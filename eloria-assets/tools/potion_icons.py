@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+import copy
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter
@@ -317,8 +318,19 @@ for index, potion in enumerate(SHELF):
 
 
 def roster() -> list[Potion]:
-    """Every potion, in the fixed order that owns its ids."""
-    return list(SHELF)
+    """Current items, retaining the IDs assigned by the historical ledger."""
+    result = []
+    for original in SHELF:
+        if original.item_id in RETIRED_ESSENCE_ITEM_IDS:
+            continue
+        potion = copy.copy(original)
+        if potion.name == "Air Essence":
+            potion.name = "Wind Essence"
+        result.append(potion)
+    return result
+
+
+RETIRED_ESSENCE_ITEM_IDS = frozenset({1854, 1857, 1858})
 
 
 # ---------------------------------------------------------------------------

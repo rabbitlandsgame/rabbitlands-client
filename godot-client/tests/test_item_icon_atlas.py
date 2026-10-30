@@ -167,6 +167,24 @@ class ItemIconAtlasTest(unittest.TestCase):
                 changed.add(image_id)
         self.assertEqual(expected, changed)
 
+    def test_eight_enriched_variants_have_distinct_cells_and_preserve_the_base_art(self) -> None:
+        import hashlib
+        from PIL import Image
+        folder = ROOT / "eloria-assets/source/item-icons/enriched-essences-2026-10-30"
+        records = json.loads((folder / "manifest.json").read_text())["items"]
+        self.assertEqual(set(range(617, 625)), {row["imageId"] for row in records})
+        self.assertEqual({'Enriched ' + school + ' Essence' for school in
+                          ('Life', 'Fire', 'Water', 'Earth', 'Wind', 'Death', 'Magic', 'Frost')},
+                         {row["name"] for row in records})
+        hashes = set()
+        for record in records:
+            cell = Image.open(folder / record["source"]).convert("RGBA")
+            base = ROOT / record["baseCell"]
+            self.assertEqual(record["baseCellSha256"], hashlib.sha256(base.read_bytes()).hexdigest())
+            self.assertNotEqual(cell.tobytes(), Image.open(base).convert("RGBA").tobytes())
+            hashes.add(hashlib.sha256(cell.tobytes()).hexdigest())
+        self.assertEqual(8, len(hashes))
+
     def test_the_island_crops_take_the_icons_after_the_distillates(self) -> None:
         """Olive and Lemon are 594 and 595, the ids the server's items name.
 
@@ -191,7 +209,7 @@ class ItemIconAtlasTest(unittest.TestCase):
         # spell tomes, and after the Watch Arming Sword the server gave 1894.
         potions = potion_icons.roster()
         self.assertEqual(sum(p.image_id < min(crops.values()) for p in potions),
-                         potion_icons.SHELF_BEFORE_CROPS)
+                         potion_icons.SHELF_BEFORE_CROPS - len(potion_icons.RETIRED_ESSENCE_ITEM_IDS))
         self.assertEqual(potion_icons.AFTER_CROPS_IMAGE_ID, max(crops.values()) + 1)
         self.assertEqual(potion_icons.AFTER_CROPS_ITEM_ID, 1895)
         self.assertGreater(potion_icons.AFTER_CROPS_ITEM_ID,

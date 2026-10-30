@@ -21,6 +21,7 @@ SOURCE = ROOT / 'eloria-assets/source/item-icons/painted-2026-10-18'
 SUPPLEMENTS = [
     ROOT / 'eloria-assets/source/item-icons/quivers-2026-10-20',
     ROOT / 'eloria-assets/source/item-icons/perk-capes-2026-10-22',
+    ROOT / 'eloria-assets/source/item-icons/enriched-essences-2026-10-30',
 ]
 REPLACEMENTS = [
     ROOT / 'eloria-assets/source/item-icons/essences-2026-10-29',
