@@ -6,6 +6,9 @@ assets and intermediate candidates remain in ignored local authoring storage.
 The product's item IDs, stats, equipment mappings and starting inventory are
 unchanged.
 
+The later [complete torso collar audit](collar-fit.md) supersedes this stage's
+Scout/Recruit torso collar fits and their corresponding model/icon hashes.
+
 | Equipment | Revision |
 | --- | --- |
 | All boot icons | Render the neutral fitted pair with parallel toe directions, rather than a living idle stance that bends one ankle. |

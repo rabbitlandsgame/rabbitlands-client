@@ -60,6 +60,10 @@ func check_rim(lining: MeshInstance3D, original: Mesh, label: String) -> void:
 				count += 1
 				var bottom := points[first + NecklineSkin.STEPS * 2 + column]
 				expect(bottom.y <= 1.405 and bottom.y <= p.y, label + " reaches beneath the fitted collar")
+				expect(absf(bottom.x) <= absf(p.x) + .000001,
+					label + " tucks the skin inward beneath the collar")
+				expect(absf(bottom.z - NecklineSkin.NECK_AXIS_Z) <= absf(p.z - NecklineSkin.NECK_AXIS_Z) + .000001,
+					label + " keeps the nape continuation inside the neck envelope")
 	expect(count > 20, label + " continues the complete neck opening")
 
 func run() -> void:
@@ -74,7 +78,10 @@ func run() -> void:
 			continue
 		var actor := make_actor(slug, models[slug], animations, equipment)
 		var body := actor.get_node("NativeModel").find_child("body", true, false) as MeshInstance3D
-		var original := body.mesh
+		# A modular RL head has already cut the displayed body. The collar
+		# continuation must still join the retained, uncut native source.
+		var displayed_uncovered := body.mesh
+		var original := body.get_meta("uncovered_body_mesh", body.mesh) as Mesh
 		for class_index: int in range(CreationArchetypes.count()):
 			var label := slug + " " + str(CreationArchetypes.at(class_index)["label"])
 			actor.apply_equipment_visuals(CreationArchetypes.loadout_at(class_index))
@@ -92,7 +99,9 @@ func run() -> void:
 			expect(body.get_meta("uncovered_body_mesh") == original, label + " preserves imported head geometry")
 			var sex := slug.get_slice("_", 1)
 			if not tested_sexes.has(sex):
-				check_rim(lining, original, label)
+				# Compare the visible continuation with the visible body: both
+				# have passed through the actor's cosmetic body refinement.
+				check_rim(lining, displayed_uncovered, label)
 				tested_sexes[sex] = true
 			for clip: String in ["Idle_Subtle", "Walk", "Fighting_Idle"]:
 				actor.animation_player.play(clip)
@@ -105,7 +114,7 @@ func run() -> void:
 				expect(lining.get_active_material(surface) == body.get_active_material(int(surfaces[surface])), label + " follows the selected skin material")
 		actor.apply_equipment_visuals({})
 		await process_frame
-		expect(body.mesh == original, slug + " restores the exact source body on unequip")
+		expect(body.mesh == displayed_uncovered, slug + " restores the exact displayed body on unequip")
 		var stale := 0
 		for node: Node in actor.get_skeleton().get_children():
 			if node.has_meta("neck_source"):
