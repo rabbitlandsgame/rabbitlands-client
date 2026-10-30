@@ -188,7 +188,8 @@ func _check_inventory_size(main: Node, state: Node) -> void:
 	_expect(inventory.size.is_equal_approx(fixed_size)
 		and inventory.scale.is_equal_approx(fixed_scale), "long item descriptions scroll without resizing inventory")
 	main.call("_apply_inventory_scale", 1.25)
-	_expect(is_equal_approx(inventory.scale.x, 1.25), "manual inventory resizing still changes the scale")
+	_expect(inventory.scale.x > fixed_scale.x and inventory.scale.x <= 1.25,
+		"manual resizing enlarges inventory while allowing it to fit the viewport")
 	main.call("_begin_quantity_edit", 0)
 	for frame: int in range(3):
 		await process_frame
@@ -454,6 +455,32 @@ func _check_el_clicks(main: Node, workspace: Node, state: Node) -> void:
 	_expect(int(main.get("_storage_carried_position")) == -1,
 		"a right click on the world behind the storage window puts the stored item back")
 
+	# All must follow the source stack, not the last inventory selection.
+	var inventory_ui: Control = main.get("inventory_workspace") as Control
+	main.set("selected_inventory_slot", -1)
+	inventory_ui.call("_quantity_all")
+	_expect(str(main.call("_slot_cursor_target", second)) == "item_grab", "stored stacks show the grab cursor")
+	_press(second)
+	_press(slots[5] as Button)
+	_expect(_take(receiver) == Protocol.withdraw_storage(1, 11)
+		and not bool(main.call("_has_carry")), "All withdraws a complete storage stack without a selected inventory item")
+	_press(slots[0] as Button)
+	_press(grid.get_child(4) as Button)
+	_expect(_take(receiver) == Protocol.deposit_storage(0, 5)
+		and not bool(main.call("_has_carry")), "All deposits the complete backpack stack after withdrawing a different amount")
+	# Pouch stacks use their authoritative special slot, too.
+	(state.get("inventory") as Dictionary)[128] = {"image_id": 3, "quantity": 23}
+	main.call("_sync_inventory")
+	var pouch: Control = inventory_ui.get("reagent_pouch") as Control
+	pouch.call("_select", 128)
+	_expect(int(main.get("_carried_slot")) == 128, "Grab lifts a pouch stack onto the cursor")
+	_press(grid.get_child(4) as Button)
+	_expect(_take(receiver) == Protocol.deposit_storage(128, 23)
+		and not bool(main.call("_has_carry")), "All deposits the complete pouch stack through the grab cursor")
+	(state.get("inventory") as Dictionary).erase(128)
+	main.call("_on_quantity_box_pressed", 0)
+	main.call("_sync_inventory")
+
 	# The stored item in hand is followed by name when positions shift, and
 	# dropped with the window or the category.
 	_press(grid.get_child(5) as Button)
@@ -480,6 +507,45 @@ func _check_el_clicks(main: Node, workspace: Node, state: Node) -> void:
 	_expect(int(main.get("_storage_carried_position")) == -1 and not carried.visible,
 		"closing storage puts the stored item back")
 
+	# The bag icon opens the bag on our tile and takes every stack on reply.
+	var saved_actors: Dictionary = state.get("actors")
+	var saved_bags: Dictionary = state.get("ground_bags")
+	var saved_bag: Dictionary = state.get("ground_bag")
+	var saved_actor_id: int = int(state.get("local_actor_id"))
+	state.set("local_actor_id", 99)
+	state.set("actors", {99: {"x": 10, "y": 20}})
+	state.set("ground_bags", {7: {"x": 10, "y": 20}})
+	state.set("ground_bag", {"open": false, "items": {}})
+	pouch.call("sync")
+	var bag_button: Button = pouch.get("drop_button") as Button
+	_expect(not bag_button.disabled, "the bag icon is available for a bag at our feet without a selected pouch item")
+	bag_button.pressed.emit()
+	_expect(_take(receiver) == Protocol.inspect_bag(7), "left-clicking the bag icon asks to open the bag at our feet")
+	state.call("_on_packet", 23, PackedByteArray([1, 3, 0, 17, 0, 0, 0, 2]))
+	main.call("_sync_ground_bag")
+	_expect(str(main.call("_slot_cursor_target", (main.get("ground_bag_slot_buttons") as Array)[0])) == "item_grab", "bag stacks show the grab cursor")
+	_expect(_take(receiver) == Protocol.pick_up_ground_item(2, 17)
+		and (main.get("ground_bag_panel") as Control).visible, "the bag reply opens its window and requests all of its stack")
+	(main.get("ground_bag_panel") as Control).hide()
+	bag_button.pressed.emit()
+	_expect(_take(receiver) == Protocol.pick_up_ground_item(2, 17)
+		and (main.get("ground_bag_panel") as Control).visible, "an already-open bag is shown again and gets all without another inspect request")
+	inventory_ui.call("_quantity_all")
+	main.call("_on_ground_bag_slot_pressed", 0)
+	_expect(_take(receiver) == Protocol.pick_up_ground_item(2, 17), "All also takes a full bag stack with one item click")
+	main.call("_begin_carry", 0)
+	main.call("_on_ground_bag_slot_pressed", 0)
+	_expect(_take(receiver) == Protocol.drop_inventory_item(0, 5)
+		and not bool(main.call("_has_carry")), "clicking the bag with a carried item drops All of that stack")
+	main.call("_on_quantity_box_pressed", 0)
+	state.set("actors", {99: {"x": 11, "y": 20}})
+	pouch.call("sync")
+	_expect(bag_button.disabled, "the bag icon cannot take from a neighboring tile")
+	state.set("actors", saved_actors)
+	state.set("ground_bags", saved_bags)
+	state.set("ground_bag", saved_bag)
+	state.set("local_actor_id", saved_actor_id)
+	main.call("_sync_ground_bag")
 	_close_fixture(fixture)
 	main.set("_inventory_quantities", saved_quantities)
 	main.set("_selected_quantity_box", saved_box)

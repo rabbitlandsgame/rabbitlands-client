@@ -139,7 +139,11 @@ func run() -> void:
 	expect(main._selected_quantity() == 17 and main._inventory_quantities == shortcuts, "typing an amount preserves the player's six quantity shortcuts")
 	app.get("inventory")[0].quantity = 2000000000
 	workspace._quantity_all()
-	expect(main._selected_quantity() == 2000000000, "All retains the complete server stack amount beyond seven digits")
+	expect(mini(main._selected_quantity(), 2000000000) == 2000000000 and workspace.quantity_value.text == "All", "All keeps the entire stack and shows its active mode")
+	main.selected_inventory_slot = -1
+	workspace._quantity_submitted("All")
+	expect(main._selected_quantity() == 0xffffffff, "All survives losing focus and needs no inventory selection")
+	main.selected_inventory_slot = 0
 	main._on_quantity_box_pressed(1)
 	expect(main._selected_quantity() == shortcuts[1], "choosing a shortcut clears the temporary quantity")
 	main._on_quantity_box_pressed(0)
@@ -275,6 +279,13 @@ func _check_bulk_shortcuts() -> void:
 	pouch.drop_button.pressed.connect(func() -> void: counts.single += 1)
 	app.set("storage", {"open": false, "read_only": false})
 	pouch.sync()
+	main._interaction_mode = "attack"
+	main._set_inventory_tool("inspect")
+	main.selected_inventory_slot = 0
+	pouch.sync()
+	await _click_action(pouch.grab_button, MOUSE_BUTTON_LEFT)
+	expect(main._inventory_tool == "grab" and main._carry_enabled() and not main._has_carry(), "Grab arms the hand without lifting the previously selected item")
+	expect(pouch.grab_button.button_pressed, "Grab shows its active state")
 	expect(pouch.store_button.disabled, "Store remains unavailable without storage or a selected pouch item")
 	await _click_action(pouch.store_button, MOUSE_BUTTON_MIDDLE)
 	expect(main._store_options_menu.visible, "middle-click opens protection options on the disabled Store icon")
