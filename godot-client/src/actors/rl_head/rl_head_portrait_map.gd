@@ -84,11 +84,18 @@ const V3_MAXIMA := {"brow_style": 13, "brow_thickness": 101, "freckles": 101, "l
 const BEARDS: Array[String] = ["none", "stubble", "moustache", "goatee", "short_beard", "full_beard"]
 ## PC/3 hair_module ids: 0 the rule below, 1 the game's own hairstyle, 2 and up
 ## an RL module (append-only; an unknown id or one of the other sex is 0).
-const HAIR_MODULES := {2: {"name": "rowan_shag", "sex": "male"}, 3: {"name": "mira_bun", "sex": "female"}}
+const HAIR_MODULES := {
+	2: {"name": "rowan_shag", "sex": "male"},
+	3: {"name": "mira_bun", "sex": "female"},
+	4: {"name": "rounded_afro", "sex": "male", "fallback_style": 1},
+	5: {"name": "cornrows_low_knot", "sex": "female", "fallback_style": 7},
+}
 ## D5: the style slots an RL module draws, per body sex.
 const HAIR_RULES := {"male": {1: "rowan_shag"}, "female": {3: "mira_bun"}}
 ## Each RL module's length and volume are centred on its own likeness preset.
-const MODULE_PRESETS := {"rowan_shag": "Rowan", "mira_bun": "Mira"}
+const MODULE_PRESETS := {"rowan_shag": "Rowan", "mira_bun": "Mira",
+	# New modules are authored at neutral grooming (50/50 and Classic).
+	"rounded_afro": "", "cornrows_low_knot": ""}
 ## The hair finish slider positions (0 sleekest .. 100 messiest) of the saved
 ## finishes, by hair_detail 0 Classic, 1 Tousled, 2 Swept: frozen (colour model
 ## spec revision 3, 2.9).
@@ -717,6 +724,12 @@ static func to_portrait_fields(rl_face: RLHeadAppearance, sex: String) -> Dictio
 		for style: Variant in (HAIR_RULES.get(sex, {}) as Dictionary):
 			if str((HAIR_RULES[sex] as Dictionary)[style]) == rl_face.hair:
 				result["hair_style"] = int(style)
+		if not result.has("hair_style"):
+			for module_id: Variant in HAIR_MODULES:
+				var module: Dictionary = HAIR_MODULES[module_id]
+				if module.name == rl_face.hair and module.sex == sex:
+					result["hair_style"] = int(module.get("fallback_style", 1))
+					result["hair_module"] = int(module_id)
 	else:
 		result["hair_style"] = legacy_style(rl_face.hair)
 	return result

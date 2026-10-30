@@ -17,6 +17,7 @@ const OLDCRAFT_ACTOR_STYLE := preload("res://src/actors/oldcraft_actor_style.gd"
 const CapeEmblems := preload("res://src/actors/cape_emblems.gd")
 const GLB_MESH_EXTRAS := preload("res://src/actors/glb_mesh_extras.gd")
 const WARDROBE_SHIRT_FIT := preload("res://src/actors/wardrobe_shirt_fit.gd")
+const FEMALE_SHIRT_NECKLINE := preload("res://src/actors/female_shirt_neckline.gd")
 const QUIVER_STRAP_FIT := preload("res://src/actors/quiver_strap_fit.gd")
 const CHARACTER_PROPORTIONS := preload("res://src/actors/character_proportions.gd")
 const PORTRAIT_GROOM := preload("res://src/actors/portrait_groom.gd")
@@ -531,6 +532,7 @@ static var _wardrobe_texture_cache: Dictionary = {}
 static func clear_wardrobe_texture_cache() -> void:
 	_wardrobe_texture_cache.clear()
 	NecklineSkin.clear()
+	FEMALE_SHIRT_NECKLINE.clear()
 	CHARACTER_PROPORTIONS.clear()
 	PORTRAIT_GROOM.clear()
 	STUBBLE_APPEARANCE.clear()
@@ -1320,6 +1322,7 @@ func _set_rl_head(face: RLHeadAppearance) -> bool:
 	# is never recoloured for the head.
 	if body != null and body.mesh != null:
 		_rl_head.set_body_material(body.get_active_material(0))
+	_rl_head.set_body_skin_color(_skin_colour)
 	_rl_head.set_portrait_pose(portrait_pose_held())
 	return true
 
@@ -3891,6 +3894,8 @@ func _refresh_wardrobe_cover() -> void:
 	CHARACTER_PROPORTIONS.restore_body_refinement(native_model)
 	var torso_visual: int = int(_equipment_visuals.get(BODY_PART, 0))
 	var covered: bool = torso_visual != 0
+	FEMALE_SHIRT_NECKLINE.cover_skin(native_model,
+		str(_model_config.get("bodyTemplate", "")) == "luminous_female" and not covered)
 	var torso_model := {}
 	if covered:
 		torso_model = _equipment_model_config(BODY_PART, torso_visual)
@@ -5833,6 +5838,7 @@ func _load_native_scene(path: String) -> Array[String]:
 	if model == null:
 		return ["model glTF import failed", path]
 	model.name = "NativeModel"
+	FEMALE_SHIRT_NECKLINE.apply(model, path)
 	add_child(model)
 	return []
 

@@ -22,8 +22,26 @@ uniform vec4 eye_tint : source_color = vec4(1.0);
 uniform bool natural_iris = false;
 uniform vec4 hair_tint : source_color = vec4(1.0);
 uniform float roughness = 0.85;
+// The repaired female shirt owns this opening. Hide source skin teeth that
+// otherwise protrude through the cloth, including the RL body's bridge.
+uniform bool smooth_shirt_neckline = false;
+varying vec3 neck_rest_position;
+
+void vertex() {
+	neck_rest_position = VERTEX;
+}
 
 void fragment() {
+	if (smooth_shirt_neckline && abs(neck_rest_position.x) < 0.135
+			&& neck_rest_position.z > -0.18 && neck_rest_position.z < 0.12
+			&& neck_rest_position.y > 1.30) {
+		float angle = atan(neck_rest_position.x, neck_rest_position.z + 0.030);
+		float front = max(cos(angle), 0.0);
+		float side = sin(angle);
+		float front_squared = front * front;
+		float rim = 1.50 + 0.010 * side * side - 0.075 * front_squared * front_squared;
+		if (neck_rest_position.y < rim - 0.001) { discard; }
+	}
 	vec3 original = texture(base_texture, UV).rgb * base_color.rgb;
 	vec3 mask = use_regions ? texture(region_texture, UV * mask_uv_scale + mask_uv_offset).rgb : vec3(0.0);
 	vec3 skin = original * skin_tint.rgb;
