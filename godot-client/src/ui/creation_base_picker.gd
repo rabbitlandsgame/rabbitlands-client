@@ -394,7 +394,7 @@ func _ensure_ui() -> void:
 	portraits.portrait_ready.connect(_portrait_ready)
 	var shade := ColorRect.new()
 	shade.name = "Backdrop"
-	shade.color = Color(0.015, 0.018, 0.024, .68)
+	shade.color = Color(0.015, 0.018, 0.024, .38)
 	shade.mouse_filter = Control.MOUSE_FILTER_STOP
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(shade)
@@ -556,7 +556,7 @@ func _cycle_focus(step: int) -> void:
 
 
 func _on_focus_changed(control: Control) -> void:
-	if not is_open():
+	if not is_open() or control == null:
 		return
 	if is_ancestor_of(control):
 		_last_focus = weakref(control)
