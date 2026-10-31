@@ -61,6 +61,7 @@ const DATA_PATH := "res://data/actors/rl_head_wire_defaults.json"
 const PRESETS := preload("res://src/actors/human_portrait_presets.gd")
 const COLOURS := preload("res://src/actors/appearance_colours.gd")
 const HAIR_FINISH := preload("res://src/actors/hair_finish.gd")
+const HAIR_MODULE_LOOKUP := preload("res://src/actors/rl_head/rl_head_hair_modules.gd")
 ## Inverse distance weighting power for the interim custom-colour ratios.
 const IDW_POWER := 2.0
 const SEX_PRESETS := {"female": "Mira", "male": "Rowan"}
@@ -84,15 +85,7 @@ const V3_MAXIMA := {"brow_style": 13, "brow_thickness": 101, "freckles": 101, "l
 const BEARDS: Array[String] = ["none", "stubble", "moustache", "goatee", "short_beard", "full_beard"]
 ## PC/3 hair_module ids: 0 the rule below, 1 the game's own hairstyle, 2 and up
 ## an RL module (append-only; an unknown id or one of the other sex is 0).
-const HAIR_MODULES := {
-	2: {"name": "rowan_shag", "sex": "male"},
-	3: {"name": "mira_bun", "sex": "female"},
-	4: {"name": "rounded_afro", "sex": "male", "fallback_style": 1},
-	5: {"name": "cornrows_low_knot", "sex": "female", "fallback_style": 7},
-	6: {"name": "shoulder_waves", "sex": "female", "fallback_style": 2},
-	7: {"name": "curly_twin_buns", "sex": "female", "fallback_style": 3},
-	8: {"name": "receding_sweep", "sex": "male", "fallback_style": 1},
-}
+const HAIR_MODULES := HAIR_MODULE_LOOKUP.ENTRIES
 ## D5: the style slots an RL module draws, per body sex.
 const HAIR_RULES := {"male": {1: "rowan_shag"}, "female": {3: "mira_bun"}}
 ## Each RL module's length and volume are centred on its own likeness preset.
@@ -260,7 +253,7 @@ static func controls(appearance: Dictionary, sex: String) -> Dictionary:
 
 ## The RL hairstyle: "none", an RL module name, or `legacy:<style>` for the
 ## game's own fitted hairstyle (drawn by the actor).
-static func hair(appearance: Dictionary, sex: String) -> String:
+static func hair(appearance: Dictionary, sex: String, modules: Dictionary = HAIR_MODULES) -> String:
 	var style := AppearanceVariants.hair_style(int(field(appearance, "hair", 0, 1 << 30)))
 	if style <= 0:
 		return RLHeadAppearance.NONE
@@ -268,8 +261,9 @@ static func hair(appearance: Dictionary, sex: String) -> String:
 		if appearance.has("hair_module") else 0
 	if module == 1:
 		return legacy_name(style)
-	if HAIR_MODULES.has(module) and str((HAIR_MODULES[module] as Dictionary)["sex"]) == sex:
-		return str((HAIR_MODULES[module] as Dictionary)["name"])
+	var resolved := HAIR_MODULE_LOOKUP.resolve(module, sex, modules)
+	if not resolved.is_empty():
+		return str(resolved.name)
 	var rules: Dictionary = HAIR_RULES.get(sex, {}) as Dictionary
 	if rules.has(style):
 		return str(rules[style])
@@ -303,7 +297,7 @@ static func hair_shapes(appearance: Dictionary, hair_name: String) -> Dictionary
 	var result := {"length": 0.0, "volume": 0.0, "detail": RLHeadAppearance.DEFAULT_HAIR_DETAIL}
 	if not is_module(hair_name):
 		return result
-	var preset := PRESETS.shape(str(MODULE_PRESETS.get(hair_name, "Rowan")))
+	var preset := PRESETS.shape(str(MODULE_PRESETS.get(hair_name, "")))
 	var hair_gain := float((data().get("hair", {}) as Dictionary).get("shapeGain", 1.0))
 	for pair: Array in [["length", "hair_length"], ["volume", "hair_volume"]]:
 		var offset := (float(field(appearance, pair[1])) - float(preset.get(pair[1], 50))) / 50.0
@@ -332,7 +326,7 @@ static func finish_slider(finish: int) -> int:
 static func detail_level(s: float, module: String) -> int:
 	var entry: Dictionary = (data().get("hair", {}) as Dictionary).get("detail", {}) as Dictionary
 	var listed: Variant = entry.get("sliderPresetFinish")
-	var preset_finish := finish_slider(int(PRESETS.shape(str(MODULE_PRESETS.get(module, "Rowan"))).get("hair_detail", 0)))
+	var preset_finish := finish_slider(int(PRESETS.shape(str(MODULE_PRESETS.get(module, ""))).get("hair_detail", 0)))
 	var value: Variant = (listed as Dictionary).get(module, preset_finish) if listed is Dictionary else preset_finish
 	var at_preset := clampf(float(value) if typeof(value) in [TYPE_INT, TYPE_FLOAT] else float(preset_finish), 1.0, 99.0)
 	var position := clampf(s, 0.0, 100.0)
@@ -714,7 +708,8 @@ static func _explicit_detail(appearance: Dictionary, name: String) -> int:
 ## face fields from the primary controls (secondary couplings are what they
 ## derive), facial_hair and the hair style from the beard and hairstyle.
 ## Colours are left out: palette indices are chosen, not derived.
-static func to_portrait_fields(rl_face: RLHeadAppearance, sex: String) -> Dictionary:
+static func to_portrait_fields(rl_face: RLHeadAppearance, sex: String,
+		modules: Dictionary = HAIR_MODULES) -> Dictionary:
 	var result := {}
 	for field_name: String in FACE_FIELDS:
 		var g := gain(field_name, sex)
@@ -729,11 +724,10 @@ static func to_portrait_fields(rl_face: RLHeadAppearance, sex: String) -> Dictio
 			if str((HAIR_RULES[sex] as Dictionary)[style]) == rl_face.hair:
 				result["hair_style"] = int(style)
 		if not result.has("hair_style"):
-			for module_id: Variant in HAIR_MODULES:
-				var module: Dictionary = HAIR_MODULES[module_id]
-				if module.name == rl_face.hair and module.sex == sex:
-					result["hair_style"] = int(module.get("fallback_style", 1))
-					result["hair_module"] = int(module_id)
+			var module_id := HAIR_MODULE_LOOKUP.find(rl_face.hair, sex, modules)
+			if module_id > 0:
+				result["hair_style"] = int(HAIR_MODULE_LOOKUP.resolve(module_id, sex, modules).fallback_style)
+				result["hair_module"] = module_id
 	else:
 		result["hair_style"] = legacy_style(rl_face.hair)
 	return result

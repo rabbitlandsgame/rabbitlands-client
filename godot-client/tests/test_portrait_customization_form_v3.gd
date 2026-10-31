@@ -149,12 +149,12 @@ func form_suite() -> void:
 	var ids: Array = []
 	for item: int in module.item_count:
 		ids.append(module.get_item_id(item))
-	expect(ids == [0, 1, 3], "U4 a female body offers Automatic, Classic and Mira bun")
+	expect(ids == [0, 1, 3, 5, 6, 7], "U4 a female body offers Automatic, Classic and its four qualified modules")
 	form.set_body(1)
 	ids.clear()
 	for item: int in module.item_count:
 		ids.append(module.get_item_id(item))
-	expect(ids == [0, 1, 2] and (stubble_row[1] as Control).visible, "U4 a male body offers Rowan shag and stubble")
+	expect(ids == [0, 1, 2, 4, 8] and (stubble_row[1] as Control).visible, "U4 a male body offers its three qualified modules and stubble")
 	module.select(module.get_item_index(2))
 	module.item_selected.emit(module.selected)
 	var stubble: Dictionary = form.detail_controls.stubble
@@ -347,7 +347,7 @@ func creation_suite() -> void:
 	var ids: Array = []
 	for item: int in module.item_count:
 		ids.append(module.get_item_id(item))
-	expect(ids == [0, 1, 3], "U5 choosing Female filters the creation hair modules")
+	expect(ids == [0, 1, 3, 5, 6, 7], "U5 choosing Female filters the creation hair modules")
 	sex.select(sex.get_item_index(1))
 	sex.item_selected.emit(sex.selected)
 	network.call("_set_appearance_protocol", 1)

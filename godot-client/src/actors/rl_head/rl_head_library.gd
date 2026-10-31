@@ -39,6 +39,7 @@ const TEXTURE_DIR := "res://assets/actors/native/rl_head_textures/"
 const MANIFEST_PATH := TEXTURE_DIR + "manifest.json"
 const GLB_MESH_EXTRAS := preload("res://src/actors/glb_mesh_extras.gd")
 const IDENTITY_BAKE := preload("res://src/actors/rl_head/rl_head_identity_bake.gd")
+const HAIR_MODULE_LOOKUP := preload("res://src/actors/rl_head/rl_head_hair_modules.gd")
 const SHADERS := {
 	"rl_skin": preload("res://src/actors/rl_head/rl_skin.gdshader"),
 	"rl_eye": preload("res://src/actors/rl_head/rl_eye.gdshader"),
@@ -516,8 +517,11 @@ static func head_path(sex: String) -> String:
 	return ROOT + "rl_head_%s.glb" % sex
 
 
-static func hair_path(style: String) -> String:
-	return HAIR_DIR + style + ".glb"
+## Filename-only calls retain their original meaning. A semantic name with
+## `sex` selects that body's fit; an incompatible registered name returns "".
+static func hair_path(style: String, sex: String = "") -> String:
+	var file_name := HAIR_MODULE_LOOKUP.file_name(style, sex)
+	return HAIR_DIR + file_name + ".glb" if not file_name.is_empty() else ""
 
 
 ## A shipped fitted hairstyle for the luminous body of `sex` (`legacy:<style>`).
@@ -538,9 +542,17 @@ static func beard_path(style: String) -> String:
 	return BEARD_DIR + style + ".glb"
 
 
-## The hairstyles on disk, by file name without extension.
-static func hair_styles() -> PackedStringArray:
-	return _glb_names(HAIR_DIR)
+## The hairstyles on disk, by file name without extension. With `sex`, omit
+## registered fits this body cannot wear; omitted sex lists every loose file.
+static func hair_styles(sex: String = "") -> PackedStringArray:
+	var names := _glb_names(HAIR_DIR)
+	if sex.is_empty():
+		return names
+	var eligible := PackedStringArray()
+	for style: String in names:
+		if not HAIR_MODULE_LOOKUP.file_name(style, sex).is_empty():
+			eligible.append(style)
+	return eligible
 
 
 ## The beards on disk, plus `stubble`, which the skin shader paints.
@@ -655,7 +667,11 @@ static func beard(style: String) -> Array:
 
 
 ## The hairstyle's `rlHair` extras, or {} for a missing file (logged once).
-static func hair_info(style: String) -> Dictionary:
+## Semantic names use `sex`; the cache is keyed by the resolved filename.
+static func hair_info(style: String, sex: String = "") -> Dictionary:
+	style = HAIR_MODULE_LOOKUP.file_name(style, sex)
+	if style.is_empty():
+		return {}
 	if not _hair_info.has(style):
 		collect_warm()
 		var path := hair_path(style)
@@ -669,8 +685,8 @@ static func hair_info(style: String) -> Dictionary:
 
 
 ## A fresh instance of a hairstyle's scene, its own skeleton included.
-static func instantiate_hair(style: String) -> Node3D:
-	var info := hair_info(style)
+static func instantiate_hair(style: String, sex: String = "") -> Node3D:
+	var info := hair_info(style, sex)
 	if info.is_empty():
 		return null
 	return GlbSceneCache.instantiate(str(info["path"]))
@@ -949,6 +965,10 @@ static func material(material_name: String, sex: String, style: String, quality:
 	var kind := str(MATERIAL_SHADERS.get(material_name, ""))
 	if kind.is_empty():
 		return null
+	if material_name in ["rl_hair_clump", "rl_hair_card"]:
+		style = HAIR_MODULE_LOOKUP.file_name(style, sex)
+		if style.is_empty():
+			return null
 	var key := "%s|%s|%s|%d" % [material_name, sex, style, quality]
 	if _materials.has(key):
 		return _materials[key] as ShaderMaterial

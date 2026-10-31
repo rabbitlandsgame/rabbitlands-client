@@ -15,6 +15,7 @@ const PRESETS = preload("res://src/actors/human_portrait_presets.gd")
 const HAIR_FINISH = preload("res://src/actors/hair_finish.gd")
 const CHOICES = preload("res://src/actors/appearance_choices.gd")
 const KIT = preload("res://src/ui/appearance_ui_kit.gd")
+const HAIR_MODULE_LOOKUP := preload("res://src/actors/rl_head/rl_head_hair_modules.gd")
 ## Names at the saved finishes' slider positions (Swept 25, Classic 50, Tousled 75).
 const FINISH_TICKS: Array = [[25, "Swept"], [50, "Classic"], [75, "Tousled"]]
 ## A slider position within this of a tick snaps to it (and saves the enum).
@@ -466,15 +467,19 @@ func _add_module(grid: GridContainer, title: String) -> void:
 		changed.emit())
 	_fill_modules()
 
+func _module_entries() -> Dictionary:
+	return RLHeadPortraitMap.HAIR_MODULES
+
 func _fill_modules() -> void:
 	var option := detail_controls["hair_module"] as OptionButton
 	option.clear()
 	option.add_item("Automatic (by hairstyle)", 0)
 	option.add_item("Classic hairstyle", 1)
-	for id: int in RLHeadPortraitMap.HAIR_MODULES:
-		var module: Dictionary = RLHeadPortraitMap.HAIR_MODULES[id]
-		if str(module.sex) == _sex:
-			option.add_item(str(MODULE_NAMES.get(str(module.name), str(module.name).capitalize())), id)
+	var eligible := HAIR_MODULE_LOOKUP.choices(_sex, _module_entries())
+	for id: int in eligible:
+		var module: Dictionary = eligible[id]
+		var label := str(module.semantic_name)
+		option.add_item(str(MODULE_NAMES.get(label, label.capitalize())), id)
 	_sync_module()
 
 func _sync_module() -> void:
@@ -485,11 +490,12 @@ func _sync_module() -> void:
 	option.disabled = _hair_style == 0
 	option.accessibility_description = option.get_item_text(option.selected)
 	var hair := RLHeadPortraitMap.hair({"hair": AppearanceVariants.pack_hair(maxi(_hair_style, 0), 0),
-		"hair_module": _module}, _sex)
+		"hair_module": _module}, _sex, _module_entries())
 	if _hair_style == 0:
 		module_hint.text = "Bald at every graphics level."
 	elif RLHeadPortraitMap.is_module(hair):
-		module_hint.text = "At High: " + str(MODULE_NAMES.get(hair, hair))
+		var semantic := str(HAIR_MODULE_LOOKUP.resolve(_module, _sex, _module_entries()).get("semantic_name", hair))
+		module_hint.text = "At High: " + str(MODULE_NAMES.get(semantic, semantic.capitalize()))
 	else:
 		module_hint.text = "At High: your hairstyle"
 
@@ -625,8 +631,8 @@ func set_body(actor_type: int, reset_incompatible := false) -> void:
 			(stubble.auto as CheckBox).set_pressed_no_signal(true)
 			(stubble.slider as HSlider).editable = false
 			_sync_auto_readout("stubble")
-		if RLHeadPortraitMap.HAIR_MODULES.has(_module) \
-				and str((RLHeadPortraitMap.HAIR_MODULES[_module] as Dictionary).sex) != _sex:
+		if _module_entries().has(_module) \
+				and HAIR_MODULE_LOOKUP.resolve(_module, _sex, _module_entries()).is_empty():
 			_module = 0
 	_fill_modules()
 	update_derived(values())

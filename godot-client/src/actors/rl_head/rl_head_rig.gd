@@ -604,7 +604,7 @@ func _build_hair() -> void:
 		# The actor's own fitted hairstyle (ReplicatedActor3D._add_hair_variant).
 		_hair_external = true
 		return
-	var instance := RLHeadLibrary.instantiate_hair(_hair_style)
+	var instance := RLHeadLibrary.instantiate_hair(_hair_style, appearance.sex)
 	if instance == null:
 		return
 	var attachment := BoneAttachment3D.new()
@@ -654,7 +654,7 @@ func _build_hair() -> void:
 		skeleton = node_value as Skeleton3D
 		break
 	if skeleton != null:
-		var info := RLHeadLibrary.hair_info(_hair_style)
+		var info := RLHeadLibrary.hair_info(_hair_style, appearance.sex)
 		_hair_motion = RLHairMotion.new()
 		_hair_motion.name = "RLHairMotion"
 		instance.add_child(_hair_motion)
