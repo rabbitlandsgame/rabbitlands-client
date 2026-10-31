@@ -1,8 +1,34 @@
 extends SceneTree
-## Rendered, offline Landfall arrival followed by three identical camera turns.
+## Rendered, offline arrival followed by three identical camera turns.
 ## Use an isolated XDG_DATA_HOME and set ELORIA_CAMERA_PROBE_USER_ROOT to it.
 ## ELORIA_CAMERA_PROBE_REPORT is the output JSON; disable the arrival warm-up
 ## with ELORIA_CAMERA_SHADER_WARMUP=0 for a matched baseline.
+## Defaults to Landfall tile 61,250. Select another registered map with
+## ELORIA_CAMERA_PROBE_MAP and an explicit ELORIA_CAMERA_PROBE_TILE=x,y.
+## Use ELORIA_CAMERA_PROBE_MINIMAP=show to include the direct 2D minimap.
+
+## Static validation is also usable by a headless test without constructing Main.
+static func probe_location(maps: Dictionary, map_text: String, tile_text: String) -> Dictionary:
+	var wanted := "landfall" if map_text.is_empty() else map_text
+	var entry := MapRegistry.resolve(maps, wanted)
+	if entry.is_empty() or str(entry.get("manifest", "")).is_empty():
+		return {"error": "ELORIA_CAMERA_PROBE_MAP must name a registered map with a manifest."}
+	var map_id := MapRegistry.normalize_server_map_id(str(entry.registryKey))
+	var tile := Vector2i(61, 250)
+	if tile_text.is_empty():
+		if map_id != "landfall":
+			return {"error": "ELORIA_CAMERA_PROBE_TILE=x,y is required for a custom map."}
+	else:
+		var parts := tile_text.split(",")
+		if parts.size() != 2 or not parts[0].strip_edges().is_valid_int() \
+				or not parts[1].strip_edges().is_valid_int():
+			return {"error": "ELORIA_CAMERA_PROBE_TILE must contain two integer server coordinates: x,y."}
+		var x := int(parts[0])
+		var y := int(parts[1])
+		if x < 0 or y < 0 or x > 65535 or y > 65535:
+			return {"error": "ELORIA_CAMERA_PROBE_TILE coordinates must fit unsigned 16-bit server fields."}
+		tile = Vector2i(x, y)
+	return {"map": map_id, "tile": tile, "manifest": str(entry.manifest)}
 
 func _init() -> void:
 	_run.call_deferred()
@@ -16,6 +42,16 @@ func _run() -> void:
 		push_error("Use an isolated user root, a report path and a rendered display.")
 		quit(1)
 		return
+	var registry: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/maps/registry.json"))
+	var maps: Dictionary = registry.get("maps", {}) if registry is Dictionary else {}
+	var location := probe_location(maps, OS.get_environment("ELORIA_CAMERA_PROBE_MAP"),
+		OS.get_environment("ELORIA_CAMERA_PROBE_TILE"))
+	if location.has("error"):
+		push_error(str(location.error))
+		quit(1)
+		return
+	var map_id: String = location.map
+	var tile: Vector2i = location.tile
 	# Only supported Graphics controls may vary. Seed the texture tier before
 	# loading main: changing its preference later cannot change this session.
 	var overrides: Dictionary = {}
@@ -70,12 +106,12 @@ func _run() -> void:
 	var state := root.get_node("AppState")
 	state.set("authenticated", true)
 	state.set("connection_state", "connected")
-	state.set("current_map", "landfall")
+	state.set("current_map", map_id)
 	state.set("local_actor_id", 99)
 	state.set("game_minute", 600)
 	state.set("game_minute_anchor_msec", Time.get_ticks_msec())
 	state.set("actors", {99: {"actor_id": 99, "kind": 1, "actor_type": 0,
-		"name": "Camera probe", "map": "landfall", "x": 61, "y": 250,
+		"name": "Camera probe", "map": map_id, "x": tile.x, "y": tile.y,
 		"rotation": 0, "health": 100, "max_health": 100, "alive": true,
 		"appearance": {}, "equipment_visuals": CreationArchetypes.loadout_at(0)}})
 	main.call("_set_login_screen_visible", false)
@@ -89,8 +125,15 @@ func _run() -> void:
 	var started := Time.get_ticks_msec()
 	while curtain.visible and Time.get_ticks_msec() - started < 150000:
 		await process_frame
-	if curtain.visible or not (main.get("_grounded_actors") as Dictionary).has(99):
+	if curtain.visible or not (main.get("_grounded_actors") as Dictionary).has(99) \
+			or MapRegistry.normalize_server_map_id(str(main.get("loaded_server_map"))) != map_id:
 		push_error("Offline arrival did not complete on loaded ground.")
+		var failure := {"map": map_id, "tile": [tile.x, tile.y], "manifest": location.manifest,
+			"error": "arrival_not_ready", "teardown": await _tear_down(main, state)}
+		FileAccess.open(report, FileAccess.WRITE).store_string(JSON.stringify(failure, "  "))
+		if not failure.teardown.ready:
+			while true:
+				await process_frame
 		quit(1)
 		return
 	var arrival_ms := Time.get_ticks_msec() - started
@@ -148,6 +191,8 @@ func _run() -> void:
 			"decorative_grass", "crowd_bodies", "swaying_capes", "particles"]:
 		settings[key] = config.get_value("graphics", key)
 	var result := {"renderer": RenderingServer.get_current_rendering_method(),
+		"map": map_id, "tile": [tile.x, tile.y], "manifest": location.manifest,
+		"loaded_map": str(main.get("loaded_server_map")), "arrival_grounded": true,
 		"adapter": RenderingServer.get_video_adapter_name(), "viewport": str(viewport.size),
 		"window": str(root.size), "actual_render_scale": viewport.scaling_3d_scale,
 		"active_texture_skip": load("res://src/world/graphics_options.gd").active_texture_skip(),
@@ -165,6 +210,9 @@ func _run() -> void:
 		"requested_vsync": vsync, "pitch": pitch, "turns": turns}
 	result["rotation_fps_cap"] = Engine.max_fps
 	result["probe_mode"] = "arrival_only" if load_only else "arrival_and_rotation"
+	# Snapshot only after timed turns, so cache-path and phase evidence does not
+	# add diagnostic work to loading or frame measurements.
+	result["world_loader"] = main.get("world_loader").diagnostic_snapshot()
 	if ResourceLoader.exists("res://src/actors/wardrobe_dye_cache.gd"):
 		result["wardrobe_cache"] = load("res://src/actors/wardrobe_dye_cache.gd").stats()
 	# Read back derived atlas bytes only after all timed turns. Comparing these
