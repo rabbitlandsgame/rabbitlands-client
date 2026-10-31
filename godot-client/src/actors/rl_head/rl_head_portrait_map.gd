@@ -126,7 +126,14 @@ static func face(appearance: Dictionary, sex: String, native_hair_only := false)
 	result.sex = sex
 	result.preset = ""
 	result.label = ""
-	var values := controls(appearance, sex)
+	var shape_appearance := appearance
+	if native_hair_only:
+		shape_appearance = appearance.duplicate()
+		# These extra controls sculpt the High head only. Native-tier hair
+		# roots must follow the same ten fields as its visible native head.
+		for high_only: String in V3_CONTROLS:
+			shape_appearance.erase(high_only)
+	var values := controls(shape_appearance, sex)
 	for control: String in values:
 		result.set_control(control, float(values[control]))
 	var skin_index := palette_index(appearance, "skin", 10)

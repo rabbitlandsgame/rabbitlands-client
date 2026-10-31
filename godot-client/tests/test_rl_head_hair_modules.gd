@@ -193,6 +193,16 @@ func _check_default_replacements() -> void:
 	_expect(Modules.replacement_id(0, "female", entries) == 0 and Modules.replacement_id(99, "male", entries) == 0,
 		"unknown and bald slots do not select an arbitrary module")
 	_expect(entries == before, "replacement resolution leaves the registry unchanged")
+	for sex: String in ["female", "male"]:
+		var native_shape := {"hair": 1, "jaw": 20, "face_length": 80}
+		var extra_shape := native_shape.duplicate()
+		for field: String in Map.V3_CONTROLS:
+			extra_shape[field] = 100
+		_expect(Map.face(extra_shape, sex, true).controls == Map.face(native_shape, sex, true).controls,
+			"native hair ignores face fields that do not sculpt the native head")
+		_expect(Map.face(extra_shape, sex).controls != Map.face(native_shape, sex).controls,
+			"the full High head retains all extra face controls")
+		_expect(extra_shape.eyelid == 100, "native mapping does not mutate saved detail fields")
 
 func _check_form() -> void:
 	var form := VariantForm.new()
