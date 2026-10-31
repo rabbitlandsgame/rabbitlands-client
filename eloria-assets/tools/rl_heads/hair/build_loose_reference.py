@@ -14,6 +14,7 @@ from PIL import Image
 from scipy import ndimage as ndi
 from scipy.spatial import ConvexHull,cKDTree
 import assemble,hairgen,headref,paths,reference_surface as ref,rlglb
+from reference_root_edges import geometric_boundary,root_colours
 
 GROOMS=['hl_length_p','hl_length_n','hl_volume_p','hl_volume_n']
 def sha(path):
@@ -354,24 +355,6 @@ def groom_fields(head,scalp,P,names,spec,hull,ranges):
     for name in names+GROOMS:
         total=np.zeros((len(counts),3));np.add.at(total,weld,delta[name]);delta[name]=total[weld]/counts[weld,None]
     return Q,root_distance,delta
-
-def geometric_boundary(P,T):
-    """Return actual open-edge vertices, excluding duplicated UV seam edges."""
-    _,weld=np.unique(np.round(P/1e-6),axis=0,return_inverse=True)
-    edges=np.sort(weld[T[:,[0,1,1,2,2,0]].reshape(-1,2)],axis=1)
-    edge,count=np.unique(edges,axis=0,return_counts=True)
-    return np.flatnonzero(np.isin(weld,np.unique(edge[count==1])))
-
-def root_colours(head,scalp,P,T,COL,ranges,distance,spec):
-    COL=COL.copy();core_end=ranges['detail'][0]
-    COL[:core_end,0]=1.;COL[:core_end,1]=np.clip(distance[:core_end]/.20,0,1)
-    lon,lat=headref.dir_lonlat(P[:core_end]-head.C);eligible=(abs(lon)<85)&(lat<scalp.hairline(lon)+8)
-    e0,e1=ranges['exterior'];outer=T[(T>=e0).all(1)&(T<e1).all(1)]-e0
-    border=geometric_boundary(P[e0:e1],outer)+e0;border=border[eligible[border]]
-    if len(border):
-        separation=cKDTree(P[border]).query(P[:core_end])[0]
-        COL[np.flatnonzero(eligible),0]=np.clip(separation[eligible]/(spec['soft_hairline_mm']/1000),0,1)
-    return COL
 
 def patch_roots(args):
     """Recolour root coverage only; retain geometry and morph bytes exactly."""
