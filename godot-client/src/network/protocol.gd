@@ -361,6 +361,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"actor_customization_v1",
 	"actor_customization_v2",
 	"actor_customization_v3",
+	"actor_customization_v4",
 	"weather_state_v1",
 	"attribute_state_v1",
 	"counter_layout_v1",
@@ -745,6 +746,8 @@ static func decode_server(command: int, payload: PackedByteArray, logical_coordi
 			return {"type": "appearance_protocol", "version": 2}
 		if payload == PackedByteArray(PortraitCustomization.V3_TAG):
 			return {"type": "appearance_protocol", "version": 3}
+		if payload == PackedByteArray(PortraitCustomization.V4_TAG):
+			return {"type": "appearance_protocol", "version": 4}
 		return {"type": "invalid", "error": "appearance_protocol"}
 	match command:
 		ServerMessage.ELORIA_INVASION_ASSISTANT_STATE:

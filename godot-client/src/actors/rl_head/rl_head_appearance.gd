@@ -12,6 +12,8 @@ extends RefCounted
 ##     which is what an actor's `appearance.rl_head` carries,
 ##   * a compact byte form (`encode` / `decode`), a proposal for the wire that
 ##     is NOT wired into the protocol; see ENCODING_VERSION below.
+## Age, greying and tied-hair placement travel in the object/dictionary and
+## PortraitCustomization PC/4; the unused compact proposal is unchanged.
 ##
 ## Control values run from -1 to 1; a control missing from `controls` is 0,
 ## the head as authored. Colours are sRGB, like AppearanceVariants' palettes.
@@ -103,6 +105,11 @@ var liner_wing := 0.0
 var hair_length := 0.0
 var hair_volume := 0.0
 var hair_detail := DEFAULT_HAIR_DETAIL
+## Independent cosmetic aging amounts, 0..1; omitted legacy values stay off.
+var skin_age := 0.0
+var hair_grey := 0.0
+## Optional qualified tied-hair shape, -1 low to 1 high (0 as authored).
+var hair_tie_height := 0.0
 ## The facial hair's own colour when `beard_color_set` (a beard card texture
 ## lights differently from a hairstyle's), else the hair colour. Not part of
 ## the byte form.
@@ -208,6 +215,9 @@ func to_dict() -> Dictionary:
 		"hair_length": snappedf(hair_length, 0.0001),
 		"hair_volume": snappedf(hair_volume, 0.0001),
 		"hair_detail": hair_detail,
+		"skin_age": snappedf(skin_age, 0.0001),
+		"hair_grey": snappedf(hair_grey, 0.0001),
+		"hair_tie_height": snappedf(hair_tie_height, 0.0001),
 		"beard_color": _color_array(beard_color) if beard_color_set else null,
 	}
 
@@ -284,6 +294,9 @@ func _merge(data: Dictionary) -> void:
 	hair_length = clampf(float(data.get("hair_length", hair_length)), -1.0, 1.0)
 	hair_volume = clampf(float(data.get("hair_volume", hair_volume)), -1.0, 1.0)
 	hair_detail = clampi(int(data.get("hair_detail", hair_detail)), 0, 100)
+	skin_age = clampf(float(data.get("skin_age", skin_age)), 0.0, 1.0)
+	hair_grey = clampf(float(data.get("hair_grey", hair_grey)), 0.0, 1.0)
+	hair_tie_height = clampf(float(data.get("hair_tie_height", hair_tie_height)), -1.0, 1.0)
 	if data.get("beard_color") != null and data.has("beard_color"):
 		beard_color = _color(data["beard_color"], beard_color)
 		beard_color_set = true

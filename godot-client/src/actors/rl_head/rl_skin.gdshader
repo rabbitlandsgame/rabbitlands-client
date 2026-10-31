@@ -32,6 +32,7 @@ shader_type spatial;
 render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_schlick_ggx;
 
 #include "res://src/actors/rl_head/rl_head_instance.gdshaderinc"
+#include "res://src/actors/rl_head/rl_age.gdshaderinc"
 
 uniform sampler2D albedo_texture : source_color, filter_linear_mipmap_anisotropic, repeat_disable;
 uniform bool has_albedo = false;
@@ -128,6 +129,10 @@ float speckle(vec2 uv) {
 }
 
 void fragment() {
+	vec2 age = rl_age_amounts();
+	// The actor's amount is uniform across a draw. Keep the derivatives in this
+	// uniform branch, including the face-island boundary's fragment quads.
+	vec3 age_contours = age.x > 0.0 ? rl_age_masks(UV) : vec3(0.0);
 	// The face proper; 0 on the neck rim and the joints it shares with the body,
 	// and (features2 A) on the neck painted to continue the body's own tone, so
 	// the whole neck takes the body's detail share and lighting.
@@ -147,16 +152,22 @@ void fragment() {
 		vec3 albedo = dye * shading;
 		vec4 features = has_features ? texture(features_texture, UV) : vec4(0.0);
 		vec3 features2 = features2_texel.rgb;
+		vec3 groom_colour = rl_grey_colour(hair_color.rgb, UV, age.y);
+		if (age.x > 0.0) {
+			float strength = pow(age.x, 1.8) * face * (1.0 - features.g);
+			albedo *= 1.0 - (age_contours.x * 0.19 + age_contours.z * 0.14) * strength;
+			albedo = mix(albedo, albedo * vec3(0.89, 0.83, 0.81), age_contours.y * strength * 0.50);
+		}
 		albedo = mix(albedo, albedo * freckle_shade, clamp(features.r * freckles, 0.0, 1.0));
 		if (stubble > 0.0) {
 			float dots = mix(0.5, 1.0, speckle(UV * 1400.0));
-			vec3 shadow = mix(albedo * 0.55, hair_color.rgb * 0.8, 0.5);
+			vec3 shadow = mix(albedo * 0.55, groom_colour * 0.8, 0.5);
 			albedo = mix(albedo, shadow, clamp(features2.r * stubble_gain, 0.0, 1.0) * stubble * dots);
 		}
 		albedo = mix(albedo, albedo * blush_tint, features2.g * blush);
 		// Under a hairstyle only (the rig sets `hairline` to 0 on a bald head):
 		// a hint of the hair's colour, as dark as the skin, at the scalp.
-		albedo = mix(albedo, hair_color.rgb * value, features2.b * clamp(hairline, 0.0, 0.35));
+		albedo = mix(albedo, groom_colour * value, features2.b * clamp(hairline, 0.0, 0.35));
 		// Lips darken with the skin: the tint is scaled by how far the chosen
 		// skin sits from the reference tone the lips were painted against.
 		float skin_luma = clamp(dot(skin_color.rgb, LUMA) / reference_luma, 0.25, 1.25);
@@ -194,14 +205,31 @@ void fragment() {
 			? mix(vec3(brow_floor, brow_span, brow_gamma), brow_thick, thickness)
 			: mix(vec3(brow_floor, brow_span, brow_gamma), brow_thin, -thickness);
 		float brow = pow(clamp((mask - curve.x) / max(curve.y, 0.01), 0.0, 1.0), curve.z) * brow_density;
-		albedo = mix(albedo, brow_color.rgb, clamp(brow, 0.0, 1.0));
+		albedo = mix(albedo, rl_grey_colour(brow_color.rgb, UV, age.y), clamp(brow, 0.0, 1.0));
 		ALBEDO = albedo;
 		ROUGHNESS = mix(rim_roughness, mix(roughness_value, 0.5, features.g), face);
+		if (age.x > 0.0) { ROUGHNESS = min(1.0, ROUGHNESS + 0.10 * age.x * face * (1.0 - features.g)); }
 		SPECULAR = mix(rim_specular, specular_value, face);
 		SSS_STRENGTH = subsurface * face;
 	}
 	if (has_normal) {
 		NORMAL_MAP = texture(normal_texture, UV).rgb;
 		NORMAL_MAP_DEPTH = normal_strength;
+	}
+	if (age.x > 0.0) {
+		float height = -(age_contours.x + age_contours.z * 0.8) * pow(age.x, 1.8) * face * 0.00065;
+		vec2 dx = dFdx(UV);
+		vec2 dy = dFdy(UV);
+		float determinant = dx.x * dy.y - dx.y * dy.x;
+		vec2 height_derivative = vec2(dFdx(height), dFdy(height));
+		if (abs(determinant) > 1e-12) {
+			vec2 gradient = vec2(height_derivative.x * dy.y - height_derivative.y * dx.y,
+				height_derivative.y * dx.x - height_derivative.x * dy.x) / determinant;
+			vec3 base_normal = has_normal ? (texture(normal_texture, UV).rgb * 2.0 - 1.0) : vec3(0.0, 0.0, 1.0);
+			base_normal.xy *= has_normal ? normal_strength : 1.0;
+			base_normal.xy -= clamp(gradient, vec2(-0.28), vec2(0.28));
+			NORMAL_MAP = normalize(base_normal) * 0.5 + 0.5;
+			NORMAL_MAP_DEPTH = 1.0;
+		}
 	}
 }

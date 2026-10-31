@@ -2725,12 +2725,13 @@ func _apply_creation_protocol() -> void:
 	var version: int = Network.appearance_protocol_version()
 	var actor_type: int = create_gender.get_selected_id()
 	var human := AppearanceVariants.culture_for_actor_type(actor_type) == "luminous" and actor_type in [0, 1]
-	portrait_form.set_detail_enabled(version >= PortraitCustomization.LATEST)
+	portrait_form.set_detail_enabled(version >= 3)
+	portrait_form.set_age_enabled(version >= 4)
 	creation_colours.visible = human
 	if human:
 		var model_config: Dictionary = models.get("luminous_female" if actor_type == 0 else "luminous_male", {})
 		creation_colours.set_body("female" if actor_type == 0 else "male", model_config)
-	creation_colours.set_custom_colours_enabled(human and version >= PortraitCustomization.LATEST)
+	creation_colours.set_custom_colours_enabled(human and version >= 3)
 
 func _on_appearance_protocol_changed(version: int) -> void:
 	_apply_creation_protocol()

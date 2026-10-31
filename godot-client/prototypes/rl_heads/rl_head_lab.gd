@@ -14,6 +14,7 @@ extends Node3D
 ## saves screenshots under .local/rl-heads/evidence/lab/ and quits.
 
 const Stage := preload("res://prototypes/rl_heads/rl_head_stage.gd")
+const HairModules := preload("res://src/actors/rl_head/rl_head_hair_modules.gd")
 const QUALITY_LABELS: Array[String] = ["Low", "Medium", "High"]
 const EXPRESSION_BUTTONS: Array[String] = ["neutral", "smile", "grin", "frown", "angry",
 	"surprise", "sad", "squint", "pucker", "sneer"]
@@ -283,6 +284,7 @@ func _build_ui() -> void:
 	_heading("Hair and grooming")
 	_hair_option = _option("Hairstyle", [], func(index: int) -> void:
 		face.hair = _hair_option.get_item_metadata(index)
+		_refresh_tie_height()
 		_apply_face())
 	_beard_option = _option("Facial hair", [], func(index: int) -> void:
 		face.beard = _beard_option.get_item_metadata(index)
@@ -290,6 +292,10 @@ func _build_ui() -> void:
 	_groom_slider("hair_length", "Length", -1.0, 1.0)
 	_groom_slider("hair_volume", "Volume", -1.0, 1.0)
 	_groom_slider("hair_detail", "Messiness", 0.0, 100.0)
+	_groom_slider("hair_tie_height", "Tie height", -1.0, 1.0)
+	_heading("Age & greying")
+	_groom_slider("skin_age", "Skin age", 0.0, 1.0)
+	_groom_slider("hair_grey", "Greying", 0.0, 1.0)
 
 	_heading("Identity")
 	_controls_box = VBoxContainer.new()
@@ -498,6 +504,20 @@ func _groom_slider(field: String, text: String, minimum: float, maximum: float) 
 		_apply_face())
 	row.add_child(slider)
 	_amount_sliders[field] = slider
+	if field == "hair_tie_height":
+		_refresh_tie_height()
+	elif field == "skin_age":
+		slider.tooltip_text = "Fine lines and skin relief; 0 keeps the original face."
+	elif field == "hair_grey":
+		slider.tooltip_text = "Greying of hair, brows and facial hair; the chosen hair colour stays editable."
+
+
+func _refresh_tie_height() -> void:
+	if not _amount_sliders.has("hair_tie_height"):
+		return
+	var module := HairModules.find(face.hair, _sex)
+	var supported := module > 0 and HairModules.supports_tie_height(module, _sex)
+	(_amount_sliders["hair_tie_height"] as HSlider).get_parent().visible = supported
 
 
 func _amount_slider(field: String, minimum: float = 0.0) -> void:
@@ -588,6 +608,7 @@ func _refresh_all() -> void:
 	hair_styles.append_array(RLHeadLibrary.legacy_hair_styles(_sex))
 	_fill_styles(_hair_option, hair_styles, face.hair)
 	_fill_styles(_beard_option, RLHeadLibrary.beard_styles(), face.beard)
+	_refresh_tie_height()
 
 
 func _fill_styles(option: OptionButton, names: PackedStringArray, current: String) -> void:

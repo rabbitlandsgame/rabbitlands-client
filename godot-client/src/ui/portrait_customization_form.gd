@@ -67,15 +67,19 @@ var finish_notice: HBoxContainer
 var detail_toggle: Button
 var detail_box: VBoxContainer
 var detail_notice: HBoxContainer
+var age_box: VBoxContainer
+var age_notice: HBoxContainer
 var module_hint: Label
 var _finish_s := 50
 var _finish_last := 50
 var _finish_dragging := false
 var _module := 0
 var _detail_enabled := false
+var _age_enabled := false
 var _sex := "male"
 var _hair_style := -1
 var _stubble_row: Array[Control] = []
+var _tie_height_row: Array[Control] = []
 var _quiet := false
 
 func _init() -> void:
@@ -99,6 +103,10 @@ func _init() -> void:
 	_add_finish_slider(controls["hair_detail"] as OptionButton)
 	_add_slider(grid, "hair_length", "Hair length", "Shorter", "Longer")
 	_add_slider(grid, "hair_volume", "Hair volume", "Close", "Full")
+	var tie_start := grid.get_child_count()
+	_add_slider(grid, "hair_tie_height", "Hair tie height", "Lower", "Higher",
+		"centre keeps this style's original tie height")
+	_tie_height_row = [grid.get_child(tie_start), grid.get_child(tie_start + 1)]
 	_add_slider(grid, "jaw", "Jaw width", "Narrow", "Broad")
 	_add_slider(grid, "cheekbones", "Cheekbones", "Soft", "Defined")
 	_add_slider(grid, "face_length", "Face length", "Shorter", "Longer")
@@ -132,6 +140,7 @@ func _init() -> void:
 	finish_notice = KIT.notice("A custom hair finish is set, but this server can't save it.", "Use nearest finish", "FinishNotice")
 	add_child(finish_notice)
 	(finish_notice.get_meta("button") as Button).pressed.connect(use_nearest_finish)
+	_add_age_section()
 	_add_detail_section()
 	var hint := Label.new()
 	hint.text = "Appearance only. Your movement, reach and equipment stats stay the same."
@@ -139,6 +148,7 @@ func _init() -> void:
 	add_child(hint)
 	_carry(CUSTOMIZATION.normalized({}))
 	_apply_detail_enabled()
+	_apply_age_enabled()
 
 func _label(grid: GridContainer, text: String) -> Label:
 	var label := Label.new()
@@ -307,11 +317,38 @@ func _add_slider(grid: GridContainer, field: String, title: String, low: String,
 	return slider
 
 func _readout(field: String, value: float) -> String:
+	if field in ["skin_age", "hair_grey"]:
+		return "%d%%" % roundi(value)
 	if field == "height":
 		return "%d%%" % roundi(90 + value * 0.2)
 	if field == "build":
 		return "%d%%" % roundi(85 + value * 0.3)
 	return str(roundi(value))
+
+func _add_age_section() -> void:
+	age_notice = KIT.notice("Age or tied-hair settings are set, but this server can't save them.",
+		"Reset these sliders", "AgeNotice")
+	add_child(age_notice)
+	(age_notice.get_meta("button") as Button).pressed.connect(func() -> void:
+		reset_age()
+		changed.emit())
+	age_box = VBoxContainer.new()
+	age_box.name = "AgeControls"
+	add_child(age_box)
+	var heading := Label.new()
+	heading.text = "Age & greying"
+	age_box.add_child(heading)
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	age_box.add_child(grid)
+	var age := _add_slider(grid, "skin_age", "Skin age", "Smooth", "Weathered",
+		"fine lines and skin relief on the High Human face")
+	var grey := _add_slider(grid, "hair_grey", "Greying", "Original colour", "Silver",
+		"mixes grey into your hair, brows and beard")
+	for slider: HSlider in [age, grey]:
+		slider.set_value_no_signal(0)
+		(slider.get_meta("readout") as Label).text = "0%"
 
 # ---------------------------------------------------------------- PC/3 detail
 
@@ -498,6 +535,7 @@ func _sync_module() -> void:
 		module_hint.text = "At High: " + str(MODULE_NAMES.get(semantic, semantic.capitalize()))
 	else:
 		module_hint.text = "At High: your hairstyle"
+	_sync_age_controls()
 
 # ---------------------------------------------------------------- state
 
@@ -589,6 +627,7 @@ func apply_preset(preset_name: String) -> void:
 ## dropdown it returns to Classic as before. Colours are untouched.
 func reset_shape() -> void:
 	var keep := {}
+	keep["hair_grey"] = values().get("hair_grey", 0)
 	for field: String in _carried:
 		if field in CUSTOMIZATION.V3_COLOURS:
 			keep[field] = _carried[field]
@@ -609,6 +648,42 @@ func set_detail_enabled(enabled: bool) -> void:
 
 func detail_enabled() -> bool:
 	return _detail_enabled
+
+## PC/4 is independent of the existing PC/3 detail/colour gate.
+func set_age_enabled(enabled: bool) -> void:
+	_age_enabled = enabled
+	_apply_age_enabled()
+
+func age_enabled() -> bool:
+	return _age_enabled
+
+func _apply_age_enabled() -> void:
+	if age_box != null:
+		age_box.visible = _age_enabled
+	_sync_age_controls()
+	_update_notices()
+
+func _sync_age_controls() -> void:
+	var tied := _age_enabled and _hair_style != 0 \
+		and HAIR_MODULE_LOOKUP.supports_tie_height(_module, _sex, _module_entries())
+	for widget: Control in _tie_height_row:
+		widget.visible = tied
+	for field: String in ["skin_age", "hair_grey"]:
+		if controls.has(field):
+			(controls[field] as HSlider).editable = _age_enabled
+
+func reset_age() -> void:
+	var look := values()
+	for field: String in CUSTOMIZATION.V4_FIELDS:
+		look[field] = CUSTOMIZATION.DEFAULTS[field]
+	set_values(look)
+
+func unsupported_age() -> bool:
+	var look := values()
+	for field: String in CUSTOMIZATION.V4_FIELDS:
+		if int(look[field]) != int(CUSTOMIZATION.DEFAULTS[field]):
+			return true
+	return false
 
 func _apply_detail_enabled() -> void:
 	(controls["hair_detail"] as OptionButton).visible = not _detail_enabled
@@ -729,3 +804,5 @@ func _update_notices() -> void:
 		return
 	finish_notice.visible = not _detail_enabled and custom_finish()
 	detail_notice.visible = not _detail_enabled and unsupported_detail()
+	if age_notice != null:
+		age_notice.visible = not _age_enabled and unsupported_age()

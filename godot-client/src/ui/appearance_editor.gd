@@ -200,8 +200,10 @@ func protocol_version() -> int:
 
 ## PC/3 controls follow the negotiated version (and its changes while open).
 func set_protocol_version(version: int) -> void:
-	var enabled := version >= PortraitCustomization.LATEST and int(_dto.get("actor_type", -1)) in [0, 1]
+	var human := int(_dto.get("actor_type", -1)) in [0, 1]
+	var enabled := version >= 3 and human
 	set_detail_enabled(enabled)
+	_form.set_age_enabled(version >= 4 and human)
 	_colours.set_custom_colours_enabled(enabled)
 
 func set_detail_enabled(enabled: bool) -> void:

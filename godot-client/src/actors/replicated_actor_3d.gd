@@ -770,6 +770,10 @@ func apply_appearance_variants(appearance: Dictionary) -> void:
 		brow_tint = colours.hair.brow
 	if bool(colours.eyes.custom):
 		eye_tint = colours.eyes.pigment
+	if _uses_portrait_customization():
+		var greying := preload("res://src/actors/character_age.gd").amount(appearance, "hair_grey")
+		hair_tint = preload("res://src/actors/character_age.gd").grey_colour(hair_tint, greying)
+		brow_tint = preload("res://src/actors/character_age.gd").grey_colour(brow_tint, greying)
 	var garments := {}
 	for part: String in ["shirt", "pants", "boots"]:
 		if bool(colours[part].custom):
@@ -1289,7 +1293,7 @@ func _apply_rl_head_and_hair(appearance: Dictionary, hair_tint: Color) -> void:
 	if face != null and _rl_head_override(appearance) != null:
 		# The lab's face names its own hairstyle and colour.
 		style = RLHeadPortraitMap.legacy_style(face.hair)
-		tint = face.hair_color
+		tint = preload("res://src/actors/character_age.gd").grey_colour(face.hair_color, face.hair_grey)
 	_add_hair_variant(style, tint)
 	if face == null or not _set_rl_head(face):
 		_rl_head_failed = face != null

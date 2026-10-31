@@ -96,6 +96,7 @@ render_mode blend_mix, depth_draw_opaque, cull_disabled;
 #endif
 
 #include "res://src/actors/rl_head/rl_head_instance.gdshaderinc"
+#include "res://src/actors/rl_head/rl_age.gdshaderinc"
 
 uniform sampler2D strand_texture : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform bool has_texture = false;
@@ -103,6 +104,8 @@ uniform bool card = false;
 // Tight braids intentionally expose the actor's scalp between their rows.
 uniform bool scalp_channels = false;
 uniform bool soft_hairline = false;
+// Reference clumps can use card shading while carrying root coverage in R.
+uniform bool soft_root_coverage = false;
 uniform float alpha_scissor : hint_range(0.0, 1.0) = 0.5;
 uniform float root_darkening : hint_range(0.0, 1.0) = 0.25;
 uniform float lock_variation : hint_range(0.0, 0.5) = 0.12;
@@ -161,7 +164,7 @@ void fragment() {
 		atlas = vec4(vec3(mix(0.78, 1.08, streak)), coverage);
 	}
 	float root = mix(1.0 - root_darkening, 1.0, smoothstep(0.0, 0.55, COLOR.g));
-	float lock_random = soft_hairline && (!card || beard) ? 0.5 : COLOR.r;
+	float lock_random = soft_hairline && (!card || beard || soft_root_coverage) ? 0.5 : COLOR.r;
 	float lock = 1.0 + (lock_random - 0.5) * 2.0 * lock_variation * (1.0 + boost);
 	float shade = mix(1.0, COLOR.b, occlusion);
 	float painted = has_texture ? dot(atlas.rgb, LUMA) : atlas.r / 1.5;
@@ -171,7 +174,7 @@ void fragment() {
 		painted = mix(painted, card ? card_flat_level : mean, flatness);
 	}
 	float luminance = painted * exposure;
-	ALBEDO = hair_color.rgb * clamp(luminance, 0.0, 2.0) * root * lock * shade * (beard ? beard_gain : 1.0);
+	ALBEDO = rl_grey_colour(hair_color.rgb, UV, rl_age_amounts().y) * clamp(luminance, 0.0, 2.0) * root * lock * shade * (beard ? beard_gain : 1.0);
 	// A dropped detail fragment fails the scissor below like uncovered atlas
 	// (alpha_scissor is above 0 on every RL hair material).
 	ALPHA = kept ? atlas.a : 0.0;
@@ -182,7 +185,7 @@ void fragment() {
 			ALPHA = 0.0;
 		}
 	}
-	if (soft_hairline && ((!card && !beard) || beard)) {
+	if (soft_hairline && ((!card && !beard) || beard || soft_root_coverage)) {
 		ALPHA *= smoothstep(0.0, 0.5, COLOR.r);
 	}
 #ifndef RL_BEARD_FEATHER

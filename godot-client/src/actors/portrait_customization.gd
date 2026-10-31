@@ -2,7 +2,7 @@ class_name PortraitCustomization
 extends RefCounted
 ## Compact, versioned appearance; order is shared with the server trailers.
 ##
-## PC/1 is 7 fields, PC/2 16 and PC/3 55 (PC/3 spec: private server handbook
+## PC/1 is 7 fields, PC/2 16, PC/3 55 and PC/4 58 (PC/3 spec: private server handbook
 ## docs/wiki/Human-Character-Customization.md, with colour model revision 3):
 ## PC/2, then the 13 High face offsets (50 = none; eye_style and eye_depth
 ## added 2026-10-29), 9 detail fields (0 = Auto;
@@ -24,7 +24,11 @@ const V3_COLOURS := ["skin_tone", "skin_undertone", "hair_hue", "hair_sat", "hai
 	"eye_hue", "eye_sat", "eye_light", "shirt_hue", "shirt_sat", "shirt_light",
 	"pants_hue", "pants_sat", "pants_light", "boots_hue", "boots_sat", "boots_light"]
 const V3_FIELDS := V3_CONTROLS + V3_DETAILS + V3_COLOURS
-const FIELDS := V2_FIELDS + V3_FIELDS
+const V3_ALL_FIELDS := V2_FIELDS + V3_FIELDS
+## Appearance-only aging and an optional tied hairstyle's root height.
+## These append to PC/3; none of the earlier bytes or neutral values change.
+const V4_FIELDS := ["skin_age", "hair_grey", "hair_tie_height"]
+const FIELDS := V3_ALL_FIELDS + V4_FIELDS
 ## The five OKHSL triples (hue 1..240, saturation and lightness 1..101).
 const COLOUR_TRIPLES := {"hair": ["hair_hue", "hair_sat", "hair_light"],
 	"eyes": ["eye_hue", "eye_sat", "eye_light"],
@@ -43,7 +47,8 @@ const DEFAULTS := {"facial_hair": 0, "jaw": 50, "cheekbones": 50, "nose": 50,
 	"skin_tone": 0, "skin_undertone": 0, "hair_hue": 0, "hair_sat": 0, "hair_light": 0,
 	"eye_hue": 0, "eye_sat": 0, "eye_light": 0, "shirt_hue": 0, "shirt_sat": 0,
 	"shirt_light": 0, "pants_hue": 0, "pants_sat": 0, "pants_light": 0, "boots_hue": 0,
-	"boots_sat": 0, "boots_light": 0}
+	"boots_sat": 0, "boots_light": 0,
+	"skin_age": 0, "hair_grey": 0, "hair_tie_height": 50}
 ## Wire maxima other than 100 (the server asserts the same literal table).
 const MAXIMA := {"facial_hair": 5, "hair_detail": 2, "brow_style": 13, "brow_thickness": 101,
 	"freckles": 101, "liner": 101, "liner_wing": 101, "stubble": 101, "lip_tint": 12,
@@ -55,7 +60,9 @@ const MAXIMA := {"facial_hair": 5, "hair_detail": 2, "brow_style": 13, "brow_thi
 const TAG := [80, 67, 1]
 const V2_TAG := [80, 67, 2]
 const V3_TAG := [80, 67, 3]
-const LATEST := 3
+const V4_TAG := [80, 67, 4]
+const LATEST := 4
+const V4_MESSAGE := "This server cannot save skin age, greying or tied-hair height yet. Reset those sliders or use an updated server."
 const V2_MESSAGE := "This server does not support the new face, eye and hair controls yet. Return those controls to neutral (50) or use an updated server."
 const V3_DETAIL_MESSAGE := "This server cannot save the High-detail face options yet. Set them back to Auto (or the centre for shape sliders), or use an updated server."
 const COLOUR_MESSAGE := "This server cannot save custom colours yet. Pick a palette colour (or press Use nearest palette colours), or use an updated server."
@@ -63,7 +70,7 @@ const COLOUR_MESSAGE := "This server cannot save custom colours yet. Pick a pale
 static func maximum(field: String) -> int:
 	return int(MAXIMA.get(field, 100))
 
-## The fields a version encodes: 0 none, 1 PC/1, 2 PC/2, 3 PC/3 (all).
+## The fields a version encodes: 0 none, 1 PC/1, 2 PC/2, 3 PC/3, 4 current.
 static func fields_for(version: int) -> Array:
 	match version:
 		1:
@@ -71,6 +78,8 @@ static func fields_for(version: int) -> Array:
 		2:
 			return V2_FIELDS
 		3:
+			return V3_ALL_FIELDS
+		4:
 			return FIELDS
 	return []
 
@@ -82,6 +91,8 @@ static func field_version(field: String) -> int:
 		return 2
 	if field in V3_FIELDS:
 		return 3
+	if field in V4_FIELDS:
+		return 4
 	return 0
 
 ## The trailer tag for a version, empty for an unknown one.
@@ -93,6 +104,8 @@ static func tag(version: int) -> Array:
 			return V2_TAG
 		3:
 			return V3_TAG
+		4:
+			return V4_TAG
 	return []
 
 ## Every field, bounded: a missing or non-integer value is neutral, an
@@ -130,11 +143,13 @@ static func validate(appearance: Dictionary, version := LATEST) -> Dictionary:
 				message = COLOUR_MESSAGE
 			elif field_version(field) == 3:
 				message = V3_DETAIL_MESSAGE
+			elif field_version(field) == 4:
+				message = V4_MESSAGE
 			return {"ok": false, "error": "unsupported", "message": message}
 	return {"ok": true}
 
 static func encode(appearance: Dictionary, version := 1) -> PackedByteArray:
-	if version not in [1, 2, 3]:
+	if version not in [1, 2, 3, 4]:
 		return PackedByteArray()
 	var result := PackedByteArray(tag(version))
 	var values := normalized(appearance)
@@ -147,7 +162,7 @@ static func decode(payload: PackedByteArray, offset: int) -> Dictionary:
 		return {}
 	var version := int(payload[offset + 2])
 	var fields: Array = fields_for(version)
-	if version not in [1, 2, 3] or payload[offset] != 80 or payload[offset + 1] != 67 \
+	if version not in [1, 2, 3, 4] or payload[offset] != 80 or payload[offset + 1] != 67 \
 			or payload.size() != offset + 3 + fields.size():
 		return {}
 	var result := {}

@@ -162,6 +162,9 @@ static func face(appearance: Dictionary, sex: String) -> RLHeadAppearance:
 	result.hair_length = float(shapes["length"])
 	result.hair_volume = float(shapes["volume"])
 	result.hair_detail = int(shapes["detail"])
+	result.skin_age = float(field(appearance, "skin_age", 0)) / 100.0
+	result.hair_grey = float(field(appearance, "hair_grey", 0)) / 100.0
+	result.hair_tie_height = (float(field(appearance, "hair_tie_height", 50)) - 50.0) / 50.0
 	return result
 
 
@@ -717,6 +720,9 @@ static func to_portrait_fields(rl_face: RLHeadAppearance, sex: String,
 		var value := centre(field_name, sex) + 50.0 * x / (g if absf(g) > 1e-4 else 1.0)
 		result[field_name] = clampi(roundi(value), 0, 100)
 	result["facial_hair"] = maxi(0, BEARDS.find(rl_face.beard))
+	result["skin_age"] = clampi(roundi(rl_face.skin_age * 100.0), 0, 100)
+	result["hair_grey"] = clampi(roundi(rl_face.hair_grey * 100.0), 0, 100)
+	result["hair_tie_height"] = clampi(50 + roundi(rl_face.hair_tie_height * 50.0), 0, 100)
 	if rl_face.hair == RLHeadAppearance.NONE:
 		result["hair_style"] = 0
 	elif is_module(rl_face.hair):

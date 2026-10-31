@@ -16,6 +16,7 @@ const LOCKS := preload("res://src/actors/portrait_hair_locks.gd")
 const GROOM := preload("res://src/actors/portrait_groom.gd")
 const HAIR_FINISH := preload("res://src/actors/hair_finish.gd")
 const COLOURS := preload("res://src/actors/appearance_colours.gd")
+const AGE := preload("res://src/actors/character_age.gd")
 ## The two imported central needle-bang islands of the female Buns hairstyle.
 const NEEDLE_BANG_SIZE := 264
 const META := &"rl_high_hair"
@@ -85,6 +86,7 @@ static func apply(native_root: Node3D, skeleton: Skeleton3D, appearance: Diction
 	if bool(COLOURS.hair(appearance, config).custom):
 		color = COLOURS.hair_dye(appearance, config, "P4", style,
 			float(finish_s if finish_s >= 0 else HAIR_FINISH.enum_slider(detail)))
+	color = AGE.grey_colour(color, AGE.amount(appearance, "hair_grey"))
 	var sex := str(config.get("gender", ""))
 	# The hero-lock layer drawn: the saved finish's, or for a slider position
 	# the Swept (below Classic) or Tousled (above) layer grown in by min(w, 1).
@@ -587,6 +589,7 @@ static func _apply_beard(beard: MeshInstance3D, skeleton: Skeleton3D, root: Node
 	var color:=AppearanceVariants.hair_color(int(appearance.get("hair",0)))
 	if bool(COLOURS.hair(appearance, config).custom):
 		color = COLOURS.hair_dye(appearance, config, "B2", clampi(int(appearance.get("facial_hair", 0)), 0, 5))
+	color = AGE.grey_colour(color, AGE.amount(appearance, "hair_grey"))
 	var material_key:="beard:%d:%s" % [original.get_instance_id(),COLOURS.colour_key(color)]
 	var material:=_materials.get(material_key) as ShaderMaterial
 	if material==null:

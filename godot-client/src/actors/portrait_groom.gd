@@ -16,6 +16,7 @@ const HAIR_SHADER := preload("res://src/actors/portrait_hair.gdshader")
 const BEARD_SHADER := preload("res://src/actors/portrait_beard.gdshader")
 const HAIR_FINISH := preload("res://src/actors/hair_finish.gd")
 const COLOURS := preload("res://src/actors/appearance_colours.gd")
+const AGE := preload("res://src/actors/character_age.gd")
 ## Tousled / Swept's portrait_hair.gdshader shading (the uniforms' defaults).
 const FINISH_ROUGHNESS := 0.76
 const FINISH_SPECULAR := 0.24
@@ -77,6 +78,7 @@ static func apply(native_root: Node3D, skeleton: Skeleton3D,
 		var path := "P3" if finish_s >= 0 or detail != 0 else ("P1" if hair_length == 50 and hair_volume == 50 else "P2")
 		hair_color = COLOURS.hair_dye(appearance, model_config, path, style_slot,
 			float(finish_s if finish_s >= 0 else HAIR_FINISH.enum_slider(detail)))
+	hair_color = AGE.grey_colour(hair_color, AGE.amount(appearance, "hair_grey"))
 	for node: Node in native_root.find_children("*", "MeshInstance3D", true, false):
 		var hair := node as MeshInstance3D
 		if hair.has_meta("rl_concept_hair"):
@@ -110,6 +112,7 @@ static func apply(native_root: Node3D, skeleton: Skeleton3D,
 	if custom_colour:
 		# B1: a custom beard shows the hair's apparent colour (owner Q-N4).
 		color = COLOURS.hair_dye(appearance, model_config, "B1", style)
+	color = AGE.grey_colour(color, AGE.amount(appearance, "hair_grey"))
 	var material_key := "%s:%d:%.5f:%.5f" % [COLOURS.colour_key(color), style, eye_height,mouth_y]
 	var material := _beard_materials.get(material_key) as ShaderMaterial
 	if material == null:

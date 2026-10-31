@@ -49,7 +49,8 @@ func look2() -> Dictionary:
 	return result
 
 func look3() -> Dictionary:
-	var result := look2()
+	var result := Custom.DEFAULTS.duplicate()
+	result.merge(look2(), true)
 	for index: int in Custom.V3_FIELDS.size():
 		result[Custom.V3_FIELDS[index]] = V3_VALUES[index]
 	return result
@@ -71,8 +72,8 @@ func run() -> void:
 
 # C14: the field table.
 func check_fields() -> void:
-	expect(Custom.FIELDS.size() == 55 and Custom.V2_FIELDS.size() == 16 and Custom.V3_FIELDS.size() == 39,
-		"55 fields: 16 PC/2 and 39 V3 (%d, %d, %d)" % [Custom.FIELDS.size(), Custom.V2_FIELDS.size(), Custom.V3_FIELDS.size()])
+	expect(Custom.V3_ALL_FIELDS.size() == 55 and Custom.V2_FIELDS.size() == 16 and Custom.V3_FIELDS.size() == 39,
+		"55 fields: 16 PC/2 and 39 V3 (%d, %d, %d)" % [Custom.V3_ALL_FIELDS.size(), Custom.V2_FIELDS.size(), Custom.V3_FIELDS.size()])
 	expect(Custom.V3_CONTROLS.size() == 13 and Custom.V3_DETAILS.size() == 9 and Custom.V3_COLOURS.size() == 17,
 		"13 offsets, 9 details, 17 colour fields")
 	# The offsets follow the head's rlHead.controls order: eye_style and eye_depth
@@ -90,7 +91,7 @@ func check_fields() -> void:
 	for field: String in Custom.FIELDS:
 		expect(Custom.maximum(field) == int(MAXIMA.get(field, 100)), "%s maximum %d" % [field, Custom.maximum(field)])
 		expect(Custom.DEFAULTS.has(field), "%s has a neutral value" % field)
-	expect(Custom.DEFAULTS.size() == 55, "55 neutral values")
+	expect(Custom.DEFAULTS.size() == 58, "58 neutral values including neutral PC/4 age and tie height")
 	for field: String in NEW_FIELDS:
 		expect(Custom.field_version(field) == 3 and Custom.DEFAULTS[field] == 0, "%s is a version 3 field, neutral 0" % field)
 	for field: String in Custom.V3_CONTROLS:
@@ -101,13 +102,13 @@ func check_fields() -> void:
 		expect(Custom.field_version(field) == 2, "%s is version 2" % field)
 	expect(Custom.field_version("skin") == 0 and Custom.field_version("future_field") == 0, "palette and unknown keys have no version")
 	expect(Custom.fields_for(0).is_empty() and Custom.fields_for(1) == Custom.V1_FIELDS
-		and Custom.fields_for(2) == Custom.V2_FIELDS and Custom.fields_for(3) == Custom.FIELDS
-		and Custom.fields_for(4).is_empty(), "fields_for(0..4)")
+		and Custom.fields_for(2) == Custom.V2_FIELDS and Custom.fields_for(3) == Custom.V3_ALL_FIELDS
+		and Custom.fields_for(4) == Custom.FIELDS and Custom.fields_for(5).is_empty(), "fields_for(0..5)")
 	for version: int in [1, 2]:
 		var shorter: Array = Custom.fields_for(version)
 		expect(Custom.fields_for(version + 1).slice(0, shorter.size()) == shorter, "fields_for(%d) is a prefix" % (version + 1))
 	expect(Custom.tag(1) == [80, 67, 1] and Custom.tag(2) == [80, 67, 2] and Custom.tag(3) == [80, 67, 3]
-		and Custom.tag(4).is_empty() and Custom.LATEST == 3, "tags and LATEST")
+		and Custom.tag(4) == [80, 67, 4] and Custom.tag(5).is_empty() and Custom.LATEST == 4, "tags and LATEST")
 	var names := {}
 	for field: String in Custom.FIELDS:
 		expect(not names.has(field), "%s is unique" % field)
@@ -135,7 +136,7 @@ func check_fixtures() -> void:
 		for field: String in Custom.FIELDS:
 			var expected: int = look[field] if Custom.field_version(field) <= version else Custom.DEFAULTS[field]
 			expect(decoded[field] == expected, "version %d carries %s" % [version, field])
-	expect(Custom.encode(look, 4).is_empty() and Custom.encode(look, 0).is_empty(), "no encoding for versions 0 or 4")
+	expect(Custom.encode(look, 5).is_empty() and Custom.encode(look, 0).is_empty(), "no encoding for versions 0 or 5")
 
 # C3: rejections.
 func check_rejections() -> void:
@@ -320,7 +321,7 @@ func check_probes() -> void:
 		and Wire.appearance_protocol_probe(3) == PackedByteArray([190, 4, 0, 80, 67, 3]), "PC/2 and PC/3 probes")
 	expect(Wire.decode_server(190, PackedByteArray([80, 67, 2])).get("version") == 2
 		and Wire.decode_server(190, PackedByteArray([80, 67, 3])).get("version") == 3, "PC/2 and PC/3 replies")
-	for bad: PackedByteArray in [PackedByteArray([80, 67, 1]), PackedByteArray([80, 67, 4]), PackedByteArray([80, 67, 3, 0]),
+	for bad: PackedByteArray in [PackedByteArray([80, 67, 1]), PackedByteArray([80, 67, 5]), PackedByteArray([80, 67, 3, 0]),
 			PackedByteArray(), PackedByteArray([90, 90, 3])]:
 		expect(Wire.decode_server(190, bad).type == "invalid", "probe reply %s is invalid" % bad.hex_encode())
 
@@ -431,7 +432,7 @@ func check_real_connection_probe() -> void:
 		var deadline := Time.get_ticks_msec() + 5000
 		var received := PackedByteArray()
 		var probes: Array[PackedByteArray] = []
-		while Time.get_ticks_msec() < deadline and probes.size() < 2:
+		while Time.get_ticks_msec() < deadline and probes.size() < 3:
 			network.call("_process", 0.0)
 			if peer == null and listener.is_connection_available():
 				peer = listener.take_connection()
@@ -446,8 +447,8 @@ func check_real_connection_probe() -> void:
 						probes.append(decoded.payload)
 					received = received.slice(decoded.consumed)
 			await process_frame
-		expect(probes == [PackedByteArray([80, 67, 2]), PackedByteArray([80, 67, 3])],
-			"%s: the PC/2 probe, then the PC/3 probe (%s)" % [peer_kind, str(probes)])
+		expect(probes == [PackedByteArray([80, 67, 2]), PackedByteArray([80, 67, 3]), PackedByteArray([80, 67, 4])],
+			"%s: ascending PC/2, PC/3 and PC/4 probes (%s)" % [peer_kind, str(probes)])
 		var want := {"pc2": 2, "v3": 3, "silent": 1}[peer_kind] as int
 		if peer != null:
 			if peer_kind != "silent":

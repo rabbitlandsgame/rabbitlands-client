@@ -147,7 +147,9 @@ const HAIR_LENGTH_SHAPES := ["hl_length_p", "hl_length_n"]
 const HAIR_VOLUME_SHAPES := ["hl_volume_p", "hl_volume_n"]
 ## The instance uniforms on an RL hairstyle's meshes. A beard keeps the
 ## shader's default `hair_detail` (0.5, nothing dropped).
-const HAIR_INSTANCE_UNIFORMS := ["hair_color", "hair_detail"]
+const HAIR_INSTANCE_UNIFORMS := ["hair_color", "hair_detail", "eye_color"]
+const AGE := preload("res://src/actors/character_age.gd")
+const HAIR_MODULE_LOOKUP := preload("res://src/actors/rl_head/rl_head_hair_modules.gd")
 
 var appearance: RLHeadAppearance
 var quality: int = ActorRenderQuality.QUALITY_DEFAULT
@@ -1002,8 +1004,14 @@ func _apply_hair_shapes() -> void:
 func _hair_shape_weights() -> Dictionary:
 	var length := clampf(appearance.hair_length, -1.0, 1.0)
 	var volume := clampf(appearance.hair_volume, -1.0, 1.0)
-	return {HAIR_LENGTH_SHAPES[0]: maxf(length, 0.0), HAIR_LENGTH_SHAPES[1]: maxf(-length, 0.0),
+	var tie := clampf(appearance.hair_tie_height, -1.0, 1.0)
+	var result := {HAIR_LENGTH_SHAPES[0]: maxf(length, 0.0), HAIR_LENGTH_SHAPES[1]: maxf(-length, 0.0),
 		HAIR_VOLUME_SHAPES[0]: maxf(volume, 0.0), HAIR_VOLUME_SHAPES[1]: maxf(-volume, 0.0)}
+	var module := HAIR_MODULE_LOOKUP.find(appearance.hair, appearance.sex)
+	if HAIR_MODULE_LOOKUP.supports_tie_height(module, appearance.sex):
+		result["hl_tie_height_p"] = maxf(tie, 0.0)
+		result["hl_tie_height_n"] = maxf(-tie, 0.0)
+	return result
 
 
 ## The `hair_detail` instance uniform: the face's level as 0..1.
@@ -1187,14 +1195,16 @@ func _apply_colours() -> void:
 	var skin := appearance.skin
 	var brow := appearance.brow_color
 	var hair := appearance.hair_color
+	var eyes := appearance.eyes
 	skin.a = body_colour.r
 	brow.a = body_colour.g
 	hair.a = body_colour.b
+	eyes.a = AGE.packed(appearance.skin_age, appearance.hair_grey)
 	var values := {
 		"skin_color": skin, "lip_tint": appearance.lip_tint,
 		"brow_color": brow, "hair_color": hair,
 		"freckles": appearance.freckles, "liner": appearance.liner,
-		"stubble": appearance.stubble_amount(), "eye_color": appearance.eyes,
+		"stubble": appearance.stubble_amount(), "eye_color": eyes,
 		"hairline": HAIRLINE_UNDER_HAIR if haired else 0.0,
 		"brow_style": appearance.brow_style, "brow_thickness": appearance.brow_thickness,
 		"liner_wing": appearance.liner_wing, "hair_detail": hair_detail_uniform(),
@@ -1202,14 +1212,14 @@ func _apply_colours() -> void:
 	}
 	# The head's surfaces read all but the hair's detail; the beard reads its
 	# colour, the hair its colour and detail.
-	var beard_values := {"hair_color": beard_colour}
+	var beard_values := {"hair_color": beard_colour, "eye_color": eyes}
 	if RLHeadLibrary.material_values():
 		values["eye_look"] = _eye_look
 		values["lid_closure"] = _lid_closure
 		_apply_material_values([[_head_lods, "", values], [_beard_lods, _beard_style, beard_values],
 			[_hair_lods, _hair_style, values]])
 		return
-	for part: Array in [[_head_lods, INSTANCE_UNIFORMS, values], [_beard_lods, ["hair_color"], beard_values],
+	for part: Array in [[_head_lods, INSTANCE_UNIFORMS, values], [_beard_lods, ["hair_color", "eye_color"], beard_values],
 			[_hair_lods, HAIR_INSTANCE_UNIFORMS, values]]:
 		for level: Array in part[0]:
 			for node: Variant in level:

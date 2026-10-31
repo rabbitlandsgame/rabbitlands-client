@@ -51,7 +51,7 @@ func form_suite() -> void:
 	# U1: hidden by default; 55 values, V3 neutral.
 	expect(not form.detail_enabled() and not form.detail_toggle.visible and not form.detail_box.visible,
 		"U1 the More face detail section is hidden by default")
-	expect(form.values().size() == 55 and neutral_v3(form.values()), "U1 values() has 55 keys and V3 is neutral")
+	expect(form.values().size() == 58 and neutral_v3(form.values()), "U1 values() has all fields and V3 is neutral")
 	expect((form.controls.hair_detail as OptionButton).visible and not form.finish_row.visible,
 		"U15 develop's finish dropdown shows at version 1-2")
 	# U2: enable and edit every V3 widget.
@@ -283,6 +283,21 @@ func editor_suite() -> void:
 	expect(tokens.size() == 39, "U6 at version 3 the sent text has all 39 V3 tokens (%d)" % tokens.size())
 	expect(state.command.contains("hair_finish=0") and state.command.contains("skin_tone=0")
 		and state.command.contains("boots_light=0"), "U10/U15 hair_finish and the colour fields are sent at version 3")
+	expect(not form.age_enabled(), "PC/3 keeps its face and colour controls but cannot edit age")
+	state.version = 4
+	editor.set_protocol_version(4)
+	expect(form.age_enabled() and form.detail_enabled(), "PC/4 dressing room enables age and existing face detail")
+	(form.controls.skin_age as HSlider).value = 71
+	(form.controls.hair_grey as HSlider).value = 38
+	editor.call("_apply")
+	expect(state.command.contains("skin_age=71") and state.command.contains("hair_grey=38"), "PC/4 dressing room saves age sliders")
+	state.version = 3
+	editor.set_protocol_version(3)
+	var age_sent: int = state.sent
+	editor.call("_apply")
+	expect(state.sent == age_sent and (editor.get("_status") as Label).text.begins_with(Custom.V4_MESSAGE), "PC/3 fallback blocks unsupported edits without losing them")
+	expect(form.values().skin_age == 71 and form.values().hair_grey == 38, "held age edits survive fallback")
+	form.reset_age()
 	# open_for with V3 values restores them.
 	var saved := look.duplicate()
 	saved.merge({"eyelid": 20, "freckles": 31, "lip_tint": 5, "hair_module": 1, "hair_detail": 1, "hair_finish": 91}, true)
@@ -333,11 +348,11 @@ func creation_suite() -> void:
 	expected.merge(Custom.DEFAULTS)
 	expect(main.call("_creation_appearance") == expected, "U5 creation at version 1 equals develop's look plus neutral V3")
 	var seen: Array = []
-	for version: int in [1, 2, 3, 1]:
+	for version: int in [1, 2, 3, 4, 1]:
 		network.call("_set_appearance_protocol", version)
-		seen.append([version, form.detail_enabled(), (main.get("creation_colours") as Control).get("_enabled")])
-	expect(seen == [[1, false, false], [2, false, false], [3, true, true], [1, false, false]],
-		"U5 creation follows appearance_protocol_changed (1, 2, 3, 1): %s" % [seen])
+		seen.append([version, form.detail_enabled(), form.age_enabled(), (main.get("creation_colours") as Control).get("_enabled")])
+	expect(seen == [[1, false, false, false], [2, false, false, false], [3, true, false, true], [4, true, true, true], [1, false, false, false]],
+		"U5 creation follows appearance_protocol_changed (1, 2, 3, 4, 1): %s" % [seen])
 	expect(main.call("_creation_appearance") == expected, "U5 the look is unchanged after the version round trip")
 	network.call("_set_appearance_protocol", 3)
 	var sex := main.get_node("%CreateGender") as OptionButton
