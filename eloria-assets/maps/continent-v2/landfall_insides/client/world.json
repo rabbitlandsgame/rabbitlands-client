@@ -411,6 +411,22 @@
         88
       ],
       "rotationDegrees": 180
+    },
+    {
+      "id": "lantern_upper_galleries",
+      "name": "Lantern Mine: Upper Galleries",
+      "section": "lantern_upper_galleries",
+      "default": false,
+      "position": [
+        520,
+        0.05,
+        172
+      ],
+      "serverTile": [
+        520,
+        548
+      ],
+      "rotationDegrees": 180
     }
   ],
   "chambers": [
@@ -3823,6 +3839,171 @@
       ],
       "radius": 11,
       "name": "The Frozen Deep"
+    },
+    {
+      "id": "lantern_upper_galleries-0",
+      "section": "lantern_upper_galleries",
+      "position": [
+        520,
+        0,
+        172
+      ],
+      "radius": 9,
+      "name": "Lantern Mine: Upper Galleries"
+    },
+    {
+      "id": "lantern_upper_galleries-1",
+      "section": "lantern_upper_galleries",
+      "position": [
+        542,
+        0,
+        150
+      ],
+      "radius": 9,
+      "name": "Lantern Mine: Upper Galleries"
+    },
+    {
+      "id": "lantern_upper_galleries-2",
+      "section": "lantern_upper_galleries",
+      "position": [
+        573,
+        0,
+        142
+      ],
+      "radius": 10,
+      "name": "Lantern Mine: Upper Galleries"
+    },
+    {
+      "id": "lantern_upper_galleries-3",
+      "section": "lantern_upper_galleries",
+      "position": [
+        605,
+        0,
+        121
+      ],
+      "radius": 12,
+      "name": "Lantern Mine: Upper Galleries"
+    },
+    {
+      "id": "lantern_upper_galleries-4",
+      "section": "lantern_upper_galleries",
+      "position": [
+        643,
+        0,
+        138
+      ],
+      "radius": 10,
+      "name": "Lantern Mine: Upper Galleries"
+    },
+    {
+      "id": "lantern_upper_galleries-5",
+      "section": "lantern_upper_galleries",
+      "position": [
+        671,
+        0,
+        114
+      ],
+      "radius": 11,
+      "name": "Lantern Mine: Upper Galleries"
+    },
+    {
+      "id": "lantern_upper_galleries-6",
+      "section": "lantern_upper_galleries",
+      "position": [
+        647,
+        0,
+        85
+      ],
+      "radius": 11,
+      "name": "Lantern Mine: Upper Galleries"
+    },
+    {
+      "id": "lantern_upper_galleries-7",
+      "section": "lantern_upper_galleries",
+      "position": [
+        610,
+        0,
+        73
+      ],
+      "radius": 11,
+      "name": "Lantern Mine: Upper Galleries"
+    },
+    {
+      "id": "lantern_upper_galleries-8",
+      "section": "lantern_upper_galleries",
+      "position": [
+        578,
+        0,
+        52
+      ],
+      "radius": 11,
+      "name": "Lantern Mine: Upper Galleries"
+    },
+    {
+      "id": "lantern_upper_galleries-9",
+      "section": "lantern_upper_galleries",
+      "position": [
+        538,
+        0,
+        35
+      ],
+      "radius": 10,
+      "name": "Lantern Mine: Upper Galleries"
+    },
+    {
+      "id": "lantern_upper_galleries-10",
+      "section": "lantern_upper_galleries",
+      "position": [
+        519,
+        0,
+        112
+      ],
+      "radius": 10,
+      "name": "Lantern Mine: Upper Galleries"
+    },
+    {
+      "id": "lantern_upper_galleries-11",
+      "section": "lantern_upper_galleries",
+      "position": [
+        565,
+        0,
+        101
+      ],
+      "radius": 10,
+      "name": "Lantern Mine: Upper Galleries"
+    },
+    {
+      "id": "lantern_upper_galleries-12",
+      "section": "lantern_upper_galleries",
+      "position": [
+        681,
+        0,
+        65
+      ],
+      "radius": 10,
+      "name": "Lantern Mine: Upper Galleries"
+    },
+    {
+      "id": "lantern_upper_galleries-13",
+      "section": "lantern_upper_galleries",
+      "position": [
+        620,
+        0,
+        39
+      ],
+      "radius": 8,
+      "name": "Lantern Mine: Upper Galleries"
+    },
+    {
+      "id": "lantern_upper_galleries-14",
+      "section": "lantern_upper_galleries",
+      "position": [
+        525,
+        0,
+        74
+      ],
+      "radius": 9,
+      "name": "Lantern Mine: Upper Galleries"
     }
   ],
   "harvestables": [
@@ -15605,27 +15786,29 @@
   ],
   "portals": [
     {
-      "id": "lantern_mine-exit",
-      "objectId": 59001,
+      "id": "lantern_mine-passage0-1",
+      "objectId": 59152,
       "role": "portal",
       "position": [
         55,
         0,
-        694
+        693
       ],
       "serverTile": [
         55,
-        26
+        27
       ],
-      "destinationMap": "landfall",
+      "destinationMap": "landfall_insides",
       "destinationTile": [
-        332,
-        81
+        536,
+        685
       ],
-      "label": "Leave Lantern Mine"
+      "section": "lantern_mine",
+      "destinationSection": "lantern_upper_galleries",
+      "label": "On into Lantern Mine: Upper Galleries"
     },
     {
-      "id": "lantern_mine-passage0-0",
+      "id": "lantern_mine-passage1-0",
       "objectId": 59101,
       "role": "portal",
       "position": [
@@ -15667,7 +15850,7 @@
       "label": "Leave Pinebrow Deep Workings"
     },
     {
-      "id": "pinebrow_workings-passage1-0",
+      "id": "pinebrow_workings-passage2-0",
       "objectId": 59103,
       "role": "portal",
       "position": [
@@ -15709,7 +15892,7 @@
       "label": "Leave Cenote Deeps"
     },
     {
-      "id": "spindle_cavern-passage4-0",
+      "id": "spindle_cavern-passage5-0",
       "objectId": 59145,
       "role": "portal",
       "position": [
@@ -16071,7 +16254,7 @@
       "label": "Leave Rimewater Ice Caves"
     },
     {
-      "id": "rimewater_ice_caves-passage5-0",
+      "id": "rimewater_ice_caves-passage6-0",
       "objectId": 59147,
       "role": "portal",
       "position": [
@@ -16113,7 +16296,7 @@
       "label": "Leave Serpent Catacombs"
     },
     {
-      "id": "serpent_catacombs-passage2-0",
+      "id": "serpent_catacombs-passage3-0",
       "objectId": 59141,
       "role": "portal",
       "position": [
@@ -16155,7 +16338,7 @@
       "label": "Leave Mirror Vaults"
     },
     {
-      "id": "mirror_vaults-passage6-1",
+      "id": "mirror_vaults-passage7-1",
       "objectId": 59150,
       "role": "portal",
       "position": [
@@ -16177,7 +16360,7 @@
       "label": "On into The Frozen Deep"
     },
     {
-      "id": "old_seam-passage0-1",
+      "id": "old_seam-passage1-1",
       "objectId": 59102,
       "role": "portal",
       "position": [
@@ -16219,7 +16402,7 @@
       "label": "Leave The Deep Workings"
     },
     {
-      "id": "deep_workings-passage1-1",
+      "id": "deep_workings-passage2-1",
       "objectId": 59104,
       "role": "portal",
       "position": [
@@ -16341,7 +16524,7 @@
       "label": "Leave The Undercity"
     },
     {
-      "id": "serpent_undercity-passage2-1",
+      "id": "serpent_undercity-passage3-1",
       "objectId": 59142,
       "role": "portal",
       "position": [
@@ -16363,7 +16546,7 @@
       "label": "On into Serpent Catacombs"
     },
     {
-      "id": "serpent_undercity-passage3-0",
+      "id": "serpent_undercity-passage4-0",
       "objectId": 59143,
       "role": "portal",
       "position": [
@@ -16385,7 +16568,7 @@
       "label": "On into The Sunken Sanctum"
     },
     {
-      "id": "serpent_undercity-passage4-1",
+      "id": "serpent_undercity-passage5-1",
       "objectId": 59146,
       "role": "portal",
       "position": [
@@ -16407,7 +16590,7 @@
       "label": "On into Cenote Deeps"
     },
     {
-      "id": "sunken_sanctum-passage3-1",
+      "id": "sunken_sanctum-passage4-1",
       "objectId": 59144,
       "role": "portal",
       "position": [
@@ -16429,7 +16612,7 @@
       "label": "On into The Undercity"
     },
     {
-      "id": "frozen_deep-passage5-1",
+      "id": "frozen_deep-passage6-1",
       "objectId": 59148,
       "role": "portal",
       "position": [
@@ -16451,7 +16634,7 @@
       "label": "On into Rimewater Ice Caves"
     },
     {
-      "id": "frozen_deep-passage6-0",
+      "id": "frozen_deep-passage7-0",
       "objectId": 59149,
       "role": "portal",
       "position": [
@@ -16471,31 +16654,75 @@
       "section": "frozen_deep",
       "destinationSection": "mirror_vaults",
       "label": "On into Mirror Vaults"
+    },
+    {
+      "id": "lantern_upper_galleries-exit",
+      "objectId": 59001,
+      "role": "portal",
+      "position": [
+        520,
+        0,
+        178
+      ],
+      "serverTile": [
+        520,
+        542
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        332,
+        81
+      ],
+      "label": "Leave Lantern Mine: Upper Galleries"
+    },
+    {
+      "id": "lantern_upper_galleries-passage0-0",
+      "objectId": 59151,
+      "role": "portal",
+      "position": [
+        530,
+        0,
+        35
+      ],
+      "serverTile": [
+        530,
+        685
+      ],
+      "destinationMap": "landfall_insides",
+      "destinationTile": [
+        55,
+        32
+      ],
+      "section": "lantern_upper_galleries",
+      "destinationSection": "lantern_mine",
+      "label": "On into Lantern Mine"
     }
   ],
   "interactives": [
     {
-      "id": "lantern_mine-exit",
-      "objectId": 59001,
+      "id": "lantern_mine-passage0-1",
+      "objectId": 59152,
       "role": "portal",
       "position": [
         55,
         0,
-        694
+        693
       ],
       "serverTile": [
         55,
-        26
+        27
       ],
-      "destinationMap": "landfall",
+      "destinationMap": "landfall_insides",
       "destinationTile": [
-        332,
-        81
+        536,
+        685
       ],
-      "label": "Leave Lantern Mine"
+      "section": "lantern_mine",
+      "destinationSection": "lantern_upper_galleries",
+      "label": "On into Lantern Mine: Upper Galleries"
     },
     {
-      "id": "lantern_mine-passage0-0",
+      "id": "lantern_mine-passage1-0",
       "objectId": 59101,
       "role": "portal",
       "position": [
@@ -16537,7 +16764,7 @@
       "label": "Leave Pinebrow Deep Workings"
     },
     {
-      "id": "pinebrow_workings-passage1-0",
+      "id": "pinebrow_workings-passage2-0",
       "objectId": 59103,
       "role": "portal",
       "position": [
@@ -16579,7 +16806,7 @@
       "label": "Leave Cenote Deeps"
     },
     {
-      "id": "spindle_cavern-passage4-0",
+      "id": "spindle_cavern-passage5-0",
       "objectId": 59145,
       "role": "portal",
       "position": [
@@ -16941,7 +17168,7 @@
       "label": "Leave Rimewater Ice Caves"
     },
     {
-      "id": "rimewater_ice_caves-passage5-0",
+      "id": "rimewater_ice_caves-passage6-0",
       "objectId": 59147,
       "role": "portal",
       "position": [
@@ -16983,7 +17210,7 @@
       "label": "Leave Serpent Catacombs"
     },
     {
-      "id": "serpent_catacombs-passage2-0",
+      "id": "serpent_catacombs-passage3-0",
       "objectId": 59141,
       "role": "portal",
       "position": [
@@ -17025,7 +17252,7 @@
       "label": "Leave Mirror Vaults"
     },
     {
-      "id": "mirror_vaults-passage6-1",
+      "id": "mirror_vaults-passage7-1",
       "objectId": 59150,
       "role": "portal",
       "position": [
@@ -17047,7 +17274,7 @@
       "label": "On into The Frozen Deep"
     },
     {
-      "id": "old_seam-passage0-1",
+      "id": "old_seam-passage1-1",
       "objectId": 59102,
       "role": "portal",
       "position": [
@@ -17089,7 +17316,7 @@
       "label": "Leave The Deep Workings"
     },
     {
-      "id": "deep_workings-passage1-1",
+      "id": "deep_workings-passage2-1",
       "objectId": 59104,
       "role": "portal",
       "position": [
@@ -17211,7 +17438,7 @@
       "label": "Leave The Undercity"
     },
     {
-      "id": "serpent_undercity-passage2-1",
+      "id": "serpent_undercity-passage3-1",
       "objectId": 59142,
       "role": "portal",
       "position": [
@@ -17233,7 +17460,7 @@
       "label": "On into Serpent Catacombs"
     },
     {
-      "id": "serpent_undercity-passage3-0",
+      "id": "serpent_undercity-passage4-0",
       "objectId": 59143,
       "role": "portal",
       "position": [
@@ -17255,7 +17482,7 @@
       "label": "On into The Sunken Sanctum"
     },
     {
-      "id": "serpent_undercity-passage4-1",
+      "id": "serpent_undercity-passage5-1",
       "objectId": 59146,
       "role": "portal",
       "position": [
@@ -17277,7 +17504,7 @@
       "label": "On into Cenote Deeps"
     },
     {
-      "id": "sunken_sanctum-passage3-1",
+      "id": "sunken_sanctum-passage4-1",
       "objectId": 59144,
       "role": "portal",
       "position": [
@@ -17299,7 +17526,7 @@
       "label": "On into The Undercity"
     },
     {
-      "id": "frozen_deep-passage5-1",
+      "id": "frozen_deep-passage6-1",
       "objectId": 59148,
       "role": "portal",
       "position": [
@@ -17321,7 +17548,7 @@
       "label": "On into Rimewater Ice Caves"
     },
     {
-      "id": "frozen_deep-passage6-0",
+      "id": "frozen_deep-passage7-0",
       "objectId": 59149,
       "role": "portal",
       "position": [
@@ -17341,6 +17568,48 @@
       "section": "frozen_deep",
       "destinationSection": "mirror_vaults",
       "label": "On into Mirror Vaults"
+    },
+    {
+      "id": "lantern_upper_galleries-exit",
+      "objectId": 59001,
+      "role": "portal",
+      "position": [
+        520,
+        0,
+        178
+      ],
+      "serverTile": [
+        520,
+        542
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        332,
+        81
+      ],
+      "label": "Leave Lantern Mine: Upper Galleries"
+    },
+    {
+      "id": "lantern_upper_galleries-passage0-0",
+      "objectId": 59151,
+      "role": "portal",
+      "position": [
+        530,
+        0,
+        35
+      ],
+      "serverTile": [
+        530,
+        685
+      ],
+      "destinationMap": "landfall_insides",
+      "destinationTile": [
+        55,
+        32
+      ],
+      "section": "lantern_upper_galleries",
+      "destinationSection": "lantern_mine",
+      "label": "On into Lantern Mine"
     }
   ],
   "navigation": {
@@ -17365,7 +17634,7 @@
       "step": 0.1
     },
     "gridAlignment": "tile-centres-v1",
-    "sha256": "14dec92f19e7532e1bbf2198170d1d096069fc39ae5c47035865ec94df366331",
+    "sha256": "a73fc151a1a5bc16c6f649b150e70e064a620bbea13af8797df5f9300b2c2781",
     "nodeNames": [
       "Build_amethyst_geode_east_amethyst_storm_rock",
       "Build_amethyst_geode_north_amethyst_storm_rock",
@@ -18027,9 +18296,109 @@
       "Build_lantern_mine_east_cliff_rock",
       "Build_lantern_mine_mouth0_cliff_rock",
       "Build_lantern_mine_mouth0_exit_dark",
+      "Build_lantern_mine_mouth1_cliff_rock",
+      "Build_lantern_mine_mouth1_exit_dark",
       "Build_lantern_mine_north_cliff_rock",
       "Build_lantern_mine_south_cliff_rock",
       "Build_lantern_mine_west_cliff_rock",
+      "Build_lantern_upper_galleries_east_cliff_rock",
+      "Build_lantern_upper_galleries_mouth0_cliff_rock",
+      "Build_lantern_upper_galleries_mouth0_exit_dark",
+      "Build_lantern_upper_galleries_north_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_0_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_1_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_10_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_11_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_12_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_13_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_14_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_15_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_16_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_17_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_18_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_19_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_2_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_20_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_21_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_22_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_23_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_24_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_25_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_26_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_27_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_28_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_29_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_3_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_30_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_31_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_32_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_33_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_34_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_35_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_36_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_37_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_38_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_39_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_4_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_40_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_41_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_42_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_43_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_44_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_45_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_46_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_47_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_5_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_6_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_7_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_8_cliff_rock",
+      "Build_lantern_upper_galleries_pillar0_9_cliff_rock",
+      "Build_lantern_upper_galleries_pillar1_0_cliff_rock",
+      "Build_lantern_upper_galleries_pillar1_1_cliff_rock",
+      "Build_lantern_upper_galleries_pillar1_10_cliff_rock",
+      "Build_lantern_upper_galleries_pillar1_11_cliff_rock",
+      "Build_lantern_upper_galleries_pillar1_12_cliff_rock",
+      "Build_lantern_upper_galleries_pillar1_13_cliff_rock",
+      "Build_lantern_upper_galleries_pillar1_14_cliff_rock",
+      "Build_lantern_upper_galleries_pillar1_15_cliff_rock",
+      "Build_lantern_upper_galleries_pillar1_16_cliff_rock",
+      "Build_lantern_upper_galleries_pillar1_17_cliff_rock",
+      "Build_lantern_upper_galleries_pillar1_18_cliff_rock",
+      "Build_lantern_upper_galleries_pillar1_2_cliff_rock",
+      "Build_lantern_upper_galleries_pillar1_3_cliff_rock",
+      "Build_lantern_upper_galleries_pillar1_4_cliff_rock",
+      "Build_lantern_upper_galleries_pillar1_5_cliff_rock",
+      "Build_lantern_upper_galleries_pillar1_6_cliff_rock",
+      "Build_lantern_upper_galleries_pillar1_7_cliff_rock",
+      "Build_lantern_upper_galleries_pillar1_8_cliff_rock",
+      "Build_lantern_upper_galleries_pillar1_9_cliff_rock",
+      "Build_lantern_upper_galleries_pillar2_0_cliff_rock",
+      "Build_lantern_upper_galleries_pillar2_1_cliff_rock",
+      "Build_lantern_upper_galleries_pillar2_10_cliff_rock",
+      "Build_lantern_upper_galleries_pillar2_11_cliff_rock",
+      "Build_lantern_upper_galleries_pillar2_12_cliff_rock",
+      "Build_lantern_upper_galleries_pillar2_2_cliff_rock",
+      "Build_lantern_upper_galleries_pillar2_3_cliff_rock",
+      "Build_lantern_upper_galleries_pillar2_4_cliff_rock",
+      "Build_lantern_upper_galleries_pillar2_5_cliff_rock",
+      "Build_lantern_upper_galleries_pillar2_6_cliff_rock",
+      "Build_lantern_upper_galleries_pillar2_7_cliff_rock",
+      "Build_lantern_upper_galleries_pillar2_8_cliff_rock",
+      "Build_lantern_upper_galleries_pillar2_9_cliff_rock",
+      "Build_lantern_upper_galleries_pillar3_0_cliff_rock",
+      "Build_lantern_upper_galleries_pillar3_1_cliff_rock",
+      "Build_lantern_upper_galleries_pillar3_10_cliff_rock",
+      "Build_lantern_upper_galleries_pillar3_11_cliff_rock",
+      "Build_lantern_upper_galleries_pillar3_2_cliff_rock",
+      "Build_lantern_upper_galleries_pillar3_3_cliff_rock",
+      "Build_lantern_upper_galleries_pillar3_4_cliff_rock",
+      "Build_lantern_upper_galleries_pillar3_5_cliff_rock",
+      "Build_lantern_upper_galleries_pillar3_6_cliff_rock",
+      "Build_lantern_upper_galleries_pillar3_7_cliff_rock",
+      "Build_lantern_upper_galleries_pillar3_8_cliff_rock",
+      "Build_lantern_upper_galleries_pillar3_9_cliff_rock",
+      "Build_lantern_upper_galleries_south_cliff_rock",
+      "Build_lantern_upper_galleries_west_cliff_rock",
       "Build_mill_race_east_grey_drystone",
       "Build_mill_race_north_grey_drystone",
       "Build_mill_race_south_grey_drystone",
@@ -18853,7 +19222,7 @@
     "servedGrid": {
       "binary": "served-grid.escg.gz",
       "format": "ESCG-v2",
-      "sha256": "970fe4ce46b11670c7b8bb2d483e0c276c8df0935347e5c9b44f0a50f471afa1",
+      "sha256": "dd55f2df9f9b3b944d0f6e335e2561d5dc4b640929a27ebbcd9de08f144ac94d",
       "unitMetres": 0.05,
       "climbMetres": 1.0,
       "originMetres": -100.0,
@@ -18884,21 +19253,6 @@
   },
   "lighting": {
     "markers": [
-      {
-        "id": "lantern_mine-daylight",
-        "position": [
-          55,
-          9,
-          695.5
-        ],
-        "color": [
-          0.92,
-          0.96,
-          0.84
-        ],
-        "energyHint": 2.41,
-        "rangeHint": 17
-      },
       {
         "id": "lantern_mine-lamp-0",
         "position": [
@@ -19040,6 +19394,126 @@
           63.5,
           2.1,
           638
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_mine-lamp-10",
+        "position": [
+          52,
+          2.1,
+          692.5
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_mine-lamp-11",
+        "position": [
+          57.8,
+          2.1,
+          680.5
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_mine-lamp-12",
+        "position": [
+          52.5,
+          2.1,
+          675.5
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_mine-lamp-13",
+        "position": [
+          52,
+          2.1,
+          651
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_mine-lamp-14",
+        "position": [
+          58,
+          2.1,
+          647
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_mine-lamp-15",
+        "position": [
+          38.5,
+          2.1,
+          664
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_mine-lamp-16",
+        "position": [
+          68,
+          2.1,
+          659
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_mine-lamp-17",
+        "position": [
+          55,
+          2.1,
+          628.5
         ],
         "color": [
           1,
@@ -21930,6 +22404,66 @@
         "rangeHint": 12
       },
       {
+        "id": "old_seam-lamp-2",
+        "position": [
+          211,
+          2.1,
+          363
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "old_seam-lamp-3",
+        "position": [
+          202,
+          2.1,
+          360
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "old_seam-lamp-4",
+        "position": [
+          211,
+          2.1,
+          354
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "old_seam-lamp-5",
+        "position": [
+          198.5,
+          2.1,
+          364
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
         "id": "deep_workings-lamp-0",
         "position": [
           45.6,
@@ -24808,6 +25342,876 @@
         ],
         "energyHint": 1.2,
         "rangeHint": 10
+      },
+      {
+        "id": "lantern_upper_galleries-daylight",
+        "position": [
+          520,
+          9,
+          180
+        ],
+        "color": [
+          0.92,
+          0.96,
+          0.84
+        ],
+        "energyHint": 2.41,
+        "rangeHint": 17
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-0",
+        "position": [
+          513.8,
+          2.1,
+          174.89999999999998
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-1",
+        "position": [
+          526.0,
+          2.1,
+          169.79999999999995
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-2",
+        "position": [
+          535.8,
+          2.1,
+          152.89999999999998
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-3",
+        "position": [
+          548.0,
+          2.1,
+          147.79999999999995
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-4",
+        "position": [
+          564.9,
+          2.1,
+          145.20000000000005
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-5",
+        "position": [
+          580.8,
+          2.1,
+          139.5
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-6",
+        "position": [
+          596.3,
+          2.1,
+          124.79999999999995
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-7",
+        "position": [
+          613.4,
+          2.1,
+          118.0
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-8",
+        "position": [
+          636.8,
+          2.1,
+          141.20000000000005
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-9",
+        "position": [
+          649.0,
+          2.1,
+          135.5
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-10",
+        "position": [
+          663.6,
+          2.1,
+          117.5
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-11",
+        "position": [
+          678.2,
+          2.1,
+          111.20000000000005
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-12",
+        "position": [
+          638.9,
+          2.1,
+          88.5
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-13",
+        "position": [
+          654.8,
+          2.1,
+          82.20000000000005
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-14",
+        "position": [
+          602.6,
+          2.1,
+          76.5
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-15",
+        "position": [
+          617.2,
+          2.1,
+          70.20000000000005
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-16",
+        "position": [
+          569.9,
+          2.1,
+          55.5
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-17",
+        "position": [
+          585.8,
+          2.1,
+          49.200000000000045
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-18",
+        "position": [
+          530.6,
+          2.1,
+          38.200000000000045
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-19",
+        "position": [
+          545.2,
+          2.1,
+          32.5
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-20",
+        "position": [
+          512.8,
+          2.1,
+          115.20000000000005
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-21",
+        "position": [
+          525.0,
+          2.1,
+          109.5
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-22",
+        "position": [
+          558.8,
+          2.1,
+          104.20000000000005
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-23",
+        "position": [
+          571.0,
+          2.1,
+          98.5
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-24",
+        "position": [
+          674.8,
+          2.1,
+          68.5
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-25",
+        "position": [
+          687.0,
+          2.1,
+          62.200000000000045
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-26",
+        "position": [
+          613.8,
+          2.1,
+          41.60000000000002
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-27",
+        "position": [
+          626.0,
+          2.1,
+          37.0
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-28",
+        "position": [
+          519.4,
+          2.1,
+          77.20000000000005
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-29",
+        "position": [
+          530.4,
+          2.1,
+          71.5
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-30",
+        "position": [
+          521.0,
+          2.1,
+          162.20000000000005
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-31",
+        "position": [
+          631.2,
+          2.1,
+          129.20000000000005
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-32",
+        "position": [
+          665.6,
+          2.1,
+          109.39999999999998
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-33",
+        "position": [
+          654.3,
+          2.1,
+          94.5
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-34",
+        "position": [
+          633.6,
+          2.1,
+          82.20000000000005
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-35",
+        "position": [
+          621.5,
+          2.1,
+          78.29999999999995
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-36",
+        "position": [
+          598.9,
+          2.1,
+          65.60000000000002
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-37",
+        "position": [
+          588.6,
+          2.1,
+          58.89999999999998
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-38",
+        "position": [
+          564.0,
+          2.1,
+          48.299999999999955
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-39",
+        "position": [
+          550.6,
+          2.1,
+          42.60000000000002
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-40",
+        "position": [
+          532.1,
+          2.1,
+          139.60000000000002
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-41",
+        "position": [
+          525.1,
+          2.1,
+          128.39999999999998
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-42",
+        "position": [
+          535.7,
+          2.1,
+          105.10000000000002
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-43",
+        "position": [
+          547.5,
+          2.1,
+          102.29999999999995
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-44",
+        "position": [
+          581.5,
+          2.1,
+          91.20000000000005
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-45",
+        "position": [
+          592.4,
+          2.1,
+          84.39999999999998
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-46",
+        "position": [
+          568.6,
+          2.1,
+          136.29999999999995
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-47",
+        "position": [
+          562.7,
+          2.1,
+          117.39999999999998
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-48",
+        "position": [
+          673.9,
+          2.1,
+          100.89999999999998
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-49",
+        "position": [
+          678.5,
+          2.1,
+          82.89999999999998
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-50",
+        "position": [
+          662.9,
+          2.1,
+          77.5
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-51",
+        "position": [
+          613.8,
+          2.1,
+          60.89999999999998
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-52",
+        "position": [
+          616.9,
+          2.1,
+          50.10000000000002
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-53",
+        "position": [
+          603.7,
+          2.1,
+          43.0
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-54",
+        "position": [
+          593.8,
+          2.1,
+          46.10000000000002
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-55",
+        "position": [
+          516.7,
+          2.1,
+          105.5
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
+      },
+      {
+        "id": "lantern_upper_galleries-lamp-56",
+        "position": [
+          518.2,
+          2.1,
+          85.39999999999998
+        ],
+        "color": [
+          1,
+          0.7,
+          0.4
+        ],
+        "energyHint": 1.6,
+        "rangeHint": 12
       }
     ]
   },
@@ -24821,6 +26225,7 @@
       "Roof_frozen_deep_glacier_ice",
       "Roof_heath_barrow_grey_drystone",
       "Roof_lantern_mine_cliff_rock",
+      "Roof_lantern_upper_galleries_cliff_rock",
       "Roof_mill_race_grey_drystone",
       "Roof_mirror_vaults_pale_ashlar",
       "Roof_old_seam_cliff_rock",
@@ -33246,6 +34651,24 @@
       {
         "node": "Build_lantern_mine_mouth0_cliff_rock",
         "outward": [
+          0,
+          0,
+          1
+        ],
+        "section": "lantern_mine"
+      },
+      {
+        "node": "Build_lantern_mine_mouth0_exit_dark",
+        "outward": [
+          0,
+          0,
+          1
+        ],
+        "section": "lantern_mine"
+      },
+      {
+        "node": "Build_lantern_mine_mouth1_cliff_rock",
+        "outward": [
           1,
           0,
           0
@@ -33253,7 +34676,7 @@
         "section": "lantern_mine"
       },
       {
-        "node": "Build_lantern_mine_mouth0_exit_dark",
+        "node": "Build_lantern_mine_mouth1_exit_dark",
         "outward": [
           1,
           0,
@@ -33287,6 +34710,1256 @@
           0
         ],
         "section": "lantern_mine"
+      },
+      {
+        "node": "Build_lantern_upper_galleries_east_cliff_rock",
+        "outward": [
+          1,
+          0,
+          0
+        ],
+        "section": "lantern_upper_galleries"
+      },
+      {
+        "node": "Build_lantern_upper_galleries_mouth0_cliff_rock",
+        "outward": [
+          -1,
+          0,
+          0
+        ],
+        "section": "lantern_upper_galleries"
+      },
+      {
+        "node": "Build_lantern_upper_galleries_mouth0_exit_dark",
+        "outward": [
+          -1,
+          0,
+          0
+        ],
+        "section": "lantern_upper_galleries"
+      },
+      {
+        "node": "Build_lantern_upper_galleries_north_cliff_rock",
+        "outward": [
+          0,
+          0,
+          1
+        ],
+        "section": "lantern_upper_galleries"
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_0_cliff_rock",
+        "outward": [
+          -0.435,
+          0,
+          -0.9
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          582.46,
+          95.97
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_1_cliff_rock",
+        "outward": [
+          -0.988,
+          0,
+          -0.156
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          574.92,
+          102.73
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_10_cliff_rock",
+        "outward": [
+          -0.746,
+          0,
+          0.666
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          580.27,
+          133.69
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_11_cliff_rock",
+        "outward": [
+          0.401,
+          0,
+          0.916
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          584.09,
+          133.33
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_12_cliff_rock",
+        "outward": [
+          0.659,
+          0,
+          0.753
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          589.79,
+          129.66
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_13_cliff_rock",
+        "outward": [
+          0.977,
+          0,
+          -0.215
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          591.49,
+          124.2
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_14_cliff_rock",
+        "outward": [
+          0.967,
+          0,
+          0.253
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          592.19,
+          117.59
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_15_cliff_rock",
+        "outward": [
+          0.89,
+          0,
+          0.455
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          593.19,
+          113.48
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_16_cliff_rock",
+        "outward": [
+          0.402,
+          0,
+          0.916
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          596.5,
+          111.31
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_17_cliff_rock",
+        "outward": [
+          0.1,
+          0,
+          0.995
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          603.01,
+          109.56
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_18_cliff_rock",
+        "outward": [
+          -0.138,
+          0,
+          0.99
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          609.87,
+          109.54
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_19_cliff_rock",
+        "outward": [
+          -0.808,
+          0,
+          0.589
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          615.02,
+          113.04
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_2_cliff_rock",
+        "outward": [
+          -0.71,
+          0,
+          -0.704
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          573.69,
+          106.2
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_20_cliff_rock",
+        "outward": [
+          -0.94,
+          0,
+          0.34
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          618.43,
+          118.74
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_21_cliff_rock",
+        "outward": [
+          -0.996,
+          0,
+          0.089
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          619.35,
+          122.3
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_22_cliff_rock",
+        "outward": [
+          -0.304,
+          0,
+          0.953
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          622.29,
+          123.31
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_23_cliff_rock",
+        "outward": [
+          -0.5,
+          0,
+          0.866
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          630.48,
+          127.29
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_24_cliff_rock",
+        "outward": [
+          0.324,
+          0,
+          0.946
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          638.77,
+          128.98
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_25_cliff_rock",
+        "outward": [
+          -0.135,
+          0,
+          0.991
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          645.49,
+          128.62
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_26_cliff_rock",
+        "outward": [
+          -0.622,
+          0,
+          0.783
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          649.34,
+          129.45
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_27_cliff_rock",
+        "outward": [
+          -0.891,
+          0,
+          0.454
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          650.26,
+          130.66
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_28_cliff_rock",
+        "outward": [
+          0.381,
+          0,
+          0.925
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          654.34,
+          130.09
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_29_cliff_rock",
+        "outward": [
+          0.84,
+          0,
+          0.543
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          660.41,
+          124.84
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_3_cliff_rock",
+        "outward": [
+          -0.562,
+          0,
+          -0.827
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          572.11,
+          107.36
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_30_cliff_rock",
+        "outward": [
+          0.574,
+          0,
+          -0.819
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          661.5,
+          120.23
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_31_cliff_rock",
+        "outward": [
+          0.972,
+          0,
+          -0.234
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          659.12,
+          116.18
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_32_cliff_rock",
+        "outward": [
+          0.86,
+          0,
+          0.51
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          660.33,
+          110.06
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_33_cliff_rock",
+        "outward": [
+          0.86,
+          0,
+          -0.51
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          659.86,
+          103.24
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_34_cliff_rock",
+        "outward": [
+          0.678,
+          0,
+          -0.735
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          654.74,
+          96.91
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_35_cliff_rock",
+        "outward": [
+          -0.204,
+          0,
+          -0.979
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          649.02,
+          95.52
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_36_cliff_rock",
+        "outward": [
+          0.234,
+          0,
+          -0.972
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          642.5,
+          95.61
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_37_cliff_rock",
+        "outward": [
+          0.826,
+          0,
+          -0.563
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          638.6,
+          92.95
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_38_cliff_rock",
+        "outward": [
+          0.653,
+          0,
+          -0.757
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          636.26,
+          90.39
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_39_cliff_rock",
+        "outward": [
+          0.973,
+          0,
+          -0.23
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          634.04,
+          86.6
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_4_cliff_rock",
+        "outward": [
+          -0.766,
+          0,
+          -0.643
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          569.96,
+          109.4
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_40_cliff_rock",
+        "outward": [
+          0.346,
+          0,
+          -0.938
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          630.29,
+          82.57
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_41_cliff_rock",
+        "outward": [
+          0.268,
+          0,
+          -0.964
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          623.51,
+          80.38
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_42_cliff_rock",
+        "outward": [
+          -0.882,
+          0,
+          -0.472
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          619.66,
+          80.42
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_43_cliff_rock",
+        "outward": [
+          -0.302,
+          0,
+          -0.953
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          616.28,
+          82.37
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_44_cliff_rock",
+        "outward": [
+          -0.06,
+          0,
+          -0.998
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          609.96,
+          83.61
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_45_cliff_rock",
+        "outward": [
+          0.218,
+          0,
+          -0.976
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          604.67,
+          83.3
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_46_cliff_rock",
+        "outward": [
+          0.715,
+          0,
+          -0.699
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          602.77,
+          82.61
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_47_cliff_rock",
+        "outward": [
+          -0.611,
+          0,
+          -0.791
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          596.24,
+          87.42
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_5_cliff_rock",
+        "outward": [
+          -0.375,
+          0,
+          -0.927
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          568.15,
+          110.95
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_6_cliff_rock",
+        "outward": [
+          -0.999,
+          0,
+          -0.045
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          567.03,
+          116.83
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_7_cliff_rock",
+        "outward": [
+          -0.904,
+          0,
+          0.428
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          569.13,
+          127.4
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_8_cliff_rock",
+        "outward": [
+          0.031,
+          0,
+          1.0
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          574.9,
+          132.07
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar0_9_cliff_rock",
+        "outward": [
+          -0.498,
+          0,
+          0.867
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          578.86,
+          132.46
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar1_0_cliff_rock",
+        "outward": [
+          0.116,
+          0,
+          0.993
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          542.04,
+          140.99
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar1_1_cliff_rock",
+        "outward": [
+          -0.532,
+          0,
+          0.847
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          545.51,
+          141.14
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar1_10_cliff_rock",
+        "outward": [
+          1.0,
+          0,
+          0.022
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          561.52,
+          117.31
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar1_11_cliff_rock",
+        "outward": [
+          0.538,
+          0,
+          -0.843
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          559.07,
+          108.57
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar1_12_cliff_rock",
+        "outward": [
+          0.835,
+          0,
+          -0.55
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          555.82,
+          106.3
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar1_13_cliff_rock",
+        "outward": [
+          -0.171,
+          0,
+          -0.985
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          549.09,
+          106.81
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar1_14_cliff_rock",
+        "outward": [
+          -0.291,
+          0,
+          -0.957
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          535.96,
+          109.97
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar1_15_cliff_rock",
+        "outward": [
+          -0.951,
+          0,
+          -0.31
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          528.75,
+          114.45
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar1_16_cliff_rock",
+        "outward": [
+          -0.652,
+          0,
+          -0.759
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          526.98,
+          117.3
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar1_17_cliff_rock",
+        "outward": [
+          -0.936,
+          0,
+          0.352
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          528.15,
+          124.68
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar1_18_cliff_rock",
+        "outward": [
+          -0.794,
+          0,
+          0.607
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          535.19,
+          136.57
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar1_2_cliff_rock",
+        "outward": [
+          -0.734,
+          0,
+          0.679
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          546.63,
+          142.13
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar1_3_cliff_rock",
+        "outward": [
+          -0.577,
+          0,
+          0.817
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          548.78,
+          143.97
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar1_4_cliff_rock",
+        "outward": [
+          -0.759,
+          0,
+          0.651
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          550.57,
+          145.3
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar1_5_cliff_rock",
+        "outward": [
+          0.258,
+          0,
+          0.966
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          555.59,
+          144.53
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar1_6_cliff_rock",
+        "outward": [
+          0.994,
+          0,
+          0.11
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          560.72,
+          140.08
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar1_7_cliff_rock",
+        "outward": [
+          0.883,
+          0,
+          0.47
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          561.19,
+          136.55
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar1_8_cliff_rock",
+        "outward": [
+          0.426,
+          0,
+          0.905
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          563.7,
+          134.82
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar1_9_cliff_rock",
+        "outward": [
+          0.904,
+          0,
+          -0.428
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          563.81,
+          129.02
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar2_0_cliff_rock",
+        "outward": [
+          -0.993,
+          0,
+          -0.117
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          590.9,
+          52.21
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar2_1_cliff_rock",
+        "outward": [
+          -0.426,
+          0,
+          0.905
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          593.34,
+          55.9
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar2_10_cliff_rock",
+        "outward": [
+          -0.084,
+          0,
+          -0.996
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          605.93,
+          43.97
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar2_11_cliff_rock",
+        "outward": [
+          -0.447,
+          0,
+          -0.894
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          594.9,
+          46.9
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar2_12_cliff_rock",
+        "outward": [
+          -0.998,
+          0,
+          0.058
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          590.93,
+          49.36
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar2_2_cliff_rock",
+        "outward": [
+          -0.646,
+          0,
+          0.763
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          600.08,
+          60.44
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar2_3_cliff_rock",
+        "outward": [
+          0.751,
+          0,
+          0.66
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          604.04,
+          63.42
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar2_4_cliff_rock",
+        "outward": [
+          0.232,
+          0,
+          0.973
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          607.03,
+          62.16
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar2_5_cliff_rock",
+        "outward": [
+          -0.074,
+          0,
+          0.997
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          610.95,
+          61.83
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar2_6_cliff_rock",
+        "outward": [
+          0.905,
+          0,
+          0.426
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          613.48,
+          58.55
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar2_7_cliff_rock",
+        "outward": [
+          0.993,
+          0,
+          0.117
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          615.58,
+          50.87
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar2_8_cliff_rock",
+        "outward": [
+          0.458,
+          0,
+          -0.889
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          615.22,
+          46.18
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar2_9_cliff_rock",
+        "outward": [
+          0.771,
+          0,
+          -0.637
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          613.58,
+          44.73
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar3_0_cliff_rock",
+        "outward": [
+          -0.837,
+          0,
+          0.547
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          665.43,
+          98.94
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar3_1_cliff_rock",
+        "outward": [
+          0.024,
+          0,
+          1.0
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          669.97,
+          103.12
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar3_10_cliff_rock",
+        "outward": [
+          -0.678,
+          0,
+          0.735
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          660.51,
+          92.7
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar3_11_cliff_rock",
+        "outward": [
+          -0.708,
+          0,
+          0.706
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          662.48,
+          94.53
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar3_2_cliff_rock",
+        "outward": [
+          0.941,
+          0,
+          0.339
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          674.36,
+          95.81
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar3_3_cliff_rock",
+        "outward": [
+          0.999,
+          0,
+          0.042
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          677.29,
+          81.94
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar3_4_cliff_rock",
+        "outward": [
+          0.543,
+          0,
+          -0.84
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          676.92,
+          75.09
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar3_5_cliff_rock",
+        "outward": [
+          0.77,
+          0,
+          -0.638
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          675.34,
+          73.47
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar3_6_cliff_rock",
+        "outward": [
+          -0.49,
+          0,
+          -0.872
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          671.44,
+          73.92
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar3_7_cliff_rock",
+        "outward": [
+          -0.514,
+          0,
+          -0.857
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          663.79,
+          78.42
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar3_8_cliff_rock",
+        "outward": [
+          -1.0,
+          0,
+          -0.005
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          659.44,
+          84.67
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_pillar3_9_cliff_rock",
+        "outward": [
+          -0.991,
+          0,
+          -0.135
+        ],
+        "section": "lantern_upper_galleries",
+        "centre": [
+          658.89,
+          89.54
+        ]
+      },
+      {
+        "node": "Build_lantern_upper_galleries_south_cliff_rock",
+        "outward": [
+          0,
+          0,
+          -1
+        ],
+        "section": "lantern_upper_galleries"
+      },
+      {
+        "node": "Build_lantern_upper_galleries_west_cliff_rock",
+        "outward": [
+          -1,
+          0,
+          0
+        ],
+        "section": "lantern_upper_galleries"
       },
       {
         "node": "Build_mill_race_east_grey_drystone",
@@ -43944,6 +46617,20 @@
           692.05
         ]
       }
+    },
+    {
+      "id": "lantern_upper_galleries",
+      "name": "Lantern Mine: Upper Galleries",
+      "bounds": {
+        "min": [
+          507.23,
+          22.83
+        ],
+        "max": [
+          693.13,
+          182.82
+        ]
+      }
     }
   ],
   "minimap": {
@@ -43965,7 +46652,7 @@
   },
   "provenance": {
     "source": "_continent_v2/content/underground.json",
-    "sourceSha256": "75c757b22bb21ed998aac4bbde1101673c8ace3aeb25d38bbbdf55d38dd5332d",
+    "sourceSha256": "7f300dff5e6ab8325777bed79cbb070fb987e15fa869a977d3a82955286f58a1",
     "builder": "_continent_v2/build_underground.py",
     "builderSha256": "d4ad29b2b55f51752aea4478d782915cd1b774cf59611e689b84d868468e2845"
   },

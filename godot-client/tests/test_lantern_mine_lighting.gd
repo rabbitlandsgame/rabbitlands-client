@@ -29,36 +29,37 @@ func run() -> void:
 	var moon := DirectionalLight3D.new(); root.add_child(moon); moon.light_energy = 0.3
 	var markers := Node3D.new(); root.add_child(markers)
 	var marker_count := MarkerBinder.apply(manifest, markers)
-	var daylight := markers.get_node("lantern_mine-daylight") as OmniLight3D
+	var daylight := markers.get_node("lantern_upper_galleries-daylight") as OmniLight3D
 	var native := markers.get_node("lantern_mine-lamp-0") as OmniLight3D
 	var other := markers.get_node("pinebrow_workings-lamp-0") as OmniLight3D
 	var other_energy := other.light_energy
 	var daylight_energy := daylight.light_energy
 	var native_energy := native.light_energy
 	var native_range := native.omni_range
+	var native_mask := native.light_cull_mask
 	var lighting := Lighting.new()
 	lighting.apply(manifest, "lantern_mine", owner, sun, moon, markers)
-	expect(lighting.is_active() and is_equal_approx(owner.environment.ambient_light_energy, 0.003),
+	expect(lighting.is_active() and is_equal_approx(owner.environment.ambient_light_energy, Lighting.AMBIENT_ENERGY),
 		"entering the mine is dark without a quest, cinematic, event or campaign snapshot")
 	expect(is_zero_approx(sun.light_energy) and is_zero_approx(moon.light_energy)
 		and owner.environment.reflected_light_source == Environment.REFLECTION_SOURCE_DISABLED
 		and is_zero_approx(owner.environment.ambient_light_sky_contribution),
 		"sun, moon, sky ambient and reflected fill cannot wash out the dark mine")
-	var warm := lighting.lamps.size() == 10
+	var warm := lighting.lamps.size() == 18
 	for lamp: OmniLight3D in lighting.lamps:
 		warm = warm and is_equal_approx(lamp.light_energy, 2.4) and is_equal_approx(lamp.omni_range, 16.0)
 		warm = warm and lamp.light_color == Color(1.0, 0.7, 0.4)
 	expect(warm and markers.get_child_count() == marker_count,
-		"all ten existing native lanterns provide broad warm pools without duplicate lights")
-	expect(is_zero_approx(daylight.light_energy) and daylight.visible and other.light_energy == other_energy,
-		"only Lantern Mine's artificial daylight fill is suppressed; room visibility stays owned by sections")
+		"all eighteen authored workings lanterns provide broad warm pools without duplicate lights")
+	expect(daylight.light_energy == daylight_energy and daylight.visible and other.light_energy == other_energy,
+		"lighting affects the selected level; other sections' native marker settings and visibility stay unchanged")
 	var dark := owner.environment
 	lighting.apply(manifest, "lantern_mine", owner, sun, moon, markers)
 	expect(owner.environment == dark and markers.get_child_count() == marker_count,
 		"repeated frame updates reuse one environment and the same real marker lights")
 	owner.environment.ambient_light_energy = 0.9; sun.light_energy = 0.6; moon.light_energy = 0.2
 	lighting.apply(manifest, "lantern_mine", owner, sun, moon, markers)
-	expect(is_equal_approx(owner.environment.ambient_light_energy, 0.003) and is_zero_approx(sun.light_energy)
+	expect(is_equal_approx(owner.environment.ambient_light_energy, Lighting.AMBIENT_ENERGY) and is_zero_approx(sun.light_energy)
 		and is_zero_approx(moon.light_energy), "ordinary clock regrading cannot brighten the mine between scenes")
 	var presenter := Presenter.new(); root.add_child(presenter)
 	presenter.apply_snapshot({}, CoordinateAdapter.new(), "landfall_insides", func(_at: Vector3) -> float: return 0.0)
@@ -81,6 +82,32 @@ func run() -> void:
 		"unrelated underground rooms retain their existing atmosphere and lamps")
 	lighting.apply(exterior, "lantern_mine", owner, sun, moon, markers)
 	expect(not lighting.is_active(), "an identically named section on another map cannot acquire mine lighting")
+	for section: String in ["lantern_upper_galleries", "old_seam"]:
+		lighting.apply(manifest, section, owner, sun, moon, markers)
+		var supported := lighting.is_active() and lighting.lamps.size() >= 6
+		for lamp: OmniLight3D in lighting.lamps:
+			supported = supported and str(lamp.name).begins_with(section + "-lamp-")
+			supported = supported and is_equal_approx(lamp.light_energy, Lighting.LANTERN_ENERGY)
+			supported = supported and is_equal_approx(lamp.omni_range, Lighting.LANTERN_RANGE)
+		expect(supported, section + " reuses its own consistent warm native lanterns during ordinary gameplay")
+		if section == "lantern_upper_galleries":
+			expect(is_zero_approx(daylight.light_energy), "the new entry shaft respects the same lantern-lit atmosphere")
+	lighting.apply(manifest, "lantern_upper_galleries", owner, sun, moon, markers)
+	var lamps := lighting.lamps.duplicate()
+	lighting.limit_lamps(Vector3(605,0,121))
+	var lit := 0
+	for lamp: OmniLight3D in lamps:
+		if lamp.is_visible_in_tree(): lit += 1
+	expect(lit == 8, "compatibility lights prioritize eight nearby lanterns rather than exhausting the floor mesh budget on distant lamps")
+	var first := lamps[0] as OmniLight3D
+	first.hide()
+	lighting.limit_lamps(Vector3(520,0,172))
+	expect(not first.visible, "the nearby light gates preserve SecretSections' independent hidden state")
+	lighting.before_regrade(exterior, "")
+	expect(first.get_parent() == markers and not first.visible and first.light_cull_mask == native_mask,
+		"leaving removes light gates and restores native masks without showing a culled section")
+	first.show()
+	lighting.before_regrade(exterior, "")
 	var stage_markers := Node3D.new(); root.add_child(stage_markers); MarkerBinder.apply(manifest, stage_markers)
 	expect(lighting.set_cinematic_region(manifest, Vector3(55, 0, 660), stage_markers),
 		"a scoped cutaway can select the real published mine by stage focus while its player remains outdoors")

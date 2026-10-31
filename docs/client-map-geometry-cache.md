@@ -75,7 +75,7 @@ Streaming territories prepare their declared chunk leaves, excluding review
 GLBs. Used underground scenery assets are separate preparation targets.
 The 35 production roots resolve to 1,294 world targets and 155 used scenery
 assets, or 1,449 targets in total. `landfall_insides` is one full-map
-package with 22 sections; its 6,110 scenery placements reuse those 155 assets.
+package with 23 sections; its 6,684 scenery placements reuse those 155 assets.
 The separate collision-face and paving shortcuts below apply to streamed
 continent chunks.
 
