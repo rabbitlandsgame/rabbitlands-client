@@ -17,10 +17,23 @@ from reference_layer_uv import split_corner_uv
 from bake_reference_paint import pack_chart_islands,bake_chart_paint
 from reference_temple_conform import conform_temples
 from native_hair_clearance import NativeHeadSurface
+from reference_posterior_nape import fit_posterior_nape
 
 GROOMS=shared.GROOMS
 PROOFS=[]
 NATIVE={}
+
+
+def prepare_head_fit(head,P,N,T,spec):
+    """Replacing prepare callback for an explicitly measured nape profile."""
+    seated,_,proof=fit_posterior_nape(head,P,N,T,spec)
+    result=assemble.push_out_var(head,seated,np.full(len(seated),.0032),iters=5)
+    _,weld=np.unique(np.round(P/1e-6),axis=0,return_inverse=True)
+    normals=headref.unit(N+assemble.morph_normals(P,T,N,result-P,weld))
+    unchanged=np.linalg.norm(result-P,axis=1)<=1e-12;normals[unchanged]=N[unchanged]
+    return result,normals,{'posterior_nape':proof,
+        'subsequent_generic_head_shift_max_mm':float(np.linalg.norm(result-seated,axis=1).max(initial=0)*1000),
+        'topology_uv_unchanged':True,'normal_transport':'Total actual head-fitting displacement'}
 
 def native_surface(head,spec):
     if not spec.get('native_head_clearance_mm'):return None
@@ -258,7 +271,10 @@ def groom_builder(head,scalp,P,names,spec,hull,ranges):
 
 def main():
     args=shared.parser().parse_args()
-    if args.step=='prepare':shared.prepare(args);return
+    if args.step=='prepare':
+        use_fit=bool(shared.profile(args.profile).get('posterior_nape_fit'))
+        shared.prepare(args,head_fit=prepare_head_fit) if use_fit else shared.prepare(args)
+        return
     if args.step=='backing':shared.backing(args);return
     assert args.step=='pack' and args.out
     out=Path(args.out);assert not out.exists();draft=out.with_name(out.stem+'.draft.glb')
