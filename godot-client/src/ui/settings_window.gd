@@ -1326,13 +1326,11 @@ func add_audio_controls() -> void:
 	page.add_child(now_playing)
 	var director := get_tree().root.find_child("AudioDirector", true, false)
 	if director != null:
-		jukebox_button.pressed.connect(func() -> void:
-			var dialog := get_node_or_null("JukeboxWindow")
-			if dialog == null:
-				dialog = JukeboxWindow.new()
-				dialog.jukebox = director.jukebox
-				add_child(dialog)
-			dialog.open())
+		jukebox_button.pressed.connect(open_jukebox)
+		director.jukebox.full_menu_requested.connect(open_jukebox)
+		director.jukebox.music_volume_requested.connect(func(value: float) -> void:
+			restore_value("audio_music", value)
+			setting_changed.emit("Audio", "audio_music", value))
 		director.music_changed.connect(func(title: String, creator: String) -> void:
 			if is_instance_valid(now_playing):
 				now_playing.text = "Music: —" if title.is_empty() else "Playing: " + title
@@ -1368,6 +1366,16 @@ func add_audio_controls() -> void:
 			setting_changed.emit("Audio", key, value))
 	# Credits stay at the end, below the controls they describe.
 	page.move_child(page.get_node("AudioCreditsButton"), page.get_child_count() - 1)
+
+func open_jukebox() -> void:
+	var director := get_tree().root.find_child("AudioDirector", true, false)
+	if director == null: return
+	var dialog := get_node_or_null("JukeboxWindow")
+	if dialog == null:
+		dialog = JukeboxWindow.new()
+		dialog.jukebox = director.jukebox
+		add_child(dialog)
+	dialog.open()
 
 ## Refreshing controls never saves or emits a change. This also covers values
 ## changed by a HUD shortcut while the settings window was closed.

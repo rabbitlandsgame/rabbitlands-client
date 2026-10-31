@@ -191,6 +191,36 @@ func _test_ui(box: Node) -> void:
 	window.call("_select", window.target, "Evening")
 	window.rule_save.pressed.emit()
 	expect(box.rules.back().context == "night" and box.rules.back().target == "Evening", "The rule editor saves the selected condition, action and target")
+	var rule_toggle := window.rules_list.find_child("RuleEnabled", true, false) as CheckButton
+	window.call("_edit_rule", 0)
+	var was_enabled: bool = box.rules[0].enabled
+	rule_toggle.button_pressed = not was_enabled
+	expect(bool(box.rules[0].enabled) != was_enabled, "A rule row can be enabled or disabled without editing its form")
+	expect(window.rule_enabled.button_pressed == bool(box.rules[0].enabled), "The rule's enable switch and edit form stay synchronized")
+	await process_frame
+	await process_frame
+	var first: Button = window.rules_list.find_child("Rule1", true, false)
+	var second: Button = window.rules_list.find_child("Rule2", true, false)
+	var first_context: String = box.rules[0].context
+	var origin := first.get_global_rect().position + Vector2(13, 24)
+	var destination := second.get_global_rect().position + Vector2(13, 24)
+	var press := InputEventMouseButton.new()
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.pressed = true
+	press.position = origin
+	window.push_input(press, true)
+	await process_frame
+	var motion := InputEventMouseMotion.new()
+	motion.button_mask = MOUSE_BUTTON_MASK_LEFT
+	motion.position = destination
+	motion.relative = destination - origin
+	window.push_input(motion, true)
+	await process_frame
+	press.pressed = false
+	press.position = destination
+	window.push_input(press, true)
+	await process_frame
+	expect(str(box.rules[1].context) == first_context, "Dragging a rule grip changes its actual first-match priority")
 	for size: Vector2i in [Vector2i(1280, 800), Vector2i(800, 600)]:
 		root.size = size
 		window.open()
@@ -198,10 +228,11 @@ func _test_ui(box: Node) -> void:
 			await process_frame
 		expect(window.size.x <= size.x and window.size.y <= size.y, "The jukebox (%s) fits a %s viewport" % [window.size, size])
 		expect(window.tabs.position.y + window.tabs.size.y < window.size.y, "Tab content stays inside the popup after its initial layout")
+		expect(Rect2(Vector2.ZERO, Vector2(window.size)).encloses(window.transport.get_global_rect()), "The complete transport footer %s fits inside the popup %s at %s" % [window.transport.get_global_rect(), window.size, size])
 		for tab: int in 3:
 			window.tabs.current_tab = tab
 			await process_frame
-			expect(window.tabs.get_child(tab).get_combined_minimum_size().x <= window.tabs.size.x, "Tab %d fits the available width at %s" % [tab, size])
+			expect(window.panels[tab].get_combined_minimum_size().x <= window.columns.size.x, "Panel %d fits the available width at %s" % [tab, size])
 	window.hide()
 	window.queue_free()
 	await process_frame

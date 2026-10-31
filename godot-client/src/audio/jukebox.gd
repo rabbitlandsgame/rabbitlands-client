@@ -4,6 +4,9 @@ extends Node
 
 signal changed
 signal preferences_changed
+signal full_menu_requested
+signal hud_player_requested
+signal music_volume_requested(value: float)
 
 const MODES := ["game", "song", "playlist", "shuffle", "silent"]
 const MODE_LABELS := ["Let the game decide", "One song", "Playlist", "Shuffle all music", "Silence"]
@@ -24,6 +27,7 @@ var rules: Array[Dictionary] = []
 var paused := false
 var available := true
 var save_error := ""
+var music_volume := 0.55
 var game_cue := ""
 var active_rule := -1
 var game_playback: Callable
@@ -58,6 +62,26 @@ func title_for(track: String) -> String:
 
 func current_track() -> String:
 	return str(playback_track.call()) if playback_track.is_valid() else str(_player.current_track())
+
+func track_info(track: String) -> Dictionary:
+	return (_entries.get(track, {}) as Dictionary).duplicate(true)
+
+func source_label() -> String:
+	var selection := effective_selection()
+	var label := {"game": "Game music", "song": "One song", "playlist": "Playlist", "shuffle": "Shuffle all", "silent": "Silence"}.get(str(selection.mode), "Music") as String
+	return label
+
+func set_music_volume(value: float) -> void:
+	music_volume = clampf(value, 0.0, 1.0)
+	music_volume_requested.emit(music_volume)
+	changed.emit()
+
+func update_music_volume(value: float) -> void:
+	music_volume = clampf(value, 0.0, 1.0)
+	changed.emit()
+
+func cycle_repeat() -> void:
+	set_options(shuffle, REPEATS[(REPEATS.find(repeat_mode) + 1) % REPEATS.size()], fade_seconds, rules_enabled)
 
 func _set_paused() -> void:
 	_player.set_paused(paused)

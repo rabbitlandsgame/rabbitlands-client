@@ -96,6 +96,8 @@ func _ready() -> void:
 	jukebox.personal_playback = _stop_legacy_music
 	jukebox.playback_track = current_music
 	jukebox.pause_playback = _pause_legacy_music
+	jukebox.music_volume_requested.connect(func(value: float) -> void: set_category_volume("music", value))
+	jukebox.update_music_volume(float(category_volumes.get("music", 0.55)))
 	AppState.sound_requested.connect(_on_sound_requested)
 	AppState.music_requested.connect(_on_music_requested)
 	for index: int in range(VOICE_COUNT):
@@ -115,6 +117,8 @@ func set_category_volume(category: String, value: float) -> void:
 		return
 	category_volumes[category] = clampf(value, 0.0, 1.0)
 	AudioMix.set_volume(AudioMix.CATEGORIES[category].bus, category_volumes[category])
+	if category == "music" and jukebox != null:
+		jukebox.update_music_volume(float(category_volumes[category]))
 
 ## The shown precipitation already follows the server's weather transition.
 ## The caller supplies an empty look indoors or outside an authenticated game.

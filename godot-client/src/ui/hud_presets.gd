@@ -16,7 +16,8 @@ const PARTS := {"rail_panel": "Blank HUD panel", "utilities": "Menu icons", "res
 	"research": "Research progress", "logo": "Rabbit Lands logo", "fps": "FPS",
 	"objectives": "Tracked objectives", "target": "Selected target", "nameplate": "Character banner",
 	"gauntlet_loot": "Gauntlet loot", "rare_drops": "Rare drop announcements",
-	"player_card": "Player card", "food_meter": "Food meter", "load_meter": "Load meter", "xp_meter": "Experience meter"}
+	"player_card": "Player card", "food_meter": "Food meter", "load_meter": "Load meter", "xp_meter": "Experience meter",
+	"jukebox": "Music player"}
 const ANCHORS := ["original", "top_left", "top_center", "top_right", "left",
 	"right", "bottom_left", "bottom_center", "bottom_right", "free"]
 const STYLES := ["heritage", "classic", "modular", "adventure", "minimal"]
@@ -211,6 +212,8 @@ static func preset(id: String) -> Dictionary:
 		value.parts.load_meter.position = Vector2(0.004688, 0.9275)
 		value.parts.load_meter.dock_target = "none"
 		value.parts.load_meter.edge_dock = "bottom_left"
+	value.parts.jukebox.background_color = Color("0d1824f5")
+	value.parts.jukebox.border_color = Color("526a7e")
 	_unify_chat_opacity(value)
 	return value
 
@@ -260,6 +263,11 @@ static func _preset_recipe(id: String) -> Dictionary:
 	for key: String in ["rail_panel", "player_card", "food_meter", "load_meter", "xp_meter"]:
 		value.parts[key].enabled = false
 		if key in ["food_meter", "load_meter", "xp_meter"]: value.parts[key].meter_keys = [{"food_meter":"food", "load_meter":"load", "xp_meter":"experience"}[key]]
+	value.parts.jukebox.enabled = false
+	value.parts.jukebox.dimensions = Vector2(560, 64)
+	value.parts.jukebox.background_color = Color("0d1824f5")
+	value.parts.jukebox.border_color = Color("526a7e")
+	_place(value, "jukebox", "bottom_center", Vector2(0, -150))
 	value.parts.objectives.enabled = true
 	value.parts.target.enabled = true
 	value.parts.items.slots = 8
@@ -663,6 +671,7 @@ static func normalise(raw: Variant) -> Dictionary:
 	var parts: Variant = raw.get("parts", {})
 	if parts is Dictionary:
 		for key: String in PARTS:
+			if key == "jukebox" and not parts.has(key): continue
 			var input: Variant = parts.get(key, {})
 			if not input is Dictionary: continue
 			var part: Dictionary = result.parts[key]
