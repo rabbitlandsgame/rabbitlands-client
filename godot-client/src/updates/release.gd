@@ -437,6 +437,57 @@ static func recover(root: String) -> String:
 	DirAccess.remove_absolute(journal)
 	return ""
 
+static func _rename_for_install(source: String, destination: String) -> Error:
+	var error := DirAccess.rename_absolute(source, destination)
+	# Windows scanners and closing processes can briefly retain folder handles
+	# after the game exits. Keep the journal active while waiting, and never
+	# overwrite or delete either folder to get around a failed rename.
+	if OS.get_name() == "Windows":
+		for attempt in 20:
+			if error == OK:
+				break
+			OS.delay_msec(250)
+			error = DirAccess.rename_absolute(source, destination)
+	return error
+
+static func _promotion_failed(root: String, source: String, destination: String, error: Error) -> String:
+	var report := {"timestamp_utc": Time.get_datetime_string_from_system(true),
+		"commit": read_json(root.path_join(".eloria-update-journal.json")).get("commit", ""),
+		"source": source, "destination": destination,
+		"error_code": int(error), "error": error_string(error), "recovery_error": "Recovery pending"}
+	var report_path := cache_for(root).path_join("last-install-error.json")
+	# Record the failed operation before recovery can change the folder layout.
+	DirAccess.make_dir_recursive_absolute(cache_for(root))
+	save_json(report_path, report)
+	var recovery := recover(root)
+	report.recovery_error = recovery
+	var saved := save_json(report_path, report)
+	var message := "The update could not be installed; the previous game was restored." if recovery == "" else recovery
+	message += "\nCould not move \"%s\" to \"%s\" (%s, error %d)." % [source, destination, error_string(error), int(error)]
+	message += "\nClose Rabbit Lands and other programs using its game folder, then run the updater again."
+	if saved == OK:
+		message += "\nError report: " + report_path
+	return message
+
+static func promote_staged(root: String, progress := Callable()) -> String:
+	# Both update formats create the recovery journal before entering here.
+	var stage := root.path_join(".eloria-update-stage")
+	var backup := root.path_join(".eloria-previous")
+	report_progress(progress, "Installing verified game files", 0, ROOTS.size())
+	for name: String in ROOTS:
+		var current := root.path_join(name)
+		var previous := backup.path_join(name)
+		if DirAccess.dir_exists_absolute(current):
+			var error := _rename_for_install(current, previous)
+			if error != OK:
+				return _promotion_failed(root, current, previous, error)
+		var staged := stage.path_join(name)
+		var error := _rename_for_install(staged, current)
+		if error != OK:
+			return _promotion_failed(root, staged, current, error)
+		report_progress(progress, "Installing verified game files", ROOTS.find(name) + 1, ROOTS.size())
+	return ""
+
 static func install(root: String, identity: Dictionary, repair := false, progress := Callable()) -> String:
 	if update_owner(identity) != "github":
 		return "This installation is updated by its distribution service."
@@ -483,17 +534,14 @@ static func install(root: String, identity: Dictionary, repair := false, progres
 	if error != "":
 		remove_tree(stage)
 		return error
-	report_progress(progress, "Installing verified game files", 0, ROOTS.size())
 	if remove_tree(backup) != OK or DirAccess.make_dir_recursive_absolute(backup) != OK:
 		return "The previous update backup cannot be replaced."
 	var journal := root.path_join(".eloria-update-journal.json")
 	if save_json(journal, {"commit": release.commit}) != OK:
 		return "The update recovery record cannot be saved."
-	for name: String in ROOTS:
-		if DirAccess.rename_absolute(root.path_join(name), backup.path_join(name)) != OK or DirAccess.rename_absolute(stage.path_join(name), root.path_join(name)) != OK:
-			var rollback := recover(root)
-			return "The update could not be installed; the previous game was restored." if rollback == "" else rollback
-		report_progress(progress, "Installing verified game files", ROOTS.find(name) + 1, ROOTS.size())
+	error = promote_staged(root, progress)
+	if error != "":
+		return error
 	# Clear the journal before marking the download consumed. A crash before
 	# this point rolls the folders back together on the following launch.
 	if DirAccess.remove_absolute(journal) != OK:

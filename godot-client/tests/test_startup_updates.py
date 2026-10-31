@@ -254,7 +254,8 @@ func _ready() -> void:
         command = [str(f["installed"] / "RabbitLands-updater.exe"), "--headless", "--", "--root", str(f["installed"])]
         if mode:
             command.extend(["--launch-only", mode])
-        original = subprocess.Popen(command, env=f["env"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        original = subprocess.Popen(command, cwd=f["installed"] / "app", env=f["env"],
+                                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         try:
             deadline = time.monotonic() + 50
             while time.monotonic() < deadline:
