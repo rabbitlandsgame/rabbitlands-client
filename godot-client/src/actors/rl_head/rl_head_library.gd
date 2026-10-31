@@ -1007,7 +1007,8 @@ static func material(material_name: String, sex: String, style: String, quality:
 			var extras := material_extras(asset, material_name)
 			var feathered_beard := material_name == "rl_beard" and bool(extras.get("featheredRoots", false))
 			var soft_details := material_name == "rl_hair_card" and bool(extras.get("softRootDetails", false))
-			if feathered_beard or soft_details:
+			var soft_clump := material_name == "rl_hair_clump" and bool(extras.get("softRootCoverage", false))
+			if feathered_beard or soft_details or soft_clump:
 				var source: Shader = result.shader
 				var shader_key: Variant = "beard_feather:%d" % source.get_instance_id() if feathered_beard else source
 				if not _soft_root_shaders.has(shader_key):
@@ -1024,8 +1025,10 @@ static func material(material_name: String, sex: String, style: String, quality:
 			result.set_shader_parameter("card", material_name != "rl_hair_clump")
 			result.set_shader_parameter("scalp_channels", style == "cornrows_low_knot")
 			result.set_shader_parameter("soft_hairline", bool(extras.get("softHairline", false)))
+			result.set_shader_parameter("soft_root_coverage", soft_clump)
 			if bool(extras.get("referenceSurface", false)):
-				result.set_shader_parameter("soft_hairline", feathered_beard)
+				result.set_shader_parameter("soft_hairline", feathered_beard \
+					or (soft_clump and bool(extras.get("softHairline", false))))
 				result.set_shader_parameter("lock_variation", 0.0)
 				result.set_shader_parameter("beard_gain", 1.0)
 				result.set_shader_parameter("card", true)

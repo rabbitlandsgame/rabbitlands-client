@@ -5,7 +5,10 @@ Ray-casts from scalp samples (head skin inside the style's hairline, at least
 directions, and reports the samples an outside viewpoint sees through the hair.
 The runtime model (rl_hair.gdshader + the hair_detail contract): clumps and cards
 are drawn double-sided and alpha-tested at 0.5 against their texture
-(hair_clump.png / hair_strands.png, UV wrapped), and a vertex with
+(hair_clump.png / hair_strands.png, UV wrapped), including the material-local
+soft-hairline multiplier from interpolated COLOR_0.R. The retained 0.5 threshold
+is conservative for runtime cards (0.35); this change does not relax that gate.
+A vertex with
 COLOR_0.A < 1 - level is discarded. Detail level 0 is the worst case (only core
 A = 1 geometry is drawn; every other level only adds hair). The head itself (ears
 included) occludes; the body does not (conservative). View directions stop at
@@ -46,6 +49,33 @@ ALPHA_SCISSOR = 0.5
 _TEX = {}
 
 
+def uses_root_coverage(material):
+    """The material-local COLOR.R multiplier selected by RLHeadLibrary.
+
+    Reference surfaces historically draw with card shading and their root
+    multiplier disabled. Only the explicit new capability changes that rule.
+    The scanner retains its existing conservative 0.5 scissor for every material.
+    """
+    name = material.get('name', '')
+    extras = material.get('extras') or {}
+    beard = name == 'rl_beard'
+    card = name != 'rl_hair_clump'
+    reference = bool(extras.get('referenceSurface', False))
+    feathered = beard and bool(extras.get('featheredRoots', False))
+    soft_clump = name == 'rl_hair_clump' and bool(extras.get('softRootCoverage', False))
+    soft = bool(extras.get('softHairline', False))
+    if reference:
+        card = True
+        soft = feathered or (soft_clump and soft)
+    return soft and ((not card and not beard) or beard or soft_clump)
+
+
+def root_alpha(red):
+    """Match the shader's smoothstep(0, 0.5, interpolated COLOR.R)."""
+    x = np.clip(np.asarray(red, np.float64) * 2.0, 0.0, 1.0)
+    return x * x * (3.0 - 2.0 * x)
+
+
 def _alpha(name):
     if name not in _TEX:
         from PIL import Image
@@ -67,7 +97,7 @@ def load_hair(path):
             continue
         lod = int(name.rsplit('lod', 1)[1])
         names = m.get('extras', {}).get('targetNames', [])
-        Ps, Ts, UVs, As, texs, D = [], [], [], [], [], {n: [] for n in names}
+        Ps, Ts, UVs, As, Rs, texs, root_flags, D = [], [], [], [], [], [], [], {n: [] for n in names}
         off = 0
         for pr in m['primitives']:
             a = pr['attributes']
@@ -95,11 +125,13 @@ def load_hair(path):
                     tex=key
             for n, t in zip(names, pr.get('targets', [])):
                 D[n].append(np.asarray(rlglb.accessor(J, B, t['POSITION']), np.float64))
-            Ps.append(P); Ts.append(T + off); UVs.append(UV); As.append(A)
+            Ps.append(P); Ts.append(T + off); UVs.append(UV); As.append(A); Rs.append(C[:, 0])
             texs += [tex] * len(T)
+            root_flags += [uses_root_coverage(mat)] * len(T)
             off += len(P)
         out[lod] = {'P': np.concatenate(Ps), 'T': np.concatenate(Ts), 'UV': np.concatenate(UVs),
-                    'A': np.concatenate(As), 'tex': np.array(texs),
+                    'A': np.concatenate(As), 'R': np.concatenate(Rs), 'tex': np.array(texs),
+                    'root_coverage': np.array(root_flags, dtype=bool),
                     'scalp_channels':J.get('asset',{}).get('extras',{}).get('rlHair',{}).get('style')=='cornrows_low_knot',
                     'targets': {n: np.concatenate(v) for n, v in D.items() if v}}
     return J, out
@@ -209,6 +241,8 @@ class _Scene:
         # a tri with any discarded corner is cut by the per-fragment test where A
         # interpolates below 1 - level: conservative, count it only when all corners survive
         self.Th = hair['T'][keep]; self.texs = hair['tex'][keep]; self.UV = hair['UV']
+        self.R = hair.get('R', np.ones(len(self.XP)))
+        self.root_coverage = hair.get('root_coverage', np.zeros(len(hair['T']), bool))[keep]
         nh = len(self.XP)
         verts = np.concatenate([self.XP, HP]); polys = np.concatenate([self.Th, head_T + nh])
         self.is_head = np.concatenate([np.zeros(len(self.Th), bool), np.ones(len(head_T), bool)])
@@ -254,7 +288,7 @@ class _Scene:
                 tt = self.Th[ht[hk]]
                 b = headref.barycentric(hl[hk], self.XP[tt[:, 0]], self.XP[tt[:, 1]], self.XP[tt[:, 2]])
                 uv = (self.UV[tt] * b[:, :, None]).sum(1)
-                opaque = np.zeros(len(hk), bool)
+                alpha = np.zeros(len(hk), np.float64)
                 tx = self.texs[ht[hk]]
                 for tname, al in self.alphas.items():
                     s = tx == tname
@@ -263,7 +297,10 @@ class _Scene:
                     hgt, wid = al.shape
                     px = (np.floor((uv[s, 0] % 1.0) * wid).astype(int)) % wid
                     py = (np.floor((uv[s, 1] % 1.0) * hgt).astype(int)) % hgt
-                    opaque[s] = al[py, px] >= ALPHA_SCISSOR
+                    alpha[s] = al[py, px]
+                root = (self.R[tt] * b).sum(1)
+                alpha *= np.where(self.root_coverage[ht[hk]], root_alpha(root), 1.0)
+                opaque = alpha >= ALPHA_SCISSOR
                 if self.partings:
                     parting=scalp_channels(hl[hk])
                     through_parting[hi[hk[parting]]]=True

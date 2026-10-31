@@ -39,6 +39,7 @@ func _initialize() -> void:
 		check(not bool(Library.material("rl_hair_clump", "female", mixed, Quality.HIGH).get_shader_parameter("anisotropic"))
 			and bool(Library.material("rl_hair_card", "female", mixed, Quality.HIGH).get_shader_parameter("anisotropic")),
 			"Opt-out affects only the material that declares it")
+		check_soft_roots(mode)
 		for pair: Array in [["male", "rowan_shag"], ["female", "mira_bun"], ["male", "rounded_afro"],
 				["female", "cornrows_low_knot"], ["female", "shoulder_waves"], ["female", "curly_twin_buns"], ["male", "receding_sweep"]]:
 			check(bool(Library.material("rl_hair_clump", pair[0], pair[1], Quality.HIGH).get_shader_parameter("anisotropic")),
@@ -50,3 +51,23 @@ func _initialize() -> void:
 	Library._values_switch = -1
 	print("RL hair strand highlights: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures else 0)
+
+func check_soft_roots(mode: int) -> void:
+	for reference: bool in [false, true]:
+		for enabled: bool in [false, true]:
+			var style := "fixture_roots_%s_%s" % [reference, enabled]
+			Library._documents[Library.hair_path(style)] = {"materials": [{
+				"name": "rl_hair_clump", "extras": {"texture": "hair_clump.png",
+				"softHairline": true, "referenceSurface": reference, "softRootCoverage": enabled}}]}
+			var material := Library.material("rl_hair_clump", "female", style, Quality.HIGH)
+			check(material.shader.code.begins_with("#define RL_SOFT_ROOTS\n") == enabled,
+				"explicit clump opt-in selects alpha-to-coverage mode%d" % mode)
+			check(bool(material.get_shader_parameter("soft_root_coverage")) == enabled,
+				"clump coverage capability reaches the shader")
+			check(bool(material.get_shader_parameter("soft_hairline")) == (not reference or enabled),
+				"reference shading preserves its old rule without explicit opt-in")
+			check(Library.shader_values(material).has("eye_color"),
+				"soft shader variants retain the age/grey carrier in both value modes")
+	var curly := Library.material("rl_hair_clump", "female", "curly_twin_buns", Quality.HIGH)
+	check(curly.shader.code.begins_with("#define RL_SOFT_ROOTS\n"), "existing curly hair keeps its soft-root shader")
+	check(not bool(curly.get_shader_parameter("soft_root_coverage")), "existing curly asset does not acquire new colour semantics")

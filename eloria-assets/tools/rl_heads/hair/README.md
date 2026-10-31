@@ -140,6 +140,16 @@ value A becomes visible once the level exceeds `100 * (1 - A)`.
 - Hanging messy groups use `spring_follow` (they borrow the nearest sprung lock's skin weights within 2.5 cm).
 - `preview.py --detail-level L` (0..1) renders with the same discard rule; `--cpu` renders with Cycles on the CPU (no GPU, no GPU lock).
 
+New clump materials may opt into `softRootCoverage: true` alongside
+`softHairline: true`. This selects alpha-to-coverage and treats COLOR_0.R as
+root coverage rather than per-lock colour variation. Keep R=1 over closed core
+coverage and feather it only at authored edges; A still controls detail bands.
+Cards use their existing `softRootDetails` capability. A reference surface's
+card-style shading retains the original root-alpha behavior unless this new
+clump capability is explicit. The coverage scanner applies the same interpolated
+R multiplier before its existing conservative alpha test. Existing asset names,
+groom fields and default rendering remain unchanged.
+
 ### Scalp coverage
 
 `validate.py` runs `coverage.py` on every hair module (skip with `--no-coverage`).
