@@ -11,6 +11,17 @@ CLUMP_ROLES={
 
 def material_role(name):return CLUMP_ROLES.get(name,name)
 
+def uses_root_coverage(material):
+    """The material-local COLOR.R multiplier selected by RLHeadLibrary."""
+    name=material_role(material.get('name',''));extras=material.get('extras') or {}
+    beard=name=='rl_beard';card=name!='rl_hair_clump'
+    reference=bool(extras.get('referenceSurface',False))
+    feathered=beard and bool(extras.get('featheredRoots',False))
+    soft_clump=name=='rl_hair_clump' and bool(extras.get('softRootCoverage',False))
+    soft=bool(extras.get('softHairline',False))
+    if reference:card=True;soft=feathered or (soft_clump and soft)
+    return soft and ((not card and not beard) or beard or soft_clump)
+
 def validate_roles(materials):
     errors=[]
     for material in materials:

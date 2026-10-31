@@ -19,8 +19,7 @@ import os, sys, json, math, argparse, subprocess, shutil
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import paths  # noqa: E402
-from material_roles import CLUMP_ROLES, material_role  # noqa: E402
-from coverage import uses_root_coverage  # noqa: E402
+from material_roles import CLUMP_ROLES, material_role, uses_root_coverage  # noqa: E402
 RL = paths.RL_ROOT
 WT = paths.WORKTREE
 VIEWS = ('front', 'profile', 'back', 'tq', 'close')

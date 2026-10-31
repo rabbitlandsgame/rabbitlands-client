@@ -1,4 +1,4 @@
-import io,tempfile,unittest
+import io,tempfile,unittest,subprocess,sys
 from pathlib import Path
 import numpy as np
 from PIL import Image
@@ -6,6 +6,18 @@ import coverage,glbwriter
 from material_roles import CLUMP_ROLES,material_role,validate_roles
 
 class MaterialRoles(unittest.TestCase):
+    def test_preview_driver_does_not_require_external_scientific_modules(self):
+        folder=Path(__file__).resolve().parent
+        script="""import sys,importlib.abc,importlib.util
+class Block(importlib.abc.MetaPathFinder):
+ def find_spec(self,fullname,path=None,target=None):
+  if fullname.split('.')[0] in {'coverage','headref','trimesh','scipy','numpy','bpy'}:raise ImportError('Unexpected preview dependency '+fullname)
+sys.meta_path.insert(0,Block())
+spec=importlib.util.spec_from_file_location('preview_import_fixture',sys.argv[1]);module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+assert module.material_role('rl_hair_clump_crest')=='rl_hair_clump'
+"""
+        result=subprocess.run([sys.executable,'-c',script,str(folder/'preview.py')],capture_output=True,text=True,timeout=30)
+        self.assertEqual(result.returncode,0,result.stderr)
     def test_only_explicit_crest_names_are_clumps(self):
         for name in CLUMP_ROLES:self.assertEqual(material_role(name),'rl_hair_clump')
         for name in ['rl_hair_clump','rl_hair_card','rl_beard','rl_hair_clump_crest_extra','rl_hair_clump_crest_lod3']:

@@ -44,31 +44,10 @@ import paths      # noqa: E402
 import rlglb      # noqa: E402
 import headref    # noqa: E402
 import hairgen    # noqa: E402
-from material_roles import material_role  # noqa: E402
+from material_roles import uses_root_coverage  # noqa: E402
 
 ALPHA_SCISSOR = 0.5
 _TEX = {}
-
-
-def uses_root_coverage(material):
-    """The material-local COLOR.R multiplier selected by RLHeadLibrary.
-
-    Reference surfaces historically draw with card shading and their root
-    multiplier disabled. Only the explicit new capability changes that rule.
-    The scanner retains its existing conservative 0.5 scissor for every material.
-    """
-    name = material_role(material.get('name', ''))
-    extras = material.get('extras') or {}
-    beard = name == 'rl_beard'
-    card = name != 'rl_hair_clump'
-    reference = bool(extras.get('referenceSurface', False))
-    feathered = beard and bool(extras.get('featheredRoots', False))
-    soft_clump = name == 'rl_hair_clump' and bool(extras.get('softRootCoverage', False))
-    soft = bool(extras.get('softHairline', False))
-    if reference:
-        card = True
-        soft = feathered or (soft_clump and soft)
-    return soft and ((not card and not beard) or beard or soft_clump)
 
 
 def root_alpha(red):
