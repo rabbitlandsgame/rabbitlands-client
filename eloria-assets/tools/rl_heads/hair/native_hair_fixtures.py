@@ -5,6 +5,7 @@ Each case supplies exact mapped hair identity controls and native bind-to-pose
 bone transforms. No static native skull is substituted for a moving case.
 """
 import argparse
+import copy
 import hashlib
 import json
 from pathlib import Path
@@ -134,20 +135,57 @@ def interior_samples(points, triangles, minimum_edge_mm=5):
     return np.concatenate([tri.mean(1), (tri[:, 0] + tri[:, 1]) / 2,
                            (tri[:, 1] + tri[:, 2]) / 2, (tri[:, 2] + tri[:, 0]) / 2])
 
+def verified_fixture_signature(manifest_path, record):
+    """Verify ordered physical sources and every named bind-to-pose delta."""
+    parts=[]
+    for part in record.get('parts',[]):
+        if part['mesh'] not in ['body','scalp','wardrobe_shirt']:continue
+        path=Path(manifest_path).parent/part['file']
+        assert sha(path)==part['sha256'],'Evaluated fixture changed: '+str(path)
+        parts.append({'mesh':part['mesh'],'sha256':part['sha256']})
+    if not parts:return None,None
+    payload={'version':1,'sex':record['sex'],'parts':parts,
+             'rl_hair_identity_controls':record['rl_hair_identity_controls'],
+             'bone_deltas':record['bone_deltas']}
+    key=hashlib.sha256(json.dumps(payload,sort_keys=True,separators=(',',':'),allow_nan=False).encode()).hexdigest()
+    return key,parts
+
+
 def check_hair(path, manifest_path, lods=(0, 1, 2), grooms=None, minimum_mm=2,
-               minimum_edge_mm=5, stop_on_first=False, case_names=None):
+               minimum_edge_mm=5, stop_on_first=False, case_names=None,
+               cache_results=True):
     manifest = json.loads(Path(manifest_path).read_text())
     assert manifest.get('hair_identity_policy') == 'native_fixed_skull', 'Use evaluated native fixture v2 or later; High identity targets do not belong to the fixed native skull'
     hair = load_hair(path)
     results = []
+    exact_results={};source_receipts=[];cache_hits=0;queries=0
     grooms = GROOM_CASES if grooms is None else grooms
     for record in manifest['cases']:
         if record['sex'] != hair['sex'] or (case_names is not None and record['case'] not in case_names): continue
         assert not record['rl_hair_identity_controls'], 'Native skull perimeter is fixed; reject High head identity weights'
-        native = load_fixture(manifest_path, record)
+        signature,sources=verified_fixture_signature(manifest_path,record)
+        source_receipts.append({'case':record['case'],'quality':record['quality'],
+            'fixture_signature_sha256':signature,'parts':sources})
+        native = None
         for lod in lods:
             for label, groom in grooms.items():
                 weights = identity_weights(record['rl_hair_identity_controls']) | groom | {'hl_native_fit': 1}
+                key=(signature,hair['sha256'],lod,
+                     json.dumps(weights,sort_keys=True,separators=(',',':'),allow_nan=False),
+                     float(minimum_mm),float(minimum_edge_mm))
+                cached=exact_results.get(key) if cache_results and signature is not None else None
+                if cached is not None:
+                    numerical,origin=cached;result=copy.deepcopy(numerical)
+                    result.update(case=record['case'],quality=record['quality'],lod=lod,groom=label)
+                    result['result_cache_reuse']={'reason':'Identical verified ordered fixture hashes, complete bone deltas, hair SHA, effective shape weights and probe thresholds',
+                        'fixture_signature_sha256':signature,**origin}
+                    cache_hits+=1;results.append(result)
+                    print(json.dumps({k:v for k,v in result.items() if k!='worst'}),flush=True)
+                    violations=result['violations']
+                    if violations and stop_on_first:break
+                    continue
+                if native is None:native=load_fixture(manifest_path,record)
+                queries+=1
                 minimum = float('inf'); violations = 0; samples = 0; worst = None
                 for part in hair['levels'][lod]:
                     points = morph_positions(part['P'], part['targets'], weights)
@@ -164,6 +202,9 @@ def check_hair(path, manifest_path, lods=(0, 1, 2), grooms=None, minimum_mm=2,
                 result = {'case': record['case'], 'quality': record['quality'], 'lod': lod,
                     'groom': label, 'minimum_clearance_mm': minimum, 'violations': violations,
                     'samples': samples, 'worst': worst}
+                if cache_results and signature is not None:
+                    numerical={k:copy.deepcopy(v) for k,v in result.items() if k not in ['case','quality','lod','groom']}
+                    exact_results[key]=(numerical,{'from_case':record['case'],'from_quality':record['quality'],'from_groom':label})
                 results.append(result)
                 print(json.dumps({k: v for k, v in result.items() if k != 'worst'}), flush=True)
                 if violations and stop_on_first: break
@@ -174,6 +215,8 @@ def check_hair(path, manifest_path, lods=(0, 1, 2), grooms=None, minimum_mm=2,
         'native_fit_weight': 1,
         'minimum_clearance_mm': minimum_mm, 'triangle_sample_minimum_edge_mm': minimum_edge_mm,
         'grooms': list(grooms), 'cases': results,
+        'result_cache':{'enabled':bool(cache_results),'reused_cases':cache_hits,'evaluated_queries':queries,
+            'requested_results_emitted':len(results),'fixture_sources':source_receipts},
         'failures': sum(r['violations'] > 0 for r in results),
         'complete_requested_scan': not (stop_on_first and results[-1]['violations'] > 0)}
 
@@ -183,10 +226,12 @@ def main():
     parser.add_argument('--out', required=True); parser.add_argument('--lods', default='0,1,2')
     parser.add_argument('--neutral-groom-only', action='store_true')
     parser.add_argument('--cases'); parser.add_argument('--stop-on-first', action='store_true')
+    parser.add_argument('--no-result-cache', action='store_true',help='Evaluate duplicate cases through the full reference path')
     args = parser.parse_args()
     result = check_hair(args.hair, args.manifest, tuple(map(int, args.lods.split(','))),
         {'neutral': {}} if args.neutral_groom_only else None,
-        stop_on_first=args.stop_on_first, case_names=args.cases.split(',') if args.cases else None)
+        stop_on_first=args.stop_on_first, case_names=args.cases.split(',') if args.cases else None,
+        cache_results=not args.no_result_cache)
     Path(args.out).write_text(json.dumps(result, indent=2) + '\n')
     raise SystemExit(int(result['failures'] > 0))
 
