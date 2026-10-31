@@ -11,4 +11,21 @@ class NativeContacts(unittest.TestCase):
     def test_large_correction_fails_closed(self):
         with self.assertRaises(AssertionError):self.surface().push_out(np.array([[0.,0.,-.02]]),max_shift_mm=10)
 
+class TiltedNormals(unittest.TestCase):
+    def test_smooth_normal_tilt_does_not_prevent_true_clearance(self):
+        P=np.array([[0.,0.,0.],[1.,0.,0.],[0.,1.,0.]])
+        N=np.tile([2**-.5,0.,2**-.5],(3,1));T=np.array([[0,1,2]])
+        surface=NativeHeadSurface(P,N,T);points=np.array([[.2,.2,-.001],[.4,.4,.01]])
+        Q,proof=surface.push_out(points)
+        self.assertGreaterEqual(surface.signed(Q)[0].min(),.0028-1e-8)
+        np.testing.assert_array_equal(Q[1],points[1]);np.testing.assert_allclose(Q[0,:2],points[0,:2],atol=1e-12,rtol=0)
+        self.assertLess(proof['maximum_shift_mm'],14)
+
+    def test_zero_distance_fallback_converges_with_tilted_normals(self):
+        P=np.array([[0.,0.,0.],[1.,0.,0.],[0.,1.,0.]])
+        surface=NativeHeadSurface(P,np.tile([2**-.5,0.,2**-.5],(3,1)),np.array([[0,1,2]]))
+        Q,proof=surface.push_out(np.array([[.2,.2,0.]]))
+        self.assertGreaterEqual(surface.signed(Q)[0].min(),.0028-1e-8)
+        self.assertLess(proof['maximum_shift_mm'],14)
+
 if __name__=='__main__':unittest.main()

@@ -48,7 +48,10 @@ class NativeHeadSurface:
         for _ in range(8):
             sd,cp,normal=self.signed(Q);bad=sd<margin-1e-8
             if not bad.any():break
-            Q[bad]=cp[bad]+normal[bad]*(margin+.0002)
+            separation=Q[bad]-cp[bad];distance=np.linalg.norm(separation,axis=1)
+            direction=headref.unit(separation)*np.where(sd[bad]<0,-1.,1.)[:,None]
+            direction[distance<1e-10]=normal[bad][distance<1e-10]
+            Q[bad]=cp[bad]+direction*(margin+.0002)
             assert np.linalg.norm(Q-original,axis=1).max()*1000<=max_shift_mm,'Native contact correction exceeded its local displacement limit'
         final,_,_=self.signed(Q)
         assert not (final<margin-1e-8).any(),'Unresolved native head contact'
