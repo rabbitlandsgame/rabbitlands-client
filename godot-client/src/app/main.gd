@@ -7095,11 +7095,13 @@ func _prefetch_respawn() -> void:
 	var stream := world_loader.world_root as ContinentChunkStream
 	var destination: Variant = AppState.death.get("destination")
 	if not bool(AppState.death.get("dead", false)) or not destination is Dictionary:
-		if stream != null:
+		if stream != null and not _prefetch_rescue_return(stream):
 			stream.clear_prefetch()
 		if not bool(AppState.death.get("dead", false)):
 			respawn_prewarm.discard()
 		return
+	if stream != null:
+		stream.remove_meta(&"rescue_return_prefetch")
 	var target: Dictionary = destination
 	var server_map := str(target.get("map", ""))
 	var tile := Vector2i(int(target.get("x", -1)), int(target.get("y", -1)))
@@ -7120,6 +7122,33 @@ func _prefetch_respawn() -> void:
 	var entry: Dictionary = MapRegistry.resolve(map_registry, server_map)
 	if not entry.is_empty():
 		respawn_prewarm.prewarm(entry, map_id, tile, world_root)
+
+## The family returns at the mine mouth, far from the ramp where this world
+## is parked. Load that ground during the opening scene and retain it with
+## the parked world. Respawn preparation takes priority while the player is dead.
+func _prefetch_rescue_return(stream: ContinentChunkStream) -> bool:
+	if bool(AppState.death.get("dead", false)):
+		stream.remove_meta(&"rescue_return_prefetch")
+		return false
+	var snapshot: Dictionary = AppState.campaign
+	var anchor: Array = (snapshot.get("anchors", {}) as Dictionary).get("cave_outside", [])
+	if adapter == null or loaded_server_map != AppState.current_map \
+			or MapRegistry.normalize_server_map_id(AppState.current_map) != "landfall" \
+			or MapRegistry.normalize_server_map_id(str(snapshot.get("map", ""))) != "landfall" \
+			or not bool(snapshot.get("active", false)) or str(snapshot.get("kind", "")) != "rescue" \
+			or str(snapshot.get("rescue", {}).get("stage", "")) == "complete" \
+			or anchor.size() != 2:
+		if stream.has_meta(&"rescue_return_prefetch"):
+			stream.remove_meta(&"rescue_return_prefetch")
+			stream.clear_prefetch()
+		return false
+	var tile := Vector2i(int(anchor[0]), int(anchor[1]))
+	if stream.get_meta(&"rescue_return_prefetch", Vector2i(-1, -1)) != tile:
+		if _world_park_settled != loaded_server_map:
+			return false
+		stream.prefetch(PackedVector3Array([adapter.tile_center(tile.x, tile.y)]))
+		stream.set_meta(&"rescue_return_prefetch", tile)
+	return true
 
 ## Brings the actor nodes in line with AppState. Given `changed` - the ids
 ## AppState has written since the last pass - only those actors are visited;
@@ -17256,6 +17285,10 @@ func _observe_world_park() -> void:
 		var stream := world_loader.world_root as ContinentChunkStream
 		if stream == null or stream.arrival_ready(adapter.tile_center(tile.x, tile.y)):
 			_world_park_settled = loaded_server_map
+	if _world_park_settled == loaded_server_map:
+		var stream := world_loader.world_root as ContinentChunkStream
+		if stream != null:
+			_prefetch_rescue_return(stream)
 	var anticipated := PackedStringArray()
 	var rescue: Dictionary = AppState.campaign
 	if bool(rescue.get("active", false)) and str(rescue.get("kind", "")) == "rescue" \
