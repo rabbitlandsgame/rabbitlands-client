@@ -1,5 +1,113 @@
 # Client runtime performance
 
+## Linux GPUs with limited video memory
+
+The 2026-10-30 Linux release was measured on a 2 GiB Quadro K620 with NVIDIA
+580.178.04. The affected live session ran at 6–7 FPS with Forward+, high quality
+and full map textures; reported graphics allocations reached about 2.2 GB and
+the driver reported 1983/2048 MiB occupied at 100% GPU utilization. Switching
+quality during that session did not activate the half-resolution map textures:
+the diagnostic `map_texture_mip_skip` remained zero until restart.
+
+For affected machines, use **Settings → Graphics → Apply Performance preset**,
+then close and reopen the game. The preset now changes Linux's Automatic
+renderer to OpenGL Compatibility, in addition to its existing lower quality,
+half-resolution map textures and 75% 3D resolution. Explicit renderer choices
+are preserved; if Forward+ was selected explicitly, select OpenGL Compatibility
+manually before restarting. The texture and renderer changes both require a
+restart. This does not change Automatic or quality defaults for other players.
+
+An isolated comparison using the installed release's PCK/assets and matching
+Godot 4.7.2 editor engine loaded Landfall at focus `(-151.5, 121.6142, 33.5)`,
+camera distance 9 m and pitch −24°, with a 941×1030 compositor-sized window.
+After 45 seconds settling, 120 frames at low quality and half map textures
+averaged 11.17 ms with OpenGL versus 18.97 ms with Vulkan. Both submitted
+1,038,514 primitives; reported graphics allocations were 344 MB versus 767 MB.
+These are terrain-only measurements with no server actors or character-creation
+history, and do not reproduce the full live session or qualify all Linux GPUs.
+The update-notice UI was visible in these runs. Full textures/high quality under
+Vulkan averaged 25.75 ms and 952 MB in a separate terrain-only run.
+See [the measurements](../../docs/qa/linux-low-vram-2026-10-30.json).
+
+`tests/test_low_end_graphics.gd` checks preset persistence, the Linux OpenGL
+launch arguments and preservation of explicit renderer choices. All 46 checks
+passed headlessly against the modified source and installed resource dependencies.
+
+## First-use camera rotation on Compatibility
+
+The follow-up online session reached 51–56 FPS but still hitched while turning.
+A three-turn offline reproduction at `(-220.5, 121.357, -2.5)`, distance 14 m,
+pitch −60°, isolated the first-use cost: the first turn paused up to 2621 ms,
+while the third turn's longest frame was 12 ms. Instrumented gameplay-script
+stages stayed below 1 ms during those pauses. This implicated first-use render
+work rather than the camera-input handler or continuous script load.
+
+`camera_shader_warmup.gd` now renders representative views through a temporary
+camera while the arrival curtain is opaque. It covers two pitches and a full
+orbit in 3° steps, requiring two actual drawn frames per view. Occluder probes
+use that camera too, preparing first-use triangle data and fading materials.
+The gameplay camera's transform and saved framing are untouched. Completion
+restores the gameplay camera and releases temporary scenery fades before the
+curtain lifts and the server receives `#arrived`. Cancellation, map changes,
+cutscene camera takeover and a 20-second limit all release the temporary camera.
+Forward+ and headless runs skip this pass. No prepared-content format changes.
+
+With one synthetic local actor and ordinary arrival/occluder handling, a matched
+control's first turn peaked at 75.38 ms. The final warm-up took 5865 ms during
+loading; the next three 360-frame turns peaked at 12.88, 13.81 and 12.73 ms,
+with no measured frame above 33.3 ms. Godot user/shader-cache roots were isolated
+per run, but NVIDIA's driver cache was shared. The earlier 2621 ms cold run is
+diagnostic evidence, not a matched cold-cache speedup claim. Large online crowds,
+other locations and other Linux GPUs have not been qualified by this probe.
+
+Run `tests/integration/camera_rotation_probe.gd` with a rendered Godot 4.7.2
+engine, isolated `XDG_DATA_HOME`, `ELORIA_CAMERA_PROBE_USER_ROOT` pointing to that
+root, and `ELORIA_CAMERA_PROBE_REPORT` naming an output JSON file. It simulates
+arrival without contacting a game server. `ELORIA_CAMERA_SHADER_WARMUP=0` selects
+the control. `tests/test_camera_shader_warmup.gd` checks draw accounting,
+restoration, cancellation, far teleports, camera takeover and the timeout.
+
+### Reducing warm-up loading time
+
+The selected pass retains all 240 views and both draws per view. It temporarily
+removes the process frame cap and window VSync, draws through a shared-world
+offscreen SubViewport with a maximum side of 192 pixels, and suspends the normal
+3D SubViewport while doing so. The temporary viewport preserves aspect and the
+camera's projection, layers and environment, copies MSAA/scaling/shadow settings,
+and disables mesh LOD reduction for its draws. Completion and cancellation restore
+the normal viewport's update mode, the player's frame cap and window VSync.
+The gameplay camera remains current in its original viewport throughout.
+
+Sequential offline trials on the same K620, with a 60 FPS arrival cap, measured:
+
+| Warm-up configuration | Warm-up | Total arrival | Worst rotation frame |
+| --- | ---: | ---: | ---: |
+| Full viewport, capped, two draws | 8.45 s | 17.04 s | 16.08 ms |
+| Full viewport, uncapped, two draws | 5.04 s | 13.64 s | 13.88 ms |
+| Small viewport, uncapped, two draws | 4.14 s | 12.74 s | 14.50 ms |
+| Selected configuration, repeat | 4.23 s | 12.86 s | 14.15 ms |
+
+The selected pass also completed three shallow-angle rotations with no frame
+above 22.45 ms, and restored VSync On and the 60 FPS cap. One draw per view was
+faster but reintroduced shallow-angle hitches up to 106.93 ms, so it was rejected.
+A preliminary 24-view pass overlapping chunk loading, followed by the full
+two-draw pass, saved only 0.16–0.29 s overall; that scheduling experiment was
+removed. Shader/mesh/light/fade variant deduplication remains unqualified.
+
+The small viewport submitted up to 349 visible draw calls in the repeated trial;
+it was not an undrawn placeholder. Native-resolution screenshots after warming
+confirmed restoration of ordinary world rendering. See [trial data and
+limitations](../../docs/qa/warmup-load-trials-2026-10-30.json). These are one-actor,
+one-location measurements with isolated Godot profiles and a shared NVIDIA driver
+cache. Full online crowds and other GPUs still need separate qualification.
+
+Diagnostic controls retain comparisons: `ELORIA_CAMERA_WARMUP_UNCAP=0` preserves
+the arrival cap, `ELORIA_CAMERA_WARMUP_VIEWPORT=screen` uses the original viewport,
+and `ELORIA_CAMERA_WARMUP_FRAMES=1` reproduces the rejected single-draw trial.
+The rotation probe accepts `ELORIA_CAMERA_PROBE_FPS`, `ELORIA_CAMERA_PROBE_PITCH`
+and `ELORIA_CAMERA_PROBE_VSYNC=on`, and records cap/VSync restoration before
+uncapping its measured rotations.
+
 ## Startup diagnostics
 
 The rotating client log includes `startup_stage` records with a stage name,

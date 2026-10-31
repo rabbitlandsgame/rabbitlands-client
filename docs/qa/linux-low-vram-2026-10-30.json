@@ -1,0 +1,296 @@
+{
+  "date": "2026-10-30",
+  "client_commit": "0513987aadaebdbbd406136edda1edd36a4b50d3",
+  "engine": "4.7.2.stable.official.ed1daf0bf",
+  "driver": "NVIDIA 580.178.04",
+  "gpu_memory_mib": 2048,
+  "display": "X11 on Wayland compositor",
+  "window_size": [
+    941,
+    1030
+  ],
+  "map": "landfall",
+  "focus": [
+    -151.5,
+    121.6142,
+    33.5
+  ],
+  "sample_frames": 120,
+  "settle_seconds": 45,
+  "scope": "Installed release PCK/assets, matching official editor engine, isolated profiles; map only, no server actors or character creation. Wall times include compositor/engine work; GPU times measure the 3D viewport. Update-notice UI remained visible. Not a full gameplay FPS qualification.",
+  "original_gameplay_log": {
+    "fps_high": [
+      6,
+      7
+    ],
+    "reported_video_memory_high_bytes": [
+      2208050560,
+      2211604624
+    ],
+    "texture_mip_skip": 0,
+    "low_quality_fps_later": 9,
+    "note": "In-session Performance settings did not activate reduced textures before restart; character creation and server actors were present. GPU driver reported 1983/2048 MiB used at 100% utilization."
+  },
+  "samples": {
+    "gl-half": {
+      "adapter": "Quadro K620",
+      "renderer": "gl_compatibility",
+      "texture_tier": "half",
+      "mip_skip": 1,
+      "scale": 0.75,
+      "camera": "(-151.5, 125.2748, 41.72191)",
+      "draw_calls": 595,
+      "primitives": 1038514,
+      "median_ms": 11.467,
+      "mean_ms": 11.1711666666667,
+      "p95_ms": 12.128,
+      "gpu_ms": 9.70939164956411,
+      "vram": 343890375
+    },
+    "vk-half": {
+      "adapter": "Quadro K620",
+      "renderer": "forward_plus",
+      "texture_tier": "half",
+      "mip_skip": 1,
+      "scale": 0.75,
+      "camera": "(-151.5, 125.2748, 41.72191)",
+      "draw_calls": 595,
+      "primitives": 1038514,
+      "median_ms": 17.707,
+      "mean_ms": 18.9728583333333,
+      "p95_ms": 23.674,
+      "gpu_ms": 16.0699332793554,
+      "vram": 767188336
+    },
+    "vk-full-high": {
+      "adapter": "Quadro K620",
+      "renderer": "forward_plus",
+      "texture_tier": "full",
+      "mip_skip": 0,
+      "scale": 1.0,
+      "camera": "(-151.5, 125.2748, 41.72191)",
+      "draw_calls": 541,
+      "primitives": 933195,
+      "median_ms": 24.894,
+      "mean_ms": 25.7519083333333,
+      "p95_ms": 29.676,
+      "gpu_ms": 22.798049958547,
+      "vram": 952085216
+    }
+  },
+  "regression": {
+    "test": "tests/test_low_end_graphics.gd",
+    "passed_checks": 46,
+    "mode": "headless, modified source with installed release resource dependencies"
+  },
+  "installed_fix": {
+    "renderer": "gl_compatibility",
+    "rendering_driver": "opengl3",
+    "map_texture_mip_skip": 1,
+    "quality": "low",
+    "render_scale": 0.75,
+    "settings_backup": "eloria_hud.cfg.before-linux-performance",
+    "verification": "Installed release reopened via its normal updater. Startup diagnostics confirm the actual renderer and texture tier; login reaches 60 FPS. Authenticated gameplay after this change has not yet been verified."
+  },
+  "camera_rotation": {
+    "followup_gameplay": {
+      "fps_samples": [
+        56,
+        51
+      ],
+      "video_memory_bytes": 1037706543,
+      "finding": "Memory pressure improved, but the player reported camera-rotation hitches."
+    },
+    "first_use_map_only": [
+      {
+        "gpu_mean_ms": 4.49911111593246,
+        "max_ms": 2620.886,
+        "mean_ms": 25.1070805555556,
+        "median_ms": 5.204,
+        "p95_ms": 14.202,
+        "p99_ms": 937.462,
+        "spikes": [
+          {
+            "angle": 92,
+            "ms": 1316.267
+          },
+          {
+            "angle": 116,
+            "ms": 2620.886
+          },
+          {
+            "angle": 117,
+            "ms": 97.367
+          },
+          {
+            "angle": 133,
+            "ms": 78.255
+          },
+          {
+            "angle": 143,
+            "ms": 116.251
+          },
+          {
+            "angle": 151,
+            "ms": 52.426
+          },
+          {
+            "angle": 154,
+            "ms": 1678.139
+          },
+          {
+            "angle": 175,
+            "ms": 115.009
+          },
+          {
+            "angle": 216,
+            "ms": 937.462
+          }
+        ],
+        "turn": 0
+      },
+      {
+        "gpu_mean_ms": 4.19982499546475,
+        "max_ms": 93.294,
+        "mean_ms": 5.69225277777778,
+        "median_ms": 5.126,
+        "p95_ms": 7.73,
+        "p99_ms": 11.391,
+        "spikes": [
+          {
+            "angle": 142,
+            "ms": 93.294
+          }
+        ],
+        "turn": 1
+      },
+      {
+        "gpu_mean_ms": 4.22589721547233,
+        "max_ms": 12.041,
+        "mean_ms": 5.45581944444444,
+        "median_ms": 5.147,
+        "p95_ms": 7.783,
+        "p99_ms": 9.558,
+        "spikes": [],
+        "turn": 2
+      }
+    ],
+    "first_use_script_cost": "No instrumented gameplay stage exceeded 1 ms during the 2621 ms first-turn render stall.",
+    "normal_arrival_control": {
+      "adapter": "Quadro K620",
+      "arrival_ms": 8652,
+      "renderer": "gl_compatibility",
+      "turns": [
+        {
+          "max_ms": 75.377,
+          "median_ms": 6.447,
+          "p95_ms": 10.478,
+          "p99_ms": 17.407,
+          "spikes": [
+            {
+              "ms": 71.065,
+              "yaw": 41
+            },
+            {
+              "ms": 75.377,
+              "yaw": 45
+            }
+          ],
+          "turn": 0
+        },
+        {
+          "max_ms": 15.153,
+          "median_ms": 6.514,
+          "p95_ms": 9.774,
+          "p99_ms": 14.348,
+          "spikes": [],
+          "turn": 1
+        },
+        {
+          "max_ms": 15.17,
+          "median_ms": 6.48,
+          "p95_ms": 9.708,
+          "p99_ms": 12.594,
+          "spikes": [],
+          "turn": 2
+        }
+      ],
+      "viewport": "(941, 1030)",
+      "warmup_enabled": false
+    },
+    "normal_arrival_with_fix": {
+      "adapter": "Quadro K620",
+      "arrival_ms": 14472,
+      "renderer": "gl_compatibility",
+      "turns": [
+        {
+          "max_ms": 12.88,
+          "median_ms": 6.456,
+          "p95_ms": 9.745,
+          "p99_ms": 12.319,
+          "spikes": [],
+          "turn": 0
+        },
+        {
+          "max_ms": 13.806,
+          "median_ms": 6.359,
+          "p95_ms": 10.01,
+          "p99_ms": 11.839,
+          "spikes": [],
+          "turn": 1
+        },
+        {
+          "max_ms": 12.73,
+          "median_ms": 6.455,
+          "p95_ms": 9.877,
+          "p99_ms": 11.494,
+          "spikes": [],
+          "turn": 2
+        }
+      ],
+      "viewport": "(941, 1030)",
+      "warmup_enabled": true
+    },
+    "warmup": {
+      "views": 240,
+      "draws_per_view": 2,
+      "duration_ms": 5865,
+      "timed_out": false,
+      "source_camera_unchanged": true
+    },
+    "qualification": "All trials use the same GPU and release content with the matching editor engine. Godot shader-cache/user profiles were isolated per trial; the NVIDIA driver cache was shared, so the earliest cold run is diagnostic evidence, not a matched cold-cache speedup claim. Normal-arrival control and final probe include one synthetic local actor and normal occluder fading. Final 1080 measured rotation frames had no frame over 33.3 ms. Full online crowds and all Linux GPUs remain unqualified.",
+    "validation": {
+      "pack_graphics_checks": 46,
+      "camera_lifecycle_tests": "PASS",
+      "native_release_executable_smoke": "PASS; reached main_scene_ready, no engine/script errors",
+      "local_client_reopened": "PASS; main_scene_ready, OpenGL renderer and half textures confirmed",
+      "online_rotation_after_patch": "Player confirmed rotation is smooth.",
+      "online_arrival_after_patch": {
+        "completed": true,
+        "warmup_ms": 18277,
+        "views": 240,
+        "timed_out": false,
+        "arrival_reported_after_warmup": true
+      },
+      "online_after_patch_snapshots": {
+        "fps": [
+          60,
+          60
+        ],
+        "camera_rotation_degrees": [
+          [
+            -23.19859,
+            112.0988,
+            0.0
+          ],
+          [
+            -12.13848,
+            -164.9256,
+            0.0
+          ]
+        ],
+        "note": "Periodic snapshots at changed viewing angles; not a continuous frame-time capture or player confirmation."
+      }
+    }
+  }
+}

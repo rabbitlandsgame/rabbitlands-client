@@ -1,0 +1,506 @@
+{
+  "date": "2026-10-30",
+  "engine": "Godot 4.7.2.stable.official.ed1daf0bf",
+  "gpu": "NVIDIA Quadro K620 2048 MiB",
+  "driver": "NVIDIA 580.178.04",
+  "content_commit": "0513987aadaebdbbd406136edda1edd36a4b50d3",
+  "setup": "Sequential rendered offline Landfall arrivals at tile (61,250), one synthetic local actor, low quality, half textures, 75% 3D scale. Player cap 60 FPS during arrival; rotations uncapped after confirming restoration. Each trial uses a fresh Godot user/shader-cache root; NVIDIA driver cache is shared. Compositor window 941x1030.",
+  "selection": {
+    "uncap_during_warmup": true,
+    "offscreen_viewport_max_side": 192,
+    "actual_warmup_viewport": "175x192",
+    "frames_per_view": 2,
+    "yaw_step_degrees": 3,
+    "pitches": [
+      -60,
+      -15
+    ],
+    "views": 240,
+    "overlap": false
+  },
+  "rejected": {
+    "one_frame": "Shallow-angle turns reintroduced 103.9/106.9 ms hitches; two draws retained.",
+    "overlap": "A 24-view primer was drawn while arrival chunks loaded, followed by the full pass. Matching two-frame comparison saved only 0.16-0.29 s overall; removed to avoid extra scheduling and cache state.",
+    "variant_deduplication": "Not implemented: the tested small-viewport path preserves exhaustive coverage; a reliable shader/mesh/light/fade variant inventory requires separate qualification.",
+    "persistent_completion_marker": "Not used: existing shader/driver caches are retained, but an on-disk completion marker does not prove a new GL context is warmed."
+  },
+  "trials": {
+    "base60": {
+      "adapter": "Quadro K620",
+      "arrival_ms": 17042,
+      "renderer": "gl_compatibility",
+      "requested_fps_cap": 60,
+      "restored_fps_cap": 60,
+      "turns": [
+        {
+          "max_ms": 16.075,
+          "median_ms": 6.335,
+          "p95_ms": 9.769,
+          "p99_ms": 13.725,
+          "spikes": [],
+          "turn": 0
+        },
+        {
+          "max_ms": 14.733,
+          "median_ms": 6.281,
+          "p95_ms": 9.577,
+          "p99_ms": 12.127,
+          "spikes": [],
+          "turn": 1
+        },
+        {
+          "max_ms": 15.42,
+          "median_ms": 6.371,
+          "p95_ms": 9.793,
+          "p99_ms": 13.217,
+          "spikes": [],
+          "turn": 2
+        }
+      ],
+      "viewport": "(941, 1030)",
+      "warmup": {
+        "active": false,
+        "elapsed_msec": 8453,
+        "timed_out": false,
+        "view": 240,
+        "views": 240
+      },
+      "warmup_enabled": true
+    },
+    "uncap": {
+      "adapter": "Quadro K620",
+      "arrival_ms": 13635,
+      "renderer": "gl_compatibility",
+      "requested_fps_cap": 60,
+      "restored_fps_cap": 60,
+      "turns": [
+        {
+          "max_ms": 12.996,
+          "median_ms": 6.391,
+          "p95_ms": 9.9,
+          "p99_ms": 11.08,
+          "spikes": [],
+          "turn": 0
+        },
+        {
+          "max_ms": 13.884,
+          "median_ms": 6.443,
+          "p95_ms": 9.785,
+          "p99_ms": 10.979,
+          "spikes": [],
+          "turn": 1
+        },
+        {
+          "max_ms": 13.071,
+          "median_ms": 6.4,
+          "p95_ms": 9.659,
+          "p99_ms": 11.298,
+          "spikes": [],
+          "turn": 2
+        }
+      ],
+      "viewport": "(941, 1030)",
+      "warmup": {
+        "active": false,
+        "elapsed_msec": 5037,
+        "frames_per_view": 2,
+        "mode": "screen",
+        "timed_out": false,
+        "uncapped": true,
+        "view": 240,
+        "views": 240
+      },
+      "warmup_enabled": true
+    },
+    "small": {
+      "adapter": "Quadro K620",
+      "arrival_ms": 12735,
+      "renderer": "gl_compatibility",
+      "requested_fps_cap": 60,
+      "restored_fps_cap": 60,
+      "turns": [
+        {
+          "max_ms": 13.749,
+          "median_ms": 6.639,
+          "p95_ms": 10.072,
+          "p99_ms": 11.667,
+          "spikes": [],
+          "turn": 0
+        },
+        {
+          "max_ms": 13.157,
+          "median_ms": 6.614,
+          "p95_ms": 9.967,
+          "p99_ms": 12.039,
+          "spikes": [],
+          "turn": 1
+        },
+        {
+          "max_ms": 14.501,
+          "median_ms": 6.825,
+          "p95_ms": 10.124,
+          "p99_ms": 13.111,
+          "spikes": [],
+          "turn": 2
+        }
+      ],
+      "viewport": "(941, 1030)",
+      "warmup": {
+        "active": false,
+        "elapsed_msec": 4139,
+        "frames_per_view": 2,
+        "mode": "small",
+        "timed_out": false,
+        "uncapped": true,
+        "view": 240,
+        "views": 240
+      },
+      "warmup_enabled": true
+    },
+    "small-one-frame": {
+      "adapter": "Quadro K620",
+      "arrival_ms": 11019,
+      "renderer": "gl_compatibility",
+      "requested_fps_cap": 60,
+      "restored_fps_cap": 60,
+      "turns": [
+        {
+          "max_ms": 14.215,
+          "median_ms": 6.406,
+          "p95_ms": 9.942,
+          "p99_ms": 12.342,
+          "spikes": [],
+          "turn": 0
+        },
+        {
+          "max_ms": 14.068,
+          "median_ms": 6.397,
+          "p95_ms": 9.847,
+          "p99_ms": 10.749,
+          "spikes": [],
+          "turn": 1
+        },
+        {
+          "max_ms": 30.828,
+          "median_ms": 6.635,
+          "p95_ms": 11.176,
+          "p99_ms": 16.354,
+          "spikes": [],
+          "turn": 2
+        }
+      ],
+      "viewport": "(941, 1030)",
+      "warmup": {
+        "active": false,
+        "elapsed_msec": 2301,
+        "frames_per_view": 1,
+        "mode": "small",
+        "timed_out": false,
+        "uncapped": true,
+        "view": 240,
+        "views": 240
+      },
+      "warmup_enabled": true
+    },
+    "overlap": {
+      "adapter": "Quadro K620",
+      "arrival_ms": 10753,
+      "pitch": -60.0,
+      "renderer": "gl_compatibility",
+      "requested_fps_cap": 60,
+      "requested_vsync": "off",
+      "restored_fps_cap": 60,
+      "restored_vsync": 0,
+      "turns": [
+        {
+          "max_ms": 72.725,
+          "median_ms": 6.511,
+          "p95_ms": 10.254,
+          "p99_ms": 12.956,
+          "spikes": [
+            {
+              "ms": 72.725,
+              "yaw": 41
+            }
+          ],
+          "turn": 0
+        },
+        {
+          "max_ms": 13.143,
+          "median_ms": 6.353,
+          "p95_ms": 10.011,
+          "p99_ms": 11.623,
+          "spikes": [],
+          "turn": 1
+        },
+        {
+          "max_ms": 13.462,
+          "median_ms": 6.463,
+          "p95_ms": 9.739,
+          "p99_ms": 11.897,
+          "spikes": [],
+          "turn": 2
+        }
+      ],
+      "viewport": "(941, 1030)",
+      "warmup": {
+        "active": false,
+        "elapsed_msec": 2104,
+        "frames_per_view": 1,
+        "mode": "small",
+        "priming": false,
+        "timed_out": false,
+        "uncapped": true,
+        "view": 240,
+        "views": 240
+      },
+      "warmup_enabled": true
+    },
+    "shallow-one-frame": {
+      "adapter": "Quadro K620",
+      "arrival_ms": 11112,
+      "pitch": -15.0,
+      "renderer": "gl_compatibility",
+      "requested_fps_cap": 60,
+      "requested_vsync": "on",
+      "restored_fps_cap": 60,
+      "restored_vsync": 1,
+      "turns": [
+        {
+          "max_ms": 103.886,
+          "median_ms": 11.494,
+          "p95_ms": 17.074,
+          "p99_ms": 19.1,
+          "spikes": [
+            {
+              "ms": 103.886,
+              "yaw": 133
+            },
+            {
+              "ms": 36.307,
+              "yaw": 301
+            }
+          ],
+          "turn": 0
+        },
+        {
+          "max_ms": 106.931,
+          "median_ms": 11.647,
+          "p95_ms": 16.755,
+          "p99_ms": 18.052,
+          "spikes": [
+            {
+              "ms": 104.319,
+              "yaw": 105
+            },
+            {
+              "ms": 106.931,
+              "yaw": 177
+            }
+          ],
+          "turn": 1
+        },
+        {
+          "max_ms": 19.543,
+          "median_ms": 11.746,
+          "p95_ms": 16.651,
+          "p99_ms": 18.206,
+          "spikes": [],
+          "turn": 2
+        }
+      ],
+      "viewport": "(941, 1030)",
+      "warmup": {
+        "active": false,
+        "elapsed_msec": 2371,
+        "frames_per_view": 1,
+        "mode": "small",
+        "priming": false,
+        "timed_out": false,
+        "uncapped": true,
+        "view": 240,
+        "views": 240
+      },
+      "warmup_enabled": true
+    },
+    "shallow-two-frames": {
+      "adapter": "Quadro K620",
+      "arrival_ms": 12950,
+      "pitch": -15.0,
+      "renderer": "gl_compatibility",
+      "requested_fps_cap": 60,
+      "requested_vsync": "on",
+      "restored_fps_cap": 60,
+      "restored_vsync": 1,
+      "turns": [
+        {
+          "max_ms": 22.449,
+          "median_ms": 12.121,
+          "p95_ms": 17.059,
+          "p99_ms": 17.795,
+          "spikes": [],
+          "turn": 0
+        },
+        {
+          "max_ms": 19.889,
+          "median_ms": 12.176,
+          "p95_ms": 17.171,
+          "p99_ms": 18.407,
+          "spikes": [],
+          "turn": 1
+        },
+        {
+          "max_ms": 19.066,
+          "median_ms": 12.129,
+          "p95_ms": 17.122,
+          "p99_ms": 18.401,
+          "spikes": [],
+          "turn": 2
+        }
+      ],
+      "viewport": "(941, 1030)",
+      "warmup": {
+        "active": false,
+        "elapsed_msec": 4252,
+        "frames_per_view": 2,
+        "mode": "small",
+        "priming": false,
+        "timed_out": false,
+        "uncapped": true,
+        "view": 240,
+        "views": 240
+      },
+      "warmup_enabled": true
+    },
+    "overlap-two-frames": {
+      "adapter": "Quadro K620",
+      "arrival_ms": 12571,
+      "pitch": -60.0,
+      "renderer": "gl_compatibility",
+      "requested_fps_cap": 60,
+      "requested_vsync": "off",
+      "restored_fps_cap": 60,
+      "restored_vsync": 0,
+      "turns": [
+        {
+          "max_ms": 14.632,
+          "median_ms": 6.525,
+          "p95_ms": 9.859,
+          "p99_ms": 12.552,
+          "spikes": [],
+          "turn": 0
+        },
+        {
+          "max_ms": 15.181,
+          "median_ms": 6.498,
+          "p95_ms": 9.819,
+          "p99_ms": 13.686,
+          "spikes": [],
+          "turn": 1
+        },
+        {
+          "max_ms": 14.32,
+          "median_ms": 6.433,
+          "p95_ms": 9.798,
+          "p99_ms": 12.582,
+          "spikes": [],
+          "turn": 2
+        }
+      ],
+      "viewport": "(941, 1030)",
+      "warmup": {
+        "active": false,
+        "elapsed_msec": 3905,
+        "frames_per_view": 2,
+        "max_draw_calls": 327,
+        "mode": "small",
+        "priming": false,
+        "render_size": "(175, 192)",
+        "timed_out": false,
+        "uncapped": true,
+        "view": 240,
+        "views": 240
+      },
+      "warmup_enabled": true
+    },
+    "small-two-frames-repeat": {
+      "adapter": "Quadro K620",
+      "arrival_ms": 12862,
+      "pitch": -60.0,
+      "renderer": "gl_compatibility",
+      "requested_fps_cap": 60,
+      "requested_vsync": "off",
+      "restored_fps_cap": 60,
+      "restored_vsync": 0,
+      "turns": [
+        {
+          "max_ms": 14.147,
+          "median_ms": 6.344,
+          "p95_ms": 9.632,
+          "p99_ms": 11.737,
+          "spikes": [],
+          "turn": 0
+        },
+        {
+          "max_ms": 12.685,
+          "median_ms": 6.571,
+          "p95_ms": 9.91,
+          "p99_ms": 12.265,
+          "spikes": [],
+          "turn": 1
+        },
+        {
+          "max_ms": 13.057,
+          "median_ms": 6.415,
+          "p95_ms": 9.729,
+          "p99_ms": 11.435,
+          "spikes": [],
+          "turn": 2
+        }
+      ],
+      "viewport": "(941, 1030)",
+      "warmup": {
+        "active": false,
+        "elapsed_msec": 4232,
+        "frames_per_view": 2,
+        "max_draw_calls": 349,
+        "mode": "small",
+        "priming": false,
+        "render_size": "(175, 192)",
+        "timed_out": false,
+        "uncapped": true,
+        "view": 240,
+        "views": 240
+      },
+      "warmup_enabled": true
+    }
+  },
+  "summary": {
+    "baseline_warmup_ms": 8453,
+    "baseline_arrival_ms": 17042,
+    "selected_warmup_ms": [
+      4139,
+      4232
+    ],
+    "selected_arrival_ms": [
+      12735,
+      12862
+    ],
+    "selected_worst_rotation_ms": [
+      14.501,
+      14.147
+    ],
+    "selected_shallow_warmup_ms": 4252,
+    "selected_shallow_worst_rotation_ms": 22.449,
+    "restoration": "60 FPS restored in all trials; VSync On restored as 1 in shallow-angle trials; Off restored as 0 in later comparisons.",
+    "offscreen_draw_proof": "Repeated selected trial recorded 349 visible draw calls in the small viewport; full-resolution screenshots confirmed normal rendering after warm-up."
+  },
+  "limitations": "One GPU and location, one synthetic local actor. No universal loading-time or cold-driver-cache claim. Failed render-counter instrumentation run was discarded and rerun; no invalid run contributes to results.",
+  "validation": {
+    "camera_lifecycle_and_restoration_tests": "PASS, including source camera destruction",
+    "graphics_regression_checks": 46,
+    "native_release_startup": "PASS; reached main_scene_ready with no engine/script errors",
+    "installed_client": "Updated and reopened",
+    "online_load_after_optimization": "Not yet measured"
+  }
+}

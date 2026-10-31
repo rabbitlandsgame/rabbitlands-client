@@ -147,6 +147,7 @@ const InteriorCutawayScript := preload("res://src/world/interior_cutaway.gd")
 const LanternMineLightingScript := preload("res://src/world/lantern_mine_lighting.gd")
 const SecretSectionsScript := preload("res://src/world/secret_sections.gd")
 const OccluderFadeScript := preload("res://src/world/occluder_fade_manager.gd")
+const CameraShaderWarmup := preload("res://src/world/camera_shader_warmup.gd")
 const CrowdPresentationScript := preload("res://src/world/crowd_presentation.gd")
 const LiveEffectBudgetScript := preload("res://src/world/live_effect_budget.gd")
 const UndergroundSceneryScript := preload("res://src/world/underground_scenery.gd")
@@ -198,6 +199,7 @@ var lantern_mine_lighting: RefCounted = LanternMineLightingScript.new()
 ## stays black.
 var secret_sections: RefCounted = SecretSectionsScript.new()
 var occluder_fade: RefCounted = OccluderFadeScript.new()
+var camera_shader_warmup: RefCounted = CameraShaderWarmup.new()
 var invasion_assistant_window
 var extension_windows: Control
 @onready var gameplay_camera: Camera3D = %Camera
@@ -4420,6 +4422,7 @@ func _close_client() -> void:
 	get_tree().quit()
 
 func _exit_tree() -> void:
+	camera_shader_warmup.cancel()
 	RLHeadLibrary.clear_render_warm_context(self)
 	lantern_mine_lighting.clear()
 	actor_resource_warmup.clear()
@@ -6429,6 +6432,7 @@ func _flush_storage_sync() -> void:
 func _load_server_map() -> void:
 	if AppState.current_map.is_empty() or loaded_server_map == AppState.current_map:
 		return
+	camera_shader_warmup.cancel()
 	var normalized_map: String = MapRegistry.normalize_server_map_id(AppState.current_map)
 	Diagnostics.record("map_requested", {"server_map": AppState.current_map, "map": normalized_map})
 	var entry: Dictionary = MapRegistry.resolve(map_registry, AppState.current_map)
@@ -6985,6 +6989,7 @@ func _update_arrival() -> void:
 				"spawn_ms": (Time.get_ticks_usec() - building) / 1000.0})
 		return
 	if not arrival_curtain.is_showing():
+		camera_shader_warmup.cancel()
 		return
 	if not AppState.authenticated and AppState.connection_state != "connected":
 		_end_arrival()
@@ -6997,6 +7002,26 @@ func _update_arrival() -> void:
 		return
 	var local_id: int = AppState.local_actor_id
 	var standing: bool = actor_nodes.has(local_id) and _grounded_actors.has(local_id)
+	if camera_shader_warmup.active():
+		if not standing or character_intro.pending or campaign_scene.playing:
+			camera_shader_warmup.cancel()
+		else:
+			camera_shader_warmup.advance()
+		if not camera_shader_warmup.active():
+			occluder_fade.release()
+			Diagnostics.record("camera_shader_warmup_finished", camera_shader_warmup.snapshot())
+		_arrival_settle_frames = 0
+		return
+	if standing and not character_intro.pending and not campaign_scene.playing \
+			and RenderingServer.get_current_rendering_method() == "gl_compatibility" \
+			and DisplayServer.get_name() != "headless" \
+			and OS.get_environment("ELORIA_CAMERA_SHADER_WARMUP") != "0":
+		_update_local_actor_follow()
+		if camera_shader_warmup.begin(world_loader.world_root, gameplay_camera,
+				(actor_nodes[local_id] as Node3D).global_position):
+			Diagnostics.record("camera_shader_warmup_started", camera_shader_warmup.snapshot())
+			_arrival_settle_frames = 0
+			return
 	if standing or arrival_curtain.elapsed_msec() > ARRIVAL_CURTAIN_LIMIT_MSEC:
 		arrival_curtain.set_progress(1.0)
 		_arrival_settle_frames += 1
@@ -7013,6 +7038,7 @@ func _arrival_pending() -> bool:
 	return not _arrival.is_empty() and not bool(_arrival.ready)
 
 func _end_arrival() -> void:
+	camera_shader_warmup.cancel()
 	_arrival = {}
 	_deferred_map_load = false
 	_arrival_settle_frames = 0
@@ -9370,7 +9396,12 @@ func _update_occluder_fade(delta: float) -> void:
 	var target: Node3D = target_value as Node3D if target_value is Node3D else null
 	if campaign_scene.playing:
 		target = campaign_scene.occlusion_focus()
-	occluder_fade.update(delta, gameplay_camera, target)
+	# The first occlusion test can materialize triangle data and a fading shader
+	# variant too. Exercise those sight lines under the same opaque curtain,
+	# instead of leaving them for the first player-controlled rotation.
+	var warm_camera: Camera3D = camera_shader_warmup.render_camera()
+	occluder_fade.update(1.0 / OccluderFade.PROBES_PER_SECOND if warm_camera != null else delta,
+		warm_camera if warm_camera != null else gameplay_camera, target)
 
 ## Which actors animate this frame, and how often. Every actor's skeleton
 ## used to be posed and every skinned mesh re-skinned every frame whether or
@@ -14479,7 +14510,8 @@ func _refresh_graphics_restart_notice() -> void:
 		or _renderer_preference != _startup_renderer_preference)
 
 ## A one-shot preset. Individual controls remain editable afterward, and the
-## renderer stays the player's choice. Preserve essential spell/projectile cues.
+## explicit renderer choices are retained. Linux Automatic uses OpenGL for this
+## preset to avoid Forward+'s overhead on low-VRAM GPUs. Preserve combat cues.
 func _apply_performance_preset() -> void:
 	_applying_graphics_preset = true
 	var values := {"quality": LookProfile.Quality.LOW,
@@ -14487,6 +14519,7 @@ func _apply_performance_preset() -> void:
 		"render_scale": 0.75, "map_texture_quality": "half", "crowd_bodies": 60,
 		"swaying_capes": 0, "shadows": false, "particles": true,
 		"decorative_grass": false, "name_distance": 20.0}
+	values["renderer"] = GraphicsLaunchOptions.performance_renderer(_renderer_preference)
 	for key: String in values:
 		_on_client_setting_changed("Graphics", key, values[key])
 	_applying_graphics_preset = false
