@@ -25,6 +25,10 @@ def conform_temples(head,scalp,P,N,T,ranges,spec):
         blend[slice(*ranges[part])]=0
     width=float(config['softness_degrees']);assert 0<width<=3
     target=lat+blend*(line+width*np.logaddexp(0,(lat-line)/width)-lat)
+    if 'max_lift_degrees' in config:
+        limit=float(config['max_lift_degrees'])
+        assert 0<limit<=25,'Invalid temple angular lift limit'
+        target=lat+np.minimum(target-lat,limit)
     changed=(target-lat)>.01;Q=P.copy();M=N.copy()
     if changed.any():
         old,old_normal=scalp.point(lon[changed],lat[changed]);new,new_normal=scalp.point(lon[changed],target[changed])

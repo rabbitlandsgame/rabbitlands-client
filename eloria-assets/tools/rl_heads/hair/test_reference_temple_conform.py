@@ -35,5 +35,16 @@ class TempleConformance(unittest.TestCase):
         Q,M,_=conform_temples(Head(),Scalp(),P,N,T,ranges,spec)
         np.testing.assert_array_equal(Q[8:],P[8:]);np.testing.assert_array_equal(M[8:],N[8:])
         self.assertGreater(Q[0,1],P[0,1])
+    def test_optional_angular_bound_retains_long_side_locks(self):
+        P,N,T,ranges,spec=self.fixture();spec['temple_conform']['max_lift_degrees']=3
+        Q,M,_=conform_temples(Head(),Scalp(),P,N,T,ranges,spec)
+        _,before=headref.dir_lonlat(P);_,after=headref.dir_lonlat(Q)
+        self.assertLessEqual(float((after-before).max()),3+1e-10)
+        self.assertAlmostEqual(float(after[0]-before[0]),3,places=10)
+        np.testing.assert_allclose(np.linalg.norm(Q,axis=1),np.linalg.norm(P,axis=1),atol=1e-12)
+        np.testing.assert_array_equal(Q[6:],P[6:]);np.testing.assert_array_equal(M[6:],N[6:])
+    def test_invalid_angular_bound_fails_closed(self):
+        P,N,T,ranges,spec=self.fixture();spec['temple_conform']['max_lift_degrees']=0
+        with self.assertRaises(AssertionError):conform_temples(Head(),Scalp(),P,N,T,ranges,spec)
 
 if __name__=='__main__':unittest.main()

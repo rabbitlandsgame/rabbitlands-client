@@ -18,6 +18,12 @@ and fails closed at the configured displacement limit.
 coverage cap completely unchanged. Its own boundary may extend under the
 painted exterior; it must not be lifted back to the exterior's visible curve.
 
+For long side locks, optional `max_lift_degrees` caps only the positive angular
+lift after the existing locality masks. The default remains the original curve.
+This preserves hanging length when rounding a small temple flap; the independent
+millimetre displacement bound still applies. Values must be greater than zero
+and no greater than 25 degrees.
+
 Example used by the tied pilot: ramps `[55, 70, 105, 120]`, margin 0.5 degrees,
 softness 1.5 degrees, limit 30mm. These values are profile choices, not global
 defaults. Keep an ordinary narrow 1–2mm root-coverage feather after conformance.
