@@ -32,6 +32,7 @@ func _expect(value: bool, message: String) -> void:
 func _run() -> void:
 	_check_legacy()
 	_check_variants()
+	_check_namespace()
 	await _check_form()
 	print("RL semantic hair: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures else 0)
@@ -102,6 +103,31 @@ func _select(form: VariantForm, id: int) -> void:
 	var option := form.detail_controls.hair_module as OptionButton
 	option.select(option.get_item_index(id))
 	option.item_selected.emit(option.selected)
+
+func _check_namespace() -> void:
+	_expect(Modules.validate().ok and Modules.validate(FIXTURE).ok, "live and synthetic variant registries validate")
+	var cross_alias := {
+		9: {"name": "collision", "sex": "male"},
+		10: {"name": "other", "variants": {"female": "collision"}},
+	}
+	var checked := Modules.validate(cross_alias)
+	_expect(not checked.ok and str(checked.errors).contains("Semantic name collision"),
+		"a semantic alias cannot shadow another ID's concrete fit across sexes")
+	var reverse_order := {10: cross_alias[10], 9: cross_alias[9]}
+	_expect(not Modules.validate(reverse_order).ok, "cross-alias rejection is independent of insertion order")
+	var duplicate_alias := {9: {"name": "same", "sex": "male"}, 10: {"name": "same", "sex": "female"}}
+	_expect(not Modules.validate(duplicate_alias).ok, "semantic aliases have one ID owner globally")
+	var duplicate_fit := {
+		9: {"name": "one", "variants": {"female": "fit"}},
+		10: {"name": "two", "variants": {"female": "fit"}},
+	}
+	_expect(not Modules.validate(duplicate_fit).ok, "a body's concrete fit has one ID owner")
+	_expect(Modules.validate({9: {"name": "same", "variants": {"female": "same", "male": "same"}}}).ok,
+		"one ID can own its own alias and both body's concrete fits")
+	_expect(not Modules.validate({32: {"name": "outside_wire", "sex": "female"}}).ok,
+		"new entries cannot exceed existing wire capacity")
+	_expect(not Modules.validate({9: {"name": "bad_fallback", "variants": {"male": {"name": "fit", "fallback_style": 0}}}}).ok,
+		"variant fallback must be a nonbald existing hairstyle slot")
 
 func _check_form() -> void:
 	var form := VariantForm.new()
