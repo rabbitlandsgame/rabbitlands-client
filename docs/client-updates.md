@@ -408,6 +408,13 @@ also contains unchanged files so both game roots can be replaced together.
 Keep enough free space for the changed downloads and staged game; the previous
 installation is retained by renaming its folders. ZIP entries use 8 MiB chunks
 and 64-bit archive offsets, so even a large PCK uses bounded extraction memory.
+On Windows, each folder move retries for up to five seconds to allow temporary
+file locks to clear. If a move still fails, recovery attempts to restore the
+previous installation and the error identifies the source, destination and error code.
+It also gives the path to `last-install-error.json` in that installation's
+update cache, recording the failed move, target commit and recovery result.
+Close programs using the game folder and retry the updater; verified downloads
+are retained after a failed move.
 The schema 1 reader remains available for previously signed whole-game downloads.
 The updater now replaces its own executable through a verified handover. Its
 original trust key remains pinned; changing that key still requires a new

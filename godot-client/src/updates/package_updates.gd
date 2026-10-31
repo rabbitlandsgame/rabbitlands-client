@@ -251,11 +251,9 @@ static func install(root: String, release: Dictionary, identity: Dictionary, pro
 			original_roots.append(name)
 	if Release.save_json(root.path_join(".eloria-update-journal.json"), {"commit": release.commit, "original_roots": original_roots}) != OK:
 		return "The update recovery record cannot be saved."
-	for name: String in Release.ROOTS:
-		var current := root.path_join(name)
-		if (DirAccess.dir_exists_absolute(current) and DirAccess.rename_absolute(current, backup.path_join(name)) != OK) or DirAccess.rename_absolute(stage.path_join(name), current) != OK:
-			var error := Release.recover(root)
-			return "The update could not be installed; the previous game was restored." if error == "" else error
+	var promotion_error := Release.promote_staged(root, progress)
+	if promotion_error != "":
+		return promotion_error
 	if DirAccess.remove_absolute(root.path_join(".eloria-update-journal.json")) != OK:
 		return "The update recovery record could not be cleared. Restart the updater."
 	Release.save_json(root.path_join(".rabbitlands-install.json"), {"schema": 1, "repository": identity.repository, "platform": identity.platform})
