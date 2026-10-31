@@ -1035,7 +1035,10 @@ static func material(material_name: String, sex: String, style: String, quality:
 			# Beards draw at the shader's beard_gain, so they light like the hair.
 			result.set_shader_parameter("beard", material_name == "rl_beard")
 			result.set_shader_parameter("alpha_scissor", 0.5 if material_name == "rl_hair_clump" else 0.35)
-			result.set_shader_parameter("anisotropic", quality != ActorRenderQuality.Quality.LOW)
+			# Imported surfaces may have arbitrary UV charts rather than strand
+			# directions. Only those materials opt out; existing assets default on.
+			result.set_shader_parameter("anisotropic", quality != ActorRenderQuality.Quality.LOW
+				and bool(extras.get("uvStrandHighlights", true)))
 	_materials[key] = result
 	return result
 
