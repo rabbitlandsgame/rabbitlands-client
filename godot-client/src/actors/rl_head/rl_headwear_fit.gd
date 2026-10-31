@@ -75,6 +75,7 @@ const THICKNESS_CAP := 0.02
 const STEP := 0.005
 const MESH_CACHE_LIMIT := 48
 const ENVELOPE_CACHE_LIMIT := 16
+const TRAIL_SUBDIVISION := preload("res://src/actors/rl_head/rl_headwear_trail_subdivision.gd")
 
 static var _data: Dictionary = {}
 static var _loaded := false
@@ -376,6 +377,22 @@ static func _build(source: Mesh, placed: Transform3D, fit: Dictionary, rule: Dic
 	out.resource_name = source.resource_name
 	for surface: int in source.get_surface_count():
 		var arrays := source.surface_get_arrays(surface)
+		var refinement: Variant = fit.get("trailSubdivision")
+		if refinement is Dictionary and not (refinement as Dictionary).is_empty():
+			var original_vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+			var original_shipped := PackedVector3Array()
+			for point: Vector3 in original_vertices:
+				original_shipped.append(placed * point)
+			var original_indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX] \
+				if arrays[Mesh.ARRAY_INDEX] != null else PackedInt32Array(range(original_vertices.size()))
+			var eligibility := trail_weights(original_shipped, original_indices, rule)
+			var prepared: Dictionary = TRAIL_SUBDIVISION.refine(arrays, placed, eligibility, refinement)
+			if bool(prepared.ok):
+				arrays = prepared.arrays
+				out.set_meta(&"rl_trail_subdivision", {"added_triangles": prepared.added_triangles,
+					"new_vertices": prepared.get("new_vertices", 0), "passes": prepared.get("passes", 0)})
+			else:
+				push_warning("Headwear trail preparation retained the original surface: " + str(prepared.reason))
 		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 		var count := vertices.size()
 		var shipped := PackedVector3Array()
