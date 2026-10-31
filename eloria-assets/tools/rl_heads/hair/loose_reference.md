@@ -73,3 +73,10 @@ validation, the shader-equivalent scalp coverage gate at all three LODs, open
 headwear fitting, and matched real-client views at neutral and grooming extremes.
 Record exact output hashes and keep `qualified` false until those checks pass.
 The style profiles alone do not register or replace an existing saved hairstyle.
+
+For an exterior-only module, `bake_loose_cap.py --source <candidate.glb>
+--out <fresh/candidate.glb>` maps the independent scalp cap into unique chart
+tiles and bakes painted flow per texel from the actual exterior. It retains
+every non-UV primitive accessor, every original exterior/detail UV, all skin and
+morph data, and opaque cap alpha. The private report includes overlap, paint
+distance, coverage and exact-accessor proofs; it does not qualify the geometry.
