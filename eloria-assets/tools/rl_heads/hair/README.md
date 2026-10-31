@@ -10,16 +10,18 @@ No generation service is called by these tools.
 
 The attached elder full beard uses `fit_attached_beard.py` to create its
 continuous foundation, then `fit_attached_full_beard.py` retains the lower
-reference mass and adds inset backing at each detail level. Keep inputs
+reference mass and adds inset backing at each detail level. The approved v15
+revision adds real attached clump volume beside both mouth corners and beneath
+the lower lip, with painted relief rerooted on that volume. Keep inputs
 immutable and use a separate ignored stage:
 
 ```text
 python fit_attached_beard.py --source <original-full-beard.glb> --texture <original-full-beard.png> --out <stage/foundation.glb>
-python fit_attached_full_beard.py --source <original-full-beard.glb> --foundation <stage/foundation.glb> --texture <original-full-beard.png> --out <stage/full_beard-v4.glb>
+python fit_attached_full_beard.py --source <original-full-beard.glb> --foundation <stage/foundation.glb> --texture <original-full-beard.png> --out <stage/full_beard.glb>
 ```
 
 Use the matching `RL_HEADS_BUILD` and `RL_MPFB_GROUPS` authoring inputs.
-The retained `full_beard-v4` output basename preserves the embedded image name
+The retained `full_beard` output basename preserves the embedded image name
 for byte-identical reproduction. Safe input/output/tool hashes and attachment
 measurements are recorded in `pilot-provenance.json`.
 
@@ -189,5 +191,6 @@ processing; current hashes and repair limits are in `pilot-provenance.json`.
 `build_beard.py --surface` accepts a private NPZ surface stage without changing
 the original procedural route. No tool calls a generation service.
 
-Bram/human34 remains held outside the selectable records. The pre-existing
-shared full-beard asset is preserved while its separate draft is revised.
+Bram/human34 is qualified for explicit selection with the exact owner-approved
+v15 shared full beard. Its atlas and the existing head/body, equipment and
+headwear contracts are preserved. NPC assignments and Randomize are unchanged.

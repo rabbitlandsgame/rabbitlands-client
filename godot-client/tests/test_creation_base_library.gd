@@ -21,7 +21,7 @@ func _run() -> void:
 	var registry: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json"))
 	var before := JSON.stringify(registry)
 	var entries: Array[Dictionary] = LIBRARY.rows(registry)
-	check(entries.size() == 24, "All sixteen bodies, three studies and five qualified Humans are offered")
+	check(entries.size() == 25, "All sixteen bodies, three studies and six qualified Humans are offered")
 	var ids: Dictionary = {}
 	var native_types: Dictionary = {}
 	var human_names: Dictionary = {}
@@ -85,9 +85,9 @@ func _run() -> void:
 		and LIBRARY.find(entries, "native_luminous_male").label == "Alden", "Native Human bases have distinct names")
 	check(cornrows.label == "Amara" and afro.label == "Darian" and bearded.label == "Corin", "Qualified Human bases use their given names")
 	check(LIBRARY.HUMAN_NAMES.size() == 11 and LIBRARY.HUMAN_NAMES.human_08 == "Corin" \
-		and LIBRARY.HUMAN_NAMES.human_14 == "Nessa" and LIBRARY.HUMAN_NAMES.human_27 == "Elowen", "The central mapping reserves all six pilot names without adding bases")
-	check(LIBRARY.find(entries, "human_34").is_empty() and LIBRARY.HUMAN_NAMES.human_34 == "Bram", "Held Bram keeps his name reservation without a selectable base")
-	check(human_names.size() == 10, "Exactly ten Human starting looks are selectable")
+		and LIBRARY.HUMAN_NAMES.human_14 == "Nessa" and LIBRARY.HUMAN_NAMES.human_27 == "Elowen", "The central mapping retains all six qualified pilot names")
+	check(LIBRARY.find(entries, "human_34").label == "Bram" and LIBRARY.HUMAN_NAMES.human_34 == "Bram", "Approved Bram uses his reserved name as a selectable base")
+	check(human_names.size() == 11, "Exactly eleven Human starting looks are selectable")
 	check(LIBRARY.find(entries, "human_14").label == "Nessa" and LIBRARY.find(entries, "human_27").label == "Elowen", "Qualified female bases retain their names")
 	check(cornrows.sex == "female" and "Cornrows" in cornrows.hair_tags and not "Long braid" in cornrows.hair_tags, "Cornrows use their actual female module, not the fallback Long braid byte")
 	check(afro.sex == "male" and "Afro" in afro.hair_tags and "Curly" in afro.hair_tags and not "Parted" in afro.hair_tags, "Afro uses its actual male module, not the fallback Parted byte")

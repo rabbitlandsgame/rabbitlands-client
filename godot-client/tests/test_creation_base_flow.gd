@@ -168,6 +168,12 @@ func run() -> void:
 		payload["actor_type"] = 1
 		check(network.call("validate_creation_appearance", payload) == OK,
 			"Applied real form validates for negotiated protocol %d" % version)
+		flow.open(false)
+		await choose("human_34")
+		var bram_payload := appearance().duplicate(true)
+		bram_payload["actor_type"] = 1
+		check(network.call("validate_creation_appearance", bram_payload) == OK,
+			"Approved Bram applies through the real controller on PC/%d" % version)
 	flow.open(false)
 	flow.picker._select_card("human_08")
 	network.call("_set_appearance_protocol", 2)
