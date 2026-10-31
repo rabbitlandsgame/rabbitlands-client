@@ -3091,6 +3091,9 @@ func _on_walk_button_pressed() -> void:
 	_sync_hud_button_states(true)
 
 func _on_sit_button_pressed() -> void:
+	# A legacy keyboard stop is a MOVE_TO. Send it before the posture request
+	# so the next process frame cannot stand us back up on a stale client tile.
+	_stop_keyboard_movement()
 	var local_actor: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
 	var error: Error = Network.set_sitting(not bool(local_actor.get("sitting", false)))
 	if error != OK:
@@ -3101,12 +3104,12 @@ func _on_attack_button_pressed() -> void:
 	_attack_selected_actor()
 	_sync_hud_button_states(true)
 
-## Asks the server to describe the selected player. The window that opens is
-## the server's reply and nothing else: the client does not remember what it
-## asked about, because the reply names the actor itself.
+## Players retain their information window. A visible ordinary creature's
+## server-owned combat inspection appears in chat without arming an attack.
 func _on_look_button_pressed() -> void:
 	var actor_id: int = AppState.selected_actor_id
-	if not _is_tradeable_player(actor_id, AppState.actors.get(actor_id, {})):
+	var dto: Dictionary = AppState.actors.get(actor_id, {})
+	if not _is_tradeable_player(actor_id, dto) and not _can_inspect_creature(actor_id, dto):
 		return
 	var error: Error = Network.look_at_player(actor_id)
 	if error != OK:
@@ -3143,7 +3146,9 @@ func _available_world_actions_at(viewport_position: Vector2) -> Array[String]:
 	var actions: Array[String] = ["walk"]
 	var actor_id: int = _pick_actor(viewport_position)
 	if actor_id >= 0:
-		if actor_id == AppState.local_actor_id and _ground_bag_below_player() >= 0:
+		if _deliberate_ground_bag_at(viewport_position, actor_id, false, "pick") >= 0 \
+				or (actor_id == AppState.local_actor_id and AppState.pending_spell_target != "actor"
+					and _ground_bag_below_player() >= 0):
 			actions.append("pick")
 		var dto: Dictionary = AppState.actors.get(actor_id, {})
 		for action: String in MouseCursors.WORLD_ACTIONS:
@@ -3158,6 +3163,18 @@ func _available_world_actions_at(viewport_position: Vector2) -> Array[String]:
 		actions.append("harvest" if map_object.is_harvestable() else "use")
 		actions.append("look")
 	return actions
+
+## Pick explicitly reaches the bag's own ray layer through an overlapping
+## body. Default combat clicks and armed actor actions retain their priority.
+func _deliberate_ground_bag_at(viewport_position: Vector2, actor_id: int,
+		alt_pressed: bool, mode := "") -> int:
+	if mode.is_empty(): mode = _interaction_mode
+	if mode != "pick" or alt_pressed or _carried_slot >= 0 \
+			or not AppState.pending_spell_target.is_empty() or not Network.magic_pending.is_empty():
+		return -1
+	if actor_id >= 0 and techniques_panel != null and not str(techniques_panel.get("pending_key")).is_empty():
+		return -1
+	return _pick_ground_bag(viewport_position)
 
 func _cycle_world_action(viewport_position: Vector2) -> void:
 	var actions: Array[String] = _available_world_actions_at(viewport_position)
@@ -5176,11 +5193,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed("toggle_sit"):
-		var local_actor: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
-		var wants_to_sit: bool = not bool(local_actor.get("sitting", false))
-		var sit_error: Error = Network.set_sitting(wants_to_sit)
-		if sit_error != OK:
-			push_warning("SIT_DOWN failed: " + error_string(sit_error))
+		_on_sit_button_pressed()
 		get_viewport().set_input_as_handled()
 		return
 
@@ -6161,6 +6174,10 @@ func _handle_world_click(event: InputEventMouseButton, viewport_position: Vector
 		# clicked next, the way a pending spell takes its target.
 		if techniques_panel != null and bool(techniques_panel.call("fire_at", picked_actor_id)):
 			AppState.select_actor(picked_actor_id)
+			return
+		var deliberate_bag := _deliberate_ground_bag_at(viewport_position, picked_actor_id, event.alt_pressed)
+		if deliberate_bag >= 0:
+			_open_ground_bag(deliberate_bag)
 			return
 		# A bag at your own feet outranks your own body: you are not a click
 		# target for yourself, so the click opens the sack you are standing
@@ -8835,6 +8852,15 @@ func _place_ground_bag_on_surface(bag: GroundBag3D) -> void:
 		bag.set_surface_height(adapter.walking_height)
 
 func _sync_ground_bag() -> void:
+	if _ground_bag_get_all_requested_msec >= 0 \
+			and int(AppState.ground_bag.get("bag_id", -1)) != _ground_bag_get_all_bag_id:
+		# CLOSE_BAG and DESTROY_BAG clear the reducer's bag identity even
+		# before an inspection opens. Retire its one-shot Get All intent too;
+		# a later reuse of the same wire ID must not inherit that request.
+		_ground_bag_get_all_requested_msec = -1
+		_ground_bag_get_all_bag_id = -1
+		if inventory_description.text == "Opening the ground bag below you…":
+			inventory_description.text = "Ground bag request cancelled."
 	var is_open: bool = bool(AppState.ground_bag.get("open", false))
 	ground_bag_panel.visible = is_open
 	if not is_open:
@@ -16838,9 +16864,10 @@ func _sync_selection() -> void:
 	attack_button.tooltip_text = ("Attack selected target [A] or Alt-click; the server approaches and validates combat"
 		if can_attack else "Select a living player or creature to attack")
 	var can_trade: bool = _is_tradeable_player(AppState.selected_actor_id, dto)
-	look_button.disabled = not can_trade
-	look_button.tooltip_text = ("Ask the server to describe the selected player"
-		if can_trade else "Select a player to look at")
+	var inspect_creature := _can_inspect_creature(AppState.selected_actor_id, dto)
+	look_button.disabled = not (can_trade or inspect_creature)
+	look_button.tooltip_text = ("Inspect the selected creature's live strength in chat" if inspect_creature \
+		else "Ask the server to describe the selected player" if can_trade else "Select a living player or creature to inspect")
 	# Never disabled: with nobody selected it arms trade mode instead.
 	trade_button.tooltip_text = ("Request or accept trade with the selected player; both players must be within four tiles"
 		if can_trade else "Arm trade, then click a player to request or accept a trade; both players must be within four tiles")
@@ -16878,7 +16905,7 @@ func _actor_click_action(actor_id: int, dto: Dictionary,
 	# included; every other action here is about somebody else.
 	if AppState.pending_spell_target == "actor":
 		return "spell"
-	if mode == "look" and int(dto.get("kind", 0)) in [1, 4] \
+	if mode == "look" and (int(dto.get("kind", 0)) in [1, 4] or _can_inspect_creature(actor_id, dto)) \
 			and not alt_pressed:
 		return "look"
 	if actor_id == AppState.local_actor_id:
@@ -16908,6 +16935,10 @@ func _actor_click_action(actor_id: int, dto: Dictionary,
 ## both halves of the promise draw the line in the same place.
 func _is_creature_actor(dto: Dictionary) -> bool:
 	return int(dto.get("kind", 0)) in [3, 5]
+
+func _can_inspect_creature(actor_id: int, dto: Dictionary) -> bool:
+	return _is_creature_actor(dto) and _is_attackable_actor(actor_id, dto) \
+		and int(dto.get("health", 1)) > 0 and not ReplicatedActor3D.is_summon(dto)
 
 func _is_tutorial_companion(actor_id: int) -> bool:
 	var tutorial: Dictionary = AppState.lantern_tutorial
@@ -18200,10 +18231,13 @@ func _cursor_context_at(viewport_position: Vector2) -> Dictionary:
 		"alt": _alt_attack_preview,
 		"spell_target": AppState.pending_spell_target,
 	}
-	# The same ray order the click handler resolves in: actors win over bags,
-	# bags over world objects, so the pointer promises what the click does.
+	# Actors normally win over bags. Explicit Pick reaches the bag's own layer,
+	# using the same predicate as cycling and click dispatch.
 	var actor_id: int = _pick_actor(viewport_position)
 	if actor_id >= 0:
+		if _deliberate_ground_bag_at(viewport_position, actor_id, _alt_attack_preview) >= 0:
+			context["target"] = "bag"
+			return context
 		var dto: Dictionary = AppState.actors.get(actor_id, {})
 		var kind: int = int(dto.get("kind", 0))
 		if actor_id == AppState.local_actor_id:

@@ -2,13 +2,6 @@ extends SceneTree
 ## Exercise production input routing and command encoding with deterministic
 ## pick results and a recording transport, without maps or a live server.
 
-class RecordingNetwork extends "res://src/network/network_client.gd":
-	var frames: Array[PackedByteArray] = []
-
-	func send_frame(frame: PackedByteArray, _sensitive := false) -> Error:
-		frames.append(frame)
-		return OK
-
 var failures := 0
 var main: Control
 var state: Node
@@ -19,6 +12,11 @@ func _init() -> void:
 
 func _run() -> void:
 	root.size = Vector2i(1280, 720)
+	network = root.get_node("Network")
+	network.block_for_hud_preview()
+	network.set_script(load("res://tests/fixtures/viewport_actions_network.gd"))
+	network.block_for_hud_preview()
+	network.set_process(false)
 	main = (load("res://src/app/main.tscn") as PackedScene).instantiate() as Control
 	main.set_script(load("res://tests/fixtures/viewport_actions_main.gd"))
 	root.add_child(main)
@@ -27,9 +25,6 @@ func _run() -> void:
 	(main.get("game_view") as Control).show()
 	(main.get("login_panel") as Control).hide()
 	state = root.get_node("AppState")
-	network = root.get_node("Network")
-	network.set_script(RecordingNetwork)
-	network.set_process(false)
 	state.set("local_actor_id", 1)
 	state.set("actors", {
 		1: {"actor_id": 1, "kind": 1, "alive": true},
@@ -43,6 +38,9 @@ func _run() -> void:
 	main.set("picked_actor", 2)
 	_check_cycle()
 	_check_actions()
+	_check_covered_bag()
+	_check_get_all_cancellation()
+	_check_creature_inspection()
 	_check_camera()
 	main.queue_free()
 	await process_frame
@@ -58,6 +56,34 @@ func _mouse(button: MouseButton, pressed := true,
 	main.call("_on_world_gui_input", event)
 	return event
 
+func _check_creature_inspection() -> void:
+	state.set("selected_actor_id", 4)
+	main.call("_sync_selection")
+	_expect(not main.look_button.disabled and main.look_button.tooltip_text.contains("live strength"),
+		"Look exposes ordinary living creature strength through the selected target control")
+	main.call("_on_look_button_pressed")
+	_expect_frame(EloriaProtocol.look_at_player(4), "creature Look uses the existing server inspection request")
+	main.set("picked_actor", 4)
+	main.set("_interaction_mode", "look")
+	_mouse(MOUSE_BUTTON_LEFT)
+	_expect_frame(EloriaProtocol.look_at_player(4), "Look mode inspects a creature under the pointer without attacking")
+	(state.get("actors") as Dictionary)[4]["health"] = 0
+	main.call("_sync_selection")
+	_expect(main.look_button.disabled, "a zero-health creature is unavailable even before its death flag arrives")
+	main.call("_on_look_button_pressed")
+	_expect((network.get("frames") as Array).is_empty(), "zero-health inspection sends no request")
+	(state.get("actors") as Dictionary)[4].erase("health")
+	for actor_id: int in [3, 5, 7, 8]:
+		state.set("selected_actor_id", actor_id)
+		main.call("_sync_selection")
+		_expect(main.look_button.disabled, "Look excludes NPC, summon, dead and unknown creature kinds")
+		main.call("_on_look_button_pressed")
+		_expect((network.get("frames") as Array).is_empty(), "an unavailable creature inspection sends no request")
+	state.set("selected_actor_id", 2)
+	main.call("_sync_selection")
+	main.call("_on_look_button_pressed")
+	_expect_frame(EloriaProtocol.look_at_player(2), "selected-player inspection retains its existing request")
+
 func _check_cycle() -> void:
 	# Selection elsewhere must not determine what is available under the mouse.
 	state.set("selected_actor_id", 3)
@@ -65,7 +91,7 @@ func _check_cycle() -> void:
 	main.set("picked_actor", 3)
 	_check_cycle_case("NPC", ["walk", "talk"])
 	main.set("picked_actor", 4)
-	_check_cycle_case("creature", ["walk", "attack"])
+	_check_cycle_case("creature", ["walk", "attack", "look"])
 	main.set("picked_actor", 5)
 	_check_cycle_case("summon", ["walk", "attack", "talk"])
 	main.set("picked_actor", 6)
@@ -210,6 +236,98 @@ func _check_actions() -> void:
 		_mouse(MOUSE_BUTTON_LEFT)
 		_expect((network.get("frames") as Array).is_empty(), "%s cannot move on a missed target" % mode)
 	object.free()
+
+func _check_covered_bag() -> void:
+	main.set("picked_bag", 9)
+	for actor_id: int in [2, 4]:
+		main.set("picked_actor", actor_id)
+		_expect("pick" in main.call("_available_world_actions_at", Vector2(640,360)),
+			"Pick remains available over a player or creature covering the bag")
+		main.set("_interaction_mode", "pick")
+		var context: Dictionary = main.call("_cursor_context_at", Vector2(640,360))
+		_expect(context.get("target") == "bag" and MouseCursors.choose(context) == MouseCursors.PICK,
+			"deliberate Pick promises the bag through an overlapping body")
+		_mouse(MOUSE_BUTTON_LEFT)
+		_expect_frame(EloriaProtocol.inspect_bag(9), "deliberate Pick requests the covered bag through the normal server path")
+		state.call("close_ground_bag")
+	main.set("picked_actor", 4)
+	main.set("_interaction_mode", "walk")
+	_mouse(MOUSE_BUTTON_LEFT)
+	_expect_frame(EloriaProtocol.attack_actor(4), "ordinary creature clicks still attack instead of recovering a covered bag")
+	main.set("_interaction_mode", "pick")
+	var alt_click := InputEventMouseButton.new()
+	alt_click.button_index = MOUSE_BUTTON_LEFT
+	alt_click.pressed = true
+	alt_click.alt_pressed = true
+	main.call("_handle_world_click", alt_click, Vector2(640,360))
+	_expect_frame(EloriaProtocol.attack_actor(4), "Alt retains deliberate attack priority over covered-bag Pick")
+	state.set("pending_spell_target", "actor")
+	_expect("pick" not in main.call("_available_world_actions_at", Vector2(640,360)),
+		"an armed actor spell does not offer the covered bag as Pick")
+	var context: Dictionary = main.call("_cursor_context_at", Vector2(640,360))
+	_expect(context.get("target") == "creature" and MouseCursors.choose(context) == MouseCursors.WAND,
+		"the armed actor spell keeps its target cursor")
+	_mouse(MOUSE_BUTTON_LEFT)
+	_expect((network.get("frames") as Array).is_empty(), "an actor spell never falls through to a bag request")
+	main.set("picked_actor", 1)
+	state.set("ground_bags", {9:{"x":10,"y":20}})
+	_expect("pick" not in main.call("_available_world_actions_at", Vector2(640,360)),
+		"a self-targeted spell does not offer Pick from the own-feet bag fallback")
+	context = main.call("_cursor_context_at", Vector2(640,360))
+	_expect(context.get("target") == "self" and MouseCursors.choose(context) == MouseCursors.WAND,
+		"a self-targeted spell keeps its cursor above the bag at the player's feet")
+	state.set("pending_spell_target", "")
+	main.set("picked_actor", 4)
+	var panel: Control = main.get("techniques_panel")
+	var sender: Callable = panel.get("request_sender")
+	var requests: Array[Dictionary] = []
+	panel.set("request_sender", func(request: Dictionary) -> void: requests.append(request))
+	panel.set("pending_key", "cleave")
+	_expect("pick" not in main.call("_available_world_actions_at", Vector2(640,360)),
+		"an armed technique retains the actor instead of offering covered-bag Pick")
+	_mouse(MOUSE_BUTTON_LEFT)
+	_expect(requests.size() == 1 and int(requests[0].get("target_id", -1)) == 4
+		and (network.get("frames") as Array).is_empty(), "the armed technique receives its target without inspecting the bag")
+	main.set("picked_actor", 1)
+	panel.set("pending_key", "cleave")
+	_expect("pick" in main.call("_available_world_actions_at", Vector2(640,360)),
+		"a creature technique that cannot target self preserves the own-feet bag action")
+	_mouse(MOUSE_BUTTON_LEFT)
+	_expect_frame(EloriaProtocol.inspect_bag(9), "the own-feet bag still opens when an armed technique cannot claim self")
+	_expect(requests.size() == 1, "self bag inspection does not spend the armed creature technique")
+	panel.set("request_sender", sender)
+	panel.call("cancel_pending")
+	state.call("close_ground_bag")
+	state.set("ground_bags", {})
+	main.set("picked_bag", -1)
+	main.set("picked_actor", 2)
+	main.set("_interaction_mode", "walk")
+
+func _check_get_all_cancellation() -> void:
+	for command: int in [EloriaProtocol.ServerMessage.CLOSE_BAG, EloriaProtocol.ServerMessage.DESTROY_BAG]:
+		state.call("close_ground_bag")
+		state.set("ground_bags", {9:{"x":10,"y":20}})
+		main.call("_on_inventory_get_all_pressed")
+		_expect_frame(EloriaProtocol.inspect_bag(9), "Get All inspects its own-feet bag before requesting contents")
+		main.call("_sync_ground_bag")
+		_expect(int(main.get("_ground_bag_get_all_requested_msec")) >= 0,
+			"a current in-flight inspection keeps its one-shot Get All intent")
+		var payload := PackedByteArray([9]) if command == EloriaProtocol.ServerMessage.DESTROY_BAG else PackedByteArray()
+		state.call("_on_packet", command, payload)
+		main.call("_sync_ground_bag")
+		_expect(int(main.get("_ground_bag_get_all_requested_msec")) == -1
+			and int(main.get("_ground_bag_get_all_bag_id")) == -1
+			and not main.inventory_description.text.contains("Opening the ground bag"),
+			"closing or destroying an unopened bag retires Get All and its opening feedback")
+		# A later bag using the same wire ID can open normally, with no stale
+		# Pick Up frames from the cancelled earlier Get All request.
+		state.call("begin_ground_bag_inspection", 9)
+		state.call("_on_packet", EloriaProtocol.ServerMessage.HERE_YOUR_GROUND_ITEMS,
+			PackedByteArray([1,1,0,3,0,0,0,0]))
+		main.call("_sync_ground_bag")
+		_expect((network.get("frames") as Array).is_empty(), "a same-ID reopen cannot inherit a cancelled Get All")
+	state.call("close_ground_bag")
+	state.set("ground_bags", {})
 
 func _check_camera() -> void:
 	var rig: IsometricCameraController = main.get("camera_rig") as IsometricCameraController

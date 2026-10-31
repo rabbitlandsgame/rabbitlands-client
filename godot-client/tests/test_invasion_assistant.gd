@@ -43,6 +43,18 @@ func _run() -> void:
 			"health": 150, "max_health": 180, "tier": "Formidable", "boss": true}]})
 	_expect(assistant.map_canvas.state.players.size() == 1, "player marker populates")
 	_expect(assistant.map_canvas.state.creatures[0].boss, "boss marker populates")
+	var live_threat := {"name": "Mighty Cinder Maw", "x": 75, "y": 88, "boss": true,
+		"health": 300, "max_health": 360, "native_level": 10, "combat_level": 120,
+		"attack": 80, "defense": 40, "damage_min": 12, "damage_max": 24,
+		"strength_bonus": 100, "level_scale": 1.0, "tier": "Elite", "rating": 190}
+	assistant.map_state["creatures"] = [live_threat]
+	assistant._rebuild_roster()
+	_expect(assistant.map_roster.text.contains("Mighty Cinder Maw")
+		and assistant.map_roster.text.contains("Live Elite · rating 190 · combat level 120")
+		and assistant.map_roster.text.contains("Native level 10 · Attack / Defense 80 / 40"),
+		"live encounter inspection exposes the named boss and rolled strength separately from native level")
+	_expect(assistant.map_roster.text.contains("not recommended player levels"),
+		"the broad strength estimate is not presented as a recommended player level")
 	_expect(not assistant.teleport_button.disabled, "teleport enables for a loaded map")
 	var long_named: Dictionary = assistant.map_state.duplicate(true)
 	long_named["locations"] = [{"name": ("The Drowned Arcades: The Campanile Stair "
@@ -167,12 +179,19 @@ func _run() -> void:
 	large_group["active"] = true
 	large_group["alive"] = 300
 	large_group["queued"] = 620
+	large_group["boss_details"] = {"name": "The Cinder Maw", "native_level": 10, "rating": 95}
+	large_group["live_boss"] = live_threat
 	assistant.apply_update({"kind": "groups", "groups": [large_group]})
 	assistant._on_group_selected(0)
 	_expect(assistant.group_minimum.value == 600 and assistant.group_maximum.value == 920,
 		"large wave counts are not clamped to the old 500 limit")
 	_expect(assistant.group_detail.text.contains("300 alive · 620 queued"),
 		"the group distinguishes living creatures from queued reinforcements")
+	_expect(assistant.group_detail.text.contains("Strongest base species rating")
+		and assistant.group_detail.text.contains("Declared boss")
+		and assistant.group_detail.text.contains("Base rating 95")
+		and assistant.group_detail.text.contains("Live Elite · rating 190"),
+		"selected group inspection distinguishes declared native strength from its live rolled boss")
 	assistant._save_group()
 	_expect(commands[-1].contains("|600|920|"),
 		"saving a duplicated large wave preserves both population endpoints")
@@ -331,15 +350,22 @@ func _check_refresh_protocol(assistant, commands: Array[String]) -> void:
 	assistant.group_description.text = "Keep this draft"
 	assistant.group_description.text_changed.emit("Keep this draft")
 	assistant.apply_update({"kind": "group_status", "revision": "r1", "groups": [{"name": group.name,
-		"active": true, "alive": 7, "queued": 3, "movement": {"anchor": {"x": 42, "y": 43}, "radius": 8, "region": null}}]})
+		"active": true, "alive": 7, "queued": 3,
+		"live_boss": {"name": "Newly rolled boss", "native_level": 10, "rating": 190, "tier": "Elite"},
+		"movement": {"anchor": {"x": 42, "y": 43}, "radius": 8, "region": null}}]})
 	_expect(assistant.selected_group.alive == 7 and assistant.selected_group.queued == 3, "status updates living and queued counts")
 	_expect(assistant.selected_group.movement.anchor.x == 42, "status updates active movement")
 	_expect(assistant.group_description.text == "Keep this draft", "status retains unsaved settings")
+	_expect(assistant.selected_group.live_boss.name == "Newly rolled boss"
+		and assistant.group_detail.text.contains("Live boss"),
+		"lightweight status refreshes the current rolled boss without discarding the edited group")
 	assistant.group_filter.text = "no matching group"
 	assistant._rebuild_groups()
 	assistant.apply_update({"kind": "group_status", "revision": "r1", "groups": [{"name": group.name,
 		"active": true, "alive": 6, "queued": 2, "movement": {"anchor": {"x": 42, "y": 43}, "radius": 8, "region": null}}]})
 	_expect(assistant.selected_group.alive == 6, "selected details stay live while the group is filtered out")
+	_expect(assistant.selected_group.live_boss.is_empty() and not assistant.group_detail.text.contains("Live boss"),
+		"a missing live boss in the complete status set removes stale rolled strength")
 	assistant.group_filter.text = ""
 	assistant._rebuild_groups()
 	assistant.apply_update({"kind": "group_status", "revision": "r1", "groups": []})
