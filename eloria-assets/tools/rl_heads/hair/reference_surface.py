@@ -100,14 +100,19 @@ def roots(head,scalp,P):
     Q,N=scalp.point(lon,lat,0)
     return Q,N
 
-def neutralize(head, P, fit,scalp):
+def neutralize(head, P, fit,scalp,exact=True):
+    """Reverse fitted identity motion; exact=False omits forward clearance.
+
+    The historical default retains its original replay. New reference fits
+    can opt out of subtracting a nearest-surface projection from the source.
+    """
     Q,_=roots(head,scalp,P)
     bind=assemble.Binding(head,P,Q,follow=.015,fade=.025,stretch=.5)
     D=np.zeros_like(head.P)
     for name,value in fit['controls'].items():
         key='id_'+name+('_p' if value>=0 else '_n')
         if key in head.id_names():D+=abs(value)*head.delta(key)
-    return P-bind.delta(D,keep_clear=False)
+    return P-bind.delta(D,keep_clear=False,exact=exact)
 
 def fine_cards(path,lod):
     if not path:return None

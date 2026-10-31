@@ -253,7 +253,11 @@ def prepare(args,head_fit=None):
     src=Path(args.source);out=Path(args.stage);assert not out.exists();out.mkdir(parents=True)
     spec=profile(args.profile);fit=profile(args.fit);sex=args.sex or fit['sex']
     source_head=BoundedHead(fit['sex']);source_scalp=hairgen.Scalp(source_head,spec.get('hairline'))
-    a=np.load(src/'extracted.npz');P=ref.neutralize(source_head,a['P'],fit,source_scalp);N=a['N'].copy()
+    identity_only=spec.get('neutralize_identity_only',False)
+    if type(identity_only) is not bool:raise ValueError('neutralize_identity_only must be a boolean')
+    a=np.load(src/'extracted.npz')
+    P=ref.neutralize(source_head,a['P'],fit,source_scalp,exact=False) if identity_only else ref.neutralize(source_head,a['P'],fit,source_scalp)
+    N=a['N'].copy()
     if sex!=fit['sex']:
         target_head=BoundedHead(sex);target_scalp=hairgen.Scalp(target_head,spec.get('hairline'))
         Q,_=ref.roots(source_head,source_scalp,P)
