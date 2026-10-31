@@ -2,6 +2,7 @@ shader_type spatial;
 render_mode cull_disabled, diffuse_burley, specular_schlick_ggx;
 
 #include "res://src/actors/stubble_pigment.gdshaderinc"
+#include "res://src/actors/shirt_neckline.gdshaderinc"
 
 uniform sampler2D base_texture : source_color, filter_linear_mipmap, repeat_enable;
 uniform sampler2D region_texture : filter_linear_mipmap, repeat_enable;
@@ -32,7 +33,12 @@ uniform vec4 portrait_eye_centers = vec4(-0.035, 0.079, 0.032, 0.079);
 uniform vec2 portrait_iris_radii = vec2(0.007, 0.007);
 uniform vec4 portrait_bounds = vec4(-0.105, 0.105, -0.075, 0.205);
 
+void vertex() {
+	neck_rest_position = CUSTOM0.xyz;
+}
+
 void fragment() {
+	if (smooth_shirt_neckline && below_shirt_neckline(neck_rest_position)) { discard; }
 	// COLOR.g marks vertices whose High sculpt supplies an outward normal.
 	// A few near-degenerate source cuts can reverse in screen space; undo
 	// Godot's back-face normal flip only for that authored normal field.

@@ -1,5 +1,6 @@
 class_name RLHeadBodyCut
 extends RefCounted
+const REST_COORDS := preload("res://src/actors/mesh_rest_coordinates.gd")
 ## Takes the body's own head off a luminous body wearing an RL head.
 ##
 ## The head module brings the face, the cranium and the neck down to a rim; the
@@ -342,7 +343,7 @@ static func _cut(source: Mesh, plan: Dictionary) -> ArrayMesh:
 		arrays[Mesh.ARRAY_INDEX] = kept
 		result.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays,
 			source.surface_get_blend_shape_arrays(surface), lods,
-			source.surface_get_format(surface) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
+			REST_COORDS.surface_flags(source.surface_get_format(surface)))
 		result.surface_set_material(surface, source.surface_get_material(surface))
 	result.resource_name = source.resource_name + " (RL head cut)"
 	return result

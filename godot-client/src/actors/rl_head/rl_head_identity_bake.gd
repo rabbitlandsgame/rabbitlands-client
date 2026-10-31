@@ -558,6 +558,9 @@ static func _surface_bytes(arrays: Array, kept: int, lods: Dictionary) -> int:
 	for slot: int in [Mesh.ARRAY_TEX_UV, Mesh.ARRAY_TEX_UV2, Mesh.ARRAY_COLOR]:
 		if arrays[slot] != null:
 			attributes += 8 if slot != Mesh.ARRAY_COLOR else 4
+	for slot: int in [Mesh.ARRAY_CUSTOM0, Mesh.ARRAY_CUSTOM1, Mesh.ARRAY_CUSTOM2, Mesh.ARRAY_CUSTOM3]:
+		if arrays[slot] != null and count > 0:
+			attributes += arrays[slot].to_byte_array().size() / count
 	return count * (20 * (1 + kept) + 16 + attributes) + index_count * 2
 
 

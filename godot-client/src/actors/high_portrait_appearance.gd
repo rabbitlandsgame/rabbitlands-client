@@ -3,6 +3,7 @@ extends RefCounted
 ## Optional Human portrait artwork. Low/Medium return before loading any High
 ## image or creating a derivative mesh. High refines only the front head;
 ## canonical skin bindings, UV1 and every lower-tier resource stay exact.
+const REST_COORDS := preload("res://src/actors/mesh_rest_coordinates.gd")
 const HIGH := 2
 const SHADER := preload("res://src/actors/high_portrait_appearance.gdshader")
 const COMPACTOR := preload("res://src/actors/character_proportions.gd")
@@ -312,7 +313,7 @@ static func _project_mesh(source: Mesh, to_head: Transform3D, projection: Dictio
 				_relax_alar_surface(arrays, to_head, bundle)
 				_orient_authored_triangles(arrays, lods)
 		result.add_surface_from_arrays(source.surface_get_primitive_type(surface), arrays, blends, lods,
-			source.surface_get_format(surface) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
+			REST_COORDS.surface_flags(source.surface_get_format(surface)))
 		result.surface_set_material(surface, source.surface_get_material(surface))
 		result.surface_set_name(surface, source.surface_get_name(surface))
 	return result
@@ -521,7 +522,7 @@ static func _shape_mesh(source: Mesh, to_head: Transform3D, frame: Dictionary, s
 		_orient_authored_triangles(arrays, lods)
 		result.add_surface_from_arrays(source.surface_get_primitive_type(surface), arrays,
 			source.surface_get_blend_shape_arrays(surface), lods,
-			source.surface_get_format(surface) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
+			REST_COORDS.surface_flags(source.surface_get_format(surface)))
 		result.surface_set_material(surface, source.surface_get_material(surface))
 		result.surface_set_name(surface, source.surface_get_name(surface))
 	return result
@@ -655,7 +656,7 @@ static func _append_midpoint(arrays: Array, a: int, b: int) -> void:
 		if values is PackedVector3Array or values is PackedVector2Array or values is PackedColorArray:
 			values.append(values[a].lerp(values[b], 0.5))
 		elif values is PackedFloat32Array:
-			var width := 4 if attribute == Mesh.ARRAY_TANGENT else 1
+			var width: int = values.size() / ((arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size() - 1)
 			for component: int in width:
 				values.append((values[a * width + component] + values[b * width + component]) * 0.5)
 		arrays[attribute] = values

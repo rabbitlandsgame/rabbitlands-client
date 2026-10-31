@@ -30,6 +30,7 @@ extends RefCounted
 ## files, the body cuts, the headwear refits and the baked identities, as
 ## develop's own High portrait releases its caches with its last user.
 
+const REST_COORDS := preload("res://src/actors/mesh_rest_coordinates.gd")
 const ROOT := "res://assets/actors/native/rl_heads/"
 const HAIR_DIR := ROOT + "hair/"
 const BEARD_DIR := ROOT + "beards/"
@@ -709,9 +710,15 @@ static func _skinned_lods(path: String, base_name: String) -> Array:
 				bones.append(bone_name)
 				binds.append(source.skin.get_bind_pose(bind))
 		var level := lod_level(str(source.name))
+		# The female body's shared face shader clips its repaired shirt opening.
+		# Its copied body patch needs the same unskinned coordinates, before any
+		# identity bake; the existing head cache owns this one derived mesh.
+		var mesh := source.mesh
+		if base_name == "rl_head" and path.get_file() == "rl_head_female.glb":
+			mesh = REST_COORDS.for_material(mesh, BODY_PATCH_MATERIAL)
 		if not by_level.has(level):
 			by_level[level] = []
-		(by_level[level] as Array).append({"name": str(source.name), "mesh": source.mesh,
+		(by_level[level] as Array).append({"name": str(source.name), "mesh": mesh,
 			"bones": bones, "binds": binds, "level": level,
 			"head_bind": bones.find("Head")})
 	imported.free()

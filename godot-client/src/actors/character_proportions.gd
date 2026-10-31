@@ -3,6 +3,7 @@ extends RefCounted
 ## Cosmetic body scale lives on the complete visual hierarchy: body, rig,
 ## garments, sockets, hair and cloth receive the same affine transform. No
 ## gameplay dimensions or authored meshes on disk are changed.
+const REST_COORDS := preload("res://src/actors/mesh_rest_coordinates.gd")
 const CACHE_LIMIT := 48
 const FACE_FIELDS := ["jaw", "cheekbones", "nose", "face_length", "eye_size", "eye_tilt",
 	"eye_spacing", "nose_width", "lip_fullness", "brow_depth"]
@@ -284,7 +285,7 @@ static func fit(source: Mesh, to_head: Transform3D, frame: Dictionary, shape: Va
 		if finish_normals and not face_is_neutral(shape):
 			_finish_face_normals(arrays, to_head, frame)
 		result.add_surface_from_arrays(source.surface_get_primitive_type(surface), arrays, blends, lods,
-			source.surface_get_format(surface) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
+			REST_COORDS.surface_flags(source.surface_get_format(surface)))
 		result.surface_set_material(surface, source.surface_get_material(surface))
 		result.surface_set_name(surface, source.surface_get_name(surface))
 	return result
@@ -432,11 +433,13 @@ static func apply_body_refinement(root: Node3D, skeleton: Skeleton3D, config: Di
 		var binding := body_binding(instance.skin, skeleton, to_rig)
 		if binding.is_empty():
 			continue
-		var key := "%s|%s|%s" % [source.get_instance_id(), frame.sex, var_to_bytes([to_rig, binding.rests]).hex_encode()]
+		var rest_coordinates := str(frame.sex) == "female" and instance.name == &"body" \
+			and bool(root.get_meta(&"female_shirt_neckline", false))
+		var key := "%s|%s|%s|%s" % [source.get_instance_id(), frame.sex, var_to_bytes([to_rig, binding.rests]).hex_encode(), rest_coordinates]
 		if _body_unchanged.has(key):
 			continue
 		if not _body_meshes.has(key):
-			var candidate := fit_body_mesh(source, binding, frame)
+			var candidate := fit_body_mesh(source, binding, frame, rest_coordinates)
 			if candidate == source:
 				if _body_unchanged.size() >= BODY_CACHE_LIMIT:
 					_body_unchanged.erase(_body_unchanged.keys()[0])
@@ -667,7 +670,7 @@ static func _body_target(point: Vector3, normal: Vector3, tangent: Vector3,
 		next_tangent = (next_tangent - next_normal * next_tangent.dot(next_normal)).normalized()
 	return [inverse * (rest_point + (sample[0] as Vector3)), next_normal, next_tangent, true]
 
-static func fit_body_mesh(source: Mesh, binding: Dictionary, frame: Dictionary) -> Mesh:
+static func fit_body_mesh(source: Mesh, binding: Dictionary, frame: Dictionary, rest_coordinates: bool = false) -> Mesh:
 	var result := ArrayMesh.new()
 	result.resource_name = source.resource_name + " Human Body Refinement"
 	for shape: int in range(source.get_blend_shape_count()):
@@ -681,6 +684,8 @@ static func fit_body_mesh(source: Mesh, binding: Dictionary, frame: Dictionary) 
 		var shapes := source.surface_get_blend_shape_arrays(surface)
 		var lods := LODS._surface_lods(source, surface)
 		compact(arrays, shapes, lods)
+		if rest_coordinates:
+			REST_COORDS.add(arrays)
 		var original := arrays.duplicate(true)
 		var points: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 		var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
@@ -733,7 +738,7 @@ static func fit_body_mesh(source: Mesh, binding: Dictionary, frame: Dictionary) 
 		if not tangents.is_empty():
 			arrays[Mesh.ARRAY_TANGENT] = tangents
 		result.add_surface_from_arrays(source.surface_get_primitive_type(surface), arrays, shapes, lods,
-			source.surface_get_format(surface) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
+			REST_COORDS.with_rest(source.surface_get_format(surface)) if rest_coordinates else REST_COORDS.surface_flags(source.surface_get_format(surface)))
 		result.surface_set_material(surface, source.surface_get_material(surface))
 		result.surface_set_name(surface, source.surface_get_name(surface))
-	return result if any_moved else source
+	return result if any_moved or rest_coordinates else source
