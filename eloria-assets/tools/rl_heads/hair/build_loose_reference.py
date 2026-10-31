@@ -441,20 +441,27 @@ def all_parts(stage,head,scalp,spec,lod):
     assert np.abs(np.linalg.norm(N,axis=1)-1).max()<1e-6,'Invalid normals before expensive morph work'
     return P,N,np.vstack(uv),T,np.vstack(colours),ranges,backing_info|{'fine_cards':cards['fine'],'messy_cards':cards['messy'],'exterior_triangles':len(exterior['T']),'backing_triangles':len(BT),'detail_triangles':len(cards['T'])}
 
+def preserve_prepared_exterior(spec):
+    value=spec.get('preserve_prepared_exterior',False)
+    if type(value) is not bool:raise ValueError('preserve_prepared_exterior must be a boolean')
+    return value
+
+
 def groom_fields(head,scalp,P,names,spec,hull,ranges,triangles=None):
+    locked=preserve_prepared_exterior(spec);baseline=P.copy() if locked else None
     Q,normal=ref.roots(head,scalp,P);binding=assemble.Binding(head,P,Q,follow=.015,fade=.025,stretch=.5,no_ears=True)
     head_margin,body_margin=layer_margins(P,ranges,spec)
     shell=slice(*ranges['shell']);cap_binding=head.bind(P[shell],no_ears=True)
     delta={};radial=bool(spec.get('preserve_curtain_depth',False))
     for name in names:
-        Dh=head.delta(name);D=binding.delta(Dh,margin=.0028)
+        Dh=head.delta(name);D=binding.delta(Dh,keep_clear=False,exact=False) if locked else binding.delta(Dh,margin=.0028)
         D[shell]=head.bound_delta(cap_binding,Dh)
         mesh=trimesh.Trimesh(head.P+Dh,head.T,process=False)
         moving=np.linalg.norm(Dh,axis=1)>1e-5
         near=np.flatnonzero(np.isfinite(cKDTree(head.P[moving]).query(P,distance_upper_bound=np.linalg.norm(Dh,axis=1).max()+.04)[0])) if moving.any() else np.array([],int)
         # Ear-side tangents can defeat the scalp-bound normal; use actual
         # morphed surface normals for the final small attachment correction.
-        for _ in range(5):
+        for _ in range(0 if locked else 5):
             if not len(near):break
             sd,cp,n,rim=head.signed(P[near]+D[near],D=Dh,mesh=mesh,with_rim=True)
             bad=(sd<head_margin[near])&~rim
@@ -464,7 +471,7 @@ def groom_fields(head,scalp,P,names,spec,hull,ranges,triangles=None):
     # Reserve only the near-head neighborhood for stacked identity envelopes.
     # Keep the dense original extraction/LOD stages unchanged during repairs.
     near=np.flatnonzero(binding.dist<.05)
-    if len(near):
+    if len(near) and not locked:
         P[near]=ref.joint_groom_clearance(head,P[near],{n:delta[n][near] for n in names},names,head_margin[near],combos=assemble.default_combos(names))
         P[:]=body_safe(head,P,hull,body_margin,radial=radial);Q,normal=ref.roots(head,scalp,P)
     root_distance=np.linalg.norm(P-Q,axis=1);low,high=np.asarray(spec['groom']['root_fade_mm'])/1000
@@ -488,21 +495,21 @@ def groom_fields(head,scalp,P,names,spec,hull,ranges,triangles=None):
             if config.get('hanging_axis_length',False):move[:,[0,2]]*=1-hanging[:,None]
         else:move=volume_direction*(volume_size*volume_fade*config['volume_positive' if positive else 'volume_negative']*(1 if positive else -1))[:,None]
         move[shell]=0
-        safe=assemble.push_out_var(head,P+move,head_margin,iters=5)
+        safe=P+move if locked else assemble.push_out_var(head,P+move,head_margin,iters=5)
         if 'length' in name and config.get('coherent_length',False):
             assert triangles is not None,'Coherent lock motion requires source connectivity'
             safe=curtain_body_safe(head,safe,hull,float(spec.get('outer_body_margin_mm',8.0))/1000,T=triangles)
         else:safe=body_safe(head,safe,hull,body_margin,radial=radial)
-        safe=ref.joint_groom_clearance(head,safe,delta,names,head_margin)
+        if not locked:safe=ref.joint_groom_clearance(head,safe,delta,names,head_margin)
         safe+=shared_body_correction(head,P,[safe],hull,body_margin,radial=radial)
         delta[name]=safe-P
     # Volume shortening shares its clearance with length shortening. Alternate
     # the two endpoint envelopes; body corrections share one outward direction.
     for _ in range(3):
         volume=P+delta['hl_volume_n'];pair=volume+delta['hl_length_n']
-        safe=ref.joint_groom_clearance(head,pair,delta,names,head_margin)
+        safe=pair if locked else ref.joint_groom_clearance(head,pair,delta,names,head_margin)
         delta['hl_volume_n']+=safe-pair
-        volume=P+delta['hl_volume_n'];safe=ref.joint_groom_clearance(head,volume,delta,names,head_margin)
+        volume=P+delta['hl_volume_n'];safe=volume if locked else ref.joint_groom_clearance(head,volume,delta,names,head_margin)
         delta['hl_volume_n']+=safe-volume
         volume=P+delta['hl_volume_n'];pair=volume+delta['hl_length_n']
         delta['hl_volume_n']+=shared_body_correction(head,P,[volume,pair,volume+delta['hl_length_p']],hull,body_margin,radial=radial)
@@ -515,6 +522,7 @@ def groom_fields(head,scalp,P,names,spec,hull,ranges,triangles=None):
     # The scalp coverage surface follows identity, while grooming affects
     # only the visible locks. Endpoint guards must not move this fixed cap.
     for name in GROOMS:delta[name][shell]=0
+    if locked:np.testing.assert_array_equal(P,baseline)
     return Q,root_distance,delta
 
 def patch_roots(args):
@@ -555,6 +563,7 @@ def patch_roots(args):
 
 def pack(args,groom_builder=None,atlas_builder=None,colour_builder=None,parts_builder=None):
     stage=Path(args.stage);spec=profile(args.profile);source=profile(stage/'source.json');head=BoundedHead(source['sex']);scalp=hairgen.Scalp(head,spec.get('hairline'))
+    locked=preserve_prepared_exterior(spec)
     assert not source.get('held',False),'Source stage is held by its authoring review'
     assert source['profile_sha256']==sha(args.profile),'Prepare a fresh stage for a changed style profile'
     assert source['head_sha256']==sha(head.glb_path),'Prepared head inputs changed'
@@ -578,13 +587,18 @@ def pack(args,groom_builder=None,atlas_builder=None,colour_builder=None,parts_bu
     for lod in (0,1,2):
         P,N,UV,T,COL,ranges,info=(parts_builder or all_parts)(stage,head,scalp,spec,lod)
         head_margin,body_margin=layer_margins(P,ranges,spec)
-        P=assemble.push_out_var(head,P,head_margin+.0008+assemble.headroom(head,P,names,frac=.6,no_ears=False),iters=5);P=body_safe(head,P,hull,body_margin,radial=bool(spec.get('preserve_curtain_depth',False)))
+        if not locked:
+            P=assemble.push_out_var(head,P,head_margin+.0008+assemble.headroom(head,P,names,frac=.6,no_ears=False),iters=5);P=body_safe(head,P,hull,body_margin,radial=bool(spec.get('preserve_curtain_depth',False)))
+        baseline=P.copy() if locked else None
         if getattr(args,'neutral_only',False):
             assert not args.check,'Neutral previews do not qualify morphs'
             Q,_=ref.roots(head,scalp,P);distance=np.linalg.norm(P-Q,axis=1);delta={n:np.zeros_like(P) for n in names+GROOMS}
             report['neutral_geometry_preview']=True
         elif groom_builder:Q,distance,delta=groom_builder(head,scalp,P,names,spec,hull,ranges)
         else:Q,distance,delta=groom_fields(head,scalp,P,names,spec,hull,ranges,triangles=T)
+        if locked:
+            np.testing.assert_array_equal(P,baseline)
+            info['prepared_exterior_preserved']=True;info['independent_physical_qualification_required']=True
         core_end=ranges['detail'][0];COL=(colour_builder or root_colours)(head,scalp,P,T,COL,ranges,distance,spec)
         joints=np.zeros((len(P),4),np.uint8);weights=np.zeros((len(P),4),'f4');weights[:,0]=1
         is_detail=(T>=core_end).all(1);primitives=[]

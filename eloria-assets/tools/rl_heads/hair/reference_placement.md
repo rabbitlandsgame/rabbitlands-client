@@ -42,6 +42,15 @@ later step does not restore the old front/back divide. Check source-position
 weld groups after every correction: moving UV copies independently can reopen
 seams even when scalp coverage passes.
 
+After a source has been fitted coherently, `preserve_prepared_exterior: true`
+retains the assembled rest positions through export. It uses blended identity
+motion without forward projection and keeps the existing analytic grooming and
+body constraints. It skips automatic head-envelope inflation and head guards
+during this export; it does **not** qualify any identity or grooming state.
+Both loose and tied builders assert the rest positions are unchanged. Generate
+the separate Native corrective afterward and run the independent physical
+checks below before registration. The historical default remains unchanged.
+
 ## Qualification and packaging
 
 Check vertices and face centres/edge midpoints on triangles with edges of at
