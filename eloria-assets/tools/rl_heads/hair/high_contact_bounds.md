@@ -14,3 +14,14 @@ already-clear points. Binding, styling and general nearest-surface queries must
 continue using the original head. This adds no default behavior or margin
 change and does not combine the High and Native skull fits. `statistics` records
 the exact-query and outside-box counts for qualification evidence.
+
+`ContactHead(..., geometric_sign=True)` explicitly selects the optional physical
+sign in `BoundedHead.signed`. Face interiors use the geometric face normal,
+edges use adjacent face normals and welded vertices use angle-weighted incident
+face normals. This prevents large neighboring triangles' lighting weights from
+putting an outside temple point on the wrong side. The original nearest-skin
+distance, closest point, rim handling and clearance threshold are retained.
+Normals used for placement must still come from the intended authoring route.
+The default stays unchanged; use the matching explicit policy for authoring and
+independent checks. Cached geometric normals are invalidated when source
+positions or indices change. This adds no runtime behavior or replacement skin.

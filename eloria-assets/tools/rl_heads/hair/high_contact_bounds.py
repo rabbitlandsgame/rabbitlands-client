@@ -7,10 +7,11 @@ import numpy as np
 
 
 class ContactHead:
-    def __init__(self,head,margin_mm=3.2):
+    def __init__(self,head,margin_mm=3.2,geometric_sign=False):
         assert hasattr(head,'delta') and hasattr(head,'P') and hasattr(head,'T')
         assert 0<margin_mm<=20
         self.head=head;self.margin=float(margin_mm)/1000
+        self.geometric_sign=bool(geometric_sign)
         self.statistics={'exact_queries':0,'outside_box_proofs':0,'calls':0}
 
     def __getattr__(self,name):return getattr(self.head,name)
@@ -26,7 +27,8 @@ class ContactHead:
         normal=np.divide(separation,distance[:,None],out=np.zeros_like(separation),where=distance[:,None]>0)
         rim=np.zeros(len(X),bool);query=~proved
         if query.any():
-            values=self.head.signed(X[query],D=D,mesh=mesh,with_rim=True,T=T)
+            kwargs={'geometric_sign':True} if self.geometric_sign else {}
+            values=self.head.signed(X[query],D=D,mesh=mesh,with_rim=True,T=T,**kwargs)
             distance[query],cp[query],normal[query],rim[query]=values
         self.statistics['calls']+=1;self.statistics['exact_queries']+=int(query.sum())
         self.statistics['outside_box_proofs']+=int(proved.sum())

@@ -55,11 +55,18 @@ class BoundedHead(headref.Head):
         X=np.asarray(X,float);points=self.P if P is None else P;mesh=self.mesh if P is None else trimesh.Trimesh(points,self.T,process=False)
         cp,distance,tri=closest_batched(mesh,X);t=self.T[tri]
         return cp,distance,tri,headref.barycentric(cp,points[t[:,0]],points[t[:,1]],points[t[:,2]])
-    def signed(self,X,D=None,mesh=None,with_rim=False,T=None):
+    def signed(self,X,D=None,mesh=None,with_rim=False,T=None,geometric_sign=False):
         X=np.asarray(X,float);P=self.P if D is None else self.P+D;Tm=self.T if T is None else T
         if mesh is None:mesh=self.mesh if D is None and T is None else trimesh.Trimesh(P,Tm,process=False)
         cp,distance,tri=closest_batched(mesh,X);t=Tm[tri];bc=headref.barycentric(cp,P[t[:,0]],P[t[:,1]],P[t[:,2]])
         Nv=self.N if D is None else headref.vertex_normals(P,self.T,self.weld);normal=unit((Nv[t]*bc[:,:,None]).sum(1))
+        if geometric_sign:
+            from geometric_surface_sign import GeometricSurfaceSign
+            signature=hashlib.sha256(P.tobytes()+Tm.tobytes()).digest()
+            if getattr(mesh,'_rl_geometric_sign_key',None)!=signature:
+                mesh._rl_geometric_sign=GeometricSurfaceSign(P,Tm,self.weld)
+                mesh._rl_geometric_sign_key=signature
+            normal=mesh._rl_geometric_sign.normals(tri,bc)
         sign=np.sign(((X-cp)*normal).sum(1));sign[sign==0]=1
         rim=((bc*self.rim[t]).sum(1)>.97)&(X[:,1]<cp[:,1]+.002)
         if T is not None and T is self.T_clear:rim|=((bc*self.rim_clear[t]).sum(1)>.97)&~self.rim[t].any(1)
