@@ -20,6 +20,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import paths  # noqa: E402
 from material_roles import CLUMP_ROLES, material_role  # noqa: E402
+from coverage import uses_root_coverage  # noqa: E402
 RL = paths.RL_ROOT
 WT = paths.WORKTREE
 VIEWS = ('front', 'profile', 'back', 'tq', 'close')
@@ -93,7 +94,7 @@ def blender_main(a):
            'rl_beard': os.path.join(paths.BEARD_TEX, 'beard.png')}
     btint = tuple(float(x) for x in a.beard_color.split(',')) if a.beard_color else tint
     for path in a.asset:
-        declared={m.get('name',''):(m.get('extras') or {}).get('texture','') for m in glb_json(path).get('materials',[])}
+        declared={m.get('name',''):m for m in glb_json(path).get('materials',[])}
         objs = imported(lambda: bpy.ops.import_scene.gltf(filepath=path))
         for o in objs:
             if o.type != 'MESH':
@@ -112,12 +113,13 @@ def blender_main(a):
                 if role in tex:
                     image=tex[role]
                     if mn in CLUMP_ROLES:
-                        file=declared.get(mn,'')
+                        file=(declared.get(mn,{}).get('extras') or {}).get('texture','')
                         candidates=[os.path.join(os.path.dirname(path),file),os.path.join(WT,'godot-client','assets','actors','native','rl_head_textures',file)] if file else []
                         image=next((p for p in candidates if os.path.isfile(p)),None)
                         if image is None:raise FileNotFoundError('Missing declared crest texture: '+mn+' '+file)
                     slot.material = hair_material(bpy, mn, image, btint if role == 'rl_beard' else tint, level=a.detail_level,
-                                                  clip=(-1.0 if a.opaque else 0.5 if role == 'rl_hair_clump' else 0.4))
+                                                  clip=(-1.0 if a.opaque else 0.5 if role == 'rl_hair_clump' else 0.4),
+                                                  root_coverage=mn in CLUMP_ROLES and uses_root_coverage(declared[mn]))
     # ---------------- shape keys (head and hair share the id_* names; hl_* are hair only)
     if a.shapes:
         want = {}
@@ -246,8 +248,11 @@ def skin_material(bpy, rgb):
     return m
 
 
-def hair_material(bpy, name, tex_path, tint, clip=0.5, level=None):
+def hair_material(bpy, name, tex_path, tint, clip=0.5, level=None, root_coverage=False):
     key = name + '_prev'
+    if name in CLUMP_ROLES:
+        import hashlib
+        key += '_' + hashlib.sha256((os.path.abspath(tex_path)+str(root_coverage)).encode()).hexdigest()[:12]
     m = bpy.data.materials.get(key)
     if m:
         return m
@@ -273,8 +278,16 @@ def hair_material(bpy, name, tex_path, tint, clip=0.5, level=None):
     Lk.new(inv.outputs[0], ramp.inputs['Value'])
     vc = N.new('ShaderNodeVertexColor'); vc.layer_name = 'Color'
     sepc = N.new('ShaderNodeSeparateColor'); Lk.new(vc.outputs['Color'], sepc.inputs[0])
+    if name in CLUMP_ROLES:
+        # Donor UVs need not follow the strand; new crest roles use the same
+        # geometric root coordinate as runtime. Existing previews stay exact.
+        Lk.new(sepc.outputs['Green'], ramp.inputs['Value'])
+        ramp.inputs['From Max'].default_value = .55
+        ramp.inputs['To Min'].default_value = .85
+        ramp.interpolation_type = 'SMOOTHSTEP'
     rr = N.new('ShaderNodeMapRange'); rr.inputs['To Min'].default_value = 0.85; rr.inputs['To Max'].default_value = 1.12
-    Lk.new(sepc.outputs['Red'], rr.inputs['Value'])
+    if root_coverage:rr.inputs['Value'].default_value = .5
+    else:Lk.new(sepc.outputs['Red'], rr.inputs['Value'])
     ao = N.new('ShaderNodeMapRange'); ao.inputs['To Min'].default_value = 0.68; ao.inputs['To Max'].default_value = 1.0
     Lk.new(sepc.outputs['Blue'], ao.inputs['Value'])
     m1 = N.new('ShaderNodeMath'); m1.operation = 'MULTIPLY'; Lk.new(ramp.outputs[0], m1.inputs[0]); Lk.new(rr.outputs[0], m1.inputs[1])
@@ -285,7 +298,8 @@ def hair_material(bpy, name, tex_path, tint, clip=0.5, level=None):
     streak.outputs[0].default_value = (min(1, tint[0] * 1.3), tint[1] * 1.12, tint[2] * 0.95, 1)
     sf = N.new('ShaderNodeMapRange'); sf.inputs['From Min'].default_value = 0.55; sf.inputs['From Max'].default_value = 1.0
     sf.inputs['To Min'].default_value = 0.0; sf.inputs['To Max'].default_value = 0.8; sf.clamp = True
-    Lk.new(sepc.outputs['Red'], sf.inputs['Value'])
+    if root_coverage:sf.inputs['Value'].default_value = .5
+    else:Lk.new(sepc.outputs['Red'], sf.inputs['Value'])
     tmix = N.new('ShaderNodeMix'); tmix.data_type = 'RGBA'
     Lk.new(sf.outputs[0], tmix.inputs['Factor']); Lk.new(tintn.outputs[0], tmix.inputs[6]); Lk.new(streak.outputs[0], tmix.inputs[7])
     mix1 = N.new('ShaderNodeMix'); mix1.data_type = 'RGBA'; mix1.blend_type = 'MULTIPLY'; mix1.inputs['Factor'].default_value = 1.0
@@ -301,7 +315,12 @@ def hair_material(bpy, name, tex_path, tint, clip=0.5, level=None):
     Lk.new(sc2.outputs[0], gain.inputs[7])
     Lk.new(gain.outputs[2], p.inputs['Base Color'])
     gt = N.new('ShaderNodeMath'); gt.operation = 'GREATER_THAN'; gt.inputs[1].default_value = clip
-    Lk.new(img.outputs['Alpha'], gt.inputs[0])
+    if root_coverage:
+        root=N.new('ShaderNodeMapRange');root.inputs['From Min'].default_value=0.;root.inputs['From Max'].default_value=.5
+        root.inputs['To Min'].default_value=0.;root.inputs['To Max'].default_value=1.;root.clamp=True;root.interpolation_type='SMOOTHSTEP'
+        Lk.new(sepc.outputs['Red'],root.inputs['Value'])
+        alpha=N.new('ShaderNodeMath');alpha.operation='MULTIPLY';Lk.new(img.outputs['Alpha'],alpha.inputs[0]);Lk.new(root.outputs[0],alpha.inputs[1]);Lk.new(alpha.outputs[0],gt.inputs[0])
+    else:Lk.new(img.outputs['Alpha'], gt.inputs[0])
     if level is None:
         Lk.new(gt.outputs[0], p.inputs['Alpha'])
     else:
