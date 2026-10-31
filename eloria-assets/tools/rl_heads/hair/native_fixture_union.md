@@ -1,6 +1,7 @@
 # Evaluated Native Rest union
 
-`NativeFixtureUnion(manifest, sex, case_names=None, optimize=True)` in `native_fixture_union.py`
+`NativeFixtureUnion(manifest, sex, case_names=None, optimize=True,
+horizontal_slice_proof=False)` in `native_fixture_union.py`
 loads complete body/scalp/shirt surfaces through the shared evaluated-fixture
 reader, verifying every NPZ SHA. It requires fixturev2's `native_fixed_skull`
 policy and zero High hair identity controls. Only Rest_Pose/fraction0 records
@@ -33,3 +34,12 @@ Use `signed(points, optimize=False)` for the unoptimized reference query.
 queries automatically retain the full route when the extra baseline witness
 would cost more queries than it could save. No fitting threshold, displacement
 bound, fixture selection or independent qualification gate changes.
+
+The optional complete-fixture horizontal-slice outside proof is explicit:
+`NativeFixtureUnion(manifest, sex, optimize=False, horizontal_slice_proof=True)`.
+Each retained fixture loads its own full, hash-verified physical triangles before
+contact-region filtering. Its ordinary full signed query applies its own slice
+proof. The existing default is unchanged. This initial optional route rejects
+optimized queries until reused witness reconstruction has been independently
+qualified against the same per-fixture proof. It does not alter distance,
+closest point, normal, clearance thresholds or the total fitting bound.

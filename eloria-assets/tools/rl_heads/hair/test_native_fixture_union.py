@@ -33,6 +33,19 @@ class UnionTest(unittest.TestCase):
             with self.assertRaisesRegex(AssertionError,'zero High'):NativeFixtureUnion(manifest,'female')
             data['cases'][0]['rl_hair_identity_controls']={};manifest.write_text(json.dumps(data));(Path(folder)/'s0.npz').write_bytes(b'changed')
             with self.assertRaisesRegex(AssertionError,'fixture changed'):NativeFixtureUnion(manifest,'female')
+    def test_optional_slice_proof_uses_each_complete_fixture_without_reuse(self):
+        with tempfile.TemporaryDirectory() as folder:
+            manifest=self.make(Path(folder));union=NativeFixtureUnion(manifest,'female',optimize=False,horizontal_slice_proof=True)
+            self.assertTrue(all(surface.horizontal_slice_proof and surface._slice_bounds is not None for surface in union.surfaces))
+            points=np.array([[.15,1.7,0],[0,1.803,0],[.2,1.82,.1]])
+            expected=[array.copy() for array in union.surfaces[0].signed(points)]
+            for surface in union.surfaces[1:]:
+                row=surface.signed(points);take=row[0]<expected[0]
+                for old,new in zip(expected,row):old[take]=new[take]
+            for a,b in zip(union.signed(points),expected):np.testing.assert_array_equal(a,b)
+            self.assertFalse(union.last_query_stats['baseline_witness_requery'])
+            with self.assertRaisesRegex(AssertionError,'optimize=False'):union.signed(points,optimize=True)
+            with self.assertRaisesRegex(AssertionError,'optimize=False'):NativeFixtureUnion(manifest,'female',horizontal_slice_proof=True)
 
 
 class OptimizedUnionTest(unittest.TestCase):

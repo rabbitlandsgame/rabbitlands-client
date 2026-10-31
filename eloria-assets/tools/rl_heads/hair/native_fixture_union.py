@@ -13,7 +13,9 @@ from native_hair_fixtures import load_fixture,EvaluatedNativeSurface
 
 
 class NativeFixtureUnion:
-    def __init__(self,manifest,sex,case_names=None,optimize=True):
+    def __init__(self,manifest,sex,case_names=None,optimize=True,horizontal_slice_proof=False):
+        assert not horizontal_slice_proof or not optimize,'Horizontal slice proof currently requires optimize=False'
+        self.horizontal_slice_proof=bool(horizontal_slice_proof)
         data=json.loads(Path(manifest).read_text())
         assert data.get('hair_identity_policy')=='native_fixed_skull','Use evaluated fixturev2 or later with zero High hair IDs'
         seen=set();self.surfaces=[];self.records=[]
@@ -23,7 +25,9 @@ class NativeFixtureUnion:
             assert not record['rl_hair_identity_controls'],'Native skull fitting must use zero High identity targets'
             signature=tuple(sorted((part['mesh'],part['sha256']) for part in record['parts'] if part['mesh'] in ['body','scalp','wardrobe_shirt']))
             if signature in seen:continue
-            seen.add(signature);self.surfaces.append(load_fixture(manifest,record))
+            seen.add(signature)
+            surface=load_fixture(manifest,record,horizontal_slice_proof=True) if self.horizontal_slice_proof else load_fixture(manifest,record)
+            self.surfaces.append(surface)
             self.records.append({'case':record['case'],'quality':record['quality']})
         assert self.surfaces,'No matching evaluated Native Rest surfaces'
         self.optimize=bool(optimize);self._plans=None;self.last_query_stats={}
@@ -117,6 +121,7 @@ class NativeFixtureUnion:
         points=np.asarray(P,float)
         if not len(points):return np.empty(0),np.empty((0,3)),np.empty((0,3))
         enabled=self.optimize if optimize is None else bool(optimize)
+        assert not getattr(self,'horizontal_slice_proof',False) or not enabled,'Horizontal slice proof currently requires optimize=False'
         base=self.surfaces[0].signed(points)
         distance,point,normal=(np.array(array,copy=True) for array in base)
         total=len(points)*len(self.surfaces);actual=len(points);frame=None
