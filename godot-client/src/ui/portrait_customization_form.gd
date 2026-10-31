@@ -43,7 +43,7 @@ const DETAIL_GROUPS: Array = [
 		["liner", "Eyeliner", "None", "Bold"],
 		["liner_wing", "Liner wing", "None", "Long"],
 		["stubble", "Stubble shadow (male only)", "None", "Dense"]]],
-	["Hair", [["hair_module", "High-detail hair", "", ""]]],
+	["Hair", [["hair_module", "Hair variation", "", ""]]],
 ]
 ## Detail fields with an Auto box (0 = Auto, then an explicit 1..maximum).
 const AUTO_FIELDS: Array[String] = ["brow_style", "brow_thickness", "freckles", "liner", "liner_wing", "stubble"]
@@ -489,7 +489,7 @@ func _add_module(grid: GridContainer, title: String) -> void:
 	var option := OptionButton.new()
 	option.name = "HairModule"
 	option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	option.tooltip_text = "Replaces your hairstyle only at High graphics. Low and Medium (and any fallback) draw the hairstyle you chose above."
+	option.tooltip_text = "Choose a variation of your hairstyle. Length, volume and finish stay adjustable at every graphics level."
 	option.accessibility_name = title
 	cell.add_child(option)
 	module_hint = Label.new()
@@ -511,7 +511,7 @@ func _fill_modules() -> void:
 	var option := detail_controls["hair_module"] as OptionButton
 	option.clear()
 	option.add_item("Automatic (by hairstyle)", 0)
-	option.add_item("Classic hairstyle", 1)
+	option.add_item("Default hairstyle", 1)
 	var eligible := HAIR_MODULE_LOOKUP.choices(_sex, _module_entries())
 	for id: int in eligible:
 		var module: Dictionary = eligible[id]
@@ -531,10 +531,11 @@ func _sync_module() -> void:
 	if _hair_style == 0:
 		module_hint.text = "Bald at every graphics level."
 	elif RLHeadPortraitMap.is_module(hair):
-		var semantic := str(HAIR_MODULE_LOOKUP.resolve(_module, _sex, _module_entries()).get("semantic_name", hair))
-		module_hint.text = "At High: " + str(MODULE_NAMES.get(semantic, semantic.capitalize()))
+		var actual_id := HAIR_MODULE_LOOKUP.find(hair, _sex, _module_entries())
+		var semantic := str(HAIR_MODULE_LOOKUP.resolve(actual_id, _sex, _module_entries()).get("semantic_name", hair))
+		module_hint.text = "Selected: " + str(MODULE_NAMES.get(semantic, semantic.capitalize()))
 	else:
-		module_hint.text = "At High: your hairstyle"
+		module_hint.text = "Selected: your hairstyle"
 	_sync_age_controls()
 
 # ---------------------------------------------------------------- state

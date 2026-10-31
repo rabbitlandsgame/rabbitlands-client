@@ -2,7 +2,8 @@ class_name RLHeadPortraitMap
 extends RefCounted
 ## The RL head a Human's saved appearance asks for: develop's PortraitCustomization
 ## fields (PC/1 and PC/2) and palette bytes in, an RLHeadAppearance out. Pure;
-## nothing here touches a node. ReplicatedActor3D draws the result at High.
+## nothing here touches a node. ReplicatedActor3D draws the head at High and
+## its modern hairstyle at every graphics level.
 ##
 ## Face (owner decision D3, recentred offset-linear): each of the ten face
 ## fields drives its RL control by
@@ -21,9 +22,10 @@ extends RefCounted
 ## Grooming: facial_hair 0..5 is none, stubble, moustache, goatee, short beard,
 ## full beard by name; women draw no beard and no stubble at High (the saved
 ## value is kept; owner decision). Hair style (D5): male Parted is the
-## rowan_shag module, female Buns the mira_bun module, every other style and
-## sex the game's own fitted hairstyle (`legacy:<style>`, drawn by the actor
-## with its High finish), Bald is none. hair_length / hair_volume drive an RL
+## rowan_shag module, female Buns the mira_bun module. Other saved families
+## resolve to their registered modern replacement, with `legacy:<style>`
+## retained only until a matching fit is qualified. Bald is none.
+## hair_length / hair_volume drive an RL
 ## module's hl_ shapes centred on its own preset's values; the hair finish
 ## (hair_detail 0 Classic, 1 Tousled, 2 Swept) becomes the module's fine-detail
 ## level through its slider position, the module's preset finish being the
@@ -83,7 +85,7 @@ const V3_MAXIMA := {"brow_style": 13, "brow_thickness": 101, "freckles": 101, "l
 	"liner_wing": 101, "stubble": 101, "lip_tint": 12, "hair_module": 31}
 ## facial_hair -> RL beard, by name (the RL registry orders them differently).
 const BEARDS: Array[String] = ["none", "stubble", "moustache", "goatee", "short_beard", "full_beard"]
-## PC/3 hair_module ids: 0 the rule below, 1 the game's own hairstyle, 2 and up
+## PC/3 hair_module ids: 0 the rule below, 1 the default family, 2 and up
 ## an RL module (append-only; an unknown id or one of the other sex is 0).
 const HAIR_MODULES := HAIR_MODULE_LOOKUP.ENTRIES
 ## D5: the style slots an RL module draws, per body sex.
@@ -263,14 +265,26 @@ static func hair(appearance: Dictionary, sex: String, modules: Dictionary = HAIR
 	var module := field(appearance, "hair_module", 0, int(V3_MAXIMA["hair_module"])) \
 		if appearance.has("hair_module") else 0
 	if module == 1:
-		return legacy_name(style)
+		return default_hair(style, sex, modules)
 	var resolved := HAIR_MODULE_LOOKUP.resolve(module, sex, modules)
 	if not resolved.is_empty():
 		return str(resolved.name)
 	var rules: Dictionary = HAIR_RULES.get(sex, {}) as Dictionary
 	if rules.has(style):
 		return str(rules[style])
-	return legacy_name(style)
+	return default_hair(style, sex, modules)
+
+
+## Saved default/classic selections move to the qualified modern family.
+## Authoring branches without a registered fit retain their existing fallback.
+static func default_hair(style: int, sex: String, modules: Dictionary = HAIR_MODULES) -> String:
+	var id := HAIR_MODULE_LOOKUP.replacement_id(style, sex, modules)
+	return str(HAIR_MODULE_LOOKUP.resolve(id, sex, modules).name) if id > 0 else legacy_name(style)
+
+
+static func upgrade_legacy(hair_name: String, sex: String, modules: Dictionary = HAIR_MODULES) -> String:
+	var style := legacy_style(hair_name)
+	return default_hair(style, sex, modules) if style > 0 else hair_name
 
 
 ## `legacy:<style>` for a hair style slot 1..9.

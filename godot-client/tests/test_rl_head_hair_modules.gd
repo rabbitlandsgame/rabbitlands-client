@@ -34,6 +34,7 @@ func _run() -> void:
 	_check_variants()
 	_check_namespace()
 	_check_placement_capability()
+	_check_default_replacements()
 	await _check_form()
 	print("RL semantic hair: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures else 0)
@@ -151,6 +152,33 @@ func _check_placement_capability() -> void:
 	_expect(not Modules.validate({9: {"name": "bad_variant_flag", "variants": {"female": {"name": "fit", "tie_height": "true"}}}}).ok,
 		"variant placement flag must be boolean")
 
+
+func _check_default_replacements() -> void:
+	var entries := {
+		22: {"name": "fixture_part", "variants": {"female": "fixture_part_female", "male": "fixture_part_male"}},
+		9: {"name": "fixture_long", "sex": "female", "fallback_style": 2},
+	}
+	var before := entries.duplicate(true)
+	_expect(Modules.LEGACY_REPLACEMENTS.size() == 9, "every original hairstyle family has a replacement reservation")
+	for sex: String in ["female", "male"]:
+		var saved := {"hair": AppearanceVariants.pack_hair(1, 3), "hair_module": 1}
+		var wire := Custom.encode(saved, 3)
+		_expect(Map.hair(saved, sex, entries) == "fixture_part_" + sex,
+			"saved classic selection resolves its body's modern replacement")
+		_expect(wire == Custom.encode(saved, 3) and saved.hair_module == 1,
+			"lookup does not rewrite saved slots or module bytes")
+		_expect(Map.upgrade_legacy("legacy:parted", sex, entries) == "fixture_part_" + sex,
+			"raw legacy aliases use the same replacement")
+	_expect(Map.hair({"hair": AppearanceVariants.pack_hair(2, 0)}, "female", entries) == "fixture_long",
+		"automatic long selection uses the qualified replacement")
+	_expect(Map.hair({"hair": AppearanceVariants.pack_hair(2, 0)}, "male", entries) == "legacy:long",
+		"an unavailable fit never crosses to another body's asset")
+	_expect(Map.hair({"hair": 1}, "male", entries) == "rowan_shag", "existing modern automatic reference stays selected")
+	_expect(Map.hair({"hair": 0, "hair_module": 1}, "female", entries) == "none", "Bald remains Bald")
+	_expect(Modules.replacement_id(0, "female", entries) == 0 and Modules.replacement_id(99, "male", entries) == 0,
+		"unknown and bald slots do not select an arbitrary module")
+	_expect(entries == before, "replacement resolution leaves the registry unchanged")
+
 func _check_form() -> void:
 	var form := VariantForm.new()
 	root.add_child(form)
@@ -163,7 +191,7 @@ func _check_form() -> void:
 	form.set_body(1, true)
 	_expect(int(form.values().hair_module) == 31 and option.get_item_index(31) >= 0,
 		"creation preserves shared semantic ID on body switch")
-	_expect(form.module_hint.text == "At High: Fixture Shared", "UI hint uses the semantic style label")
+	_expect(form.module_hint.text == "Selected: Fixture Shared", "UI hint uses the semantic style label")
 	form.set_body(0)
 	_select(form, 30)
 	form.set_body(1)

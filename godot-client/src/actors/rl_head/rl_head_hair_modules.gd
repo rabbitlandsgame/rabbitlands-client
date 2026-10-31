@@ -22,6 +22,11 @@ const ENTRIES := {
 	8: {"name": "receding_sweep", "sex": "male", "fallback_style": 1},
 }
 
+## The original saved hairstyle byte remains the player's family choice.
+## A replacement is enabled only once its qualified body fit is registered.
+const LEGACY_REPLACEMENTS := {1: 22, 2: 9, 3: 24, 4: 21, 5: 11,
+	6: 15, 7: 18, 8: 25, 9: 23}
+
 static var _default_validated := false
 static var _default_validation: Dictionary = {}
 
@@ -107,9 +112,14 @@ static func _usable(entries: Dictionary) -> bool:
 	return bool(result.ok)
 
 
-## The concrete asset and Low/Medium fallback for this body, or {}.
+## The concrete asset and compatibility fallback for this body, or {}.
 static func resolve(id: int, sex: String, entries: Dictionary = ENTRIES) -> Dictionary:
 	return _resolve(id, sex, entries) if _usable(entries) else {}
+
+
+static func replacement_id(style: int, sex: String, entries: Dictionary = ENTRIES) -> int:
+	var id := int(LEGACY_REPLACEMENTS.get(style, 0))
+	return id if not resolve(id, sex, entries).is_empty() else 0
 
 
 ## A style advertises this only after both placement shapes and their limits

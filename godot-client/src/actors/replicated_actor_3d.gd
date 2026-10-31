@@ -348,6 +348,10 @@ var _hidden_body_surfaces: Dictionary = {}
 ## upper neck and hair at High quality; null for every other actor and tier,
 ## and then none of the RL hooks below changes anything.
 var _rl_head: RLHeadRig = null
+## Modern hair can keep its own LODs while the body's native head is drawn.
+var _rl_hair: RLHeadRig = null
+var _rl_hair_pending: RLHeadAppearance = null
+var _hair_tint := Color.WHITE
 ## The face asked for before the animation import has run; the head is built
 ## after it, so the importer never sees its blend shapes.
 var _rl_head_pending: RLHeadAppearance = null
@@ -730,9 +734,9 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 			_configuration_phases_us["animation"] = Time.get_ticks_usec() - phase_started
 			phase_started = Time.get_ticks_usec()
 			_rl_head_ready = true
-			if _rl_head_pending != null:
-				# The appearance pass above drew everything but the RL head
-				# itself: build it now, after the import, in place.
+			if _rl_head_pending != null or _rl_hair_pending != null:
+				# Build deferred head/hair modules after animation import, so
+				# the importer never sees their blend shapes.
 				_switch_rl_head_in_place()
 			_configuration_phases_us["rl_head"] = Time.get_ticks_usec() - phase_started
 	phase_started = Time.get_ticks_usec()
@@ -774,6 +778,7 @@ func apply_appearance_variants(appearance: Dictionary) -> void:
 		var greying := preload("res://src/actors/character_age.gd").amount(appearance, "hair_grey")
 		hair_tint = preload("res://src/actors/character_age.gd").grey_colour(hair_tint, greying)
 		brow_tint = preload("res://src/actors/character_age.gd").grey_colour(brow_tint, greying)
+	_hair_tint = hair_tint
 	var garments := {}
 	for part: String in ["shirt", "pants", "boots"]:
 		if bool(colours[part].custom):
@@ -1256,7 +1261,7 @@ static func _rl_head_override(appearance: Dictionary) -> Variant:
 ## Whether this actor draws an RL head now: a Human, RL heads not switched to
 ## classic, and either the lab's override or High
 ## quality in a renderer that draws it, with the head module for its sex on
-## disk. Low and Medium never read an RL asset.
+## disk. Low and Medium keep the native head and may draw modern hair alone.
 func _rl_head_wanted() -> bool:
 	if _native_skeleton == null or not _uses_portrait_customization() or rl_heads_classic():
 		return false
@@ -1279,6 +1284,8 @@ func _rl_head_face(appearance: Dictionary) -> RLHeadAppearance:
 		RLHeadLibrary.warn_once("sex:" + face.preset, "%s is a %s head; using the %s head for this body"
 			% [face.preset, face.sex, gender])
 		face.sex = gender
+	if face != null:
+		face.hair = RLHeadPortraitMap.upgrade_legacy(face.hair, gender)
 	return face
 
 ## The head and the hair for one appearance pass. The game's fitted hairstyle
@@ -1294,13 +1301,67 @@ func _apply_rl_head_and_hair(appearance: Dictionary, hair_tint: Color) -> void:
 		# The lab's face names its own hairstyle and colour.
 		style = RLHeadPortraitMap.legacy_style(face.hair)
 		tint = preload("res://src/actors/character_age.gd").grey_colour(face.hair_color, face.hair_grey)
-	_add_hair_variant(style, tint)
-	if face == null or not _set_rl_head(face):
-		_rl_head_failed = face != null
-		_remove_rl_head()
-		return
-	if _rl_head != null:
-		_rl_head.set_hair_external(style != 0 and not _rl_head.draws_module_hair())
+	if face != null:
+		_remove_rl_hair()
+		if _set_rl_head(face):
+			var modern := _rl_head_pending != null or (_rl_head != null and _rl_head.draws_module_hair())
+			_add_hair_variant(0 if modern else style, tint)
+			if _rl_head != null:
+				_rl_head.set_hair_external(style != 0 and not modern)
+			return
+		_rl_head_failed = true
+	_remove_rl_head()
+	var hair_face: RLHeadAppearance = null
+	if _uses_portrait_customization() and not rl_heads_classic():
+		hair_face = _rl_head_face(appearance)
+	if hair_face != null and hair_face.hair != RLHeadAppearance.NONE \
+			and not hair_face.hair.begins_with(RLHeadLibrary.LEGACY_PREFIX) \
+			and _set_rl_hair(hair_face):
+		_add_hair_variant(0, tint)
+	else:
+		_remove_rl_hair()
+		_add_hair_variant(style, tint)
+
+
+func _set_rl_hair(face: RLHeadAppearance) -> bool:
+	if not _rl_head_ready:
+		_rl_hair_pending = face
+		return true
+	_rl_hair_pending = null
+	var native_model := get_node_or_null("NativeModel") as Node3D
+	var body := native_model.find_child("body", true, false) as MeshInstance3D \
+		if native_model != null else null
+	var layers := body.layers if body != null else 1
+	if _rl_hair == null:
+		_rl_hair = RLHeadRig.attach_hair_only(_native_skeleton, face, _render_quality,
+			_animated_head_cull_margin(), layers)
+		if _rl_hair == null:
+			return false
+	elif not _rl_hair.apply_appearance(face):
+		_remove_rl_hair()
+		return false
+	_rl_hair.set_quality(_render_quality)
+	_rl_hair.set_mesh_presentation(_animated_head_cull_margin(), layers)
+	_rl_hair.set_body_skin_color(_skin_colour)
+	_rl_hair.set_portrait_pose(portrait_pose_held())
+	return true
+
+
+func _remove_rl_hair() -> void:
+	_rl_hair_pending = null
+	if _rl_hair != null:
+		_rl_hair.teardown()
+		_rl_hair = null
+
+
+func _module_hair_rig() -> RLHeadRig:
+	if _rl_head != null and _rl_head.draws_module_hair():
+		return _rl_head
+	return _rl_hair if _rl_hair != null and _rl_hair.draws_module_hair() else null
+
+
+func hair_module_rig() -> RLHeadRig:
+	return _module_hair_rig()
 
 ## Builds or updates the RL head; false when it cannot be drawn, so the caller
 ## falls back to develop's head. Before the animation import it only records
@@ -1357,19 +1418,11 @@ func _remove_rl_head() -> void:
 			(node_value as MeshInstance3D).visible = bool(node_value.get_meta(RL_HEAD_SHOWN_META))
 			node_value.remove_meta(RL_HEAD_SHOWN_META)
 
-## Crossing High on a live actor (or RL heads switched), and building the head
-## that waited for the animation import: the RL head on or off in place - the
-## game hairstyle is already built under it - then the visibility, the
-## wardrobe cover, the face finishing and the tier, as develop's own in-place
-## switch runs them. Down from High the actor ends exactly as a develop actor
-## switched down; back up it takes its RL head again.
+## Switch head quality independently of hairstyle. Native-head tiers retain
+## the modern hair through its own rig; High uses the combined head/hair rig.
+## Deferred initial modules also enter here after animation import.
 func _switch_rl_head_in_place() -> void:
-	var face: RLHeadAppearance = _rl_head_face(_appearance) if _rl_head_wanted() else null
-	if face == null or not _set_rl_head(face):
-		_rl_head_failed = face != null
-		_remove_rl_head()
-	elif _rl_head != null:
-		_rl_head.set_hair_external(_legacy_hair_style_drawn() > 0 and not _rl_head.draws_module_hair())
+	_apply_rl_head_and_hair(_appearance, _hair_tint)
 	_rl_switching = true
 	_refresh_body_surface_visibility()
 	_refresh_wardrobe_cover()
@@ -1443,12 +1496,16 @@ func hold_portrait_pose(holder: Object) -> void:
 	_portrait_holds[holder.get_instance_id()] = weakref(holder)
 	if _rl_head != null:
 		_rl_head.set_portrait_pose(true)
+	if _rl_hair != null:
+		_rl_hair.set_portrait_pose(true)
 
 func release_portrait_pose(holder: Object) -> void:
 	if holder != null:
 		_portrait_holds.erase(holder.get_instance_id())
 	if _rl_head != null:
 		_rl_head.set_portrait_pose(portrait_pose_held())
+	if _rl_hair != null:
+		_rl_hair.set_portrait_pose(portrait_pose_held())
 
 func portrait_pose_held() -> bool:
 	for key: Variant in _portrait_holds.keys():
@@ -1489,6 +1546,9 @@ func _rl_headwear_hair(model_config: Dictionary) -> String:
 	for piece: Dictionary in _equipment_pieces(str(model_config.get("scene", ""))):
 		if bool(piece.get("covers_hair", false)):
 			return ""
+	var module_rig := _module_hair_rig()
+	if module_rig != null:
+		return module_rig.appearance.hair
 	if _rl_head != null:
 		if _rl_head.draws_module_hair():
 			return _rl_head.appearance.hair
@@ -1555,7 +1615,8 @@ func _rl_headwear_sources(hair: String) -> Array:
 		for piece: Dictionary in _equipment_pieces(torso):
 			sources.append({"key": "torso:%s:%s" % [torso, piece.get("name", "")],
 				"mesh": piece.get("mesh")})
-	var module_hair := _rl_head != null and _rl_head.draws_module_hair()
+	var hair_rig := _module_hair_rig()
+	var module_hair := hair_rig != null
 	if not hair.is_empty() and not module_hair:
 		for holder: Node in _native_skeleton.get_children():
 			if not holder.name.begins_with("AppearanceHair_") or holder.name == RLHeadRig.HAIR_NODE_NAME:
@@ -1564,18 +1625,19 @@ func _rl_headwear_sources(hair: String) -> Array:
 				var hair_mesh := found as MeshInstance3D
 				sources.append({"key": "hair:%s:%s" % [hair, found.name],
 					"mesh": hair_mesh.get_meta(PORTRAIT_GROOM.SOURCE_META, hair_mesh.mesh)})
-	if _rl_head == null:
-		return sources
-	var nodes: Dictionary = _rl_head.mesh_nodes()
 	for group: String in ["head", "hair"]:
 		if group == "hair" and (hair.is_empty() or not module_hair):
 			continue
+		var part_rig: RLHeadRig = _rl_head if group == "head" else hair_rig
+		if part_rig == null:
+			continue
+		var nodes: Dictionary = part_rig.mesh_nodes()
 		var levels: Array = nodes.get(group, []) as Array
 		if levels.is_empty():
 			continue
 		for mesh_node: MeshInstance3D in levels[0]:
 			# The unbaked source: the fits are keyed by part, not by face.
-			sources.append({"key": "%s:%s:%s:%s" % [group, _rl_head.appearance.sex,
+			sources.append({"key": "%s:%s:%s:%s" % [group, part_rig.appearance.sex,
 				hair if group == "hair" else "", mesh_node.name], "mesh": RLHeadRig.source_mesh(mesh_node)})
 	return sources
 
@@ -1670,6 +1732,8 @@ func _apply_render_quality_to_visuals() -> void:
 			HIGH_PORTRAIT.apply(_native_model, _native_skeleton, _appearance, _model_config, _render_quality)
 			HIGH_HAIR.apply(_native_model, _native_skeleton, _appearance, _model_config, _render_quality)
 			STUBBLE_APPEARANCE.apply(_native_model, _appearance, _model_config)
+			if _rl_hair != null:
+				_rl_hair.set_quality(_render_quality)
 		ACTOR_RENDER_QUALITY.apply_actor(_native_model, _render_quality)
 	var fallback := get_node_or_null("MissingModelFallback") as MeshInstance3D
 	if fallback != null:
@@ -4033,9 +4097,8 @@ func _refresh_body_surface_visibility() -> void:
 			mesh_node.visible = true
 	if _native_skeleton != null:
 		var hide_hair: bool = _hidden_body_surfaces.has("hair")
-		# Under an RL hairstyle module the game hairstyle stays built, hidden,
-		# exactly as develop has it for the tiers below (see _rl_head_and_hair).
-		var module_hair := _rl_head != null and _rl_head.draws_module_hair()
+		# Module attachments share the normal headwear visibility contract.
+		var module_hair := _module_hair_rig() != null
 		for node_value: Node in _native_skeleton.get_children():
 			if node_value.name.begins_with("AppearanceHair_"):
 				(node_value as Node3D).visible = not hide_hair and not (module_hair \
