@@ -866,6 +866,50 @@ def _shell_face_clearance(head, P, N, target, iters=6, max_lift=0.004):
     return P
 
 
+def shell_boundary_rows(s, requested=None):
+    """Optional normalized rows; return the original array for old profiles."""
+    if requested is None:return s
+    assert isinstance(requested,(list,tuple)), 'boundary_rows must be a list'
+    assert all(np.isfinite(value) and 0<float(value)<1 for value in requested), 'Boundary rows must be inside (0,1)'
+    return np.unique(np.r_[s,np.asarray(requested,float)]) if requested else s
+
+
+def shell_physical_rings(data,rows,cps,sectors,requested):
+    """Insert physical rim samples along the existing last-row edges.
+
+    UVs and shading parameters interpolate with the geometry. The original
+    boundary stays exactly fixed.
+    """
+    assert isinstance(requested,(list,tuple)) and requested
+    assert all(np.isfinite(value) and float(value)>0 for value in requested), 'Invalid boundary_ring_mm'
+    distances=np.array(sorted(set(map(float,requested)),reverse=True))/1000
+    P,N,UV,T,t,s=data;stride=1+rows*(cps+1);assert len(P)==stride*sectors
+    newP=[];newN=[];newUV=[];newt=[];news=[];faces=[];newrows=rows+len(distances)
+    for sector in range(sectors):
+        start=sector*stride;edge_start=start+1+(rows-1)*(cps+1);inner_start=edge_start-(cps+1)
+        outer=P[edge_start:edge_start+cps+1];inner=P[inner_start:inner_start+cps+1]
+        lengths=np.linalg.norm(outer-inner,axis=1)
+        assert (lengths>distances.max()+1e-9).all(),'Physical rim must fit inside the existing last shell row'
+        end=edge_start;base=len(newP)
+        newP.extend(P[start:end]);newN.extend(N[start:end]);newUV.extend(UV[start:end]);newt.extend(t[start:end]);news.extend(s[start:end])
+        for distance in distances:
+            fraction=1-distance/lengths
+            for source,target in [(P,newP),(N,newN),(UV,newUV)]:
+                a=source[inner_start:inner_start+cps+1];b=source[edge_start:edge_start+cps+1]
+                values=a+(b-a)*fraction[:,None]
+                target.extend(unit(values) if source is N else values)
+            for source,target in [(t,newt),(s,news)]:
+                a=source[inner_start:inner_start+cps+1];b=source[edge_start:edge_start+cps+1];target.extend(a+(b-a)*fraction)
+        newP.extend(P[edge_start:edge_start+cps+1]);newN.extend(N[edge_start:edge_start+cps+1]);newUV.extend(UV[edge_start:edge_start+cps+1]);newt.extend(t[edge_start:edge_start+cps+1]);news.extend(s[edge_start:edge_start+cps+1])
+        for column in range(cps):faces.append([base,base+1+column+1,base+1+column])
+        for row in range(1,newrows):
+            a=base+1+(row-1)*(cps+1);b=base+1+row*(cps+1)
+            for column in range(cps):faces.extend([[a+column,a+column+1,b+column],[a+column+1,b+column+1,b+column]])
+    newP=np.asarray(newP);newT=np.asarray(faces,np.int64)
+    if np.dot(headref.tri_normals(P,T)[0],headref.tri_normals(newP,newT)[0])<0:newT=newT[:,[0,2,1]]
+    return newP,np.asarray(newN),np.asarray(newUV),newT,np.asarray(newt),np.asarray(news)
+
+
 def shell_mesh(scalp, spec, rows, cols, rng=None):
     """Scalp-hugging under-shell bounded by the hairline.
 
@@ -883,6 +927,9 @@ def shell_mesh(scalp, spec, rows, cols, rng=None):
     edge_inset (deg, or [[lon, deg], ...]): the shell edge sits that far OUTSIDE the
     hairline (negative: inside it). face_clear: keep the triangle faces at that
     fraction of offset_mm off the skin (raises the grid where coarse faces dip).
+    boundary_rows: optional normalized rows close to s=1; boundary_ring_mm:
+    optional physical distances along the final last-row edges. The two modes
+    are exclusive. Old profiles keep the exact same grid/UV/colour path.
     Returns P, N, UV, T, t, s (s = 0 at the pole .. 1 at the hairline).
     """
     head = scalp.head
@@ -926,6 +973,9 @@ def shell_mesh(scalp, spec, rows, cols, rng=None):
         rows = len(s) - 1
     else:
         s = np.linspace(0, 1, rows + 1)
+    assert not (spec.get('boundary_rows') and spec.get('boundary_ring_mm')), 'Choose normalized or physical boundary rings'
+    s = shell_boundary_rows(s,spec.get('boundary_rows'))
+    rows = len(s) - 1
     rho = np.radians(s[:, None] * rm[None, :])
     br = np.radians(beta)[None, :]
     dirs = (np.cos(rho)[..., None] * pole + np.sin(rho)[..., None] *
@@ -987,7 +1037,8 @@ def shell_mesh(scalp, spec, rows, cols, rng=None):
         v0 = spec.get('v_start', 0.3)       # skip most of the root-darkening ramp under the pole
         UVa[:, 1] = np.where(sv <= 1 - tb, v0 + sv * (0.84 - v0) / (1 - tb), 0.84 + (sv - (1 - tb)) / tb * 0.15)
     t = UVa[:, 1].copy()
-    return V, Nv, UVa, T, t, sl
+    data=(V,Nv,UVa,T,t,sl)
+    return shell_physical_rings(data,rows,cps,u_rep,spec['boundary_ring_mm']) if spec.get('boundary_ring_mm') else data
 
 
 # =============================================================== sections per lod
