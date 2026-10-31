@@ -85,6 +85,10 @@ func _run() -> void:
 		await _skin_review()
 		quit(0 if failures.is_empty() else 1)
 		return
+	if OS.get_cmdline_user_args().has("--grey-review"):
+		await _grey_review()
+		quit(0 if failures.is_empty() else 1)
+		return
 	var modes: Array = [1] if RenderingServer.get_current_rendering_method() == "gl_compatibility" else [0, 1]
 	for mode: int in modes:
 		RLHeadLibrary.reload_values_switch()
@@ -175,3 +179,24 @@ func _skin_review() -> void:
 		actor.free()
 		await process_frame
 	print("Character skin-age visual review complete: ", out)
+
+func _grey_review() -> void:
+	for sex: String in ["female", "male"]:
+		var base := {"skin": 3 if sex == "female" else 2, "hair": 1, "eyes": 2,
+			"facial_hair": 0 if sex == "female" else 4, "hair_module": 3 if sex == "female" else 2}
+		var actor := STAGE.spawn(stage, sex, base)
+		_quiet(actor)
+		var other := STAGE.spawn(stage, sex, _saved(base, 0, 17), {}, ActorRenderQuality.Quality.HIGH, 9301)
+		_quiet(other)
+		other.hide()
+		STAGE.frame(camera, actor, "front")
+		for grey: int in [0, 50, 100]:
+			actor.apply_appearance_variants(_saved(base, 0, grey))
+			_quiet(actor)
+			_check_carriers(actor, 0, grey)
+			_check_carriers(other, 0, 17)
+			await _capture("grey_review_%s_%d" % [sex, grey])
+		actor.free()
+		other.free()
+		await process_frame
+	print("Character greying review: %d checks, %d failures; %s" % [checks, failures.size(), out])

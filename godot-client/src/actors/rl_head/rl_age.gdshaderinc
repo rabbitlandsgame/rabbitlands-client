@@ -12,8 +12,16 @@ vec2 rl_age_amounts() {
 // coverage. Alpha/keep levels, roots and silhouette are never changed here.
 vec3 rl_grey_colour(vec3 colour, vec2 uv, float amount) {
 	if (amount <= 0.0) { return colour; }
-	float strand = fract(sin(floor(uv.x * 224.0) * 127.1 + 17.4) * 43758.5453);
-	float grey = amount >= 1.0 ? 1.0 : smoothstep(strand - 0.035, strand + 0.035, amount);
+	// Blend every strand gradually. A threshold here produced stark black and
+	// white bands on arbitrary reference UVs, especially around beard seams.
+	float along = uv.x * 112.0;
+	float cell = floor(along);
+	float first = fract(sin(cell * 127.1 + 17.4) * 43758.5453);
+	float next = fract(sin((cell + 1.0) * 127.1 + 17.4) * 43758.5453);
+	float strand = mix(first, next, smoothstep(0.0, 1.0, fract(along))) * 2.0 - 1.0;
+	float resolved = 1.0 - smoothstep(0.3, 1.5, fwidth(along));
+	float variation = 0.075 * 4.0 * amount * (1.0 - amount) * strand * resolved;
+	float grey = clamp(amount + variation, 0.0, 1.0);
 	float lightness = max(max(colour.r, max(colour.g, colour.b)) * 0.95, 0.65);
 	return mix(colour, vec3(0.97, 0.985, 1.0) * lightness, grey);
 }
