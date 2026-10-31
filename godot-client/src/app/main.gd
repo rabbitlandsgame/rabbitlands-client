@@ -6770,7 +6770,7 @@ func _apply_day_night() -> void:
 
 func _apply_lantern_mine_lighting() -> void:
 	lantern_mine_lighting.apply(world_loader.manifest, secret_sections.current_section(),
-		world_environment, world_sun, world_moon, map_light_root)
+		world_environment, world_sun, world_moon, map_light_root, camera_rig.focus)
 
 ## The Graphics tab's "Directional shadows", held over the binders. The map's
 ## bind and the hour both decide whether the sun may cast (an interior's
