@@ -1001,6 +1001,12 @@ var _actor_roster_generation_seen := -1
 ## The statistics window's built parts fall behind the stats packets while
 ## it is hidden; they are rebuilt when it is next shown.
 var _stats_window_stale := true
+## Packet reduction stays immediate; these expensive views use the latest
+## state once per process frame, including a burst of local health updates.
+const CHARACTER_UI_STATS := 1
+const CHARACTER_UI_SPELLS := 2
+const CHARACTER_UI_CRAFTING := 4
+var _character_ui_dirty := 0
 ## The last chat line each log rendered, so a new line can be appended to
 ## it rather than the log rebuilt. See `_append_chat_line`.
 var _chat_tail: Dictionary = {}
@@ -2086,6 +2092,7 @@ func _bind_shared_world() -> void:
 	print_debug("world_binding stage=shared world=", gameplay_world)
 
 func _process(delta: float) -> void:
+	_flush_character_ui_sync()
 	if AppState.authenticated and AppState.inventory_metadata_dirty and Network._link_ready() \
 			and Time.get_ticks_msec() >= _inventory_metadata_at:
 		AppState.inventory_metadata_dirty = false
@@ -6369,26 +6376,25 @@ func _on_state_changed(path: StringName) -> void:
 			_apply_day_night()
 			_sync_diagnostics()
 		&"attributes", &"techniques":
-			_sync_stats()
+			_queue_character_ui_sync(CHARACTER_UI_STATS)
 		&"autocast":
 			_sync_autocast()
 		&"perks", &"perk_catalog":
-			_sync_stats()
+			_queue_character_ui_sync(CHARACTER_UI_STATS)
 			_sync_perk_catalog()
 		&"counters":
 			_sync_counters()
 		&"mix_state":
 			_on_mix_state_changed()
 		&"stats":
-			_sync_stats()
-			_sync_spells()
-			_sync_manufacturing()
+			# Preserve per-award last/max XP while deferring only presentation.
+			_track_experience()
+			_queue_character_ui_sync(CHARACTER_UI_STATS | CHARACTER_UI_SPELLS | CHARACTER_UI_CRAFTING)
 		&"inventory", &"inventory_text", &"inventory_state":
 			if path == &"inventory_text" and manufacturing_panel.visible:
 				manufacturing_server_status = AppState.inventory_text
 			_sync_inventory()
-			_sync_spells()
-			_sync_manufacturing()
+			_queue_character_ui_sync(CHARACTER_UI_SPELLS | CHARACTER_UI_CRAFTING)
 			# The stored side does not change with the backpack, and rebuilding
 			# it for every inventory line and every command 226 cost three full
 			# refreshes per deposit. Only the backpack column follows.
@@ -6417,7 +6423,7 @@ func _on_state_changed(path: StringName) -> void:
 		&"presence":
 			nearby_indicator.show_count(AppState.presence.nearby_hidden)
 		&"experience_state":
-			_sync_stats()
+			_queue_character_ui_sync(CHARACTER_UI_STATS)
 		&"worn_slots", &"degraded_items":
 			# Which slots are worn changes independently of what is in them,
 			# so the icons are redrawn on the mask as well as on the contents.
@@ -6441,7 +6447,7 @@ func _on_state_changed(path: StringName) -> void:
 			if inventory_workspace != null and inventory_workspace.ready_to_layout:
 				inventory_workspace.refresh_actions()
 		&"spells":
-			_sync_spells()
+			_queue_character_ui_sync(CHARACTER_UI_SPELLS)
 		&"selection":
 			_sync_selection()
 		&"combat_state":
@@ -6449,7 +6455,7 @@ func _on_state_changed(path: StringName) -> void:
 			# with the actor packets, so it is re-read here as well: only the
 			# old and the new target can have changed.
 			_sync_overhead_health_for([])
-			_sync_manufacturing()
+			_queue_character_ui_sync(CHARACTER_UI_CRAFTING)
 		&"npc_dialogue":
 			_sync_dialogue()
 		&"popup":
@@ -6466,7 +6472,7 @@ func _on_state_changed(path: StringName) -> void:
 		&"map_markers":
 			_sync_map_markers()
 		&"spell_power":
-			_sync_spells()
+			_queue_character_ui_sync(CHARACTER_UI_SPELLS)
 		&"harvest":
 			_sync_harvest_indicator()
 		&"reading":
@@ -6477,7 +6483,7 @@ func _on_state_changed(path: StringName) -> void:
 			_sync_ground_bag()
 		&"knowledge":
 			_sync_knowledge()
-			_sync_manufacturing()
+			_queue_character_ui_sync(CHARACTER_UI_CRAFTING)
 			_sync_reading()
 
 func _queue_world_sync() -> void:
@@ -6485,6 +6491,21 @@ func _queue_world_sync() -> void:
 		return
 	_world_sync_queued = true
 	_flush_world_sync.call_deferred()
+
+func _queue_character_ui_sync(views: int) -> void:
+	_character_ui_dirty |= views
+
+func _flush_character_ui_sync() -> void:
+	var dirty := _character_ui_dirty
+	_character_ui_dirty = 0
+	if not AppState.authenticated:
+		return
+	if dirty & CHARACTER_UI_STATS:
+		_sync_stats()
+	if dirty & CHARACTER_UI_SPELLS:
+		_sync_spells()
+	if dirty & CHARACTER_UI_CRAFTING:
+		_sync_manufacturing()
 
 func _flush_world_sync() -> void:
 	if not _world_sync_queued:
