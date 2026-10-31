@@ -160,11 +160,16 @@ def joint_groom_clearance(head,P,target_d,names,margin,combos=None):
         result+=radial*step[:,None]
     return result
 
-def build(args):
+def build(args,head_factory=None):
     src=Path(args.source);out=Path(args.out);out.parent.mkdir(parents=True,exist_ok=True)
     spec=json.loads(Path(args.profile).read_text());receipt=json.loads((src/'source.json').read_text())
     if (src/'topology-repair.json').exists():receipt['topology_repair']=json.loads((src/'topology-repair.json').read_text())
-    head=headref.Head(receipt['sex']);scalp=hairgen.Scalp(head,spec.get('hairline'))
+    # Existing callers keep the exact Head implementation. Dense new sources
+    # may supply equivalent bounded queries without changing the fit/write path.
+    head=(headref.Head if head_factory is None else head_factory)(receipt['sex']);scalp=hairgen.Scalp(head,spec.get('hairline'))
+    freeze_shell=spec.get('freeze_shell_grooming',False)
+    if type(freeze_shell) is not bool:raise ValueError('freeze_shell_grooming must be a boolean')
+    checked=args.check or freeze_shell
     fit=json.loads(Path(args.fit).read_text())
     names=head.id_names();grooms=['hl_length_p','hl_length_n','hl_volume_p','hl_volume_n']
     groom_clear=float(spec.get('groom_clearance_mm',3.2))/1000
@@ -280,6 +285,12 @@ def build(args):
             # from the volume-only endpoint (especially beside the ear).
             safe=joint_groom_clearance(head,P+target_d['hl_volume_n'],target_d,names,groom_safe)
             target_d['hl_volume_n']=seam_fix(safe-P)
+        if freeze_shell:
+            # Shared guards may move a cap while correcting the exterior. A
+            # fixed-cap profile must validate its final pinned state instead.
+            for name in grooms:target_d[name][shell_start:]=0.0
+            assert all(np.count_nonzero(target_d[name][shell_start:])==0 for name in grooms)
+            report.setdefault('frozenShellGrooming',{})[f'lod{lod}']={'vertices':len(P)-shell_start,'nonzeroComponents':0}
         colour=np.zeros((len(P),4),np.uint8);colour[:,0]=128;colour[:,1]=np.clip(length_scale*255,0,255).astype(np.uint8);colour[:,2]=230;colour[:,3]=255
         if spec.get('soft_hairline_mm'):
             edge=np.sort(T[(T<ref_n).all(1)][:,[0,1,1,2,2,0]].reshape(-1,2),axis=1)
@@ -302,7 +313,7 @@ def build(args):
             primitives.append(writer.primitive(P[used].astype('f4'),N[used].astype('f4'),UV[used].astype('f4'),inverse.reshape(-1,3),colour[used],joints[used],weights[used],material,[(target_d[n][used],None) for n in names+grooms]))
         meshes.append(writer.mesh(f'hair_lod{lod}',primitives,names+grooms))
         report['lods'][f'lod{lod}']={'tris':len(T),'verts':len(P)}
-        if args.check:
+        if checked:
             combos=assemble.default_combos(names)
             for groom in grooms:
                 for suffix in ('_p','_n'):combos[groom+'+all_id'+suffix]={n:1 for n in names if n.endswith(suffix)}|{groom:1}
@@ -321,7 +332,7 @@ def build(args):
     # checked build silently advance through an automated delivery pipeline.
     if not report['withinBudget']:
         raise SystemExit('Hair exceeds an LOD triangle budget; inspect the saved report')
-    if args.check and any(c['rest']['violations'] or c['morphs']['violatingCases'] for c in report['clearance'].values()):
+    if checked and any(c['rest']['violations'] or c['morphs']['violatingCases'] for c in report['clearance'].values()):
         raise SystemExit('Hair clearance failed; inspect the saved report')
 
 def main():
