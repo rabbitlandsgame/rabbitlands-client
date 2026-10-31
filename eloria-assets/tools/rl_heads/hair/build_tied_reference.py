@@ -137,22 +137,11 @@ def groom_builder(head,scalp,P,names,spec,hull,ranges):
             if not bad.any():break
             indices=near[bad];D[indices]=cp[bad]+n[bad]*(head_margin[indices]+.0006)[:,None]-P[indices]
         delta[name]=shared.body_safe(head,P+D,hull,body_margin)-P
-        if native is not None:
-            safe,_=native.push_out(P+delta[name],native_margin);delta[name]=safe-P
         print('TIED_ID_BOUND',len(PROOFS),name,flush=True)
     near=np.flatnonzero(binding.dist<.05)
     if len(near):
         P[near]=ref.joint_groom_clearance(head,P[near],{n:delta[n][near] for n in names},names,head_margin[near],combos=assemble.default_combos(names))
         P[:]=shared.body_safe(head,P,hull,body_margin)
-    if native is not None:
-        for _ in range(4):
-            largest=0.
-            for case in [{},{n:1 for n in names if n.endswith('_p')},{n:1 for n in names if n.endswith('_n')}]:
-                movement=sum((delta[n]*weight for n,weight in case.items()),np.zeros_like(P))
-                safe,proof=native.push_out(P+movement,native_margin);correction=safe-P-movement
-                largest=max(largest,float(np.linalg.norm(correction,axis=1).max()));P[:]+=correction
-            if largest<1e-7:break
-        native_proofs.append({'stage':'identity_envelope_base','maximum_last_iteration_mm':largest*1000})
     Q,normal=ref.roots(head,scalp,P);distance=np.linalg.norm(P-Q,axis=1)
     cap=np.zeros(len(P),bool);cap[shell]=True;active=np.flatnonzero(~cap)
     d0,d1=ranges['detail'];segments=spec['details']['segments'][min(len(PROOFS),2)];stride=2*(segments+1)
@@ -205,7 +194,10 @@ def groom_builder(head,scalp,P,names,spec,hull,ranges):
         assert not np.any(delta[name][cap])
     native_cases={}
     if native is not None:
-        cases={'rest':{}}|{name:{name:1} for name in names+GROOMS}|assemble.default_combos(names)
+        # Native identities use a different ten-field rest sculpture. Only
+        # evaluated native fixtures with their exact mapped hair controls may
+        # qualify them; arbitrary High-head identity stacks are not that gate.
+        cases={'rest':{}}|{name:{name:1} for name in GROOMS}
         for length in GROOMS[:2]:
             for volume in GROOMS[2:]:cases[length+'+'+volume]={length:1,volume:1}
         for label,mix in cases.items():
