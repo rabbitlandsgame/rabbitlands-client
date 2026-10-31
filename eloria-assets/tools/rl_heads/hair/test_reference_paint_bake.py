@@ -32,6 +32,12 @@ class PaintBakeTests(unittest.TestCase):
         self.assertTrue((image[:,:,3]==255).all());self.assertEqual(receipt['source_alpha_min'],0)
         self.assertEqual(receipt['source_nonopaque_samples'],256)
 
+    def test_normalized_texel_centres_match_gpu_sampling(self):
+        P=np.array([[0,0,0],[1,0,0],[1,1,0],[0,1,0]],float);UV=P[:,:2].copy();T=np.array([[0,1,2],[0,2,3]])
+        source=np.array([[[255,0,0,255],[0,255,0,255]],[[0,0,255,255],[255,255,255,255]]],dtype='u1')
+        image,_=bake_chart_paint(P,UV,T,P,UV,T,source,size=(2,2))
+        np.testing.assert_array_equal(image,source)
+
     def test_overlapping_recipient_charts_fail_closed(self):
         args=list(self.fixture());args[4]=np.tile(np.array([[0,0],[1,0],[1,1],[0,1]],float),(2,1));args[3]=np.vstack([args[3],args[3]+[0,0,.01]])
         args[5]=np.vstack([args[5],args[5]+4])

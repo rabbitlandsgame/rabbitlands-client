@@ -49,7 +49,9 @@ def _linear_rgba(image):
 
 def _sample_rgba(rgba,uv):
     """Bilinear colour sampling in linear light, clamped to the atlas edges."""
-    xy=np.clip(uv,0,1)*np.array([rgba.shape[1]-1,rgba.shape[0]-1])
+    # Normalized GPU texture coordinates address texel centres at (i+.5)/size.
+    xy=np.clip(uv*np.array([rgba.shape[1],rgba.shape[0]])-.5,
+               [0,0],[rgba.shape[1]-1,rgba.shape[0]-1])
     lo=np.floor(xy).astype(int);hi=np.minimum(lo+1,np.array([rgba.shape[1]-1,rgba.shape[0]-1]));f=xy-lo
     samples=(rgba[lo[:,1],lo[:,0]]*(1-f[:,0,None])*(1-f[:,1,None])+
              rgba[lo[:,1],hi[:,0]]*f[:,0,None]*(1-f[:,1,None])+
