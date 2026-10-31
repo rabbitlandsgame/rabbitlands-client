@@ -14,7 +14,7 @@ extends RefCounted
 ##   that interior is built in the background, ready for the map change;
 ##   wandering more than 48 tiles away for a minute drops it. Standing by
 ##   without going in does not (final review 2026-10-27: the Town is ~120 MiB
-##   against the 1.5 GiB budget, and its ten doors ring the town centre where
+##   against the shared cache budget, and its ten doors ring the town centre where
 ##   players linger): a built interior - preloaded, or parked after a visit -
 ##   is let go while the player stays in its area only under memory-budget
 ##   pressure (the kept worlds' estimates over BUDGET_BYTES). One let go while
@@ -44,7 +44,10 @@ const PRELOAD_WAIT_LIMIT_MSEC := 15000
 ## interior is estimated from its textures' pixels (texture_footprint.gd), a
 ## streamed territory by its own budget; the measured figures belong to the
 ## integration run (tests/integration/landfall_town_park.gd).
-const BUDGET_BYTES := 1536 * 1048576
+# The shared underground now includes all regional workings (~1.58 GiB on
+# source fallback). A 1.75 GiB ceiling admits that one world while retaining
+# the same eviction rules; no unbounded preload or texture downgrade.
+const BUDGET_BYTES := 1792 * 1048576
 ## What an interior holds beyond its textures: its geometry, collision and
 ## nodes (the Town's 1,771 nodes and 818 KB shell measured ~26 MiB of RAM).
 const INTERIOR_FLOOR_BYTES := 32 * 1048576

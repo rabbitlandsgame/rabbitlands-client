@@ -2090,8 +2090,15 @@ func _process(delta: float) -> void:
 		if is_instance_valid(trail_actor):
 			quest_trail.update_trail(delta, (trail_actor as Node3D).global_position)
 		_update_map_walk_target()
-		if AppState.actors.has(AppState.local_actor_id) and not _world_input_blocked():
-			exterior_stream.update_position(camera_rig.focus)
+		if AppState.actors.has(AppState.local_actor_id):
+			var film_focus: Node3D = campaign_scene.occlusion_focus()
+			if is_instance_valid(film_focus) and not campaign_cutaway.presenting:
+				# Films move the rendered camera without changing the saved play
+				# rig. Keep their ground resident, including a parked map's return.
+				exterior_stream.update_position(film_focus.global_position)
+			elif not _world_input_blocked():
+				exterior_stream.update_position(camera_rig.focus)
+			# Background travel preparation continues through reading/choices.
 			_observe_world_park()
 		_update_door_labels()
 		_update_door_approach()
@@ -17249,7 +17256,14 @@ func _observe_world_park() -> void:
 		var stream := world_loader.world_root as ContinentChunkStream
 		if stream == null or stream.arrival_ready(adapter.tile_center(tile.x, tile.y)):
 			_world_park_settled = loaded_server_map
-	world_park.observe(loaded_server_map, tile, AppState.map_objects, _world_park_settled == loaded_server_map)
+	var anticipated := PackedStringArray()
+	var rescue: Dictionary = AppState.campaign
+	if bool(rescue.get("active", false)) and str(rescue.get("kind", "")) == "rescue" \
+			and MapRegistry.normalize_server_map_id(loaded_server_map) == "landfall" \
+			and str(rescue.get("rescue", {}).get("stage", "")) in ["choice", "ambush", "injured", "ready", "to_mine", "deferred"]:
+		anticipated.append("landfall_insides")
+	world_park.observe(loaded_server_map, tile, AppState.map_objects,
+		_world_park_settled == loaded_server_map, anticipated)
 
 ## The lantern island's maps, whose packages author their caches, bench and
 ## chart (and, on Cinderbank and Reedway, their resources' pick shapes).
