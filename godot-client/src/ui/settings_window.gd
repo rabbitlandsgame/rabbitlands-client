@@ -1367,6 +1367,16 @@ func add_audio_controls() -> void:
 	# Credits stay at the end, below the controls they describe.
 	page.move_child(page.get_node("AudioCreditsButton"), page.get_child_count() - 1)
 
+func is_jukebox_open() -> bool:
+	var dialog := get_node_or_null("JukeboxWindow") as Window
+	return dialog != null and dialog.visible
+
+func toggle_jukebox() -> void:
+	if is_jukebox_open():
+		(get_node("JukeboxWindow") as Window).hide()
+	else:
+		open_jukebox()
+
 func open_jukebox() -> void:
 	var director := get_tree().root.find_child("AudioDirector", true, false)
 	if director == null: return

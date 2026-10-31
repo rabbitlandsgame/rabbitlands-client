@@ -48,11 +48,45 @@ func _run() -> void:
 	expect(compact.jukebox == box, "The HUD player uses the production jukebox")
 	for key: String in Presets.BUILT_INS:
 		expect(not Presets.preset(key).parts.jukebox.enabled, "The new component preserves the saved/default " + key + " layout")
+		var icons: Dictionary = Presets.preset(key).icons
+		expect(bool(icons.get("JukeboxButton", icons.get("__default", true))), "The jukebox menu icon is available in the " + key + " preset")
 	var old := Presets.preset("heritage")
 	old.parts.erase("jukebox")
 	var migrated := Presets.normalise(old)
 	expect(not migrated.parts.jukebox.enabled and migrated.parts.jukebox.anchor == "bottom_center", "Older HUD profiles gain a disabled player with a usable default position")
+	old.icons = {"__default": false}
+	expect(Presets.normalise(old).icons.JukeboxButton, "Older profiles that hide unknown icons still gain the jukebox menu entry")
+	old.icons["JukeboxButton"] = false
+	expect(not Presets.normalise(old).icons.JukeboxButton, "An explicit choice to hide the jukebox menu icon is preserved")
 	workspace.choose_preset("heritage", true)
+	var menu_button: Button = main.get_node("%JukeboxButton")
+	expect(menu_button in workspace.icon_buttons and menu_button.icon != null and menu_button.text.is_empty(), "The real HUD menu includes the painted jukebox icon")
+	menu_button.pressed.emit()
+	await frames()
+	var menu_window: Window = main.settings_window.get_node_or_null("JukeboxWindow")
+	expect(menu_window != null and menu_window.visible and menu_window.jukebox == box and menu_button.button_pressed, "The menu icon opens the shared jukebox and shows its active state")
+	menu_button.pressed.emit()
+	await frames()
+	expect(not menu_window.visible and not menu_button.button_pressed, "The menu icon toggles the full jukebox closed")
+	menu_button.pressed.emit()
+	await frames()
+	expect(main.settings_window.get_node("JukeboxWindow") == menu_window, "Opening from the menu reuses the existing player window")
+	menu_window.hide()
+	await frames()
+	expect(not menu_button.button_pressed, "Closing the full menu clears the icon's active state")
+	workspace.open_editor()
+	workspace.select_component("utilities")
+	var icon_toggle: CheckBox
+	for row: Control in workspace.details.get_children():
+		if str(row.get_meta("option_caption", "")).begins_with("Jukebox"):
+			icon_toggle = row as CheckBox
+	expect(icon_toggle != null, "The HUD editor lists the jukebox menu icon")
+	if icon_toggle != null:
+		icon_toggle.button_pressed = false
+		await frames()
+		expect(not menu_button.visible, "The HUD editor can hide the jukebox menu icon")
+	workspace.cancel_edit()
+	expect(menu_button.visible, "Cancel restores the jukebox menu icon")
 	workspace.open_editor()
 	workspace.select_component("jukebox")
 	var found := false

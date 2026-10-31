@@ -3419,6 +3419,7 @@ func _configure_unified_settings() -> void:
 			if row_name == "UiScaleRow":
 				page.move_child(row, 0)
 	settings_window.add_audio_controls()
+	_configure_jukebox_button()
 	for category: String in audio_director.category_volumes:
 		settings_window.restore_value("audio_" + category,
 			audio_director.category_volumes[category])
@@ -3597,6 +3598,19 @@ func _on_stats_button_pressed() -> void:
 		stats_tabs.current_tab = 0
 		_sync_stats()
 	_sync_hud_button_states(true)
+
+func _configure_jukebox_button() -> void:
+	var button: Button = %JukeboxButton
+	button.icon = _external_texture("res://assets/ui/menu-icons/jukebox.png")
+	button.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	button.expand_icon = true
+	button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	button.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
+	button.text = ""
+	button.toggle_mode = true
+	button.pressed.connect(func() -> void:
+		settings_window.toggle_jukebox()
+		_sync_hud_button_states(true))
 
 func _configure_service_buttons() -> void:
 	var icons := preload("res://src/ui/service_menu_icons.gd")
@@ -13820,7 +13834,7 @@ func _sync_hud_button_states(force := false) -> void:
 			%EncyclopediaButton, %SpellsButton, %EmotesButton, %QuestButton,
 			%InfoButton, %BuddyButton, %ConsoleButton, %HelpButton,
 			%RangingButton, %MinimapButton, %OptionsButton, %MountsButton, %LeaderboardsButton,
-			%ExchangeButton, %StoragePreviewButton]
+			%ExchangeButton, %StoragePreviewButton, %JukeboxButton]
 	var local_actor: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
 	var sitting: bool = bool(local_actor.get("sitting", false))
 	var stats_open: bool = stats_panel.visible
@@ -13853,7 +13867,8 @@ func _sync_hud_button_states(force := false) -> void:
 		mounts_window != null and bool(mounts_window.call("is_open")),
 		leaderboards_window != null and bool(leaderboards_window.call("is_open")),
 		extension_windows != null and (extension_windows.get("market_panel") as Control).visible,
-		storage_panel.visible]
+		storage_panel.visible,
+		settings_window != null and bool(settings_window.call("is_jukebox_open"))]
 	# Only while the player has not chosen attack mode from the HUD: a mode
 	# they picked stays picked, and Alt must not appear to be what put it there.
 	var attack_preview: bool = _alt_attack_preview and _interaction_mode != "attack"

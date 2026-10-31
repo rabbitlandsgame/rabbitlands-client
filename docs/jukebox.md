@@ -1,6 +1,6 @@
 # Jukebox
 
-Open **Settings → Audio → Open jukebox**. The Moonlit Slate menu includes every music track shipped with the client. Its searchable Library, playlist, and rule editor appear side by side on a wide screen; smaller screens use the Library / Playlists / Rules tabs. Music volume and the main audio switch still apply.
+Click the **gold lyre icon** on the menu bar, or open **Settings → Audio → Open jukebox**. The icon lights while the menu is open. The Moonlit Slate menu includes every music track shipped with the client. Its searchable Library, playlist, and rule editor appear side by side on a wide screen; smaller screens use the Library / Playlists / Rules tabs. Music volume and the main audio switch still apply.
 
 ## Compact HUD player
 
