@@ -92,6 +92,21 @@ def load_hair(path):
         levels.append(parts)
     return {'sex': meta['sex'], 'levels': levels, 'sha256': sha(path)}
 
+class EvaluatedNativeSurface(NativeHeadSurface):
+    """Keep open-cut shading normals from misclassifying distant outside points."""
+    def signed(self, points):
+        distance, closest, normal = super().signed(points)
+        bounds = self.mesh.bounds
+        # A complete three-dimensional actor cannot enclose a point outside
+        # its bounds. Retain the original sign test within that envelope and
+        # for planar authoring fixtures; the geometric distance never changes.
+        if ((bounds[1] - bounds[0]) > 1e-6).all():
+            points = np.asarray(points)
+            outside = ((points < bounds[0] - 1e-9) | (points > bounds[1] + 1e-9)).any(1)
+            distance[outside] = np.abs(distance[outside])
+        return distance, closest, normal
+
+
 def load_fixture(manifest_path, record):
     stage = Path(manifest_path).parent
     points, normals, triangles, offset = [], [], [], 0
@@ -109,7 +124,7 @@ def load_fixture(manifest_path, record):
         points.append(P[ids]); normals.append(N[ids]); triangles.append(inverse.reshape(-1, 3) + offset)
         offset += len(ids)
     assert points, 'No actual native collision surfaces in fixture'
-    return NativeHeadSurface(np.vstack(points), np.vstack(normals), np.vstack(triangles))
+    return EvaluatedNativeSurface(np.vstack(points), np.vstack(normals), np.vstack(triangles))
 
 def interior_samples(points, triangles, minimum_edge_mm=5):
     if not len(triangles): return np.empty((0, 3))

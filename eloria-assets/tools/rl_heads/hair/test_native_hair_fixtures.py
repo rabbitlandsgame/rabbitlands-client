@@ -4,9 +4,29 @@ import tempfile
 import unittest
 from unittest.mock import patch
 import numpy as np
+import trimesh
 import native_hair_fixtures as fixtures
 
 class NativeFixtureChecks(unittest.TestCase):
+    def test_outside_bounds_proof_preserves_distance_despite_cut_normal(self):
+        box=trimesh.creation.box(extents=[2,2,2])
+        normals=np.tile([0.,1,0],(len(box.vertices),1))
+        original=fixtures.NativeHeadSurface(box.vertices,normals,box.faces)
+        evaluated=fixtures.EvaluatedNativeSurface(box.vertices,normals,box.faces)
+        point=np.array([[0.,-3,0]])
+        before=original.signed(point);after=evaluated.signed(point)
+        self.assertLess(before[0][0],0)
+        np.testing.assert_allclose(after[0],np.abs(before[0]))
+        np.testing.assert_array_equal(after[1],before[1]);np.testing.assert_array_equal(after[2],before[2])
+
+    def test_inside_bounds_and_planar_fixture_signs_remain_strict(self):
+        box=trimesh.creation.box(extents=[2,2,2])
+        surface=fixtures.EvaluatedNativeSurface(box.vertices,box.vertex_normals,box.faces)
+        self.assertLess(surface.signed(np.zeros((1,3)))[0][0],0)
+        P=np.array([[-1.,0,0],[1,0,0],[0,1,0]])
+        plane=fixtures.EvaluatedNativeSurface(P,np.tile([0.,0,1],(3,1)),np.array([[0,1,2]]))
+        self.assertLess(plane.signed(np.array([[0.,.25,-.003]]))[0][0],0)
+
     def test_old_native_identity_manifest_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             manifest = Path(directory) / 'manifest.json'
