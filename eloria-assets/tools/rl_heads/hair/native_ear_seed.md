@@ -20,7 +20,7 @@ D1, vertex_receipt = fit_vertices(rest_union, P, targets,
 The successful authoring route then supported all triangle centres/midpoints
 across the nine grooms against the complete evaluated Rest union at a 2.5 mm
 fitting margin, retaining the independent 2 mm production gate. That source's
-three clump LODs converged with a maximum 11.69 mm corrective. Its exact LOD0
+three clump LODs converged with a maximum 11.89 mm corrective (11.69 mm at LOD0). Its exact LOD0
 seed first used the neutral complete fixture at 2.8 mm; LOD1/2 used the complete
 Rest union at 2.6 mm. This is an example, not an automatic setting for other
 families, sexes, head frames or styles. Fine-root attachment, total corrective
