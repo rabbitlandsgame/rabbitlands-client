@@ -2,6 +2,7 @@ extends SceneTree
 ## Baked images match stable IDs and exact protocol looks; no live fallback.
 const Portraits := preload("res://src/ui/creation_base_portraits.gd")
 const Library := preload("res://src/ui/creation_base_library.gd")
+const PC := preload("res://src/actors/portrait_customization.gd")
 var checks := 0
 var failures := 0
 const FIXTURE_PATH := "user://creation_base_portraits_test.json"
@@ -62,7 +63,7 @@ func _check_catalog() -> void:
 	var portraits := Portraits.new()
 	portraits.configure()
 	var textures := {}
-	for protocol: int in [0, 1, 2, 3]:
+	for protocol: int in range(PC.LATEST + 1):
 		var rows := Library.rows(registry, protocol)
 		check(rows.size() == 25, "All 25 looks remain available on PC/%d" % protocol)
 		for row: Dictionary in rows:

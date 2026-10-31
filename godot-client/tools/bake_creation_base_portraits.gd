@@ -7,6 +7,7 @@ extends SceneTree
 const BASES := preload("res://src/ui/creation_base_library.gd")
 const STATIC_PORTRAITS := preload("res://src/ui/creation_base_portraits.gd")
 const PORTRAIT_RENDERER := preload("res://src/ui/leaderboard_portraits.gd")
+const PC := preload("res://src/actors/portrait_customization.gd")
 const OUTPUT := "res://assets/ui/creation_base_portraits/"
 const MANIFEST := "res://data/ui/creation_base_portraits.json"
 const SIZE := 512
@@ -36,7 +37,7 @@ func run() -> void:
 	renderer._viewport.size = Vector2i(SIZE,SIZE)
 	var total := 0
 	var expected_count := -1
-	for protocol: int in [3,2,1,0]:
+	for protocol: int in range(PC.LATEST, -1, -1):
 		var rows: Array[Dictionary] = BASES.rows(registry,protocol)
 		assert(not rows.is_empty(),"The starting-look catalog is empty.")
 		if expected_count < 0:
@@ -67,7 +68,7 @@ func run() -> void:
 				failures.append(id+" PC/"+str(protocol))
 				continue
 			var image := portrait.get_image()
-			var path := OUTPUT + id + ("" if protocol == 3 else "_pc%d" % protocol) + ".png"
+			var path := OUTPUT + id + ("" if protocol == PC.LATEST else "_pc%d" % protocol) + ".png"
 			assert(image != null and image.get_size() == Vector2i(SIZE,SIZE))
 			assert(image.save_png(ProjectSettings.globalize_path(path)) == OK)
 			var model_id := str((registry.get("actorTypes",{}) as Dictionary).get(str(int(row.look.actor_type)),""))

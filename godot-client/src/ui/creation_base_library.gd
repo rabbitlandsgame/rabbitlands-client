@@ -24,7 +24,7 @@ const PUBLIC_DESCRIPTIONS := {
 }
 
 
-static func rows(registry: Dictionary, protocol_version: int = 3) -> Array[Dictionary]:
+static func rows(registry: Dictionary, protocol_version: int = PC.LATEST) -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	var bodies: Dictionary = {}
 	var models: Dictionary = registry.get("models", {})
@@ -69,7 +69,7 @@ static func rows(registry: Dictionary, protocol_version: int = 3) -> Array[Dicti
 			if id.is_empty() or body.is_empty() or body.race != "luminous" \
 					or str(entry.get("sex", "")) != str(body.sex):
 				continue
-			var source: Dictionary = entry.get("appearance_pc3" if protocol_version >= 3 else "appearance_pc2", {})
+			var source := _archetype_appearance(entry, protocol_version)
 			if source.is_empty():
 				continue
 			var source_label := str(entry.get("label", id))
@@ -101,6 +101,17 @@ static func find(entries: Array[Dictionary], id: String) -> Dictionary:
 	return {}
 
 
+## Newer authoring fields may be absent on an older saved starting look.
+## Choose the newest available compatible source before neutralizing fields.
+static func _archetype_appearance(entry: Dictionary, version: int) -> Dictionary:
+	for candidate: int in range(mini(version, PC.LATEST), 1, -1):
+		var source: Variant = entry.get("appearance_pc%d" % candidate)
+		if source is Dictionary and not (source as Dictionary).is_empty():
+			return (source as Dictionary).duplicate(true)
+	var legacy: Variant = entry.get("appearance_pc2", {})
+	return (legacy as Dictionary).duplicate(true) if legacy is Dictionary else {}
+
+
 static func _native_appearance(race: String, sex: String) -> Dictionary:
 	# Race-default skin preserves authored markings. Native crests and mushroom
 	# caps start without an added hairstyle; the editor still offers fitted hair.
@@ -122,7 +133,7 @@ static func _appearance(source: Dictionary, human: bool, version: int) -> Dictio
 	if human and version >= 2:
 		var normalized: Dictionary = PC.normalized(source)
 		for field: String in PC.FIELDS:
-			result[field] = int(normalized[field]) if PC.field_version(field) <= clampi(version, 0, 3) \
+			result[field] = int(normalized[field]) if PC.field_version(field) <= clampi(version, 0, PC.LATEST) \
 				else int(PC.DEFAULTS[field])
 	return result
 

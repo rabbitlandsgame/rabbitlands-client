@@ -50,7 +50,7 @@ func _run() -> void:
 		if str(row.id).begins_with("native_"):
 			native_types[actor_type] = true
 		var appearance: Dictionary = look.appearance
-		check(PC.validate(appearance, 3).get("ok", false), row.id + " is PC/3-valid")
+		check(PC.validate(appearance, PC.LATEST).get("ok", false), row.id + " is valid on the current protocol")
 		for field: String in appearance:
 			check(field in LIBRARY.LEGACY_FIELDS or (actor_type in [0, 1] and field in PC.FIELDS), row.id + " only includes supported cosmetics: " + field)
 		for field: String in ["skin", "eyes", "head", "shirt", "pants", "boots"]:
@@ -98,7 +98,7 @@ func _run() -> void:
 	var raw: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(LIBRARY.ARCHETYPES_PATH))
 	var network := root.get_node("Network")
 	var previous_protocol := int(network.call("appearance_protocol_version"))
-	for version: int in [0, 1, 2, 3]:
+	for version: int in range(PC.LATEST + 1):
 		network.call("_set_appearance_protocol", maxi(1, version))
 		var versioned: Array[Dictionary] = LIBRARY.rows(registry, version)
 		check("cornrows" in LIBRARY.find(versioned, "human_01").search_text \
@@ -122,12 +122,13 @@ func _run() -> void:
 						check(int(row.look.appearance[field]) == int(PC.DEFAULTS[field]), "%s PC/%d neutralizes unsupported %s" % [row.id, version, field])
 		for original: Dictionary in raw.archetypes:
 			var found := LIBRARY.find(versioned, original.id)
-			var expected: Dictionary = original.appearance_pc3 if version >= 3 else original.appearance_pc2
+			var expected: Dictionary = LIBRARY._archetype_appearance(original, version)
 			for field: String in LIBRARY.LEGACY_FIELDS:
 				check(int(found.look.appearance[field]) == int(expected.get(field, 0)), "%s PC/%d preserves the saved palette byte %s" % [original.id, version, field])
 			for field: String in PC.FIELDS:
 				if version >= 2 and PC.field_version(field) <= version:
-					check(int(found.look.appearance[field]) == int(expected[field]), "%s PC/%d preserves saved cosmetic %s" % [original.id, version, field])
+					check(int(found.look.appearance[field]) == int(expected.get(field, PC.DEFAULTS[field])), "%s PC/%d preserves saved cosmetic %s" % [original.id, version, field])
+	_check_age_sources()
 	network.call("_set_appearance_protocol", previous_protocol)
 	check(JSON.stringify(registry) == before, "Catalog does not mutate the registry")
 	var pristine: Array[Dictionary] = LIBRARY.rows(registry)
@@ -145,3 +146,21 @@ func _run() -> void:
 	check(LIBRARY.rows(incomplete).size() == 5, "Only the valid body's native, study and qualified bases remain")
 	print("creation base library: %d choices, %d failures" % [pristine.size(), failures.size()])
 	quit(0 if failures.is_empty() else 1)
+
+
+func _check_age_sources() -> void:
+	var old := {"skin": 2, "hair_length": 62}
+	var aged := {"skin": 2, "hair_length": 62, "skin_age": 73, "hair_grey": 41, "hair_tie_height": 67}
+	var fixture := {"appearance_pc2": {"skin": 1}, "appearance_pc3": old, "appearance_pc4": aged}
+	check(LIBRARY._archetype_appearance(fixture, 4) == aged, "PC/4 selects the saved aging and placement source")
+	check(LIBRARY._archetype_appearance(fixture, 3) == old, "PC/3 retains its exact saved source")
+	check(LIBRARY._archetype_appearance(fixture, 1) == fixture.appearance_pc2, "Legacy creation retains its historical source")
+	check(LIBRARY._archetype_appearance({"appearance_pc3": old}, 4) == old, "PC/4 falls back to an existing PC/3 base")
+	check(LIBRARY._archetype_appearance({"appearance_pc2": old, "appearance_pc4": []}, 4) == old, "An invalid newer source does not hide an older valid base")
+	var current := LIBRARY._appearance(aged, true, 4)
+	for field: String in ["skin_age", "hair_grey", "hair_tie_height"]:
+		check(int(current[field]) == int(aged[field]), "Current creation preserves " + field)
+		check(int(LIBRARY._appearance(aged, true, 3)[field]) == int(PC.DEFAULTS[field]), "Older creation neutralizes " + field)
+		check(not LIBRARY._appearance(aged, false, 4).has(field), "Other races do not acquire Human " + field)
+	current.skin_age = 1
+	check(fixture.appearance_pc4.skin_age == 73, "A selected base cannot mutate the saved age source")
