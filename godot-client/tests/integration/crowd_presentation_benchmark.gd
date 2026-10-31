@@ -431,6 +431,9 @@ func _set_up_main() -> void:
 	_main = scene.instantiate() as Control
 	root.add_child(_main)
 	await process_frame
+	# Main has restored its saved cap. Establish the benchmark cap before any
+	# arrival can capture it for temporary shader warm-up and later restoration.
+	Engine.max_fps = _fps_cap
 	_app_state = root.get_node_or_null("/root/AppState")
 	if not _expect(_app_state != null, "AppState is available"):
 		_main = null

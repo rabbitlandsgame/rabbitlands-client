@@ -8,6 +8,7 @@ func _init() -> void:
 	_run.call_deferred()
 
 func _run() -> void:
+	var boot_msec := Time.get_ticks_msec()
 	var isolated := OS.get_environment("ELORIA_CAMERA_PROBE_USER_ROOT")
 	var report := OS.get_environment("ELORIA_CAMERA_PROBE_REPORT")
 	if isolated.is_empty() or not OS.get_user_data_dir().begins_with(isolated.trim_suffix("/") + "/") \
@@ -15,8 +16,25 @@ func _run() -> void:
 		push_error("Use an isolated user root, a report path and a rendered display.")
 		quit(1)
 		return
+	# Only supported Graphics controls may vary. Seed the texture tier before
+	# loading main: changing its preference later cannot change this session.
+	var overrides: Dictionary = {}
+	if OS.has_environment("ELORIA_CAMERA_PROBE_GRAPHICS"):
+		var parsed: Variant = JSON.parse_string(OS.get_environment("ELORIA_CAMERA_PROBE_GRAPHICS"))
+		if not parsed is Dictionary:
+			push_error("ELORIA_CAMERA_PROBE_GRAPHICS must be a JSON object.")
+			quit(1)
+			return
+		overrides = parsed
+	for key: String in overrides:
+		if key not in ["render_scale", "map_texture_quality", "quality", "shadows",
+				"decorative_grass", "crowd_bodies", "swaying_capes", "particles"]:
+			push_error("Unsupported camera probe Graphics setting: " + key)
+			quit(1)
+			return
 	var config := ConfigFile.new()
-	var preferences := {"renderer": "gl_compatibility", "map_texture_quality": "half"}
+	var preferences := {"renderer": RenderingServer.get_current_rendering_method(),
+		"map_texture_quality": overrides.get("map_texture_quality", "half")}
 	for key: String in preferences:
 		config.set_value("graphics", key, preferences[key])
 	config.save("user://eloria_hud.cfg")
@@ -30,11 +48,20 @@ func _run() -> void:
 	root.add_child(main)
 	await process_frame
 	main.call("_apply_performance_preset")
+	for key: String in overrides:
+		var value: Variant = overrides[key]
+		if key == "quality":
+			value = load("res://src/world/look/look_profile.gd").quality_named(str(value))
+		main.call("_on_client_setting_changed", "Graphics", key, value)
+	if OS.has_environment("ELORIA_CAMERA_PROBE_MINIMAP"):
+		main.call("_on_client_setting_changed", "HUD", "minimap_visible",
+			OS.get_environment("ELORIA_CAMERA_PROBE_MINIMAP") == "show")
 	var frame_cap := int(OS.get_environment("ELORIA_CAMERA_PROBE_FPS")) \
 		if OS.has_environment("ELORIA_CAMERA_PROBE_FPS") else 60
 	main.call("_on_client_setting_changed", "Graphics", "fps_limit", frame_cap)
 	var vsync := "on" if OS.get_environment("ELORIA_CAMERA_PROBE_VSYNC") == "on" else "off"
 	main.call("_on_client_setting_changed", "Graphics", "vsync_mode", vsync)
+	var main_ready_msec := Time.get_ticks_msec()
 	var rig: Node3D = main.get("camera_rig")
 	rig.set("distance", 14.0)
 	var pitch := float(OS.get_environment("ELORIA_CAMERA_PROBE_PITCH")) \
@@ -56,6 +83,7 @@ func _run() -> void:
 	main.get("game_view").show()
 	var curtain: CanvasLayer = main.get("arrival_curtain")
 	curtain.call("begin", "Camera test")
+	var requested := Time.get_ticks_msec()
 	main.call("_load_server_map")
 	main.call("_sync_world")
 	var started := Time.get_ticks_msec()
@@ -69,17 +97,25 @@ func _run() -> void:
 	var warmup: Dictionary = main.get("camera_shader_warmup").snapshot()
 	var restored_cap := Engine.max_fps
 	var restored_vsync := DisplayServer.window_get_vsync_mode()
-	Engine.max_fps = 0 # Compare rotation frame costs without the loading cap.
+	var rotation_cap := int(OS.get_environment("ELORIA_CAMERA_PROBE_ROTATION_FPS"))
+	Engine.max_fps = clampi(rotation_cap, 0, 240) # Default: uncapped frame costs.
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 	# Let background scenery finish before attributing a hitch to rotation.
+	var load_only := OS.get_environment("ELORIA_CAMERA_PROBE_LOAD_ONLY") == "1"
 	var settled := Time.get_ticks_msec()
-	while Time.get_ticks_msec() - settled < 30000:
+	while not load_only and Time.get_ticks_msec() - settled < 30000:
 		await process_frame
 	var viewport: SubViewport = main.get("main_viewport")
 	RenderingServer.viewport_set_measure_render_time(viewport.get_viewport_rid(), true)
+	for frame: int in 3:
+		await process_frame
 	var turns := []
-	for turn: int in 3:
+	for turn: int in (0 if load_only else 3):
 		var times: Array[float] = []
+		var gpu_times: Array[float] = []
+		var cpu_times: Array[float] = []
+		var draw_calls: Array[float] = []
+		var primitives: Array[float] = []
 		var spikes := []
 		for yaw: int in 360:
 			var tick := Time.get_ticks_usec()
@@ -88,19 +124,140 @@ func _run() -> void:
 			await process_frame
 			var elapsed := (Time.get_ticks_usec() - tick) / 1000.0
 			times.append(elapsed)
+			gpu_times.append(RenderingServer.viewport_get_measured_render_time_gpu(viewport.get_viewport_rid()))
+			cpu_times.append(RenderingServer.viewport_get_measured_render_time_cpu(viewport.get_viewport_rid()))
+			draw_calls.append(float(viewport.get_render_info(Viewport.RENDER_INFO_TYPE_VISIBLE,
+				Viewport.RENDER_INFO_DRAW_CALLS_IN_FRAME)))
+			primitives.append(float(viewport.get_render_info(Viewport.RENDER_INFO_TYPE_VISIBLE,
+				Viewport.RENDER_INFO_PRIMITIVES_IN_FRAME)))
 			if elapsed > 33.3:
-				spikes.append({"yaw": yaw, "ms": elapsed})
+				spikes.append({"yaw": yaw, "ms": elapsed, "at_msec": Time.get_ticks_msec(), "gpu_ms": gpu_times[-1],
+					"render_cpu_ms": cpu_times[-1],
+					"process_ms": Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
+					"physics_ms": Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0})
 		times.sort()
-		turns.append({"turn": turn, "median_ms": times[180], "p95_ms": times[342],
-			"p99_ms": times[356], "max_ms": times[359], "spikes": spikes})
+		turns.append({"turn": turn, "median_ms": times[179], "p95_ms": times[341],
+			"p99_ms": times[356], "max_ms": times[359], "spikes": spikes,
+			"mean_ms": _mean(times), "gpu_mean_ms": _mean(gpu_times),
+			"render_cpu_mean_ms": _mean(cpu_times), "draw_calls_mean": _mean(draw_calls),
+			"primitives_mean": _mean(primitives)})
 		print("camera_rotation_probe ", JSON.stringify(turns[-1]))
+	config.load("user://eloria_hud.cfg")
+	var settings := {}
+	for key: String in ["quality", "render_scale", "map_texture_quality", "shadows",
+			"decorative_grass", "crowd_bodies", "swaying_capes", "particles"]:
+		settings[key] = config.get_value("graphics", key)
 	var result := {"renderer": RenderingServer.get_current_rendering_method(),
 		"adapter": RenderingServer.get_video_adapter_name(), "viewport": str(viewport.size),
+		"window": str(root.size), "actual_render_scale": viewport.scaling_3d_scale,
+		"active_texture_skip": load("res://src/world/graphics_options.gd").active_texture_skip(),
+		"settings": settings, "minimap_visible": main.get("minimap_frame").visible,
+		"sun_shadows_enabled": main.get("world_sun").shadow_enabled,
+		"video_memory_bytes": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_VIDEO_MEM_USED),
+		"static_memory_bytes": Performance.get_monitor(Performance.MEMORY_STATIC),
+		"main_setup_ms": main_ready_msec - boot_msec,
+		"synchronous_map_setup_ms": started - requested,
+		"map_request_to_ready_ms": started + arrival_ms - requested,
+		"arrival_complete_msec": started + arrival_ms,
 		"warmup_enabled": OS.get_environment("ELORIA_CAMERA_SHADER_WARMUP") != "0",
 		"arrival_ms": arrival_ms, "warmup": warmup, "requested_fps_cap": frame_cap,
 		"restored_fps_cap": restored_cap, "restored_vsync": restored_vsync,
 		"requested_vsync": vsync, "pitch": pitch, "turns": turns}
-	FileAccess.open(report, FileAccess.WRITE).store_string(JSON.stringify(result, "  "))
+	result["rotation_fps_cap"] = Engine.max_fps
+	result["probe_mode"] = "arrival_only" if load_only else "arrival_and_rotation"
+	if ResourceLoader.exists("res://src/actors/wardrobe_dye_cache.gd"):
+		result["wardrobe_cache"] = load("res://src/actors/wardrobe_dye_cache.gd").stats()
+	# Read back derived atlas bytes only after all timed turns. Comparing these
+	# hashes across processes checks the real actor's cache-on/off texture parity.
+	var texture_hashes: Array[String] = []
+	var seen_textures := {}
+	for raw_texture: Variant in ReplicatedActor3D._wardrobe_texture_cache.values():
+		var texture := raw_texture as Texture2D
+		if texture == null or seen_textures.has(texture.get_instance_id()):
+			continue
+		seen_textures[texture.get_instance_id()] = true
+		var pixels := texture.get_image()
+		var digest := HashingContext.new()
+		digest.start(HashingContext.HASH_SHA256)
+		digest.update(var_to_bytes([pixels.get_width(), pixels.get_height(), pixels.get_format(),
+			pixels.has_mipmaps(), pixels.get_mipmap_count()]))
+		digest.update(pixels.get_data())
+		texture_hashes.append(digest.finish().hex_encode())
+	texture_hashes.sort()
+	result["wardrobe_texture_hashes"] = texture_hashes
 	await RenderingServer.frame_post_draw
 	root.get_texture().get_image().save_png(report + ".png")
+	result["teardown"] = await _tear_down(main, state)
+	FileAccess.open(report, FileAccess.WRITE).store_string(JSON.stringify(result, "  "))
+	if not result.teardown.ready:
+		push_error("Camera probe teardown timed out; owning runner must terminate it.")
+		while true:
+			await process_frame
 	quit()
+
+func _mean(values: Array[float]) -> float:
+	return values.reduce(func(total: float, value: float) -> float: return total + value, 0.0) / values.size()
+
+## Like the crowd harness, keep rendering/physics alive until private imports,
+## retirements and grounding callbacks drain. Early loading-only exits otherwise
+## free the engine while a streamed map worker can still be using its services.
+func _tear_down(main: Node, state: Node) -> Dictionary:
+	var started := Time.get_ticks_msec()
+	var deadline := started + 60000
+	Engine.max_fps = 60
+	state.set("authenticated", false)
+	state.set("local_actor_id", -1)
+	state.set("actors", {})
+	state.set("current_map", "")
+	main.set_process(false)
+	main.set_physics_process(false)
+	main.set("_world_sync_queued", false)
+	main.set("_spawn_backlog", false)
+	main.set("_deferred_map_load", false)
+	main.get("character_intro").cancel()
+	main.get("respawn_prewarm").discard()
+	main.get("gauntlet_prewarm").discard()
+	RLHeadLibrary.cancel_warm()
+	var actor_warmup: RefCounted = main.get("actor_resource_warmup")
+	actor_warmup.call("clear")
+	var park: Node = main.get("world_park")
+	park.call("clear")
+	var exterior: Node = main.get("exterior_stream")
+	exterior.call("clear")
+	var loader: Node = main.get("world_loader")
+	var phases := []
+	for stage: String in ["workers", "unload", "free"]:
+		if stage == "unload":
+			main.process_mode = Node.PROCESS_MODE_DISABLED
+			main.call("_clear_world_presentation")
+			park.call("release_now")
+		elif stage == "free":
+			main.queue_free()
+		var stable := 0
+		var pending := 0
+		while stable < 2 and Time.get_ticks_msec() < deadline:
+			await physics_frame
+			await process_frame
+			pending = 0
+			if is_instance_valid(main):
+				for child: Node in main.find_children("*", "", true, false):
+					if child is ContinentChunkStream:
+						child.pause_streaming()
+						pending += int(not child.can_retire()) + (child.get("_retiring") as Array).size()
+				pending += int((main.call("surface_work_snapshot") as Dictionary).get("pending", 0))
+				pending += int(main.get("_actor_surface_snap_pending"))
+			if is_instance_valid(loader):
+				pending += int(int(loader.get("_cache_write_countdown")) > 0)
+			for raw_thread: Variant in NativeAnimationImporter._prewarming.values():
+				var thread := raw_thread as Thread
+				pending += int(thread != null and thread.is_alive())
+			pending += ContinentChunkStream.reap_orphans()
+			pending += int(is_instance_valid(exterior) and not bool(exterior.call("is_idle")))
+			pending += int(is_instance_valid(park) and not bool(park.call("is_idle")))
+			pending += int(not bool(actor_warmup.call("is_idle"))) + int(RLHeadLibrary.warming())
+			pending += int(stage == "free" and is_instance_valid(main))
+			stable = stable + 1 if pending == 0 else 0
+		phases.append({"stage": stage, "pending": pending, "stable_frames": stable})
+		if stable < 2:
+			return {"ready": false, "phases": phases, "milliseconds": Time.get_ticks_msec() - started}
+	return {"ready": true, "phases": phases, "milliseconds": Time.get_ticks_msec() - started}
