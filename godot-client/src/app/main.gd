@@ -157,6 +157,7 @@ const MapViewScript := preload("res://src/world/map_view.gd")
 const MapMarkerOverlayScript := preload("res://src/ui/map_marker_overlay.gd")
 const ContinentMapScript := preload("res://src/ui/continent_map.gd")
 const MinimapMarkerOverlayScript := preload("res://src/ui/minimap_marker_overlay.gd")
+const MapActorMarkerCacheScript := preload("res://src/ui/map_actor_marker_cache.gd")
 const NearbyIndicatorScript := preload("res://src/ui/nearby_indicator.gd")
 const InterestProtocol := preload("res://src/network/interest_protocol.gd")
 const PlayerInfoPanelScript := preload("res://src/ui/player_info_panel.gd")
@@ -429,6 +430,7 @@ var start_screen_backdrop: Control
 @onready var login_logo: TextureRect = %LoginLogo
 
 var actor_nodes: Dictionary = {}
+var _map_actor_marker_cache := MapActorMarkerCacheScript.new()
 var ground_bag_nodes: Dictionary = {}
 ## The click-to-walk crosses currently collapsing, keyed by destination tile
 ## so a re-click restarts a tile's mark instead of stacking a brighter copy.
@@ -580,6 +582,7 @@ var cartography: Dictionary = {}
 var cartography_regions: Array = []
 ## Region outlines in continent picture pixels, for which territory a map click is on.
 var _region_polygons: Array[Array] = []
+var _region_polygon_sources: Array = []
 ## The continent picture and the regions' tab maps are decoded the first
 ## time the map window opens, not at startup: the continent alone is a
 ## 1600-pixel image nobody sees before pressing Tab.
@@ -596,6 +599,12 @@ var _tab_map_textures: Dictionary = {}
 ## The wider overview uses the small images warmed in _tab_map_textures.
 var _tab_map_detail_textures: Dictionary = {}
 var _map_detail_visible: Dictionary = {}
+## Ownership samples depend on the map views, not on moving actor dots. Keep
+## the last query only; picture/cartography binds invalidate it explicitly.
+var _map_detail_query_signature: Array = []
+var _map_detail_query_regions: Array = []
+var _map_detail_query_polygon_count := -1
+var _map_detail_query_visible: Dictionary = {}
 ## Which region the big map is showing as a preview, or -1 for none, with
 ## that map's own adapter so the cursor can name the tile under it.
 var _preview_region_index := -1
@@ -1640,7 +1649,7 @@ func _ready() -> void:
 		if not detail.is_empty() and detail.get("worldMin") == tab_map.get("worldMin") \
 				and detail.get("worldMax") == tab_map.get("worldMax"):
 			tab_map["detail"] = detail
-	_region_polygons.clear()
+	_invalidate_cartography_ownership_cache()
 	invasion_assistant_window.configure_cartography(cartography_regions)
 	Diagnostics.startup_stage("equipment_catalogue")
 	equipment_config = preload(
@@ -4654,6 +4663,7 @@ func _clear_world_presentation(retain_map_resources := false) -> void:
 		if is_instance_valid(raw_node):
 			(raw_node as Node).queue_free()
 	actor_nodes.clear()
+	_map_actor_marker_cache.clear()
 	crowd.clear()
 	_built_bodies = 0
 	for raw_bag_node: Variant in ground_bag_nodes.values():
@@ -5953,8 +5963,10 @@ func _cartography_frame(index: int) -> String:
 
 ## A region's outline in continent picture pixels, built once per cartography.
 func _region_polygon_components(index: int) -> Array[PackedVector2Array]:
-	if _region_polygons.size() != cartography_regions.size():
+	if not is_same(_region_polygon_sources, cartography_regions) \
+			or _region_polygons.size() != cartography_regions.size():
 		_region_polygons.clear()
+		_region_polygon_sources = cartography_regions
 		for region_value: Variant in cartography_regions:
 			var row: Dictionary = region_value as Dictionary
 			_region_polygons.append(CartographyOwnershipGeometry.polygons(
@@ -8518,6 +8530,7 @@ func _remove_map_picture() -> void:
 	_sync_map_background_pictures()
 
 func _sync_map_background_pictures() -> void:
+	_invalidate_map_detail_query()
 	var pictures: Array[Dictionary] = []
 	# Neighbors draw first; the current region owns overlapping pixels.
 	for map_id: String in _neighbour_pictures:
@@ -10096,22 +10109,47 @@ func _tab_map_detail_texture(region: Dictionary) -> Texture2D:
 ## the visible ground's owners, keeping a bounded set of up to five regions.
 func _update_map_detail_levels() -> void:
 	if _neighbour_pictures.is_empty():
+		_invalidate_map_detail_query()
 		return
-	var wanted := {MapRegistry.normalize_server_map_id(AppState.current_map): true}
+	var current_map_id := MapRegistry.normalize_server_map_id(AppState.current_map)
 	var views: Array[Array] = []
 	if full_map.visible and map_image.visible and _full_map_zoom < 1.0:
 		views.append([full_map_camera, full_map_viewport.size])
 	if minimap_frame.visible:
 		views.append([map_camera, map_viewport.size])
+	# Key the actual ownership inputs. In particular, camera height does not
+	# affect the XZ samples, while orientation, pan, zoom and aspect changes do.
+	var continent: Dictionary = cartography.get("continent", {}) if cartography is Dictionary else {}
+	var active_region_index := _region_index_for_map(current_map_id)
+	var active_region: Dictionary = cartography_regions[active_region_index] if active_region_index >= 0 else {}
+	var query: Array = [current_map_id, cartography_regions.size(),
+		(continent.get("originMetres", []) as Array).duplicate(),
+		float(continent.get("metresPerPixel", 0.0)),
+		(active_region.get("globalTranslation", []) as Array).duplicate(),
+		str(active_region.get("frame", ""))]
+	var samples: Array[Vector3] = []
 	for view: Array in views:
 		var camera: Camera3D = view[0]
+		query.append(camera.get_instance_id())
+		query.append(view[1])
 		for fraction: Vector2 in [Vector2(.5, .5), Vector2(.1, .1), Vector2(.9, .1),
 				Vector2(.1, .9), Vector2(.9, .9), Vector2(.5, .1), Vector2(.5, .9),
 				Vector2(.1, .5), Vector2(.9, .5)]:
-			var owner := _map_owning_point(camera.project_ray_origin(Vector2(view[1]) * fraction))
-			if not owner.is_empty() and wanted.size() < 5:
-				wanted[owner] = true
+			var point := camera.project_ray_origin(Vector2(view[1]) * fraction)
+			samples.append(point)
+			query.append(Vector2(point.x, point.z))
+	if is_same(cartography_regions, _map_detail_query_regions) \
+			and _region_polygons.size() == _map_detail_query_polygon_count \
+			and _map_detail_visible == _map_detail_query_visible \
+			and query == _map_detail_query_signature:
+		return
+	var wanted := {current_map_id: true}
+	for point: Vector3 in samples:
+		var owner := _map_owning_point(point)
+		if not owner.is_empty() and wanted.size() < 5:
+			wanted[owner] = true
 	if wanted == _map_detail_visible:
+		_remember_map_detail_query(query)
 		return
 	_map_detail_visible = wanted
 	for map_id: String in _neighbour_pictures:
@@ -10129,6 +10167,27 @@ func _update_map_detail_levels() -> void:
 	for key: String in _tab_map_detail_textures.keys():
 		if not wanted.has(key) and key != str((cartography_regions[_preview_region_index] as Dictionary).get("serverMap", "") if _preview_region_index >= 0 else ""):
 			_tab_map_detail_textures.erase(key)
+	_remember_map_detail_query(query)
+
+## Cartography is loaded at startup. Any later in-place ownership edits must
+## invalidate both the existing polygon cache and the sampled-view memo.
+func _invalidate_cartography_ownership_cache() -> void:
+	_region_polygons.clear()
+	_region_polygon_sources = []
+	_invalidate_map_detail_query()
+
+func _invalidate_map_detail_query() -> void:
+	_map_detail_query_signature = []
+	# This is an identity reference to the live region array; never clear it.
+	_map_detail_query_regions = []
+	_map_detail_query_polygon_count = -1
+	_map_detail_query_visible = {}
+
+func _remember_map_detail_query(query: Array) -> void:
+	_map_detail_query_signature = query
+	_map_detail_query_regions = cartography_regions
+	_map_detail_query_polygon_count = _region_polygons.size()
+	_map_detail_query_visible = _map_detail_visible.duplicate()
 
 ## A region's name as the cartography writes it, for a line the player reads.
 func _region_name_for_map(server_map: String) -> String:
@@ -11038,6 +11097,7 @@ func _apply_minimap_shape() -> void:
 ## switch is read in one place rather than in five.
 func _collect_minimap_marks() -> Array[Dictionary]:
 	var marks: Array[Dictionary] = []
+	_map_actor_marker_cache.retain(actor_nodes)
 	var service_names := {}
 	for service: Dictionary in _current_service_records():
 		service_names[str(service.get("name", "")).to_lower()] = true
@@ -11067,9 +11127,7 @@ func _collect_minimap_marks() -> Array[Dictionary]:
 			continue
 		if int(dto.get("kind", 0)) == 2 and service_names.has(str(dto.get("name", "")).to_lower()):
 			continue
-		marks.append({"position": actor.global_position,
-			"type": _minimap_actor_type(dto),
-			"colour": ReplicatedActor3D.map_dot_colour(dto)})
+		marks.append(_map_actor_marker_cache.mark(actor_id, actor.global_position, dto))
 	for raw_object: Variant in map_object_nodes.values():
 		if not is_instance_valid(raw_object):
 			continue
@@ -11267,14 +11325,7 @@ func _collect_map_waypoints() -> Array[Dictionary]:
 ## decided by `ReplicatedActor3D` from the same two fields; this only decides
 ## which of the marker-type switches turns it off.
 static func _minimap_actor_type(dto: Dictionary) -> StringName:
-	var kind: int = int(dto.get("kind", 0))
-	if kind == ReplicatedActor3D.CREATURE_ACTOR_KIND:
-		return (&"invasion" if int(dto.get("name_colour", 0))
-			== ReplicatedActor3D.INVASION_NAME_COLOUR else &"creature")
-	# EL's HUMAN, COMPUTER_CONTROLLED_HUMAN and PKABLE_HUMAN. Everything else
-	# the server replicates and does not call a creature is scenery: a trader,
-	# a guard, a gate warden.
-	return &"player" if kind in [1, 3, 4] else &"npc"
+	return MapActorMarkerCacheScript.actor_type(dto)
 
 func _on_minimap_frame_gui_input(event: InputEvent) -> void:
 	if _handle_minimap_drag(event):

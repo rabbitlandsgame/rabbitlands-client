@@ -373,6 +373,52 @@ the frame cap and VSync before map loading, and requires actual VSync-off,
 requested cap, completed 240×2 warming and no active arrival/head warming at
 both sample boundaries. Short rendered smoke checks precede accepted runs.
 
+## Minimap refresh reuse on K620 (2026-10-31)
+
+Main now reuses a data-only marker dictionary per actor, updating the drawn
+node's position on every collection. Style decisions use the same actor kind,
+name colour and canonical colour function. The existing visibility, living,
+local-player and service-duplicate filters remain in Main, including dots for
+deferred bodies. Cached actor records are bounded to the current population plus
+32; styles are bounded to 64, and world teardown clears both.
+
+Neighbour-detail selection also reuses its last ownership result when the
+actual camera samples and cartography inputs are unchanged. Pan, rotation,
+zoom, viewport changes and picture rebinding invalidate that result. The native
+projection/clipping, ownership rules, 66 ms refresh cadence and direct 2D
+backgrounds remain unchanged. Explicit in-place ownership edits must call
+`_invalidate_cartography_ownership_cache()` to clear both ownership caches.
+
+Three planned before/after pairs used six fresh processes, in AB/BA/AB order,
+with the same 500-creature cohort and `performance-60` configuration above.
+All six retained full 240-view, two-draw warming and passed pre/post-sample
+pacing, cohort, source/asset/engine identity and teardown checks. The
+[refresh trial record](../../docs/qa/linux-minimap-refresh-trials-2026-10-31.json)
+preserves each pair and its body census.
+
+| Pair | Map CPU mean, before → after | Map CPU p95, before → after | Built bodies, before → after |
+| --- | ---: | ---: | ---: |
+| AB | 1.086 → .815 ms | 4.542 → 3.462 ms | 78 → 75 |
+| BA | 1.073 → .797 ms | 4.617 → 3.445 ms | 77 → 78 |
+| AB | 1.078 → .783 ms | 4.684 → 3.308 ms | 74 → 79 |
+
+The median map CPU mean fell 26.1% (1.078 → .797 ms per frame), and its p95
+fell 25.4% (4.617 → 3.445 ms). Median Main processing fell 5.804 → 5.591 ms.
+Delivered FPS remained approximately 60: 60.064 → 60.168 median. The declared
+five-body tolerance is not identical model membership; these trials establish
+repeated map CPU savings, not a causal whole-frame FPS or memory improvement.
+The map timer excludes deferred canvas work. Root UI captures retain the 2D
+background and dense dots; the third pair was also inspected visually.
+
+These remain source-project screening runs over extracted release imports,
+based on `4b2bad69f`, with only Main differing between variants and the new
+helper present in both. Later remote cape changes were integrated separately
+and checked headlessly. Actor-cache integration passed 1,181 checks and detail
+memoization passed 81, with existing map projection, background, marker,
+presence and section-privacy regressions also passing. A separate affine
+projection experiment was discarded: the small microbenchmark saving changed
+exact edge clipping. No shader warming or loading policy changed.
+
 ## Startup diagnostics
 
 The rotating client log includes `startup_stage` records with a stage name,

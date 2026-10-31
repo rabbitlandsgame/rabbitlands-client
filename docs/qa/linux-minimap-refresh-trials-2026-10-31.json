@@ -1,0 +1,2806 @@
+{
+  "schema_version": 1,
+  "baseline_revision": "4b2bad69f5f7fb18cf7e6e500077bd67be396d08",
+  "manifest_sha256": "43a46a8bfc85945f88c077c1587212778c664ce418ce9acbb540d1b5625eea4d",
+  "driver_sha256": "454d8dd9ee3af48c5ae1e2893322471f10d1a52ae4bc3cdc5901a6201955bc18",
+  "private_wrapper_sha256": "6490474964ea7f544bd28f0225dd887dbcaa5791b065e6eb39000126d9c2c0af",
+  "pair_orders": [
+    [
+      "before",
+      "after"
+    ],
+    [
+      "after",
+      "before"
+    ],
+    [
+      "before",
+      "after"
+    ]
+  ],
+  "pairs": [
+    {
+      "pair": 1,
+      "status": "matched_census",
+      "exact_census_counts_equal": false,
+      "order": [
+        "before",
+        "after"
+      ],
+      "source_difference_paths": [
+        "app/src/app/main.gd"
+      ],
+      "census_tolerance": {
+        "builtBodies": 5,
+        "inFrustumBuiltBodies": 5
+      },
+      "census_deltas_after_minus_before": {
+        "afterSpawn.builtBodies": -3,
+        "afterSpawn.inFrustumBuiltBodies": -3,
+        "afterSample.builtBodies": -3,
+        "afterSample.inFrustumBuiltBodies": -3
+      },
+      "runs": [
+        {
+          "variant": "before",
+          "report": {
+            "file": "artifacts/minimap-ab/pair1-before/pair1-before-all-windowed-live-20261031T113442-75419d7c.json",
+            "sha256": "97b055a3501d5d66f84b012fd02128aa69c9b96543d862da87d35a33b60e3639"
+          },
+          "process": {
+            "file": "artifacts/minimap-ab/pair1-before/pair1-before-all-windowed-live-20261031T113442-75419d7c.process.json",
+            "sha256": "6290f53d797ca0dfed54e9fb56a4b6e73c848d067cbe5c63353859a4460c5044"
+          },
+          "source_sha256": "923004bdbbcf20bb7489dbfb69a0c6421879733fa8470d2b7970de56e1201169",
+          "asset_sha256": "9381f3ebc7517e0f905c0cb133dcc7dfdb8083010e5b1e23746e58971e1c43de",
+          "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e",
+          "world_screenshot_sha256": "7ead36ed8c962570945f8d98359b1058dcafb085b75f014b0dd82fc5026f64f8",
+          "root_ui_screenshot_sha256": "172b1edd7012bb26ed93475f2b6548fad8188723c1d91d461d9fe3aea85c457e",
+          "census": {
+            "afterSample": {
+              "nodes": 501,
+              "builtBodies": 78,
+              "deferred": 423,
+              "visibleBuiltBodies": 78,
+              "inFrustumBuiltBodies": 78,
+              "bodyTierFull": 7,
+              "bodyTierHalf": 6,
+              "bodyTierQuarter": 65,
+              "bodyTierPaused": 0,
+              "productionUndead": {
+                "aliveRemoteCreatures": 500,
+                "invalidHealth": 0,
+                "invalidProfiles": 0,
+                "localPlayers": 1,
+                "remoteCreatures": 500,
+                "species": {
+                  "drowned_lich_king": 166,
+                  "skeleton": 167,
+                  "zombie": 167
+                }
+              }
+            },
+            "afterSpawn": {
+              "nodes": 501,
+              "builtBodies": 78,
+              "deferred": 423,
+              "visibleBuiltBodies": 78,
+              "inFrustumBuiltBodies": 78,
+              "bodyTierFull": 6,
+              "bodyTierHalf": 7,
+              "bodyTierQuarter": 65,
+              "bodyTierPaused": 0,
+              "productionUndead": {
+                "aliveRemoteCreatures": 500,
+                "invalidHealth": 0,
+                "invalidProfiles": 0,
+                "localPlayers": 1,
+                "remoteCreatures": 500,
+                "species": {
+                  "drowned_lich_king": 166,
+                  "skeleton": 167,
+                  "zombie": 167
+                }
+              }
+            },
+            "preSample": {
+              "nodes": 501,
+              "builtBodies": 78,
+              "deferred": 423,
+              "visibleBuiltBodies": 78,
+              "inFrustumBuiltBodies": 78,
+              "bodyTierFull": 7,
+              "bodyTierHalf": 6,
+              "bodyTierQuarter": 65,
+              "bodyTierPaused": 0,
+              "productionUndead": {
+                "aliveRemoteCreatures": 500,
+                "invalidHealth": 0,
+                "invalidProfiles": 0,
+                "localPlayers": 1,
+                "remoteCreatures": 500,
+                "species": {
+                  "drowned_lich_king": 166,
+                  "skeleton": 167,
+                  "zombie": 167
+                }
+              }
+            }
+          },
+          "validation": {
+            "valid": true,
+            "qualification": "screening",
+            "measuredCells": [
+              "production-undead-500"
+            ],
+            "pendingCells": []
+          },
+          "identityStable": true,
+          "executionKind": "source-project",
+          "startedUtc": "2026-10-31T15:34:54Z",
+          "engine": {
+            "build": "official",
+            "hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+            "hex": 263938,
+            "major": 4,
+            "minor": 7,
+            "patch": 2,
+            "status": "stable",
+            "string": "4.7.2-stable (official)",
+            "timestamp": 0
+          },
+          "machine": {
+            "processor": "Intel(R) Xeon(R) CPU E5-2623 v4 @ 2.60GHz",
+            "videoAdapter": "Quadro K620",
+            "videoVendor": "NVIDIA"
+          },
+          "strictConfiguration": {
+            "observed": {
+              "appearance": "painted_ground",
+              "bodyCap": 60,
+              "clothBudget": 0,
+              "decorativeGrass": false,
+              "frameCap": 60,
+              "minimap": true,
+              "nameDistanceMetres": 20.0,
+              "particlesEnabled": true,
+              "quality": "low",
+              "renderScale": 0.75,
+              "renderer": "gl_compatibility",
+              "rootSize": [
+                941,
+                1030
+              ],
+              "shadowsPreference": false,
+              "sunShadowsEnabled": false,
+              "textureQuality": "half",
+              "textureSkip": 1,
+              "vsyncMode": 0,
+              "worldViewportSize": [
+                941,
+                1030
+              ]
+            },
+            "allExpectedFieldsMatch": true,
+            "camera": {
+              "distance": 26.0,
+              "fieldOfView": 50.0,
+              "pitchDegrees": -60.0
+            },
+            "map": "twinbrook",
+            "centreTile": [
+              453,
+              168
+            ],
+            "measurement": {
+              "actualVsyncMode": 0,
+              "actualWindowMode": 0,
+              "actualWindowSize": [
+                941,
+                1030
+              ],
+              "attribution": false,
+              "attributionScope": "disabled",
+              "cadenceMilliseconds": 50,
+              "driver": "live",
+              "driverDescription": "live: 50 ms server ticks; each mover steps every 600 ms (a walk) and each fighter acts every 2 s (a combat round), staggered across the crowd",
+              "fpsCap": 60,
+              "frameMetric": "frame work: first physics step (or process) to frame_post_draw (windowed) or to a deferred call queued by the last node to process, after Main's deferred world sync (headless, which draws nothing); the frame-cap sleep is excluded",
+              "requestedDisplayWindowMode": 0,
+              "requestedWindowMode": "windowed",
+              "sampleMilliseconds": 10000,
+              "vsync": "disabled",
+              "wallMetric": "process_frame to process_frame, including the frame-cap sleep",
+              "warmupMilliseconds": 30000,
+              "windowPlatform": "Linux"
+            }
+          },
+          "readiness": {
+            "ready": true,
+            "stableFrames": 18,
+            "waitMilliseconds": 313
+          },
+          "pacing": {
+            "afterSample": {
+              "arrivalPending": false,
+              "arrivalVisible": false,
+              "cameraWarmup": {
+                "active": false,
+                "elapsed_msec": 2815,
+                "frames_per_view": 2,
+                "max_draw_calls": 78,
+                "mode": "small",
+                "render_size": "(175, 192)",
+                "timed_out": false,
+                "uncapped": true,
+                "view": 240,
+                "views": 240
+              },
+              "frameCap": 60,
+              "headWarmupActive": false,
+              "vsyncMode": 0,
+              "warmingRequired": true
+            },
+            "preSample": {
+              "arrivalPending": false,
+              "arrivalVisible": false,
+              "cameraWarmup": {
+                "active": false,
+                "elapsed_msec": 2815,
+                "frames_per_view": 2,
+                "max_draw_calls": 78,
+                "mode": "small",
+                "render_size": "(175, 192)",
+                "timed_out": false,
+                "uncapped": true,
+                "view": 240,
+                "views": 240
+              },
+              "frameCap": 60,
+              "headWarmupActive": false,
+              "vsyncMode": 0,
+              "warmingRequired": true
+            }
+          },
+          "frames": 596,
+          "sampleMilliseconds": 10005,
+          "deliveredAverageFps": 59.86590038314176,
+          "memoryWithCrowd": {
+            "staticBytes": 566356078,
+            "videoBytes": 495665659
+          },
+          "captures": {
+            "world": {
+              "path": "artifacts/minimap-ab/pair1-before/pair1-before-all-windowed-live-20261031T113442-75419d7c.production-undead-500.after-sample.png",
+              "sha256": "7ead36ed8c962570945f8d98359b1058dcafb085b75f014b0dd82fc5026f64f8",
+              "width": 941,
+              "height": 1030,
+              "outsideSample": true,
+              "status": "captured"
+            },
+            "rootUi": {
+              "path": "artifacts/minimap-ab/pair1-before/pair1-before-all-windowed-live-20261031T113442-75419d7c.production-undead-500.after-sample-root.png",
+              "sha256": "172b1edd7012bb26ed93475f2b6548fad8188723c1d91d461d9fe3aea85c457e",
+              "width": 941,
+              "height": 1030,
+              "outsideSample": true,
+              "status": "captured"
+            }
+          },
+          "teardown": {
+            "ready": true
+          },
+          "runtimeSources": [
+            {
+              "path": "app/src/app/main.gd",
+              "bytes": 867728,
+              "sha256": "4242dba8c4c0958fe288373d04bbead41260730191baf4bb84aa800612ecc141"
+            },
+            {
+              "path": "app/src/ui/map_actor_marker_cache.gd",
+              "bytes": 2549,
+              "sha256": "cefb14359b1044e12dc4113f6804f3245712faafbece4e0c20d79b9744f62ab1"
+            },
+            {
+              "path": "app/tests/integration/crowd_presentation_benchmark.gd",
+              "bytes": 122283,
+              "sha256": "68ca9c5047d300b09e8a6e00f6871ec48c514592f8c3a60f73c728dc536bccdb"
+            }
+          ]
+        },
+        {
+          "variant": "after",
+          "report": {
+            "file": "artifacts/minimap-ab/pair1-after/pair1-after-all-windowed-live-20261031T113625-2619618f.json",
+            "sha256": "6c75f96ab8d89e7a0ce30583257d41f5c79eff47230f299c1a650f8d5325de35"
+          },
+          "process": {
+            "file": "artifacts/minimap-ab/pair1-after/pair1-after-all-windowed-live-20261031T113625-2619618f.process.json",
+            "sha256": "fc0ca77c151d03116157054773d7910a84c21668c6d1f350ca3419fc546d1c97"
+          },
+          "source_sha256": "da2f960bca05c5fdd38bd15d78fd5182e97b9fa7fdc503861153d7fe2e9f10dd",
+          "asset_sha256": "9381f3ebc7517e0f905c0cb133dcc7dfdb8083010e5b1e23746e58971e1c43de",
+          "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e",
+          "world_screenshot_sha256": "ed5a79390906eb0b3d900cfe368c4971f8013e84f002ca96bf2199e63118bd45",
+          "root_ui_screenshot_sha256": "bdd23ed9e4440937d2e125114eb948276a7643340ac65e7130043b64216f96d3",
+          "census": {
+            "afterSample": {
+              "nodes": 501,
+              "builtBodies": 75,
+              "deferred": 426,
+              "visibleBuiltBodies": 75,
+              "inFrustumBuiltBodies": 75,
+              "bodyTierFull": 7,
+              "bodyTierHalf": 6,
+              "bodyTierQuarter": 62,
+              "bodyTierPaused": 0,
+              "productionUndead": {
+                "aliveRemoteCreatures": 500,
+                "invalidHealth": 0,
+                "invalidProfiles": 0,
+                "localPlayers": 1,
+                "remoteCreatures": 500,
+                "species": {
+                  "drowned_lich_king": 166,
+                  "skeleton": 167,
+                  "zombie": 167
+                }
+              }
+            },
+            "afterSpawn": {
+              "nodes": 501,
+              "builtBodies": 75,
+              "deferred": 426,
+              "visibleBuiltBodies": 75,
+              "inFrustumBuiltBodies": 75,
+              "bodyTierFull": 6,
+              "bodyTierHalf": 7,
+              "bodyTierQuarter": 62,
+              "bodyTierPaused": 0,
+              "productionUndead": {
+                "aliveRemoteCreatures": 500,
+                "invalidHealth": 0,
+                "invalidProfiles": 0,
+                "localPlayers": 1,
+                "remoteCreatures": 500,
+                "species": {
+                  "drowned_lich_king": 166,
+                  "skeleton": 167,
+                  "zombie": 167
+                }
+              }
+            },
+            "preSample": {
+              "nodes": 501,
+              "builtBodies": 75,
+              "deferred": 426,
+              "visibleBuiltBodies": 75,
+              "inFrustumBuiltBodies": 75,
+              "bodyTierFull": 7,
+              "bodyTierHalf": 6,
+              "bodyTierQuarter": 62,
+              "bodyTierPaused": 0,
+              "productionUndead": {
+                "aliveRemoteCreatures": 500,
+                "invalidHealth": 0,
+                "invalidProfiles": 0,
+                "localPlayers": 1,
+                "remoteCreatures": 500,
+                "species": {
+                  "drowned_lich_king": 166,
+                  "skeleton": 167,
+                  "zombie": 167
+                }
+              }
+            }
+          },
+          "validation": {
+            "valid": true,
+            "qualification": "screening",
+            "measuredCells": [
+              "production-undead-500"
+            ],
+            "pendingCells": []
+          },
+          "identityStable": true,
+          "executionKind": "source-project",
+          "startedUtc": "2026-10-31T15:36:36Z",
+          "engine": {
+            "build": "official",
+            "hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+            "hex": 263938,
+            "major": 4,
+            "minor": 7,
+            "patch": 2,
+            "status": "stable",
+            "string": "4.7.2-stable (official)",
+            "timestamp": 0
+          },
+          "machine": {
+            "processor": "Intel(R) Xeon(R) CPU E5-2623 v4 @ 2.60GHz",
+            "videoAdapter": "Quadro K620",
+            "videoVendor": "NVIDIA"
+          },
+          "strictConfiguration": {
+            "observed": {
+              "appearance": "painted_ground",
+              "bodyCap": 60,
+              "clothBudget": 0,
+              "decorativeGrass": false,
+              "frameCap": 60,
+              "minimap": true,
+              "nameDistanceMetres": 20.0,
+              "particlesEnabled": true,
+              "quality": "low",
+              "renderScale": 0.75,
+              "renderer": "gl_compatibility",
+              "rootSize": [
+                941,
+                1030
+              ],
+              "shadowsPreference": false,
+              "sunShadowsEnabled": false,
+              "textureQuality": "half",
+              "textureSkip": 1,
+              "vsyncMode": 0,
+              "worldViewportSize": [
+                941,
+                1030
+              ]
+            },
+            "allExpectedFieldsMatch": true,
+            "camera": {
+              "distance": 26.0,
+              "fieldOfView": 50.0,
+              "pitchDegrees": -60.0
+            },
+            "map": "twinbrook",
+            "centreTile": [
+              453,
+              168
+            ],
+            "measurement": {
+              "actualVsyncMode": 0,
+              "actualWindowMode": 0,
+              "actualWindowSize": [
+                941,
+                1030
+              ],
+              "attribution": false,
+              "attributionScope": "disabled",
+              "cadenceMilliseconds": 50,
+              "driver": "live",
+              "driverDescription": "live: 50 ms server ticks; each mover steps every 600 ms (a walk) and each fighter acts every 2 s (a combat round), staggered across the crowd",
+              "fpsCap": 60,
+              "frameMetric": "frame work: first physics step (or process) to frame_post_draw (windowed) or to a deferred call queued by the last node to process, after Main's deferred world sync (headless, which draws nothing); the frame-cap sleep is excluded",
+              "requestedDisplayWindowMode": 0,
+              "requestedWindowMode": "windowed",
+              "sampleMilliseconds": 10000,
+              "vsync": "disabled",
+              "wallMetric": "process_frame to process_frame, including the frame-cap sleep",
+              "warmupMilliseconds": 30000,
+              "windowPlatform": "Linux"
+            }
+          },
+          "readiness": {
+            "ready": true,
+            "stableFrames": 17,
+            "waitMilliseconds": 307
+          },
+          "pacing": {
+            "afterSample": {
+              "arrivalPending": false,
+              "arrivalVisible": false,
+              "cameraWarmup": {
+                "active": false,
+                "elapsed_msec": 2745,
+                "frames_per_view": 2,
+                "max_draw_calls": 78,
+                "mode": "small",
+                "render_size": "(175, 192)",
+                "timed_out": false,
+                "uncapped": true,
+                "view": 240,
+                "views": 240
+              },
+              "frameCap": 60,
+              "headWarmupActive": false,
+              "vsyncMode": 0,
+              "warmingRequired": true
+            },
+            "preSample": {
+              "arrivalPending": false,
+              "arrivalVisible": false,
+              "cameraWarmup": {
+                "active": false,
+                "elapsed_msec": 2745,
+                "frames_per_view": 2,
+                "max_draw_calls": 78,
+                "mode": "small",
+                "render_size": "(175, 192)",
+                "timed_out": false,
+                "uncapped": true,
+                "view": 240,
+                "views": 240
+              },
+              "frameCap": 60,
+              "headWarmupActive": false,
+              "vsyncMode": 0,
+              "warmingRequired": true
+            }
+          },
+          "frames": 590,
+          "sampleMilliseconds": 10001,
+          "deliveredAverageFps": 59.280336712312526,
+          "memoryWithCrowd": {
+            "staticBytes": 566230071,
+            "videoBytes": 482522751
+          },
+          "captures": {
+            "world": {
+              "path": "artifacts/minimap-ab/pair1-after/pair1-after-all-windowed-live-20261031T113625-2619618f.production-undead-500.after-sample.png",
+              "sha256": "ed5a79390906eb0b3d900cfe368c4971f8013e84f002ca96bf2199e63118bd45",
+              "width": 941,
+              "height": 1030,
+              "outsideSample": true,
+              "status": "captured"
+            },
+            "rootUi": {
+              "path": "artifacts/minimap-ab/pair1-after/pair1-after-all-windowed-live-20261031T113625-2619618f.production-undead-500.after-sample-root.png",
+              "sha256": "bdd23ed9e4440937d2e125114eb948276a7643340ac65e7130043b64216f96d3",
+              "width": 941,
+              "height": 1030,
+              "outsideSample": true,
+              "status": "captured"
+            }
+          },
+          "teardown": {
+            "ready": true
+          },
+          "runtimeSources": [
+            {
+              "path": "app/src/app/main.gd",
+              "bytes": 870160,
+              "sha256": "ca910683740fbef6e37393bb09f1c28c505fb08202ff5c7e2cfab226e5946bdb"
+            },
+            {
+              "path": "app/src/ui/map_actor_marker_cache.gd",
+              "bytes": 2549,
+              "sha256": "cefb14359b1044e12dc4113f6804f3245712faafbece4e0c20d79b9744f62ab1"
+            },
+            {
+              "path": "app/tests/integration/crowd_presentation_benchmark.gd",
+              "bytes": 122283,
+              "sha256": "68ca9c5047d300b09e8a6e00f6871ec48c514592f8c3a60f73c728dc536bccdb"
+            }
+          ]
+        }
+      ],
+      "automatic_screenshot_equivalence_claim": false,
+      "metrics_before_after": {
+        "wallMilliseconds": [
+          {
+            "mean": 16.704,
+            "p95": 25.884,
+            "p99": 29.597,
+            "max": 30.743
+          },
+          {
+            "mean": 16.869,
+            "p95": 25.834,
+            "p99": 29.689,
+            "max": 37.878
+          }
+        ],
+        "frameMilliseconds": [
+          {
+            "mean": 16.518,
+            "p95": 25.771,
+            "p99": 29.619,
+            "max": 35.054
+          },
+          {
+            "mean": 16.53,
+            "p95": 25.763,
+            "p99": 29.14,
+            "max": 36.77
+          }
+        ],
+        "mapViewportsMilliseconds": [
+          {
+            "mean": 1.086,
+            "p95": 4.542,
+            "p99": 6.292,
+            "max": 7.012
+          },
+          {
+            "mean": 0.815,
+            "p95": 3.462,
+            "p99": 4.922,
+            "max": 5.19
+          }
+        ],
+        "mainProcessMilliseconds": [
+          {
+            "mean": 5.804,
+            "p95": 11.011,
+            "p99": 13.512,
+            "max": 14.135
+          },
+          {
+            "mean": 5.6,
+            "p95": 10.403,
+            "p99": 12.517,
+            "max": 15.313
+          }
+        ],
+        "rootRenderCpuMilliseconds": [
+          {
+            "mean": 2.003,
+            "p95": 2.934,
+            "p99": 3.233,
+            "max": 3.53
+          },
+          {
+            "mean": 2.037,
+            "p95": 2.945,
+            "p99": 3.344,
+            "max": 3.772
+          }
+        ],
+        "rootRenderGpuMilliseconds": [
+          {
+            "mean": 1.027,
+            "p95": 2.203,
+            "p99": 2.278,
+            "max": 2.344
+          },
+          {
+            "mean": 0.996,
+            "p95": 1.247,
+            "p99": 2.298,
+            "max": 2.338
+          }
+        ],
+        "worldRenderCpuMilliseconds": [
+          {
+            "mean": 1.358,
+            "p95": 1.958,
+            "p99": 2.259,
+            "max": 3.004
+          },
+          {
+            "mean": 1.386,
+            "p95": 1.965,
+            "p99": 2.226,
+            "max": 2.407
+          }
+        ],
+        "worldRenderGpuMilliseconds": [
+          {
+            "mean": 11.745,
+            "p95": 12.586,
+            "p99": 12.713,
+            "max": 12.98
+          },
+          {
+            "mean": 11.935,
+            "p95": 12.619,
+            "p99": 12.875,
+            "max": 12.983
+          }
+        ]
+      },
+      "delivered_fps_before_after": [
+        59.86590038314176,
+        59.280336712312526
+      ],
+      "scope": "Three planned pairs; no automatic retries. Nonzero tolerance is not proof of identical built model membership."
+    },
+    {
+      "pair": 2,
+      "status": "matched_census",
+      "exact_census_counts_equal": false,
+      "order": [
+        "after",
+        "before"
+      ],
+      "source_difference_paths": [
+        "app/src/app/main.gd"
+      ],
+      "census_tolerance": {
+        "builtBodies": 5,
+        "inFrustumBuiltBodies": 5
+      },
+      "census_deltas_after_minus_before": {
+        "afterSpawn.builtBodies": 1,
+        "afterSpawn.inFrustumBuiltBodies": 1,
+        "afterSample.builtBodies": 1,
+        "afterSample.inFrustumBuiltBodies": 1
+      },
+      "runs": [
+        {
+          "variant": "before",
+          "report": {
+            "file": "artifacts/minimap-ab/pair2-before/pair2-before-all-windowed-live-20261031T113947-731bba14.json",
+            "sha256": "13965b227aabe53d12abc048ac51f69813611741fd7122eb61d67a8f55c8b5aa"
+          },
+          "process": {
+            "file": "artifacts/minimap-ab/pair2-before/pair2-before-all-windowed-live-20261031T113947-731bba14.process.json",
+            "sha256": "c35ed2c07ac1ad5d138c44e6486d572ffa5d5d570fb4811700467fb35313c045"
+          },
+          "source_sha256": "923004bdbbcf20bb7489dbfb69a0c6421879733fa8470d2b7970de56e1201169",
+          "asset_sha256": "9381f3ebc7517e0f905c0cb133dcc7dfdb8083010e5b1e23746e58971e1c43de",
+          "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e",
+          "world_screenshot_sha256": "19d9c6f22c019c0578b9e0f547ee7c859eebf09752e058fc5dd28ac9a88ae1bb",
+          "root_ui_screenshot_sha256": "b0d90479ecc8f490567c88b30cc397eb28da04499304486d1d28e5ebe84cc8e7",
+          "census": {
+            "afterSample": {
+              "nodes": 501,
+              "builtBodies": 77,
+              "deferred": 424,
+              "visibleBuiltBodies": 77,
+              "inFrustumBuiltBodies": 77,
+              "bodyTierFull": 7,
+              "bodyTierHalf": 6,
+              "bodyTierQuarter": 64,
+              "bodyTierPaused": 0,
+              "productionUndead": {
+                "aliveRemoteCreatures": 500,
+                "invalidHealth": 0,
+                "invalidProfiles": 0,
+                "localPlayers": 1,
+                "remoteCreatures": 500,
+                "species": {
+                  "drowned_lich_king": 166,
+                  "skeleton": 167,
+                  "zombie": 167
+                }
+              }
+            },
+            "afterSpawn": {
+              "nodes": 501,
+              "builtBodies": 77,
+              "deferred": 424,
+              "visibleBuiltBodies": 77,
+              "inFrustumBuiltBodies": 77,
+              "bodyTierFull": 6,
+              "bodyTierHalf": 7,
+              "bodyTierQuarter": 64,
+              "bodyTierPaused": 0,
+              "productionUndead": {
+                "aliveRemoteCreatures": 500,
+                "invalidHealth": 0,
+                "invalidProfiles": 0,
+                "localPlayers": 1,
+                "remoteCreatures": 500,
+                "species": {
+                  "drowned_lich_king": 166,
+                  "skeleton": 167,
+                  "zombie": 167
+                }
+              }
+            },
+            "preSample": {
+              "nodes": 501,
+              "builtBodies": 77,
+              "deferred": 424,
+              "visibleBuiltBodies": 77,
+              "inFrustumBuiltBodies": 77,
+              "bodyTierFull": 7,
+              "bodyTierHalf": 6,
+              "bodyTierQuarter": 64,
+              "bodyTierPaused": 0,
+              "productionUndead": {
+                "aliveRemoteCreatures": 500,
+                "invalidHealth": 0,
+                "invalidProfiles": 0,
+                "localPlayers": 1,
+                "remoteCreatures": 500,
+                "species": {
+                  "drowned_lich_king": 166,
+                  "skeleton": 167,
+                  "zombie": 167
+                }
+              }
+            }
+          },
+          "validation": {
+            "valid": true,
+            "qualification": "screening",
+            "measuredCells": [
+              "production-undead-500"
+            ],
+            "pendingCells": []
+          },
+          "identityStable": true,
+          "executionKind": "source-project",
+          "startedUtc": "2026-10-31T15:39:58Z",
+          "engine": {
+            "build": "official",
+            "hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+            "hex": 263938,
+            "major": 4,
+            "minor": 7,
+            "patch": 2,
+            "status": "stable",
+            "string": "4.7.2-stable (official)",
+            "timestamp": 0
+          },
+          "machine": {
+            "processor": "Intel(R) Xeon(R) CPU E5-2623 v4 @ 2.60GHz",
+            "videoAdapter": "Quadro K620",
+            "videoVendor": "NVIDIA"
+          },
+          "strictConfiguration": {
+            "observed": {
+              "appearance": "painted_ground",
+              "bodyCap": 60,
+              "clothBudget": 0,
+              "decorativeGrass": false,
+              "frameCap": 60,
+              "minimap": true,
+              "nameDistanceMetres": 20.0,
+              "particlesEnabled": true,
+              "quality": "low",
+              "renderScale": 0.75,
+              "renderer": "gl_compatibility",
+              "rootSize": [
+                941,
+                1030
+              ],
+              "shadowsPreference": false,
+              "sunShadowsEnabled": false,
+              "textureQuality": "half",
+              "textureSkip": 1,
+              "vsyncMode": 0,
+              "worldViewportSize": [
+                941,
+                1030
+              ]
+            },
+            "allExpectedFieldsMatch": true,
+            "camera": {
+              "distance": 26.0,
+              "fieldOfView": 50.0,
+              "pitchDegrees": -60.0
+            },
+            "map": "twinbrook",
+            "centreTile": [
+              453,
+              168
+            ],
+            "measurement": {
+              "actualVsyncMode": 0,
+              "actualWindowMode": 0,
+              "actualWindowSize": [
+                941,
+                1030
+              ],
+              "attribution": false,
+              "attributionScope": "disabled",
+              "cadenceMilliseconds": 50,
+              "driver": "live",
+              "driverDescription": "live: 50 ms server ticks; each mover steps every 600 ms (a walk) and each fighter acts every 2 s (a combat round), staggered across the crowd",
+              "fpsCap": 60,
+              "frameMetric": "frame work: first physics step (or process) to frame_post_draw (windowed) or to a deferred call queued by the last node to process, after Main's deferred world sync (headless, which draws nothing); the frame-cap sleep is excluded",
+              "requestedDisplayWindowMode": 0,
+              "requestedWindowMode": "windowed",
+              "sampleMilliseconds": 10000,
+              "vsync": "disabled",
+              "wallMetric": "process_frame to process_frame, including the frame-cap sleep",
+              "warmupMilliseconds": 30000,
+              "windowPlatform": "Linux"
+            }
+          },
+          "readiness": {
+            "ready": true,
+            "stableFrames": 17,
+            "waitMilliseconds": 306
+          },
+          "pacing": {
+            "afterSample": {
+              "arrivalPending": false,
+              "arrivalVisible": false,
+              "cameraWarmup": {
+                "active": false,
+                "elapsed_msec": 2758,
+                "frames_per_view": 2,
+                "max_draw_calls": 78,
+                "mode": "small",
+                "render_size": "(175, 192)",
+                "timed_out": false,
+                "uncapped": true,
+                "view": 240,
+                "views": 240
+              },
+              "frameCap": 60,
+              "headWarmupActive": false,
+              "vsyncMode": 0,
+              "warmingRequired": true
+            },
+            "preSample": {
+              "arrivalPending": false,
+              "arrivalVisible": false,
+              "cameraWarmup": {
+                "active": false,
+                "elapsed_msec": 2758,
+                "frames_per_view": 2,
+                "max_draw_calls": 78,
+                "mode": "small",
+                "render_size": "(175, 192)",
+                "timed_out": false,
+                "uncapped": true,
+                "view": 240,
+                "views": 240
+              },
+              "frameCap": 60,
+              "headWarmupActive": false,
+              "vsyncMode": 0,
+              "warmingRequired": true
+            }
+          },
+          "frames": 599,
+          "sampleMilliseconds": 10011,
+          "deliveredAverageFps": 60.12144531954549,
+          "memoryWithCrowd": {
+            "staticBytes": 566431224,
+            "videoBytes": 495540547
+          },
+          "captures": {
+            "world": {
+              "path": "artifacts/minimap-ab/pair2-before/pair2-before-all-windowed-live-20261031T113947-731bba14.production-undead-500.after-sample.png",
+              "sha256": "19d9c6f22c019c0578b9e0f547ee7c859eebf09752e058fc5dd28ac9a88ae1bb",
+              "width": 941,
+              "height": 1030,
+              "outsideSample": true,
+              "status": "captured"
+            },
+            "rootUi": {
+              "path": "artifacts/minimap-ab/pair2-before/pair2-before-all-windowed-live-20261031T113947-731bba14.production-undead-500.after-sample-root.png",
+              "sha256": "b0d90479ecc8f490567c88b30cc397eb28da04499304486d1d28e5ebe84cc8e7",
+              "width": 941,
+              "height": 1030,
+              "outsideSample": true,
+              "status": "captured"
+            }
+          },
+          "teardown": {
+            "ready": true
+          },
+          "runtimeSources": [
+            {
+              "path": "app/src/app/main.gd",
+              "bytes": 867728,
+              "sha256": "4242dba8c4c0958fe288373d04bbead41260730191baf4bb84aa800612ecc141"
+            },
+            {
+              "path": "app/src/ui/map_actor_marker_cache.gd",
+              "bytes": 2549,
+              "sha256": "cefb14359b1044e12dc4113f6804f3245712faafbece4e0c20d79b9744f62ab1"
+            },
+            {
+              "path": "app/tests/integration/crowd_presentation_benchmark.gd",
+              "bytes": 122283,
+              "sha256": "68ca9c5047d300b09e8a6e00f6871ec48c514592f8c3a60f73c728dc536bccdb"
+            }
+          ]
+        },
+        {
+          "variant": "after",
+          "report": {
+            "file": "artifacts/minimap-ab/pair2-after/pair2-after-all-windowed-live-20261031T113806-08b0be04.json",
+            "sha256": "55b6dadbd8b68c7b3406c0699891835de67329af775f6d028ab1bcec51c201a1"
+          },
+          "process": {
+            "file": "artifacts/minimap-ab/pair2-after/pair2-after-all-windowed-live-20261031T113806-08b0be04.process.json",
+            "sha256": "7ab1f955586e7b2f28434035d483094c2b1b27f536d5c2faca4f39f3a1c478a0"
+          },
+          "source_sha256": "da2f960bca05c5fdd38bd15d78fd5182e97b9fa7fdc503861153d7fe2e9f10dd",
+          "asset_sha256": "9381f3ebc7517e0f905c0cb133dcc7dfdb8083010e5b1e23746e58971e1c43de",
+          "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e",
+          "world_screenshot_sha256": "5babc115c3532b94c3425ca5eb13740d13f1c365c85aa773179d0aba3c997e59",
+          "root_ui_screenshot_sha256": "03c3b117fb9f0701ede0068ed8c0b5a67fabf0f0141de12e83b1ead0cfbd1cf8",
+          "census": {
+            "afterSample": {
+              "nodes": 501,
+              "builtBodies": 78,
+              "deferred": 423,
+              "visibleBuiltBodies": 78,
+              "inFrustumBuiltBodies": 78,
+              "bodyTierFull": 7,
+              "bodyTierHalf": 6,
+              "bodyTierQuarter": 65,
+              "bodyTierPaused": 0,
+              "productionUndead": {
+                "aliveRemoteCreatures": 500,
+                "invalidHealth": 0,
+                "invalidProfiles": 0,
+                "localPlayers": 1,
+                "remoteCreatures": 500,
+                "species": {
+                  "drowned_lich_king": 166,
+                  "skeleton": 167,
+                  "zombie": 167
+                }
+              }
+            },
+            "afterSpawn": {
+              "nodes": 501,
+              "builtBodies": 78,
+              "deferred": 423,
+              "visibleBuiltBodies": 78,
+              "inFrustumBuiltBodies": 78,
+              "bodyTierFull": 6,
+              "bodyTierHalf": 7,
+              "bodyTierQuarter": 65,
+              "bodyTierPaused": 0,
+              "productionUndead": {
+                "aliveRemoteCreatures": 500,
+                "invalidHealth": 0,
+                "invalidProfiles": 0,
+                "localPlayers": 1,
+                "remoteCreatures": 500,
+                "species": {
+                  "drowned_lich_king": 166,
+                  "skeleton": 167,
+                  "zombie": 167
+                }
+              }
+            },
+            "preSample": {
+              "nodes": 501,
+              "builtBodies": 78,
+              "deferred": 423,
+              "visibleBuiltBodies": 78,
+              "inFrustumBuiltBodies": 78,
+              "bodyTierFull": 7,
+              "bodyTierHalf": 6,
+              "bodyTierQuarter": 65,
+              "bodyTierPaused": 0,
+              "productionUndead": {
+                "aliveRemoteCreatures": 500,
+                "invalidHealth": 0,
+                "invalidProfiles": 0,
+                "localPlayers": 1,
+                "remoteCreatures": 500,
+                "species": {
+                  "drowned_lich_king": 166,
+                  "skeleton": 167,
+                  "zombie": 167
+                }
+              }
+            }
+          },
+          "validation": {
+            "valid": true,
+            "qualification": "screening",
+            "measuredCells": [
+              "production-undead-500"
+            ],
+            "pendingCells": []
+          },
+          "identityStable": true,
+          "executionKind": "source-project",
+          "startedUtc": "2026-10-31T15:38:17Z",
+          "engine": {
+            "build": "official",
+            "hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+            "hex": 263938,
+            "major": 4,
+            "minor": 7,
+            "patch": 2,
+            "status": "stable",
+            "string": "4.7.2-stable (official)",
+            "timestamp": 0
+          },
+          "machine": {
+            "processor": "Intel(R) Xeon(R) CPU E5-2623 v4 @ 2.60GHz",
+            "videoAdapter": "Quadro K620",
+            "videoVendor": "NVIDIA"
+          },
+          "strictConfiguration": {
+            "observed": {
+              "appearance": "painted_ground",
+              "bodyCap": 60,
+              "clothBudget": 0,
+              "decorativeGrass": false,
+              "frameCap": 60,
+              "minimap": true,
+              "nameDistanceMetres": 20.0,
+              "particlesEnabled": true,
+              "quality": "low",
+              "renderScale": 0.75,
+              "renderer": "gl_compatibility",
+              "rootSize": [
+                941,
+                1030
+              ],
+              "shadowsPreference": false,
+              "sunShadowsEnabled": false,
+              "textureQuality": "half",
+              "textureSkip": 1,
+              "vsyncMode": 0,
+              "worldViewportSize": [
+                941,
+                1030
+              ]
+            },
+            "allExpectedFieldsMatch": true,
+            "camera": {
+              "distance": 26.0,
+              "fieldOfView": 50.0,
+              "pitchDegrees": -60.0
+            },
+            "map": "twinbrook",
+            "centreTile": [
+              453,
+              168
+            ],
+            "measurement": {
+              "actualVsyncMode": 0,
+              "actualWindowMode": 0,
+              "actualWindowSize": [
+                941,
+                1030
+              ],
+              "attribution": false,
+              "attributionScope": "disabled",
+              "cadenceMilliseconds": 50,
+              "driver": "live",
+              "driverDescription": "live: 50 ms server ticks; each mover steps every 600 ms (a walk) and each fighter acts every 2 s (a combat round), staggered across the crowd",
+              "fpsCap": 60,
+              "frameMetric": "frame work: first physics step (or process) to frame_post_draw (windowed) or to a deferred call queued by the last node to process, after Main's deferred world sync (headless, which draws nothing); the frame-cap sleep is excluded",
+              "requestedDisplayWindowMode": 0,
+              "requestedWindowMode": "windowed",
+              "sampleMilliseconds": 10000,
+              "vsync": "disabled",
+              "wallMetric": "process_frame to process_frame, including the frame-cap sleep",
+              "warmupMilliseconds": 30000,
+              "windowPlatform": "Linux"
+            }
+          },
+          "readiness": {
+            "ready": true,
+            "stableFrames": 18,
+            "waitMilliseconds": 305
+          },
+          "pacing": {
+            "afterSample": {
+              "arrivalPending": false,
+              "arrivalVisible": false,
+              "cameraWarmup": {
+                "active": false,
+                "elapsed_msec": 2758,
+                "frames_per_view": 2,
+                "max_draw_calls": 78,
+                "mode": "small",
+                "render_size": "(175, 192)",
+                "timed_out": false,
+                "uncapped": true,
+                "view": 240,
+                "views": 240
+              },
+              "frameCap": 60,
+              "headWarmupActive": false,
+              "vsyncMode": 0,
+              "warmingRequired": true
+            },
+            "preSample": {
+              "arrivalPending": false,
+              "arrivalVisible": false,
+              "cameraWarmup": {
+                "active": false,
+                "elapsed_msec": 2758,
+                "frames_per_view": 2,
+                "max_draw_calls": 78,
+                "mode": "small",
+                "render_size": "(175, 192)",
+                "timed_out": false,
+                "uncapped": true,
+                "view": 240,
+                "views": 240
+              },
+              "frameCap": 60,
+              "headWarmupActive": false,
+              "vsyncMode": 0,
+              "warmingRequired": true
+            }
+          },
+          "frames": 600,
+          "sampleMilliseconds": 10000,
+          "deliveredAverageFps": 60.288177488394524,
+          "memoryWithCrowd": {
+            "staticBytes": 566696546,
+            "videoBytes": 502056235
+          },
+          "captures": {
+            "world": {
+              "path": "artifacts/minimap-ab/pair2-after/pair2-after-all-windowed-live-20261031T113806-08b0be04.production-undead-500.after-sample.png",
+              "sha256": "5babc115c3532b94c3425ca5eb13740d13f1c365c85aa773179d0aba3c997e59",
+              "width": 941,
+              "height": 1030,
+              "outsideSample": true,
+              "status": "captured"
+            },
+            "rootUi": {
+              "path": "artifacts/minimap-ab/pair2-after/pair2-after-all-windowed-live-20261031T113806-08b0be04.production-undead-500.after-sample-root.png",
+              "sha256": "03c3b117fb9f0701ede0068ed8c0b5a67fabf0f0141de12e83b1ead0cfbd1cf8",
+              "width": 941,
+              "height": 1030,
+              "outsideSample": true,
+              "status": "captured"
+            }
+          },
+          "teardown": {
+            "ready": true
+          },
+          "runtimeSources": [
+            {
+              "path": "app/src/app/main.gd",
+              "bytes": 870160,
+              "sha256": "ca910683740fbef6e37393bb09f1c28c505fb08202ff5c7e2cfab226e5946bdb"
+            },
+            {
+              "path": "app/src/ui/map_actor_marker_cache.gd",
+              "bytes": 2549,
+              "sha256": "cefb14359b1044e12dc4113f6804f3245712faafbece4e0c20d79b9744f62ab1"
+            },
+            {
+              "path": "app/tests/integration/crowd_presentation_benchmark.gd",
+              "bytes": 122283,
+              "sha256": "68ca9c5047d300b09e8a6e00f6871ec48c514592f8c3a60f73c728dc536bccdb"
+            }
+          ]
+        }
+      ],
+      "automatic_screenshot_equivalence_claim": false,
+      "metrics_before_after": {
+        "wallMilliseconds": [
+          {
+            "mean": 16.633,
+            "p95": 25.562,
+            "p99": 28.551,
+            "max": 31.328
+          },
+          {
+            "mean": 16.587,
+            "p95": 24.896,
+            "p99": 27.54,
+            "max": 29.798
+          }
+        ],
+        "frameMilliseconds": [
+          {
+            "mean": 16.369,
+            "p95": 25.549,
+            "p99": 28.246,
+            "max": 31.164
+          },
+          {
+            "mean": 16.219,
+            "p95": 24.991,
+            "p99": 27.506,
+            "max": 32.075
+          }
+        ],
+        "mapViewportsMilliseconds": [
+          {
+            "mean": 1.073,
+            "p95": 4.617,
+            "p99": 6.264,
+            "max": 6.494
+          },
+          {
+            "mean": 0.797,
+            "p95": 3.445,
+            "p99": 4.449,
+            "max": 6.047
+          }
+        ],
+        "mainProcessMilliseconds": [
+          {
+            "mean": 5.798,
+            "p95": 10.61,
+            "p99": 12.921,
+            "max": 15.651
+          },
+          {
+            "mean": 5.567,
+            "p95": 9.477,
+            "p99": 11.702,
+            "max": 13.476
+          }
+        ],
+        "rootRenderCpuMilliseconds": [
+          {
+            "mean": 1.994,
+            "p95": 3.005,
+            "p99": 3.309,
+            "max": 3.703
+          },
+          {
+            "mean": 2.002,
+            "p95": 2.869,
+            "p99": 3.243,
+            "max": 3.429
+          }
+        ],
+        "rootRenderGpuMilliseconds": [
+          {
+            "mean": 1.08,
+            "p95": 2.203,
+            "p99": 2.279,
+            "max": 2.346
+          },
+          {
+            "mean": 1.005,
+            "p95": 1.237,
+            "p99": 2.274,
+            "max": 2.381
+          }
+        ],
+        "worldRenderCpuMilliseconds": [
+          {
+            "mean": 1.331,
+            "p95": 1.902,
+            "p99": 2.343,
+            "max": 2.872
+          },
+          {
+            "mean": 1.344,
+            "p95": 1.89,
+            "p99": 2.211,
+            "max": 2.666
+          }
+        ],
+        "worldRenderGpuMilliseconds": [
+          {
+            "mean": 11.957,
+            "p95": 12.66,
+            "p99": 12.906,
+            "max": 13.049
+          },
+          {
+            "mean": 12.116,
+            "p95": 12.712,
+            "p99": 12.87,
+            "max": 12.994
+          }
+        ]
+      },
+      "delivered_fps_before_after": [
+        60.12144531954549,
+        60.288177488394524
+      ],
+      "scope": "Three planned pairs; no automatic retries. Nonzero tolerance is not proof of identical built model membership."
+    },
+    {
+      "pair": 3,
+      "status": "matched_census",
+      "exact_census_counts_equal": false,
+      "order": [
+        "before",
+        "after"
+      ],
+      "source_difference_paths": [
+        "app/src/app/main.gd"
+      ],
+      "census_tolerance": {
+        "builtBodies": 5,
+        "inFrustumBuiltBodies": 5
+      },
+      "census_deltas_after_minus_before": {
+        "afterSpawn.builtBodies": 5,
+        "afterSpawn.inFrustumBuiltBodies": 5,
+        "afterSample.builtBodies": 5,
+        "afterSample.inFrustumBuiltBodies": 5
+      },
+      "runs": [
+        {
+          "variant": "before",
+          "report": {
+            "file": "artifacts/minimap-ab/pair3-before/pair3-before-all-windowed-live-20261031T114128-559058a2.json",
+            "sha256": "07ac0c4050b72c79dab578c0b77e171d2dd19ab07b0bf9c8f41787c9846a4607"
+          },
+          "process": {
+            "file": "artifacts/minimap-ab/pair3-before/pair3-before-all-windowed-live-20261031T114128-559058a2.process.json",
+            "sha256": "475638d52c6b5bab796a418b1416221214dafdf9442c194ba1b5c1f4c4acc9e4"
+          },
+          "source_sha256": "923004bdbbcf20bb7489dbfb69a0c6421879733fa8470d2b7970de56e1201169",
+          "asset_sha256": "9381f3ebc7517e0f905c0cb133dcc7dfdb8083010e5b1e23746e58971e1c43de",
+          "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e",
+          "world_screenshot_sha256": "e4afb8e499d2587fcd925d3d6968f782de1cf25f6f82e143373e25f146995755",
+          "root_ui_screenshot_sha256": "9f50c714868029d174419a16167bd286effa8ff4027d26a6904aae3d0625bfb8",
+          "census": {
+            "afterSample": {
+              "nodes": 501,
+              "builtBodies": 74,
+              "deferred": 427,
+              "visibleBuiltBodies": 74,
+              "inFrustumBuiltBodies": 74,
+              "bodyTierFull": 6,
+              "bodyTierHalf": 6,
+              "bodyTierQuarter": 62,
+              "bodyTierPaused": 0,
+              "productionUndead": {
+                "aliveRemoteCreatures": 500,
+                "invalidHealth": 0,
+                "invalidProfiles": 0,
+                "localPlayers": 1,
+                "remoteCreatures": 500,
+                "species": {
+                  "drowned_lich_king": 166,
+                  "skeleton": 167,
+                  "zombie": 167
+                }
+              }
+            },
+            "afterSpawn": {
+              "nodes": 501,
+              "builtBodies": 74,
+              "deferred": 427,
+              "visibleBuiltBodies": 74,
+              "inFrustumBuiltBodies": 74,
+              "bodyTierFull": 6,
+              "bodyTierHalf": 6,
+              "bodyTierQuarter": 62,
+              "bodyTierPaused": 0,
+              "productionUndead": {
+                "aliveRemoteCreatures": 500,
+                "invalidHealth": 0,
+                "invalidProfiles": 0,
+                "localPlayers": 1,
+                "remoteCreatures": 500,
+                "species": {
+                  "drowned_lich_king": 166,
+                  "skeleton": 167,
+                  "zombie": 167
+                }
+              }
+            },
+            "preSample": {
+              "nodes": 501,
+              "builtBodies": 74,
+              "deferred": 427,
+              "visibleBuiltBodies": 74,
+              "inFrustumBuiltBodies": 74,
+              "bodyTierFull": 6,
+              "bodyTierHalf": 6,
+              "bodyTierQuarter": 62,
+              "bodyTierPaused": 0,
+              "productionUndead": {
+                "aliveRemoteCreatures": 500,
+                "invalidHealth": 0,
+                "invalidProfiles": 0,
+                "localPlayers": 1,
+                "remoteCreatures": 500,
+                "species": {
+                  "drowned_lich_king": 166,
+                  "skeleton": 167,
+                  "zombie": 167
+                }
+              }
+            }
+          },
+          "validation": {
+            "valid": true,
+            "qualification": "screening",
+            "measuredCells": [
+              "production-undead-500"
+            ],
+            "pendingCells": []
+          },
+          "identityStable": true,
+          "executionKind": "source-project",
+          "startedUtc": "2026-10-31T15:41:39Z",
+          "engine": {
+            "build": "official",
+            "hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+            "hex": 263938,
+            "major": 4,
+            "minor": 7,
+            "patch": 2,
+            "status": "stable",
+            "string": "4.7.2-stable (official)",
+            "timestamp": 0
+          },
+          "machine": {
+            "processor": "Intel(R) Xeon(R) CPU E5-2623 v4 @ 2.60GHz",
+            "videoAdapter": "Quadro K620",
+            "videoVendor": "NVIDIA"
+          },
+          "strictConfiguration": {
+            "observed": {
+              "appearance": "painted_ground",
+              "bodyCap": 60,
+              "clothBudget": 0,
+              "decorativeGrass": false,
+              "frameCap": 60,
+              "minimap": true,
+              "nameDistanceMetres": 20.0,
+              "particlesEnabled": true,
+              "quality": "low",
+              "renderScale": 0.75,
+              "renderer": "gl_compatibility",
+              "rootSize": [
+                941,
+                1030
+              ],
+              "shadowsPreference": false,
+              "sunShadowsEnabled": false,
+              "textureQuality": "half",
+              "textureSkip": 1,
+              "vsyncMode": 0,
+              "worldViewportSize": [
+                941,
+                1030
+              ]
+            },
+            "allExpectedFieldsMatch": true,
+            "camera": {
+              "distance": 26.0,
+              "fieldOfView": 50.0,
+              "pitchDegrees": -60.0
+            },
+            "map": "twinbrook",
+            "centreTile": [
+              453,
+              168
+            ],
+            "measurement": {
+              "actualVsyncMode": 0,
+              "actualWindowMode": 0,
+              "actualWindowSize": [
+                941,
+                1030
+              ],
+              "attribution": false,
+              "attributionScope": "disabled",
+              "cadenceMilliseconds": 50,
+              "driver": "live",
+              "driverDescription": "live: 50 ms server ticks; each mover steps every 600 ms (a walk) and each fighter acts every 2 s (a combat round), staggered across the crowd",
+              "fpsCap": 60,
+              "frameMetric": "frame work: first physics step (or process) to frame_post_draw (windowed) or to a deferred call queued by the last node to process, after Main's deferred world sync (headless, which draws nothing); the frame-cap sleep is excluded",
+              "requestedDisplayWindowMode": 0,
+              "requestedWindowMode": "windowed",
+              "sampleMilliseconds": 10000,
+              "vsync": "disabled",
+              "wallMetric": "process_frame to process_frame, including the frame-cap sleep",
+              "warmupMilliseconds": 30000,
+              "windowPlatform": "Linux"
+            }
+          },
+          "readiness": {
+            "ready": true,
+            "stableFrames": 17,
+            "waitMilliseconds": 310
+          },
+          "pacing": {
+            "afterSample": {
+              "arrivalPending": false,
+              "arrivalVisible": false,
+              "cameraWarmup": {
+                "active": false,
+                "elapsed_msec": 2764,
+                "frames_per_view": 2,
+                "max_draw_calls": 78,
+                "mode": "small",
+                "render_size": "(175, 192)",
+                "timed_out": false,
+                "uncapped": true,
+                "view": 240,
+                "views": 240
+              },
+              "frameCap": 60,
+              "headWarmupActive": false,
+              "vsyncMode": 0,
+              "warmingRequired": true
+            },
+            "preSample": {
+              "arrivalPending": false,
+              "arrivalVisible": false,
+              "cameraWarmup": {
+                "active": false,
+                "elapsed_msec": 2764,
+                "frames_per_view": 2,
+                "max_draw_calls": 78,
+                "mode": "small",
+                "render_size": "(175, 192)",
+                "timed_out": false,
+                "uncapped": true,
+                "view": 240,
+                "views": 240
+              },
+              "frameCap": 60,
+              "headWarmupActive": false,
+              "vsyncMode": 0,
+              "warmingRequired": true
+            }
+          },
+          "frames": 598,
+          "sampleMilliseconds": 10005,
+          "deliveredAverageFps": 60.06366748753678,
+          "memoryWithCrowd": {
+            "staticBytes": 566018545,
+            "videoBytes": 495185343
+          },
+          "captures": {
+            "world": {
+              "path": "artifacts/minimap-ab/pair3-before/pair3-before-all-windowed-live-20261031T114128-559058a2.production-undead-500.after-sample.png",
+              "sha256": "e4afb8e499d2587fcd925d3d6968f782de1cf25f6f82e143373e25f146995755",
+              "width": 941,
+              "height": 1030,
+              "outsideSample": true,
+              "status": "captured"
+            },
+            "rootUi": {
+              "path": "artifacts/minimap-ab/pair3-before/pair3-before-all-windowed-live-20261031T114128-559058a2.production-undead-500.after-sample-root.png",
+              "sha256": "9f50c714868029d174419a16167bd286effa8ff4027d26a6904aae3d0625bfb8",
+              "width": 941,
+              "height": 1030,
+              "outsideSample": true,
+              "status": "captured"
+            }
+          },
+          "teardown": {
+            "ready": true
+          },
+          "runtimeSources": [
+            {
+              "path": "app/src/app/main.gd",
+              "bytes": 867728,
+              "sha256": "4242dba8c4c0958fe288373d04bbead41260730191baf4bb84aa800612ecc141"
+            },
+            {
+              "path": "app/src/ui/map_actor_marker_cache.gd",
+              "bytes": 2549,
+              "sha256": "cefb14359b1044e12dc4113f6804f3245712faafbece4e0c20d79b9744f62ab1"
+            },
+            {
+              "path": "app/tests/integration/crowd_presentation_benchmark.gd",
+              "bytes": 122283,
+              "sha256": "68ca9c5047d300b09e8a6e00f6871ec48c514592f8c3a60f73c728dc536bccdb"
+            }
+          ]
+        },
+        {
+          "variant": "after",
+          "report": {
+            "file": "artifacts/minimap-ab/pair3-after/pair3-after-all-windowed-live-20261031T114309-46cbfb6b.json",
+            "sha256": "b169b6929c7c659aad3345afd81c9daa811759ff090eac22b38293c9c028cc6c"
+          },
+          "process": {
+            "file": "artifacts/minimap-ab/pair3-after/pair3-after-all-windowed-live-20261031T114309-46cbfb6b.process.json",
+            "sha256": "2cc567f4bccd410581d29b097676afb73ff75d8fadb4fc47e67911b8b8e850a6"
+          },
+          "source_sha256": "da2f960bca05c5fdd38bd15d78fd5182e97b9fa7fdc503861153d7fe2e9f10dd",
+          "asset_sha256": "9381f3ebc7517e0f905c0cb133dcc7dfdb8083010e5b1e23746e58971e1c43de",
+          "engine_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e",
+          "world_screenshot_sha256": "9ffe3e4ec30ffaa45ab0de9798cd1c894201cc30dec638019a69295619d4999b",
+          "root_ui_screenshot_sha256": "195e1903e7f847a6ee8e5bbca91991fc4b8eb0ebac57efd470c157a55320ba3b",
+          "census": {
+            "afterSample": {
+              "nodes": 501,
+              "builtBodies": 79,
+              "deferred": 422,
+              "visibleBuiltBodies": 79,
+              "inFrustumBuiltBodies": 79,
+              "bodyTierFull": 8,
+              "bodyTierHalf": 6,
+              "bodyTierQuarter": 65,
+              "bodyTierPaused": 0,
+              "productionUndead": {
+                "aliveRemoteCreatures": 500,
+                "invalidHealth": 0,
+                "invalidProfiles": 0,
+                "localPlayers": 1,
+                "remoteCreatures": 500,
+                "species": {
+                  "drowned_lich_king": 166,
+                  "skeleton": 167,
+                  "zombie": 167
+                }
+              }
+            },
+            "afterSpawn": {
+              "nodes": 501,
+              "builtBodies": 79,
+              "deferred": 422,
+              "visibleBuiltBodies": 79,
+              "inFrustumBuiltBodies": 79,
+              "bodyTierFull": 7,
+              "bodyTierHalf": 7,
+              "bodyTierQuarter": 65,
+              "bodyTierPaused": 0,
+              "productionUndead": {
+                "aliveRemoteCreatures": 500,
+                "invalidHealth": 0,
+                "invalidProfiles": 0,
+                "localPlayers": 1,
+                "remoteCreatures": 500,
+                "species": {
+                  "drowned_lich_king": 166,
+                  "skeleton": 167,
+                  "zombie": 167
+                }
+              }
+            },
+            "preSample": {
+              "nodes": 501,
+              "builtBodies": 79,
+              "deferred": 422,
+              "visibleBuiltBodies": 79,
+              "inFrustumBuiltBodies": 79,
+              "bodyTierFull": 8,
+              "bodyTierHalf": 6,
+              "bodyTierQuarter": 65,
+              "bodyTierPaused": 0,
+              "productionUndead": {
+                "aliveRemoteCreatures": 500,
+                "invalidHealth": 0,
+                "invalidProfiles": 0,
+                "localPlayers": 1,
+                "remoteCreatures": 500,
+                "species": {
+                  "drowned_lich_king": 166,
+                  "skeleton": 167,
+                  "zombie": 167
+                }
+              }
+            }
+          },
+          "validation": {
+            "valid": true,
+            "qualification": "screening",
+            "measuredCells": [
+              "production-undead-500"
+            ],
+            "pendingCells": []
+          },
+          "identityStable": true,
+          "executionKind": "source-project",
+          "startedUtc": "2026-10-31T15:43:20Z",
+          "engine": {
+            "build": "official",
+            "hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+            "hex": 263938,
+            "major": 4,
+            "minor": 7,
+            "patch": 2,
+            "status": "stable",
+            "string": "4.7.2-stable (official)",
+            "timestamp": 0
+          },
+          "machine": {
+            "processor": "Intel(R) Xeon(R) CPU E5-2623 v4 @ 2.60GHz",
+            "videoAdapter": "Quadro K620",
+            "videoVendor": "NVIDIA"
+          },
+          "strictConfiguration": {
+            "observed": {
+              "appearance": "painted_ground",
+              "bodyCap": 60,
+              "clothBudget": 0,
+              "decorativeGrass": false,
+              "frameCap": 60,
+              "minimap": true,
+              "nameDistanceMetres": 20.0,
+              "particlesEnabled": true,
+              "quality": "low",
+              "renderScale": 0.75,
+              "renderer": "gl_compatibility",
+              "rootSize": [
+                941,
+                1030
+              ],
+              "shadowsPreference": false,
+              "sunShadowsEnabled": false,
+              "textureQuality": "half",
+              "textureSkip": 1,
+              "vsyncMode": 0,
+              "worldViewportSize": [
+                941,
+                1030
+              ]
+            },
+            "allExpectedFieldsMatch": true,
+            "camera": {
+              "distance": 26.0,
+              "fieldOfView": 50.0,
+              "pitchDegrees": -60.0
+            },
+            "map": "twinbrook",
+            "centreTile": [
+              453,
+              168
+            ],
+            "measurement": {
+              "actualVsyncMode": 0,
+              "actualWindowMode": 0,
+              "actualWindowSize": [
+                941,
+                1030
+              ],
+              "attribution": false,
+              "attributionScope": "disabled",
+              "cadenceMilliseconds": 50,
+              "driver": "live",
+              "driverDescription": "live: 50 ms server ticks; each mover steps every 600 ms (a walk) and each fighter acts every 2 s (a combat round), staggered across the crowd",
+              "fpsCap": 60,
+              "frameMetric": "frame work: first physics step (or process) to frame_post_draw (windowed) or to a deferred call queued by the last node to process, after Main's deferred world sync (headless, which draws nothing); the frame-cap sleep is excluded",
+              "requestedDisplayWindowMode": 0,
+              "requestedWindowMode": "windowed",
+              "sampleMilliseconds": 10000,
+              "vsync": "disabled",
+              "wallMetric": "process_frame to process_frame, including the frame-cap sleep",
+              "warmupMilliseconds": 30000,
+              "windowPlatform": "Linux"
+            }
+          },
+          "readiness": {
+            "ready": true,
+            "stableFrames": 17,
+            "waitMilliseconds": 308
+          },
+          "pacing": {
+            "afterSample": {
+              "arrivalPending": false,
+              "arrivalVisible": false,
+              "cameraWarmup": {
+                "active": false,
+                "elapsed_msec": 2717,
+                "frames_per_view": 2,
+                "max_draw_calls": 78,
+                "mode": "small",
+                "render_size": "(175, 192)",
+                "timed_out": false,
+                "uncapped": true,
+                "view": 240,
+                "views": 240
+              },
+              "frameCap": 60,
+              "headWarmupActive": false,
+              "vsyncMode": 0,
+              "warmingRequired": true
+            },
+            "preSample": {
+              "arrivalPending": false,
+              "arrivalVisible": false,
+              "cameraWarmup": {
+                "active": false,
+                "elapsed_msec": 2717,
+                "frames_per_view": 2,
+                "max_draw_calls": 78,
+                "mode": "small",
+                "render_size": "(175, 192)",
+                "timed_out": false,
+                "uncapped": true,
+                "view": 240,
+                "views": 240
+              },
+              "frameCap": 60,
+              "headWarmupActive": false,
+              "vsyncMode": 0,
+              "warmingRequired": true
+            }
+          },
+          "frames": 599,
+          "sampleMilliseconds": 10005,
+          "deliveredAverageFps": 60.16847172081829,
+          "memoryWithCrowd": {
+            "staticBytes": 569336628,
+            "videoBytes": 502174795
+          },
+          "captures": {
+            "world": {
+              "path": "artifacts/minimap-ab/pair3-after/pair3-after-all-windowed-live-20261031T114309-46cbfb6b.production-undead-500.after-sample.png",
+              "sha256": "9ffe3e4ec30ffaa45ab0de9798cd1c894201cc30dec638019a69295619d4999b",
+              "width": 941,
+              "height": 1030,
+              "outsideSample": true,
+              "status": "captured"
+            },
+            "rootUi": {
+              "path": "artifacts/minimap-ab/pair3-after/pair3-after-all-windowed-live-20261031T114309-46cbfb6b.production-undead-500.after-sample-root.png",
+              "sha256": "195e1903e7f847a6ee8e5bbca91991fc4b8eb0ebac57efd470c157a55320ba3b",
+              "width": 941,
+              "height": 1030,
+              "outsideSample": true,
+              "status": "captured"
+            }
+          },
+          "teardown": {
+            "ready": true
+          },
+          "runtimeSources": [
+            {
+              "path": "app/src/app/main.gd",
+              "bytes": 870160,
+              "sha256": "ca910683740fbef6e37393bb09f1c28c505fb08202ff5c7e2cfab226e5946bdb"
+            },
+            {
+              "path": "app/src/ui/map_actor_marker_cache.gd",
+              "bytes": 2549,
+              "sha256": "cefb14359b1044e12dc4113f6804f3245712faafbece4e0c20d79b9744f62ab1"
+            },
+            {
+              "path": "app/tests/integration/crowd_presentation_benchmark.gd",
+              "bytes": 122283,
+              "sha256": "68ca9c5047d300b09e8a6e00f6871ec48c514592f8c3a60f73c728dc536bccdb"
+            }
+          ]
+        }
+      ],
+      "automatic_screenshot_equivalence_claim": false,
+      "metrics_before_after": {
+        "wallMilliseconds": [
+          {
+            "mean": 16.649,
+            "p95": 26.095,
+            "p99": 28.602,
+            "max": 29.872
+          },
+          {
+            "mean": 16.62,
+            "p95": 25.15,
+            "p99": 29.117,
+            "max": 31.22
+          }
+        ],
+        "frameMilliseconds": [
+          {
+            "mean": 16.358,
+            "p95": 26.049,
+            "p99": 29.133,
+            "max": 34.815
+          },
+          {
+            "mean": 16.283,
+            "p95": 25.034,
+            "p99": 28.931,
+            "max": 36.868
+          }
+        ],
+        "mapViewportsMilliseconds": [
+          {
+            "mean": 1.078,
+            "p95": 4.684,
+            "p99": 6.22,
+            "max": 6.861
+          },
+          {
+            "mean": 0.783,
+            "p95": 3.308,
+            "p99": 4.296,
+            "max": 4.915
+          }
+        ],
+        "mainProcessMilliseconds": [
+          {
+            "mean": 5.83,
+            "p95": 11.052,
+            "p99": 13.307,
+            "max": 15.695
+          },
+          {
+            "mean": 5.591,
+            "p95": 9.91,
+            "p99": 12.641,
+            "max": 14.637
+          }
+        ],
+        "rootRenderCpuMilliseconds": [
+          {
+            "mean": 1.995,
+            "p95": 2.817,
+            "p99": 3.315,
+            "max": 4.496
+          },
+          {
+            "mean": 1.999,
+            "p95": 2.664,
+            "p99": 3.327,
+            "max": 3.937
+          }
+        ],
+        "rootRenderGpuMilliseconds": [
+          {
+            "mean": 1.06,
+            "p95": 2.209,
+            "p99": 2.297,
+            "max": 2.357
+          },
+          {
+            "mean": 1.05,
+            "p95": 1.48,
+            "p99": 2.294,
+            "max": 2.326
+          }
+        ],
+        "worldRenderCpuMilliseconds": [
+          {
+            "mean": 1.339,
+            "p95": 1.895,
+            "p99": 2.282,
+            "max": 2.616
+          },
+          {
+            "mean": 1.352,
+            "p95": 1.935,
+            "p99": 2.269,
+            "max": 3.98
+          }
+        ],
+        "worldRenderGpuMilliseconds": [
+          {
+            "mean": 11.763,
+            "p95": 12.586,
+            "p99": 12.839,
+            "max": 12.923
+          },
+          {
+            "mean": 12.013,
+            "p95": 12.683,
+            "p99": 12.921,
+            "max": 13.02
+          }
+        ]
+      },
+      "delivered_fps_before_after": [
+        60.06366748753678,
+        60.16847172081829
+      ],
+      "scope": "Three planned pairs; no automatic retries. Nonzero tolerance is not proof of identical built model membership."
+    }
+  ],
+  "stage_restored": true,
+  "original_stage_files": [
+    {
+      "path": "src/app/main.gd",
+      "existed": true,
+      "sha256": "4242dba8c4c0958fe288373d04bbead41260730191baf4bb84aa800612ecc141"
+    },
+    {
+      "path": "src/ui/map_actor_marker_cache.gd",
+      "existed": false,
+      "sha256": null
+    }
+  ],
+  "scope": "Extracted release imports with declared raw source overrides; warm OS/driver caches; fresh profiles; shared host; source/asset/engine hashes outside engine timing",
+  "record": "linux-minimap-refresh-trials-2026-10-31",
+  "date": "2026-10-31",
+  "classification": "three_pair_component_screening_with_predeclared_census_tolerance",
+  "implementation": {
+    "actorCache": "Data-only per-actor dictionary reuse; live node position each refresh; canonical kind/name_colour style; current actors plus32 grace,64 styles; no dictionary recycled across IDs",
+    "regionOwnership": "Memoized region-ownership query context; region selection and fresh camera/position queries preserved",
+    "preserved": [
+      "all deferred-body dots",
+      "living/visibility/local-player filters",
+      "service deduplication",
+      "glyphs, entrance/border/secret/neighbour marks",
+      "marker draw order and refresh cadence",
+      "240 views with two warm-up draws"
+    ]
+  },
+  "aggregate": {
+    "mapViewportsMilliseconds.mean": {
+      "medianBefore": 1.078,
+      "medianAfter": 0.797,
+      "percentChangeOfMedians": -26.066790352504636,
+      "pairedPercentChanges": [
+        -24.953959484346235,
+        -25.72227399813606,
+        -27.36549165120594
+      ]
+    },
+    "mapViewportsMilliseconds.p95": {
+      "medianBefore": 4.617,
+      "medianAfter": 3.445,
+      "percentChangeOfMedians": -25.384448776261646,
+      "pairedPercentChanges": [
+        -23.778071334213994,
+        -25.384448776261646,
+        -29.376601195559356
+      ]
+    },
+    "mainProcessMilliseconds.mean": {
+      "medianBefore": 5.804,
+      "medianAfter": 5.591,
+      "percentChangeOfMedians": -3.6698828394210903,
+      "pairedPercentChanges": [
+        -3.5148173673328844,
+        -3.98413245946878,
+        -4.099485420240135
+      ]
+    },
+    "frameMilliseconds.mean": {
+      "medianBefore": 16.369,
+      "medianAfter": 16.283,
+      "percentChangeOfMedians": -0.5253833465697264,
+      "pairedPercentChanges": [
+        0.07264802034144845,
+        -0.9163663021565067,
+        -0.45849125810000785
+      ]
+    },
+    "wallMilliseconds.p95": {
+      "medianBefore": 25.884,
+      "medianAfter": 25.15,
+      "percentChangeOfMedians": -2.835728635450478,
+      "pairedPercentChanges": [
+        -0.19316952557564793,
+        -2.6054299350598558,
+        -3.62138340678291
+      ]
+    },
+    "deliveredAverageFps": {
+      "medianBefore": 60.06366748753678,
+      "medianAfter": 60.16847172081829
+    }
+  },
+  "restorationGuard": {
+    "required": true,
+    "pending": false,
+    "coordinatorVerifiedOriginalStage": true,
+    "method": "Coordinator stopped owned engine, restored declared original-stage files, and verified recorded original hashes; assembler does not alter stage"
+  },
+  "visualReview": {
+    "method": "Root visually inspected pair3 before/after root captures",
+    "observed": "Direct2D background and dense marker dots retained",
+    "automaticPixelEquivalenceClaim": false,
+    "scope": "Qualitative inspection of pair3 only; screenshots retain their recorded hashes; assembler never opens images"
+  },
+  "validation": {
+    "actorCache": {
+      "artifact": "artifacts/minimap-diagnostics/cache-main-integration.log",
+      "sha256": "e785a8a985994338eee5784181657d1a9fc8c8849dfcd1025c61324d0cf648bc",
+      "checks": 1181,
+      "status": "passed",
+      "scope": "Existing completed headless log; assembler does not rerun checks"
+    },
+    "regionOwnership": {
+      "artifact": "artifacts/minimap-detail-check/test.log",
+      "sha256": "e0211cdecca2e07a519b8bf65daf8bfaea149a17887d963ae7c5c4a984f2f8ce",
+      "checks": 81,
+      "status": "passed",
+      "scope": "Existing completed headless log; assembler does not rerun checks"
+    },
+    "sourceFreeze": {
+      "src/ui/map_actor_marker_cache.gd": "cefb14359b1044e12dc4113f6804f3245712faafbece4e0c20d79b9744f62ab1",
+      "tests/test_map_actor_marker_cache.gd": "bf44fcddb5e2a2d05e50f3f10caaca7c9107e1881600006a107d9ad3e2684fc0",
+      "src/app/main.gd": "ca910683740fbef6e37393bb09f1c28c505fb08202ff5c7e2cfab226e5946bdb"
+    },
+    "mergedCompatibility": {
+      "mergeBase": "93e0535e49bf8927f66f085a9600e49ae0f2a247",
+      "scope": "Merged headless compatibility only; no performance requalification",
+      "project": "artifacts/minimap-detail-check/app",
+      "copied": [
+        {
+          "path": "src/app/main.gd",
+          "sha256": "ca910683740fbef6e37393bb09f1c28c505fb08202ff5c7e2cfab226e5946bdb"
+        },
+        {
+          "path": "src/ui/map_actor_marker_cache.gd",
+          "sha256": "cefb14359b1044e12dc4113f6804f3245712faafbece4e0c20d79b9744f62ab1"
+        },
+        {
+          "path": "data/actors/cape_motion/armour-fit.bin",
+          "sha256": "79e6baf79e64314b7fb203ad279e829c98bc23672fd4c587c801bfa540d7b0ed"
+        },
+        {
+          "path": "data/actors/cape_motion/catalog.json",
+          "sha256": "d306f1fada56f03e1b67b3a077dc15601196de73429ee08976a0dfa15408ec29"
+        },
+        {
+          "path": "data/actors/cape_motion/motion.bin",
+          "sha256": "f3ca3c898d32a322bfe817e50baa9ce7ee9de90d2425530a226b7c74155a80e1"
+        },
+        {
+          "path": "data/actors/cape_motion/wardrobe-fit.bin",
+          "sha256": "fa6cd48e51550c617fdeaac3376b177425baff20928545705e2f749006267e7c"
+        },
+        {
+          "path": "src/actors/cape_approved_data.gd",
+          "sha256": "b76cb96a01be4f381166d8d59074f876f2ef979f389ab2930f1732620290c21e"
+        },
+        {
+          "path": "src/actors/cape_approved_player.gd",
+          "sha256": "b5a3f8a6017328ca37e086b04eae3a149b1595ad9f4c1716e3526adfe057c06d"
+        },
+        {
+          "path": "src/actors/cape_cloth.gd",
+          "sha256": "89f234a194344aeeb2a12eca527f0855c16c19b7a16468ee59ba871b464b552f"
+        },
+        {
+          "path": "src/actors/cape_drape.gd",
+          "sha256": "41a528d2f0e46ebd32c3dbfebaee63e53549b474a024fe9d085dd0b8bbd1637f"
+        },
+        {
+          "path": "src/actors/character_proportions.gd",
+          "sha256": "20895f691c5c73722da99e0e735e990066d7bd1611d7373ea84aaf0a9a8a59bf"
+        },
+        {
+          "path": "src/actors/replicated_actor_3d.gd",
+          "sha256": "301c51e59cce1bf87416d1d0b7f08e9f80778a6b6c874244d401377f371b60f5"
+        },
+        {
+          "path": "tests/test_map_actor_marker_cache.gd",
+          "sha256": "bf44fcddb5e2a2d05e50f3f10caaca7c9107e1881600006a107d9ad3e2684fc0"
+        },
+        {
+          "path": "tests/test_map_detail_refresh_cache.gd",
+          "sha256": "61cbef2801e97a1210b1355b69de7a791d846808a62df8b263ea30e808ab5579"
+        },
+        {
+          "path": "tests/test_map_detail.gd",
+          "sha256": "e42b72851b808bf15e806904c22db5f6e5081d095e3a1d7cc1e53731419cef52"
+        },
+        {
+          "path": "tests/test_map_picture_handoff.gd",
+          "sha256": "e015737389f22bf2c00d785c4300db270a4fca9da2d8c30c5989a35697b3bcec"
+        },
+        {
+          "path": "tests/test_presence_state.gd",
+          "sha256": "213f5a56255497988ac63f496d6780097f524cc4f5dad371a7944eb08b3aa87d"
+        },
+        {
+          "path": "tests/test_minimap_marker_overlay.gd",
+          "sha256": "b9ea2c423c63d8f9039eb6747e3d335db10546d00d6adfc2b87af7b755fc64c2"
+        },
+        {
+          "path": "tests/test_map_background_2d.gd",
+          "sha256": "be414caa001f8a4fe6e24032f6385c85a9f135c5bf5f9e1603e341c29fb1484f"
+        },
+        {
+          "path": "tests/test_map_view.gd",
+          "sha256": "4fa417e71da4f8a23012c600abbd23f63715294cd23281077b871fe046036512"
+        }
+      ],
+      "physicalStageModified": false,
+      "processesEnded": true,
+      "tests": [
+        {
+          "test": "test_map_actor_marker_cache",
+          "exit": 0,
+          "seconds": 12.768,
+          "errors": 0,
+          "pass": true,
+          "summary": [
+            "map actor marker cache: 1181 checks, 0 failures"
+          ],
+          "command": [
+            "artifacts/linux-diagnosis/engine/Godot_v4.7.2-stable_linux.x86_64",
+            "--headless",
+            "--path",
+            "artifacts/minimap-detail-check/app",
+            "--script",
+            "res://tests/test_map_actor_marker_cache.gd",
+            "--audio-driver",
+            "Dummy",
+            "--log-file",
+            "artifacts/minimap-detail-check/merged-regression/test_map_actor_marker_cache.engine.log"
+          ],
+          "environmentOverrides": {
+            "XDG_DATA_HOME": "artifacts/minimap-detail-check/merged-userdata/test_map_actor_marker_cache",
+            "XDG_CONFIG_HOME": "artifacts/minimap-detail-check/merged-config/test_map_actor_marker_cache",
+            "XDG_CACHE_HOME": "artifacts/minimap-detail-check/merged-cache/test_map_actor_marker_cache"
+          },
+          "log": "artifacts/minimap-detail-check/merged-regression/test_map_actor_marker_cache.log",
+          "logSha256": "1c0042cec4fccb20db75227a564093b63b5cb0576c9d142e49c62f6fc060c0f8",
+          "noScriptOrLoadErrors": true,
+          "warningCount": 4,
+          "warningCategories": {
+            "uid_text_path_fallback": 3,
+            "non_equal_anchors": 1
+          }
+        },
+        {
+          "test": "test_map_detail_refresh_cache",
+          "exit": 0,
+          "seconds": 8.596,
+          "errors": 0,
+          "pass": true,
+          "summary": [
+            "Map detail refresh cache: 81 checks, 0 failures"
+          ],
+          "command": [
+            "artifacts/linux-diagnosis/engine/Godot_v4.7.2-stable_linux.x86_64",
+            "--headless",
+            "--path",
+            "artifacts/minimap-detail-check/app",
+            "--script",
+            "res://tests/test_map_detail_refresh_cache.gd",
+            "--audio-driver",
+            "Dummy",
+            "--log-file",
+            "artifacts/minimap-detail-check/merged-regression/test_map_detail_refresh_cache.engine.log"
+          ],
+          "environmentOverrides": {
+            "XDG_DATA_HOME": "artifacts/minimap-detail-check/merged-userdata/test_map_detail_refresh_cache",
+            "XDG_CONFIG_HOME": "artifacts/minimap-detail-check/merged-config/test_map_detail_refresh_cache",
+            "XDG_CACHE_HOME": "artifacts/minimap-detail-check/merged-cache/test_map_detail_refresh_cache"
+          },
+          "log": "artifacts/minimap-detail-check/merged-regression/test_map_detail_refresh_cache.log",
+          "logSha256": "b61543bb6c11c6c5c92c55298540e4c8ce6b4e8fbc96e5cfe9ba6506e7540a6a",
+          "noScriptOrLoadErrors": true,
+          "warningCount": 0,
+          "warningCategories": {}
+        },
+        {
+          "test": "test_map_detail",
+          "exit": 0,
+          "seconds": 13.794,
+          "errors": 0,
+          "pass": true,
+          "summary": [
+            "Map detail: 109 checks, 0 failures"
+          ],
+          "command": [
+            "artifacts/linux-diagnosis/engine/Godot_v4.7.2-stable_linux.x86_64",
+            "--headless",
+            "--path",
+            "artifacts/minimap-detail-check/app",
+            "--script",
+            "res://tests/test_map_detail.gd",
+            "--audio-driver",
+            "Dummy",
+            "--log-file",
+            "artifacts/minimap-detail-check/merged-regression/test_map_detail.engine.log"
+          ],
+          "environmentOverrides": {
+            "XDG_DATA_HOME": "artifacts/minimap-detail-check/merged-userdata/test_map_detail",
+            "XDG_CONFIG_HOME": "artifacts/minimap-detail-check/merged-config/test_map_detail",
+            "XDG_CACHE_HOME": "artifacts/minimap-detail-check/merged-cache/test_map_detail"
+          },
+          "log": "artifacts/minimap-detail-check/merged-regression/test_map_detail.log",
+          "logSha256": "fa8703085a464f420b43dcb019a6da3ab2f8924b9ebbb7c81cf2cf791e70dd80",
+          "noScriptOrLoadErrors": true,
+          "warningCount": 4,
+          "warningCategories": {
+            "uid_text_path_fallback": 3,
+            "non_equal_anchors": 1
+          }
+        },
+        {
+          "test": "test_map_picture_handoff",
+          "exit": 0,
+          "seconds": 13.522,
+          "errors": 0,
+          "pass": true,
+          "summary": [
+            "PASS: a handoff leaves no obsolete picture geometry in either world",
+            "PASS: one active picture and one picture per other region remain after cleanup",
+            "PASS: returning across the seam restores the original picture frame",
+            "PASS: removing the map picture also removes all neighboring pictures"
+          ],
+          "command": [
+            "artifacts/linux-diagnosis/engine/Godot_v4.7.2-stable_linux.x86_64",
+            "--headless",
+            "--path",
+            "artifacts/minimap-detail-check/app",
+            "--script",
+            "res://tests/test_map_picture_handoff.gd",
+            "--audio-driver",
+            "Dummy",
+            "--log-file",
+            "artifacts/minimap-detail-check/merged-regression/test_map_picture_handoff.engine.log"
+          ],
+          "environmentOverrides": {
+            "XDG_DATA_HOME": "artifacts/minimap-detail-check/merged-userdata/test_map_picture_handoff",
+            "XDG_CONFIG_HOME": "artifacts/minimap-detail-check/merged-config/test_map_picture_handoff",
+            "XDG_CACHE_HOME": "artifacts/minimap-detail-check/merged-cache/test_map_picture_handoff"
+          },
+          "log": "artifacts/minimap-detail-check/merged-regression/test_map_picture_handoff.log",
+          "logSha256": "ab0f257944b10adfbb27c49b92d9dc29828be012e3a5ab597e938db0910557ea",
+          "noScriptOrLoadErrors": true,
+          "warningCount": 4,
+          "warningCategories": {
+            "uid_text_path_fallback": 3,
+            "non_equal_anchors": 1
+          }
+        },
+        {
+          "test": "test_presence_state",
+          "exit": 0,
+          "seconds": 1.31,
+          "errors": 0,
+          "pass": true,
+          "summary": [
+            "PASS: the crowd setting's default declares 160, as declaring nothing would",
+            "PASS: the declared cap follows the crowd setting up to 160",
+            "PASS: every dot placed by the affine shortcut stands where the adapter puts it",
+            "presence state tests: PASS"
+          ],
+          "command": [
+            "artifacts/linux-diagnosis/engine/Godot_v4.7.2-stable_linux.x86_64",
+            "--headless",
+            "--path",
+            "artifacts/minimap-detail-check/app",
+            "--script",
+            "res://tests/test_presence_state.gd",
+            "--audio-driver",
+            "Dummy",
+            "--log-file",
+            "artifacts/minimap-detail-check/merged-regression/test_presence_state.engine.log"
+          ],
+          "environmentOverrides": {
+            "XDG_DATA_HOME": "artifacts/minimap-detail-check/merged-userdata/test_presence_state",
+            "XDG_CONFIG_HOME": "artifacts/minimap-detail-check/merged-config/test_presence_state",
+            "XDG_CACHE_HOME": "artifacts/minimap-detail-check/merged-cache/test_presence_state"
+          },
+          "log": "artifacts/minimap-detail-check/merged-regression/test_presence_state.log",
+          "logSha256": "7782de22356f5e6eb198faef825ed34f841671dfc1a93fd54c898464580023fa",
+          "noScriptOrLoadErrors": true,
+          "warningCount": 0,
+          "warningCategories": {}
+        },
+        {
+          "test": "test_minimap_marker_overlay",
+          "exit": 0,
+          "seconds": 1.03,
+          "errors": 0,
+          "pass": true,
+          "summary": [
+            "Minimap marker overlay: 6 checks, 0 failures"
+          ],
+          "command": [
+            "artifacts/linux-diagnosis/engine/Godot_v4.7.2-stable_linux.x86_64",
+            "--headless",
+            "--path",
+            "artifacts/minimap-detail-check/app",
+            "--script",
+            "res://tests/test_minimap_marker_overlay.gd",
+            "--audio-driver",
+            "Dummy",
+            "--log-file",
+            "artifacts/minimap-detail-check/merged-regression/test_minimap_marker_overlay.engine.log"
+          ],
+          "environmentOverrides": {
+            "XDG_DATA_HOME": "artifacts/minimap-detail-check/merged-userdata/test_minimap_marker_overlay",
+            "XDG_CONFIG_HOME": "artifacts/minimap-detail-check/merged-config/test_minimap_marker_overlay",
+            "XDG_CACHE_HOME": "artifacts/minimap-detail-check/merged-cache/test_minimap_marker_overlay"
+          },
+          "log": "artifacts/minimap-detail-check/merged-regression/test_minimap_marker_overlay.log",
+          "logSha256": "79cca7957cde30d4a920c61bdab15c5e46b45ac8ef38fa9c1e429ae2e6fb5048",
+          "noScriptOrLoadErrors": true,
+          "warningCount": 0,
+          "warningCategories": {}
+        },
+        {
+          "test": "test_map_background_2d",
+          "exit": 0,
+          "seconds": 1.03,
+          "errors": 0,
+          "pass": true,
+          "summary": [
+            "Map background 2D: 92 checks, 0 failures"
+          ],
+          "command": [
+            "artifacts/linux-diagnosis/engine/Godot_v4.7.2-stable_linux.x86_64",
+            "--headless",
+            "--path",
+            "artifacts/minimap-detail-check/app",
+            "--script",
+            "res://tests/test_map_background_2d.gd",
+            "--audio-driver",
+            "Dummy",
+            "--log-file",
+            "artifacts/minimap-detail-check/merged-regression/test_map_background_2d.engine.log"
+          ],
+          "environmentOverrides": {
+            "XDG_DATA_HOME": "artifacts/minimap-detail-check/merged-userdata/test_map_background_2d",
+            "XDG_CONFIG_HOME": "artifacts/minimap-detail-check/merged-config/test_map_background_2d",
+            "XDG_CACHE_HOME": "artifacts/minimap-detail-check/merged-cache/test_map_background_2d"
+          },
+          "log": "artifacts/minimap-detail-check/merged-regression/test_map_background_2d.log",
+          "logSha256": "212f62fef5d853c98af87e4201264eba8dc45a042faadc3ecdc0ca1513ccd3da",
+          "noScriptOrLoadErrors": true,
+          "warningCount": 0,
+          "warningCategories": {}
+        },
+        {
+          "test": "test_map_view",
+          "exit": 0,
+          "seconds": 3.543,
+          "errors": 0,
+          "pass": true,
+          "summary": [
+            "Map view: 1066 checks, 0 failures"
+          ],
+          "command": [
+            "artifacts/linux-diagnosis/engine/Godot_v4.7.2-stable_linux.x86_64",
+            "--headless",
+            "--path",
+            "artifacts/minimap-detail-check/app",
+            "--script",
+            "res://tests/test_map_view.gd",
+            "--audio-driver",
+            "Dummy",
+            "--log-file",
+            "artifacts/minimap-detail-check/merged-regression/test_map_view.engine.log"
+          ],
+          "environmentOverrides": {
+            "XDG_DATA_HOME": "artifacts/minimap-detail-check/merged-userdata/test_map_view",
+            "XDG_CONFIG_HOME": "artifacts/minimap-detail-check/merged-config/test_map_view",
+            "XDG_CACHE_HOME": "artifacts/minimap-detail-check/merged-cache/test_map_view"
+          },
+          "log": "artifacts/minimap-detail-check/merged-regression/test_map_view.log",
+          "logSha256": "eb5e2bcb37696d777b59637caf113796fc9fb3fd0ba1b58de70bcc9057375cac",
+          "noScriptOrLoadErrors": true,
+          "warningCount": 0,
+          "warningCategories": {}
+        }
+      ],
+      "allPassed": true,
+      "noScriptOrLoadErrors": true,
+      "warningsPresent": true,
+      "warningCategories": {
+        "uid_text_path_fallback": 9,
+        "non_equal_anchors": 3
+      },
+      "warningExamples": {
+        "uid_text_path_fallback": [
+          "WARNING: res://src/app/main.tscn:3 - ext_resource, invalid UID: uid://dbhj8rl6i8dyi - using text path instead: res://src/app/main.gd",
+          "WARNING: res://src/app/main.tscn:4 - ext_resource, invalid UID: uid://dbpi40yl6pryr - using text path instead: res://src/camera/isometric_camera_controller.gd"
+        ],
+        "non_equal_anchors": [
+          "WARNING: Nodes with non-equal opposite anchors will have their size overridden after _ready(). "
+        ]
+      },
+      "warningAssessment": "UID text-path fallbacks and unequal-anchor UI layout warnings are inherited test/import environment warnings; no unrelated scene changes made. This is not an all-warnings-clean claim.",
+      "performanceScope": "Compatibility checks only on merged cape base 93e0535e49bf8927f66f085a9600e49ae0f2a247; prior physical performance evidence remains scoped to its frozen 4b benchmark build.",
+      "sourceSnapshotsVerifiedAfterTests": true
+    }
+  },
+  "diagnosticAttribution": {
+    "artifact": "artifacts/gauntlet-trials/undead500-minimap-observer-v4/undead500-minimap-observer-v4-all-windowed-live-20261031T110723-91217a40.json",
+    "sha256": "d381c097af98670de4a20820fd99cbcd2e1c8de61a20b9999a23ac3b99090022",
+    "retainedInProduction": false,
+    "scope": "Attribution only; inclusive/nested timings and per-point virtual-call/clock overhead; never an FPS acceptance arm",
+    "phases": {
+      "actorNodes": 501,
+      "main": {
+        "borderExitLabels": {
+          "calls": 138,
+          "items": 828,
+          "maxItems": 6,
+          "maxUsec": 291,
+          "usec": 26865
+        },
+        "collectMarksTotal": {
+          "calls": 138,
+          "items": 69414,
+          "maxItems": 503,
+          "maxUsec": 5346,
+          "usec": 481081
+        },
+        "entranceIds": {
+          "calls": 138,
+          "items": 276,
+          "maxItems": 2,
+          "maxUsec": 82,
+          "usec": 6839
+        },
+        "entranceMarks": {
+          "calls": 138,
+          "items": 276,
+          "maxItems": 2,
+          "maxUsec": 142,
+          "usec": 10507
+        },
+        "entranceRecords": {
+          "calls": 276,
+          "items": 552,
+          "maxItems": 2,
+          "maxUsec": 103,
+          "usec": 12259
+        },
+        "harvestGroupingMarks": {
+          "calls": 138,
+          "items": 0,
+          "maxItems": 0,
+          "maxUsec": 22,
+          "usec": 1877
+        },
+        "mapDetailLevels": {
+          "calls": 138,
+          "items": 0,
+          "maxItems": 0,
+          "maxUsec": 1345,
+          "usec": 98469
+        },
+        "presenceMarks": {
+          "calls": 138,
+          "items": 0,
+          "maxItems": 0,
+          "maxUsec": 28,
+          "usec": 774
+        },
+        "serviceMarks": {
+          "calls": 138,
+          "items": 0,
+          "maxItems": 0,
+          "maxUsec": 122,
+          "usec": 6361
+        },
+        "serviceRecords": {
+          "calls": 276,
+          "items": 0,
+          "maxItems": 0,
+          "maxUsec": 115,
+          "usec": 11528
+        },
+        "updateMapViewportsTotal": {
+          "calls": 571,
+          "items": 0,
+          "maxItems": 0,
+          "maxUsec": 7226,
+          "usec": 653910
+        }
+      },
+      "mapObjectNodes": 0,
+      "neighbourPictures": 16,
+      "overlays": {
+        "fullMapLive": {
+          "fanCapacityIndices": 61992,
+          "glyphsFlushDotsInOriginalOrder": true,
+          "marksHeld": 0,
+          "observerClockCalls": 0,
+          "timings": {},
+          "unitCircleSegments": 16
+        },
+        "minimap": {
+          "fanCapacityIndices": 61992,
+          "glyphsFlushDotsInOriginalOrder": true,
+          "marksHeld": 503,
+          "observerClockCalls": 278484,
+          "timings": {
+            "boundaries": {
+              "calls": 138,
+              "items": 0,
+              "maxItems": 0,
+              "maxUsec": 635,
+              "usec": 50305
+            },
+            "dotGeometry": {
+              "calls": 69138,
+              "items": 0,
+              "maxItems": 0,
+              "maxUsec": 191,
+              "usec": 202606
+            },
+            "drawOrder": {
+              "calls": 138,
+              "items": 69414,
+              "maxItems": 503,
+              "maxUsec": 648,
+              "usec": 55468
+            },
+            "drawTotal": {
+              "calls": 138,
+              "items": 69414,
+              "maxItems": 503,
+              "maxUsec": 9556,
+              "usec": 899095
+            },
+            "flushDotsTotal": {
+              "calls": 138,
+              "items": 138276,
+              "maxItems": 1002,
+              "maxUsec": 561,
+              "usec": 54813
+            },
+            "indexSliceAndSubmit": {
+              "calls": 138,
+              "items": 5807592,
+              "maxItems": 42084,
+              "maxUsec": 553,
+              "usec": 53629
+            },
+            "projectMark": {
+              "calls": 69414,
+              "items": 69138,
+              "maxItems": 1,
+              "maxUsec": 135,
+              "usec": 152330
+            }
+          },
+          "unitCircleSegments": 16
+        }
+      },
+      "scope": "private-minimap-diagnostic-v1; inclusive call timers; not acceptance performance",
+      "serverMarkerNodes": 0
+    }
+  },
+  "rejectedAffineExperiment": {
+    "status": "rejected_not_retained",
+    "artifact": "artifacts/projection-microbench/receipt.json",
+    "sha256": "f9056a2def66303243009231f5aafa7b845da4afd03945d63ad8c3a124914399",
+    "reason": "Helper projection was slower; inline-local savings were small and clipping parity failed at mask edges",
+    "scope": "CPU projection plus unchanged clipping only; no markers, world, GPU or FPS qualification",
+    "headless": true,
+    "engine": {
+      "build": "official",
+      "hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+      "hex": 263938,
+      "major": 4,
+      "minor": 7,
+      "patch": 2,
+      "status": "stable",
+      "string": "4.7.2-stable (official)",
+      "timestamp": 0
+    },
+    "timingSummary": {
+      "helperOverNativeRatioRange": [
+        1.22453430180024,
+        1.32153623266654
+      ],
+      "inlineSavedUsecPer500Range": [
+        8.300000000000011,
+        45.94
+      ]
+    },
+    "parity": {
+      "checks": 159202,
+      "maskMismatches": 673,
+      "maxPixelError": 0.00830437056720257,
+      "maxPixelErrorBelow100kWorld": 0.00740339094772935,
+      "maskMismatchesByCategory": {
+        "regular/edges": 661,
+        "regular/random": 0,
+        "large/random": 0,
+        "large/edges": 12
+      },
+      "maxPixelErrorByCategory": {
+        "regular/edges": 0.00666856206953526,
+        "regular/random": 0.00740339094772935,
+        "large/random": 0.0045861373655498,
+        "large/edges": 0.00830437056720257
+      }
+    }
+  },
+  "preflightRejection": {
+    "artifact": "artifacts/private-minimap-ab/results-v1/ab-summary.json",
+    "sha256": "24329d4192cc659ce020e428339d5c0b396a4ef051bec6c712a7071b1ff5dc11",
+    "classification": "preflight_only_no_engine_sample",
+    "reason": "Private driver retained centre675,186; maintained fixture required453,168",
+    "completedPairs": 0,
+    "stageRestored": true,
+    "supersededDriverSha256": "ccd2b95d5ca63e626d88e1404322ae24b4a9d76920f21a4d3e6be5589bf67b69",
+    "correctedDriverSha256": "454d8dd9ee3af48c5ae1e2893322471f10d1a52ae4bc3cdc5901a6201955bc18"
+  },
+  "limitations": [
+    "Primary claim is lower minimap-refresh CPU cost; no isolated FPS gain is established.",
+    "Built-body count deltas are tolerated up to5 at both boundaries; exact rendered model membership was not attested.",
+    "Fresh user profiles retain warm OS and driver caches; one machine, shared host and synthetic offline500-creature workload.",
+    "Frame-work excludes cap sleep; delivered wall intervals include it; nested CPU/GPU timers must not be added.",
+    "Screenshots were captured after sampling; unequal hashes do not imply a regression and no automatic image-equivalence claim is made.",
+    "Godot memory values are snapshots; process RSS/HWM observations have their recorded sampling limits.",
+    "Actor-row microbench gains are component-only, not whole-collector or whole-frame qualification."
+  ],
+  "recordedInputHashes": {
+    "artifacts/minimap-ab/ab-summary.json": "fd86eaa978a464bdd68d3c8e047458e2ed02ea67e1226fa58d1f809172f4e262",
+    "artifacts/minimap-ab/pair1-before/pair1-before-all-windowed-live-20261031T113442-75419d7c.json": "97b055a3501d5d66f84b012fd02128aa69c9b96543d862da87d35a33b60e3639",
+    "artifacts/minimap-ab/pair1-before/pair1-before-all-windowed-live-20261031T113442-75419d7c.process.json": "6290f53d797ca0dfed54e9fb56a4b6e73c848d067cbe5c63353859a4460c5044",
+    "artifacts/minimap-ab/pair1-after/pair1-after-all-windowed-live-20261031T113625-2619618f.json": "6c75f96ab8d89e7a0ce30583257d41f5c79eff47230f299c1a650f8d5325de35",
+    "artifacts/minimap-ab/pair1-after/pair1-after-all-windowed-live-20261031T113625-2619618f.process.json": "fc0ca77c151d03116157054773d7910a84c21668c6d1f350ca3419fc546d1c97",
+    "artifacts/minimap-ab/pair2-before/pair2-before-all-windowed-live-20261031T113947-731bba14.json": "13965b227aabe53d12abc048ac51f69813611741fd7122eb61d67a8f55c8b5aa",
+    "artifacts/minimap-ab/pair2-before/pair2-before-all-windowed-live-20261031T113947-731bba14.process.json": "c35ed2c07ac1ad5d138c44e6486d572ffa5d5d570fb4811700467fb35313c045",
+    "artifacts/minimap-ab/pair2-after/pair2-after-all-windowed-live-20261031T113806-08b0be04.json": "55b6dadbd8b68c7b3406c0699891835de67329af775f6d028ab1bcec51c201a1",
+    "artifacts/minimap-ab/pair2-after/pair2-after-all-windowed-live-20261031T113806-08b0be04.process.json": "7ab1f955586e7b2f28434035d483094c2b1b27f536d5c2faca4f39f3a1c478a0",
+    "artifacts/minimap-ab/pair3-before/pair3-before-all-windowed-live-20261031T114128-559058a2.json": "07ac0c4050b72c79dab578c0b77e171d2dd19ab07b0bf9c8f41787c9846a4607",
+    "artifacts/minimap-ab/pair3-before/pair3-before-all-windowed-live-20261031T114128-559058a2.process.json": "475638d52c6b5bab796a418b1416221214dafdf9442c194ba1b5c1f4c4acc9e4",
+    "artifacts/minimap-ab/pair3-after/pair3-after-all-windowed-live-20261031T114309-46cbfb6b.json": "b169b6929c7c659aad3345afd81c9daa811759ff090eac22b38293c9c028cc6c",
+    "artifacts/minimap-ab/pair3-after/pair3-after-all-windowed-live-20261031T114309-46cbfb6b.process.json": "2cc567f4bccd410581d29b097676afb73ff75d8fadb4fc47e67911b8b8e850a6",
+    "artifacts/private-minimap-ab/results-v1/ab-summary.json": "24329d4192cc659ce020e428339d5c0b396a4ef051bec6c712a7071b1ff5dc11",
+    "artifacts/minimap-diagnostics/cache-integration-freeze.json": "d515c6cd59d57b3cebd89cb7133f9737dfc5757ef3fbf8674f33d537dadc8438",
+    "artifacts/minimap-detail-check/merged-regression/receipt.json": "c591418ebfbeb50755ab57c1ad283765c2155a04adf2ad23e1c0017280906f25",
+    "artifacts/private-minimap-ab/run_ab.py": "454d8dd9ee3af48c5ae1e2893322471f10d1a52ae4bc3cdc5901a6201955bc18",
+    "artifacts/private-minimap-ab/root_capture_benchmark.gd": "6490474964ea7f544bd28f0225dd887dbcaa5791b065e6eb39000126d9c2c0af",
+    "artifacts/private-minimap-ab/analyze_ab.py": "50584ddb4d9526a58dd55967d493749f00115d995e1356423b7b745427c9eeed",
+    "artifacts/private-minimap-ab/assemble_qa.py": "d18cc1e0d5134e90a1779eebb3d5845a00795b3e3c2c59313622ace65e4fbe51",
+    "artifacts/gauntlet-trials/undead500-minimap-observer-v4/undead500-minimap-observer-v4-all-windowed-live-20261031T110723-91217a40.json": "d381c097af98670de4a20820fd99cbcd2e1c8de61a20b9999a23ac3b99090022",
+    "artifacts/projection-microbench/receipt.json": "f9056a2def66303243009231f5aafa7b845da4afd03945d63ad8c3a124914399"
+  }
+}
