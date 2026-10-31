@@ -44,6 +44,7 @@ import paths      # noqa: E402
 import rlglb      # noqa: E402
 import headref    # noqa: E402
 import hairgen    # noqa: E402
+from material_roles import material_role  # noqa: E402
 
 ALPHA_SCISSOR = 0.5
 _TEX = {}
@@ -56,7 +57,7 @@ def uses_root_coverage(material):
     multiplier disabled. Only the explicit new capability changes that rule.
     The scanner retains its existing conservative 0.5 scissor for every material.
     """
-    name = material.get('name', '')
+    name = material_role(material.get('name', ''))
     extras = material.get('extras') or {}
     beard = name == 'rl_beard'
     card = name != 'rl_hair_clump'

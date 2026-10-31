@@ -23,6 +23,7 @@ import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import rlglb  # noqa: E402
+from material_roles import validate_roles  # noqa: E402
 
 SIZE = {5120: 1, 5121: 1, 5122: 2, 5123: 2, 5125: 4, 5126: 4}
 
@@ -34,6 +35,7 @@ def validate(path):
     if magic != 0x46546C67 or ver != 2 or length != len(data):
         errs.append('bad GLB header')
     g, b = rlglb.read(path)
+    errs.extend(validate_roles(g.get('materials',[])))
     if g['buffers'][0]['byteLength'] > len(b):
         errs.append('buffer shorter than declared')
     for i, v in enumerate(g['bufferViews']):

@@ -50,11 +50,17 @@ const SHADERS := {
 	"rl_mouth": preload("res://src/actors/rl_head/rl_mouth.gdshader"),
 	"rl_hidden": preload("res://src/actors/rl_head/rl_hidden.gdshader"),
 }
-## Imported material name -> the shader that draws it.
+## Canonical material role -> the shader that draws it.
 const MATERIAL_SHADERS := {
 	"rl_skin": "rl_skin", "rl_mouth": "rl_mouth", "rl_eye": "rl_eye",
 	"rl_lash": "rl_lash", "rl_brow": "rl_brow", "rl_hair_clump": "rl_hair",
 	"rl_hair_card": "rl_hair", "rl_beard": "rl_hair", "rl_cornea": "rl_cornea",
+}
+## Explicit clump roles with independent concrete names, extras and textures.
+const MATERIAL_ROLES := {
+	"rl_hair_clump_crest": "rl_hair_clump",
+	"rl_hair_clump_crest_lod1": "rl_hair_clump",
+	"rl_hair_clump_crest_lod2": "rl_hair_clump",
 }
 ## Drawn with the actor's own body material, not one of ours: the clipped
 ## lower part of the body triangles the cut removes, carrying the body's UVs
@@ -968,11 +974,16 @@ static func slot_texture(keys: Array[String], slot: String, fallback: String, qu
 ## (face_material); its shader is then the RL_MATERIAL_VALUES compile too, so
 ## no RL surface ever declares an instance uniform, not even for the moment
 ## between a mesh node's creation and its face's values.
+static func material_role(material_name: String) -> String:
+	return str(MATERIAL_ROLES.get(material_name, material_name))
+
+
 static func material(material_name: String, sex: String, style: String, quality: int) -> ShaderMaterial:
-	var kind := str(MATERIAL_SHADERS.get(material_name, ""))
+	var role := material_role(material_name)
+	var kind := str(MATERIAL_SHADERS.get(role, ""))
 	if kind.is_empty():
 		return null
-	if material_name in ["rl_hair_clump", "rl_hair_card"]:
+	if role in ["rl_hair_clump", "rl_hair_card"]:
 		style = HAIR_MODULE_LOOKUP.file_name(style, sex)
 		if style.is_empty():
 			return null
@@ -981,7 +992,7 @@ static func material(material_name: String, sex: String, style: String, quality:
 		return _materials[key] as ShaderMaterial
 	var result := ShaderMaterial.new()
 	result.shader = _values_shader(SHADERS[kind]) if material_values() else SHADERS[kind]
-	if material_name == "rl_hair_clump" and style == "curly_twin_buns":
+	if role == "rl_hair_clump" and style == "curly_twin_buns":
 		var source: Shader = result.shader
 		if not _soft_root_shaders.has(source):
 			var shader := Shader.new()
@@ -993,7 +1004,7 @@ static func material(material_name: String, sex: String, style: String, quality:
 			or (material_name == "rl_cornea" and quality < CORNEA_QUALITY):
 		result.shader = SHADERS["rl_hidden"]
 	result.resource_name = material_name
-	match material_name:
+	match role:
 		"rl_skin":
 			_configure_skin(result, material_name, sex, quality)
 		"rl_eye":
@@ -1010,11 +1021,11 @@ static func material(material_name: String, sex: String, style: String, quality:
 			var keys: Array[String] = [material_name + "_" + style, style, material_name]
 			# The asset names its texture in the material's glTF extras
 			# (`texture`); without that, by convention.
-			var asset := beard_path(style) if material_name == "rl_beard" else hair_path(style)
+			var asset := beard_path(style) if role == "rl_beard" else hair_path(style)
 			var extras := material_extras(asset, material_name)
-			var feathered_beard := material_name == "rl_beard" and bool(extras.get("featheredRoots", false))
-			var soft_details := material_name == "rl_hair_card" and bool(extras.get("softRootDetails", false))
-			var soft_clump := material_name == "rl_hair_clump" and bool(extras.get("softRootCoverage", false))
+			var feathered_beard := role == "rl_beard" and bool(extras.get("featheredRoots", false))
+			var soft_details := role == "rl_hair_card" and bool(extras.get("softRootDetails", false))
+			var soft_clump := role == "rl_hair_clump" and bool(extras.get("softRootCoverage", false))
 			if feathered_beard or soft_details or soft_clump:
 				var source: Shader = result.shader
 				var shader_key: Variant = "beard_feather:%d" % source.get_instance_id() if feathered_beard else source
@@ -1026,10 +1037,10 @@ static func material(material_name: String, sex: String, style: String, quality:
 				result.shader = _soft_root_shaders[shader_key]
 			var file := str(extras.get("texture", ""))
 			if file.is_empty():
-				file = "beard.png" if material_name == "rl_beard" else "hair_%s.png" % style
+				file = "beard.png" if role == "rl_beard" else "hair_%s.png" % style
 			_set_texture(result, "strand_texture", "has_texture",
 				slot_texture(keys, "albedo", file, quality))
-			result.set_shader_parameter("card", material_name != "rl_hair_clump")
+			result.set_shader_parameter("card", role != "rl_hair_clump")
 			result.set_shader_parameter("scalp_channels", style == "cornrows_low_knot")
 			result.set_shader_parameter("soft_hairline", bool(extras.get("softHairline", false)))
 			result.set_shader_parameter("soft_root_coverage", soft_clump)
@@ -1049,8 +1060,8 @@ static func material(material_name: String, sex: String, style: String, quality:
 					and float(paint_flatness) >= 0.0 and float(paint_flatness) <= 1.0:
 				result.set_shader_parameter("flatness", float(paint_flatness))
 			# Beards draw at the shader's beard_gain, so they light like the hair.
-			result.set_shader_parameter("beard", material_name == "rl_beard")
-			result.set_shader_parameter("alpha_scissor", 0.5 if material_name == "rl_hair_clump" else 0.35)
+			result.set_shader_parameter("beard", role == "rl_beard")
+			result.set_shader_parameter("alpha_scissor", 0.5 if role == "rl_hair_clump" else 0.35)
 			# Imported surfaces may have arbitrary UV charts rather than strand
 			# directions. Only those materials opt out; existing assets default on.
 			result.set_shader_parameter("anisotropic", quality != ActorRenderQuality.Quality.LOW

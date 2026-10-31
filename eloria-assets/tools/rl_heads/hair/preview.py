@@ -19,6 +19,7 @@ import os, sys, json, math, argparse, subprocess, shutil
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import paths  # noqa: E402
+from material_roles import CLUMP_ROLES, material_role  # noqa: E402
 RL = paths.RL_ROOT
 WT = paths.WORKTREE
 VIEWS = ('front', 'profile', 'back', 'tq', 'close')
@@ -92,6 +93,7 @@ def blender_main(a):
            'rl_beard': os.path.join(paths.BEARD_TEX, 'beard.png')}
     btint = tuple(float(x) for x in a.beard_color.split(',')) if a.beard_color else tint
     for path in a.asset:
+        declared={m.get('name',''):(m.get('extras') or {}).get('texture','') for m in glb_json(path).get('materials',[])}
         objs = imported(lambda: bpy.ops.import_scene.gltf(filepath=path))
         for o in objs:
             if o.type != 'MESH':
@@ -106,9 +108,16 @@ def blender_main(a):
                 pass
             for slot in o.material_slots:
                 mn = slot.material.name.split('.')[0] if slot.material else ''
-                if mn in tex:
-                    slot.material = hair_material(bpy, mn, tex[mn], btint if mn == 'rl_beard' else tint, level=a.detail_level,
-                                                  clip=(-1.0 if a.opaque else 0.5 if mn == 'rl_hair_clump' else 0.4))
+                role=material_role(mn)
+                if role in tex:
+                    image=tex[role]
+                    if mn in CLUMP_ROLES:
+                        file=declared.get(mn,'')
+                        candidates=[os.path.join(os.path.dirname(path),file),os.path.join(WT,'godot-client','assets','actors','native','rl_head_textures',file)] if file else []
+                        image=next((p for p in candidates if os.path.isfile(p)),None)
+                        if image is None:raise FileNotFoundError('Missing declared crest texture: '+mn+' '+file)
+                    slot.material = hair_material(bpy, mn, image, btint if role == 'rl_beard' else tint, level=a.detail_level,
+                                                  clip=(-1.0 if a.opaque else 0.5 if role == 'rl_hair_clump' else 0.4))
     # ---------------- shape keys (head and hair share the id_* names; hl_* are hair only)
     if a.shapes:
         want = {}
