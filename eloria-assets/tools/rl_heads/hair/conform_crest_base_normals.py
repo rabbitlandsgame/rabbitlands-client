@@ -12,6 +12,23 @@ import paths, rlglb, glbwriter, headref, assemble
 from build_short_reference import BoundedHead, closest
 
 
+def native_fit_digest(document, blob):
+    """Canonical append_native_fit digest of the stored Native corrective."""
+    digest=hashlib.sha256()
+    for mesh in document['meshes']:
+        index=mesh['extras']['targetNames'].index('hl_native_fit')
+        for primitive_index, primitive in enumerate(mesh['primitives']):
+            target=primitive['targets'][index]
+            position=rlglb.accessor(document,blob,target['POSITION'])
+            digest.update(json.dumps([mesh['name'],primitive_index],separators=(',',':')).encode())
+            for field in ['POSITION','NORMAL']:
+                array=rlglb.accessor(document,blob,target[field]) if field in target else np.zeros_like(position)
+                digest.update(field.encode())
+                digest.update(np.asarray(array.shape,dtype='<i8').tobytes())
+                digest.update(np.ascontiguousarray(array,dtype='<f4').tobytes())
+    return digest.hexdigest()
+
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source',required=True)
@@ -27,12 +44,7 @@ def main():
       for ti,t in enumerate(p['targets']):
        D=rlglb.accessor(g,b,t['POSITION']);normal_delta=rlglb.accessor(g,b,t['NORMAL']);normal_delta[mask]=assemble.morph_normals(P,T,newN,D,weld)[mask];t['NORMAL']=w.sparse_vec3(normal_delta,eps=0)
       reports.append({'sex':sex,'lod':lod,'changed_normals':int(mask.sum()),'maximum_turn_degrees':float(np.degrees(np.arccos(np.clip(np.einsum('ij,ij->i',N,newN),-1,1))).max())})
-     native_hash=hashlib.sha256()
-     for m in w.g['meshes']:
-      index=m['extras']['targetNames'].index('hl_native_fit')
-      for p in m['primitives']:
-       for field in ['POSITION','NORMAL']:native_hash.update(rlglb.accessor(w.g,bytes(w.blob),p['targets'][index][field]).astype('<f4').tobytes())
-     w.g['asset']['extras']['rlHair']['nativeFit']['deltaSHA256']=native_hash.hexdigest();w.g['asset']['extras']['rlHair']['source']['rootNormalToolSHA256']=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+     w.g['asset']['extras']['rlHair']['nativeFit']['deltaSHA256']=native_fit_digest(w.g,bytes(w.blob));w.g['asset']['extras']['rlHair']['source']['rootNormalToolSHA256']=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
      out=outdir/source.name;w.save(str(out));(outdir/source.with_suffix('.png').name).write_bytes(source.with_suffix('.png').read_bytes());h,bb=rlglb.read(str(out));assert bb[:len(b)]==b
      for lod in range(3):
       assert h['meshes'][lod]['primitives'][:2]==g['meshes'][lod]['primitives'][:2];a=g['meshes'][lod]['primitives'][2];z=h['meshes'][lod]['primitives'][2];assert a['indices']==z['indices']
