@@ -31,6 +31,7 @@ const WARDROBE_DYE_CACHE := preload("res://src/actors/wardrobe_dye_cache.gd")
 const ACTOR_RENDER_QUALITY := preload("res://src/actors/actor_render_quality.gd")
 const OLDCRAFT_ACTOR_STYLE := preload("res://src/actors/oldcraft_actor_style.gd")
 const CapeEmblems := preload("res://src/actors/cape_emblems.gd")
+const CapeApprovedData := preload("res://src/actors/cape_approved_data.gd")
 const GLB_MESH_EXTRAS := preload("res://src/actors/glb_mesh_extras.gd")
 const WARDROBE_SHIRT_FIT := preload("res://src/actors/wardrobe_shirt_fit.gd")
 const FEMALE_SHIRT_NECKLINE := preload("res://src/actors/female_shirt_neckline.gd")
@@ -434,6 +435,7 @@ var _silhouette: OccludedSilhouette
 var _animation_tier: int = AnimationGate.Tier.FULL
 var _animation_gate_owner: AnimationGate
 var _cape_cloth_worn := false
+var _cape_mounted_fit := false
 var _cape_cloth_allowed := true
 ## The resolved graphics quality and whether this is the player's own actor.
 ## Main supplies both after configure; keeping them here makes appearance and
@@ -3404,6 +3406,7 @@ func apply_equipment_visuals(visuals: Dictionary, fallback_parts: Array = []) ->
 	_refresh_wardrobe_cover()
 	profile_started = _configuration_profile_step("wardrobe_cover", profile_started)
 	_refresh_melee_animation_mapping()
+	_update_cape_geometry_guard()
 	_refresh_quiver_cape_fit()
 	if _weapon_carry != null:
 		_weapon_carry.call("refresh_equipment")
@@ -3664,12 +3667,12 @@ func _worn_skinned_scene(part: int) -> String:
 		return ""
 	return str(model.get("scene", ""))
 
-## One cape surface, cut to clear the torso worn under it. The mesh itself
-## when nothing is worn there, or when nothing on it had to move.
+## One cape surface, relaxed at the shoulders and fitted to the torso worn
+## under it. The bare wardrobe receives the same relaxed shoulder fold.
 func _draped_over(torso_scene: String, cape_scene: String,
 		piece: Dictionary) -> Mesh:
 	var mesh: Mesh = piece.get("mesh") as Mesh
-	if torso_scene.is_empty() or mesh == null:
+	if mesh == null:
 		return mesh
 	var key: String = "%s|%s|%s" % [cape_scene, torso_scene,
 		str(piece.get("name", ""))]
@@ -3712,6 +3715,13 @@ func _set_cape_cloth_active(enabled: bool) -> void:
 	_cape_cloth_worn = enabled
 	if _cape_cloth == null:
 		return
+	var profile := ""
+	if enabled:
+		for node: Node in _equipment_nodes.get(CAPE_PART, []):
+			if node.has_meta("cape_approved_profile"):
+				profile = str(node.get_meta("cape_approved_profile"))
+				break
+	_cape_cloth.call("configure_approved_motion", self, profile)
 	if enabled:
 		_tell_cloth_what_is_worn()
 	_refresh_cape_cloth_activity(true)
@@ -3759,6 +3769,8 @@ func _refresh_cape_cloth_activity(reset_when_enabled: bool = false) -> void:
 	if enabled and reset_when_enabled and not _cape_cloth.active:
 		_cape_cloth.call("reset")
 	_cape_cloth.active = enabled
+	if not enabled and not is_instance_valid(_mount_visual):
+		_cape_cloth.call("hold_approved_idle")
 	if is_instance_valid(_mount_visual):
 		_mount_visual.call("refresh_cloth_permission", reset_when_enabled)
 
@@ -3769,8 +3781,10 @@ func _tell_cloth_what_is_worn() -> void:
 	if _cape_cloth == null or _native_skeleton == null:
 		return
 	var torso_scene: String = _worn_torso_scene()
+	_update_cape_geometry_guard()
 	var fabric: Array = _cape_fabric_line(torso_scene)
 	_cape_cloth.call("set_fabric_line", fabric[0], fabric[1])
+	_cape_cloth.call("set_surface_samples", fabric[2])
 	_cape_cloth.call("set_shin_reach", _shin_reach(torso_scene))
 	var empty := PackedFloat32Array()
 	if torso_scene.is_empty():
@@ -3786,25 +3800,44 @@ func _tell_cloth_what_is_worn() -> void:
 		_torso_reaches[key] = reach
 	_cape_cloth.call("set_torso_reach", reach[0], reach[1])
 
+func _update_cape_geometry_guard() -> void:
+	if _cape_cloth == null:
+		return
+	var torso_scene := _worn_torso_scene()
+	# Keep the reviewed reference fit exact; other proportions and equipment
+	# additionally use the measured body/garment capsule guard.
+	var reference_body := str(_model_config.get("scene", "")).contains("luminous_male")
+	var reference_kit := (torso_scene.is_empty() and int(_equipment_visuals.get(4, 0)) == 0 and int(_equipment_visuals.get(6, 0)) == 0 \
+		and int(_equipment_visuals.get(0, 0)) == 0 and int(_equipment_visuals.get(1, 0)) == 0) \
+		or (int(_equipment_visuals.get(BODY_PART, 0)) == 184 and int(_equipment_visuals.get(4, 0)) == 171 and int(_equipment_visuals.get(6, 0)) == 192 \
+		and int(_equipment_visuals.get(0, 0)) == 114 and int(_equipment_visuals.get(1, 0)) == 106)
+	_cape_cloth.call("set_approved_geometry_guard", not (reference_body and reference_kit))
+
 ## Where the worn cape's cloth hangs behind each of its chains, for the solver
 ## to hang plumb and to collide. It depends on the rig, the cape and - through
 ## the drape that holds the yoke out over armour - the torso, so it is shared
-## by every actor wearing the three. The line, then the cape's cross-section.
+## by every actor wearing the three. The line, the cape's cross-section, then
+## actual surface contact samples with their per-link skin weights.
 func _cape_fabric_line(torso_scene: String) -> Array:
 	var cape: Array = []
 	for node_value: Variant in _equipment_nodes.get(CAPE_PART, []) as Array:
 		if node_value is MeshInstance3D and is_instance_valid(node_value):
 			cape.append(node_value)
 	if cape.is_empty():
-		return [[], []]
+		return [[], [], []]
+	var profile := str((cape[0] as Node).get_meta("cape_approved_profile", ""))
 	var visual: int = int(_equipment_visuals.get(CAPE_PART, 0))
-	var key: String = "%s|%s|%s" % [str(_model_config.get("scene", "")),
+	var key: String = "%s|%s|%s|%s" % [str(_model_config.get("scene", "")),
 		str(_equipment_model_config(CAPE_PART, visual).get("scene", "")),
-		torso_scene]
+		torso_scene, profile]
 	if not _fabric_lines.has(key):
 		var section: Array = []
-		var line: Array = CapeDrape.fabric_line(_native_skeleton, cape, section)
-		_fabric_lines[key] = [line, section]
+		var contacts: Array = []
+		var overrides := {}
+		if not profile.is_empty():
+			overrides = CapeApprovedData.neutral_rests(_native_skeleton, profile)
+		var line: Array = CapeDrape.fabric_line(_native_skeleton, cape, section, contacts, overrides)
+		_fabric_lines[key] = [line, section, contacts]
 	return _fabric_lines[key] as Array
 
 ## How far the legs reach behind each thigh and shin - left thigh, right
@@ -4126,6 +4159,9 @@ func _set_mount_state_legacy(state: Dictionary, models: Dictionary) -> void:
 		was_mounted = false
 	mount_state = state.duplicate(true)
 	if riding and not was_mounted:
+		# Seated cloth retains its qualified mesh/skin and solver together.
+		# The new fitted skin is restored when ordinary locomotion resumes.
+		_rebuild_cape_for_mount(true)
 		# Seat fitting records the neutral imported root, without terrain lean.
 		_clear_native_surface_tilt()
 		# A previously stepped player must leave the gate before mounted sampling
@@ -4143,6 +4179,7 @@ func _set_mount_state_legacy(state: Dictionary, models: Dictionary) -> void:
 		if not errors.is_empty():
 			visual.call("restore")
 			visual.free()
+			_rebuild_cape_for_mount(false)
 			_restore_unmounted_animation_gate()
 			push_warning("Mount: " + str(errors))
 			play_action(&"idle", true)
@@ -4164,6 +4201,7 @@ func _set_mount_state_legacy(state: Dictionary, models: Dictionary) -> void:
 		_mount_visual = null
 		previous.call("restore")
 		previous.free()
+		_rebuild_cape_for_mount(false)
 		_restore_unmounted_animation_gate()
 		_pace_histories.clear()
 		_last_movement_update_msec = -1
@@ -4175,6 +4213,24 @@ func _set_mount_state_legacy(state: Dictionary, models: Dictionary) -> void:
 	if riding != was_mounted:
 		_surface_applied_up = Vector3(NAN, NAN, NAN)
 		_apply_surface_orientation()
+
+func _rebuild_cape_for_mount(mounted: bool) -> void:
+	if _cape_mounted_fit == mounted:
+		return
+	_cape_mounted_fit = mounted
+	if not _equipment_nodes.has(CAPE_PART):
+		return
+	var visual := int(_equipment_visuals.get(CAPE_PART, 0))
+	_clear_equipment_part(CAPE_PART)
+	_equipment_visuals[CAPE_PART] = visual
+	_create_equipment_part(CAPE_PART, visual, false)
+	if is_instance_valid(_native_model):
+		CHARACTER_PROPORTIONS.apply_body_refinement(_native_model, _native_skeleton, _model_config)
+		OLDCRAFT_ACTOR_STYLE.apply_surface_finish(_native_model)
+	_apply_render_quality_to_visuals()
+	_refresh_quiver_cape_fit()
+	if _silhouette != null and _silhouette.is_enabled():
+		_silhouette.rebuild()
 
 func _equipment_model_config(part: int, visual_id: int) -> Dictionary:
 	var aliases: Dictionary = _equipment_config.get("aliases", {}) as Dictionary
@@ -4300,6 +4356,11 @@ func _socket_placement(socket: Dictionary, bone_rest: Transform3D, fit: float,
 			Vector3.ZERO) * (PI / 180.0)).scaled(Vector3.ONE * scale),
 		bone_rest.origin + _vector3(socket.get("offset", []), Vector3.ZERO) * fit)
 
+func _approved_cape_profile(scene_path: String, part: int) -> String:
+	if not _cape_mounted_fit and part == CAPE_PART and scene_path == CapeApprovedData.TEMPLATE and CapeApprovedData.compatible(_native_skeleton):
+		return "wardrobe" if _worn_torso_scene().is_empty() else "armour"
+	return ""
+
 func _attach_skinned_equipment(scene_path: String, part: int, visual_id: int,
 		tint: Array = [], author_rig: String = "",
 		skin_region: String = "", fit_profile: String = "",
@@ -4319,10 +4380,20 @@ func _attach_skinned_equipment(scene_path: String, part: int, visual_id: int,
 	# The cape is the one garment cut against another: its yoke is rigid, so
 	# only this can hold it outside the torso worn under it.
 	var worn: String = _worn_torso_scene() if part == CAPE_PART else ""
+	var approved_profile := _approved_cape_profile(scene_path, part)
 	for piece_value: Variant in _equipment_pieces(scene_path):
 		var piece: Dictionary = piece_value as Dictionary
 		var surface_key: String = "%s|%s" % [cache_key, str(piece.get("name", ""))]
-		var rebound: Skin = _rebound_skins.get(surface_key) as Skin
+		var approved_mesh: Mesh = null
+		var rebound: Skin = null
+		if not approved_profile.is_empty():
+			approved_mesh = CapeApprovedData.fit_mesh(approved_profile, piece.get("mesh") as Mesh)
+			if approved_mesh != null:
+				rebound = CapeApprovedData.fit_skin(approved_profile)
+				if rebound == null:
+					approved_mesh = null
+		if rebound == null:
+			rebound = _rebound_skins.get(surface_key) as Skin
 		if rebound == null:
 			rebound = _rebound_skin(piece.get("bones", PackedStringArray()) as PackedStringArray,
 				piece.get("binds", [] as Array[Transform3D]) as Array[Transform3D],
@@ -4338,9 +4409,12 @@ func _attach_skinned_equipment(scene_path: String, part: int, visual_id: int,
 		var clone: MeshInstance3D = MeshInstance3D.new()
 		clone.name = "EquipmentSkin_%d_Visual_%d_%s" % [part, visual_id,
 			str(piece.get("name", "Mesh"))]
-		clone.mesh = _draped_over(worn, scene_path, piece)
+		clone.mesh = approved_mesh if approved_mesh != null else (_draped_over(worn, scene_path, piece) if part == CAPE_PART
+			else piece.get("mesh") as Mesh)
 		clone.skin = rebound
-		clone.transform = piece.get("transform", Transform3D.IDENTITY)
+		clone.transform = Transform3D.IDENTITY if approved_mesh != null else piece.get("transform", Transform3D.IDENTITY)
+		if approved_mesh != null:
+			clone.set_meta("cape_approved_profile", approved_profile)
 		_restore_piece_render_state(clone, piece)
 		_tint_surfaces(clone, tint)
 		if str(piece.get("name", "")) == "EquipmentForearmSkin":

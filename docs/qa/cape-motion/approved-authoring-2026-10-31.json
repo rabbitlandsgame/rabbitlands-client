@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "product": "Rabbit Lands",
+  "receipt_id": "cape-authoring-approval-2026-10-31",
+  "approval": {
+    "status": "accepted",
+    "authority": "user",
+    "date": "2026-10-31",
+    "authoring_stage": "red-idle-v100",
+    "review_set": "video-review-v101",
+    "scope": [
+      "wardrobe fit",
+      "armour fit",
+      "idle",
+      "walking",
+      "running",
+      "primary attack",
+      "secondary attack"
+    ],
+    "runtime_integration_and_publication_authorized": true
+  },
+  "provenance": {
+    "native_cape": "godot-client/assets/actors/native/equipment/generic_cape.glb",
+    "native_cape_sha256": "8bdcb5be9ea9e40d1e0ff01a6010a65e131312592cb4884c4d55767fa544a392",
+    "reference_body": "godot-client/assets/actors/native/races/luminous_male.glb",
+    "review_base_commit": "8506e9070f6a3a8c2bbff8b8df93f21eb826c8c5",
+    "method": "Offline cloth references fitted to the existing twelve cape bones; later idle-only bone offsets preserve the approved moving flow.",
+    "reference_outline_sha256": "fa26c1ad8725239ae320499326fc2c2cd24fe9b5cd2d0e9fe8a44c47e3f07a53",
+    "review_media_retention": "Content hashes identify the accepted review artifacts; authoring scenes and review media are not packaged by this receipt."
+  },
+  "contract": {
+    "canonical_body_bones": 65,
+    "cape_bones": 12,
+    "maximum_influences": 8,
+    "authoring_sample_hz": 120,
+    "steady_moving_review_frame_range_preserved_by_idle_revision": [
+      161,
+      420
+    ],
+    "core_neck_and_fully_body_bound_upper_vertices_unchanged": true,
+    "body_rest_skin_and_clips_unchanged_by_cape_animation": true
+  },
+  "fits": {
+    "armour": {
+      "authoring_scene_sha256": "872130a7a39e65fe6dd78fb50901c0ea53ebf13808e9219cdd627b515945ee19",
+      "authoring_scene_bytes": 29000683,
+      "authoring_motion_sha256": "1c6eacaff34ce69e69fef75dde6325f2ef5f53b6ad7b1a26a3c166b647db8100",
+      "review_glb_sha256": "7685f77e4d2377e67d2d40afcff3c59051a6dec777232143e2a045b7f9c5ce98",
+      "idle_hem_drop_m": 0.06567910213637718,
+      "reviewed_context": {
+        "rig": "luminous_male",
+        "cape_visual": 5,
+        "body_visual": 184,
+        "legs_visual": 171,
+        "boots_visual": 192,
+        "weapon_visual": 114,
+        "shield_visual": 106
+      },
+      "authoring_checks": {
+        "body_bones_unchanged": 65,
+        "body_world_matrix_change": 0.0,
+        "actual_skin_position_error_m": 1.9888712976875427e-06,
+        "maximum_influences": 8,
+        "idle_free_panel_intersections": 0,
+        "review_skin_leg_boot_intersections": 0,
+        "known_remaining_scope": "Small upper-back garment seam contacts during movement; the source review is not a blanket collision-free gameplay qualification."
+      }
+    },
+    "wardrobe": {
+      "authoring_scene_sha256": "6760da9f744f0161645999626dd78fbd7d605a38a120ec1f9acb33118af01a8f",
+      "authoring_scene_bytes": 15578511,
+      "authoring_motion_sha256": "b42533ab21053bea685dfa20d0b75193a74afac11509766e3f539100f94dd1a6",
+      "review_glb_sha256": "e0ce1a02fd7071805de0f7c48b50c433c96ce13a69c963e0babfd7b795e9018e",
+      "idle_hem_drop_m": 0.03866046806214679,
+      "reviewed_context": {
+        "rig": "luminous_male",
+        "cape_visual": 5,
+        "body_visual": 0,
+        "legs_visual": 0,
+        "boots_visual": 0,
+        "weapon_visual": 0,
+        "shield_visual": 0
+      },
+      "authoring_checks": {
+        "body_bones_unchanged": 65,
+        "body_world_matrix_change": 0.0,
+        "actual_skin_position_error_m": 1.869810043667791e-06,
+        "maximum_influences": 8,
+        "idle_free_panel_intersections": 0,
+        "review_skin_leg_boot_intersections": 0,
+        "known_remaining_scope": "Small upper-back garment seam contacts during movement; the source review is not a blanket collision-free gameplay qualification."
+      }
+    }
+  },
+  "review_media": [
+    {
+      "clip": "idle",
+      "label": "Idle",
+      "sha256": "0083a92db417c7340f0a510710aa050ffcc527214555790f80387618a268e8b9",
+      "bytes": 210334,
+      "frames": 180,
+      "fps": 30,
+      "duration_seconds": 6.0
+    },
+    {
+      "clip": "walking",
+      "label": "Walking",
+      "sha256": "72a18cf8791ac331fda1deb184a17b5e3df041dd2656b734d93baafe340927d5",
+      "bytes": 4848309,
+      "frames": 540,
+      "fps": 30,
+      "duration_seconds": 18.0
+    },
+    {
+      "clip": "running",
+      "label": "Running",
+      "sha256": "c6927faf6f1db7ce8b0fd4ff7c1a9b0fec56f40ddf82e65abb3b5325e1e32163",
+      "bytes": 5966578,
+      "frames": 540,
+      "fps": 30,
+      "duration_seconds": 18.0
+    },
+    {
+      "clip": "attack-primary",
+      "label": "Primary attack",
+      "sha256": "61985c6a21e9f53a527fa6eb28c0e89fedfb518beb9125c88be6de2196c942f4",
+      "bytes": 1524775,
+      "frames": 270,
+      "fps": 30,
+      "duration_seconds": 9.0
+    },
+    {
+      "clip": "attack-secondary",
+      "label": "Secondary attack",
+      "sha256": "f0e976fabadcb533c9047f38806c7b1fadc39ec31a8a9e44322f19161851b3d5",
+      "bytes": 1073823,
+      "frames": 270,
+      "fps": 30,
+      "duration_seconds": 9.0
+    }
+  ],
+  "authoring_export_validation": {
+    "export_fidelity_pass": true,
+    "isolated_godot_load_play_eight_influence_check_pass": true,
+    "scope": "Authoring review exports and isolated load/play checks. Installed gameplay and packaging are qualified separately."
+  },
+  "portable_source_catalog": "eloria-assets/source/capes/approved-v100/source-catalog.json",
+  "runtime_integration_receipt": "docs/qa/cape-motion/runtime-integration.json"
+}

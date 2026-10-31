@@ -84,7 +84,9 @@ def performance_fixture():
     data["runtimeBuild"]["userDataDir"] = request["settings_seed_user_dir"]
     for observed in (data, data["cells"][0]["effectiveRuntime"]):
         observed["effectiveSettings"].update(quality="low", frameCap=30, bodyCap=60, renderScale=.75,
-                                              textureQuality="half", textureSkip=1, appearance="painted_ground")
+                                              textureQuality="half", textureSkip=1, appearance="painted_ground", clothBudget=0,
+                                              shadowsPreference=False, sunShadowsEnabled=False,
+                                              particlesEnabled=True, decorativeGrass=False, nameDistanceMetres=20.0)
     for census in data["cells"][0]["census"].values():
         census.update(builtBodies=60, deferred=100)
     return data, request

@@ -1,0 +1,322 @@
+{
+  "schemaVersion": 1,
+  "label": "Resin Road: Lantern Glade, Sounder mire-goblin pulse 3, six-player party",
+  "qualification": "One real simultaneous authored pulse only. Excludes surviving earlier pulses, server AI, pathfinding and encounter progression. Not a hundreds-of-creatures stress workload.",
+  "map": "resin_road_gauntlet",
+  "centreTile": [
+    195,
+    118
+  ],
+  "waveCentreTile": [
+    196,
+    87
+  ],
+  "observer": {
+    "mouth": "w5-north",
+    "positionScope": "unused_published_mouth_spawn_tile",
+    "servedGridCode": 1980,
+    "nearbyActorIds": [
+      14001,
+      14004,
+      14007,
+      14010,
+      14013,
+      14016,
+      14019
+    ],
+    "nearbyMaxDistanceMetres": 3.0,
+    "minimumExpectedInFrustumCreatures": 7
+  },
+  "localActorId": 14000,
+  "activity": {
+    "baseline": "stationary at authored spawn tiles",
+    "combat": "separate scripted native-attack presentation cell; no server combat simulation",
+    "movement": "authored tile membership alone does not prove an arbitrary movement segment is walkable"
+  },
+  "wave": {
+    "band": "sounder",
+    "section": "w5",
+    "variant": "mire-goblin",
+    "pulse": 3,
+    "partySize": 6,
+    "partyScale": 1.3,
+    "totalCreatures": 21,
+    "releaseAliveFraction": 0.34,
+    "releaseSeconds": 45
+  },
+  "scaleSemantics": "profiles[].scale is the server actor DTO multiplier. modelImportScale is applied by the model registry and must not be copied into the DTO. Omitted server scale and footprint mean 1.0 and [1,1].",
+  "profiles": [
+    {
+      "creature": "mire_goblin",
+      "actorType": 624,
+      "model": "mire_goblin",
+      "scene": "res://assets/actors/native/creatures/mire_goblin.glb",
+      "sceneSha256": "ce053f656eafd1bcc483b5b55938ff8758b48a09765d80aa4969fa73375c1b6d",
+      "scale": 1.0,
+      "modelImportScale": 0.676024,
+      "footprint": [
+        1,
+        1
+      ],
+      "health": 90,
+      "count": 20
+    },
+    {
+      "creature": "giant_amber_moth",
+      "actorType": 583,
+      "model": "giant_amber_moth",
+      "scene": "res://assets/actors/native/creatures/giant_amber_moth.glb",
+      "sceneSha256": "c9c0c4a2c4ebb2bb8a9b32d74a746434bc7786fc70c433d68192dbfe0f0a0e8d",
+      "scale": 1.0,
+      "modelImportScale": 0.293997,
+      "footprint": [
+        1,
+        1
+      ],
+      "health": 275,
+      "count": 1
+    }
+  ],
+  "spawnGroups": [
+    {
+      "id": "t_resinroad_sounder_w5_mire_goblin_p3_0",
+      "creature": "mire_goblin",
+      "partyBase": 15,
+      "shape": "pack",
+      "levelFactor": 1.0,
+      "count": 20
+    },
+    {
+      "id": "t_resinroad_sounder_w5_mire_goblin_p3_1",
+      "creature": "giant_amber_moth",
+      "partyBase": 0,
+      "shape": "leader",
+      "levelFactor": 1.25,
+      "count": 1
+    }
+  ],
+  "actors": [
+    {
+      "actorId": 14001,
+      "profile": "mire_goblin",
+      "tile": [
+        195,
+        116
+      ],
+      "mouth": "w5-north",
+      "spawnGroup": "t_resinroad_sounder_w5_mire_goblin_p3_0"
+    },
+    {
+      "actorId": 14002,
+      "profile": "mire_goblin",
+      "tile": [
+        195,
+        59
+      ],
+      "mouth": "w5-south",
+      "spawnGroup": "t_resinroad_sounder_w5_mire_goblin_p3_0"
+    },
+    {
+      "actorId": 14003,
+      "profile": "mire_goblin",
+      "tile": [
+        164,
+        101
+      ],
+      "mouth": "w5-northwest",
+      "spawnGroup": "t_resinroad_sounder_w5_mire_goblin_p3_0"
+    },
+    {
+      "actorId": 14004,
+      "profile": "mire_goblin",
+      "tile": [
+        196,
+        116
+      ],
+      "mouth": "w5-north",
+      "spawnGroup": "t_resinroad_sounder_w5_mire_goblin_p3_0"
+    },
+    {
+      "actorId": 14005,
+      "profile": "mire_goblin",
+      "tile": [
+        196,
+        59
+      ],
+      "mouth": "w5-south",
+      "spawnGroup": "t_resinroad_sounder_w5_mire_goblin_p3_0"
+    },
+    {
+      "actorId": 14006,
+      "profile": "mire_goblin",
+      "tile": [
+        164,
+        102
+      ],
+      "mouth": "w5-northwest",
+      "spawnGroup": "t_resinroad_sounder_w5_mire_goblin_p3_0"
+    },
+    {
+      "actorId": 14007,
+      "profile": "mire_goblin",
+      "tile": [
+        194,
+        116
+      ],
+      "mouth": "w5-north",
+      "spawnGroup": "t_resinroad_sounder_w5_mire_goblin_p3_0"
+    },
+    {
+      "actorId": 14008,
+      "profile": "mire_goblin",
+      "tile": [
+        194,
+        59
+      ],
+      "mouth": "w5-south",
+      "spawnGroup": "t_resinroad_sounder_w5_mire_goblin_p3_0"
+    },
+    {
+      "actorId": 14009,
+      "profile": "mire_goblin",
+      "tile": [
+        165,
+        104
+      ],
+      "mouth": "w5-northwest",
+      "spawnGroup": "t_resinroad_sounder_w5_mire_goblin_p3_0"
+    },
+    {
+      "actorId": 14010,
+      "profile": "mire_goblin",
+      "tile": [
+        197,
+        116
+      ],
+      "mouth": "w5-north",
+      "spawnGroup": "t_resinroad_sounder_w5_mire_goblin_p3_0"
+    },
+    {
+      "actorId": 14011,
+      "profile": "mire_goblin",
+      "tile": [
+        197,
+        59
+      ],
+      "mouth": "w5-south",
+      "spawnGroup": "t_resinroad_sounder_w5_mire_goblin_p3_0"
+    },
+    {
+      "actorId": 14012,
+      "profile": "mire_goblin",
+      "tile": [
+        164,
+        103
+      ],
+      "mouth": "w5-northwest",
+      "spawnGroup": "t_resinroad_sounder_w5_mire_goblin_p3_0"
+    },
+    {
+      "actorId": 14013,
+      "profile": "mire_goblin",
+      "tile": [
+        195,
+        117
+      ],
+      "mouth": "w5-north",
+      "spawnGroup": "t_resinroad_sounder_w5_mire_goblin_p3_0"
+    },
+    {
+      "actorId": 14014,
+      "profile": "mire_goblin",
+      "tile": [
+        195,
+        58
+      ],
+      "mouth": "w5-south",
+      "spawnGroup": "t_resinroad_sounder_w5_mire_goblin_p3_0"
+    },
+    {
+      "actorId": 14015,
+      "profile": "mire_goblin",
+      "tile": [
+        163,
+        101
+      ],
+      "mouth": "w5-northwest",
+      "spawnGroup": "t_resinroad_sounder_w5_mire_goblin_p3_0"
+    },
+    {
+      "actorId": 14016,
+      "profile": "mire_goblin",
+      "tile": [
+        196,
+        117
+      ],
+      "mouth": "w5-north",
+      "spawnGroup": "t_resinroad_sounder_w5_mire_goblin_p3_0"
+    },
+    {
+      "actorId": 14017,
+      "profile": "mire_goblin",
+      "tile": [
+        196,
+        58
+      ],
+      "mouth": "w5-south",
+      "spawnGroup": "t_resinroad_sounder_w5_mire_goblin_p3_0"
+    },
+    {
+      "actorId": 14018,
+      "profile": "mire_goblin",
+      "tile": [
+        164,
+        104
+      ],
+      "mouth": "w5-northwest",
+      "spawnGroup": "t_resinroad_sounder_w5_mire_goblin_p3_0"
+    },
+    {
+      "actorId": 14019,
+      "profile": "mire_goblin",
+      "tile": [
+        194,
+        117
+      ],
+      "mouth": "w5-north",
+      "spawnGroup": "t_resinroad_sounder_w5_mire_goblin_p3_0"
+    },
+    {
+      "actorId": 14020,
+      "profile": "mire_goblin",
+      "tile": [
+        194,
+        58
+      ],
+      "mouth": "w5-south",
+      "spawnGroup": "t_resinroad_sounder_w5_mire_goblin_p3_0"
+    },
+    {
+      "actorId": 14021,
+      "profile": "giant_amber_moth",
+      "tile": [
+        163,
+        102
+      ],
+      "mouth": "w5-northwest",
+      "spawnGroup": "t_resinroad_sounder_w5_mire_goblin_p3_1"
+    }
+  ],
+  "evidence": {
+    "clientManifest": "eloria-assets/maps/gauntlets/resin_road_gauntlet/client/world.json",
+    "design": "eloria-assets/maps/gauntlets/resin_road_gauntlet/source/design.json",
+    "models": "godot-client/data/actors/models.json",
+    "retirementPolicy": "godot-client/data/assets/retired_procedural_models.json",
+    "currentModelRoster": "eloria-assets/source/model-development-roster.json",
+    "serverInstance": "../rabbitlands-server/config/eloria/instances/resin_road_gauntlet.def",
+    "serverSpawnGroups": "../rabbitlands-server/config/eloria/spawn_groups/invasion/gauntlets_trail.def",
+    "serverCreatures": "../rabbitlands-server/config/eloria/creatures.txt",
+    "serverScaling": "../rabbitlands-server/eloria/gauntlets.py#scaled_count",
+    "spawnTileSource": "actors[].tile are exact served [monster] coordinates and members of their named published mouth.spawnTiles; no generated free-space grid."
+  }
+}

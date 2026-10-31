@@ -405,14 +405,15 @@ def parser() -> argparse.ArgumentParser:
                    help="rendered window mode; fullscreen requests exclusive fullscreen on Windows/Linux")
     p.add_argument("--renderer", default="forward_plus", choices=["forward_plus", "mobile", "gl_compatibility"])
     p.add_argument("--resolution", type=resolution, default=(1280, 720))
-    p.add_argument("--settings-profile", choices=["default", "performance"], default="default",
-                   help="Performance seeds the actual preset into fresh isolated Windows/Linux user settings before startup")
+    p.add_argument("--settings-profile", choices=["default", "performance", "performance-60", "performance-60-scale50"], default="default",
+                   help="Performance presets seed fresh Windows/Linux settings; performance-60 changes only the cap to 60; performance-60-scale50 also uses render scale .5")
     p.add_argument("--fps-cap", type=int, default=None,
-                   help="default 60; Performance profile requires 30")
+                   help="default 60; performance requires 30 and performance-60 requires 60")
     p.add_argument("--map", default="")
     p.add_argument("--centre", default="")
     p.add_argument("--quality", default="", choices=["", "low", "medium", "high"])
-    p.add_argument("--cells", default="phase4")
+    p.add_argument("--cells", default="phase4",
+                   help="Historical selectors, production-undead (160/300/500 remote creatures plus one player), or authored-gauntlet-resinroad-combat-21")
     p.add_argument("--variants", default="all,legacy")
     p.add_argument("--body-cap", type=int)
     p.add_argument("--driver", default="live", choices=["live", "stress"])

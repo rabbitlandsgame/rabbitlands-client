@@ -71,6 +71,17 @@ const MIN_SAMPLE_FRAMES := 60
 ## market (the mean of the isle's NPC posts, as the server's S3 preset takes it)
 ## and a Twinbrook invasion wave's authored centre (S2).
 const HOT_SPOTS := {"landfall": Vector2i(122, 225), "twinbrook": Vector2i(675, 186)}
+## Separate from the historical ten-quantile invasion mix. These retained
+## profiles come from nym_twinbrook_onslaught (190..500, equal species weights).
+## 300/500 are dense client stress above ordinary server publication caps.
+const UNDEAD_PROFILES := [
+	{"model": "zombie", "actorType": 746, "footprint": Vector2i.ONE, "health": 400},
+	{"model": "skeleton", "actorType": 745, "footprint": Vector2i.ONE, "health": 262},
+	{"model": "drowned_lich_king", "actorType": 671, "footprint": Vector2i(2, 2), "health": 1088},
+]
+const GAUNTLET_FIXTURE := "res://tests/fixtures/gauntlet_performance_wave.json"
+const GAUNTLET_CELL := "authored-gauntlet-resinroad-combat-21"
+const ArchivedPolicy := preload("res://src/actors/archived_model_policy.gd")
 const REPLAY_MAGIC := "RLREC1\n"
 ## A recording record: kind (1 byte), monotonic nanoseconds (u64), length (u32).
 const REPLAY_RECORD_HEADER := 13
@@ -97,6 +108,9 @@ var _main: Control
 var _app_state: Node
 var _adapter: CoordinateAdapter
 var _creatures: Array = []
+var _production_undead := false
+var _authored_gauntlet := false
+var _gauntlet_fixture: Dictionary = {}
 var _report: Dictionary = {}
 var _centre := Vector2i.ZERO
 var _driver_packets := 0
@@ -196,6 +210,25 @@ static func cells_for(profile: String) -> Array:
 	cells.append({"id":"combat-heat-bolt-160","count":160,"shape":"heat_bolt","activity":"heat_bolt_combat"})
 	if profile == "phase7":
 		return [cells[cells.size()-1]]
+	var undead_cells: Array = []
+	for remote_count: int in [160, 300, 500]:
+		var species_counts := {}
+		for index: int in UNDEAD_PROFILES.size():
+			species_counts[UNDEAD_PROFILES[index].model] = remote_count / 3 + int(index < remote_count % 3)
+		undead_cells.append({"id": "production-undead-%d" % remote_count,
+			"count": remote_count + 1, "creatureCount": remote_count,
+			"shape": "undead_invasion", "activity": "undead_melee",
+			"cohort": "twinbrook-onslaught-v1", "sourceWave": "nym_twinbrook_onslaught",
+			"populationScope": "remote_creatures_plus_one_player", "speciesCounts": species_counts,
+			"stressAboveDefaultServerCaps": remote_count > 160, "combatDriver": "melee_only"})
+	if profile == "production-undead":
+		return undead_cells
+	cells.append_array(undead_cells)
+	cells.append({"id": GAUNTLET_CELL, "count": 22, "creatureCount": 21,
+		"shape": "authored_gauntlet", "activity": "gauntlet_melee", "cohort": "resinroad-sounder-w5-pulse3-v1",
+		"populationScope": "remote_creatures_plus_one_player", "speciesCounts": {"mire_goblin": 20, "giant_amber_moth": 1},
+		"positionScope": "exact_authored_spawn_tiles", "combatDriver": "scripted_melee_only",
+		"qualification": "One authored six-player pulse; scripted attack presentation, no server AI or encounter simulation"})
 	if profile == "phase1":
 		var phase_one := ["s3-market-160", "s2-invasion-160", "mixed-mounted-160",
 			"combat-160", "empty", "traversal-southern-cold", "traversal-southern-warm"]
@@ -240,6 +273,8 @@ func _run() -> void:
 	var replay := _driver_mode() == "replay"
 	var profile := "replay" if replay else _env("RABBITLANDS_CROWD_BENCH_CELLS", "phase4")
 	var cells := [] if replay else cells_for(profile)
+	_production_undead = not cells.is_empty() and str(cells[0].get("shape", "")) == "undead_invasion"
+	_authored_gauntlet = not cells.is_empty() and str(cells[0].get("shape", "")) == "authored_gauntlet"
 	_presence_dots = _env_int("RABBITLANDS_CROWD_BENCH_PRESENCE", 0, 0)
 	_server_time = OS.get_environment("RABBITLANDS_CROWD_BENCH_SERVER_TIME").strip_edges() == "1"
 	_report = {
@@ -302,7 +337,36 @@ func _run() -> void:
 			cells.append({"id": "replay-%s" % _replay_map, "count": 0, "shape": "replay",
 				"activity": "recorded"})
 	else:
-		_creatures = _creature_actor_types()
+		var undead_cells := cells.filter(func(c: Dictionary) -> bool: return str(c.get("shape", "")) == "undead_invasion")
+		if not undead_cells.is_empty() and undead_cells.size() != cells.size():
+			_expect(false, "production undead and historical cells require separate prewarm runs")
+			_finish()
+			return
+		var gauntlet_cells := cells.filter(func(c: Dictionary) -> bool: return str(c.get("shape", "")) == "authored_gauntlet")
+		if not gauntlet_cells.is_empty() and gauntlet_cells.size() != cells.size():
+			_expect(false, "authored gauntlet and other cells require separate prewarm runs")
+			_finish()
+			return
+		if _authored_gauntlet:
+			_creatures = _authored_gauntlet_profiles()
+			_report["creatureCohort"] = {"id": "resinroad-sounder-w5-pulse3-v1", "fixture": GAUNTLET_FIXTURE,
+				"fixtureSha256": FileAccess.get_sha256(GAUNTLET_FIXTURE), "profiles": _gauntlet_fixture.get("profiles", []),
+				"wave": _gauntlet_fixture.get("wave", {}), "qualification": _gauntlet_fixture.get("qualification", ""),
+				"waveCentreTile": _gauntlet_fixture.get("waveCentreTile"), "observer": _gauntlet_fixture.get("observer"),
+				"combat": "all authored remote creatures use scripted native attack commands; stationary; no server AI"}
+		else:
+			_creatures = _production_undead_profiles() if _production_undead else _creature_actor_types()
+		if _production_undead:
+			var profiles := []
+			for creature_profile: Dictionary in UNDEAD_PROFILES:
+				var plain := creature_profile.duplicate(true)
+				plain.footprint = [creature_profile.footprint.x, creature_profile.footprint.y]
+				plain["scale"] = 1.0
+				profiles.append(plain)
+			_report["creatureCohort"] = {"id": "twinbrook-onslaught-v1", "profiles": profiles,
+				"sourceWaveMaximum": 500, "defaultActorViewCap": 160, "defaultCreatureViewCap": 200,
+				"layout": "seeded unique footprint cells within 30 tiles; synthetic client stress, not server AI/navigation",
+				"combat": "one third active, half walking and half melee; no ranged/spell roles"}
 	if not _expect(requested_window_mode in ["windowed", "fullscreen"], "valid rendered window mode") \
 			or not _expect(not cells.is_empty(), "profile %s selects at least one cell" % profile) \
 			or not _expect(replay or not _creatures.is_empty(), "creature models resolve"):
@@ -388,6 +452,8 @@ func _run() -> void:
 	if not replay:
 		await _prewarm()
 	for cell: Dictionary in cells:
+		if _failures > 0:
+			break # An invalid setup must not spend time sampling later cells.
 		if str(cell.shape) == "traversal":
 			await _run_traversal_cell(cell)
 		else:
@@ -434,16 +500,30 @@ func _set_up_main() -> void:
 	# Main has restored its saved cap. Establish the benchmark cap before any
 	# arrival can capture it for temporary shader warm-up and later restoration.
 	Engine.max_fps = _fps_cap
+	if not _headless:
+		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 	_app_state = root.get_node_or_null("/root/AppState")
 	if not _expect(_app_state != null, "AppState is available"):
 		_main = null
 		return
+	if _production_undead or _authored_gauntlet:
+		_seed_cohort_footprints()
 	_app_state.set("authenticated", true)
 	(_main.get("login_panel") as Control).hide()
 	(_main.get("creation_panel") as Control).hide()
 	(_main.get("game_view") as Control).show()
 	var map_id := _env("RABBITLANDS_CROWD_BENCH_MAP", _replay_map if not _replay_map.is_empty()
 		else "four_gates")
+	if _production_undead:
+		if not _expect(map_id in ["four_gates", "twinbrook"] and \
+				OS.get_environment("RABBITLANDS_CROWD_BENCH_MAP") in ["", "twinbrook"], "production undead uses authored Twinbrook"):
+			return
+		map_id = "twinbrook"
+	if _authored_gauntlet:
+		var authored_map := str(_gauntlet_fixture.map)
+		if not _expect(OS.get_environment("RABBITLANDS_CROWD_BENCH_MAP") in ["", authored_map], "authored gauntlet map"):
+			return
+		map_id = authored_map
 	_report["map"] = map_id
 	if map_id != "none":
 		_app_state.set("current_map", map_id)
@@ -455,7 +535,17 @@ func _set_up_main() -> void:
 		_expect(loader.world_root != null, "benchmark map loads")
 	_adapter = _main.get("adapter") as CoordinateAdapter
 	var centre_text := OS.get_environment("RABBITLANDS_CROWD_BENCH_CENTRE")
-	if centre_text.contains(","):
+	if _production_undead:
+		if not _expect(centre_text in ["", "453,168"], "production undead uses authored centre 453,168"):
+			return
+		_centre = Vector2i(453, 168)
+	elif _authored_gauntlet:
+		var observer: Array = _gauntlet_fixture.centreTile
+		var pinned := "%d,%d" % [int(observer[0]), int(observer[1])]
+		if not _expect(centre_text in ["", pinned], "authored gauntlet observer centre " + pinned):
+			return
+		_centre = Vector2i(int(observer[0]), int(observer[1]))
+	elif centre_text.contains(","):
 		var parts := centre_text.split(",")
 		_centre = Vector2i(int(parts[0]), int(parts[1]))
 	elif _replay_spawn.x >= 0:
@@ -497,20 +587,78 @@ func _set_up_main() -> void:
 	_report["worldReadiness"] = await _wait_for_world_readiness("initial map", 1500)
 
 
+## The server supplies this actor-type table at login. Individual record
+## footprints are intentionally overwritten by Main's presentation DTO bridge.
+## Seed only the selected cohort through that same wire decoder/reducer path.
+func _seed_cohort_footprints() -> void:
+	var large := []
+	for profile: Dictionary in _creatures:
+		if profile.footprint != Vector2i.ONE:
+			large.append(profile)
+	var payload := PackedByteArray()
+	_append_u16(payload, large.size())
+	for profile: Dictionary in large:
+		_append_u16(payload, int(profile.actorType))
+		payload.append(int(profile.footprint.x))
+		payload.append(int(profile.footprint.y))
+	_send_packet(EloriaProtocol.ServerMessage.ELORIA_ACTOR_FOOTPRINTS, payload)
+	var observed := {}
+	for profile: Dictionary in _creatures:
+		var size: Vector2i = _app_state.call("footprint_for_actor_type", int(profile.actorType))
+		observed[str(int(profile.actorType))] = [size.x, size.y]
+		_expect(size == profile.footprint, "login footprint table resolves " + str(profile.model))
+	_report["creatureFootprints"] = observed
+
+
+func _accept_explicit_census(spec: Dictionary, census: Dictionary, boundary: String) -> bool:
+	if not (_production_undead or _authored_gauntlet):
+		return true
+	var key := "productionUndead" if _production_undead else "authoredGauntlet"
+	var expected := {"remoteCreatures": int(spec.creatureCount), "localPlayers": 1,
+		"species": spec.speciesCounts, "invalidProfiles": 0,
+		"aliveRemoteCreatures": int(spec.creatureCount), "invalidHealth": 0}
+	var minimum_visible := int(_gauntlet_fixture.get("observer", {}).get("minimumExpectedInFrustumCreatures", 1)) + 1
+	var visible_wave := not _authored_gauntlet or boundary != "preSample" or int(census.get("inFrustumBuiltBodies", 0)) >= minimum_visible
+	if _expect(census.get(key, {}) == expected and visible_wave, "%s valid live/visible cohort census at %s: %s; inFrustumBuiltBodies=%d" % [spec.id, boundary, JSON.stringify(census.get(key, {})), int(census.get("inFrustumBuiltBodies", 0))]):
+		return true
+	var excluded := spec.duplicate(true)
+	excluded["status"] = "invalid_setup"
+	excluded["qualification"] = "excluded"
+	excluded["frames"] = 0
+	excluded["census"] = {boundary: census}
+	(_report.cells as Array).append(excluded)
+	return false
+
+
 func _prewarm() -> void:
 	# One equipped humanoid and one of every creature model the cells use, so a
 	# cell's timings never include a model's first glTF parse.
 	var records: Dictionary = {FIRST_ACTOR_ID: _record(0, true, _centre, FULL_KIT_A)}
-	for index: int in range(_creatures.size()):
-		var id := FIRST_ACTOR_ID + 1 + index
-		records[id] = _record(id - FIRST_ACTOR_ID, false, _centre + Vector2i(index + 2, 2), {})
-	records[FIRST_ACTOR_ID + 40] = _record(40, true, _centre + Vector2i(-2, -2), FULL_KIT_B)
+	if _production_undead:
+		records = production_undead_records(3, _centre, str(_app_state.get("current_map")))
+	elif _authored_gauntlet:
+		var full := authored_gauntlet_records(_gauntlet_fixture)
+		var seen := {}
+		for id: int in full:
+			var row: Dictionary = full[id]
+			if id == FIRST_ACTOR_ID or not seen.has(row.name):
+				records[id] = row
+				seen[row.name] = true
+	else:
+		for index: int in range(_creatures.size()):
+			var id := FIRST_ACTOR_ID + 1 + index
+			records[id] = _record(id - FIRST_ACTOR_ID, false, _centre + Vector2i(index + 2, 2), {})
+		records[FIRST_ACTOR_ID + 40] = _record(40, true, _centre + Vector2i(-2, -2), FULL_KIT_B)
 	_app_state.set("actors", records)
 	_app_state.call("mark_all_actors_changed")
 	await _spawn_and_build(records.size())
 	await _settle_frames(10)
 	_report["prewarmed"] = {"models": GlbSceneCache.cached_scene_count(),
 		"animationLibraries": NativeAnimationImporter.cached_library_count()}
+	if _production_undead:
+		_report.prewarmed["creatureModels"] = ["zombie", "skeleton", "drowned_lich_king"]
+	elif _authored_gauntlet:
+		_report.prewarmed["creatureModels"] = ["mire_goblin", "giant_amber_moth"]
 	_app_state.set("actors", {FIRST_ACTOR_ID: _record(0, true, _centre, FULL_KIT_A)})
 	_main.call("_sync_world")
 	await _settle_frames(20)
@@ -525,6 +673,8 @@ func _run_cell(spec: Dictionary) -> void:
 			return
 	var count := int(spec["count"])
 	var records: Dictionary = {} if replay else _make_records(count, str(spec["shape"]))
+	if (_production_undead or _authored_gauntlet) and not _expect(records.size() == count, "complete explicit creature fixture population"):
+		return
 	_app_state.set("actor_mounts", {})
 	if str(spec.shape) == "mounted":
 		var mounts := Workloads.mount_rows(records, int(spec.mountedCount), str(_app_state.get("current_map")))
@@ -544,6 +694,8 @@ func _run_cell(spec: Dictionary) -> void:
 		spawn = await _spawn_and_build(count)
 	var readiness := await _wait_for_world_readiness(str(spec["id"]), 300)
 	var census_before := _census("afterSpawn")
+	if not _accept_explicit_census(spec, census_before, "afterSpawn"):
+		return
 	if str(spec.shape) == "mounted":
 		_expect(int(census_before.mountedActors) == int(spec.mountedCount),
 			"mixed-mounted fixture builds all %d mounted actors" % int(spec.mountedCount))
@@ -552,6 +704,10 @@ func _run_cell(spec: Dictionary) -> void:
 	if not replay:
 		active = _active_ids(records, str(spec["activity"]))
 	var plan := _plan(active, str(spec["activity"]))
+	if _production_undead or _authored_gauntlet:
+		spec["activitySpecies"] = {"active": production_undead_activity_species(records, active),
+			"moving": production_undead_activity_species(records, plan.moving),
+			"fighting": production_undead_activity_species(records, plan.fighting)}
 	if str(spec.shape) == "heat_bolt":
 		_heat_bolt_benchmark = HeatBoltBenchmark.new()
 		(_main.get("world_root") as Node3D).add_child(_heat_bolt_benchmark)
@@ -585,6 +741,14 @@ func _run_cell(spec: Dictionary) -> void:
 	else:
 		await _prime(plan)
 	await _drive_for(plan, int((_report["measurement"] as Dictionary)["warmupMilliseconds"]), null)
+	var census_ready := {}
+	if _production_undead or _authored_gauntlet:
+		census_ready = _census("preSample")
+		if not _accept_explicit_census(spec, census_ready, "preSample"):
+			return
+	var pacing_before := _steady_pacing_snapshot()
+	if not _accept_steady_pacing(spec, pacing_before, "preSample"):
+		return
 	var raw := {"frameMilliseconds": [], "wallMilliseconds": [], "tickFrameMilliseconds": [],
 		"syncWorldMilliseconds": [], "presentMilliseconds": [],
 		"groundMilliseconds": [], "overheadMilliseconds": [], "animationGateMilliseconds": [],
@@ -612,7 +776,9 @@ func _run_cell(spec: Dictionary) -> void:
 	await _drive_for(plan, int((_report["measurement"] as Dictionary)["sampleMilliseconds"]), raw, profile_frames)
 	var elapsed := Time.get_ticks_msec() - sample_started
 	var census_after := _census("afterSample")
-	var sampled_runtime := _main.call("benchmark_runtime_snapshot") as Dictionary
+	var pacing_after := _steady_pacing_snapshot()
+	_accept_steady_pacing(spec, pacing_after, "afterSample")
+	var sampled_runtime := _runtime_snapshot()
 	# No await: retain the same counter boundary while reading the already
 	# completed viewport. This stalls/readbacks outside the timed sample.
 	var boundary_capture := _capture_sample_boundary(str(spec["id"]))
@@ -676,6 +842,9 @@ func _run_cell(spec: Dictionary) -> void:
 	result["spawn"] = spawn
 	result["readiness"] = readiness
 	result["census"] = {"afterSpawn": census_before, "afterSample": census_after}
+	if _production_undead or _authored_gauntlet:
+		result.census["preSample"] = census_ready
+	result["pacing"] = {"preSample": pacing_before, "afterSample": pacing_after}
 	result["effectBudget"] = budget
 	result["crowdPolicy"] = crowd
 	result["effectiveRuntime"] = sampled_runtime
@@ -729,6 +898,10 @@ func _capture_sample_boundary(cell_id: String) -> Dictionary:
 
 
 func _make_records(count: int, shape: String) -> Dictionary:
+	if shape == "undead_invasion":
+		return production_undead_records(count - 1, _centre, str(_app_state.get("current_map")))
+	if shape == "authored_gauntlet":
+		return authored_gauntlet_records(_gauntlet_fixture)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7741 + count
 	var records: Dictionary = {}
@@ -766,6 +939,70 @@ func _make_records(count: int, shape: String) -> Dictionary:
 		if humanoid:
 			kit = FULL_KIT_A if index % 4 < 2 else FULL_KIT_B
 		records[FIRST_ACTOR_ID + index] = _record(index, humanoid, tile, kit)
+	return records
+
+
+## Pure data fixture, also exercised headlessly without constructing Main.
+## A constant seed makes smaller populations exact prefixes of larger ones.
+static func production_undead_records(remote_count: int, centre: Vector2i, map_id: String) -> Dictionary:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 2310031
+	var records := {}
+	var occupied := {centre: true}
+	records[FIRST_ACTOR_ID] = {"actor_id": FIRST_ACTOR_ID, "x": centre.x, "y": centre.y,
+		"map": map_id, "rotation": 0, "actor_type": 1, "kind": 1, "name": "Invasion observer",
+		"health": 5000, "max_health": 5000, "alive": true, "appearance": {},
+		"equipment_visuals": FULL_KIT_A.duplicate(), "equipment_fallback_parts": []}
+	for index: int in remote_count:
+		var profile: Dictionary = UNDEAD_PROFILES[index % UNDEAD_PROFILES.size()]
+		var size: Vector2i = profile.footprint
+		var tile := centre
+		var found := false
+		for attempt: int in 256:
+			tile = centre + Vector2i(rng.randi_range(-30, 30), rng.randi_range(-30, 30))
+			var clear := true
+			for y: int in size.y:
+				for x: int in size.x:
+					clear = clear and not occupied.has(tile + Vector2i(x, y))
+			if clear:
+				found = true
+				break
+		if not found:
+			return {} # Never silently qualify an incomplete population.
+		for y: int in size.y:
+			for x: int in size.x:
+				occupied[tile + Vector2i(x, y)] = true
+		var id := FIRST_ACTOR_ID + index + 1
+		records[id] = {"actor_id": id, "x": tile.x, "y": tile.y, "map": map_id,
+			"rotation": (index * 977) % 65536, "actor_type": int(profile.actorType), "kind": 5,
+			"name": str(profile.model), "health": int(profile.health), "max_health": int(profile.health),
+			"alive": true, "appearance": {}, "equipment_visuals": {}, "equipment_fallback_parts": [],
+			"footprint": size, "scale": 1.0}
+	return records
+
+
+static func authored_gauntlet_records(fixture: Dictionary) -> Dictionary:
+	if int(fixture.get("schemaVersion", -1)) != 1 or int(fixture.get("localActorId", -1)) != FIRST_ACTOR_ID:
+		return {}
+	var centre: Array = fixture.centreTile
+	var map_id := str(fixture.map)
+	var records := {FIRST_ACTOR_ID: {"actor_id": FIRST_ACTOR_ID, "x": int(centre[0]), "y": int(centre[1]),
+		"map": map_id, "rotation": 0, "actor_type": 1, "kind": 1, "name": "Gauntlet observer",
+		"health": 5000, "max_health": 5000, "alive": true, "appearance": {},
+		"equipment_visuals": FULL_KIT_A.duplicate(), "equipment_fallback_parts": []}}
+	var profiles := {}
+	for profile: Dictionary in fixture.profiles:
+		profiles[str(profile.creature)] = profile
+	for row: Dictionary in fixture.actors:
+		if not profiles.has(str(row.profile)) or records.has(int(row.actorId)):
+			return {}
+		var profile: Dictionary = profiles[str(row.profile)]
+		var id := int(row.actorId)
+		records[id] = {"actor_id": id, "x": int(row.tile[0]), "y": int(row.tile[1]), "map": map_id,
+			"rotation": (id * 977) % 65536, "actor_type": int(profile.actorType), "kind": 5,
+			"name": str(profile.model), "health": int(profile.health), "max_health": int(profile.health),
+			"alive": true, "appearance": {}, "equipment_visuals": {}, "equipment_fallback_parts": [],
+			"footprint": Vector2i(int(profile.footprint[0]), int(profile.footprint[1])), "scale": float(profile.scale)}
 	return records
 
 
@@ -839,6 +1076,8 @@ func _waiting_bodies() -> int:
 
 
 func _active_ids(records: Dictionary, activity: String) -> Array[int]:
+	if activity == "undead_melee":
+		return production_undead_active_ids(records)
 	var ids: Array = records.keys()
 	ids.sort()
 	var active: Array[int] = []
@@ -847,9 +1086,30 @@ func _active_ids(records: Dictionary, activity: String) -> Array[int]:
 	for index: int in range(1, ids.size()):
 		# Every third remote actor, so the active third is spread through the
 		# crowd rather than packed at one end of it.
-		if activity in ["all_combat", "heat_bolt_combat"] or index % 3 == 1:
+		if activity in ["all_combat", "heat_bolt_combat", "gauntlet_melee"] or index % 3 == 1:
 			active.append(int(ids[index]))
 	return active
+
+
+static func production_undead_active_ids(records: Dictionary) -> Array[int]:
+	var ids: Array = records.keys()
+	ids.sort()
+	var active: Array[int] = []
+	# The historical every-third-ID rule would pick only zombies because this
+	# cohort itself cycles every three IDs. Random positions keep this prefix
+	# spatially distributed, and its species remain balanced.
+	for index: int in (maxi(0, ids.size() - 1) + 2) / 3:
+		active.append(int(ids[index + 1]))
+	return active
+
+
+static func production_undead_activity_species(records: Dictionary, ids: Array) -> Dictionary:
+	var counts := {}
+	for id: int in ids:
+		var record: Dictionary = records[id]
+		var model := str(record.name)
+		counts[model] = int(counts.get(model, 0)) + 1
+	return counts
 
 
 func _plan(active: Array[int], activity: String) -> Dictionary:
@@ -859,7 +1119,7 @@ func _plan(active: Array[int], activity: String) -> Dictionary:
 		if activity == "heat_bolt_combat":
 			(moving if index % 10 == 0 else fighting).append(active[index])
 			continue
-		if activity == "all_combat" or index % 2 == 1:
+		if activity in ["all_combat", "gauntlet_melee"] or index % 2 == 1:
 			fighting.append(active[index])
 		else:
 			moving.append(active[index])
@@ -1360,7 +1620,7 @@ func _drive_combat(fighting: Array[int], due: Array[int], tick: int) -> void:
 	for index: int in due:
 		var id := fighting[index]
 		var other := fighting[(index + 1) % fighting.size()]
-		match index % 4:
+		match (2 if (_production_undead or _authored_gauntlet) else index % 4):
 			0:
 				var payload := PackedByteArray([tick % 6])
 				_append_u16(payload, id)
@@ -1375,12 +1635,38 @@ func _drive_combat(fighting: Array[int], due: Array[int], tick: int) -> void:
 				_send_packet(EloriaProtocol.ServerMessage.ADD_ACTOR_ANIMATION, payload)
 			_:
 				melee.append(id)
-		var health := PackedByteArray()
-		_append_u16(health, other)
-		_append_u16(health, 3)
-		_send_packet(EloriaProtocol.ServerMessage.GET_ACTOR_DAMAGE if (tick / 4) % 8 != 7
-			else EloriaProtocol.ServerMessage.GET_ACTOR_HEAL, health)
+		if _production_undead or _authored_gauntlet:
+			# Use the state reduced by the preceding packets, including catch-up
+			# ticks. This workload must not turn into a corpse population in long
+			# runs or when one fighter never hits the historical tick heal phase.
+			var target: Dictionary = (_app_state.get("actors") as Dictionary).get(other, {})
+			var delta := bounded_combat_health_delta(target)
+			if delta != 0:
+				var health := PackedByteArray()
+				_append_u16(health, other)
+				_append_u16(health, absi(delta))
+				_send_packet(EloriaProtocol.ServerMessage.GET_ACTOR_HEAL if delta > 0
+					else EloriaProtocol.ServerMessage.GET_ACTOR_DAMAGE, health)
+		else:
+			var health := PackedByteArray()
+			_append_u16(health, other)
+			_append_u16(health, 3)
+			_send_packet(EloriaProtocol.ServerMessage.GET_ACTOR_DAMAGE if (tick / 4) % 8 != 7
+				else EloriaProtocol.ServerMessage.GET_ACTOR_HEAL, health)
 	_send_actor_commands(melee, 46)
+
+
+## Positive means heal, negative means damage. Only the two new creature
+## fixtures use this policy; historical cells retain their exact packet pattern.
+## Refuse invalid state so the census exposes it instead of silently reviving it.
+static func bounded_combat_health_delta(record: Dictionary) -> int:
+	var health := int(record.get("health", 0))
+	var maximum := int(record.get("max_health", 0))
+	if not bool(record.get("alive", false)) or health <= 0 or maximum < health:
+		return 0
+	if health <= maxi(1, maximum / 2):
+		return mini(3, maximum - health)
+	return -mini(3, health - 1)
 
 
 func _send_actor_commands(ids: Array, command: int) -> void:
@@ -1431,10 +1717,16 @@ func _census(boundary := "unspecified") -> Dictionary:
 	var local := nodes.get(_local_id) as Node3D
 	var out := {"nodes": nodes.size(), "builtBodies": 0, "deferred": 0, "standIns": 0,
 		"drawn": 0, "inFrustumAndDrawn": 0, "tierFull": 0, "tierHalf": 0, "tierPaused": 0,
+		"visibleBuiltBodies": 0, "inFrustumBuiltBodies": 0,
+		"bodyTierFull": 0, "bodyTierHalf": 0, "bodyTierQuarter": 0, "bodyTierPaused": 0,
 		"skeletons": 0, "skeletonsProcessing": 0, "beyondDrawDistance": 0, "crowdHidden": 0,
 		"capeClothActive": 0, "capeSolversActive": 0, "mountedActors": 0,
 		"mountSkeletons": 0, "mountedVisualsProcessing": 0,
 		"mountedWornCapes": 0, "ambientAnimals": 0}
+	var explicit_census_key := "productionUndead" if _production_undead else "authoredGauntlet"
+	if _production_undead or _authored_gauntlet:
+		out[explicit_census_key] = {"remoteCreatures": 0, "localPlayers": 0, "species": {}, "invalidProfiles": 0,
+			"aliveRemoteCreatures": 0, "invalidHealth": 0}
 	var mounted_presentation := MountedCensus.begin(boundary)
 	out["mountedPresentation"] = mounted_presentation
 	var planes: Array[Plane] = camera.get_frustum() if camera != null else []
@@ -1445,6 +1737,32 @@ func _census(boundary := "unspecified") -> Dictionary:
 		var actor := value as ReplicatedActor3D
 		if actor == null:
 			continue
+		if _production_undead or _authored_gauntlet:
+			var observed: Dictionary = out[explicit_census_key]
+			if actor.actor_id == _local_id:
+				observed.localPlayers += 1
+			else:
+				observed.remoteCreatures += 1
+				var record: Dictionary = (_app_state.get("actors") as Dictionary).get(actor.actor_id, {})
+				var health := int(record.get("health", 0))
+				if bool(record.get("alive", false)) and health > 0 and int(record.get("max_health", 0)) >= health:
+					observed.aliveRemoteCreatures += 1
+				else:
+					observed.invalidHealth += 1
+				var matches := _creatures.filter(func(p: Dictionary) -> bool: return int(p.actorType) == int(record.get("actor_type", -1)))
+				if matches.size() != 1:
+					observed.invalidProfiles += 1
+				else:
+					var profile: Dictionary = matches[0]
+					observed.species[profile.model] = int(observed.species.get(profile.model, 0)) + 1
+					if int(record.get("kind", -1)) != 5 or actor.footprint != profile.footprint \
+							or not is_equal_approx(actor.server_scale, 1.0) \
+							or str(actor._model_config.get("scene", "")).get_file() != str(profile.model) + ".glb":
+						observed.invalidProfiles += 1
+				if _authored_gauntlet:
+					var authored: Array = _gauntlet_fixture.actors.filter(func(a: Dictionary) -> bool: return int(a.actorId) == actor.actor_id)
+					if authored.size() != 1 or Vector2i(int(record.get("x", -1)), int(record.get("y", -1))) != Vector2i(authored[0].tile[0], authored[0].tile[1]):
+						observed.invalidProfiles += 1
 		if is_instance_valid(actor._mount_visual):
 			MountedCensus.include_visual(mounted_presentation, actor._mount_visual)
 			out["mountedActors"] += 1
@@ -1459,19 +1777,33 @@ func _census(boundary := "unspecified") -> Dictionary:
 		out[("deferred" if deferred else "builtBodies")] += 1
 		if actor.has_method("stand_in_visible") and bool(actor.call("stand_in_visible")):
 			out["standIns"] += 1
-		if actor.has_method("crowd_hidden") and bool(actor.call("crowd_hidden")):
+		var hidden: bool = actor.has_method("crowd_hidden") and bool(actor.call("crowd_hidden"))
+		if hidden:
 			out["crowdHidden"] += 1
 		if actor.is_drawn():
 			out["drawn"] += 1
+			if not deferred and not hidden:
+				out["visibleBuiltBodies"] += 1
 			var inside := true
 			for plane: Plane in planes:
 				if plane.distance_to(actor.global_position + Vector3.UP) > actor.view_radius():
 					inside = false
 					break
 			out["inFrustumAndDrawn"] += int(inside)
+			if not deferred and not hidden:
+				out["inFrustumBuiltBodies"] += int(inside)
 		if local != null and local.global_position.distance_to(actor.global_position) > 80.0:
 			out["beyondDrawDistance"] += 1
 		var tier := actor.animation_tier()
+		if not deferred:
+			if tier == AnimationGate.Tier.FULL:
+				out["bodyTierFull"] += 1
+			elif tier == AnimationGate.Tier.HALF:
+				out["bodyTierHalf"] += 1
+			elif tier == quarter:
+				out["bodyTierQuarter"] += 1
+			else:
+				out["bodyTierPaused"] += 1
 		if tier == AnimationGate.Tier.FULL:
 			out["tierFull"] += 1
 		elif tier == AnimationGate.Tier.HALF:
@@ -1540,6 +1872,10 @@ func _wait_for_world_readiness(label: String, minimum_msec: int) -> Dictionary:
 		var chunk := loader.world_root as ContinentChunkStream if loader != null else null
 		last_state = _main.call("benchmark_readiness_snapshot") as Dictionary
 		var idle := _streaming_idle(loader, chunk) and bool(last_state.get("ready", false))
+		if _production_undead or _authored_gauntlet:
+			var presentation := _steady_pacing_snapshot()
+			last_state["steadyPresentation"] = presentation
+			idle = idle and _warming_complete(presentation)
 		var signature := "%d|%d|%d" % [GlbSceneCache.cached_scene_count(),
 			int(Performance.get_monitor(Performance.OBJECT_RESOURCE_COUNT)),
 			chunk.cells.size() if chunk != null else -1]
@@ -1567,8 +1903,44 @@ func _streaming_idle(loader: WorldLoader, chunk: ContinentChunkStream) -> bool:
 	return exterior == null or exterior.is_idle()
 
 
-func _record_effective_runtime() -> void:
+func _steady_pacing_snapshot() -> Dictionary:
+	var warmup: RefCounted = _main.get("camera_shader_warmup")
+	var curtain := _main.get("arrival_curtain") as Node
+	return {"frameCap": Engine.max_fps,
+		"vsyncMode": null if _headless else DisplayServer.window_get_vsync_mode(),
+		"warmingRequired": not _headless and RenderingServer.get_current_rendering_method() == "gl_compatibility",
+		"cameraWarmup": warmup.call("snapshot"),
+		"arrivalPending": bool(_main.call("_arrival_pending")),
+		"arrivalVisible": bool(curtain.call("is_showing")),
+		"headWarmupActive": RLHeadLibrary.render_warm_active()}
+
+
+static func _warming_complete(state: Dictionary) -> bool:
+	var warm: Dictionary = state.get("cameraWarmup", {})
+	if bool(warm.get("active", true)) or bool(state.get("arrivalPending", true)) \
+			or bool(state.get("arrivalVisible", true)) or bool(state.get("headWarmupActive", true)):
+		return false
+	return not bool(state.get("warmingRequired", false)) or (int(warm.get("view", -1)) == 240 \
+		and int(warm.get("views", -1)) == 240 and int(warm.get("frames_per_view", -1)) == 2 \
+		and not bool(warm.get("timed_out", true)))
+
+
+func _accept_steady_pacing(spec: Dictionary, state: Dictionary, boundary: String) -> bool:
+	if not (_production_undead or _authored_gauntlet):
+		return true
+	var valid := _warming_complete(state) and int(state.frameCap) == _fps_cap \
+		and (_headless or int(state.vsyncMode) == DisplayServer.VSYNC_DISABLED)
+	return _expect(valid, "%s steady pacing/warming at %s: %s" % [spec.id, boundary, JSON.stringify(state)])
+
+
+func _runtime_snapshot() -> Dictionary:
 	var runtime := _main.call("benchmark_runtime_snapshot") as Dictionary
+	(runtime.effectiveSettings as Dictionary)["vsyncMode"] = null if _headless else DisplayServer.window_get_vsync_mode()
+	return runtime
+
+
+func _record_effective_runtime() -> void:
+	var runtime := _runtime_snapshot()
 	_report["effectiveSettings"] = runtime.get("effectiveSettings", {})
 	_report["activeBackends"] = runtime.get("activeBackends", {})
 	_report["clientDiagnostics"] = runtime.get("clientDiagnostics", {})
@@ -2065,6 +2437,46 @@ func _creature_actor_types() -> Array:
 	for step: int in range(10):
 		chosen.append((candidates[int(floor(float(step) * float(candidates.size() - 1) / 9.0))]
 			as Dictionary).duplicate())
+	return chosen
+
+
+func _authored_gauntlet_profiles() -> Array:
+	var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string(GAUNTLET_FIXTURE))
+	if not _expect(raw is Dictionary and not authored_gauntlet_records(raw).is_empty(), "authored gauntlet fixture resolves"):
+		return []
+	_gauntlet_fixture = raw
+	var parsed: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(MODELS))
+	var chosen := []
+	for profile: Dictionary in _gauntlet_fixture.profiles:
+		var model: Dictionary = parsed.get("models", {}).get(profile.model, {})
+		var scene := str(model.get("scene", ""))
+		if not _expect(parsed.get("actorTypes", {}).get(str(int(profile.actorType))) == profile.model \
+				and scene == str(profile.scene) and FileAccess.file_exists(scene) \
+				and FileAccess.get_sha256(scene) == str(profile.sceneSha256) \
+				and not bool(model.get("retired", false)) and not ArchivedPolicy.is_retired_actor_type(int(profile.actorType)) \
+				and not ArchivedPolicy.is_retired_path(scene), "supported retained gauntlet creature: " + str(profile.model)):
+			return []
+		var converted := profile.duplicate(true)
+		converted.footprint = Vector2i(int(profile.footprint[0]), int(profile.footprint[1]))
+		chosen.append(converted)
+	return chosen
+
+
+func _production_undead_profiles() -> Array:
+	var parsed: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(MODELS))
+	var models: Dictionary = parsed.get("models", {})
+	var actor_types: Dictionary = parsed.get("actorTypes", {})
+	var chosen := []
+	for profile: Dictionary in UNDEAD_PROFILES:
+		var model: Dictionary = models.get(profile.model, {})
+		var scene := str(model.get("scene", ""))
+		if not _expect(actor_types.get(str(int(profile.actorType))) == profile.model \
+				and not bool(model.get("retired", false)) and not ArchivedPolicy.is_retired_actor_type(int(profile.actorType)) \
+				and scene.begins_with("res://assets/actors/native/creatures/") \
+				and not ArchivedPolicy.is_retired_path(scene) and FileAccess.file_exists(scene),
+				"supported retained production creature: " + str(profile.model)):
+			return []
+		chosen.append(profile.duplicate(true))
 	return chosen
 
 
