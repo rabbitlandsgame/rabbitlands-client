@@ -1,0 +1,106 @@
+{
+  "version": 1,
+  "status": "qualified_geometry_candidate_pending_open_headwear",
+  "style": "painted_twin_buns_female",
+  "semantic_family": "twin_buns",
+  "module_id": 24,
+  "sex": "female",
+  "legacy_hairstyle_slot": 3,
+  "additional_generation_credits": 0,
+  "method": "Approved painted twin-bun exterior, fixed inset scalp coverage, bounded root-edge polish, independent knot grooms and separate Native-skull corrective",
+  "glb_sha256": "e359785b941366250b46b830eb9f86efe1209f56dd7ee4217398c8ac6ea36ebd",
+  "texture_sha256": "a6302c682782700b6d1036afa0808428fd0976e039c54da32ec9bb9a16c075d6",
+  "texture_import_sha256": "65f1d117ddcf4d7a5aed318bc872e1a627c21106b319cefcea60e4259a894f80",
+  "source_reference_sha256": "02345827ecd8383e6c03f9ca32d34d8b14b86becde91784f6a9c7e32548880c4",
+  "head_sha256": "f767679b773ed68071f0ad70d37cc17a7690425ef866707e52b96bfe1c7b76f6",
+  "triangles": {
+    "lod0": 13294,
+    "lod1": 5400,
+    "lod2": 2228
+  },
+  "vertices": {
+    "lod0": 9202,
+    "lod1": 4255,
+    "lod2": 1902
+  },
+  "contract": {
+    "identity_targets": 46,
+    "grooming_targets": [
+      "hl_length_p",
+      "hl_length_n",
+      "hl_volume_p",
+      "hl_volume_n"
+    ],
+    "cap_grooming_deltas_exact_zero": true,
+    "length": "Each knot radial mass and rooted strand length",
+    "volume": "Each knot axial depth and swept-hair stand-off",
+    "detail_range": [
+      0,
+      100
+    ],
+    "tie_height": false,
+    "optional_native_target": "hl_native_fit",
+    "native_default_weight": 0,
+    "native_hair_only_ignores_high_identities": true,
+    "springs": false
+  },
+  "qualification": {
+    "high_structural_errors": 0,
+    "scalp_coverage": {
+      "cases": 42,
+      "hole_samples_max": 0,
+      "report_sha256": "1b6f04879160bcea567be63f39e366b7da35b019c44ff327f8b2f15f8ff25029"
+    },
+    "native": {
+      "evaluated_cases": 1674,
+      "qualities": [
+        "Low",
+        "Medium"
+      ],
+      "groom_cases": 9,
+      "lods": 3,
+      "failures": 0,
+      "minimum_clearance_mm": 2.128618072132556,
+      "fixture_manifest_sha256": "de6a4f42543f4e004e602091170048bbd550a862907da921f70fb1c704002b5a",
+      "report_sha256": "5804917303c6256c3e2439632250684b1da394cc72b5d4ccdb56a64a3edcb0b5",
+      "maximum_corrective_shift_mm": 15.12994521684213,
+      "style_local_cap_limit_mm": 16,
+      "horizontal_slice_proof": false
+    },
+    "client": {
+      "renderer": "Forward+",
+      "texture_loading": "actual imported BPTC resource; no private texture overrides",
+      "high_frames": 22,
+      "native_frames": 4,
+      "controls": [
+        "length minimum/maximum",
+        "volume minimum/maximum",
+        "detail minimum/maximum"
+      ],
+      "identity_extrema": 2,
+      "poses": [
+        "Rest",
+        "Idle",
+        "Walk"
+      ],
+      "closed_headwear_items": [
+        134,
+        159
+      ],
+      "closed_headwear_hides_hair": true,
+      "pending_open_headwear_items": [
+        111,
+        170
+      ],
+      "activation_held": true
+    }
+  },
+  "provenance_hashes": {
+    "original_source_preparation": "c9c31e7565cb9545ee6bc78855fe2bf5b8c76f2d6ab9ce301d34a2930fc5fddc",
+    "full_groom_report": "343b52b55c76f6bc38c683ccfad424e369c12d448253c2a42f1030952fe524db",
+    "native_authoring": "489be69f174feab1cefa4b23bbfba73bf19c579dc716648db3f62a15b4415ec2",
+    "native_face_support": "f5fc4048e3832e027237f9071fd8cc76a8e4d5ae7740ed064d5a290c2fe9f0f4",
+    "final_metadata_equality": "efb832203bebb99799317dacfdff13d28d7502c67e3961ea7cabf042db69784b",
+    "texture_import": "ed18e790bb996689e5613d88f2ec3cf09e262f1d5a6d54314a075de0ec749d91"
+  }
+}
