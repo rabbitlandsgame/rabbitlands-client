@@ -31,35 +31,44 @@ func run() -> void:
 	main.exterior_stream.set_process(false)
 	root.get_node("Network").set_process(false)
 	select_map(main, "hearthcroft")
-	var before: MeshInstance3D = main._neighbour_pictures["landfall"]
-	var old_frame := before.transform
-	expect(before.get_parent() == main.world_root, "the unloaded region starts in the departure world's frame")
+	var before: Dictionary = main._neighbour_pictures["landfall"]
+	var old_frame: Transform3D = before.transform
+	expect(old_frame.is_equal_approx(main.world_root.global_transform * main.exterior_stream.region_transform("landfall")),
+		"the unloaded region starts in the departure world's frame")
 	var textures: Dictionary = main._tab_map_textures.duplicate()
 	select_map(main, "reedfall")
-	var after: MeshInstance3D = main._neighbour_pictures["landfall"]
-	expect(after != before and before.is_queued_for_deletion() and not before.visible,
-		"old pictures stop drawing immediately at a map handoff")
-	expect(after.transform.is_equal_approx(main.exterior_stream.region_transform("landfall")),
+	var after: Dictionary = main._neighbour_pictures["landfall"]
+	var stale_draw := false
+	for row: Dictionary in main.minimap_background.get("_pictures"):
+		stale_draw = stale_draw or (row.texture == before.texture and row.transform.is_equal_approx(old_frame))
+	expect(not stale_draw, "the departure frame stops drawing immediately at a map handoff")
+	expect(after.transform.is_equal_approx(main.world_root.global_transform * main.exterior_stream.region_transform("landfall")),
 		"the unloaded picture moves into Reedfall's coordinate frame")
 	expect(not after.transform.is_equal_approx(old_frame), "a shared parent cannot preserve the departure transform")
 	var region_index: int = main._region_index_for_map("landfall")
 	var expected_height: float = main._map_picture_height - main.MAP_PICTURE_SINK_METRES * float(region_index + 1)
-	expect(absf(after.mesh.get_aabb().position.y - expected_height) < 0.001,
-		"the rebuilt picture also sinks below the new active picture")
+	expect(absf(float(after.height) - expected_height) < 0.001,
+		"the rebuilt descriptor retains the new region's projection height")
+	var plan: Array = main.minimap_background.get("_pictures")
+	expect(not plan.is_empty() and plan.back().texture == main._map_picture.texture,
+		"the current picture owns overlapping pixels after the handoff")
 	var reused: bool = main._tab_map_textures.size() == textures.size()
 	for map_id: String in textures:
 		reused = reused and main._tab_map_textures[map_id] == textures[map_id]
 	expect(reused, "the crossing reuses every decoded texture")
 	await process_frame
 	await process_frame
-	expect(not is_instance_valid(before), "the obsolete picture is freed after the handoff frame")
+	expect(main.world_root.find_children("MapPicture", "MeshInstance3D", true, false).is_empty(),
+		"a handoff leaves no obsolete picture geometry in either world")
 	expect(main._neighbour_pictures.size() + 1 == textures.size(),
 		"one active picture and one picture per other region remain after cleanup")
 	select_map(main, "hearthcroft")
-	var returned: MeshInstance3D = main._neighbour_pictures["landfall"]
+	var returned: Dictionary = main._neighbour_pictures["landfall"]
 	expect(returned.transform.is_equal_approx(old_frame), "returning across the seam restores the original picture frame")
 	main._remove_map_picture()
-	expect(main._neighbour_pictures.is_empty() and main._map_picture == null,
+	expect(main._neighbour_pictures.is_empty() and main._map_picture.is_empty()
+		and main.minimap_background.get("_pictures").is_empty()
+		and main.full_map_background.get("_pictures").is_empty(),
 		"removing the map picture also removes all neighboring pictures")
 	print("map picture handoff: %d failures" % failures)
 	textures.clear()

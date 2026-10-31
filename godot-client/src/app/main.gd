@@ -927,17 +927,18 @@ var _arrival_unreported := false
 ## curtain still up is lowered: neither may strand a player.
 const ARRIVAL_TIMEOUT_MSEC := 30000
 const ARRIVAL_CURTAIN_LIMIT_MSEC := 60000
-## The region's picture under the map cameras, or null on a map without one.
-var _map_picture: MeshInstance3D
+## Active prerender descriptor, empty while a secret room is not yet known.
+var _map_picture: Dictionary = {}
+var minimap_background: Control
+var full_map_background: Control
+var _map_background_catalog := preload("res://src/world/map_background_catalog.gd").new()
 ## The ground the current region's picture lies on: what the other regions'
 ## pictures sink below, since only a loaded region publishes its own.
 var _map_picture_height := 0.0
 ## Regions whose tab-map textures are still to be decoded ahead of a crossing.
 var _map_picture_warmup: Array[String] = []
 var _map_picture_warmup_armed := false
-## The other regions' pictures, keyed by normalized map id: a quad under each
-## resident's root, so it stands in that map's rigid frame, and one in
-## world_root for every region that is not loaded.
+## Other regions' 2D picture descriptors in the active world's surveyed frame.
 var _neighbour_pictures: Dictionary = {}
 ## Neighbour map id -> {transform, adapter}: the framed adapters actors on
 ## resident neighbours are placed through, rebuilt when the root moves.
@@ -1522,12 +1523,22 @@ func _ready() -> void:
 	map_image.add_child(map_marker_overlay)
 	map_marker_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	map_marker_overlay.configure(full_map_camera, adapter, full_map_viewport.size)
+	full_map_background = preload("res://src/ui/map_background_2d.gd").new()
+	map_image.add_child(full_map_background)
+	map_image.move_child(full_map_background, 0)
+	full_map_background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	full_map_background.configure(full_map_camera, full_map_viewport.size)
 	minimap_marker_overlay = MinimapMarkerOverlayScript.new()
 	minimap_marker_overlay.name = "MinimapMarkerOverlay"
 	minimap_marker_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	minimap.add_child(minimap_marker_overlay)
 	minimap_marker_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	minimap_marker_overlay.configure(map_camera, map_viewport.size)
+	minimap_background = preload("res://src/ui/map_background_2d.gd").new()
+	minimap.add_child(minimap_background)
+	minimap.move_child(minimap_background, 0)
+	minimap_background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	minimap_background.configure(map_camera, map_viewport.size)
 	nearby_indicator = NearbyIndicatorScript.new()
 	minimap.add_child(nearby_indicator)
 	Diagnostics.startup_stage("audio")
@@ -1764,8 +1775,8 @@ func _ready() -> void:
 	game_view.add_child(_world_text_overlay)
 	game_view.move_child(_world_text_overlay, viewport_container.get_index() + 1)
 	_world_text_overlay.configure(main_viewport)
-	minimap.texture = map_viewport.get_texture()
-	map_image.texture = full_map_viewport.get_texture()
+	minimap.texture = null
+	map_image.texture = null
 	full_map.hide()
 	console_panel.hide()
 	settings_panel.hide()
@@ -2054,8 +2065,14 @@ func _bind_shared_world() -> void:
 	if gameplay_world == null:
 		push_error("world_binding stage=resolve error=WorldRoot_has_no_World3D")
 		return
-	map_viewport.world_3d = gameplay_world
-	full_map_viewport.world_3d = gameplay_world
+	# Map cameras retain only projection/picking math. Their viewports never
+	# render or share the gameplay world; backgrounds are direct 2D Controls.
+	for viewport: SubViewport in [map_viewport, full_map_viewport]:
+		viewport.own_world_3d = true
+		viewport.disable_3d = true
+		viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	map_camera.cull_mask = 0
+	full_map_camera.cull_mask = 0
 	_sync_map_viewport_activity()
 	print_debug("world_binding stage=shared world=", gameplay_world)
 
@@ -2155,15 +2172,14 @@ func _process(delta: float) -> void:
 				_sync_session_experience()
 		_sync_hud_button_states()
 
-## Drives the two map SubViewports on demand instead of leaving them on
-## UPDATE_ALWAYS. Each requests a single redraw, so a hidden map costs nothing
-## and a visible one refreshes fast enough to read as live.
+## Refresh direct 2D pictures and markers only while their panel is visible.
+## Projection-only SubViewports remain disabled, including missing-image cases.
 func _update_map_viewports() -> void:
 	var now: int = Time.get_ticks_msec()
 	if minimap_frame.visible and now >= _minimap_refresh_msec:
 		_minimap_refresh_msec = now + MINIMAP_REFRESH_MSEC
 		_update_map_detail_levels()
-		map_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+		minimap_background.refresh(map_viewport.size)
 		# The marks are drawn over that image and follow the same camera, so
 		# they are collected when it is redrawn and never while it is hidden.
 		minimap_marker_overlay.set_marks(_collect_minimap_marks())
@@ -2176,7 +2192,7 @@ func _update_map_viewports() -> void:
 		_update_map_detail_levels()
 		if _full_map_cursor_inside:
 			_update_full_map_cursor(_full_map_cursor_position)
-		full_map_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+		full_map_background.refresh(full_map_viewport.size)
 		# Refresh projected markers alongside the terrain, including visibility
 		# changes when the player enters a different secret section.
 		map_marker_overlay.set_live_marks(_collect_minimap_marks())
@@ -3216,12 +3232,9 @@ func _hide_chat_input() -> void:
 ## minimap back on full-rate world rendering for up to a whole throttle
 ## interval, which is exactly the cost the throttle exists to remove.
 func _sync_map_viewport_activity() -> void:
-	map_viewport.render_target_update_mode = (
-		SubViewport.UPDATE_ONCE if minimap_frame.visible
-		else SubViewport.UPDATE_DISABLED)
-	full_map_viewport.render_target_update_mode = (
-		SubViewport.UPDATE_ONCE if full_map.visible and map_image.visible
-		else SubViewport.UPDATE_DISABLED)
+	map_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	full_map_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	_request_map_redraw()
 
 
 func _toggle_full_map() -> void:
@@ -5591,7 +5604,7 @@ func _apply_minimap_zoom() -> void:
 	# The minimap render is throttled, so a zoom would otherwise not be seen
 	# until the next scheduled frame.
 	if minimap_frame.visible:
-		map_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+		minimap_background.refresh(map_viewport.size)
 
 ## The scroll wheel over the Tab map frames more or less of the continent
 ## around the region. Every region's picture stands whether or not it is
@@ -6801,28 +6814,13 @@ func _update_border_lighting() -> void:
 	# Look pass: and the sky's haze, over the border's blended colours.
 	LookSky.apply(lighting, world_environment, AppState.continuous_game_minute())
 
-## The maps are navigation aids, not scenery. Rendered through the world's own
-## environment they went as dark as the world did, and a minimap nobody can
-## read at night is a minimap that only works half the time. Both map cameras
-## get their own copy of the environment with a floor under the ambient, so
-## night still reads as night on them but the streets stay legible.
+## Map pixels use their baked colors and optional HUD palette. Projection-only
+## cameras never need a copy of the world's environment or lighting.
 func _sync_map_environment() -> void:
-	var source: Environment = world_environment.environment
-	if source == null:
-		for uncovered: Camera3D in [map_camera, full_map_camera]:
-			uncovered.environment = null
-		return
-	if _map_environment == null or _map_environment.sky != source.sky:
-		_map_environment = source.duplicate() as Environment
-	_map_environment.background_mode = source.background_mode
-	_map_environment.sky = source.sky
-	_map_environment.ambient_light_source = source.ambient_light_source
-	_map_environment.ambient_light_color = source.ambient_light_color
-	_map_environment.ambient_light_energy = maxf(
-		source.ambient_light_energy, MAP_MINIMUM_AMBIENT)
-	_map_environment.fog_enabled = false
-	for lit: Camera3D in [map_camera, full_map_camera]:
-		lit.environment = _map_environment
+	# Prerendered 2D pixels are independent of world lighting and weather.
+	_map_environment = null
+	map_camera.environment = null
+	full_map_camera.environment = null
 
 ## The ambience a package declares for itself. Four Gates has named a civic
 ## murmur and its waterfalls since it was authored and nothing played them.
@@ -8444,46 +8442,60 @@ func _adapter_for_actor(dto: Dictionary) -> CoordinateAdapter:
 ## so a live render of the world framed to the whole region showed the
 ## resident chunks in a field of nothing. Every region ships its picture
 ## (minimap.webp, one pixel a metre, north up, framed by cartography.json as
-## the full-map camera frames the region); it is laid on the ground on a
-## visual layer only the map cameras render, and while it stands they render
-## nothing else. The dots and marks are drawn over it as before. A map
-## without a picture (an interior) keeps the live render.
+## the full-map camera frames the region). The image is drawn directly in 2D;
+## cameras supply projection math only. Interiors use the required prerender
+## catalog, with secret sections selecting only their own image.
 func _install_map_picture(manifest: WorldManifest) -> void:
 	_remove_map_picture()
 	var region_index: int = _region_index_for_map(AppState.current_map)
 	var minimap: Dictionary = manifest.data.get("minimap", {}) as Dictionary
 	var texture: Texture2D = null
 	var tab_map: Dictionary = {}
-	if region_index >= 0 and not minimap.is_empty():
+	if region_index >= 0 and not minimap.is_empty() and not SecretSections.applies(manifest):
 		var region: Dictionary = cartography_regions[region_index] as Dictionary
 		texture = _tab_map_texture(region)
 		if texture != null:
 			texture = _tab_map_detail_texture(region)
 		tab_map = region.get("tabMap", {}) as Dictionary
 	var extent: Rect2 = MapPicture.extent(minimap, tab_map) if texture != null else Rect2()
-	if texture == null or extent.size.x <= 0.0 or extent.size.y <= 0.0:
-		_set_map_cameras_picture(false)
-		return
 	_map_picture_height = MapPicture.height_below(manifest.data)
-	_map_picture = MapPicture.build(texture, extent, _map_picture_height, MAP_PICTURE_LAYER)
-	world_root.add_child(_map_picture)
+	if texture == null or extent.size.x <= 0.0 or extent.size.y <= 0.0:
+		_map_picture = _map_background_catalog.picture(AppState.current_map,
+			secret_sections.current_section(), _map_picture_height)
+	else:
+		_map_picture = {"texture": texture, "extent": extent, "height": _map_picture_height,
+			"transform": world_root.global_transform}
+	if not _map_picture.is_empty():
+		_map_picture["transform"] = world_root.global_transform
 	_set_map_cameras_picture(true)
-	_install_neighbour_pictures()
+	if region_index >= 0 and not _map_picture.is_empty() and not SecretSections.applies(manifest):
+		_install_neighbour_pictures()
+	_sync_map_background_pictures()
 
 func _remove_map_picture() -> void:
 	_map_detail_visible.clear()
-	if is_instance_valid(_map_picture):
-		_map_picture.hide()
-		_map_picture.queue_free()
-	_map_picture = null
+	_map_picture = {}
 	# Far-region pictures share world_root, so a map handoff does not change
 	# their parent. Their transforms and depths still belong to the departure
 	# map. Rebuild them with the new picture; the decoded textures stay cached.
-	for picture: Variant in _neighbour_pictures.values():
-		if is_instance_valid(picture):
-			(picture as Node3D).hide()
-			(picture as Node).queue_free()
 	_neighbour_pictures.clear()
+	_sync_map_background_pictures()
+
+func _sync_map_background_pictures() -> void:
+	var pictures: Array[Dictionary] = []
+	# Neighbors draw first; the current region owns overlapping pixels.
+	for map_id: String in _neighbour_pictures:
+		pictures.append(_neighbour_pictures[map_id])
+	pictures.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return ((a.transform as Transform3D) * Vector3(0, float(a.height), 0)).y \
+			< ((b.transform as Transform3D) * Vector3(0, float(b.height), 0)).y)
+	if not _map_picture.is_empty():
+		pictures.append(_map_picture)
+	if minimap_background != null:
+		minimap_background.set_pictures(pictures)
+	if full_map_background != null:
+		full_map_background.set_pictures(pictures)
+	_request_map_redraw()
 
 ## The region boundaries in the current map's frame: every region's cartography
 ## polygon (continent picture pixels, north up) turned into metres of this map,
@@ -8539,35 +8551,27 @@ func _update_map_boundaries() -> void:
 ## first and stands in its own frame as before. Called after the current
 ## picture is laid and whenever the stream's resident table changes.
 func _install_neighbour_pictures() -> void:
-	var detail_plan_changed := false
 	if exterior_stream != null and not exterior_stream.residents_changed.is_connected(_install_neighbour_pictures):
 		exterior_stream.residents_changed.connect(_install_neighbour_pictures)
+	if _map_picture.is_empty() or _region_index_for_map(AppState.current_map) < 0 \
+			or secret_sections.is_active():
+		return
 	var residents: Dictionary = exterior_stream.residents if exterior_stream != null else {}
 	var wanted: Array[String] = exterior_stream.continent_maps() if exterior_stream != null else ([] as Array[String])
 	for map_id: String in residents.keys():
 		if not wanted.has(map_id):
 			wanted.append(map_id)
-	# A picture whose frame changed - a region loaded, or the map swapped under
-	# it at a crossing - is dropped here and built again below in its new one.
-	for stale_id: String in _neighbour_pictures.keys():
-		var stale: Variant = _neighbour_pictures[stale_id]
-		var resident_root: Node3D = (residents.get(stale_id, {}) as Dictionary).get("root") as Node3D
-		var frame: Node = resident_root if is_instance_valid(resident_root) else world_root
-		if (not wanted.has(stale_id) or not is_instance_valid(stale)
-				or (stale as Node).get_parent() != frame):
-			if is_instance_valid(stale):
-				(stale as Node).queue_free()
-			_neighbour_pictures.erase(stale_id)
-			detail_plan_changed = true
+	# Descriptors hold immutable pixels and the current surveyed frame, rather
+	# than Nodes parented to a world that can be parked or retired.
+	_neighbour_pictures.clear()
 	for map_id: String in wanted:
-		if _neighbour_pictures.has(map_id):
+		if MapRegistry.normalize_server_map_id(map_id) == MapRegistry.normalize_server_map_id(AppState.current_map):
 			continue
 		var picture: Variant = _build_region_picture(map_id, residents.get(map_id, {}) as Dictionary)
-		if picture is MeshInstance3D:
+		if picture is Dictionary and not picture.is_empty():
 			_neighbour_pictures[map_id] = picture
-			detail_plan_changed = true
-	if detail_plan_changed:
-		_map_detail_visible.clear()
+	_map_detail_visible.clear()
+	_sync_map_background_pictures()
 
 ## One region's picture: its own minimap pixels, framed as the Tab map frames
 ## that region. A resident region is laid under its root at its manifest's
@@ -8580,11 +8584,11 @@ func _install_neighbour_pictures() -> void:
 func _build_region_picture(map_id: String, resident: Dictionary) -> Variant:
 	var region_index: int = _region_index_for_map(map_id)
 	if region_index < 0 or exterior_stream == null:
-		return null
+		return {}
 	var region: Dictionary = cartography_regions[region_index] as Dictionary
 	var texture: Texture2D = _tab_map_texture(region)
 	if texture == null:
-		return null
+		return {}
 	var tab_map: Dictionary = region.get("tabMap", {}) as Dictionary
 	var root: Node3D = resident.get("root") as Node3D
 	var manifest: WorldManifest = resident.get("manifest") as WorldManifest
@@ -8592,20 +8596,17 @@ func _build_region_picture(map_id: String, resident: Dictionary) -> Variant:
 	var extent: Rect2 = (MapPicture.extent(manifest.data.get("minimap", {}) as Dictionary, tab_map)
 		if loaded else MapPicture.tab_map_extent(tab_map))
 	if extent.size.x <= 0.0 or extent.size.y <= 0.0:
-		return null
+		return {}
 	var height: float = (MapPicture.height_below(manifest.data) if loaded
 		else _map_picture_height - MAP_PICTURE_SINK_METRES * float(region_index + 1))
-	var picture := MapPicture.build(texture, extent, height, MAP_PICTURE_LAYER)
 	if loaded:
-		root.add_child(picture)
-		return picture
+		return {"texture": texture, "extent": extent, "height": height,
+			"transform": root.global_transform}
 	var frame_value: Variant = exterior_stream.region_transform(map_id)
 	if not frame_value is Transform3D:
-		picture.queue_free()
-		return null
-	world_root.add_child(picture)
-	picture.transform = frame_value as Transform3D
-	return picture
+		return {}
+	return {"texture": texture, "extent": extent, "height": height,
+		"transform": world_root.global_transform * (frame_value as Transform3D)}
 
 ## The neighbours' pictures ahead of the crossing: a seamless handoff must not
 ## pay for a webp decode and an upload while the traveller drifts to its
@@ -8651,10 +8652,12 @@ func _warm_one_map_picture() -> void:
 
 ## What the map cameras render: the picture alone while one stands, else the
 ## live world on layer 1 as they always did.
-func _set_map_cameras_picture(picture: bool) -> void:
-	var mask: int = MAP_PICTURE_LAYER if picture else 1
-	map_camera.cull_mask = mask
-	full_map_camera.cull_mask = mask
+func _set_map_cameras_picture(_picture: bool) -> void:
+	map_camera.cull_mask = 0
+	full_map_camera.cull_mask = 0
+	map_viewport.disable_3d = true
+	full_map_viewport.disable_3d = true
+	_sync_map_viewport_activity()
 
 func _footstep_surface_at(tile: Vector2i) -> String:
 	if gameplay_world == null or adapter == null:
@@ -9778,6 +9781,7 @@ func _update_secret_sections(force: bool = false) -> void:
 	if secret_sections.current_section() != previous_section:
 		_full_map_panned = false
 		_configure_full_map(world_loader.manifest)
+		_install_map_picture(world_loader.manifest)
 		_request_map_redraw()
 		_apply_day_night()
 	# whoever and whatever stands in another secret stays unseen
@@ -9808,6 +9812,8 @@ func _configure_full_map(manifest: WorldManifest) -> void:
 	var buffer: float = MapViewScript.NEIGHBOUR_BUFFER_METRES if manifest.data.has("continentGeography") else 0.0
 	MapViewScript.configure(full_map_camera, full_map_viewport,
 		MapViewScript.bounds_for(manifest, secret_sections.current_section()), buffer)
+	if full_map_background != null:
+		full_map_background.configure(full_map_camera, full_map_viewport.size)
 	# Every map can magnify around the cursor. Only continent exteriors can
 	# pull back past their default framing to show neighbouring regions.
 	_full_map_base_size = full_map_camera.size
@@ -10073,16 +10079,16 @@ func _update_map_detail_levels() -> void:
 		return
 	_map_detail_visible = wanted
 	for map_id: String in _neighbour_pictures:
-		var picture := _neighbour_pictures[map_id] as MeshInstance3D
-		if not is_instance_valid(picture):
+		var picture: Dictionary = _neighbour_pictures[map_id]
+		if picture.is_empty():
 			continue
 		var region_index := _region_index_for_map(map_id)
 		if region_index < 0:
 			continue
 		var region: Dictionary = cartography_regions[region_index]
-		var material := picture.mesh.surface_get_material(0) as StandardMaterial3D
-		material.albedo_texture = (_tab_map_detail_texture(region) if wanted.has(map_id)
+		picture["texture"] = (_tab_map_detail_texture(region) if wanted.has(map_id)
 			else _tab_map_texture(region))
+	_sync_map_background_pictures()
 	# Release detailed images when their regions leave both map views.
 	for key: String in _tab_map_detail_textures.keys():
 		if not wanted.has(key) and key != str((cartography_regions[_preview_region_index] as Dictionary).get("serverMap", "") if _preview_region_index >= 0 else ""):
@@ -10148,7 +10154,7 @@ func _show_continent_view() -> void:
 	_boat_continent_overlay.set_hovered_dock(-1)
 	continent_map.set_current_region(_continent_region_indices.find(_region_index_for_map(AppState.current_map)))
 	# The live render keeps its last frame while its viewport idles.
-	continent_button.texture_normal = full_map_viewport.get_texture()
+	continent_button.texture_normal = _map_picture.get("texture") as Texture2D
 	continent_button.tooltip_text = "Return to your current map"
 	map_title.text = _continent_name().to_upper() + " CONTINENT"
 	map_coordinates.text = CONTINENT_HINT
@@ -10975,13 +10981,10 @@ func _apply_minimap_marker_settings() -> void:
 ## border the map no longer reaches.
 func _apply_minimap_shape() -> void:
 	var is_round: bool = _minimap_shape == "round"
-	if _minimap_mask_material == null:
-		var shader := Shader.new()
-		shader.code = MINIMAP_MASK_SHADER
-		_minimap_mask_material = ShaderMaterial.new()
-		_minimap_mask_material.shader = shader
-	_minimap_mask_material.set_shader_parameter("rounded", is_round)
-	minimap.material = _minimap_mask_material
+	if minimap_background != null:
+		minimap_background.set_round(is_round)
+		_minimap_mask_material = minimap_background.material as ShaderMaterial
+	minimap.material = null
 	if _minimap_panel_style != null:
 		var radius: int = (roundi(minimap_frame.size.x * 0.5) if is_round else 1)
 		_minimap_panel_style.corner_radius_top_left = radius

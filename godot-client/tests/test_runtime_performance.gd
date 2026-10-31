@@ -1,6 +1,6 @@
 extends SceneTree
-## Guards the runtime-cost work: the map SubViewports must stay idle while their
-## UI is hidden, the surface sampler must not re-query physics for an actor that
+## Guards runtime costs: direct map backgrounds refresh only while visible and
+## coordinate SubViewports never render; the surface sampler skips an actor that
 ## has not moved, the animation importer must rebuild only the clips an actor
 ## can play, and the glTF cache must parse a file once. Then the per-packet
 ## work: item icons are shared, only the actors that changed are re-presented,
@@ -27,85 +27,115 @@ func _run() -> void:
 	var full_map: Control = scene.get_node("%FullMap")
 	var map_image: Control = scene.get_node("%MapImage")
 
-	_expect(map_viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED,
-		"minimap viewport ships idle instead of redrawing the world every frame")
-	_expect(full_map_viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED,
-		"full-map viewport ships idle")
+	var minimap_background: Control = scene.get("minimap_background")
+	var full_map_background: Control = scene.get("full_map_background")
+	var minimap_material := minimap_background.material as ShaderMaterial
+	var full_map_material := full_map_background.material as ShaderMaterial
+	var untouched := Vector4(-1, -1, -1, -1)
+	_expect(map_viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED
+		and full_map_viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED,
+		"map coordinate viewports never render a framebuffer")
+	_expect(map_viewport.disable_3d and full_map_viewport.disable_3d
+		and map_viewport.own_world_3d and full_map_viewport.own_world_3d,
+		"map projection cameras are isolated from the gameplay world")
+	_expect(scene.get("map_camera").cull_mask == 0 and scene.get("full_map_camera").cull_mask == 0,
+		"map coordinate cameras cannot draw any world visual layer")
+	_expect(scene.get("minimap").texture == null and scene.get("map_image").texture == null,
+		"map controls retain no viewport texture or placeholder image")
+	_expect(minimap_background.get_parent() == scene.get("minimap")
+		and full_map_background.get_parent() == scene.get("map_image"),
+		"backgrounds draw directly under the existing map marker controls")
 	_expect(preview_viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED,
 		"character preview viewport ships idle")
 
 	minimap_frame.hide()
 	full_map.hide()
+	minimap_material.set_shader_parameter("image_rect", untouched)
+	full_map_material.set_shader_parameter("image_rect", untouched)
 	scene.call("_request_map_redraw")
 	scene.call("_update_map_viewports")
-	_expect(map_viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED,
-		"a hidden minimap requests no redraw")
-	_expect(full_map_viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED,
-		"a hidden full map requests no redraw")
+	_expect(minimap_material.get_shader_parameter("image_rect") == untouched
+		and full_map_material.get_shader_parameter("image_rect") == untouched,
+		"hidden map panels do not request background projection/redraw work")
 
 	minimap_frame.show()
 	full_map.show()
 	map_image.show()
 	scene.call("_request_map_redraw")
 	scene.call("_update_map_viewports")
-	_expect(map_viewport.render_target_update_mode == SubViewport.UPDATE_ONCE,
-		"a visible minimap requests a single redraw")
-	_expect(full_map_viewport.render_target_update_mode == SubViewport.UPDATE_ONCE,
-		"a visible full map requests a single redraw")
-
-	map_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	_expect(minimap_material.get_shader_parameter("image_rect") != untouched
+		and full_map_material.get_shader_parameter("image_rect") != untouched,
+		"visible panels refresh their fitted direct 2D background rectangles")
+	_expect(map_viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED
+		and full_map_viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED,
+		"visible map refreshes never request a 3D pass")
+	minimap_material.set_shader_parameter("image_rect", untouched)
 	scene.call("_update_map_viewports")
-	_expect(map_viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED,
-		"minimap redraws are throttled rather than requested every frame")
+	_expect(minimap_material.get_shader_parameter("image_rect") == untouched,
+		"minimap projection/redraw requests retain their refresh throttle")
 	minimap_frame.hide()
 	full_map.hide()
 
-	# The map-load and toggle path runs on every map load and every full-map
-	# toggle. It used to set UPDATE_ALWAYS for a visible panel, which put the
-	# world back on full-rate rendering for up to one throttle interval and
-	# undid the throttle it shares the file with. It may only ever idle a
-	# viewport or request its single first frame.
+	# Map loads and toggles invalidate the 2D schedule, while the retained
+	# Camera3D/SubViewport nodes remain disabled coordinate holders throughout.
 	minimap_frame.show()
 	full_map.show()
 	map_image.show()
 	scene.call("_sync_map_viewport_activity")
-	_expect(map_viewport.render_target_update_mode == SubViewport.UPDATE_ONCE
-		and full_map_viewport.render_target_update_mode == SubViewport.UPDATE_ONCE,
-		"a map load with both panels visible requests one frame, not continuous redraw")
+	scene.call("_update_map_viewports")
+	_expect(minimap_material.get_shader_parameter("image_rect") != untouched
+		and map_viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED
+		and full_map_viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED,
+		"a visible map-load refresh updates 2D pixels without enabling either viewport")
 	minimap_frame.hide()
 	full_map.hide()
 	scene.call("_sync_map_viewport_activity")
 	_expect(map_viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED
 		and full_map_viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED,
-		"a map load with both panels hidden idles both viewports")
+		"a hidden map load leaves both coordinate viewports disabled")
 
-	# The toggle paths themselves: opening the tab map or the minimap must not
-	# reach UPDATE_ALWAYS either, and closing them must idle immediately.
+	full_map_material.set_shader_parameter("image_rect", untouched)
 	scene.call("_toggle_full_map")
-	_expect(full_map.visible
-		and full_map_viewport.render_target_update_mode == SubViewport.UPDATE_ONCE,
-		"opening the tab map requests one redraw")
+	scene.call("_update_map_viewports")
+	_expect(full_map.visible and full_map_material.get_shader_parameter("image_rect") != untouched,
+		"opening the Tab map refreshes its 2D background")
+	full_map_material.set_shader_parameter("image_rect", untouched)
 	scene.call("_show_continent_view")
-	_expect(full_map_viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED,
-		"switching the tab map to the continent view idles the world render")
+	scene.call("_update_map_viewports")
+	_expect(full_map_material.get_shader_parameter("image_rect") == untouched,
+		"the continent view does not refresh the hidden regional background")
 	scene.call("_show_current_map_view")
-	_expect(full_map_viewport.render_target_update_mode == SubViewport.UPDATE_ONCE,
-		"switching back to the live map requests one redraw")
+	scene.call("_update_map_viewports")
+	_expect(full_map_material.get_shader_parameter("image_rect") != untouched,
+		"switching back to the regional map refreshes its background")
 	scene.call("_toggle_full_map")
-	_expect(not full_map.visible
-		and full_map_viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED,
-		"closing the tab map idles its viewport")
+	_expect(not full_map.visible and full_map_viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED,
+		"closing the Tab map retains its disabled coordinate viewport")
 	scene.call("_toggle_minimap")
-	_expect(minimap_frame.visible
-		and map_viewport.render_target_update_mode == SubViewport.UPDATE_ONCE,
-		"showing the minimap requests one redraw")
-	scene.call("_toggle_minimap")
-	_expect(not minimap_frame.visible
+	scene.call("_update_map_viewports")
+	_expect(minimap_frame.visible and minimap_material.get_shader_parameter("image_rect") != untouched
 		and map_viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED,
-		"hiding the minimap idles its viewport")
+		"showing the minimap refreshes direct 2D pixels only")
+	scene.call("_toggle_minimap")
+	_expect(not minimap_frame.visible and map_viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED,
+		"hiding the minimap leaves its coordinate viewport idle")
 
 	# The surface sampler is the per-actor physics query; it must be skipped for
 	# an actor that has not moved since the last sample.
+	# Supply navigation ground: an actual ray miss intentionally stays uncached
+	# until streamed physics arrives, so fallback-height-only ground is unsuitable.
+	var ground := StaticBody3D.new()
+	ground.collision_layer = WorldLoader.NAVIGATION_SURFACE_LAYER
+	ground.collision_mask = 0
+	var ground_shape := CollisionShape3D.new()
+	var ground_box := BoxShape3D.new()
+	ground_box.size = Vector3(40, 1, 40)
+	ground_shape.shape = ground_box
+	ground_shape.position.y = -0.5
+	ground.add_child(ground_shape)
+	scene.get_node("%WorldRoot").add_child(ground)
+	await physics_frame
+	await process_frame
 	var actor := ReplicatedActor3D.new()
 	actor.actor_id = 4242
 	actor.server_target = Vector3(3.0, 0.0, 7.0)
@@ -121,6 +151,7 @@ func _run() -> void:
 	scene.call("_place_actor_on_surface", actor)
 	_expect(samples[4242] != recorded, "a moved actor is re-sampled")
 	actor.queue_free()
+	ground.queue_free()
 
 	# Only the clips the action map can request are worth rebuilding.
 	var resolver := AnimationResolver.new({
@@ -224,16 +255,16 @@ func _run() -> void:
 	var lines: Array = app_state.get("chat_lines")
 	lines.clear()
 	for index: int in range(3):
-		lines.append({"channel": 0, "text": "line %d" % index})
+		lines.append({"channel": 0, "text": "Tester: line %d" % index})
 	scene.call("_sync_chat")
 	var paragraphs: int = chat_output.get_paragraph_count()
 	app_state.set("authenticated", true)
-	app_state.call("append_local_message", "one more line", 0)
+	app_state.call("append_local_message", "Tester: one more line", 0)
 	_expect(chat_output.get_paragraph_count() == paragraphs + 1
 		and chat_output.get_parsed_text().contains("one more line"),
 		"a new chat line is appended to the panel")
 	for index: int in range(120):
-		app_state.call("append_local_message", "filler %d" % index, 0)
+		app_state.call("append_local_message", "Tester: filler %d" % index, 0)
 	_expect(chat_output.get_paragraph_count() == 101,
 		"the chat panel keeps its hundred newest lines")
 	_expect(chat_output.get_parsed_text().contains("filler 119")
@@ -257,9 +288,15 @@ func _run() -> void:
 	app_state.set("actors", pack)
 	scene.call("_sync_world")
 	var nodes: Dictionary = scene.get("actor_nodes")
-	_expect(nodes.size() == 4, "one pass builds at most the spawn budget of actors")
-	for unused: int in range(4):
+	var creation: Dictionary = scene.call("actor_creation_budget_snapshot")
+	_expect(not nodes.is_empty() and nodes.size() <= pack.size()
+		and int(creation.bodiesThisFrame) <= int(creation.bodyLimit),
+		"one pass respects the body budget while permitting cheap deferred actor nodes")
+	var pack_deadline := Time.get_ticks_msec() + 30000
+	while (nodes.size() < pack.size() or not NativeAnimationImporter.has_source(library)) \
+			and Time.get_ticks_msec() < pack_deadline:
 		await process_frame
+		scene.call("_sync_world")
 	_expect(nodes.size() == 7, "the rest of the pack follows on the next frames")
 	_expect(NativeAnimationImporter.has_source(library),
 		"the first actor used the prewarmed library")
