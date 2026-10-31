@@ -489,7 +489,7 @@ func _add_module(grid: GridContainer, title: String) -> void:
 	var option := OptionButton.new()
 	option.name = "HairModule"
 	option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	option.tooltip_text = "Choose a variation of your hairstyle. Length, volume and finish stay adjustable at every graphics level."
+	option.tooltip_text = "Choose a variation of your hairstyle. Length, volume and finish stay adjustable."
 	option.accessibility_name = title
 	cell.add_child(option)
 	module_hint = Label.new()
@@ -534,6 +534,8 @@ func _sync_module() -> void:
 		var actual_id := HAIR_MODULE_LOOKUP.find(hair, _sex, _module_entries())
 		var semantic := str(HAIR_MODULE_LOOKUP.resolve(actual_id, _sex, _module_entries()).get("semantic_name", hair))
 		module_hint.text = "Selected: " + str(MODULE_NAMES.get(semantic, semantic.capitalize()))
+		if not HAIR_MODULE_LOOKUP.supports_native_head(actual_id, _sex, _module_entries()):
+			module_hint.text += " (High detail)"
 	else:
 		module_hint.text = "Selected: your hairstyle"
 	_sync_age_controls()

@@ -155,8 +155,9 @@ func _check_placement_capability() -> void:
 
 func _check_default_replacements() -> void:
 	var entries := {
-		22: {"name": "fixture_part", "variants": {"female": "fixture_part_female", "male": "fixture_part_male"}},
-		9: {"name": "fixture_long", "sex": "female", "fallback_style": 2},
+		2: {"name": "rowan_shag", "sex": "male"},
+		22: {"name": "fixture_part", "native_head": true, "variants": {"female": "fixture_part_female", "male": "fixture_part_male"}},
+		9: {"name": "fixture_long", "sex": "female", "fallback_style": 2, "native_head": true},
 	}
 	var before := entries.duplicate(true)
 	_expect(Modules.LEGACY_REPLACEMENTS.size() == 9, "every original hairstyle family has a replacement reservation")
@@ -173,7 +174,21 @@ func _check_default_replacements() -> void:
 		"automatic long selection uses the qualified replacement")
 	_expect(Map.hair({"hair": AppearanceVariants.pack_hair(2, 0)}, "male", entries) == "legacy:long",
 		"an unavailable fit never crosses to another body's asset")
-	_expect(Map.hair({"hair": 1}, "male", entries) == "rowan_shag", "existing modern automatic reference stays selected")
+	_expect(Map.hair({"hair": 1}, "male", entries) == "fixture_part_male", "automatic selection uses the new family when qualified")
+	_expect(Map.hair({"hair": 1, "hair_module": 2}, "male", entries) == "rowan_shag", "an explicit older variation stays selected at High")
+	_expect(Map.native_hair({"hair": 1, "hair_module": 2}, "male", entries) == "fixture_part_male",
+		"an older variation uses the qualified saved family on the native head")
+	_expect(Map.native_hair({"hair": 2, "hair_module": 2}, "male", entries) == "legacy:long",
+		"a High-only variation is never fitted to an unqualified native skull")
+	_expect(Map.native_hair({"hair": 2}, "female", entries) == "fixture_long",
+		"a qualified native variation is selected directly")
+	_expect(not Modules.supports_native_head(2, "male", entries), "omitted native qualification defaults off")
+	_expect(not Modules.validate({9: {"name": "invalid_flag", "sex": "female", "native_head": 1}}).ok,
+		"native qualification must be explicit boolean")
+	var flags := {9: {"name": "variant_flags", "native_head": true,
+		"variants": {"female": {"name": "female_flag", "native_head": false}, "male": "male_flag"}}}
+	_expect(not Modules.supports_native_head(9, "female", flags) and Modules.supports_native_head(9, "male", flags),
+		"native qualification is independently overridable for each body fit")
 	_expect(Map.hair({"hair": 0, "hair_module": 1}, "female", entries) == "none", "Bald remains Bald")
 	_expect(Modules.replacement_id(0, "female", entries) == 0 and Modules.replacement_id(99, "male", entries) == 0,
 		"unknown and bald slots do not select an arbitrary module")
@@ -191,7 +206,7 @@ func _check_form() -> void:
 	form.set_body(1, true)
 	_expect(int(form.values().hair_module) == 31 and option.get_item_index(31) >= 0,
 		"creation preserves shared semantic ID on body switch")
-	_expect(form.module_hint.text == "Selected: Fixture Shared", "UI hint uses the semantic style label")
+	_expect(form.module_hint.text == "Selected: Fixture Shared (High detail)", "UI hint names the style and its detail availability")
 	form.set_body(0)
 	_select(form, 30)
 	form.set_body(1)

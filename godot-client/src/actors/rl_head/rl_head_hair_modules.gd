@@ -56,8 +56,9 @@ static func validate(entries: Dictionary = ENTRIES) -> Dictionary:
 		var fallback: Variant = entry.get("fallback_style", 1)
 		if typeof(fallback) != TYPE_INT or int(fallback) < 1 or int(fallback) > 9:
 			errors.append("Module %d fallback_style must be an integer in 1..9" % id)
-		if entry.has("tie_height") and entry.tie_height is not bool:
-			errors.append("Module %d tie_height must be a boolean" % id)
+		for capability: String in ["tie_height", "native_head"]:
+			if entry.has(capability) and entry[capability] is not bool:
+				errors.append("Module %d %s must be a boolean" % [id, capability])
 		if entry.has("variants"):
 			if entry.variants is not Dictionary or (entry.variants as Dictionary).is_empty():
 				errors.append("Module %d variants must be a nonempty dictionary" % id)
@@ -83,8 +84,9 @@ static func validate(entries: Dictionary = ENTRIES) -> Dictionary:
 				var style: Variant = (variant as Dictionary).get("fallback_style", fallback)
 				if typeof(style) != TYPE_INT or int(style) < 1 or int(style) > 9:
 					errors.append("Module %d %s fallback_style must be an integer in 1..9" % [id, sex])
-				if variant.has("tie_height") and variant.tie_height is not bool:
-					errors.append("Module %d %s tie_height must be a boolean" % [id, sex])
+				for capability: String in ["tie_height", "native_head"]:
+					if variant.has(capability) and variant[capability] is not bool:
+						errors.append("Module %d %s %s must be a boolean" % [id, sex, capability])
 			if name.is_empty():
 				errors.append("Module %d %s needs a nonempty concrete filename" % [id, sex])
 			elif (concrete[sex] as Dictionary).has(name) and int(concrete[sex][name]) != id:
@@ -125,14 +127,24 @@ static func replacement_id(style: int, sex: String, entries: Dictionary = ENTRIE
 ## A style advertises this only after both placement shapes and their limits
 ## have been qualified on the matching body. Older entries keep it disabled.
 static func supports_tie_height(id: int, sex: String, entries: Dictionary = ENTRIES) -> bool:
+	return _supports(id, sex, "tie_height", entries)
+
+
+## Native-head tiers need their own skull, grooming and identity qualification.
+## A fit to the High head alone does not establish this capability.
+static func supports_native_head(id: int, sex: String, entries: Dictionary = ENTRIES) -> bool:
+	return _supports(id, sex, "native_head", entries)
+
+
+static func _supports(id: int, sex: String, capability: String, entries: Dictionary) -> bool:
 	if not _usable(entries) or _resolve(id, sex, entries).is_empty():
 		return false
 	var entry: Dictionary = entries[id]
-	var supported := bool(entry.get("tie_height", false))
+	var supported := bool(entry.get(capability, false))
 	if entry.has("variants"):
 		var variant: Variant = (entry.variants as Dictionary).get(sex)
 		if variant is Dictionary:
-			supported = bool(variant.get("tie_height", supported))
+			supported = bool(variant.get(capability, supported))
 	return supported
 
 

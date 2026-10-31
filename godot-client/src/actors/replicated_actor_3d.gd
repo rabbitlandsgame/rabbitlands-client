@@ -1276,11 +1276,11 @@ func _rl_head_wanted() -> bool:
 
 ## The face for `appearance`: the lab's override, else the saved fields mapped
 ## onto the RL controls, palettes and grooming. Its sex is always the body's.
-func _rl_head_face(appearance: Dictionary) -> RLHeadAppearance:
+func _rl_head_face(appearance: Dictionary, native_hair_only := false) -> RLHeadAppearance:
 	var gender := str(_model_config.get("gender", "female"))
 	var override: Variant = _rl_head_override(appearance)
 	if override == null:
-		return RLHeadPortraitMap.face(appearance, gender)
+		return RLHeadPortraitMap.face(appearance, gender, native_hair_only)
 	var face := RLHeadAppearance.from_value(override)
 	if face != null and RLHeadAppearance.SEXES.has(gender) and face.sex != gender:
 		RLHeadLibrary.warn_once("sex:" + face.preset, "%s is a %s head; using the %s head for this body"
@@ -1315,7 +1315,7 @@ func _apply_rl_head_and_hair(appearance: Dictionary, hair_tint: Color, rebuild_n
 	_remove_rl_head()
 	var hair_face: RLHeadAppearance = null
 	if _uses_portrait_customization() and not rl_heads_classic():
-		hair_face = _rl_head_face(appearance)
+		hair_face = _rl_head_face(appearance, true)
 	if hair_face != null and hair_face.hair != RLHeadAppearance.NONE \
 			and not hair_face.hair.begins_with(RLHeadLibrary.LEGACY_PREFIX) \
 			and _set_rl_hair(hair_face):
@@ -1428,8 +1428,11 @@ func _switch_rl_head_in_place() -> void:
 	# An unchanged compatibility hairstyle keeps its original resource identity.
 	if is_instance_valid(_native_model):
 		HIGH_HAIR.restore(_native_model)
+	var previous_style := _legacy_hair_style_drawn()
 	_apply_rl_head_and_hair(_appearance, _hair_tint, false)
-	_rl_switching = true
+	var current_style := _legacy_hair_style_drawn()
+	# A newly built compatibility fallback still needs the saved grooming.
+	_rl_switching = current_style == 0 or current_style == previous_style
 	_refresh_body_surface_visibility()
 	_refresh_wardrobe_cover()
 	_refit_rl_headwear()

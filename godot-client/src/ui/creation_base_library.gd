@@ -155,6 +155,10 @@ static func _row(id: String, label: String, body: Dictionary, appearance: Dictio
 static func _hair_tags(appearance: Dictionary, sex: String, human: bool) -> Array[String]:
 	var style := VARIANTS.hair_style(int(appearance.get("hair", 0)))
 	var actual := HEAD_MAP.hair(appearance, sex) if human else ""
+	if human:
+		var modules := HEAD_MAP.HAIR_MODULE_LOOKUP
+		var id := modules.find(actual, sex)
+		actual = str(modules.resolve(id, sex).get("semantic_name", actual))
 	var tags: Array[String] = []
 	match actual:
 		"rounded_afro": tags.assign(["Short", "Curly", "Afro"])
@@ -164,6 +168,21 @@ static func _hair_tags(appearance: Dictionary, sex: String, human: bool) -> Arra
 		"shoulder_waves": tags.assign(["Long", "Wavy"])
 		"rowan_shag": tags.assign(["Short", "Wavy", "Shag"])
 		"mira_bun": tags.assign(["Tied", "Bun"])
+		"layered_long": tags.assign(["Long", "Wavy", "Layered"])
+		"swept_low_bun": tags.assign(["Tied", "Bun"])
+		"soft_wavy_bob": tags.assign(["Short", "Wavy", "Bob"])
+		"braided_crown": tags.assign(["Tied", "Braided", "Crown"])
+		"layered_pixie": tags.assign(["Short", "Layered", "Pixie"])
+		"spiky_undercut": tags.assign(["Short", "Spiky", "Undercut"])
+		"swept_ponytail": tags.assign(["Long", "Tied", "Ponytail"])
+		"side_braid", "rear_braid", "twin_braids": tags.assign(["Long", "Tied", "Braided"])
+		"short_coils": tags.assign(["Short", "Curly", "Coils"])
+		"receding_crop": tags.assign(["Short", "Receding", "Crop"])
+		"buzz_cut": tags.assign(["Short", "Buzzcut"])
+		"parted_sweep": tags.assign(["Short", "Parted", "Sweep"])
+		"feathered_mohawk": tags.assign(["Short", "Mohawk"])
+		"twin_buns": tags.assign(["Tied", "Curly", "Buns"])
+		"topknot": tags.assign(["Tied", "Topknot"])
 		_:
 			var categories := {0: ["Bald"], 1: ["Short"], 2: ["Long"], 3: ["Tied"],
 				4: ["Short"], 5: ["Short"], 6: ["Long", "Tied"], 7: ["Long", "Tied", "Braided"],

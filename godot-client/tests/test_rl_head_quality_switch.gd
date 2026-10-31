@@ -278,9 +278,10 @@ func _check_release() -> void:
 	_expect(RLHeadLibrary.users() == 3 and RLHeadLibrary.is_loaded(), "three RL heads hold the caches (%d)" % RLHeadLibrary.users())
 	actors[0].apply_render_quality(MEDIUM, false)
 	await process_frame
-	_expect(RLHeadLibrary.users() == 3 and RLHeadLibrary.is_loaded(), "one switched down retains its modern hair lease")
-	_expect(RLHeadRig.find_on(actors[0].get_skeleton()) == null and actors[0].hair_module_rig() != null,
-		"the switched actor keeps only its hairstyle rig")
+	var modern0 := actors[0].hair_module_rig() != null
+	_expect(RLHeadLibrary.users() == (3 if modern0 else 2) and RLHeadLibrary.is_loaded(),
+		"one switched down retains a library lease only for a qualified modern fit")
+	_expect(RLHeadRig.find_on(actors[0].get_skeleton()) == null, "the native-head tier releases its full head rig")
 	# The last one going keeps the caches for the retention time: switching
 	# back up within it reads and parses nothing again.
 	RLHeadLibrary.retain_seconds = 0.4
@@ -288,8 +289,10 @@ func _check_release() -> void:
 	actors[2].free()
 	await process_frame
 	await process_frame
-	_expect(RLHeadLibrary.users() == 2 and not RLHeadLibrary.retaining(),
-		"Low and Medium hairstyles keep the library alive")
+	var modern1 := actors[1].hair_module_rig() != null
+	var hair_users := int(modern0) + int(modern1)
+	_expect(RLHeadLibrary.users() == hair_users and (not RLHeadLibrary.retaining() or hair_users == 0),
+		"qualified Low and Medium hairstyles keep their library leases")
 	for actor: ReplicatedActor3D in [actors[0], actors[1]]:
 		actor.apply_appearance_variants(actor._appearance.merged({"hair": 0}, true))
 	await process_frame

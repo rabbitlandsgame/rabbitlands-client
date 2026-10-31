@@ -45,20 +45,25 @@ func run() -> void:
 			actor.apply_appearance_variants(app)
 			actor.apply_render_quality(quality)
 			await process_frame
+			var expected := RLHeadPortraitMap.hair(app, sex) if quality == 2 else RLHeadPortraitMap.native_hair(app, sex)
+			var modern := RLHeadPortraitMap.is_module(expected)
 			var rig := actor.hair_module_rig()
-			check(rig != null and rig.draws_module_hair(), "%s quality%d draws modern hair" % [sex, quality])
-			check(actor._legacy_hair_style_drawn() == 0, "retired native hair is not built behind the module")
+			check((rig != null) == modern, "%s quality%d draws only a qualified module" % [sex, quality])
+			check(actor._legacy_hair_style_drawn() == (0 if modern else style),
+				"a qualified module never leaves a retired native mesh behind")
 			check((actor.rl_head() != null) == (quality == 2), "quality changes the head independently of hair")
-			check((actor._rl_hair != null) == (quality < 2), "native-head tiers use the hair-only rig")
+			check((actor._rl_hair != null) == (quality < 2 and modern), "qualified native-head tiers use the hair-only rig")
 			if rig != null:
+				check(rig.appearance.hair == expected, "the rig uses the qualified concrete body fit")
 				check(int(rig.all_meshes()[0].get_meta(RLHeadRig.LOD_LEVEL_META)) == 2 - quality,
 					"actor uses the quality's authored hair LOD")
 			await capture(actor, sex, quality)
 			var before := actor._appearance.duplicate(true)
 			actor.apply_appearance_variants(app.merged({"hair_length": 80, "hair_volume": 25, "hair_grey": 50}, true))
 			await process_frame
-			check(actor.hair_module_rig() != null and actor._legacy_hair_style_drawn() == 0,
-				"live groom edits keep the module and no legacy mesh")
+			check((actor.hair_module_rig() != null) == modern
+				and actor._legacy_hair_style_drawn() == (0 if modern else style),
+				"live groom edits preserve the qualified hairstyle selection")
 			check(int(actor._appearance.hair) == int(before.hair)
 				and int(actor._appearance.hair_module) == module, "rendering preserves saved hairstyle bytes")
 		actor.apply_appearance_variants(app.merged({"hair": 0}, true))
@@ -70,8 +75,9 @@ func run() -> void:
 		await process_frame
 		actor._hidden_body_surfaces["hair"] = true
 		actor._refresh_body_surface_visibility()
-		var attachment := actor.get_skeleton().get_node_or_null(RLHeadRig.HAIR_NODE_NAME) as Node3D
-		check(attachment != null and not attachment.visible, "closed headwear hides modern hair on the native head")
+		var attachment_name := RLHeadRig.HAIR_NODE_NAME if actor.hair_module_rig() != null else "AppearanceHair_%d" % style
+		var attachment := actor.get_skeleton().get_node_or_null(attachment_name) as Node3D
+		check(attachment != null and not attachment.visible, "closed headwear hides hair on the native head")
 		actor._hidden_body_surfaces.erase("hair")
 		actor._refresh_body_surface_visibility()
 		check(attachment != null and attachment.visible, "removing headwear restores the same hair")

@@ -120,7 +120,7 @@ static func reload() -> void:
 
 
 ## The RL head for `appearance` on a body of `sex` ("female" / "male").
-static func face(appearance: Dictionary, sex: String) -> RLHeadAppearance:
+static func face(appearance: Dictionary, sex: String, native_hair_only := false) -> RLHeadAppearance:
 	sex = "male" if sex == "male" else "female"
 	var result := RLHeadAppearance.new()
 	result.sex = sex
@@ -139,7 +139,7 @@ static func face(appearance: Dictionary, sex: String) -> RLHeadAppearance:
 	result.eyes = custom_eye_color(custom_eyes.pigment, sex) if custom_eyes.custom \
 		else eye_color(palette_index(appearance, "eyes", 12), sex)
 	var custom_hair := COLOURS.hair(appearance, config)
-	var hair_name := hair(appearance, sex)
+	var hair_name := native_hair(appearance, sex) if native_hair_only else hair(appearance, sex)
 	var shapes := hair_shapes(appearance, hair_name)
 	result.hair_color = custom_table_color("hair", custom_hair, sex, hair_name, int(shapes["detail"])) \
 		if custom_hair.custom else hair_color(AppearanceVariants.hair_color_index(int(appearance.get("hair", 0))), sex)
@@ -269,10 +269,29 @@ static func hair(appearance: Dictionary, sex: String, modules: Dictionary = HAIR
 	var resolved := HAIR_MODULE_LOOKUP.resolve(module, sex, modules)
 	if not resolved.is_empty():
 		return str(resolved.name)
+	var replacement := HAIR_MODULE_LOOKUP.replacement_id(style, sex, modules)
+	if replacement > 0:
+		return str(HAIR_MODULE_LOOKUP.resolve(replacement, sex, modules).name)
 	var rules: Dictionary = HAIR_RULES.get(sex, {}) as Dictionary
 	if rules.has(style):
 		return str(rules[style])
 	return default_hair(style, sex, modules)
+
+
+## A selected variation may be qualified only for the High head. Below High
+## use its saved family's qualified replacement, preserving the saved bytes.
+static func native_hair(appearance: Dictionary, sex: String, modules: Dictionary = HAIR_MODULES) -> String:
+	var selected := hair(appearance, sex, modules)
+	if not is_module(selected):
+		return selected
+	var id := HAIR_MODULE_LOOKUP.find(selected, sex, modules)
+	if HAIR_MODULE_LOOKUP.supports_native_head(id, sex, modules):
+		return selected
+	var style := AppearanceVariants.hair_style(int(field(appearance, "hair", 0, 1 << 30)))
+	var replacement := HAIR_MODULE_LOOKUP.replacement_id(style, sex, modules)
+	if HAIR_MODULE_LOOKUP.supports_native_head(replacement, sex, modules):
+		return str(HAIR_MODULE_LOOKUP.resolve(replacement, sex, modules).name)
+	return legacy_name(style)
 
 
 ## Saved default/classic selections move to the qualified modern family.
