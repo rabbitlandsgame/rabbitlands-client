@@ -119,10 +119,11 @@ func _install_packages(release: Dictionary, identity: Dictionary) -> String:
 		if valid == true:
 			return {} if DirAccess.copy_absolute(source, target) == OK else {"error": "A verified download could not be copied."}
 		return await transport.fetch(url, target, limit)
-	error = await Download.prepare(root, release, fetch, transport.worker, _progress)
+	var prepared_plan: Dictionary = {}
+	error = await Download.prepare(root, release, fetch, transport.worker, _progress, Callable(), prepared_plan)
 	if error != "":
 		return error
-	return await transport.worker(func() -> String: return Packages.install(root, release, identity, _progress))
+	return await transport.worker(func() -> String: return Packages.install(root, release, identity, _progress, prepared_plan.get("checked")))
 
 func _install() -> String:
 	var args := OS.get_cmdline_user_args()

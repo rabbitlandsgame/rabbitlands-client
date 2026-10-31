@@ -80,6 +80,13 @@ static func saved_renderer(path := "user://eloria_hud.cfg") -> String:
 static func renderer_name(value: Variant) -> String:
 	return str(value) if value is String and value in RENDERERS else "auto"
 
+## Performance is an explicit request for a cheaper graphics configuration.
+## Linux's Automatic path otherwise keeps Forward+, even on low-VRAM GPUs.
+## Keep a renderer the player deliberately selected on every platform.
+static func performance_renderer(preference: String, platform := OS.get_name()) -> String:
+	var renderer := renderer_name(preference)
+	return "gl_compatibility" if platform == "Linux" and renderer == "auto" else renderer
+
 static func renderer_arguments(renderer: String) -> PackedStringArray:
 	if renderer == "gl_compatibility":
 		return PackedStringArray(["--rendering-method", renderer, "--rendering-driver", "opengl3"])

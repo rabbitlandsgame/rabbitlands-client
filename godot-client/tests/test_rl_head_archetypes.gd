@@ -20,13 +20,13 @@ func _initialize() -> void:
 		quit(1)
 		return
 	var rows: Array = raw.get("archetypes", [])
-	check(rows.size() == 3, "Selected library must contain the three qualified human bases")
+	check(rows.size() == 6, "Selected library must contain the six qualified Human bases")
 	var ids: Dictionary = {}
 	for row: Dictionary in rows:
 		var id: String = row.get("id", "")
 		check(not id.is_empty() and not ids.has(id), "Missing or duplicate archetype id " + id)
 		ids[id] = true
-		check(id in ["human_01", "human_20", "human_34"], "Unaccepted pilot included: " + id)
+		check(id in ["human_01", "human_08", "human_14", "human_20", "human_27", "human_34"], "Unaccepted pilot included: " + id)
 		var sex: String = row.get("sex", "")
 		check(sex in ["female", "male"], id + " invalid sex")
 		check(row.get("body_template", "") == "luminous_" + sex, id + " body mismatch")
@@ -68,9 +68,11 @@ func _initialize() -> void:
 			check(inverse.get("hair_module") == module.id, id + " hairstyle inverse mapping")
 			check(is_zero_approx(face.hair_length) and is_zero_approx(face.hair_volume)
 				and face.hair_detail == 50, id + " authored neutral grooming")
-	for id: String in ["human_08", "human_14", "human_27"]:
-		check(not RLHeadAppearance.presets().has(id), "Unaccepted raw preset included: " + id)
+	check(RLHeadAppearance.presets().has("human_34"), "Approved Bram preset must be selectable")
+	var bram := RLHeadAppearance.from_preset("human_34")
+	check(bram.preset == "human_34" and bram.beard == "full_beard" and bram.hair == "none",
+		"Bram keeps the approved bald head and shared full beard")
 	for module_id: int in [6, 7, 8]:
-		check(not MAP.HAIR_MODULES.has(module_id), "Unaccepted hairstyle registered")
+		check(MAP.HAIR_MODULES.has(module_id), "Qualified hairstyle must be registered")
 	print("RL selected archetypes: %d presets, %d failures" % [rows.size(), failures.size()])
 	quit(0 if failures.is_empty() else 1)

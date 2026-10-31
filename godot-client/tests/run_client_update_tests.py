@@ -33,6 +33,9 @@ def main() -> None:
     for name in ("release.gd", "client_updates.gd", "package_updates.gd", "package_download.gd",
                  "startup_update.gd", "launch_options.gd", "update_transport.gd"):
         shutil.copyfile(SOURCE / "src/updates" / name, scripts / name)
+    # The real update notice uses the shared text-color binding.
+    (root / "src/ui").mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(SOURCE / "src/ui/text_colors.gd", root / "src/ui/text_colors.gd")
     (root / "data").mkdir(exist_ok=True)
     (root / "data/client_release.json").write_text('{"platform":"source"}')
     (root / "network_stub.gd").write_text("extends Node\nvar offline_hud_preview := false\nsignal packet_received(command, payload)\nsignal connection_state_changed(state)\n")

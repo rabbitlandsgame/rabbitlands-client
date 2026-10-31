@@ -1,15 +1,17 @@
 # Selected human bases
 
-This develop integration adds three explicit bases to the existing RL Head Lab:
+This develop integration adds five explicit bases to the existing RL Head Lab:
 
-| Preset | Sex | Grooming |
-|---|---|---|
-| `human_01` | female | Cornrows into a low knot |
-| `human_20` | male | Rounded Afro |
-| `human_34` | male | Bald elder with an attached grey full beard |
+| Preset | Name | Sex | Grooming |
+|---|---|---|---|
+| `human_01` | Amara | female | Cornrows into a low knot |
+| `human_20` | Darian | male | Rounded Afro |
+| `human_08` | Corin | male | Receding sweep with attached short beard |
+| `human_14` | Nessa | female | Curly twin buns |
+| `human_27` | Elowen | female | Shoulder waves |
 
 Run `godot-client/open-rl-head-lab.bat --preset human_01` or
-`godot-client/open-rl-head-lab.bat --preset human_20`, or use `--preset human_34`.
+`godot-client/open-rl-head-lab.bat --preset human_20`, or use `--preset human_08`, `human_14` or `human_27`.
 You can also choose the appropriate
 sex and preset in the lab. Use High quality for the fitted hair modules. The lab
 uses each base's saved PC/3 body and garment appearance while editing its raw
@@ -18,8 +20,7 @@ head controls; existing head-only presets retain their previous behavior.
 The catalog is `data/actors/rl_head_archetypes.json`. PC/2 fallback appearances
 are retained exactly. Module IDs 4 and 5 are append-only; IDs 6–8 remain
 unregistered here. Existing saves, NPC assignments and creation Randomize are
-unchanged. This adds no character-creation popup; that interface is a separate
-design task.
+unchanged. These bases also supply the editable [starting-look library](character-starting-looks.md) before character creation.
 
 The source is the already generated pilot assets, not new paid generation.
 The cornrows deliberately expose six scalp channels between seven rows. Afro
@@ -34,17 +35,17 @@ female default shirt has a smooth mirrored collar; its skin cover is active only
 on the repaired luminous female shirt and is disabled for an equipped torso.
 Canonical body/head files, Mira/Rowan assets and rules are preserved.
 
-Human 34 uses a continuous skin-attached foundation around the chin and lips,
-with the long painted reference mass retained below it. All three detail levels
-retain the 75 identity/expression targets. The full-beard module uses continuous
-alpha at its feathered margins; the other hair and beard modules retain their
-existing rendering routes. Individual beard colour remains bound in both
-instance-uniform and material-uniform rendering modes. Neutral, smile and
-combined jaw/smile views are reviewed at the saved human34 fit and all three
-detail levels. Artistic acceptance remains an owner review.
+Corin uses a skin-attached chin/mouth foundation and feathered beard margins.
+Nessa has scalp-following soft roots and backed curls; Elowen uses a closed
+shoulder-wave volume. The normal material route and grooming controls remain
+editable. Attachment and exported topology checks complement client front,
+three-quarter, profile and detail-level review. Artistic acceptance remains an
+owner review.
 
-Humans 08, 14 and 27 stay outside this integration. Original source stages,
-fit consensus, failed candidates and images remain in ignored authoring storage.
+Bram/human34 is held outside the selectable catalog and raw fit presets. His
+name reservation and private draft remain available for continued review. The
+already shipped shared full-beard module is unchanged for other wearers.
+Original source stages, fit consensus and failed candidates remain ignored.
 
 The selected fits are review bases with disputed controls recorded in the data;
 this is not a claim that all historical synthetic likeness tests pass. Current

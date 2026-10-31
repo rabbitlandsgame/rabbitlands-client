@@ -1,6 +1,7 @@
 # RL hair and beard modules
 
-The selected human bases currently add `rounded_afro` and `cornrows_low_knot`.
+The selected human bases include `rounded_afro`, `cornrows_low_knot`, `receding_sweep`,
+`curly_twin_buns` and `shoulder_waves`.
 Their reference surfaces are processed with `reference_surface.py`, the UV-aware
 `decimate_reference_surface.py`, topology repair and final UV/detail guards.
 The authoring stages remain ignored; safe hashes and retained qualification
@@ -9,16 +10,18 @@ No generation service is called by these tools.
 
 The attached elder full beard uses `fit_attached_beard.py` to create its
 continuous foundation, then `fit_attached_full_beard.py` retains the lower
-reference mass and adds inset backing at each detail level. Keep inputs
+reference mass and adds inset backing at each detail level. The approved v15
+revision adds real attached clump volume beside both mouth corners and beneath
+the lower lip, with painted relief rerooted on that volume. Keep inputs
 immutable and use a separate ignored stage:
 
 ```text
 python fit_attached_beard.py --source <original-full-beard.glb> --texture <original-full-beard.png> --out <stage/foundation.glb>
-python fit_attached_full_beard.py --source <original-full-beard.glb> --foundation <stage/foundation.glb> --texture <original-full-beard.png> --out <stage/full_beard-v4.glb>
+python fit_attached_full_beard.py --source <original-full-beard.glb> --foundation <stage/foundation.glb> --texture <original-full-beard.png> --out <stage/full_beard.glb>
 ```
 
 Use the matching `RL_HEADS_BUILD` and `RL_MPFB_GROUPS` authoring inputs.
-The retained `full_beard-v4` output basename preserves the embedded image name
+The retained `full_beard` output basename preserves the embedded image name
 for byte-identical reproduction. Safe input/output/tool hashes and attachment
 measurements are recorded in `pilot-provenance.json`.
 
@@ -36,8 +39,8 @@ are deterministic: the same definition, seed and head build give the same asset.
 
 | File | Purpose |
 |---|---|
-| `build_hair.py` | style JSON → `build/hair/<style>.glb` (+ `.report.json`). The style schema is in its docstring. |
-| `build_beard.py` | beard JSON → `build/beards/<style>.glb` (+ report; `--chart` writes an authoring chart). Schema in its docstring. |
+| `build_hair.py` | style JSON â†’ `build/hair/<style>.glb` (+ `.report.json`). The style schema is in its docstring. |
+| `build_beard.py` | beard JSON â†’ `build/beards/<style>.glb` (+ report; `--chart` writes an authoring chart). Schema in its docstring. |
 | `hairgen.py` | Library: head frame and hairline, root sampling, flow fields, guide-curve growth, shaping, and primitives (tube clumps, ribbons, cards, helical curls, braid, torus bun, scalp under-shell). Also the grooming curve rescale. |
 | `headref.py` | The RL head module as a reference surface: binding, signed distance, ray casts, morph deltas. |
 | `assemble.py` | Morph transfer, clearance checks, COLOR_0, and the GLB writer wrapper. |
@@ -55,11 +58,11 @@ are deterministic: the same definition, seed and head build give the same asset.
 All inputs live under the RL head authoring area, `RL_HEADS_ROOT` (default:
 `RL_HEADS_LOCAL`, else the repository's `.local/rl-heads`). None of them is committed.
 
-- `build/v1/rl_head_<sex>.glb` and `.npz` — the RL head module build. Supplies the skin, morph targets, skeleton and skin weights.
-- `blender_profile/extensions/user_default/mpfb/entities/socketobject/_extra_vertex_groups.py` — the MPFB2 scalp, ears and lips vertex-index lists. Override with `RL_MPFB_GROUPS`.
-- `gen/hair_lock_v1.png` — source of the clump texture.
-- `ref/*.png` — concept crops, used only for the comparison sheets.
-- `<RL_WORKTREE>/godot-client/assets/actors/native/races/luminous_<sex>.glb` — the shipped body. Used by `preview.py` (context) and `validate.py` (the `hair_root` check). `RL_WORKTREE` defaults to two levels above `RL_HEADS_ROOT`.
+- `build/v1/rl_head_<sex>.glb` and `.npz` â€” the RL head module build. Supplies the skin, morph targets, skeleton and skin weights.
+- `blender_profile/extensions/user_default/mpfb/entities/socketobject/_extra_vertex_groups.py` â€” the MPFB2 scalp, ears and lips vertex-index lists. Override with `RL_MPFB_GROUPS`.
+- `gen/hair_lock_v1.png` â€” source of the clump texture.
+- `ref/*.png` â€” concept crops, used only for the comparison sheets.
+- `<RL_WORKTREE>/godot-client/assets/actors/native/races/luminous_<sex>.glb` â€” the shipped body. Used by `preview.py` (context) and `validate.py` (the `hair_root` check). `RL_WORKTREE` defaults to two levels above `RL_HEADS_ROOT`.
 
 Other environment variables: `BLENDER` (default: `blender` on PATH) and
 `RL_GPU_LOCK` (an optional wrapper that serialises GPU renders on a shared
@@ -92,13 +95,13 @@ python coverage.py ../../build/hair/rowan_shag.glb --sex male [--cases rest,hl_v
 ## Asset contract (summary)
 
 - **Hair skeleton:** `hair_root`, whose rest global equals the body's `Head`, plus optional spring chains `lock_<k>_<j>` (j = 0 at the root). Vertices are in body model space; the inverse binds make rest coincide with that space.
-- **Hair meshes:** `hair_lod0/1/2` with materials `rl_hair_clump` (clump texture) and `rl_hair_card` (strand atlas). UV v runs root (0) → tip (1).
+- **Hair meshes:** `hair_lod0/1/2` with materials `rl_hair_clump` (clump texture) and `rl_hair_card` (strand atlas). UV v runs root (0) â†’ tip (1).
 - **Beards:** skinned to `spine_03`, `neck_01` and `Head` using the head module's inverse binds. Meshes `beard_lod0/1/2`, material `rl_beard`.
 - **COLOR_0** (normalised u8):
-  - R — per-lock random;
-  - G — position along the lock (0 root … 1 tip);
-  - B — ambient occlusion (0 deep … 1 outer);
-  - A — hair_detail keep-level (see below).
+  - R â€” per-lock random;
+  - G â€” position along the lock (0 root â€¦ 1 tip);
+  - B â€” ambient occlusion (0 deep â€¦ 1 outer);
+  - A â€” hair_detail keep-level (see below).
 - **Morph targets** (names in mesh `extras.targetNames`, POSITION only, sparse):
   - hair: every `id_*` head shape, plus the grooming shapes `hl_length_p`, `hl_length_n`, `hl_volume_p`, `hl_volume_n`;
   - beards: every `id_*` and `ex_*` head shape.
@@ -110,12 +113,12 @@ python coverage.py ../../build/hair/rowan_shag.glb --sex male [--cases rest,hl_v
 
 Weight 1 is the full effect; weight 0 is the authored hair.
 
-- **`hl_length_p` / `_n`:** each lock is re-meshed along its own growth curve at +60% / −40% of its length, with roots pinned. Extensions continue the tip and droop toward gravity. Curls keep their helix per parameter, so ringlets stretch or compress.
+- **`hl_length_p` / `_n`:** each lock is re-meshed along its own growth curve at +60% / âˆ’40% of its length, with roots pinned. Extensions continue the tip and droop toward gravity. Curls keep their helix per parameter, so ringlets stretch or compress.
   - Groups with `"groom": {"length": false}` (for example Mira's swept locks that end in the bun) keep their length.
-- **`hl_volume_p` / `_n`:** each ring moves along the skin normal by +80% / −50% of its stand-off above a 4.5 mm hugging base. The effect ramps in from the root and is full from 45% of the lock length.
+- **`hl_volume_p` / `_n`:** each ring moves along the skin normal by +80% / âˆ’50% of its stand-off above a 4.5 mm hugging base. The effect ramps in from the root and is full from 45% of the lock length.
   - Flattening is capped per vertex by its clearance at rest, shortened and lengthened.
 - **Clearance safety:**
-  - Every grooming shape is pushed out to ≥ 2.6 mm against the rest skin.
+  - Every grooming shape is pushed out to â‰¥ 2.6 mm against the rest skin.
   - It is also pushed out against the skin morphed by the all-`_p` and all-`_n` identity extremes, including the hair's own identity deltas.
 - **Spring chains** keep their authored rest lengths. Extended tips stay weighted to the last joint, so they swing with it; shortened locks simply use fewer joints.
 
@@ -141,19 +144,19 @@ value A becomes visible once the level exceeds `100 * (1 - A)`.
 
 `validate.py` runs `coverage.py` on every hair module (skip with `--no-coverage`).
 
-- **Samples.** About 900 scalp points at least 4° (true angular distance) inside the hairline.
-- **Views.** About 165 directions, elevation ≥ −30°.
+- **Samples.** About 900 scalp points at least 4Â° (true angular distance) inside the hairline.
+- **Views.** About 165 directions, elevation â‰¥ âˆ’30Â°.
 - **Runtime model.** Rays use the runtime rules: double-sided surfaces, the alpha test at 0.5 against the texture, and the hair_detail discard.
 - **Worst case.** The check runs at detail 0, where only core A = 1 geometry is drawn.
-- **Hole.** A robust escaped ray (2 of 4 jittered rays escape too) that climbs 10 mm off the skin while still ≥ 6° inside the hairline. The viewer sees scalp through a gap in the hair.
+- **Hole.** A robust escaped ray (2 of 4 jittered rays escape too) that climbs 10 mm off the skin while still â‰¥ 6Â° inside the hairline. The viewer sees scalp through a gap in the hair.
 - **Edge.** An escaped ray that runs out under the hairline edge, such as under the fringe, over an ear or up at the nape. These are reported only.
 - **Gate.** The build fails on any hole at rest, under `hl_volume_n`, under `hl_length_n`, or under both, on any LOD.
 - **Warnings.** `all_id_p`, `all_id_n` (alone and with both grooming shapes) and four random identity mixes are measured and reported as warnings.
 
 Under-shell options (style `shell`) that keep the scalp covered:
 
-- **Whole sectors.** `cols` is rounded to whole texture sectors. 40 columns over 12 sectors left a 36° wedge of scalp bare from the crown to the nape on LOD0. That wedge was the hole reported on 2026-10-28.
-- **`face_clear`.** Raises the grid until the triangle faces, not only the vertices, keep that fraction of `offset_mm` off the skin (ears excluded, lift ≤ 4 mm). Coarse grids dipped up to 6 mm under the skin at LOD2.
+- **Whole sectors.** `cols` is rounded to whole texture sectors. 40 columns over 12 sectors left a 36Â° wedge of scalp bare from the crown to the nape on LOD0. That wedge was the hole reported on 2026-10-28.
+- **`face_clear`.** Raises the grid until the triangle faces, not only the vertices, keep that fraction of `offset_mm` off the skin (ears excluded, lift â‰¤ 4 mm). Coarse grids dipped up to 6 mm under the skin at LOD2.
 - **`edge_inset`.** May be `[[lon, deg], ...]`, so the edge can sit under baby hairs at the front and past the hairline at the nape.
 - **Seam vertices.** Duplicated seam vertices share their morph deltas, so the seams do not open under identity shapes.
 
@@ -166,6 +169,28 @@ Under-shell options (style `shell`) that keep the scalp covered:
 - **Geometry:**
   - Mira/Rowan and the procedural beard definitions are generated by these scripts. The selected Afro, cornrows and elder full beard combine processed generated-reference surfaces with procedural coverage or attached foundations; their source hashes are recorded in `pilot-provenance.json`.
   - It is placed on and bound to the RL head module skin, which is derived from MPFB2 / MakeHuman hm08. The MakeHuman base mesh and targets are CC0 1.0.
-  - The GLBs contain no MakeHuman mesh data. Their morph deltas are computed from the head module's shapes by surface binding.
+  - Hair shells and reference locks transfer morphs by surface binding. Attached beard foundations resample the canonical head surface and retain its identity/expression targets.
   - At build time the tools read the scalp, ears and lips vertex-index lists from MPFB2's `_extra_vertex_groups.py`. MPFB2 is GPL-3.0; the file is read, not vendored.
 - **Code:** project code. `glbwriter.py` is copied from the RL head build in this project.
+
+## Selected curl, wave and short-beard repairs
+
+`repair_curly_hairline.py prepare/finish` retains the source curls over scalp
+and bun backing; `decimate_curly_core.py` reduces the ignored stage in Blender.
+Fine/messy card density is stored in vertex alpha. Soft roots use the dedicated
+alpha-to-coverage shader variant.
+
+`repair_wave_volume.py prepare/pack` with Blender's `smooth_wave_volume.py`
+produces a closed hanging volume whose cavity includes the ears. Keep the
+source, intermediate NPZs and final GLB in distinct ignored stages.
+
+`fit_attached_beard.py` builds Corin's continuous attached chin/mouth foundation
+and transfers all head identity/expression targets. The retained historical
+`repair_review_fit.py` and `finish_reference_beard.py` stages explain the source
+processing; current hashes and repair limits are in `pilot-provenance.json`.
+`build_beard.py --surface` accepts a private NPZ surface stage without changing
+the original procedural route. No tool calls a generation service.
+
+Bram/human34 is qualified for explicit selection with the exact owner-approved
+v15 shared full beard. Its atlas and the existing head/body, equipment and
+headwear contracts are preserved. NPC assignments and Randomize are unchanged.

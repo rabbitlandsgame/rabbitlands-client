@@ -92,9 +92,30 @@ func _run() -> void:
     var fetch := func(url: String, path: String, limit: int) -> Dictionary:
         return await transport.fetch(request.server + "/" + url.get_file(), path, limit)
     if error == "" and request.action == "update":
-        error = await Download.prepare(request.root, release, fetch, transport.worker)
+        var prepared_plan: Dictionary = {}
+        var progress := func(phase: String, completed: int, _total: int, _detail := "") -> void:
+            if phase == "Checking installed packages" and completed == 0:
+                print("TEST_VERIFICATION_PASS")
+        if request.get("corrupt_cached_package", false):
+            for package: Dictionary in release.packages:
+                if package.id == "client":
+                    var path := Packages.package_path(Release.cache_for(request.root), package)
+                    DirAccess.make_dir_recursive_absolute(path.get_base_dir())
+                    var file := FileAccess.open(path, FileAccess.WRITE)
+                    file.store_string("damaged cached archive")
+                    file.close()
+        error = await Download.prepare(request.root, release, fetch, transport.worker, progress, Callable(), prepared_plan)
+        if error == "" and request.has("tamper_after_prepare"):
+            var entry: Dictionary = request.tamper_after_prepare
+            var file := FileAccess.open(request.root.path_join(entry.path), FileAccess.WRITE)
+            file.store_string(entry.content)
+            file.close()
+        if error == "" and request.has("plan_root"):
+            prepared_plan["checked"] = Packages.inspect(request.plan_root, release)
         if error == "":
-            error = await transport.worker(func() -> String: return Packages.install(request.root, release, request.identity))
+            error = await transport.worker(func() -> String: return Packages.install(request.root, release, request.identity, progress, prepared_plan.get("checked")))
+        if error == "" and request.get("reuse_consumed_plan", false):
+            error = await transport.worker(func() -> String: return Packages.install(request.root, release, request.identity, progress, prepared_plan.get("checked")))
     if error == "" and request.action == "bootstrap":
         error = await Bootstrap.prepare_helpers(request.root, release, fetch, transport.worker)
         if error == "":
@@ -176,6 +197,7 @@ def test_real_download_skips_unchanged_packages_repairs_and_removes_obsolete_fil
     (f["installed"] / "app/obsolete.txt").write_text("retired")
     code, error, output = f["run"]()
     assert code == 0 and not error, output
+    assert output.count("TEST_VERIFICATION_PASS") == 1, "The locked transaction scanned installed files twice."
     # Only the client descriptor changed. The engine, actor and map stay local.
     assert len(f["downloads"]) == 1 and ".pkg.client.zip." in f["downloads"][0]
     assert not (f["installed"] / "app/obsolete.txt").exists()
@@ -207,6 +229,71 @@ def test_fresh_install_fetches_every_package_once(fixture):
     assert code == 0 and not error, output
     assert len(f["downloads"]) == len(f["payload"]["parts"])
     assert json.loads((f["installed"] / "app/client-release.json").read_text())["commit"] == "b" * 40
+
+
+def test_changed_local_file_after_planning_cannot_be_promoted(fixture):
+    f = fixture
+    descriptor = (f["installed"] / "app/client-release.json").read_bytes()
+    code, error, output = f["run"](tamper_after_prepare={
+        "path": "app/assets/actors/native/creatures/rabbit.glb", "content": "bad rabbit"})
+    assert code == 1 and "staged package failed verification" in error, output
+    assert output.count("TEST_VERIFICATION_PASS") == 1
+    assert (f["installed"] / "app/client-release.json").read_bytes() == descriptor
+    assert not (f["installed"] / ".eloria-update-journal.json").exists()
+
+
+def test_plan_for_another_installation_is_not_reused(fixture):
+    f = fixture
+    # The target stage already matches everything. Taking its plan for the old
+    # installed root would otherwise falsely turn this update into a no-op.
+    code, error, output = f["run"](plan_root=str(f["stage"]))
+    assert code == 0 and not error, output
+    assert output.count("TEST_VERIFICATION_PASS") == 2
+    assert json.loads((f["installed"] / "app/client-release.json").read_text())["commit"] == "b" * 40
+
+
+def test_a_consumed_plan_rechecks_the_installation_on_reuse(fixture):
+    f = fixture
+    code, error, output = f["run"](reuse_consumed_plan=True)
+    assert code == 0 and not error, output
+    assert output.count("TEST_VERIFICATION_PASS") == 2
+    assert len(f["downloads"]) == 1
+
+
+def test_single_part_download_replaces_a_damaged_cached_archive(fixture):
+    f = fixture
+    code, error, output = f["run"](corrupt_cached_package=True)
+    assert code == 0 and not error, output
+    assert len(f["downloads"]) == 1
+    assert json.loads((f["installed"] / "app/client-release.json").read_text())["commit"] == "b" * 40
+
+
+def test_map_texture_and_metadata_updates_keep_mesh_packages_reusable(tmp_path):
+    stage = tmp_path / "map-stage"
+    source(stage, {"commit": "a" * 40})
+    pool = stage / "eloria-assets/maps/continent-v2/shared-assets/vram"
+    pool.mkdir(parents=True)
+    texture = pool / "first.base.evt"
+    texture.write_bytes(b"texture one")
+    other = next(pool / f"other-{i}.base.evt" for i in range(256)
+                 if asset_packages.package_id((pool / f"other-{i}.base.evt").relative_to(stage).as_posix())
+                 != asset_packages.package_id(texture.relative_to(stage).as_posix()))
+    other.write_bytes(b"texture two")
+    metadata = pool / "index.json"
+    metadata.write_text('{"revision":1}')
+    mesh = stage / "eloria-assets/maps/continent-v2/world.glb"
+    mesh.write_bytes(b"stable large map geometry")
+    before = {p["id"]: p["sha256"] for p in asset_packages.build(stage, "https://example.invalid/one")}
+    texture.write_bytes(b"changed texture")
+    metadata.write_text('{"revision":2}')
+    next_stage = tmp_path / "next" / "map-stage"
+    shutil.copytree(stage, next_stage)
+    after = {p["id"]: p["sha256"] for p in asset_packages.build(next_stage, "https://example.invalid/two")}
+    assert {name for name in before if before[name] != after[name]} == {
+        asset_packages.package_id(texture.relative_to(stage).as_posix()),
+        asset_packages.package_id(metadata.relative_to(stage).as_posix())}
+    assert before[asset_packages.package_id(mesh.relative_to(stage).as_posix())] == after[
+        asset_packages.package_id(mesh.relative_to(stage).as_posix())]
 
 
 def test_uninstall_requires_confirmation_and_refuses_steam(fixture):

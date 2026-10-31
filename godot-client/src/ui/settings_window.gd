@@ -748,6 +748,7 @@ func _save_text_colors() -> void:
 func _build_graphics() -> void:
 	var page := _new_page("Graphics", tr("ELORIA_SETTINGS_GRAPHICS"))
 	_add_button(page, "performance_preset", "Apply Performance preset")
+	(page.find_child("performance_preset", true, false) as Button).tooltip_text = "Reduce graphics and memory use. On Linux, Automatic renderer switches to OpenGL Compatibility. Restart the game to apply texture and renderer changes."
 	add_choice("Graphics", "render_scale", "3D resolution", ["100%", "75%", "50%"], [1.0, 0.75, 0.5])
 	(page.find_child("render_scale", true, false) as OptionButton).tooltip_text = "Lower the world's resolution to improve performance. Text and menus stay sharp."
 	add_choice("Graphics", "map_texture_quality", "Map textures (restart required)",

@@ -2,6 +2,27 @@ extends RefCounted
 ## Independent ZIP packages. Only signed paths are reused, downloaded or installed.
 const Release = preload("res://src/updates/release.gd")
 
+# This receipt stays in memory for one locked download/install transaction.
+# Never persist it or use it to skip the final staged-file hashes.
+class CheckedPlan extends RefCounted:
+	var needed: Array = []
+	var unchanged: Dictionary = {}
+	var _root: String
+	var _inventory_hash: String
+	var _used := false
+
+	func _init(root: String, release: Dictionary) -> void:
+		_root = root
+		_inventory_hash = JSON.stringify(release.packages).sha256_text()
+
+	func take(root: String, release: Dictionary) -> Dictionary:
+		if _used:
+			return {}
+		_used = true
+		if root != _root or JSON.stringify(release.packages).sha256_text() != _inventory_hash:
+			return {}
+		return unchanged
+
 static func validate(release: Dictionary, identity: Dictionary) -> Dictionary:
 	if release.has("launch_args"):
 		if not release.launch_args is Array or release.launch_args.size() > 32:
@@ -62,32 +83,58 @@ static func validate(release: Dictionary, identity: Dictionary) -> Dictionary:
 static func package_path(cache: String, package: Dictionary) -> String:
 	return cache.path_join("packages/" + str(package.sha256) + ".zip")
 
-static func matches(root: String, package: Dictionary) -> bool:
+static func matches(root: String, package: Dictionary, directories: Dictionary = {}) -> bool:
 	for entry: Dictionary in package.files:
 		var path := root.path_join(entry.path)
-		if linked_path(root, entry.path) or not Release.check_file(path, int(entry.size), entry.sha256):
+		if linked_path(root, entry.path, directories) or not Release.check_file(path, int(entry.size), entry.sha256):
 			return false
 	return true
 
-static func linked_path(root: String, relative: String) -> bool:
+static func linked_path(root: String, relative: String, directories: Dictionary = {}) -> bool:
 	var path := root
-	for component: String in relative.split("/"):
-		path = path.path_join(component)
-		if Release.is_link(path):
+	var components := relative.split("/")
+	for index in components.size():
+		path = path.path_join(components[index])
+		# Share ancestor checks only within this scan. Always inspect the leaf,
+		# and start with a fresh cache when validating the completed stage.
+		if index == components.size() - 1:
+			if Release.is_link(path):
+				return true
+		elif not directories.has(path):
+			directories[path] = Release.is_link(path)
+		if directories.get(path, false):
 			return true
 	return false
 
 static func plan(root: String, release: Dictionary) -> Array:
-	var needed: Array = []
+	return inspect(root, release).needed
+
+static func inspect(root: String, release: Dictionary, progress := Callable()) -> CheckedPlan:
+	var checked := CheckedPlan.new(root, release)
+	var directories: Dictionary = {}
+	var completed := 0
 	for package: Dictionary in release.packages:
-		if not matches(root, package):
-			needed.append(package)
-	return needed
+		Release.report_progress(progress, "Checking installed packages", completed, release.packages.size(), package.id)
+		checked.unchanged[package.id] = matches(root, package, directories)
+		if not checked.unchanged[package.id]:
+			checked.needed.append(package)
+		completed += 1
+	Release.report_progress(progress, "Checking installed packages", completed, release.packages.size())
+	return checked
 
 static func assemble(cache: String, package: Dictionary) -> String:
 	var destination := package_path(cache, package)
 	if DirAccess.make_dir_recursive_absolute(destination.get_base_dir()) != OK:
 		return "The package cache is not writable."
+	if package.parts.size() == 1:
+		var part: Dictionary = package.parts[0]
+		if int(part.size) == int(package.size) and part.sha256 == package.sha256:
+			var path := cache.path_join("packages/" + part.sha256 + ".part")
+			if not Release.check_file(path, int(part.size), part.sha256):
+				return "A package download failed verification."
+			if DirAccess.rename_absolute(path, destination) != OK:
+				return "The verified package could not be recorded."
+			return ""
 	var output := FileAccess.open(destination + ".tmp", FileAccess.WRITE)
 	if output == null:
 		return "There is not enough space for this package."
@@ -129,21 +176,26 @@ static func extract(archive: String, stage: String, package: Dictionary) -> Stri
 			return "The package cannot be unpacked. Check free disk space."
 		var remaining := int(entry.size)
 		var chunk := 0
+		var hash := HashingContext.new()
+		hash.start(HashingContext.HASH_SHA256)
 		while remaining > 0:
 			var bytes := zip.read_file("files/%06d/%06d" % [index, chunk])
 			if bytes.size() != mini(Release.CHUNK_BYTES, remaining):
 				return "An unpacked package file is incomplete."
 			file.store_buffer(bytes)
+			hash.update(bytes)
 			remaining -= bytes.size()
 			chunk += 1
 		file.flush()
 		var error := file.get_error()
 		file.close()
-		if error != OK or not Release.check_file(path, int(entry.size), entry.sha256):
+		# Validate the decoded bytes here; install() also reads and hashes the
+		# completed stage before promotion, including every copied local file.
+		if error != OK or hash.finish().hex_encode() != entry.sha256:
 			return "An unpacked package file failed verification."
 	return ""
 
-static func install(root: String, release: Dictionary, identity: Dictionary, progress := Callable()) -> String:
+static func install(root: String, release: Dictionary, identity: Dictionary, progress := Callable(), checked: CheckedPlan = null) -> String:
 	# All staging is outside the live roots. A crash during promotion uses the
 	# same two-root journal and recovery as legacy full-game updates.
 	var recovery := Release.recover(root)
@@ -152,10 +204,11 @@ static func install(root: String, release: Dictionary, identity: Dictionary, pro
 	var cache := Release.cache_for(root)
 	var stage := root.path_join(".eloria-update-stage")
 	var backup := root.path_join(".eloria-previous")
-	var unchanged: Dictionary = {}
+	var unchanged: Dictionary = checked.take(root, release) if checked != null else {}
+	if unchanged.is_empty():
+		unchanged = inspect(root, release, progress).unchanged
 	var complete := true
 	for package: Dictionary in release.packages:
-		unchanged[package.id] = matches(root, package)
 		complete = complete and unchanged[package.id]
 	if complete:
 		DirAccess.remove_absolute(cache.path_join("pending.json"))
@@ -167,12 +220,13 @@ static func install(root: String, release: Dictionary, identity: Dictionary, pro
 			return "The installed game folders must not be links."
 		if DirAccess.make_dir_recursive_absolute(stage.path_join(name)) != OK:
 			return "The update staging folder cannot be created."
+	var staged_directories: Dictionary = {}
 	for index in release.packages.size():
 		var package: Dictionary = release.packages[index]
 		Release.report_progress(progress, "Preparing game packages", index, release.packages.size(), package.id)
 		if unchanged[package.id]:
-			# Recheck real file hashes, including for pre-package installations.
-			# No unchanged package is downloaded, and user files are not copied.
+			# The plan checked actual files, including pre-package installations.
+			# Final stage hashes catch changes made during downloading/copying.
 			for entry: Dictionary in package.files:
 				var destination := stage.path_join(entry.path)
 				if DirAccess.make_dir_recursive_absolute(destination.get_base_dir()) != OK or DirAccess.copy_absolute(root.path_join(entry.path), destination) != OK:
@@ -181,7 +235,7 @@ static func install(root: String, release: Dictionary, identity: Dictionary, pro
 			var error := extract(package_path(cache, package), stage, package)
 			if error != "":
 				return error
-		if not matches(stage, package):
+		if not matches(stage, package, staged_directories):
 			return "A staged package failed verification. The installed game was kept."
 	var descriptor := Release.read_json(stage.path_join("app/client-release.json"))
 	var binary := "RabbitLands.exe" if identity.platform == "windows" else "RabbitLands.x86_64"

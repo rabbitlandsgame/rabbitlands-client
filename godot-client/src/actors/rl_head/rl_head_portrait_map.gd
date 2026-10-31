@@ -89,13 +89,17 @@ const HAIR_MODULES := {
 	3: {"name": "mira_bun", "sex": "female"},
 	4: {"name": "rounded_afro", "sex": "male", "fallback_style": 1},
 	5: {"name": "cornrows_low_knot", "sex": "female", "fallback_style": 7},
+	6: {"name": "shoulder_waves", "sex": "female", "fallback_style": 2},
+	7: {"name": "curly_twin_buns", "sex": "female", "fallback_style": 3},
+	8: {"name": "receding_sweep", "sex": "male", "fallback_style": 1},
 }
 ## D5: the style slots an RL module draws, per body sex.
 const HAIR_RULES := {"male": {1: "rowan_shag"}, "female": {3: "mira_bun"}}
 ## Each RL module's length and volume are centred on its own likeness preset.
 const MODULE_PRESETS := {"rowan_shag": "Rowan", "mira_bun": "Mira",
 	# New modules are authored at neutral grooming (50/50 and Classic).
-	"rounded_afro": "", "cornrows_low_knot": ""}
+	"rounded_afro": "", "cornrows_low_knot": "", "shoulder_waves": "",
+	"curly_twin_buns": "", "receding_sweep": ""}
 ## The hair finish slider positions (0 sleekest .. 100 messiest) of the saved
 ## finishes, by hair_detail 0 Classic, 1 Tousled, 2 Swept: frozen (colour model
 ## spec revision 3, 2.9).

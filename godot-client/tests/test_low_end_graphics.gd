@@ -71,6 +71,7 @@ func _run() -> void:
 		if value.get_node("Glow").visible:
 			lights += 1
 	expect(lights == Weather3D.FIRE_LIGHTS_BY_QUALITY[0], "low quality limits real fire lights")
+	main.call("_on_client_setting_changed", "Graphics", "renderer", "auto")
 	main.call("_apply_performance_preset")
 	var viewport: SubViewport = main.get("main_viewport")
 	expect(is_equal_approx(viewport.scaling_3d_scale, 0.75) and viewport.size == root.size,
@@ -95,6 +96,17 @@ func _run() -> void:
 	expect(stored.get_value("graphics", "map_texture_quality") == "half"
 		and stored.get_value("graphics", "render_scale") == 0.75
 		and stored.get_value("graphics", "crowd_bodies") == 60, "preset persists device preferences")
+	var performance_renderer := Launch.performance_renderer("auto")
+	expect(main.get("_renderer_preference") == performance_renderer
+		and stored.get_value("graphics", "renderer") == performance_renderer,
+		"preset applies and saves the platform's performance renderer")
+	var launched := Launch.game_arguments([], [], "/Game Folder", false)
+	expect(OS.get_name() != "Linux" or ("gl_compatibility" in launched and "opengl3" in launched
+		and launched.find("--rendering-method") < launched.find("--")),
+		"reopening after Linux Performance actually launches OpenGL")
+	main.call("_on_client_setting_changed", "Graphics", "renderer", "forward_plus")
+	main.call("_apply_performance_preset")
+	expect(main.get("_renderer_preference") == "forward_plus", "preset retains explicit Forward+ in the UI")
 	expect(Options.active_texture_skip() == 0, "texture preference waits for a restart")
 	main.call("_on_client_setting_changed", "Graphics", "render_scale", 0.5)
 	main.call("_on_window_size_changed")
@@ -163,6 +175,15 @@ func _check_images() -> void:
 	Options._texture_skip = original_skip
 
 func _check_renderer() -> void:
+	expect(Launch.performance_renderer("auto", "Linux") == "gl_compatibility",
+		"Linux Performance selects OpenGL instead of Automatic Forward+")
+	for platform: String in ["Linux", "Windows", "macOS"]:
+		for renderer: String in ["forward_plus", "gl_compatibility"]:
+			expect(Launch.performance_renderer(renderer, platform) == renderer,
+				"Performance preserves the player's explicit renderer on " + platform)
+	for platform: String in ["Windows", "macOS"]:
+		expect(Launch.performance_renderer("auto", platform) == "auto",
+			"Performance preserves Automatic on " + platform)
 	var config := ConfigFile.new()
 	config.load(Options.SETTINGS_PATH)
 	var had_renderer := config.has_section_key("graphics", "renderer")

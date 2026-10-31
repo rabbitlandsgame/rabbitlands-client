@@ -22,6 +22,8 @@ func run() -> void:
 	var main := (load("res://src/app/main.tscn") as PackedScene).instantiate() as Control
 	root.add_child(main)
 	await process_frame
+	# This suite exercises editor controls, not the optional arrival-map warm-up.
+	main.set("map_registry", {})
 	main.get_node("%LoginPanel").hide()
 	main.get_node("%CreationPanel").show()
 	await process_frame
@@ -124,6 +126,9 @@ func run() -> void:
 	main.call("_on_new_character_pressed")
 	expect(main.call("_creation_appearance") == seeded_appearance,
 		"reopening creation preserves the rolled appearance")
+	# Modal Use/Cancel is covered by test_creation_base_flow; resume this
+	# fixture's independent editor checks after confirming the staged form.
+	main.get("creation_base_flow").close_for_exit()
 	app_state.set("connection_state", connection_before)
 	main.call("_set_creation_class", -1)
 	expect(int(main.get("selected_creation_class")) == 3 and
