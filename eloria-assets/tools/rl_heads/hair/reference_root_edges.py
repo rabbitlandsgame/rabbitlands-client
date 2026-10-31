@@ -14,7 +14,9 @@ def root_colours(head,scalp,P,T,COL,ranges,distance,spec):
     """Return copied RGBA with geometric frontal root fade; detail stays intact."""
     COL=COL.copy();core_end=ranges['detail'][0]
     COL[:core_end,0]=1.;COL[:core_end,1]=np.clip(distance[:core_end]/.20,0,1)
-    lon,lat=headref.dir_lonlat(P[:core_end]-head.C);eligible=(abs(lon)<85)&(lat<scalp.hairline(lon)+8)
+    sector=float(spec.get('root_sector_degrees',85));band=float(spec.get('root_band_degrees',8))
+    assert 0<sector<=180 and 0<band<=30,'Invalid root colouring sector/band'
+    lon,lat=headref.dir_lonlat(P[:core_end]-head.C);eligible=(abs(lon)<sector)&(lat<scalp.hairline(lon)+band)
     e0,e1=ranges['exterior'];outer=T[(T>=e0).all(1)&(T<e1).all(1)]-e0
     border=geometric_boundary(P[e0:e1],outer)+e0;border=border[eligible[border]]
     if len(border):
