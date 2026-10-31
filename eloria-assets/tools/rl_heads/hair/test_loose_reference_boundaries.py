@@ -2,7 +2,7 @@
 import unittest
 import numpy as np
 from types import SimpleNamespace
-from build_loose_reference import geometric_boundary,body_safe,shared_body_correction
+from build_loose_reference import geometric_boundary,body_safe,shared_body_correction,curtain_body_safe
 
 class Boundaries(unittest.TestCase):
     def test_split_uv_centre_is_not_an_open_edge(self):
@@ -39,5 +39,15 @@ class BodyClearance(unittest.TestCase):
         np.testing.assert_array_equal(correction[:,1],0)
         for points in states:
             self.assertTrue((np.max((points+correction)@self.hull[:,:3].T+self.hull[:,3],axis=1)>=.0035-1e-12).all())
+
+    def test_curtain_keeps_curl_depth_and_pins_high_roots(self):
+        hull=np.array([[1,0,0,-.2],[-1,0,0,-.2],[0,1,0,-1.55],[0,-1,0,1.0],[0,0,1,-.1],[0,0,-1,-.1]],float)
+        P=np.array([[.08,1.2,.025],[.08,1.2,.075],[-.08,1.3,-.06],[-.08,1.3,-.09],[.04,1.69,.025]])
+        result=curtain_body_safe(self.head,P,hull)
+        np.testing.assert_array_equal(result[:,:2],P[:,:2])
+        np.testing.assert_allclose(np.diff(result[:2,2]),np.diff(P[:2,2]),atol=1e-12)
+        np.testing.assert_allclose(np.diff(result[2:4,2]),np.diff(P[2:4,2]),atol=1e-12)
+        np.testing.assert_array_equal(result[4],P[4])
+        self.assertTrue((np.max(result@hull[:,:3].T+hull[:,3],axis=1)>=.0035-1e-12).all())
 
 if __name__=='__main__':unittest.main()

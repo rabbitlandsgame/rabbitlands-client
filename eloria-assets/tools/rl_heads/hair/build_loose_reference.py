@@ -1,8 +1,9 @@
-"""Reference-derived loose hair with closed backing and rooted grooming detail.
+"""Reference-derived loose hair with independent scalp coverage and rooted detail.
 
 Keep reference extractions immutable. ``prepare`` writes a neutral source copy;
-run repair_reference_topology.py and decimate_reference_surface.py on that copy.
-``backing`` prepares its inset closed volume for smooth_loose_backing.py.
+run decimate_reference_surface.py --weld-geometry on that copy. Repair only
+measured accidental holes; blanket filling can close intentional curl windows.
+Optional ``backing`` prepares an inset volume for smooth_loose_backing.py.
 ``pack`` writes the three-level runtime module and its qualification report.
 No provider, network or generation service is used.
 """
@@ -25,7 +26,7 @@ def unit(value):return headref.unit(value)
 
 def public_source(source):
     allowed=['fit_sha256','reference_sha256','source_extraction_sha256','profile_sha256','source_head_sha256','head_sha256','body_sha256','garment_sha256']
-    result={'method':'reference exterior with inset closed backing and surface-rooted detail'}
+    result={'method':'reference exterior with independent scalp coverage and surface-rooted detail'}
     for key in allowed:
         value=source.get(key)
         if value is not None:
@@ -128,6 +129,19 @@ def layer_margins(P,ranges,spec):
     body_margin[slice(*ranges['detail'])]=float(spec.get('outer_body_margin_mm',8.0))/1000-.0015
     return head_margin,body_margin
 
+def curtain_body_safe(head,P,hull,margin=.0035):
+    """Translate each lower curtain coherently, keeping its curl depth intact."""
+    raw=body_safe(head,P,hull,margin);needed=np.abs((raw-P)[:,2])
+    side=P[:,2]>=head.C[2]-.05;group=(P[:,0]>=0).astype(int)*2+side.astype(int)
+    fade=hairgen.smoothstep((head.eye_mid[1]-.055-P[:,1])/.10)
+    amounts=np.zeros(4);lower=P[:,1]<head.eye_mid[1]-.13
+    for index in range(4):
+        selected=(group==index)&lower
+        if selected.any():amounts[index]=np.max(needed[selected]/np.maximum(fade[selected],.05))
+    assert amounts.max()<.25,'Reference requires an excessive torso displacement'
+    result=P.copy();result[:,2]+=np.where(side,1.,-1.)*amounts[group]*fade
+    return body_safe(head,result,hull,margin)
+
 def prepare(args):
     src=Path(args.source);out=Path(args.stage);assert not out.exists();out.mkdir(parents=True)
     spec=profile(args.profile);fit=profile(args.fit);sex=args.sex or fit['sex']
@@ -140,10 +154,14 @@ def prepare(args):
         target_Q,target_N=target_scalp.point(lon,lat,0)
         radial=P-Q;ratio=target_head.R/source_head.R
         P=target_Q+radial*np.array([ratio,1.,ratio])
-        N=unit(N*np.array([1/ratio,1.,1/ratio]))
+        if not spec.get('transport_normals',False):N=unit(N*np.array([1/ratio,1.,1/ratio]))
     head=BoundedHead(sex);hull=body_hull(head)
     P=assemble.push_out_var(head,P,np.full(len(P),.0032),iters=5)
-    P=body_safe(head,P,hull,float(spec.get('outer_body_margin_mm',8.0))/1000)
+    body_fit=curtain_body_safe if spec.get('preserve_curtain_depth',False) else body_safe
+    P=body_fit(head,P,hull,float(spec.get('outer_body_margin_mm',8.0))/1000)
+    if spec.get('transport_normals',False):
+        _,weld=np.unique(np.round(a['P']/1e-6),axis=0,return_inverse=True)
+        N=unit(a['N']+assemble.morph_normals(a['P'],a['T'],a['N'],P-a['P'],weld))
     np.savez_compressed(out/'extracted.npz',P=P,N=N,UV=a['UV'],T=a['T'])
     for name in ['hair-only.png','hair-mask.png']:copy_path=out/name;copy_path.write_bytes((src/name).read_bytes())
     source=profile(src/'source.json')
@@ -151,6 +169,7 @@ def prepare(args):
                   profile_sha256=sha(args.profile),source_head_sha256=sha(source_head.glb_path),head_sha256=sha(head.glb_path),body_sha256=sha(paths.body_glb(sex)))
     garment=Path(paths.body_glb(sex)).with_name('luminous_'+sex+'_shirt.glb')
     if garment.is_file():source['garment_sha256']=sha(garment)
+    source['fitting']={'preserve_curtain_depth':bool(spec.get('preserve_curtain_depth',False)),'transport_normals':bool(spec.get('transport_normals',False))}
     save_json(out/'source.json',source);save_json(out/'lod-budgets.json',spec['outer_triangles'])
     print('PREPARED_LOOSE_REFERENCE',sex,len(P),len(a['T']),flush=True)
 
@@ -214,6 +233,7 @@ def detail_cards(head,surface,source_normals,spec,lod):
     config=spec['details'];rng=np.random.default_rng(spec['seed'])
     points=surface.vertices;radial=points-head.C;normals=source_normals
     eligible=(np.einsum('ij,ij->i',radial,normals)>-.002)&((abs(points[:,0])>.035)|(points[:,2]<head.C[2]-.025))
+    eligible&=np.linalg.norm(normals,axis=1)>.5
     eligible&=(points[:,1]>points[:,1].min()+.025)&(points[:,1]<head.C[1]+.200)
     candidates=rng.permutation(np.flatnonzero(eligible));roots=[]
     fine_count=int(config['fine_count'][lod]);messy_count=int(config['messy_count'][lod]);count=fine_count+messy_count
@@ -252,6 +272,24 @@ def detail_cards(head,surface,source_normals,spec,lod):
             a=start+step*2;T.extend([[a,a+1,a+2],[a+1,a+3,a+2]])
     return {'P':np.asarray(P).reshape(-1,3),'N':np.asarray(N).reshape(-1,3),'UV':np.asarray(UV).reshape(-1,2),'T':np.asarray(T,int).reshape(-1,3),'COL':np.asarray(COL).reshape(-1,4),'roots':np.asarray(root_points),'fine':min(fine_count,len(roots)),'messy':max(0,len(roots)-fine_count)}
 
+def backing_part(stage,head,spec,lod,P,T):
+    if spec.get('backing_mode','closed')=='none':
+        return np.empty((0,3)),np.empty((0,3)),np.empty((0,2)),np.empty((0,3),int),{'backing_closed':False,'backing_components':0,'backing_omitted':True}
+    volume=np.load(stage/'backing'/f'lod{lod}.npz');BP=volume['P'].astype(float);BT=volume['T'].astype(int)
+    area=np.linalg.norm(np.cross(BP[BT[:,1]]-BP[BT[:,0]],BP[BT[:,2]]-BP[BT[:,0]]),axis=1)*.5
+    BT=BT[area>1e-12];used,inverse=np.unique(BT,return_inverse=True);BP=BP[used];BT=inverse.reshape(-1,3)
+    mesh=trimesh.Trimesh(BP,BT,process=False);assert mesh.is_watertight,'Backing must be closed at every LOD'
+    exterior=trimesh.Trimesh(P,T,process=False);face_normal=unit(np.cross(P[T[:,1]]-P[T[:,0]],P[T[:,2]]-P[T[:,0]]))
+    inset=float(spec.get('backing_inset_mm',2.5))/1000
+    for _ in range(3):
+        cp,dist,face=closest_batched(exterior,BP);normal=face_normal[face]
+        signed=np.einsum('ij,ij->i',BP-cp,normal);bad=(signed>-inset)&(dist<.02)
+        if not bad.any():break
+        BP[bad]=cp[bad]-normal[bad]*inset
+    BN=headref.vertex_normals(BP,BT);theta=np.arctan2(BP[:,0],BP[:,2]-head.C[2]);v=np.clip((head.C[1]+.10-BP[:,1])/.43,0,1)
+    BU=np.c_[.5+.24*np.sin(theta),.756+.086*v]
+    return BP,BN,BU,BT,{'backing_closed':True,'backing_components':int(mesh.body_count)}
+
 def all_parts(stage,head,scalp,spec,lod):
     exterior=np.load(stage/f'lod{lod}.npz');high=np.load(stage/'extracted.npz')
     P=exterior['P'].astype(float);N=unit(exterior['N'].astype(float));T=exterior['T'].astype(int);UV=exterior['UV'].copy();UV[:,1]*=.75
@@ -260,22 +298,7 @@ def all_parts(stage,head,scalp,spec,lod):
     good=np.linalg.norm(smoothed,axis=1)>1e-8;N[good]=unit(smoothed[good])
     source_surface=trimesh.Trimesh(high['P'],high['T'],process=False)
     cards=detail_cards(head,source_surface,unit(high['N']),spec,lod)
-    volume=np.load(stage/'backing'/f'lod{lod}.npz');BP=volume['P'].astype(float);BT=volume['T'].astype(int)
-    # Only zero-area remeshing slivers are removed; closed backing stays closed.
-    area=np.linalg.norm(np.cross(BP[BT[:,1]]-BP[BT[:,0]],BP[BT[:,2]]-BP[BT[:,0]]),axis=1)*.5
-    BT=BT[area>1e-12];used,inverse=np.unique(BT,return_inverse=True);BP=BP[used];BT=inverse.reshape(-1,3)
-    backing_mesh=trimesh.Trimesh(BP,BT,process=False);assert backing_mesh.is_watertight,'Backing must be closed at every LOD'
-    # Compare to this LOD's actual exterior, rather than letting a smooth
-    # high-resolution backing protrude through a reduced painted surface.
-    exterior_mesh=trimesh.Trimesh(P,T,process=False);face_normal=unit(np.cross(P[T[:,1]]-P[T[:,0]],P[T[:,2]]-P[T[:,0]]))
-    inset=float(spec.get('backing_inset_mm',2.5))/1000
-    for _ in range(3):
-        cp,dist,face=closest_batched(exterior_mesh,BP);normal=face_normal[face]
-        signed=np.einsum('ij,ij->i',BP-cp,normal);bad=(signed>-inset)&(dist<.02)
-        if not bad.any():break
-        BP[bad]=cp[bad]-normal[bad]*inset
-    BN=headref.vertex_normals(BP,BT);theta=np.arctan2(BP[:,0],BP[:,2]-head.C[2]);v=np.clip((head.C[1]+.10-BP[:,1])/.43,0,1)
-    BU=np.c_[.5+.24*np.sin(theta),.756+.086*v]
+    BP,BN,BU,BT,backing_info=backing_part(stage,head,spec,lod,P,T)
     shell_spec=spec['shell'];rows,cols=shell_spec['lod'][str(lod)];SP,SN,SU,ST,_,_=hairgen.shell_mesh(scalp,shell_spec,rows,cols)
     SU[:,0]%=1.;SU[:,1]=.756+.086*SU[:,1]
     parts=[{'P':P,'N':N,'UV':UV,'T':T,'kind':'exterior'},{'P':BP,'N':BN,'UV':BU,'T':BT,'kind':'backing'},{'P':SP,'N':SN,'UV':SU,'T':ST,'kind':'shell'},cards]
@@ -291,7 +314,7 @@ def all_parts(stage,head,scalp,spec,lod):
         valid=np.linalg.norm(geometric,axis=1)>.5;N[bad]=np.where(valid[bad,None],unit(geometric[bad]),fallback[bad])
     N=unit(N)
     assert np.abs(np.linalg.norm(N,axis=1)-1).max()<1e-6,'Invalid normals before expensive morph work'
-    return P,N,np.vstack(uv),T,np.vstack(colours),ranges,{'backing_closed':True,'backing_components':int(backing_mesh.body_count),'fine_cards':cards['fine'],'messy_cards':cards['messy'],'exterior_triangles':len(exterior['T']),'backing_triangles':len(BT),'detail_triangles':len(cards['T'])}
+    return P,N,np.vstack(uv),T,np.vstack(colours),ranges,backing_info|{'fine_cards':cards['fine'],'messy_cards':cards['messy'],'exterior_triangles':len(exterior['T']),'backing_triangles':len(BT),'detail_triangles':len(cards['T'])}
 
 def groom_fields(head,scalp,P,names,spec,hull,ranges):
     Q,normal=ref.roots(head,scalp,P);binding=assemble.Binding(head,P,Q,follow=.015,fade=.025,stretch=.5,no_ears=True)

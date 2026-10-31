@@ -1,17 +1,17 @@
 # Reference-derived hair authoring
 
 `build_loose_reference.py` retains the fitted reference's painted exterior and
-adds an inset closed backing, an independent scalp cap, and rooted fine/messy
+adds an independent scalp cap and rooted fine/messy
 detail. It uses existing reconstruction files and calls no external service.
 Keep original extractions immutable and write each candidate to a fresh stage.
+An inset closed backing is optional. Use `backing_mode: "none"` when the
+painted exterior already provides the volume; a backing must never become
+the visible rear surface or fill an intentional curl opening.
 
 ```text
 python reference_surface.py extract --fit <fit.json> --out <original>
 python build_loose_reference.py prepare --source <original> --fit <fit.json> --profile styles/layered_long.json --stage <stage> --sex female
-blender -b --factory-startup --threads 2 --python repair_reference_topology.py -- <stage>
 blender -b --factory-startup --threads 2 --python decimate_reference_surface.py -- <stage> --weld-geometry
-python build_loose_reference.py backing --stage <stage> --profile styles/layered_long.json
-blender -b --factory-startup --threads 2 --python smooth_loose_backing.py -- <stage/backing>
 python build_loose_reference.py pack --stage <stage> --profile styles/layered_long.json --out <candidate/layered_long_female.glb> --check
 ```
 
@@ -30,6 +30,13 @@ repaired shirt. Forward/backward clearance preserves hanging X/Y instead of
 pushing locks upwards or across outstretched arms. Painted exterior and hidden
 backing use distinct clearance layers; each reduced backing is inset against
 its matching exterior. Cap/backing UVs stay in the opaque texture region.
+`preserve_curtain_depth` shares the required lower-lock displacement within
+each side instead of flattening individual curls against the torso envelope.
+`transport_normals` carries the source's painted surface shading through that
+fit. Both options preserve their old default behavior when absent.
+For a profile using closed backing, run `backing` and `smooth_loose_backing.py`
+before packing. Do not run blanket topology filling on an exterior with
+intentional ringlets: identify an accidental opening before repairing it.
 The stage's extraction and reduced exterior/backing files remain reusable when
 repairing only exported attachment, grooming, or material data.
 
