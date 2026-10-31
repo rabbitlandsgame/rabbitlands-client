@@ -135,7 +135,7 @@ static func _row(id: String, label: String, body: Dictionary, appearance: Dictio
 	words.append_array(tags)
 	if body.race == "ssarathi":
 		words.append("Lizardfolk")
-	return {"id": id, "label": label, "race_id": str(body.race), "race_label": str(body.label),
+	return {"id": id, "portrait_id": id, "label": label, "race_id": str(body.race), "race_label": str(body.label),
 		"sex": str(body.sex), "hair_tags": tags, "search_text": " ".join(PackedStringArray(words)).to_lower(),
 		"look": {"actor_type": int(body.actor_type), "appearance": appearance.duplicate(true),
 			"equipment_visuals": {}}}

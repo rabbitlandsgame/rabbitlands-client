@@ -1,6 +1,7 @@
 extends SceneTree
 ## Modal selection, combined filters, responsive bounds and keyboard focus.
 const Picker := preload("res://src/ui/creation_base_picker.gd")
+const Library := preload("res://src/ui/creation_base_library.gd")
 var failures: Array[String] = []
 var chosen: Array[String] = []
 var previews: Array[String] = []
@@ -17,6 +18,10 @@ func _initialize() -> void:
 func settle() -> void:
 	for frame: int in 4:
 		await process_frame
+
+func check_static_cards(picker: CreationBasePicker, phase: String) -> void:
+	check(picker.find_children("*", "SubViewport", true, false).is_empty(), phase + ": cards create no render viewports")
+	check(picker.find_children("*", "Node3D", true, false).is_empty(), phase + ": cards create no actors or 3D stages")
 
 func run() -> void:
 	var host := Control.new()
@@ -45,9 +50,11 @@ func run() -> void:
 	check(picker.is_open() and picker.search.has_focus(), "opening focuses search")
 	check(picker.selected_id() == "waves" and not picker.use_button.disabled, "default basis highlighted")
 	check(chosen.is_empty(), "opening does not commit an appearance")
+	check_static_cards(picker, "open")
 	picker.search.text = "silver human"
 	picker._filter_rows()
 	check(picker.filtered_ids() == PackedStringArray(["waves"]), "search matches all words across row fields")
+	check_static_cards(picker, "filter")
 	picker._reset_filters()
 	picker._select_filter(picker.sex_filter, "female")
 	picker._select_filter(picker.race_filter, "ssarathi")
@@ -57,6 +64,7 @@ func run() -> void:
 	check(picker.use_button.disabled, "filtered-out selection cannot accidentally be committed")
 	picker._select_card("ssarathi")
 	check(previews == ["ssarathi"] and chosen.is_empty(), "selection emits only preview")
+	check_static_cards(picker, "select")
 	picker._use_basis()
 	await settle()
 	check(chosen == ["ssarathi"] and not picker.is_open(), "Use emits the chosen basis once and closes")
@@ -104,6 +112,26 @@ func run() -> void:
 		check(picker.scroll.get_global_rect().encloses(card.get_global_rect()), "both rows fit without clipping %s" % row.label)
 		check(card.get_global_rect().encloses(caption.get_global_rect()), "name stays inside its card: %s" % row.label)
 		check((card.get_meta("portrait") as TextureRect).size.y >= 96, "portrait remains legible: %s" % row.label)
+	var registry: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json"))
+	var catalog := Library.rows(registry)
+	picker.setup(catalog, "human_34", {"portrait_manifest_path": "user://no_creation_portrait_manifest.json"})
+	await settle()
+	check(picker._cards.size() == 25, "All 25 catalog cards exist without live portrait stages")
+	check_static_cards(picker, "all25")
+	for id: String in picker._cards:
+		var card := picker._cards[id] as Button
+		check((card.get_meta("portrait") as TextureRect).texture == null and (card.get_meta("placeholder") as Label).visible,
+			"Missing portrait is a static placeholder: " + id)
+	picker.scroll.scroll_vertical = int(picker.scroll.get_v_scroll_bar().max_value)
+	await settle()
+	check_static_cards(picker, "scroll25")
+	picker._select_filter(picker.race_filter, "luminous")
+	picker._filter_rows()
+	await settle()
+	check(picker._cards.size() == 11, "Static filtering retains all 11 Human choices")
+	check_static_cards(picker, "filter11")
+	picker._select_card("human_01")
+	check_static_cards(picker, "select and reopen")
 	var cancel := InputEventAction.new()
 	cancel.action = "ui_cancel"
 	cancel.pressed = true

@@ -2,15 +2,15 @@ class_name CreationBasePicker
 extends Control
 ## A modal appearance library. Selection is local until Use this basis emits
 ## basis_selected; the creation controller owns all model/editor changes.
-## Rows: id, label, race_id, race_label, sex, hair_tags, search_text, look.
-## Context: registry/equipment for portraits; optional filter_options and
+## Rows: id, portrait_id, label, race_id, race_label, sex, hair_tags, search_text, look.
+## Context: optional portrait_manifest_path, filter_options and
 ## initial_filters {race_id, sex, hair_tag}. setup never opens the popup.
 
 signal basis_selected(id: String)
 signal dismissed
 signal preview_requested(id: String)
 
-const Portraits := preload("res://src/ui/leaderboard_portraits.gd")
+const Portraits := preload("res://src/ui/creation_base_portraits.gd")
 const Art := preload("res://src/ui/leaderboard_art.gd")
 const EntryStyle := preload("res://src/ui/oldcraft_entry_style.gd")
 const TEXT := Color("f0e8d8")
@@ -35,13 +35,12 @@ var selected_label: Label
 var use_button: Button
 var cancel_button: Button
 var close_button: Button
-var portraits: Node
+var portraits := Portraits.new()
 
 var _rows: Array[Dictionary] = []
 var _visible_rows: Array[Dictionary] = []
 var _by_id: Dictionary = {}
 var _cards: Dictionary = {}
-var _portrait_keys: Dictionary = {}
 var _selected_id := ""
 var _default_id := ""
 var _return_focus: WeakRef
@@ -84,7 +83,7 @@ func setup(rows: Array, default_id: String = "", context: Dictionary = {}) -> vo
 		_by_id[id] = row
 	_default_id = default_id if _by_id.has(default_id) else ""
 	_selected_id = _default_id
-	portraits.configure(context.get("registry", {}), context.get("equipment", {}))
+	portraits.configure(str(context.get("portrait_manifest_path", Portraits.MANIFEST_PATH)))
 	_updating = true
 	search.clear()
 	_populate_filters(context.get("filter_options", {}))
@@ -104,9 +103,7 @@ func open() -> void:
 	_return_focus = weakref(focus) if focus != null else null
 	show()
 	move_to_front()
-	portraits.set_active(true)
 	_layout()
-	_request_visible_portraits.call_deferred()
 	search.grab_focus.call_deferred()
 
 
@@ -116,7 +113,6 @@ func close() -> void:
 		hide()
 		return
 	hide()
-	portraits.set_active(false)
 	var focus := get_viewport().gui_get_focus_owner()
 	if focus != null and is_ancestor_of(focus):
 		focus.release_focus()
@@ -248,9 +244,7 @@ func _filter_value(option: OptionButton) -> String:
 func _filter_rows(_value: Variant = null) -> void:
 	if _updating:
 		return
-	portraits.begin_batch()
 	_cards.clear()
-	_portrait_keys.clear()
 	_visible_rows.clear()
 	for child: Node in grid.get_children():
 		grid.remove_child(child)
@@ -283,7 +277,6 @@ func _filter_rows(_value: Variant = null) -> void:
 	scroll.scroll_vertical = 0
 	_update_selection()
 	_layout()
-	_request_visible_portraits.call_deferred()
 
 
 func _reset_filters() -> void:
@@ -334,7 +327,7 @@ func _make_card(row: Dictionary) -> Button:
 	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	portrait_frame.add_child(portrait)
-	var placeholder := _label("…", 28, MUTED)
+	var placeholder := _label("—", 28, MUTED)
 	placeholder.name = "Placeholder"
 	placeholder.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	placeholder.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -347,41 +340,11 @@ func _make_card(row: Dictionary) -> Button:
 	button.set_meta("portrait", portrait)
 	button.set_meta("caption", label)
 	button.set_meta("placeholder", placeholder)
-	button.set_meta("look", row.get("look", {}))
 	button.custom_minimum_size.y = _portrait_height + CARD_FOOTER_HEIGHT
 	_cards[id] = button
-	var key := Portraits.cache_key(row.get("look", {}))
-	if not _portrait_keys.has(key):
-		_portrait_keys[key] = []
-	(_portrait_keys[key] as Array).append(button)
+	portrait.texture = portraits.texture(str(row.get("portrait_id", id)), row.get("look", {}))
+	placeholder.visible = portrait.texture == null
 	return button
-
-
-func _request_visible_portraits() -> void:
-	if not is_open() or scroll == null:
-		return
-	var bounds := scroll.get_global_rect()
-	for id: String in _cards:
-		var card := _cards[id] as Button
-		var image := card.get_meta("portrait") as TextureRect
-		if not card.get_global_rect().intersects(bounds):
-			image.texture = null
-			(card.get_meta("placeholder") as Label).show()
-			continue
-		var texture: Texture2D = portraits.request(card.get_meta("look"))
-		if texture != null:
-			image.texture = texture
-			(card.get_meta("placeholder") as Label).hide()
-
-
-func _portrait_ready(key: String, texture: Texture2D) -> void:
-	if not is_open():
-		return
-	for raw: Variant in _portrait_keys.get(key, []):
-		var card := raw as Button
-		if is_instance_valid(card) and card.get_global_rect().intersects(scroll.get_global_rect()):
-			(card.get_meta("portrait") as TextureRect).texture = texture
-			(card.get_meta("placeholder") as Label).hide()
 
 
 func _ensure_ui() -> void:
@@ -389,9 +352,6 @@ func _ensure_ui() -> void:
 		return
 	_built = true
 	name = "CreationBasePicker"
-	portraits = Portraits.new()
-	add_child(portraits)
-	portraits.portrait_ready.connect(_portrait_ready)
 	var shade := ColorRect.new()
 	shade.name = "Backdrop"
 	shade.color = Color(0.015, 0.018, 0.024, .38)
@@ -465,10 +425,7 @@ func _ensure_ui() -> void:
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.custom_minimum_size.y = 80
 	scroll.follow_focus = true
-	scroll.resized.connect(func() -> void:
-		_fit_card_height.call_deferred()
-		_request_visible_portraits.call_deferred())
-	scroll.get_v_scroll_bar().value_changed.connect(func(_value: float) -> void: _request_visible_portraits.call_deferred())
+	scroll.resized.connect(func() -> void: _fit_card_height.call_deferred())
 	_body.add_child(scroll)
 	var results := VBoxContainer.new()
 	results.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -532,7 +489,6 @@ func _layout() -> void:
 	panel.position = Vector2(start + (region_width - panel.size.x) * .5, (bounds.y - panel.size.y) * .5)
 	_fit_card_height()
 	_refresh_focus_links()
-	_request_visible_portraits.call_deferred()
 
 
 ## Reserve room for the name as well as the face. The portrait area is the
@@ -553,7 +509,6 @@ func _fit_card_height() -> void:
 		var card := _cards[id] as Button
 		card.custom_minimum_size = Vector2(_card_width, _portrait_height + CARD_FOOTER_HEIGHT)
 		(card.get_meta("portrait") as TextureRect).custom_minimum_size.y = _portrait_height
-	_request_visible_portraits.call_deferred()
 
 
 func _focus_order() -> Array[Control]:
