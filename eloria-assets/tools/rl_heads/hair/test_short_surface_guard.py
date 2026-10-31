@@ -23,6 +23,17 @@ def triangle(radius=1.003):
 
 
 class GuardTest(unittest.TestCase):
+    def test_explicit_limiting_faces_with_remote_corners_are_checked(self):
+        P=np.array([[-.24,0,1],[.24,0,1],[0,.24,1.]])
+        P=P/np.linalg.norm(P,axis=1)[:,None]*1.025;T=np.array([[0,1,2]])
+        untouched,_=guard(Sphere(),P,T,{},[],{})
+        np.testing.assert_array_equal(untouched,P)
+        self.assertLess(np.linalg.norm(P[T].mean(1),axis=1)[0]-1,.003)
+        Q,report=guard(Sphere(),P,T,{},[],{},all_faces=True)
+        self.assertGreaterEqual(np.linalg.norm(Q[T].mean(1),axis=1)[0]-1,.003-1e-8)
+        self.assertGreater(report['changed_vertices'],0)
+        self.assertLessEqual(report['maximum_shift_mm'],14)
+
     def test_clear_corners_do_not_hide_a_colliding_face(self):
         P,T=triangle();Q,report=guard(Sphere(),P,T,{},[],{},margin=.003)
         self.assertGreaterEqual((np.linalg.norm(P,axis=1)-1).min(),.002999)

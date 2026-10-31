@@ -9,14 +9,14 @@ import headref
 
 
 def guard(head,P,T,delta,ids,combos,native=False,margin=.0030,max_shift_mm=14,max_iterations=6,
-          fixed=None,native_controls=None):
+          fixed=None,native_controls=None,all_faces=False):
     original=np.asarray(P);Q=original.astype(float,copy=True)
     assert not native and not native_controls,'Use a separate Native-only corrective; this guard owns the RL surface'
     # Crests far from the head cannot touch it. Keep all near-head faces and
     # their boundary neighbours; no topology or UV change occurs.
     sd,_,_=head.signed(Q)
     near=sd<.018
-    faces=T[near[T].any(1)]
+    faces=T if all_faces else T[near[T].any(1)]
     if not len(faces):
         return Q,{'face_samples':0,'states':1+len(delta)+len(combos),'changed_vertices':0,'maximum_shift_mm':0.,'margin_mm':margin*1000,'iterations':[],'native_bind_baseline_only':False,'native_source':None,'noncontact_positions_exact':True}
     bary=np.array([[1/3,1/3,1/3],[.5,.5,0],[.5,0,.5],[0,.5,.5]])

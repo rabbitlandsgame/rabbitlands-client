@@ -16,3 +16,9 @@ triangle per new row. Reassemble the unchanged old rows and seated additions,
 then run the independent real-client triangle-interior check. `fixed` selects
 the2.4mm hidden-cap margin; it is not a freeze mask. New normals/receipts remain
 the caller's responsibility. This authoring helper is not asset qualification.
+
+For independently identified limiting exterior faces, `all_faces=True` also
+checks faces whose corners all lie beyond the default 18 mm near-skin filter.
+A long chord can cross skin while every corner remains clear. Pass the bounded
+local face neighborhood explicitly; the default filtering and Native rejection
+remain unchanged. Check its adjacent faces and attachment after reassembly.
