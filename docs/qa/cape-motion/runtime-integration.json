@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "product": "Rabbit Lands",
+  "status": "runtime_qualified",
+  "approval_receipt": "docs/qa/cape-motion/approved-authoring-2026-10-31.json",
+  "portable_source_catalog": "eloria-assets/source/capes/approved-v100/source-catalog.json",
+  "runtime_catalog": "godot-client/data/actors/cape_motion/catalog.json",
+  "replay_tool": "eloria-assets/tools/prepare_approved_cape_motion.py",
+  "delivery_contract": {
+    "shared_cape_visuals": 39,
+    "canonical_rigs": 16,
+    "body_bones_preserved": 65,
+    "cape_bones_driven": 12,
+    "maximum_skin_influences": 8,
+    "material_policy": "Preserve native Cape Base, Cape Trim and Cape Detail materials, existing tints and emblems.",
+    "clock_policy": "Phase-averaged, closed steady loops sampled in actual body-clip seconds; intrinsic attacks exclude the reference run history, and transitions carry the actual outgoing cape state.",
+    "review_episode_equivalence": "The runtime adapter preserves the accepted fit and motion character; it does not replay the complete three-second authoring episodes at every native phase.",
+    "collision_policy": "Extra body/gear guards are bypassed only for the full reviewed reference kit; weapon/shield changes and cross-profile clip data restore guards.",
+    "fallback_policy": "Unsupported and native cinematic clips use the bridged legacy Verlet writer on the approved fit. Mounted actors use original legacy geometry, skin and solver; approved geometry is rebuilt after dismount or failed mount setup. Inactive quality and crowd tiers hold the approved idle cheaply.",
+    "body_animation_policy": "The source body animation library remains authoritative; the adapter writes only twelve cape poses after body animation."
+  },
+  "qualification": {
+    "installed_actor_geometry_and_motion": "pass: 1362 checks, eight reference cases, native graphics idle/run captures for both outfits",
+    "canonical_rig_compatibility": "pass: 16 canonical rig global rests compatible; maximum body rest origin difference below 0.734 micrometres",
+    "body_pose_preservation": "pass: 65 native body rests and body animation ownership retained; cape-only writer",
+    "action_switches_and_loop_boundaries": "pass: clip phase/rates/aliases, steady closed loops, intrinsic attacks and outgoing carry",
+    "shipping_and_native_import": "pending integration owner completion after authorized develop integration",
+    "transition_regressions": "pass: exact-context guard bypass, authored-to-Verlet substep hold, weapon/profile changes, aliases, mount/dismount geometry and skin restoration"
+  },
+  "limitations": [
+    "Visual acceptance covers the two reference outfits and five reviewed animations. Rest compatibility across the canonical rigs is separate from exhaustive visual review of every equipment combination.",
+    "Small upper-back garment seam contacts remain in the authoring reference; installed gameplay contact results are recorded separately.",
+    "Runtime loops are a phase-averaged projection of accepted source motion. Native mesh/weight packing contributes to the measured sub-0.2 mm idle source difference. Mounted motion deliberately retains the qualified legacy geometry and solver."
+  ],
+  "reports": [
+    "docs/qa/cape-motion/runtime-qualification-2026-10-31.json"
+  ],
+  "runtime_schema": {
+    "catalog_schema_version": 1,
+    "fit_payloads": [
+      "wardrobe-fit.bin",
+      "armour-fit.bin"
+    ],
+    "motion_payload": "motion.bin",
+    "skin_bind_contract": "17 named bind slots; first 12 are the cape controls; eight influences per vertex",
+    "curve_clock": "Original native clip seconds, phase-averaged closed locomotion, intrinsic attack plus actual outgoing carry"
+  },
+  "qualified_on": "2026-10-31",
+  "asset_hashes": {
+    "godot-client/data/actors/cape_motion/catalog.json": {
+      "sha256": "d306f1fada56f03e1b67b3a077dc15601196de73429ee08976a0dfa15408ec29",
+      "bytes": 58832
+    },
+    "godot-client/data/actors/cape_motion/wardrobe-fit.bin": {
+      "sha256": "fa6cd48e51550c617fdeaac3376b177425baff20928545705e2f749006267e7c",
+      "bytes": 1363584
+    },
+    "godot-client/data/actors/cape_motion/armour-fit.bin": {
+      "sha256": "79e6baf79e64314b7fb203ad279e829c98bc23672fd4c587c801bfa540d7b0ed",
+      "bytes": 1363584
+    },
+    "godot-client/data/actors/cape_motion/motion.bin": {
+      "sha256": "f3ca3c898d32a322bfe817e50baa9ce7ee9de90d2425530a226b7c74155a80e1",
+      "bytes": 274752
+    },
+    "eloria-assets/source/capes/approved-v100/source-catalog.json": {
+      "sha256": "cfe0f5c94c3e64420baeb37047a444993a717cbce5f5d02d2ab505cc3e41f6e6",
+      "bytes": 41118
+    },
+    "eloria-assets/source/capes/approved-v100/approved-motion.npz": {
+      "sha256": "4fcec2dac2c7abeb5c1f3e21bb6274645aaaf672af90a86a33564e4b60cb0240",
+      "bytes": 1120565
+    },
+    "eloria-assets/source/capes/approved-v100/wardrobe-fit.source.bin": {
+      "sha256": "fa6cd48e51550c617fdeaac3376b177425baff20928545705e2f749006267e7c",
+      "bytes": 1363584
+    },
+    "eloria-assets/source/capes/approved-v100/armour-fit.source.bin": {
+      "sha256": "79e6baf79e64314b7fb203ad279e829c98bc23672fd4c587c801bfa540d7b0ed",
+      "bytes": 1363584
+    },
+    "eloria-assets/source/capes/approved-v100/native-adapter-validation.json": {
+      "sha256": "afd87429fef68025986b4ab74afa63c577c74a4e3d09877c66fd592bae2d3a5f",
+      "bytes": 13331
+    },
+    "eloria-assets/tools/prepare_approved_cape_motion.py": {
+      "sha256": "4070273225587d5e70c99e8b95fe4de23a5b88365c7255ea35401688d368e375",
+      "bytes": 10218
+    }
+  }
+}

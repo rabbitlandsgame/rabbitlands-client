@@ -1,0 +1,323 @@
+{
+  "schema_version": 1,
+  "product": "Rabbit Lands",
+  "status": "runtime_qualified",
+  "date": "2026-10-31",
+  "engine": "Godot 4.7.2 stable, Windows native build",
+  "asset_hashes": {
+    "godot-client/data/actors/cape_motion/catalog.json": {
+      "sha256": "d306f1fada56f03e1b67b3a077dc15601196de73429ee08976a0dfa15408ec29",
+      "bytes": 58832
+    },
+    "godot-client/data/actors/cape_motion/wardrobe-fit.bin": {
+      "sha256": "fa6cd48e51550c617fdeaac3376b177425baff20928545705e2f749006267e7c",
+      "bytes": 1363584
+    },
+    "godot-client/data/actors/cape_motion/armour-fit.bin": {
+      "sha256": "79e6baf79e64314b7fb203ad279e829c98bc23672fd4c587c801bfa540d7b0ed",
+      "bytes": 1363584
+    },
+    "godot-client/data/actors/cape_motion/motion.bin": {
+      "sha256": "f3ca3c898d32a322bfe817e50baa9ce7ee9de90d2425530a226b7c74155a80e1",
+      "bytes": 274752
+    },
+    "eloria-assets/source/capes/approved-v100/source-catalog.json": {
+      "sha256": "cfe0f5c94c3e64420baeb37047a444993a717cbce5f5d02d2ab505cc3e41f6e6",
+      "bytes": 41118
+    },
+    "eloria-assets/source/capes/approved-v100/approved-motion.npz": {
+      "sha256": "4fcec2dac2c7abeb5c1f3e21bb6274645aaaf672af90a86a33564e4b60cb0240",
+      "bytes": 1120565
+    },
+    "eloria-assets/source/capes/approved-v100/wardrobe-fit.source.bin": {
+      "sha256": "fa6cd48e51550c617fdeaac3376b177425baff20928545705e2f749006267e7c",
+      "bytes": 1363584
+    },
+    "eloria-assets/source/capes/approved-v100/armour-fit.source.bin": {
+      "sha256": "79e6baf79e64314b7fb203ad279e829c98bc23672fd4c587c801bfa540d7b0ed",
+      "bytes": 1363584
+    },
+    "eloria-assets/source/capes/approved-v100/native-adapter-validation.json": {
+      "sha256": "afd87429fef68025986b4ab74afa63c577c74a4e3d09877c66fd592bae2d3a5f",
+      "bytes": 13331
+    },
+    "eloria-assets/tools/prepare_approved_cape_motion.py": {
+      "sha256": "4070273225587d5e70c99e8b95fe4de23a5b88365c7255ea35401688d368e375",
+      "bytes": 10218
+    }
+  },
+  "approved_motion_suite": {
+    "script": "godot-client/tests/test_cape_approved_motion.gd",
+    "checks": 1362,
+    "failures": [],
+    "exit_code": 0,
+    "elapsed_seconds": 25.90576940000028,
+    "reference_cases": [
+      "luminous/luminous_male/0",
+      "luminous/luminous_male/184",
+      "human/luminous_male/0",
+      "human/luminous_male/184",
+      "luminous/luminous_female/0",
+      "luminous/luminous_female/184",
+      "human/luminous_female/0",
+      "human/luminous_female/184"
+    ],
+    "coverage": [
+      "Native 65 body rests unchanged from pre-construction baseline",
+      "Approved geometry preserved after character finishing; three materials and eight influences",
+      "Body-owned neckline remains fixed under cape-control displacement",
+      "Native clip phase, playback rate, restart aliases, steady-loop closure and outgoing transition carry",
+      "Equipment and cape switches, alternate-race guard finiteness, low-quality idle hold",
+      "Unsupported-clip fallback and mounted legacy geometry/skin/solver, followed by approved geometry restoration"
+    ]
+  },
+  "native_source_idle": {
+    "passes": true,
+    "source_frame": 150,
+    "native_body_time_seconds": 0.9666666666666667,
+    "comparison": "Approved v100 Blender golden surface versus actual native runtime world skin, including native vertex and weight packing",
+    "maximum_allowed_error_m": 0.0002,
+    "rows": [
+      {
+        "profile": "wardrobe",
+        "actual_source_max_m": 0.00013074775244375733,
+        "actual_source_p95_m": 6.969877816458909e-05,
+        "max_cape_palette_origin_error_m": 4.356088427307627e-07,
+        "actual_expected_gpu_max_m": 3.6875473676128795e-07,
+        "gpu_storage_quantization_max_m": 0.00013072152637348794,
+        "ideal_source_max_m": 1.910143045243943e-05
+      },
+      {
+        "profile": "armour",
+        "actual_source_max_m": 0.00010919266001956524,
+        "actual_source_p95_m": 7.062113417997543e-05,
+        "max_cape_palette_origin_error_m": 4.923321244042621e-07,
+        "actual_expected_gpu_max_m": 3.291667936602659e-07,
+        "gpu_storage_quantization_max_m": 0.00010901772884764997,
+        "ideal_source_max_m": 1.9881977540368627e-05
+      }
+    ],
+    "note": "The direct source comparison includes native vertex and influence quantization. The independently reproduced one-time float32-to-UNORM16 storage boundary also agrees with the actual runtime below 0.4 micrometres.",
+    "gpu_storage_boundary": "float32 influence times65535 truncated toUNORM16 once, asArrayMesh stores it",
+    "gpu_storage_maximum_allowed_error_m": 2e-06
+  },
+  "canonical_rig_rests": {
+    "cases": 16,
+    "all77bones": true,
+    "all_names_exact": true,
+    "max_body_rest_origin_m": 7.33040224076831e-07,
+    "max_body_rest_basis_component": 2.38418579101563e-06,
+    "max_cape_rest_origin_m": 6.55651092529297e-07,
+    "max_cape_rest_basis_component": 2.38418579101563e-07,
+    "skeleton_rest_compatible": true,
+    "note": "This proves skeleton global rests only, not equal equipment skin inversebinds or anatomical geometry clearance."
+  },
+  "native_graphics": {
+    "renderer": "gl_compatibility",
+    "checks": 15,
+    "failures": [],
+    "capture_count": 8,
+    "exit_code": 0,
+    "captures": [
+      {
+        "action": "idle",
+        "clip": "Idle_Subtle",
+        "profile": "wardrobe",
+        "time": 0.966666666666667,
+        "view": "side",
+        "file": "wardrobe-idle-side.png",
+        "sha256": "de43372158b506083095a7b53f5cf779ab8a036dbec126f04df8fba40559b507",
+        "bytes": 100460
+      },
+      {
+        "action": "idle",
+        "clip": "Idle_Subtle",
+        "profile": "wardrobe",
+        "time": 0.966666666666667,
+        "view": "quarter",
+        "file": "wardrobe-idle-quarter.png",
+        "sha256": "0906c7ea3d872a25fede6df942e11899bb4f0db1369a61a52f491924b6a25bb6",
+        "bytes": 191195
+      },
+      {
+        "action": "run",
+        "clip": "Run_Female",
+        "profile": "wardrobe",
+        "time": 0.308333215713501,
+        "view": "side",
+        "file": "wardrobe-run-side.png",
+        "sha256": "7eb9067523d3282b1be2136b0ecf1858b9c8e31201a5b32fdaf0329fd031539d",
+        "bytes": 144476
+      },
+      {
+        "action": "run",
+        "clip": "Run_Female",
+        "profile": "wardrobe",
+        "time": 0.308333215713501,
+        "view": "quarter",
+        "file": "wardrobe-run-quarter.png",
+        "sha256": "2c7bc411af4cfe69256fd19477717c9550a2938dabafec11291e3c39ae28225c",
+        "bytes": 206479
+      },
+      {
+        "action": "idle",
+        "clip": "Idle_Subtle",
+        "profile": "armour",
+        "time": 0.966666666666667,
+        "view": "side",
+        "file": "armour-idle-side.png",
+        "sha256": "26387e680d8a1b58a9acc8e42ca41fee1f84592b5400a2f1a3d721f443ae15da",
+        "bytes": 295789
+      },
+      {
+        "action": "idle",
+        "clip": "Idle_Subtle",
+        "profile": "armour",
+        "time": 0.966666666666667,
+        "view": "quarter",
+        "file": "armour-idle-quarter.png",
+        "sha256": "920c712a0a2334b09c3d2ea72cc60cff91c21c7259afeb4850419c00745d59f5",
+        "bytes": 283841
+      },
+      {
+        "action": "run",
+        "clip": "Human_Run_Hold_Both",
+        "profile": "armour",
+        "time": 0.308333215713501,
+        "view": "side",
+        "file": "armour-run-side.png",
+        "sha256": "463d87381cb8afa5a61de60f5fcedba5acf4691132820782cb91e1a1dbdc6490",
+        "bytes": 343065
+      },
+      {
+        "action": "run",
+        "clip": "Human_Run_Hold_Both",
+        "profile": "armour",
+        "time": 0.308333215713501,
+        "view": "quarter",
+        "file": "armour-run-quarter.png",
+        "sha256": "efc9d7d3d6227d6ef661c7e49625c6309d7cc5aec91937e9d84172bc4029435f",
+        "bytes": 349541
+      }
+    ],
+    "log_assessment": "No script, resource or native rendering errors. Optional absent head normal map uses the existing fallback; ObjectDB shutdown warnings remain."
+  },
+  "mounted_regression": {
+    "script": "godot-client/tests/test_mounted_cape.gd",
+    "checks": 47,
+    "failures": 0,
+    "geometry_policy": "Original legacy mesh, skin and Verlet solver while mounted; approved fit is rebuilt on dismount or failed mount setup.",
+    "maximum_edge_ratio": 1.44481683123849,
+    "maximum_cloth_inside_envelope_m": 0.00921559799462557,
+    "maximum_material_link_error_m": 0.001056969165802,
+    "sample_count": 10
+  },
+  "performance": {
+    "scope": "single process headless debug build; cape modifier only; body sampling excluded; 24 warmup then120frames percase; no wall-clock performance assertion",
+    "failures": [],
+    "rows": [
+      {
+        "profile": "wardrobe",
+        "rig": "luminous_male",
+        "frames": 120,
+        "cape_only_mean_ms": 0.0637916666666667,
+        "cape_only_p50_ms": 0.056,
+        "cape_only_p95_ms": 0.103,
+        "cape_only_max_ms": 0.139
+      },
+      {
+        "profile": "armour",
+        "rig": "luminous_male",
+        "frames": 120,
+        "cape_only_mean_ms": 0.05145,
+        "cape_only_p50_ms": 0.045,
+        "cape_only_p95_ms": 0.088,
+        "cape_only_max_ms": 0.268
+      },
+      {
+        "profile": "wardrobe",
+        "rig": "orun_male",
+        "frames": 120,
+        "cape_only_mean_ms": 0.700208333333333,
+        "cape_only_p50_ms": 0.642,
+        "cape_only_p95_ms": 1.235,
+        "cape_only_max_ms": 1.398
+      },
+      {
+        "profile": "armour",
+        "rig": "orun_male",
+        "frames": 120,
+        "cape_only_mean_ms": 0.7279,
+        "cape_only_p50_ms": 0.724,
+        "cape_only_p95_ms": 0.815,
+        "cape_only_max_ms": 0.993
+      }
+    ],
+    "interpretation": "Debug-build modifier costs are informational, exclude body sampling and do not predict full-frame or crowd performance."
+  },
+  "historical_manual_suite_triage": {
+    "baseline_revision": "4df96d138d6c18c9f580128e833eedcbef43ef0d",
+    "baseline_legacy_idle_failures": 8,
+    "baseline_solver_vs_frozen_reference_failures": 4216,
+    "current_legacy_vs_baseline_solver_failures": 0,
+    "current_legacy_vs_baseline_exit_code": 0,
+    "baseline_mounted_checks": 47,
+    "baseline_mounted_failures": 0,
+    "interpretation": "Private replay of baseline cape source and original legacy assets reproduces the eight after-walk idle failures and 4216 obsolete frozen-reference mismatches. Direct current legacy solver versus baseline parity passes. These historical fixtures do not qualify the authored motion path; the 1362-check suite does. Frozen references were not rewritten."
+  },
+  "diagnostics": [
+    "Headless dummy-renderer material-null diagnostics during mounted teardown and existing RID/ObjectDB cleanup warnings occur despite passing assertions and exit zero. Native graphics captures have no corresponding rendering/resource errors."
+  ],
+  "publication_and_primary_checkout_import": {
+    "status": "pending integration owner completion",
+    "scope": "Runtime qualification precedes the authorized develop push and the primary checkout native asset guard/import maintenance."
+  },
+  "frozen_validation": {
+    "passes": true,
+    "elapsed_seconds": 27.056029899998975,
+    "jobs": [
+      {
+        "script": "run_approved_integration",
+        "exit_code": 0,
+        "elapsed_seconds": 25.90576940000028
+      },
+      {
+        "script": "run_runtime_captures",
+        "exit_code": 0,
+        "elapsed_seconds": 8.08284249999997
+      },
+      {
+        "script": "compare_runtime_idle",
+        "exit_code": 0,
+        "elapsed_seconds": 0.7829885000028298
+      },
+      {
+        "script": "make_runtime_contacts",
+        "exit_code": 0,
+        "elapsed_seconds": 0.30184149999695364
+      }
+    ],
+    "inputs_unchanged_during_run": true,
+    "input_sha256": {
+      "godot-client/src/actors/replicated_actor_3d.gd": "301c51e59cce1bf87416d1d0b7f08e9f80778a6b6c874244d401377f371b60f5",
+      "godot-client/src/actors/cape_cloth.gd": "89f234a194344aeeb2a12eca527f0855c16c19b7a16468ee59ba871b464b552f",
+      "godot-client/src/actors/cape_approved_data.gd": "b76cb96a01be4f381166d8d59074f876f2ef979f389ab2930f1732620290c21e",
+      "godot-client/src/actors/cape_approved_player.gd": "b5a3f8a6017328ca37e086b04eae3a149b1595ad9f4c1716e3526adfe057c06d",
+      "godot-client/src/actors/character_proportions.gd": "20895f691c5c73722da99e0e735e990066d7bd1611d7373ea84aaf0a9a8a59bf",
+      "godot-client/tests/test_cape_approved_motion.gd": "cd39105c6760bd05cc8f2da8ceb560b368496f74547681c6f10dfa7f5d8a52e3",
+      "godot-client/data/actors/cape_motion/armour-fit.bin": "79e6baf79e64314b7fb203ad279e829c98bc23672fd4c587c801bfa540d7b0ed",
+      "godot-client/data/actors/cape_motion/catalog.json": "d306f1fada56f03e1b67b3a077dc15601196de73429ee08976a0dfa15408ec29",
+      "godot-client/data/actors/cape_motion/motion.bin": "f3ca3c898d32a322bfe817e50baa9ce7ee9de90d2425530a226b7c74155a80e1",
+      "godot-client/data/actors/cape_motion/wardrobe-fit.bin": "fa6cd48e51550c617fdeaac3376b177425baff20928545705e2f749006267e7c",
+      "eloria-assets/source/capes/approved-v100/approved-motion.npz": "4fcec2dac2c7abeb5c1f3e21bb6274645aaaf672af90a86a33564e4b60cb0240",
+      "eloria-assets/source/capes/approved-v100/armour-fit.source.bin": "79e6baf79e64314b7fb203ad279e829c98bc23672fd4c587c801bfa540d7b0ed",
+      "eloria-assets/source/capes/approved-v100/native-adapter-validation.json": "afd87429fef68025986b4ab74afa63c577c74a4e3d09877c66fd592bae2d3a5f",
+      "eloria-assets/source/capes/approved-v100/README.md": "22946f0b6fd17fe3a0b7a697998233804d668ad863c54cffc326dd25b85783f8",
+      "eloria-assets/source/capes/approved-v100/source-catalog.json": "cfe0f5c94c3e64420baeb37047a444993a717cbce5f5d02d2ab505cc3e41f6e6",
+      "eloria-assets/source/capes/approved-v100/wardrobe-fit.source.bin": "fa6cd48e51550c617fdeaac3376b177425baff20928545705e2f749006267e7c"
+    },
+    "changed_inputs": [],
+    "unexpected_headless_error_lines": [],
+    "native_render_error_lines": []
+  }
+}

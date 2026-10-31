@@ -1,4 +1,8 @@
 extends SkeletonModifier3D
+const ApprovedPlayer := preload("res://src/actors/cape_approved_player.gd")
+var _approved_player: RefCounted
+var _approved_profile := ""
+var _approved_geometry_guard := true
 ## Verlet cloth for the cape chains on the player rig.
 ##
 ## A cape skinned to the spine cannot avoid a leg. Measured against the shared
@@ -192,6 +196,86 @@ var _section_knots := PackedFloat32Array()
 var _section_halves := PackedFloat32Array()
 var _section_folds := PackedFloat32Array()
 var _section_blend := PackedFloat32Array()
+
+func configure_approved_motion(actor: Node, profile: String) -> void:
+	if profile == _approved_profile and _approved_player != null:
+		return
+	var skeleton := get_skeleton()
+	if skeleton == null:
+		return
+	_approved_profile = ""
+	if _approved_player != null:
+		for side: String in CHAINS:
+			for link: int in LINKS:
+				var bone := skeleton.find_bone("cape_%s_%02d" % [side, link + 1])
+				if bone >= 0:
+					skeleton.reset_bone_pose(bone)
+	_approved_player = null
+	if not profile.is_empty():
+		var player := ApprovedPlayer.new()
+		if player.configure(actor, skeleton, profile):
+			_approved_player = player
+			_approved_profile = profile
+			player.hold_idle(skeleton)
+	reset()
+
+func set_approved_geometry_guard(enabled: bool) -> void:
+	_approved_geometry_guard = enabled
+
+func approved_motion_stats() -> Dictionary:
+	return _approved_player.call("stats") if _approved_player != null else {"enabled": false, "fallback": true, "profile": "", "clip": ""}
+
+func hold_approved_idle() -> void:
+	# These local cape poses remain under spine_03. Body clips name only the
+	# original65joints, so a sleeping modifier keeps the fitted idle at no
+	# per-frame simulation cost.
+	if _approved_player != null and _mount_surface == null:
+		_approved_player.call("hold_idle", get_skeleton())
+
+func _apply_approved_frame(skeleton: Skeleton3D, to_world: Transform3D,
+		values: PackedVector3Array, delta: float) -> void:
+	var anchor_pose := skeleton.get_bone_global_pose(_anchor)
+	var carried := to_world.basis * anchor_pose.basis * _anchor_rest_inverse
+	var down := (to_world.basis * anchor_pose.basis * _hang_local).normalized()
+	var frame: Transform3D = _approved_player.call("skin_frame", skeleton)
+	var vectors := to_world.basis * frame.basis
+	var inverse_vectors := vectors.inverse()
+	var guard := _approved_geometry_guard or bool(_approved_player.call("needs_geometry_guard"))
+	var fabrics: Array[PackedVector3Array] = []
+	_snapshot_collision_world(skeleton, to_world)
+	for chain: int in _bones.size():
+		var rest := _rest_joints_from_pose(to_world, chain, anchor_pose, down)
+		var fabric := _fabric_joints(rest, chain, carried)
+		fabrics.append(fabric)
+		var points := fabric.duplicate()
+		for link: int in points.size():
+			points[link] += vectors * values[chain * LINKS + mini(link, LINKS - 1)]
+			if guard and link > 0:
+				points[link] = _push_out_of_collision_snapshot(to_world, points[link])
+		_points[chain] = points
+	var forward := _torso_forward_from_pose(to_world, anchor_pose)
+	# The reviewed cage supplies flow, not particle integration. Keep the
+	# existing measured leg/fold guards for the wearer's actual kit/proportions.
+	if guard:
+		if _keeps_off_legs():
+			_keep_off_legs(forward, carried)
+		_keep_surface_clear(fabrics, to_world * anchor_pose.origin, carried, forward)
+	for chain: int in _bones.size():
+		for link: int in LINKS:
+			values[chain * LINKS + link] = inverse_vectors * (_points[chain][link] - fabrics[chain][link])
+		_previous[chain] = _points[chain].duplicate()
+	_approved_player.call("write_pose", skeleton, values)
+	_approved_player.call("commit", values, delta)
+	_remember_chain_pose(skeleton)
+	_settled = true
+
+func _remember_chain_pose(skeleton: Skeleton3D) -> void:
+	_held_chain_positions.clear()
+	_held_chain_rotations.clear()
+	for chain: PackedInt32Array in _bones:
+		for bone: int in chain:
+			_held_chain_positions.append(skeleton.get_bone_pose_position(bone))
+			_held_chain_rotations.append(skeleton.get_bone_pose_rotation(bone))
 
 func set_native_mounted_constraint_kernel(backend: RefCounted) -> void:
 	_native_mounted_constraint_kernel = backend if not _native_mounted_constraint_disabled else null
@@ -941,6 +1025,14 @@ func _process_modification_with_delta(delta: float) -> void:
 		if delta > 0.0 and _last_translation.is_finite() else 0.0)
 	_last_anchor = anchor_world
 	_last_translation = world.origin
+	if _approved_player != null and _mount_surface == null:
+		var authored: PackedVector3Array = _approved_player.call("step", skeleton, delta)
+		if authored.size() == 12:
+			_apply_approved_frame(skeleton, world, authored, delta)
+			_previous_frame_world = world
+			_frame_world_ready = true
+			_step_owed = 0.0
+			return
 	var elapsed := clampf(delta, 0.0, MAX_STEP)
 	if not _frame_world_ready or _previous_frame_world.origin.distance_to(world.origin) > TELEPORT:
 		_previous_frame_world = world
@@ -963,12 +1055,7 @@ func _process_modification_with_delta(delta: float) -> void:
 	# Reapply the last solved cape on frames shorter than the simulation step;
 	# otherwise a fast display alternates between the solved and authored hang.
 	if stepped:
-		_held_chain_positions.clear()
-		_held_chain_rotations.clear()
-		for chain: PackedInt32Array in _bones:
-			for bone: int in chain:
-				_held_chain_positions.append(skeleton.get_bone_pose_position(bone))
-				_held_chain_rotations.append(skeleton.get_bone_pose_rotation(bone))
+		_remember_chain_pose(skeleton)
 	elif _held_chain_positions.size() == _bones.size() * LINKS:
 		var index := 0
 		for chain: PackedInt32Array in _bones:
@@ -976,6 +1063,8 @@ func _process_modification_with_delta(delta: float) -> void:
 				skeleton.set_bone_pose_position(bone, _held_chain_positions[index])
 				skeleton.set_bone_pose_rotation(bone, _held_chain_rotations[index])
 				index += 1
+	if _approved_player != null and _mount_surface == null:
+		_approved_player.call("observe_fallback", skeleton, delta)
 
 
 func _simulate_step(delta: float, simulation_world: Transform3D) -> void:
@@ -1168,6 +1257,10 @@ func _write_chain_bones(skeleton: Skeleton3D, chain: int,
 		var bone := _bones[chain][link]
 		var bone_rest: Transform3D = _bone_rests[chain][link]
 		authored = authored * bone_rest
+		if _approved_player != null:
+			# The fitted skin's neutral frame differs from the original helper
+			# rest. Use it for legacy/mounted motion as well as authored cages.
+			authored = to_world * (_approved_player.call("neutral_bone_pose", skeleton, chain * LINKS + link) as Transform3D)
 		if measured:
 			rest_direction = (fabric[link + 1] - fabric[link]).normalized()
 		var wanted := (points[link + 1] - points[link]).normalized()
@@ -1208,3 +1301,5 @@ func reset() -> void:
 			_last_anchor = _previous_frame_world * skeleton.get_bone_global_pose(_anchor).origin
 	_held_chain_positions.clear()
 	_held_chain_rotations.clear()
+	if _approved_player != null:
+		_approved_player.call("reset")

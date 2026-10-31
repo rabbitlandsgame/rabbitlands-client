@@ -425,6 +425,10 @@ static func apply_body_refinement(root: Node3D, skeleton: Skeleton3D, config: Di
 			continue
 		if instance.has_meta(&"rl_head"):  # RLHeadRig's head/beard/hair: fitted to the body already
 			continue
+		# Approved cape profiles were fitted on the refined production body.
+		# Applying this field again changes the reviewed neckline and sheet.
+		if instance.has_meta("cape_approved_profile"):
+			continue
 		if instance.has_meta(BODY_RESULT_META) and instance.mesh == instance.get_meta(BODY_RESULT_META):
 			continue
 		var source := instance.mesh

@@ -541,7 +541,7 @@ static func axis_reach(pieces: Array, from: Vector3, to: Vector3,
 ## contacts receives actual inner-fold positions and their per-link weights
 ## for the surface collision correction, including the hem below the last bone.
 static func fabric_line(skeleton: Skeleton3D, cape: Array,
-		section: Array = [], contacts: Array = []) -> Array:
+		section: Array = [], contacts: Array = [], rest_overrides: Dictionary = {}) -> Array:
 	var chains: Array[PackedInt32Array] = []
 	for side: String in CHAIN_SIDES:
 		var chain := PackedInt32Array()
@@ -567,7 +567,7 @@ static func fabric_line(skeleton: Skeleton3D, cape: Array,
 				bone = -1
 			carrier.append(bone)
 			carry.append(Transform3D.IDENTITY if bone < 0
-				else skeleton.get_bone_global_rest(bone) * node.skin.get_bind_pose(bind))
+				else (rest_overrides.get(bone, skeleton.get_bone_global_rest(bone)) as Transform3D) * node.skin.get_bind_pose(bind))
 		for surface: int in range(node.mesh.get_surface_count()):
 			var arrays: Array = node.mesh.surface_get_arrays(surface)
 			var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
