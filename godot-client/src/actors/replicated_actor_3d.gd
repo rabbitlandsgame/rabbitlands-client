@@ -1105,6 +1105,13 @@ func _add_hair_variant(style: int, color: Color) -> void:
 	for old_attachment: Node in _native_skeleton.get_children():
 		if old_attachment.name.begins_with("AppearanceHair_") and old_attachment.name != RLHeadRig.HAIR_NODE_NAME:
 			_native_skeleton.remove_child(old_attachment)
+			# Clear the retiring render instance before its unique restored
+			# materials are released with the queued node. A dirty surface RID
+			# can otherwise outlive its material until the next renderer update.
+			for old_mesh: MeshInstance3D in old_attachment.find_children("*", "MeshInstance3D", true, false):
+				old_mesh.mesh = null
+				old_mesh.material_override = null
+				old_mesh.material_overlay = null
 			old_attachment.queue_free()
 	# Zero is bald for every colour cycle. Also hide any legacy sculpted hair;
 	# appearance metadata keeps helmet removal from revealing it again.
