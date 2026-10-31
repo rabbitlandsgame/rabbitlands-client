@@ -23,6 +23,24 @@ def triangle(radius=1.003):
 
 
 class GuardTest(unittest.TestCase):
+    def test_optional_geometric_projection_preserves_tangential_position(self):
+        class TiltedPlane(Sphere):
+            def signed(self,P,D=None,mesh=None,with_rim=False):
+                cp=P.copy();cp[:,2]=0
+                result=(P[:,2].copy(),cp,np.tile([.8,0,.6],(len(P),1)))
+                return result+(np.zeros(len(P),bool),) if with_rim else result
+        P=np.array([[0.,0.,-.002]]);T=np.array([[0,0,0]])
+        old,_=guard(TiltedPlane(),P,T,{},[],{})
+        explicit_old,_=guard(TiltedPlane(),P,T,{},[],{},geometric_projection=False)
+        np.testing.assert_array_equal(old,explicit_old)
+        Q,_=guard(TiltedPlane(),P,T,{},[],{},geometric_projection=True)
+        np.testing.assert_array_equal(Q[:,:2],P[:,:2])
+        self.assertGreaterEqual(Q[0,2],.003)
+        self.assertGreater(abs(old[0,0]),.001)
+        zero,_=guard(TiltedPlane(),np.zeros((1,3)),T,{},[],{},geometric_projection=True)
+        self.assertTrue(np.isfinite(zero).all())
+        self.assertGreaterEqual(zero[0,2],.003)
+
     def test_explicit_limiting_faces_with_remote_corners_are_checked(self):
         P=np.array([[-.24,0,1],[.24,0,1],[0,.24,1.]])
         P=P/np.linalg.norm(P,axis=1)[:,None]*1.025;T=np.array([[0,1,2]])

@@ -9,7 +9,7 @@ import headref
 
 
 def guard(head,P,T,delta,ids,combos,native=False,margin=.0030,max_shift_mm=14,max_iterations=6,
-          fixed=None,native_controls=None,all_faces=False):
+          fixed=None,native_controls=None,all_faces=False,geometric_projection=False):
     original=np.asarray(P);Q=original.astype(float,copy=True)
     assert not native and not native_controls,'Use a separate Native-only corrective; this guard owns the RL surface'
     # Crests far from the head cannot touch it. Keep all near-head faces and
@@ -47,7 +47,13 @@ def guard(head,P,T,delta,ids,combos,native=False,margin=.0030,max_shift_mm=14,ma
                 contacts[kind]+=int(bad.sum())
                 if not bad.any():continue
                 amount=target[bad]+.0002-distance[bad]
-                proposals=normal[bad]*amount[:,None]
+                direction=normal[bad]
+                if geometric_projection:
+                    separation=probes[bad]-cp[bad]
+                    length=np.linalg.norm(separation,axis=1)
+                    direction=headref.unit(separation)*np.where(distance[bad]<0,-1.,1.)[:,None]
+                    direction[length<1e-10]=normal[bad][length<1e-10]
+                proposals=direction*amount[:,None]
                 order=np.argsort(amount,kind='stable')
                 for corner in range(3):
                     indices=vertices[bad,corner]

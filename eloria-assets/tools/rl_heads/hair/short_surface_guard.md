@@ -22,3 +22,9 @@ checks faces whose corners all lie beyond the default 18 mm near-skin filter.
 A long chord can cross skin while every corner remains clear. Pass the bounded
 local face neighborhood explicitly; the default filtering and Native rejection
 remain unchanged. Check its adjacent faces and attachment after reassembly.
+
+`geometric_projection=True` uses the signed closest-point separation direction
+for a correction, retaining the supplied skin normal only at zero separation.
+This avoids tangential drift along interpolated shading normals at ear folds.
+The default normal projection, margin, displacement limit and Native rejection
+remain unchanged. This option still requires the independent final surface gate.
