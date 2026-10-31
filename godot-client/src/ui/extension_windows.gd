@@ -1792,6 +1792,7 @@ func _party_row(member: Dictionary) -> Control:
 	title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	title.add_theme_font_size_override("font_size", 12)
 	TextColors.bind(title, "party_text")
+	_party_text_contrast(title)
 	header.add_child(title)
 	var where := Label.new()
 	where.name = "Standing"
@@ -1802,6 +1803,7 @@ func _party_row(member: Dictionary) -> Control:
 		where.text = "standby"
 	where.add_theme_font_size_override("font_size", 10)
 	TextColors.bind(where, "party_muted")
+	_party_text_contrast(where)
 	header.add_child(where)
 
 	var low_health := float(member.get("health", 0)) / maxf(1, float(member.get("max_health", 1))) < 0.25
@@ -1837,6 +1839,7 @@ func _party_number(node_name: String, current: int, maximum: int, _colour: Color
 	number.text = "%d/%d" % [current, maximum] if online else "—/—"
 	number.add_theme_font_size_override("font_size", 11)
 	TextColors.bind(number, "party_ether" if node_name == "EtherNumber" else "party_health_low" if float(current) / maxf(1, maximum) < 0.25 else "party_health")
+	_party_text_contrast(number)
 	number.visible = _party_numbers
 	return number
 
@@ -3143,4 +3146,11 @@ static func _bind_party_labels(parent: Node) -> void:
 	for child: Node in parent.get_children():
 		if child is Label and not child.has_meta("text_color_role"):
 			TextColors.bind(child as Label, "party_text")
+		if child is Label:
+			_party_text_contrast(child as Label)
 		_bind_party_labels(child)
+
+## The HUD editor can hide the roster backing; retain readable text over stone.
+static func _party_text_contrast(label: Label) -> void:
+	label.add_theme_color_override("font_outline_color", Color(0.025, 0.03, 0.025, 1.0))
+	label.add_theme_constant_override("outline_size", 2)
