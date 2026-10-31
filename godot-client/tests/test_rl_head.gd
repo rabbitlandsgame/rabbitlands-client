@@ -1388,8 +1388,19 @@ func _check_headwear_fit() -> void:
 	_expect(not data.is_empty(), "headwear fit data loads")
 	for visual: int in [111, 112, 114, 119]:
 		_expect(RLHeadwearFit.has_piece(visual), "open piece 3:%d has a fit" % visual)
-	for visual: int in [134, 159, 150, 170]:
+	for visual: int in [134, 159, 150]:
 		_expect(not RLHeadwearFit.has_piece(visual), "closed piece 3:%d keeps its shipped fit" % visual)
+	var sun := RLHeadwearFit.piece(170)
+	_expect(RLHeadwearFit.fit_name(sun, "female", "") == ""
+		and RLHeadwearFit.fit_name(sun, "female", "no_such_style") == ""
+		and RLHeadwearFit.fit_name(sun, "male", "painted_twin_buns_female") == "",
+		"Sun Headband keeps its shipped placement outside its reviewed Twin pairing")
+	_expect(RLHeadwearFit.fit_name(sun, "female", "painted_twin_buns_female")
+		== "female/painted_twin_buns_female", "Sun Headband selects the exact reviewed Twin fit")
+	for visual: int in [111, 170]:
+		_expect(RLHeadwearFit.fits_shipped_body("luminous_female", visual, "painted_twin_buns_female")
+			and not RLHeadwearFit.fits_shipped_body("luminous_female", visual, "no_such_style"),
+			"only the reviewed Twin Native headwear pairing opts in for piece%d" % visual)
 	var circlet := RLHeadwearFit.piece(111)
 	_expect(RLHeadwearFit.fit_name(circlet, "female", "") == "female", "bald fit chosen with no hair")
 	_expect(RLHeadwearFit.fit_name(circlet, "female", "mira_bun") == "female/mira_bun",
