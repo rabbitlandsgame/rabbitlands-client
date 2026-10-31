@@ -3582,7 +3582,7 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 		return {"type": "invalid", "error": "campaign_stage"}
 	if bool(value.active) and (str(value.get("map", "")).is_empty() or str(value.get("run_id", "")).is_empty()):
 		return {"type": "invalid", "error": "campaign_identity"}
-	for field: String in ["available", "started"]:
+	for field: String in ["available", "started", "completed"]:
 		if value.has(field) and not value[field] is bool:
 			return {"type": "invalid", "error": "campaign_boolean"}
 	if not value.get("targets", []) is Array or value.get("targets", []).size() > 64:
