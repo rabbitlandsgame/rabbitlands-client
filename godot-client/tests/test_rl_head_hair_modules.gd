@@ -33,6 +33,7 @@ func _run() -> void:
 	_check_legacy()
 	_check_variants()
 	_check_namespace()
+	_check_placement_capability()
 	await _check_form()
 	print("RL semantic hair: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures else 0)
@@ -47,8 +48,8 @@ func _check_legacy() -> void:
 		7: {"name": "curly_twin_buns", "sex": "female", "fallback_style": 3},
 		8: {"name": "receding_sweep", "sex": "male", "fallback_style": 1},
 	}
-	_expect(Map.HAIR_MODULES == frozen, "IDs 2–8 are unchanged; no production IDs added")
 	for id: int in frozen:
+		_expect(Map.HAIR_MODULES.get(id) == frozen[id], "existing module %d keeps its entry" % id)
 		var entry: Dictionary = frozen[id]
 		var sex := str(entry.sex)
 		var other := "male" if sex == "female" else "female"
@@ -128,6 +129,27 @@ func _check_namespace() -> void:
 		"new entries cannot exceed existing wire capacity")
 	_expect(not Modules.validate({9: {"name": "bad_fallback", "variants": {"male": {"name": "fit", "fallback_style": 0}}}}).ok,
 		"variant fallback must be a nonbald existing hairstyle slot")
+
+func _check_placement_capability() -> void:
+	var entries := {
+		31: {"name": "fixture_tied", "tie_height": true, "variants": {
+			"female": "fixture_tied_female",
+			"male": {"name": "fixture_tied_male", "tie_height": false}}},
+		30: {"name": "fixture_one_tie", "sex": "female", "tie_height": true},
+	}
+	_expect(Modules.validate(entries).ok, "placement flags are valid optional metadata")
+	_expect(Modules.supports_tie_height(31, "female", entries), "qualified variant inherits placement support")
+	_expect(not Modules.supports_tie_height(31, "male", entries), "a variant can decline placement support")
+	_expect(Modules.supports_tie_height(30, "female", entries), "a single-body fit can declare placement support")
+	_expect(not Modules.supports_tie_height(30, "male", entries), "unavailable body never exposes placement")
+	_expect(not Modules.supports_tie_height(29, "female", entries), "unknown module never exposes placement")
+	for id: int in range(2, 9):
+		for sex: String in ["female", "male"]:
+			_expect(not Modules.supports_tie_height(id, sex), "existing styles retain fixed attachment placement")
+	_expect(not Modules.validate({9: {"name": "bad_flag", "sex": "female", "tie_height": 1}}).ok,
+		"integer placement flag is rejected")
+	_expect(not Modules.validate({9: {"name": "bad_variant_flag", "variants": {"female": {"name": "fit", "tie_height": "true"}}}}).ok,
+		"variant placement flag must be boolean")
 
 func _check_form() -> void:
 	var form := VariantForm.new()

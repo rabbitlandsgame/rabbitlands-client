@@ -159,12 +159,12 @@ static func render_warm_snapshot() -> Dictionary:
 ## The per-actor values (rl_head_instance.gdshaderinc) each RL shader reads, by
 ## shader: what a per-face material copy of it carries (see face_material).
 const SHADER_VALUES := {
-	"rl_skin": ["skin_color", "lip_tint", "brow_color", "hair_color", "freckles", "liner", "stubble",
+	"rl_skin": ["skin_color", "lip_tint", "brow_color", "hair_color", "eye_color", "freckles", "liner", "stubble",
 		"hairline", "brow_style", "brow_thickness", "liner_wing", "eye_style_paint", "lid_closure"],
 	"rl_eye": ["eye_color", "eye_look", "eye_style_paint"],
 	"rl_lash": ["hair_color"],
 	"rl_brow": ["brow_color"],
-	"rl_hair": ["hair_color", "hair_detail"],
+	"rl_hair": ["hair_color", "hair_detail", "eye_color"],
 	"rl_cornea": [],
 	"rl_mouth": [],
 }
