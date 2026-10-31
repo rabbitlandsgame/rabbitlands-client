@@ -7,11 +7,27 @@ var _remote_enrollment_ready := false
 var _remote_pending_transfer := PackedFloat64Array()
 ## Last configure call only; no frame-time sampling or retained Resources.
 var _configuration_phases_us: Dictionary = {}
+var _configuration_profile_scope := ""
 
 func configuration_timings_usec() -> Dictionary:
 	return _configuration_phases_us.duplicate()
 
+## Opt-in configure-only attribution. Detailed finish/part durations are nested
+## inside their parent phases, not additional time to sum into the total.
+## Ordinary actor changes never sample clocks or add diagnostic entries.
+func _configuration_profile_tick() -> int:
+	return 0 if _configuration_profile_scope.is_empty() else Time.get_ticks_usec()
+
+func _configuration_profile_step(key: String, started: int) -> int:
+	if started == 0 or _configuration_profile_scope.is_empty():
+		return 0
+	var now := Time.get_ticks_usec()
+	var field := "detail.%s.%s" % [_configuration_profile_scope, key]
+	_configuration_phases_us[field] = int(_configuration_phases_us.get(field, 0)) + now - started
+	return now
+
 const REBOUND_SKIN_POOL := preload("res://src/actors/rebound_skin_pool.gd")
+const WARDROBE_DYE_CACHE := preload("res://src/actors/wardrobe_dye_cache.gd")
 const ACTOR_RENDER_QUALITY := preload("res://src/actors/actor_render_quality.gd")
 const OLDCRAFT_ACTOR_STYLE := preload("res://src/actors/oldcraft_actor_style.gd")
 const CapeEmblems := preload("res://src/actors/cape_emblems.gd")
@@ -589,6 +605,8 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 		equipment_config: Dictionary = {}, build_model := true) -> Array[String]:
 	var configure_started := Time.get_ticks_usec()
 	_configuration_phases_us.clear()
+	_configuration_profile_scope = ""
+	var profile_build := OS.get_environment("ELORIA_ACTOR_BUILD_PROFILE") == "1"
 	# Choose the tier before loading any optional High-only portrait resources.
 	if not _render_quality_selected:
 		_render_quality = LookProfile.quality()
@@ -697,7 +715,9 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 				skeleton.add_child(_weapon_carry)
 			phase_started = Time.get_ticks_usec()
 			_attach_cape_cloth(skeleton)
+			_configuration_profile_scope = "appearance" if profile_build else ""
 			apply_appearance_variants(dto.get("appearance", {}) as Dictionary)
+			_configuration_profile_scope = ""
 			_configuration_phases_us["appearance"] = Time.get_ticks_usec() - phase_started
 			phase_started = Time.get_ticks_usec()
 			var animation_path := _external_path(str(model_config.get("animationLibrary", "")))
@@ -736,16 +756,20 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 				_switch_rl_head_in_place()
 			_configuration_phases_us["rl_head"] = Time.get_ticks_usec() - phase_started
 	phase_started = Time.get_ticks_usec()
+	_configuration_profile_scope = "equipment" if profile_build else ""
 	apply_equipment_visuals(dto.get("equipment_visuals", {}) as Dictionary,
 		dto.get("equipment_fallback_parts", []) as Array)
+	_configuration_profile_scope = ""
 	_configuration_phases_us["equipment"] = Time.get_ticks_usec() - phase_started
 	_configuration_phases_us["total"] = Time.get_ticks_usec() - configure_started
 	return errors
 
 func apply_appearance_variants(appearance: Dictionary) -> void:
+	var profile_started := _configuration_profile_tick()
 	_appearance = appearance.duplicate()
 	_rl_head_failed = false
 	_apply_character_proportions()
+	profile_started = _configuration_profile_step("scale", profile_started)
 	if _native_skeleton == null:
 		return
 	var culture: String = str(_model_config.get("culture", "luminous"))
@@ -830,22 +854,31 @@ func apply_appearance_variants(appearance: Dictionary) -> void:
 			var baked: Array = _model_config.get("wardrobeBakedGrow", []) as Array
 			if not baked.has(mesh_name):
 				_grow_mesh(mesh_node, float(WARDROBE_GROW[mesh_name]))
+	profile_started = _configuration_profile_step("colours_materials", profile_started)
 	_apply_face_appearance(native_model, skin_tint, eye_tint, brow_tint)
+	profile_started = _configuration_profile_step("face", profile_started)
 	_apply_rl_head_and_hair(appearance, hair_tint)
+	profile_started = _configuration_profile_step("head_and_hair", profile_started)
 	_expand_animated_face_bounds(native_model)
 	_refresh_body_surface_visibility()
+	profile_started = _configuration_profile_step("bounds_visibility", profile_started)
 	_refresh_wardrobe_cover()
+	profile_started = _configuration_profile_step("wardrobe_cover", profile_started)
 	# Open headwear follows the head and hair just set (RLHeadwearFit); a piece
 	# rebuilt here then takes the quality and Oldcraft passes below.
 	_refit_rl_headwear()
+	profile_started = _configuration_profile_step("headwear_refit", profile_started)
 	_apply_render_quality_to_visuals()
+	profile_started = _configuration_profile_step("finish", profile_started)
 	OLDCRAFT_ACTOR_STYLE.apply_surface_finish(native_model)
+	profile_started = _configuration_profile_step("surface_finish", profile_started)
 	for nodes: Array in _equipment_nodes.values():
 		for node: Node in nodes:
 			if node is MeshInstance3D and node.has_meta("neck_source"):
 				NecklineSkin.refresh_materials(node as MeshInstance3D)
 	if _silhouette != null and _silhouette.is_enabled():
 		_silhouette.rebuild()
+	_configuration_profile_step("necklines_silhouette", profile_started)
 
 func _set_appearance_visible(mesh_node: MeshInstance3D, visible_by_style: bool) -> void:
 	# Appearance owns whether a wardrobe surface exists at all; equipment only
@@ -1049,25 +1082,28 @@ static func _wardrobe_dye_texture(source: Texture2D) -> Texture2D:
 	var original := source.get_image()
 	if original == null or original.is_empty():
 		return source
-	var neutral := original.duplicate() as Image
-	if neutral.is_compressed():
-		neutral.decompress()
-	neutral.convert(Image.FORMAT_RGBA8)
-	var reference := 0.0
-	var count := 0
-	for y: int in neutral.get_height():
-		for x: int in neutral.get_width():
-			var pixel := neutral.get_pixel(x, y)
-			if pixel.a > 0.0:
-				reference += pixel.get_luminance()
-				count += 1
-	reference = maxf(0.01, reference / maxi(1, count))
-	for y: int in neutral.get_height():
-		for x: int in neutral.get_width():
-			var pixel := neutral.get_pixel(x, y)
-			var value := clampf(pixel.get_luminance() / reference, 0.0, 1.0)
-			neutral.set_pixel(x, y, Color(value, value, value, pixel.a))
-	neutral.generate_mipmaps()
+	var neutral: Image = WARDROBE_DYE_CACHE.load_image(original)
+	if neutral == null:
+		neutral = original.duplicate() as Image
+		if neutral.is_compressed():
+			neutral.decompress()
+		neutral.convert(Image.FORMAT_RGBA8)
+		var reference := 0.0
+		var count := 0
+		for y: int in neutral.get_height():
+			for x: int in neutral.get_width():
+				var pixel := neutral.get_pixel(x, y)
+				if pixel.a > 0.0:
+					reference += pixel.get_luminance()
+					count += 1
+		reference = maxf(0.01, reference / maxi(1, count))
+		for y: int in neutral.get_height():
+			for x: int in neutral.get_width():
+				var pixel := neutral.get_pixel(x, y)
+				var value := clampf(pixel.get_luminance() / reference, 0.0, 1.0)
+				neutral.set_pixel(x, y, Color(value, value, value, pixel.a))
+		neutral.generate_mipmaps()
+		WARDROBE_DYE_CACHE.store_image(original, neutral)
 	var texture := ImageTexture.create_from_image(neutral)
 	_wardrobe_texture_cache[key] = texture
 	_wardrobe_texture_cache[texture.get_instance_id()] = texture
@@ -1621,11 +1657,13 @@ func mounted_presentation_priority() -> bool:
 	return _render_quality_local_actor or _selected or _combat_target
 
 func _apply_render_quality_to_visuals() -> void:
+	var profile_started := _configuration_profile_tick()
 	if is_instance_valid(_native_model):
 		# All authored body coverage, cape drape and quiver-strap fitting have
 		# finished before this stage. Fit the final wardrobe exactly once.
 		HIGH_HAIR.restore(_native_model)
 		HIGH_PORTRAIT.restore(_native_model)
+		profile_started = _configuration_profile_step("finish.restore", profile_started)
 		# With an RL head (or one waiting for the animation import) the body's
 		# own head is hidden and cut away: no face sculpt, no beard shell and
 		# no stubble on it, and no classic High portrait. Its legacy hairstyle,
@@ -1636,17 +1674,22 @@ func _apply_render_quality_to_visuals() -> void:
 			# individual face lets all face choices reuse the same outfit fit.
 			# This field ends below its authored head/upper-neck replacement.
 			CHARACTER_PROPORTIONS.apply_body_refinement(_native_model, _native_skeleton, _model_config)
+			profile_started = _configuration_profile_step("finish.body_refinement", profile_started)
 			if rl:
 				CHARACTER_PROPORTIONS.restore(_native_model)
+				profile_started = _configuration_profile_step("finish.face_proportions", profile_started)
 				if not _rl_switching:
 					PORTRAIT_GROOM.apply(_native_model, _native_skeleton, _rl_groom_appearance(), _model_config)
+					profile_started = _configuration_profile_step("finish.groom", profile_started)
 			else:
 				CHARACTER_PROPORTIONS.apply(_native_model, _native_skeleton, _appearance)
+				profile_started = _configuration_profile_step("finish.face_proportions", profile_started)
 				# A switch down from the RL head grooms again only to build a
 				# beard shell the RL head went without; otherwise the hair keeps
 				# the grooming and finish it had, as in develop's own switch.
 				if not _rl_switching or _beard_shell_missing():
 					PORTRAIT_GROOM.apply(_native_model, _native_skeleton, _appearance, _model_config)
+					profile_started = _configuration_profile_step("finish.groom", profile_started)
 			_human_shape_needs_finish = false
 		if rl:
 			if _native_model.has_meta(HIGH_PORTRAIT.USER_META):
@@ -1659,7 +1702,9 @@ func _apply_render_quality_to_visuals() -> void:
 			HIGH_PORTRAIT.apply(_native_model, _native_skeleton, _appearance, _model_config, _render_quality)
 			HIGH_HAIR.apply(_native_model, _native_skeleton, _appearance, _model_config, _render_quality)
 			STUBBLE_APPEARANCE.apply(_native_model, _appearance, _model_config)
+		profile_started = _configuration_profile_step("finish.portrait_hair_stubble", profile_started)
 		ACTOR_RENDER_QUALITY.apply_actor(_native_model, _render_quality)
+		profile_started = _configuration_profile_step("finish.quality_flags", profile_started)
 	var fallback := get_node_or_null("MissingModelFallback") as MeshInstance3D
 	if fallback != null:
 		ACTOR_RENDER_QUALITY.apply_mesh(fallback, _render_quality)
@@ -3295,11 +3340,13 @@ func apply_equipment_visuals(visuals: Dictionary, fallback_parts: Array = []) ->
 		return
 	if _equipment_applied and _equipment_matches(visuals, fallback_parts):
 		return
+	var profile_started := _configuration_profile_tick()
 	if is_instance_valid(_native_model):
 		HIGH_HAIR.restore(_native_model)
 		HIGH_PORTRAIT.restore(_native_model)
 		CHARACTER_PROPORTIONS.restore(_native_model)
 		CHARACTER_PROPORTIONS.restore_body_refinement(_native_model)
+	profile_started = _configuration_profile_step("restore", profile_started)
 	_equipment_applied = true
 	var torso_before: int = int(_equipment_visuals.get(BODY_PART, 0))
 	var shins_before := Vector2i(int(_equipment_visuals.get(LEGS_PART, 0)),
@@ -3325,10 +3372,14 @@ func apply_equipment_visuals(visuals: Dictionary, fallback_parts: Array = []) ->
 		if int(_equipment_visuals.get(part, -1)) == visual_id and (
 				not allow_fallback or _equipment_nodes.has(part)):
 			continue
+		var part_started := _configuration_profile_tick()
 		_clear_equipment_part(part)
 		_equipment_visuals[part] = visual_id
 		_create_equipment_part(part, visual_id, allow_fallback)
+		if part_started != 0:
+			_configuration_profile_step("parts.%d.visual_%d" % [part, visual_id], part_started)
 		cape_rebuilt = cape_rebuilt or part == CAPE_PART
+	profile_started = _configuration_profile_step("parts", profile_started)
 	# A cape kept from before still hangs on the armour it was cut against, so
 	# a change of chest piece re-cuts it even though the cape itself did not
 	# change. One rebuilt in the loop above was already cut against the new
@@ -3349,7 +3400,9 @@ func apply_equipment_visuals(visuals: Dictionary, fallback_parts: Array = []) ->
 	# Open headwear drapes its trails over the torso worn (RLHeadwearFit).
 	if not _headwear_fit_base().is_empty():
 		_refit_rl_headwear()
+	profile_started = _configuration_profile_step("cape_headwear_refit", profile_started)
 	_refresh_wardrobe_cover()
+	profile_started = _configuration_profile_step("wardrobe_cover", profile_started)
 	_refresh_melee_animation_mapping()
 	_refresh_quiver_cape_fit()
 	if _weapon_carry != null:
@@ -3358,13 +3411,17 @@ func apply_equipment_visuals(visuals: Dictionary, fallback_parts: Array = []) ->
 		var weapon := _equipment_model_config(0, int(_equipment_visuals.get(0, 0)))
 		var bow_path := _ranged_bow_path(weapon)
 		combat_presentation.set_equipped_bow(bow_path)
+	profile_started = _configuration_profile_step("mapping_quiver", profile_started)
 	# Equipment adds and removes mesh instances, so the silhouette's clone set
 	# has to be built again against what the actor is now made of.
 	_apply_render_quality_to_visuals()
+	profile_started = _configuration_profile_step("finish", profile_started)
 	if _silhouette != null and _silhouette.is_enabled():
 		_silhouette.rebuild()
+	profile_started = _configuration_profile_step("silhouette", profile_started)
 	if is_instance_valid(_native_model):
 		OLDCRAFT_ACTOR_STYLE.apply_surface_finish(_native_model)
+	_configuration_profile_step("surface_finish", profile_started)
 
 ## The quiver carries authored cape-on and cape-off fits on the same skin.
 ## Changing one actor's morph weight leaves shared meshes and other wearers alone.

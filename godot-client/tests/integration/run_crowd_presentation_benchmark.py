@@ -406,7 +406,7 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--renderer", default="forward_plus", choices=["forward_plus", "mobile", "gl_compatibility"])
     p.add_argument("--resolution", type=resolution, default=(1280, 720))
     p.add_argument("--settings-profile", choices=["default", "performance"], default="default",
-                   help="Performance seeds the actual preset into fresh Windows user settings before startup")
+                   help="Performance seeds the actual preset into fresh isolated Windows/Linux user settings before startup")
     p.add_argument("--fps-cap", type=int, default=None,
                    help="default 60; Performance profile requires 30")
     p.add_argument("--map", default="")

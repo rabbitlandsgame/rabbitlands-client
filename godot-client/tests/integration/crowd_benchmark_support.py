@@ -40,6 +40,7 @@ OVERRIDE_PREFIXES = ("ELORIA_LOOK", "ELORIA_CROWD_", "ELORIA_NATIVE_", "RABBITLA
 OVERRIDE_NAMES = {"ELORIA_VRAM_TEXTURES", "ELORIA_NO_MAP_CACHE", "ELORIA_SAFE_MODE", "RABBITLANDS_CLIENT_RUNTIME", "RABBITLANDS_RUST_EFFECTS"}
 OVERRIDE_NAMES.update({"RABBITLANDS_RESOURCE_ADMISSION", "RABBITLANDS_RESOURCE_BUDGET_MIB"})
 OVERRIDE_NAMES.update({"RABBITLANDS_PREPARED_CONTENT", "RABBITLANDS_PREPARED_NODE_POLICY"})
+OVERRIDE_NAMES.update({"ELORIA_WARDROBE_TEXTURE_CACHE", "ELORIA_ACTOR_BUILD_PROFILE"})
 PERFORMANCE_GRAPHICS = {
     "quality": "low", "appearance": "painted_ground", "fps_limit": 30,
     "render_scale": .75, "map_texture_quality": "half", "crowd_bodies": 60,
@@ -64,8 +65,8 @@ def configure_settings_profile(args, system: str | None = None) -> None:
     if profile not in ("default", "performance"):
         raise EvidenceError("unknown settings profile")
     if profile == "performance":
-        if (platform.system() if system is None else system) != "Windows":
-            raise EvidenceError("Performance settings seeding currently supports Windows only")
+        if (platform.system() if system is None else system) not in ("Windows", "Linux"):
+            raise EvidenceError("Performance settings seeding supports Windows and Linux only")
         for field, absent, expected in (("quality", "", "low"), ("fps_cap", None, 30),
                                         ("body_cap", None, 60)):
             value = getattr(args, field)
@@ -85,17 +86,20 @@ def seed_settings_profile(profile: str, client: Path, user_root: Path,
                           environment: dict[str, str], system: str | None = None) -> dict | None:
     """Write only fresh, generated preferences before Godot caches texture quality.
 
-    Windows custom user:// uses APPDATA. Other platforms are rejected explicitly
-    until their isolation and custom-directory behavior are supported and tested.
+    Windows custom user:// uses APPDATA; Linux uses XDG_DATA_HOME and the
+    project's explicit linuxbsd custom-directory override. Startup attestation
+    must confirm that the engine opened this exact generated directory.
     """
     if profile == "default":
         return None
-    if profile != "performance" or (platform.system() if system is None else system) != "Windows":
-        raise EvidenceError("Performance settings seeding currently supports Windows only")
+    system = platform.system() if system is None else system
+    if profile != "performance" or system not in ("Windows", "Linux"):
+        raise EvidenceError("Performance settings seeding supports Windows and Linux only")
     root = user_root.resolve()
-    appdata = environment.get("APPDATA")
-    if not appdata or Path(appdata).resolve() != root:
-        raise EvidenceError("Performance profile requires the fresh isolated APPDATA directory")
+    variable = "APPDATA" if system == "Windows" else "XDG_DATA_HOME"
+    data_home = environment.get(variable)
+    if not data_home or not Path(data_home).is_absolute() or Path(data_home).resolve() != root:
+        raise EvidenceError(f"Performance profile requires the fresh isolated {variable} directory")
     # Verify the repository's declared custom path instead of assuming the
     # engine's default application-name directory or copying a user's config.
     application, section = {}, ""
@@ -109,9 +113,12 @@ def seed_settings_profile(profile: str, client: Path, user_root: Path,
     custom = "config/custom_user_dir_name"
     if application.get("config/use_custom_user_dir") != "true" \
             or application.get(custom) != '"Godot/app_userdata/Eloria"' \
+            or (system == "Linux" and application.get(custom + ".linuxbsd") != '"godot/app_userdata/Eloria"') \
             or any(key.startswith(custom + ".") and key != custom + ".linuxbsd" for key in application):
         raise EvidenceError("Performance profile does not support this project's custom user directory settings")
-    user_dir = root / "Godot/app_userdata/Eloria"
+    user_dir = root / ("Godot/app_userdata/Eloria" if system == "Windows" else "godot/app_userdata/Eloria")
+    if not user_dir.resolve().is_relative_to(root):
+        raise EvidenceError("Performance settings path escaped the isolated run directory")
     path = user_dir / "eloria_hud.cfg"
     content = "[graphics]\n\n" + "".join(
         f"{key}={json.dumps(value, ensure_ascii=False, allow_nan=False)}\n"

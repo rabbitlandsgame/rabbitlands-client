@@ -445,18 +445,19 @@ class IdentityAndProcessTests(unittest.TestCase):
         defaults = runner.parser().parse_args(["--godot", "unused"])
         support.configure_settings_profile(defaults, system="Linux")
         self.assertEqual((defaults.fps_cap, defaults.quality, defaults.body_cap), (60, "", None))
-        args = runner.parser().parse_args(["--godot", "unused", "--settings-profile", "performance"])
-        support.configure_settings_profile(args, system="Windows")
-        self.assertEqual((args.quality, args.fps_cap, args.body_cap), ("low", 30, 60))
-        support.configure_settings_profile(args, system="Windows")  # Idempotent before each repeated run.
+        for system in ("Windows", "Linux"):
+            args = runner.parser().parse_args(["--godot", "unused", "--settings-profile", "performance"])
+            support.configure_settings_profile(args, system=system)
+            self.assertEqual((args.quality, args.fps_cap, args.body_cap), ("low", 30, 60))
+            support.configure_settings_profile(args, system=system)  # Idempotent before each repeated run.
         for options in (["--quality", "high"], ["--fps-cap", "60"], ["--body-cap", "160"],
                         ["--tuning", "cloth=8"], ["--cells", "mixed-mounted-160"], ["--cells", "phase1"]):
             args = runner.parser().parse_args(["--godot", "unused", "--settings-profile", "performance", *options])
             with self.subTest(options=options), self.assertRaises(support.EvidenceError):
                 support.configure_settings_profile(args, system="Windows")
-        with self.assertRaisesRegex(support.EvidenceError, "Windows only"):
+        with self.assertRaisesRegex(support.EvidenceError, "Windows and Linux only"):
             support.configure_settings_profile(runner.parser().parse_args(
-                ["--godot", "unused", "--settings-profile", "performance"]), system="Linux")
+                ["--godot", "unused", "--settings-profile", "performance"]), system="Darwin")
 
     def test_settings_seed_is_fresh_exact_and_hashed_in_actual_custom_directory(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -488,6 +489,55 @@ class IdentityAndProcessTests(unittest.TestCase):
             (root / "project.godot").write_text('[application]\nconfig/use_custom_user_dir=false\n')
             with self.assertRaisesRegex(support.EvidenceError, "custom user directory"):
                 support.seed_settings_profile("performance", root, fresh, {"APPDATA": str(fresh)}, "Windows")
+
+    def test_linux_settings_seed_uses_exact_lowercase_custom_path_and_refuses_inherited_storage(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_project(root)
+            fresh = root / "isolated"
+            fresh.mkdir()
+            inherited = root / "player-settings"
+            inherited.mkdir()
+            for environment in ({}, {"APPDATA": str(fresh)}, {"XDG_DATA_HOME": str(inherited)},
+                                {"XDG_DATA_HOME": "relative-user-data"}):
+                with self.subTest(environment=environment), self.assertRaisesRegex(support.EvidenceError, "XDG_DATA_HOME"):
+                    support.seed_settings_profile("performance", root, fresh, environment, "Linux")
+            self.assertEqual(list(inherited.iterdir()), [])
+            environment = {"XDG_DATA_HOME": str(fresh), "APPDATA": str(inherited)}
+            metadata = support.seed_settings_profile("performance", root, fresh, environment, "Linux")
+            user_dir = fresh / "godot/app_userdata/Eloria"
+            path = user_dir / "eloria_hud.cfg"
+            self.assertEqual(metadata["userDataDir"], str(user_dir))
+            self.assertEqual(metadata["content"], path.read_text())
+            self.assertEqual(metadata["sha256"], support.sha256_file(path))
+            self.assertIn('map_texture_quality="half"', path.read_text())
+            self.assertIn('crowd_bodies=60', path.read_text())
+            self.assertFalse((fresh / "Godot").exists())
+            with self.assertRaisesRegex(support.EvidenceError, "already exists"):
+                support.seed_settings_profile("performance", root, fresh, environment, "Linux")
+
+    def test_linux_settings_seed_rejects_unknown_custom_override_and_symlink_escape(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_project(root)
+            original = (root / "project.godot").read_text()
+            fresh = root / "isolated"
+            fresh.mkdir()
+            environment = {"XDG_DATA_HOME": str(fresh)}
+            for replacement in ('"Godot/app_userdata/Eloria"', '"../player-settings"'):
+                (root / "project.godot").write_text(original.replace('"godot/app_userdata/Eloria"', replacement))
+                with self.subTest(replacement=replacement), self.assertRaisesRegex(support.EvidenceError, "custom user directory"):
+                    support.seed_settings_profile("performance", root, fresh, environment, "Linux")
+            write_project(root)
+            inherited = root / "player-settings"
+            inherited.mkdir()
+            try:
+                (fresh / "godot").symlink_to(inherited, target_is_directory=True)
+            except OSError as exc:
+                self.skipTest(f"directory symlinks unavailable on this host: {exc}")
+            with self.assertRaisesRegex(support.EvidenceError, "escaped"):
+                support.seed_settings_profile("performance", root, fresh, environment, "Linux")
+            self.assertEqual(list(inherited.iterdir()), [])
 
     def test_performance_config_exists_before_process_starts_and_is_recorded(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -524,6 +574,41 @@ class IdentityAndProcessTests(unittest.TestCase):
             self.assertEqual(seed["sha256"], support.sha256_file(Path(seed["path"])))
             recorded = support.read_json(next(root.glob("*.process.json")))
             self.assertEqual(recorded["settingsSeed"]["content"], seed["content"])
+
+    def test_linux_runner_seeds_before_startup_and_attests_isolated_user_directory(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_project(root)
+            exe = root / "godot"
+            exe.write_bytes(b"not executed")
+            args = runner.parser().parse_args(["--godot", str(exe), "--project-path", str(root),
+                "--settings-profile", "performance", "--cells", "s3-market-160", "--mode", "windowed",
+                "--minimap", "show", "--sample-ms", "1000", "--warmup-ms", "100"])
+            args.godot = exe
+            data, _request = performance_fixture()
+            data["measurement"]["windowPlatform"] = "Linux"
+
+            def fake_launch(command, *, env, stdout, **_kwargs):
+                isolated = Path(env["XDG_DATA_HOME"])
+                self.assertTrue(isolated.is_relative_to(root / "userdata"))
+                user_dir = isolated / "godot/app_userdata/Eloria"
+                self.assertTrue((user_dir / "eloria_hud.cfg").is_file())
+                data["runtimeBuild"].update(executablePath=str(exe), userDataDir=str(user_dir))
+                write_startup_ack(env, exe, user_dir)
+                Path(env["RABBITLANDS_CROWD_BENCH_OUT"]).write_text(json.dumps(data))
+                Path(command[command.index("--log-file") + 1]).write_text("normal")
+                return mock.Mock(pid=12345, wait=mock.Mock(return_value=0), poll=mock.Mock(return_value=None))
+
+            with mock.patch.dict(os.environ, {"XDG_DATA_HOME": str(root / "player-settings")}), \
+                    mock.patch.object(support.platform, "system", return_value="Linux"), \
+                    mock.patch.object(runner, "identity", return_value={"source": "stable"}), \
+                    mock.patch.object(runner.subprocess, "Popen", side_effect=fake_launch):
+                result = runner.run_one(args, "all", 1, root)
+            self.assertTrue(result["validation"]["valid"], result["validation"])
+            self.assertTrue(result["startup"]["valid"])
+            seed = result["settingsSeed"]
+            self.assertEqual(seed["sha256"], result["settingsSeedFinalSha256"])
+            self.assertFalse((root / "player-settings").exists())
 
     def test_missing_invalid_and_nonfinite_json_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -626,9 +711,14 @@ class IdentityAndProcessTests(unittest.TestCase):
 
     def test_environment_overrides_isolated_without_recording_unrelated_secrets(self):
         clean, names = support.clean_environment({"PATH": "usable", "ELORIA_LOOK_QUALITY": "low",
+                                                  "ELORIA_WARDROBE_TEXTURE_CACHE": "1",
+                                                  "ELORIA_ACTOR_BUILD_PROFILE": "1",
                                                   "RABBITLANDS_CROWD_TUNING": "full=0", "SECRET_TOKEN": "hidden"})
         self.assertEqual(clean["PATH"], "usable")
         self.assertNotIn("ELORIA_LOOK_QUALITY", clean)
+        for diagnostic in ("ELORIA_WARDROBE_TEXTURE_CACHE", "ELORIA_ACTOR_BUILD_PROFILE"):
+            self.assertNotIn(diagnostic, clean)
+            self.assertIn(diagnostic, names)
         self.assertNotIn("SECRET_TOKEN", names)
 
     def test_replay_output_must_stay_outside_repository(self):

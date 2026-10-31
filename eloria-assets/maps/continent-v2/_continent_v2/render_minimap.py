@@ -128,7 +128,7 @@ class Pool:
 
 
 def read_chunk(rc, pool, glb: Path, resources: dict, chunk: str, retirement=None, checkout=None,
-               *, road_ground=None, manifest_path=None) -> dict:
+               *, road_ground=None, manifest_path=None, hidden_nodes=(), node_label=None) -> dict:
     """One chunk's materials and its triangles in territory metres (scene_from_glb's rules: water ink on water
     materials, linear albedo, MASK for BLEND and soft ground, mirrored instances re-wound, invisible stream
     thresholds left out)."""
@@ -157,6 +157,20 @@ def read_chunk(rc, pool, glb: Path, resources: dict, chunk: str, retirement=None
         doc, binary = glb_reader.SM.inline_prototypes(glb, doc, binary)
     finally:
         glb_reader.SM.POOL = previous_pool
+    # Optional offline interior cutaway. Mutate this private decoded scene,
+    # never source GLBs; ordinary regional rendering retains every node.
+    hidden = set(hidden_nodes)
+    if hidden:
+        stack = [i for i, node in enumerate(doc.get("nodes", [])) if node.get("name", "") in hidden]
+        seen = set()
+        while stack:
+            index = stack.pop()
+            if index in seen:
+                continue
+            seen.add(index)
+            node = doc["nodes"][index]
+            node.pop("mesh", None)
+            stack.extend(node.get("children", []))
     resources = dict(resources)
     # Restored pooled prototypes can name textures not present in the tiny
     # placement document. Their content-addressed filenames pin their bytes.
@@ -195,8 +209,9 @@ def read_chunk(rc, pool, glb: Path, resources: dict, chunk: str, retirement=None
         materials.append(made)
     if not materials:
         materials.append(R.RenderMaterial(f"{chunk}:0"))
-    parts, cache, ground = [], {}, []
+    parts, cache, ground, labels = [], {}, [], []
     for name, mesh_index, transform in rc.visible_nodes(doc):
+        label = node_label(name, mesh_index, transform, doc, binary) if node_label is not None else None
         for pi, primitive in enumerate(doc["meshes"][mesh_index]["primitives"]):
             if primitive.get("mode", 4) != 4:
                 raise MinimapError(f"{glb}: non-triangle primitive in {name}")
@@ -232,11 +247,15 @@ def read_chunk(rc, pool, glb: Path, resources: dict, chunk: str, retirement=None
                 faces = indices.reshape(-1, 3)[:, ::-1].reshape(-1)
             parts.append((world.astype(np.float32), normals.astype(np.float32), uv, faces.astype(np.int32), color,
                           material))
+            if node_label is not None:
+                labels.append(label)
             if road_ground and name.startswith("AuthoredGround_"):
                 ground.append((name, world, normals, faces))
     low = np.min([p[0].min(axis=0) for p in parts], axis=0) if parts else np.zeros(3)
     high = np.max([p[0].max(axis=0) for p in parts], axis=0) if parts else np.zeros(3)
     result = {"materials": materials, "parts": parts, "low": low, "high": high}
+    if node_label is not None:
+        result["part_labels"] = labels
     if road_ground is not None:
         if checkout is None or manifest_path is None:
             raise MinimapError("Road-field cartography requires its repository and chunk manifest")
