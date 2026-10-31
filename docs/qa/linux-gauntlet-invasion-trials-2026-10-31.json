@@ -12541,7 +12541,22 @@
       "passed": 21,
       "failed": 0
     },
-    "scope": "Completed checks supplied by the coordinator; the evidence builder did not run further engine or test workloads."
+    "scope": "Completed checks supplied by the coordinator; the evidence builder did not run further engine or test workloads.",
+    "post_merge": {
+      "python_pytest": {
+        "passed": 356,
+        "skipped": 7,
+        "subtests_passed": 167,
+        "seconds": 56.42
+      },
+      "updater_runtime_checks": "PASS",
+      "new_updater_url_cases": {
+        "legacy_shared_url": "accepted",
+        "matching_checksum_partition": "accepted",
+        "mismatched_checksum_partition": "rejected"
+      },
+      "scope": "Combined benchmark, packaging, storage and publication regression suite after merging the later release-storage changes; no additional rendered performance measurements."
+    }
   },
   "excluded_trials": [
     {
