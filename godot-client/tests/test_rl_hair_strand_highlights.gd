@@ -40,6 +40,7 @@ func _initialize() -> void:
 			and bool(Library.material("rl_hair_card", "female", mixed, Quality.HIGH).get_shader_parameter("anisotropic")),
 			"Opt-out affects only the material that declares it")
 		check_soft_roots(mode)
+		check_paint_flatness(mode)
 		for pair: Array in [["male", "rowan_shag"], ["female", "mira_bun"], ["male", "rounded_afro"],
 				["female", "cornrows_low_knot"], ["female", "shoulder_waves"], ["female", "curly_twin_buns"], ["male", "receding_sweep"]]:
 			check(bool(Library.material("rl_hair_clump", pair[0], pair[1], Quality.HIGH).get_shader_parameter("anisotropic")),
@@ -71,3 +72,22 @@ func check_soft_roots(mode: int) -> void:
 	var curly := Library.material("rl_hair_clump", "female", "curly_twin_buns", Quality.HIGH)
 	check(curly.shader.code.begins_with("#define RL_SOFT_ROOTS\n"), "existing curly hair keeps its soft-root shader")
 	check(not bool(curly.get_shader_parameter("soft_root_coverage")), "existing curly asset does not acquire new colour semantics")
+
+func check_paint_flatness(mode: int) -> void:
+	var cases: Array = [[0, 0.0], [.15, .15], [1, 1.0], [null, null],
+		[true, null], ["0.15", null], [-.01, null], [1.01, null], [NAN, null]]
+	for index: int in cases.size():
+		var style := "fixture_paint_%d" % index
+		var materials: Array = []
+		for name: String in ["rl_hair_clump", "rl_hair_card", "rl_beard"]:
+			materials.append({"name": name, "extras": {"texture": "hair_clump.png",
+				"paintFlatness": cases[index][0]}})
+		Library._documents[Library.hair_path(style)] = {"materials": materials}
+		Library._documents[Library.beard_path(style)] = {"materials": materials}
+		for name: String in ["rl_hair_clump", "rl_hair_card", "rl_beard"]:
+			for quality: int in [Quality.LOW, Quality.MEDIUM, Quality.HIGH]:
+				var material := Library.material(name, "female", style, quality)
+				var actual: Variant = material.get_shader_parameter("flatness")
+				var retained_default := actual == null and material.shader.code.contains("uniform float flatness : hint_range(0.0, 1.0) = 0.65;")
+				check(retained_default if cases[index][1] == null else actual != null and is_equal_approx(float(actual), float(cases[index][1])),
+					"paint detail metadata %d %s quality%d mode%d is bounded and material-local" % [index, name, quality, mode])

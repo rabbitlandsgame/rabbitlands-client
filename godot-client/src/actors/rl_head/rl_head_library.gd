@@ -1035,6 +1035,12 @@ static func material(material_name: String, sex: String, style: String, quality:
 				result.set_shader_parameter("flatness", 0.65)
 				result.set_shader_parameter("root_darkening", 0.15)
 				result.set_shader_parameter("primary_strength", 0.003)
+			# Reference paint can retain fine close-cut detail without changing
+			# the shared shader default or any older material's response.
+			var paint_flatness: Variant = extras.get("paintFlatness")
+			if typeof(paint_flatness) in [TYPE_INT, TYPE_FLOAT] and is_finite(float(paint_flatness)) \
+					and float(paint_flatness) >= 0.0 and float(paint_flatness) <= 1.0:
+				result.set_shader_parameter("flatness", float(paint_flatness))
 			# Beards draw at the shader's beard_gain, so they light like the hair.
 			result.set_shader_parameter("beard", material_name == "rl_beard")
 			result.set_shader_parameter("alpha_scissor", 0.5 if material_name == "rl_hair_clump" else 0.35)

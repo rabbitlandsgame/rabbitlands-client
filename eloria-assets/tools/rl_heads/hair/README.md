@@ -150,6 +150,13 @@ clump capability is explicit. The coverage scanner applies the same interpolated
 R multiplier before its existing conservative alpha test. Existing asset names,
 groom fields and default rendering remain unchanged.
 
+A new hair material may also declare `paintFlatness` in0..1 to control how much
+of its painted luminance is flattened toward the local mean. Lower values
+retain close-fibre detail. The ordinary material uniform already exists; no
+instance-uniform or save field is added. Omitted or invalid values preserve
+the original shader/material default. Qualify the actual texture at the chosen
+value before opting in, including grey and custom hair colours.
+
 ### Scalp coverage
 
 `validate.py` runs `coverage.py` on every hair module (skip with `--no-coverage`).
