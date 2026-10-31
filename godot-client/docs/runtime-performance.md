@@ -412,10 +412,10 @@ background and dense dots; the third pair was also inspected visually.
 
 These remain source-project screening runs over extracted release imports,
 based on `4b2bad69f`, with only Main differing between variants and the new
-helper present in both. Later remote cape changes were integrated separately
-and checked headlessly. Actor-cache integration passed 1,181 checks and detail
-memoization passed 81, with existing map projection, background, marker,
-presence and section-privacy regressions also passing. A separate affine
+helper present in both. Later remote cape and Lantern Mine changes were
+integrated separately and checked headlessly. Actor-cache integration passed
+1,181 checks and detail memoization passed 81, with existing map projection,
+background, marker, presence and section-privacy regressions also passing. A separate affine
 projection experiment was discarded: the small microbenchmark saving changed
 exact edge clipping. No shader warming or loading policy changed.
 

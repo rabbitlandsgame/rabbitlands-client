@@ -2551,6 +2551,258 @@
       "warningAssessment": "UID text-path fallbacks and unequal-anchor UI layout warnings are inherited test/import environment warnings; no unrelated scene changes made. This is not an all-warnings-clean claim.",
       "performanceScope": "Compatibility checks only on merged cape base 93e0535e49bf8927f66f085a9600e49ae0f2a247; prior physical performance evidence remains scoped to its frozen 4b benchmark build.",
       "sourceSnapshotsVerifiedAfterTests": true
+    },
+    "finalDevelopIntegration": {
+      "commit": "90d338505660f99de3a7be66381dc1d9601e5339",
+      "scope": "Final headless integration only; no GPU, map GLB import or new mine bitmap visual qualification",
+      "project": "artifacts/minimap-detail-check/app",
+      "copied": [
+        {
+          "source": "godot-client/src/app/main.gd",
+          "ownedPath": "app/src/app/main.gd",
+          "sha256": "9b073d82cd5932d45de4492b3a02187a3c6dde58e7635bcd014579352a6e96b3"
+        },
+        {
+          "source": "godot-client/src/world/lantern_mine_lighting.gd",
+          "ownedPath": "app/src/world/lantern_mine_lighting.gd",
+          "sha256": "e330eb5cfa05ff9fd90a0dc29d2e5e0c3a9ba1fdf71d1bfe8daea19133d3a2b7"
+        },
+        {
+          "source": "godot-client/data/campaign/rescue_scenes.json",
+          "ownedPath": "app/data/campaign/rescue_scenes.json",
+          "sha256": "ae364687f40aea6849a36cfb07da02664adc87b3855a5d45d08fe78a5c0993f5"
+        },
+        {
+          "source": "godot-client/data/maps/map-backgrounds.json",
+          "ownedPath": "app/data/maps/map-backgrounds.json",
+          "sha256": "2323ae3660669d1fbd6f36cd012ef97eb283873e50fc0a2c370e04caa19dc6fc"
+        },
+        {
+          "source": "godot-client/data/world/objects.json",
+          "ownedPath": "app/data/world/objects.json",
+          "sha256": "94e7ad5f822f1f53a93349ca5ef483dcf8b310bcb286defe2cf9679781831cc6"
+        },
+        {
+          "source": "godot-client/data/world/underground-scenery.json",
+          "ownedPath": "app/data/world/underground-scenery.json",
+          "sha256": "79e9a30030c8d7806701c9be82ec2a080fdd8110199d4a96603b42454ae99805"
+        },
+        {
+          "source": "godot-client/tests/test_lantern_mine_lighting.gd",
+          "ownedPath": "app/tests/test_lantern_mine_lighting.gd",
+          "sha256": "b1487d4ca849eb91e5c30368e843992e54e92f6b3355b626ea9fd67787c21963"
+        },
+        {
+          "source": "eloria-assets/maps/continent-v2/landfall_insides/client/world.json",
+          "ownedPath": "eloria-assets/maps/continent-v2/landfall_insides/client/world.json",
+          "sha256": "b6900bef430c063ebd90f0e374fa45630bee3fdbcf6fd0ddd188503d594e706f"
+        }
+      ],
+      "physicalStageModified": false,
+      "mineAssets": "Owned current world.json overlay; other resources remain read-only links. No 27MB world GLB or new mine images copied/loaded by these selected tests.",
+      "processesEnded": true,
+      "tests": [
+        {
+          "test": "test_map_actor_marker_cache",
+          "exit": 0,
+          "seconds": 12.677,
+          "errors": 0,
+          "pass": true,
+          "noScriptOrLoadErrors": true,
+          "warningCount": 4,
+          "warningCategories": {
+            "uid_text_path_fallback": 3,
+            "non_equal_anchors": 1
+          },
+          "summary": [
+            "map actor marker cache: 1181 checks, 0 failures"
+          ],
+          "command": [
+            "artifacts/linux-diagnosis/engine/Godot_v4.7.2-stable_linux.x86_64",
+            "--headless",
+            "--path",
+            "artifacts/minimap-detail-check/app",
+            "--script",
+            "res://tests/test_map_actor_marker_cache.gd",
+            "--audio-driver",
+            "Dummy",
+            "--log-file",
+            "artifacts/minimap-detail-check/final-integration/test_map_actor_marker_cache.engine.log"
+          ],
+          "environmentOverrides": {
+            "XDG_DATA_HOME": "artifacts/minimap-detail-check/final-userdata/test_map_actor_marker_cache",
+            "XDG_CONFIG_HOME": "artifacts/minimap-detail-check/final-config/test_map_actor_marker_cache",
+            "XDG_CACHE_HOME": "artifacts/minimap-detail-check/final-cache/test_map_actor_marker_cache"
+          },
+          "log": "artifacts/minimap-detail-check/final-integration/test_map_actor_marker_cache.log",
+          "logSha256": "67989cf1b0af4b59e5539b9a944c5b4ca213f53737df10d4e794d2c4a442ba31"
+        },
+        {
+          "test": "test_map_detail_refresh_cache",
+          "exit": 0,
+          "seconds": 8.683,
+          "errors": 0,
+          "pass": true,
+          "noScriptOrLoadErrors": true,
+          "warningCount": 0,
+          "warningCategories": {},
+          "summary": [
+            "Map detail refresh cache: 81 checks, 0 failures"
+          ],
+          "command": [
+            "artifacts/linux-diagnosis/engine/Godot_v4.7.2-stable_linux.x86_64",
+            "--headless",
+            "--path",
+            "artifacts/minimap-detail-check/app",
+            "--script",
+            "res://tests/test_map_detail_refresh_cache.gd",
+            "--audio-driver",
+            "Dummy",
+            "--log-file",
+            "artifacts/minimap-detail-check/final-integration/test_map_detail_refresh_cache.engine.log"
+          ],
+          "environmentOverrides": {
+            "XDG_DATA_HOME": "artifacts/minimap-detail-check/final-userdata/test_map_detail_refresh_cache",
+            "XDG_CONFIG_HOME": "artifacts/minimap-detail-check/final-config/test_map_detail_refresh_cache",
+            "XDG_CACHE_HOME": "artifacts/minimap-detail-check/final-cache/test_map_detail_refresh_cache"
+          },
+          "log": "artifacts/minimap-detail-check/final-integration/test_map_detail_refresh_cache.log",
+          "logSha256": "f0f592e84da326058ac8252460bfa2f30e7a9a16f0db084f47af67b69c6a5a75"
+        },
+        {
+          "test": "test_lantern_mine_lighting",
+          "exit": 0,
+          "seconds": 3.827,
+          "errors": 0,
+          "pass": true,
+          "noScriptOrLoadErrors": true,
+          "warningCount": 0,
+          "warningCategories": {},
+          "summary": [
+            "PASS: a cutaway focus in Pinebrow cannot activate Lantern Mine's profile",
+            "PASS: invalid or ended cinematic overrides fail back to normal gameplay",
+            "PASS: map exit cleans up safely even when native marker nodes have already been freed",
+            "Lantern Mine lighting: 25 checks; 0 failures"
+          ],
+          "command": [
+            "artifacts/linux-diagnosis/engine/Godot_v4.7.2-stable_linux.x86_64",
+            "--headless",
+            "--path",
+            "artifacts/minimap-detail-check/app",
+            "--script",
+            "res://tests/test_lantern_mine_lighting.gd",
+            "--audio-driver",
+            "Dummy",
+            "--log-file",
+            "artifacts/minimap-detail-check/final-integration/test_lantern_mine_lighting.engine.log"
+          ],
+          "environmentOverrides": {
+            "XDG_DATA_HOME": "artifacts/minimap-detail-check/final-userdata/test_lantern_mine_lighting",
+            "XDG_CONFIG_HOME": "artifacts/minimap-detail-check/final-config/test_lantern_mine_lighting",
+            "XDG_CACHE_HOME": "artifacts/minimap-detail-check/final-cache/test_lantern_mine_lighting"
+          },
+          "log": "artifacts/minimap-detail-check/final-integration/test_lantern_mine_lighting.log",
+          "logSha256": "f9170814759ec1b656d37e02ee14e9efb455aef930e53b93b330f6104aaa48e2"
+        },
+        {
+          "test": "test_map_background_2d",
+          "exit": 0,
+          "seconds": 1.029,
+          "errors": 0,
+          "pass": true,
+          "noScriptOrLoadErrors": true,
+          "warningCount": 0,
+          "warningCategories": {},
+          "summary": [
+            "Map background 2D: 92 checks, 0 failures"
+          ],
+          "command": [
+            "artifacts/linux-diagnosis/engine/Godot_v4.7.2-stable_linux.x86_64",
+            "--headless",
+            "--path",
+            "artifacts/minimap-detail-check/app",
+            "--script",
+            "res://tests/test_map_background_2d.gd",
+            "--audio-driver",
+            "Dummy",
+            "--log-file",
+            "artifacts/minimap-detail-check/final-integration/test_map_background_2d.engine.log"
+          ],
+          "environmentOverrides": {
+            "XDG_DATA_HOME": "artifacts/minimap-detail-check/final-userdata/test_map_background_2d",
+            "XDG_CONFIG_HOME": "artifacts/minimap-detail-check/final-config/test_map_background_2d",
+            "XDG_CACHE_HOME": "artifacts/minimap-detail-check/final-cache/test_map_background_2d"
+          },
+          "log": "artifacts/minimap-detail-check/final-integration/test_map_background_2d.log",
+          "logSha256": "eaf868bc439c59b84615176915ef5be083970a216c2da014b01cd5b004b81d79"
+        },
+        {
+          "test": "test_map_picture_handoff",
+          "exit": 0,
+          "seconds": 13.442,
+          "errors": 0,
+          "pass": true,
+          "noScriptOrLoadErrors": true,
+          "warningCount": 4,
+          "warningCategories": {
+            "uid_text_path_fallback": 3,
+            "non_equal_anchors": 1
+          },
+          "summary": [
+            "PASS: a handoff leaves no obsolete picture geometry in either world",
+            "PASS: one active picture and one picture per other region remain after cleanup",
+            "PASS: returning across the seam restores the original picture frame",
+            "PASS: removing the map picture also removes all neighboring pictures"
+          ],
+          "command": [
+            "artifacts/linux-diagnosis/engine/Godot_v4.7.2-stable_linux.x86_64",
+            "--headless",
+            "--path",
+            "artifacts/minimap-detail-check/app",
+            "--script",
+            "res://tests/test_map_picture_handoff.gd",
+            "--audio-driver",
+            "Dummy",
+            "--log-file",
+            "artifacts/minimap-detail-check/final-integration/test_map_picture_handoff.engine.log"
+          ],
+          "environmentOverrides": {
+            "XDG_DATA_HOME": "artifacts/minimap-detail-check/final-userdata/test_map_picture_handoff",
+            "XDG_CONFIG_HOME": "artifacts/minimap-detail-check/final-config/test_map_picture_handoff",
+            "XDG_CACHE_HOME": "artifacts/minimap-detail-check/final-cache/test_map_picture_handoff"
+          },
+          "log": "artifacts/minimap-detail-check/final-integration/test_map_picture_handoff.log",
+          "logSha256": "b481c41e2f0104b11b1ea3abd7eb13802ce0cae76b8061af0616b6e6372255a0"
+        }
+      ],
+      "allPassed": true,
+      "noScriptOrLoadErrors": true,
+      "warningCategories": {
+        "uid_text_path_fallback": 6,
+        "non_equal_anchors": 2
+      },
+      "warningExamples": {
+        "uid_text_path_fallback": [
+          "WARNING: res://src/app/main.tscn:3 - ext_resource, invalid UID: uid://dbhj8rl6i8dyi - using text path instead: res://src/app/main.gd",
+          "WARNING: res://src/app/main.tscn:4 - ext_resource, invalid UID: uid://dbpi40yl6pryr - using text path instead: res://src/camera/isometric_camera_controller.gd"
+        ],
+        "non_equal_anchors": [
+          "WARNING: Nodes with non-equal opposite anchors will have their size overridden after _ready(). "
+        ]
+      },
+      "warningAssessment": "UID text-path fallback and unequal-anchor UI layout warnings are inherited test/import environment warnings. This is not an all-warnings-clean claim.",
+      "sourceFilesAtReceipt": {
+        "src/app/main.gd": "9b073d82cd5932d45de4492b3a02187a3c6dde58e7635bcd014579352a6e96b3",
+        "src/ui/map_actor_marker_cache.gd": "cefb14359b1044e12dc4113f6804f3245712faafbece4e0c20d79b9744f62ab1",
+        "src/world/lantern_mine_lighting.gd": "e330eb5cfa05ff9fd90a0dc29d2e5e0c3a9ba1fdf71d1bfe8daea19133d3a2b7",
+        "tests/test_map_actor_marker_cache.gd": "bf44fcddb5e2a2d05e50f3f10caaca7c9107e1881600006a107d9ad3e2684fc0",
+        "tests/test_map_detail_refresh_cache.gd": "61cbef2801e97a1210b1355b69de7a791d846808a62df8b263ea30e808ab5579",
+        "tests/test_lantern_mine_lighting.gd": "b1487d4ca849eb91e5c30368e843992e54e92f6b3355b626ea9fd67787c21963",
+        "tests/test_map_background_2d.gd": "be414caa001f8a4fe6e24032f6385c85a9f135c5bf5f9e1603e341c29fb1484f",
+        "tests/test_map_picture_handoff.gd": "e015737389f22bf2c00d785c4300db270a4fca9da2d8c30c5989a35697b3bcec"
+      },
+      "sourceSnapshotsVerifiedAfterTests": true,
+      "performanceScope": "Headless final integration only; physical performance evidence remains bound to frozen4b benchmark build."
     }
   },
   "diagnosticAttribution": {
@@ -2801,6 +3053,7 @@
     "artifacts/private-minimap-ab/analyze_ab.py": "50584ddb4d9526a58dd55967d493749f00115d995e1356423b7b745427c9eeed",
     "artifacts/private-minimap-ab/assemble_qa.py": "d18cc1e0d5134e90a1779eebb3d5845a00795b3e3c2c59313622ace65e4fbe51",
     "artifacts/gauntlet-trials/undead500-minimap-observer-v4/undead500-minimap-observer-v4-all-windowed-live-20261031T110723-91217a40.json": "d381c097af98670de4a20820fd99cbcd2e1c8de61a20b9999a23ac3b99090022",
-    "artifacts/projection-microbench/receipt.json": "f9056a2def66303243009231f5aafa7b845da4afd03945d63ad8c3a124914399"
+    "artifacts/projection-microbench/receipt.json": "f9056a2def66303243009231f5aafa7b845da4afd03945d63ad8c3a124914399",
+    "artifacts/minimap-detail-check/final-integration/receipt.json": "370d0f4e8f4cb0bad567063da50ec0d176752737e112da5d6d24705de52323ef"
   }
 }
