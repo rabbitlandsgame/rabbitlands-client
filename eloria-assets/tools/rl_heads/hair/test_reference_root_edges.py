@@ -33,4 +33,14 @@ class RootProfile(unittest.TestCase):
         np.testing.assert_array_equal(self.colours([9,10,11],{'root_sector_degrees':115})[:,0],1)
         np.testing.assert_array_equal(self.colours([9,10,11],{'root_sector_degrees':115,'root_band_degrees':12})[:,0],0)
 
+    def test_cap_own_boundary_fade_requires_opt_in(self):
+        P=np.array([[0,.010,0],[.004,.010,0],[.004,.014,0],[0,.014,0],[.002,.012,0]])
+        T=np.array([[0,1,4],[1,2,4],[2,3,4],[3,0,4]])
+        args=(SimpleNamespace(C=np.array([0.,-1.,0.])),SimpleNamespace(hairline=lambda lon:np.zeros_like(lon)),P,T,np.ones((5,4)),{'exterior':[0,0],'shell':[0,5],'detail':[5,5]},np.zeros(5))
+        old=root_colours(*args,{'soft_hairline_mm':2})
+        new=root_colours(*args,{'soft_hairline_mm':2,'soft_cap_edge_mm':2})
+        np.testing.assert_array_equal(old[:,0],1)
+        np.testing.assert_array_equal(new[:,0],[0,0,0,0,1])
+        np.testing.assert_array_equal(old[:,1:],new[:,1:])
+
 if __name__=='__main__':unittest.main()

@@ -22,4 +22,12 @@ def root_colours(head,scalp,P,T,COL,ranges,distance,spec):
     if len(border):
         separation=cKDTree(P[border]).query(P[:core_end])[0]
         COL[np.flatnonzero(eligible),0]=np.clip(separation[eligible]/(spec['soft_hairline_mm']/1000),0,1)
+    cap_softness=float(spec.get('soft_cap_edge_mm',0))
+    if cap_softness:
+        assert 0<cap_softness<=3 and 'shell' in ranges
+        s0,s1=ranges['shell'];tri=T[(T>=s0).all(1)&(T<s1).all(1)]-s0
+        boundary=geometric_boundary(P[s0:s1],tri)+s0
+        assert len(boundary),'A soft cap requires an actual open scalp boundary'
+        distance=cKDTree(P[boundary]).query(P[s0:s1])[0]
+        COL[s0:s1,0]=np.minimum(COL[s0:s1,0],np.clip(distance/(cap_softness/1000),0,1))
     return COL
