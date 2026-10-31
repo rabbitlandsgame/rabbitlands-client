@@ -162,8 +162,33 @@ func run() -> void:
 	check_rescue_readiness()
 	check_manual_rescue_dialogue()
 	check_carry_and_native_handoff()
+	check_departed_corpse()
 	print("Rescue scene checks: ", checks, "; failures: ", failures)
 	quit(1 if failures else 0)
+
+func check_departed_corpse() -> void:
+	for time: float in [10.0, 30.0]:
+		var scene := Scene.new()
+		root.add_child(scene)
+		scene.set_auto_dialogue(true, false)
+		var rig := Rig.new()
+		root.add_child(rig)
+		rig.camera = Camera3D.new(); rig.add_child(rig.camera)
+		var bindings := {}; var nodes := {}; var id := 1
+		for role: String in ["mother", "daughter", "goblin_boss", "protagonist"]:
+			var actor := Actor.new(); root.add_child(actor)
+			bindings[role] = id; nodes[id] = actor; id += 1
+		var snapshot := {"active":true,"kind":"rescue","run_id":"corpse-interest","map":"landfall_insides",
+			"scene":{"id":"measure.rescue.captive","token":"corpse-interest:captive","actors":bindings}}
+		scene.update(0.0,snapshot,rig,nodes,bindings.protagonist,"landfall_insides",true)
+		expect(scene.playing,"the captive scene starts with all four real bodies")
+		scene.elapsed = time
+		nodes[bindings.goblin_boss].free(); nodes.erase(bindings.goblin_boss)
+		scene.update(0.1,snapshot,rig,nodes,bindings.protagonist,"landfall_insides",true)
+		expect(scene.playing == (time >= 28.0),
+			"corpse interest loss is tolerated only after its final shot, at " + str(time))
+		scene.cancel("test_complete"); scene.queue_free(); rig.queue_free()
+		for actor: Actor in nodes.values(): actor.queue_free()
 
 func check_rescue_readiness() -> void:
 	var scene := Scene.new()

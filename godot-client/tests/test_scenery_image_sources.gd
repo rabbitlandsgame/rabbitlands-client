@@ -8,6 +8,7 @@ const Vram := preload("res://src/world/vram_textures.gd")
 const Graphics := preload("res://src/world/graphics_options.gd")
 const Pool := preload("res://src/world/external_texture_pool.gd")
 const Quantization := preload("res://src/world/gltf_quantization.gd")
+const Footprint := preload("res://src/world/texture_footprint.gd")
 var failures := 0
 var checks := 0
 var fixture := ""
@@ -144,7 +145,45 @@ func run() -> void:
 		"real import handles every image before any fallback readback")
 	check(raw_state.get_json().images[0].uri == "shared.png" and raw_state.get_images()[0] != null and raw_state.get_images()[0].get_width() == 64,
 		"real import restores URI and replaces pooled placeholder")
+	check_footprint_policy()
 	DirAccess.remove_absolute(fixture.path_join("shared.png"))
 	DirAccess.remove_absolute(fixture)
 	print("SCENERY IMAGE SOURCES: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures else 0)
+
+func check_footprint_policy() -> void:
+	var source_root := "res://tests/fixtures/vram/shared-assets"
+	var sha := "90c51de41c0f4fffd8a6c225f67472eb77d262a183e2fcae827383d3e10d32f4"
+	var source := FileAccess.get_file_as_bytes(source_root.path_join(sha + ".jpg"))
+	var index: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(source_root.path_join("vram/index.json")))
+	var entry: Dictionary = index.images[sha]
+	var base := fixture.path_join("footprint")
+	var uri := "pixels/" + sha + ".jpg"
+	write(base.path_join(uri),source)
+	write(base.path_join("vram/" + str(entry.file)),FileAccess.get_file_as_bytes(source_root.path_join("vram/" + str(entry.file))))
+	write(base.path_join("vram/index.json"),JSON.stringify({"schema":1,"recipeVersion":1,"images":{sha:entry}}).to_utf8_buffer())
+	var descriptor := {"uri":uri,"extras":{Vram.POLICY_DIRECTORY_EXTRA:".",Source.ELIGIBLE_EXTRA:true}}
+	var document := {"asset":{"version":"2.0"},"images":[descriptor],"textures":[{"source":0}],
+		"materials":[{"pbrMetallicRoughness":{"baseColorTexture":{"index":0}}}],
+		"extras":{Source.KEY:{"schema":Source.SCHEMA,"mipPolicy":"full","resources":{uri:sha},"imagePolicies":{uri:["."]}}}}
+	var glb := base.path_join("probe.glb")
+	var previous := OS.get_environment(Vram.ENVIRONMENT)
+	OS.set_environment(Vram.ENVIRONMENT,"force"); Vram.reconfigure()
+	write(glb,glb_bytes(document,PackedByteArray()))
+	var seen := {}
+	check(Footprint.glb_texture_bytes(glb,seen) == int(entry.gpuBytes),
+		"preload budget reads a verified scenery sidecar beside its GLB, not beside the shared pixels")
+	check(Footprint.glb_texture_bytes(glb,seen) == 0,"the same original texture policy is counted once")
+	var decoded := Footprint.texture_bytes(Footprint.header_size(source))
+	descriptor.extras[Source.ELIGIBLE_EXTRA] = false
+	write(glb,glb_bytes(document,PackedByteArray()))
+	check(Footprint.glb_texture_bytes(glb) == decoded,"a compression-excluded scenery image keeps its decoded budget")
+	descriptor.extras[Source.ELIGIBLE_EXTRA] = true
+	write(glb,glb_bytes(document,PackedByteArray()))
+	var changed := Image.create(64,64,false,Image.FORMAT_RGB8).save_png_to_buffer()
+	write(base.path_join(uri),changed)
+	check(Footprint.glb_texture_bytes(glb) == Footprint.texture_bytes(Vector2i(64,64)),
+		"changed source bytes cannot borrow a smaller sidecar budget from stale metadata")
+	OS.set_environment(Vram.ENVIRONMENT,previous); Vram.reconfigure()
+	for path: String in [glb,base.path_join(uri),base.path_join("vram/index.json"),base.path_join("vram/" + str(entry.file)),
+		base.path_join("pixels"),base.path_join("vram"),base]: DirAccess.remove_absolute(path)
