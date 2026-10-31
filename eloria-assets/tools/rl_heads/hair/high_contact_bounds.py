@@ -8,12 +8,13 @@ import hashlib
 
 
 class ContactHead:
-    def __init__(self,head,margin_mm=3.2,geometric_sign=False,horizontal_slice_proof=False):
+    def __init__(self,head,margin_mm=3.2,geometric_sign=False,horizontal_slice_proof=False,closed_section_proof=False):
         assert hasattr(head,'delta') and hasattr(head,'P') and hasattr(head,'T')
         assert 0<margin_mm<=20
         self.head=head;self.margin=float(margin_mm)/1000
         self.geometric_sign=bool(geometric_sign)
         self.horizontal_slice_proof=bool(horizontal_slice_proof)
+        self.closed_section_proof=bool(closed_section_proof)
         self.statistics={'exact_queries':0,'outside_box_proofs':0,'calls':0}
 
     def __getattr__(self,name):return getattr(self.head,name)
@@ -47,6 +48,19 @@ class ContactHead:
                 slice_proved=cache_owner._rl_high_slice.outside(X[negative])
                 distance[negative[slice_proved]]=abs(distance[negative[slice_proved]])
                 self.statistics['horizontal_slice_sign_proofs']=self.statistics.get('horizontal_slice_sign_proofs',0)+int(slice_proved.sum())
+            negative=np.flatnonzero(query&(distance<0))
+            if self.closed_section_proof and len(negative):
+                import trimesh
+                from closed_section_outside import ClosedSectionOutside
+                fullT=np.asarray(self.head.T)
+                signature=hashlib.sha256(P.tobytes()+fullT.tobytes()).digest()
+                cache_owner=mesh if mesh is not None else self.head
+                if getattr(cache_owner,'_rl_high_contour_key',None)!=signature:
+                    cache_owner._rl_high_contour=ClosedSectionOutside(trimesh.Trimesh(P,fullT,process=False))
+                    cache_owner._rl_high_contour_key=signature
+                proved_outside=cache_owner._rl_high_contour.outside(X[negative])
+                distance[negative[proved_outside]]=abs(distance[negative[proved_outside]])
+                self.statistics['closed_section_sign_proofs']=self.statistics.get('closed_section_sign_proofs',0)+int(proved_outside.sum())
         self.statistics['calls']+=1;self.statistics['exact_queries']+=int(query.sum())
         self.statistics['outside_box_proofs']+=int(proved.sum())
         return (distance,cp,normal,rim) if with_rim else (distance,cp,normal)
