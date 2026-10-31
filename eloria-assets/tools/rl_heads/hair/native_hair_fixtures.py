@@ -115,8 +115,18 @@ class EvaluatedNativeSurface(NativeHeadSurface):
         # A complete three-dimensional actor cannot enclose a point outside
         # its bounds. Retain the original sign test within that envelope and
         # for planar authoring fixtures; the geometric distance never changes.
-        outside=self.proven_outside(points)
-        distance[outside] = np.abs(distance[outside])
+        if self.horizontal_slice_proof:
+            # An outside proof can change only a negative sign. Avoid building
+            # horizontal contours for already positive probes; include -0.0
+            # so the optimized path preserves the reference result bitwise.
+            negative=np.flatnonzero(np.signbit(distance))
+            if len(negative):
+                outside=self.proven_outside(np.asarray(points)[negative])
+                corrected=negative[outside]
+                distance[corrected]=np.abs(distance[corrected])
+        else:
+            outside=self.proven_outside(points)
+            distance[outside] = np.abs(distance[outside])
         return distance, closest, normal
 
 

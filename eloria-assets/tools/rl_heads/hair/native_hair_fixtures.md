@@ -30,3 +30,8 @@ client appearance and motion rendering, and equipment checks remain separate.
 Native runtime mapping keeps hair on the fixed skull; High identity targets
 remain active on the separate High head and its hair.
 Keep fixture manifests, original captures and numeric evidence outside Git.
+
+With the optional horizontal outside proof, only negative signed rows enter
+the proof query. Positive distances and all closest-point/normal results stay
+exact. Negative zero is included to preserve the reference sign bit. The
+default bounds-only path and complete-fixture verification remain unchanged.
