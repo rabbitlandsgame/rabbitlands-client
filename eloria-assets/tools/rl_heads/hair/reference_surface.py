@@ -22,6 +22,14 @@ from build_hair import secure_groom
 
 def digest(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
+def extraction_lower_y(center_y,requested=None):
+    """Keep legacy bounds unless a hanging-hair profile explicitly opts in."""
+    if requested is None:return float(center_y)-.34
+    value=float(requested)
+    if not np.isfinite(value) or not float(center_y)-1.2<=value<=float(center_y)-.1:
+        raise ValueError('Explicit hair minimum Y must be finite and 0.1..1.2m below the head centre')
+    return value
+
 def extract(args):
     out=Path(args.out);out.mkdir(parents=True,exist_ok=True)
     fit=json.loads(Path(args.fit).read_text());ref=RefMesh(fit['reference'])
@@ -35,9 +43,12 @@ def extract(args):
     surface=model.surface(model.morph(v=values))
     labels,_,_,info=segment.classify(cloud,sim(X),sim.rot(ref.fn),model,surface,final=True)
     is_beard=getattr(args,'kind','hair')=='beard'
+    requested_lower_y=getattr(args,'hair_min_y',None)
+    if is_beard and requested_lower_y is not None:raise ValueError('hair_min_y is only valid for scalp hair')
     keep=labels==(segment.BEARD if is_beard else segment.HAIR)
     # Clothing and incidental islands are outside the hair's head zone.
-    center=sim(X);keep &= (center[:,1]>model.C[1]-.34)
+    center=sim(X);lower_y=extraction_lower_y(model.C[1],requested_lower_y)
+    keep &= (center[:,1]>lower_y)
     # Colour segmentation can call painted eyebrows "hair" on an off-model
     # face. Retain scalp-connected surfaces, with a close rear-knot exception.
     from scipy.sparse import coo_matrix
@@ -79,6 +90,8 @@ def extract(args):
              'hair_triangles':int(keep.sum()),'source_triangles':len(ref.F),'segmentation':info['counts'],
              'discarded_incidental_hair_triangles':int(len(candidate)-keep.sum()),
              'method':'Final fitted-head hair segmentation, scalp component cleanup; retain original positions/UVs/painted strand detail'}
+    if requested_lower_y is not None:
+        receipt.update(hair_lower_y=lower_y,hair_lower_bound_mode='explicit profile bound; hair classification and scalp connectivity retained')
     (out/'source.json').write_text(json.dumps(receipt,indent=2));print(json.dumps(receipt),flush=True)
 
 def roots(head,scalp,P):
@@ -337,7 +350,7 @@ def build(args,head_factory=None):
 
 def main():
     ap=argparse.ArgumentParser();sub=ap.add_subparsers(dest='cmd',required=True)
-    p=sub.add_parser('extract');p.add_argument('--fit',required=True);p.add_argument('--out',required=True);p.add_argument('--kind',choices=['hair','beard'],default='hair')
+    p=sub.add_parser('extract');p.add_argument('--fit',required=True);p.add_argument('--out',required=True);p.add_argument('--kind',choices=['hair','beard'],default='hair');p.add_argument('--hair-min-y',type=float,help='Explicit world-space lower Y bound for scalp-connected hanging hair; default head centre minus 0.34m')
     p=sub.add_parser('build');p.add_argument('--fit',required=True);p.add_argument('--source',required=True);p.add_argument('--profile',required=True);p.add_argument('--out',required=True);p.add_argument('--detail');p.add_argument('--check',action='store_true')
     args=ap.parse_args();{'extract':extract,'build':build}[args.cmd](args)
 if __name__=='__main__':main()
