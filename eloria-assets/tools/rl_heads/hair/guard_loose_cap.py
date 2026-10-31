@@ -44,7 +44,25 @@ def pin_nape_height(head,P,T,hairline):
     return Q,{'enabled':True,'nape_y':ny,'selected_boundary_vertices':len(selected),'changed_vertices':int((shift>0).sum()),'maximum_shift_mm':float(shift.max()*1000),'outside_positions_exact':True}
 
 
-def repair(source,out,extra_controls=None,margin_mm=2.8,max_shift_mm=14,profile_path=None,pin_nape=False):
+def cap_edge_override(spec,value):
+    """Apply an explicit bounded footprint change to a copied profile only."""
+    if value is None:return spec
+    assert spec is not None,'A cap edge override requires the original validated profile'
+    values=np.asarray(value,float)
+    assert np.isfinite(values).all(),'Cap edge override must be finite'
+    if values.ndim==0:
+        assert abs(float(values))<=8
+        value=float(values)
+    else:
+        assert values.ndim==2 and values.shape[1]==2 and len(values)>=2
+        assert values[0,0]==-180 and values[-1,0]==180 and (np.diff(values[:,0])>0).all()
+        assert values[0,1]==values[-1,1] and (abs(values[:,1])<=8).all()
+        value=values.tolist()
+    result=copy.deepcopy(spec);result['shell']['edge_inset']=value
+    return result
+
+
+def repair(source,out,extra_controls=None,margin_mm=2.8,max_shift_mm=14,profile_path=None,pin_nape=False,edge_inset_override=None):
     source,out=Path(source),Path(out)
     assert source.name==out.name and source.resolve()!=out.resolve()
     assert not out.exists() and not out.with_suffix('.png').exists()
@@ -54,6 +72,7 @@ def repair(source,out,extra_controls=None,margin_mm=2.8,max_shift_mm=14,profile_
     ids=head.id_names();combos=assemble.default_combos(ids)
     spec=profile(profile_path) if profile_path else None
     if spec:assert spec['name']==meta['style'] and sha(profile_path)==meta['source']['profile_sha256']
+    spec=cap_edge_override(spec,edge_inset_override)
     if extra_controls:
         assert isinstance(extra_controls,dict)
         extra={}
@@ -107,7 +126,7 @@ def repair(source,out,extra_controls=None,margin_mm=2.8,max_shift_mm=14,profile_
                     pr['targets'].append({key:writer.sparse_vec3(value,eps=0) for key,value in target.items()})
             records.append({'mesh':mesh['name'],'cap_vertices':e-s,'rebuilt_from_profile_without_identity_envelope':bool(spec),'nape_boundary':nape,'total_cap_rebuild_shift_mm':float(np.linalg.norm(Q-P[s:e],axis=1).max()*1000),**proof})
     assert records
-    writer.g['asset']['extras']['rlHair']['rlCapSupport']={'sourceSHA256':sha(source),'toolSHA256':sha(__file__),'method':'local RL cap support; painted exterior and existing shapes retained'}
+    writer.g['asset']['extras']['rlHair']['rlCapSupport']={'sourceSHA256':sha(source),'toolSHA256':sha(__file__),'method':'local RL cap support; painted exterior and existing shapes retained','edgeInsetOverride':edge_inset_override}
     out.parent.mkdir(parents=True,exist_ok=True);writer.save(str(out));shutil.copy2(source.with_suffix('.png'),out.with_suffix('.png'))
     result,blob=rlglb.read(str(out));assert blob[:len(b)]==b
     for a,m in zip(g['meshes'],result['meshes']):
@@ -123,12 +142,12 @@ def repair(source,out,extra_controls=None,margin_mm=2.8,max_shift_mm=14,profile_
             else:assert old.get('targets')==new.get('targets')
             for key,index in old['attributes'].items():
                 if key not in ['POSITION','NORMAL'] and not (spec and key=='COLOR_0'):assert new['attributes'][key]==index
-    report={'source_sha256':sha(source),'output_sha256':sha(out),'tool_sha256':sha(__file__),'records':records,'old_blob_prefix_exact':True,'all_indices_uv_skin_accessors_exact':True,'all_original_target_accessors_exact':not bool(spec),'painted_exterior_positions_normals_and_targets_exact':True,'profile_sha256':sha(profile_path) if profile_path else None,'extra_controls':extra_controls or {},'qualified':False}
+    report={'source_sha256':sha(source),'output_sha256':sha(out),'tool_sha256':sha(__file__),'records':records,'old_blob_prefix_exact':True,'all_indices_uv_skin_accessors_exact':True,'all_original_target_accessors_exact':not bool(spec),'painted_exterior_positions_normals_and_targets_exact':True,'profile_sha256':sha(profile_path) if profile_path else None,'edge_inset_override':edge_inset_override,'extra_controls':extra_controls or {},'qualified':False}
     save_json(out.with_suffix('.rl-cap-support.json'),report);return report
 
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--source',required=True);p.add_argument('--out',required=True);p.add_argument('--extra-controls');p.add_argument('--margin-mm',type=float,default=2.8);p.add_argument('--max-shift-mm',type=float,default=14);p.add_argument('--rebuild-from-profile');p.add_argument('--pin-profile-nape',action='store_true')
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--source',required=True);p.add_argument('--out',required=True);p.add_argument('--extra-controls');p.add_argument('--margin-mm',type=float,default=2.8);p.add_argument('--max-shift-mm',type=float,default=14);p.add_argument('--rebuild-from-profile');p.add_argument('--pin-profile-nape',action='store_true');p.add_argument('--cap-edge-inset-json',type=json.loads)
     a=p.parse_args();controls=json.loads(Path(a.extra_controls).read_text()) if a.extra_controls else None
     assert not a.pin_profile_nape or a.rebuild_from_profile
-    report=repair(a.source,a.out,controls,a.margin_mm,a.max_shift_mm,a.rebuild_from_profile,a.pin_profile_nape);print('RL_CAP_SUPPORTED',report['output_sha256'],flush=True)
+    report=repair(a.source,a.out,controls,a.margin_mm,a.max_shift_mm,a.rebuild_from_profile,a.pin_profile_nape,a.cap_edge_inset_json);print('RL_CAP_SUPPORTED',report['output_sha256'],flush=True)

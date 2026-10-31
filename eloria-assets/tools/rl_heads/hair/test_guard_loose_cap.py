@@ -1,6 +1,24 @@
 import unittest
 import numpy as np
-from guard_loose_cap import pin_nape_height,cap_body_clearance
+from guard_loose_cap import pin_nape_height,cap_body_clearance,cap_edge_override
+
+
+class CapEdgeOverride(unittest.TestCase):
+    def test_default_is_exact_identity(self):
+        spec={'shell':{'edge_inset':-2}}
+        self.assertIs(cap_edge_override(spec,None),spec)
+    def test_periodic_local_override_preserves_original(self):
+        spec={'shell':{'edge_inset':-2,'pole':[180,62]},'hairline':{'noise':.2}}
+        table=[[-180,-2],[-110,-2],[-100,3],[-80,3],[-65,-2],[65,-2],[80,3],[100,3],[110,-2],[180,-2]]
+        result=cap_edge_override(spec,table)
+        self.assertEqual(spec['shell']['edge_inset'],-2)
+        self.assertEqual(result['shell']['edge_inset'],table)
+        self.assertEqual(result['hairline'],spec['hairline']);self.assertEqual(result['shell']['pole'],[180,62])
+    def test_invalid_or_unbounded_override_is_rejected(self):
+        spec={'shell':{'edge_inset':-2}}
+        for value in [9,float('nan'),[[-180,-2],[180,3]],[[-180,-2],[0,9],[180,-2]],[[180,-2],[-180,-2]]]:
+            with self.subTest(value=value),self.assertRaises(AssertionError):cap_edge_override(spec,value)
+        with self.assertRaises(AssertionError):cap_edge_override(None,2)
 
 
 class Head:

@@ -25,3 +25,13 @@ nape setting. Actual head/body seating and full coverage still decide acceptance
 Keep original assets and intermediate stages. The report records hashes,
 changed counts, displacements and preservation proofs; public asset metadata
 contains semantic methods and hashes only.
+
+## Explicit local cap footprint
+
+`repair(..., edge_inset_override=None)` retains the original profile footprint by
+default. An explicit scalar or periodic `[longitude, degrees]` table can rebuild
+only the cap edge within eight degrees of the source hairline. The original
+profile is still hash-validated and is never edited. Overrides are recorded in
+the asset and receipt; cap identity rebinding, surface/coverage checks and later
+Native fitting remain required. The command-line option is
+`--cap-edge-inset-json`. This changes no painted exterior or declared hairline.
