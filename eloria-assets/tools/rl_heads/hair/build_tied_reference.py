@@ -32,6 +32,9 @@ def parts_builder(stage,head,scalp,spec,lod):
     if spec.get('painted_backing',False):
         oldP,oldT=P,T;parts=[];offset=0;new_ranges={}
         for kind in ['exterior','backing','shell','detail']:
+            if ranges[kind][0]==ranges[kind][1]:
+                new_ranges[kind]=[offset,offset]
+                continue
             start,end=ranges[kind];mask=(T>=start).all(1)&(T<end).all(1);tri=T[mask]-start
             points=P[start:end];normals=N[start:end];colors=COL[start:end];uv=UV[start:end]
             if kind=='backing':
@@ -62,7 +65,11 @@ def bake_hidden_layers(writer,source_gltf,source_blob,source_atlas,out_atlas):
             attrs=old['attributes'];P=rlglb.accessor(source_gltf,source_blob,attrs['POSITION']);UV=rlglb.accessor(source_gltf,source_blob,attrs['TEXCOORD_0']);T=rlglb.accessor(source_gltf,source_blob,old['indices'],normalize=False).astype(int).reshape(-1,3)
             updated=UV.copy();ranges=old['extras']['partVertexRanges'];e0,e1=ranges['exterior'];donor=T[(T>=e0).all(1)&(T<e1).all(1)]-e0
             for kind in ['backing','shell']:
-                start,end=ranges[kind];tri=T[(T>=start).all(1)&(T<end).all(1)]-start;width=512 if lod==0 else 256
+                width=512 if lod==0 else 256
+                if kind not in ranges:
+                    x+=width
+                    continue
+                start,end=ranges[kind];tri=T[(T>=start).all(1)&(T<end).all(1)]-start
                 chart,receipt=bake_chart_paint(P[e0:e1],UV[e0:e1],donor,P[start:end],UV[start:end],tri,source_image,size=(width,256),force_opaque=True)
                 image.paste(Image.fromarray(chart),(x,1536))
                 updated[start:end,0]=(x+UV[start:end,0]*width)/2048
@@ -152,7 +159,7 @@ def groom_builder(head,scalp,P,names,spec,hull,ranges):
     native_proofs=[]
     if native is not None:
         before=P.copy();P[:],proof=native.push_out(P,native_margin)
-        proof['parts']={kind:{'changed_vertices':int((np.linalg.norm(P[start:end]-before[start:end],axis=1)>0).sum()),'max_shift_mm':float(np.linalg.norm(P[start:end]-before[start:end],axis=1).max()*1000)} for kind,(start,end) in ranges.items()}
+        proof['parts']={kind:{'changed_vertices':int((np.linalg.norm(P[start:end]-before[start:end],axis=1)>0).sum()),'max_shift_mm':float(np.linalg.norm(P[start:end]-before[start:end],axis=1).max()*1000) if end>start else 0.} for kind,(start,end) in ranges.items()}
         native_proofs.append({'stage':'after_shared_rest_guard',**proof})
     # Reuse the shared identity attachment contract without constructing and
     # then discarding the unrelated loose-curtain grooming shapes.
@@ -259,7 +266,16 @@ def main():
     for material in writer.g['materials']:material.setdefault('extras',{})['texture']=out.with_suffix('.png').name
     writer.g['asset']['extras']['rlHair']['materials']={material['name']:out.with_suffix('.png').name for material in writer.g['materials']}
     groom=writer.g['asset']['extras']['rlHair']['grooming']
-    groom.update(lengthMeaning='Wrapped knot radial mass and rooted loose-strand length.',volumeMeaning='Knot axial depth and swept-hair stand-off.',capGrooming='Fixed for all four grooming shapes.')
+    mass=shared.profile(args.profile)['tied_mass']
+    if mass.get('kind')=='tail':
+        groom.update(lengthMeaning='Hanging-tail length about its pinned attachment and rooted loose-strand length.',volumeMeaning='Tail cross-section about its authored spine and swept-hair stand-off.')
+    elif 'centers' in mass:
+        groom.update(lengthMeaning='Each tied knot radial mass and rooted loose-strand length.',volumeMeaning='Each tied knot axial depth and swept-hair stand-off.')
+    else:
+        groom.update(lengthMeaning='Wrapped knot radial mass and rooted loose-strand length.',volumeMeaning='Knot axial depth and swept-hair stand-off.')
+    groom['capGrooming']='Fixed for all four grooming shapes.'
+    if shared.profile(args.profile).get('backing_mode')=='none':
+        writer.g['asset']['extras']['rlHair']['source']['method']='Painted reference exterior with scalp coverage and rooted detail; no mass backing'
     writer.g['asset']['generator']='Rabbit Lands painted tied-hair builder'
     writer.save(str(out))
     if not baked:out.with_suffix('.png').write_bytes(draft.with_suffix('.png').read_bytes())
