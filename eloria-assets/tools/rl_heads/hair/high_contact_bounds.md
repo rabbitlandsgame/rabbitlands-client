@@ -25,3 +25,13 @@ Normals used for placement must still come from the intended authoring route.
 The default stays unchanged; use the matching explicit policy for authoring and
 independent checks. Cached geometric normals are invalidated when source
 positions or indices change. This adds no runtime behavior or replacement skin.
+
+`horizontal_slice_proof=True` adds the optional complete-surface outside proof
+used by evaluated Native fixtures. It intersects the complete current High skin
+with each queried horizontal plane. A negative distance becomes positive only
+when its point lies outside that plane's complete skin X/Z bounds; geometric
+distance, closest point, normal and rim flag stay exact. Empty or coplanar
+sections fall back to the original sign. Lighting and even geometric normals on
+a folded extreme face can otherwise misclassify an outside forehead point.
+The matching explicit policy belongs in independent verification too. The
+default is unchanged and the production2mm clearance remains unchanged.

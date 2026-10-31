@@ -38,5 +38,26 @@ class ContactBoundsTest(unittest.TestCase):
         self.assertEqual(guard.statistics['outside_box_proofs'],0)
         self.assertEqual(len(head.calls[0][0]),1)
 
+    def test_optional_complete_slice_corrects_only_proven_outside_signs(self):
+        import trimesh
+        mesh=trimesh.creation.cone(radius=1,height=2,sections=16)
+        points=np.asarray(mesh.vertices).copy();points[:,[1,2]]=points[:,[2,1]]
+        head=Head();head.P=points;head.T=np.asarray(mesh.faces)
+        shape=trimesh.Trimesh(points,head.T,process=False)
+        def signed(X,D=None,mesh=None,with_rim=False,T=None):
+            cp,distance,tri=trimesh.proximity.closest_point(shape,X)
+            result=(-distance,cp,shape.face_normals[tri],np.zeros(len(X),bool))
+            return result if with_rim else result[:3]
+        head.signed=signed
+        X=np.array([[.8,1.7,0],[.1,.3,0]])
+        before=ContactHead(head).signed(X,with_rim=True)
+        guard=ContactHead(head,horizontal_slice_proof=True);after=guard.signed(X,with_rim=True)
+        self.assertLess(before[0][0],0);self.assertGreater(after[0][0],0)
+        self.assertLess(after[0][1],0)
+        np.testing.assert_array_equal(abs(before[0]),abs(after[0]))
+        for a,b in zip(before[1:],after[1:]):np.testing.assert_array_equal(a,b)
+        self.assertEqual(guard.statistics['horizontal_slice_sign_proofs'],1)
+        self.assertEqual(guard.statistics['outside_box_proofs'],0)
+
 
 if __name__=='__main__':unittest.main()
