@@ -48,5 +48,21 @@ class CapFitTests(unittest.TestCase):
         self.assertGreater(len(T),1);self.assertGreaterEqual(report['minimum_clearance_mm'],2)
         np.testing.assert_array_equal(result['P'][:3],P)
         self.assertLess(report['maximum_shift_mm'],14)
+    def test_optional_vertex_seater_preserves_high_and_uses_same_face_gate(self):
+        P=np.array([[-.02,-.02,.001],[.02,-.02,.001],[0,.02,.001]]);calls=[]
+        def seat(native,points,center,margin,limit):
+            calls.append((margin,limit));Q=points.copy();Q[:,2]=.003
+            return Q,{'explicit_test_seed':True}
+        result,_,D,report=fit_cap(self.plane(),self.arrays(P),np.array([[0,1,2]]),[0,0,-.1],0,vertex_seater=seat)
+        np.testing.assert_array_equal(result['P'],P);self.assertEqual(calls,[(2.2,14)])
+        self.assertGreaterEqual(report['minimum_clearance_mm'],2)
+        np.testing.assert_allclose(D[:,2],.002)
+    def test_optional_vertex_seater_cannot_bypass_bound_or_margin(self):
+        P=np.array([[-.02,-.02,.001],[.02,-.02,.001],[0,.02,.001]])
+        for amount in [.020,.0015]:
+            def seat(native,points,center,margin,limit):
+                Q=points.copy();Q[:,2]=amount;return Q,{}
+            with self.assertRaises(AssertionError):
+                fit_cap(self.plane(),self.arrays(P),np.array([[0,1,2]]),[0,0,-.1],0,vertex_seater=seat)
 
 if __name__=='__main__':unittest.main()

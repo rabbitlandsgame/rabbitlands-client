@@ -38,7 +38,7 @@ def radial_seat(native,P,center,stand_off_mm=2.3,vertex_margin_mm=2.2,max_shift_
 
 def fit_cap(native,attributes,triangles,center,max_extra_triangles,max_shift_mm=14,
             refinement_rounds=3,deep_clearance_mm=1,face_margin_mm=2.15,
-            radial_stand_off_mm=2.3,vertex_margin_mm=2.2):
+            radial_stand_off_mm=2.3,vertex_margin_mm=2.2,vertex_seater=None):
     """Return refined High arrays/triangles, Native POSITION delta and receipt.
 
     ``attributes`` and ``triangles`` describe the shell only. All existing ID,
@@ -52,8 +52,15 @@ def fit_cap(native,attributes,triangles,center,max_extra_triangles,max_shift_mm=
     arrays={key:np.asarray(value).copy() for key,value in attributes.items()};T=np.asarray(triangles,int).copy()
     original_triangles=len(T);records=[];original_prefix={key:value.copy() for key,value in arrays.items()}
     for iteration in range(refinement_rounds+1):
-        Q,seating=radial_seat(native,arrays['P'],center,max_shift_mm=max_shift_mm,
-                             stand_off_mm=radial_stand_off_mm,vertex_margin_mm=vertex_margin_mm)
+        if vertex_seater is None:
+            Q,seating=radial_seat(native,arrays['P'],center,max_shift_mm=max_shift_mm,
+                                 stand_off_mm=radial_stand_off_mm,vertex_margin_mm=vertex_margin_mm)
+        else:
+            Q,seating=vertex_seater(native,arrays['P'],center,vertex_margin_mm,max_shift_mm)
+            Q=np.asarray(Q,float)
+            assert Q.shape==arrays['P'].shape and np.isfinite(Q).all()
+            assert np.linalg.norm(Q-arrays['P'],axis=1).max()*1000<=max_shift_mm,'Custom Native vertex seed exceeded its total displacement bound'
+            assert (native.signed(Q)[0]>=vertex_margin_mm/1000-1e-8).all(),'Custom Native vertex seed did not retain its margin'
         probes,faces=cap_probes(Q,T)
         signed=native.signed(probes)[0] if len(probes) else np.empty(0)
         worst=signed.reshape(-1,4).min(1);deep=faces[worst<deep_clearance_mm/1000]
