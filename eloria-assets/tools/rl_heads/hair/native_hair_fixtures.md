@@ -1,0 +1,26 @@
+# Evaluated native head and clothing checks
+
+`native_hair_fixtures.py` consumes an ignored `npz-manifest.json` of independently
+evaluated client surfaces. Each case includes the exact mapped hair identity
+controls and native bone deltas in model space. It applies the hair's exported
+identity and grooming targets before the pose. Named hair-root/spring descendants
+follow Head; unknown joints fail instead of receiving a guessed transform.
+
+```text
+python native_hair_fixtures.py <candidate.glb> --manifest <ignored/npz-manifest.json> --out <ignored/native-check.json>
+```
+
+The default measures all three LODs, all available matching cases, and nine
+Length/Volume positions. It checks vertices plus triangle edge midpoints and
+centroids where an edge is at least 5 mm long. These extra probes detect coarse
+cap intersections that a vertex-only check can miss. The minimum remains 2 mm;
+provided outward skin normals establish the sign independently of winding.
+Manifest hashes and triangle-used vertex scope are checked before querying.
+
+For a repair iteration, `--neutral-groom-only`, `--cases neutral` and
+`--stop-on-first` allow a bounded diagnostic. An early failed scan explicitly
+records that the requested scan was incomplete. It never establishes
+qualification. Full RL identity/coverage checks, native scalp-coverage review,
+client appearance and motion rendering, and equipment checks remain separate.
+Native runtime mapping ignores face fields which sculpt only the High head.
+Keep fixture manifests, original captures and numeric evidence outside Git.
