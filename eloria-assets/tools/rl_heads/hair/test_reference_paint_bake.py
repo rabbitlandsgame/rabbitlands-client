@@ -1,10 +1,22 @@
 """Small geometric paint fixtures; no private input or runtime assets required."""
 import unittest
 import numpy as np
-from bake_reference_paint import bake_chart_paint,pack_chart_islands
+from bake_reference_paint import bake_chart_paint,pack_chart_islands,_barycentric
 
 
 class PaintBakeTests(unittest.TestCase):
+    def test_retained_thin_donor_has_stable_barycentric_coordinates(self):
+        triangles=np.array([[[0,0,0],[.05,0,0],[.05,2e-12,0]]],float)
+        expected=np.array([[.2,.3,.5]])
+        point=np.einsum('fc,fcv->fv',expected,triangles)
+        # This face passes the donor-area gate but its Gram determinant cancels.
+        self.assertGreater(np.linalg.norm(np.cross(triangles[0,1],triangles[0,2])),1e-14)
+        np.testing.assert_allclose(_barycentric(point,triangles),expected,atol=1e-14)
+
+    def test_truly_degenerate_donor_still_fails(self):
+        with self.assertRaisesRegex(AssertionError,'Degenerate'):
+            _barycentric(np.zeros((1,3)),np.array([[[0,0,0],[1,0,0],[2,0,0]]],float))
+
     def fixture(self):
         positions=np.array([[-1,0,0],[0,0,0],[0,1,0],[-1,1,0],[0,0,0],[1,0,0],[1,1,0],[0,1,0]],float)
         triangles=np.array([[0,1,2],[0,2,3],[4,5,6],[4,6,7]])

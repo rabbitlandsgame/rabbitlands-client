@@ -31,11 +31,13 @@ def pack_chart_islands(uv,triangles,padding=.025):
 
 def _barycentric(points, triangles):
     a=triangles[:,0];v0=triangles[:,1]-a;v1=triangles[:,2]-a;v2=points-a
-    d00=np.einsum('ij,ij->i',v0,v0);d01=np.einsum('ij,ij->i',v0,v1)
-    d11=np.einsum('ij,ij->i',v1,v1);d20=np.einsum('ij,ij->i',v2,v0);d21=np.einsum('ij,ij->i',v2,v1)
-    denominator=d00*d11-d01*d01
-    assert (abs(denominator)>1e-25).all(),'Degenerate donor triangle'
-    v=(d11*d20-d01*d21)/denominator;w=(d00*d21-d01*d20)/denominator
+    # A retained thin triangle can have a valid cross-product area while its
+    # Gram determinant loses all precision through subtraction. Use the same
+    # geometric area as donor filtering and avoid an unrelated absolute cutoff.
+    normal=np.cross(v0,v1);denominator=np.einsum('ij,ij->i',normal,normal)
+    assert np.isfinite(denominator).all() and (denominator>0).all(),'Degenerate donor triangle'
+    v=np.einsum('ij,ij->i',np.cross(v2,v1),normal)/denominator
+    w=np.einsum('ij,ij->i',np.cross(v0,v2),normal)/denominator
     return np.column_stack([1-v-w,v,w])
 
 
