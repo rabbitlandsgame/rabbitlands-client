@@ -22,3 +22,11 @@ Keep their inputs and receipts private. Require independent High identity and
 groom checks, actual Native controls/poses, unchanged scalp coverage, client
 materials, movement and headwear checks before registration. A hash match or
 vertex-only fit does not replace triangle-interior or visual checks.
+
+`conform_crest_base_normals.py --source <fitted stage> --output <new stage>`
+is an optional shading-only step for the exposed front of this lower mass.
+It blends that range's authored normals toward the actual opaque cap and
+transports all corresponding target normals. The cap and upper locks stay
+exact, as do every POSITION/index/UV/coverage/skin/target POSITION value.
+Reject the result unless matched front/profile views improve. Keep the
+original fitted stage and the normal/payload preservation receipt.
