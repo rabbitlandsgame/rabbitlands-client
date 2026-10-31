@@ -1,10 +1,11 @@
 import unittest
 import numpy as np
-from guard_loose_cap import pin_nape_height
+from guard_loose_cap import pin_nape_height,cap_body_clearance
 
 
 class Head:
     C=np.array([0.,1.65,0.])
+    eye_mid=np.array([0.,1.65,0.])
     P=np.array([[0.,1.6,0.]])
     vgroups={'ears':np.array([True])}
 
@@ -29,6 +30,12 @@ class NapeHeight(unittest.TestCase):
     def test_nape_disabled_profile_is_rejected(self):
         P,T=self.fixture()
         with self.assertRaises(AssertionError):pin_nape_height(Head(),P,T,{'nape':False})
+    def test_cap_torso_clearance_preserves_height_and_clear_rows(self):
+        P=np.array([[.01,1.55,.015],[.1,1.55,.03]])
+        hull=np.array([[1,0,0,-.04],[-1,0,0,-.04],[0,1,0,-1.58],[0,-1,0,1.50],[0,0,1,-.03],[0,0,-1,-.03]])
+        Q=cap_body_clearance(Head(),P,hull)
+        self.assertGreaterEqual(float((Q[0]@hull[:,:3].T+hull[:,3]).max()),.0035-1e-12)
+        np.testing.assert_array_equal(Q[:,1],P[:,1]);np.testing.assert_array_equal(Q[1],P[1])
 
 
 if __name__=='__main__':unittest.main()

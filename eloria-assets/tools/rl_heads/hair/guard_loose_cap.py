@@ -15,6 +15,20 @@ from reference_root_edges import root_colours,geometric_boundary
 from short_surface_guard import guard
 
 
+def cap_body_clearance(head,P,equations,margin=.0035):
+    """Clear the local torso horizontally, preserving the physical nape height."""
+    Q=P.copy();divide=head.C[2]-.05
+    direction=unit(np.c_[P[:,0]*.35,np.zeros(len(P)),P[:,2]-divide])
+    distance=P@equations[:,:3].T+equations[:,3]
+    inside=(distance.max(1)<margin-.00025)&(P[:,1]<head.eye_mid[1]-.055)
+    slope=direction@equations[:,:3].T
+    exits=np.where(slope>1e-6,np.maximum(margin-distance,0)/np.maximum(slope,1e-6),np.inf)
+    amount=exits.min(1);assert np.isfinite(amount).all()
+    Q[inside]+=direction[inside]*amount[inside,None]
+    np.testing.assert_array_equal(Q[~inside],P[~inside]);np.testing.assert_array_equal(Q[:,1],P[:,1])
+    return Q
+
+
 def pin_nape_height(head,P,T,hairline):
     """Restore only low rear boundary rows to the declared physical nape height."""
     assert hairline.get('nape',True)
@@ -70,7 +84,7 @@ def repair(source,out,extra_controls=None,margin_mm=2.8,max_shift_mm=14,profile_
                 base=SP[used]
                 if pin_nape:base,nape=pin_nape_height(head,base,capT,spec.get('hairline',{}))
                 base=assemble.push_out_var(head,base,np.full(e-s,.0032),iters=5)
-                base=body_safe(head,base,body_hull(head),.0035,radial=bool(spec.get('preserve_curtain_depth',False)))
+                base=(cap_body_clearance if spec.get('preserve_curtain_depth',False) else body_safe)(head,base,body_hull(head),.0035)
                 normal=SN[used];binding=head.bind(base,no_ears=True)
                 assert set(names)==set(ids+['hl_length_p','hl_length_n','hl_volume_p','hl_volume_n'])
                 delta={name:(head.bound_delta(binding,head.delta(name)) if name in ids else np.zeros_like(base)) for name in names}
