@@ -94,7 +94,9 @@ def publish(receipt: Path) -> str:
         if set(actual) != set(expected) or any(not release.asset_matches(actual[n], r) for n, r in expected.items()):
             raise ValueError("Installer release checksum verification failed; keeping earlier published downloads.")
         pool = shared.validate_release(json.loads(release.gh("api", f"repos/{release.REPOSITORY}/releases/{pool_id}")))
-        remote = {r["name"]: r for r in release.github_assets(pool["id"])}
+        remote = shared.verify_storage(pooled, data["shared_release_ids"]) if "shared_release_ids" in data else {r["name"]: r for r in release.github_assets(pool["id"])}
+        if "shared_release_ids" in data and data["shared_release_ids"].get(shared.TAG) != pool_id:
+            raise ValueError("Legacy helper storage identity changed.")
         if any(not release.asset_matches(remote.get(n, {}), r) for n, r in pooled.items()):
             raise ValueError("Shared download checksum verification failed; keeping earlier published downloads.")
 

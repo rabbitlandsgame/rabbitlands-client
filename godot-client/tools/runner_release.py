@@ -55,17 +55,17 @@ class GitHubSink:
         self.previous = {asset["name"]: asset for asset in release.github_assets(release_id)}
         self.pool = None
         self.shared_previous = {}
+        self.storage = shared.Storage(self.tag.removeprefix("client-"))
         self.uploaded_bytes = self.reused_bytes = 0
 
     def shared_inventory(self):
         if self.pool is None:
-            self.pool = shared.ensure()
-            self.shared_previous = {a["name"]: a for a in release.github_assets(self.pool["id"])}
+            self.pool, self.shared_previous = self.storage.pool()
         return self.shared_previous
 
     def reuse(self, rows: list[dict]) -> bool:
-        previous = self.shared_inventory()
         for row in rows:
+            _, previous = self.storage.destination(row["name"])
             old = previous.get(row["name"], {})
             if not release.asset_matches(old, row):
                 if old.get("state") == "uploaded":
@@ -82,11 +82,10 @@ class GitHubSink:
             raise ValueError("Shared download name and checksum disagree.")
         if pooled and self.pool is None:
             self.shared_inventory()
-        previous = self.shared_previous if pooled else self.previous
+        previous = self.storage.destination(path.name)[1] if pooled else self.previous
         old = previous.get(path.name, {})
         reused = release.asset_matches(old, row)
-        actual = release.upload_asset_api(self.pool["id"] if pooled else self.release_id, path, row, old,
-                                          **({"immutable": True} if pooled else {}))
+        actual = self.storage.upload(path, row) if pooled else release.upload_asset_api(self.release_id, path, row, old)
         if not release.asset_matches(actual, row):
             raise ValueError(f"GitHub did not verify {path.name}; retaining the local part.")
         previous[path.name] = actual
@@ -114,6 +113,10 @@ class RunnerStorage:
     def reuse_package(self, previous):
         parts = previous.get("parts", [])
         if not parts or not all(shared.matches(p, release.REPOSITORY) for p in parts):
+            return False
+        # Legacy package URLs must be re-emitted once into partitioned storage.
+        # Helpers remain at legacy URLs so installed bootstraps can self-update.
+        if any(p["url"] != shared.download_url(release.REPOSITORY, p["url"].rsplit("/", 1)[1]) for p in parts):
             return False
         rows = [{"name": p["url"].rsplit("/", 1)[1], "size": p["size"], "sha256": p["sha256"]}
                 for p in parts]
@@ -339,6 +342,7 @@ def build(options) -> Path:
     release.write_json(receipt, {"schema": 1, "repository": release.REPOSITORY, "commit": sha,
         "platform": options.platform, "release_id": options.draft_release_id, "stage": stage.name,
         "update_schema": 2, "shared_storage": 1, "shared_release_id": storage.sink.pool["id"],
+        "shared_release_ids": storage.sink.storage.ids,
         "shared_assets": list(storage.shared_rows.values()),
         "shared_packages": {p["id"]: [i["url"].rsplit("/", 1)[1] for i in p["parts"]] for p in payload["packages"]},
         "shared_helpers": {kind: payload[kind]["url"].rsplit("/", 1)[1] for kind in ("updater", "uninstall")},
