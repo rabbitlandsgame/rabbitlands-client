@@ -37,7 +37,8 @@ def radial_seat(native,P,center,stand_off_mm=2.3,vertex_margin_mm=2.2,max_shift_
     return Q,{'changed_vertices':int((displacement>0).sum()),'maximum_shift_mm':float(displacement.max()),'vertex_seating':seating}
 
 def fit_cap(native,attributes,triangles,center,max_extra_triangles,max_shift_mm=14,
-            refinement_rounds=3,deep_clearance_mm=1,face_margin_mm=2.15):
+            refinement_rounds=3,deep_clearance_mm=1,face_margin_mm=2.15,
+            radial_stand_off_mm=2.3,vertex_margin_mm=2.2):
     """Return refined High arrays/triangles, Native POSITION delta and receipt.
 
     ``attributes`` and ``triangles`` describe the shell only. All existing ID,
@@ -47,10 +48,12 @@ def fit_cap(native,attributes,triangles,center,max_extra_triangles,max_shift_mm=
     """
     assert 0<max_shift_mm<=20 and 0<=refinement_rounds<=6
     assert 0<=deep_clearance_mm<2 and 2<face_margin_mm<=3
+    assert 2<=vertex_margin_mm<=radial_stand_off_mm<=5
     arrays={key:np.asarray(value).copy() for key,value in attributes.items()};T=np.asarray(triangles,int).copy()
     original_triangles=len(T);records=[];original_prefix={key:value.copy() for key,value in arrays.items()}
     for iteration in range(refinement_rounds+1):
-        Q,seating=radial_seat(native,arrays['P'],center,max_shift_mm=max_shift_mm)
+        Q,seating=radial_seat(native,arrays['P'],center,max_shift_mm=max_shift_mm,
+                             stand_off_mm=radial_stand_off_mm,vertex_margin_mm=vertex_margin_mm)
         probes,faces=cap_probes(Q,T)
         signed=native.signed(probes)[0] if len(probes) else np.empty(0)
         worst=signed.reshape(-1,4).min(1);deep=faces[worst<deep_clearance_mm/1000]
@@ -68,6 +71,7 @@ def fit_cap(native,attributes,triangles,center,max_extra_triangles,max_shift_mm=
     for key,value in original_prefix.items():assert np.array_equal(arrays[key][:len(value)],value)
     return arrays,T,(Q-arrays['P']).astype('f4'),{'iterations':records,'face_support':face_proof,
         'maximum_shift_mm':float(displacement.max()),'limit_mm':max_shift_mm,
+        'radial_stand_off_mm':radial_stand_off_mm,'vertex_margin_mm':vertex_margin_mm,
         'minimum_clearance_mm':float(signed.min()*1000),
         'clearance_percentiles_mm':np.percentile(signed*1000,[0,1,5,50,95,99,100]).tolist(),
         'old_high_attribute_prefix_exact':True,'extra_triangles':len(T)-original_triangles,

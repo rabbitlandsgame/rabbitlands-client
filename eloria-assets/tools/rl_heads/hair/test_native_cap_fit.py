@@ -31,6 +31,13 @@ class CapFitTests(unittest.TestCase):
         _,_,_,report=fit_cap(self.plane(),self.arrays(P),np.array([[0,1,2]]),[0,0,-.1],0)
         self.assertIsNone(report['iterations'][0]['minimum_probe_clearance_mm'])
         self.assertGreaterEqual(report['minimum_clearance_mm'],2)
+    def test_explicit_standoff_does_not_change_high_or_bound(self):
+        P=np.array([[-.02,-.02,.001],[.02,-.02,.001],[0,.02,.001]])
+        arrays=self.arrays(P);result,_,D,report=fit_cap(self.plane(),arrays,np.array([[0,1,2]]),[0,0,-.1],0,radial_stand_off_mm=3,vertex_margin_mm=2.8)
+        np.testing.assert_array_equal(result['P'],P)
+        self.assertGreaterEqual(report['minimum_clearance_mm'],2.8)
+        self.assertEqual(report['limit_mm'],14)
+        self.assertEqual(report['radial_stand_off_mm'],3)
     def test_curved_interior_requires_budget_and_keeps_high_surface(self):
         sphere=trimesh.creation.icosphere(subdivisions=2,radius=.1)
         native=NativeHeadSurface(sphere.vertices,sphere.vertex_normals,sphere.faces)

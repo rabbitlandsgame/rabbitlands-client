@@ -16,3 +16,8 @@ closed if the final total displacement exceeds its bound or clearance is below
 must be explicit, recorded and reviewed; this is not runtime registration or
 asset acceptance. Painted exterior, backing, actual Native controls/poses,
 High identities, grooming, scalp coverage and LOD budgets remain separate gates.
+
+`radial_stand_off_mm=2.3` and `vertex_margin_mm=2.2` preserve the initial
+defaults. A caller can explicitly increase the stand-off within the same total
+motion bound to trade vertex clearance for fewer required adaptive faces. The
+receipt records both values; the final 2 mm gate and triangle budget still apply.
