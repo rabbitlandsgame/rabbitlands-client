@@ -31,10 +31,17 @@ def conform_temples(head,scalp,P,N,T,ranges,spec):
         target=lat+np.minimum(target-lat,limit)
     changed=(target-lat)>.01;Q=P.copy();M=N.copy()
     if changed.any():
-        old,old_normal=scalp.point(lon[changed],lat[changed]);new,new_normal=scalp.point(lon[changed],target[changed])
-        axis=np.cross(old_normal,new_normal);angle=np.arctan2(np.linalg.norm(axis,axis=1),(old_normal*new_normal).sum(1))
-        Q[changed]=new+hairgen.rotate(P[changed]-old,axis,angle)
-        M[changed]=hairgen.rotate(N[changed],axis,angle)
+        old,old_normal=scalp.point(lon[changed],lat[changed])
+        if 'max_root_distance_mm' in config:
+            limit=float(config['max_root_distance_mm']);assert 0<limit<=50
+            near=np.linalg.norm(P[changed]-old,axis=1)*1000<=limit
+            changed[np.flatnonzero(changed)[~near]]=False
+            old,old_normal=old[near],old_normal[near]
+        if changed.any():
+            new,new_normal=scalp.point(lon[changed],target[changed])
+            axis=np.cross(old_normal,new_normal);angle=np.arctan2(np.linalg.norm(axis,axis=1),(old_normal*new_normal).sum(1))
+            Q[changed]=new+hairgen.rotate(P[changed]-old,axis,angle)
+            M[changed]=hairgen.rotate(N[changed],axis,angle)
     assert np.array_equal(Q[~changed],P[~changed]) and np.array_equal(M[~changed],N[~changed])
     movement=np.linalg.norm(Q-P,axis=1)*1000
     assert movement.max()<=float(config['max_displacement_mm'])

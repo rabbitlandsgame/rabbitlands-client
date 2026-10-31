@@ -46,5 +46,17 @@ class TempleConformance(unittest.TestCase):
     def test_invalid_angular_bound_fails_closed(self):
         P,N,T,ranges,spec=self.fixture();spec['temple_conform']['max_lift_degrees']=0
         with self.assertRaises(AssertionError):conform_temples(Head(),Scalp(),P,N,T,ranges,spec)
+    def test_optional_root_distance_preserves_hanging_locks(self):
+        P,N,T,ranges,spec=self.fixture();P[3:6]*=2
+        spec['temple_conform']['max_root_distance_mm']=10
+        Q,M,proof=conform_temples(Head(),Scalp(),P,N,T,ranges,spec)
+        self.assertGreater(Q[0,1],P[0,1])
+        np.testing.assert_array_equal(Q[3:],P[3:]);np.testing.assert_array_equal(M[3:],N[3:])
+        self.assertEqual(proof['positive']['changed_vertices'],0)
+    def test_all_hanging_locks_are_an_exact_noop(self):
+        P,N,T,ranges,spec=self.fixture();P*=2;spec['temple_conform']['max_root_distance_mm']=10
+        Q,M,proof=conform_temples(Head(),Scalp(),P,N,T,ranges,spec)
+        np.testing.assert_array_equal(Q,P);np.testing.assert_array_equal(M,N)
+        self.assertEqual(proof['negative']['changed_vertices'],0)
 
 if __name__=='__main__':unittest.main()
