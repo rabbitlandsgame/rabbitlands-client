@@ -1,0 +1,174 @@
+{
+  "version": 2,
+  "status": "qualified_asset_candidate",
+  "style": "feathered_mohawk_female",
+  "semantic_family": "feathered_mohawk",
+  "module_id": 23,
+  "sex": "female",
+  "legacy_hairstyle_slot": 9,
+  "additional_generation_credits": 0,
+  "method": "Reference-guided rounded tapered locks and continuous dense lower crest over the exact qualified buzz-cut cap; directional fibre paint, layered fine/messy locks and separate Native corrective",
+  "glb_sha256": "bebef88ce3d9820f342d645d3cb3836f4088563634320b6f472c826a137c7dcc",
+  "texture_sha256": "606e54b8bfa2f5c343067d85ffc2bdfd563fe5cca0da31cba79a0d7e7316aca6",
+  "texture_import_sha256": "4a1cfd7dc66ac60051ac18127564cb3c5f801eb0bbbb33683d1a088a23436103",
+  "source_reference_sha256": "403151a9e3253b3de63ab757e03a073c5307910eea6414ca13b84f9089509c8f",
+  "qualified_cap_sha256": "07495acf193a1e45dbaf60c6425a35bcd4fd4d0a8fa525a28036d78da89b9eab",
+  "head_sha256": "f767679b773ed68071f0ad70d37cc17a7690425ef866707e52b96bfe1c7b76f6",
+  "triangles": {
+    "lod0": 15286,
+    "lod1": 4988,
+    "lod2": 1964
+  },
+  "vertices": {
+    "lod0": 12804,
+    "lod1": 4379,
+    "lod2": 1688
+  },
+  "contract": {
+    "identity_targets": 46,
+    "grooming_targets": [
+      "hl_length_p",
+      "hl_length_n",
+      "hl_volume_p",
+      "hl_volume_n"
+    ],
+    "optional_native_target": "hl_native_fit",
+    "native_default_weight": 0,
+    "native_hair_only_ignores_high_identities": true,
+    "fine_detail_range": [
+      0,
+      100
+    ],
+    "length_delta_mm": [
+      -13.901559538488769,
+      25.98993316968513
+    ],
+    "volume_delta_mm": [
+      -4.276124486237475,
+      6.131720541709369
+    ],
+    "crest_length_fraction": [
+      -0.3,
+      0.5
+    ],
+    "crest_width_fraction": [
+      -0.28,
+      0.42
+    ],
+    "springs": false
+  },
+  "qualification": {
+    "high_new_crest_states_per_lod": 81,
+    "high_vertices_and_triangle_interiors": true,
+    "high_minimum_clearance_mm": 2.6742612873550002,
+    "high_report_sha256": "875b4c04b1cc245fe0648c6001cfcff38fd33250e55cf7d14a0c402fd1a418d7",
+    "retained_cap_and_cards_previously_qualified_exact": true,
+    "scalp_coverage": {
+      "cases": 78,
+      "lods": 3,
+      "samples": 900,
+      "requested_directions": 220,
+      "retained_directions": 165,
+      "level": 0.0,
+      "margin_degrees": 4.0,
+      "minimum_elevation_degrees": -30.0,
+      "hole_samples_max": 0,
+      "report_sha256": "2c1accc733e79963bb0199d28e734b907d8f6d5ef301f1c95164a7174e080e17"
+    },
+    "native": {
+      "evaluated_cases": 1674,
+      "complete_requested_scan": true,
+      "qualities": [
+        "Low",
+        "Medium"
+      ],
+      "groom_cases": 9,
+      "lods": 3,
+      "high_identities": 0,
+      "failures": 0,
+      "minimum_clearance_mm": 2.137529616033192,
+      "maximum_corrective_shift_mm": 6.870512108780238,
+      "new_crest_maximum_corrective_shift_mm": 4.381355513873123,
+      "limit_mm": 14,
+      "fixture_manifest_sha256": "de6a4f42543f4e004e602091170048bbd550a862907da921f70fb1c704002b5a",
+      "report_sha256": "2fdf4f2c118f3709ab2a16cf788b9a7b1aba6ba90c715618669d0d2a2d79fcbb"
+    },
+    "physical_gate_preservation": {
+      "numerical_source_glb_sha256": "fc2070fdd9437f4a3c0dbdae95b2b2739a3913fabf44215d660b104bdbafc884",
+      "final_glb_sha256": "bebef88ce3d9820f342d645d3cb3836f4088563634320b6f472c826a137c7dcc",
+      "collision_and_coverage_payload_sha256": "c3a08d3b65b922720c3d7c3dc8c003b49a5c7d4c742a0fe18e1c6a19d6a56e55",
+      "collision_and_coverage_arrays_checked": 513,
+      "position_index_uv_colour_skin_node_and_target_position_bytes_exact": true,
+      "post_gate_edits": "Material metadata, lossless removal of unused authoring buffers, then explicit front basal NORMAL/target NORMAL conformance only",
+      "proof_sha256": "4a45bb4a28be2c9adfb81f70e719426e2827bb1a399c51de4cf29f9ae5ae05da"
+    },
+    "client": {
+      "renderer": "Forward+",
+      "texture_loading": "actual imported BPTC CompressedTexture2D; no private texture overrides",
+      "controls": [
+        "length minimum/maximum",
+        "volume minimum/maximum",
+        "detail minimum/maximum"
+      ],
+      "additional_identities": 2,
+      "poses": [
+        "Rest",
+        "Idle",
+        "Walk"
+      ],
+      "headwear_items_high": [
+        134,
+        159,
+        111,
+        170
+      ],
+      "closed_headwear_hides_hair": true,
+      "open_headwear_uses_existing_policy": true,
+      "new_exact_headwear_pairings": false,
+      "native_harness_views": 8,
+      "native_harness_poses": [
+        "Rest",
+        "Idle",
+        "Walk"
+      ],
+      "actual_resource_main_captures": 26,
+      "front_volume_endpoint_captures": 2,
+      "final_normals_actual_resource_spot_captures": 2,
+      "control_endpoint_changed_pixels_before_normal_polish": {
+        "length": 109267,
+        "volume": 84561,
+        "detail": 61507
+      },
+      "capture_receipt_sha256": "49459025f7a842633cf0b94c4ff2ed5628958572d7fd759ace1d21dda73fce7c",
+      "final_normal_spot_report_sha256": "27bb9fa3eb997d71b645af9ed928491a17b927fec84f90beef3249daa4e129a3"
+    },
+    "normal_polish": {
+      "scope": "Exposed front of dense basal ridge only; cap and upper locks exact",
+      "changed_base_normals_by_lod": [
+        69,
+        36,
+        16
+      ],
+      "target_normals_transported": true,
+      "all_collision_and_alpha_fields_exact": true,
+      "tool_sha256": "a6e766498eed3b0f41484455d769ee1f698819e22a96905e741430a72896caa6"
+    },
+    "lossless_packing": {
+      "bytes": 6466980,
+      "live_accessor_and_image_payloads_exact": true,
+      "unmodified_authoring_sources_preserved": true
+    }
+  },
+  "authoring": {
+    "upper_tool_sha256": "b2acc6b5cfa16df7111c54ea2396f9980e658496b1891ebd59728826d073a4b5",
+    "basal_tool_sha256": "a92edf6bc3bf31b426a14efe5859008bb6184ddd49c7dd9f5c04b87ba501fb30",
+    "profile_sha256": "197a3daa0a3a4956fb7d117eb7584c6cd46d207a6c9f9f2bd9e981a010273c7a",
+    "upper_and_basal_cli_reproduce_reviewed_sources_exactly": true
+  },
+  "review_notes": [
+    "The tiny front-left close-cut hairline chip is inherited from the preserved qualified cap.",
+    "Low-detail crest sections are deliberately coarser at very close diagnostic distance.",
+    "Open headwear retains existing default fitting; this asset adds no exact headwear fit records.",
+    "Minor concave root shading remains in oblique closeups; the basal surface is continuous."
+  ]
+}
