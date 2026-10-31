@@ -23,6 +23,20 @@ def triangle(radius=1.003):
 
 
 class GuardTest(unittest.TestCase):
+    def test_geometric_edge_correction_keeps_opposite_clear_corner_exact(self):
+        class Plane(Sphere):
+            def signed(self,P,D=None,mesh=None,with_rim=False):
+                cp=P.copy();cp[:,2]=0
+                result=(P[:,2].copy(),cp,np.tile([0,0,1.],(len(P),1)))
+                return result+(np.zeros(len(P),bool),) if with_rim else result
+        P=np.array([[-.01,0,-.002],[.01,0,-.002],[0,.01,.04]])
+        T=np.array([[0,1,2]])
+        Q,_=guard(Plane(),P,T,{},[],{},all_faces=True,geometric_projection=True)
+        np.testing.assert_array_equal(Q[2],P[2])
+        self.assertGreaterEqual(Q[:2,2].min(),.003)
+        old,_=guard(Plane(),P,T,{},[],{},all_faces=True)
+        self.assertGreater(old[2,2],P[2,2])
+
     def test_optional_geometric_projection_preserves_tangential_position(self):
         class TiltedPlane(Sphere):
             def signed(self,P,D=None,mesh=None,with_rim=False):

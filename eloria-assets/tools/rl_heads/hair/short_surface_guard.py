@@ -21,6 +21,8 @@ def guard(head,P,T,delta,ids,combos,native=False,margin=.0030,max_shift_mm=14,ma
         return Q,{'face_samples':0,'states':1+len(delta)+len(combos),'changed_vertices':0,'maximum_shift_mm':0.,'margin_mm':margin*1000,'iterations':[],'native_bind_baseline_only':False,'native_source':None,'noncontact_positions_exact':True}
     bary=np.array([[1/3,1/3,1/3],[.5,.5,0],[.5,0,.5],[0,.5,.5]])
     used=np.unique(faces);vertices=np.vstack([np.repeat(used[:,None],3,axis=1),np.repeat(faces,len(bary),axis=0)])
+    contribution=np.vstack([np.full((len(used),3),1/3),np.tile(bary,(len(faces),1))])
+    contribution/=np.square(contribution).sum(1)[:,None]
     margins=np.full(len(Q),margin)
     if fixed is not None:margins[fixed]=.0024
     probe_margin=np.r_[margins[used],np.repeat(margins[faces].max(1),len(bary))]
@@ -57,9 +59,12 @@ def guard(head,P,T,delta,ids,combos,native=False,margin=.0030,max_shift_mm=14,ma
                 order=np.argsort(amount,kind='stable')
                 for corner in range(3):
                     indices=vertices[bad,corner]
+                    corner_amount=amount*contribution[bad,corner] if geometric_projection else amount
+                    corner_vectors=proposals*contribution[bad,corner,None] if geometric_projection else proposals
+                    if geometric_projection:order=np.argsort(corner_amount,kind='stable')
                     unique,reverse=np.unique(indices[order][::-1],return_index=True)
-                    chosen=order[len(order)-1-reverse];wins=amount[chosen]>steps[unique]
-                    steps[unique[wins]]=amount[chosen[wins]];vectors[unique[wins]]=proposals[chosen[wins]]
+                    chosen=order[len(order)-1-reverse];wins=corner_amount[chosen]>steps[unique]
+                    steps[unique[wins]]=corner_amount[chosen[wins]];vectors[unique[wins]]=corner_vectors[chosen[wins]]
         records.append({'iteration':iteration,'contacts':contacts,'minimum_mm':{key:value*1000 for key,value in worst.items() if np.isfinite(value)}})
         print('SHORT_SURFACE_GUARD',records[-1],flush=True)
         active=steps>0

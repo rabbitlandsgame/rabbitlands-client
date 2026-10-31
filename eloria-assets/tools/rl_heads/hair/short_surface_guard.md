@@ -26,5 +26,7 @@ remain unchanged. Check its adjacent faces and attachment after reassembly.
 `geometric_projection=True` uses the signed closest-point separation direction
 for a correction, retaining the supplied skin normal only at zero separation.
 This avoids tangential drift along interpolated shading normals at ear folds.
+The geometric option distributes each probe correction by its barycentric
+contributors; an edge midpoint leaves its opposite corner unchanged.
 The default normal projection, margin, displacement limit and Native rejection
 remain unchanged. This option still requires the independent final surface gate.
