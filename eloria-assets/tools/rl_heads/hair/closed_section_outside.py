@@ -76,7 +76,18 @@ class ClosedSectionOutside:
         result = np.zeros(len(points), bool)
         if not len(points) or not self.volumetric:
             return result
-        for y in np.unique(points[:, 1]):
+        # A horizontal ray is only a conservative prefilter. An odd crossing
+        # count withholds a proof; an even count still requires the complete
+        # closed-contour test below. This avoids rebuilding thousands of
+        # sections for points genuinely buried inside a dense reference.
+        candidate = np.zeros(len(points), bool)
+        for start in range(0, len(points), 512):
+            chunk = points[start:start + 512]
+            directions = np.tile([1., 0., 0.], (len(chunk), 1))
+            _, rays, _ = self.mesh.ray.intersects_location(chunk, directions, multiple_hits=True)
+            counts = np.bincount(rays, minlength=len(chunk))
+            candidate[start:start + len(chunk)] = counts % 2 == 0
+        for y in np.unique(points[candidate, 1]):
             if float(y) not in self.cache:
                 contours = self._contours(float(y))
                 if len(self.cache) >= self.cache_planes:
@@ -87,7 +98,7 @@ class ClosedSectionOutside:
                 contours = self.cache[float(y)]
             if contours is None:
                 continue
-            rows = np.flatnonzero(points[:, 1] == y)
+            rows = np.flatnonzero((points[:, 1] == y) & candidate)
             q = points[rows][:, [0, 2]]
             outside_all = np.ones(len(rows), bool)
             for contour in contours:
