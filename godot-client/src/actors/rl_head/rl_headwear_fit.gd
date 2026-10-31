@@ -18,9 +18,9 @@ extends RefCounted
 ## data/actors/rl_head_headwear_fit.json is rebuilt once per piece, head and
 ## outfit, never per identity. The data also carries fits for the shipped
 ## luminous heads (`shippedBodies`, fits keyed by body and hairstyle file);
-## those would change Low and Medium Humans too, so they stay OFF unless the
-## RL_HEADWEAR_FIT developer variable is `shipped` (owner decision pending,
-## D8). The fit:
+## those stay OFF unless an exact piece/body/hairstyle fit is explicitly
+## nativeQualified, or the RL_HEADWEAR_FIT developer variable is `shipped`
+## for comparison. The global D8 default remains off. The fit:
 ##
 ##   * Fit. The piece as the runtime places it (socket, rest pose) takes a
 ##     similarity - scale, a mild width/depth ratio, a pitch about the band's
@@ -127,13 +127,24 @@ static func reload() -> void:
 	clear_caches()
 
 
-## Whether a shipped head (no RL head) of `body` - a model scene name such as
-## luminous_female - takes the fits too: the data's `shippedBodies`, and only
-## while RL_HEADWEAR_FIT=shipped (off by default; D8). Other race bodies wear
-## their own variants on their own heads and are never listed.
-static func fits_shipped_body(body: String) -> bool:
+## Shipped-head fits remain off by default (D8), except an exact body/hair
+## pairing explicitly marked nativeQualified after its actual client review.
+## Wildcards and bald fits cannot opt in. The existing developer switch still
+## enables all listed shipped bodies for comparison; other races stay out.
+static func fits_shipped_body(body: String, visual_id: int = 0, hair: String = "") -> bool:
 	var bodies: Variant = data().get("shippedBodies", [])
-	return _shipped and bodies is Array and (bodies as Array).has(body)
+	if not (bodies is Array) or not (bodies as Array).has(body):
+		return false
+	if _shipped:
+		return true
+	if visual_id <= 0 or hair.is_empty() or hair == "*":
+		return false
+	var fits: Dictionary = piece(visual_id).get("fits", {}) as Dictionary
+	var own: Variant = fits.get(body + "/" + hair)
+	if not (own is Dictionary):
+		return false
+	var qualified: Variant = (own as Dictionary).get("nativeQualified", false)
+	return qualified is bool and bool(qualified)
 
 
 ## Which fit applies for `base` (an RL head's sex, or a shipped body's name):

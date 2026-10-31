@@ -1529,24 +1529,24 @@ func portrait_pose_held() -> bool:
 func _fit_rl_headwear(attachment: BoneAttachment3D, visual_id: int,
 		model_config: Dictionary) -> Array[Node]:
 	var made: Array[Node] = []
-	var base := _headwear_fit_base()
+	var hair := _rl_headwear_hair(model_config)
+	var base := _headwear_fit_base(visual_id, hair)
 	if base.is_empty() or not RLHeadwearFit.has_piece(visual_id):
 		return made
-	var hair := _rl_headwear_hair(model_config)
 	made = RLHeadwearFit.apply(attachment, visual_id, _native_skeleton, base,
 		str(_model_config.get("gender", "female")), hair, _rl_headwear_sources(hair))
 	attachment.set_meta(RL_HEADWEAR_META, _rl_headwear_key(visual_id, model_config))
 	return made
 
 ## Whose fits a head piece takes: the RL head's sex; the body's name for a
-## shipped luminous head only while RL_HEADWEAR_FIT=shipped (owner decision
-## D8 pending: those fits change Low and Medium too); else "" - as shipped.
-func _headwear_fit_base() -> String:
+## shipped luminous head only for an explicitly qualified piece/hair pairing
+## or the existing RL_HEADWEAR_FIT=shipped comparison switch; else as shipped.
+func _headwear_fit_base(visual_id: int = 0, hair: String = "") -> String:
 	if _native_skeleton == null:
 		return ""
 	if _rl_head != null:
 		return _rl_head.appearance.sex
-	return rig_name() if RLHeadwearFit.fits_shipped_body(rig_name()) else ""
+	return rig_name() if RLHeadwearFit.fits_shipped_body(rig_name(), visual_id, hair) else ""
 
 ## The hairstyle a piece is fitted over: "" when the piece hides the hair or
 ## the head is bald; an RL module, `legacy:<style>` for the game hairstyle
@@ -1571,10 +1571,11 @@ func _rl_headwear_hair(model_config: Dictionary) -> String:
 
 ## What a refitted piece depends on; "" while nothing refits it.
 func _rl_headwear_key(visual_id: int, model_config: Dictionary) -> String:
-	var base := _headwear_fit_base()
+	var hair := _rl_headwear_hair(model_config)
+	var base := _headwear_fit_base(visual_id, hair)
 	if base.is_empty() or not RLHeadwearFit.has_piece(visual_id):
 		return ""
-	return "%d|%s|%s|%s" % [visual_id, base, _rl_headwear_hair(model_config), _worn_torso_scene()]
+	return "%d|%s|%s|%s" % [visual_id, base, hair, _worn_torso_scene()]
 
 ## Rebuilds the worn head piece when what its fit depends on changed: an RL
 ## head put on or taken off, the hairstyle, the torso under its trails. The
@@ -3431,8 +3432,7 @@ func apply_equipment_visuals(visuals: Dictionary, fallback_parts: Array = []) ->
 			int(_equipment_visuals.get(BOOTS_PART, 0))):
 		_tell_cloth_what_is_worn()
 	# Open headwear drapes its trails over the torso worn (RLHeadwearFit).
-	if not _headwear_fit_base().is_empty():
-		_refit_rl_headwear()
+	_refit_rl_headwear()
 	_refresh_wardrobe_cover()
 	_refresh_melee_animation_mapping()
 	_refresh_quiver_cape_fit()
@@ -3658,7 +3658,7 @@ func _create_equipment_part(part: int, visual_id: int, allow_fallback: bool) -> 
 				socket, scene_path, model_config, part, visual_id)
 			if attachment != null:
 				created.append(attachment)
-				if part == 3 and not _headwear_fit_base().is_empty():
+				if part == 3:
 					created.append_array(_fit_rl_headwear(attachment, visual_id, model_config))
 	if created.is_empty() and allow_fallback:
 		created.append_array(_attach_fallback_equipment(part, visual_id, part_config))
