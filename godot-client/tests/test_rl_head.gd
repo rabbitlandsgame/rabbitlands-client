@@ -18,6 +18,7 @@ extends SceneTree
 ##   Godot --headless --path godot-client --script res://tests/test_rl_head.gd
 
 const Stage := preload("res://prototypes/rl_heads/rl_head_stage.gd")
+const SkinCompatibility := preload("res://tests/helpers/rl_head_skin_compatibility.gd")
 
 var _failures := 0
 var _stage: Node3D
@@ -160,11 +161,15 @@ func _check_shipping_route() -> void:
 ## the grooming shapes and keep levels, then with the scalp coverage fix and
 ## the messy band; 2026-10-29: build v2_eyestyle, the eye_style and eye_depth
 ## controls and their correctives added, the rest pose and every earlier shape
-## unchanged, hair and beards refitted to it). A new head build needs its hair
-## and beards rebuilt and this table changed with them.
-const SHIPPED_HEADS := {
+## unchanged, hair and beards refitted to it). These remain the historical
+## fitted builds. The narrow skin repair below has a recomputable fit invariant.
+const FITTED_HEADS := {
 	"female": "214459df4df8a63079b5075d84bbbef197c05f0bd40cd59c317d21bff614a192",
 	"male": "9fa7f57485d81cf18ff4b11ec3b405e7e128d8df04a7fd02d5a7ab08ec9f3cce",
+}
+const SHIPPED_HEADS := {
+	"female": "f767679b773ed68071f0ad70d37cc17a7690425ef866707e52b96bfe1c7b76f6",
+	"male": "6b3549331bacbb7ba1664f569b34a9babd57dd93b14345f627a9791231c53619",
 }
 ## Blend shapes per mesh of the shipped build (23 controls): a hairstyle carries
 ## the 46 `id_` shapes and the 4 grooming shapes; a beard the 46 `id_` shapes,
@@ -183,15 +188,24 @@ const KEEP_BAND_SLACK := 1.0 / 255.0
 ## KEEP_TOLERANCE (half an 8-bit step); _check_messy_band_by_finish models it.
 const HAIR_KEEP_TOLERANCE := 0.5 / 255.0
 
-## Hair and facial hair are fitted to one build of a head: each records the
-## SHA-256 of the head GLB it was fitted to (`headSHA256`), which must be the
-## head shipped for its sex, with no exceptions.
+## Preserve each groom's fitted-head SHA. A head-only skin repair may retain
+## that fit only with exact old/new full hashes and the recomputed invariant;
+## a claim in the head's extras alone cannot establish compatibility.
 func _check_asset_consistency() -> void:
 	var heads := {}
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/rl_head_skin_compatibility.json"))
+	var compatibility: Dictionary = parsed if parsed is Dictionary else {}
+	var verified := {}
 	for sex: String in ["female", "male"]:
 		heads[sex] = FileAccess.get_sha256(RLHeadLibrary.head_path(sex))
 		_expect(heads[sex] == SHIPPED_HEADS[sex], "the shipped %s head is build %s (%s)" % [sex,
 			str(SHIPPED_HEADS[sex]).left(12), str(heads[sex]).left(12)])
+		var scope: Dictionary = (compatibility.get("heads", {}) as Dictionary).get(sex, {})
+		var pinned: bool = str(scope.get("source_head_sha256", "")) == FITTED_HEADS[sex] \
+			and str(scope.get("shipped_head_sha256", "")) == SHIPPED_HEADS[sex]
+		var digest := SkinCompatibility.digest(RLHeadLibrary.head_path(sex), scope) if pinned else ""
+		verified[sex] = pinned and not digest.is_empty() and digest == str(scope.get("invariant_sha256", ""))
+		_expect(bool(verified[sex]), "%s skin repair retains its pinned fitted-head invariant, including outside-mask weights" % sex)
 	var counted := {"hair/": 0, "beards/": 0}
 	for folder: Array in [["hair/", "rlHair"], ["beards/", "rlBeard"]]:
 		for file: String in DirAccess.get_files_at(RLHeadLibrary.ROOT + folder[0]):
@@ -205,7 +219,7 @@ func _check_asset_consistency() -> void:
 			_expect(heads.has(sex), "%s names the head sex it was fitted to (%s)" % [relative, sex])
 			if not heads.has(sex):
 				continue
-			_expect(recorded == heads[sex], "%s was fitted to the shipped %s head (%s against %s)" % [relative,
+			_expect(bool(verified[sex]) and recorded in [heads[sex], FITTED_HEADS[sex]], "%s retains an exact or verified compatible %s fitted-head build (%s against %s)" % [relative,
 				sex, recorded.left(12), str(heads[sex]).left(12)])
 	_expect(int(counted["hair/"]) >= 2 and int(counted["beards/"]) >= 4,
 		"every shipped hairstyle and beard was checked %s" % counted)
@@ -1177,12 +1191,12 @@ func _check_dev_switch() -> void:
 # ---------------------------------------------------------------- LOD
 
 func _check_lod_selection() -> void:
-	var skeleton := Skeleton3D.new()
-	for bone: String in ["spine_03", "neck_01", "Head"]:
-		skeleton.add_bone(bone)
-	_stage.add_child(skeleton)
 	var info := RLHeadLibrary.head("female")
 	var piece: Dictionary = ((info["lods"] as Array)[0] as Array)[0]
+	var skeleton := Skeleton3D.new()
+	for bone: String in piece["bones"]:
+		skeleton.add_bone(bone)
+	_stage.add_child(skeleton)
 	var three_levels: Array = [[piece], [piece], [piece]]
 	var expected := {ActorRenderQuality.Quality.HIGH: 3, ActorRenderQuality.Quality.MEDIUM: 2,
 		ActorRenderQuality.Quality.LOW: 1}
