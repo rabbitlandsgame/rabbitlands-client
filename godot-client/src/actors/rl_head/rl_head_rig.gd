@@ -61,6 +61,7 @@ extends Node3D
 signal changed
 
 const NODE_NAME := "RLHead"
+const HAIR_ONLY_NODE_NAME := "RLHairModule"
 ## The BoneAttachment3D the hair hangs from. ReplicatedActor3D hides every
 ## skeleton child named AppearanceHair_* under hair-covering headwear.
 const HAIR_NODE_NAME := "AppearanceHair_RL"
@@ -206,6 +207,8 @@ var _drawn_expressive := true
 var _expression_paused := false
 ## The skeleton's Head bone (-2 until looked up).
 var _head_bone := -2
+## The native head stays in place while modern hair uses its own lower LODs.
+var _hair_only := false
 
 ## Mesh resource id -> {blend shape name: index}, shared by every actor.
 static var _shape_indices: Dictionary = {}
@@ -227,13 +230,29 @@ static var max_expressive := COMPATIBILITY_MAX_EXPRESSIVE if _compatibility() el
 static func attach(skeleton: Skeleton3D, value: Variant,
 		level: int = ActorRenderQuality.QUALITY_DEFAULT, margin: float = 0.0,
 		layers: int = 1) -> RLHeadRig:
+	return _attach(skeleton, value, level, margin, layers, false)
+
+
+## Uses the same hair, grooming, dyes and LODs without loading a head mesh.
+static func attach_hair_only(skeleton: Skeleton3D, value: Variant,
+		level: int = ActorRenderQuality.QUALITY_DEFAULT, margin: float = 0.0,
+		layers: int = 1) -> RLHeadRig:
+	return _attach(skeleton, value, level, margin, layers, true)
+
+
+static func _attach(skeleton: Skeleton3D, value: Variant, level: int,
+		margin: float, layers: int, hair_only: bool) -> RLHeadRig:
 	var face := RLHeadAppearance.from_value(value)
 	if face == null or skeleton == null:
 		if face == null:
 			RLHeadLibrary.warn_once("face:" + str(value), "no RL head preset or face in " + str(value))
 		return null
+	if hair_only and (face.hair == RLHeadAppearance.NONE \
+			or face.hair.begins_with(RLHeadLibrary.LEGACY_PREFIX)):
+		return null
 	var rig := RLHeadRig.new()
-	rig.name = NODE_NAME
+	rig._hair_only = hair_only
+	rig.name = HAIR_ONLY_NODE_NAME if hair_only else NODE_NAME
 	rig.quality = ActorRenderQuality.normalized_quality(level)
 	rig.cull_margin = margin
 	rig.mesh_layers = layers
@@ -244,7 +263,7 @@ static func attach(skeleton: Skeleton3D, value: Variant,
 	# Ranked with the others within LOD_CHECK_FRAMES; until then a face out of
 	# range starts still rather than baking expressions it will not draw.
 	var distance := rig._camera_distance()
-	rig._expressive = distance < 0.0 or distance <= expressive_range
+	rig._expressive = not hair_only and (distance < 0.0 or distance <= expressive_range)
 	if not rig.apply_appearance(face):
 		rig.teardown()
 		return null
@@ -286,15 +305,17 @@ func apply_appearance(face: RLHeadAppearance) -> bool:
 		return false
 	var previous := appearance
 	appearance = face.duplicate_appearance()
-	if previous == null or previous.sex != appearance.sex or _head_lods.is_empty():
-		if not _build_head():
+	if previous == null or previous.sex != appearance.sex or (not _hair_only and _head_lods.is_empty()):
+		if not _hair_only and not _build_head():
 			return false
 		_hair_style = "\n"
 		_beard_style = "\n"
 	if appearance.hair != _hair_style:
 		_build_hair()
-	if appearance.beard != _beard_style:
+	if not _hair_only and appearance.beard != _beard_style:
 		_build_beard()
+	if _hair_only and _hair_lods.is_empty():
+		return false
 	_apply_controls()
 	_apply_hair_shapes()
 	_apply_colours()
@@ -365,11 +386,13 @@ func set_quality(level: int) -> void:
 	if level == quality:
 		return
 	quality = level
-	_build_head()
+	if not _hair_only:
+		_build_head()
 	_hair_style = "\n"
 	_beard_style = "\n"
 	_build_hair()
-	_build_beard()
+	if not _hair_only:
+		_build_beard()
 	_apply_controls()
 	_apply_hair_shapes()
 	_apply_colours()
@@ -852,7 +875,7 @@ static func _check_lods() -> void:
 static func _rank_expressive() -> void:
 	var candidates: Array = []
 	for rig: RLHeadRig in _lod_rigs:
-		if not is_instance_valid(rig) or not rig.can_process():
+		if not is_instance_valid(rig) or not rig.can_process() or rig._hair_only:
 			continue
 		var distance := rig._camera_distance()
 		var margin := LOD_MARGIN if rig._expressive else 0.0
@@ -888,6 +911,8 @@ func _check_lod() -> void:
 
 ## Whether this face is drawn with its live expressions (see MAX_EXPRESSIVE).
 func draws_expressions() -> bool:
+	if _hair_only:
+		return false
 	return _expressive or _portrait_pose or not _lod_listed
 
 
