@@ -32,7 +32,7 @@ def main():
      x=(i+.5+rng.uniform(-.3,.3))*size/56;start=rng.uniform(-700,900);length=rng.uniform(300,1400);phase=rng.uniform(0,6.28);slope=rng.uniform(-.007,.007);points=[(float(x+np.sin(y/180+phase)*1.6+slope*(y-start)),float(y)) for y in np.linspace(start,start+length,25)];shade=int(rng.integers(96,145));draw.line(points,fill=(shade,)*3,width=int(rng.integers(2,5)))
      if i%4==0:draw.line([(x+2,y) for x,y in points],fill=(194,)*3,width=1)
     paint_name='feathered_mohawk_crest_round.png';image.convert('RGBA').save(outdir/paint_name)
-    
+
     def curve(d,surface):
      origin=np.array([[d['x'],2.,d['z']]]);hits,ray,face=surface.ray.intersects_location(origin,np.array([[0.,-1.,0.]]),multiple_hits=True);rootp=hits[np.argmax(hits[:,1])] if len(hits) else closest(surface,np.array([[d['x'],1.8,d['z']]]))[0][0];cp,_,tri=closest(surface,rootp[None]);normal=headref.unit(np.asarray(surface.face_normals)[tri])[0];rootp=cp[0]-normal*.00005;tz=max(-.128,float(rootp[2])-d['sweep']);height=max(.018,float(np.interp(tz,gz,gy)-np.interp(float(rootp[2]),gz,gr)))*d['height_scale'];tip=rootp+np.array([d['tip_x'],height,tz-float(rootp[2])]);c1=rootp+normal*height*.40+np.array([0,0,-d['sweep']*.06]);c2=tip+np.array([-d['tip_x']*.15,-height*.06,d['sweep']*.26]);return np.array([rootp,c1,c2,tip])
     def sample(B,n):
@@ -59,9 +59,9 @@ def main():
      for i in range(3):assert h['meshes'][i]['primitives'][:2]==g['meshes'][i]['primitives'][:2]
      report={'qualified':False,'sex':sex,'method':'Round curved tapered guide locks derived from approved donor crest profile and backward flow; no old fin reuse','qualified_cap_primitives_all_51_targets_blob_prefix_exact':True,'material':'Continuous longitudinal close-fibre chart; cap texture remains exact','lods':receipts,'total_triangles':info['tris'],'source_sha256':hashlib.sha256(out.read_bytes()).hexdigest()};out.with_suffix('.pilot.json').write_text(json.dumps(report,indent=2));print('ROUND_LOCK_PILOT',report,flush=True)
     (outdir/'guide-definitions.json').write_text(json.dumps(definitions,indent=2))
-    
-    
-    
+
+
+
 
 
 if __name__ == "__main__":
