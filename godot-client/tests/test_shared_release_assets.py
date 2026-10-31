@@ -31,10 +31,13 @@ def remote(row, index=1):
 
 def test_only_changed_packages_upload_across_different_release_dates_and_drafts(tmp_path, monkeypatch):
     monkeypatch.setattr(runner, "authorize", lambda: None)
-    monkeypatch.setattr(shared, "ensure", lambda: POOL)
+    pools = {shared.TAG: POOL}
+    def ensure(sha=None, *, tag=shared.TAG):
+        return pools.setdefault(tag, {**POOL, "id": 777 + len(pools), "tag_name": tag})
+    monkeypatch.setattr(shared, "ensure", ensure)
     monkeypatch.setattr(release, "gh", lambda *args: json.dumps({"draft": True, "tag_name": "client-a", "author": {"login": "rabbitlandsgame"}}))
     cloud, uploads = {}, []
-    monkeypatch.setattr(release, "github_assets", lambda id: list(cloud.values()) if id == 777 else [])
+    monkeypatch.setattr(release, "github_assets", lambda id: [a for a in cloud.values() if a["pool_id"] == id])
     monkeypatch.setenv("GH_TOKEN", "fixture-only-token")
 
     @contextmanager
@@ -45,6 +48,7 @@ def test_only_changed_packages_upload_across_different_release_dates_and_drafts(
         row = {"name": name, "size": len(data), "sha256": hashlib.sha256(data).hexdigest()}
         assert shared.NAME.fullmatch(name)[2] == row["sha256"]
         cloud[name] = remote(row, len(cloud) + 1)
+        cloud[name]["pool_id"] = int(release.urllib.parse.urlparse(request.full_url).path.split("/")[-2])
         yield io.BytesIO(json.dumps(cloud[name]).encode())
 
     monkeypatch.setattr(release.urllib.request, "urlopen", upload)
@@ -57,7 +61,7 @@ def test_only_changed_packages_upload_across_different_release_dates_and_drafts(
         (stage / "app/RabbitLands.pck").write_bytes(b"client revision " + str(index).encode())
         (stage / "eloria-assets/maps/example/map.json").write_bytes(b"same map")
         sink = runner.GitHubSink(index)
-        packages = asset_packages.build(stage, shared.base(release.REPOSITORY), shared=True)
+        packages = asset_packages.build(stage, shared.base(release.REPOSITORY), shared="partitioned")
         for package in packages:
             for part in package["parts"]:
                 path = stage.parent / part["url"].rsplit("/", 1)[1]
@@ -335,6 +339,7 @@ def test_publication_cleanup_verifies_reused_files_before_deleting_any_build(tmp
     monkeypatch.setattr(release, "gh", gh)
     monkeypatch.setattr(release, "github_assets", lambda id: pool_assets if id == 777 else assets)
     monkeypatch.setattr(shared, "ensure", lambda: POOL)
+    monkeypatch.setattr(shared, "published_inventory", lambda: pool_assets)
     if corrupt:
         with pytest.raises(ValueError, match="checksum"):
             prune.prune(current["tag_name"])

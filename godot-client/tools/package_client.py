@@ -3892,7 +3892,7 @@ def _main(argv=None, storage=None) -> int:
         if updating:
             outputs.extend(client_release.publish_artifacts(stage, metadata, options.update_signing_key,
                                                             godot, project, run_godot, logs,
-                shared=options.shared_release_assets,
+                shared="partitioned" if STORAGE else options.shared_release_assets,
                 **({"accept_part": storage.accept_part, "budget": storage.budget} if storage else {}),
                 **({"previous_packages": storage.previous_packages, "reuse_package": storage.reuse_package}
                    if asset_cache else {})))

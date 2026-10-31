@@ -218,7 +218,11 @@ static func valid_hash(value: Variant) -> bool:
 	return true
 
 static func shared_download(row: Dictionary, repository: String, kind := "pkg", extension := "zip.part") -> bool:
-	return valid_hash(row.get("sha256")) and row.get("url") == "https://github.com/%s/releases/download/client-assets/RabbitLands-%s-%s.%s" % [repository, kind, row.sha256, extension]
+	if not valid_hash(row.get("sha256")):
+		return false
+	var prefix := "https://github.com/%s/releases/download/client-assets" % repository
+	var filename := "/RabbitLands-%s-%s.%s" % [kind, row.sha256, extension]
+	return row.get("url") == prefix + filename or (kind == "pkg" and extension == "zip.part" and row.get("url") == prefix + "-" + str(row.sha256).left(1) + filename)
 
 static func verify_envelope(envelope: Dictionary, identity: Dictionary) -> Dictionary:
 	if update_owner(identity) != "github":
