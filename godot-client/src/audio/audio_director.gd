@@ -16,6 +16,7 @@ extends Node
 
 const AudioMix := preload("res://src/audio/audio_mix.gd")
 const MusicProgramPlayer := preload("res://src/audio/music_program_player.gd")
+const Jukebox := preload("res://src/audio/jukebox.gd")
 signal music_changed(title: String, creator: String)
 const CATALOG_PATH := "res://assets/audio/catalog.json"
 const AUDIO_DIRECTORY := "res://assets/audio/"
@@ -35,8 +36,8 @@ var enabled := true:
 		_update_master()
 		if not value:
 			stop_all(false)
-		else:
-			play_music(_requested_music)
+		elif jukebox != null:
+			jukebox.set_available(true)
 var volume_linear := AudioMix.MASTER_DEFAULT:
 	set(value):
 		volume_linear = clampf(value, 0.0, 1.0)
@@ -55,6 +56,7 @@ var _music_track := ""
 ## Keep the server's latest choice while muted, so enabling audio resumes it.
 var _requested_music := ""
 var _program_player: Node
+var jukebox: Node
 var _music_entries: Array = []
 var _voices: Array[AudioStreamPlayer] = []
 var _next_voice := 0
@@ -87,6 +89,13 @@ func _ready() -> void:
 	_program_player.configure(_music_entries)
 	_program_player.track_changed.connect(func(title: String, creator: String) -> void:
 		music_changed.emit(title, creator))
+	jukebox = Jukebox.new()
+	add_child(jukebox)
+	jukebox.configure(_music_entries, _program_player)
+	jukebox.game_playback = _play_game_music
+	jukebox.personal_playback = _stop_legacy_music
+	jukebox.playback_track = current_music
+	jukebox.pause_playback = _pause_legacy_music
 	AppState.sound_requested.connect(_on_sound_requested)
 	AppState.music_requested.connect(_on_music_requested)
 	for index: int in range(VOICE_COUNT):
@@ -167,15 +176,30 @@ func music_names() -> Array[String]:
 
 ## What is playing under the map, or "" for silence.
 func current_music() -> String:
-	if _requested_music.begins_with("@") and _program_player != null:
+	if _program_player != null and not str(_program_player.current_track()).is_empty():
 		return str(_program_player.current_track())
 	return _music_track
 
-## Plays the named music bed, looping, or stops the music for "". A track this
-## client does not have is silence rather than a guess at a substitute, and it
-## says so by returning false.
+## Remember the server's music even while personal playback overrides it.
+## Return whether audio is enabled and the server request is understood.
 func play_music(track: String) -> bool:
 	_requested_music = track
+	if jukebox == null:
+		return false
+	jukebox.request_game(track)
+	return enabled and (track.trim_prefix("@").get_slice("|", 0) in _program_player.programs \
+		if track.begins_with("@") else _music_streams.has(track))
+
+func _stop_legacy_music() -> void:
+	if _music_player != null:
+		_music_player.stop()
+	_music_track = ""
+
+func _pause_legacy_music(value: bool) -> void:
+	if _music_player != null:
+		_music_player.stream_paused = value
+
+func _play_game_music(track: String) -> bool:
 	if track.begins_with("@"):
 		if _music_player != null:
 			_music_player.stop()
@@ -198,6 +222,7 @@ func play_music(track: String) -> bool:
 		_music_player.bus = AudioMix.CATEGORIES.music.bus
 		add_child(_music_player)
 	_music_player.stream = _music_streams[track] as AudioStream
+	_music_player.stream_paused = false
 	_music_player.volume_db = 0.0
 	_music_player.play()
 	_music_track = track
@@ -211,6 +236,11 @@ func stop_all(clear_music_request := true) -> void:
 		_rain_player.stop()
 	if _program_player != null:
 		_program_player.stop()
+	if jukebox != null:
+		if clear_music_request:
+			jukebox.disconnect_session()
+		else:
+			jukebox.set_available(false)
 	for player: AudioStreamPlayer in _voices:
 		player.stop()
 	if _music_player != null:
@@ -218,6 +248,9 @@ func stop_all(clear_music_request := true) -> void:
 	_music_track = ""
 	if clear_music_request:
 		_requested_music = ""
+	music_changed.emit("", "")
+	if jukebox != null:
+		jukebox.changed.emit()
 
 ## True while any voice is sounding. Used by the tests rather than by the game.
 func is_playing() -> bool:
