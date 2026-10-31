@@ -23,6 +23,8 @@ const ENTRIES := {
 	21: {"name": "buzz_cut", "fallback_style": 4, "variants": {
 		"female": {"name": "buzz_cut_female", "native_head": true},
 		"male": {"name": "buzz_cut_male", "native_head": true}}},
+	24: {"name": "twin_buns", "fallback_style": 3, "variants": {
+		"female": {"name": "painted_twin_buns_female", "native_head": true}}},
 }
 
 ## The original saved hairstyle byte remains the player's family choice.
