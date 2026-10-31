@@ -33,6 +33,12 @@ OLD_CELLS += ["combat-100", "combat-160", "aoi-160", "empty"]
 PHASE1_CELLS = ["s3-market-160", "s2-invasion-160", "mixed-mounted-160",
                 "combat-160", "empty", "traversal-southern-cold", "traversal-southern-warm"]
 PHASE7_CELLS = ["combat-heat-bolt-160"]
+UNDEAD_CELLS = [f"production-undead-{count}" for count in (160, 300, 500)]
+GAUNTLET_CELL = "authored-gauntlet-resinroad-combat-21"
+GAUNTLET_FIXTURE = "tests/fixtures/gauntlet_performance_wave.json"
+UNDEAD_SPECIES = {"zombie": {"actorType": 746, "footprint": [1, 1]},
+                  "skeleton": {"actorType": 745, "footprint": [1, 1]},
+                  "drowned_lich_king": {"actorType": 671, "footprint": [2, 2]}}
 ALL_CELLS = OLD_CELLS + ["mixed-mounted-160", "authored-herd",
                          "traversal-southern-cold", "traversal-southern-warm"]
 ERROR_PATTERN = re.compile(r"SCRIPT ERROR|Parse Error|Failed to load|Error loading|ERROR:", re.I)
@@ -47,6 +53,8 @@ PERFORMANCE_GRAPHICS = {
     "swaying_capes": 0, "shadows": False, "particles": True,
     "decorative_grass": False, "name_distance": 20.0,
 }
+PERFORMANCE_PROFILES = {"performance": 30, "performance-60": 60, "performance-60-scale50": 60}
+PERFORMANCE_RENDER_SCALES = {"performance": .75, "performance-60": .75, "performance-60-scale50": .5}
 RUST_MOUNT_PROFILES = frozenset({"moor_pony", "golden_plains_horse", "crystalback_tortoise",
                                "rabbit", "jadefeather_raptor"})
 MIXED_MOUNT_PROFILES = RUST_MOUNT_PROFILES | {"giant_rat"}
@@ -62,12 +70,13 @@ def configure_prepared_profile(args) -> None:
 def configure_settings_profile(args, system: str | None = None) -> None:
     """Resolve omitted arguments, rejecting overrides that would mislabel a preset."""
     profile = getattr(args, "settings_profile", "default")
-    if profile not in ("default", "performance"):
+    if profile not in ("default", *PERFORMANCE_PROFILES):
         raise EvidenceError("unknown settings profile")
-    if profile == "performance":
+    if profile in PERFORMANCE_PROFILES:
+        profile_fps = PERFORMANCE_PROFILES[profile]
         if (platform.system() if system is None else system) not in ("Windows", "Linux"):
             raise EvidenceError("Performance settings seeding supports Windows and Linux only")
-        for field, absent, expected in (("quality", "", "low"), ("fps_cap", None, 30),
+        for field, absent, expected in (("quality", "", "low"), ("fps_cap", None, profile_fps),
                                         ("body_cap", None, 60)):
             value = getattr(args, field)
             if value != absent and value != expected:
@@ -78,6 +87,26 @@ def configure_settings_profile(args, system: str | None = None) -> None:
     elif args.fps_cap is None:
         args.fps_cap = 60  # Preserve the existing default profile.
     cells = selected_cells(args.cells, bool(args.replay))
+    undead = [name in UNDEAD_CELLS for name in cells]
+    if any(undead):
+        if not all(undead):
+            raise EvidenceError("production undead and historical cells need separate runs/prewarms")
+        if getattr(args, "map", "") not in ("", "twinbrook"):
+            raise EvidenceError("production undead requires the authored Twinbrook map")
+        if getattr(args, "centre", "") not in ("", "453,168"):
+            raise EvidenceError("production undead requires authored centre 453,168")
+        args.map, args.centre = "twinbrook", "453,168"
+    if GAUNTLET_CELL in cells:
+        if cells != [GAUNTLET_CELL]:
+            raise EvidenceError("authored gauntlet and other cells need separate runs/prewarms")
+        fixture = gauntlet_fixture()
+        map_id = fixture["map"]
+        centre = ",".join(str(int(value)) for value in fixture["centreTile"])
+        if getattr(args, "map", "") not in ("", map_id):
+            raise EvidenceError(f"authored gauntlet requires {map_id}")
+        if getattr(args, "centre", "") not in ("", centre):
+            raise EvidenceError(f"authored gauntlet requires observer centre {centre}")
+        args.map, args.centre = map_id, centre
     if "mixed-mounted-160" in cells and args.body_cap is not None and 0 < args.body_cap < 80:
         raise EvidenceError("mixed-mounted-160 requires 80 mounted bodies; the requested body cap is below 80")
 
@@ -93,7 +122,7 @@ def seed_settings_profile(profile: str, client: Path, user_root: Path,
     if profile == "default":
         return None
     system = platform.system() if system is None else system
-    if profile != "performance" or system not in ("Windows", "Linux"):
+    if profile not in PERFORMANCE_PROFILES or system not in ("Windows", "Linux"):
         raise EvidenceError("Performance settings seeding supports Windows and Linux only")
     root = user_root.resolve()
     variable = "APPDATA" if system == "Windows" else "XDG_DATA_HOME"
@@ -120,9 +149,11 @@ def seed_settings_profile(profile: str, client: Path, user_root: Path,
     if not user_dir.resolve().is_relative_to(root):
         raise EvidenceError("Performance settings path escaped the isolated run directory")
     path = user_dir / "eloria_hud.cfg"
+    graphics = PERFORMANCE_GRAPHICS | {"fps_limit": PERFORMANCE_PROFILES[profile],
+                                       "render_scale": PERFORMANCE_RENDER_SCALES[profile]}
     content = "[graphics]\n\n" + "".join(
         f"{key}={json.dumps(value, ensure_ascii=False, allow_nan=False)}\n"
-        for key, value in PERFORMANCE_GRAPHICS.items())
+        for key, value in graphics.items())
     user_dir.mkdir(parents=True, exist_ok=True)
     try:
         with path.open("x", encoding="utf-8", newline="\n") as stream:
@@ -168,13 +199,102 @@ def selected_cells(profile: str, replay: bool = False) -> list[str]:
     if replay:
         return []  # The recording determines its map; validate exactly one replay cell later.
     profiles = {"phase4": OLD_CELLS, "quick": ["s3-market-160", "s2-invasion-160"],
-                "phase1": PHASE1_CELLS, "phase7": PHASE7_CELLS, "all": ALL_CELLS}
+                "phase1": PHASE1_CELLS, "phase7": PHASE7_CELLS, "all": ALL_CELLS,
+                "production-undead": UNDEAD_CELLS}
     names = list(profiles[profile]) if profile in profiles else profile.split(",")
-    if not names or any(not item or item not in ALL_CELLS + PHASE7_CELLS for item in names):
+    if not names or any(not item or item not in ALL_CELLS + PHASE7_CELLS + UNDEAD_CELLS + [GAUNTLET_CELL] for item in names):
         raise EvidenceError("unknown or empty benchmark cell selector")
     if len(set(names)) != len(names):
         raise EvidenceError("duplicate benchmark cell selector")
     return names
+
+
+def validate_undead_cell(cell: dict) -> None:
+    """The new population counts remote creatures, in addition to one player."""
+    name = cell["id"]
+    remote = int(name.rsplit("-", 1)[-1])
+    expected = {species: remote // 3 + int(index < remote % 3)
+                for index, species in enumerate(UNDEAD_SPECIES)}
+    if cell.get("count") != remote + 1 or cell.get("creatureCount") != remote \
+            or cell.get("cohort") != "twinbrook-onslaught-v1" \
+            or cell.get("populationScope") != "remote_creatures_plus_one_player" \
+            or cell.get("speciesCounts") != expected \
+            or cell.get("stressAboveDefaultServerCaps") is not (remote > 160):
+        raise EvidenceError(f"{name}: production undead population metadata differs")
+    active = (remote + 2) // 3
+    if cell.get("plan") != {"active": active, "moving": (active + 1) // 2, "fighting": active // 2} \
+            or cell.get("combatDriver") != "melee_only":
+        raise EvidenceError(f"{name}: production undead activity differs")
+    names = list(UNDEAD_SPECIES)
+    def species_counts(indices):
+        return {species: sum(names[index % 3] == species for index in indices) for species in names}
+    if cell.get("activitySpecies") != {"active": species_counts(range(active)),
+                                       "moving": species_counts(range(0, active, 2)),
+                                       "fighting": species_counts(range(1, active, 2))}:
+        raise EvidenceError(f"{name}: production undead active species differ")
+    for boundary in ("afterSpawn", "afterSample"):
+        observed = cell.get("census", {}).get(boundary, {}).get("productionUndead", {})
+        if observed != {"remoteCreatures": remote, "localPlayers": 1,
+                        "species": expected, "invalidProfiles": 0, "aliveRemoteCreatures": remote, "invalidHealth": 0}:
+            raise EvidenceError(f"{name}: production undead census/profile/alive mismatch at {boundary}")
+
+
+def gauntlet_fixture() -> dict:
+    return read_json(Path(__file__).resolve().parents[2] / GAUNTLET_FIXTURE)
+
+
+def validate_gauntlet_cohort(data: dict) -> None:
+    fixture = gauntlet_fixture()
+    cohort = data.get("creatureCohort", {})
+    fixture_path = Path(__file__).resolve().parents[2] / GAUNTLET_FIXTURE
+    if data.get("map") != fixture["map"] or data.get("centreTile") != fixture["centreTile"] \
+            or cohort.get("id") != "resinroad-sounder-w5-pulse3-v1" \
+            or cohort.get("fixture") != "res://" + GAUNTLET_FIXTURE \
+            or cohort.get("fixtureSha256") != sha256_file(fixture_path) \
+            or cohort.get("profiles") != fixture["profiles"] or cohort.get("wave") != fixture["wave"] \
+            or cohort.get("waveCentreTile") != fixture.get("waveCentreTile") or cohort.get("observer") != fixture.get("observer") \
+            or cohort.get("qualification") != fixture["qualification"] \
+            or data.get("creatureFootprints") != {str(p["actorType"]): p["footprint"] for p in fixture["profiles"]} \
+            or data.get("prewarmed", {}).get("creatureModels") != [p["model"] for p in fixture["profiles"]]:
+        raise EvidenceError("authored gauntlet cohort/map/fixture/prewarm differs")
+
+
+def validate_gauntlet_cell(cell: dict) -> None:
+    fixture = gauntlet_fixture()
+    species = {p["model"]: p["count"] for p in fixture["profiles"]}
+    remote = len(fixture["actors"])
+    if cell.get("count") != remote + 1 or cell.get("creatureCount") != remote \
+            or cell.get("cohort") != "resinroad-sounder-w5-pulse3-v1" \
+            or cell.get("populationScope") != "remote_creatures_plus_one_player" \
+            or cell.get("positionScope") != "exact_authored_spawn_tiles" or cell.get("speciesCounts") != species \
+            or cell.get("combatDriver") != "scripted_melee_only" \
+            or cell.get("plan") != {"active": remote, "moving": 0, "fighting": remote} \
+            or cell.get("activitySpecies") != {"active": species, "moving": {}, "fighting": species}:
+        raise EvidenceError("authored gauntlet population/activity differs")
+    for boundary in ("afterSpawn", "preSample", "afterSample"):
+        sample = cell.get("census", {}).get(boundary, {})
+        minimum_visible = _integer(fixture.get("observer", {}).get("minimumExpectedInFrustumCreatures"), "gauntlet.minimumVisibleCreatures", 1) + 1
+        if boundary != "afterSpawn" and _integer(sample.get("inFrustumBuiltBodies"), "gauntlet.inFrustumBuiltBodies") < minimum_visible:
+            raise EvidenceError(f"authored gauntlet has fewer than {minimum_visible} visible built bodies at {boundary}")
+        observed = sample.get("authoredGauntlet", {})
+        if observed != {"remoteCreatures": remote, "localPlayers": 1, "species": species, "invalidProfiles": 0,
+                        "aliveRemoteCreatures": remote, "invalidHealth": 0}:
+            raise EvidenceError(f"authored gauntlet census/profile/tile/alive mismatch at {boundary}")
+
+
+def validate_steady_pacing(cell: dict, request: dict) -> None:
+    required = request["mode"] == "windowed" and request["renderer"] == "gl_compatibility"
+    for boundary in ("preSample", "afterSample"):
+        state = _object(cell.get("pacing", {}).get(boundary), cell["id"] + ".pacing." + boundary)
+        if state.get("frameCap") != request["fps_cap"] \
+                or (request["mode"] == "windowed" and state.get("vsyncMode") != 0) \
+                or state.get("warmingRequired") is not required \
+                or any(state.get(key) is not False for key in ("arrivalPending", "arrivalVisible", "headWarmupActive")):
+            raise EvidenceError(f"{cell['id']}: steady pacing/arrival differs at {boundary}")
+        warm = _object(state.get("cameraWarmup"), cell["id"] + ".cameraWarmup")
+        if warm.get("active") is not False or (required and (warm.get("view") != 240 or warm.get("views") != 240 \
+                or warm.get("frames_per_view") != 2 or warm.get("timed_out") is not False)):
+            raise EvidenceError(f"{cell['id']}: complete warming differs at {boundary}")
 
 
 def _number(value: Any, label: str, minimum: float = 0) -> float:
@@ -272,9 +392,17 @@ def validate_runtime(runtime: dict, request: dict, renderer: str, quality: str,
     backends = _object(runtime.get("activeBackends"), label + ".activeBackends")
     expected = {"quality": quality, "bodyCap": body_cap, "frameCap": request["fps_cap"],
                 "renderer": renderer, "rootSize": list(request["resolution"])}
-    if request.get("settings_profile") == "performance":
-        expected.update(quality="low", bodyCap=60, renderScale=.75,
+    if request.get("settings_profile") in PERFORMANCE_PROFILES:
+        if request["fps_cap"] != PERFORMANCE_PROFILES[request["settings_profile"]]:
+            raise EvidenceError(f"{label}: frame cap differs from named Performance profile")
+        expected.update(quality="low", bodyCap=60, renderScale=PERFORMANCE_RENDER_SCALES[request["settings_profile"]],
                         textureQuality="half", textureSkip=1, appearance="painted_ground")
+        expected.update(clothBudget=0, shadowsPreference=False, sunShadowsEnabled=False,
+                        particlesEnabled=True, decorativeGrass=False, nameDistanceMetres=20.0)
+    if request.get("mode") == "windowed" and any(
+            name in UNDEAD_CELLS or name == GAUNTLET_CELL
+            for name in selected_cells(request["cells"], bool(request.get("replay")))):
+        expected["vsyncMode"] = 0
     if request.get("minimap") in ("show", "hide"):
         expected["minimap"] = request["minimap"] == "show"
     for key, value in expected.items():
@@ -425,6 +553,8 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
     errors = ERROR_PATTERN.findall(log)
     if errors:
         raise EvidenceError(f"engine log contains {len(errors)} script/load/error lines")
+    if GAUNTLET_CELL in selected_cells(request["cells"], bool(request.get("replay"))):
+        validate_gauntlet_cohort(data)
     if data.get("benchmark") != "crowd_presentation" or type(data.get("schemaVersion")) is not int \
             or data.get("schemaVersion") != 1:
         raise EvidenceError("unexpected benchmark/schema")
@@ -432,6 +562,16 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
         raise EvidenceError("benchmark reports failures or omits failure metadata")
     if data.get("functionalOnly") is True:
         raise EvidenceError("functional-only placement probe is not accepted timing evidence")
+    if any(name in UNDEAD_CELLS for name in selected_cells(request["cells"], bool(request.get("replay")))):
+        cohort = data.get("creatureCohort", {})
+        profiles = [{"model": species, **profile, "health": health, "scale": 1.0}
+                    for (species, profile), health in zip(UNDEAD_SPECIES.items(), (400, 262, 1088))]
+        if data.get("map") != "twinbrook" or data.get("centreTile") != [453, 168] \
+                or cohort.get("id") != "twinbrook-onslaught-v1" or cohort.get("profiles") != profiles \
+                or cohort.get("sourceWaveMaximum") != 500 \
+                or data.get("creatureFootprints") != {str(p["actorType"]): p["footprint"] for p in profiles} \
+                or data.get("prewarmed", {}).get("creatureModels") != list(UNDEAD_SPECIES):
+            raise EvidenceError("production undead cohort/map/prewarm differs")
     if data.get("headless") is not (request["mode"] == "headless"):
         raise EvidenceError("actual display mode differs from requested mode")
     if request["mode"] == "windowed" and data.get("renderingMethod") != request["renderer"]:
@@ -468,7 +608,7 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
         raise EvidenceError("actual body cap differs from request")
     budget = {"low": 8, "medium": 12, "high": 16}[data["graphicsQuality"]]
     expected_budgets = {"fullRateBodies": budget, "halfRateBodies": budget,
-                        "clothBodies": 0 if request.get("settings_profile") == "performance" else 8}
+                        "clothBodies": 0 if request.get("settings_profile") in PERFORMANCE_PROFILES else 8}
     for entry in request.get("tuning", "").split(","):
         pair = entry.split("=")
         if len(pair) == 2 and pair[0].strip() in ("full", "half", "cloth"):
@@ -499,7 +639,7 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
         user_dir = _object(data.get("runtimeBuild"), "runtimeBuild").get("userDataDir")
         if not isinstance(user_dir, str) or not Path(user_dir).resolve().is_relative_to(Path(request["user_root"]).resolve()):
             raise EvidenceError("engine user data escaped the isolated run directory")
-    if request.get("settings_profile") == "performance":
+    if request.get("settings_profile") in PERFORMANCE_PROFILES:
         seed_dir = request.get("settings_seed_user_dir")
         actual = _object(data.get("runtimeBuild"), "runtimeBuild").get("userDataDir")
         if not isinstance(seed_dir, str) or not isinstance(actual, str) \
@@ -552,7 +692,9 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
             raise EvidenceError(f"{name}: frame statistics disagree with raw series")
         count = _integer(cell.get("count"), name + ".count", 1)
         if not request.get("replay"):
-            wanted_count = int(name.rsplit("-", 1)[-1]) if name.rsplit("-", 1)[-1].isdigit() else 1
+            wanted_count = (22 if name == GAUNTLET_CELL else
+                            int(name.rsplit("-", 1)[-1]) + 1 if name in UNDEAD_CELLS else
+                            int(name.rsplit("-", 1)[-1]) if name.rsplit("-", 1)[-1].isdigit() else 1)
             if count != wanted_count:
                 raise EvidenceError(f"{name}: actor population differs from requested cell")
         try:
@@ -560,13 +702,26 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
         except ValueError as exc:
             raise EvidenceError(str(exc)) from exc
         census = _object(cell.get("census"), name + ".census")
-        for point in ("afterSpawn", "afterSample"):
+        if name in UNDEAD_CELLS:
+            validate_undead_cell(cell)
+        if name == GAUNTLET_CELL:
+            validate_gauntlet_cell(cell)
+        points = ("afterSpawn", "preSample", "afterSample") if name in UNDEAD_CELLS or name == GAUNTLET_CELL else ("afterSpawn", "afterSample")
+        for point in points:
             sample = _object(census.get(point), name + "." + point)
             nodes = _integer(sample.get("nodes"), name + ".nodes", 1)
             built = _integer(sample.get("builtBodies"), name + ".builtBodies")
             deferred = _integer(sample.get("deferred"), name + ".deferred")
             if built + deferred != nodes or (not request.get("replay") and nodes != count):
                 raise EvidenceError(f"{name}: actor/body census is inconsistent")
+            body_fields = ("visibleBuiltBodies", "inFrustumBuiltBodies", "bodyTierFull", "bodyTierHalf", "bodyTierQuarter", "bodyTierPaused")
+            if name in UNDEAD_CELLS or name == GAUNTLET_CELL or any(field in sample for field in body_fields):
+                actual = {field: _integer(sample.get(field), name + "." + field) for field in body_fields}
+                if not 0 <= actual["inFrustumBuiltBodies"] <= actual["visibleBuiltBodies"] <= built \
+                        or sum(actual[field] for field in body_fields[2:]) != built:
+                    raise EvidenceError(f"{name}: built-body visibility/tier census is inconsistent")
+        if name in UNDEAD_CELLS or name == GAUNTLET_CELL:
+            validate_steady_pacing(cell, request)
         runtime = _object(cell.get("effectiveRuntime"), name + ".effectiveRuntime")
         observed_native.append(validate_runtime(runtime, request, data.get("renderingMethod"),
                                                data["graphicsQuality"], policy["bodyCap"], name))
@@ -623,10 +778,10 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
             active = _integer(plan.get("active"), name + ".plan.active")
             moving = _integer(plan.get("moving"), name + ".plan.moving")
             fighting = _integer(plan.get("fighting"), name + ".plan.fighting")
-            expected_active = count - 1 if name.startswith("combat-") else \
+            expected_active = count - 1 if name.startswith("combat-") or name == GAUNTLET_CELL else \
                 (1 if name.startswith("traversal-") else (count + 1) // 3 if count > 1 else 0)
             expected_moving = 16 if name == "combat-heat-bolt-160" else (
-                0 if name.startswith("combat-") else (expected_active + 1) // 2)
+                0 if name.startswith("combat-") or name == GAUNTLET_CELL else (expected_active + 1) // 2)
             if (active, moving, fighting) != (expected_active, expected_moving, expected_active - expected_moving):
                 raise EvidenceError(f"{name}: activity workload differs from requested cell")
             if active and not name.startswith("traversal-"):
@@ -794,6 +949,9 @@ def source_files(client: Path) -> list[Path]:
     binaries = {".dll", ".so", ".dylib"}
     suffixes = {".gd", ".uid", ".gdshader", ".tscn", ".tres", ".py", ".rs", ".cpp", ".h", ".hpp", ".gdextension", ".toml", ".lock"} | binaries
     files = [client / "project.godot"]
+    fixture = client / GAUNTLET_FIXTURE
+    if fixture.is_file():
+        files.append(fixture)
     closure_helper = client / "tools/benchmark_asset_closure.py"
     if closure_helper.is_file():
         files.append(closure_helper)
@@ -810,6 +968,19 @@ def source_files(client: Path) -> list[Path]:
 def asset_files(client: Path, maps: list[str]) -> list[Path]:
     """Runtime resources plus explicit current-map/chunk dependency closure; no authoring trees."""
     files = [p for folder in ("assets", "data") for p in (client / folder).rglob("*") if p.is_file()]
+    # Navigation can show neighbouring regions, so conservatively attest the
+    # complete small picture catalog, including every private section image.
+    backgrounds = client / "data/maps/map-backgrounds.json"
+    if backgrounds.is_file():
+        for row in read_json(backgrounds).get("maps", {}).values():
+            for picture in ([row] if row.get("path") else []) + list(row.get("sections", {}).values()):
+                resource = picture.get("path", "")
+                if not isinstance(resource, str) or not resource.startswith("res://"):
+                    raise EvidenceError("map background identity has no resource path")
+                path = (client / resource.removeprefix("res://")).resolve()
+                if not path.is_relative_to(client.parent.resolve()) or not path.is_file():
+                    raise EvidenceError("map background identity is missing/outside the runtime repository")
+                files.append(path)
     registry_path = client / "data/maps/registry.json"
     if not registry_path.is_file():
         return files
@@ -820,6 +991,12 @@ def asset_files(client: Path, maps: list[str]) -> list[Path]:
             continue
         if name not in registry:
             raise EvidenceError("asset identity requested unknown map")
+        visited = set()
+        while registry[name].get("alias"):
+            if name in visited or registry[name]["alias"] not in registry:
+                raise EvidenceError("map asset identity has an invalid alias")
+            visited.add(name)
+            name = registry[name]["alias"]
         pending.append((client / registry[name]["manifest"].removeprefix("res://")).resolve())
     seen: set[Path] = set()
     vram_directories: set[Path] = set()
@@ -849,7 +1026,7 @@ def asset_files(client: Path, maps: list[str]) -> list[Path]:
         refs += [c["manifest"] for c in chunks if "manifest" in c]
         for ref in refs:
             pending.append((client / ref[6:] if ref.startswith("res://") else path.parent / ref).resolve())
-    return files
+    return list(dict.fromkeys(files))
 
 
 def default_lock_path(client: Path) -> Path:

@@ -259,6 +259,120 @@ round-mask tests include model traps and zero map-viewport primitives. Real
 interior/secret views, marker picking and the Reedfall territory seam were
 rendered separately. Packaging verified all 275 staged images against source.
 
+## Gauntlets and large invasions on K620 (2026-10-31)
+
+These are source-project screening runs using extracted release imports and
+current source overrides, rather than qualification of a newly exported client.
+The machine, settings, retained warm-up, rejected evidence and accepted results
+are recorded in [the trial report](../../docs/qa/linux-gauntlet-invasion-trials-2026-10-31.json).
+OpenGL Compatibility, Low, Half textures, .75 render scale, shadows off and a
+visible direct 2D minimap are used throughout. Crowd body allowance is 60 and
+remote cloth allowance is zero; the local player's cape remains eligible.
+
+Sunmane, Harrowcrag and Resin Road entry tests each completed three full camera
+turns at approximately 60 FPS. All six raw/prepared entry runs had no intervals
+above 33.3 ms; the worst was 25.65 ms. First raw arrivals took 14.185, 16.167 and
+13.740 seconds respectively. These single-player tests retain all 240 warm-up
+views and two draws per view; they do not qualify combat or traversal through
+the entire gauntlet.
+
+A three-map local OpenGL geometry cache built in 9.914 seconds, occupied
+21,676,440 bytes, and passed a second verification with three entries reused.
+Interleaved Harrowcrag raw/prepared trials did not establish a loading benefit:
+mean loader time was 1.969/2.187 seconds and Main setup plus arrival was
+21.308/21.676 seconds. The apparent .302-second arrival-only improvement omits
+additional preparation checks during setup. Warm-up remained intact. The earlier
+larger differences also included warming of OS/driver caches. Keep this result
+separate from the opt-in wardrobe texture cache above, which targets a different
+cost: avatar appearance and equipment construction still take about six seconds
+in these gauntlet arrival tests.
+
+`--cells production-undead-160`, `production-undead-300` and
+`production-undead-500` select an equal-weight zombie/skeleton/drowned-lich-king
+cohort derived from Twinbrook's authored onslaught. Counts are remote creatures
+plus one local player. The authored wave permits up to 500 creatures, but 300/500
+visible records exceed ordinary server publication caps and are client stress
+tests. One third are active, distributed across all three species, with walking
+and melee presentation. Navigation and server AI are not simulated.
+
+Use a fresh process for each count. Growing several cells in one process can
+reuse parked bodies and retain them under distance hysteresis, changing the
+rendered population. The 60-body setting is a soft distance policy; report
+actual `builtBodies`, `deferred`, `inFrustumBuiltBodies` and built-only tier
+counts. Legacy `inFrustumAndDrawn` and `tierFull` also count deferred actor nodes
+and do not establish visible or animated model counts. Delivered FPS comes from
+`wallMilliseconds`; `frameTime` excludes cap sleep.
+
+The accepted 30-second-settle/10-second-sample runs measured:
+
+| Workload | Scale | Cap | Delivered FPS | Interval p95 | Built / in-frustum bodies |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 160 creatures + player | .75 | 60 | 60.3 | 17.26 ms | 82 / 48 |
+| 300 creatures + player | .75 | 60 | 60.3 | 21.26 ms | 80 / 68 |
+| 500 creatures + player | .75 | 30 | 30.1 | 34.00 ms | 80 / 79 |
+| 500 creatures + player | .75 | 60 | 59.0 | 26.54 ms | 78 / 78 |
+| Authored 21-creature gauntlet pulse + player | .75 | 60 | 60.4 | 16.69 ms | 22 / 8 |
+| Same gauntlet pulse | .50 | 60 | 60.4 | 16.71 ms | 22 / 8 |
+
+Frustum counts are actor-bound estimates, not pixel occlusion measurements.
+The gauntlet observer stands on published, unused walkable tile 195,118 near
+seven goblins; the authored wave centre remains 196,87. All 21 creature positions
+are unchanged. Both pre- and post-sample checks require at least those seven
+creature bodies and the player in frame. The gauntlet pair does not demonstrate
+an FPS improvement at the 60-FPS cap.
+
+A separate one-player camera sweep at the denser arena centre used distance 26m,
+FOV 50°, pitch −60° and three full turns. Mean frame intervals were 16.804/16.655 ms
+at .75/.50 scale; mean world GPU time was 11.500/9.145 ms.
+The worst-turn p95 interval improved 18.677→16.748 ms, while the maximum interval
+remained similar (22.677/23.671 ms). This suggests additional GPU headroom at .50,
+with no established improvement in the single worst frame. These two cases have
+contemporary before/after source, asset, engine and private-probe identities.
+
+With 500 creatures and the minimap retained, .50 scale reduced mean world GPU
+time from 11.906 to 7.975 ms. Delivered FPS changed only 59.0→59.9 and interval
+p95 changed 26.538→26.295 ms, with the same 78 built/in-frustum bodies. Lower
+resolution adds GPU headroom but does not remove the remaining CPU cost.
+
+Hiding only the minimap at .75 scale was a diagnostic control: interval p95 fell
+26.538→19.129 ms, while the map-update timer fell from 1.120 ms mean/5.108 ms p95
+to .042/.007 ms. This pair had 78 versus 77 built bodies, and is not a precise
+causal FPS estimate. It identifies map mark collection/projection and deferred
+canvas drawing as useful next profiling targets; the timer does not include all
+canvas work. All ordinary qualification cases retain the visible 2D minimap.
+
+`--settings-profile performance-60` changes only the Performance preset's frame
+cap from 30 to 60. Both named profiles reject conflicting overrides and validate
+the actual runtime settings. `performance-60-scale50` changes only render scale
+from .75 to .50 relative to `performance-60`. Run each with 30 seconds of settling and a
+10-second sample, for example:
+
+```sh
+python3 godot-client/tests/integration/run_crowd_presentation_benchmark.py \
+  --godot "$ELORIA_GODOT" --project-path "$ELORIA_BENCH_STAGE" \
+  --settings-profile performance-60 --variants all \
+  --cells production-undead-500 --mode windowed \
+  --renderer gl_compatibility --resolution 941x1030 --minimap show \
+  --warmup-ms 30000 --sample-ms 10000 --capture-boundaries \
+  --label undead500-60 --out-dir /tmp/rabbitlands-undead500-60
+```
+
+`--cells authored-gauntlet-resinroad-combat-21` selects one real six-player-scale
+Resin Road pulse: twenty Mire Goblins and one Giant Amber Moth, at the exact
+published spawn tiles, plus the local observer on a separate unused mouth tile.
+It uses stationary native melee
+presentation and excludes earlier survivors, encounter progression and server
+combat/pathfinding. Its JSON fixture is included in source identity and benchmark
+exports. New cohorts seed the production footprint-table packet before Main
+creates actors, bound synthetic health, and reject invalid live/profile census
+before sampling. The initial invasion trial omitted that table; its wrong lich
+footprints caused validation failure and all its timings remain excluded.
+Six subsequent trials also remain quarantined: their early VSync acknowledgement
+was contradicted by warm-up restoring VSync later. The harness now establishes
+the frame cap and VSync before map loading, and requires actual VSync-off,
+requested cap, completed 240×2 warming and no active arrival/head warming at
+both sample boundaries. Short rendered smoke checks precede accepted runs.
+
 ## Startup diagnostics
 
 The rotating client log includes `startup_stage` records with a stage name,
