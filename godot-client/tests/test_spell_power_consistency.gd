@@ -15,6 +15,7 @@ func run() -> void:
 	root.get_node("Network").block_for_hud_preview()
 	root.size = Vector2i(1280, 720)
 	var main = load("res://src/app/main.tscn").instantiate()
+	main.set_script(load("res://tests/fixtures/offline_ui_main.gd"))
 	root.add_child(main)
 	for frame in range(8): await process_frame
 	main.get_node("LoginPanel").hide()

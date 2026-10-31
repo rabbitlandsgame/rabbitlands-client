@@ -36,6 +36,7 @@ func run() -> void:
 	root.get_node("Network").block_for_hud_preview()
 	root.size = Vector2i(1280, 720)
 	main = (load("res://src/app/main.tscn") as PackedScene).instantiate()
+	main.set_script(load("res://tests/fixtures/offline_ui_main.gd"))
 	main.get_node("GameView/ChatWindow").preferences_path = artifacts.path_join("browser_%d.cfg" % Time.get_ticks_usec())
 	root.add_child(main)
 	await frames(10)

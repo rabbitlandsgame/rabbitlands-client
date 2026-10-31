@@ -154,6 +154,8 @@ var building_door := false
 ## The same door object on the interior's exit tile (one object id serves both
 ## ends): named by the record's `exitLabel` under the same rule.
 var building_exit := false
+## An authored cave mouth on its exterior tile uses the same approach as a door.
+var cave_entrance := false
 ## The name a building door or exit gives itself (the record's `label` or
 ## `exitLabel`), without the "Click to enter" line.
 var door_label := ""
@@ -670,6 +672,7 @@ func _build_visual(catalog: Dictionary) -> void:
 	# (`modelOffset`, world metres from the tile's centre). The same object id
 	# stands on the interior's exit tile, where `exitLabel` names the way out.
 	var building := bool(authored.get("building", false)) and is_portal()
+	cave_entrance = entrance and not building
 	building_door = entrance and building
 	building_exit = building and not entrance and bool(authored.get("entrance", false))
 	if building_door or building_exit:

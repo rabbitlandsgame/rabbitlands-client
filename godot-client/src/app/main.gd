@@ -2336,6 +2336,8 @@ func _update_keyboard_movement() -> void:
 ## direction is sent when it changes, when the server changes the epoch (a map
 ## change) and as a keep-alive, instead of a MOVE_TO every 360 ms.
 func _update_keyboard_intent(direction: Vector2i, run: bool, now: int) -> void:
+	if direction != Vector2i.ZERO:
+		_door_approach.clear()
 	if _keyboard_moving and _keyboard_intent_epoch == Network.move_intent_epoch \
 			and direction == _keyboard_direction and run == _keyboard_running \
 			and now < _keyboard_refresh_msec:
@@ -15430,8 +15432,7 @@ func _cast_power_for(spell_id: int) -> int:
 	var effect: String = spell_catalog.effect_for(spell_id)
 	if not AppState.spell_power.has(effect):
 		return 0
-	var stated: Dictionary = AppState.spell_power[effect] as Dictionary
-	return mini(requested_spell_power, maxi(1, int(stated.get("limit", 1))))
+	return mini(requested_spell_power, maxi(1, spell_catalog.cast_power_limit(spell_id, AppState.spell_power, AppState.stats)))
 
 func _spell_result_text(result: Dictionary) -> String:
 	if result.is_empty():
@@ -15464,8 +15465,12 @@ func _magic_ring_ui(action: int) -> void:
 		Network.tutorial_ui(action)
 
 func _begin_prepared_cast(spell_id: int, power: int) -> void:
-	var stated: Dictionary = AppState.spell_power.get(spell_catalog.effect_for(spell_id), {})
-	power = mini(power, maxi(1, int(stated.get("limit", 1))))
+	var ceiling: int = spell_catalog.cast_power_limit(spell_id, AppState.spell_power, AppState.stats)
+	if ceiling < 1:
+		var reasons: Array[String] = spell_catalog.unavailable_reasons(spell_id, AppState.known_knowledge, AppState.stats, AppState.inventory)
+		magic_selection.status_changed.emit(reasons[0] if not reasons.is_empty() else "This spell requires more Magic or Magic Nexus.")
+		return
+	power = mini(power, ceiling)
 	magic_selection.begin(spell_id, power, AppState.selected_actor_id)
 	spells_window.close()
 
@@ -15634,6 +15639,8 @@ func _report_health_change(actor_id: int, health: int, max_health: int,
 	var delta: int = health - int(previous)
 	if delta == 0:
 		return
+	if delta < 0 and health > 0 and is_instance_valid(actor):
+		actor.receive_damage_reaction(-delta)
 	var is_self: bool = actor_id == AppState.local_actor_id
 	var option: String = ("damage_numbers_self" if is_self
 		else ("damage_numbers_players" if _is_player_actor(actor_id)
@@ -17206,7 +17213,7 @@ func _activate_map_object(map_object: MapObject3D, inspect: bool) -> void:
 		if harvest_error != OK:
 			push_warning("HARVEST failed: " + error_string(harvest_error))
 		return
-	if (map_object.building_door or map_object.building_exit or map_object.is_stair_end()) \
+	if (map_object.building_door or map_object.building_exit or map_object.cave_entrance or map_object.is_stair_end()) \
 			and _approach_door(map_object):
 		return
 	var use_error: Error = Network.use_map_object(map_object.object_id)
@@ -17242,9 +17249,12 @@ func _update_door_approach() -> void:
 		return
 	var object_id := int(_door_approach.object_id)
 	var local: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
-	if AppState.current_map != str(_door_approach.map) or not AppState.map_objects.has(object_id) \
-			or Time.get_ticks_msec() > int(_door_approach.until_msec) or local.is_empty():
+	if AppState.current_map != str(_door_approach.map) or not AppState.map_objects.has(object_id) or local.is_empty():
 		_door_approach = {}
+		return
+	if Time.get_ticks_msec() > int(_door_approach.until_msec):
+		_door_approach = {}
+		AppState.append_local_message("Could not reach the entrance. Move closer or choose another route.")
 		return
 	var door: Vector2i = _door_approach.tile
 	var reach := maxi(absi(int(local.get("x", 0)) - door.x), absi(int(local.get("y", 0)) - door.y))
