@@ -169,6 +169,9 @@ def groom_builder(head,scalp,P,names,spec,hull,ranges):
     # exterior hairline can leave its edge behind when the temples expand.
     cap_binding=head.bind(P[shell],no_ears=True)
     head_margin,body_margin=shared.layer_margins(P,ranges,spec);delta={}
+    # Keep the same continuous torso exit through preparation and every
+    # identity/groom guard; an unopted profile keeps the exact old calls.
+    body_options={'radial':True} if spec.get('preserve_curtain_depth',False) else {}
     for name in names:
         Dh=head.delta(name);D=binding.delta(Dh,margin=.0028)
         D[shell]=head.bound_delta(cap_binding,Dh)
@@ -180,12 +183,12 @@ def groom_builder(head,scalp,P,names,spec,hull,ranges):
             bad=(sd<head_margin[near])&~rim
             if not bad.any():break
             indices=near[bad];D[indices]=cp[bad]+n[bad]*(head_margin[indices]+.0006)[:,None]-P[indices]
-        delta[name]=shared.body_safe(head,P+D,hull,body_margin)-P
+        delta[name]=shared.body_safe(head,P+D,hull,body_margin,**body_options)-P
         print('TIED_ID_BOUND',len(PROOFS),name,flush=True)
     near=np.flatnonzero(binding.dist<.05)
     if len(near):
         P[near]=ref.joint_groom_clearance(head,P[near],{n:delta[n][near] for n in names},names,head_margin[near],combos=assemble.default_combos(names))
-        P[:]=shared.body_safe(head,P,hull,body_margin)
+        P[:]=shared.body_safe(head,P,hull,body_margin,**body_options)
     Q,normal=ref.roots(head,scalp,P);distance=np.linalg.norm(P-Q,axis=1)
     cap=np.zeros(len(P),bool);cap[shell]=True;active=np.flatnonzero(~cap)
     d0,d1=ranges['detail'];segments=spec['details']['segments'][min(len(PROOFS),2)];stride=2*(segments+1)
@@ -211,7 +214,7 @@ def groom_builder(head,scalp,P,names,spec,hull,ranges):
         safe=P+move
         safe[active]=assemble.push_out_var(head,safe[active],head_margin[active],iters=5)
         safe[active]=ref.joint_groom_clearance(head,safe[active],{n:delta[n][active] for n in names},names,head_margin[active])
-        safe[active]=shared.body_safe(head,safe[active],hull,body_margin[active])
+        safe[active]=shared.body_safe(head,safe[active],hull,body_margin[active],**body_options)
         if native is not None:safe[active],_=native.push_out(safe[active],native_margin)
         delta[name]=safe-P;delta[name][cap]=0
     for _ in range(5):
@@ -226,7 +229,7 @@ def groom_builder(head,scalp,P,names,spec,hull,ranges):
                 delta[volume][active]+=correction
         for volume in GROOMS[2:]:
             states=[P+delta[volume],P+delta[volume]+delta['hl_length_p'],P+delta[volume]+delta['hl_length_n']]
-            correction=shared.shared_body_correction(head,P,states,hull,body_margin)
+            correction=shared.shared_body_correction(head,P,states,hull,body_margin,**body_options)
             correction[cap]=0;largest=max(largest,float(np.linalg.norm(correction,axis=1).max()))
             delta[volume]+=correction
         if largest<1e-6:break
