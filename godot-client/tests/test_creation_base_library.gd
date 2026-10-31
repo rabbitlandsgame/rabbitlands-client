@@ -29,6 +29,7 @@ func _run() -> void:
 	var other_native_ids: Array[String] = []
 	for row: Dictionary in entries:
 		check(not ids.has(row.id), "Unique stable id: " + row.id)
+		check(str(row.portrait_id) == str(row.id), "Static portrait key follows the stable catalog ID")
 		ids[row.id] = true
 		if row.race_id == "luminous":
 			check(not other_race_seen, "Human starting points precede the other races")

@@ -7,6 +7,7 @@ var checks := 0
 var main: Control
 var flow: Variant
 var network: Node
+var _scene_viewport_budget := 0
 
 func _initialize() -> void:
 	call_deferred("run")
@@ -20,6 +21,17 @@ func check(condition: bool, message: String) -> void:
 func settle() -> void:
 	for frame: int in 4:
 		await process_frame
+
+func capture(label: String) -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+	for argument: String in OS.get_cmdline_user_args():
+		if argument.begins_with("--capture-dir="):
+			var folder := argument.trim_prefix("--capture-dir=")
+			DirAccess.make_dir_recursive_absolute(folder)
+			await RenderingServer.frame_post_draw
+			check(root.get_texture().get_image().save_png(folder.path_join(label + ".png")) == OK,
+				"Saved UI review capture " + label)
 
 func appearance() -> Dictionary:
 	return main.call("_creation_appearance")
@@ -42,6 +54,20 @@ func ssarathi_id(actor_type: int) -> String:
 		if int(row.look.actor_type) == actor_type:
 			return str(row.id)
 	return ""
+
+func check_preview_budget(phase: String) -> void:
+	var actors: Array[Node] = []
+	for node: Node in main.find_children("*", "Node", true, false):
+		if node is ReplicatedActor3D and not node.is_queued_for_deletion():
+			actors.append(node)
+	check(actors.size() == 1 and actors[0] == main.get("preview_actor"),
+		phase + ": only the selected creation preview owns a live actor")
+	check(main.find_children("*", "SubViewport", true, false).size() == _scene_viewport_budget
+		and main.get_node("CreationPanel").find_children("*", "SubViewport", true, false).size() == 1,
+		phase + ": only the existing scene viewports and one creation preview, no card bake viewport")
+	check(flow.picker.find_children("*", "SubViewport", true, false).is_empty()
+		and flow.picker.find_children("*", "Node3D", true, false).is_empty(),
+		phase + ": 25 cards contain no live 3D stage")
 
 func run() -> void:
 	root.size = Vector2i(1366, 768)
@@ -70,9 +96,13 @@ func run() -> void:
 		network.call("_set_appearance_protocol", old_protocol)
 		quit(1)
 		return
+	_scene_viewport_budget = main.find_children("*", "SubViewport", true, false).size()
+	print("Creation preview budget: existing scene viewports=%d; one active actor; no card viewports" % _scene_viewport_budget)
 	main.call("_on_new_character_pressed")
 	await settle()
 	check(flow.is_open() and flow.picker.is_open(), "First creation entry opens the picker")
+	check_preview_budget("first open")
+	await capture("picker-first-open")
 	check(not main.get_node("%FormPanel").visible and not main.get_node("%ClassRail").visible,
 		"First entry chooses a look before exposing the editor")
 	flow.picker._dismiss()
@@ -119,6 +149,8 @@ func run() -> void:
 	flow.picker._select_card("human_01")
 	await settle()
 	check(form_state() == saved, "Browsing another look does not mutate the edited form")
+	check_preview_budget("select")
+	await capture("picker-selected-preview")
 	check(int(main.get("_creation_preview_actor_type")) == 0,
 		"Browsing updates the preview independently of the male form")
 	flow.picker._dismiss()
@@ -132,13 +164,19 @@ func run() -> void:
 		and is_equal_approx(float(main.get("preview_pitch")), float(camera.pitch))
 		and is_equal_approx(float(main.get("preview_distance")), float(camera.distance))
 		and main.get("creation_face_focus") == camera.face, "Cancel restores the prior camera framing")
-	# A warmed portrait cache exposed a material fault during same-body grooming
-	# transitions; exercise both directions and preserve the editor on Cancel.
+	# Static cards never add actors while scrolling/filtering. Same-body grooming
+	# transitions still exercise the one active preview and preserve Cancel.
 	flow.open(false)
-	var deadline := Time.get_ticks_msec() + 15000
-	while not flow.picker.portraits.is_idle() and Time.get_ticks_msec() < deadline:
-		await process_frame
-	check(flow.picker.portraits.is_idle(), "Visible portraits finish before changing the staged look")
+	flow.picker.scroll.scroll_vertical = int(flow.picker.scroll.get_v_scroll_bar().max_value)
+	await settle()
+	check_preview_budget("scroll")
+	await capture("picker-scrolled")
+	flow.picker.search.text = "Bram"
+	flow.picker._filter_rows()
+	await settle()
+	check_preview_budget("filter")
+	await capture("picker-filtered")
+	flow.picker._reset_filters()
 	flow.picker._select_card("human_20")
 	await settle()
 	check(form_state() == saved, "A same-body hair-route preview keeps editor changes staged")
@@ -146,6 +184,7 @@ func run() -> void:
 	await settle()
 	check(form_state() == saved and main.get("_creation_preview_appearance") == saved.appearance,
 		"Cancelling the same-body hair-route preview restores the edited appearance")
+	check_preview_budget("cancel and reopen")
 	for actor_type: int in [41, 42]:
 		flow.open(false)
 		var id := ssarathi_id(actor_type)
