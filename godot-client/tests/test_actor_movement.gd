@@ -139,6 +139,81 @@ func check_multicombat_idle() -> void:
 	expect(actor.current_action == &"turn", "turning outside combat keeps its normal standing pose")
 	actor.free()
 
+func check_damage_reactions() -> void:
+	var actor := spawn_actor()
+	add_animation_fixture(actor)
+	actor.apply_server_state(state(0,0,7,false), adapter, true)
+	expect(not actor.receive_damage_reaction(0) and not actor.receive_damage_reaction(-2)
+		and actor.current_action == &"idle", "misses and zero damage do not trigger a hit reaction")
+	expect(actor.receive_damage_reaction(2) and actor.current_action == &"pain",
+		"confirmed stationary damage plays the existing hit clip")
+	actor.animation_player.advance(0.04)
+	var elapsed := actor.presentation_action_time()
+	expect(not actor.receive_damage_reaction(3) and is_equal_approx(actor.presentation_action_time(),elapsed),
+		"repeated hits do not restart a reaction")
+	actor.animation_player.advance(0.11)
+	expect(actor.current_action == &"idle" and not actor.receive_damage_reaction(2),
+		"a completed clip still observes the reaction cooldown")
+	for action: StringName in [&"attack_primary", &"cast", &"walk"]:
+		actor._last_damage_reaction_msec = -actor.DAMAGE_REACTION_COOLDOWN_MSEC
+		actor.play_action(&"idle", true)
+		expect(actor.receive_damage_reaction(1), "a fresh idle reaction can start before %s" % action)
+		actor.play_action(action, true)
+		actor.animation_player.advance(0.03)
+		elapsed = actor.presentation_action_time()
+		expect(actor.current_action == action and not actor.receive_damage_reaction(1)
+			and is_equal_approx(actor.presentation_action_time(),elapsed),
+			"%s interrupts a reaction and later hits cannot cancel it" % action)
+	actor.play_action(&"combat_idle", true)
+	actor._last_damage_reaction_msec = -actor.DAMAGE_REACTION_COOLDOWN_MSEC
+	for guard: String in ["_cinematic_active", "_ranged_aiming", "_crowd_hidden"]:
+		actor.set(guard, true)
+		expect(not actor.receive_damage_reaction(1) and actor.current_action == &"combat_idle",
+			"%s keeps control of the actor during damage" % guard)
+		actor.set(guard, false)
+	actor._drawn = false
+	expect(not actor.receive_damage_reaction(1), "a culled actor does not start an unseen hit clip")
+	actor._drawn = true
+	for guard: String in ["_segment_duration", "_movement_coast_remaining"]:
+		actor.set(guard, 0.1)
+		expect(not actor.receive_damage_reaction(1), "%s prevents a hit clip replacing active travel" % guard)
+		actor.set(guard, 0.0)
+	var mount := Node3D.new()
+	actor._mount_visual = mount
+	expect(not actor.receive_damage_reaction(1), "a mounted hit cannot replace the rider's seated layer")
+	actor._mount_visual = null
+	mount.free()
+	expect(actor.receive_damage_reaction(1), "a stationary combat guard can react without losing combat state")
+	actor._in_combat = true
+	actor.animation_player.advance(0.11)
+	expect(actor.current_action == &"combat_idle", "a guard reaction returns to the combat stance")
+	actor.play_action(&"death", true)
+	expect(not actor.receive_damage_reaction(1) and actor.current_action == &"death",
+		"damage feedback cannot replace a death")
+	actor.free()
+
+func check_damage_feedback_wiring() -> void:
+	# Use the real accepted-health feedback entry point without constructing a
+	# map or socket. Disabled floating numbers isolate the independent reaction.
+	var main: Control = load("res://src/app/main.gd").new()
+	main._hud_element_options = {"damage_numbers_self":false,
+		"damage_numbers_players":false, "damage_numbers_creatures":false}
+	var actor := spawn_actor()
+	add_animation_fixture(actor)
+	actor.apply_server_state(state(0,0,7,false), adapter, true)
+	main._report_health_change(900, 20, 20, actor)
+	main._report_health_change(900, 20, 20, actor)
+	main._report_health_change(900, 21, 25, actor)
+	expect(actor.current_action == &"idle", "first snapshots, unchanged health and healing do not request hit motion")
+	main._report_health_change(900, 18, 25, actor)
+	expect(actor.current_action == &"pain", "accepted health loss triggers hit motion even with floating numbers disabled")
+	actor.animation_player.advance(0.11)
+	actor._last_damage_reaction_msec = -actor.DAMAGE_REACTION_COOLDOWN_MSEC
+	main._report_health_change(900, 0, 25, actor)
+	expect(actor.current_action == &"idle", "lethal health loss leaves the death presentation in control")
+	actor.free()
+	main.free()
+
 func check_post_combat_pace() -> void:
 	for command: int in [22, 32]:
 		var pace := 0.2 if command == 32 else 0.6
@@ -199,6 +274,8 @@ func check_post_combat_pace() -> void:
 func run() -> void:
 	check_post_combat_movement()
 	check_multicombat_idle()
+	check_damage_reactions()
+	check_damage_feedback_wiring()
 	check_post_combat_pace()
 	for running: bool in [false, true]:
 		var ordinary := spawn_actor()
