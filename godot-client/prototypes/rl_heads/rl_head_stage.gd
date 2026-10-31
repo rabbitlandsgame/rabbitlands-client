@@ -146,6 +146,7 @@ static func spawn(parent: Node, sex: String, appearance: Dictionary, visuals: Di
 	var config: Dictionary = ((data("models").get("models", {}) as Dictionary).get(slug, {})
 		as Dictionary).duplicate(true)
 	var actor := ReplicatedActor3D.new()
+	actor.apply_render_quality(quality, false)
 	parent.add_child(actor)
 	var errors: Array = actor.configure({"actor_id": actor_id, "x": 0, "y": 0, "rotation": 0,
 		"kind": 1, "name": "", "appearance": appearance, "equipment_visuals": {}},
@@ -153,7 +154,6 @@ static func spawn(parent: Node, sex: String, appearance: Dictionary, visuals: Di
 	if not errors.is_empty():
 		push_error("RL head stage: configure %s: %s" % [slug, str(errors)])
 	actor.server_target = Vector3.ZERO
-	actor.apply_render_quality(quality, false)
 	actor.global_position = Vector3.ZERO
 	actor.rotation.y = PI
 	actor.set_process(false)

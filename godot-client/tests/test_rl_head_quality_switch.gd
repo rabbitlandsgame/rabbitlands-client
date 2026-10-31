@@ -6,7 +6,8 @@ extends SceneTree
 ##     bias, layers, skins) for presets, beards, a game hairstyle, an open band
 ##     and a closed helm; RL_HEADS=classic switches a live actor to develop's
 ##     classic High head and back;
-##   * RL caches outlive the last RL head for the retention time (a switch back
+##   * RL caches stay in use while modern hair is drawn below High, then
+##     outlive the last head/hair module for the retention time (a switch back
 ##     up within it parses nothing again), then are all released; no rig is
 ##     left behind; prewarm parses the RL files on workers and publishes them;
 ##   * body refinement never touches RL meshes (no cache entries for them);
@@ -277,8 +278,9 @@ func _check_release() -> void:
 	_expect(RLHeadLibrary.users() == 3 and RLHeadLibrary.is_loaded(), "three RL heads hold the caches (%d)" % RLHeadLibrary.users())
 	actors[0].apply_render_quality(MEDIUM, false)
 	await process_frame
-	_expect(RLHeadLibrary.users() == 2 and RLHeadLibrary.is_loaded(), "one switched down leaves the caches loaded")
-	_expect(RLHeadRig.find_on(actors[0].get_skeleton()) == null, "the switched actor keeps no rig")
+	_expect(RLHeadLibrary.users() == 3 and RLHeadLibrary.is_loaded(), "one switched down retains its modern hair lease")
+	_expect(RLHeadRig.find_on(actors[0].get_skeleton()) == null and actors[0].hair_module_rig() != null,
+		"the switched actor keeps only its hairstyle rig")
 	# The last one going keeps the caches for the retention time: switching
 	# back up within it reads and parses nothing again.
 	RLHeadLibrary.retain_seconds = 0.4
@@ -286,8 +288,13 @@ func _check_release() -> void:
 	actors[2].free()
 	await process_frame
 	await process_frame
+	_expect(RLHeadLibrary.users() == 2 and not RLHeadLibrary.retaining(),
+		"Low and Medium hairstyles keep the library alive")
+	for actor: ReplicatedActor3D in [actors[0], actors[1]]:
+		actor.apply_appearance_variants(actor._appearance.merged({"hair": 0}, true))
+	await process_frame
 	_expect(RLHeadLibrary.users() == 0 and RLHeadLibrary.is_loaded() and RLHeadLibrary.retaining(),
-		"the last RL head going keeps the caches for the retention time")
+		"removing the last modern hairstyles starts cache retention")
 	var misses := int(GlbSceneCache.retention_snapshot()["lookup_misses"])
 	actors[0].apply_render_quality(HIGH, false)
 	await process_frame

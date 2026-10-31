@@ -1110,7 +1110,9 @@ func _grow_mesh(mesh_node: MeshInstance3D, amount: float) -> void:
 	material.grow = true
 	material.grow_amount = amount
 
-func _add_hair_variant(style: int, color: Color) -> void:
+func _add_hair_variant(style: int, color: Color, rebuild := true) -> void:
+	if not rebuild and _legacy_hair_style_drawn() == style:
+		return
 	for old_attachment: Node in _native_skeleton.get_children():
 		if old_attachment.name.begins_with("AppearanceHair_") and old_attachment.name != RLHeadRig.HAIR_NODE_NAME:
 			_native_skeleton.remove_child(old_attachment)
@@ -1293,7 +1295,7 @@ func _rl_head_face(appearance: Dictionary) -> RLHeadAppearance:
 ## hair pass); an RL hairstyle module, where the face has one, hides it while
 ## drawn, so a missing module falls back to it and a switch down from High
 ## finds it as develop left it. Then the RL head, or none.
-func _apply_rl_head_and_hair(appearance: Dictionary, hair_tint: Color) -> void:
+func _apply_rl_head_and_hair(appearance: Dictionary, hair_tint: Color, rebuild_native := true) -> void:
 	var face: RLHeadAppearance = _rl_head_face(appearance) if _rl_head_wanted() else null
 	var style := AppearanceVariants.hair_style(int(appearance.get("hair", 0)))
 	var tint := hair_tint
@@ -1305,7 +1307,7 @@ func _apply_rl_head_and_hair(appearance: Dictionary, hair_tint: Color) -> void:
 		_remove_rl_hair()
 		if _set_rl_head(face):
 			var modern := _rl_head_pending != null or (_rl_head != null and _rl_head.draws_module_hair())
-			_add_hair_variant(0 if modern else style, tint)
+			_add_hair_variant(0 if modern else style, tint, rebuild_native)
 			if _rl_head != null:
 				_rl_head.set_hair_external(style != 0 and not modern)
 			return
@@ -1317,10 +1319,10 @@ func _apply_rl_head_and_hair(appearance: Dictionary, hair_tint: Color) -> void:
 	if hair_face != null and hair_face.hair != RLHeadAppearance.NONE \
 			and not hair_face.hair.begins_with(RLHeadLibrary.LEGACY_PREFIX) \
 			and _set_rl_hair(hair_face):
-		_add_hair_variant(0, tint)
+		_add_hair_variant(0, tint, rebuild_native)
 	else:
 		_remove_rl_hair()
-		_add_hair_variant(style, tint)
+		_add_hair_variant(style, tint, rebuild_native)
 
 
 func _set_rl_hair(face: RLHeadAppearance) -> bool:
@@ -1422,7 +1424,11 @@ func _remove_rl_head() -> void:
 ## the modern hair through its own rig; High uses the combined head/hair rig.
 ## Deferred initial modules also enter here after animation import.
 func _switch_rl_head_in_place() -> void:
-	_apply_rl_head_and_hair(_appearance, _hair_tint)
+	# Retire any High finish before replacing its source node or material.
+	# An unchanged compatibility hairstyle keeps its original resource identity.
+	if is_instance_valid(_native_model):
+		HIGH_HAIR.restore(_native_model)
+	_apply_rl_head_and_hair(_appearance, _hair_tint, false)
 	_rl_switching = true
 	_refresh_body_surface_visibility()
 	_refresh_wardrobe_cover()

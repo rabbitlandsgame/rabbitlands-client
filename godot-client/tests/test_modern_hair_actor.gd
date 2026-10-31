@@ -39,6 +39,8 @@ func run() -> void:
 			"eyes": 2, "hair_module": module, "facial_hair": 0}
 		var actor := Stage.spawn(world, sex, app, {}, 0)
 		await process_frame
+		if sex == "female":
+			check(Library._heads.is_empty(), "initial Low actor loads hair without loading a modern head")
 		for quality: int in [0, 1, 2, 1, 0, 2]:
 			actor.apply_appearance_variants(app)
 			actor.apply_render_quality(quality)
@@ -76,6 +78,7 @@ func run() -> void:
 		actor.queue_free()
 		await process_frame
 		await process_frame
+	check(Library.users() == 0, "freeing both actors releases every head and hair library lease")
 	Library.clear()
 	NativeAnimationImporter.clear()
 	GlbSceneCache.clear()
