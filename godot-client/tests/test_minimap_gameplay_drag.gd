@@ -1,12 +1,6 @@
 extends SceneTree
 ## Exercise the production GUI path, including circular rims over the map image.
 const Presets := preload("res://src/ui/hud_presets.gd")
-class CaptureNetwork extends EloriaNetworkClient:
-	var outgoing: Array[PackedByteArray] = []
-	func send_frame(frame: PackedByteArray, _sensitive := false) -> Error:
-		outgoing.append(frame.duplicate())
-		return OK
-
 var main: Control
 var checks := 0
 var failures := 0
@@ -68,7 +62,9 @@ func drag(delta: Vector2, label: String, round_map := true) -> void:
 func run() -> void:
 	create_timer(100).timeout.connect(func() -> void: quit(99))
 	var network := root.get_node("Network")
-	network.set_script(CaptureNetwork)
+	# Load after autoload registration. A script-level subclass of the network
+	# client compiles its AppState references before that singleton exists.
+	network.set_script(load("res://tests/fixtures/minimap_drag_network_probe.gd"))
 	network.block_for_hud_preview()
 	root.size = Vector2i(1440, 900)
 	main = (load("res://src/app/main.tscn") as PackedScene).instantiate()

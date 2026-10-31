@@ -78,6 +78,17 @@ func _initialize() -> void:
 	for path in ["../escape", "app/../escape", "app/x:stream", "app/CON", "app/X.", "app//x", "/app/x", "other/x", "app\\x"]:
 		expect(not Release.safe_path(path), "unsafe path accepted: " + path)
 	expect(Release.safe_path("app/assets/models/example.glb"), "ordinary nested paths must work")
+	var shared_hash := "a".repeat(64)
+	var shared_name := "/RabbitLands-pkg-%s.zip.part" % shared_hash
+	expect(Release.shared_download({"sha256": shared_hash,
+		"url": "https://github.com/o/r/releases/download/client-assets" + shared_name}, "o/r"),
+		"legacy shared package URL must remain valid")
+	expect(Release.shared_download({"sha256": shared_hash,
+		"url": "https://github.com/o/r/releases/download/client-assets-a" + shared_name}, "o/r"),
+		"checksum-partitioned shared package URL must be valid")
+	expect(not Release.shared_download({"sha256": shared_hash,
+		"url": "https://github.com/o/r/releases/download/client-assets-b" + shared_name}, "o/r"),
+		"shared package must reject a mismatched checksum partition")
 	old_install()
 	var signed := make_download(b)
 	var release := Release.verify_manifest(signed, _identity, b)

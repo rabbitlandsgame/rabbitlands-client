@@ -24,6 +24,10 @@ def finalize(receipts: list[Path], out: Path) -> str:
     if any((item.get("shared_storage") == 1) != pooled for item in data):
         raise ValueError("Both platforms must use the same asset storage.")
     pool_id = data[0].get("shared_release_id") if pooled else None
+    partitioned = "shared_release_ids" in data[0]
+    pool_ids = {}
+    if any(("shared_release_ids" in item) != partitioned for item in data):
+        raise ValueError("Both platforms must use the same storage layout.")
     for item in data:
         if (item.get("schema") != 1 or item["repository"] != release.REPOSITORY
                 or item["commit"] != sha or item["release_id"] != release_id):
@@ -36,6 +40,13 @@ def finalize(receipts: list[Path], out: Path) -> str:
         stages[platform] = stage
         packaged = item.get("update_schema", 1) == 2
         if pooled:
+            if partitioned:
+                if not isinstance(item["shared_release_ids"], dict):
+                    raise ValueError("Invalid shared storage release identities.")
+                for storage_tag, storage_id in item["shared_release_ids"].items():
+                    if storage_tag in pool_ids and pool_ids[storage_tag] != storage_id:
+                        raise ValueError("Platform shared storage destinations disagree.")
+                    pool_ids[storage_tag] = storage_id
             if not packaged or item.get("shared_release_id") != pool_id or not isinstance(pool_id, int) or pool_id <= 0:
                 raise ValueError("Platform receipts use different shared downloads.")
             for name, row in shared.receipt_assets(item).items():
@@ -70,7 +81,7 @@ def finalize(receipts: list[Path], out: Path) -> str:
             raise ValueError("A runner receipt is missing required downloads.")
     if len(rows) + 1 > 1000:
         raise ValueError("Too many release assets.")
-    if len(shared_rows) > 1000:
+    if not partitioned and len(shared_rows) > 1000:
         raise ValueError("Too many shared release assets.")
     optimization_proofs = {item["platform"]: item["optimizations"] for item in data}
     if len({proof["coverage_sha256"] for proof in optimization_proofs.values()}) != 1 \
@@ -86,8 +97,11 @@ def finalize(receipts: list[Path], out: Path) -> str:
     if any(not release.asset_matches(remote.get(name, {}), row) for name, row in rows.items()):
         raise ValueError("A runner download is missing or failed checksum verification; keeping previous files.")
     if pooled:
+        if partitioned:
+            if pool_ids.get(shared.TAG) != pool_id:
+                raise ValueError("Legacy helper storage identity changed.")
         shared.validate_release(json.loads(release.gh("api", f"repos/{release.REPOSITORY}/releases/{pool_id}")))
-        remote_pool = {a["name"]: a for a in release.github_assets(pool_id)}
+        remote_pool = shared.verify_storage(shared_rows, pool_ids) if partitioned else {a["name"]: a for a in release.github_assets(pool_id)}
         if any(not release.asset_matches(remote_pool.get(name, {}), row) for name, row in shared_rows.items()):
             raise ValueError("A shared download failed checksum verification; keeping previous files.")
     tag = f"client-{sha}"
@@ -111,7 +125,7 @@ def finalize(receipts: list[Path], out: Path) -> str:
     if any(not release.asset_matches(remote.get(name, {}), row) for name, row in rows.items()):
         raise ValueError("Final checksum verification failed; keeping previous files.")
     if pooled:
-        remote_pool = {a["name"]: a for a in release.github_assets(pool_id)}
+        remote_pool = shared.verify_storage(shared_rows, pool_ids) if partitioned else {a["name"]: a for a in release.github_assets(pool_id)}
         if any(not release.asset_matches(remote_pool.get(name, {}), row) for name, row in shared_rows.items()):
             raise ValueError("Final shared checksum verification failed; keeping previous files.")
     base = f"https://github.com/{release.REPOSITORY}/releases/download/{tag}"
@@ -171,7 +185,7 @@ argument. Existing installations reuse their matching packages.
             text += "\n" + platform.title() + ": " + ", ".join(
                 f"[{kind}]({shared.base(release.REPOSITORY)}/{name})" for kind, name in names.items()) + ".\n"
         text = text.replace("`.pkg.*.zip.###` packages", "checksum-named ZIP packages")
-        text += "\nSupporting package files live in one shared downloads release. Only changed checksums are uploaded; the latest playable release is still the only retained game version.\n"
+        text += "\nSupporting package files use shared downloads storage. Only changed checksums are uploaded; the latest playable release is still the only retained game version.\n"
         notes.write_text(text, encoding="utf-8", newline="\n")
     release.gh("release", "edit", draft["tag_name"], "--repo", release.REPOSITORY, "--draft", "--tag", tag,
                "--target", sha, "--title", f"Rabbit Lands {sha[:9]}", "--notes-file", str(notes))
@@ -189,6 +203,7 @@ argument. Existing installations reuse their matching packages.
     release.write_json(out / "runner-release.json", {"schema": 1, "repository": release.REPOSITORY, "commit": sha, "release_id": release_id,
         "optimizations": optimization_proofs,
         "assets": list(rows.values()), "shared_assets": list(shared_rows.values()), "shared_release_id": pool_id,
+        **({"shared_release_ids": pool_ids} if partitioned else {}),
         "transfer": {key: sum(i.get("transfer", {}).get(key, 0) for i in data) for key in ("uploaded_bytes", "reused_bytes")}})
     url = json.loads(release.gh("api", f"repos/{release.REPOSITORY}/releases/{release_id}"))["html_url"]
     print(f"Draft verified: {url}")

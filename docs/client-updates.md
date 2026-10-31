@@ -60,7 +60,11 @@ to update that installation. If downloaded elsewhere, it uses the per-user
 
 The schema 2 signed manifest lists independent ZIP packages. New release builds
 use checksum-named `RabbitLands-pkg-<SHA256>.zip.part` downloads in the permanent
-`client-assets` supporting prerelease; older builds use `.pkg.<id>.zip.###` names.
+supporting storage prereleases. Actions builds place packages in `client-assets-0`
+through `client-assets-f`, selected by the first digit of each part's SHA-256.
+This keeps GitHub's 1,000-assets-per-release limit independent of the total
+package count. Existing `client-assets` URLs remain valid; older builds also use
+`.pkg.<id>.zip.###` names.
 Each package has a full ZIP SHA-256, bounded download-part hashes, and a signed
 inventory of its files, sizes and hashes. Fixed groups cover the engine,
 client pack, actors, maps, audio, shared assets and records. Path-based buckets
@@ -96,7 +100,13 @@ reusing identical uploaded packages across releases. Changed packages get new
 checksum names. Both platform manifests and `SHA256SUMS` reference those files;
 the latest playable release remains separate from this shared download store.
 New helpers also have checksum names, so unchanged updaters and uninstallers
-are reused. The signature still binds the repository, helper kind, platform,
+are reused. Their URLs stay under `client-assets`, allowing installed launchers
+to update their helpers before validating packages in partitioned storage.
+Storage partitions affect download placement, not package membership or selective
+updates. Both platforms' receipts identify their storage destinations; finalization
+and publication verify bytes at those exact destinations. Unused parts are removed
+only after publication and only when no competing client draft remains.
+The signature still binds the repository, helper kind, platform,
 exact download URL and expected hashes. Arbitrary external URLs are rejected.
 
 For the first upgrade from a client without shared-download support, run the
@@ -398,6 +408,13 @@ also contains unchanged files so both game roots can be replaced together.
 Keep enough free space for the changed downloads and staged game; the previous
 installation is retained by renaming its folders. ZIP entries use 8 MiB chunks
 and 64-bit archive offsets, so even a large PCK uses bounded extraction memory.
+On Windows, each folder move retries for up to five seconds to allow temporary
+file locks to clear. If a move still fails, recovery attempts to restore the
+previous installation and the error identifies the source, destination and error code.
+It also gives the path to `last-install-error.json` in that installation's
+update cache, recording the failed move, target commit and recovery result.
+Close programs using the game folder and retry the updater; verified downloads
+are retained after a failed move.
 The schema 1 reader remains available for previously signed whole-game downloads.
 The updater now replaces its own executable through a verified handover. Its
 original trust key remains pinned; changing that key still requires a new

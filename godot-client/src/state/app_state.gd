@@ -1799,11 +1799,13 @@ func select_actor(actor_id: int) -> void:
 	state_changed.emit(&"selection")
 
 func _apply_actor_health_delta(actor_id: int, amount: int) -> void:
-	if not actors.has(actor_id):
+	if amount == 0 or not actors.has(actor_id):
 		return
 	var actor: Dictionary = actors[actor_id]
 	var maximum: int = maxi(0, int(actor.get("max_health", 0)))
 	var health: int = clampi(int(actor.get("health", 0)) + amount, 0, maximum)
+	if health == int(actor.get("health", 0)):
+		return
 	if int(actor.get("health", 0)) <= 0 and health > 0:
 		actor["command"] = 7
 		actor["in_combat"] = false

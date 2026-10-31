@@ -13,6 +13,7 @@ MAIN_LOOP_CLASS = "RabbitLandsCrowdBenchmarkLoop"
 MAIN_ENTRY_SCENE = "res://tests/integration/crowd_benchmark_entry.tscn"
 EXECUTION_MODE_ENVIRONMENT = "RABBITLANDS_CROWD_BENCH_EXECUTION_MODE"
 WORKLOAD_FILES = frozenset({
+    "tests/fixtures/gauntlet_performance_wave.json",
     "tests/integration/crowd_benchmark_loop.gd",
     "tests/integration/crowd_benchmark_entry.tscn",
     "tests/integration/crowd_presentation_benchmark.gd",

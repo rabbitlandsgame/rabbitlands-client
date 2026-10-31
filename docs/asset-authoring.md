@@ -58,6 +58,38 @@ Runtime loads detailed images with mipmaps for the active region, nearby regions
 visible while magnifying or panning, and the latest preview. At most five visible
 regions and one preview are retained; the wider overview uses smaller images.
 
+All registered maps also have mandatory 2D background coverage in the independent
+`godot-client/data/maps/map-backgrounds.json` catalog. Refresh it after map
+publication, using the maintained CPU cartography reader and rasterizer:
+
+```powershell
+python eloria-assets/tools/render_map_backgrounds.py --work .local/asset-authoring/working/map-backgrounds --apply
+python eloria-assets/tools/render_map_backgrounds.py --check
+```
+
+The generator reuses current regional detail images and renders interiors,
+gauntlets and tutorial maps from published GLBs, with their exact MapView X/Z
+extent. It uses NumPy, Pillow and a C compiler; `--check` and release validation
+use only the Python standard library. New renders remove declared cutaway lids
+and older caves' explicitly named roof surfaces without changing source assets.
+Images retain geometry-derived alpha and use lossless WebP. Ordinary map
+geometry, collision, material preparation and cache policy stay unchanged.
+
+Secret and sectioned maps publish one filtered image per declared section and
+no aggregate image. Mesh ownership follows `SecretSections`: section-name
+prefixes first, then the transformed mesh bounds' centre. This prevents another
+room from appearing even where its geometry overlaps the selected frame;
+cropping a whole-map image is insufficient. Aliases share canonical pictures.
+The catalog records every source dependency, renderer input and image SHA-256;
+missing, stale, incorrectly framed or incomplete coverage fails release
+packaging. The runtime does not fall back to a live 3D map.
+
+Use `--map <canonical-id>` for a scoped regeneration. Whole-map source changes
+require a new picture; update stale regional detail images with their existing
+tool before refreshing this catalog. Intermediates and native compiler outputs
+remain in the ignored working directory; only images and the catalog are
+published. No full-world editor import or retired procedural builder runs.
+
 Procedural model outputs across all types were archived and removed from game
 use on 2026-10-16. See [the retirement record](procedural-model-archive.md) before
 running older builders or selecting animation targets. Their original sources

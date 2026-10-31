@@ -12,6 +12,21 @@ const MAX_IDLE_SLOPE := 0.06
 ## stood 20-24 mm through the hem until the shins were collided.
 const MAX_PLUMB_DRIFT := 0.04
 
+# Retained legacy-asset/Verlet regression. Authored fit, skin and motion use
+# their independent installed-game suite in test_cape_approved_motion.gd.
+class LegacyCapeActor extends ReplicatedActor3D:
+	func _approved_cape_profile(_scene_path: String, _part: int) -> String:
+		return ""
+
+func _spawn(visuals: Dictionary) -> ReplicatedActor3D:
+	var actor := LegacyCapeActor.new()
+	_stage.add_child(actor)
+	actor.configure({"actor_id": 8200, "x": 0, "y": 0, "rotation": 0, "kind": 1,
+		"name": "cape", "appearance": {}, "equipment_visuals": visuals},
+		_adapter, _model_config, _animation_config, _equipment_config)
+	actor.server_target = Vector3.ZERO
+	return actor
+
 func _run() -> void:
 	_main = (load("res://src/app/main.tscn") as PackedScene).instantiate() as Control
 	root.add_child(_main)

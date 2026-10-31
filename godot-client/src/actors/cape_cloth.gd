@@ -1,4 +1,8 @@
 extends SkeletonModifier3D
+const ApprovedPlayer := preload("res://src/actors/cape_approved_player.gd")
+var _approved_player: RefCounted
+var _approved_profile := ""
+var _approved_geometry_guard := true
 ## Verlet cloth for the cape chains on the player rig.
 ##
 ## A cape skinned to the spine cannot avoid a leg. Measured against the shared
@@ -28,7 +32,14 @@ const GRAVITY := Vector3(0.0, -14.0, 0.0)
 ## second and trails lower while travelling.
 const DAMPING := 0.72
 const WALK_DAMPING := 0.42
+## Damp relative motion rather than discarding the wearer's carried velocity.
+## Absolute world damping acted like a strong headwind even at walking speed,
+## folding the free sheet up against its rigid shoulder section.
+const TRAVEL_CARRY := 0.85
 var _last_translation := Vector3.INF
+## Frame-level motion measurement and fixed-step carried motion have separate
+## histories: a display frame may contain more than one simulation step.
+var _last_simulation_translation := Vector3.INF
 ## Two passes is enough for a four-link chain and is the whole reason this is
 ## affordable. More iterations buy stiffness nobody can see on a cape.
 const RELAX_PASSES := 2
@@ -145,6 +156,12 @@ const BACK_OFFSET := -0.02
 ## what hangs plumb from the yoke and what the body pushes out.
 var _fabric_rest: Array[PackedVector3Array] = []
 var _anchor_rest_inverse := Basis.IDENTITY
+var _anchor_rest_origin := Vector3.ZERO
+var _surface_samples: Array = []
+var _surface_rest := PackedVector3Array()
+var _surface_indices: Array[PackedInt32Array] = []
+var _surface_weights: Array[PackedFloat32Array] = []
+var _surface_norms := PackedVector2Array()
 ## The legs, hip to knee and knee to ankle (thighs then shins, left then
 ## right), and how far what is worn reaches behind each, sampled along it
 ## (`set_shin_reach`).
@@ -179,6 +196,86 @@ var _section_knots := PackedFloat32Array()
 var _section_halves := PackedFloat32Array()
 var _section_folds := PackedFloat32Array()
 var _section_blend := PackedFloat32Array()
+
+func configure_approved_motion(actor: Node, profile: String) -> void:
+	if profile == _approved_profile and _approved_player != null:
+		return
+	var skeleton := get_skeleton()
+	if skeleton == null:
+		return
+	_approved_profile = ""
+	if _approved_player != null:
+		for side: String in CHAINS:
+			for link: int in LINKS:
+				var bone := skeleton.find_bone("cape_%s_%02d" % [side, link + 1])
+				if bone >= 0:
+					skeleton.reset_bone_pose(bone)
+	_approved_player = null
+	if not profile.is_empty():
+		var player := ApprovedPlayer.new()
+		if player.configure(actor, skeleton, profile):
+			_approved_player = player
+			_approved_profile = profile
+			player.hold_idle(skeleton)
+	reset()
+
+func set_approved_geometry_guard(enabled: bool) -> void:
+	_approved_geometry_guard = enabled
+
+func approved_motion_stats() -> Dictionary:
+	return _approved_player.call("stats") if _approved_player != null else {"enabled": false, "fallback": true, "profile": "", "clip": ""}
+
+func hold_approved_idle() -> void:
+	# These local cape poses remain under spine_03. Body clips name only the
+	# original65joints, so a sleeping modifier keeps the fitted idle at no
+	# per-frame simulation cost.
+	if _approved_player != null and _mount_surface == null:
+		_approved_player.call("hold_idle", get_skeleton())
+
+func _apply_approved_frame(skeleton: Skeleton3D, to_world: Transform3D,
+		values: PackedVector3Array, delta: float) -> void:
+	var anchor_pose := skeleton.get_bone_global_pose(_anchor)
+	var carried := to_world.basis * anchor_pose.basis * _anchor_rest_inverse
+	var down := (to_world.basis * anchor_pose.basis * _hang_local).normalized()
+	var frame: Transform3D = _approved_player.call("skin_frame", skeleton)
+	var vectors := to_world.basis * frame.basis
+	var inverse_vectors := vectors.inverse()
+	var guard := _approved_geometry_guard or bool(_approved_player.call("needs_geometry_guard"))
+	var fabrics: Array[PackedVector3Array] = []
+	_snapshot_collision_world(skeleton, to_world)
+	for chain: int in _bones.size():
+		var rest := _rest_joints_from_pose(to_world, chain, anchor_pose, down)
+		var fabric := _fabric_joints(rest, chain, carried)
+		fabrics.append(fabric)
+		var points := fabric.duplicate()
+		for link: int in points.size():
+			points[link] += vectors * values[chain * LINKS + mini(link, LINKS - 1)]
+			if guard and link > 0:
+				points[link] = _push_out_of_collision_snapshot(to_world, points[link])
+		_points[chain] = points
+	var forward := _torso_forward_from_pose(to_world, anchor_pose)
+	# The reviewed cage supplies flow, not particle integration. Keep the
+	# existing measured leg/fold guards for the wearer's actual kit/proportions.
+	if guard:
+		if _keeps_off_legs():
+			_keep_off_legs(forward, carried)
+		_keep_surface_clear(fabrics, to_world * anchor_pose.origin, carried, forward)
+	for chain: int in _bones.size():
+		for link: int in LINKS:
+			values[chain * LINKS + link] = inverse_vectors * (_points[chain][link] - fabrics[chain][link])
+		_previous[chain] = _points[chain].duplicate()
+	_approved_player.call("write_pose", skeleton, values)
+	_approved_player.call("commit", values, delta)
+	_remember_chain_pose(skeleton)
+	_settled = true
+
+func _remember_chain_pose(skeleton: Skeleton3D) -> void:
+	_held_chain_positions.clear()
+	_held_chain_rotations.clear()
+	for chain: PackedInt32Array in _bones:
+		for bone: int in chain:
+			_held_chain_positions.append(skeleton.get_bone_pose_position(bone))
+			_held_chain_rotations.append(skeleton.get_bone_pose_rotation(bone))
 
 func set_native_mounted_constraint_kernel(backend: RefCounted) -> void:
 	_native_mounted_constraint_kernel = backend if not _native_mounted_constraint_disabled else null
@@ -274,6 +371,7 @@ func _cache(skeleton: Skeleton3D) -> bool:
 	# the chest is found once, against the rest hang the cape drapes opposite.
 	var anchor_rest := skeleton.get_bone_global_rest(_anchor)
 	_anchor_rest_inverse = anchor_rest.basis.inverse()
+	_anchor_rest_origin = anchor_rest.origin
 	_hang_local = _anchor_rest_inverse * Vector3.DOWN
 	var up_rest := Vector3.UP
 	var neck := skeleton.find_bone("neck_01")
@@ -550,6 +648,128 @@ func _keep_off_legs(forward: Vector3, carried: Basis) -> void:
 							-half, half), half, side, forward, shin, knee, axis, span)
 
 
+## The chains carry one sheet. Independent capsule contacts can otherwise
+## leave one strip at the knees and its neighbour at the shoulders, folding
+## the skinned cloth through itself. Share the row's displacement while
+## retaining each root's authored spacing and the cape's measured folds.
+## Use the furthest-back contact: moving the other strips back preserves
+## the clearance already found by the body and leg constraints.
+func _keep_sheet_coherent(carried: Basis, forward: Vector3) -> void:
+	if _mount_surface != null or _points.size() != 3 or forward == Vector3.ZERO:
+		return
+	for chain: int in range(3):
+		if not _fabric_measured(chain) or _points[chain].size() != LINKS + 1:
+			return
+	var side := carried * Vector3.RIGHT
+	side = (side - forward * side.dot(forward)).normalized()
+	var up := forward.cross(side).normalized()
+	for joint: int in range(1, LINKS + 1):
+		var middle := _points[1][joint] - _points[1][0]
+		var fall := 0.0
+		var back := INF
+		for chain: int in range(3):
+			var displacement := _points[chain][joint] - _points[chain][0]
+			fall += displacement.dot(up) / 3.0
+			back = minf(back, displacement.dot(forward))
+		var displacement := side * middle.dot(side) + up * fall + forward * back
+		for chain: int in range(3):
+			_points[chain][joint] = _points[chain][0] + displacement
+
+
+func set_surface_samples(samples: Array) -> void:
+	_surface_samples = samples
+	_surface_rest.clear()
+	_surface_indices.clear()
+	_surface_weights.clear()
+	_surface_norms.clear()
+	for sample: Dictionary in samples:
+		_surface_rest.append(sample.position)
+		var indices := PackedInt32Array()
+		var active_weights := PackedFloat32Array()
+		var norms := Vector2.ZERO
+		var weights: PackedFloat32Array = sample.weights
+		for bone: int in weights.size():
+			var weight := weights[bone]
+			if weight <= 0.0:
+				continue
+			indices.append(bone)
+			active_weights.append(weight)
+			norms.x += weight * weight
+			if bone % LINKS > 0:
+				norms.y += weight * weight
+		_surface_indices.append(indices)
+		_surface_weights.append(active_weights)
+		_surface_norms.append(norms)
+
+
+## Project the skinned folds and hem, rather than only the joint line. With
+## displacement skinning their positions are exactly the weighted sums below;
+## pushing the responsible rows backward clears the rendered fabric too.
+## The freely skinned top row may follow that correction in a torso twist;
+## the shoulder attachment itself remains held by its spine skin weights.
+func _keep_surface_clear(fabrics: Array[PackedVector3Array], anchor: Vector3,
+		carried: Basis, forward: Vector3) -> void:
+	if _mount_surface != null or forward == Vector3.ZERO or _surface_rest.is_empty() or not _fabric_measured(1):
+		return
+	# Sample positions and capsule spans do not change within the projection
+	# passes. Keep only their active skin weights in the inner loop.
+	var world := PackedVector3Array()
+	for point: Vector3 in _surface_rest:
+		world.append(anchor + carried * (point - _anchor_rest_origin))
+	var axes := PackedVector3Array()
+	var spans := PackedFloat64Array()
+	var limits := PackedVector2Array()
+	for shin: int in _shins.size():
+		var start := _shin_world[shin * 2]
+		var end := _shin_world[shin * 2 + 1]
+		axes.append(end - start)
+		spans.append(axes[shin].length_squared())
+		var radius := SHIN_RADIUS
+		if shin < _shin_row_reach.size():
+			for reach: float in _shin_row_reach[shin]:
+				radius = maxf(radius, reach)
+		limits.append(Vector2(minf(start.y, end.y) - radius,
+			maxf(start.y, end.y) + radius))
+	for _pass: int in 4:
+		var displacements := PackedVector3Array()
+		for chain: int in _points.size():
+			for link: int in LINKS:
+				displacements.append(_points[chain][link] - fabrics[chain][link])
+		var moved := false
+		for sample: int in world.size():
+			var indices := _surface_indices[sample]
+			var weights := _surface_weights[sample]
+			var point := world[sample]
+			for at: int in indices.size():
+				point += displacements[indices[at]] * weights[at]
+			var plane_back := maxf(0.0, (point - anchor).dot(forward) - BACK_OFFSET)
+			var first_link := 0 if plane_back > 0.0 else 1
+			var norm := _surface_norms[sample].x if first_link == 0 else _surface_norms[sample].y
+			if norm < 1e-6:
+				continue
+			var back := plane_back
+			for shin: int in _shins.size():
+				if point.y < limits[shin].x or point.y > limits[shin].y or spans[shin] < 1e-9:
+					continue
+				back = maxf(back, _band_clearance(shin, point, forward,
+					_shin_world[shin * 2], axes[shin], spans[shin]))
+			if back <= 0.0:
+				continue
+			moved = true
+			for at: int in indices.size():
+				var bone := indices[at]
+				if bone % LINKS >= first_link:
+					displacements[bone] -= forward * (back * weights[at] / norm)
+		if not moved:
+			return
+		for chain: int in _points.size():
+			var points := _points[chain]
+			for link: int in LINKS:
+				points[link] = fabrics[chain][link] + displacements[chain * LINKS + link]
+			_points[chain] = points
+		_keep_sheet_coherent(carried, forward)
+
+
 ## A chain's point `third` of the way from joint `index` to the next.
 func _level_point(chain: int, index: int, third: float) -> Vector3:
 	var points := _points[chain]
@@ -805,6 +1025,14 @@ func _process_modification_with_delta(delta: float) -> void:
 		if delta > 0.0 and _last_translation.is_finite() else 0.0)
 	_last_anchor = anchor_world
 	_last_translation = world.origin
+	if _approved_player != null and _mount_surface == null:
+		var authored: PackedVector3Array = _approved_player.call("step", skeleton, delta)
+		if authored.size() == 12:
+			_apply_approved_frame(skeleton, world, authored, delta)
+			_previous_frame_world = world
+			_frame_world_ready = true
+			_step_owed = 0.0
+			return
 	var elapsed := clampf(delta, 0.0, MAX_STEP)
 	if not _frame_world_ready or _previous_frame_world.origin.distance_to(world.origin) > TELEPORT:
 		_previous_frame_world = world
@@ -827,12 +1055,7 @@ func _process_modification_with_delta(delta: float) -> void:
 	# Reapply the last solved cape on frames shorter than the simulation step;
 	# otherwise a fast display alternates between the solved and authored hang.
 	if stepped:
-		_held_chain_positions.clear()
-		_held_chain_rotations.clear()
-		for chain: PackedInt32Array in _bones:
-			for bone: int in chain:
-				_held_chain_positions.append(skeleton.get_bone_pose_position(bone))
-				_held_chain_rotations.append(skeleton.get_bone_pose_rotation(bone))
+		_remember_chain_pose(skeleton)
 	elif _held_chain_positions.size() == _bones.size() * LINKS:
 		var index := 0
 		for chain: PackedInt32Array in _bones:
@@ -840,6 +1063,8 @@ func _process_modification_with_delta(delta: float) -> void:
 				skeleton.set_bone_pose_position(bone, _held_chain_positions[index])
 				skeleton.set_bone_pose_rotation(bone, _held_chain_rotations[index])
 				index += 1
+	if _approved_player != null and _mount_surface == null:
+		_approved_player.call("observe_fallback", skeleton, delta)
 
 
 func _simulate_step(delta: float, simulation_world: Transform3D) -> void:
@@ -879,6 +1104,11 @@ func _simulate_step(delta: float, simulation_world: Transform3D) -> void:
 	var damping := SETTLE_DAMPING if still or _mount_surface != null else DAMPING
 	if not still and _mount_surface == null:
 		damping = lerpf(WALK_DAMPING, DAMPING, smoothstep(2.0, 4.0, _frame_travel_speed))
+		if _last_simulation_translation.is_finite() and step > 0.0:
+			var travel := to_world.origin - _last_simulation_translation
+			if travel.length() < TELEPORT:
+				fall += travel * (1.0 - damping) * TRAVEL_CARRY
+	_last_simulation_translation = to_world.origin
 	# The back-of-the-torso plane, held for every chain this frame: a cape
 	# swings and cannot pass to the chest, which is what an attack's lean and
 	# twist made it do.
@@ -951,8 +1181,11 @@ func _simulate_step(delta: float, simulation_world: Transform3D) -> void:
 					points[index] = _mount_surface.call("limit_lift", points[index], rest[0], material_length, float(index) / LINKS)
 		_points[chain] = points
 		_previous[chain] = previous
+	_keep_sheet_coherent(anchor_carry, forward)
 	if _keeps_off_legs():
 		_keep_off_legs(forward, anchor_carry)
+	_keep_sheet_coherent(anchor_carry, forward)
+	_keep_surface_clear(fabrics, anchor_world, anchor_carry, forward)
 	for chain in range(_bones.size()):
 		_write_chain_bones(skeleton, chain, fabrics[chain], anchor_pose, to_world, to_local)
 	_settled = true
@@ -997,22 +1230,21 @@ func _try_native_constraint_step(skeleton: Skeleton3D, to_world: Transform3D,
 			_native_constraint_fallbacks += 1
 			return false
 		_native_constraint_calls += 1
+	_keep_sheet_coherent(carried, forward)
 	if _keeps_off_legs():
 		_keep_off_legs(forward, carried)
+	_keep_sheet_coherent(carried, forward)
+	_keep_surface_clear(fabrics, to_world * anchor_pose.origin, carried, forward)
 	for chain: int in range(_bones.size()):
 		_write_chain_bones(skeleton, chain, fabrics[chain], anchor_pose,
 			to_world, to_local)
 	return true
 
 
-## Carry the authored bone frames with the simulated cloth. A bone's origin is
-## offset from the cloth it carries, increasingly so down a tilted bind chain;
-## rotating bones alone turns that offset into an outward hem slope, even when
-## every simulated segment has settled vertically. So each frame is turned from
-## the direction its own stretch of cloth was authored in to the simulated one,
-## about the cloth, and the offset rides along. Without a measured line the
-## material line stands in for the cloth and every segment starts straight
-## down; with one, an authored lean onto the legs is what gets straightened.
+## Measured unmounted cloth uses a displacement lattice: the original bone
+## bases retain the folds while skin weights blend the simulated row offsets.
+## Mounted cloth and unmeasured rigs retain their original rotating frames,
+## including the offset between each bind frame and its material line.
 func _write_chain_bones(skeleton: Skeleton3D, chain: int,
 		fabric: PackedVector3Array, anchor_pose: Transform3D,
 		to_world: Transform3D, to_local: Transform3D) -> void:
@@ -1025,6 +1257,10 @@ func _write_chain_bones(skeleton: Skeleton3D, chain: int,
 		var bone := _bones[chain][link]
 		var bone_rest: Transform3D = _bone_rests[chain][link]
 		authored = authored * bone_rest
+		if _approved_player != null:
+			# The fitted skin's neutral frame differs from the original helper
+			# rest. Use it for legacy/mounted motion as well as authored cages.
+			authored = to_world * (_approved_player.call("neutral_bone_pose", skeleton, chain * LINKS + link) as Transform3D)
 		if measured:
 			rest_direction = (fabric[link + 1] - fabric[link]).normalized()
 		var wanted := (points[link + 1] - points[link]).normalized()
@@ -1033,6 +1269,14 @@ func _write_chain_bones(skeleton: Skeleton3D, chain: int,
 			turn = Basis(Quaternion(rest_direction, wanted))
 		var posed := to_local * Transform3D(turn * authored.basis,
 			points[link] + turn * (authored.origin - fabric[link]))
+		if measured and _mount_surface == null:
+			# Measured rows are a displacement lattice for the actual skin.
+			# Rotating an off-line bind frame about each independently tilted
+			# segment folds its vertices over the neighbouring row in a run.
+			# Shared translations retain the authored cross-section and let
+			# the existing skin weights interpolate a continuous curved sheet.
+			posed = to_local * Transform3D(authored.basis,
+				authored.origin + points[link] - fabric[link])
 		var local_pose := parent.affine_inverse() * posed
 		skeleton.set_bone_pose_position(bone, local_pose.origin)
 		skeleton.set_bone_pose_rotation(bone,
@@ -1046,6 +1290,7 @@ func reset() -> void:
 	_step_owed = 0.0
 	_last_anchor = Vector3.INF
 	_last_translation = Vector3.INF
+	_last_simulation_translation = Vector3.INF
 	_frame_world_ready = false
 	var skeleton := get_skeleton()
 	if skeleton != null:
@@ -1056,3 +1301,5 @@ func reset() -> void:
 			_last_anchor = _previous_frame_world * skeleton.get_bone_global_pose(_anchor).origin
 	_held_chain_positions.clear()
 	_held_chain_rotations.clear()
+	if _approved_player != null:
+		_approved_player.call("reset")

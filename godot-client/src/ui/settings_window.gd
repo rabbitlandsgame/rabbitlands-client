@@ -14,6 +14,7 @@ extends Control
 ## autoload singletons are registered, and this reads `AppState` directly.
 
 const AudioMix := preload("res://src/audio/audio_mix.gd")
+const JukeboxWindow := preload("res://src/ui/jukebox_window.gd")
 const ChatColors := preload("res://src/ui/chat_colors.gd")
 const TextColors := preload("res://src/ui/text_colors.gd")
 const PANEL_SIZE := Vector2(960.0, 520.0)
@@ -1313,6 +1314,11 @@ func add_choice(section: String, key: String, label: String,
 
 func add_audio_controls() -> void:
 	var page := page_body("Audio")
+	var jukebox_button := Button.new()
+	jukebox_button.name = "JukeboxButton"
+	jukebox_button.text = "Open jukebox…"
+	jukebox_button.tooltip_text = "Browse all music, make playlists, and choose music for game contexts."
+	page.add_child(jukebox_button)
 	var now_playing := Label.new()
 	now_playing.name = "NowPlaying"
 	now_playing.text = "Music: —"
@@ -1320,9 +1326,15 @@ func add_audio_controls() -> void:
 	page.add_child(now_playing)
 	var director := get_tree().root.find_child("AudioDirector", true, false)
 	if director != null:
+		jukebox_button.pressed.connect(open_jukebox)
+		director.jukebox.full_menu_requested.connect(open_jukebox)
+		director.jukebox.music_volume_requested.connect(func(value: float) -> void:
+			restore_value("audio_music", value)
+			setting_changed.emit("Audio", "audio_music", value))
 		director.music_changed.connect(func(title: String, creator: String) -> void:
-			now_playing.text = "Music: —" if title.is_empty() else "Playing: " + title
-			now_playing.tooltip_text = creator)
+			if is_instance_valid(now_playing):
+				now_playing.text = "Music: —" if title.is_empty() else "Playing: " + title
+				now_playing.tooltip_text = creator)
 	for category: String in AudioMix.CATEGORIES:
 		var info: Dictionary = AudioMix.CATEGORIES[category]
 		var key := "audio_" + category
@@ -1354,6 +1366,26 @@ func add_audio_controls() -> void:
 			setting_changed.emit("Audio", key, value))
 	# Credits stay at the end, below the controls they describe.
 	page.move_child(page.get_node("AudioCreditsButton"), page.get_child_count() - 1)
+
+func is_jukebox_open() -> bool:
+	var dialog := get_node_or_null("JukeboxWindow") as Window
+	return dialog != null and dialog.visible
+
+func toggle_jukebox() -> void:
+	if is_jukebox_open():
+		(get_node("JukeboxWindow") as Window).hide()
+	else:
+		open_jukebox()
+
+func open_jukebox() -> void:
+	var director := get_tree().root.find_child("AudioDirector", true, false)
+	if director == null: return
+	var dialog := get_node_or_null("JukeboxWindow")
+	if dialog == null:
+		dialog = JukeboxWindow.new()
+		dialog.jukebox = director.jukebox
+		add_child(dialog)
+	dialog.open()
 
 ## Refreshing controls never saves or emits a change. This also covers values
 ## changed by a HUD shortcut while the settings window was closed.

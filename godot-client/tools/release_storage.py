@@ -239,7 +239,8 @@ class PartWriter(io.RawIOBase):
             else:
                 self.path.rename(target)
             self.path = target
-        row = {"url": f"{self.base_url}/{self.path.name}", "size": self.part_size,
+        download_base = self.base_url + "-" + self.part_hasher.hexdigest()[0] if self.shared == "partitioned" else self.base_url
+        row = {"url": f"{download_base}/{self.path.name}", "size": self.part_size,
                "sha256": self.part_hasher.hexdigest()}
         try:
             if self.accept:

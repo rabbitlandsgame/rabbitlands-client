@@ -157,6 +157,7 @@ const MapViewScript := preload("res://src/world/map_view.gd")
 const MapMarkerOverlayScript := preload("res://src/ui/map_marker_overlay.gd")
 const ContinentMapScript := preload("res://src/ui/continent_map.gd")
 const MinimapMarkerOverlayScript := preload("res://src/ui/minimap_marker_overlay.gd")
+const MapActorMarkerCacheScript := preload("res://src/ui/map_actor_marker_cache.gd")
 const NearbyIndicatorScript := preload("res://src/ui/nearby_indicator.gd")
 const InterestProtocol := preload("res://src/network/interest_protocol.gd")
 const PlayerInfoPanelScript := preload("res://src/ui/player_info_panel.gd")
@@ -429,6 +430,7 @@ var start_screen_backdrop: Control
 @onready var login_logo: TextureRect = %LoginLogo
 
 var actor_nodes: Dictionary = {}
+var _map_actor_marker_cache := MapActorMarkerCacheScript.new()
 var ground_bag_nodes: Dictionary = {}
 ## The click-to-walk crosses currently collapsing, keyed by destination tile
 ## so a re-click restarts a tile's mark instead of stacking a brighter copy.
@@ -580,6 +582,7 @@ var cartography: Dictionary = {}
 var cartography_regions: Array = []
 ## Region outlines in continent picture pixels, for which territory a map click is on.
 var _region_polygons: Array[Array] = []
+var _region_polygon_sources: Array = []
 ## The continent picture and the regions' tab maps are decoded the first
 ## time the map window opens, not at startup: the continent alone is a
 ## 1600-pixel image nobody sees before pressing Tab.
@@ -596,6 +599,12 @@ var _tab_map_textures: Dictionary = {}
 ## The wider overview uses the small images warmed in _tab_map_textures.
 var _tab_map_detail_textures: Dictionary = {}
 var _map_detail_visible: Dictionary = {}
+## Ownership samples depend on the map views, not on moving actor dots. Keep
+## the last query only; picture/cartography binds invalidate it explicitly.
+var _map_detail_query_signature: Array = []
+var _map_detail_query_regions: Array = []
+var _map_detail_query_polygon_count := -1
+var _map_detail_query_visible: Dictionary = {}
 ## Which region the big map is showing as a preview, or -1 for none, with
 ## that map's own adapter so the cursor can name the tile under it.
 var _preview_region_index := -1
@@ -927,17 +936,18 @@ var _arrival_unreported := false
 ## curtain still up is lowered: neither may strand a player.
 const ARRIVAL_TIMEOUT_MSEC := 30000
 const ARRIVAL_CURTAIN_LIMIT_MSEC := 60000
-## The region's picture under the map cameras, or null on a map without one.
-var _map_picture: MeshInstance3D
+## Active prerender descriptor, empty while a secret room is not yet known.
+var _map_picture: Dictionary = {}
+var minimap_background: Control
+var full_map_background: Control
+var _map_background_catalog := preload("res://src/world/map_background_catalog.gd").new()
 ## The ground the current region's picture lies on: what the other regions'
 ## pictures sink below, since only a loaded region publishes its own.
 var _map_picture_height := 0.0
 ## Regions whose tab-map textures are still to be decoded ahead of a crossing.
 var _map_picture_warmup: Array[String] = []
 var _map_picture_warmup_armed := false
-## The other regions' pictures, keyed by normalized map id: a quad under each
-## resident's root, so it stands in that map's rigid frame, and one in
-## world_root for every region that is not loaded.
+## Other regions' 2D picture descriptors in the active world's surveyed frame.
 var _neighbour_pictures: Dictionary = {}
 ## Neighbour map id -> {transform, adapter}: the framed adapters actors on
 ## resident neighbours are placed through, rebuilt when the root moves.
@@ -991,6 +1001,12 @@ var _actor_roster_generation_seen := -1
 ## The statistics window's built parts fall behind the stats packets while
 ## it is hidden; they are rebuilt when it is next shown.
 var _stats_window_stale := true
+## Packet reduction stays immediate; these expensive views use the latest
+## state once per process frame, including a burst of local health updates.
+const CHARACTER_UI_STATS := 1
+const CHARACTER_UI_SPELLS := 2
+const CHARACTER_UI_CRAFTING := 4
+var _character_ui_dirty := 0
 ## The last chat line each log rendered, so a new line can be appended to
 ## it rather than the log rebuilt. See `_append_chat_line`.
 var _chat_tail: Dictionary = {}
@@ -1522,12 +1538,22 @@ func _ready() -> void:
 	map_image.add_child(map_marker_overlay)
 	map_marker_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	map_marker_overlay.configure(full_map_camera, adapter, full_map_viewport.size)
+	full_map_background = preload("res://src/ui/map_background_2d.gd").new()
+	map_image.add_child(full_map_background)
+	map_image.move_child(full_map_background, 0)
+	full_map_background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	full_map_background.configure(full_map_camera, full_map_viewport.size)
 	minimap_marker_overlay = MinimapMarkerOverlayScript.new()
 	minimap_marker_overlay.name = "MinimapMarkerOverlay"
 	minimap_marker_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	minimap.add_child(minimap_marker_overlay)
 	minimap_marker_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	minimap_marker_overlay.configure(map_camera, map_viewport.size)
+	minimap_background = preload("res://src/ui/map_background_2d.gd").new()
+	minimap.add_child(minimap_background)
+	minimap.move_child(minimap_background, 0)
+	minimap_background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	minimap_background.configure(map_camera, map_viewport.size)
 	nearby_indicator = NearbyIndicatorScript.new()
 	minimap.add_child(nearby_indicator)
 	Diagnostics.startup_stage("audio")
@@ -1629,7 +1655,7 @@ func _ready() -> void:
 		if not detail.is_empty() and detail.get("worldMin") == tab_map.get("worldMin") \
 				and detail.get("worldMax") == tab_map.get("worldMax"):
 			tab_map["detail"] = detail
-	_region_polygons.clear()
+	_invalidate_cartography_ownership_cache()
 	invasion_assistant_window.configure_cartography(cartography_regions)
 	Diagnostics.startup_stage("equipment_catalogue")
 	equipment_config = preload(
@@ -1764,8 +1790,8 @@ func _ready() -> void:
 	game_view.add_child(_world_text_overlay)
 	game_view.move_child(_world_text_overlay, viewport_container.get_index() + 1)
 	_world_text_overlay.configure(main_viewport)
-	minimap.texture = map_viewport.get_texture()
-	map_image.texture = full_map_viewport.get_texture()
+	minimap.texture = null
+	map_image.texture = null
 	full_map.hide()
 	console_panel.hide()
 	settings_panel.hide()
@@ -2054,12 +2080,19 @@ func _bind_shared_world() -> void:
 	if gameplay_world == null:
 		push_error("world_binding stage=resolve error=WorldRoot_has_no_World3D")
 		return
-	map_viewport.world_3d = gameplay_world
-	full_map_viewport.world_3d = gameplay_world
+	# Map cameras retain only projection/picking math. Their viewports never
+	# render or share the gameplay world; backgrounds are direct 2D Controls.
+	for viewport: SubViewport in [map_viewport, full_map_viewport]:
+		viewport.own_world_3d = true
+		viewport.disable_3d = true
+		viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	map_camera.cull_mask = 0
+	full_map_camera.cull_mask = 0
 	_sync_map_viewport_activity()
 	print_debug("world_binding stage=shared world=", gameplay_world)
 
 func _process(delta: float) -> void:
+	_flush_character_ui_sync()
 	if AppState.authenticated and AppState.inventory_metadata_dirty and Network._link_ready() \
 			and Time.get_ticks_msec() >= _inventory_metadata_at:
 		AppState.inventory_metadata_dirty = false
@@ -2162,15 +2195,14 @@ func _process(delta: float) -> void:
 				_sync_session_experience()
 		_sync_hud_button_states()
 
-## Drives the two map SubViewports on demand instead of leaving them on
-## UPDATE_ALWAYS. Each requests a single redraw, so a hidden map costs nothing
-## and a visible one refreshes fast enough to read as live.
+## Refresh direct 2D pictures and markers only while their panel is visible.
+## Projection-only SubViewports remain disabled, including missing-image cases.
 func _update_map_viewports() -> void:
 	var now: int = Time.get_ticks_msec()
 	if minimap_frame.visible and now >= _minimap_refresh_msec:
 		_minimap_refresh_msec = now + MINIMAP_REFRESH_MSEC
 		_update_map_detail_levels()
-		map_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+		minimap_background.refresh(map_viewport.size)
 		# The marks are drawn over that image and follow the same camera, so
 		# they are collected when it is redrawn and never while it is hidden.
 		minimap_marker_overlay.set_marks(_collect_minimap_marks())
@@ -2183,7 +2215,7 @@ func _update_map_viewports() -> void:
 		_update_map_detail_levels()
 		if _full_map_cursor_inside:
 			_update_full_map_cursor(_full_map_cursor_position)
-		full_map_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+		full_map_background.refresh(full_map_viewport.size)
 		# Refresh projected markers alongside the terrain, including visibility
 		# changes when the player enters a different secret section.
 		map_marker_overlay.set_live_marks(_collect_minimap_marks())
@@ -3224,12 +3256,9 @@ func _hide_chat_input() -> void:
 ## minimap back on full-rate world rendering for up to a whole throttle
 ## interval, which is exactly the cost the throttle exists to remove.
 func _sync_map_viewport_activity() -> void:
-	map_viewport.render_target_update_mode = (
-		SubViewport.UPDATE_ONCE if minimap_frame.visible
-		else SubViewport.UPDATE_DISABLED)
-	full_map_viewport.render_target_update_mode = (
-		SubViewport.UPDATE_ONCE if full_map.visible and map_image.visible
-		else SubViewport.UPDATE_DISABLED)
+	map_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	full_map_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	_request_map_redraw()
 
 
 func _toggle_full_map() -> void:
@@ -3398,6 +3427,7 @@ func _configure_unified_settings() -> void:
 			if row_name == "UiScaleRow":
 				page.move_child(row, 0)
 	settings_window.add_audio_controls()
+	_configure_jukebox_button()
 	for category: String in audio_director.category_volumes:
 		settings_window.restore_value("audio_" + category,
 			audio_director.category_volumes[category])
@@ -3576,6 +3606,19 @@ func _on_stats_button_pressed() -> void:
 		stats_tabs.current_tab = 0
 		_sync_stats()
 	_sync_hud_button_states(true)
+
+func _configure_jukebox_button() -> void:
+	var button: Button = %JukeboxButton
+	button.icon = _external_texture("res://assets/ui/menu-icons/jukebox.png")
+	button.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	button.expand_icon = true
+	button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	button.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
+	button.text = ""
+	button.toggle_mode = true
+	button.pressed.connect(func() -> void:
+		settings_window.toggle_jukebox()
+		_sync_hud_button_states(true))
 
 func _configure_service_buttons() -> void:
 	var icons := preload("res://src/ui/service_menu_icons.gd")
@@ -4642,6 +4685,7 @@ func _clear_world_presentation(retain_map_resources := false) -> void:
 		if is_instance_valid(raw_node):
 			(raw_node as Node).queue_free()
 	actor_nodes.clear()
+	_map_actor_marker_cache.clear()
 	crowd.clear()
 	_built_bodies = 0
 	for raw_bag_node: Variant in ground_bag_nodes.values():
@@ -5599,7 +5643,7 @@ func _apply_minimap_zoom() -> void:
 	# The minimap render is throttled, so a zoom would otherwise not be seen
 	# until the next scheduled frame.
 	if minimap_frame.visible:
-		map_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+		minimap_background.refresh(map_viewport.size)
 
 ## The scroll wheel over the Tab map frames more or less of the continent
 ## around the region. Every region's picture stands whether or not it is
@@ -5843,8 +5887,9 @@ func _handle_map_gui_input(event: InputEvent, map_control: TextureRect,
 	var mouse_button: InputEventMouseButton = event as InputEventMouseButton
 	if not mouse_button.pressed or mouse_button.button_index != MOUSE_BUTTON_LEFT:
 		return
+	var teleport := mouse_button.ctrl_pressed and mouse_button.shift_pressed
 	var selecting_spell := not Network.magic_pending.is_empty() and Network.magic_scope in ["burst", "location"]
-	if not selecting_spell and _movement_locked(mouse_button.ctrl_pressed):
+	if not teleport and not selecting_spell and _movement_locked(mouse_button.ctrl_pressed):
 		map_control.accept_event()
 		return
 	var viewport_position_value: Variant = _texture_to_viewport_position(
@@ -5856,7 +5901,7 @@ func _handle_map_gui_input(event: InputEvent, map_control: TextureRect,
 	var target_value: Variant = _map_target_tile(camera, viewport_position)
 	print_debug("map_input source=", source, " local_click=", mouse_button.position,
 		" viewport=", viewport_position, " server_tile=", target_value,
-		" command=", "RUN_TO" if mouse_button.shift_pressed else "MOVE_TO")
+		" command=", "#tp" if teleport else ("RUN_TO" if mouse_button.shift_pressed else "MOVE_TO"))
 	# Whose ground the click is on decides the walk, not whether it falls inside
 	# this map's square of served cells: that square reaches far into every
 	# neighbour's ground, so a click on the neighbour's side went to the server
@@ -5866,6 +5911,23 @@ func _handle_map_gui_input(event: InputEvent, map_control: TextureRect,
 	var here_map: String = MapRegistry.normalize_server_map_id(AppState.current_map)
 	var elsewhere: bool = (owner != here_map) if not owner.is_empty() else (
 		target_value is Vector2i and not _tile_inside_current_map(target_value as Vector2i))
+	if teleport:
+		var destination: Dictionary = {}
+		var region_index := _region_index_for_map(AppState.current_map)
+		var has_territory := region_index >= 0 and not _region_polygon_components(region_index).is_empty()
+		if target_value is Vector2i and not here_map.is_empty():
+			if not owner.is_empty() and owner != here_map and click_point is Vector3:
+				var destination_tile: Variant = exterior_stream.tile_on(owner, click_point as Vector3)
+				if destination_tile is Vector2i:
+					destination = {"map": owner, "tile": destination_tile}
+			elif (owner == here_map or not has_territory) and _tile_inside_current_map(target_value as Vector2i):
+				destination = {"map": here_map, "tile": target_value}
+		if destination.is_empty():
+			AppState.append_local_message("There is no map there to teleport to.", 3)
+		else:
+			_request_map_teleport(str(destination.map), destination.tile as Vector2i)
+		map_control.accept_event()
+		return
 	if target_value is Vector2i and elsewhere:
 		# Past the seam: the neighbour that owns the ground is walked to in legs,
 		# the way a world click on its resident ground is.
@@ -5883,6 +5945,18 @@ func _handle_map_gui_input(event: InputEvent, map_control: TextureRect,
 		elif not selecting_spell:
 			_set_map_walk_target(MapRegistry.normalize_server_map_id(AppState.current_map), target_value)
 	map_control.accept_event()
+
+## Use the same command as the console so access and destination validation
+## stay with the server. A teleport replaces any client-side walking route.
+func _request_map_teleport(map_id: String, tile: Vector2i) -> void:
+	var error: Error = Network.send_chat("#tp %d %d %s" % [tile.x, tile.y, map_id])
+	if error != OK:
+		AppState.append_local_message("Could not teleport: " + error_string(error), 3)
+		return
+	exterior_stream.pending_walk.clear()
+	_clear_map_walk_target()
+	_clear_keyboard_movement_tracking()
+	_clear_local_turn_prediction()
 
 func _map_target_tile(camera: Camera3D, viewport_position: Vector2) -> Variant:
 	var point: Variant = _map_click_point(camera, viewport_position)
@@ -5941,8 +6015,10 @@ func _cartography_frame(index: int) -> String:
 
 ## A region's outline in continent picture pixels, built once per cartography.
 func _region_polygon_components(index: int) -> Array[PackedVector2Array]:
-	if _region_polygons.size() != cartography_regions.size():
+	if not is_same(_region_polygon_sources, cartography_regions) \
+			or _region_polygons.size() != cartography_regions.size():
 		_region_polygons.clear()
+		_region_polygon_sources = cartography_regions
 		for region_value: Variant in cartography_regions:
 			var row: Dictionary = region_value as Dictionary
 			_region_polygons.append(CartographyOwnershipGeometry.polygons(
@@ -6301,26 +6377,25 @@ func _on_state_changed(path: StringName) -> void:
 			_apply_day_night()
 			_sync_diagnostics()
 		&"attributes", &"techniques":
-			_sync_stats()
+			_queue_character_ui_sync(CHARACTER_UI_STATS)
 		&"autocast":
 			_sync_autocast()
 		&"perks", &"perk_catalog":
-			_sync_stats()
+			_queue_character_ui_sync(CHARACTER_UI_STATS)
 			_sync_perk_catalog()
 		&"counters":
 			_sync_counters()
 		&"mix_state":
 			_on_mix_state_changed()
 		&"stats":
-			_sync_stats()
-			_sync_spells()
-			_sync_manufacturing()
+			# Preserve per-award last/max XP while deferring only presentation.
+			_track_experience()
+			_queue_character_ui_sync(CHARACTER_UI_STATS | CHARACTER_UI_SPELLS | CHARACTER_UI_CRAFTING)
 		&"inventory", &"inventory_text", &"inventory_state":
 			if path == &"inventory_text" and manufacturing_panel.visible:
 				manufacturing_server_status = AppState.inventory_text
 			_sync_inventory()
-			_sync_spells()
-			_sync_manufacturing()
+			_queue_character_ui_sync(CHARACTER_UI_SPELLS | CHARACTER_UI_CRAFTING)
 			# The stored side does not change with the backpack, and rebuilding
 			# it for every inventory line and every command 226 cost three full
 			# refreshes per deposit. Only the backpack column follows.
@@ -6349,7 +6424,7 @@ func _on_state_changed(path: StringName) -> void:
 		&"presence":
 			nearby_indicator.show_count(AppState.presence.nearby_hidden)
 		&"experience_state":
-			_sync_stats()
+			_queue_character_ui_sync(CHARACTER_UI_STATS)
 		&"worn_slots", &"degraded_items":
 			# Which slots are worn changes independently of what is in them,
 			# so the icons are redrawn on the mask as well as on the contents.
@@ -6373,7 +6448,7 @@ func _on_state_changed(path: StringName) -> void:
 			if inventory_workspace != null and inventory_workspace.ready_to_layout:
 				inventory_workspace.refresh_actions()
 		&"spells":
-			_sync_spells()
+			_queue_character_ui_sync(CHARACTER_UI_SPELLS)
 		&"selection":
 			_sync_selection()
 		&"combat_state":
@@ -6381,7 +6456,7 @@ func _on_state_changed(path: StringName) -> void:
 			# with the actor packets, so it is re-read here as well: only the
 			# old and the new target can have changed.
 			_sync_overhead_health_for([])
-			_sync_manufacturing()
+			_queue_character_ui_sync(CHARACTER_UI_CRAFTING)
 		&"npc_dialogue":
 			_sync_dialogue()
 		&"popup":
@@ -6398,7 +6473,7 @@ func _on_state_changed(path: StringName) -> void:
 		&"map_markers":
 			_sync_map_markers()
 		&"spell_power":
-			_sync_spells()
+			_queue_character_ui_sync(CHARACTER_UI_SPELLS)
 		&"harvest":
 			_sync_harvest_indicator()
 		&"reading":
@@ -6409,7 +6484,7 @@ func _on_state_changed(path: StringName) -> void:
 			_sync_ground_bag()
 		&"knowledge":
 			_sync_knowledge()
-			_sync_manufacturing()
+			_queue_character_ui_sync(CHARACTER_UI_CRAFTING)
 			_sync_reading()
 
 func _queue_world_sync() -> void:
@@ -6417,6 +6492,21 @@ func _queue_world_sync() -> void:
 		return
 	_world_sync_queued = true
 	_flush_world_sync.call_deferred()
+
+func _queue_character_ui_sync(views: int) -> void:
+	_character_ui_dirty |= views
+
+func _flush_character_ui_sync() -> void:
+	var dirty := _character_ui_dirty
+	_character_ui_dirty = 0
+	if not AppState.authenticated:
+		return
+	if dirty & CHARACTER_UI_STATS:
+		_sync_stats()
+	if dirty & CHARACTER_UI_SPELLS:
+		_sync_spells()
+	if dirty & CHARACTER_UI_CRAFTING:
+		_sync_manufacturing()
 
 func _flush_world_sync() -> void:
 	if not _world_sync_queued:
@@ -6758,7 +6848,7 @@ func _apply_day_night() -> void:
 
 func _apply_lantern_mine_lighting() -> void:
 	lantern_mine_lighting.apply(world_loader.manifest, secret_sections.current_section(),
-		world_environment, world_sun, world_moon, map_light_root)
+		world_environment, world_sun, world_moon, map_light_root, camera_rig.focus)
 
 ## The Graphics tab's "Directional shadows", held over the binders. The map's
 ## bind and the hour both decide whether the sun may cast (an interior's
@@ -6809,28 +6899,13 @@ func _update_border_lighting() -> void:
 	# Look pass: and the sky's haze, over the border's blended colours.
 	LookSky.apply(lighting, world_environment, AppState.continuous_game_minute())
 
-## The maps are navigation aids, not scenery. Rendered through the world's own
-## environment they went as dark as the world did, and a minimap nobody can
-## read at night is a minimap that only works half the time. Both map cameras
-## get their own copy of the environment with a floor under the ambient, so
-## night still reads as night on them but the streets stay legible.
+## Map pixels use their baked colors and optional HUD palette. Projection-only
+## cameras never need a copy of the world's environment or lighting.
 func _sync_map_environment() -> void:
-	var source: Environment = world_environment.environment
-	if source == null:
-		for uncovered: Camera3D in [map_camera, full_map_camera]:
-			uncovered.environment = null
-		return
-	if _map_environment == null or _map_environment.sky != source.sky:
-		_map_environment = source.duplicate() as Environment
-	_map_environment.background_mode = source.background_mode
-	_map_environment.sky = source.sky
-	_map_environment.ambient_light_source = source.ambient_light_source
-	_map_environment.ambient_light_color = source.ambient_light_color
-	_map_environment.ambient_light_energy = maxf(
-		source.ambient_light_energy, MAP_MINIMUM_AMBIENT)
-	_map_environment.fog_enabled = false
-	for lit: Camera3D in [map_camera, full_map_camera]:
-		lit.environment = _map_environment
+	# Prerendered 2D pixels are independent of world lighting and weather.
+	_map_environment = null
+	map_camera.environment = null
+	full_map_camera.environment = null
 
 ## The ambience a package declares for itself. Four Gates has named a civic
 ## murmur and its waterfalls since it was authored and nothing played them.
@@ -8481,46 +8556,61 @@ func _adapter_for_actor(dto: Dictionary) -> CoordinateAdapter:
 ## so a live render of the world framed to the whole region showed the
 ## resident chunks in a field of nothing. Every region ships its picture
 ## (minimap.webp, one pixel a metre, north up, framed by cartography.json as
-## the full-map camera frames the region); it is laid on the ground on a
-## visual layer only the map cameras render, and while it stands they render
-## nothing else. The dots and marks are drawn over it as before. A map
-## without a picture (an interior) keeps the live render.
+## the full-map camera frames the region). The image is drawn directly in 2D;
+## cameras supply projection math only. Interiors use the required prerender
+## catalog, with secret sections selecting only their own image.
 func _install_map_picture(manifest: WorldManifest) -> void:
 	_remove_map_picture()
 	var region_index: int = _region_index_for_map(AppState.current_map)
 	var minimap: Dictionary = manifest.data.get("minimap", {}) as Dictionary
 	var texture: Texture2D = null
 	var tab_map: Dictionary = {}
-	if region_index >= 0 and not minimap.is_empty():
+	if region_index >= 0 and not minimap.is_empty() and not SecretSections.applies(manifest):
 		var region: Dictionary = cartography_regions[region_index] as Dictionary
 		texture = _tab_map_texture(region)
 		if texture != null:
 			texture = _tab_map_detail_texture(region)
 		tab_map = region.get("tabMap", {}) as Dictionary
 	var extent: Rect2 = MapPicture.extent(minimap, tab_map) if texture != null else Rect2()
-	if texture == null or extent.size.x <= 0.0 or extent.size.y <= 0.0:
-		_set_map_cameras_picture(false)
-		return
 	_map_picture_height = MapPicture.height_below(manifest.data)
-	_map_picture = MapPicture.build(texture, extent, _map_picture_height, MAP_PICTURE_LAYER)
-	world_root.add_child(_map_picture)
+	if texture == null or extent.size.x <= 0.0 or extent.size.y <= 0.0:
+		_map_picture = _map_background_catalog.picture(AppState.current_map,
+			secret_sections.current_section(), _map_picture_height)
+	else:
+		_map_picture = {"texture": texture, "extent": extent, "height": _map_picture_height,
+			"transform": world_root.global_transform}
+	if not _map_picture.is_empty():
+		_map_picture["transform"] = world_root.global_transform
 	_set_map_cameras_picture(true)
-	_install_neighbour_pictures()
+	if region_index >= 0 and not _map_picture.is_empty() and not SecretSections.applies(manifest):
+		_install_neighbour_pictures()
+	_sync_map_background_pictures()
 
 func _remove_map_picture() -> void:
 	_map_detail_visible.clear()
-	if is_instance_valid(_map_picture):
-		_map_picture.hide()
-		_map_picture.queue_free()
-	_map_picture = null
+	_map_picture = {}
 	# Far-region pictures share world_root, so a map handoff does not change
 	# their parent. Their transforms and depths still belong to the departure
 	# map. Rebuild them with the new picture; the decoded textures stay cached.
-	for picture: Variant in _neighbour_pictures.values():
-		if is_instance_valid(picture):
-			(picture as Node3D).hide()
-			(picture as Node).queue_free()
 	_neighbour_pictures.clear()
+	_sync_map_background_pictures()
+
+func _sync_map_background_pictures() -> void:
+	_invalidate_map_detail_query()
+	var pictures: Array[Dictionary] = []
+	# Neighbors draw first; the current region owns overlapping pixels.
+	for map_id: String in _neighbour_pictures:
+		pictures.append(_neighbour_pictures[map_id])
+	pictures.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return ((a.transform as Transform3D) * Vector3(0, float(a.height), 0)).y \
+			< ((b.transform as Transform3D) * Vector3(0, float(b.height), 0)).y)
+	if not _map_picture.is_empty():
+		pictures.append(_map_picture)
+	if minimap_background != null:
+		minimap_background.set_pictures(pictures)
+	if full_map_background != null:
+		full_map_background.set_pictures(pictures)
+	_request_map_redraw()
 
 ## The region boundaries in the current map's frame: every region's cartography
 ## polygon (continent picture pixels, north up) turned into metres of this map,
@@ -8576,35 +8666,27 @@ func _update_map_boundaries() -> void:
 ## first and stands in its own frame as before. Called after the current
 ## picture is laid and whenever the stream's resident table changes.
 func _install_neighbour_pictures() -> void:
-	var detail_plan_changed := false
 	if exterior_stream != null and not exterior_stream.residents_changed.is_connected(_install_neighbour_pictures):
 		exterior_stream.residents_changed.connect(_install_neighbour_pictures)
+	if _map_picture.is_empty() or _region_index_for_map(AppState.current_map) < 0 \
+			or secret_sections.is_active():
+		return
 	var residents: Dictionary = exterior_stream.residents if exterior_stream != null else {}
 	var wanted: Array[String] = exterior_stream.continent_maps() if exterior_stream != null else ([] as Array[String])
 	for map_id: String in residents.keys():
 		if not wanted.has(map_id):
 			wanted.append(map_id)
-	# A picture whose frame changed - a region loaded, or the map swapped under
-	# it at a crossing - is dropped here and built again below in its new one.
-	for stale_id: String in _neighbour_pictures.keys():
-		var stale: Variant = _neighbour_pictures[stale_id]
-		var resident_root: Node3D = (residents.get(stale_id, {}) as Dictionary).get("root") as Node3D
-		var frame: Node = resident_root if is_instance_valid(resident_root) else world_root
-		if (not wanted.has(stale_id) or not is_instance_valid(stale)
-				or (stale as Node).get_parent() != frame):
-			if is_instance_valid(stale):
-				(stale as Node).queue_free()
-			_neighbour_pictures.erase(stale_id)
-			detail_plan_changed = true
+	# Descriptors hold immutable pixels and the current surveyed frame, rather
+	# than Nodes parented to a world that can be parked or retired.
+	_neighbour_pictures.clear()
 	for map_id: String in wanted:
-		if _neighbour_pictures.has(map_id):
+		if MapRegistry.normalize_server_map_id(map_id) == MapRegistry.normalize_server_map_id(AppState.current_map):
 			continue
 		var picture: Variant = _build_region_picture(map_id, residents.get(map_id, {}) as Dictionary)
-		if picture is MeshInstance3D:
+		if picture is Dictionary and not picture.is_empty():
 			_neighbour_pictures[map_id] = picture
-			detail_plan_changed = true
-	if detail_plan_changed:
-		_map_detail_visible.clear()
+	_map_detail_visible.clear()
+	_sync_map_background_pictures()
 
 ## One region's picture: its own minimap pixels, framed as the Tab map frames
 ## that region. A resident region is laid under its root at its manifest's
@@ -8617,11 +8699,11 @@ func _install_neighbour_pictures() -> void:
 func _build_region_picture(map_id: String, resident: Dictionary) -> Variant:
 	var region_index: int = _region_index_for_map(map_id)
 	if region_index < 0 or exterior_stream == null:
-		return null
+		return {}
 	var region: Dictionary = cartography_regions[region_index] as Dictionary
 	var texture: Texture2D = _tab_map_texture(region)
 	if texture == null:
-		return null
+		return {}
 	var tab_map: Dictionary = region.get("tabMap", {}) as Dictionary
 	var root: Node3D = resident.get("root") as Node3D
 	var manifest: WorldManifest = resident.get("manifest") as WorldManifest
@@ -8629,20 +8711,17 @@ func _build_region_picture(map_id: String, resident: Dictionary) -> Variant:
 	var extent: Rect2 = (MapPicture.extent(manifest.data.get("minimap", {}) as Dictionary, tab_map)
 		if loaded else MapPicture.tab_map_extent(tab_map))
 	if extent.size.x <= 0.0 or extent.size.y <= 0.0:
-		return null
+		return {}
 	var height: float = (MapPicture.height_below(manifest.data) if loaded
 		else _map_picture_height - MAP_PICTURE_SINK_METRES * float(region_index + 1))
-	var picture := MapPicture.build(texture, extent, height, MAP_PICTURE_LAYER)
 	if loaded:
-		root.add_child(picture)
-		return picture
+		return {"texture": texture, "extent": extent, "height": height,
+			"transform": root.global_transform}
 	var frame_value: Variant = exterior_stream.region_transform(map_id)
 	if not frame_value is Transform3D:
-		picture.queue_free()
-		return null
-	world_root.add_child(picture)
-	picture.transform = frame_value as Transform3D
-	return picture
+		return {}
+	return {"texture": texture, "extent": extent, "height": height,
+		"transform": world_root.global_transform * (frame_value as Transform3D)}
 
 ## The neighbours' pictures ahead of the crossing: a seamless handoff must not
 ## pay for a webp decode and an upload while the traveller drifts to its
@@ -8688,10 +8767,12 @@ func _warm_one_map_picture() -> void:
 
 ## What the map cameras render: the picture alone while one stands, else the
 ## live world on layer 1 as they always did.
-func _set_map_cameras_picture(picture: bool) -> void:
-	var mask: int = MAP_PICTURE_LAYER if picture else 1
-	map_camera.cull_mask = mask
-	full_map_camera.cull_mask = mask
+func _set_map_cameras_picture(_picture: bool) -> void:
+	map_camera.cull_mask = 0
+	full_map_camera.cull_mask = 0
+	map_viewport.disable_3d = true
+	full_map_viewport.disable_3d = true
+	_sync_map_viewport_activity()
 
 func _footstep_surface_at(tile: Vector2i) -> String:
 	if gameplay_world == null or adapter == null:
@@ -9815,6 +9896,7 @@ func _update_secret_sections(force: bool = false) -> void:
 	if secret_sections.current_section() != previous_section:
 		_full_map_panned = false
 		_configure_full_map(world_loader.manifest)
+		_install_map_picture(world_loader.manifest)
 		_request_map_redraw()
 		_apply_day_night()
 	# whoever and whatever stands in another secret stays unseen
@@ -9845,6 +9927,8 @@ func _configure_full_map(manifest: WorldManifest) -> void:
 	var buffer: float = MapViewScript.NEIGHBOUR_BUFFER_METRES if manifest.data.has("continentGeography") else 0.0
 	MapViewScript.configure(full_map_camera, full_map_viewport,
 		MapViewScript.bounds_for(manifest, secret_sections.current_section()), buffer)
+	if full_map_background != null:
+		full_map_background.configure(full_map_camera, full_map_viewport.size)
 	# Every map can magnify around the cursor. Only continent exteriors can
 	# pull back past their default framing to show neighbouring regions.
 	_full_map_base_size = full_map_camera.size
@@ -10091,39 +10175,85 @@ func _tab_map_detail_texture(region: Dictionary) -> Texture2D:
 ## the visible ground's owners, keeping a bounded set of up to five regions.
 func _update_map_detail_levels() -> void:
 	if _neighbour_pictures.is_empty():
+		_invalidate_map_detail_query()
 		return
-	var wanted := {MapRegistry.normalize_server_map_id(AppState.current_map): true}
+	var current_map_id := MapRegistry.normalize_server_map_id(AppState.current_map)
 	var views: Array[Array] = []
 	if full_map.visible and map_image.visible and _full_map_zoom < 1.0:
 		views.append([full_map_camera, full_map_viewport.size])
 	if minimap_frame.visible:
 		views.append([map_camera, map_viewport.size])
+	# Key the actual ownership inputs. In particular, camera height does not
+	# affect the XZ samples, while orientation, pan, zoom and aspect changes do.
+	var continent: Dictionary = cartography.get("continent", {}) if cartography is Dictionary else {}
+	var active_region_index := _region_index_for_map(current_map_id)
+	var active_region: Dictionary = cartography_regions[active_region_index] if active_region_index >= 0 else {}
+	var query: Array = [current_map_id, cartography_regions.size(),
+		(continent.get("originMetres", []) as Array).duplicate(),
+		float(continent.get("metresPerPixel", 0.0)),
+		(active_region.get("globalTranslation", []) as Array).duplicate(),
+		str(active_region.get("frame", ""))]
+	var samples: Array[Vector3] = []
 	for view: Array in views:
 		var camera: Camera3D = view[0]
+		query.append(camera.get_instance_id())
+		query.append(view[1])
 		for fraction: Vector2 in [Vector2(.5, .5), Vector2(.1, .1), Vector2(.9, .1),
 				Vector2(.1, .9), Vector2(.9, .9), Vector2(.5, .1), Vector2(.5, .9),
 				Vector2(.1, .5), Vector2(.9, .5)]:
-			var owner := _map_owning_point(camera.project_ray_origin(Vector2(view[1]) * fraction))
-			if not owner.is_empty() and wanted.size() < 5:
-				wanted[owner] = true
+			var point := camera.project_ray_origin(Vector2(view[1]) * fraction)
+			samples.append(point)
+			query.append(Vector2(point.x, point.z))
+	if is_same(cartography_regions, _map_detail_query_regions) \
+			and _region_polygons.size() == _map_detail_query_polygon_count \
+			and _map_detail_visible == _map_detail_query_visible \
+			and query == _map_detail_query_signature:
+		return
+	var wanted := {current_map_id: true}
+	for point: Vector3 in samples:
+		var owner := _map_owning_point(point)
+		if not owner.is_empty() and wanted.size() < 5:
+			wanted[owner] = true
 	if wanted == _map_detail_visible:
+		_remember_map_detail_query(query)
 		return
 	_map_detail_visible = wanted
 	for map_id: String in _neighbour_pictures:
-		var picture := _neighbour_pictures[map_id] as MeshInstance3D
-		if not is_instance_valid(picture):
+		var picture: Dictionary = _neighbour_pictures[map_id]
+		if picture.is_empty():
 			continue
 		var region_index := _region_index_for_map(map_id)
 		if region_index < 0:
 			continue
 		var region: Dictionary = cartography_regions[region_index]
-		var material := picture.mesh.surface_get_material(0) as StandardMaterial3D
-		material.albedo_texture = (_tab_map_detail_texture(region) if wanted.has(map_id)
+		picture["texture"] = (_tab_map_detail_texture(region) if wanted.has(map_id)
 			else _tab_map_texture(region))
+	_sync_map_background_pictures()
 	# Release detailed images when their regions leave both map views.
 	for key: String in _tab_map_detail_textures.keys():
 		if not wanted.has(key) and key != str((cartography_regions[_preview_region_index] as Dictionary).get("serverMap", "") if _preview_region_index >= 0 else ""):
 			_tab_map_detail_textures.erase(key)
+	_remember_map_detail_query(query)
+
+## Cartography is loaded at startup. Any later in-place ownership edits must
+## invalidate both the existing polygon cache and the sampled-view memo.
+func _invalidate_cartography_ownership_cache() -> void:
+	_region_polygons.clear()
+	_region_polygon_sources = []
+	_invalidate_map_detail_query()
+
+func _invalidate_map_detail_query() -> void:
+	_map_detail_query_signature = []
+	# This is an identity reference to the live region array; never clear it.
+	_map_detail_query_regions = []
+	_map_detail_query_polygon_count = -1
+	_map_detail_query_visible = {}
+
+func _remember_map_detail_query(query: Array) -> void:
+	_map_detail_query_signature = query
+	_map_detail_query_regions = cartography_regions
+	_map_detail_query_polygon_count = _region_polygons.size()
+	_map_detail_query_visible = _map_detail_visible.duplicate()
 
 ## A region's name as the cartography writes it, for a line the player reads.
 func _region_name_for_map(server_map: String) -> String:
@@ -10185,7 +10315,7 @@ func _show_continent_view() -> void:
 	_boat_continent_overlay.set_hovered_dock(-1)
 	continent_map.set_current_region(_continent_region_indices.find(_region_index_for_map(AppState.current_map)))
 	# The live render keeps its last frame while its viewport idles.
-	continent_button.texture_normal = full_map_viewport.get_texture()
+	continent_button.texture_normal = _map_picture.get("texture") as Texture2D
 	continent_button.tooltip_text = "Return to your current map"
 	map_title.text = _continent_name().to_upper() + " CONTINENT"
 	map_coordinates.text = CONTINENT_HINT
@@ -11012,13 +11142,10 @@ func _apply_minimap_marker_settings() -> void:
 ## border the map no longer reaches.
 func _apply_minimap_shape() -> void:
 	var is_round: bool = _minimap_shape == "round"
-	if _minimap_mask_material == null:
-		var shader := Shader.new()
-		shader.code = MINIMAP_MASK_SHADER
-		_minimap_mask_material = ShaderMaterial.new()
-		_minimap_mask_material.shader = shader
-	_minimap_mask_material.set_shader_parameter("rounded", is_round)
-	minimap.material = _minimap_mask_material
+	if minimap_background != null:
+		minimap_background.set_round(is_round)
+		_minimap_mask_material = minimap_background.material as ShaderMaterial
+	minimap.material = null
 	if _minimap_panel_style != null:
 		var radius: int = (roundi(minimap_frame.size.x * 0.5) if is_round else 1)
 		_minimap_panel_style.corner_radius_top_left = radius
@@ -11036,6 +11163,7 @@ func _apply_minimap_shape() -> void:
 ## switch is read in one place rather than in five.
 func _collect_minimap_marks() -> Array[Dictionary]:
 	var marks: Array[Dictionary] = []
+	_map_actor_marker_cache.retain(actor_nodes)
 	var service_names := {}
 	for service: Dictionary in _current_service_records():
 		service_names[str(service.get("name", "")).to_lower()] = true
@@ -11065,9 +11193,7 @@ func _collect_minimap_marks() -> Array[Dictionary]:
 			continue
 		if int(dto.get("kind", 0)) == 2 and service_names.has(str(dto.get("name", "")).to_lower()):
 			continue
-		marks.append({"position": actor.global_position,
-			"type": _minimap_actor_type(dto),
-			"colour": ReplicatedActor3D.map_dot_colour(dto)})
+		marks.append(_map_actor_marker_cache.mark(actor_id, actor.global_position, dto))
 	for raw_object: Variant in map_object_nodes.values():
 		if not is_instance_valid(raw_object):
 			continue
@@ -11265,14 +11391,7 @@ func _collect_map_waypoints() -> Array[Dictionary]:
 ## decided by `ReplicatedActor3D` from the same two fields; this only decides
 ## which of the marker-type switches turns it off.
 static func _minimap_actor_type(dto: Dictionary) -> StringName:
-	var kind: int = int(dto.get("kind", 0))
-	if kind == ReplicatedActor3D.CREATURE_ACTOR_KIND:
-		return (&"invasion" if int(dto.get("name_colour", 0))
-			== ReplicatedActor3D.INVASION_NAME_COLOUR else &"creature")
-	# EL's HUMAN, COMPUTER_CONTROLLED_HUMAN and PKABLE_HUMAN. Everything else
-	# the server replicates and does not call a creature is scenery: a trader,
-	# a guard, a gate warden.
-	return &"player" if kind in [1, 3, 4] else &"npc"
+	return MapActorMarkerCacheScript.actor_type(dto)
 
 func _on_minimap_frame_gui_input(event: InputEvent) -> void:
 	if _handle_minimap_drag(event):
@@ -13737,7 +13856,7 @@ func _sync_hud_button_states(force := false) -> void:
 			%EncyclopediaButton, %SpellsButton, %EmotesButton, %QuestButton,
 			%InfoButton, %BuddyButton, %ConsoleButton, %HelpButton,
 			%RangingButton, %MinimapButton, %OptionsButton, %MountsButton, %LeaderboardsButton,
-			%ExchangeButton, %StoragePreviewButton]
+			%ExchangeButton, %StoragePreviewButton, %JukeboxButton]
 	var local_actor: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
 	var sitting: bool = bool(local_actor.get("sitting", false))
 	var stats_open: bool = stats_panel.visible
@@ -13770,7 +13889,8 @@ func _sync_hud_button_states(force := false) -> void:
 		mounts_window != null and bool(mounts_window.call("is_open")),
 		leaderboards_window != null and bool(leaderboards_window.call("is_open")),
 		extension_windows != null and (extension_windows.get("market_panel") as Control).visible,
-		storage_panel.visible]
+		storage_panel.visible,
+		settings_window != null and bool(settings_window.call("is_jukebox_open"))]
 	# Only while the player has not chosen attack mode from the HUD: a mode
 	# they picked stays picked, and Alt must not appear to be what put it there.
 	var attack_preview: bool = _alt_attack_preview and _interaction_mode != "attack"

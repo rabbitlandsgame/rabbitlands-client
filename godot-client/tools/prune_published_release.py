@@ -34,8 +34,7 @@ def prune(tag):
         expected = shared.checksum_inventory(sums.read_text(encoding="ascii"))
     pooled = []
     if any(shared.is_name(name) for name in expected):
-        pool = shared.ensure()
-        pooled = release.github_assets(pool["id"])
+        pooled = shared.published_inventory()
     shared.verify_inventory(expected, list(assets.values()), pooled)
     names = set(expected)
     if not all(any(name.endswith(suffix) for name in names) for suffix in

@@ -6,6 +6,12 @@ func _init() -> void:
 	call_deferred("run")
 
 func run() -> void:
+	if DisplayServer.get_name() == "headless":
+		push_error("The seam capture requires a rendered display.")
+		quit(1)
+		return
+	root.size = Vector2i(640, 640)
+	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
 	var main: Control = load("res://src/app/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -41,20 +47,33 @@ func run() -> void:
 		print("MINIMAP FRAME ", map_id, " ", main.exterior_stream.residents[map_id].root.transform)
 	main._install_map_picture(manifest)
 	main.map_viewport.size = Vector2i(512, 512)
-	main.map_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	main.map_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 	main.map_camera.position = Vector3(point.x, 220.0, point.z)
 	main.map_camera.rotation = Vector3(-PI / 2, PI / 2, 0)
 	main.map_camera.size = 180.0
+	# Capture the real direct UI background, not an unused SubViewportTexture.
+	# Place it on the root canvas at one logical pixel per captured pixel, so
+	# this seam probe remains independent of the player's HUD arrangement.
+	var background: Control = main.minimap_background
+	background.reparent(root)
+	background.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	background.position = Vector2.ZERO
+	background.size = Vector2(512, 512)
+	background.set_round(false)
+	background.refresh(main.map_viewport.size)
+	main.hide()
+	main.main_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 	for _frame: int in range(10):
 		await process_frame
 	await RenderingServer.frame_post_draw
 	var out := OS.get_environment("ELORIA_MINIMAP_OUT")
 	if out.is_empty():
 		out = ProjectSettings.globalize_path("res://../test-artifacts/reedfall-minimap-seams.png")
-	var captured: Image = main.map_viewport.get_texture().get_image()
+	var captured: Image = root.get_texture().get_image().get_region(Rect2i(0, 0, 512, 512))
 	var error: Error = captured.save_png(out)
 	print("Reedfall minimap capture: ", out, " saved=", error == OK)
 	main.queue_free()
+	background.queue_free()
 	await process_frame
 	await process_frame
 	quit(0 if error == OK else 1)

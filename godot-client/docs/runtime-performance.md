@@ -108,6 +108,317 @@ The rotation probe accepts `ELORIA_CAMERA_PROBE_FPS`, `ELORIA_CAMERA_PROBE_PITCH
 and `ELORIA_CAMERA_PROBE_VSYNC=on`, and records cap/VSync restoration before
 uncapping its measured rotations.
 
+## K620 configuration follow-up (2026-10-31)
+
+Twenty sequential camera configurations and repeats retained the same Landfall
+location, one equipped actor and 941×1030 window. These use the editor engine with
+extracted release imports and source overrides; they are local screening data,
+not a complete exported-client or online qualification. OS and NVIDIA driver
+caches were warm/shared; Godot profiles were isolated except explicit reuse.
+See [configuration measurements](../../docs/qa/linux-configuration-trials-2026-10-31.json).
+
+At the overhead camera angle, typical OpenGL Low frames averaged 7.5–7.9 ms.
+Medium with shadows disabled was similar at 7.9 ms; enabling Medium shadows
+increased this to 15.5 ms and warm-up from 4.6 s to 9.9 s. Forward+ and Mobile
+averaged 14.8 and 13.5 ms with about 1.10 and 1.03 GB of reported graphics
+allocations, versus about 0.51–0.52 GB with OpenGL. Reusing Forward+'s Godot
+profile reduced map-request-to-ready time from 32.4 s to 12.3 s, but retained
+its slower frames and larger allocations.
+
+Quarter map textures saved about 50–60 MB versus Half, without a clear frame-rate
+benefit. Full textures used about 180 MB more. Hiding the minimap reduced average
+overhead-view frame time modestly, from roughly 7.5–7.9 ms to 7.2 ms. These
+one-location results do not justify further texture or resolution reduction as
+a universal default.
+
+The shallow −15° camera exposed a pacing tradeoff:
+
+| 3D resolution / rotation cap | Mean interval | Worst interval | Frames above 33.3 ms |
+| --- | ---: | ---: | ---: |
+| 75% / uncapped, repeat | 12.48 ms | 25.28 ms | 0 |
+| 50% / uncapped | 10.80 ms | 102.20 ms | 5 |
+| 50% / uncapped, no GPU polling | 10.78 ms | 102.21 ms | 5 |
+| 50% / 60 FPS | 16.65 ms | 24.67 ms | 0 |
+| 75% / 60 FPS | 16.65 ms | 23.30 ms | 0 |
+
+The earlier 75% shallow run also had one 96.58 ms first-turn pause. Recurring
+50% pauses shifted yaw and occurred on later turns too. Their world GPU/render
+CPU measurements did not account for the full delay. A 60 FPS cap removed them
+in these trials; the exact uncapped scheduling/driver mechanism remains
+unresolved. Retain 75% for its sharper image when it already meets the cap;
+50% is an option when a busier view exceeds the GPU budget. The user's saved
+OpenGL/Low/Half/75%/shadows-off/60-FPS settings already matched this balance.
+
+### Character texture cache trial
+
+Configure-only attribution found the existing wardrobe-atlas neutralization
+dominated appearance setup: about 3 s in the editor engine and 2 s in the native
+release engine. `ELORIA_ACTOR_BUILD_PROFILE=1` adds `detail.appearance.*` and
+`detail.equipment.*` durations to the existing slow-actor record. Finish/part
+durations are nested in their parent phases and must not be added to them.
+
+`ELORIA_WARDROBE_TEXTURE_CACHE=1` enables an experimental lossless cache, off by
+default. It keys original image bytes, layout, recipe and engine generation,
+validates bounded metadata/payload checksums and restores the full RGBA8 mip
+chain. Invalid or unwritable entries retain the existing calculation. Entries
+are published by same-directory rename in `user://wardrobe-dye-cache/v1`.
+
+Alternating cache-on/off launches of the same disposable native release-engine
+package and user profile measured:
+
+| Mean of two launches | Cache off | Cache hit |
+| --- | ---: | ---: |
+| Local avatar setup | 4.45 s | 3.13 s |
+| Map request to curtain release | 12.03 s | 10.97 s |
+
+Actual actor atlas hashes, including every pixel, alpha and mip level, matched
+across all five accepted launches. Every pass retained 240 views and two draws
+per view, restoring the 60 FPS cap and VSync. The final native cached run also
+completed three shallow rotations at 60 FPS with no interval above 21.96 ms.
+The cache contract suite passed 63 checks. One generated entry occupied 22.4 MB.
+These timings use warm OS/tmpfs storage; cold physical-disk behavior and a total
+disk-cache eviction policy remain unqualified, so the cache stays opt-in.
+
+Loading-only probes now drain owned imports, retirement work and deferred
+callbacks before freeing Main. Their teardown duration is outside arrival
+timing. An earlier direct-quit trial crashed after recording while imports were
+still active and is excluded from the results.
+
+### Synthetic crowds
+
+The maintained market/combat fixtures each supplied 160 actors on Landfall,
+with the minimap hidden, a 30 FPS cap, 30 s settling and 10 s samples. Both
+configurations passed runtime-settings, readiness and teardown validation.
+
+| Configuration / workload | Delivered FPS | 95th percentile interval | Reported graphics allocations |
+| --- | ---: | ---: | ---: |
+| Performance preset / market | 30.09 | 33.57 ms | 875 MB |
+| Ordinary Low, 160-body setting / market | 30.10 | 33.71 ms | 1241 MB |
+| Performance preset / combat | 29.94 | 41.62 ms | 834 MB |
+| Ordinary Low, 160-body setting / combat | 29.49 | 43.41 ms | 1092 MB |
+
+These compare the complete Performance preset with ordinary Low, including
+texture size, render scale, cloth/grass preferences and body budget. They do not
+isolate body count alone. Priority actors remain protected: the preset's
+60-body setting retained 69 market bodies and 80 combat bodies, versus 160 for
+ordinary Low. The preset's strongest gain here was graphics-memory headroom;
+combat still had frames exceeding the 30 FPS budget.
+
+The crowd harness now establishes its requested frame cap before map arrival,
+so shader warm-up captures and restores that value. The validator rejected an
+earlier ordinary-Low run that restored its saved unlimited cap; only the
+corrected run appears above. Linux Performance-profile seeding uses fresh
+`XDG_DATA_HOME` storage, with the exact runtime directory checked at startup.
+The crowd-harness CPU suite passed all 48 checks.
+
+For further camera trials, `ELORIA_CAMERA_PROBE_GRAPHICS` accepts a JSON object
+of supported Graphics controls, for example
+`{"render_scale":0.5,"map_texture_quality":"quarter","quality":"low"}`.
+Use `ELORIA_CAMERA_PROBE_MINIMAP=show` or `hide`, and
+`ELORIA_CAMERA_PROBE_ROTATION_FPS=60` to test delivered pacing instead of the
+default uncapped cost. `ELORIA_CAMERA_PROBE_LOAD_ONLY=1` measures arrival without
+the settling/rotation workload. Reports distinguish synchronous map setup,
+map-request-to-ready time and Main setup; Main setup excludes earlier engine
+and autoload parsing. Keep the existing isolated-profile guards enabled.
+
+## Direct 2D navigation maps (2026-10-31)
+
+Both the minimap and current-map panel draw prerendered images directly in UI
+Controls. Their former SubViewports remain disabled, with 3D disabled, empty
+private worlds and camera cull masks of zero. The retained orthographic cameras
+provide projection and picking math only; neither viewport texture is displayed
+or requested to render. Markers, round masks, HUD palettes, rotation, zoom, pan,
+click-to-walk and territory transforms retain the same coordinate mapping.
+
+`data/maps/map-backgrounds.json` requires coverage of all 90 canonical maps and
+43 aliases. The 275 image references include 246 new lossless WebP images
+(49.75 MB) and 29 existing, verified regional detail images. Fourteen sectioned
+maps have 199 independently filtered room images and no aggregate image.
+Unknown secret sections draw no background. Other-room geometry is filtered
+before rasterization, including overlaps inside the selected room's bounds.
+Only three decoded catalog images are retained; existing regional-detail
+retention remains bounded by the visible-map plan.
+
+Release packaging validates canonical/alias/section coverage, exact framing,
+source and renderer freshness, image hashes/dimensions, actual staged bitmap
+bytes and the catalog's PCK/loose-data presence. There is no live-world fallback
+when a picture is missing. See the [authoring workflow](../../docs/asset-authoring.md)
+and [qualification data](../../docs/qa/map-backgrounds-2d-2026-10-31.json).
+
+Two alternating before/after K620 camera runs measured mean frame intervals of
+7.83 ms before and 7.80 ms after: effectively unchanged in this already-baked
+Landfall scene. Reported graphics allocations fell by 4.3–8.5 MB. Arrival times
+varied and do not establish a loading speedup. The structural interior gain is
+removal of its live map-render pass; an interior FPS speedup has not been
+quantified. All comparison runs retained the complete camera warm-up.
+
+Qualification includes 92 background projection/crop checks, 10 secret-catalog
+selection checks, 1066 map framing/picking checks, handoff/detail/adjacency and
+runtime suites, plus 28 minimap-drag and 39 Tab-map checks. Rendered color/atlas/
+round-mask tests include model traps and zero map-viewport primitives. Real
+interior/secret views, marker picking and the Reedfall territory seam were
+rendered separately. Packaging verified all 275 staged images against source.
+
+## Gauntlets and large invasions on K620 (2026-10-31)
+
+These are source-project screening runs using extracted release imports and
+current source overrides, rather than qualification of a newly exported client.
+The machine, settings, retained warm-up, rejected evidence and accepted results
+are recorded in [the trial report](../../docs/qa/linux-gauntlet-invasion-trials-2026-10-31.json).
+OpenGL Compatibility, Low, Half textures, .75 render scale, shadows off and a
+visible direct 2D minimap are used throughout. Crowd body allowance is 60 and
+remote cloth allowance is zero; the local player's cape remains eligible.
+
+Sunmane, Harrowcrag and Resin Road entry tests each completed three full camera
+turns at approximately 60 FPS. All six raw/prepared entry runs had no intervals
+above 33.3 ms; the worst was 25.65 ms. First raw arrivals took 14.185, 16.167 and
+13.740 seconds respectively. These single-player tests retain all 240 warm-up
+views and two draws per view; they do not qualify combat or traversal through
+the entire gauntlet.
+
+A three-map local OpenGL geometry cache built in 9.914 seconds, occupied
+21,676,440 bytes, and passed a second verification with three entries reused.
+Interleaved Harrowcrag raw/prepared trials did not establish a loading benefit:
+mean loader time was 1.969/2.187 seconds and Main setup plus arrival was
+21.308/21.676 seconds. The apparent .302-second arrival-only improvement omits
+additional preparation checks during setup. Warm-up remained intact. The earlier
+larger differences also included warming of OS/driver caches. Keep this result
+separate from the opt-in wardrobe texture cache above, which targets a different
+cost: avatar appearance and equipment construction still take about six seconds
+in these gauntlet arrival tests.
+
+`--cells production-undead-160`, `production-undead-300` and
+`production-undead-500` select an equal-weight zombie/skeleton/drowned-lich-king
+cohort derived from Twinbrook's authored onslaught. Counts are remote creatures
+plus one local player. The authored wave permits up to 500 creatures, but 300/500
+visible records exceed ordinary server publication caps and are client stress
+tests. One third are active, distributed across all three species, with walking
+and melee presentation. Navigation and server AI are not simulated.
+
+Use a fresh process for each count. Growing several cells in one process can
+reuse parked bodies and retain them under distance hysteresis, changing the
+rendered population. The 60-body setting is a soft distance policy; report
+actual `builtBodies`, `deferred`, `inFrustumBuiltBodies` and built-only tier
+counts. Legacy `inFrustumAndDrawn` and `tierFull` also count deferred actor nodes
+and do not establish visible or animated model counts. Delivered FPS comes from
+`wallMilliseconds`; `frameTime` excludes cap sleep.
+
+The accepted 30-second-settle/10-second-sample runs measured:
+
+| Workload | Scale | Cap | Delivered FPS | Interval p95 | Built / in-frustum bodies |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 160 creatures + player | .75 | 60 | 60.3 | 17.26 ms | 82 / 48 |
+| 300 creatures + player | .75 | 60 | 60.3 | 21.26 ms | 80 / 68 |
+| 500 creatures + player | .75 | 30 | 30.1 | 34.00 ms | 80 / 79 |
+| 500 creatures + player | .75 | 60 | 59.0 | 26.54 ms | 78 / 78 |
+| Authored 21-creature gauntlet pulse + player | .75 | 60 | 60.4 | 16.69 ms | 22 / 8 |
+| Same gauntlet pulse | .50 | 60 | 60.4 | 16.71 ms | 22 / 8 |
+
+Frustum counts are actor-bound estimates, not pixel occlusion measurements.
+The gauntlet observer stands on published, unused walkable tile 195,118 near
+seven goblins; the authored wave centre remains 196,87. All 21 creature positions
+are unchanged. Both pre- and post-sample checks require at least those seven
+creature bodies and the player in frame. The gauntlet pair does not demonstrate
+an FPS improvement at the 60-FPS cap.
+
+A separate one-player camera sweep at the denser arena centre used distance 26m,
+FOV 50°, pitch −60° and three full turns. Mean frame intervals were 16.804/16.655 ms
+at .75/.50 scale; mean world GPU time was 11.500/9.145 ms.
+The worst-turn p95 interval improved 18.677→16.748 ms, while the maximum interval
+remained similar (22.677/23.671 ms). This suggests additional GPU headroom at .50,
+with no established improvement in the single worst frame. These two cases have
+contemporary before/after source, asset, engine and private-probe identities.
+
+With 500 creatures and the minimap retained, .50 scale reduced mean world GPU
+time from 11.906 to 7.975 ms. Delivered FPS changed only 59.0→59.9 and interval
+p95 changed 26.538→26.295 ms, with the same 78 built/in-frustum bodies. Lower
+resolution adds GPU headroom but does not remove the remaining CPU cost.
+
+Hiding only the minimap at .75 scale was a diagnostic control: interval p95 fell
+26.538→19.129 ms, while the map-update timer fell from 1.120 ms mean/5.108 ms p95
+to .042/.007 ms. This pair had 78 versus 77 built bodies, and is not a precise
+causal FPS estimate. It identifies map mark collection/projection and deferred
+canvas drawing as useful next profiling targets; the timer does not include all
+canvas work. All ordinary qualification cases retain the visible 2D minimap.
+
+`--settings-profile performance-60` changes only the Performance preset's frame
+cap from 30 to 60. Both named profiles reject conflicting overrides and validate
+the actual runtime settings. `performance-60-scale50` changes only render scale
+from .75 to .50 relative to `performance-60`. Run each with 30 seconds of settling and a
+10-second sample, for example:
+
+```sh
+python3 godot-client/tests/integration/run_crowd_presentation_benchmark.py \
+  --godot "$ELORIA_GODOT" --project-path "$ELORIA_BENCH_STAGE" \
+  --settings-profile performance-60 --variants all \
+  --cells production-undead-500 --mode windowed \
+  --renderer gl_compatibility --resolution 941x1030 --minimap show \
+  --warmup-ms 30000 --sample-ms 10000 --capture-boundaries \
+  --label undead500-60 --out-dir /tmp/rabbitlands-undead500-60
+```
+
+`--cells authored-gauntlet-resinroad-combat-21` selects one real six-player-scale
+Resin Road pulse: twenty Mire Goblins and one Giant Amber Moth, at the exact
+published spawn tiles, plus the local observer on a separate unused mouth tile.
+It uses stationary native melee
+presentation and excludes earlier survivors, encounter progression and server
+combat/pathfinding. Its JSON fixture is included in source identity and benchmark
+exports. New cohorts seed the production footprint-table packet before Main
+creates actors, bound synthetic health, and reject invalid live/profile census
+before sampling. The initial invasion trial omitted that table; its wrong lich
+footprints caused validation failure and all its timings remain excluded.
+Six subsequent trials also remain quarantined: their early VSync acknowledgement
+was contradicted by warm-up restoring VSync later. The harness now establishes
+the frame cap and VSync before map loading, and requires actual VSync-off,
+requested cap, completed 240×2 warming and no active arrival/head warming at
+both sample boundaries. Short rendered smoke checks precede accepted runs.
+
+## Minimap refresh reuse on K620 (2026-10-31)
+
+Main now reuses a data-only marker dictionary per actor, updating the drawn
+node's position on every collection. Style decisions use the same actor kind,
+name colour and canonical colour function. The existing visibility, living,
+local-player and service-duplicate filters remain in Main, including dots for
+deferred bodies. Cached actor records are bounded to the current population plus
+32; styles are bounded to 64, and world teardown clears both.
+
+Neighbour-detail selection also reuses its last ownership result when the
+actual camera samples and cartography inputs are unchanged. Pan, rotation,
+zoom, viewport changes and picture rebinding invalidate that result. The native
+projection/clipping, ownership rules, 66 ms refresh cadence and direct 2D
+backgrounds remain unchanged. Explicit in-place ownership edits must call
+`_invalidate_cartography_ownership_cache()` to clear both ownership caches.
+
+Three planned before/after pairs used six fresh processes, in AB/BA/AB order,
+with the same 500-creature cohort and `performance-60` configuration above.
+All six retained full 240-view, two-draw warming and passed pre/post-sample
+pacing, cohort, source/asset/engine identity and teardown checks. The
+[refresh trial record](../../docs/qa/linux-minimap-refresh-trials-2026-10-31.json)
+preserves each pair and its body census.
+
+| Pair | Map CPU mean, before → after | Map CPU p95, before → after | Built bodies, before → after |
+| --- | ---: | ---: | ---: |
+| AB | 1.086 → .815 ms | 4.542 → 3.462 ms | 78 → 75 |
+| BA | 1.073 → .797 ms | 4.617 → 3.445 ms | 77 → 78 |
+| AB | 1.078 → .783 ms | 4.684 → 3.308 ms | 74 → 79 |
+
+The median map CPU mean fell 26.1% (1.078 → .797 ms per frame), and its p95
+fell 25.4% (4.617 → 3.445 ms). Median Main processing fell 5.804 → 5.591 ms.
+Delivered FPS remained approximately 60: 60.064 → 60.168 median. The declared
+five-body tolerance is not identical model membership; these trials establish
+repeated map CPU savings, not a causal whole-frame FPS or memory improvement.
+The map timer excludes deferred canvas work. Root UI captures retain the 2D
+background and dense dots; the third pair was also inspected visually.
+
+These remain source-project screening runs over extracted release imports,
+based on `4b2bad69f`, with only Main differing between variants and the new
+helper present in both. Later remote cape and Lantern Mine changes were
+integrated separately and checked headlessly. Actor-cache integration passed
+1,181 checks and detail memoization passed 81, with existing map projection,
+background, marker, presence and section-privacy regressions also passing. A separate affine
+projection experiment was discarded: the small microbenchmark saving changed
+exact edge clipping. No shader warming or loading policy changed.
+
 ## Startup diagnostics
 
 The rotating client log includes `startup_stage` records with a stage name,
@@ -160,14 +471,15 @@ pass, not an emptied operating-system cache. `authored-herd` is separately
 selectable and reports unavailable content when the map has no authored herd.
 Unavailable content is retained as pending, never accepted as an empty timing.
 
-On Windows, `--settings-profile performance` seeds the game's Performance
+On Windows and Linux, `--settings-profile performance` seeds the game's Performance
 preferences into fresh isolated storage before startup: Low, 30 FPS, 75% world
 scale, Half map textures, 60 crowd bodies and the remaining preset values.
 The runner records the seed and checks the actual loaded settings. Conflicting
 options are rejected. Use market/invasion/combat cells for this profile; the
 80-mount census requires a larger body allowance. Ordinary Low at 30 FPS uses
 `--settings-profile default --quality low --fps-cap 30` and remains a separate
-comparison. Performance profile seeding currently supports Windows only.
+comparison. Generated preferences use isolated APPDATA on Windows and
+XDG_DATA_HOME on Linux; startup attestation checks the engine's exact user directory.
 
 For shipping-path measurements, create a committed standalone benchmark export:
 
@@ -260,13 +572,13 @@ down. Measured on the Four Gates package (1717 imported mesh nodes referencing
 
 ## Where the frame goes
 
-**One world, three cameras.** `MapViewport` and `FullMapViewport` share the
-gameplay `World3D`, so each is a complete extra render of the region - geometry,
-materials and the directional shadow pass. Both shipped on `UPDATE_ALWAYS`,
-which is where the 9 237 draw calls came from. They are now idle by default and
-`Main._update_map_viewports()` asks for a single redraw only while the matching
-UI is on screen: the minimap at ~15 Hz, the full map at ~5 Hz. The character
-creation preview follows the same rule through `_update_preview_viewport()`.
+**One gameplay render, 2D navigation maps.** The historical map cameras shared
+the gameplay world and rendered geometry, materials and shadows again. They
+were first throttled, then exterior map images replaced their geometry. The
+direct 2D path above now removes the map-render passes entirely, including
+interiors. `Main._update_map_viewports()` refreshes UI pictures and markers only
+while visible: the minimap at about 15 Hz, the full map at about 5 Hz. The
+separate character-creation preview still uses `_update_preview_viewport()`.
 
 If you add another SubViewport over the gameplay world, drive it the same way.
 Leaving one on `UPDATE_ALWAYS` silently doubles the client's raster cost.

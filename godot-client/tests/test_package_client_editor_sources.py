@@ -3,7 +3,7 @@
 godot-client/world_authoring holds the map editor's region scenes, their
 prototype models and textures and the territory catalogs. Only the editor and
 its plugins open them, never the game, yet the export packed them all: 1.77 GB
-of the 2.11 GB PCK of 91ce68374. Both export presets now leave world_authoring/*
+of the 2.11 GB PCK of 91ce68374. All export presets now leave world_authoring/*
 out, and check_editor_sources_unpacked stops a build whose PCK still holds any
 of it. The map data a package stages may not name a res://world_authoring/ path
 either (check_map_data_names_no_editor_sources): the game loads what it names by
@@ -32,6 +32,7 @@ import pytest
 
 
 SOURCE = Path(__file__).resolve().parents[1] / "tools" / "package_client.py"
+sys.path.insert(0, str(SOURCE.parent))
 SPEC = importlib.util.spec_from_file_location("package_client_editor_sources", SOURCE)
 package = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = package
@@ -60,9 +61,9 @@ def _exclude_filters() -> list[list[str]]:
             for line in package.EXPORT_PRESETS.splitlines() if line.startswith("exclude_filter=")]
 
 
-def test_both_presets_leave_the_region_sources_out():
+def test_all_presets_leave_the_region_sources_out():
     filters = _exclude_filters()
-    assert len(filters) == 2
+    assert len(filters) == len(package.PLATFORMS)
     for preset in filters:
         assert "world_authoring/*" in preset
         # Godot matches a filter case-insensitively against the res:// path and the path without it, and its *
@@ -101,7 +102,7 @@ def test_the_pack_check_refuses_a_region_source(tmp_path):
 
 def test_the_build_checks_the_pack_after_the_export():
     source = SOURCE.read_text(encoding="utf-8")
-    body = source[source.index("def main() -> int:"):]
+    body = source[source.index("def _main(argv=None, storage=None) -> int:"):]
     export = body.index("export_project(godot, project, app_dir")
     check = body.index("check_editor_sources_unpacked(app_dir)")
     assert export < check < body.index("make_zip(stage)")

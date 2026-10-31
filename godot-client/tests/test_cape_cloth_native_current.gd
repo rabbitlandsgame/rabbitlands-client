@@ -47,7 +47,7 @@ func _run() -> void:
 		var fabric: Array = optimized_cloth.get("_fabric_rest")
 		_check(fabric.size() == 3 and fabric == baseline_cloth.get("_fabric_rest"),
 			"both actual equipped rigs retain all measured fabric chains")
-		for key: String in ["_section_knots", "_section_halves", "_section_folds", "_section_blend", "_shin_reaches"]:
+		for key: String in ["_section_knots", "_section_halves", "_section_folds", "_section_blend", "_shin_reaches", "_surface_samples"]:
 			_check(optimized_cloth.get(key) == baseline_cloth.get(key), "paired current input " + key)
 		_check_rig_ownership(optimized_skeleton)
 		var optimized_player := optimized_actor.animation_player
@@ -103,6 +103,7 @@ func _replace_with_baseline(actor: ReplicatedActor3D, skeleton: Skeleton3D) -> S
 	for key: String in ["_section_knots", "_section_halves", "_section_folds", "_section_blend"]:
 		section.append((original.get(key) as PackedFloat32Array).duplicate())
 	var shins: Array = (original.get("_shin_reaches") as Array).duplicate(true)
+	var samples: Array = (original.get("_surface_samples") as Array).duplicate(true)
 	skeleton.remove_child(original)
 	original.free()
 	var replacement: SkeletonModifier3D = (load(CURRENT_SCRIPT_REFERENCE) as Script).new()
@@ -111,6 +112,7 @@ func _replace_with_baseline(actor: ReplicatedActor3D, skeleton: Skeleton3D) -> S
 	replacement.call("set_torso_reach", torso, lumbar)
 	replacement.call("set_fabric_line", fabric, section)
 	replacement.call("set_shin_reach", shins)
+	replacement.call("set_surface_samples", samples)
 	replacement.active = false
 	actor.set("_cape_cloth", replacement)
 	return replacement
@@ -119,6 +121,7 @@ func _run_material_line_sequence(actors: Array[ReplicatedActor3D], optimized: Sk
 		baseline: SkeletonModifier3D) -> void:
 	for cloth: SkeletonModifier3D in [optimized, baseline]:
 		cloth.call("set_fabric_line", [])
+		cloth.call("set_surface_samples", [])
 		cloth.call("set_shin_reach", [])
 		cloth.call("set_torso_reach", PackedFloat32Array(), PackedFloat32Array())
 		cloth.call("reset")

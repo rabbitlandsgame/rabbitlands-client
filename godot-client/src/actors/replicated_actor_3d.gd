@@ -7,14 +7,31 @@ var _remote_enrollment_ready := false
 var _remote_pending_transfer := PackedFloat64Array()
 ## Last configure call only; no frame-time sampling or retained Resources.
 var _configuration_phases_us: Dictionary = {}
+var _configuration_profile_scope := ""
 
 func configuration_timings_usec() -> Dictionary:
 	return _configuration_phases_us.duplicate()
 
+## Opt-in configure-only attribution. Detailed finish/part durations are nested
+## inside their parent phases, not additional time to sum into the total.
+## Ordinary actor changes never sample clocks or add diagnostic entries.
+func _configuration_profile_tick() -> int:
+	return 0 if _configuration_profile_scope.is_empty() else Time.get_ticks_usec()
+
+func _configuration_profile_step(key: String, started: int) -> int:
+	if started == 0 or _configuration_profile_scope.is_empty():
+		return 0
+	var now := Time.get_ticks_usec()
+	var field := "detail.%s.%s" % [_configuration_profile_scope, key]
+	_configuration_phases_us[field] = int(_configuration_phases_us.get(field, 0)) + now - started
+	return now
+
 const REBOUND_SKIN_POOL := preload("res://src/actors/rebound_skin_pool.gd")
+const WARDROBE_DYE_CACHE := preload("res://src/actors/wardrobe_dye_cache.gd")
 const ACTOR_RENDER_QUALITY := preload("res://src/actors/actor_render_quality.gd")
 const OLDCRAFT_ACTOR_STYLE := preload("res://src/actors/oldcraft_actor_style.gd")
 const CapeEmblems := preload("res://src/actors/cape_emblems.gd")
+const CapeApprovedData := preload("res://src/actors/cape_approved_data.gd")
 const GLB_MESH_EXTRAS := preload("res://src/actors/glb_mesh_extras.gd")
 const WARDROBE_SHIRT_FIT := preload("res://src/actors/wardrobe_shirt_fit.gd")
 const FEMALE_SHIRT_NECKLINE := preload("res://src/actors/female_shirt_neckline.gd")
@@ -422,6 +439,7 @@ var _silhouette: OccludedSilhouette
 var _animation_tier: int = AnimationGate.Tier.FULL
 var _animation_gate_owner: AnimationGate
 var _cape_cloth_worn := false
+var _cape_mounted_fit := false
 var _cape_cloth_allowed := true
 ## The resolved graphics quality and whether this is the player's own actor.
 ## Main supplies both after configure; keeping them here makes appearance and
@@ -593,6 +611,8 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 		equipment_config: Dictionary = {}, build_model := true) -> Array[String]:
 	var configure_started := Time.get_ticks_usec()
 	_configuration_phases_us.clear()
+	_configuration_profile_scope = ""
+	var profile_build := OS.get_environment("ELORIA_ACTOR_BUILD_PROFILE") == "1"
 	# Choose the tier before loading any optional High-only portrait resources.
 	if not _render_quality_selected:
 		_render_quality = LookProfile.quality()
@@ -701,7 +721,9 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 				skeleton.add_child(_weapon_carry)
 			phase_started = Time.get_ticks_usec()
 			_attach_cape_cloth(skeleton)
+			_configuration_profile_scope = "appearance" if profile_build else ""
 			apply_appearance_variants(dto.get("appearance", {}) as Dictionary)
+			_configuration_profile_scope = ""
 			_configuration_phases_us["appearance"] = Time.get_ticks_usec() - phase_started
 			phase_started = Time.get_ticks_usec()
 			var animation_path := _external_path(str(model_config.get("animationLibrary", "")))
@@ -740,16 +762,20 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 				_switch_rl_head_in_place()
 			_configuration_phases_us["rl_head"] = Time.get_ticks_usec() - phase_started
 	phase_started = Time.get_ticks_usec()
+	_configuration_profile_scope = "equipment" if profile_build else ""
 	apply_equipment_visuals(dto.get("equipment_visuals", {}) as Dictionary,
 		dto.get("equipment_fallback_parts", []) as Array)
+	_configuration_profile_scope = ""
 	_configuration_phases_us["equipment"] = Time.get_ticks_usec() - phase_started
 	_configuration_phases_us["total"] = Time.get_ticks_usec() - configure_started
 	return errors
 
 func apply_appearance_variants(appearance: Dictionary) -> void:
+	var profile_started := _configuration_profile_tick()
 	_appearance = appearance.duplicate()
 	_rl_head_failed = false
 	_apply_character_proportions()
+	profile_started = _configuration_profile_step("scale", profile_started)
 	if _native_skeleton == null:
 		return
 	var culture: String = str(_model_config.get("culture", "luminous"))
@@ -839,22 +865,31 @@ func apply_appearance_variants(appearance: Dictionary) -> void:
 			var baked: Array = _model_config.get("wardrobeBakedGrow", []) as Array
 			if not baked.has(mesh_name):
 				_grow_mesh(mesh_node, float(WARDROBE_GROW[mesh_name]))
+	profile_started = _configuration_profile_step("colours_materials", profile_started)
 	_apply_face_appearance(native_model, skin_tint, eye_tint, brow_tint)
+	profile_started = _configuration_profile_step("face", profile_started)
 	_apply_rl_head_and_hair(appearance, hair_tint)
+	profile_started = _configuration_profile_step("head_and_hair", profile_started)
 	_expand_animated_face_bounds(native_model)
 	_refresh_body_surface_visibility()
+	profile_started = _configuration_profile_step("bounds_visibility", profile_started)
 	_refresh_wardrobe_cover()
+	profile_started = _configuration_profile_step("wardrobe_cover", profile_started)
 	# Open headwear follows the head and hair just set (RLHeadwearFit); a piece
 	# rebuilt here then takes the quality and Oldcraft passes below.
 	_refit_rl_headwear()
+	profile_started = _configuration_profile_step("headwear_refit", profile_started)
 	_apply_render_quality_to_visuals()
+	profile_started = _configuration_profile_step("finish", profile_started)
 	OLDCRAFT_ACTOR_STYLE.apply_surface_finish(native_model)
+	profile_started = _configuration_profile_step("surface_finish", profile_started)
 	for nodes: Array in _equipment_nodes.values():
 		for node: Node in nodes:
 			if node is MeshInstance3D and node.has_meta("neck_source"):
 				NecklineSkin.refresh_materials(node as MeshInstance3D)
 	if _silhouette != null and _silhouette.is_enabled():
 		_silhouette.rebuild()
+	_configuration_profile_step("necklines_silhouette", profile_started)
 
 func _set_appearance_visible(mesh_node: MeshInstance3D, visible_by_style: bool) -> void:
 	# Appearance owns whether a wardrobe surface exists at all; equipment only
@@ -1058,25 +1093,28 @@ static func _wardrobe_dye_texture(source: Texture2D) -> Texture2D:
 	var original := source.get_image()
 	if original == null or original.is_empty():
 		return source
-	var neutral := original.duplicate() as Image
-	if neutral.is_compressed():
-		neutral.decompress()
-	neutral.convert(Image.FORMAT_RGBA8)
-	var reference := 0.0
-	var count := 0
-	for y: int in neutral.get_height():
-		for x: int in neutral.get_width():
-			var pixel := neutral.get_pixel(x, y)
-			if pixel.a > 0.0:
-				reference += pixel.get_luminance()
-				count += 1
-	reference = maxf(0.01, reference / maxi(1, count))
-	for y: int in neutral.get_height():
-		for x: int in neutral.get_width():
-			var pixel := neutral.get_pixel(x, y)
-			var value := clampf(pixel.get_luminance() / reference, 0.0, 1.0)
-			neutral.set_pixel(x, y, Color(value, value, value, pixel.a))
-	neutral.generate_mipmaps()
+	var neutral: Image = WARDROBE_DYE_CACHE.load_image(original)
+	if neutral == null:
+		neutral = original.duplicate() as Image
+		if neutral.is_compressed():
+			neutral.decompress()
+		neutral.convert(Image.FORMAT_RGBA8)
+		var reference := 0.0
+		var count := 0
+		for y: int in neutral.get_height():
+			for x: int in neutral.get_width():
+				var pixel := neutral.get_pixel(x, y)
+				if pixel.a > 0.0:
+					reference += pixel.get_luminance()
+					count += 1
+		reference = maxf(0.01, reference / maxi(1, count))
+		for y: int in neutral.get_height():
+			for x: int in neutral.get_width():
+				var pixel := neutral.get_pixel(x, y)
+				var value := clampf(pixel.get_luminance() / reference, 0.0, 1.0)
+				neutral.set_pixel(x, y, Color(value, value, value, pixel.a))
+		neutral.generate_mipmaps()
+		WARDROBE_DYE_CACHE.store_image(original, neutral)
 	var texture := ImageTexture.create_from_image(neutral)
 	_wardrobe_texture_cache[key] = texture
 	_wardrobe_texture_cache[texture.get_instance_id()] = texture
@@ -1704,11 +1742,13 @@ func mounted_presentation_priority() -> bool:
 	return _render_quality_local_actor or _selected or _combat_target
 
 func _apply_render_quality_to_visuals() -> void:
+	var profile_started := _configuration_profile_tick()
 	if is_instance_valid(_native_model):
 		# All authored body coverage, cape drape and quiver-strap fitting have
 		# finished before this stage. Fit the final wardrobe exactly once.
 		HIGH_HAIR.restore(_native_model)
 		HIGH_PORTRAIT.restore(_native_model)
+		profile_started = _configuration_profile_step("finish.restore", profile_started)
 		# With an RL head (or one waiting for the animation import) the body's
 		# own head is hidden and cut away: no face sculpt, no beard shell and
 		# no stubble on it, and no classic High portrait. Its legacy hairstyle,
@@ -1719,17 +1759,22 @@ func _apply_render_quality_to_visuals() -> void:
 			# individual face lets all face choices reuse the same outfit fit.
 			# This field ends below its authored head/upper-neck replacement.
 			CHARACTER_PROPORTIONS.apply_body_refinement(_native_model, _native_skeleton, _model_config)
+			profile_started = _configuration_profile_step("finish.body_refinement", profile_started)
 			if rl:
 				CHARACTER_PROPORTIONS.restore(_native_model)
+				profile_started = _configuration_profile_step("finish.face_proportions", profile_started)
 				if not _rl_switching:
 					PORTRAIT_GROOM.apply(_native_model, _native_skeleton, _rl_groom_appearance(), _model_config)
+					profile_started = _configuration_profile_step("finish.groom", profile_started)
 			else:
 				CHARACTER_PROPORTIONS.apply(_native_model, _native_skeleton, _appearance)
+				profile_started = _configuration_profile_step("finish.face_proportions", profile_started)
 				# A switch down from the RL head grooms again only to build a
 				# beard shell the RL head went without; otherwise the hair keeps
 				# the grooming and finish it had, as in develop's own switch.
 				if not _rl_switching or _beard_shell_missing():
 					PORTRAIT_GROOM.apply(_native_model, _native_skeleton, _appearance, _model_config)
+					profile_started = _configuration_profile_step("finish.groom", profile_started)
 			_human_shape_needs_finish = false
 		if rl:
 			if _native_model.has_meta(HIGH_PORTRAIT.USER_META):
@@ -1744,7 +1789,9 @@ func _apply_render_quality_to_visuals() -> void:
 			STUBBLE_APPEARANCE.apply(_native_model, _appearance, _model_config)
 			if _rl_hair != null:
 				_rl_hair.set_quality(_render_quality)
+		profile_started = _configuration_profile_step("finish.portrait_hair_stubble", profile_started)
 		ACTOR_RENDER_QUALITY.apply_actor(_native_model, _render_quality)
+		profile_started = _configuration_profile_step("finish.quality_flags", profile_started)
 	var fallback := get_node_or_null("MissingModelFallback") as MeshInstance3D
 	if fallback != null:
 		ACTOR_RENDER_QUALITY.apply_mesh(fallback, _render_quality)
@@ -3380,11 +3427,13 @@ func apply_equipment_visuals(visuals: Dictionary, fallback_parts: Array = []) ->
 		return
 	if _equipment_applied and _equipment_matches(visuals, fallback_parts):
 		return
+	var profile_started := _configuration_profile_tick()
 	if is_instance_valid(_native_model):
 		HIGH_HAIR.restore(_native_model)
 		HIGH_PORTRAIT.restore(_native_model)
 		CHARACTER_PROPORTIONS.restore(_native_model)
 		CHARACTER_PROPORTIONS.restore_body_refinement(_native_model)
+	profile_started = _configuration_profile_step("restore", profile_started)
 	_equipment_applied = true
 	var torso_before: int = int(_equipment_visuals.get(BODY_PART, 0))
 	var shins_before := Vector2i(int(_equipment_visuals.get(LEGS_PART, 0)),
@@ -3410,10 +3459,14 @@ func apply_equipment_visuals(visuals: Dictionary, fallback_parts: Array = []) ->
 		if int(_equipment_visuals.get(part, -1)) == visual_id and (
 				not allow_fallback or _equipment_nodes.has(part)):
 			continue
+		var part_started := _configuration_profile_tick()
 		_clear_equipment_part(part)
 		_equipment_visuals[part] = visual_id
 		_create_equipment_part(part, visual_id, allow_fallback)
+		if part_started != 0:
+			_configuration_profile_step("parts.%d.visual_%d" % [part, visual_id], part_started)
 		cape_rebuilt = cape_rebuilt or part == CAPE_PART
+	profile_started = _configuration_profile_step("parts", profile_started)
 	# A cape kept from before still hangs on the armour it was cut against, so
 	# a change of chest piece re-cuts it even though the cape itself did not
 	# change. One rebuilt in the loop above was already cut against the new
@@ -3433,8 +3486,11 @@ func apply_equipment_visuals(visuals: Dictionary, fallback_parts: Array = []) ->
 		_tell_cloth_what_is_worn()
 	# Open headwear drapes its trails over the torso worn (RLHeadwearFit).
 	_refit_rl_headwear()
+	profile_started = _configuration_profile_step("cape_headwear_refit", profile_started)
 	_refresh_wardrobe_cover()
+	profile_started = _configuration_profile_step("wardrobe_cover", profile_started)
 	_refresh_melee_animation_mapping()
+	_update_cape_geometry_guard()
 	_refresh_quiver_cape_fit()
 	if _weapon_carry != null:
 		_weapon_carry.call("refresh_equipment")
@@ -3442,13 +3498,17 @@ func apply_equipment_visuals(visuals: Dictionary, fallback_parts: Array = []) ->
 		var weapon := _equipment_model_config(0, int(_equipment_visuals.get(0, 0)))
 		var bow_path := _ranged_bow_path(weapon)
 		combat_presentation.set_equipped_bow(bow_path)
+	profile_started = _configuration_profile_step("mapping_quiver", profile_started)
 	# Equipment adds and removes mesh instances, so the silhouette's clone set
 	# has to be built again against what the actor is now made of.
 	_apply_render_quality_to_visuals()
+	profile_started = _configuration_profile_step("finish", profile_started)
 	if _silhouette != null and _silhouette.is_enabled():
 		_silhouette.rebuild()
+	profile_started = _configuration_profile_step("silhouette", profile_started)
 	if is_instance_valid(_native_model):
 		OLDCRAFT_ACTOR_STYLE.apply_surface_finish(_native_model)
+	_configuration_profile_step("surface_finish", profile_started)
 
 ## The quiver carries authored cape-on and cape-off fits on the same skin.
 ## Changing one actor's morph weight leaves shared meshes and other wearers alone.
@@ -3691,12 +3751,12 @@ func _worn_skinned_scene(part: int) -> String:
 		return ""
 	return str(model.get("scene", ""))
 
-## One cape surface, cut to clear the torso worn under it. The mesh itself
-## when nothing is worn there, or when nothing on it had to move.
+## One cape surface, relaxed at the shoulders and fitted to the torso worn
+## under it. The bare wardrobe receives the same relaxed shoulder fold.
 func _draped_over(torso_scene: String, cape_scene: String,
 		piece: Dictionary) -> Mesh:
 	var mesh: Mesh = piece.get("mesh") as Mesh
-	if torso_scene.is_empty() or mesh == null:
+	if mesh == null:
 		return mesh
 	var key: String = "%s|%s|%s" % [cape_scene, torso_scene,
 		str(piece.get("name", ""))]
@@ -3739,6 +3799,13 @@ func _set_cape_cloth_active(enabled: bool) -> void:
 	_cape_cloth_worn = enabled
 	if _cape_cloth == null:
 		return
+	var profile := ""
+	if enabled:
+		for node: Node in _equipment_nodes.get(CAPE_PART, []):
+			if node.has_meta("cape_approved_profile"):
+				profile = str(node.get_meta("cape_approved_profile"))
+				break
+	_cape_cloth.call("configure_approved_motion", self, profile)
 	if enabled:
 		_tell_cloth_what_is_worn()
 	_refresh_cape_cloth_activity(true)
@@ -3786,6 +3853,8 @@ func _refresh_cape_cloth_activity(reset_when_enabled: bool = false) -> void:
 	if enabled and reset_when_enabled and not _cape_cloth.active:
 		_cape_cloth.call("reset")
 	_cape_cloth.active = enabled
+	if not enabled and not is_instance_valid(_mount_visual):
+		_cape_cloth.call("hold_approved_idle")
 	if is_instance_valid(_mount_visual):
 		_mount_visual.call("refresh_cloth_permission", reset_when_enabled)
 
@@ -3796,8 +3865,10 @@ func _tell_cloth_what_is_worn() -> void:
 	if _cape_cloth == null or _native_skeleton == null:
 		return
 	var torso_scene: String = _worn_torso_scene()
+	_update_cape_geometry_guard()
 	var fabric: Array = _cape_fabric_line(torso_scene)
 	_cape_cloth.call("set_fabric_line", fabric[0], fabric[1])
+	_cape_cloth.call("set_surface_samples", fabric[2])
 	_cape_cloth.call("set_shin_reach", _shin_reach(torso_scene))
 	var empty := PackedFloat32Array()
 	if torso_scene.is_empty():
@@ -3813,25 +3884,44 @@ func _tell_cloth_what_is_worn() -> void:
 		_torso_reaches[key] = reach
 	_cape_cloth.call("set_torso_reach", reach[0], reach[1])
 
+func _update_cape_geometry_guard() -> void:
+	if _cape_cloth == null:
+		return
+	var torso_scene := _worn_torso_scene()
+	# Keep the reviewed reference fit exact; other proportions and equipment
+	# additionally use the measured body/garment capsule guard.
+	var reference_body := str(_model_config.get("scene", "")).contains("luminous_male")
+	var reference_kit := (torso_scene.is_empty() and int(_equipment_visuals.get(4, 0)) == 0 and int(_equipment_visuals.get(6, 0)) == 0 \
+		and int(_equipment_visuals.get(0, 0)) == 0 and int(_equipment_visuals.get(1, 0)) == 0) \
+		or (int(_equipment_visuals.get(BODY_PART, 0)) == 184 and int(_equipment_visuals.get(4, 0)) == 171 and int(_equipment_visuals.get(6, 0)) == 192 \
+		and int(_equipment_visuals.get(0, 0)) == 114 and int(_equipment_visuals.get(1, 0)) == 106)
+	_cape_cloth.call("set_approved_geometry_guard", not (reference_body and reference_kit))
+
 ## Where the worn cape's cloth hangs behind each of its chains, for the solver
 ## to hang plumb and to collide. It depends on the rig, the cape and - through
 ## the drape that holds the yoke out over armour - the torso, so it is shared
-## by every actor wearing the three. The line, then the cape's cross-section.
+## by every actor wearing the three. The line, the cape's cross-section, then
+## actual surface contact samples with their per-link skin weights.
 func _cape_fabric_line(torso_scene: String) -> Array:
 	var cape: Array = []
 	for node_value: Variant in _equipment_nodes.get(CAPE_PART, []) as Array:
 		if node_value is MeshInstance3D and is_instance_valid(node_value):
 			cape.append(node_value)
 	if cape.is_empty():
-		return [[], []]
+		return [[], [], []]
+	var profile := str((cape[0] as Node).get_meta("cape_approved_profile", ""))
 	var visual: int = int(_equipment_visuals.get(CAPE_PART, 0))
-	var key: String = "%s|%s|%s" % [str(_model_config.get("scene", "")),
+	var key: String = "%s|%s|%s|%s" % [str(_model_config.get("scene", "")),
 		str(_equipment_model_config(CAPE_PART, visual).get("scene", "")),
-		torso_scene]
+		torso_scene, profile]
 	if not _fabric_lines.has(key):
 		var section: Array = []
-		var line: Array = CapeDrape.fabric_line(_native_skeleton, cape, section)
-		_fabric_lines[key] = [line, section]
+		var contacts: Array = []
+		var overrides := {}
+		if not profile.is_empty():
+			overrides = CapeApprovedData.neutral_rests(_native_skeleton, profile)
+		var line: Array = CapeDrape.fabric_line(_native_skeleton, cape, section, contacts, overrides)
+		_fabric_lines[key] = [line, section, contacts]
 	return _fabric_lines[key] as Array
 
 ## How far the legs reach behind each thigh and shin - left thigh, right
@@ -4152,6 +4242,9 @@ func _set_mount_state_legacy(state: Dictionary, models: Dictionary) -> void:
 		was_mounted = false
 	mount_state = state.duplicate(true)
 	if riding and not was_mounted:
+		# Seated cloth retains its qualified mesh/skin and solver together.
+		# The new fitted skin is restored when ordinary locomotion resumes.
+		_rebuild_cape_for_mount(true)
 		# Seat fitting records the neutral imported root, without terrain lean.
 		_clear_native_surface_tilt()
 		# A previously stepped player must leave the gate before mounted sampling
@@ -4169,6 +4262,7 @@ func _set_mount_state_legacy(state: Dictionary, models: Dictionary) -> void:
 		if not errors.is_empty():
 			visual.call("restore")
 			visual.free()
+			_rebuild_cape_for_mount(false)
 			_restore_unmounted_animation_gate()
 			push_warning("Mount: " + str(errors))
 			play_action(&"idle", true)
@@ -4190,6 +4284,7 @@ func _set_mount_state_legacy(state: Dictionary, models: Dictionary) -> void:
 		_mount_visual = null
 		previous.call("restore")
 		previous.free()
+		_rebuild_cape_for_mount(false)
 		_restore_unmounted_animation_gate()
 		_pace_histories.clear()
 		_last_movement_update_msec = -1
@@ -4201,6 +4296,24 @@ func _set_mount_state_legacy(state: Dictionary, models: Dictionary) -> void:
 	if riding != was_mounted:
 		_surface_applied_up = Vector3(NAN, NAN, NAN)
 		_apply_surface_orientation()
+
+func _rebuild_cape_for_mount(mounted: bool) -> void:
+	if _cape_mounted_fit == mounted:
+		return
+	_cape_mounted_fit = mounted
+	if not _equipment_nodes.has(CAPE_PART):
+		return
+	var visual := int(_equipment_visuals.get(CAPE_PART, 0))
+	_clear_equipment_part(CAPE_PART)
+	_equipment_visuals[CAPE_PART] = visual
+	_create_equipment_part(CAPE_PART, visual, false)
+	if is_instance_valid(_native_model):
+		CHARACTER_PROPORTIONS.apply_body_refinement(_native_model, _native_skeleton, _model_config)
+		OLDCRAFT_ACTOR_STYLE.apply_surface_finish(_native_model)
+	_apply_render_quality_to_visuals()
+	_refresh_quiver_cape_fit()
+	if _silhouette != null and _silhouette.is_enabled():
+		_silhouette.rebuild()
 
 func _equipment_model_config(part: int, visual_id: int) -> Dictionary:
 	var aliases: Dictionary = _equipment_config.get("aliases", {}) as Dictionary
@@ -4326,6 +4439,11 @@ func _socket_placement(socket: Dictionary, bone_rest: Transform3D, fit: float,
 			Vector3.ZERO) * (PI / 180.0)).scaled(Vector3.ONE * scale),
 		bone_rest.origin + _vector3(socket.get("offset", []), Vector3.ZERO) * fit)
 
+func _approved_cape_profile(scene_path: String, part: int) -> String:
+	if not _cape_mounted_fit and part == CAPE_PART and scene_path == CapeApprovedData.TEMPLATE and CapeApprovedData.compatible(_native_skeleton):
+		return "wardrobe" if _worn_torso_scene().is_empty() else "armour"
+	return ""
+
 func _attach_skinned_equipment(scene_path: String, part: int, visual_id: int,
 		tint: Array = [], author_rig: String = "",
 		skin_region: String = "", fit_profile: String = "",
@@ -4345,10 +4463,20 @@ func _attach_skinned_equipment(scene_path: String, part: int, visual_id: int,
 	# The cape is the one garment cut against another: its yoke is rigid, so
 	# only this can hold it outside the torso worn under it.
 	var worn: String = _worn_torso_scene() if part == CAPE_PART else ""
+	var approved_profile := _approved_cape_profile(scene_path, part)
 	for piece_value: Variant in _equipment_pieces(scene_path):
 		var piece: Dictionary = piece_value as Dictionary
 		var surface_key: String = "%s|%s" % [cache_key, str(piece.get("name", ""))]
-		var rebound: Skin = _rebound_skins.get(surface_key) as Skin
+		var approved_mesh: Mesh = null
+		var rebound: Skin = null
+		if not approved_profile.is_empty():
+			approved_mesh = CapeApprovedData.fit_mesh(approved_profile, piece.get("mesh") as Mesh)
+			if approved_mesh != null:
+				rebound = CapeApprovedData.fit_skin(approved_profile)
+				if rebound == null:
+					approved_mesh = null
+		if rebound == null:
+			rebound = _rebound_skins.get(surface_key) as Skin
 		if rebound == null:
 			rebound = _rebound_skin(piece.get("bones", PackedStringArray()) as PackedStringArray,
 				piece.get("binds", [] as Array[Transform3D]) as Array[Transform3D],
@@ -4364,9 +4492,12 @@ func _attach_skinned_equipment(scene_path: String, part: int, visual_id: int,
 		var clone: MeshInstance3D = MeshInstance3D.new()
 		clone.name = "EquipmentSkin_%d_Visual_%d_%s" % [part, visual_id,
 			str(piece.get("name", "Mesh"))]
-		clone.mesh = _draped_over(worn, scene_path, piece)
+		clone.mesh = approved_mesh if approved_mesh != null else (_draped_over(worn, scene_path, piece) if part == CAPE_PART
+			else piece.get("mesh") as Mesh)
 		clone.skin = rebound
-		clone.transform = piece.get("transform", Transform3D.IDENTITY)
+		clone.transform = Transform3D.IDENTITY if approved_mesh != null else piece.get("transform", Transform3D.IDENTITY)
+		if approved_mesh != null:
+			clone.set_meta("cape_approved_profile", approved_profile)
 		_restore_piece_render_state(clone, piece)
 		_tint_surfaces(clone, tint)
 		if str(piece.get("name", "")) == "EquipmentForearmSkin":

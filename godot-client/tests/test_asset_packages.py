@@ -1,5 +1,7 @@
 """Real Godot checks for selective downloads, repair, rollback and uninstall."""
 import base64
+from concurrent.futures import ThreadPoolExecutor
+from contextlib import contextmanager
 import functools
 import http.server
 import json
@@ -20,6 +22,25 @@ sys.path.insert(0, str(CLIENT / "tools"))
 import asset_packages
 import client_release
 import package_client
+
+
+@contextmanager
+def locked_directory(path):
+    """Hold a real Windows directory handle without delete/rename sharing."""
+    import ctypes
+    from ctypes import wintypes
+
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel.CreateFileW.argtypes = [wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD,
+                                  wintypes.LPVOID, wintypes.DWORD, wintypes.DWORD, wintypes.HANDLE]
+    kernel.CreateFileW.restype = wintypes.HANDLE
+    kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+    handle = kernel.CreateFileW(str(path), 1, 3, None, 3, 0x02000000, None)
+    assert handle != wintypes.HANDLE(-1).value, ctypes.get_last_error()
+    try:
+        yield
+    finally:
+        kernel.CloseHandle(handle)
 
 
 def source(root, identity):
@@ -127,6 +148,8 @@ func _run() -> void:
         var file := FileAccess.open(request.script, FileAccess.WRITE)
         file.store_string(Uninstall.windows_script(request.root, request.cache, 0, request.identity.repository))
         file.close()
+    if error == "" and request.action == "promote":
+        error = await transport.worker(func() -> String: return Release.promote_staged(request.root))
     Release.save_json(request.result, {"error": error})
     quit(0 if error == "" else 1)
 ''')
@@ -220,6 +243,74 @@ def test_corrupt_package_preserves_existing_install(fixture):
     code, error, output = f["run"]()
     assert code == 1 and ("verification" in error or "download failed" in error), output
     assert (f["installed"] / "app/client-release.json").read_bytes() == before
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Native Windows folder locking")
+@pytest.mark.parametrize("locked_root", ["app", "eloria-assets"])
+def test_locked_installed_folder_reports_failure_and_rolls_back(fixture, locked_root):
+    f = fixture
+    before = {path.relative_to(f["installed"]): path.read_bytes()
+              for path in f["installed"].rglob("*") if path.is_file()}
+    with locked_directory(f["installed"] / locked_root):
+        code, error, output = f["run"]()
+    assert code == 1 and "previous game was restored" in error, output
+    assert "Could not move" in error and locked_root in error and "error " in error
+    report_path = Path(error.split("Error report: ", 1)[1])
+    report = json.loads(report_path.read_text())
+    assert Path(report["source"]) == f["installed"] / locked_root
+    assert Path(report["destination"]) == f["installed"] / ".eloria-previous" / locked_root
+    assert report["error_code"] != 0 and report["error"]
+    assert report["commit"] == f["payload"]["commit"] and report["timestamp_utc"]
+    assert report["recovery_error"] == ""
+    assert not (f["installed"] / ".eloria-update-journal.json").exists()
+    assert all((f["installed"] / path).read_bytes() == data for path, data in before.items())
+    f["downloads"].clear()
+    assert f["run"]()[0] == 0
+    assert not f["downloads"], "A failed folder swap must retain verified downloads for retry."
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Native Windows folder locking")
+@pytest.mark.parametrize("locked_root", ["app", "eloria-assets"])
+def test_temporary_folder_lock_is_retried(fixture, locked_root):
+    f = fixture
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        with locked_directory(f["installed"] / locked_root):
+            future = executor.submit(f["run"])
+            deadline = time.monotonic() + 15
+            while not (f["installed"] / ".eloria-update-journal.json").exists():
+                assert not future.done(), future.result()
+                assert time.monotonic() < deadline, "The updater never reached folder promotion."
+                time.sleep(0.01)
+            # Hold the lock through the first rename, then let the retry succeed.
+            time.sleep(0.5)
+            assert not future.done(), "The updater abandoned a temporary folder lock."
+        code, error, output = future.result(timeout=15)
+    assert code == 0 and not error, output
+    assert json.loads((f["installed"] / "app/client-release.json").read_text())["commit"] == "b" * 40
+    assert json.loads((f["installed"] / ".eloria-previous/app/client-release.json").read_text())["commit"] == "a" * 40
+    assert not (f["installed"] / ".eloria-update-journal.json").exists()
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Native Windows folder locking")
+@pytest.mark.parametrize("locked_root", ["app", "eloria-assets"])
+def test_locked_staged_folder_reports_promotion_and_restores_both_roots(fixture, locked_root):
+    f = fixture
+    stage = f["installed"] / ".eloria-update-stage"
+    shutil.copytree(f["stage"], stage)
+    (f["installed"] / ".eloria-previous").mkdir()
+    journal = f["installed"] / ".eloria-update-journal.json"
+    journal.write_text(json.dumps({"commit": f["payload"]["commit"], "original_roots": ["app", "eloria-assets"]}))
+    before = (f["installed"] / "app/client-release.json").read_bytes()
+    with locked_directory(stage / locked_root):
+        code, error, output = f["run"]("promote")
+    assert code == 1 and "previous game was restored" in error, output
+    report = json.loads(Path(error.split("Error report: ", 1)[1]).read_text())
+    assert Path(report["source"]) == stage / locked_root
+    assert Path(report["destination"]) == f["installed"] / locked_root
+    assert report["recovery_error"] == ""
+    assert (f["installed"] / "app/client-release.json").read_bytes() == before
+    assert (f["installed"] / "eloria-assets/maps/landfall/world.json").read_bytes() == b"unchanged world"
+    assert not journal.exists()
 
 
 def test_fresh_install_fetches_every_package_once(fixture):

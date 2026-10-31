@@ -145,6 +145,7 @@ import prepared_content_package
 import creature_compression
 import full_optimization_package
 import release_world_preparation
+import map_background_package
 from road_ground_dependencies import dependencies as road_dependencies, RoadGroundDependencyError
 from pathlib import Path, PurePosixPath
 from urllib.parse import unquote
@@ -2209,6 +2210,35 @@ def check_registry(build_dir: Path, stage: Path) -> None:
     log(f"checked {len(registry.get('maps', {}))} registry maps")
 
 
+def check_map_backgrounds(build_dir: Path, stage: Path | None = None) -> None:
+    """Every registry map/section has a current image, and those pixels ship.
+
+    Source validation happens before preview pruning or storage retirement.
+    Staged validation checks the registry still selected for this package and
+    reads actual loose pixels, not the PCK's catalog references alone.
+    """
+    try:
+        errors = (map_background_package.validate_catalog(build_dir) if stage is None
+                  else map_background_package.staged_image_errors(build_dir, stage))
+    except (OSError, ValueError, KeyError, TypeError) as error:
+        raise PackageError(f"Cannot validate prerendered map backgrounds: {error}") from error
+    if errors:
+        raise PackageError("prerendered map backgrounds are incomplete or stale:\n  " + "\n  ".join(errors[:40]))
+    log("checked " + ("current source coverage for all prerendered maps/sections" if stage is None
+                       else "all prerendered map/section images in staged loose assets"))
+
+
+def check_map_background_export(build_dir: Path, app_dir: Path) -> None:
+    inside = "data/maps/map-backgrounds.json"
+    source = build_dir / map_background_package.CATALOG
+    loose = app_dir / inside
+    if inside not in pck_paths(app_dir / "RabbitLands.pck"):
+        raise PackageError("Prerendered map background catalog is missing from the PCK")
+    if not loose.is_file() or source.read_bytes() != loose.read_bytes():
+        raise PackageError("Prerendered map background catalog differs in staged client data")
+    log("checked the prerendered map catalog in the PCK and loose client data")
+
+
 def check_shared_meshes(build_dir: Path, stage: Path) -> None:
     """Every prototype mesh a staged manifest names is in the package, and is the file the manifest was written
     against.
@@ -3651,6 +3681,7 @@ def _main(argv=None, storage=None) -> int:
         project = prepare_build_tree(build_dir, sha)
         if (project / "prepared-content").exists():
             raise PackageError("Disposable build has an old prepared-content directory; use a fresh build checkout to avoid unintended export.")
+        check_map_backgrounds(build_dir)
         optimization = None
         if options.full_optimizations:
             optimization = full_optimization_package.FullOptimizationBuild(project, stage, godot,
@@ -3693,6 +3724,7 @@ def _main(argv=None, storage=None) -> int:
             # Stage/prove map shipping before the first export reservation, so
             # warm import+graphics caches do not overlap unused map sources.
             warnings = stage_eloria_assets(build_dir, stage, previews, served)
+            check_map_backgrounds(build_dir, stage)
             check_served_packages(stage, served)
             check_map_data_names_no_editor_sources(stage)
             check_registry(build_dir, stage)
@@ -3725,6 +3757,7 @@ def _main(argv=None, storage=None) -> int:
             storage.check("export validated")
         if not (storage and optimization):
             warnings = stage_eloria_assets(build_dir, stage, previews, served)
+            check_map_backgrounds(build_dir, stage)
             check_served_packages(stage, served)
             check_map_data_names_no_editor_sources(stage)
         check_loose_scenery_images(build_dir, stage)
@@ -3806,6 +3839,7 @@ def _main(argv=None, storage=None) -> int:
             if storage:
                 storage.world_preparation = world_receipt
         check_registry(build_dir, stage)
+        check_map_background_export(build_dir, app_dir)
         check_glb_textures(app_dir)
         check_shared_meshes(build_dir, stage)
         if updating:
@@ -3858,7 +3892,7 @@ def _main(argv=None, storage=None) -> int:
         if updating:
             outputs.extend(client_release.publish_artifacts(stage, metadata, options.update_signing_key,
                                                             godot, project, run_godot, logs,
-                shared=options.shared_release_assets,
+                shared="partitioned" if STORAGE else options.shared_release_assets,
                 **({"accept_part": storage.accept_part, "budget": storage.budget} if storage else {}),
                 **({"previous_packages": storage.previous_packages, "reuse_package": storage.reuse_package}
                    if asset_cache else {})))

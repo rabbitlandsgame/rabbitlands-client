@@ -125,10 +125,11 @@ func _run() -> void:
 
 func _check_layout_and_cursor(main: Control) -> void:
 	var area: Rect2 = main.full_map.get_rect()
-	_expect(area.position.is_equal_approx(main.viewport_container.position), "the map starts at the play area's top-left edge")
-	_expect(absf(area.end.x - main.right_rail.position.x) < 0.01, "the map ends exactly at the right HUD rail")
-	_expect(absf(area.end.y - (main.get_node("%Quickbar") as Control).position.y) < 0.01,
-		"the map ends exactly above the bottom HUD")
+	_expect(area.position.is_zero_approx(), "the map starts at the client canvas's top-left edge")
+	_expect(absf(area.end.x - main.game_view.size.x) < 0.01,
+		"the map fills the client width independently of movable HUD rails")
+	_expect(absf(area.end.y - main.game_view.size.y) < 0.01,
+		"the map fills the client height independently of the selected HUD layout")
 	var sidebar: Control = main.get_node("GameView/FullMap/MapLayout/Sidebar")
 	var before := sidebar.get_global_rect()
 	_expect(absf(before.position.x - main.game_view.global_position.x) < 0.01 and absf(sidebar.size.x - 216.0) < 0.01,
