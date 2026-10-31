@@ -59,6 +59,18 @@ carried item stays on the cursor until another click places it.
   `tests/test_world_input.gd` `_check_item_clicks` push real mouse events and
   read the requests sent.
 
+## Map clicks
+
+The Tab map and minimap share `_handle_map_gui_input` in `src/app/main.gd`.
+`Ctrl+Shift+left click` sends `#tp x y map` through `Network.send_chat`, leaving
+access checks and destination validation to the server. It takes precedence
+over Shift to run, movement locks and pending location spells. A click on another
+territory uses its coordinate transform and explicit map ID. Successful dispatch
+clears the client walking route and destination marker; server replies determine
+whether the teleport is allowed. Letterbox margins and Tab-map panning never
+send a teleport. `tests/test_map_click_teleport.gd` checks the outgoing frames
+through both production map handlers.
+
 ## Movement presentation
 
 The server paces player steps. `ReplicatedActor3D.apply_server_state`

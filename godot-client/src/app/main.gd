@@ -5865,8 +5865,9 @@ func _handle_map_gui_input(event: InputEvent, map_control: TextureRect,
 	var mouse_button: InputEventMouseButton = event as InputEventMouseButton
 	if not mouse_button.pressed or mouse_button.button_index != MOUSE_BUTTON_LEFT:
 		return
+	var teleport := mouse_button.ctrl_pressed and mouse_button.shift_pressed
 	var selecting_spell := not Network.magic_pending.is_empty() and Network.magic_scope in ["burst", "location"]
-	if not selecting_spell and _movement_locked(mouse_button.ctrl_pressed):
+	if not teleport and not selecting_spell and _movement_locked(mouse_button.ctrl_pressed):
 		map_control.accept_event()
 		return
 	var viewport_position_value: Variant = _texture_to_viewport_position(
@@ -5878,7 +5879,7 @@ func _handle_map_gui_input(event: InputEvent, map_control: TextureRect,
 	var target_value: Variant = _map_target_tile(camera, viewport_position)
 	print_debug("map_input source=", source, " local_click=", mouse_button.position,
 		" viewport=", viewport_position, " server_tile=", target_value,
-		" command=", "RUN_TO" if mouse_button.shift_pressed else "MOVE_TO")
+		" command=", "#tp" if teleport else ("RUN_TO" if mouse_button.shift_pressed else "MOVE_TO"))
 	# Whose ground the click is on decides the walk, not whether it falls inside
 	# this map's square of served cells: that square reaches far into every
 	# neighbour's ground, so a click on the neighbour's side went to the server
@@ -5888,6 +5889,23 @@ func _handle_map_gui_input(event: InputEvent, map_control: TextureRect,
 	var here_map: String = MapRegistry.normalize_server_map_id(AppState.current_map)
 	var elsewhere: bool = (owner != here_map) if not owner.is_empty() else (
 		target_value is Vector2i and not _tile_inside_current_map(target_value as Vector2i))
+	if teleport:
+		var destination: Dictionary = {}
+		var region_index := _region_index_for_map(AppState.current_map)
+		var has_territory := region_index >= 0 and not _region_polygon_components(region_index).is_empty()
+		if target_value is Vector2i and not here_map.is_empty():
+			if not owner.is_empty() and owner != here_map and click_point is Vector3:
+				var destination_tile: Variant = exterior_stream.tile_on(owner, click_point as Vector3)
+				if destination_tile is Vector2i:
+					destination = {"map": owner, "tile": destination_tile}
+			elif (owner == here_map or not has_territory) and _tile_inside_current_map(target_value as Vector2i):
+				destination = {"map": here_map, "tile": target_value}
+		if destination.is_empty():
+			AppState.append_local_message("There is no map there to teleport to.", 3)
+		else:
+			_request_map_teleport(str(destination.map), destination.tile as Vector2i)
+		map_control.accept_event()
+		return
 	if target_value is Vector2i and elsewhere:
 		# Past the seam: the neighbour that owns the ground is walked to in legs,
 		# the way a world click on its resident ground is.
@@ -5905,6 +5923,18 @@ func _handle_map_gui_input(event: InputEvent, map_control: TextureRect,
 		elif not selecting_spell:
 			_set_map_walk_target(MapRegistry.normalize_server_map_id(AppState.current_map), target_value)
 	map_control.accept_event()
+
+## Use the same command as the console so access and destination validation
+## stay with the server. A teleport replaces any client-side walking route.
+func _request_map_teleport(map_id: String, tile: Vector2i) -> void:
+	var error: Error = Network.send_chat("#tp %d %d %s" % [tile.x, tile.y, map_id])
+	if error != OK:
+		AppState.append_local_message("Could not teleport: " + error_string(error), 3)
+		return
+	exterior_stream.pending_walk.clear()
+	_clear_map_walk_target()
+	_clear_keyboard_movement_tracking()
+	_clear_local_turn_prediction()
 
 func _map_target_tile(camera: Camera3D, viewport_position: Vector2) -> Variant:
 	var point: Variant = _map_click_point(camera, viewport_position)
