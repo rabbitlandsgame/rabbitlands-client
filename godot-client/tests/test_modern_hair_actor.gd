@@ -2,6 +2,7 @@ extends SceneTree
 ## Real actor transitions keep modern hair, the native head and wardrobe apart.
 const Stage := preload("res://prototypes/rl_heads/rl_head_stage.gd")
 const Library := preload("res://src/actors/rl_head/rl_head_library.gd")
+const Modules := preload("res://src/actors/rl_head/rl_head_hair_modules.gd")
 var checks := 0
 var failures := 0
 var capture_dir := ""
@@ -84,12 +85,45 @@ func run() -> void:
 		actor.queue_free()
 		await process_frame
 		await process_frame
+	await check_registered_replacements(world)
 	check(Library.users() == 0, "freeing both actors releases every head and hair library lease")
 	Library.clear()
 	NativeAnimationImporter.clear()
 	GlbSceneCache.clear()
 	print("Modern hair actor: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures else 0)
+
+func check_registered_replacements(world: Node3D) -> void:
+	for sex: String in ["female", "male"]:
+		for family: int in Modules.LEGACY_REPLACEMENTS:
+			var module := Modules.replacement_id(family, sex)
+			if module == 0 or not Modules.supports_native_head(module, sex):
+				continue
+			var resolved := Modules.resolve(module, sex)
+			var app := {"skin": 2, "eyes": 2, "hair": AppearanceVariants.pack_hair(family, 1),
+				"hair_module": 1, "facial_hair": 0}
+			var saved := app.duplicate(true)
+			var actor := Stage.spawn(world, sex, app, {}, 0)
+			for quality: int in [0, 1, 2, 0]:
+				actor.apply_render_quality(quality)
+				await process_frame
+				var rig := actor.hair_module_rig()
+				check(rig != null and rig.appearance.hair == str(resolved.name),
+					"registered %s family%d replaces its saved automatic choice at quality%d" % [sex, family, quality])
+				check(actor._legacy_hair_style_drawn() == 0, "registered replacement hides its retired native hair")
+				check((actor._rl_hair != null) == (quality < 2) and (actor.rl_head() != null) == (quality == 2),
+					"registered replacement uses the matching head representation")
+				if rig != null:
+					rig._go_live()
+					check(float(rig._hair_shape_weights().get("hl_native_fit", 0.0)) == (1.0 if quality < 2 else 0.0),
+						"registered replacement enables the Native corrective only with its native head")
+					check(int(rig.all_meshes()[0].get_meta(RLHeadRig.LOD_LEVEL_META)) == 2 - quality,
+						"registered replacement selects its authored detail level")
+				check(actor._appearance.hair == saved.hair and actor._appearance.hair_module == saved.hair_module,
+					"replacement activation preserves the saved family and variation")
+			actor.queue_free()
+			await process_frame
+			await process_frame
 
 func capture(actor: ReplicatedActor3D, sex: String, quality: int) -> void:
 	var key := "%s-quality%d" % [sex, quality]
