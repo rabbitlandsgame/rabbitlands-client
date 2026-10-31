@@ -105,3 +105,13 @@ tiles and bakes painted flow per texel from the actual exterior. It retains
 every non-UV primitive accessor, every original exterior/detail UV, all skin and
 morph data, and opaque cap alpha. The private report includes overlap, paint
 distance, coverage and exact-accessor proofs; it does not qualify the geometry.
+
+For a measured source-specific head fitting problem, Python callers may pass
+`prepare(args, head_fit=callback)`. After neutral/body-sex mapping, the callback
+receives `(head, P, N, T, spec)` and returns `(fitted_P, fitted_N, receipt)`. It
+replaces the generic nearest-normal push, retains topology/UVs, and receives
+copies of the mapped arrays. With normal transport enabled, subsequent body
+fitting transports the callback's returned normals rather than overwriting them
+from the old source. The default callback is absent and keeps the original
+preparation path exactly. This hook never waives final physical, coverage,
+grooming or appearance checks; receipts remain in private authoring output.

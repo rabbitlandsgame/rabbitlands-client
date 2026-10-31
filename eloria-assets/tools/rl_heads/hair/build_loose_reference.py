@@ -227,7 +227,29 @@ def fair_body_clearance(head,P,T,hull,margin=.0035,fixed=None):
     print('FAIR_BODY_CLEARANCE',proof,'final_projection_mm',final,flush=True)
     return P+(safe-base)[weld]
 
-def prepare(args):
+def fit_mapped_head(head,P,N,T,spec,head_fit=None):
+    """Optional source-specific head fitting after neutral/body-sex mapping.
+
+    An explicit callback replaces the generic nearest-normal push. It cannot
+    change topology or the caller's inputs; its result still needs all final
+    physical, coverage and appearance gates.
+    """
+    if head_fit is None:
+        return assemble.push_out_var(head,P,np.full(len(P),.0032),iters=5),N,None
+    original_T=np.asarray(T);passed_T=original_T.copy()
+    value=head_fit(head,np.array(P,copy=True),np.array(N,copy=True),passed_T,copy.deepcopy(spec))
+    assert isinstance(value,tuple) and len(value)==3,'Head fit must return POSITION, NORMAL, receipt'
+    Q,normal,receipt=value;Q=np.asarray(Q);normal=np.asarray(normal)
+    assert Q.shape==np.asarray(P).shape and normal.shape==np.asarray(N).shape
+    assert np.isfinite(Q).all() and np.isfinite(normal).all()
+    assert np.allclose(np.linalg.norm(normal,axis=1),1,atol=1e-4),'Head fit normals must be unit length'
+    assert np.array_equal(passed_T,original_T),'Head fit cannot change topology'
+    assert isinstance(receipt,dict),'Head fit receipt must be a dictionary'
+    json.dumps(receipt) # Reject non-serialisable provenance before writing arrays.
+    return Q,normal,receipt
+
+
+def prepare(args,head_fit=None):
     src=Path(args.source);out=Path(args.stage);assert not out.exists();out.mkdir(parents=True)
     spec=profile(args.profile);fit=profile(args.fit);sex=args.sex or fit['sex']
     source_head=BoundedHead(fit['sex']);source_scalp=hairgen.Scalp(source_head,spec.get('hairline'))
@@ -241,14 +263,22 @@ def prepare(args):
         P=target_Q+radial*np.array([ratio,1.,ratio])
         if not spec.get('transport_normals',False):N=unit(N*np.array([1/ratio,1.,1/ratio]))
     head=BoundedHead(sex);hull=body_hull(head)
-    P=assemble.push_out_var(head,P,np.full(len(P),.0032),iters=5)
+    if head_fit is not None and spec.get('transport_normals',False):
+        _,weld=np.unique(np.round(a['P']/1e-6),axis=0,return_inverse=True)
+        N=unit(a['N']+assemble.morph_normals(a['P'],a['T'],a['N'],P-a['P'],weld))
+    P,N,head_proof=fit_mapped_head(head,P,N,a['T'],spec,head_fit)
+    if head_fit is not None:normal_anchor_P,normal_anchor_N=P.copy(),N.copy()
     np.savez_compressed(out/'pre-body.npz',P=P,N=N,UV=a['UV'],T=a['T'])
     body_fit=curtain_body_safe if spec.get('preserve_curtain_depth',False) else body_safe
     options={'T':a['T']} if spec.get('preserve_curtain_depth',False) else {}
     P=body_fit(head,P,hull,float(spec.get('outer_body_margin_mm',8.0))/1000,**options)
     if spec.get('transport_normals',False):
-        _,weld=np.unique(np.round(a['P']/1e-6),axis=0,return_inverse=True)
-        N=unit(a['N']+assemble.morph_normals(a['P'],a['T'],a['N'],P-a['P'],weld))
+        if head_fit is None:
+            _,weld=np.unique(np.round(a['P']/1e-6),axis=0,return_inverse=True)
+            N=unit(a['N']+assemble.morph_normals(a['P'],a['T'],a['N'],P-a['P'],weld))
+        else:
+            _,weld=np.unique(np.round(normal_anchor_P/1e-6),axis=0,return_inverse=True)
+            N=unit(normal_anchor_N+assemble.morph_normals(normal_anchor_P,a['T'],normal_anchor_N,P-normal_anchor_P,weld))
     P,N,T,collar=repair_collar(head,P,N,a['UV'],a['T'],spec,np.asarray(Image.open(src/'hair-mask.png')))
     ranges={'exterior':[0,len(P)],'shell':[len(P),len(P)]}
     P,N,temple=conform_temples(head,hairgen.Scalp(head,spec.get('hairline')),P,N,T,ranges,spec)
@@ -260,6 +290,7 @@ def prepare(args):
     garment=Path(paths.body_glb(sex)).with_name('luminous_'+sex+'_shirt.glb')
     if garment.is_file():source['garment_sha256']=sha(garment)
     source['fitting']={'preserve_curtain_depth':bool(spec.get('preserve_curtain_depth',False)),'transport_normals':bool(spec.get('transport_normals',False)),'collar_repair':collar,'temple_conformance':temple}
+    if head_proof is not None:source['fitting']['head_fit']=head_proof
     save_json(out/'source.json',source);save_json(out/'lod-budgets.json',spec['outer_triangles'])
     print('PREPARED_LOOSE_REFERENCE',sex,len(P),len(a['T']),flush=True)
 
