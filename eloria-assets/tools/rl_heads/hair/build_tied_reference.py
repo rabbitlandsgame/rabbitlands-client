@@ -96,7 +96,10 @@ def atlas_builder(stage,out,spec):
     atlas.save(out);return shared.sha(out)
 
 def knot_field(P,Q,head,scalp,spec,kind,positive):
-    config=spec['tied_mass'];base,normal=scalp.point(*config['center'])
+    config=spec['tied_mass']
+    if config.get('kind')=='tail':return tail_field(P,Q,head,scalp,spec,kind,positive)
+    if 'centers' in config:return multiple_knot_field(P,Q,head,scalp,spec,kind,positive)
+    base,normal=scalp.point(*config['center'])
     axis=headref.unit(normal[0]);anchor=base[0]+axis*config['attachment_mm']*.001
     relative=P-anchor;axial=relative@axis;radial=relative-axial[:,None]*axis
     lon,lat=headref.dir_lonlat(P-head.C);a,b=config['rear_sector'];top,bottom=config['lower_latitude']
@@ -108,6 +111,40 @@ def knot_field(P,Q,head,scalp,spec,kind,positive):
     amount=spec['groom'][kind+('_positive' if positive else '_negative')]*(1 if positive else -1)
     direction=radial if kind=='length' else np.maximum(axial,0)[:,None]*axis
     return direction*(weight*amount)[:,None]
+
+def multiple_knot_field(P,Q,head,scalp,spec,kind,positive):
+    config=spec['tied_mass'];near,far=np.asarray(spec['groom']['root_fade_mm'])*.001
+    attached=hairgen.smoothstep((np.linalg.norm(P-Q,axis=1)-near)/(far-near))
+    direction=headref.unit(P-head.C);move=np.zeros_like(P);total=np.zeros(len(P))
+    radius=float(config['angular_radius_degrees']);feather=float(config['angular_feather_degrees']);assert 0<feather<radius<90
+    amount=spec['groom'][kind+('_positive' if positive else '_negative')]*(1 if positive else -1)
+    for center in config['centers']:
+        base,normal=scalp.point(*center);axis=headref.unit(normal[0]);anchor=base[0]+axis*config['attachment_mm']*.001
+        angle=np.degrees(np.arccos(np.clip(direction@headref.lonlat_dir(*center),-1,1)))
+        angular=hairgen.smoothstep((radius+feather-angle)/(2*feather))
+        relative=P-anchor;axial=relative@axis;radial=relative-axial[:,None]*axis
+        r0,r1=np.asarray(config['root_ramp_mm'])*.001
+        weight=attached*angular*hairgen.smoothstep((axial-r0)/(r1-r0));total+=weight
+        field=radial if kind=='length' else np.maximum(axial,0)[:,None]*axis
+        move+=field*(weight*amount)[:,None]
+    return move/np.maximum(total,1)[:,None]
+
+def tail_field(P,Q,head,scalp,spec,kind,positive):
+    """Resize a whole hanging mass about a pinned attachment and smooth spine."""
+    config=spec['tied_mass'];base,normal=scalp.point(*config['center']);anchor=base[0]+normal[0]*config['attachment_mm']*.001
+    axis=headref.unit(np.asarray(config.get('direction',[0,-1,0]),float));relative=P-anchor;axial=relative@axis
+    a,b=config['rear_sector'];lon,_=headref.dir_lonlat(P-head.C)
+    near,far=np.asarray(spec['groom']['root_fade_mm'])*.001;r0,r1=np.asarray(config['root_ramp_mm'])*.001
+    weight=hairgen.smoothstep((abs(lon)-a)/(b-a))*hairgen.smoothstep((axial-r0)/(r1-r0))
+    weight*=hairgen.smoothstep((np.linalg.norm(P-Q,axis=1)-near)/(far-near))
+    if kind=='length':field=axis*np.maximum(axial,0)[:,None]
+    else:
+        spine=np.asarray(config['spine'],float);assert spine.ndim==2 and spine.shape[1]==3 and (np.diff(spine[:,0])>0).all()
+        centre=anchor+np.maximum(axial,0)[:,None]*axis
+        centre[:,0]+=np.interp(axial,spine[:,0],spine[:,1]);centre[:,2]+=np.interp(axial,spine[:,0],spine[:,2])
+        field=P-centre;field-=axis*(field@axis)[:,None]
+    amount=spec['groom'][kind+('_positive' if positive else '_negative')]*(1 if positive else -1)
+    return field*(weight*amount)[:,None]
 
 def groom_builder(head,scalp,P,names,spec,hull,ranges):
     shell=slice(*ranges['shell']);before_cap=P[shell].copy()
