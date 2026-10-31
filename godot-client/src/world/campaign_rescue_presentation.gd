@@ -6,8 +6,10 @@ const Dissolve := preload("res://src/actors/creature_dissolve.gd")
 const FireVisual := preload("res://src/world/weather_3d.gd")
 const FENCE_ID := "11ec54ffb8d8eb66b5a8de1e0bdb3da278b75459c880a07fc46acfcf1e9f4c65"
 const FENCE_PATH := "res://../eloria-assets/maps/_shared/meshes/"+FENCE_ID+".glb"
+const ENTRANCE_PATH := "res://assets/world/underground/cave_mouth.glb"
 
 var cage: Node3D
+var entrance: Node3D
 var gate: Node3D
 var panels: Array[MeshInstance3D] = []
 var points: Dictionary = {}
@@ -73,6 +75,17 @@ func apply_snapshot(snapshot: Dictionary, adapter: CoordinateAdapter, current_ma
 		if _scene_id.is_empty():_set_gate(_accepted_gate)
 		if labels.has("cage"):
 			labels.cage.text="Liora's holding cage · "+("open" if _accepted_gate>0.5 else "locked")
+	elif points.has("entrance_focus"):
+		# Owned outdoor copies expose campaign actions instead of public portal
+		# 59001. Keep that portal's existing art at the same physical mine mouth.
+		# This is scenery only; the native campaign action still owns entry.
+		if not is_instance_valid(entrance):
+			entrance = GlbSceneCache.instantiate(ENTRANCE_PATH)
+			if is_instance_valid(entrance):
+				entrance.name = "RescueMineEntrance"
+				add_child(entrance)
+		if is_instance_valid(entrance):
+			entrance.global_position = points.get("mine_entry", points.entrance_focus + Vector3(0,0,-5)) + Vector3(0,0,-6)
 	show()
 
 func _build_cage(at: Vector3) -> bool:
@@ -508,9 +521,10 @@ func clear() -> void:
 		if is_instance_valid(actor):actor.call("set_server_scale",float(row.scale))
 	_scales.clear()
 	if is_instance_valid(cage):cage.queue_free()
+	if is_instance_valid(entrance):entrance.queue_free()
 	if is_instance_valid(_fade_layer):_fade_layer.queue_free()
 	_fade=null;_fade_layer=null
-	cage=null;gate=null;panels.clear();labels.clear();points.clear()
+	cage=null;entrance=null;gate=null;panels.clear();labels.clear();points.clear()
 	_identity="";_geometry="";_map="";_snapshot.clear();_world=null;hide()
 
 func _exit_tree() -> void:

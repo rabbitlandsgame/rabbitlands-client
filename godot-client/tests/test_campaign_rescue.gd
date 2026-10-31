@@ -175,6 +175,8 @@ func run() -> void:
 	# full actor selection-ring renderer (covered by the native integration).
 	app.state_changed.disconnect(Callable(main, "_on_state_changed"))
 	reset_main()
+	_test_return_prefetch()
+	reset_main()
 	var held_payload := {"kind":"actor_death","actor_id":20,"temporary":false,"hold_for_scene":true}
 	var held := EloriaProtocol.decode_server(212, JSON.stringify(held_payload).to_utf8_buffer())
 	expect(held.type == "magic_state" and bool(held.data.hold_for_scene), "the native corpse hold flag survives strict magic-state decoding")
@@ -433,3 +435,37 @@ func run() -> void:
 	await process_frame; await process_frame
 	print("campaign rescue: ", checks, " checks; ", failures, " failures")
 	quit(1 if failures else 0)
+
+func _test_return_prefetch() -> void:
+	var prior_adapter: Variant = main.get("adapter")
+	var prior_loaded: Variant = main.get("loaded_server_map")
+	var prior_settled: Variant = main.get("_world_park_settled")
+	main.set("adapter", CoordinateAdapter.new())
+	main.set("loaded_server_map", "landfall")
+	main.set("_world_park_settled", "")
+	app.campaign.anchors = {"cave_outside":[332,81]}
+	var stream := ContinentChunkStream.new()
+	stream.entries.append({"id":"ramp","bounds":{"min":[260,-1,-140],"max":[270,1,-130]}})
+	stream.entries.append({"id":"mine-mouth","bounds":{"min":[330,-1,-84],"max":[336,1,-78]}})
+	expect(not main.call("_prefetch_rescue_return", stream) and (stream.get("_prefetch") as Array).is_empty(), "scripted return preparation waits for the player's own arrival ground")
+	main.set("_world_park_settled", "landfall")
+	expect(main.call("_prefetch_rescue_return", stream) and not stream.prefetch_ready(), "the opening requests the distant mine-mouth terrain before entering the mine")
+	var requested: Array = stream.get("_prefetch")
+	expect(requested.size() == 1 and requested[0].id == "mine-mouth", "return preparation uses the outdoor anchor rather than the current ramp or indoor tiles")
+	stream.cells["mine-mouth"] = {}
+	stream.pause_streaming()
+	expect(stream.prefetch_ready(), "the return terrain stays pinned when its stream is parked")
+	app.death = {"dead":true}
+	expect(not main.call("_prefetch_rescue_return", stream) and not stream.has_meta(&"rescue_return_prefetch"), "rescue terrain preparation yields its ownership to real respawn preparation")
+	app.death = {}
+	main.call("_prefetch_rescue_return", stream)
+	app.campaign.map = "landfall_insides"
+	expect(not main.call("_prefetch_rescue_return", stream) and (stream.get("_prefetch") as Array).is_empty(), "indoor anchors cannot be mistaken for outdoor return coordinates")
+	app.campaign.map = "landfall"
+	main.call("_prefetch_rescue_return", stream)
+	app.campaign.rescue.stage = "complete"
+	expect(not main.call("_prefetch_rescue_return", stream) and (stream.get("_prefetch") as Array).is_empty(), "completion releases the cinematic's terrain hold")
+	stream.free()
+	main.set("adapter", prior_adapter)
+	main.set("loaded_server_map", prior_loaded)
+	main.set("_world_park_settled", prior_settled)

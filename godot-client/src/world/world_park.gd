@@ -490,7 +490,8 @@ func doors() -> Dictionary:
 ## (Main: the curtain is up, or the streamed cells around them are not all
 ## resident): nothing new starts then, so a preload never competes with the
 ## arrival's own chunks.
-func observe(map_id: String, tile: Vector2i, map_objects: Dictionary = {}, settled := true) -> void:
+func observe(map_id: String, tile: Vector2i, map_objects: Dictionary = {}, settled := true,
+		anticipated := PackedStringArray()) -> void:
 	if not enabled or MapRegistry.normalize_server_map_id(map_id) != _bound_map:
 		return
 	if settled:
@@ -508,6 +509,18 @@ func observe(map_id: String, tile: Vector2i, map_objects: Dictionary = {}, settl
 		if distance < float(nearest.get(interior, INF)):
 			nearest[interior] = distance
 			nearest_door[interior] = object_id
+	# A scripted departure can cross the parent before reaching its door. Start
+	# its destination during the conversation and keep it across reading pauses.
+	# The ordinary settled, shader warm-up and memory limits still apply.
+	for requested: String in anticipated:
+		var interior := MapRegistry.normalize_server_map_id(requested)
+		if not _flagged(interior) or parent_of(interior) != _bound_map: continue
+		nearest[interior] = 0.0
+		nearest_door[interior] = -1
+		if not _preload.is_empty() and str(_preload.map) != interior and settled:
+			_drop_preload("anticipated_travel")
+		nearest = _prioritize(nearest, interior)
+		break # One background slot; the first eligible destination has priority.
 	for interior: String in nearest:
 		if _parked.has(interior):
 			# A parked interior is the preload already done, and is kept as one:
@@ -523,6 +536,11 @@ func observe(map_id: String, tile: Vector2i, map_objects: Dictionary = {}, settl
 		_judge_preload(interior, float(nearest[interior]), int(nearest_door[interior]), now, settled)
 	if not _preload.is_empty() and not nearest.has(str(_preload.map)):
 		_judge_preload(str(_preload.map), INF, -1, now, settled)
+
+static func _prioritize(distances: Dictionary, interior: String) -> Dictionary:
+	var ordered := {interior: distances[interior]}
+	ordered.merge(distances)
+	return ordered
 
 func _judge_preload(interior: String, distance: float, door: int, now: int, settled := true) -> void:
 	var state := {"active": not _preload.is_empty(),
