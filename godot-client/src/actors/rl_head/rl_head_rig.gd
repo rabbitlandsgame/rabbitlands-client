@@ -1007,7 +1007,7 @@ func _control_names() -> PackedStringArray:
 ## no `id_` shapes left and ignores them).
 func _apply_identity_weights(mesh_node: MeshInstance3D) -> void:
 	for control_name: String in _control_names():
-		var amount := appearance.control(control_name)
+		var amount := 0.0 if _hair_only else appearance.control(control_name)
 		_set_shape(mesh_node, "id_%s_p" % control_name, maxf(amount, 0.0))
 		_set_shape(mesh_node, "id_%s_n" % control_name, maxf(-amount, 0.0))
 
@@ -1058,7 +1058,7 @@ func _is_hair_node(mesh_node: MeshInstance3D) -> bool:
 func _baked_weights(mesh_node: MeshInstance3D) -> Dictionary:
 	var weights := {}
 	for control_name: String in _control_names():
-		var amount := appearance.control(control_name)
+		var amount := 0.0 if _hair_only else appearance.control(control_name)
 		weights["id_%s_p" % control_name] = maxf(amount, 0.0)
 		weights["id_%s_n" % control_name] = maxf(-amount, 0.0)
 	if _is_hair_node(mesh_node):

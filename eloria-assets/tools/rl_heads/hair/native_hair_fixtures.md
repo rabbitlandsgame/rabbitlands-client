@@ -2,8 +2,10 @@
 
 `native_hair_fixtures.py` consumes an ignored `npz-manifest.json` of independently
 evaluated client surfaces. Each case includes the exact mapped hair identity
-controls and native bone deltas in model space. It applies the hair's exported
-identity and grooming targets before the pose. Named hair-root/spring descendants
+controls and native bone deltas in model space. The native skull perimeter is
+fixed by `CharacterProportions.face_point`; the checker requires a v2-or-later
+`native_fixed_skull` manifest with zero High-head identity weights. It applies
+the hair's grooming targets before the pose. Named hair-root/spring descendants
 follow Head; unknown joints fail instead of receiving a guessed transform.
 
 ```text
@@ -22,5 +24,6 @@ For a repair iteration, `--neutral-groom-only`, `--cases neutral` and
 records that the requested scan was incomplete. It never establishes
 qualification. Full RL identity/coverage checks, native scalp-coverage review,
 client appearance and motion rendering, and equipment checks remain separate.
-Native runtime mapping ignores face fields which sculpt only the High head.
+Native runtime mapping keeps hair on the fixed skull; High identity targets
+remain active on the separate High head and its hair.
 Keep fixture manifests, original captures and numeric evidence outside Git.

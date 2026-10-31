@@ -44,6 +44,12 @@ func run() -> void:
 			var nodes := rig.all_meshes()
 			check(not nodes.is_empty(), "hair has real render meshes")
 			var first := nodes[0]
+			var ear_shape := first.find_blend_shape_by_name("id_ear_size_p")
+			check(ear_shape >= 0 and is_zero_approx(first.get_blend_shape_value(ear_shape)),
+				"native hair does not sculpt the fixed skull with High identity shapes")
+			check(is_zero_approx(float(rig._baked_weights(first).get("id_ear_size_p", -1.0))),
+				"baked native hair also excludes High identity shapes")
+			check(is_equal_approx(face.control("ear_size"), 0.3), "native drawing does not mutate the saved face")
 			check(int(first.get_meta(Rig.LOD_LEVEL_META)) == 2 - quality,
 				"Low/Medium/High start at authored LOD2/1/0")
 			face.hair_length = 0.4

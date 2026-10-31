@@ -7,6 +7,13 @@ import numpy as np
 import native_hair_fixtures as fixtures
 
 class NativeFixtureChecks(unittest.TestCase):
+    def test_old_native_identity_manifest_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            manifest = Path(directory) / 'manifest.json'
+            manifest.write_text(json.dumps({'cases': []}))
+            with self.assertRaisesRegex(AssertionError, 'v2 or later'):
+                fixtures.check_hair('unused', manifest)
+
     def test_column_basis_and_eight_influence_pose(self):
         turn = [[0, 1, 0], [-1, 0, 0], [0, 0, 1], [3, 4, 5]]
         stay = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, 0]]
@@ -55,7 +62,7 @@ class NativeFixtureChecks(unittest.TestCase):
                 'bone_deltas': {'Head': [[1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, 0]]}}
         with tempfile.TemporaryDirectory() as directory:
             manifest = Path(directory) / 'manifest.json'
-            manifest.write_text(json.dumps({'cases': [case]}))
+            manifest.write_text(json.dumps({'hair_identity_policy': 'native_fixed_skull', 'cases': [case]}))
             with patch.object(fixtures, 'load_hair', return_value={'sex': 'female', 'sha256': 'test', 'levels': [[part]]}), \
                  patch.object(fixtures, 'load_fixture', return_value=Dome()), patch('builtins.print'):
                 result = fixtures.check_hair('unused', manifest, lods=(0,), stop_on_first=True)

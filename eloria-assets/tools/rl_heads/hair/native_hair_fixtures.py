@@ -122,11 +122,13 @@ def interior_samples(points, triangles, minimum_edge_mm=5):
 def check_hair(path, manifest_path, lods=(0, 1, 2), grooms=None, minimum_mm=2,
                minimum_edge_mm=5, stop_on_first=False, case_names=None):
     manifest = json.loads(Path(manifest_path).read_text())
+    assert manifest.get('hair_identity_policy') == 'native_fixed_skull', 'Use evaluated native fixture v2 or later; High identity targets do not belong to the fixed native skull'
     hair = load_hair(path)
     results = []
     grooms = GROOM_CASES if grooms is None else grooms
     for record in manifest['cases']:
         if record['sex'] != hair['sex'] or (case_names is not None and record['case'] not in case_names): continue
+        assert not record['rl_hair_identity_controls'], 'Native skull perimeter is fixed; reject High head identity weights'
         native = load_fixture(manifest_path, record)
         for lod in lods:
             for label, groom in grooms.items():

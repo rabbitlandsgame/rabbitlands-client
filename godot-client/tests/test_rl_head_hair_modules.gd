@@ -200,6 +200,8 @@ func _check_default_replacements() -> void:
 			extra_shape[field] = 100
 		_expect(Map.face(extra_shape, sex, true).controls == Map.face(native_shape, sex, true).controls,
 			"native hair ignores face fields that do not sculpt the native head")
+		_expect(Map.face(native_shape, sex, true).controls.is_empty(),
+			"native hair stays on the fixed skull when native face sliders change")
 		_expect(Map.face(extra_shape, sex).controls != Map.face(native_shape, sex).controls,
 			"the full High head retains all extra face controls")
 		_expect(extra_shape.eyelid == 100, "native mapping does not mutate saved detail fields")
