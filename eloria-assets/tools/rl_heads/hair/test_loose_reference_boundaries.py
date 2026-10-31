@@ -2,7 +2,7 @@
 import unittest
 import numpy as np
 from types import SimpleNamespace
-from build_loose_reference import geometric_boundary,body_safe,shared_body_correction,curtain_body_safe
+from build_loose_reference import geometric_boundary,body_safe,shared_body_correction,curtain_body_safe,fair_body_clearance,coherent_lower_depth
 
 class Boundaries(unittest.TestCase):
     def test_split_uv_centre_is_not_an_open_edge(self):
@@ -40,14 +40,42 @@ class BodyClearance(unittest.TestCase):
         for points in states:
             self.assertTrue((np.max((points+correction)@self.hull[:,:3].T+self.hull[:,3],axis=1)>=.0035-1e-12).all())
 
-    def test_curtain_keeps_curl_depth_and_pins_high_roots(self):
+    def test_curtain_preserves_radial_curl_depth_and_pins_high_roots(self):
         hull=np.array([[1,0,0,-.2],[-1,0,0,-.2],[0,1,0,-1.55],[0,-1,0,1.0],[0,0,1,-.1],[0,0,-1,-.1]],float)
-        P=np.array([[.08,1.2,.025],[.08,1.2,.075],[-.08,1.3,-.06],[-.08,1.3,-.09],[.04,1.69,.025]])
+        P=np.array([[.08,1.2,.03],[.12,1.2,.07],[-.08,1.3,-.13],[-.12,1.3,-.17],[.04,1.69,.025]])
         result=curtain_body_safe(self.head,P,hull)
-        np.testing.assert_array_equal(result[:,:2],P[:,:2])
-        np.testing.assert_allclose(np.diff(result[:2,2]),np.diff(P[:2,2]),atol=1e-12)
-        np.testing.assert_allclose(np.diff(result[2:4,2]),np.diff(P[2:4,2]),atol=1e-12)
+        np.testing.assert_array_equal(result[:,1],P[:,1])
+        np.testing.assert_allclose(result[1]-result[0],P[1]-P[0],atol=1e-12)
+        np.testing.assert_allclose(result[3]-result[2],P[3]-P[2],atol=1e-12)
         np.testing.assert_array_equal(result[4],P[4])
         self.assertTrue((np.max(result@hull[:,:3].T+hull[:,3],axis=1)>=.0035-1e-12).all())
+
+    def test_continuous_body_field_does_not_tear_across_depth_divide(self):
+        hull=np.array([[1,0,0,-.2],[-1,0,0,-.2],[0,1,0,-1.55],[0,-1,0,1.0],[0,0,1,-.1],[0,0,-1,-.1]],float)
+        P=np.array([[.16,1.3,-.0501],[.16,1.3,-.0499]])
+        result=body_safe(self.head,P,hull,radial=True)
+        self.assertLess(np.linalg.norm(result[1]-result[0]),.0004)
+
+    def test_connected_contact_fit_clears_body_and_keeps_roots_and_hanging_length(self):
+        hull=np.array([[1,0,0,-.2],[-1,0,0,-.2],[0,1,0,-1.55],[0,-1,0,1.0],[0,0,1,-.1],[0,0,-1,-.1]],float)
+        P=np.array([[x,y,.03] for y in np.linspace(1.2,1.7,11) for x in [.08,.10]])
+        T=np.array([[i,i+1,i+2] for i in range(0,20,2)]+[[i+1,i+3,i+2] for i in range(0,20,2)])
+        Q=fair_body_clearance(self.head,P,T,hull)
+        np.testing.assert_array_equal(Q[-2:],P[-2:])
+        np.testing.assert_array_equal(Q[P[:,1]<1.46,1],P[P[:,1]<1.46,1])
+        points=Q[Q[:,1]<self.head.eye_mid[1]-.055]
+        self.assertTrue((np.max(points@hull[:,:3].T+hull[:,3],axis=1)>=.00325-1e-9).all())
+
+    def test_lower_lock_depth_stays_coherent_through_connected_shoulder(self):
+        hull=np.array([[1,0,0,-.2],[-1,0,0,-.2],[0,1,0,-1.55],[0,-1,0,1.0],[0,0,1,-.1],[0,0,-1,-.1]],float)
+        P=np.array([[.08,1.7,.03],[.10,1.7,.03],[.08,1.2,.03],[.10,1.2,.06],
+                    [.08,1.7,-.08],[.10,1.7,-.08],[.08,1.2,-.08],[.10,1.2,-.09]])
+        T=np.array([[0,1,2],[1,3,2],[4,6,5],[5,6,7],[0,4,1],[1,4,5]])
+        Q,fixed=coherent_lower_depth(self.head,P,T,hull,.0035)
+        np.testing.assert_array_equal(Q[:,:2],P[:,:2])
+        np.testing.assert_array_equal(Q[[0,1,4,5]],P[[0,1,4,5]])
+        np.testing.assert_allclose(Q[3]-Q[2],P[3]-P[2],atol=1e-12)
+        np.testing.assert_allclose(Q[7]-Q[6],P[7]-P[6],atol=1e-12)
+        self.assertTrue((np.max(Q[fixed]@hull[:,:3].T+hull[:,3],axis=1)>=.0035-1e-12).all())
 
 if __name__=='__main__':unittest.main()

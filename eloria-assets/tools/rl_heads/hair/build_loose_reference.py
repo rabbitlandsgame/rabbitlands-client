@@ -14,8 +14,12 @@ import trimesh
 from PIL import Image
 from scipy import ndimage as ndi
 from scipy.spatial import ConvexHull,cKDTree
+from scipy import sparse
+from scipy.sparse.linalg import factorized
 import assemble,hairgen,headref,paths,reference_surface as ref,rlglb
 from reference_root_edges import geometric_boundary,root_colours
+from reference_collar_repair import repair as repair_collar
+from reference_temple_conform import conform_temples
 
 GROOMS=['hl_length_p','hl_length_n','hl_volume_p','hl_volume_n']
 def sha(path):
@@ -101,21 +105,34 @@ def outside_hull(P,equations,margin,mask=None):
         result[batch]+=equations[face,:3]*amount[:,None]
     return result
 
-def body_safe(head,P,equations,margin=.0035):
-    return P+shared_body_correction(head,P,[P],equations,margin)
+def body_safe(head,P,equations,margin=.0035,radial=False):
+    return P+shared_body_correction(head,P,[P],equations,margin,radial=radial)
 
-def shared_body_correction(head,P,states,equations,margin=.0035):
+def shared_body_correction(head,P,states,equations,margin=.0035,radial=False):
     """Exit forward/backward on a stable side; preserve hanging X and Y."""
     correction=np.zeros_like(P);margin=np.broadcast_to(np.asarray(margin,float),(len(P),))
     for start in range(0,len(P),2048):
         sl=slice(start,start+2048);base=P[sl]
         divide=head.C[2]-.05
         direction=np.zeros_like(base);direction[:,2]=np.where(base[:,2]>=divide,1.,-1.)
+        if radial:
+            direction=unit(np.c_[base[:,0]*.35,np.zeros(len(base)),base[:,2]-divide])
+            if radial in ['nearest','drape']:
+                horizontal=equations[:,:3].copy();horizontal[:,1]=0
+                norm=np.linalg.norm(horizontal,axis=1);distance=base@equations[:,:3].T+equations[:,3]
+                cost=np.where(norm>1e-6,np.maximum(margin[sl,None]-distance,0)/np.maximum(norm,1e-6),np.inf)
+                outside=distance.max(1)>=margin[sl]
+                cost[outside]=np.where(norm>1e-6,-distance[outside]/np.maximum(norm,1e-6),np.inf)
+                direction=unit(horizontal[np.argmin(cost,axis=1)])
+                if radial=='drape':
+                    vertical=hairgen.smoothstep((base[:,1]-(head.eye_mid[1]-.20))/.035)
+                    direction*=1-vertical[:,None];direction[:,1]=vertical;direction=unit(direction)
         slope=direction@equations[:,:3].T
         amount=np.zeros(len(base))
         for state in states:
             points=state[sl];distance=points@equations[:,:3].T+equations[:,3]
-            inside=(distance.max(1)<margin[sl])&(points[:,1]<head.eye_mid[1]-.055)
+            tolerance=.00025 if radial else 0.
+            inside=(distance.max(1)<margin[sl]-tolerance)&(points[:,1]<head.eye_mid[1]-.055)
             exits=np.where(slope>1e-6,np.maximum(margin[sl,None]-distance,0)/np.maximum(slope,1e-6),np.inf)
             need=exits.min(1);assert np.isfinite(need).all()
             amount=np.maximum(amount,np.where(inside,need,0))
@@ -129,18 +146,79 @@ def layer_margins(P,ranges,spec):
     body_margin[slice(*ranges['detail'])]=float(spec.get('outer_body_margin_mm',8.0))/1000-.0015
     return head_margin,body_margin
 
-def curtain_body_safe(head,P,hull,margin=.0035):
-    """Translate each lower curtain coherently, keeping its curl depth intact."""
-    raw=body_safe(head,P,hull,margin);needed=np.abs((raw-P)[:,2])
-    side=P[:,2]>=head.C[2]-.05;group=(P[:,0]>=0).astype(int)*2+side.astype(int)
+def curtain_body_safe(head,P,hull,margin=.0035,T=None):
+    """Expand the lower mass smoothly around the torso without a side divide."""
+    if T is not None:
+        fitted,fixed=coherent_lower_depth(head,P,T,hull,margin)
+        return fair_body_clearance(head,fitted,T,hull,margin,fixed=fixed)
+    radial=np.c_[P[:,0]*.35,np.zeros(len(P)),P[:,2]-(head.C[2]-.05)]
+    raw=body_safe(head,P,hull,margin,radial=True);needed=np.linalg.norm(raw-P,axis=1)
     fade=hairgen.smoothstep((head.eye_mid[1]-.055-P[:,1])/.10)
-    amounts=np.zeros(4);lower=P[:,1]<head.eye_mid[1]-.13
-    for index in range(4):
-        selected=(group==index)&lower
-        if selected.any():amounts[index]=np.max(needed[selected]/np.maximum(fade[selected],.05))
-    assert amounts.max()<.25,'Reference requires an excessive torso displacement'
-    result=P.copy();result[:,2]+=np.where(side,1.,-1.)*amounts[group]*fade
-    return body_safe(head,result,hull,margin)
+    lower=P[:,1]<head.eye_mid[1]-.13
+    amount=np.max(needed[lower]/np.maximum(fade[lower],.05)) if lower.any() else 0
+    displacement=unit(radial)*(amount*fade)[:,None]
+    assert np.linalg.norm(displacement,axis=1).max()<.25,'Reference requires an excessive torso displacement'
+    return body_safe(head,P+displacement,hull,margin,radial=True)
+
+def mesh_laplacian(P,T):
+    """Weld only coincident positions, retaining all original attribute loops."""
+    _,first,weld=np.unique(np.round(P/1e-6),axis=0,return_index=True,return_inverse=True)
+    base=P[first];tri=weld[T];edge=np.sort(tri[:,[0,1,1,2,2,0]].reshape(-1,2),axis=1)
+    edge=np.unique(edge[edge[:,0]!=edge[:,1]],axis=0);length=np.linalg.norm(base[edge[:,0]]-base[edge[:,1]],axis=1)
+    weight=np.minimum((.020/np.maximum(length,.0005))**2,1600)
+    rows=np.r_[edge[:,0],edge[:,1]];cols=np.r_[edge[:,1],edge[:,0]];weights=np.r_[weight,weight]
+    degree=np.bincount(rows,weights=weights,minlength=len(base))
+    lap=sparse.diags(degree)-sparse.csr_matrix((weights,(rows,cols)),shape=(len(base),len(base)))
+    return base,first,weld,lap
+
+def coherent_lower_depth(head,P,T,hull,margin):
+    """Move complete lower locks in depth, with a harmonic shoulder transition."""
+    base,first,weld,lap=mesh_laplacian(P,T)
+    lower=base[:,1]<head.eye_mid[1]-.20
+    fixed=lower[weld]
+    if not lower.any():return P.copy(),fixed
+    raw=body_safe(head,base,hull,margin);front=base[:,2]>=head.C[2]-.05
+    target=np.zeros(len(base));amounts=[]
+    for side in [False,True]:
+        selected=lower&(front==side);amount=float(np.max(np.abs((raw-base)[selected,2]))) if selected.any() else 0.
+        target[selected]=amount*(1 if side else -1);amounts.append(amount*1000)
+    anchor=lower|(base[:,1]>head.eye_mid[1]-.08)
+    matrix=lap+sparse.diags(anchor.astype(float)*1e8+.0001)
+    delta=factorized(matrix.tocsc())(target*anchor*1e8);delta[anchor]=target[anchor]
+    fitted=P.copy();fitted[:,2]+=delta[weld]
+    signed=(fitted[fixed]@hull[:,:3].T+hull[:,3]).max(1)
+    assert (signed>=margin-.0003).all(),'Coherent lower locks must clear the torso before locking their shape'
+    print('COHERENT_LOWER_DEPTH_MM',amounts,flush=True)
+    return fitted,fixed
+
+def fair_body_clearance(head,P,T,hull,margin=.0035,fixed=None):
+    """Spread actual contact corrections over connected locks, with fixed roots."""
+    base,first,weld,lap=mesh_laplacian(P,T)
+    pinned=base[:,1]>=head.eye_mid[1]-.045;delta=np.zeros_like(base);target=np.zeros_like(base);active=np.zeros(len(base),bool)
+    fixed_horizontal=np.zeros(len(base),bool) if fixed is None else fixed[first]
+    proof=[]
+    for iteration in range(8):
+        correction=shared_body_correction(head,base,[base+delta],hull,margin,radial='drape');safe=base+delta+correction
+        contact=np.linalg.norm(correction,axis=1)>1e-7;contact[pinned]=False
+        active|=contact;target[contact]=safe[contact]-base[contact];target[pinned]=0
+        if not active.any():return P.copy()
+        contact_weight=25*10**min(iteration,5)
+        penalty=active.astype(float)*contact_weight+pinned.astype(float)*1000+.0001
+        matrix=lap+sparse.diags(penalty);solve=factorized((matrix+sparse.diags(fixed_horizontal.astype(float)*1e8)).tocsc())
+        delta=solve(target*(active*contact_weight)[:,None])
+        lower=base[:,1]<head.eye_mid[1]-.24
+        solve_y=factorized((matrix+sparse.diags(lower.astype(float)*1e6)).tocsc())
+        delta[:,1]=solve_y(target[:,1]*active*contact_weight);delta[lower,1]=0
+        delta[fixed_horizontal,0]=0;delta[fixed_horizontal,2]=0
+        assert np.isfinite(delta).all()
+        delta[pinned]=0
+        proof.append({'iteration':iteration,'contacts':int(contact.sum()),'max_contact_mm':float(np.linalg.norm(correction,axis=1).max()*1000)})
+        print('FAIR_BODY_ITERATION',proof[-1],flush=True)
+    result=base+delta;safe=result+shared_body_correction(head,base,[result],hull,margin,radial='drape')
+    final=np.linalg.norm(safe-result,axis=1).max()*1000
+    assert final<3.,('Body contact correction remains too local',final)
+    print('FAIR_BODY_CLEARANCE',proof,'final_projection_mm',final,flush=True)
+    return P+(safe-base)[weld]
 
 def prepare(args):
     src=Path(args.source);out=Path(args.stage);assert not out.exists();out.mkdir(parents=True)
@@ -157,19 +235,24 @@ def prepare(args):
         if not spec.get('transport_normals',False):N=unit(N*np.array([1/ratio,1.,1/ratio]))
     head=BoundedHead(sex);hull=body_hull(head)
     P=assemble.push_out_var(head,P,np.full(len(P),.0032),iters=5)
+    np.savez_compressed(out/'pre-body.npz',P=P,N=N,UV=a['UV'],T=a['T'])
     body_fit=curtain_body_safe if spec.get('preserve_curtain_depth',False) else body_safe
-    P=body_fit(head,P,hull,float(spec.get('outer_body_margin_mm',8.0))/1000)
+    options={'T':a['T']} if spec.get('preserve_curtain_depth',False) else {}
+    P=body_fit(head,P,hull,float(spec.get('outer_body_margin_mm',8.0))/1000,**options)
     if spec.get('transport_normals',False):
         _,weld=np.unique(np.round(a['P']/1e-6),axis=0,return_inverse=True)
         N=unit(a['N']+assemble.morph_normals(a['P'],a['T'],a['N'],P-a['P'],weld))
-    np.savez_compressed(out/'extracted.npz',P=P,N=N,UV=a['UV'],T=a['T'])
+    P,N,T,collar=repair_collar(head,P,N,a['UV'],a['T'],spec,np.asarray(Image.open(src/'hair-mask.png')))
+    ranges={'exterior':[0,len(P)],'shell':[len(P),len(P)]}
+    P,N,temple=conform_temples(head,hairgen.Scalp(head,spec.get('hairline')),P,N,T,ranges,spec)
+    np.savez_compressed(out/'extracted.npz',P=P,N=N,UV=a['UV'],T=T)
     for name in ['hair-only.png','hair-mask.png']:copy_path=out/name;copy_path.write_bytes((src/name).read_bytes())
     source=profile(src/'source.json')
     source.update(sex=sex,source_sex=fit['sex'],neutralized=True,source_extraction_sha256=sha(src/'extracted.npz'),
                   profile_sha256=sha(args.profile),source_head_sha256=sha(source_head.glb_path),head_sha256=sha(head.glb_path),body_sha256=sha(paths.body_glb(sex)))
     garment=Path(paths.body_glb(sex)).with_name('luminous_'+sex+'_shirt.glb')
     if garment.is_file():source['garment_sha256']=sha(garment)
-    source['fitting']={'preserve_curtain_depth':bool(spec.get('preserve_curtain_depth',False)),'transport_normals':bool(spec.get('transport_normals',False))}
+    source['fitting']={'preserve_curtain_depth':bool(spec.get('preserve_curtain_depth',False)),'transport_normals':bool(spec.get('transport_normals',False)),'collar_repair':collar,'temple_conformance':temple}
     save_json(out/'source.json',source);save_json(out/'lod-budgets.json',spec['outer_triangles'])
     print('PREPARED_LOOSE_REFERENCE',sex,len(P),len(a['T']),flush=True)
 
@@ -316,12 +399,14 @@ def all_parts(stage,head,scalp,spec,lod):
     assert np.abs(np.linalg.norm(N,axis=1)-1).max()<1e-6,'Invalid normals before expensive morph work'
     return P,N,np.vstack(uv),T,np.vstack(colours),ranges,backing_info|{'fine_cards':cards['fine'],'messy_cards':cards['messy'],'exterior_triangles':len(exterior['T']),'backing_triangles':len(BT),'detail_triangles':len(cards['T'])}
 
-def groom_fields(head,scalp,P,names,spec,hull,ranges):
+def groom_fields(head,scalp,P,names,spec,hull,ranges,triangles=None):
     Q,normal=ref.roots(head,scalp,P);binding=assemble.Binding(head,P,Q,follow=.015,fade=.025,stretch=.5,no_ears=True)
     head_margin,body_margin=layer_margins(P,ranges,spec)
-    delta={}
+    shell=slice(*ranges['shell']);cap_binding=head.bind(P[shell],no_ears=True)
+    delta={};radial=bool(spec.get('preserve_curtain_depth',False))
     for name in names:
         Dh=head.delta(name);D=binding.delta(Dh,margin=.0028)
+        D[shell]=head.bound_delta(cap_binding,Dh)
         mesh=trimesh.Trimesh(head.P+Dh,head.T,process=False)
         moving=np.linalg.norm(Dh,axis=1)>1e-5
         near=np.flatnonzero(np.isfinite(cKDTree(head.P[moving]).query(P,distance_upper_bound=np.linalg.norm(Dh,axis=1).max()+.04)[0])) if moving.any() else np.array([],int)
@@ -333,13 +418,13 @@ def groom_fields(head,scalp,P,names,spec,hull,ranges):
             bad=(sd<head_margin[near])&~rim
             if not bad.any():break
             indices=near[bad];D[indices]=cp[bad]+n[bad]*(head_margin[indices]+.0006)[:,None]-P[indices]
-        D=body_safe(head,P+D,hull,body_margin)-P;delta[name]=D
+        D=body_safe(head,P+D,hull,body_margin,radial=radial)-P;delta[name]=D
     # Reserve only the near-head neighborhood for stacked identity envelopes.
     # Keep the dense original extraction/LOD stages unchanged during repairs.
     near=np.flatnonzero(binding.dist<.05)
     if len(near):
         P[near]=ref.joint_groom_clearance(head,P[near],{n:delta[n][near] for n in names},names,head_margin[near],combos=assemble.default_combos(names))
-        P[:]=body_safe(head,P,hull,body_margin);Q,normal=ref.roots(head,scalp,P)
+        P[:]=body_safe(head,P,hull,body_margin,radial=radial);Q,normal=ref.roots(head,scalp,P)
     root_distance=np.linalg.norm(P-Q,axis=1);low,high=np.asarray(spec['groom']['root_fade_mm'])/1000
     fade=hairgen.smoothstep((root_distance-low)/(high-low));shell=slice(*ranges['shell']);fade[shell]=0
     lon,lat=headref.dir_lonlat(P-head.C)
@@ -352,14 +437,22 @@ def groom_fields(head,scalp,P,names,spec,hull,ranges):
     volume_direction=unit(normal*(1-hanging[:,None])+horizontal*hanging[:,None])
     stand=np.maximum(np.einsum('ij,ij->i',P-Q,normal)-.0045,0)
     volume_size=np.maximum(stand,.012)*(1-hanging)+horizontal_radius*hanging
+    if 'hanging_volume_mm' in spec['groom']:
+        volume_size=np.maximum(stand,.012)*(1-hanging)+np.minimum(horizontal_radius,spec['groom']['hanging_volume_mm']/1000)*hanging
     for name in GROOMS:
         positive=name.endswith('_p');config=spec['groom']
-        if 'length' in name:move=(P-Q)*fade[:,None]*config['length_positive' if positive else 'length_negative']*(1 if positive else -1)
+        if 'length' in name:
+            move=(P-Q)*fade[:,None]*config['length_positive' if positive else 'length_negative']*(1 if positive else -1)
+            if config.get('hanging_axis_length',False):move[:,[0,2]]*=1-hanging[:,None]
         else:move=volume_direction*(volume_size*volume_fade*config['volume_positive' if positive else 'volume_negative']*(1 if positive else -1))[:,None]
         move[shell]=0
-        safe=assemble.push_out_var(head,P+move,head_margin,iters=5);safe=body_safe(head,safe,hull,body_margin)
+        safe=assemble.push_out_var(head,P+move,head_margin,iters=5)
+        if 'length' in name and config.get('coherent_length',False):
+            assert triangles is not None,'Coherent lock motion requires source connectivity'
+            safe=curtain_body_safe(head,safe,hull,float(spec.get('outer_body_margin_mm',8.0))/1000,T=triangles)
+        else:safe=body_safe(head,safe,hull,body_margin,radial=radial)
         safe=ref.joint_groom_clearance(head,safe,delta,names,head_margin)
-        safe+=shared_body_correction(head,P,[safe],hull,body_margin)
+        safe+=shared_body_correction(head,P,[safe],hull,body_margin,radial=radial)
         delta[name]=safe-P
     # Volume shortening shares its clearance with length shortening. Alternate
     # the two endpoint envelopes; body corrections share one outward direction.
@@ -370,13 +463,16 @@ def groom_fields(head,scalp,P,names,spec,hull,ranges):
         volume=P+delta['hl_volume_n'];safe=ref.joint_groom_clearance(head,volume,delta,names,head_margin)
         delta['hl_volume_n']+=safe-volume
         volume=P+delta['hl_volume_n'];pair=volume+delta['hl_length_n']
-        delta['hl_volume_n']+=shared_body_correction(head,P,[volume,pair,volume+delta['hl_length_p']],hull,body_margin)
+        delta['hl_volume_n']+=shared_body_correction(head,P,[volume,pair,volume+delta['hl_length_p']],hull,body_margin,radial=radial)
     volume=P+delta['hl_volume_p']
-    delta['hl_volume_p']+=shared_body_correction(head,P,[volume,volume+delta['hl_length_p'],volume+delta['hl_length_n']],hull,body_margin)
+    delta['hl_volume_p']+=shared_body_correction(head,P,[volume,volume+delta['hl_length_p'],volume+delta['hl_length_n']],hull,body_margin,radial=radial)
     # All duplicated geometric seams receive exactly the same deformation.
     _,weld=np.unique(np.round(P/1e-6),axis=0,return_inverse=True);counts=np.bincount(weld)
     for name in names+GROOMS:
         total=np.zeros((len(counts),3));np.add.at(total,weld,delta[name]);delta[name]=total[weld]/counts[weld,None]
+    # The scalp coverage surface follows identity, while grooming affects
+    # only the visible locks. Endpoint guards must not move this fixed cap.
+    for name in GROOMS:delta[name][shell]=0
     return Q,root_distance,delta
 
 def patch_roots(args):
@@ -417,6 +513,7 @@ def patch_roots(args):
 
 def pack(args,groom_builder=None,atlas_builder=None,colour_builder=None,parts_builder=None):
     stage=Path(args.stage);spec=profile(args.profile);source=profile(stage/'source.json');head=BoundedHead(source['sex']);scalp=hairgen.Scalp(head,spec.get('hairline'))
+    assert not source.get('held',False),'Source stage is held by its authoring review'
     assert source['profile_sha256']==sha(args.profile),'Prepare a fresh stage for a changed style profile'
     assert source['head_sha256']==sha(head.glb_path),'Prepared head inputs changed'
     body_sha=sha(paths.body_glb(source['sex']))
@@ -428,19 +525,24 @@ def pack(args,groom_builder=None,atlas_builder=None,colour_builder=None,parts_bu
         source['garment_sha256']=sha(garment)
     out=Path(args.out);assert not out.exists() and not out.with_suffix('.png').exists();out.parent.mkdir(parents=True,exist_ok=True)
     atlas=out.with_suffix('.png');atlas_sha=(atlas_builder or make_atlas)(stage,atlas);writer=assemble.Writer('Rabbit Lands reference-derived loose hair')
-    core=writer.material('rl_hair_clump',[1,1,1,1],extras={'texture':atlas.name,'softHairline':True,'softRootCoverage':True,'uvStrandHighlights':False})
+    core_extras={'texture':atlas.name,'softHairline':True,'softRootCoverage':True,'uvStrandHighlights':False}
+    if 'paint_flatness' in spec:
+        value=float(spec['paint_flatness']);assert 0<=value<=1 and np.isfinite(value)
+        core_extras['paintFlatness']=value
+    core=writer.material('rl_hair_clump',[1,1,1,1],extras=core_extras)
     card=writer.material('rl_hair_card',[1,1,1,1],cutoff=.35,extras={'texture':atlas.name,'softRootDetails':True})
     writer.embed_texture(core,str(atlas));writer.g.g['materials'][card]['pbrMetallicRoughness']['baseColorTexture']=copy.deepcopy(writer.g.g['materials'][core]['pbrMetallicRoughness']['baseColorTexture'])
     names=head.id_names();hull=body_hull(head);meshes=[];report={'style':spec['name'],'sex':source['sex'],'source':source,'profile_sha256':sha(args.profile),'tool_sha256':sha(__file__),'atlas_sha256':atlas_sha,'head_sha256':sha(head.glb_path),'checked_head_clearance':bool(args.check),'qualified':False,'lods':{},'clearance':{},'body_clearance':{}}
     for lod in (0,1,2):
         P,N,UV,T,COL,ranges,info=(parts_builder or all_parts)(stage,head,scalp,spec,lod)
         head_margin,body_margin=layer_margins(P,ranges,spec)
-        P=assemble.push_out_var(head,P,head_margin+.0008+assemble.headroom(head,P,names,frac=.6,no_ears=False),iters=5);P=body_safe(head,P,hull,body_margin)
+        P=assemble.push_out_var(head,P,head_margin+.0008+assemble.headroom(head,P,names,frac=.6,no_ears=False),iters=5);P=body_safe(head,P,hull,body_margin,radial=bool(spec.get('preserve_curtain_depth',False)))
         if getattr(args,'neutral_only',False):
             assert not args.check,'Neutral previews do not qualify morphs'
             Q,_=ref.roots(head,scalp,P);distance=np.linalg.norm(P-Q,axis=1);delta={n:np.zeros_like(P) for n in names+GROOMS}
             report['neutral_geometry_preview']=True
-        else:Q,distance,delta=(groom_builder or groom_fields)(head,scalp,P,names,spec,hull,ranges)
+        elif groom_builder:Q,distance,delta=groom_builder(head,scalp,P,names,spec,hull,ranges)
+        else:Q,distance,delta=groom_fields(head,scalp,P,names,spec,hull,ranges,triangles=T)
         core_end=ranges['detail'][0];COL=(colour_builder or root_colours)(head,scalp,P,T,COL,ranges,distance,spec)
         joints=np.zeros((len(P),4),np.uint8);weights=np.zeros((len(P),4),'f4');weights[:,0]=1
         is_detail=(T>=core_end).all(1);primitives=[]

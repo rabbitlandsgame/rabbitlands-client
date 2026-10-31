@@ -34,6 +34,13 @@ its matching exterior. Cap/backing UVs stay in the opaque texture region.
 each side instead of flattening individual curls against the torso envelope.
 `transport_normals` carries the source's painted surface shading through that
 fit. Both options preserve their old default behavior when absent.
+The connected curtain fit now keeps the hanging lower-lock depth coherent,
+spreads shoulder corrections over the welded source connectivity and pins the
+upper roots. It uses a continuous displacement field across front/back regions;
+do not restore a hard divide or flatten each curl independently against a torso
+envelope. The ignored `pre-body.npz` retains the neutral surface before this fit.
+Optional collar and near-root temple corrections run before reduction and retain
+the painted UVs; their bounded measurements are included in the stage receipt.
 For a profile using closed backing, run `backing` and `smooth_loose_backing.py`
 before packing. Do not run blanket topology filling on an exterior with
 intentional ringlets: identify an accidental opening before repairing it.
@@ -48,6 +55,10 @@ its own knot motion and paint normalization. A grooming callback returns
 it must supply every identity target and the four `hl_*` targets. A colour
 callback returns float RGBA. Core A is 1, fine/messy cards occupy distinct
 continuous keep bands, and R carries soft-root coverage on opted-in clumps.
+The default groom builder receives source triangles when `coherent_length` is
+enabled so length extremes keep the connected shoulder transition. External
+groom callbacks retain their existing argument contract. Optional `paint_flatness`
+is forwarded to the clump material; zero retains the full painted texture.
 The part callback retains the same return tuple and ranges; exported primitive
 `extras.partVertexRanges` records the actual compact ranges for inspection and
 for painted backing that shares the exterior's UV region.
@@ -81,6 +92,12 @@ validation, the shader-equivalent scalp coverage gate at all three LODs, open
 headwear fitting, and matched real-client views at neutral and grooming extremes.
 Record exact output hashes and keep `qualified` false until those checks pass.
 The style profiles alone do not register or replace an existing saved hairstyle.
+Vertex clearance alone is insufficient: check triangle centres and long-edge
+midpoints against the actual morphed High head as well. A source may contain
+buried closure faces whose corners are clear. Treat those separately from the
+visible painted locks, preserve unrelated source data, and repeat coverage and
+matched views after any cleanup. Native-head support is a separate corrective;
+do not fit its skull envelope into the High baseline or High identity targets.
 
 For an exterior-only module, `bake_loose_cap.py --source <candidate.glb>
 --out <fresh/candidate.glb>` maps the independent scalp cap into unique chart

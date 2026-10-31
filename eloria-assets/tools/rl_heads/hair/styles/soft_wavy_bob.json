@@ -1,15 +1,23 @@
 {
   "name": "soft_wavy_bob",
   "seed": 901,
+  "paint_flatness": 0.15,
   "clearance_mm": 3.2,
-  "hairline": {"ear_margin": 4.0, "nape_below_lobe_mm": 22.0, "noise": 0.6},
+  "hairline": {"ear_margin": 4.0, "nape_below_lobe_mm": 20.0, "noise": 0.6},
+  "preserve_curtain_depth": true,
+  "transport_normals": true,
+  "backing_mode": "none",
+  "root_sector_degrees": 115,
+  "root_band_degrees": 12,
+  "soft_cap_edge_mm": 2.0,
   "shell": {
     "pole": [0, 88], "v": "from_pole", "tip_band": 0,
     "offset_mm": [4.0, 3.2], "face_clear": 0.9,
-    "edge_inset": 2.0, "u_repeat": 12, "ao": 0.92,
-    "lod": {"0": [7, 48], "1": [4, 36], "2": [3, 24]}
+    "edge_inset": [[-180,2],[-100,2],[-70,0],[0,-0.5],[70,0],[100,2],[180,2]], "u_repeat": 6, "ao": 0.92,
+    "boundary_ring_mm": [1,2],
+    "lod": {"0": [7, 48], "1": [4, 36], "2": [6, 30]}
   },
-  "outer_triangles": [10500, 3600, 850],
+  "outer_triangles": [14000, 4500, 1100],
   "backing_triangles": [4000, 1750, 750],
   "backing": {"pitch_mm": 1.6, "inflate_mm": 2.0, "close_mm": 8.0, "erode_mm": 3.0, "head_margin_mm": 3.0, "body_margin_mm": 3.5},
   "groom": {"length_positive": 0.60, "length_negative": 0.40, "volume_positive": 0.38, "volume_negative": 0.24, "root_fade_mm": [5, 38]},
