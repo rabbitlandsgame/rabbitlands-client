@@ -29,5 +29,11 @@ class TempleConformance(unittest.TestCase):
     def test_displacement_limit_fails_closed(self):
         P,N,T,ranges,spec=self.fixture();spec=copy.deepcopy(spec);spec['temple_conform']['max_displacement_mm']=1
         with self.assertRaises(AssertionError):conform_temples(Head(),Scalp(),P,N,T,ranges,spec)
+    def test_explicit_preserved_cap_is_not_conformed(self):
+        P,N,T,ranges,spec=self.fixture();P=np.vstack([P,P[:3]]);N=np.vstack([N,N[:3]])
+        T=np.vstack([T,[[8,9,10]]]);ranges['shell']=[8,11];spec['temple_conform']['preserve_parts']=['shell']
+        Q,M,_=conform_temples(Head(),Scalp(),P,N,T,ranges,spec)
+        np.testing.assert_array_equal(Q[8:],P[8:]);np.testing.assert_array_equal(M[8:],N[8:])
+        self.assertGreater(Q[0,1],P[0,1])
 
 if __name__=='__main__':unittest.main()

@@ -20,6 +20,9 @@ def conform_temples(head,scalp,P,N,T,ranges,spec):
     blend*=hairgen.smoothstep((lat-line+22)/4)
     distance=cKDTree(P[border[eligible]]).query(P)[0]
     blend*=1-hairgen.smoothstep((distance-.020)/.015)
+    for part in config.get('preserve_parts',[]):
+        assert part in ranges,'Unknown preserved temple-conformance part'
+        blend[slice(*ranges[part])]=0
     width=float(config['softness_degrees']);assert 0<width<=3
     target=lat+blend*(line+width*np.logaddexp(0,(lat-line)/width)-lat)
     changed=(target-lat)>.01;Q=P.copy();M=N.copy()
