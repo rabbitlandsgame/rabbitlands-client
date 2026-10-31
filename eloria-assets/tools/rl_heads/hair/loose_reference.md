@@ -15,22 +15,35 @@ blender -b --factory-startup --threads 2 --python smooth_loose_backing.py -- <st
 python build_loose_reference.py pack --stage <stage> --profile styles/layered_long.json --out <candidate/layered_long_female.glb> --check
 ```
 
+First run `pack --neutral-only` into a separate ignored preview directory and
+inspect the painted silhouette in the real client. This writes zero identity
+and grooming deltas and explicitly remains a neutral geometry preview. Repair
+unexpected deformation or visible backing before running the expensive checked
+build; never install the preview as a qualified hairstyle.
+
 Use the current pinned `RL_HEADS_BUILD`, `RL_MPFB_GROUPS`, `RL_HEADS_ROOT`
 and `RL_WORKTREE` inputs described in README.md. Private paths and full source
 records belong in ignored reports; runtime extras carry safe SHA-256 values.
-Body clearance excludes the native head triangles hidden by the RL head cut,
-scopes each primitive to its used vertices, and includes the repaired shirt.
+The torso/inner-shoulder envelope excludes native head triangles hidden by the
+RL head cut, scopes each primitive to its used vertices, and includes the
+repaired shirt. Forward/backward clearance preserves hanging X/Y instead of
+pushing locks upwards or across outstretched arms. Painted exterior and hidden
+backing use distinct clearance layers; each reduced backing is inset against
+its matching exterior. Cap/backing UVs stay in the opaque texture region.
 The stage's extraction and reduced exterior/backing files remain reusable when
 repairing only exported attachment, grooming, or material data.
 
-`pack(args, groom_builder=None, atlas_builder=None, colour_builder=None)` exposes
-three authoring hooks. Their default functions are `groom_fields`, `make_atlas`
-and `root_colours`. A tied style can reuse the export contract while supplying
+`pack(args, groom_builder=None, atlas_builder=None, colour_builder=None, parts_builder=None)`
+exposes four authoring hooks. Their default functions are `groom_fields`,
+`make_atlas`, `root_colours`, and `all_parts`. A tied style can reuse the export contract while supplying
 its own knot motion and paint normalization. A grooming callback returns
 `(roots, root_distance, deltas)` and may reserve clearance in `P` in place;
 it must supply every identity target and the four `hl_*` targets. A colour
 callback returns float RGBA. Core A is 1, fine/messy cards occupy distinct
 continuous keep bands, and R carries soft-root coverage on opted-in clumps.
+The part callback retains the same return tuple and ranges; exported primitive
+`extras.partVertexRanges` records the actual compact ranges for inspection and
+for painted backing that shares the exterior's UV region.
 
 Root boundary detection welds POSITION before counting open edges, so UV
 seams cannot become false faded stripes. For a geometry-checked older candidate,
