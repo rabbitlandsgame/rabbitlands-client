@@ -45,7 +45,7 @@ def repair(head,P,N,UV,T,spec,paint_mask=None):
         selected=np.flatnonzero(labels==component);vertices=ids[selected]
         if not 3<=len(vertices)<=int(config['hole_vertices']) or not (degree[selected]==2).all():continue
         points=Q[vertices];center=points.mean(0)
-        if not y0<center[1]<y1 or abs(center[0])>x1 or np.ptp(points,axis=0).max()>max_span:continue
+        if not ((points[:,1]>y0)&(points[:,1]<y1)&(abs(points[:,0])>x0)&(abs(points[:,0])<x1)).all() or np.ptp(points,axis=0).max()>max_span:continue
         adjacency={int(v):[] for v in vertices}
         for a,b in edge[np.isin(edge[:,0],vertices)&np.isin(edge[:,1],vertices)]:adjacency[int(a)].append(int(b));adjacency[int(b)].append(int(a))
         order=[int(vertices[0])];last=-1
