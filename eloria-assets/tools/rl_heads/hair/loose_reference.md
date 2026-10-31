@@ -68,6 +68,14 @@ without the flag. The receipt also reports each requested budget: complicated
 painted topology may reach a reduction floor and still needs a separate lower
 detail surface; the weld alone does not qualify an asset.
 
+An additional `--split-nonmanifold` opt-in separates only edges incident to more
+than two faces after that weld. It preserves every source face corner's position,
+UV and normal exactly before reduction, and leaves ordinary two-face UV seams
+joined. Its receipt records selected contacts and remaining nonmanifold edges.
+Use it only for measured contact obstructions; reduced silhouette, painted seams,
+coverage and budgets still require validation. It requires `--weld-geometry` and
+does not alter the default reduction path.
+
 A successful pack is a geometry check, not final qualification. Run structural
 validation, the shader-equivalent scalp coverage gate at all three LODs, open
 headwear fitting, and matched real-client views at neutral and grooming extremes.

@@ -4,8 +4,12 @@ blender -b --python decimate_reference_surface.py -- <stage>
 import sys,json,hashlib
 from pathlib import Path
 import bpy,bmesh,numpy as np
+sys.path.insert(0,str(Path(__file__).resolve().parent))
+from split_reference_contacts import split_contacts
 stage=Path(sys.argv[sys.argv.index('--')+1]);source=np.load(stage/'extracted.npz')
 weld_geometry='--weld-geometry' in sys.argv
+split_nonmanifold='--split-nonmanifold' in sys.argv
+assert not split_nonmanifold or weld_geometry,'Contact splitting requires the loop-preserving POSITION weld'
 weld_tolerance=1e-6
 receipt={'source_sha256':hashlib.sha256((stage/'extracted.npz').read_bytes()).hexdigest(),'tool_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'weld_geometry':weld_geometry,'weld_tolerance_mm':weld_tolerance*1000,'lods':{}}
 bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
@@ -26,6 +30,9 @@ if weld_geometry:
     before_vertices=len(bm.verts);before_faces=len(bm.faces)
     bmesh.ops.remove_doubles(bm,verts=list(bm.verts),dist=weld_tolerance)
     uv_layer=bm.loops.layers.uv.active;uv_error=0.;normal_error=0.
+    if split_nonmanifold:
+        receipt['contact_split']=split_contacts(bm,uv_layer,normal_layer,face_layer)
+        print('REFERENCE_CONTACT_SPLIT',receipt['contact_split'],flush=True)
     for face in bm.faces:
         original=int(face[face_layer]);expected_uv=source_uv[source_t[original]];expected_n=source_n[original]
         for loop in face.loops:
