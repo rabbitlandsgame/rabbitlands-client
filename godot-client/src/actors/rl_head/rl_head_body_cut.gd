@@ -1,6 +1,7 @@
 class_name RLHeadBodyCut
 extends RefCounted
 const REST_COORDS := preload("res://src/actors/mesh_rest_coordinates.gd")
+const NECK_NORMALS := preload("res://src/actors/rl_head/rl_head_neck_normals.gd")
 ## Takes the body's own head off a luminous body wearing an RL head.
 ##
 ## The head module brings the face, the cranium and the neck down to a rim; the
@@ -148,7 +149,8 @@ static func _plan(original: Mesh, head_info: Dictionary, body_scene: String,
 		if not bool(corner_use[vertex]):
 			hidden_vertices[vertex] = true
 	var plan := {"source": weakref(original), "hidden": hidden,
-		"hidden_vertices": hidden_vertices, "method": method, "reason": reason}
+		"hidden_vertices": hidden_vertices, "method": method, "reason": reason,
+		"neck_normals": head_info.get("neck_normals", [])}
 	_plans[key] = plan
 	return plan
 
@@ -318,6 +320,7 @@ static func _cut(source: Mesh, plan: Dictionary) -> ArrayMesh:
 		result.blend_shape_mode = (source as ArrayMesh).blend_shape_mode
 	for surface: int in source.get_surface_count():
 		var arrays := source.surface_get_arrays(surface)
+		NECK_NORMALS.apply_body(arrays,plan.get("neck_normals", []))
 		var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
 		var kept := PackedInt32Array()
 		for index: int in range(0, indices.size(), 3):

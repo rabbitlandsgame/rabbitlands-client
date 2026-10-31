@@ -31,6 +31,7 @@ extends RefCounted
 ## develop's own High portrait releases its caches with its last user.
 
 const REST_COORDS := preload("res://src/actors/mesh_rest_coordinates.gd")
+const NECK_NORMALS := preload("res://src/actors/rl_head/rl_head_neck_normals.gd")
 const ROOT := "res://assets/actors/native/rl_heads/"
 const HAIR_DIR := ROOT + "hair/"
 const BEARD_DIR := ROOT + "beards/"
@@ -635,6 +636,8 @@ static func head(sex: String) -> Dictionary:
 			"control_names": names, "expressions": expressions, "correctives": correctives, "lods": lods,
 			"body_cut": extras.get("bodyCut", {}) as Dictionary,
 			"eye": _eye_layout(lods[0] as Array)}
+		if sex == "male":
+			info["neck_normals"] = ((lods[0] as Array)[0] as Dictionary).get("neck_normals", [])
 	_heads[sex] = info
 	return info
 
@@ -714,19 +717,22 @@ static func _skinned_lods(path: String, base_name: String) -> Array:
 		# Its copied body patch needs the same unskinned coordinates, before any
 		# identity bake; the existing head cache owns this one derived mesh.
 		var mesh := source.mesh
+		var neck_normals: Array = []
 		if base_name == "rl_head" and path.get_file() == "rl_head_female.glb":
 			mesh = REST_COORDS.for_material(mesh, BODY_PATCH_MATERIAL)
 		if not by_level.has(level):
 			by_level[level] = []
 		(by_level[level] as Array).append({"name": str(source.name), "mesh": mesh,
 			"bones": bones, "binds": binds, "level": level,
-			"head_bind": bones.find("Head")})
+			"head_bind": bones.find("Head"), "neck_normals":neck_normals})
 	imported.free()
 	var levels: Array = by_level.keys()
 	levels.sort()
 	var lods: Array = []
 	for level: Variant in levels:
 		lods.append(by_level[level])
+	if base_name == "rl_head" and path.get_file() == "rl_head_male.glb":
+		NECK_NORMALS.prepare_lods(lods,"res://assets/actors/native/races/luminous_male.glb")
 	if lods.is_empty():
 		warn_once("pieces:" + path, "%s has no %s meshes" % [path, base_name])
 	return lods

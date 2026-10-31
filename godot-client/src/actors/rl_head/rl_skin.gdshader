@@ -107,10 +107,8 @@ uniform float brow_spread_gain : hint_range(0.5, 4.0) = 1.7;
 const vec3 LUMA = vec3(0.2126, 0.7152, 0.0722);
 
 varying float face_weight;
-varying float rest_height;
 
 void vertex() {
-	rest_height = VERTEX.y;
 	face_weight = 0.0;
 	for (int i = 0; i < 4; i++) {
 		if (int(BONE_INDICES[i]) == head_bind_index) {
@@ -145,7 +143,7 @@ void fragment() {
 		// continuously over the neck instead of dyeing it with the calibrated
 		// face colour and stepping abruptly to the torso's different colour.
 		vec3 body_dye = vec3(skin_color.a, brow_color.a, hair_color.a);
-		vec3 dye = mix(body_dye, skin_color.rgb, smoothstep(1.48, 1.66, rest_height));
+		vec3 dye = mix(body_dye, skin_color.rgb, face);
 		vec3 albedo = dye * shading;
 		vec4 features = has_features ? texture(features_texture, UV) : vec4(0.0);
 		vec3 features2 = features2_texel.rgb;
