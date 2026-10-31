@@ -946,9 +946,16 @@ static func _size_cap(path: String) -> int:
 
 
 ## The texture for one material slot: the manifest's choice, else `fallback`.
-static func slot_texture(keys: Array[String], slot: String, fallback: String, quality: int) -> Texture2D:
+static func slot_texture(keys: Array[String], slot: String, fallback: String, quality: int,
+		optional_fallback: bool = false) -> Texture2D:
 	var named: Variant = manifest_value(keys, slot, quality)
-	return texture(str(named) if named is String else fallback)
+	if named is String:
+		return texture(str(named))
+	if optional_fallback and not fallback.is_empty():
+		var path := fallback if fallback.begins_with("res://") else TEXTURE_DIR + fallback
+		if not ResourceLoader.exists(path) and not FileAccess.file_exists(path):
+			return null
+	return texture(fallback)
 
 
 # ---------------------------------------------------------------- materials
@@ -1169,7 +1176,8 @@ static func _configure_skin(target: ShaderMaterial, material_name: String, sex: 
 	# one painted brow in features B, as before brow styles.
 	_set_texture(target, "brows_texture", "has_brows",
 		slot_texture(keys, "brows", prefix + "brows.png", quality))
-	var normal := slot_texture(keys, "normal", prefix + "normal.png", quality) \
+	# Normal maps are optional; an explicitly configured missing map still warns.
+	var normal := slot_texture(keys, "normal", prefix + "normal.png", quality, true) \
 		if quality != ActorRenderQuality.Quality.LOW else null
 	_set_texture(target, "normal_texture", "has_normal", normal)
 	# Stubble, blush and the hairline are features2's R, G and B.
