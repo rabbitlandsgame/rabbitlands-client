@@ -1,0 +1,140 @@
+{
+  "version": 1,
+  "status": "qualified_asset_candidate",
+  "style": "buzz_cut_male",
+  "semantic_family": "buzz_cut",
+  "module_id": 21,
+  "sex": "male",
+  "legacy_hairstyle_slot": 4,
+  "additional_generation_credits": 0,
+  "method": "Approved native Buzzed silhouette, symmetric physically feathered modern cap, directional close-fibre paint, rooted fine detail, coherent upward/rear ear seed and separate Native-skull corrective",
+  "glb_sha256": "ac143984db8783d94ee51ae65f06a708f280bfceddd03f51aabcc1ac94becb35",
+  "texture_sha256": "3778194d413e3f48214057ab49c3d8bf813f963c9dd9a27ae732ad210e474250",
+  "texture_import_sha256": "afeeecd635e5d2096654b4c91a369e471f9d53197f71decf92647a79d6a5f9f4",
+  "source_reference_sha256": "bccf4617e77c9a69c75c3fb4fb5d939364fb9684625665f04b98195ceb5b2145",
+  "head_sha256": "6b3549331bacbb7ba1664f569b34a9babd57dd93b14345f627a9791231c53619",
+  "triangles": {
+    "lod0": 9018,
+    "lod1": 2954,
+    "lod2": 1076
+  },
+  "vertices": {
+    "lod0": 8912,
+    "lod1": 2940,
+    "lod2": 1026
+  },
+  "contract": {
+    "identity_targets": 46,
+    "grooming_targets": [
+      "hl_length_p",
+      "hl_length_n",
+      "hl_volume_p",
+      "hl_volume_n"
+    ],
+    "optional_native_target": "hl_native_fit",
+    "native_default_weight": 0,
+    "springs": false,
+    "native_hair_only_ignores_high_identities": true,
+    "fine_detail_range": [
+      0,
+      100
+    ],
+    "length_nominal_delta_mm": [
+      -1,
+      4.5
+    ],
+    "volume_nominal_delta_mm": [
+      -0.5,
+      1.5
+    ]
+  },
+  "qualification": {
+    "high_vertex_and_morph_cases_per_lod": 85,
+    "high_surface_states_per_lod": 82,
+    "high_minimum_clearance_mm": 2.123951369138893,
+    "scalp_coverage": {
+      "cases": 78,
+      "lods": 3,
+      "samples": 900,
+      "requested_directions": 220,
+      "retained_directions": 165,
+      "level": 0.0,
+      "margin_degrees": 4.0,
+      "minimum_elevation_degrees": -30.0,
+      "hole_samples_max": 0,
+      "report_sha256": "2848a71c541e1f7bce88236225db5217f1366398695d97282d5ff48171ad68cc"
+    },
+    "native": {
+      "evaluated_cases": 1674,
+      "qualities": [
+        "Low",
+        "Medium"
+      ],
+      "groom_cases": 9,
+      "lods": 3,
+      "high_identities": 0,
+      "failures": 0,
+      "minimum_clearance_mm": 2.1764190429447194,
+      "maximum_corrective_shift_mm": 11.888505018257685,
+      "fixture_manifest_sha256": "de6a4f42543f4e004e602091170048bbd550a862907da921f70fb1c704002b5a",
+      "report_sha256": "48b2ba30744960e96896cccff27aac43544611a922681284022512df0acad041",
+      "collision_report_base_glb_sha256": "e138b2df4d4ea527450d69f31342b338006e0bf21c6b3c4fb90a9f7b8ecd02fa",
+      "collision_attributes_after_root_and_embedding_edits_exact": true,
+      "limit_mm": 14
+    },
+    "client": {
+      "renderer": "Forward+",
+      "texture_loading": "actual imported BPTC resource; no private texture overrides",
+      "controls": [
+        "length minimum/maximum",
+        "volume minimum/maximum",
+        "detail minimum/maximum"
+      ],
+      "additional_identities": 2,
+      "poses": [
+        "Rest",
+        "Idle",
+        "Walk"
+      ],
+      "headwear_items": [
+        134,
+        159,
+        111,
+        170
+      ],
+      "closed_headwear_hides_hair": true,
+      "native_harness_views": 4,
+      "native_harness_errors": 0,
+      "actual_resource_captures": 22,
+      "control_endpoint_changed_pixels": {
+        "length": 85370,
+        "volume": 72993,
+        "detail": 55932
+      },
+      "capture_receipt_sha256": "d6ab4b334017558d59bc6c7a88364142425f0c4850df164bb43ada080551da06"
+    },
+    "root_feather": {
+      "changed_R_bytes": [
+        21,
+        10,
+        5
+      ],
+      "all_geometry_and_targets_exact": true,
+      "all_GBA_exact": true,
+      "fine_parent_coverage_protected": true,
+      "proof_sha256": "f29f751121fb28759d0b4d7cf00cc3ad9b74aa557528a7754ce363a9d681f334"
+    },
+    "high_fine_interior_states_per_lod": 82,
+    "high_fine_interior_failures": 0,
+    "high_fine_interior_minimum_mm": 2.297773476496042,
+    "high_fine_interior_report_sha256": "ff2dac984fea4e2a9f72d15c87572843d7c6b2c59e04013821b1c01914183bb9"
+  },
+  "provenance_hashes": {
+    "high_grooming_report_sha256": "ce84a92d1a1eee9210b4491ea4ae54eb7a89fb4754d410bad45de442fb8154e7",
+    "native_authoring_report_sha256": "3067bf85c731bc1a67b21755931b3cbf64d0e805bcf49795d4c658d24e5f97a3",
+    "source_preparation_receipt_sha256": "3531fe4f787428dc587e065d96cf1ed848f1d4dd2b5e32628445a051a859333f",
+    "texture_import_receipt_sha256": "b72d1e740cc5f81a21834394a8978ce68b1efeedac57afcae1d8de9352103f7a",
+    "complete_handoff_check_sha256": "97abfcb183f5332f144ccd36a28a08030e10563328f2b1ae545722e133b7c00e"
+  },
+  "standalone_glb_atlas_matches_runtime_png": true
+}
