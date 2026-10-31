@@ -55,6 +55,8 @@ var _last_compact := false
 var _selected_actor := -2
 var _item_header_height := 0.0
 var _item_view_height := 0.0
+var _power_refresh_pending := false
+var _power_stats := Vector2i(-1, -1)
 ## An explicit workspace layout bypasses the original coupled right rail.
 ## The same prepared buttons retain assignments, badges, menus and signals.
 var workspace_layout: Dictionary = {}
@@ -200,10 +202,25 @@ func _ready() -> void:
 	loadout.changed.connect(refresh)
 	AppState.magic_state_received.connect(func(_data: Dictionary): refresh())
 	AppState.state_changed.connect(func(path: StringName):
-		if path == &"techniques": refresh())
+		if path == &"techniques": refresh()
+		elif path == &"spell_power": _queue_power_refresh()
+		elif path == &"stats":
+			var gates := Vector2i(int(AppState.stats.get("magic", 0)), int(AppState.stats.get("magic_nexus", 0)))
+			if gates != _power_stats:
+				_power_stats = gates
+				_queue_power_refresh())
 	refresh()
 	set_expanded(start_expanded)
 	_layout()
+
+func _queue_power_refresh() -> void:
+	if _power_refresh_pending: return
+	_power_refresh_pending = true
+	_refresh_power.call_deferred()
+
+func _refresh_power() -> void:
+	_power_refresh_pending = false
+	if is_inside_tree() and loadout != null: refresh()
 
 func _style(background: Color, margin: float) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
@@ -673,15 +690,15 @@ func refresh() -> void:
 			_refresh_technique_slot(index, button)
 			continue
 		button.spell_id = int(slot.id)
-		button.power = int(slot.power)
 		var definition: Dictionary = loadout.catalog.spell(int(slot.id))
 		button.icon = loadout.catalog.icon_for(int(slot.id)) if int(slot.id) >= 0 else null
 		button.text = "+" if int(slot.id) < 0 else ""
 		var scope := str(definition.get("scope", ""))
-		var limit: Dictionary = AppState.spell_power.get(loadout.catalog.effect_for(int(slot.id)), {})
-		var effective_power := mini(int(slot.power), maxi(1, int(limit.get("limit", 1))))
+		var ceiling: int = loadout.catalog.cast_power_limit(int(slot.id), AppState.spell_power, AppState.stats)
+		var effective_power := mini(int(slot.power), maxi(1, ceiling))
+		button.power = effective_power
 		button.get_node("Target").text = str(CORNER_BADGES.get(scope, ""))
-		button.get_node("Power").text = str(int(slot.power)) if int(slot.id) >= 0 else ""
+		button.get_node("Power").text = str(effective_power) if int(slot.id) >= 0 else ""
 		button.get_node("Target").visible = int(slot.id) >= 0
 		button.get_node("Power").visible = int(slot.id) >= 0
 		if not workspace_layout.is_empty() and not workspace_layout.get("show_badges", true):
@@ -697,7 +714,7 @@ func refresh() -> void:
 		var target_label := str(SCOPE_BADGES.get(scope, ""))
 		if scope == "target":
 			target_label += ": click the recipient"
-		button.tooltip_text = "%s · %s · Power %d\n%s\nUses the last cast target type and power for this family.\nRight click to edit; drag a spell here." % [definition.get("name", "Empty slot"), target_label, int(slot.power), shortcut]
+		button.tooltip_text = "%s · %s · Power %d\n%s\nUses the last cast target type and power for this family.\nRight click to edit; drag a spell here." % [definition.get("name", "Empty slot"), target_label, effective_power, shortcut]
 		if effective_power != int(slot.power): button.tooltip_text += "\nSaved P%d; currently limited to P%d." % [int(slot.power), effective_power]
 		var reasons: Array[String] = []
 		if int(slot.id) >= 0:

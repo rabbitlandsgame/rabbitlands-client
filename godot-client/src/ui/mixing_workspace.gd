@@ -418,6 +418,28 @@ func _icon(image: int, parent: Node, extent := 22) -> TextureRect:
 	parent.add_child(icon)
 	return icon
 
+func _empty_recipe_message() -> String:
+	if main.manufacturing_list.item_count > 0:
+		return "No recipe selected.\nChoose a recipe from the list above or open Recipes."
+	if main.manufacturing_catalog.count() == 0:
+		return "No recipes are available."
+	var filters: Array[String] = []
+	var actions: Array[String] = []
+	var query := str(main.manufacturing_filter.text).strip_edges()
+	if not query.is_empty():
+		filters.append("Search: %s" % query)
+		actions.append("clear the search")
+	if not main.manufacturing_skill.is_empty():
+		filters.append("Skill: %s" % str(main.manufacturing_skill).capitalize())
+		actions.append("choose All skills")
+	if main.manufacturing_ready_only.button_pressed:
+		filters.append("Ingredients available: backpack")
+		actions.append("turn off Ingredients available or add ingredients to your pack")
+	var message := "No recipes match the current filters."
+	if not filters.is_empty(): message += "\n" + " · ".join(filters)
+	if not actions.is_empty(): message += "\nTry: " + "; ".join(actions) + "."
+	return message
+
 func _render_detail() -> void:
 	_clear(details)
 	var definition: Dictionary = main.manufacturing_catalog.recipe(main.selected_manufacturing_recipe)
@@ -457,7 +479,10 @@ func _render_detail() -> void:
 				break)
 	title_column.add_child(selector)
 	if definition.is_empty():
-		details.add_child(_label("No matching recipes.\nChange search or ingredient filter."))
+		var explanation := _label(_empty_recipe_message())
+		explanation.name = "EmptyRecipeExplanation"
+		explanation.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		details.add_child(explanation)
 		return
 	var meta := _label("%s %d · %d XP · Food %d" % [str(definition.get("skill", "")).capitalize(), int(definition.get("level", 0)), int(definition.get("experience", 0)), int(definition.get("food", 0))])
 	meta.clip_text = true

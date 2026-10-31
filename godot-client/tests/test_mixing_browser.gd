@@ -48,6 +48,19 @@ func run() -> void:
 	workspace = main.mixing_workspace
 	workspace.choose_preset("workbench", true)
 	main.manufacturing_ready_only.button_pressed = false
+	main.selected_manufacturing_recipe = -1
+	main.manufacturing_list.deselect_all()
+	main._sync_manufacturing()
+	await frames()
+	expect(main.manufacturing_list.item_count > 0 and workspace.details.get_node("EmptyRecipeExplanation").text.contains("No recipe selected"), "an unselected recipe is distinguished from an empty filter")
+	await screenshot("00-no-recipe-selected.png")
+	main.manufacturing_filter.text = "no such stream recipe"
+	main._sync_manufacturing()
+	await frames()
+	expect(workspace.details.get_node("EmptyRecipeExplanation").text.contains("Search: no such stream recipe") and workspace.details.get_node("EmptyRecipeExplanation").text.contains("clear the search"), "empty results name the active search and recovery action")
+	await screenshot("00-active-search-empty.png")
+	main.manufacturing_filter.text = ""
+	main._sync_manufacturing()
 	var fixed_size: Vector2 = main.manufacturing_panel.size
 	for output: String in ["Militia Arming Sword", "Potion of Manufacturing", "Stormglass Shield Spear", "Sunmane Twin Crescent Glaive"]:
 		select_output(output)
