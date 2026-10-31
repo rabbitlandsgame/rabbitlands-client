@@ -7,6 +7,9 @@ fixed by `CharacterProportions.face_point`; the checker requires a v2-or-later
 `native_fixed_skull` manifest with zero High-head identity weights. It applies
 the hair's grooming targets before the pose. Named hair-root/spring descendants
 follow Head; unknown joints fail instead of receiving a guessed transform.
+An optional internal `hl_native_fit` shape is active at1 in native mode and0
+under the High head. It separates local skull fitting from player grooming.
+Assets without that shape keep their existing geometry and bake keys.
 
 ```text
 python native_hair_fixtures.py <candidate.glb> --manifest <ignored/npz-manifest.json> --out <ignored/native-check.json>

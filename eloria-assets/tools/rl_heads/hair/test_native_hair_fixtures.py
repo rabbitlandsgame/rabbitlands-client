@@ -35,6 +35,12 @@ class NativeFixtureChecks(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, 'No evaluated native pose'):
             fixtures.skin_positions(np.zeros((1, 3)), np.zeros((1, 4), int), np.ones((1, 4)) / 4, ['Unknown'], {})
 
+    def test_native_corrective_is_optional_and_adds_to_groom(self):
+        base = np.array([[0., 1.6, .001]])
+        targets = {'hl_native_fit': np.array([[0., 0, .004]]), 'hl_volume_n': np.array([[0., 0, -.001]])}
+        np.testing.assert_allclose(fixtures.morph_positions(base, targets, {'hl_native_fit': 1, 'hl_volume_n': 1}), [[0, 1.6, .004]])
+        np.testing.assert_array_equal(fixtures.morph_positions(base, {}, {'hl_native_fit': 1}), base)
+
     def test_fixture_hash_and_triangle_used_vertices(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'mesh.npz'

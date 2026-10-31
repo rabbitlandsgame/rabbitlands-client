@@ -146,6 +146,8 @@ const HAIRLINE_UNDER_HAIR := 0.35
 ## The hair-shape blend shapes (see the asset contract above).
 const HAIR_LENGTH_SHAPES := ["hl_length_p", "hl_length_n"]
 const HAIR_VOLUME_SHAPES := ["hl_volume_p", "hl_volume_n"]
+## Optional fitted offset for the retained native skull; never a player field.
+const NATIVE_HAIR_FIT_SHAPE := "hl_native_fit"
 ## The instance uniforms on an RL hairstyle's meshes. A beard keeps the
 ## shader's default `hair_detail` (0.5, nothing dropped).
 const HAIR_INSTANCE_UNIFORMS := ["hair_color", "hair_detail", "eye_color"]
@@ -1031,7 +1033,8 @@ func _hair_shape_weights() -> Dictionary:
 	var volume := clampf(appearance.hair_volume, -1.0, 1.0)
 	var tie := clampf(appearance.hair_tie_height, -1.0, 1.0)
 	var result := {HAIR_LENGTH_SHAPES[0]: maxf(length, 0.0), HAIR_LENGTH_SHAPES[1]: maxf(-length, 0.0),
-		HAIR_VOLUME_SHAPES[0]: maxf(volume, 0.0), HAIR_VOLUME_SHAPES[1]: maxf(-volume, 0.0)}
+		HAIR_VOLUME_SHAPES[0]: maxf(volume, 0.0), HAIR_VOLUME_SHAPES[1]: maxf(-volume, 0.0),
+		NATIVE_HAIR_FIT_SHAPE: 1.0 if _hair_only else 0.0}
 	var module := HAIR_MODULE_LOOKUP.find(appearance.hair, appearance.sex)
 	if HAIR_MODULE_LOOKUP.supports_tie_height(module, appearance.sex):
 		result["hl_tie_height_p"] = maxf(tie, 0.0)

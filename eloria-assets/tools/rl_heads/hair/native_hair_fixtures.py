@@ -132,7 +132,7 @@ def check_hair(path, manifest_path, lods=(0, 1, 2), grooms=None, minimum_mm=2,
         native = load_fixture(manifest_path, record)
         for lod in lods:
             for label, groom in grooms.items():
-                weights = identity_weights(record['rl_hair_identity_controls']) | groom
+                weights = identity_weights(record['rl_hair_identity_controls']) | groom | {'hl_native_fit': 1}
                 minimum = float('inf'); violations = 0; samples = 0; worst = None
                 for part in hair['levels'][lod]:
                     points = morph_positions(part['P'], part['targets'], weights)
@@ -156,6 +156,7 @@ def check_hair(path, manifest_path, lods=(0, 1, 2), grooms=None, minimum_mm=2,
         if violations and stop_on_first: break
     assert results, 'No matching evaluated fixture cases'
     return {'hair_sha256': hair['sha256'], 'manifest_sha256': sha(manifest_path),
+        'native_fit_weight': 1,
         'minimum_clearance_mm': minimum_mm, 'triangle_sample_minimum_edge_mm': minimum_edge_mm,
         'grooms': list(grooms), 'cases': results,
         'failures': sum(r['violations'] > 0 for r in results),

@@ -17,6 +17,7 @@ func _initialize() -> void:
 	run.call_deferred()
 
 func run() -> void:
+	check_native_fit_shape()
 	for sex: String in ["female", "male"]:
 		for quality: int in [0, 1, 2]:
 			Library.clear()
@@ -72,3 +73,37 @@ func run() -> void:
 	GlbSceneCache.clear()
 	print("RL hair-only rig: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures else 0)
+
+func check_native_fit_shape() -> void:
+	var source := ArrayMesh.new()
+	source.blend_shape_mode = Mesh.BLEND_SHAPE_MODE_RELATIVE
+	source.add_blend_shape("hl_native_fit")
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = PackedVector3Array([Vector3.ZERO, Vector3.RIGHT, Vector3.UP])
+	arrays[Mesh.ARRAY_NORMAL] = PackedVector3Array([Vector3.BACK, Vector3.BACK, Vector3.BACK])
+	var delta := []
+	delta.resize(Mesh.ARRAY_MAX)
+	delta[Mesh.ARRAY_VERTEX] = PackedVector3Array([Vector3.RIGHT * .003, Vector3.RIGHT * .003, Vector3.RIGHT * .003])
+	delta[Mesh.ARRAY_NORMAL] = PackedVector3Array([Vector3.ZERO, Vector3.ZERO, Vector3.ZERO])
+	source.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [delta])
+	var mesh := MeshInstance3D.new()
+	mesh.mesh = source
+	var rig := Rig.new()
+	rig.appearance = RLHeadAppearance.new()
+	rig._hair_lods = [[mesh]]
+	rig._hair_only = true
+	rig._apply_hair_shapes()
+	check(is_equal_approx(mesh.get_blend_shape_value(0), 1.0), "native mode activates its optional fitted offset")
+	var native_key := RLHeadIdentityBake.key(source, rig._baked_weights(mesh))
+	rig._hair_only = false
+	rig._apply_hair_shapes()
+	check(is_zero_approx(mesh.get_blend_shape_value(0)), "High mode preserves the original fitted baseline")
+	check(native_key != RLHeadIdentityBake.key(source, rig._baked_weights(mesh)),
+		"native fitted geometry has a separate bake key")
+	var plain := ArrayMesh.new()
+	plain.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	check(RLHeadIdentityBake.key(plain, {"hl_native_fit": 1}) == RLHeadIdentityBake.key(plain, {}),
+		"a source without native fitting keeps its original bake key")
+	rig.free()
+	mesh.free()
