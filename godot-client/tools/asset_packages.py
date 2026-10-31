@@ -17,6 +17,8 @@ from release_storage import PartWriter
 
 PREPARED_WORLD_BLOB_BUCKETS = 128
 PREPARED_WORLD_METADATA_BUCKETS = 8
+MAP_TEXTURE_BUCKETS = 128
+MAP_METADATA_BUCKETS = 8
 
 
 def package_id(relative: str) -> str:
@@ -42,7 +44,13 @@ def package_id(relative: str) -> str:
     elif relative.startswith("app/assets/actors/"):
         group, slots = "actors-" + "-".join(parts[3:5]), 16
     elif relative.startswith("eloria-assets/maps/"):
-        group, slots = "map-" + parts[2], 8
+        group = "map-" + parts[2]
+        if "/vram/" in relative and relative.endswith(".evt"):
+            group, slots = group + "-textures", MAP_TEXTURE_BUCKETS
+        elif relative.endswith(".json"):
+            group, slots = group + "-metadata", MAP_METADATA_BUCKETS
+        else:
+            slots = 8
     elif relative.startswith("app/assets/audio/"):
         group, slots = "audio", 8
     elif relative.startswith("app/assets/"):

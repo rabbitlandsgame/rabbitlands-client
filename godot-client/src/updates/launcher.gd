@@ -129,9 +129,10 @@ func _ready() -> void:
 		if release.has("error") or release.get("schema") != 2:
 			_fail(str(release.get("error", "The game package format is unsupported.")))
 			return
-		error = await Download.prepare(_root, release, _transport.fetch, _transport.worker, _progress)
+		var prepared_plan: Dictionary = {}
+		error = await Download.prepare(_root, release, _transport.fetch, _transport.worker, _progress, Callable(), prepared_plan)
 		if error == "":
-			error = await _transport.worker(func() -> String: return Packages.install(_root, release, identity, _progress))
+			error = await _transport.worker(func() -> String: return Packages.install(_root, release, identity, _progress, prepared_plan.get("checked")))
 		if error != "":
 			_fail(error)
 			return

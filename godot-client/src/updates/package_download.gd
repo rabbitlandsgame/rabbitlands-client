@@ -2,14 +2,15 @@ extends RefCounted
 const Release = preload("res://src/updates/release.gd")
 const Packages = preload("res://src/updates/package_updates.gd")
 
-static func prepare(root: String, release: Dictionary, fetch: Callable, worker: Callable, progress := Callable(), cancelled := Callable()) -> String:
+static func prepare(root: String, release: Dictionary, fetch: Callable, worker: Callable, progress := Callable(), cancelled := Callable(), prepared_plan: Dictionary = {}) -> String:
+	prepared_plan.clear()
 	var cache := Release.cache_for(root)
 	if Release.is_link(cache) or Release.is_link(cache.path_join("packages")) or DirAccess.make_dir_recursive_absolute(cache.path_join("packages")) != OK:
 		return "The package cache is not writable."
-	Release.report_progress(progress, "Checking installed packages", 0, 1)
-	var needed: Variant = await worker.call(func() -> Array: return Packages.plan(root, release))
-	if not needed is Array:
+	var checked: Variant = await worker.call(func() -> Packages.CheckedPlan: return Packages.inspect(root, release, progress))
+	if not checked is Packages.CheckedPlan:
 		return "The package verification could not start."
+	var needed: Array = checked.needed
 	var total := 0
 	var completed := 0
 	for package: Dictionary in needed:
@@ -43,4 +44,5 @@ static func prepare(root: String, release: Dictionary, fetch: Callable, worker: 
 		else:
 			completed += int(package.size)
 	Release.report_progress(progress, "Changed packages ready", 1, 1, "%d of %d packages needed downloads" % [needed.size(), release.packages.size()])
+	prepared_plan["checked"] = checked
 	return ""

@@ -70,6 +70,11 @@ builds, independent of the release date, filename and source-file timestamps.
 The exported `RabbitLands.pck` remains one client package; this is package reuse,
 not a binary patch within a PCK, GLB or ZIP.
 
+Loose map textures use 128 stable buckets per map pool, with JSON metadata in
+eight separate buckets. Updating a generated texture or its small index no longer
+invalidates a large package of unrelated meshes and textures. The package format
+and signed-file checks remain compatible with earlier package updaters.
+
 Prepared world data is shipped loose under `app/prepared-world/`, outside the
 client PCK. Each engine/renderer compatibility variant has a small catalog
 package, eight stable metadata buckets and 128 stable native-payload buckets.
@@ -112,6 +117,14 @@ Unchanged files and verified changed packages are staged locally, then `app/`
 and `eloria-assets/` are promoted together with a recovery journal and previous
 installation backup. Files absent from the new inventory are retired. Allow
 space for that local stage and the changed package downloads.
+
+The installer and updater keep the checked package plan in memory for their one
+locked transaction, avoiding a second scan after downloading. Folder checks are
+shared within each scan; every file still receives its signed SHA-256 check, and
+the completed staging files are checked again before the live game is replaced.
+The plan is never loaded from disk or reused by a later updater run. Single-part
+packages are promoted directly from their verified download instead of making
+another complete archive copy.
 
 When explicitly run or accepted from the game, the updater checks the stable `RabbitLands-<platform>.json` alias in
 the latest published release. Its **bootstrap schema 1** contract verifies the
