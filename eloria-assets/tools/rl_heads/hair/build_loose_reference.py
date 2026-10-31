@@ -402,7 +402,9 @@ def patch_roots(args):
             else:
                 e0=0;e1=int((UV[:,1]<.75).sum());assert (UV[:e1,1]<.75).all() and (UV[e1:,1]>=.75).all()
             Q,_=ref.roots(head,scalp,P);distance=np.linalg.norm(P-Q,axis=1)
-            updated=root_colours(head,scalp,P,T,COL,{'exterior':[e0,e1],'detail':[len(P),len(P)]},distance,spec)
+            colour_ranges=copy.deepcopy(part_ranges) if part_ranges else {'exterior':[e0,e1]}
+            colour_ranges['detail']=[len(P),len(P)]
+            updated=root_colours(head,scalp,P,T,COL,colour_ranges,distance,spec)
             view=g['bufferViews'][accessor['bufferView']];stride=view.get('byteStride',4);start=binary_start+view.get('byteOffset',0)+accessor.get('byteOffset',0)
             values=np.rint(np.clip(updated[:,0],0,1)*255).astype('u1')
             for row,value in enumerate(values):allowed[start+row*stride]=True;result[start+row*stride]=int(value)
