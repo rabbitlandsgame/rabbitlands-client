@@ -57,6 +57,7 @@ func _run() -> void:
 	await _test_streamed_parking()
 	await _test_eviction()
 	await _test_preload()
+	await _test_anticipated_travel()
 	await _test_wait_and_miss()
 	await _test_parent_kept_inside()
 	await _test_replaced_park()
@@ -241,8 +242,10 @@ func _test_policy() -> void:
 		"a preload is never dropped by time alone while the player stays in its area")
 	_expect(not Policy.under_pressure({"a": {"bytes": 600}, "preload": {"bytes": 400}}, 1000)
 		and Policy.under_pressure({"a": {"bytes": 600}, "preload": {"bytes": 401}}, 1000)
-		and Policy.BUDGET_BYTES == 1536 * 1048576,
-		"memory-budget pressure is the kept worlds over the 1.5 GiB budget together")
+		and Policy.BUDGET_BYTES == 1792 * 1048576,
+		"memory-budget pressure is the kept worlds over the 1.75 GiB budget together")
+	_expect(Policy.interior_estimate(1565 * 1048576, 22 * 1048576) <= Policy.BUDGET_BYTES,
+		"the complete underground fits even when unavailable compression requires source textures")
 	_expect(Policy.interior_estimate(400 * 1048576, 1048576) == 401 * 1048576 + Policy.INTERIOR_FLOOR_BYTES,
 		"an interior's estimate is its textures, its shell and a floor")
 
@@ -528,6 +531,33 @@ func _test_preload() -> void:
 	park.release_now()
 	loader.unload_world()
 	loader.queue_free()
+	park.queue_free()
+	await _frames(2)
+
+func _test_anticipated_travel() -> void:
+	var park := _park()
+	park.bind_map("exterior")
+	park.finish_estimates(true)
+	var destination := PackedStringArray(["interior"])
+	park.observe("exterior", Vector2i(200, 200), {}, false, destination)
+	_expect(park.preload_state() == "", "a quest cannot compete with the current map's arrival")
+	park.observe("exterior", Vector2i(200, 200), {}, true, PackedStringArray(["elsewhere", "cellar"]))
+	_expect(park.preload_state() == "", "only flagged interiors of this parent may be anticipated")
+	park.observe("exterior", Vector2i(200, 200), {}, true, destination)
+	_expect(park.preload_state("interior") == "running", "a quest prepares its destination before walking to its door")
+	var ready: bool = await _until(func() -> bool: return park.preload_state("interior") == "ready")
+	_expect(ready, "the anticipated destination finishes in the background")
+	park.now_override = 10000
+	park.observe("exterior", Vector2i(200, 200), {}, true, destination)
+	park.now_override += Policy.PRELOAD_DROP_MSEC + 1
+	park.observe("exterior", Vector2i(200, 200), {}, true, destination)
+	_expect(park.preload_state("interior") == "ready", "a long dialogue keeps its destination ready away from the door")
+	var resident: Dictionary = park.take("interior")
+	_expect(not resident.is_empty() and int(park.counters.preload_hit) == 1,
+		"the quest map change adopts the prepared world without loading it again")
+	if is_instance_valid(resident.get("root")): resident.root.free()
+	park.clear()
+	park.release_now()
 	park.queue_free()
 	await _frames(2)
 

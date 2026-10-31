@@ -13,6 +13,13 @@ regional rooms, caves, secret areas and Landfall Underground. This uses the
 existing WorldPark byte budget and travel/expiry cleanup; it adds no disk cache
 or geometry preparation. Actors and map objects still refresh from the server.
 
+Scripted rescue travel also prepares the mine while its opening conversation is
+playing. The outdoor cave-mouth cells are prefetched at the same time and kept
+with the parked territory for the family's return. Cinematic camera focus keeps
+visible terrain streaming while world input is blocked. The parked/preloaded
+world budget is 1,792 MiB; admission and eviction still apply. This preparation
+uses existing source validation and caches without changing their format.
+
 Published static map GLBs also consolidate byte-identical complete vertex records
 with `eloria-assets/tools/consolidate_map_vertices.py`, called by
 `publish_finish.py` after normal/tangent quantization and before prototype hash

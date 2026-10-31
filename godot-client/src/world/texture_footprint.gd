@@ -24,6 +24,7 @@ const MIP_DENOMINATOR := 3
 const HEADER_BYTES := 65536
 
 const VramTextures := preload("res://src/world/vram_textures.gd")
+const ScenerySources := preload("res://src/world/scenery_image_sources.gd")
 
 const GLB_MAGIC := 0x46546C67
 const CHUNK_JSON := 0x4E4F534A
@@ -101,6 +102,12 @@ static func glb_texture_bytes(glb_path: String, seen: Dictionary = {}) -> int:
 	var images: Array = document.get("images", [])
 	# Embedded images have sidecars only where the GLB's folder has an index.
 	var directory := glb_path.get_base_dir()
+	# Externalized scenery keeps its compression policy beside the original
+	# GLB, independently of the shared pixel file's location. Use the same
+	# verified closure as the importer before accepting that policy.
+	var verified := ScenerySources.verify_document(document, directory)
+	var scenery_policy := bool(verified.get("ok", false)) and bool(verified.get("tagged", false))
+	var tagged_scenery := bool(verified.get("tagged", false))
 	var index_info := VramTextures.index_for_directory(directory)
 	var indexed := str(index_info.status) == "ok" and int(index_info.entries) > 0
 	var roles := VramTextures.image_roles(document)
@@ -115,21 +122,26 @@ static func glb_texture_bytes(glb_path: String, seen: Dictionary = {}) -> int:
 			if uri.begins_with("data:"):
 				continue
 			key = glb_path.get_base_dir().path_join(uri.uri_decode()).simplify_path()
-			if seen.has(key):
+			var policy_directory := VramTextures.image_policy_directory(image, directory) if scenery_policy else key.get_base_dir()
+			var seen_key := key + "|policy=" + policy_directory if scenery_policy else key
+			if seen.has(seen_key):
 				continue
 			# A content-addressed map image (<sha256>.<ext>) with a sidecar the
 			# renderer takes is uploaded compressed, at the index's own size.
 			var sha := key.get_file().get_basename()
-			if sha.length() == 64 and sha.is_valid_hex_number():
-				var sidecar := _usable_sidecar(sha, key.get_base_dir(), roles.get(index, {}))
+			if scenery_policy: sha = str((verified.resources as Dictionary).get(uri, sha))
+			var eligible := not tagged_scenery or scenery_policy and bool(image.get("extras", {}).get(ScenerySources.ELIGIBLE_EXTRA, false))
+			if eligible and sha.length() == 64 and sha.is_valid_hex_number():
+				var sidecar := _usable_sidecar(sha, policy_directory, roles.get(index, {}))
 				if sidecar > 0:
-					seen[key] = true
+					seen[seen_key] = true
 					total += sidecar
 					continue
 			var source := FileAccess.open(key, FileAccess.READ)
 			if source == null:
 				continue
 			header = source.get_buffer(mini(HEADER_BYTES, source.get_length()))
+			key = seen_key
 		else:
 			var view_index: Variant = (image as Dictionary).get("bufferView")
 			if (view_index is not int and view_index is not float) or int(view_index) >= views.size():

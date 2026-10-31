@@ -50,7 +50,7 @@ def context(tmp_path, monkeypatch):
     def gh(*args):
         calls.append(args)
         if args[:2] == ("release", "edit"):
-            assert state["verified"] == 2, "Both release inventories must be checked before publication"
+            assert state["verified"] == state.get("expected_prepublication_checks", 2), "All release inventories must be checked before publication"
             assert "--draft=false" in args and "--latest" in args
             current["draft"] = False
             if state["post_publish_damage"]:

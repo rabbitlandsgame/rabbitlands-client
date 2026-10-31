@@ -15,7 +15,16 @@ func _run() -> void:
 	main.set_process(false)
 	main.exterior_stream.set_process(false)
 	root.get_node("Network").set_process(false)
-	_expect(main.cartography_regions.size() == 27, "all 27 exterior regions are present")
+	var expected_maps := {}
+	for path: String in ["res://data/maps/cartography.json", "res://data/maps/cartography-continent-v2.json"]:
+		var published: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(path))
+		for row: Dictionary in published.get("regions", []):
+			expected_maps[str(row.serverMap)] = true
+	var actual_maps := {}
+	for row: Dictionary in main.cartography_regions:
+		actual_maps[str(row.serverMap)] = true
+	_expect(actual_maps == expected_maps and main.cartography_regions.size() == expected_maps.size(),
+		"every published exterior region is present exactly once")
 	for region: Dictionary in main.cartography_regions:
 		var tab: Dictionary = region.tabMap
 		var detail: Dictionary = tab.get("detail", {})
@@ -45,21 +54,21 @@ func _run() -> void:
 	main.exterior_stream.active_root = main.world_root
 	main.exterior_stream.active_manifest = manifest
 	main._install_map_picture(manifest)
-	var material: StandardMaterial3D = main._map_picture.mesh.surface_get_material(0)
-	_expect(material.albedo_texture == texture, "both map cameras use detailed pixels on the active picture")
+	_expect(main._map_picture.texture == texture, "both map backgrounds use detailed pixels on the active picture")
 	var expected := MapPicture.extent(manifest.data.minimap, region.tabMap)
-	var actual: AABB = main._map_picture.mesh.get_aabb()
-	_expect(Vector2(actual.position.x, actual.position.z).is_equal_approx(expected.position)
-		and Vector2(actual.size.x, actual.size.z).is_equal_approx(expected.size),
+	var actual: Rect2 = main._map_picture.extent
+	_expect(actual.is_equal_approx(expected),
 		"the higher-resolution picture retains its exact world extent")
-	var neighbour: MeshInstance3D = main._neighbour_pictures["reedfall"]
-	var neighbour_material: StandardMaterial3D = neighbour.mesh.surface_get_material(0)
+	var neighbour: Dictionary = main._neighbour_pictures["reedfall"]
 	var neighbour_row: Dictionary = main.cartography_regions[main._region_index_for_map("reedfall")]
-	_expect(neighbour_material.albedo_texture == main._tab_map_texture(neighbour_row),
+	_expect(neighbour.texture == main._tab_map_texture(neighbour_row),
 		"continental neighbours keep the smaller cached pictures")
 	main._configure_full_map(manifest)
 	_expect(maxi(main.full_map_viewport.size.x, main.full_map_viewport.size.y) == 2048,
-		"Tab-map render resolution supports the detailed source image")
+		"Tab-map logical projection resolution supports the detailed source image")
+	_expect(main.full_map_viewport.disable_3d
+		and main.full_map_viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED,
+		"detailed pixels never allocate a map render pass")
 	main.game_view.show()
 	main.full_map.show()
 	main._show_current_map_view()
@@ -76,21 +85,19 @@ func _run() -> void:
 	main.full_map_camera.global_position.z = reedfall_center.z
 	main._update_map_detail_levels()
 	_expect(main._map_detail_visible.has("reedfall"), "panning a magnified map requests neighbour detail")
-	_expect(neighbour_material.albedo_texture == main._tab_map_detail_texture(neighbour_row),
+	_expect(neighbour.texture == main._tab_map_detail_texture(neighbour_row),
 		"a magnified neighbour uses its detailed pixels")
 	_expect(main._map_detail_visible.size() <= 5 and main._tab_map_detail_textures.size() <= 6,
 		"visible map details and one preview have a bounded cache")
 	main._neighbour_pictures.erase("reedfall")
-	neighbour.queue_free()
 	main._install_neighbour_pictures()
 	main._update_map_detail_levels()
 	neighbour = main._neighbour_pictures["reedfall"]
-	neighbour_material = neighbour.mesh.surface_get_material(0)
-	_expect(neighbour_material.albedo_texture == main._tab_map_detail_texture(neighbour_row),
+	_expect(neighbour.texture == main._tab_map_detail_texture(neighbour_row),
 		"rebuilding a neighbour picture preserves its visible detail")
 	main._full_map_zoom = 1.0
 	main._update_map_detail_levels()
-	_expect(neighbour_material.albedo_texture == main._tab_map_texture(neighbour_row),
+	_expect(neighbour.texture == main._tab_map_texture(neighbour_row),
 		"pulling back returns neighbours to the smaller overview pictures")
 	_expect(not main._tab_map_detail_textures.has("reedfall"), "leaving the detailed view releases its cached image")
 	main.queue_free()

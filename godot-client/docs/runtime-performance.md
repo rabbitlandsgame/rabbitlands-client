@@ -108,6 +108,157 @@ The rotation probe accepts `ELORIA_CAMERA_PROBE_FPS`, `ELORIA_CAMERA_PROBE_PITCH
 and `ELORIA_CAMERA_PROBE_VSYNC=on`, and records cap/VSync restoration before
 uncapping its measured rotations.
 
+## K620 configuration follow-up (2026-10-31)
+
+Twenty sequential camera configurations and repeats retained the same Landfall
+location, one equipped actor and 941×1030 window. These use the editor engine with
+extracted release imports and source overrides; they are local screening data,
+not a complete exported-client or online qualification. OS and NVIDIA driver
+caches were warm/shared; Godot profiles were isolated except explicit reuse.
+See [configuration measurements](../../docs/qa/linux-configuration-trials-2026-10-31.json).
+
+At the overhead camera angle, typical OpenGL Low frames averaged 7.5–7.9 ms.
+Medium with shadows disabled was similar at 7.9 ms; enabling Medium shadows
+increased this to 15.5 ms and warm-up from 4.6 s to 9.9 s. Forward+ and Mobile
+averaged 14.8 and 13.5 ms with about 1.10 and 1.03 GB of reported graphics
+allocations, versus about 0.51–0.52 GB with OpenGL. Reusing Forward+'s Godot
+profile reduced map-request-to-ready time from 32.4 s to 12.3 s, but retained
+its slower frames and larger allocations.
+
+Quarter map textures saved about 50–60 MB versus Half, without a clear frame-rate
+benefit. Full textures used about 180 MB more. Hiding the minimap reduced average
+overhead-view frame time modestly, from roughly 7.5–7.9 ms to 7.2 ms. These
+one-location results do not justify further texture or resolution reduction as
+a universal default.
+
+The shallow −15° camera exposed a pacing tradeoff:
+
+| 3D resolution / rotation cap | Mean interval | Worst interval | Frames above 33.3 ms |
+| --- | ---: | ---: | ---: |
+| 75% / uncapped, repeat | 12.48 ms | 25.28 ms | 0 |
+| 50% / uncapped | 10.80 ms | 102.20 ms | 5 |
+| 50% / uncapped, no GPU polling | 10.78 ms | 102.21 ms | 5 |
+| 50% / 60 FPS | 16.65 ms | 24.67 ms | 0 |
+| 75% / 60 FPS | 16.65 ms | 23.30 ms | 0 |
+
+The earlier 75% shallow run also had one 96.58 ms first-turn pause. Recurring
+50% pauses shifted yaw and occurred on later turns too. Their world GPU/render
+CPU measurements did not account for the full delay. A 60 FPS cap removed them
+in these trials; the exact uncapped scheduling/driver mechanism remains
+unresolved. Retain 75% for its sharper image when it already meets the cap;
+50% is an option when a busier view exceeds the GPU budget. The user's saved
+OpenGL/Low/Half/75%/shadows-off/60-FPS settings already matched this balance.
+
+### Character texture cache trial
+
+Configure-only attribution found the existing wardrobe-atlas neutralization
+dominated appearance setup: about 3 s in the editor engine and 2 s in the native
+release engine. `ELORIA_ACTOR_BUILD_PROFILE=1` adds `detail.appearance.*` and
+`detail.equipment.*` durations to the existing slow-actor record. Finish/part
+durations are nested in their parent phases and must not be added to them.
+
+`ELORIA_WARDROBE_TEXTURE_CACHE=1` enables an experimental lossless cache, off by
+default. It keys original image bytes, layout, recipe and engine generation,
+validates bounded metadata/payload checksums and restores the full RGBA8 mip
+chain. Invalid or unwritable entries retain the existing calculation. Entries
+are published by same-directory rename in `user://wardrobe-dye-cache/v1`.
+
+Alternating cache-on/off launches of the same disposable native release-engine
+package and user profile measured:
+
+| Mean of two launches | Cache off | Cache hit |
+| --- | ---: | ---: |
+| Local avatar setup | 4.45 s | 3.13 s |
+| Map request to curtain release | 12.03 s | 10.97 s |
+
+Actual actor atlas hashes, including every pixel, alpha and mip level, matched
+across all five accepted launches. Every pass retained 240 views and two draws
+per view, restoring the 60 FPS cap and VSync. The final native cached run also
+completed three shallow rotations at 60 FPS with no interval above 21.96 ms.
+The cache contract suite passed 63 checks. One generated entry occupied 22.4 MB.
+These timings use warm OS/tmpfs storage; cold physical-disk behavior and a total
+disk-cache eviction policy remain unqualified, so the cache stays opt-in.
+
+Loading-only probes now drain owned imports, retirement work and deferred
+callbacks before freeing Main. Their teardown duration is outside arrival
+timing. An earlier direct-quit trial crashed after recording while imports were
+still active and is excluded from the results.
+
+### Synthetic crowds
+
+The maintained market/combat fixtures each supplied 160 actors on Landfall,
+with the minimap hidden, a 30 FPS cap, 30 s settling and 10 s samples. Both
+configurations passed runtime-settings, readiness and teardown validation.
+
+| Configuration / workload | Delivered FPS | 95th percentile interval | Reported graphics allocations |
+| --- | ---: | ---: | ---: |
+| Performance preset / market | 30.09 | 33.57 ms | 875 MB |
+| Ordinary Low, 160-body setting / market | 30.10 | 33.71 ms | 1241 MB |
+| Performance preset / combat | 29.94 | 41.62 ms | 834 MB |
+| Ordinary Low, 160-body setting / combat | 29.49 | 43.41 ms | 1092 MB |
+
+These compare the complete Performance preset with ordinary Low, including
+texture size, render scale, cloth/grass preferences and body budget. They do not
+isolate body count alone. Priority actors remain protected: the preset's
+60-body setting retained 69 market bodies and 80 combat bodies, versus 160 for
+ordinary Low. The preset's strongest gain here was graphics-memory headroom;
+combat still had frames exceeding the 30 FPS budget.
+
+The crowd harness now establishes its requested frame cap before map arrival,
+so shader warm-up captures and restores that value. The validator rejected an
+earlier ordinary-Low run that restored its saved unlimited cap; only the
+corrected run appears above. Linux Performance-profile seeding uses fresh
+`XDG_DATA_HOME` storage, with the exact runtime directory checked at startup.
+The crowd-harness CPU suite passed all 48 checks.
+
+For further camera trials, `ELORIA_CAMERA_PROBE_GRAPHICS` accepts a JSON object
+of supported Graphics controls, for example
+`{"render_scale":0.5,"map_texture_quality":"quarter","quality":"low"}`.
+Use `ELORIA_CAMERA_PROBE_MINIMAP=show` or `hide`, and
+`ELORIA_CAMERA_PROBE_ROTATION_FPS=60` to test delivered pacing instead of the
+default uncapped cost. `ELORIA_CAMERA_PROBE_LOAD_ONLY=1` measures arrival without
+the settling/rotation workload. Reports distinguish synchronous map setup,
+map-request-to-ready time and Main setup; Main setup excludes earlier engine
+and autoload parsing. Keep the existing isolated-profile guards enabled.
+
+## Direct 2D navigation maps (2026-10-31)
+
+Both the minimap and current-map panel draw prerendered images directly in UI
+Controls. Their former SubViewports remain disabled, with 3D disabled, empty
+private worlds and camera cull masks of zero. The retained orthographic cameras
+provide projection and picking math only; neither viewport texture is displayed
+or requested to render. Markers, round masks, HUD palettes, rotation, zoom, pan,
+click-to-walk and territory transforms retain the same coordinate mapping.
+
+`data/maps/map-backgrounds.json` requires coverage of all 90 canonical maps and
+43 aliases. The 275 image references include 246 new lossless WebP images
+(49.75 MB) and 29 existing, verified regional detail images. Fourteen sectioned
+maps have 199 independently filtered room images and no aggregate image.
+Unknown secret sections draw no background. Other-room geometry is filtered
+before rasterization, including overlaps inside the selected room's bounds.
+Only three decoded catalog images are retained; existing regional-detail
+retention remains bounded by the visible-map plan.
+
+Release packaging validates canonical/alias/section coverage, exact framing,
+source and renderer freshness, image hashes/dimensions, actual staged bitmap
+bytes and the catalog's PCK/loose-data presence. There is no live-world fallback
+when a picture is missing. See the [authoring workflow](../../docs/asset-authoring.md)
+and [qualification data](../../docs/qa/map-backgrounds-2d-2026-10-31.json).
+
+Two alternating before/after K620 camera runs measured mean frame intervals of
+7.83 ms before and 7.80 ms after: effectively unchanged in this already-baked
+Landfall scene. Reported graphics allocations fell by 4.3–8.5 MB. Arrival times
+varied and do not establish a loading speedup. The structural interior gain is
+removal of its live map-render pass; an interior FPS speedup has not been
+quantified. All comparison runs retained the complete camera warm-up.
+
+Qualification includes 92 background projection/crop checks, 10 secret-catalog
+selection checks, 1066 map framing/picking checks, handoff/detail/adjacency and
+runtime suites, plus 28 minimap-drag and 39 Tab-map checks. Rendered color/atlas/
+round-mask tests include model traps and zero map-viewport primitives. Real
+interior/secret views, marker picking and the Reedfall territory seam were
+rendered separately. Packaging verified all 275 staged images against source.
+
 ## Startup diagnostics
 
 The rotating client log includes `startup_stage` records with a stage name,
@@ -160,14 +311,15 @@ pass, not an emptied operating-system cache. `authored-herd` is separately
 selectable and reports unavailable content when the map has no authored herd.
 Unavailable content is retained as pending, never accepted as an empty timing.
 
-On Windows, `--settings-profile performance` seeds the game's Performance
+On Windows and Linux, `--settings-profile performance` seeds the game's Performance
 preferences into fresh isolated storage before startup: Low, 30 FPS, 75% world
 scale, Half map textures, 60 crowd bodies and the remaining preset values.
 The runner records the seed and checks the actual loaded settings. Conflicting
 options are rejected. Use market/invasion/combat cells for this profile; the
 80-mount census requires a larger body allowance. Ordinary Low at 30 FPS uses
 `--settings-profile default --quality low --fps-cap 30` and remains a separate
-comparison. Performance profile seeding currently supports Windows only.
+comparison. Generated preferences use isolated APPDATA on Windows and
+XDG_DATA_HOME on Linux; startup attestation checks the engine's exact user directory.
 
 For shipping-path measurements, create a committed standalone benchmark export:
 
@@ -260,13 +412,13 @@ down. Measured on the Four Gates package (1717 imported mesh nodes referencing
 
 ## Where the frame goes
 
-**One world, three cameras.** `MapViewport` and `FullMapViewport` share the
-gameplay `World3D`, so each is a complete extra render of the region - geometry,
-materials and the directional shadow pass. Both shipped on `UPDATE_ALWAYS`,
-which is where the 9 237 draw calls came from. They are now idle by default and
-`Main._update_map_viewports()` asks for a single redraw only while the matching
-UI is on screen: the minimap at ~15 Hz, the full map at ~5 Hz. The character
-creation preview follows the same rule through `_update_preview_viewport()`.
+**One gameplay render, 2D navigation maps.** The historical map cameras shared
+the gameplay world and rendered geometry, materials and shadows again. They
+were first throttled, then exterior map images replaced their geometry. The
+direct 2D path above now removes the map-render passes entirely, including
+interiors. `Main._update_map_viewports()` refreshes UI pictures and markers only
+while visible: the minimap at about 15 Hz, the full map at about 5 Hz. The
+separate character-creation preview still uses `_update_preview_viewport()`.
 
 If you add another SubViewport over the gameplay world, drive it the same way.
 Leaving one on `UPDATE_ALWAYS` silently doubles the client's raster cost.

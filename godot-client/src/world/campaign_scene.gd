@@ -881,8 +881,14 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 			cancel("camera_lost")
 			return
 		# Never hold the player's controls for a missing NPC or an asset failure.
-		for role: String in _actors:
+		for role: String in _actors.keys():
 			if not is_instance_valid(_actors[role]):
+				# Native interest can retire the corpse after the film has left
+				# its cave. Only an explicit completed role may leave the cast;
+				# a missing current speaker still releases the player safely.
+				if elapsed >= float((_definition.get("release_actors_after", {}) as Dictionary).get(role, INF)):
+					_actors.erase(role)
+					continue
 				cancel("actor_lost")
 				return
 		if _returning:

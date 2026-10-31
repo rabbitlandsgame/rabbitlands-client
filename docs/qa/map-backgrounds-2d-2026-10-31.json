@@ -1,0 +1,157 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-31",
+  "feature": "Direct 2D minimap and full-map backgrounds; mandatory interior prerenders",
+  "coverage": {
+    "canonical_maps": 90,
+    "aliases": 43,
+    "images": 275,
+    "new_lossless_webp_images": 246,
+    "new_image_bytes": 49746086,
+    "reused_regional_details": 29,
+    "sectioned_maps": 14,
+    "isolated_section_images": 199
+  },
+  "invariants": {
+    "map_viewports_update_disabled": true,
+    "map_viewports_3d_disabled": true,
+    "map_camera_cull_masks_zero": true,
+    "no_live_world_fallback": true,
+    "no_aggregate_secret_map_image": true,
+    "catalog_decoded_texture_limit": 3,
+    "map_geometry_materials_collision_and_manifests_unchanged": true
+  },
+  "validation": {
+    "production_package_receipt": {
+      "canonical_maps": 90,
+      "aliases": 43,
+      "images": 275,
+      "section_images": 199,
+      "sectioned_maps": 14,
+      "source_errors": [],
+      "staged_errors": [],
+      "staged_images": 275,
+      "catalog_sha256": "c1d05d9a2c53f362c4652dfbca81f564aa195575b29afa0a6d8684f194f98de7",
+      "elapsed_seconds": 40.899,
+      "ready": true
+    },
+    "renderer_cpu_tests": 5,
+    "cartography_road_regressions": 22,
+    "packaging_editor_tests": 17,
+    "packaging_subtests": 3,
+    "background_headless_checks": 92,
+    "catalog_selection_checks": 10,
+    "map_projection_picking_checks": 1066,
+    "handoff_checks": 11,
+    "detail_checks": 109,
+    "adjacent_actor_checks": 62,
+    "runtime_performance": "PASS",
+    "minimap_drag_checks": 28,
+    "tab_map_checks": 39,
+    "rendered_color_atlas_round_mask_and_model_traps": "PASS, zero map-viewport primitives",
+    "rendered_interior_map_picking": [
+      "four-gates-stormglass-house",
+      "landfall_town/tavern_ground",
+      "landfall_insides/old_well",
+      "amberwood_secrets/amber-resin-hollow",
+      "amberwood_secrets/amber-beekeepers-garden"
+    ],
+    "rendered_territory_seam": "Reedfall, after Hearthcroft handoff, with neighbors resident; PASS"
+  },
+  "performance": {
+    "hardware": "Quadro K620 2 GiB, Xeon E5-2623 v4, NVIDIA580.178.04, Godot4.7.2",
+    "conditions": "Sequential alternating source/editor runs with installed release imports, isolated profiles, warm OS/shared driver cache; one equipped Landfall actor;941x1030 window;Low,Half,75%,minimap visible;uncapped measured rotations;no GPU polling",
+    "trials": [
+      {
+        "id": "before-1",
+        "mean_ms": 7.828912962962967,
+        "worst_ms": 15.958,
+        "video_memory_bytes": 518694169,
+        "arrival_ms": 16418,
+        "warmup": {
+          "active": false,
+          "elapsed_msec": 4402,
+          "frames_per_view": 2,
+          "max_draw_calls": 255,
+          "mode": "small",
+          "render_size": "(175, 192)",
+          "timed_out": false,
+          "uncapped": true,
+          "view": 240,
+          "views": 240
+        },
+        "teardown_ready": true
+      },
+      {
+        "id": "after-1",
+        "mean_ms": 7.75359722222222,
+        "worst_ms": 16.022,
+        "video_memory_bytes": 510172701,
+        "arrival_ms": 14892,
+        "warmup": {
+          "active": false,
+          "elapsed_msec": 4741,
+          "frames_per_view": 2,
+          "max_draw_calls": 448,
+          "mode": "small",
+          "render_size": "(175, 192)",
+          "timed_out": false,
+          "uncapped": true,
+          "view": 240,
+          "views": 240
+        },
+        "teardown_ready": true
+      },
+      {
+        "id": "before-2",
+        "mean_ms": 7.830357407407407,
+        "worst_ms": 15.018,
+        "video_memory_bytes": 516563977,
+        "arrival_ms": 14836,
+        "warmup": {
+          "active": false,
+          "elapsed_msec": 4646,
+          "frames_per_view": 2,
+          "max_draw_calls": 373,
+          "mode": "small",
+          "render_size": "(175, 192)",
+          "timed_out": false,
+          "uncapped": true,
+          "view": 240,
+          "views": 240
+        },
+        "teardown_ready": true
+      },
+      {
+        "id": "after-2",
+        "mean_ms": 7.8473546296296295,
+        "worst_ms": 20.17,
+        "video_memory_bytes": 512301789,
+        "arrival_ms": 14861,
+        "warmup": {
+          "active": false,
+          "elapsed_msec": 4626,
+          "frames_per_view": 2,
+          "max_draw_calls": 364,
+          "mode": "small",
+          "render_size": "(175, 192)",
+          "timed_out": false,
+          "uncapped": true,
+          "view": 240,
+          "views": 240
+        },
+        "teardown_ready": true
+      }
+    ],
+    "conclusion": "Landfall frame time essentially unchanged; graphics allocations reduced4.3-8.5MB. Arrival variability does not qualify a loading gain. Interior live-map pass removed; interior FPS gain not quantified."
+  },
+  "source_sha256": {
+    "godot-client/src/app/main.gd": "a8e4825e96f9a50fafe2c35cf8bf7d71c60213eae6e23783256df31339c89a04",
+    "godot-client/src/app/main.tscn": "9f9d928948c6550e7d08eee7c17707cc9ab14f2f14efa8359d78108530da5326",
+    "godot-client/src/ui/map_background_2d.gd": "258dde3f35ab1c936f1bf9fff60a232697698f16edeb3baf4eb3db20310dd9a3",
+    "godot-client/src/ui/map_background_2d.gdshader": "e2f906a15fb46b831b777e6795cb3f40ec167b91a6a912b2ff30cbce3f3ea558",
+    "godot-client/src/world/map_background_catalog.gd": "61096bbf1cb43790c2226d69b1d8ecded574d13e7b05d402b6435dedfc6631aa",
+    "godot-client/tools/map_background_package.py": "b02f1f57d9718912861d6be9618bacdf65f0cfb46800b5808e86848cb3c103aa",
+    "eloria-assets/tools/render_map_backgrounds.py": "8df1a017fce83c384bc36eb354420481b4c7fb692766699a2953317e55d10673"
+  }
+}

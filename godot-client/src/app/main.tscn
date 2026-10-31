@@ -470,12 +470,14 @@ fit_content = true
 
 [node name="MapViewport" type="SubViewport" parent="GameView" unique_id=891640277]
 unique_name_in_owner = true
+disable_3d = true
+own_world_3d = true
 render_target_update_mode = 0
 
 [node name="MapCamera" type="Camera3D" parent="GameView/MapViewport" unique_id=1016038437]
 unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 220, 0)
-cull_mask = 1
+cull_mask = 0
 projection = 1
 current = true
 size = 180.0
@@ -483,13 +485,15 @@ far = 1000.0
 
 [node name="FullMapViewport" type="SubViewport" parent="GameView" unique_id=596270942]
 unique_name_in_owner = true
+disable_3d = true
+own_world_3d = true
 size = Vector2i(768, 768)
 render_target_update_mode = 0
 
 [node name="FullMapCamera" type="Camera3D" parent="GameView/FullMapViewport" unique_id=462932064]
 unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 1200, 0)
-cull_mask = 1
+cull_mask = 0
 projection = 1
 current = true
 size = 1600.0

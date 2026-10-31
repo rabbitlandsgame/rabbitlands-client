@@ -60,7 +60,11 @@ to update that installation. If downloaded elsewhere, it uses the per-user
 
 The schema 2 signed manifest lists independent ZIP packages. New release builds
 use checksum-named `RabbitLands-pkg-<SHA256>.zip.part` downloads in the permanent
-`client-assets` supporting prerelease; older builds use `.pkg.<id>.zip.###` names.
+supporting storage prereleases. Actions builds place packages in `client-assets-0`
+through `client-assets-f`, selected by the first digit of each part's SHA-256.
+This keeps GitHub's 1,000-assets-per-release limit independent of the total
+package count. Existing `client-assets` URLs remain valid; older builds also use
+`.pkg.<id>.zip.###` names.
 Each package has a full ZIP SHA-256, bounded download-part hashes, and a signed
 inventory of its files, sizes and hashes. Fixed groups cover the engine,
 client pack, actors, maps, audio, shared assets and records. Path-based buckets
@@ -96,7 +100,13 @@ reusing identical uploaded packages across releases. Changed packages get new
 checksum names. Both platform manifests and `SHA256SUMS` reference those files;
 the latest playable release remains separate from this shared download store.
 New helpers also have checksum names, so unchanged updaters and uninstallers
-are reused. The signature still binds the repository, helper kind, platform,
+are reused. Their URLs stay under `client-assets`, allowing installed launchers
+to update their helpers before validating packages in partitioned storage.
+Storage partitions affect download placement, not package membership or selective
+updates. Both platforms' receipts identify their storage destinations; finalization
+and publication verify bytes at those exact destinations. Unused parts are removed
+only after publication and only when no competing client draft remains.
+The signature still binds the repository, helper kind, platform,
 exact download URL and expected hashes. Arbitrary external URLs are rejected.
 
 For the first upgrade from a client without shared-download support, run the

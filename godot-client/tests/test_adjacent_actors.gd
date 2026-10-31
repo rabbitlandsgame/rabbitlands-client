@@ -4,7 +4,7 @@ extends SceneTree
 ## the stock "z" field, the state tags them with the neighbour's name once, and
 ## Main places them through the neighbour's adapter carried by the frame its
 ## resident scene stands in. A seamless crossing keeps every actor. The Tab map
-## and the minimap draw the region's own picture on a map-only layer.
+## and the minimap draw the region's own picture directly in 2D.
 
 var failures: int = 0
 
@@ -26,12 +26,11 @@ func _expect(ok: bool, message: String) -> void:
 	else:
 		print("PASS: " + message)
 
-## Whether a flat mesh's bounds cover `extent` on X and Z at `height`, within
-## the tolerance a mesh AABB carries (a flat surface may be padded a little).
-static func _spans(aabb: AABB, extent: Rect2, height: float) -> bool:
-	return (absf(aabb.position.x - extent.position.x) < 0.05 and absf(aabb.position.z - extent.position.y) < 0.05
-		and absf(aabb.end.x - extent.end.x) < 0.05 and absf(aabb.end.z - extent.end.y) < 0.05
-		and absf(aabb.position.y - height) < 0.05 and aabb.size.y < 0.05)
+## Published image descriptors keep their exact world rectangle and projection
+## height; the 2D background's projection/picking contracts are tested separately.
+static func _spans(picture: Dictionary, extent: Rect2, height: float) -> bool:
+	return picture.get("extent") is Rect2 and (picture.extent as Rect2).is_equal_approx(extent) \
+		and absf(float(picture.get("height", INF)) - height) < 0.001
 
 static func _u16(value: int) -> PackedByteArray:
 	return PackedByteArray([value & 0xff, (value >> 8) & 0xff])
@@ -108,18 +107,9 @@ func _map_picture_geometry() -> void:
 	_expect(MapPicture.extent({}, {}) == Rect2(), "a map without a minimap frame has no picture extent")
 	_expect(is_equal_approx(MapPicture.height_below({"minimap": minimap}), -24.0),
 		"the picture lies a metre under the lowest ground")
-	var texture := ImageTexture.create_from_image(Image.create(4, 4, false, Image.FORMAT_RGB8))
-	var picture := MapPicture.build(texture, whole, -24.0, 8)
-	var aabb := picture.mesh.get_aabb()
-	_expect(picture.layers == 8 and picture.name == "MapPicture", "the picture stands on the map layer")
-	_expect(_spans(aabb, whole, -24.0), "the quad spans the extent at the given height (%s)" % aabb)
-	var mesh := picture.mesh as ArrayMesh
-	var arrays: Array = mesh.surface_get_arrays(0)
-	var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-	var uvs: PackedVector2Array = arrays[Mesh.ARRAY_TEX_UV]
-	_expect(vertices[0].z < vertices[3].z and uvs[0].y < uvs[3].y,
-		"the top row of the picture lies at the north edge")
-	picture.free()
+	_expect(MapPicture.tab_map_extent({"worldMin": [-224.0, -246.0],
+		"worldMax": [232.0, 346.0]}).is_equal_approx(whole),
+		"an unloaded region's cartography publishes the same world extent")
 
 func _state_and_main() -> void:
 	var scene_resource: Resource = load("res://src/app/main.tscn")
@@ -178,8 +168,8 @@ func _state_and_main() -> void:
 			"a moved root rebuilds the framed adapter")
 	_expect(main.call("_adapter_for_actor", {"map": "grey_moors"}) == null,
 		"an actor on a neighbour that is not resident waits for its ground")
-	# The map picture: the current region's own picture on the map layer, and the
-	# map cameras render that layer alone; a map without a picture keeps the live render.
+	# Current and resident pictures are 2D descriptors; cameras retain only
+	# projection/picking math and cannot render actors or the imported world.
 	app_state.call("_on_packet", EloriaProtocol.ServerMessage.CHANGE_MAP, "mirrorhold".to_ascii_buffer() + PackedByteArray([0]))
 	var manifest := WorldManifest.new()
 	manifest.data = {"schemaVersion": "1.0", "asset": {"id": "mirrorhold", "origin": [0, 0, 0]},
@@ -189,36 +179,37 @@ func _state_and_main() -> void:
 	var picture: Variant = main.get("_map_picture")
 	var map_camera: Camera3D = main.get("map_camera")
 	var full_map_camera: Camera3D = main.get("full_map_camera")
-	_expect(picture is MeshInstance3D and is_instance_valid(picture),
+	_expect(picture is Dictionary and not picture.is_empty(),
 		"the current region's picture is installed")
-	if picture is MeshInstance3D:
-		var aabb: AABB = (picture as MeshInstance3D).mesh.get_aabb()
+	if picture is Dictionary and not picture.is_empty():
 		# The published cartography crops the picture: frame it as the neighbour's is framed below, inside the minimap.
 		var region: Dictionary = (main.get("cartography_regions") as Array)[main.call("_region_index_for_map", "mirrorhold")] as Dictionary
 		var extent: Rect2 = MapPicture.extent(manifest.data.get("minimap", {}) as Dictionary, region.get("tabMap", {}) as Dictionary)
 		_expect(extent.size.x > 0.0 and Rect2(-224.0, -246.0, 456.0, 592.0).encloses(extent),
 			"the region's cartography frames its picture inside its minimap (%s)" % extent)
-		_expect(_spans(aabb, extent, -24.0),
-			"the picture spans the region's framed minimap (%s)" % aabb)
-		_expect((picture as MeshInstance3D).layers == main.get("MAP_PICTURE_LAYER"), "the picture is on the map layer")
-	_expect(map_camera.cull_mask == main.get("MAP_PICTURE_LAYER") and full_map_camera.cull_mask == main.get("MAP_PICTURE_LAYER"),
-		"the map cameras render the picture layer alone")
-	# The resident neighbour's picture stands under its root, in its frame, on the
-	# same layer, so the minimap window past the seam shows that map and not the background.
+		_expect(_spans(picture, extent, -24.0),
+			"the picture spans the region's framed minimap (%s)" % extent)
+		_expect(picture.transform.is_equal_approx(main.world_root.global_transform),
+			"the active picture is projected through the active world's frame")
+	_expect(map_camera.cull_mask == 0 and full_map_camera.cull_mask == 0,
+		"the map coordinate cameras cannot render world models")
+	_expect(main.minimap_background.get_parent() == main.minimap
+		and main.full_map_background.get_parent() == main.map_image,
+		"map pictures are drawn directly inside the map UI controls")
+	# Resident frame transforms still place a neighbour's pixels across the seam.
 	var neighbour_pictures: Dictionary = main.get("_neighbour_pictures")
 	var neighbour_picture: Variant = neighbour_pictures.get("whitehorn_range")
-	_expect(neighbour_picture is MeshInstance3D and is_instance_valid(neighbour_picture),
+	_expect(neighbour_picture is Dictionary and not neighbour_picture.is_empty(),
 		"a resident neighbour's picture is installed")
-	if neighbour_picture is MeshInstance3D:
-		_expect((neighbour_picture as Node).get_parent() == neighbour_root, "the neighbour's picture stands under its resident root")
-		_expect((neighbour_picture as MeshInstance3D).layers == main.get("MAP_PICTURE_LAYER"), "the neighbour's picture is on the map layer")
-		var neighbour_aabb: AABB = (neighbour_picture as MeshInstance3D).mesh.get_aabb()
+	if neighbour_picture is Dictionary and not neighbour_picture.is_empty():
+		_expect(neighbour_picture.transform.is_equal_approx(neighbour_root.global_transform),
+			"the neighbour's picture retains its resident root's surveyed frame")
 		var neighbour_region: Dictionary = (main.get("cartography_regions") as Array)[main.call("_region_index_for_map", "whitehorn_range")] as Dictionary
 		var neighbour_extent: Rect2 = MapPicture.extent(neighbour_manifest.data.get("minimap", {}) as Dictionary, neighbour_region.get("tabMap", {}) as Dictionary)
 		_expect(neighbour_extent.size.x > 0.0 and Rect2(-362.0, -522.0, 708.0, 708.0).encloses(neighbour_extent),
 			"the neighbour's cartography frames its picture inside its minimap (%s)" % neighbour_extent)
-		_expect(_spans(neighbour_aabb, neighbour_extent, -23.0),
-			"the neighbour's picture spans its framed minimap a metre under its lowest ground (%s)" % neighbour_aabb)
+		_expect(_spans(neighbour_picture, neighbour_extent, -23.0),
+			"the neighbour's picture spans its framed minimap at its projection height (%s)" % neighbour_extent)
 	(stream.get("residents") as Dictionary).erase("whitehorn_range")
 	stream.emit_signal("residents_changed")
 	_expect(not (main.get("_neighbour_pictures") as Dictionary).has("whitehorn_range"), "a neighbour that leaves takes its picture with it")
@@ -233,11 +224,9 @@ func _state_and_main() -> void:
 	var registry: Dictionary = main.get("map_registry") as Dictionary
 	var far_pictures: Dictionary = main.get("_neighbour_pictures") as Dictionary
 	var far_picture: Variant = far_pictures.get("four_gates")
-	_expect(far_picture is MeshInstance3D and is_instance_valid(far_picture),
+	_expect(far_picture is Dictionary and not far_picture.is_empty(),
 		"a region that is not loaded still has its picture")
-	if far_picture is MeshInstance3D:
-		_expect((far_picture as Node).get_parent() == main.get("world_root"),
-			"an unloaded region's picture stands in the world root")
+	if far_picture is Dictionary and not far_picture.is_empty():
 		var here_translation: Array = (MapRegistry.resolve(registry, "mirrorhold").get(
 			"continentGeography", {}) as Dictionary).get("translation", []) as Array
 		var there_translation: Array = (MapRegistry.resolve(registry, "four_gates").get(
@@ -245,15 +234,15 @@ func _state_and_main() -> void:
 		var offset := Vector3(float(there_translation[0]) - float(here_translation[0]),
 			float(there_translation[1]) - float(here_translation[1]),
 			float(there_translation[2]) - float(here_translation[2]))
-		_expect((far_picture as MeshInstance3D).transform.origin.is_equal_approx(offset),
+		_expect((far_picture.transform as Transform3D).origin.is_equal_approx(offset),
 			"it stands where the continent translations put it (%s for %s)" % [
-				(far_picture as MeshInstance3D).transform.origin, offset])
+				(far_picture.transform as Transform3D).origin, offset])
 		var far_index: int = main.call("_region_index_for_map", "four_gates")
 		var far_region: Dictionary = (main.get("cartography_regions") as Array)[far_index] as Dictionary
 		var far_extent: Rect2 = MapPicture.tab_map_extent(far_region.get("tabMap", {}) as Dictionary)
 		var sunk: float = float(main.get("_map_picture_height")) - float(main.get("MAP_PICTURE_SINK_METRES")) * float(far_index + 1)
-		_expect(far_extent.size.x > 0.0 and _spans((far_picture as MeshInstance3D).mesh.get_aabb(), far_extent, sunk),
-			"its picture spans the framing its cartography publishes (%s)" % (far_picture as MeshInstance3D).mesh.get_aabb())
+		_expect(far_extent.size.x > 0.0 and _spans(far_picture, far_extent, sunk),
+			"its picture spans the framing its cartography publishes (%s)" % far_extent)
 		# A click out there names that region and its tile, though no link joins
 		# the two maps directly: the walk is then routed leg by leg as ever.
 		var middle: Vector2 = far_extent.get_center()
@@ -344,12 +333,13 @@ func _state_and_main() -> void:
 		_expect(bool(boundaries[current_index].get("current", false)) and str(boundaries[current_index].get("name", "")) == str(mirror.get("name", "")),
 			"the current region is flagged with its name")
 	var interior := WorldManifest.new()
-	interior.data = {"schemaVersion": "1.0", "asset": {"id": "amberwood_estate", "origin": [0, 0, 0]}}
-	app_state.call("_on_packet", EloriaProtocol.ServerMessage.CHANGE_MAP, "amberwood_estate".to_ascii_buffer() + PackedByteArray([0]))
+	interior.data = {"schemaVersion": "1.0", "asset": {"id": "no_cartography_fixture", "origin": [0, 0, 0]}}
+	app_state.set("current_map", "no_cartography_fixture")
 	main.call("_install_map_picture", interior)
-	_expect(main.get("_map_picture") == null, "a map without a picture installs none")
-	_expect(map_camera.cull_mask == 1 and full_map_camera.cull_mask == 1,
-		"the map cameras return to the live render on a map without a picture")
+	_expect((main.get("_map_picture") as Dictionary).is_empty(), "an unknown map installs no unrelated picture")
+	_expect(map_camera.cull_mask == 0 and full_map_camera.cull_mask == 0
+		and main.map_viewport.disable_3d and main.full_map_viewport.disable_3d,
+		"a missing image never falls back to drawing world models")
 	# The neighbours' pictures are decoded ahead of a crossing, one a frame, into the Tab map's cache.
 	var textures: Dictionary = main.get("_tab_map_textures")
 	textures.erase("whitehorn_range")
