@@ -11,3 +11,5 @@ On trail roads, creatures emerging from channels walk towards the bowl's center,
 Players can see creatures at twice the usual distance inside gauntlets. Once a wave has fully arrived, its last few survivors occasionally approach the party, making stragglers easier to find.
 
 Killing the boss breaks that movement anchor. Surviving followers and creatures the boss summoned stay alive and return to normal wandering. Finish the remaining enemies to clear the wave. Invasion bosses follow the same rule, and an invasion can still have queued reinforcements after its leader falls.
+
+The encounter card beside the combat HUD separates the wave number, current enemies and future pulses. Ordinary roaming pulses release at their remaining-enemy threshold. Hunted and swarm pulses also have a clock; the displayed countdown is an upper bound because kills can release the next pulse earlier. Arrival cues follow authoritative pulse updates. A countdown reaching zero waits for the server's release.

@@ -190,6 +190,8 @@ var achievements_catalog: Dictionary = {"worn_title": "", "entries": []}
 var leaderboard: Dictionary = {}
 var gauntlet_ready: Dictionary = {}
 var gauntlet_loot: Dictionary = {}
+var gauntlet_progress: Dictionary = {}
+var gauntlet_progress_anchor_msec := 0
 ## What each player on this map is calling themselves, {actor_id: title}. Kept
 ## apart from the actor's display name, which carries a colour byte, the name
 ## and the guild tag in one string that every client unpicks by hand.
@@ -685,6 +687,8 @@ func _on_connection_state_changed(value: String) -> void:
 		leaderboard.clear()
 		gauntlet_ready.clear()
 		gauntlet_loot.clear()
+		gauntlet_progress.clear()
+		gauntlet_progress_anchor_msec = 0
 		actor_titles.clear()
 		actor_occupations.clear()
 		actor_mounts.clear()
@@ -835,6 +839,9 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			state_changed.emit(&"clock")
 		"change_map":
 			current_map = event.map_name
+			gauntlet_progress.clear()
+			gauntlet_progress_anchor_msec = 0
+			state_changed.emit(&"gauntlet_progress")
 			_begin_mount_handoff()
 			presence.clear_map(current_map)
 			_unseen_mount_rows.clear()
@@ -1532,6 +1539,22 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 		"gauntlet_loot":
 			gauntlet_loot = (event.data as Dictionary).duplicate(true)
 			state_changed.emit(&"gauntlet_loot")
+		"gauntlet_progress":
+			var progress: Dictionary = event.data
+			if progress.has("map_id") and EloriaProtocol.map_id_from_reference(str(progress.map_id)) \
+					!= EloriaProtocol.map_id_from_reference(current_map):
+				return
+			if not bool(progress.get("active", false)) and progress.has("run_id") \
+					and not gauntlet_progress.is_empty() and progress.run_id != gauntlet_progress.run_id:
+				return
+			if bool(progress.get("active", false)) and not gauntlet_progress.is_empty() \
+					and progress.run_id == gauntlet_progress.run_id:
+				if progress.wave < gauntlet_progress.wave or (progress.wave == gauntlet_progress.wave \
+						and progress.arrival_serial < gauntlet_progress.arrival_serial):
+					return
+			gauntlet_progress = progress.duplicate(true) if bool(progress.get("active", false)) else {}
+			gauntlet_progress_anchor_msec = Time.get_ticks_msec()
+			state_changed.emit(&"gauntlet_progress")
 		"party":
 			party = {"in_party": bool(event.in_party),
 				"members": event.members,
