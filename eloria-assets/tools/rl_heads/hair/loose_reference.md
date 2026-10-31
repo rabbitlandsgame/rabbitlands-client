@@ -9,7 +9,7 @@ Keep original extractions immutable and write each candidate to a fresh stage.
 python reference_surface.py extract --fit <fit.json> --out <original>
 python build_loose_reference.py prepare --source <original> --fit <fit.json> --profile styles/layered_long.json --stage <stage> --sex female
 blender -b --factory-startup --threads 2 --python repair_reference_topology.py -- <stage>
-blender -b --factory-startup --threads 2 --python decimate_reference_surface.py -- <stage>
+blender -b --factory-startup --threads 2 --python decimate_reference_surface.py -- <stage> --weld-geometry
 python build_loose_reference.py backing --stage <stage> --profile styles/layered_long.json
 blender -b --factory-startup --threads 2 --python smooth_loose_backing.py -- <stage/backing>
 python build_loose_reference.py pack --stage <stage> --profile styles/layered_long.json --out <candidate/layered_long_female.glb> --check
@@ -51,6 +51,15 @@ the `root-edges --source <candidate.glb> --profile <style.json> --out <fresh/can
 step changes only COLOR.R bytes. Its report proves that geometry, skin, morph,
 material and metadata bytes stayed unchanged. Coverage and visual checks must
 still be rerun because root opacity changed.
+
+`decimate_reference_surface.py -- <stage> --weld-geometry` is an explicit opt-in
+for UV-split reference extractions. It welds positions at 0.001 mm before
+reduction while preserving per-corner UVs and source normals, and records their
+measured preservation together with source/tool/output hashes and geometric
+open-edge counts in `lod-position-weld.json`. Original behavior is unchanged
+without the flag. The receipt also reports each requested budget: complicated
+painted topology may reach a reduction floor and still needs a separate lower
+detail surface; the weld alone does not qualify an asset.
 
 A successful pack is a geometry check, not final qualification. Run structural
 validation, the shader-equivalent scalp coverage gate at all three LODs, open
