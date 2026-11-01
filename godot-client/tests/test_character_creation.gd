@@ -178,6 +178,7 @@ func run() -> void:
 	var previous_sex := str(sex.get_selected_metadata())
 	for race_index in range(race.item_count):
 		var eyes_before := eyes.get_selected_id()
+		var skin_before := skin.get_selected_id()
 		choose(race, race_index)
 		var culture := str(race.get_selected_metadata())
 		if culture in ["orun", "mycelari"]:
@@ -190,8 +191,8 @@ func run() -> void:
 			as Dictionary) == class_loadout,
 			"class selection and starting-kit preview survive race switch: " + culture)
 		expect(str(sex.get_selected_metadata()) == previous_sex, "changing race preserves sex: " + culture)
-		var expected_skin := 1 if culture == "luminous" else 0
-		expect(skin.get_selected_id() == expected_skin, "race switch selects its default skin: " + culture)
+		var expected_skin := skin_before
+		expect(skin.get_selected_id() == expected_skin, "the fixed Human race preserves its selected skin")
 		for sex_index in range(sex.item_count):
 			choose(sex, sex_index)
 			var actor_type := sex.get_selected_id()
@@ -202,12 +203,12 @@ func run() -> void:
 			expect(model.culture == culture and model.gender == sex.get_selected_metadata(), "race and sex resolve the matching model")
 			var actor := main.get("preview_actor") as ReplicatedActor3D
 			expect(actor.get("_model_config") == model, "preview uses the selected race and sex")
-			expect(skin.get_selected_id() == expected_skin, "sex change preserves race default")
+			expect(skin.get_selected_id() == expected_skin, "Human sex change preserves selected skin")
 			var look: Dictionary = main.call("_creation_appearance")
 			look["actor_type"] = actor_type
 			var packet := EloriaProtocol.create_character("Preview", "secret", look)
 			var tail := packet.slice(packet.find(0, 3) + 1)
-			expect(tail[0] == expected_skin and tail[5] == actor_type, "creation bytes preserve race, sex and default skin")
+			expect(tail[0] == expected_skin and tail[5] == actor_type, "creation bytes preserve Human sex and selected skin")
 			var class_packet := EloriaProtocol.create_character(
 				"Preview", "secret", look, int(main.get("selected_creation_class")))
 			var class_tail := class_packet.slice(class_packet.find(0, 3) + 1)
