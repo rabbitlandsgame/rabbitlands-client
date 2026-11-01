@@ -174,6 +174,8 @@ func run() -> void:
 	ReplicatedActor3D.clear_wardrobe_texture_cache()
 	RLHeadLibrary.clear()
 	GlbSceneCache.clear()
+	NativeAnimationImporter.clear()
+	RLHeadRig.clear_caches()
 	print("STATIC_BASE_PORTRAITS_READY ",result.size()," IDs / ",image_paths.size(),
 		" images (",total," baked, ",reused," reused)")
 	quit()
