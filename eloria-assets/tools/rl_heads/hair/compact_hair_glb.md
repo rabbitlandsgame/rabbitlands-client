@@ -24,3 +24,13 @@ python compact_hair_glb.py --source PRIVATE/authoring/style_female.glb \
 Compaction does not qualify a model. Existing geometry, coverage, pose and
 appearance evidence remains reusable only after the exact live-payload proof;
 the final packaged file still needs its structural/runtime resource checks.
+
+An explicit `--prune-unused-detail-vertices` option also removes unindexed rows
+from separate `rl_hair_card` primitives whose only part range is `detail`.
+This handles index-only authoring cuts without leaving dormant strand vertices
+in the client buffers. All indexed POSITION, normal, UV, colour, skin and shape
+values retain their exact component bytes, including sparse targets and signed
+zero. Triangle order, material and scene metadata, core/cap streams and default
+weights stay intact. The default path is unchanged. The private receipt includes
+an old-to-new vertex map for updating private root bindings; removed rows map to
+`-1`. Keep source bindings and apply the map before further strand authoring.

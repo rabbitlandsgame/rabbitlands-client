@@ -117,18 +117,101 @@ def compact_document(document, blob):
     return result, bytes(packed), {'accessors': accessor_map, 'bufferViews': view_map}
 
 
-def compact(source, output):
+def compact_detail_vertices(document, blob):
+    """Remove only unindexed rows in explicitly identified hair-card streams.
+
+    The returned per-stream map permits private root-binding records to follow
+    the vertex renumbering. No indexed attribute or shape value is altered.
+    """
+    # Validate the known reference graph before appending selected accessors.
+    compact_document(document, blob)
+    writer = glbwriter.GLB()
+    writer.g, writer.blob = copy.deepcopy(document), bytearray(blob)
+    reports = []
+    for mi, mesh in enumerate(document['meshes']):
+        for pi, primitive in enumerate(mesh['primitives']):
+            material = document.get('materials', [])[primitive['material']] if 'material' in primitive else {}
+            if material.get('name') != 'rl_hair_card':
+                continue
+            ranges = primitive.get('extras', {}).get('partVertexRanges', {})
+            count = document['accessors'][primitive['attributes']['POSITION']]['count']
+            assert ranges == {'detail': [0, count]}, 'Expected a separate, full detail stream'
+            assert primitive.get('mode', 4) == 4 and 'indices' in primitive
+            old_indices = rlglb.accessor(document, blob, primitive['indices'], normalize=False).astype(np.int64)
+            assert old_indices.size and old_indices.size % 3 == 0
+            assert old_indices.min() >= 0 and old_indices.max() < count
+            used = np.unique(old_indices)
+            remap = np.full(count, -1, dtype=np.int64)
+            remap[used] = np.arange(len(used))
+            report = {'mesh': mesh['name'], 'primitive': pi, 'old_count': count,
+                      'new_count': len(used), 'old_to_new': remap.tolist()}
+            reports.append(report)
+            if len(used) == count:
+                continue
+            destination = writer.g['meshes'][mi]['primitives'][pi]
+
+            def select(index, target=False):
+                accessor = document['accessors'][index]
+                assert accessor['count'] == count
+                assert set(accessor) <= {'bufferView', 'byteOffset', 'componentType', 'count', 'type',
+                                         'normalized', 'min', 'max', 'sparse'}, 'Unknown vertex accessor metadata'
+                data = rlglb.accessor(document, blob, index, normalize=False)
+                values = data[used]
+                if target:
+                    assert accessor['componentType'] == 5126 and accessor['type'] == 'VEC3'
+                    assert not accessor.get('normalized')
+                    if ((values == 0) & np.signbit(values)).any():
+                        out = writer.accessor(values, 'VEC3', minmax='min' in accessor)
+                    else:
+                        out = writer.sparse_vec3(values, eps=0, minmax='min' in accessor)
+                else:
+                    assert accessor['componentType'] in {5121, 5123, 5125, 5126}
+                    out = writer.accessor(values, accessor['type'], accessor['componentType'],
+                                          target=34962, minmax='min' in accessor,
+                                          normalized=accessor.get('normalized', False))
+                actual = rlglb.accessor(writer.g, writer.blob, out, normalize=False)
+                dtype = rlglb.COMPONENT[accessor['componentType']]
+                assert np.asarray(actual, dtype=dtype).tobytes() == np.asarray(values, dtype=dtype).tobytes()
+                return out
+
+            destination['attributes'] = {name: select(index) for name, index in primitive['attributes'].items()}
+            destination['targets'] = [{name: select(index, True) for name, index in shape.items()}
+                                      for shape in primitive.get('targets', [])]
+            index_type = document['accessors'][primitive['indices']]['componentType']
+            assert index_type in {5121, 5123, 5125}
+            destination['indices'] = writer.accessor(remap[old_indices].reshape(-1), 'SCALAR', index_type, target=34963)
+            destination['extras']['partVertexRanges'] = {'detail': [0, len(used)]}
+            # An indexed corner retains every exact source field, including skin
+            # integers, sparse targets and normalised colour/weight payloads.
+            for old_group, new_group in [(primitive['attributes'], destination['attributes'])] + list(zip(primitive.get('targets', []), destination.get('targets', []))):
+                for name, index in old_group.items():
+                    before = rlglb.accessor(document, blob, index, normalize=False)[old_indices.reshape(-1)]
+                    after = rlglb.accessor(writer.g, writer.blob, new_group[name], normalize=False)[remap[old_indices].reshape(-1)]
+                    dtype = rlglb.COMPONENT[document['accessors'][index]['componentType']]
+                    assert np.asarray(before, dtype=dtype).tobytes() == np.asarray(after, dtype=dtype).tobytes()
+    writer.g['buffers'][0]['byteLength'] = len(writer.blob)
+    return writer.g, bytes(writer.blob), reports
+
+
+def compact(source, output, prune_detail_vertices=False):
     source, output = Path(source), Path(output)
     assert source.resolve() != output.resolve() and not output.exists()
     assert source.name == output.name, 'Preserve the runtime asset and relative atlas names'
     document, blob = rlglb.read(str(source))
-    result, packed, maps = compact_document(document, blob)
+    working, working_blob = document, blob
+    detail_report = []
+    if prune_detail_vertices:
+        working, working_blob, detail_report = compact_detail_vertices(document, blob)
+    result, packed, maps = compact_document(working, working_blob)
     atlas = source.with_suffix('.png')
     if atlas.exists():
         assert not output.with_suffix('.png').exists()
     result['asset']['extras']['rlHair']['compaction'] = {
         'sourceSHA256': sha(source), 'toolSHA256': sha(__file__),
         'method': 'Remove unreferenced authoring payloads; every live buffer-view byte retained'}
+    if prune_detail_vertices:
+        result['asset']['extras']['rlHair']['compaction']['unusedDetailRowsRemoved'] = sum(r['old_count'] - r['new_count'] for r in detail_report)
+        result['asset']['extras']['rlHair']['compaction']['indexedValuesExact'] = True
     writer = glbwriter.GLB()
     writer.g, writer.blob = result, bytearray(packed)
     # The vendored writer removes empty optional arrays when saving.
@@ -144,6 +227,9 @@ def compact(source, output):
               'removed_accessors': len(document['accessors']) - len(maps['accessors']),
               'removed_buffer_views': len(document['bufferViews']) - len(maps['bufferViews']),
               'live_payload_bytes_exact': True, 'authoring_source_preserved': True}
+    if prune_detail_vertices:
+        report['detail_vertex_streams'] = detail_report
+        report['indexed_values_exact'] = True
     return report
 
 
@@ -152,7 +238,9 @@ if __name__ == '__main__':
     parser.add_argument('--source', required=True)
     parser.add_argument('--out', required=True)
     parser.add_argument('--report', required=True, help='Ignored/private preservation receipt')
+    parser.add_argument('--prune-unused-detail-vertices', action='store_true',
+                        help='Explicitly compact unindexed rows in separate rl_hair_card streams')
     args = parser.parse_args()
-    receipt = compact(args.source, args.out)
+    receipt = compact(args.source, args.out, prune_detail_vertices=args.prune_unused_detail_vertices)
     Path(args.report).write_text(json.dumps(receipt, indent=2) + '\n')
     print(json.dumps(receipt))
