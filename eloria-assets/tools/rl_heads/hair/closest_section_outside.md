@@ -44,3 +44,17 @@ See [Bærentzen and Aanæs, 2005](https://www2.imm.dtu.dk/pubdb/edoc/imm3578.pdf
 Run `test_closest_section_outside.py`, `test_native_hair_fixtures.py`,
 `test_native_slice_bounds.py` and `test_native_rigid_pose_union.py`. Private
 fixture receipts and source model inputs belong in ignored authoring output.
+
+An optional bounded alternative-plane search is available when the first
+section is inconclusive. `ClosestSectionOutside(..., fallback_plane_count=64)`
+tries the fixed 64-normal Fibonacci schedule, stopping at the first valid
+outside certificate. A smaller count uses that schedule's prefix. The default
+is zero, preserving the original single-plane behavior. Open, branched,
+degenerate, touching, self-crossing and inside contours never supply an outside
+certificate; no lighting or raw triangle normal substitutes for one.
+
+Both Native adapters expose `closest_section_fallback_planes=0`; a nonzero
+value requires `closest_section_proof=True`. The serialized checker CLI uses
+`--closest-section-proof --closest-section-fallback-planes 64`. Results, exact
+cache keys and pose-union receipts include the count and certificate-tool hash.
+Distances, closest points, normals and fixture data remain unchanged.

@@ -8,6 +8,15 @@ filled independently, so nested/overlapping components cannot cancel.
 import numpy as np
 
 
+def fallback_plane_normals():
+    """Fixed 64-plane schedule; smaller budgets use its exact prefix."""
+    index = np.arange(64, dtype=np.float64)
+    y = 1 - 2 * (index + .5) / 64
+    phi = index * np.pi * (3 - np.sqrt(5))
+    radius = np.sqrt(1 - y * y)
+    return np.column_stack([radius * np.cos(phi), y, radius * np.sin(phi)])
+
+
 def _cross(a, b):
     return a[..., 0] * b[..., 1] - a[..., 1] * b[..., 0]
 
@@ -48,13 +57,17 @@ def _simple(contour, epsilon):
 
 
 class ClosestSectionOutside:
-    def __init__(self, complete_mesh, epsilon=1e-8, cache_points=8192):
+    def __init__(self, complete_mesh, epsilon=1e-8, cache_points=8192,
+                 fallback_plane_count=0):
         assert 0 < epsilon <= 1e-6 and cache_points >= 0
+        assert type(fallback_plane_count) is int and 0 <= fallback_plane_count <= 64
         self.triangles = np.asarray(complete_mesh.triangles, dtype=np.float64)
         assert len(self.triangles) and np.isfinite(self.triangles).all()
         self.epsilon = float(epsilon)
         self.cache_points = int(cache_points)
         self.cache = {}
+        self.fallback_plane_count = fallback_plane_count
+        self.fallback_normals = fallback_plane_normals()[:fallback_plane_count]
         self.volumetric = bool(((complete_mesh.bounds[1] - complete_mesh.bounds[0]) > epsilon * 2).all())
         self.last_query = {}
 
@@ -129,6 +142,18 @@ class ClosestSectionOutside:
                 return False, 'inside_contour'
         return True, 'outside_all_complete_simple_contours'
 
+    def _with_fallback(self, point, closest):
+        result, reason = self._certificate(point, closest)
+        if result or not self.fallback_plane_count:
+            return result, reason
+        # Only complete simple closed sections can certify outside. Lighting
+        # normals and inconclusive planes never supply a sign change.
+        for normal in self.fallback_normals:
+            result, fallback_reason = self._certificate(point, point - normal)
+            if result:
+                return True, fallback_reason
+        return False, reason
+
     def outside(self, points, closest):
         points = np.ascontiguousarray(points, dtype=np.float64)
         closest = np.ascontiguousarray(closest, dtype=np.float64)
@@ -143,7 +168,7 @@ class ClosestSectionOutside:
             key = point.tobytes() + cp.tobytes()
             value = self.cache.get(key)
             if value is None:
-                value = self._certificate(point, cp)
+                value = self._with_fallback(point, cp)
                 if len(self.cache) >= self.cache_points:
                     self.cache.clear()
                 if self.cache_points:
@@ -151,4 +176,6 @@ class ClosestSectionOutside:
             result[i], reason = value
             reasons[reason] = reasons.get(reason, 0) + 1
         self.last_query = {'points': len(points), 'proven_outside_points': int(result.sum()), 'reasons': reasons}
+        if self.fallback_plane_count:
+            self.last_query['fallback_plane_count'] = self.fallback_plane_count
         return result

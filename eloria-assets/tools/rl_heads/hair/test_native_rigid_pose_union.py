@@ -108,6 +108,16 @@ class RigidPoseUnionTests(unittest.TestCase):
         self.assertTrue(union.source['closest_section_proof'])
         self.assertEqual(len(union.source['closest_section_tool_sha256']), 64)
 
+    def test_fallback_plane_option_is_explicit_and_recorded(self):
+        union, calls = self.make([record('a', np.eye(4))], {'a': Plane(0.)},
+                                 closest_section_proof=True, closest_section_fallback_planes=64)
+        self.assertEqual(calls, [{'horizontal_slice_proof': False,
+            'closest_section_proof': True, 'closest_section_fallback_planes': 64}])
+        self.assertEqual(union.source['closest_section_fallback_planes'], 64)
+        with self.assertRaises(AssertionError):
+            self.make([record('a', np.eye(4))], {'a': Plane(0.)},
+                      closest_section_fallback_planes=64)
+
 
 if __name__ == '__main__':
     unittest.main()

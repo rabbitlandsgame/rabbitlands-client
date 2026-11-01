@@ -7,13 +7,15 @@ from pathlib import Path
 import hashlib
 import json
 import numpy as np
-from native_hair_fixtures import load_fixture, matrix, verified_fixture_signature
+from native_hair_fixtures import (load_fixture, matrix, verified_fixture_signature,
+                                validated_closest_section_fallback)
 
 
 class RigidNativePoseUnion:
     def __init__(self, manifest, sex, case_names=None, quality=0,
                  carrier_bone='Head', horizontal_slice_proof=False,
-                 closest_section_proof=False):
+                 closest_section_proof=False, closest_section_fallback_planes=0):
+        validated_closest_section_fallback(closest_section_fallback_planes, closest_section_proof)
         manifest = Path(manifest)
         document = json.loads(manifest.read_text())
         assert document.get('hair_identity_policy') == 'native_fixed_skull'
@@ -37,6 +39,8 @@ class RigidNativePoseUnion:
             options = {'horizontal_slice_proof': horizontal_slice_proof}
             if closest_section_proof:
                 options['closest_section_proof'] = True
+            if closest_section_fallback_planes:
+                options['closest_section_fallback_planes'] = closest_section_fallback_planes
             surface = load_fixture(manifest, record, **options)
             self.poses.append((surface, transform, np.linalg.inv(basis)))
             found.add(record['case'])
@@ -52,6 +56,7 @@ class RigidNativePoseUnion:
                        'poses': sources, 'authoring_only': True, 'qualified': False}
         if closest_section_proof:
             self.source['closest_section_proof'] = True
+            self.source['closest_section_fallback_planes'] = closest_section_fallback_planes
             self.source['closest_section_tool_sha256'] = hashlib.sha256(
                 Path(__file__).with_name('closest_section_outside.py').read_bytes()).hexdigest()
 

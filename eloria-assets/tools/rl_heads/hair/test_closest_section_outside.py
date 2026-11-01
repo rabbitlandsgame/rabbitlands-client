@@ -1,8 +1,8 @@
 import unittest
 import numpy as np
 import trimesh
-from closest_section_outside import ClosestSectionOutside, _simple
-from native_hair_fixtures import EvaluatedNativeSurface
+from closest_section_outside import ClosestSectionOutside, _simple, fallback_plane_normals
+from native_hair_fixtures import EvaluatedNativeSurface, check_hair
 
 
 def u_mesh():
@@ -73,6 +73,71 @@ class ClosestSectionCertificates(unittest.TestCase):
         with self.assertRaises(AssertionError):
             EvaluatedNativeSurface(mesh.vertices, inward_shading_normals, mesh.faces,
                                    closest_section_proof=True)
+
+    def test_alternative_plane_certifies_after_coplanar_first_plane_withholds(self):
+        mesh = trimesh.creation.box(extents=[2, 2, 2])
+        point = np.array([[1.3, .13, 1.]])
+        seed = point - [0, 0, 1]
+        old = ClosestSectionOutside(mesh)
+        zero = ClosestSectionOutside(mesh, fallback_plane_count=0)
+        new = ClosestSectionOutside(mesh, fallback_plane_count=64)
+        self.assertFalse(old.outside(point, seed)[0])
+        np.testing.assert_array_equal(old.outside(point, seed), zero.outside(point, seed))
+        self.assertEqual(old.last_query, zero.last_query)
+        self.assertTrue(new.outside(point, seed)[0])
+        self.assertEqual(new.last_query['fallback_plane_count'], 64)
+
+    def test_fixed_schedule_prefix_and_first_valid_stop(self):
+        mesh = trimesh.creation.box(extents=[2, 2, 2])
+        point = np.array([1.3, .13, 1.])
+        calls = []
+        proof = ClosestSectionOutside(mesh, fallback_plane_count=3)
+        schedule = fallback_plane_normals()
+        self.assertEqual(schedule.shape, (64, 3))
+        self.assertEqual(schedule[0, 1], 63 / 64)
+
+        def certificate(p, cp):
+            normal = p - cp
+            calls.append(normal.copy())
+            return (bool(np.allclose(normal, schedule[1], atol=1e-14, rtol=0)), 'test')
+
+        proof._certificate = certificate
+        self.assertTrue(proof.outside(point[None], (point - [0, 0, 1])[None])[0])
+        self.assertEqual(len(calls), 3)  # Original plane, then schedule indices 0/1.
+        np.testing.assert_allclose(calls[1:], schedule[:2], atol=1e-15, rtol=0)
+
+    def test_fallback_does_not_certify_inside_nested_or_open_sections(self):
+        outer = trimesh.creation.box(extents=[2, 2, 2])
+        inner = trimesh.creation.box(extents=[1, 1, 1])
+        mesh = trimesh.util.concatenate([outer, inner])
+        points = np.array([[.13, .17, .19], [.73, .11, .13]])
+        cp, _, _ = trimesh.proximity.closest_point(mesh, points)
+        self.assertFalse(ClosestSectionOutside(mesh, fallback_plane_count=64).outside(points, cp).any())
+        triangle = trimesh.Trimesh([[0, 0, 0], [1, 0, .2], [0, 1, .4]],
+                                   [[0, 1, 2]], process=False)
+        self.assertFalse(ClosestSectionOutside(triangle, fallback_plane_count=64)
+                         .outside([[.4, .3, .5]], [[0, 0, 0]])[0])
+
+    def test_fallback_validation_and_explicit_adapter_gate(self):
+        mesh = trimesh.creation.box()
+        for count in [-1, 65, .5, True, '2']:
+            with self.assertRaises(AssertionError):
+                ClosestSectionOutside(mesh, fallback_plane_count=count)
+        with self.assertRaises(AssertionError):
+            EvaluatedNativeSurface(mesh.vertices, mesh.vertex_normals, mesh.faces,
+                                   complete_fixture_mesh=mesh, closest_section_fallback_planes=1)
+        with self.assertRaises(AssertionError):
+            check_hair('absent.glb', 'absent.json', closest_section_fallback_planes=64)
+
+    def test_fallback_adapter_retains_original_distance_witness_and_normal(self):
+        mesh = u_mesh();point = np.array([[.1, .13, .017]])
+        old = EvaluatedNativeSurface(mesh.vertices, -mesh.vertex_normals, mesh.faces,
+                                     closest_section_proof=True, complete_fixture_mesh=mesh)
+        new = EvaluatedNativeSurface(mesh.vertices, -mesh.vertex_normals, mesh.faces,
+                                     closest_section_proof=True, complete_fixture_mesh=mesh,
+                                     closest_section_fallback_planes=64)
+        for before, after in zip(old.signed(point), new.signed(point)):
+            np.testing.assert_array_equal(before, after)
 
 
 if __name__ == '__main__':
