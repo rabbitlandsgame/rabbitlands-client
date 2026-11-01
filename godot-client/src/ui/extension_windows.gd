@@ -177,6 +177,7 @@ var _market_request_msec := -1
 var party_panel: PanelContainer
 var gauntlet_ready_window: Control
 var gauntlet_loot_window: Control
+var gauntlet_progress_hud: Control
 var party_header: Label
 var party_rows: VBoxContainer
 var party_invite_row: HBoxContainer
@@ -233,6 +234,10 @@ func _ready() -> void:
 	add_child(gauntlet_ready_window)
 	gauntlet_loot_window = preload("res://src/ui/gauntlet_loot_window.gd").new()
 	add_child(gauntlet_loot_window)
+	gauntlet_progress_hud = preload("res://src/ui/gauntlet_progress_hud.gd").new()
+	gauntlet_progress_hud.configure(func() -> Rect2: return combat_panel.get_global_rect(),
+		func() -> bool: return combat_hud_enabled)
+	add_child(gauntlet_progress_hud)
 	gauntlet_loot_window.item_inspection_requested.connect(func() -> void: detail_popup_allowed = true)
 	if item_atlas != null: gauntlet_loot_window.configure(item_atlas)
 	gauntlet_loot_window.call("_style_dialog", market_price_dialog)
@@ -1792,6 +1797,7 @@ func _party_row(member: Dictionary) -> Control:
 	title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	title.add_theme_font_size_override("font_size", 12)
 	TextColors.bind(title, "party_text")
+	_party_text_contrast(title)
 	header.add_child(title)
 	var where := Label.new()
 	where.name = "Standing"
@@ -1802,6 +1808,7 @@ func _party_row(member: Dictionary) -> Control:
 		where.text = "standby"
 	where.add_theme_font_size_override("font_size", 10)
 	TextColors.bind(where, "party_muted")
+	_party_text_contrast(where)
 	header.add_child(where)
 
 	var low_health := float(member.get("health", 0)) / maxf(1, float(member.get("max_health", 1))) < 0.25
@@ -1837,6 +1844,7 @@ func _party_number(node_name: String, current: int, maximum: int, _colour: Color
 	number.text = "%d/%d" % [current, maximum] if online else "—/—"
 	number.add_theme_font_size_override("font_size", 11)
 	TextColors.bind(number, "party_ether" if node_name == "EtherNumber" else "party_health_low" if float(current) / maxf(1, maximum) < 0.25 else "party_health")
+	_party_text_contrast(number)
 	number.visible = _party_numbers
 	return number
 
@@ -3143,4 +3151,11 @@ static func _bind_party_labels(parent: Node) -> void:
 	for child: Node in parent.get_children():
 		if child is Label and not child.has_meta("text_color_role"):
 			TextColors.bind(child as Label, "party_text")
+		if child is Label:
+			_party_text_contrast(child as Label)
 		_bind_party_labels(child)
+
+## The HUD editor can hide the roster backing; retain readable text over stone.
+static func _party_text_contrast(label: Label) -> void:
+	label.add_theme_color_override("font_outline_color", Color(0.025, 0.03, 0.025, 1.0))
+	label.add_theme_constant_override("outline_size", 2)

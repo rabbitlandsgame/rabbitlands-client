@@ -63,28 +63,28 @@ func _draw() -> void:
 	var center := Vector2(32, 33)
 	draw_circle(center, 23, config.background_color.darkened(0.3))
 	draw_arc(center, 23, 0, TAU, 48, config.border_color, 2, true)
-	draw_string(font, Vector2(9, 39), data.name.left(2).to_upper(), HORIZONTAL_ALIGNMENT_CENTER, 46, 15, text)
-	draw_string(font, Vector2(65, 21), data.name, HORIZONTAL_ALIGNMENT_LEFT, size.x - 76, 14, text)
+	_draw_text(font, Vector2(9, 39), data.name.left(2).to_upper(), HORIZONTAL_ALIGNMENT_CENTER, 46, 15, text)
+	_draw_text(font, Vector2(65, 21), data.name, HORIZONTAL_ALIGNMENT_LEFT, size.x - 76, 14, text)
 	_meter(Rect2(65, 29, size.x - 78, 8), data.health, data.max_health, palette.health)
 	_meter(Rect2(65, 44, size.x - 78, 6), data.ether, data.max_ether, palette.mana)
 	if config.show_values:
-		draw_string(font, Vector2(65, 26), "%d / %d" % [data.health, data.max_health], HORIZONTAL_ALIGNMENT_RIGHT, size.x - 78, 10, text)
+		_draw_text(font, Vector2(65, 26), "%d / %d" % [data.health, data.max_health], HORIZONTAL_ALIGNMENT_RIGHT, size.x - 78, 10, text)
 	if role == "player" and config.show_secondary:
 		for index: int in 3:
 			var key: String = ["food", "load", "action"][index]
 			var resource := Values.read(key)
 			var x := 10 + index * (size.x - 20) / 3
-			draw_string(font, Vector2(x, 78), resource.label, HORIZONTAL_ALIGNMENT_LEFT, (size.x - 20) / 3, 10, text)
-			draw_string(font, Vector2(x, 95), "%d / %d" % [resource.value, resource.maximum], HORIZONTAL_ALIGNMENT_LEFT, (size.x - 20) / 3, 11, text)
+			_draw_text(font, Vector2(x, 78), resource.label, HORIZONTAL_ALIGNMENT_LEFT, (size.x - 20) / 3, 10, text)
+			_draw_text(font, Vector2(x, 95), "%d / %d" % [resource.value, resource.maximum], HORIZONTAL_ALIGNMENT_LEFT, (size.x - 20) / 3, 11, text)
 			_meter(Rect2(x, 100, (size.x - 26) / 3 - 6, 4), resource.value, resource.maximum, palette[key])
 
 func _detailed_player(data: Dictionary, font: Font, text: Color) -> void:
 	var center := Vector2(26, 25)
 	draw_circle(center, 18, palette.health.darkened(0.72))
 	draw_arc(center, 18, 0, TAU, 48, palette.health, 2, true)
-	draw_string(font, Vector2(8, 31), data.name.left(2).to_upper(), HORIZONTAL_ALIGNMENT_CENTER, 36, 13, text)
-	draw_string(font, Vector2(52, 23), data.name, HORIZONTAL_ALIGNMENT_LEFT, size.x - 60, 14, text)
-	draw_string(font, Vector2(52, 39), "You · Party leader" if data.leader else "You · live resources", HORIZONTAL_ALIGNMENT_LEFT, size.x - 60, 10, text.darkened(0.15))
+	_draw_text(font, Vector2(8, 31), data.name.left(2).to_upper(), HORIZONTAL_ALIGNMENT_CENTER, 36, 13, text)
+	_draw_text(font, Vector2(52, 23), data.name, HORIZONTAL_ALIGNMENT_LEFT, size.x - 60, 14, text)
+	_draw_text(font, Vector2(52, 39), "You · Party leader" if data.leader else "You · live resources", HORIZONTAL_ALIGNMENT_LEFT, size.x - 60, 10, text.darkened(0.15))
 	for index: int in 5:
 		var key: String = ["health", "mana", "food", "action", "load"][index]
 		var resource := Values.read(key)
@@ -92,8 +92,8 @@ func _detailed_player(data: Dictionary, font: Font, text: Color) -> void:
 		var color: Color = palette[key]
 		var icon := Icons.tinted_icon(key, color)
 		if icon != null: draw_texture_rect(icon, Rect2(8, y - 2, 16, 16), false)
-		draw_string(font, Vector2(29, y + 6), resource.label, HORIZONTAL_ALIGNMENT_LEFT, size.x - 104, 10, text)
-		draw_string(font, Vector2(29, y + 6), Values.value_text(resource), HORIZONTAL_ALIGNMENT_RIGHT, size.x - 40, 10, color.lightened(0.25))
+		_draw_text(font, Vector2(29, y + 6), resource.label, HORIZONTAL_ALIGNMENT_LEFT, size.x - 104, 10, text)
+		_draw_text(font, Vector2(29, y + 6), Values.value_text(resource), HORIZONTAL_ALIGNMENT_RIGHT, size.x - 40, 10, color.lightened(0.25))
 		_meter(Rect2(29, y + 10, size.x - 40, 4), resource.value, resource.maximum, color)
 
 func _meter(rect: Rect2, current: float, maximum: float, color: Color) -> void:
@@ -102,3 +102,9 @@ func _meter(rect: Rect2, current: float, maximum: float, color: Color) -> void:
 	fill.size.x *= clampf(current / maxf(1, maximum), 0, 1)
 	draw_rect(fill, color)
 	draw_rect(rect, config.border_color.darkened(0.45), false, 1)
+
+## Keep floating HUD text readable when a saved design hides its backing.
+func _draw_text(font: Font, at: Vector2, text: String, alignment: HorizontalAlignment,
+		width: float, points: int, color: Color) -> void:
+	draw_string_outline(font, at, text, alignment, width, points, 2, Color(0.025, 0.03, 0.025, 1.0))
+	draw_string(font, at, text, alignment, width, points, color)

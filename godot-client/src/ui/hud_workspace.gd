@@ -15,6 +15,7 @@ const MinimapLabels := preload("res://src/ui/hud_minimap_labels.gd")
 const ClockFace := preload("res://src/ui/hud_clock_face.gd")
 const FrameOverlay := preload("res://src/ui/hud_frame_overlay.gd")
 const TextColors := preload("res://src/ui/text_colors.gd")
+const JukeboxTransport := preload("res://src/ui/jukebox_transport.gd")
 const SWITCHES := {"skills": "side_stats", "clock": "analog_clock", "status": "indicators",
 	"timer": "hud_timer", "research": "knowledge_bar", "fps": "show_fps"}
 var model := Presets.new()
@@ -180,6 +181,12 @@ func configure(owner_main: Control) -> void:
 	main.game_view.add_child(player_card)
 	parts.player_card = player_card
 	player_card.hide()
+	var music_player := JukeboxTransport.new()
+	music_player.jukebox = main.audio_director.jukebox
+	main.game_view.add_child(music_player)
+	parts.jukebox = music_player
+	music_player.hide()
+	main.audio_director.jukebox.hud_player_requested.connect(_show_music_player)
 	target_card = UnitCard.new()
 	target_card.name = "TargetCard"
 	target_card.role = "target"
@@ -253,10 +260,16 @@ func configure(owner_main: Control) -> void:
 func is_open() -> bool:
 	return panel != null and panel.visible
 
+func _show_music_player() -> void:
+	change_part("jukebox", "enabled", true)
+	if is_open(): select_component("jukebox")
+	else: _store()
+
 func manages_layout() -> bool:
 	return ready_to_layout and not bool(model.working.legacy)
 
 func _sync_gauntlet_hud() -> void:
+	if parts.has("jukebox"): parts.jukebox.set_editor_preview(is_open())
 	main.extension_windows.gauntlet_loot_window.configure_hud(
 		model.working.parts.gauntlet_loot.enabled, model.working.parts.rare_drops.enabled, is_open())
 	queue_layout()
@@ -739,7 +752,7 @@ func select_component(key: String, arc_index := -1) -> void:
 	if _selected_arc < 0:
 		_toggle("Show " + Presets.PARTS[key], bool(config.enabled), func(value: bool) -> void: change_part(key, "enabled", value))
 		_choice("Position", Presets.ANCHORS, str(config.anchor), func(value: String) -> void: change_part(key, "anchor", value))
-		_choice("Appearance", Presets.STYLES, str(config.style), func(value: String) -> void: change_part(key, "style", value))
+		if key != "jukebox": _choice("Appearance", Presets.STYLES, str(config.style), func(value: String) -> void: change_part(key, "style", value))
 		_number("Scale", float(config.scale), 0.5, 2.0, 0.05, func(value: float) -> void: change_part(key, "scale", value))
 		if key in ["skills", "clock", "status", "timer", "research", "logo", "fps"]:
 			for axis: String in ["x", "y"]:
@@ -931,7 +944,7 @@ func select_component(key: String, arc_index := -1) -> void:
 				surface.apply_options()
 				main._on_chat_configuration_changed("combined", value)
 				_capture_chat(model.working, key))
-	if key in ["rail_panel", "utilities", "spells", "items", "chat", "system_chat", "party", "minimap", "compass", "clock", "resources", "food_meter", "load_meter", "xp_meter", "player_card", "target", "gauntlet_loot", "rare_drops"]:
+	if key in ["rail_panel", "utilities", "spells", "items", "chat", "system_chat", "party", "minimap", "compass", "clock", "resources", "food_meter", "load_meter", "xp_meter", "player_card", "target", "gauntlet_loot", "rare_drops", "jukebox"]:
 		for axis: String in ["x", "y"]:
 			var dimensions: Vector2 = _root(key).size
 			var minimum: Vector2 = _root(key).get_combined_minimum_size()
@@ -1144,7 +1157,7 @@ func change_part(key: String, field: String, value: Variant) -> void:
 			model.working.parts[key].show_background = true
 			model.working.parts[key].frame_style = "panel"
 	if field == "center_resource": model.working.parts.medallion.center_color = Presets.RESOURCE_COLORS[value]
-	if field != "enabled" or key in ["medallion", "player_card", "food_meter", "load_meter", "xp_meter"] and value == true: model.working.legacy = false
+	if field != "enabled" or key in ["medallion", "player_card", "food_meter", "load_meter", "xp_meter", "jukebox"] and value == true: model.working.legacy = false
 	model.working = Presets.normalise(model.working)
 	apply_layout()
 	_refresh_actions()
@@ -1625,6 +1638,9 @@ func _restore_original(key: String) -> void:
 func _style_part(key: String) -> void:
 	var control := _root(key)
 	var config: Dictionary = model.working.parts[key]
+	if key == "jukebox":
+		parts.jukebox.configure_appearance(config)
+		return
 	var box := HudChrome.box(config.background_color, config.border_color, 5)
 	box.set_corner_radius_all(7 if config.style == "adventure" else 2)
 	if key in ["spells", "items"] and config.flush_slots: box.set_content_margin_all(0)
@@ -1767,11 +1783,11 @@ func layout_hud() -> void:
 			main.casting_bar._layout()
 			continue
 		control.scale = config.axis_scale * float(config.scale)
-		if key not in ["utilities", "chat", "system_chat", "party", "items", "minimap", "compass", "medallion", "resources", "food_meter", "load_meter", "xp_meter", "player_card", "target"]: control.reset_size()
+		if key not in ["utilities", "chat", "system_chat", "party", "items", "minimap", "compass", "medallion", "resources", "food_meter", "load_meter", "xp_meter", "player_card", "target", "jukebox"]: control.reset_size()
 		var dimensions := control.size
 		if key in ["gauntlet_loot", "rare_drops"]:
 			dimensions = main.extension_windows.gauntlet_loot_window.default_hud_rect(key, main.game_view.size).size
-		if config.dimensions != Vector2.ZERO and key in ["chat", "system_chat", "minimap", "compass", "clock", "research", "logo", "medallion", "resources", "food_meter", "load_meter", "xp_meter", "player_card", "target", "gauntlet_loot", "rare_drops"]:
+		if config.dimensions != Vector2.ZERO and key in ["chat", "system_chat", "minimap", "compass", "clock", "research", "logo", "medallion", "resources", "food_meter", "load_meter", "xp_meter", "player_card", "target", "gauntlet_loot", "rare_drops", "jukebox"]:
 			dimensions = config.dimensions
 		elif key == "medallion": dimensions = Vector2(240, 200)
 		if key == "rail_panel":
@@ -2304,7 +2320,7 @@ func _resize_window(key: String, delta: Vector2, bypass_snap: bool) -> void:
 		if _resize_axis.x < 0: rect.position.x = _resize_rect.end.x - diameter
 		if _resize_axis.y < 0: rect.position.y = _resize_rect.end.y - diameter
 	var dimensions := rect.size / _resize_runtime_scale.max(Vector2.ONE * 0.01)
-	var direct := key in ["rail_panel", "utilities", "spells", "items", "chat", "system_chat", "party", "minimap", "compass", "clock", "resources", "food_meter", "load_meter", "xp_meter", "player_card", "target", "gauntlet_loot", "rare_drops"]
+	var direct := key in ["rail_panel", "utilities", "spells", "items", "chat", "system_chat", "party", "minimap", "compass", "clock", "resources", "food_meter", "load_meter", "xp_meter", "player_card", "target", "gauntlet_loot", "rare_drops", "jukebox"]
 	if direct:
 		if key == "rail_panel" and _resize_axis.y != 0: config.full_height = false
 		if config.extend_to_edge and (config.dock_side in ["left", "right"] and _resize_axis.x != 0 or config.dock_side in ["top", "bottom"] and _resize_axis.y != 0): config.extend_to_edge = false

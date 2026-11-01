@@ -35,6 +35,26 @@ offered only where it would act.
   A player already selected is asked at once; otherwise the next click on a
   player asks them. `Esc` or the Move icon puts the mode down. Covered by
   `_check_trade_mode` in the same test.
+- Look mode and the selected-target Look button share `_can_inspect_creature`.
+  Living ordinary creatures use the existing `GET_PLAYER_INFO` request, with a
+  bounded chat reply containing live stats. The server checks map membership,
+  actual visibility and detectability; player information keeps its existing
+  binary format. Default creature clicks still attack. The viewport action
+  fixture exercises cycling and dispatch without loading maps or opening sockets.
+- Both sit entry points call `_on_sit_button_pressed`. Retire keyboard movement
+  before sending `SIT_DOWN`: a legacy stop is `MOVE_TO`, and sending it after
+  the sit request can stand the player again on a stale client tile.
+- Door/cave approaches and ground-bag inspection retire tracked keyboard movement
+  before sending their new route, use or inspection request. A later key release
+  must not send a legacy stop that cancels that approach. World Pick and inventory
+  Get All share `_request_ground_bag_inspection`; both legacy movement and modern
+  held intent have packet-order coverage in the offline input fixtures.
+- Explicit Pick uses `_deliberate_ground_bag_at` in cycling, cursor resolution
+  and click dispatch to reach a bag beneath another actor. Armed actor spells,
+  techniques and Alt attacks keep their priority. The server approaches the
+  exact bag tile; a blocked current request explains the failure and closes the
+  waiting view. Cancellation and map/character changes cannot close a newer
+  request. The viewport and server bag-recovery fixtures cover both sides.
 
 ## Item clicks
 

@@ -175,6 +175,8 @@ var _in_combat := false
 var _ranged_aiming := false
 var _last_command_sequence := -1
 var _swing_index := 0
+const DAMAGE_REACTION_COOLDOWN_MSEC := 450
+var _last_damage_reaction_msec := -DAMAGE_REACTION_COOLDOWN_MSEC
 var _trail_weapon_mesh: MeshInstance3D
 var _trail_weapon_tip := Vector3.ZERO
 var current_action: StringName = &"idle"
@@ -2162,6 +2164,9 @@ func set_overhead_crowded(crowded: bool) -> void:
 		return
 	_overhead_crowded = crowded
 	_refresh_overhead()
+
+func overhead_crowded() -> bool:
+	return _overhead_crowded
 
 func _fade_label(label: Label3D) -> void:
 	var alpha := 1.0
@@ -4913,6 +4918,27 @@ func end_charge_leap() -> void:
 	_schedule_due = -1.0
 	_travel_yaw_active = false
 	_wake()
+
+## A confirmed health loss can use the existing reaction while resting.
+## The full-body clip must never replace travel, a strike, a cast or a scene;
+## busy hits are not queued to play after their damage is already stale.
+func receive_damage_reaction(amount: int) -> bool:
+	if amount <= 0 or not _drawn or _crowd_hidden or _cinematic_active or _charge_leap != null \
+			or is_instance_valid(_mount_visual) or _ranged_aiming \
+			or _segment_duration > 0.0 or _movement_coast_remaining > 0.0 \
+			or current_action not in [&"idle", &"combat_idle", &"turn"] \
+			or animation_player == null or resolver == null:
+		return false
+	var now := Time.get_ticks_msec()
+	if now - _last_damage_reaction_msec < DAMAGE_REACTION_COOLDOWN_MSEC \
+			or not resolver.action_to_clip.has("pain") \
+			or not animation_player.has_animation(resolver.clip_for_action(&"pain")):
+		return false
+	play_action(&"pain", true)
+	if current_action != &"pain":
+		return false
+	_last_damage_reaction_msec = now
+	return true
 
 func play_action(action: StringName, restart := false) -> void:
 	var remote = RemotePresentationService.current() if _remote_generation > 0 else null

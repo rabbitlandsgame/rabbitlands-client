@@ -1,4 +1,4 @@
-extends "res://src/app/main.gd"
+extends "res://tests/fixtures/offline_ui_main.gd"
 ## Loaded after autoload registration, like the production main scene.
 var picked_actor := -1
 var picked_bag := -1

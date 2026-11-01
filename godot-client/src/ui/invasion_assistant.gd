@@ -838,6 +838,10 @@ func _apply_group_status(update: Dictionary) -> void:
 				membership_changed = membership_changed or field == "active"
 				group[field] = value
 				changed[group_name] = group
+		var live_boss: Dictionary = row.get("live_boss", {})
+		if group.get("live_boss", {}) != live_boss:
+			group["live_boss"] = live_boss
+			changed[group_name] = group
 		if row.has("coordinatesSupported") and group.get("coordinatesSupported", true) != row.coordinatesSupported:
 			group["coordinatesSupported"] = row.coordinatesSupported
 			changed[group_name] = group
@@ -1840,17 +1844,46 @@ func _rebuild_roster() -> void:
 			player.get("name", "Player"), player.get("combat_level", 0),
 			player.get("x", 0), player.get("y", 0)])
 	lines.append("\n[b]INVASION CREATURES[/b]")
+	lines.append("[color={invasion_muted}]Ratings are estimates, not recommended player levels.[/color]")
 	var creatures: Array = map_state.get("creatures", []) as Array
 	if creatures.is_empty():
 		lines.append("[color={invasion_muted}]None[/color]")
 	for raw_creature: Variant in creatures:
 		var creature := raw_creature as Dictionary
 		var marker := "[color={invasion_boss}]◆[/color]" if bool(creature.get("boss", false)) or bool(creature.get("miniboss", false)) else "[color={invasion_enemy}]◆[/color]"
-		lines.append("%s %s\n   %s · %d/%d HP · [%d,%d]" % [marker,
-			creature.get("name", "Invader"), creature.get("tier", "Unknown"),
-			creature.get("health", 0), creature.get("max_health", 0),
+		lines.append("%s %s\n   %s · [%d,%d]" % [marker,
+			creature.get("name", "Invader"), _live_threat_summary(creature),
 			creature.get("x", 0), creature.get("y", 0)])
 	map_roster.text = _invasion_markup("\n".join(lines))
+
+
+func _live_threat_summary(creature: Dictionary) -> String:
+	if not creature.has("native_level"):
+		return "%s · %d/%d HP" % [creature.get("tier", "Unknown"),
+			creature.get("health", 0), creature.get("max_health", 0)]
+	return ("Live %s · rating %d · combat level %d\n"
+		+ "Native level %d · Attack / Defense %d / %d · HP %d / %d\n"
+		+ "Innate damage %d–%d · Rolled bonus %.0f%% · Level scaling ×%.2f") % [
+		creature.get("tier", "Unknown"), creature.get("rating", 0), creature.get("combat_level", 0),
+		creature.get("native_level", 0), creature.get("attack", 0), creature.get("defense", 0),
+		creature.get("health", 0), creature.get("max_health", 0),
+		creature.get("damage_min", 0), creature.get("damage_max", 0),
+		float(creature.get("strength_bonus", 0)), float(creature.get("level_scale", 1.0))]
+
+
+func _group_threat_summary(group: Dictionary) -> String:
+	var lines: Array[String] = []
+	var declared: Dictionary = group.get("boss_details", {})
+	if not declared.is_empty():
+		lines.append("[b]Declared boss[/b] %s · Native level %d · Base rating %d" % [
+			declared.get("name", "Boss"), declared.get("native_level", 0), declared.get("rating", 0)])
+	elif not str(group.get("boss", "")).is_empty():
+		lines.append("[b]Declared boss[/b] %s · Native details unavailable" % group.get("boss"))
+	var live: Dictionary = group.get("live_boss", {})
+	if not live.is_empty():
+		lines.append("[b]Live boss[/b] %s\n%s" % [live.get("name", "Boss"), _live_threat_summary(live)])
+	lines.append("Ratings are estimates, not recommended player levels.")
+	return "\n".join(lines)
 
 
 func _on_coordinate_selected(tile: Vector2i) -> void:
@@ -1986,10 +2019,11 @@ func _show_group(next_group: Dictionary) -> void:
 	group_spawn.disabled = active or int(selected_group.get("points",0)) == 0
 	group_clear.disabled = not active
 	group_save.disabled = not dynamic
-	group_detail.text = "[b]%s[/b]\n%s · %s\n%s\nRespawns: %s\nHealth ×%.1f · Strongest rating %d" % [
+	group_detail.text = "[b]%s[/b]\n%s · %s\n%s\nRespawns: %s\nHealth ×%.1f · Strongest base species rating %d\n%s" % [
 		selected_group.get("name", "Group"), "Editable" if dynamic else "Configured · duplicate to edit",
 		selected_group.get("map_name", ""), _active_summary(selected_group), _respawn_summary(selected_group),
-		float(selected_group.get("health_multiplier",1)), int(selected_group.get("strength",0))]
+		float(selected_group.get("health_multiplier",1)), int(selected_group.get("strength",0)),
+		_group_threat_summary(selected_group)]
 	if not preserve_fields:
 		group_name.text = str(selected_group.get("name", ""))
 		group_description.text = str(selected_group.get("description", ""))

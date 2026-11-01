@@ -85,6 +85,7 @@ var _profile := ""
 var _empty_label: Label
 var _quote_request := ""
 var _last_quote: Dictionary = {}
+var _power_notice := ""
 var _assign_button: Button
 var _preparation_label: Label
 var _prepare_controls: HBoxContainer
@@ -220,6 +221,7 @@ func _on_state_changed(path: StringName) -> void:
 	if path in [&"spells", &"stats", &"inventory", &"knowledge", &"spell_power"]:
 		_quote_request = ""
 		_last_quote.clear()
+		_power_notice = ""
 		sync()
 
 func sync() -> void:
@@ -321,6 +323,7 @@ func _on_spell_pressed(id: int) -> void:
 	selected_spell_id = id
 	_quote_request = ""
 	_last_quote.clear()
+	_power_notice = ""
 	if loadout != null: requested_power = loadout.power_for(id)
 	power_picker.set_value_no_signal(requested_power)
 	for key in _buttons: (_buttons[key] as Button).set_pressed_no_signal(key == id)
@@ -362,8 +365,8 @@ func _refresh_details() -> void:
 	favorite_button.text = "★" if selected_spell_id in _favorites else "☆"
 	favorite_button.tooltip_text = "Remove favorite" if selected_spell_id in _favorites else "Add favorite"
 	effect_preview.set_spell(definition, requested_power)
-	var limit: Dictionary = AppState.spell_power.get(catalog.effect_for(selected_spell_id), {})
-	power_picker.max_value = maxi(requested_power, maxi(1, int(limit.get("limit", 10))))
+	power_picker.max_value = 10
+	power_picker.tooltip_text = "The server checks the selected tier's Magic and Nexus requirements."
 	numbers_label.text = "%s · Base ether %d" % [str(definition.get("scope", "self")).capitalize(), int(definition.get("mana", 0))]
 	var magic := int(AppState.stats.get("magic", 0))
 	var level := int(definition.get("level", 0))
@@ -398,6 +401,7 @@ func _refresh_details() -> void:
 			status_label.text = "Checking cost and requirements…"
 			TextColors.bind(status_label, "spell_muted")
 			cast_button.disabled = true
+			_refresh_preparation()
 			Network.magic_request({"op": "preview", "id": selected_spell_id, "power": requested_power})
 		elif not _last_quote.is_empty():
 			_quote_state(_last_quote)
@@ -415,6 +419,16 @@ func _add_reagent(reagent: Dictionary, required: int, have: int) -> void:
 func _quote_state(data: Dictionary) -> void:
 	if data.get("kind") != "preview" or int(data.get("id", -1)) != selected_spell_id or int(data.get("requested", 0)) != requested_power: return
 	_last_quote = data.duplicate(true)
+	var effective := int(data.get("power", 1))
+	if int(data.get("limit", 0)) >= 1 and effective != requested_power:
+		_power_notice = str(data.get("power_reason", "The requested tier exceeds your current Magic or Magic Nexus.")) + " Using Power %d." % effective
+		requested_power = effective
+		power_picker.set_value_no_signal(effective)
+		# Costs already describe this effective tier. Normalize the cache token
+		# as well, so a late reply for the old request cannot restore it.
+		_last_quote["requested"] = effective
+		_quote_request = "%d:%d" % [selected_spell_id, effective]
+		if loadout != null: loadout.remember_power(selected_spell_id, effective)
 	effect_preview.set_spell(catalog.spell(selected_spell_id), int(data.get("power", 1)))
 	numbers_label.text = "%s · Power %d / %d · Ether %d" % [str(catalog.spell(selected_spell_id).get("scope", "self")).capitalize(), int(data.get("power", 1)), int(data.get("limit", 1)), int(data.get("mana", 0))]
 	var quality: Dictionary = data.get("potency", {})
@@ -433,16 +447,27 @@ func _quote_state(data: Dictionary) -> void:
 	if not str(data.get("focus", "")).is_empty():
 		UI.requirement(reagents_rows, str(data.focus), "Focus", true)
 	var ready := bool(data.get("ready", false))
-	_set_status("Ready" if ready else str(data.get("reason", "Unavailable")), ready)
+	var status := "Ready" if ready else str(data.get("reason", "Unavailable"))
+	_set_status((_power_notice + "\n" if not _power_notice.is_empty() else "") + status, ready)
+	_refresh_preparation()
 
 func _on_cast_pressed() -> void:
 	if cast_button.disabled or selected_spell_id < 0 or not _cast.is_valid(): return
+	if loadout != null: loadout.remember_power(selected_spell_id, requested_power)
 	_cast.call(selected_spell_id)
 	if loadout != null: close()
 
 func _refresh_preparation() -> void:
 	if _assign_button == null: return
 	_assign_button.disabled = selected_spell_id < 0 or loadout == null
+	if AppState.authenticated and _last_quote.is_empty():
+		_assign_button.disabled = true
+		_assign_button.tooltip_text = "Checking the selected power with the server…"
+	elif not _last_quote.is_empty() and int(_last_quote.get("limit", 0)) < 1:
+		_assign_button.disabled = true
+		_assign_button.tooltip_text = str(_last_quote.get("reason", "Requires more Magic or Magic Nexus."))
+	else:
+		_assign_button.tooltip_text = "Assign the displayed power to this slot." if selected_spell_id >= 0 else "Select a spell first."
 	_prepare_controls.visible = loadout != null
 	if selected_spell_id < 0 or catalog == null:
 		_preparation_label.text = ""
@@ -696,6 +721,7 @@ func _build_details() -> void:
 		if loadout != null and selected_spell_id >= 0: loadout.remember_power(selected_spell_id, requested_power)
 		_quote_request = ""
 		_last_quote.clear()
+		_power_notice = ""
 		_refresh_details()
 		_refresh_preparation())
 	power_row.add_child(power_picker)
@@ -714,7 +740,7 @@ func _build_details() -> void:
 	_assign_button.name = "AssignSpell"
 	_assign_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_assign_button.pressed.connect(func():
-		if selected_spell_id >= 0 and loadout != null:
+		if not _assign_button.disabled and selected_spell_id >= 0 and loadout != null:
 			loadout.assign_slot(slot_picker.selected, selected_spell_id, requested_power)
 			_preparation_label.text = "Assigned to slot %d" % (slot_picker.selected + 1))
 	_prepare_controls.add_child(_assign_button)

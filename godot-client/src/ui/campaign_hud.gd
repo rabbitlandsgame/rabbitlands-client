@@ -308,6 +308,7 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 	_local_tile = local_tile
 	_current_map = EloriaProtocol.map_id_from_reference(current_map)
 	var active := bool(snapshot.get("active", false))
+	var complete := str(snapshot.get("kind", "")) == "rescue" and bool(snapshot.get("completed", false))
 	var matches := EloriaProtocol.map_id_from_reference(str(snapshot.get("map", ""))) == _current_map
 	var party: Dictionary = snapshot.get("party", {})
 	var can_join := bool(party.get("can_join", false))
@@ -346,6 +347,15 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 	_reduced.set_pressed_no_signal(reduced_motion)
 	_guidance.visible = active and matches and not travelling and Guidance.is_guided(snapshot)
 	_guidance.text = Guidance.legend(snapshot) if _guidance.visible else ""
+	if complete:
+		# Keep scene replay and Return accessible without another objective,
+		# conversation or reward selection after personal completion.
+		_hint.text = "Your rewards and account are saved."
+		for control: Control in [_notice, _opening_details, _rescue, _rescue_actions,
+				_rescue_rewards, _scroll, _guidance, _help, _account, _entry, _join, _own,
+				_bank, _road, _lamps, _prediction_actions, _party, _adoption, _adoption_actions,
+				_companion, _companion_actions, _convoy, _convoy_actions]:
+			control.hide()
 	if _guidance.visible != _opening_actions_first:
 		_opening_actions_first = _guidance.visible
 		_column.move_child(_scroll, _hint.get_index() + 1 if _opening_actions_first else _entry.get_index() - 1)
@@ -353,7 +363,7 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 	_hint.visible = not _embedded
 	_layout()
 	var rows: Array = []
-	var source: Array = Guidance.work_targets(snapshot) if Guidance.is_guided(snapshot) else snapshot.get("targets", [])
+	var source: Array = [] if complete else Guidance.work_targets(snapshot) if Guidance.is_guided(snapshot) else snapshot.get("targets", [])
 	# Keep the server's clue order stable within each group, including legacy
 	# encounters that have no navigation-only checkpoint.
 	for navigation: bool in [true, false]:

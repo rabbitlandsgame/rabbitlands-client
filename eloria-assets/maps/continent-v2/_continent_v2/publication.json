@@ -1076,7 +1076,7 @@
    "README": "3370dec01f13023720b6294d8e9a3ae661e4fe38ea4fbb9e069c09a32da62ba2",
    "maps.txt": "9f1375323de77dfefd3fd18bafb34062ab13b2dbfce183356111a2f074540a0a",
    "spawns.txt": "d60fb9f16c1223ca848751f5648eb9845bd6cf7d6cc4f048063f6fdd90babf79",
-   "harvesting.txt": "136d7206328274e3b7586ce187bb238d444f7e1fa55d0bb60bb12ffd85251e6f",
+   "harvesting.txt": "6ab880bdd952d8d12bf2e1dffa97465304999dd6def586058f166e05e561282c",
    "npcs.txt": "daf92e2604bde6c98dcf541d74c0c10d76ec90b200d0830551babada98d28cf4",
    "interactives.txt": "c1e0d679ba50c52d54b0fcd1acb2e0c7dc714e1d773687570d1f8b6ecae5fb05",
    "exterior_connections.json": "805a49705bdbc26e9b8052384b23aa1689d05415a990d1c74f1496973cff334e",
@@ -1101,7 +1101,7 @@
      "home_npcs.txt",
      "special_areas.txt"
     ],
-    "manifestBlockSha256": "802a0db6ee2b5efe2a3620f93d912e49f61b13cfc73541fcbdf6d4986d4feef6"
+    "manifestBlockSha256": "a81bac114c16c379a996a56b6bae79e74f6d2f7806d49c286a32255d73baaa10"
    },
    "m2": {
     "files": [
@@ -1118,7 +1118,7 @@
      "home_npcs.txt",
      "special_areas.txt"
     ],
-    "manifestBlockSha256": "091649b7950f2900a05934e6030588640678f751b3a523892d0b0eecd8c1cf1b"
+    "manifestBlockSha256": "01293a326cece1c51568563a42d7b64b8f13a38dc5a9da5760495409f6e9cd71"
    },
    "m3": {
     "files": [
@@ -1135,7 +1135,7 @@
      "home_npcs.txt",
      "special_areas.txt"
     ],
-    "manifestBlockSha256": "f936a4203052f3c93e99b02157d1ddfb1293f9d6ae559cf98a679aca0be4f33a"
+    "manifestBlockSha256": "291b28073e9aed4e47d14cb876a8cb6a64d41e560f13c6d9fd43fed880d27b6b"
    },
    "m4": {
     "files": [
@@ -1152,7 +1152,7 @@
      "home_npcs.txt",
      "special_areas.txt"
     ],
-    "manifestBlockSha256": "0d339cb5e9f796eec209ae5996d875d98952b3015a1bb25ab95ae5c48b5cd296"
+    "manifestBlockSha256": "1c21bf15d5bcad4b8c965ac2697aa324416ad0614a38eceaac6e486fde78eb7d"
    }
   },
   "manifestEntriesSha256": "5f621181e12876425780046147fe72345203a2d1e825dc31bd4d377061f58244",
@@ -1195,9 +1195,9 @@
     32
    ],
    "servedGridSha256": "dd55f2df9f9b3b944d0f6e335e2561d5dc4b640929a27ebbcd9de08f144ac94d",
-   "collisionSha256": "a73fc151a1a5bc16c6f649b150e70e064a620bbea13af8797df5f9300b2c2781",
-   "sourceSha256": "7f300dff5e6ab8325777bed79cbb070fb987e15fa869a977d3a82955286f58a1",
-   "manifestSha256": "b6900bef430c063ebd90f0e374fa45630bee3fdbcf6fd0ddd188503d594e706f",
+   "collisionSha256": "5a20e4f54e0038e91e26cbef522701a8dda32c2f885ad35f89c598713cb87172",
+   "sourceSha256": "705904c3220d4774f16097d8dedc01522b0c7aedfc291f77bf2834551e8609e4",
+   "manifestSha256": "e33b0eefc07bb7f5af2cbb82c5f8d99204e0a5a610bd6d1c4ad7fc2e292122ec",
    "sections": [
     {
      "id": "lantern_mine",
@@ -1948,7 +1948,7 @@
     }
    ],
    "rows": {
-    "nodes": 736,
+    "nodes": 739,
     "spawns": 178,
     "interactives": 72
    },
@@ -2306,5 +2306,104 @@
    },
    "walkableTiles": 1841
   }
- }
+ },
+ "interiorResourceAmendments": [
+  {
+   "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_interior_resources.py",
+   "region": "landfall_insides",
+   "addedNodes": [
+    [
+     19901,
+     "Coal",
+     510,
+     550
+    ],
+    [
+     19902,
+     "Coal",
+     511,
+     551
+    ],
+    [
+     19903,
+     "Coal",
+     512,
+     552
+    ]
+   ],
+   "basePublicationSha256": "605c6108192c6ac26c945ad6c54e450dfdc057cf3dd563e02d3e8807124aa69d",
+   "baseSourceSha256": "7f300dff5e6ab8325777bed79cbb070fb987e15fa869a977d3a82955286f58a1",
+   "sourceSha256": "705904c3220d4774f16097d8dedc01522b0c7aedfc291f77bf2834551e8609e4",
+   "frozenExteriorMapsSha256": "d706b613b0b8b09448bc914d285982b2d583311da8aece03bfd4db6b44f3e6f9",
+   "exteriorValidation": "explicit historical server package view matches sealed publication; newer client exterior files retained unchanged",
+   "frozenExteriorFilesSha256": "2e6f8043ef88e1188179934761d28f2afb2cb9cd89b3ccce0c902a3934b5624a",
+   "retainedClientExteriorFilesSha256": "c242e2f56272ca1ad7b51538cf3bfe16778bce6ace7f2611bbdf4fb5b32b283e",
+   "clientExteriorDrift": [
+    "boarsend",
+    "brambleshaw",
+    "coilmere",
+    "greenlight",
+    "hearthcroft",
+    "hornmere",
+    "landfall",
+    "pinebrow",
+    "ravenhead",
+    "reedfall",
+    "ringholm",
+    "saltsound",
+    "stagheath",
+    "suncoil",
+    "twinbrook",
+    "warrenmead",
+    "whitepeak"
+   ],
+   "sealedCrossingsSha256": "30eb2e9d09de9edd5b1aa0c448fe8c21a05efd2554a194219139aecb2d724dac",
+   "retainedClientCrossingsSha256": "deea267d8bc8c8db91b4ad3d97b35134a19108b380827e671950a5ba0c38acdc",
+   "baseManifestSha256": "b6900bef430c063ebd90f0e374fa45630bee3fdbcf6fd0ddd188503d594e706f",
+   "proposedBuildManifestSha256": "cf96924dd64032d9bd8f880e68e1394d4e8904adb27e210f5920a1073ff5b1a8",
+   "certifiedGlbSha256": "f0e294abec5a56a59c13f697bb9dcdb6180d36ae5064078edcfc2fe2f85f89b4",
+   "rebuiltGlbSha256": "5af4453300e923a240708ca5536382828d236af06577195c8b7b611a89a4db61",
+   "retainedResourcesSha256": "0994399f62bd91c6785b9b6bc8405705e93d197cc7c7a75fb20df59d0fadbaee",
+   "geometry": "retain certified shell and resource closure; genuine base/proposed shell bytes equal",
+   "doorValidation": "inherited unchanged doors/passages from sealed publication; no exterior bakes supplied",
+   "halfCellClosures": [
+    [
+     1022,
+     1102
+    ],
+    [
+     1023,
+     1102
+    ],
+    [
+     1023,
+     1103
+    ],
+    [
+     1025,
+     1104
+    ]
+   ],
+   "servedGridSha256": "dd55f2df9f9b3b944d0f6e335e2561d5dc4b640929a27ebbcd9de08f144ac94d",
+   "collisionSha256": "5a20e4f54e0038e91e26cbef522701a8dda32c2f885ad35f89c598713cb87172",
+   "scenerySha256": "d65298d3ce33face3b219330b43395153600f5e15ff00414587990123affb905",
+   "minimapSha256": "6a5541d651f417abb8ba541362ffbe877896f490933551346b2f428859510aa5",
+   "harvestingSha256": "6ab880bdd952d8d12bf2e1dffa97465304999dd6def586058f166e05e561282c",
+   "renderedAcceptance": "pending",
+   "backgroundCarryForward": {
+    "catalogBaseSha256": "2323ae3660669d1fbd6f36cd012ef97eb283873e50fc0a2c370e04caa19dc6fc",
+    "retainedPictures": 23,
+    "rendererInputsSha256": "c768a33064a46810018a4de535e698cf36ebae8ca1653d8301f04c90298a37c0",
+    "renderSettings": {
+     "pixelsPerMetre": 4.0,
+     "supersample": 1,
+     "minimumLongestSide": 512,
+     "maximumLongestSide": 2048,
+     "roofPolicy": "declared-cutaway-and-named-cave-lids"
+    },
+    "imageRowsSha256": "2cbdd6b7a7dc83de183721daf3bb2c83273604e54613e64e7e48035c48680565",
+    "contract": "exact renderer inputs/image bytes retained; only non-render manifest fields change"
+   }
+  }
+ ]
 }

@@ -66,7 +66,11 @@ Preferences apply immediately, survive actor updates and save locally under
 Creature banners can overlap each other and NPC banners, while visible player
 banners retain their space. The active combat target keeps its existing
 exception to overlap hiding; explicit visibility and content choices still
-apply to it.
+apply to it. Hidden NPC/player banners do not reserve invisible screen space.
+At the edge of another banner, a visible block hides on actual overlap and an
+overlap-hidden block returns once six render pixels clear. This small gap keeps
+names and health bars steady during slight camera movement; range, wall and
+visibility rules still apply immediately.
 
 Creature imports specify `visualBacksetMetres` in gameplay metres after import
 scaling, before runtime small-creature enlargement and server actor scale.

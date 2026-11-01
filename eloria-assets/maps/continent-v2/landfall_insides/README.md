@@ -13,7 +13,7 @@ from the authored underground plan into `cartography-continent-v2.json`.
 
 | Area | Exterior entrance | Resources | Encounters |
 |---|---|---|---|
-| Lantern Mine: Upper Galleries → workings → Old Seam | Landfall `(332, 86)` | Existing mine resources retained | Four native groups of three Lantern Goblins in the Upper Galleries |
+| Lantern Mine: Upper Galleries → workings → Old Seam | Landfall `(332, 86)` | Entry Coal vein; existing workings and Old Seam resources retained | Four native groups of three Lantern Goblins in the Upper Galleries |
 | Pinebrow Deep Workings | Pinebrow `(537, 490)` | Coal, Iron Ore, Copper, Sulfur, Slate | 2 Coal Kobolds, 1 Nightweave Spider |
 | Cenote Deeps | Coilmere `(230, 754)` | Quartz, Salt, Slate, Sulfur, Crystal, Geode | 2 Cave Spiders, 1 Moss Golem |
 | Boarsend Old Barrow | Boarsend `(825, 489)` | Quartz, Salt | 2 Skeletons, 1 Moss Golem |
@@ -44,6 +44,11 @@ looping haulage tunnels and side cuts. The outside door now arrives at
 The return stair in the workings is `(55, 27)`. The existing Old Seam passage
 remains in place. Public Lantern Goblins use the existing goblin model, level 5
 stats, short leashes and ordinary respawns; entry and stair landings stay clear.
+
+Three Coal seams stand along the western wall of the Upper Galleries entry
+chamber, at `(510, 550)`, `(511, 551)` and `(512, 552)`. Their object IDs are
+19901–19903. A newcomer with a Pickaxe can gather here before descending; the
+approaches stay clear of rescue party and escort landings.
 
 All three mine levels use a warm lantern atmosphere, with 57 lights in the
 Upper Galleries, 18 in the workings and 6 in Old Seam. The compatibility renderer
@@ -111,3 +116,24 @@ already served. An interior change must not silently promote unrelated exterior
 collision or crossing changes. The 2026-10-31 mine publication keeps the exterior
 packages from client `2c04d2e8`; their exact hashes remain in the publication
 record. The mine source, collision and manifest hashes identify the new interior.
+
+The stream-review Coal addition uses the narrowly scoped
+`_continent_v2/publish_interior_resources.py` amendment. It requires genuine
+baseline/proposed builds and scenery configurations, and rejects changes beyond
+the three nodes, their vein and four client half-cell closures. The served grid
+stays identical. The certified shell, textures and unaffected scenery are retained;
+fresh library-dependent pillar enumeration is not promoted into other sections.
+
+When the current exterior packages are newer than the server's retained
+publication, `--frozen-exteriors` must contain the exact historical
+`REGION/client/{world.json,collision.bin,served-grid.escg.gz}` files and
+`crossings.json`. Their hashes must match the sealed publication. The newer
+client files are separately validated and watched for changes. This amendment
+inherits unchanged door validation; it does not replace the full publisher's
+exact-bake check.
+
+Validation prepares a private `--bundle` containing old/new bytes and hashes
+before any local writes. Review it, then use `--resume <bundle>` to apply or
+resume it. Only old or already-applied target states are accepted; unrelated
+edits stop the operation. Preserve that bundle until both repositories are
+integrated. Rendered seam visibility, cutaway and picking remain acceptance work.

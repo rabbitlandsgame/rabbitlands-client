@@ -62,6 +62,8 @@ func _run() -> void:
 	var mouth := _object(59001, Vector2i(30, 30), "Beyond it lies Lantern Mine. Safe.", catalog)
 	made.append(mouth)
 	_expect(mouth.destination() == "Lantern Mine", "a cave mouth still hovers as where it leads")
+	_expect(mouth.cave_entrance and not cave.cave_entrance,
+		"the exterior cave mouth participates in approach-to-use without reclassifying an internal passage")
 	var gate := _object(17, Vector2i(3, 3), "A waygate hums. Beyond it lies Boarsend.", catalog)
 	made.append(gate)
 	_expect(gate.destination() == "Boarsend", "a waygate still hovers as where it leads")

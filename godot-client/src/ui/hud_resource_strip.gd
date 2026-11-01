@@ -119,9 +119,9 @@ func _draw() -> void:
 		origin.x += icon_width
 		var content_width := cell.x - icon_width
 		var stack_text: bool = grid.stacked
-		if config.show_labels: draw_string(font, origin + Vector2(0, 12), _caption(key), HORIZONTAL_ALIGNMENT_LEFT, content_width - 8, 11, config.text_color)
+		if config.show_labels: _draw_text(font, origin + Vector2(0, 12), _caption(key), HORIZONTAL_ALIGNMENT_LEFT, content_width - 8, 11, config.text_color)
 		if config.show_values:
-			draw_string(font, origin + Vector2(0, 25 if stack_text else 12), "%d / %d" % [values.x, values.y], HORIZONTAL_ALIGNMENT_RIGHT, content_width - 8, 10, config.text_color)
+			_draw_text(font, origin + Vector2(0, 25 if stack_text else 12), "%d / %d" % [values.x, values.y], HORIZONTAL_ALIGNMENT_RIGHT, content_width - 8, 10, config.text_color)
 		var bar_y: float = grid.bar_y
 		var rect := Rect2(origin + Vector2(0, bar_y), Vector2(maxf(2, content_width - 8), 7))
 		draw_rect(rect, Color("101413"))
@@ -130,3 +130,9 @@ func _draw() -> void:
 		fill.size.x *= clampf(values.x / maxf(1, values.y), 0, 1)
 		draw_rect(fill, color)
 		draw_rect(rect, config.border_color, false, 1)
+
+## Keep floating HUD text readable when a saved design hides its backing.
+func _draw_text(font: Font, at: Vector2, text: String, alignment: HorizontalAlignment,
+		width: float, points: int, color: Color) -> void:
+	draw_string_outline(font, at, text, alignment, width, points, 2, Color(0.025, 0.03, 0.025, 1.0))
+	draw_string(font, at, text, alignment, width, points, color)

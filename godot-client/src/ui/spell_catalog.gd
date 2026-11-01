@@ -104,6 +104,16 @@ func spell(spell_id: int) -> Dictionary:
 	var value: Variant = _spells.get(int(_aliases.get(str(spell_id), spell_id)))
 	return value as Dictionary if value is Dictionary else {}
 
+## The server states the effect ceiling; delivery variants also carry their
+## own Nexus gate. Reuse those two facts for badges, drags and actual casts.
+func cast_power_limit(spell_id: int, power_state: Dictionary, stats: Dictionary) -> int:
+	var definition := spell(spell_id)
+	if definition.is_empty(): return 0
+	var stated: Dictionary = power_state.get(effect_for(spell_id), {})
+	if stated.is_empty(): return 1 # Preserve the existing quick-cast fallback for older servers.
+	if int(stats.get("magic", 0)) < int(definition.get("level", 0)): return 0
+	return mini(int(stated.get("limit", 1)), maxi(0, 1 + int(stats.get("magic_nexus", 0)) - int(definition.get("nexus", 0))))
+
 func icon_for(spell_id: int) -> Texture2D:
 	var definition: Dictionary = spell(spell_id)
 	if definition.is_empty():
@@ -154,6 +164,10 @@ func unavailable_reasons(spell_id: int, known_knowledge: Array[int], stats: Dict
 	var current_level: int = int(stats.get("magic", 0))
 	if current_level < required_level:
 		reasons.append("Requires Magic %d (current %d)" % [required_level, current_level])
+	var required_nexus := int(definition.get("nexus", 0))
+	var current_nexus := int(stats.get("magic_nexus", 0))
+	if current_nexus < required_nexus:
+		reasons.append("Requires Magic Nexus %d (current %d)" % [required_nexus, current_nexus])
 	var required_mana: int = int(definition.get("mana", 0))
 	var current_mana: int = int(stats.get("ether", 0))
 	if current_mana < required_mana:

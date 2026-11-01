@@ -13,6 +13,7 @@ const MAX_PAYLOAD := 65532
 const MAP_STORAGE_COORDS_CAPABILITY := "map_storage_coords_v1"
 const CoordinateTransport = preload("res://src/network/coordinate_transport.gd")
 const InterestProtocol := preload("res://src/network/interest_protocol.gd")
+const GauntletProgressProtocol := preload("res://src/network/gauntlet_progress_protocol.gd")
 
 ## The guild packet's permissions field: what the server says this reader may
 ## do. They live here, with the packet they arrive in, and the rank each power
@@ -143,6 +144,7 @@ enum ServerMessage {
 	ELORIA_GAUNTLET_LOOT_STATE = 192,
 	ELORIA_CAMPAIGN_STATE = 191,
 	ELORIA_APPEARANCE_PROTOCOL = 190,
+	ELORIA_GAUNTLET_PROGRESS_STATE = 189,
 	# Which map package the server was built against. Continues the same
 	# downward run below 211.
 	ELORIA_MAP_DIGEST = 209,
@@ -336,6 +338,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"party_window_v1",
 	"gauntlet_ready_v1",
 	"gauntlet_loot_v1",
+	"gauntlet_progress_v1",
 	"perk_catalog_v3",
 	"player_info_v1",
 	"achievements_window_v1",
@@ -1250,6 +1253,8 @@ static func decode_server(command: int, payload: PackedByteArray, logical_coordi
 			return decode_gauntlet_ready(payload)
 		ServerMessage.ELORIA_GAUNTLET_LOOT_STATE:
 			return decode_gauntlet_loot(payload)
+		ServerMessage.ELORIA_GAUNTLET_PROGRESS_STATE:
+			return GauntletProgressProtocol.decode(payload)
 		ServerMessage.ELORIA_CAMPAIGN_STATE:
 			return decode_campaign(payload)
 		ServerMessage.ELORIA_LANTERN_STATE:
@@ -3582,7 +3587,7 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 		return {"type": "invalid", "error": "campaign_stage"}
 	if bool(value.active) and (str(value.get("map", "")).is_empty() or str(value.get("run_id", "")).is_empty()):
 		return {"type": "invalid", "error": "campaign_identity"}
-	for field: String in ["available", "started"]:
+	for field: String in ["available", "started", "completed"]:
 		if value.has(field) and not value[field] is bool:
 			return {"type": "invalid", "error": "campaign_boolean"}
 	if not value.get("targets", []) is Array or value.get("targets", []).size() > 64:

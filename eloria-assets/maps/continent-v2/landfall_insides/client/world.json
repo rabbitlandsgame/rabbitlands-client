@@ -15782,6 +15782,54 @@
       ],
       "section": "frozen_deep",
       "authority": "server"
+    },
+    {
+      "id": "lantern_upper_galleries-19901",
+      "objectId": 19901,
+      "resource": "Coal",
+      "serverTile": [
+        510,
+        550
+      ],
+      "position": [
+        510.5,
+        0,
+        169.5
+      ],
+      "section": "lantern_upper_galleries",
+      "authority": "server"
+    },
+    {
+      "id": "lantern_upper_galleries-19902",
+      "objectId": 19902,
+      "resource": "Coal",
+      "serverTile": [
+        511,
+        551
+      ],
+      "position": [
+        511.5,
+        0,
+        168.5
+      ],
+      "section": "lantern_upper_galleries",
+      "authority": "server"
+    },
+    {
+      "id": "lantern_upper_galleries-19903",
+      "objectId": 19903,
+      "resource": "Coal",
+      "serverTile": [
+        512,
+        552
+      ],
+      "position": [
+        512.5,
+        0,
+        167.5
+      ],
+      "section": "lantern_upper_galleries",
+      "authority": "server"
     }
   ],
   "portals": [
@@ -17634,7 +17682,7 @@
       "step": 0.1
     },
     "gridAlignment": "tile-centres-v1",
-    "sha256": "a73fc151a1a5bc16c6f649b150e70e064a620bbea13af8797df5f9300b2c2781",
+    "sha256": "5a20e4f54e0038e91e26cbef522701a8dda32c2f885ad35f89c598713cb87172",
     "nodeNames": [
       "Build_amethyst_geode_east_amethyst_storm_rock",
       "Build_amethyst_geode_north_amethyst_storm_rock",
@@ -46652,9 +46700,108 @@
   },
   "provenance": {
     "source": "_continent_v2/content/underground.json",
-    "sourceSha256": "7f300dff5e6ab8325777bed79cbb070fb987e15fa869a977d3a82955286f58a1",
+    "sourceSha256": "705904c3220d4774f16097d8dedc01522b0c7aedfc291f77bf2834551e8609e4",
     "builder": "_continent_v2/build_underground.py",
-    "builderSha256": "d4ad29b2b55f51752aea4478d782915cd1b774cf59611e689b84d868468e2845"
+    "builderSha256": "d4ad29b2b55f51752aea4478d782915cd1b774cf59611e689b84d868468e2845",
+    "interiorResourceAmendments": [
+      {
+        "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_interior_resources.py",
+        "region": "landfall_insides",
+        "addedNodes": [
+          [
+            19901,
+            "Coal",
+            510,
+            550
+          ],
+          [
+            19902,
+            "Coal",
+            511,
+            551
+          ],
+          [
+            19903,
+            "Coal",
+            512,
+            552
+          ]
+        ],
+        "basePublicationSha256": "605c6108192c6ac26c945ad6c54e450dfdc057cf3dd563e02d3e8807124aa69d",
+        "baseSourceSha256": "7f300dff5e6ab8325777bed79cbb070fb987e15fa869a977d3a82955286f58a1",
+        "sourceSha256": "705904c3220d4774f16097d8dedc01522b0c7aedfc291f77bf2834551e8609e4",
+        "frozenExteriorMapsSha256": "d706b613b0b8b09448bc914d285982b2d583311da8aece03bfd4db6b44f3e6f9",
+        "exteriorValidation": "explicit historical server package view matches sealed publication; newer client exterior files retained unchanged",
+        "frozenExteriorFilesSha256": "2e6f8043ef88e1188179934761d28f2afb2cb9cd89b3ccce0c902a3934b5624a",
+        "retainedClientExteriorFilesSha256": "c242e2f56272ca1ad7b51538cf3bfe16778bce6ace7f2611bbdf4fb5b32b283e",
+        "clientExteriorDrift": [
+          "boarsend",
+          "brambleshaw",
+          "coilmere",
+          "greenlight",
+          "hearthcroft",
+          "hornmere",
+          "landfall",
+          "pinebrow",
+          "ravenhead",
+          "reedfall",
+          "ringholm",
+          "saltsound",
+          "stagheath",
+          "suncoil",
+          "twinbrook",
+          "warrenmead",
+          "whitepeak"
+        ],
+        "sealedCrossingsSha256": "30eb2e9d09de9edd5b1aa0c448fe8c21a05efd2554a194219139aecb2d724dac",
+        "retainedClientCrossingsSha256": "deea267d8bc8c8db91b4ad3d97b35134a19108b380827e671950a5ba0c38acdc",
+        "baseManifestSha256": "b6900bef430c063ebd90f0e374fa45630bee3fdbcf6fd0ddd188503d594e706f",
+        "proposedBuildManifestSha256": "cf96924dd64032d9bd8f880e68e1394d4e8904adb27e210f5920a1073ff5b1a8",
+        "certifiedGlbSha256": "f0e294abec5a56a59c13f697bb9dcdb6180d36ae5064078edcfc2fe2f85f89b4",
+        "rebuiltGlbSha256": "5af4453300e923a240708ca5536382828d236af06577195c8b7b611a89a4db61",
+        "retainedResourcesSha256": "0994399f62bd91c6785b9b6bc8405705e93d197cc7c7a75fb20df59d0fadbaee",
+        "geometry": "retain certified shell and resource closure; genuine base/proposed shell bytes equal",
+        "doorValidation": "inherited unchanged doors/passages from sealed publication; no exterior bakes supplied",
+        "halfCellClosures": [
+          [
+            1022,
+            1102
+          ],
+          [
+            1023,
+            1102
+          ],
+          [
+            1023,
+            1103
+          ],
+          [
+            1025,
+            1104
+          ]
+        ],
+        "servedGridSha256": "dd55f2df9f9b3b944d0f6e335e2561d5dc4b640929a27ebbcd9de08f144ac94d",
+        "collisionSha256": "5a20e4f54e0038e91e26cbef522701a8dda32c2f885ad35f89c598713cb87172",
+        "scenerySha256": "d65298d3ce33face3b219330b43395153600f5e15ff00414587990123affb905",
+        "minimapSha256": "6a5541d651f417abb8ba541362ffbe877896f490933551346b2f428859510aa5",
+        "harvestingSha256": "6ab880bdd952d8d12bf2e1dffa97465304999dd6def586058f166e05e561282c",
+        "renderedAcceptance": "pending",
+        "backgroundCarryForward": {
+          "catalogBaseSha256": "2323ae3660669d1fbd6f36cd012ef97eb283873e50fc0a2c370e04caa19dc6fc",
+          "retainedPictures": 23,
+          "rendererInputsSha256": "c768a33064a46810018a4de535e698cf36ebae8ca1653d8301f04c90298a37c0",
+          "renderSettings": {
+            "pixelsPerMetre": 4.0,
+            "supersample": 1,
+            "minimumLongestSide": 512,
+            "maximumLongestSide": 2048,
+            "roofPolicy": "declared-cutaway-and-named-cave-lids"
+          },
+          "imageRowsSha256": "2cbdd6b7a7dc83de183721daf3bb2c83273604e54613e64e7e48035c48680565",
+          "contract": "exact renderer inputs/image bytes retained; only non-render manifest fields change"
+        }
+      }
+    ]
   },
   "externalResources": {
     "../../../_shared/images/03ab777006bb7b6d23c06f339ae702915f0b2fa1b050a5b1c08c1ce498cf4eda.png": "03ab777006bb7b6d23c06f339ae702915f0b2fa1b050a5b1c08c1ce498cf4eda",
