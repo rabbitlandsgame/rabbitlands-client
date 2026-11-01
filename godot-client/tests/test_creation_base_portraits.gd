@@ -59,13 +59,13 @@ func _check_catalog() -> void:
 	check(manifest is Dictionary and manifest.get("portraits") is Dictionary, "Current catalog has an offline portrait manifest")
 	if manifest is not Dictionary or manifest.get("portraits") is not Dictionary:
 		return
-	check((manifest.portraits as Dictionary).size() >= 11, "Retained portrait catalog covers the enabled Human starting looks")
+	check((manifest.portraits as Dictionary).size() >= 41, "Retained portrait catalog covers the enabled Human starting looks")
 	var portraits := Portraits.new()
 	portraits.configure()
 	var textures := {}
 	for protocol: int in range(PC.LATEST + 1):
 		var rows := Library.rows(registry, protocol)
-		check(rows.size() == 11, "All eleven Human looks remain available on PC/%d" % protocol)
+		check(rows.size() == 41, "All 41 Human looks remain available on PC/%d" % protocol)
 		for row: Dictionary in rows:
 			var path := portraits.texture_path(str(row.portrait_id), row.look)
 			check(not path.is_empty(), "%s PC/%d matches its exact baked look" % [row.id, protocol])

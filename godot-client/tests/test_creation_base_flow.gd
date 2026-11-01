@@ -67,7 +67,7 @@ func check_preview_budget(phase: String) -> void:
 		phase + ": only the existing scene viewports and one creation preview, no card bake viewport")
 	check(flow.picker.find_children("*", "SubViewport", true, false).is_empty()
 		and flow.picker.find_children("*", "Node3D", true, false).is_empty(),
-		phase + ": 11 Human cards contain no live 3D stage")
+		phase + ": 41 Human cards contain no live 3D stage")
 
 func run() -> void:
 	root.size = Vector2i(1366, 768)

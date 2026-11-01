@@ -129,6 +129,9 @@ func _check_editable(row: Dictionary) -> void:
 			var high := app.duplicate(true)
 			low[pair[0]] = 1 if pair[0] == "hair_finish" else 0
 			high[pair[0]] = 101 if pair[0] == "hair_finish" else 100
+			if pair[0] == "hair_finish":
+				low.merge(HairFinish.canonical(0), true)
+				high.merge(HairFinish.canonical(100), true)
 			var low_shapes := MAP.hair_shapes(low, hair)
 			var high_shapes := MAP.hair_shapes(high, hair)
 			check(float(high_shapes[pair[1]]) > float(low_shapes[pair[1]]) + 0.1,

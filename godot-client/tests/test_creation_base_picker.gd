@@ -116,7 +116,7 @@ func run() -> void:
 	var catalog := Library.rows(registry)
 	picker.setup(catalog, "human_34", {"portrait_manifest_path": "user://no_creation_portrait_manifest.json"})
 	await settle()
-	check(picker._cards.size() == 11, "All eleven Human catalog cards exist without live portrait stages")
+	check(picker._cards.size() == 41, "All 41 Human catalog cards exist without live portrait stages")
 	check_static_cards(picker, "all11")
 	for id: String in picker._cards:
 		var card := picker._cards[id] as Button
@@ -128,7 +128,7 @@ func run() -> void:
 	picker._select_filter(picker.race_filter, "luminous")
 	picker._filter_rows()
 	await settle()
-	check(picker._cards.size() == 11, "Static filtering retains all 11 Human choices")
+	check(picker._cards.size() == 41, "Static filtering retains all 41 Human choices")
 	check_static_cards(picker, "filter11")
 	picker._select_card("human_01")
 	check_static_cards(picker, "select and reopen")

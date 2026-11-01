@@ -20,13 +20,13 @@ func _initialize() -> void:
 		quit(1)
 		return
 	var rows: Array = raw.get("archetypes", [])
-	check(rows.size() == 6, "Selected library must contain the six qualified Human bases")
+	check(rows.size() == 36, "Development library must contain all 36 Human bases")
 	var ids: Dictionary = {}
 	for row: Dictionary in rows:
 		var id: String = row.get("id", "")
 		check(not id.is_empty() and not ids.has(id), "Missing or duplicate archetype id " + id)
 		ids[id] = true
-		check(id in ["human_01", "human_08", "human_14", "human_20", "human_27", "human_34"], "Unaccepted pilot included: " + id)
+		check(id.begins_with("human_") and int(id.trim_prefix("human_")) in range(1,37), "Unexpected matrix ID: " + id)
 		var sex: String = row.get("sex", "")
 		check(sex in ["female", "male"], id + " invalid sex")
 		check(row.get("body_template", "") == "luminous_" + sex, id + " body mismatch")
