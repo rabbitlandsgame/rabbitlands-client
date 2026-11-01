@@ -13,6 +13,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstring>
+#include <limits>
 #include <thread>
 #include <atomic>
 #include <mutex>
@@ -195,7 +196,7 @@ struct Template {
     std::array<std::array<float, 3>, 3> spans{};
     double edge_limit = 1.79, gap_limit = .003, strain_tolerance = .005;
     int cold_iterations = 24, warm_iterations = 12;
-    bool activate_contacts = true, covered_clear = true, exact_memo = false, trusted_body = false, parallel_contacts = false;
+    bool activate_contacts = true, covered_clear = true, exact_memo = false, trusted_body = false, parallel_contacts = false, parallel_residuals = false, refresh_clear_contacts = false;
 };
 bool read_template(const Dictionary &d, Template &t) {
     const Variant settings = d.get("solver", Dictionary());
@@ -234,6 +235,13 @@ bool read_template(const Dictionary &d, Template &t) {
     if (parallel.get_type() != Variant::BOOL) return false;
     t.parallel_contacts = parallel;
     if (t.parallel_contacts && !t.trusted_body) return false;
+    const Variant residuals = solver.get("parallel_residuals", false);
+    if (residuals.get_type() != Variant::BOOL) return false;
+    t.parallel_residuals = residuals;
+    if (t.parallel_residuals && (!t.parallel_contacts || !t.exact_memo)) return false;
+    const Variant refresh = solver.get("refresh_clear_contacts", false);
+    if (refresh.get_type() != Variant::BOOL) return false;
+    t.refresh_clear_contacts = refresh;
     std::vector<Vector3> positions, idle, centres, weighted_idle;
     if (!packed_vectors(field(d, "positions"), positions) || positions.empty()
         || !packed_vectors(field(d, "idle"), idle, COUNT)
@@ -514,9 +522,11 @@ struct RabbitLandsCapeProjector::Impl {
     std::array<Vector3, COUNT> last{};
     Basis last_basis;
     std::vector<Vector3> world, virtual_world, edge_dual, normals;
-    std::vector<double> planes, multipliers;
+    std::vector<double> planes, multipliers, edge_maximum;
+    std::vector<Vector3> edge_base;
     double gap = 0., correction = 0., strain = 1.;
     int iterations = 0;
+    uint64_t refreshed_contacts = 0;
     uint64_t project_usec = 0, prepare_usec = 0, calls = 0, rejected = 0;
     String last_error;
     std::vector<Vector3> plane_points, residual_points, batch_points;
@@ -528,6 +538,70 @@ struct RabbitLandsCapeProjector::Impl {
     std::vector<uint32_t> residual_epochs;
     uint32_t residual_epoch = 0;
     uint64_t plane_queries = 0, plane_hits = 0, residual_hits = 0, residual_misses = 0;
+    // The exact serial access count is immutable: eligible real samples followed
+    // by both endpoints of every edge. Worker scheduling never changes counters.
+    std::vector<int> residual_needed;
+    uint64_t residual_accesses_per_scan = 0;
+    uint64_t parallel_residual_batches = 0, parallel_strain_batches = 0;
+    void prepare_initial_sample_points(const std::array<Vector3, COUNT> &translations) {
+        contact_workers.run(data.samples.size(), [&](size_t first, size_t end, size_t) {
+            for (size_t i = first; i < end; ++i) if (batch_active[i]) {
+                batch_points[i] = point(data.samples[i].id, translations);
+            }
+        });
+    }
+    void prepare_parallel_residual_points(const std::array<Vector3, COUNT> &translations) {
+        ++parallel_residual_batches;
+        // Every destination is unique. No epoch, counter, body query or Godot
+        // API is touched by these workers; translations are frozen for the scan.
+        contact_workers.run(residual_needed.size(), [&](size_t first, size_t end, size_t) {
+            for (size_t i = first; i < end; ++i) {
+                const int index = residual_needed[i];
+                residual_points[index] = point(index, translations);
+            }
+        });
+        contact_workers.run(data.samples.size(), [&](size_t first, size_t end, size_t) {
+            for (size_t i = first; i < end; ++i) if (batch_active[i]) {
+                const int index = data.samples[i].id;
+                // Preserve the virtual baseline-plus-weighted-translations
+                // arithmetic; do not replace it with averaged posed corners.
+                batch_points[i] = index >= 0 ? residual_points[index] : point(index, translations);
+            }
+        });
+        residual_misses += static_cast<uint64_t>(residual_needed.size());
+        residual_hits += residual_accesses_per_scan - static_cast<uint64_t>(residual_needed.size());
+    }
+    bool parallel_residual_strain(double scale, double &maximum) {
+        struct alignas(64) Maximum { double value = 1.; bool bad = false; };
+        std::array<Maximum, 6> maxima{};
+        ++parallel_strain_batches;
+        contact_workers.run(data.edges.size(), [&](size_t first, size_t end, size_t worker) {
+            auto &result = maxima[worker];
+            for (size_t i = first; i < end; ++i) {
+                const auto &edge = data.edges[i];
+                // Vector3::distance_to evaluates (to - from).length(). Keep
+                // exactly that subtraction and the original sqrt/division for
+                // every edge that could increase the finite maximum.
+                const Vector3 delta = residual_points[edge.b] - residual_points[edge.a];
+                const real_t squared = delta.length_squared();
+                const double denominator = edge.length * scale;
+                const double bound = result.value * denominator;
+                constexpr double rounding_guard = 1. + 4. * std::numeric_limits<real_t>::epsilon();
+                if (std::isfinite(squared) && static_cast<double>(squared) * rounding_guard < bound * bound) continue;
+                const double ratio = static_cast<double>(delta.length()) / denominator;
+                if (!std::isfinite(ratio)) result.bad = true;
+                else result.value = std::max(result.value, ratio);
+            }
+        });
+        // Max selects an existing finite value, rather than accumulating a sum.
+        // Reducing in worker-index order gives exactly the original finite max.
+        maximum = 1.;
+        for (const auto &result : maxima) {
+            if (result.bad) return false;
+            maximum = std::max(maximum, result.value);
+        }
+        return true;
+    }
     Vector3 residual_point(int index, const std::array<Vector3, COUNT> &translations) {
         if (!data.exact_memo || index < 0) return point(index, translations);
         if (residual_epochs[index] == residual_epoch) {++residual_hits;return residual_points[index];}
@@ -606,6 +680,23 @@ bool RabbitLandsCapeProjector::configure(const Dictionary &values) {
     state->batch_active.resize(state->data.samples.size());
     state->plane_valid.resize(state->data.samples.size());state->residual_points.resize(state->data.vertices.size());
     state->residual_epochs.resize(state->data.vertices.size());
+    state->residual_needed.clear();state->residual_accesses_per_scan = 0;
+    if (state->data.parallel_residuals) {
+        std::vector<uint8_t> included(state->data.vertices.size(), 0);
+        const auto include = [&](int index) {
+            if (!included[index]) {included[index] = 1;state->residual_needed.push_back(index);}
+        };
+        for (size_t i = 0; i < state->data.samples.size(); ++i) {
+            const int index = state->data.samples[i].id;
+            state->batch_active[i] = state->norm(index) >= .02;
+            if (state->batch_active[i] && index >= 0) {
+                ++state->residual_accesses_per_scan;include(index);
+            }
+        }
+        for (const auto &edge : state->data.edges) {
+            state->residual_accesses_per_scan += 2;include(edge.a);include(edge.b);
+        }
+    }
     state->gap = state->correction = 0.;state->strain = 1.;state->iterations = 0;
     state->project_usec = state->prepare_usec = 0;state->last_error = "";
     return true;
@@ -623,10 +714,14 @@ Dictionary RabbitLandsCapeProjector::stats() const {
     out["correction_m"] = state->correction;out["strain"] = state->strain;out["iterations"] = state->iterations;
     out["project_usec"] = static_cast<int64_t>(state->project_usec);out["prepare_usec"] = static_cast<int64_t>(state->prepare_usec);
     out["calls"] = static_cast<int64_t>(state->calls);out["rejected"] = static_cast<int64_t>(state->rejected);
-    out["exact_memo"] = state->data.exact_memo;out["trusted_body"] = state->data.trusted_body;
+    out["refreshed_contacts"] = static_cast<int64_t>(state->refreshed_contacts);out["refresh_clear_contacts"] = state->data.refresh_clear_contacts;out["exact_memo"] = state->data.exact_memo;out["trusted_body"] = state->data.trusted_body;
     out["point_prep_usec"] = static_cast<int64_t>(state->point_prep_usec);
     out["parallel_query_usec"] = static_cast<int64_t>(state->parallel_query_usec);out["serial_updates_usec"] = static_cast<int64_t>(state->serial_updates_usec);out["strain_scan_usec"] = static_cast<int64_t>(state->strain_scan_usec);
     out["parallel_batches"] = static_cast<int64_t>(state->parallel_batches);out["parallel_contacts"] = state->data.parallel_contacts;
+    out["parallel_residuals"] = state->data.parallel_residuals;
+    out["parallel_residual_batches"] = static_cast<int64_t>(state->parallel_residual_batches);
+    out["parallel_strain_batches"] = static_cast<int64_t>(state->parallel_strain_batches);
+    out["residual_unique_real_points"] = static_cast<int64_t>(state->residual_needed.size());
     out["plane_queries"] = static_cast<int64_t>(state->plane_queries);out["plane_memo_hits"] = static_cast<int64_t>(state->plane_hits);
     out["residual_point_hits"] = static_cast<int64_t>(state->residual_hits);out["residual_point_misses"] = static_cast<int64_t>(state->residual_misses);
     out["edge_limit"] = state->data.edge_limit;out["gap_limit_m"] = state->data.gap_limit;
@@ -634,7 +729,7 @@ Dictionary RabbitLandsCapeProjector::stats() const {
 }
 Dictionary RabbitLandsCapeProjector::runtime_info() const {
     Dictionary out;out["api"] = 2;out["implementation"] = "native";
-    out["kind"] = "mounted_cape_material";out["virtual_factors"] = true;out["exact_memo"] = true;out["trusted_body"] = true;out["parallel_contacts"] = true;out["parallel_workers"] = static_cast<int64_t>(CONTACT_WORKERS_LIMIT);out["parallel_workers_limit"] = static_cast<int64_t>(CONTACT_WORKERS_LIMIT);out["parallel_serial_fallback"] = CONTACT_WORKERS_LIMIT < 2;out["parallel_chunk"] = 256;return out;
+    out["refresh_clear_contacts"] = true;out["kind"] = "mounted_cape_material";out["virtual_factors"] = true;out["exact_memo"] = true;out["trusted_body"] = true;out["parallel_contacts"] = true;out["parallel_residuals"] = true;out["parallel_workers"] = static_cast<int64_t>(CONTACT_WORKERS_LIMIT);out["parallel_workers_limit"] = static_cast<int64_t>(CONTACT_WORKERS_LIMIT);out["parallel_serial_fallback"] = CONTACT_WORKERS_LIMIT < 2;out["parallel_chunk"] = 256;return out;
 }
 Dictionary RabbitLandsCapeProjector::project(const Transform3D &world, const Transform3D &frame,
     const Array &roots_in, const Array &bodies_in, const PackedVector3Array &incoming,
@@ -675,6 +770,7 @@ Dictionary RabbitLandsCapeProjector::project(const Transform3D &world, const Tra
     const auto &data = state->data;
     state->plane_queries = state->plane_hits = state->residual_hits = state->residual_misses = 0;
     state->residual_epoch = 0;state->parallel_batches = 0;state->parallel_query_usec = state->serial_updates_usec = state->strain_scan_usec = state->point_prep_usec = 0;
+    state->parallel_residual_batches = state->parallel_strain_batches = 0;
     std::fill(state->plane_valid.begin(), state->plane_valid.end(), 0);
     std::fill(state->residual_epochs.begin(), state->residual_epochs.end(), 0);
     const Transform3D rigid = world * frame;
@@ -717,7 +813,8 @@ Dictionary RabbitLandsCapeProjector::project(const Transform3D &world, const Tra
     std::fill(state->multipliers.begin(), state->multipliers.end(), 0.);
     if (data.parallel_contacts) {
         const auto points_started = Clock::now();
-        for (size_t i = 0; i < data.samples.size(); ++i) {
+        if (data.parallel_residuals) state->prepare_initial_sample_points(translations);
+        else for (size_t i = 0; i < data.samples.size(); ++i) {
             const int index = data.samples[i].id;
             state->batch_active[i] = state->norm(index) >= .02;
             if (state->batch_active[i]) state->batch_points[i] = state->point(index, translations);
@@ -735,19 +832,30 @@ Dictionary RabbitLandsCapeProjector::project(const Transform3D &world, const Tra
         state->normals[i] = plane.normal;state->planes[i] = plane.d;
     }
     }
+    state->edge_base.resize(data.edges.size());state->edge_maximum.resize(data.edges.size());
+    for (size_t i = 0; i < data.edges.size(); ++i) {
+        const auto &edge = data.edges[i];
+        state->edge_base[i] = state->world[edge.a] - state->world[edge.b];
+        state->edge_maximum[i] = edge.length * scale * data.edge_limit;
+    }
+    state->refreshed_contacts = 0;
     double correction = 0., gap = 0., strain = 1.;int iterations = 0;
     for (int iteration = 0; iteration < (cold ? data.cold_iterations : data.warm_iterations); ++iteration) {
         iterations = iteration + 1;
         const auto updates_started = Clock::now();
         for (size_t i = 0; i < data.edges.size(); ++i) {
-            const auto &edge = data.edges[i];Vector3 delta = state->world[edge.a] - state->world[edge.b];
+            const auto &edge = data.edges[i];
+            if (edge.norm < .0000001) continue;
+            Vector3 delta = state->edge_base[i];
             for (size_t slot = 0; slot < edge.active.size(); ++slot) delta += translations[edge.active[slot]] * edge.weights[slot];
             const double norm = edge.norm;delta += state->edge_dual[i] * static_cast<real_t>(norm);
-            const double length = delta.length(), maximum = edge.length * scale * data.edge_limit;
+            const double length = delta.length(), maximum = state->edge_maximum[i];
             if (norm < .0000001) continue;
             const Vector3 dual = delta * static_cast<real_t>(std::max(0., length - maximum) / std::max(length, .000001) / norm);
             const Vector3 change = state->edge_dual[i] - dual;
-            if (change.length_squared() > .000000000001) for (size_t slot = 0; slot < FREE.size(); ++slot) translations[FREE[slot]] += change * static_cast<real_t>(edge.gains[slot]);
+            if (change.length_squared() > .000000000001) for (size_t slot = 0; slot < FREE.size(); ++slot) {
+                translations[FREE[slot]] += change * static_cast<real_t>(edge.gains[slot]);
+            }
             state->edge_dual[i] = dual;
         }
         for (size_t i = 0; i < data.samples.size(); ++i) {
@@ -758,20 +866,31 @@ Dictionary RabbitLandsCapeProjector::project(const Transform3D &world, const Tra
             const double distance = state->planes[i] - point.dot(state->normals[i]);
             const double multiplier = std::max(0., state->multipliers[i] + distance / norm);
             const Vector3 change = state->normals[i] * static_cast<real_t>(multiplier - state->multipliers[i]);
-            if (change.length_squared() > .000000000001) for (size_t slot = 0; slot < FREE.size(); ++slot) {
-                const Vector3 move = change * static_cast<real_t>(sample.gains[slot]);
-                translations[FREE[slot]] += move;correction = std::max(correction, static_cast<double>(move.length()));
+            if (change.length_squared() > .000000000001) {
+                real_t maximum_move_squared = 0.;
+                for (size_t slot = 0; slot < FREE.size(); ++slot) {
+                    const Vector3 move = change * static_cast<real_t>(sample.gains[slot]);
+                    translations[FREE[slot]] += move;
+                    maximum_move_squared = std::max(maximum_move_squared, move.length_squared());
+                }
+                correction = std::max(correction, static_cast<double>(Math::sqrt(maximum_move_squared)));
             }
             state->multipliers[i] = multiplier;
         }
         state->serial_updates_usec += elapsed_us(updates_started);
         if (iteration % 2 == 0) continue;
         ++state->residual_epoch;
+        if (data.parallel_residuals) {
+            const auto points_started = Clock::now();
+            state->prepare_parallel_residual_points(translations);
+            state->point_prep_usec += elapsed_us(points_started);
+        }
         gap = 0.;
         if (data.parallel_contacts && data.activate_contacts) {
             const auto points_started = Clock::now();
-            // All point/memo writes are on the owner, with frozen translations.
-            for (size_t i = 0; i < data.samples.size(); ++i) {
+            // The optional worker preparation already populated these exact
+            // sample slots. The legacy owner path remains unchanged.
+            if (!data.parallel_residuals) for (size_t i = 0; i < data.samples.size(); ++i) {
                 const auto &sample = data.samples[i];
                 state->batch_active[i] = state->norm(sample.id) >= .02;
                 if (state->batch_active[i]) state->batch_points[i] = state->residual_point(sample.id, translations);
@@ -782,29 +901,47 @@ Dictionary RabbitLandsCapeProjector::project(const Transform3D &world, const Tra
                 const Vector3 point = state->batch_points[i];
                 const Plane contact = state->batch_planes[i];
                 const Vector3 projected = point - contact.normal * static_cast<real_t>(std::min(0., static_cast<double>(contact.distance_to(point))));
-                gap = std::max(gap, static_cast<double>(point.distance_to(projected)));
-                if (state->normals[i] == Vector3() && contact.normal != Vector3()) {
+                const double residual_gap = static_cast<double>(point.distance_to(projected));
+                gap = std::max(gap, residual_gap);
+                if (contact.normal != Vector3() && (state->normals[i] == Vector3()
+                    || (data.refresh_clear_contacts && state->multipliers[i] == 0.
+                        && point.dot(state->normals[i]) >= state->planes[i]
+                        && contact.distance_to(point) < -data.gap_limit))) {
+                    if (state->normals[i] != Vector3()) ++state->refreshed_contacts;
+                    // The previous clear plane has no stored dual correction.
+                    // A newly encountered body region can replace that inactive
+                    // barrier without changing the current primal/history.
                     state->normals[i] = contact.normal;state->planes[i] = contact.d;
                 }
             }
         } else for (size_t i = 0; i < data.samples.size(); ++i) {
             const auto &sample = data.samples[i];
             if (state->norm(sample.id) < .02) continue;
-            const Vector3 point = state->residual_point(sample.id, translations);
+            const Vector3 point = data.parallel_residuals ? state->batch_points[i] : state->residual_point(sample.id, translations);
             if (data.activate_contacts) {
                 const Plane contact = state->query_plane(contacts, i, point);
                 const Vector3 projected = point - contact.normal * static_cast<real_t>(std::min(0., static_cast<double>(contact.distance_to(point))));
-                gap = std::max(gap, static_cast<double>(point.distance_to(projected)));
+                const double residual_gap = static_cast<double>(point.distance_to(projected));
+                gap = std::max(gap, residual_gap);
                 // Edge correction can move an initially clear sample into
                 // clothing. Activate that contact before the next sweep.
-                if (state->normals[i] == Vector3() && contact.normal != Vector3()) {
+                if (contact.normal != Vector3() && (state->normals[i] == Vector3()
+                    || (data.refresh_clear_contacts && state->multipliers[i] == 0.
+                        && point.dot(state->normals[i]) >= state->planes[i]
+                        && contact.distance_to(point) < -data.gap_limit))) {
+                    if (state->normals[i] != Vector3()) ++state->refreshed_contacts;
+                    // The previous clear plane has no stored dual correction.
+                    // A newly encountered body region can replace that inactive
+                    // barrier without changing the current primal/history.
                     state->normals[i] = contact.normal;state->planes[i] = contact.d;
                 }
             } else gap = std::max(gap, static_cast<double>(point.distance_to(contacts.project(point))));
         }
         const auto strain_started = Clock::now();
         strain = 1.;
-        for (const auto &edge : data.edges) strain = std::max(strain, static_cast<double>(state->residual_point(edge.a, translations).distance_to(state->residual_point(edge.b, translations))) / (edge.length * scale));
+        if (data.parallel_residuals) {
+            if (!state->parallel_residual_strain(scale, strain)) return fail("nonfinite_residual_strain");
+        } else for (const auto &edge : data.edges) strain = std::max(strain, static_cast<double>(state->residual_point(edge.a, translations).distance_to(state->residual_point(edge.b, translations))) / (edge.length * scale));
         state->strain_scan_usec += elapsed_us(strain_started);
         if (gap < data.gap_limit && strain < data.edge_limit + data.strain_tolerance) break;
     }

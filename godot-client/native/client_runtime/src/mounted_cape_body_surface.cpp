@@ -9,6 +9,7 @@
 #include <chrono>
 #include <cmath>
 #include <limits>
+#include <cstring>
 
 using namespace godot;
 namespace {
@@ -17,6 +18,15 @@ uint64_t elapsed(Clock::time_point start) {
     return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(Clock::now()-start).count());
 }
 constexpr double CELL=.08, MARGIN=.008;
+constexpr int SUBDIVISIONS=4, SUBGRID_MIN_CANDIDATES=32;
+constexpr uint64_t MAX_FINE_REFERENCES=8000000, MAX_CELL_EXPANSION=8;
+int fine_coordinate(real_t value, int32_t coarse) {
+    const int64_t global=static_cast<int64_t>(std::floor(static_cast<double>(value)/(CELL/SUBDIVISIONS)));
+    return static_cast<int>(std::clamp<int64_t>(global-static_cast<int64_t>(coarse)*SUBDIVISIONS,0,SUBDIVISIONS-1));
+}
+int32_t signed_coordinate(uint32_t bits) {
+    int32_t result;std::memcpy(&result,&bits,sizeof(result));return result;
+}
 constexpr int64_t MAX_SOURCES=64, MAX_BONES=1024, MAX_VERTICES=1000000;
 constexpr int64_t MAX_INDICES=6000000, MAX_INFLUENCES=8000000;
 constexpr uint64_t MAX_GRID_REFERENCES=8000000;
@@ -49,6 +59,7 @@ bool RabbitLandsCapeBodySurface::owner() const {
 }
 void RabbitLandsCapeBodySurface::_bind_methods() {
     ClassDB::bind_method(D_METHOD("configure_sources","descriptors","skeleton_bone_count"),&RabbitLandsCapeBodySurface::configure_sources);
+    ClassDB::bind_method(D_METHOD("set_subgrid_enabled","enabled"),&RabbitLandsCapeBodySurface::set_subgrid_enabled);
     ClassDB::bind_method(D_METHOD("prepare_pose","body_bone_poses","world","spine_skin_frame","rigid_source_world"),&RabbitLandsCapeBodySurface::prepare_pose);
     ClassDB::bind_method(D_METHOD("body_plane_at","world_point"),&RabbitLandsCapeBodySurface::body_plane_at);
     ClassDB::bind_method(D_METHOD("stats"),&RabbitLandsCapeBodySurface::stats);
@@ -122,7 +133,52 @@ bool RabbitLandsCapeBodySurface::configure_sources(const Array &descriptors,int6
     if(total_vertices==0)return false;
     sources=std::move(next);bone_count=skeleton_bone_count;vertex_count=total_vertices;
     triangles.clear();grid.clear();pose_context.clear();configured=true;
+    coarse_references=fine_references=refined_cells=coarse_max_candidates=0;
     configure_us=elapsed(started);return true;
+}
+
+bool RabbitLandsCapeBodySurface::set_subgrid_enabled(bool enabled) {
+    if(!owner())return false;
+    if(subgrid_enabled==enabled)return true;
+    subgrid_enabled=enabled;prepared=false;pose_cache_hit=false;pose_context.clear();
+    return true;
+}
+
+void RabbitLandsCapeBodySurface::build_subgrid(Grid &cells,const std::vector<Triangle> &values,
+    uint64_t &refined,uint64_t &references) {
+    refined=references=0;
+    // The original coarse membership/order is the authority. Subcells remove
+    // only candidates whose existing padded XY box cannot contain the query.
+    for(auto &item:cells) {
+        GridCell &cell=item.second;
+        if(cell.coarse.size()<SUBGRID_MIN_CANDIDATES)continue;
+        const int32_t x=signed_coordinate(static_cast<uint32_t>(item.first>>32));
+        const int32_t y=signed_coordinate(static_cast<uint32_t>(item.first));
+        uint64_t required=0;
+        std::array<uint32_t,16> counts{};
+        for(const auto &candidate:cell.coarse) {
+            const Triangle &t=values[candidate.index];
+            const int x0=fine_coordinate(t.low.x,x),x1=fine_coordinate(t.high.x,x);
+            const int y0=fine_coordinate(t.low.y,y),y1=fine_coordinate(t.high.y,y);
+            required+=static_cast<uint64_t>(x1-x0+1)*(y1-y0+1);
+            if(required>cell.coarse.size()*MAX_CELL_EXPANSION||required>MAX_FINE_REFERENCES-references)break;
+            for(int sy=y0;sy<=y1;++sy)for(int sx=x0;sx<=x1;++sx)++counts[sy*SUBDIVISIONS+sx];
+        }
+        // Large triangles or extreme inputs can retain the exact coarse path.
+        if(required>cell.coarse.size()*MAX_CELL_EXPANSION||required>MAX_FINE_REFERENCES-references)continue;
+        for(size_t i=0;i<counts.size();++i)cell.offsets[i+1]=cell.offsets[i]+counts[i];
+        cell.fine.resize(static_cast<size_t>(required));
+        std::array<uint32_t,16> cursors{};
+        std::copy(cell.offsets.begin(),cell.offsets.begin()+16,cursors.begin());
+        for(const auto &candidate:cell.coarse) {
+            const Triangle &t=values[candidate.index];
+            const int x0=fine_coordinate(t.low.x,x),x1=fine_coordinate(t.high.x,x);
+            const int y0=fine_coordinate(t.low.y,y),y1=fine_coordinate(t.high.y,y);
+            for(int sy=y0;sy<=y1;++sy)for(int sx=x0;sx<=x1;++sx)
+                cell.fine[cursors[sy*SUBDIVISIONS+sx]++]=candidate;
+        }
+        references+=required;++refined;cell.refined=true;
+    }
 }
 
 bool RabbitLandsCapeBodySurface::prepare_pose(const Array &body_bone_poses,const Transform3D &world,
@@ -161,6 +217,12 @@ bool RabbitLandsCapeBodySurface::prepare_pose(const Array &body_bone_poses,const
         if(source.bones.empty()) { poses[si].push_back(next_from_world*rigid);context.push_back(poses[si][0]); }
     }
     if(previously_prepared&&context_origin==from_skeleton.origin&&pose_context==context) {
+        // World orientation may change even when the local body pose is cached.
+        // The expression matches the original per-query normal exactly.
+        for(auto &triangle:triangles) {
+            triangle.outward=next_normal_to_world.xform(triangle.normal).normalized();
+            if(!triangle.outward.is_finite())return false;
+        }
         to_world=next_to_world;from_world=next_from_world;normal_to_world=next_normal_to_world;
         prepared=true;pose_cache_hit=true;++pose_cache_hits;prepare_us=elapsed(started);return true;
     }
@@ -194,6 +256,8 @@ bool RabbitLandsCapeBodySurface::prepare_pose(const Array &body_bone_poses,const
                 if(std::abs(area)<1e-9)continue;
                 t.inverse_area=1.0/area;t.normal=(b-a).cross(c-a).normalized();if(t.normal.z>0)t.normal=-t.normal;
                 if(!t.normal.is_finite()||t.normal==Vector3())return false;
+                t.outward=next_normal_to_world.xform(t.normal).normalized();
+                if(!t.outward.is_finite())return false;
                 t.heights=Vector3(a.z,b.z-a.z,c.z-a.z);
                 const Vector2 low(std::min({a.x,b.x,c.x}),std::min({a.y,b.y,c.y}));
                 const Vector2 high(std::max({a.x,b.x,c.x}),std::max({a.y,b.y,c.y}));
@@ -207,14 +271,18 @@ bool RabbitLandsCapeBodySurface::prepare_pose(const Array &body_bone_poses,const
                 references+=count;
                 const Candidate candidate{std::min({a.z,b.z,c.z}),static_cast<uint32_t>(next_triangles.size())};
                 next_triangles.push_back(t);
-                for(int32_t x=x0;x<=x1;++x)for(int32_t y=y0;y<=y1;++y)next_grid[cell_key(x,y)].push_back(candidate);
+                for(int32_t x=x0;x<=x1;++x)for(int32_t y=y0;y<=y1;++y)next_grid[cell_key(x,y)].coarse.push_back(candidate);
             }
         }
     }
-    for(auto &cell:next_grid)std::sort(cell.second.begin(),cell.second.end(),[](const Candidate &a,const Candidate &b){
+    for(auto &cell:next_grid)std::sort(cell.second.coarse.begin(),cell.second.coarse.end(),[](const Candidate &a,const Candidate &b){
         return a.z<b.z||(a.z==b.z&&a.index<b.index);
     });
+    uint64_t next_refined=0,next_fine_references=0,next_max_candidates=0;
+    for(const auto &cell:next_grid)next_max_candidates=std::max<uint64_t>(next_max_candidates,cell.second.coarse.size());
+    if(subgrid_enabled)build_subgrid(next_grid,next_triangles,next_refined,next_fine_references);
     triangles=std::move(next_triangles);grid=std::move(next_grid);pose_context=std::move(context);context_origin=from_skeleton.origin;
+    coarse_references=references;fine_references=next_fine_references;refined_cells=next_refined;coarse_max_candidates=next_max_candidates;
     to_world=next_to_world;from_world=next_from_world;normal_to_world=next_normal_to_world;
     prepared=true;prepare_us=elapsed(started);return true;
 }
@@ -233,7 +301,14 @@ Plane RabbitLandsCapeBodySurface::trusted_body_plane_at(const Vector3 &world_poi
     double minimum=std::numeric_limits<double>::infinity();
     const Triangle *best=nullptr;
     uint32_t best_index=std::numeric_limits<uint32_t>::max();
-    for(const Candidate &candidate:found->second) {
+    const GridCell &cell=found->second;
+    const Candidate *first=cell.coarse.data(),*end=first+cell.coarse.size();
+    if(cell.refined) {
+        const int at=fine_coordinate(local.y,y)*SUBDIVISIONS+fine_coordinate(local.x,x);
+        first=cell.fine.data()+cell.offsets[at];end=cell.fine.data()+cell.offsets[at+1];
+    }
+    for(const Candidate *next=first;next!=end;++next) {
+        const Candidate &candidate=*next;
         if(candidate.z>minimum+.000002)break;
         const Triangle &t=triangles[candidate.index];
         if(uv.x<t.low.x||uv.y<t.low.y||uv.x>=t.high.x||uv.y>=t.high.y)continue;
@@ -244,7 +319,7 @@ Plane RabbitLandsCapeBodySurface::trusted_body_plane_at(const Vector3 &world_poi
         if(z<minimum||(z==minimum&&candidate.index<best_index)) {minimum=z;best=&t;best_index=candidate.index;}
     }
     if(!best)return Plane();
-    const Vector3 outward=normal_to_world.xform(best->normal).normalized();
+    const Vector3 outward=best->outward;
     const Vector3 surface=to_world.xform(Vector3(local.x,local.y,static_cast<real_t>(minimum)))+outward*static_cast<real_t>(MARGIN);
     if(!outward.is_finite()||!surface.is_finite())return Plane();
     return Plane(outward,outward.dot(surface));
@@ -253,10 +328,13 @@ Dictionary RabbitLandsCapeBodySurface::stats() const {
     Dictionary d;if(!owner())return d;
     d["meshes"]=static_cast<int64_t>(sources.size());d["vertices"]=vertex_count;d["triangles"]=static_cast<int64_t>(triangles.size());
     d["configure_usec"]=static_cast<int64_t>(configure_us);d["prepare_usec"]=static_cast<int64_t>(prepare_us);
+    d["subgrid_enabled"]=subgrid_enabled;d["coarse_cells"]=static_cast<int64_t>(grid.size());
+    d["coarse_references"]=static_cast<int64_t>(coarse_references);d["fine_references"]=static_cast<int64_t>(fine_references);
+    d["refined_cells"]=static_cast<int64_t>(refined_cells);d["coarse_max_candidates"]=static_cast<int64_t>(coarse_max_candidates);
     d["pose_cache_hit"]=pose_cache_hit;d["pose_cache_hits"]=static_cast<int64_t>(pose_cache_hits);d["prepared"]=prepared;
     return d;
 }
 Dictionary RabbitLandsCapeBodySurface::runtime_info() const {
     Dictionary d;d["ready"]=owner()&&sizeof(real_t)==4;d["mounted_cape_body_surface_api"]=1;
-    d["engine_scalar_bytes"]=static_cast<int64_t>(sizeof(real_t));return d;
+    d["engine_scalar_bytes"]=static_cast<int64_t>(sizeof(real_t));d["world_normal_cache"]=true;d["subgrid"]=true;d["subgrid_divisions"]=SUBDIVISIONS;return d;
 }

@@ -39,7 +39,11 @@ cover the one-third and two-third points of source edges longer than 6 cm;
 edges longer than 12 cm also include their quarter points and midpoint.
 These use the same exact rendered-corner arithmetic. Clear posterior body
 planes remain unilateral barriers, and newly penetrating samples activate
-after material correction. The internal source-edge target is 1.79; independent
+after material correction. When a point reaches a different body region, a
+clear inactive plane with no stored correction is replaced by the newly
+penetrated surface plane. The next checked sweep clears the current surface
+instead of exhausting the iteration budget against stale support. The script
+fallback follows the same contact policy. The internal source-edge target is 1.79; independent
 posed-mesh checks retain the 1.8 acceptance limit. Near-immovable edges retain
 the solver's numerical cutoff and are still included in the independent audit.
 The convergence target is a 6 mm residual against the body's 8 mm posterior
@@ -60,7 +64,10 @@ checksums are verified before loading. Missing or incompatible payloads use
 the complete script implementation. `RABBITLANDS_CAPE_MATH=gdscript` explicitly
 selects that implementation without changing other runtime modes.
 Exact per-batch query caches and persistent numeric workers accelerate frozen
-contact queries. Workers read immutable numeric surfaces after ownership is
+contact queries, exact residual skin points and finite strain maxima. Body
+sampling retains its sorted coarse candidates and uses bounded, conservative
+fine buckets in dense cells; posed world normals are cached per triangle.
+These arithmetic optimizations preserve the reference results. Workers read immutable numeric surfaces after ownership is
 validated; the owning thread retains all scene, bone and sequential projection
 writes. The pool reserves two logical cores, uses at most six workers, falls
 back to the owning thread on small machines, and joins on extension shutdown.
@@ -87,5 +94,10 @@ python eloria-assets/tools/prepare_mounted_cape_support_edges.py --check
 The sparse edge certificate is sampled coverage, not a clearance proof. Native
 runtime checks in `godot-client/tests/test_mounted_approved_cape.gd` cover actual
 equipment, mounting, dismounting, supported upper-body actions and all mount
-profiles. Local review videos and full-resolution skin witnesses belong in
-ignored authoring output, not in the source package.
+profiles. The manual `godot-client/tests/test_mounted_cape_native_math.gd`
+regression compares reference and parallel residual arithmetic byte for byte
+through gaits and upper actions, including rejected-batch history checks.
+It reports an explicit skip without a compatible optional payload;
+`RL_MOUNT_REQUIRE_NATIVE=1` requires that payload and its current capabilities.
+Local review videos and full-resolution skin witnesses belong in ignored
+authoring output, not in the source package.

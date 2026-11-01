@@ -948,7 +948,11 @@ func project(skeleton: Skeleton3D, world: Transform3D, frame: Transform3D,
 				_last_gap = maxf(_last_gap, point.distance_to(projected))
 				# Material correction can create a contact that was absent at
 				# the target pose. Do not leave that sample inactive all frame.
-				if normals[at] == Vector3.ZERO and plane.normal != Vector3.ZERO:
+				if plane.normal != Vector3.ZERO and (normals[at] == Vector3.ZERO or (
+						multipliers[at] == 0.0 and point.dot(normals[at]) >= planes[at]
+						and plane.distance_to(point) < -GAP_LIMIT)):
+					# An inactive clear plane has no stored dual correction. Let
+					# the next sweep respond to the current body surface instead.
 					normals[at] = plane.normal
 					planes[at] = plane.d
 		_last_strain = 1.0
@@ -975,7 +979,8 @@ func _configure_native() -> void:
 		return
 	# Older API2 payloads only understand centroid samples. Their complete
 	# script fallback remains correct for the nonuniform edge factors.
-	if not bool((candidate.call("runtime_info") as Dictionary).get("virtual_factors", false)):
+	var capabilities: Dictionary = candidate.call("runtime_info")
+	if not bool(capabilities.get("virtual_factors", false)):
 		return
 	var template := {}
 	for field: StringName in TEMPLATE_FIELDS:
@@ -983,7 +988,12 @@ func _configure_native() -> void:
 	template["solver"] = {"edge_limit": EDGE_LIMIT, "gap_limit_m": GAP_LIMIT,
 		"cold_iterations": COLD_ITERATIONS, "warm_iterations": WARM_ITERATIONS,
 		"strain_tolerance": .005, "activate_contacts": true, "covered_clear": true,
-		"exact_memo": true, "trusted_body": true, "parallel_contacts": true}
+		"exact_memo": true, "trusted_body": true, "parallel_contacts": true,
+		"parallel_residuals": bool(capabilities.get("parallel_residuals", false)),
+		"refresh_clear_contacts": bool(capabilities.get("refresh_clear_contacts", false))}
+	# A stale arithmetic payload cannot implement the current contact policy.
+	if not bool(capabilities.get("refresh_clear_contacts", false)):
+		return
 	if bool(candidate.call("configure", template)):
 		_native = candidate
 

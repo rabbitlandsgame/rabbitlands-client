@@ -5,6 +5,7 @@
 #include <godot_cpp/variant/plane.hpp>
 #include <godot_cpp/variant/transform3d.hpp>
 #include <cstdint>
+#include <array>
 #include <unordered_map>
 #include <vector>
 
@@ -25,11 +26,17 @@ class RabbitLandsCapeBodySurface : public RefCounted {
     };
     struct Triangle {
         Vector2 uv, ab, ac, low, high;
-        Vector3 heights, normal;
+        Vector3 heights, normal, outward;
         double inverse_area=0;
     };
     struct Candidate { real_t z; uint32_t index; };
-    using Grid = std::unordered_map<uint64_t, std::vector<Candidate>>;
+    struct GridCell {
+        std::vector<Candidate> coarse;
+        std::vector<Candidate> fine;
+        std::array<uint32_t, 17> offsets{};
+        bool refined = false;
+    };
+    using Grid = std::unordered_map<uint64_t, GridCell>;
     std::vector<Source> sources;
     std::vector<Triangle> triangles;
     Grid grid;
@@ -39,13 +46,18 @@ class RabbitLandsCapeBodySurface : public RefCounted {
     Basis normal_to_world;
     int64_t owner_thread=0, bone_count=0, vertex_count=0;
     uint64_t configure_us=0, prepare_us=0, pose_cache_hits=0;
-    bool configured=false, prepared=false, pose_cache_hit=false;
+    bool configured=false, prepared=false, pose_cache_hit=false, subgrid_enabled=false;
+    uint64_t coarse_references=0, fine_references=0, refined_cells=0, coarse_max_candidates=0;
+    static void build_subgrid(Grid &cells, const std::vector<Triangle> &values,
+        uint64_t &refined, uint64_t &references);
     bool owner() const;
 protected:
     static void _bind_methods();
 public:
     RabbitLandsCapeBodySurface();
     bool configure_sources(const Array &descriptors, int64_t skeleton_bone_count);
+    // Optional exact acceleration; invalidates prepared cache, then prepare again.
+    bool set_subgrid_enabled(bool enabled);
     bool prepare_pose(const Array &body_bone_poses, const Transform3D &world,
         const Transform3D &spine_skin_frame, const Array &rigid_source_world);
     // A nonzero plane also denotes a covered point that is already clear.

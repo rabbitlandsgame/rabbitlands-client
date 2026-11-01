@@ -60,6 +60,8 @@ func _configure_native() -> void:
 	var info: Dictionary = candidate.call("runtime_info")
 	if not bool(info.get("ready", false)) or int(info.get("mounted_cape_body_surface_api", 0)) != 1:
 		return
+	if bool(info.get("subgrid", false)):
+		candidate.call("set_subgrid_enabled", true)
 	var descriptors: Array = []
 	for source: Dictionary in _sources:
 		descriptors.append({"bones": source.bones, "used_binds": source.template.used_binds,
