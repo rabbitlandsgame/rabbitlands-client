@@ -477,7 +477,57 @@ static func _warp(p: Vector3, warp: Dictionary) -> Vector3:
 	var height := d.dot(axis)
 	var radial := d - axis * height
 	var phi := atan2(radial.dot(left), radial.dot(front))
-	return origin + axis * height + radial * warp_factor(warp, phi)
+	var fitted := origin + axis * height + radial * warp_factor(warp, phi)
+	if not warp.has("upperSideInset"):
+		return fitted
+	return _upper_side_inset(fitted, origin, axis, front, left, warp.upperSideInset)
+
+
+## Optional exact-style correction for raised side ornament hidden under hair.
+## Existing band fits and the front ornament keep their original path. The
+## height ramp is above the band plane, with symmetric soft side-sector edges.
+static func _upper_side_inset(p: Vector3, origin: Vector3, axis: Vector3,
+		front: Vector3, left: Vector3, config: Variant) -> Vector3:
+	if not (config is Dictionary):
+		return p
+	var settings: Dictionary = config
+	var height: Variant = settings.get("heightMm")
+	var sector: Variant = settings.get("sectorDegrees")
+	var amount: Variant = settings.get("insetMm")
+	var radius_floor: Variant = settings.get("minRadiusMm", 1.0)
+	if not (height is Array) or not (sector is Array) or not (amount is float or amount is int):
+		return p
+	if height.size() != 2 or sector.size() != 4:
+		return p
+	var values: Array = height.duplicate()
+	values.append_array(sector)
+	values.append(amount)
+	values.append(radius_floor)
+	for value: Variant in values:
+		if not (value is float or value is int) or not is_finite(float(value)):
+			return p
+	var begin := float(height[0]) * .001
+	var full := float(height[1]) * .001
+	var inset := float(amount) * .001
+	var minimum_radius := float(radius_floor) * .001
+	if begin < 0.0 or full <= begin or full > .1 or inset <= 0.0 or inset > .020 or minimum_radius < .001 or minimum_radius > .2:
+		return p
+	var a := float(sector[0])
+	var b := float(sector[1])
+	var c := float(sector[2])
+	var d := float(sector[3])
+	if a < 0.0 or a >= b or b > c or c >= d or d > 180.0:
+		return p
+	var offset := p - origin
+	var h := offset.dot(axis)
+	if h <= begin:
+		return p
+	var radial := offset - axis * h
+	var bearing := absf(rad_to_deg(atan2(radial.dot(left), radial.dot(front))))
+	if bearing <= a or bearing >= d or radial.length_squared() < 1e-8:
+		return p
+	var blend := smoothstep(begin, full, h) * smoothstep(a, b, bearing) * (1.0 - smoothstep(c, d, bearing))
+	return p - radial.normalized() * minf(inset * blend, maxf(0.0, radial.length() - minimum_radius))
 
 
 ## Per vertex, how much of it hangs as a trail (0 = rigid with the band): the
