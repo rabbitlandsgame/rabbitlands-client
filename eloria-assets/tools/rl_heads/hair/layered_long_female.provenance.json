@@ -1,0 +1,155 @@
+{
+  "version": 1,
+  "status": "qualified_asset_candidate",
+  "style": "layered_long_female",
+  "semantic_family": "layered_long",
+  "module_id": 9,
+  "sex": "female",
+  "legacy_hairstyle_slot": 2,
+  "additional_generation_credits": 0,
+  "method": "Approved painted long-hair exterior with preserved bulk and parting, rounded rooted face locks, a closed painted Low proxy, surface-bound detail and separate Native-skull/pose corrective",
+  "glb_sha256": "e820e50571ba68820ab855ccc96463f36f29a22827b0c30d96fff2b52807b6cd",
+  "texture_sha256": "6c414086e16cb538d597ad255cefd9ae591dda2089ad21ddf65f871990d9a1fb",
+  "texture_import_sha256": "e11a9f68d5e7e9020b1209ec5a1d52c2c5e5540ab35e8c472147c6717c366e83",
+  "source_reference_sha256": "38970e9b3c55194644731060a8b88da5e2a42cf79e4b8f09209821d0f3d08647",
+  "head_sha256": "f767679b773ed68071f0ad70d37cc17a7690425ef866707e52b96bfe1c7b76f6",
+  "triangles": {
+    "lod0": 16062,
+    "lod1": 5808,
+    "lod2": 2142
+  },
+  "vertices": {
+    "lod0": 14305,
+    "lod1": 6325,
+    "lod2": 3354
+  },
+  "contract": {
+    "identity_targets": 46,
+    "grooming_targets": [
+      "hl_length_p",
+      "hl_length_n",
+      "hl_volume_p",
+      "hl_volume_n"
+    ],
+    "optional_native_target": "hl_native_fit",
+    "native_default_weight": 0,
+    "springs": false,
+    "native_hair_only_ignores_high_identities": true,
+    "fine_detail_range": [
+      0,
+      100
+    ],
+    "rooted_length": true,
+    "independent_volume": true,
+    "tie_height_supported": false
+  },
+  "qualification": {
+    "high_surface_states_per_lod": 74,
+    "high_head_and_body_face_interiors": true,
+    "high_minimum_head_clearance_mm": 2.0501606010801168,
+    "high_minimum_body_clearance_mm": 2.149998992146296,
+    "final_live_geometry_and_targets_bit_exact_to_validated_authoring_rows": true,
+    "scalp_coverage": {
+      "cases_per_lod": 14,
+      "lods": 3,
+      "samples": 900,
+      "requested_directions": 220,
+      "retained_directions": 165,
+      "level": 0,
+      "margin_degrees": 4,
+      "minimum_elevation_degrees": -30,
+      "hole_samples_max": 0,
+      "report_sha256": "64f12675f8486a087f3c82656f1d10fef94ced24de4dcc5c991fbc3a9ff8c552"
+    },
+    "root_attachment": {
+      "cases": 54,
+      "modes": [
+        "High",
+        "Native"
+      ],
+      "grooms": 9,
+      "lods": 3,
+      "maximum_root_to_opaque_parent_distance_mm": 1.0548045714499825,
+      "report_sha256": "785432f6e2f034c1d31bbc6a1c5c6051a53231e24429c0970e6a47318dbb5b3d"
+    },
+    "native": {
+      "evaluated_cases": 1674,
+      "qualities": [
+        "Low",
+        "Medium"
+      ],
+      "groom_cases": 9,
+      "lods": 3,
+      "high_identities": 0,
+      "failures": 0,
+      "minimum_clearance_mm": 2.1503950939199457,
+      "fixture_manifest_sha256": "de6a4f42543f4e004e602091170048bbd550a862907da921f70fb1c704002b5a",
+      "maximum_cap_corrective_limit_mm": 16,
+      "maximum_exterior_corrective_limit_mm": 14,
+      "complete_requested_traversal": true,
+      "report_sha256": "29780288c754a30e62a8a9f428265df6c2e62465fea24a4a1ac07cb1257cffb0"
+    },
+    "client": {
+      "renderer": "Forward+",
+      "texture_loading": "actual imported BPTC resource; no private texture overrides",
+      "high_views": 23,
+      "native_and_corrected_grey_views": 15,
+      "ordinary_exact_headwear_views": 12,
+      "controls": [
+        "length minimum/maximum",
+        "volume minimum/maximum",
+        "detail minimum/maximum"
+      ],
+      "additional_identities": 2,
+      "poses": [
+        "Rest",
+        "Idle",
+        "Walk"
+      ],
+      "headwear_items": [
+        134,
+        159,
+        111,
+        170
+      ],
+      "closed_headwear_hides_hair": true,
+      "grey_midpoint_actual_amount": 0.5,
+      "previous_mislabeled_grey_frame_retained_as_full_grey_evidence": true,
+      "errors": 0,
+      "warnings": 0
+    },
+    "headwear111": {
+      "exact_keys": [
+        "female/layered_long_female",
+        "luminous_female/layered_long_female"
+      ],
+      "all_existing_entries_exact": true,
+      "ordinary_default_path": true,
+      "native_qualified": true,
+      "changed_surface_minimum_skin_clearance_mm": {
+        "High": 2.5146917641293953,
+        "Native": 1.2148458988927942,
+        "wider_High_actual": 2.514429704334186
+      },
+      "volume_extremes_reviewed": true,
+      "front_and_band_plane_exact": true,
+      "trial_data_sha256": "c65b1059896a4ef6321b098c088beb8b80f4f62fd94248e4e3178cccf12089e5",
+      "actual_wider_head_geometry_audit_sha256": "58c8762712f554dd4d573ccd79058858b4d4990c6acd29d9489bb313867c40d7"
+    }
+  },
+  "provenance_hashes": {
+    "frozen_input_sha256": "edd5b40ba0e712301d29effba327195ac7120a6bd09341b53c0723bfa8b209a0",
+    "source_profile_sha256": "30d246305e3d8f6e4da62292c080e370ddfa1b95d9d79bc610978373e921032f",
+    "intake_receipt_sha256": "c58680df0fbbcdb1c0bfc6fa932e0c3a001ccd3a9190197b7519ce10d236deaf",
+    "round_face_and_paint_report_sha256": "e9d3e8420288454114fd46e1701102e66c534b83685807c7ff82327b6cb6b33d",
+    "high_surface_report_sha256": "2ed38dff559226abb8c748bc723d41fdd70094a2b0fc86a6e4e74480f06c4e2e",
+    "low_endpoint_surface_report_sha256": "770534bc548dcac4cc7138116081bd9bef6ea98df0551b0c829a0388ec4a37ba",
+    "live_row_preservation_receipt_sha256": "6db260df49967644077491056f61f2b586bd41b1b8a83a6501ab7b1e858bc170",
+    "canonical_native_append_report_sha256": "de2f1f10a60869c2a210e159dea7bd5e179b927ce8b9d73dd641e8d963f34887",
+    "graph_compaction_report_sha256": "3133778c8c66e5abee2894147c0b0a382b842f1eefdbc3965d00795aadbe2690",
+    "texture_import_receipt_sha256": "05235e7433eabeb67b117df182cd75c2d49f968283ec13fd21a2b03112f3e581",
+    "high_client_capture_manifest_sha256": "07326a71a1dc88ebc545f2a198d87469116927e291d2ab974c7e93cb59bbe3a0",
+    "native_client_capture_manifest_sha256": "3a3dc0f43a26a89e1293202fedfd6f49b6f44c12cd116262b8cf6fc01d4474d0",
+    "ordinary_headwear_capture_manifest_sha256": "a6347caab25fd13d460d69e779acf6668dcde90ec3c9d9d1c67348a7ba1c7b6c"
+  }
+}
