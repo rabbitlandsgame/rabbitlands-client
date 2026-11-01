@@ -44,6 +44,7 @@ const ENTRIES := {
 		"female": {"name": "painted_twin_buns_female", "native_head": true, "tie_height": false},
 		"male": {"name": "painted_twin_buns_male", "native_head": true, "tie_height": false}}},
 	25: {"name": "topknot", "fallback_style": 8, "variants": {
+		"female": {"name": "painted_topknot_female", "native_head": true, "tie_height": false},
 		"male": {"name": "painted_topknot_male", "native_head": true, "tie_height": false}}},
 }
 
