@@ -25,6 +25,9 @@ const ENTRIES := {
 	11: {"name": "soft_wavy_bob", "fallback_style": 5, "variants": {
 		"female": {"name": "soft_wavy_bob_female", "native_head": true},
 		"male": {"name": "soft_wavy_bob_male", "native_head": true}}},
+	18: {"name": "rear_braid", "fallback_style": 7, "variants": {
+		"female": {"name": "rear_braid_female", "native_head": true},
+		"male": {"name": "rear_braid_male", "native_head": true}}},
 	21: {"name": "buzz_cut", "fallback_style": 4, "variants": {
 		"female": {"name": "buzz_cut_female", "native_head": true},
 		"male": {"name": "buzz_cut_male", "native_head": true}}},

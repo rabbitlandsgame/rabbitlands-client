@@ -1,0 +1,140 @@
+{
+  "version": 1,
+  "status": "qualified_asset_candidate",
+  "style": "rear_braid_female",
+  "semantic_family": "rear_braid",
+  "module_id": 18,
+  "sex": "female",
+  "legacy_hairstyle_slot": 7,
+  "additional_generation_credits": 0,
+  "method": "Approved painted reference exterior; preserved coherent source, source-painted Low volume, continuous body clearance, surface-rooted detail and separately bounded Native fit",
+  "glb_sha256": "9c373093bb86c3e2a41fb6080b762df2c875c1b99e907408962c9e3efe8b7d0d",
+  "texture_sha256": "a5227e7a357c6fbedc81c9ddfe4cd7717b150f810f802418472052055622d55f",
+  "texture_import_sha256": "4d7a6c5503a21ab1ee323bc7b69fd5e36798f048b096b12acb9a53919f5d269e",
+  "high_head_sha256": "f767679b773ed68071f0ad70d37cc17a7690425ef866707e52b96bfe1c7b76f6",
+  "triangles": {
+    "lod0": 16294,
+    "lod1": 5999,
+    "lod2": 2245
+  },
+  "vertices": {
+    "lod0": 16693,
+    "lod1": 7786,
+    "lod2": 2763
+  },
+  "identity_targets": 46,
+  "groom_targets": [
+    "hl_length_p",
+    "hl_length_n",
+    "hl_volume_p",
+    "hl_volume_n"
+  ],
+  "native_corrective": "hl_native_fit",
+  "native_default_weight": 0,
+  "springs": false,
+  "fine_detail_range": [
+    0,
+    100
+  ],
+  "paint_flatness": 0,
+  "qualification": {
+    "high_surface_body_cases": 222,
+    "minimum_high_head_mm": 2.050069969812496,
+    "minimum_high_body_mm": 14.066630352990245,
+    "native_evaluated_cases": 1674,
+    "native_failed_cases": 0,
+    "native_minimum_clearance_mm": 2.1057308405944792,
+    "native_reports": [
+      {
+        "kind": "complete_source1674",
+        "sha256": "33e4481cd2963e084e41cf18cc7e24f077392effae682f1ceb36d292496ccfd1",
+        "cases": 1674
+      }
+    ],
+    "scalp_coverage_cases": 42,
+    "scalp_hole_samples_max": 0,
+    "coverage_report_sha256": "1d655e1532e319136846915218aa7c74f695f065b6dfff5c3f9c7f8793ed602e",
+    "all_original_ear_trim_attributes_and51fields_exact": true,
+    "ear_trim_inheritance_sha256": "670923ae89f8e5dad9bf01c5a4eaa2d791c48ea8adc5206b6e44bdc08edf05d6",
+    "fine_root_parents_preserved": true,
+    "native_cap_and_fine_limit_mm": 14,
+    "native_exterior_non_ear_limit_mm": 14,
+    "native_exterior_ear_limit_mm": 20,
+    "native_ear_roi": {
+      "abs_x": [
+        0.045,
+        0.14
+      ],
+      "y": [
+        1.57,
+        1.71
+      ],
+      "z": [
+        -0.1,
+        0.05
+      ]
+    },
+    "native_bounds": [
+      {
+        "lod": 0,
+        "cap_max_mm": 13.999900419559392,
+        "exterior_max_mm": 19.999900923444013,
+        "non_ear_max_mm": 10.356242045450548,
+        "fine_max_mm": 9.002730609084512
+      },
+      {
+        "lod": 1,
+        "cap_max_mm": 13.999900385789246,
+        "exterior_max_mm": 19.004074480392642,
+        "non_ear_max_mm": 10.40953949360952,
+        "fine_max_mm": 5.040534223333382
+      },
+      {
+        "lod": 2,
+        "cap_max_mm": 13.99990045786612,
+        "exterior_max_mm": 19.9999007878257,
+        "non_ear_max_mm": 11.498308622856245,
+        "fine_max_mm": 8.740368179479711
+      }
+    ],
+    "ear_aperture_levels": [
+      1,
+      2
+    ],
+    "ear_aperture_faces_removed": [
+      0,
+      129,
+      70
+    ],
+    "native_proof": "Verified full pose/control inputs; High/Medium source fields exact, male Low replayed after Native-geometry-preserving body repair. Later normal, compaction and strict triangle-subset changes preserve all clearance probes or remove them."
+  },
+  "actual_client_review": {
+    "renderer": "Forward+",
+    "texture": "BPTC compressed with mipmaps; no texture/material overrides",
+    "qualities": [
+      "High",
+      "Medium",
+      "Low"
+    ],
+    "views": [
+      "front",
+      "profile",
+      "opposite profile",
+      "three-quarter",
+      "both close Native ear three-quarters"
+    ],
+    "grooms": [
+      "neutral",
+      "short/thin",
+      "long/full",
+      "messy/walk"
+    ],
+    "headwear": [
+      134,
+      111,
+      170
+    ],
+    "notes": "Detailed High silhouette retained. Lower-detail apertures clear the visible pinnae; scalp cap and all remaining root-parent triangles retained. Existing Native skin/facial-hair rendering is unchanged."
+  },
+  "compaction": "Unused build buffers removed; every live accessor retained"
+}

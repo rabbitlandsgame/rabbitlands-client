@@ -1,0 +1,151 @@
+{
+  "version": 1,
+  "status": "qualified_asset_candidate",
+  "style": "rear_braid_male",
+  "semantic_family": "rear_braid",
+  "module_id": 18,
+  "sex": "male",
+  "legacy_hairstyle_slot": 7,
+  "additional_generation_credits": 0,
+  "method": "Approved painted reference exterior; preserved coherent source, source-painted Low volume, continuous body clearance, surface-rooted detail and separately bounded Native fit",
+  "glb_sha256": "dc0154e8663376d3f8c347dd6d98795a1d8331cbe7ccc9875c0bf5267d2d0ccc",
+  "texture_sha256": "3413a9886642edef052bcccb8fab97117bf1c4d92ea3ce2a79251f5030bcc70c",
+  "texture_import_sha256": "77222cb2ce28529ff9b9feb6997575483ff7c41a6296b08003189d2f8ee28385",
+  "high_head_sha256": "6b3549331bacbb7ba1664f569b34a9babd57dd93b14345f627a9791231c53619",
+  "triangles": {
+    "lod0": 16594,
+    "lod1": 6297,
+    "lod2": 2350
+  },
+  "vertices": {
+    "lod0": 16878,
+    "lod1": 7913,
+    "lod2": 2661
+  },
+  "identity_targets": 46,
+  "groom_targets": [
+    "hl_length_p",
+    "hl_length_n",
+    "hl_volume_p",
+    "hl_volume_n"
+  ],
+  "native_corrective": "hl_native_fit",
+  "native_default_weight": 0,
+  "springs": false,
+  "fine_detail_range": [
+    0,
+    100
+  ],
+  "paint_flatness": 0,
+  "qualification": {
+    "high_surface_body_cases": 222,
+    "minimum_high_head_mm": 2.002531077196344,
+    "minimum_high_body_mm": 3.4527250931751103,
+    "native_evaluated_cases": 1674,
+    "native_failed_cases": 0,
+    "native_minimum_clearance_mm": 2.1502879142673557,
+    "native_reports": [
+      {
+        "kind": "complete_source1674",
+        "sha256": "d4868c639257b4f914ec93f5f95a856471cfc03fca0b9c776a780157e8a74b3b",
+        "cases": 1674
+      },
+      {
+        "kind": "repaired_Low558",
+        "sha256": "d86c382be4232feab8c07d45dd2c0908f07612e0509b1abfc09093fbd023e842",
+        "cases": 558
+      }
+    ],
+    "scalp_coverage_cases": 42,
+    "scalp_hole_samples_max": 0,
+    "coverage_report_sha256": "0ec1dc6c691ad891944a69463e1efbce0cdc382aea20d1c7b4b53bde75cb7b29",
+    "all_original_ear_trim_attributes_and51fields_exact": true,
+    "ear_trim_inheritance_sha256": "e24026049386bac551e8dfbac5cb839048f9ae5ca3a2a175fcced3d7c212278b",
+    "fine_root_parents_preserved": true,
+    "native_cap_and_fine_limit_mm": 14,
+    "native_exterior_non_ear_limit_mm": 14,
+    "native_exterior_ear_limit_mm": 20,
+    "native_ear_roi": {
+      "abs_x": [
+        0.045,
+        0.14
+      ],
+      "y": [
+        1.57,
+        1.71
+      ],
+      "z": [
+        -0.1,
+        0.05
+      ]
+    },
+    "native_bounds": [
+      {
+        "lod": 0,
+        "cap_max_mm": 11.10214642922159,
+        "exterior_max_mm": 19.99990047754219,
+        "non_ear_max_mm": 7.931678552764257,
+        "fine_max_mm": 4.701869671693922
+      },
+      {
+        "lod": 1,
+        "cap_max_mm": 11.22039335766156,
+        "exterior_max_mm": 19.999900617390715,
+        "non_ear_max_mm": 7.742377574936775,
+        "fine_max_mm": 5.073563324221366
+      },
+      {
+        "lod": 2,
+        "cap_max_mm": 10.320605928598019,
+        "exterior_max_mm": 19.99990379361786,
+        "non_ear_max_mm": 7.647559058729374,
+        "fine_max_mm": 1.8933648185676248
+      }
+    ],
+    "ear_aperture_levels": [
+      1,
+      2
+    ],
+    "ear_aperture_faces_removed": [
+      0,
+      58,
+      38
+    ],
+    "native_proof": "Verified full pose/control inputs; High/Medium source fields exact, male Low replayed after Native-geometry-preserving body repair. Later normal, compaction and strict triangle-subset changes preserve all clearance probes or remove them.",
+    "repairs": {
+      "Low_posterior_body_seat_mm": 5,
+      "Low_max_effective_Native_position_error_mm": 6.1e-05,
+      "High_Medium_new_cap_normals_normalized": 215,
+      "Native_effective_normal_error_max": 5e-08
+    }
+  },
+  "actual_client_review": {
+    "renderer": "Forward+",
+    "texture": "BPTC compressed with mipmaps; no texture/material overrides",
+    "qualities": [
+      "High",
+      "Medium",
+      "Low"
+    ],
+    "views": [
+      "front",
+      "profile",
+      "opposite profile",
+      "three-quarter",
+      "both close Native ear three-quarters"
+    ],
+    "grooms": [
+      "neutral",
+      "short/thin",
+      "long/full",
+      "messy/walk"
+    ],
+    "headwear": [
+      134,
+      111,
+      170
+    ],
+    "notes": "Detailed High silhouette retained. Lower-detail apertures clear the visible pinnae; scalp cap and all remaining root-parent triangles retained. Existing Native skin/facial-hair rendering is unchanged."
+  },
+  "compaction": "Unused build buffers removed; every live accessor retained"
+}
