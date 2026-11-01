@@ -1,0 +1,116 @@
+{
+  "version": 1,
+  "status": "qualified_asset_candidate",
+  "style": "parted_sweep_male",
+  "semantic_family": "parted_sweep",
+  "module_id": 22,
+  "sex": "male",
+  "legacy_hairstyle_slot": 1,
+  "additional_generation_credits": 0,
+  "method": "Approved painted swept reference with retained original scalp footprint; bounded continuous ear contour, preserved position controls, source-painted Low volume, fixed surface roots and separately bounded Native fit",
+  "glb_sha256": "f254e7f35c7e18ff3b791cee2acceeae0279c4e639fc77bebfe0229b129affad",
+  "texture_sha256": "24752eca64345ea7e9e7ff24f51e4897c5290e29990e6e85a9d51f2512c2370b",
+  "texture_import_sha256": "c33c26182315c392c7f1796a8c4a5066eb3053c25c78ae3735e971bb227be0a4",
+  "high_head_sha256": "6b3549331bacbb7ba1664f569b34a9babd57dd93b14345f627a9791231c53619",
+  "source_reference_sha256": "daaa915517b755f2221a8a7221bf32eb696fb8d017f684bbc307d6b2ed1211b1",
+  "triangles": {
+    "lod0": 16810,
+    "lod1": 5502,
+    "lod2": 1580
+  },
+  "vertices": {
+    "lod0": 18002,
+    "lod1": 7774,
+    "lod2": 2836
+  },
+  "identity_targets": 46,
+  "groom_targets": [
+    "hl_length_p",
+    "hl_length_n",
+    "hl_volume_p",
+    "hl_volume_n"
+  ],
+  "native_corrective": "hl_native_fit",
+  "native_default_weight": 0,
+  "springs": false,
+  "fine_detail_range": [
+    0,
+    100
+  ],
+  "paint_flatness": 0,
+  "qualification": {
+    "high_surface_body_cases": 222,
+    "minimum_high_head_mm": 2.003140956055283,
+    "minimum_high_body_mm": 2.34922044140351,
+    "high_report_sha256": "b0ca34c7d9757c7a6fa301cf3d11136f8ba129f5bff2d8a8fec78f4e67a5fa1a",
+    "native_evaluated_cases": 1674,
+    "native_failed_cases": 0,
+    "native_minimum_clearance_mm": 2.0211229197310128,
+    "native_report_sha256": "2bd7b6b237a6ab1402adf7e5b35fbab3f1ca29a28ebda3ae0b8cdb1ddc137d4b",
+    "native_report_inheritance": "Every attribute and all51 fields exact; Medium triangles strict subset after removing two disconnected opaque neck patches; all remaining fine parents retained",
+    "inheritance_receipt_sha256": "a9271481aa3a7096ee60b5a858c3f213c91662cd8d1982b2d04620fcf428fe01",
+    "scalp_coverage_cases": 42,
+    "scalp_hole_samples_max": 0,
+    "coverage_report_sha256": "b9a626d16d0ccf3c0b869dad931ee8811ac34e1451b9a443dfe3fe23483c67c6",
+    "native_limit_mm": 14,
+    "float32_bound_tolerance_mm": 0.0001,
+    "native_bounds": [
+      {
+        "lod": 0,
+        "cap_max_mm": 10.12942844080186,
+        "exterior_max_mm": 14.000000576149233,
+        "fine_max_mm": 11.78064907769351
+      },
+      {
+        "lod": 1,
+        "cap_max_mm": 9.507428581659482,
+        "exterior_max_mm": 14.000000870939557,
+        "fine_max_mm": 11.792228949812346
+      },
+      {
+        "lod": 2,
+        "cap_max_mm": 9.816975795534828,
+        "exterior_max_mm": 14.00000118703673,
+        "fine_max_mm": 11.513558409826047
+      }
+    ],
+    "structural_errors": 0,
+    "structural_report_sha256": "72523b83fef5d6c39451cad50997a56c1ee984e7454ecd4e74c304bcf9f2f196",
+    "actual_imported_BPTC": true,
+    "private_material_overrides": false,
+    "private_texture_overrides": false,
+    "high_hair_frames": 16,
+    "native_hair_frames": 40,
+    "headwear_default_frames": 36,
+    "native_developer_switch": false,
+    "client_logs_clean": true,
+    "provenance_hashes": {
+      "high_hair_and_generic_headwear": {
+        "execution_sha256": "742294ebd784b7cd1e23b6b73ae6aca5277605409a3407a9797f74c3ad07d19d",
+        "captures_sha256": "3dd2bb40a9bd5989839ad10aaf004ad10a28b0741b2385769a382a11dddfe033",
+        "count": 24
+      },
+      "native_hair_original": {
+        "execution_sha256": "6657296d535666c2127e726587762b09eaca2b4e3b29755c9b3a7ad50695d3d3",
+        "captures_sha256": "c24e36ee944fc7c5460b18c3593426912a54fb1c55d6712de19b8d24e859cee1",
+        "count": 40
+      },
+      "medium_hair_cleanup": {
+        "execution_sha256": "747e9214d5f35cd0de96260281b5990c39e17b370e0655b1586bb0453fc5fe48",
+        "captures_sha256": "0097df0da8e9ffaff643da0ca27d2e4afe4344d13cba03055564106eb0d455d4",
+        "count": 20
+      },
+      "headwear_default": {
+        "execution_sha256": "f1fe8d854b59a45010cc21fa12045819e7104c8038c0230243b57f09730dfeab",
+        "captures_sha256": "70cc6fc406b43ce125dc52d7270ca490111046a31b3ec8ded3528e1938c3a846",
+        "count": 36
+      }
+    },
+    "accepted_capture_selection": {
+      "high_hair": "16 rest/groom minimum/groom maximum/Walk frames from actual-high-review-v4; its8 generic headwear frames replaced by final exact-fit review",
+      "native_low_hair": "20 unchanged Low frames from actual-native-review-v4",
+      "native_medium_hair": "20 final detached-patch cleanup frames from final-detached-clean-v5",
+      "headwear": "36 ordinary-default exact111/170 frames acrossHigh/Low/Medium and neutral/minimum/maximum grooming; initial developer comparison is supplementary only"
+    }
+  }
+}
