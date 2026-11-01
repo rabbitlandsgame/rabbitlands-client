@@ -362,10 +362,11 @@ def detail_cards(head,surface,source_normals,spec,lod):
     eligible&=(points[:,1]>points[:,1].min()+.025)&(points[:,1]<head.C[1]+.200)
     candidates=rng.permutation(np.flatnonzero(eligible));roots=[]
     fine_count=int(config['fine_count'][lod]);messy_count=int(config['messy_count'][lod]);count=fine_count+messy_count
+    assert fine_count>=0 and messy_count>=0,'Detail counts must be nonnegative'
     for row in candidates:
+        if len(roots)>=count:break
         if roots and np.linalg.norm(points[roots]-points[row],axis=1).min()<.008:continue
         roots.append(row)
-        if len(roots)==count:break
     P=[];N=[];UV=[];T=[];COL=[];root_points=[];segments=int(config['segments'][lod])
     for number,row in enumerate(roots):
         messy=number>=fine_count;length=rng.uniform(*(config['messy_length_mm'] if messy else config['fine_length_mm']))/1000
