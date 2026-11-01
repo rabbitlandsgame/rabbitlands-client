@@ -19,7 +19,84 @@ REPO = Path(__file__).resolve().parents[2]
 CLIENT = REPO / "godot-client"
 MAPS = ("landfall",)
 CREATURES = {"rabbit", "beaver", "shrew", "squirrel", "hedgehog", "dormouse", "gecko", "pheasant", "stoat"}
+MOUNTS = {"moor_pony", "golden_plains_horse", "crystalback_tortoise", "jadefeather_raptor", "giant_rat"}
 SKIP = {".godot", "bin", "native", "tools", "tests", "docs", "prototypes", "world_authoring", "test-artifacts"}
+PART_BYTES = 24 * 1024 * 1024
+
+
+def describe(path: Path) -> dict:
+    with path.open("rb") as source:
+        digest = hashlib.file_digest(source, "sha256").hexdigest()
+    return {"file": path.name, "bytes": path.stat().st_size, "sha256": digest}
+
+
+def raw_archives(files: list[Path], assets: Path) -> list[dict]:
+    """Independent archives keep temporary browser download memory bounded."""
+    groups, group, size = [], [], 0
+    for path in files:
+        length = path.stat().st_size
+        if group and size + length > PART_BYTES:
+            groups.append(group)
+            group, size = [], 0
+        group.append(path)
+        size += length
+    if group:
+        groups.append(group)
+    result = []
+    for group in groups:
+        temporary = assets / "packing.zip"
+        with zipfile.ZipFile(temporary, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
+            for source in group:
+                archive.write(source, source.relative_to(REPO).as_posix())
+        row = describe(temporary)
+        target = assets / (row["sha256"] + ".zip")
+        temporary.replace(target)
+        result.append({**row, "file": target.name})
+    return result
+
+
+def finish_site(stage: Path, assets_base_url: str):
+    site, assets = stage / "site", stage / "assets"
+    pack = site / "index.pck"
+    parts = []
+    with pack.open("rb") as source:
+        while data := source.read(PART_BYTES):
+            digest = hashlib.sha256(data).hexdigest()
+            target = assets / (digest + ".bin")
+            target.write_bytes(data)
+            parts.append({"file": target.name, "bytes": len(data), "sha256": digest})
+    wasm = describe(site / "index.wasm")
+    target = assets / (wasm["sha256"] + ".wasm")
+    shutil.copy2(site / "index.wasm", target)
+    report = json.loads((stage / "build.json").read_text())
+    manifest = {"schema": 1, "base_url": assets_base_url.rstrip("/") + "/",
+                "pack": {"bytes": pack.stat().st_size, "parts": parts},
+                "wasm": {**wasm, "file": target.name}, "archives": report["archives"]}
+    (site / "browser-assets.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    shutil.copy2(CLIENT / "src/platform/browser_assets.js", site / "browser-assets.js")
+    # Keep the worker script on the launch origin while loading verified WASM
+    # from the asset origin. Assert the supported engine hook rather than
+    # silently producing a broken build after an export-template upgrade.
+    script = site / "index.js"
+    text = script.read_text(encoding="utf-8")
+    hook = 'preloader.loadPromise(`${loadPath}.wasm`, size, true)'
+    if text.count(hook) != 1:
+        raise ValueError("Web template WASM hook changed; qualify the new engine before exporting")
+    script.write_text(text.replace(hook, 'preloader.loadPromise(globalThis.RL_BROWSER_WASM_URL || `${loadPath}.wasm`, size, true)'), encoding="utf-8")
+    shell = site / "index.html"
+    text = shell.read_text(encoding="utf-8")
+    if text.count("engine.startGame({") != 1:
+        raise ValueError("Web template startup changed")
+    text = text.replace('<script src="index.js"></script>', '<script src="index.js"></script>\n<script src="browser-assets.js"></script>')
+    shell.write_text(text.replace("engine.startGame({", "RabbitLandsBrowser.start(engine, GODOT_CONFIG, {"), encoding="utf-8")
+    # The launch folder cannot accidentally serve the large payloads.
+    pack.unlink()
+    (site / "index.wasm").unlink()
+    (site / "assets.zip").unlink(missing_ok=True)
+    report.update({"assets_base_url": assets_base_url,
+                   "asset_download_bytes": sum(row["bytes"] for row in [*report["archives"], *parts, wasm]),
+                   "launch_site_bytes": sum(p.stat().st_size for p in site.iterdir() if p.is_file())})
+    (stage / "build.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
 
 
 def strings(value):
@@ -57,7 +134,7 @@ def raw_files() -> list[Path]:
     tracked = set(subprocess.check_output(["git", "ls-files", "-z"], cwd=REPO).decode().split("\0"))
     models = json.loads((CLIENT / "data/actors/models.json").read_text())
     selected = {name: row for name, row in models["models"].items()
-                if name.endswith(("_male", "_female")) or name in CREATURES}
+                if name.endswith(("_male", "_female")) or name in CREATURES | MOUNTS}
     found: set[Path] = set()
 
     def add(path):
@@ -96,7 +173,7 @@ def raw_files() -> list[Path]:
             add(CLIENT / value.removeprefix("res://"))
     native = CLIENT / "assets/actors/native"
     # Preserve the current Human identities, hair, animation and starter gear.
-    for root in ("rl_heads", "rl_head_textures", "face_masks"):
+    for root in ("rl_heads", "rl_head_textures", "face_masks", "mounts"):
         for path in (native / root).rglob("*"):
             if path.is_file() and path.suffix not in {".uid", ".import", ".md"}:
                 add(path)
@@ -143,11 +220,13 @@ def raw_files() -> list[Path]:
     return sorted(found)
 
 
-def stage_project(stage: Path, endpoint: str, assets_url: str = "") -> dict:
+def stage_project(stage: Path, endpoint: str) -> dict:
     project = stage / "project"
     site = stage / "site"
     project.mkdir(parents=True, exist_ok=True)
     site.mkdir(exist_ok=True)
+    assets = stage / "assets"
+    assets.mkdir(exist_ok=True)
     # Importers also need external scenery images in their existing relative
     # location. This generated sibling stays inside the isolated build stage.
     images = REPO / "eloria-assets/world/_shared/images"
@@ -187,16 +266,12 @@ def stage_project(stage: Path, endpoint: str, assets_url: str = "") -> dict:
     (project / "data/maps/geometry-cache-scope.json").write_text(
         json.dumps({"schema": 1, "version": 1, "maps": [], "groups": {}, "asset_overlays": []}), encoding="utf-8")
     files = raw_files()
-    with zipfile.ZipFile(site / "assets.zip", "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
-        for source in files:
-            archive.write(source, source.relative_to(REPO).as_posix())
-    with (site / "assets.zip").open("rb") as source:
-        digest = hashlib.file_digest(source, "sha256").hexdigest()
-    cfg = {"schema": 1, "maps": list(MAPS), "endpoint": endpoint, "assets_url": assets_url, "assets_sha256": digest}
+    archives = raw_archives(files, assets)
+    cfg = {"schema": 2, "maps": list(MAPS), "endpoint": endpoint, "archives": archives}
     (project / "data/web_prototype.json").write_text(json.dumps(cfg, indent=2), encoding="utf-8")
     # A static login picture is enough for the prototype; save player choices separately.
     report = {**cfg, "raw_files": len(files), "raw_bytes": sum(p.stat().st_size for p in files),
-              "download_bytes": (site / "assets.zip").stat().st_size,
+              "download_bytes": sum(row["bytes"] for row in archives),
               "client_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO, text=True).strip()}
     (stage / "build.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
     return report
@@ -208,19 +283,20 @@ def main():
     parser.add_argument("--templates", required=True, type=Path)
     parser.add_argument("--stage", type=Path, default=REPO / ".local/browser-prototype/build")
     parser.add_argument("--endpoint", default="ws://127.0.0.1:2002")
-    parser.add_argument("--assets-url", default="", help="Direct browser-accessible HTTPS asset URL; defaults to the site folder")
+    parser.add_argument("--assets-base-url", default="http://127.0.0.1:8061/", help="CORS-enabled asset folder; HTTPS outside loopback")
     parser.add_argument("--prepare-only", action="store_true")
     args = parser.parse_args()
     stage = args.stage.resolve()
     if not stage.is_relative_to(REPO / ".local"):
         parser.error("Prototype output must stay inside this worktree's ignored .local directory")
     stage.mkdir(parents=True, exist_ok=True)
-    if args.assets_url:
-        from urllib.parse import urlsplit
-        url = urlsplit(args.assets_url)
-        if url.scheme != "https" or not url.hostname or url.username or url.fragment:
-            parser.error("Remote assets require a direct HTTPS URL without credentials or fragments")
-    print(json.dumps(stage_project(stage, args.endpoint, args.assets_url), indent=2), flush=True)
+    from urllib.parse import urlsplit
+    url = urlsplit(args.assets_base_url)
+    if not url.hostname or url.username or url.password or url.query or url.fragment or (url.scheme != "https" and not
+            (url.scheme == "http" and url.hostname in {"localhost", "127.0.0.1", "::1"})):
+        parser.error("Assets require HTTPS without credentials, query or fragments; HTTP is allowed only on loopback")
+    report = stage_project(stage, args.endpoint)
+    print(f"Prepared {report['raw_files']} raw files in {len(report['archives'])} verified archives", flush=True)
     if args.prepare_only:
         return
     project = stage / "project"
@@ -260,6 +336,7 @@ progressive_web_app/enabled=false
         text = log.read_text(encoding="utf-8", errors="replace")
         if result.returncode or any(s in text for s in ("SCRIPT ERROR", "Parse Error", "ERROR:")):
             raise SystemExit(f"Browser {label} failed; inspect {log}")
+    finish_site(stage, args.assets_base_url)
     print(f"Browser build ready: {stage / 'site/index.html'}", flush=True)
 
 
