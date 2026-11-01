@@ -32,6 +32,7 @@ const ENTRIES := {
 		"female": {"name": "buzz_cut_female", "native_head": true},
 		"male": {"name": "buzz_cut_male", "native_head": true}}},
 	22: {"name": "parted_sweep", "fallback_style": 1, "variants": {
+		"female": {"name": "parted_sweep_female", "native_head": true, "tie_height": false},
 		"male": {"name": "parted_sweep_male", "native_head": true, "tie_height": false}}},
 	23: {"name": "feathered_mohawk", "fallback_style": 9, "variants": {
 		"female": {"name": "feathered_mohawk_female", "native_head": true},
