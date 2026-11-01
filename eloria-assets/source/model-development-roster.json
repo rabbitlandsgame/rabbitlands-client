@@ -3351,9 +3351,9 @@
     {
       "id": "swan",
       "file": "godot-client/assets/actors/native/creatures/basic_expansion/swan.glb",
-      "sha256": "60bc59a8e3ecfe0e88a94ffccb9689156a6a929b676c13016539bbf0ce30b4f9",
-      "status": "current model; updated animation draft installed; actor-specific visual review pending; storage optimized",
-      "runtimeVisualAcceptance": {
+      "sha256": "dba9783f3b184fe59823ea72d6cc2b4e243c1f8ebb262d443b08afc9bcc4661c",
+      "status": "current model; grounded idle motion revision; user visual review pending",
+      "previousRuntimeVisualAcceptance": {
         "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
         "actor": "swan",
         "appliesToSHA256": "60bc59a8e3ecfe0e88a94ffccb9689156a6a929b676c13016539bbf0ce30b4f9",
@@ -3366,6 +3366,25 @@
         },
         "previousAuthoringReviewStatus": "draft_needs_review",
         "repairNoteEvents": []
+      },
+      "runtimeAnimationRevision": {
+        "id": "swan-grounded-idle-v1",
+        "receipt": "docs/qa/creature-storage/swan-idle-motion.json",
+        "baselineSHA256": "60bc59a8e3ecfe0e88a94ffccb9689156a6a929b676c13016539bbf0ce30b4f9",
+        "runtimeSHA256": "dba9783f3b184fe59823ea72d6cc2b4e243c1f8ebb262d443b08afc9bcc4661c",
+        "changedClips": [
+          "Idle_A",
+          "Fighting_Idle"
+        ],
+        "preservedClips": [
+          "Death_A",
+          "Fly",
+          "Hit_Chest",
+          "Jog",
+          "Sword_Attack",
+          "Walk"
+        ],
+        "status": "task_requested_idle_revision; technical_checks_passed; user_visual_approval_not_recorded"
       }
     },
     {

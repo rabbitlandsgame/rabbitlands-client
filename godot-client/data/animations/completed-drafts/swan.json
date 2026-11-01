@@ -75,13 +75,13 @@
     "walk": 0.20883511303617353,
     "run": 0.487349723213646
   },
-  "reviewStatus": "accepted",
+  "reviewStatus": "draft_needs_review",
   "concept": {
     "movement": "A measured broad-bodied walk with quiet long-neck balance, low webbed-foot recovery and restrained sway. The run stays low and deliberate with folded wings.",
     "attack": "A deliberate S-neck recoil followed by an extended forward bill jab and a small balanced wing flare.",
     "death": "The breast settles first, the curved neck folds forward in a continuous arc, and the wings and released feet settle into a supported held pose."
   },
-  "runtimeVisualAcceptance": {
+  "previousRuntimeVisualAcceptance": {
     "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
     "actor": "swan",
     "appliesToSHA256": "60bc59a8e3ecfe0e88a94ffccb9689156a6a929b676c13016539bbf0ce30b4f9",
@@ -96,13 +96,42 @@
     "repairNoteEvents": []
   },
   "runtimeOptimization": {
-    "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+    "receipt": "docs/qa/creature-storage/swan-idle-motion.json",
     "actor": "swan",
-    "sourceSHA256": "55dba90a3f158fbd5a27246d599b3ff896e834b03c72afc44d36f04644a9066c",
-    "previousRuntimeSHA256": "55dba90a3f158fbd5a27246d599b3ff896e834b03c72afc44d36f04644a9066c",
-    "runtimeSHA256": "60bc59a8e3ecfe0e88a94ffccb9689156a6a929b676c13016539bbf0ce30b4f9",
-    "method": "visually_accepted_offline_corrective_bake",
+    "sourceSHA256": "60bc59a8e3ecfe0e88a94ffccb9689156a6a929b676c13016539bbf0ce30b4f9",
+    "previousRuntimeSHA256": "60bc59a8e3ecfe0e88a94ffccb9689156a6a929b676c13016539bbf0ce30b4f9",
+    "runtimeSHA256": "dba9783f3b184fe59823ea72d6cc2b4e243c1f8ebb262d443b08afc9bcc4661c",
+    "method": "preserved_accepted_bake_with_two_idle_channel_revision",
     "bakeFPS": 30,
-    "previousRuntimeOptimization": null
+    "previousRuntimeOptimization": {
+      "receipt": "docs/qa/creature-storage/visually-accepted-delivery.json",
+      "actor": "swan",
+      "sourceSHA256": "55dba90a3f158fbd5a27246d599b3ff896e834b03c72afc44d36f04644a9066c",
+      "previousRuntimeSHA256": "55dba90a3f158fbd5a27246d599b3ff896e834b03c72afc44d36f04644a9066c",
+      "runtimeSHA256": "60bc59a8e3ecfe0e88a94ffccb9689156a6a929b676c13016539bbf0ce30b4f9",
+      "method": "visually_accepted_offline_corrective_bake",
+      "bakeFPS": 30,
+      "previousRuntimeOptimization": null
+    }
+  },
+  "previousReviewStatus": "accepted",
+  "runtimeAnimationRevision": {
+    "id": "swan-grounded-idle-v1",
+    "receipt": "docs/qa/creature-storage/swan-idle-motion.json",
+    "baselineSHA256": "60bc59a8e3ecfe0e88a94ffccb9689156a6a929b676c13016539bbf0ce30b4f9",
+    "runtimeSHA256": "dba9783f3b184fe59823ea72d6cc2b4e243c1f8ebb262d443b08afc9bcc4661c",
+    "changedClips": [
+      "Idle_A",
+      "Fighting_Idle"
+    ],
+    "preservedClips": [
+      "Death_A",
+      "Fly",
+      "Hit_Chest",
+      "Jog",
+      "Sword_Attack",
+      "Walk"
+    ],
+    "status": "task_requested_idle_revision; technical_checks_passed; user_visual_approval_not_recorded"
   }
 }

@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "actor": "swan",
+  "revision": "swan-grounded-idle-v1",
+  "issue": "RL31-11",
+  "runtimePath": "godot-client/assets/actors/native/creatures/basic_expansion/swan.glb",
+  "baselineSHA256": "60bc59a8e3ecfe0e88a94ffccb9689156a6a929b676c13016539bbf0ce30b4f9",
+  "runtimeSHA256": "dba9783f3b184fe59823ea72d6cc2b4e243c1f8ebb262d443b08afc9bcc4661c",
+  "baselineBytes": 605324,
+  "runtimeBytes": 610124,
+  "authoringTool": "eloria-assets/tools/refine_swan_idle.py",
+  "independentChecker": "eloria-assets/tools/check_swan_idle.py",
+  "nativeEngineTest": "godot-client/tests/test_swan_idle_motion.gd",
+  "independentWitness": "godot-client/tests/fixtures/swan-idle-motion.json",
+  "changedClips": ["Idle_A", "Fighting_Idle"],
+  "changedChannelsPerClip": ["neck_01:rotation", "spine_02:translation"],
+  "preservedClips": ["Death_A", "Fly", "Hit_Chest", "Jog", "Sword_Attack", "Walk"],
+  "preservation": {
+    "originalBinaryPrefixExact": true,
+    "geometrySkinRestBindsTexturesAndMaterialsExact": true,
+    "allNativeClipNamesAndDurationsExact": true,
+    "unrelatedAnimationRecordsExact": true,
+    "unchangedIdleChannelsExact": true,
+    "addedJointsOrCorrectiveTargets": 0,
+    "maximumNewChannelSamplesPerSecond": 24,
+    "nativeImportBakeFPS": 30,
+    "replayByteIdentical": true
+  },
+  "independentSkinChecks": {
+    "sampledStates": {"Idle_A": 355, "Fighting_Idle": 363},
+    "Idle_A": {
+      "durationSeconds": 2.0,
+      "headScanDegrees": 5.0,
+      "headDipDegrees": 1.4,
+      "chestRiseMillimetres": 2.5,
+      "footVertices": 409,
+      "maximumFootDisplacementMillimetres": 0.0,
+      "maximumHeadDisplacementMillimetres": 16.00584608104563,
+      "maximumAddedSeamGapMillimetres": 0.0
+    },
+    "Fighting_Idle": {
+      "durationSeconds": 1.600000023841858,
+      "headScanDegrees": 3.5,
+      "headDipDegrees": 0.9,
+      "chestRiseMillimetres": 2.0,
+      "footVertices": 407,
+      "maximumFootDisplacementMillimetres": 0.0,
+      "maximumHeadDisplacementMillimetres": 10.97184590857725,
+      "maximumAddedSeamGapMillimetres": 0.0
+    },
+    "maximumLoopClosureMillimetres": 2.4835037038225096e-13
+  },
+  "godot": {
+    "version": "4.7.2-stable",
+    "focusedChecks": 17,
+    "maximumOffGridBonePositionErrorMillimetres": 0.05324277299,
+    "maximumOffGridBoneBasisVectorError": 0.00056054897141,
+    "productionActorComparisonStates": 490,
+    "unchangedClipPoseSamples": 66,
+    "unchangedClipMaximumPositionAndNormalDifference": 0.0,
+    "directedSwitchPairs": 56,
+    "firstTickSwitchStates": 112,
+    "frameSteppedSwitchStates": 280,
+    "configuredDefaultAndRESETExact": true,
+    "continuousGateProbePhases": 16,
+    "continuousGateProbeFailures": 0,
+    "continuousGateProbeScope": "Two actual creature actors; FULL/HALF/QUARTER, offscreen/return, repeated attacks, death"
+  },
+  "blender": {
+    "version": "5.2.1 LTS",
+    "baselineAndCandidateFreshImportFiniteActions": true,
+    "scope": "Fresh import and finite-action checks; not an artistic approval"
+  },
+  "review": {
+    "implementationVisualReview": "Full cycles at native speed, three-quarter/side/rear and gameplay-distance cameras; folded wings, planted feet and connected neck retained",
+    "comparisonViewer": "eloria-assets/tools/preview_creature_runtime_optimization.py",
+    "userVisualApproval": null,
+    "historicalAcceptance": "The previous exact-version approval remains attached to the baseline SHA in previousRuntimeVisualAcceptance; it is not approval of this revision"
+  },
+  "limits": [
+    "The original stream's complete animation-stop cause is not attributed; static idle clips are the reproduced defect addressed here",
+    "This is component and asset qualification, not a full live Gauntlet/crowd or performance acceptance",
+    "The older generic creature validator's material/root/scale assumptions fail identically on baseline and candidate; it is not counted as a pass"
+  ]
+}
