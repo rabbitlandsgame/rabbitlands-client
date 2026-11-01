@@ -128,7 +128,7 @@ func _run() -> void:
 	check(LIBRARY.find(entries, "missing").is_empty(), "Unknown base does not select an arbitrary look")
 	var incomplete := registry.duplicate(true)
 	incomplete.creationOptions = [registry.creationOptions[0], registry.creationOptions[0], {"actorType": -1, "model": "missing"}]
-	check(LIBRARY.rows(incomplete).size() == 5, "Only the valid body's native, study and qualified bases remain")
+	check(LIBRARY.rows(incomplete).size() == 20, "Only the valid female body's native, study and 18 archetypes remain")
 	print("creation base library: %d choices, %d failures" % [pristine.size(), failures.size()])
 	quit(0 if failures.is_empty() else 1)
 
