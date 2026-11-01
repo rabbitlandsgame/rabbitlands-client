@@ -40,7 +40,7 @@ func run() -> void:
 	var lighting := Lighting.new()
 	lighting.apply(manifest, "lantern_mine", owner, sun, moon, markers)
 	expect(lighting.is_active() and is_equal_approx(owner.environment.ambient_light_energy, Lighting.AMBIENT_ENERGY),
-		"entering the mine is dark without a quest, cinematic, event or campaign snapshot")
+		"ordinary mine lighting includes the same navigation fill without a quest or campaign snapshot")
 	expect(is_zero_approx(sun.light_energy) and is_zero_approx(moon.light_energy)
 		and owner.environment.reflected_light_source == Environment.REFLECTION_SOURCE_DISABLED
 		and is_zero_approx(owner.environment.ambient_light_sky_contribution),
