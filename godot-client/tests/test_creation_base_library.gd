@@ -4,6 +4,7 @@ extends SceneTree
 const LIBRARY := preload("res://src/ui/creation_base_library.gd")
 const PC := preload("res://src/actors/portrait_customization.gd")
 const VARIANTS := preload("res://src/actors/appearance_variants.gd")
+const POLICY := preload("res://src/actors/player_creation_policy.gd")
 var failures: Array[String] = []
 
 
@@ -21,25 +22,18 @@ func _run() -> void:
 	var registry: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json"))
 	var before := JSON.stringify(registry)
 	var entries: Array[Dictionary] = LIBRARY.rows(registry)
-	check(entries.size() == 25, "All sixteen bodies, three studies and six qualified Humans are offered")
+	check(entries.size() == 11, "Two Human bodies, three studies and six qualified Humans are offered")
 	var ids: Dictionary = {}
 	var native_types: Dictionary = {}
 	var human_names: Dictionary = {}
-	var other_race_seen := false
-	var other_native_ids: Array[String] = []
 	for row: Dictionary in entries:
 		check(not ids.has(row.id), "Unique stable id: " + row.id)
 		check(str(row.portrait_id) == str(row.id), "Static portrait key follows the stable catalog ID")
 		ids[row.id] = true
-		if row.race_id == "luminous":
-			check(not other_race_seen, "Human starting points precede the other races")
-			check(row.label == LIBRARY.HUMAN_NAMES.get(row.id, ""), row.id + " uses its stable Human name")
-			check(not human_names.has(row.label), "Available Human names are unique: " + row.label)
-			human_names[row.label] = true
-		else:
-			other_race_seen = true
-			other_native_ids.append(str(row.id))
-			check(row.label == row.race_label + " " + str(row.sex).capitalize(), "Other races retain their existing labels")
+		check(row.race_id == "luminous", "Only Human starting looks are offered")
+		check(row.label == LIBRARY.HUMAN_NAMES.get(row.id, ""), row.id + " uses its stable Human name")
+		check(not human_names.has(row.label), "Available Human names are unique: " + row.label)
+		human_names[row.label] = true
 		var look: Dictionary = row.look
 		var actor_type := int(look.actor_type)
 		var model_id := str(registry.actorTypes[str(actor_type)])
@@ -59,24 +53,15 @@ func _run() -> void:
 		check(hair >= 0 and hair < 300 and VARIANTS.hair_style(hair) in range(10) \
 			and VARIANTS.hair_color_index(hair) in range(20), row.id + " has valid logical hair")
 		check(VARIANTS.hair_from_wire(hair & 255, VARIANTS.hair_wire_head(hair, int(appearance.head))) == hair, row.id + " retains extended hair on the wire")
-		if actor_type not in [0, 1]:
-			check(appearance.size() == LIBRARY.LEGACY_FIELDS.size() and int(appearance.skin) == 0, row.id + " preserves authored race skin and has no Human fields")
-		elif row.sex == "female":
+		if row.sex == "female":
 			check(int(appearance.facial_hair) == 0 and not "Facial hair" in row.hair_tags, row.id + " does not offer a male beard on a female base")
-		if row.race_id in ["orun", "mycelari"]:
-			check(int(appearance.eyes) == 3, row.id + " preserves amber race defaults")
-	for option: Dictionary in registry.creationOptions:
+	for option: Dictionary in POLICY.options(registry):
 		check(native_types.has(int(option.actorType)), "Default exists for playable actor type %d" % option.actorType)
-	var expected_other_ids: Array[String] = []
+	check(native_types.size() == 2, "Exactly two Human race/sex bases")
+	check((registry.creationOptions as Array).size() == 16, "The full source body catalog remains available for NPCs and tools")
 	for option: Dictionary in registry.creationOptions:
 		if registry.models[str(option.model)].culture != "luminous":
-			expected_other_ids.append("native_" + str(option.model))
-	check(other_native_ids == expected_other_ids, "Other race pairs retain their registry order")
-	check(native_types.size() == 16, "Exactly sixteen native race/sex bases")
-	for sex: String in ["female", "male"]:
-		var ssarathi := LIBRARY.find(entries, "native_ssarathi_" + sex)
-		check(ssarathi.race_label == "Ssarathi" and "ssarathi" in ssarathi.search_text \
-			and "lizardfolk" in ssarathi.search_text, "Ssarathi keeps both public search names for " + sex)
+			check(LIBRARY.find(entries, "native_" + str(option.model)).is_empty(), "Non-Human catalog body is not selectable")
 	check(LIBRARY.find(entries, "study_mira").sex == "female", "Mira is a female study")
 	check(LIBRARY.find(entries, "study_rowan").sex == "male" and LIBRARY.find(entries, "study_tavi").sex == "male", "Rowan and Tavi are male studies")
 	var cornrows := LIBRARY.find(entries, "human_01")

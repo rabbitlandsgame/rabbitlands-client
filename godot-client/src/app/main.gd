@@ -28,6 +28,7 @@ var window_stack: Node
 var lantern_scene: Node3D
 
 const AppearanceChoices = preload("res://src/actors/appearance_choices.gd")
+const PLAYER_CREATION := preload("res://src/actors/player_creation_policy.gd")
 const PortraitFormScript = preload("res://src/ui/portrait_customization_form.gd")
 const AppearanceEditorScript = preload("res://src/ui/appearance_editor.gd")
 const AppearanceColourPanelScript = preload("res://src/ui/appearance_colour_panel.gd")
@@ -1503,7 +1504,7 @@ func _ready() -> void:
 	actor_type_models = model_registry.get("actorTypes", {})
 	npc_looks = model_registry.get("npcLooks", {})
 	npc_characters = _json("res://data/actors/npc_characters.json")
-	creation_options = model_registry.get("creationOptions", [])
+	creation_options = PLAYER_CREATION.options(model_registry)
 	animation_config = _json("res://data/animations/luminous.json")
 	animation_configs["res://data/animations/luminous.json"] = animation_config
 	var registry_document := _json("res://data/maps/registry.json")
@@ -2558,8 +2559,9 @@ func _initialize_creation_appearance() -> void:
 		var selector := get_node("%" + key) as OptionButton
 		selector.select(selector.get_item_index(int(choices[key])))
 
-## Rolls race and sex before the seven appearance selectors so every press can
-## produce a genuinely different character silhouette. Calling and account
+## Rolls the available player body and sex before the appearance selectors.
+## Player availability is filtered independently of the full NPC/model catalog.
+## Calling and account
 ## fields deliberately live outside this list, and selecting without emitting
 ## each control's signal lets the completed look rebuild the preview once.
 ## Tests can pass a seeded generator without changing the generator used by the
@@ -2666,6 +2668,9 @@ func _record_startup_window(window_name: String, began: int) -> int:
 func _refresh_creation_preview(starting_look: Dictionary = {}, reset_actor: bool = false) -> void:
 	var choosing_base := not starting_look.is_empty()
 	var actor_type: int = int(starting_look.get("actor_type", create_gender.get_selected_id()))
+	if not PLAYER_CREATION.allows_actor_type(actor_type):
+		create_status.text = PLAYER_CREATION.MESSAGE
+		return
 	var appearance: Dictionary = (starting_look.get("appearance", {}) as Dictionary).duplicate(true) if choosing_base else _creation_appearance()
 	# Modified 2026-08-28 for Eloria Client: the creation bytes are equipment
 	# visual ids now, so the preview resolves them exactly as the world does.
@@ -2712,7 +2717,7 @@ func _refresh_creation_preview(starting_look: Dictionary = {}, reset_actor: bool
 	if not _creation_preview_errors.is_empty():
 		create_status.text = "Preview warnings: " + "; ".join(_creation_preview_errors)
 	else:
-		create_status.text = "%s starting items will be granted for any race. Drag to rotate." % \
+		create_status.text = "%s starting items will be granted. Drag to rotate." % \
 			creation_class_title.text
 
 func _populate_creation_races() -> void:
@@ -2732,6 +2737,7 @@ func _populate_creation_races() -> void:
 		create_race.set_item_metadata(index, culture)
 		if culture == "luminous":
 			create_race.select(index)
+	create_race.disabled = create_race.item_count <= 1
 
 func _populate_creation_sexes() -> void:
 	var previous := str(create_gender.get_selected_metadata()) if create_gender.item_count > 0 else "female"
@@ -7607,6 +7613,7 @@ func _present_actor(id: Variant) -> void:
 	existing_actor.apply_vitals(int(dto.get("health", 0)),
 		int(dto.get("max_health", 0)))
 	_apply_actor_banner_options(int(id), existing_actor)
+	campaign_scene.prepare_actor_visibility(AppState.campaign, existing_actor, int(id), AppState.current_map)
 	# A deferred actor out of draw range shows nothing to stand on the ground:
 	# its map dot needs only the tile. Its body is put on the ground when built.
 	if not existing_actor.is_model_deferred() or existing_actor.is_drawn():
@@ -7662,6 +7669,7 @@ func _spawn_actor(id: Variant, build := true,
 	_place_actor_on_surface(node, true, actor_adapter.fallback_height())
 	node.adopt_presentation_from(previous)
 	node.set_selected(int(id) == AppState.selected_actor_id)
+	campaign_scene.prepare_actor_visibility(AppState.campaign, node, int(id), AppState.current_map)
 	if int(id) == AppState.local_actor_id:
 		# Built behind the curtain, shown once its ground is resident.
 		node.visible = not _arrival_pending()
@@ -7707,6 +7715,7 @@ func _revive_actor(id: Variant, node: ReplicatedActor3D, dto: Dictionary,
 	_apply_actor_mount(id)
 	_place_actor_on_surface(node, true, actor_adapter.fallback_height())
 	node.set_selected(int(id) == AppState.selected_actor_id)
+	campaign_scene.prepare_actor_visibility(AppState.campaign, node, int(id), AppState.current_map)
 	node.set_drawn(_crowd_reference_point().distance_to(node.global_position)
 		<= ACTOR_DRAW_DISTANCE_METRES)
 	# Paused while parked; it animates meanwhile, as a body coming into view

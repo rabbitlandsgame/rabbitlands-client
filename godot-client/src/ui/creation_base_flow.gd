@@ -23,7 +23,7 @@ func configure(main: Control) -> void:
 	_button = Button.new()
 	_button.name = "ChooseStartingLook"
 	_button.text = "Choose starting look"
-	_button.tooltip_text = "Browse editable starting looks for every race and sex"
+	_button.tooltip_text = "Browse editable Human starting looks for both sexes"
 	_button.accessibility_name = _button.text
 	_button.custom_minimum_size.y = 38
 	var form := main.get_node("CreationPanel/Columns/FormPanel/Form")

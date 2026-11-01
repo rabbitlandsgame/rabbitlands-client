@@ -488,6 +488,10 @@ func set_particles_enabled(enabled: bool) -> void:
 ## an object is merely standing there, so this is the only thing that draws it
 ## on an object whose model loaded.
 func set_active(active: bool) -> void:
+	# Campaign guidance owns its work circles, including cinematic suppression.
+	# A later HUD/harvest refresh must not reveal or recolour them for a frame.
+	if has_meta("campaign_work_available"):
+		return
 	var ring: MeshInstance3D = get_node_or_null("Ring") as MeshInstance3D
 	if not is_instance_valid(ring):
 		return

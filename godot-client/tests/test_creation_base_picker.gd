@@ -116,15 +116,15 @@ func run() -> void:
 	var catalog := Library.rows(registry)
 	picker.setup(catalog, "human_34", {"portrait_manifest_path": "user://no_creation_portrait_manifest.json"})
 	await settle()
-	check(picker._cards.size() == 25, "All 25 catalog cards exist without live portrait stages")
-	check_static_cards(picker, "all25")
+	check(picker._cards.size() == 11, "All eleven Human catalog cards exist without live portrait stages")
+	check_static_cards(picker, "all11")
 	for id: String in picker._cards:
 		var card := picker._cards[id] as Button
 		check((card.get_meta("portrait") as TextureRect).texture == null and (card.get_meta("placeholder") as Label).visible,
 			"Missing portrait is a static placeholder: " + id)
 	picker.scroll.scroll_vertical = int(picker.scroll.get_v_scroll_bar().max_value)
 	await settle()
-	check_static_cards(picker, "scroll25")
+	check_static_cards(picker, "scroll11")
 	picker._select_filter(picker.race_filter, "luminous")
 	picker._filter_rows()
 	await settle()

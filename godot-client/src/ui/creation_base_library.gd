@@ -7,6 +7,7 @@ const VARIANTS := preload("res://src/actors/appearance_variants.gd")
 const CHOICES := preload("res://src/actors/appearance_choices.gd")
 const STUDIES := preload("res://src/actors/human_portrait_presets.gd")
 const HEAD_MAP := preload("res://src/actors/rl_head/rl_head_portrait_map.gd")
+const PLAYER_CREATION := preload("res://src/actors/player_creation_policy.gd")
 const ARCHETYPES_PATH := "res://data/actors/rl_head_archetypes.json"
 const LEGACY_FIELDS := ["skin", "hair", "eyes", "head", "shirt", "pants", "boots"]
 const STUDY_SEX := {"Mira": "female", "Rowan": "male", "Tavi": "male"}
@@ -29,7 +30,7 @@ static func rows(registry: Dictionary, protocol_version: int = PC.LATEST) -> Arr
 	var bodies: Dictionary = {}
 	var models: Dictionary = registry.get("models", {})
 	var seen: Dictionary = {}
-	for option: Dictionary in registry.get("creationOptions", []):
+	for option: Dictionary in PLAYER_CREATION.options(registry):
 		var model_id := str(option.get("model", ""))
 		var model: Dictionary = models.get(model_id, {})
 		var race := str(model.get("culture", ""))

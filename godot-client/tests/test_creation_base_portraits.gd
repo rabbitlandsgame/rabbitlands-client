@@ -59,13 +59,13 @@ func _check_catalog() -> void:
 	check(manifest is Dictionary and manifest.get("portraits") is Dictionary, "Current catalog has an offline portrait manifest")
 	if manifest is not Dictionary or manifest.get("portraits") is not Dictionary:
 		return
-	check((manifest.portraits as Dictionary).size() == 25, "All 25 starting looks have portrait entries")
+	check((manifest.portraits as Dictionary).size() >= 11, "Retained portrait catalog covers the enabled Human starting looks")
 	var portraits := Portraits.new()
 	portraits.configure()
 	var textures := {}
 	for protocol: int in range(PC.LATEST + 1):
 		var rows := Library.rows(registry, protocol)
-		check(rows.size() == 25, "All 25 looks remain available on PC/%d" % protocol)
+		check(rows.size() == 11, "All eleven Human looks remain available on PC/%d" % protocol)
 		for row: Dictionary in rows:
 			var path := portraits.texture_path(str(row.portrait_id), row.look)
 			check(not path.is_empty(), "%s PC/%d matches its exact baked look" % [row.id, protocol])
@@ -74,4 +74,5 @@ func _check_catalog() -> void:
 			if image != null:
 				check(image.get_size() == Vector2(512, 512), "Portrait retains the authored 512px size")
 				textures[path] = true
-	check(textures.size() == int(manifest.get("portrait_count", 0)), "Manifest accounts for every distinct portrait asset")
+	check(textures.size() <= int(manifest.get("portrait_count", 0)), "Enabled Human portraits reuse the existing offline catalog")
+	check((manifest.portraits as Dictionary).has("native_ssarathi_female"), "Unused non-Human art is preserved without making it selectable")

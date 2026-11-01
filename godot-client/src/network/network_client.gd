@@ -2,6 +2,7 @@ class_name EloriaNetworkClient
 extends Node
 
 const Diagnostics = preload("res://src/diagnostics/client_diagnostics.gd")
+const PLAYER_CREATION := preload("res://src/actors/player_creation_policy.gd")
 
 signal connection_state_changed(state: String)
 signal packet_received(command: int, payload: PackedByteArray)
@@ -25,15 +26,13 @@ func _set_appearance_protocol(version: int) -> void:
 
 func validate_creation_appearance(appearance: Dictionary) -> Error:
 	appearance_error = ""
+	if not PLAYER_CREATION.allows_actor_type(appearance.get("actor_type", 0)):
+		appearance_error = PLAYER_CREATION.MESSAGE
+		return ERR_UNAVAILABLE
 	var validation := PortraitCustomization.validate(appearance, _appearance_protocol_version)
 	if not validation.ok:
 		appearance_error = validation.message
 		return ERR_UNAVAILABLE if validation.error == "unsupported" else ERR_INVALID_DATA
-	if int(appearance.get("actor_type", 0)) not in [0, 1]:
-		for field: String in PortraitCustomization.FIELDS:
-			if appearance.get(field, PortraitCustomization.DEFAULTS[field]) != PortraitCustomization.DEFAULTS[field]:
-				appearance_error = "Advanced face, hair and body customization is currently available for Human characters only."
-				return ERR_INVALID_DATA
 	return OK
 const CoordinateContext = preload("res://src/network/coordinate_context.gd")
 var coordinates = CoordinateContext.new()

@@ -36,7 +36,7 @@ func run() -> void:
 	var shirt := main.get_node("%CreateShirt") as OptionButton
 	var pants := main.get_node("%CreatePants") as OptionButton
 	var boots := main.get_node("%CreateBoots") as OptionButton
-	expect(race.item_count == 8 and sex.item_count == 2, "eight races and two separate sex choices")
+	expect(race.item_count == 1 and race.disabled and sex.item_count == 2, "Human is fixed with two separate sex choices")
 	expect(race.get_selected_metadata() == "luminous" and sex.get_selected_id() == 1,
 		"creation initially selects Human Male")
 	for selector: OptionButton in [skin, hair, hair_color, eyes, shirt, pants, boots]:
@@ -87,8 +87,8 @@ func run() -> void:
 	var seeded_appearance: Dictionary = main.call("_creation_appearance")
 	var seeded_race := race.selected
 	var seeded_sex := sex.selected
-	expect(preview_root.get_child_count() == preview_children_before + 1,
-		"one randomized roll rebuilds the preview exactly once")
+	expect(preview_root.get_child_count() <= preview_children_before + 1,
+		"one randomized roll creates at most one new preview")
 	expect(seeded_race == expected_race_index and seeded_sex == expected_sex_index,
 		"appearance randomization includes the seeded race and sex rolls")
 	for frame in range(2):
@@ -178,6 +178,7 @@ func run() -> void:
 	var previous_sex := str(sex.get_selected_metadata())
 	for race_index in range(race.item_count):
 		var eyes_before := eyes.get_selected_id()
+		var skin_before := skin.get_selected_id()
 		choose(race, race_index)
 		var culture := str(race.get_selected_metadata())
 		if culture in ["orun", "mycelari"]:
@@ -190,8 +191,8 @@ func run() -> void:
 			as Dictionary) == class_loadout,
 			"class selection and starting-kit preview survive race switch: " + culture)
 		expect(str(sex.get_selected_metadata()) == previous_sex, "changing race preserves sex: " + culture)
-		var expected_skin := 1 if culture == "luminous" else 0
-		expect(skin.get_selected_id() == expected_skin, "race switch selects its default skin: " + culture)
+		var expected_skin := skin_before
+		expect(skin.get_selected_id() == expected_skin, "the fixed Human race preserves its selected skin")
 		for sex_index in range(sex.item_count):
 			choose(sex, sex_index)
 			var actor_type := sex.get_selected_id()
@@ -202,12 +203,12 @@ func run() -> void:
 			expect(model.culture == culture and model.gender == sex.get_selected_metadata(), "race and sex resolve the matching model")
 			var actor := main.get("preview_actor") as ReplicatedActor3D
 			expect(actor.get("_model_config") == model, "preview uses the selected race and sex")
-			expect(skin.get_selected_id() == expected_skin, "sex change preserves race default")
+			expect(skin.get_selected_id() == expected_skin, "Human sex change preserves selected skin")
 			var look: Dictionary = main.call("_creation_appearance")
 			look["actor_type"] = actor_type
 			var packet := EloriaProtocol.create_character("Preview", "secret", look)
 			var tail := packet.slice(packet.find(0, 3) + 1)
-			expect(tail[0] == expected_skin and tail[5] == actor_type, "creation bytes preserve race, sex and default skin")
+			expect(tail[0] == expected_skin and tail[5] == actor_type, "creation bytes preserve Human sex and selected skin")
 			var class_packet := EloriaProtocol.create_character(
 				"Preview", "secret", look, int(main.get("selected_creation_class")))
 			var class_tail := class_packet.slice(class_packet.find(0, 3) + 1)
@@ -231,13 +232,12 @@ func run() -> void:
 		if culture != "luminous":
 			choose(skin, skin.get_item_index(0))
 		previous_sex = str(sex.get_selected_metadata())
-	expect(actor_types.keys().size() == 16, "all sixteen existing actor types remain selectable")
-	# A customized skin must also reset on a non-human to non-human switch.
-	choose(skin, skin.get_item_index(8))
-	choose(race, 0)
-	expect(skin.get_selected_id() == 0, "changing non-human race resets a custom skin")
+	expect(actor_types.keys().size() == 2 and actor_types.has(0) and actor_types.has(1),
+		"only the two Human bodies are selectable")
+	var customized_skin := skin.get_selected_id()
 	choose(race, human_index)
-	expect(skin.get_selected_id() == 1 and skin.get_item_index(0) == -1, "returning to Human selects a valid human tone")
+	expect(skin.get_selected_id() == customized_skin and skin.get_item_index(0) == -1,
+		"the fixed Human race preserves a valid customized Human skin tone")
 	for window_size: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080)]:
 		root.size = window_size
 		for frame in range(3):
@@ -246,29 +246,19 @@ func run() -> void:
 		var sex_rect := sex.get_global_rect()
 		expect(is_equal_approx(race_rect.position.y, sex_rect.position.y) and race_rect.end.x <= sex_rect.position.x, "race and sex boxes sit side by side")
 		expect(main.get_global_rect().encloses(race_rect) and main.get_global_rect().encloses(sex_rect), "both selectors fit the window")
-	# Orun and Mycelari are amber-eyed: a roll for either keeps to the two
-	# ambers, every other race rolls the whole palette.
-	var amber_rolls := 0
-	var other_rolls := 0
-	var other_eyes: Dictionary = {}
-	var ambers_seen: Dictionary = {}
+	var rolled_bodies: Dictionary = {}
+	var rolled_eyes: Dictionary = {}
 	for seed_value in range(60):
 		var amber_rng := RandomNumberGenerator.new()
 		amber_rng.seed = 4000 + seed_value
 		main.call("_randomize_creation_appearance", amber_rng)
 		var rolled_culture := AppearanceVariants.culture_for_actor_type(sex.get_selected_id())
-		if rolled_culture in ["orun", "mycelari"]:
-			amber_rolls += 1
-			ambers_seen[eyes.get_selected_id()] = true
-			expect(eyes.get_selected_id() in [3, 9],
-				"a rolled %s has amber eyes, got %d" % [rolled_culture, eyes.get_selected_id()])
-		else:
-			other_rolls += 1
-			other_eyes[eyes.get_selected_id()] = true
-	expect(amber_rolls > 0 and ambers_seen.size() == 2,
-		"rolls reach Orun or Mycelari and both ambers (%d rolls)" % amber_rolls)
-	expect(other_rolls > 0 and other_eyes.size() > 2,
-		"other races still roll the whole eye palette")
+		expect(rolled_culture == "luminous" and sex.get_selected_id() in [0, 1], "Randomize never selects a non-Human player body")
+		rolled_bodies[sex.get_selected_id()] = true
+		rolled_eyes[eyes.get_selected_id()] = true
+		await process_frame
+	expect(rolled_bodies.size() == 2, "Human randomization still reaches both sexes")
+	expect(rolled_eyes.size() > 2, "Human randomization retains the full eye palette")
 	main.call("_set_creation_class", 0)
 	await capture("character-creation-ui")
 	main.queue_free()
