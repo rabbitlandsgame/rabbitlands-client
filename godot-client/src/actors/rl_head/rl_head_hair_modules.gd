@@ -21,7 +21,8 @@ const ENTRIES := {
 	7: {"name": "curly_twin_buns", "sex": "female", "fallback_style": 3},
 	8: {"name": "receding_sweep", "sex": "male", "fallback_style": 1},
 	9: {"name": "layered_long", "fallback_style": 2, "variants": {
-		"female": {"name": "layered_long_female", "native_head": true}}},
+		"female": {"name": "layered_long_female", "native_head": true},
+		"male": {"name": "layered_long_male", "native_head": true, "tie_height": false}}},
 	11: {"name": "soft_wavy_bob", "fallback_style": 5, "variants": {
 		"female": {"name": "soft_wavy_bob_female", "native_head": true},
 		"male": {"name": "soft_wavy_bob_male", "native_head": true}}},
