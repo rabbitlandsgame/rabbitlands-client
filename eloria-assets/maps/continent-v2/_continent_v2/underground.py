@@ -203,6 +203,27 @@ def check_ids(loaded, pub, error):
                             '(objects.json is keyed by id alone)')
 
 
+def walk_component(collision, start, posts):
+    """Interior reach using the server's step rule, with all NPC posts closed."""
+    reach = {start}; q = deque([start])
+    while q:
+        a, b = q.popleft()
+        for dx, dy in FOUR:
+            target = (a + dx, b + dy)
+            if target not in reach and target not in posts and collision.can_step(a, b, *target, 2):
+                reach.add(target); q.append(target)
+    return reach
+
+
+def checked_node_row(region, sid, node, walk_codes, reach, resources, error=ValueError, label='underground'):
+    """The full publisher's blocked-body and reached cardinal harvest-approach rule."""
+    oid, res, nx, ny = node
+    if res not in resources: raise error(f'unknown {label} resource {res}')
+    if walk_codes[ny, nx] or not any((nx + dx, ny + dy) in reach for dx, dy in FOUR):
+        raise error(f'{sid}: node {oid} has no harvest approach or its body is open')
+    return f'node | {region} | {oid} | {nx} | {ny} | {res}'
+
+
 def attach(ctx, pub, error=ValueError, fields=None):
     """Validate every interior source present and add its rows to the overlay. Sets pub.interiors (one namespace per
     interior, in SOURCES order), pub.underground (the caves', or None) and pub.vendor_regions."""
@@ -263,19 +284,10 @@ def attach_one(ctx, pub, spec, reader, path, design, error, fields, door_tiles):
     reach_of={}
     exterior_posts={(p['map'],tuple(p['tile'])):p['name'] for p in [*getattr(pub,'new_people',[]),*getattr(pub,'rehomed',[])]}
     exterior_objects={(i['map'],tuple(i['tile'])):i['object'] for i in pub.interactives}
-    def walk(start):
-        reach={start};q=deque([start])
-        while q:
-            a,b=q.popleft()
-            for dx,dy in FOUR:
-                target=(a+dx,b+dy)
-                if target not in reach and target not in posts and collision.can_step(a,b,*target,2):
-                    reach.add(target);q.append(target)
-        return reach
     for section in design['sections']:
         sid=section['id']; arrival=tuple(reader.primary_arrival(design,section))
         if not collision.walkable(*arrival) or arrival in posts: raise error(f'{sid}: arrival blocked')
-        reach=walk(arrival)
+        reach=walk_component(collision,arrival,posts)
         if any(reach&other for other in reaches): raise error(f'{spec.label} sections connect across blackspace')
         reaches.append(reach); reach_of[sid]=reach
         for door in reader.doors(section):
@@ -370,10 +382,8 @@ def attach_one(ctx, pub, spec, reader, path, design, error, fields, door_tiles):
         for oid,res,nx,ny in section['nodes']:
             if oid in ids: raise error(f'duplicate {spec.label} object id')
             ids.add(oid)
-            if res not in ctx.server.base_resources: raise error(f'unknown {spec.label} resource {res}')
-            if walk_codes[ny,nx] or not any((nx+dx,ny+dy) in reach for dx,dy in FOUR):
-                raise error(f'{sid}: node {oid} has no harvest approach or its body is open')
-            nodes.append(f'node | {region} | {oid} | {nx} | {ny} | {res}')
+            nodes.append(checked_node_row(region,sid,(oid,res,nx,ny),walk_codes,reach,
+                                          ctx.server.base_resources,error,spec.label))
         for creature,sx,sy,leash in section['spawns']:
             definition=ctx.server.creatures.get(creature)
             if definition is None or definition.raw.get('model')!='final': raise error(f'{creature}: no reviewed model')
