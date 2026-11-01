@@ -7,9 +7,10 @@ extends SceneTree
 ## Face (D3, recentred offset-linear): Rowan and Mira reproduce the authored RL
 ## heads (every control 0); every field is monotonic with the sign of (v - c),
 ## reaches its clamp at the far end, and is the formula exactly; missing or
-## invalid fields count as 50. Grooming: every hair style x sex (D5 modules,
-## legacy names, bald), every facial_hair x sex (beards by name, none and no
-## stubble on women), every palette index (skin, eyes, hair). The hl_ hair
+## invalid fields count as 50. Grooming: every hair style x sex (qualified
+## family replacements, explicit original modules, legacy fixtures and bald),
+## every facial_hair x sex (beards by name, none and no stubble on women),
+## every palette index (skin, eyes, hair). The hl_ hair
 ## shapes and the hair finish's fine-detail level centre on each module's
 ## preset; PC/3 fields slot in over the derived
 ## values; the inverse map round-trips the presets.
@@ -21,6 +22,14 @@ const PRESETS := preload("res://src/actors/human_portrait_presets.gd")
 const EXPECTED_SIGN := {"jaw": 1.0, "cheekbones": 1.0, "nose": 1.0, "face_length": 1.0, "eye_size": 1.0,
 	"eye_tilt": -1.0, "eye_spacing": 1.0, "nose_width": 1.0, "lip_fullness": 1.0, "brow_depth": 1.0}
 const Map := preload("res://src/actors/rl_head/rl_head_portrait_map.gd")
+## Independent expectations for the nine qualified saved-family replacements.
+const MODERN_STYLE_NAMES := ["", "parted_sweep", "layered_long", "painted_twin_buns",
+	"buzz_cut", "soft_wavy_bob", "painted_ponytail", "rear_braid", "painted_topknot", "feathered_mohawk"]
+## Preserve the pre-replacement rule and game-hair paths explicitly. New live
+## registry entries must not silently change what these historical cases test.
+const LEGACY_MODULE_FIXTURE := {
+	2: {"name": "rowan_shag", "sex": "male"},
+	3: {"name": "mira_bun", "sex": "female"}}
 
 var _checks := 0
 var _failures := 0
@@ -143,12 +152,8 @@ func _check_hair() -> void:
 				var appearance := {"hair": AppearanceVariants.pack_hair(style, colour)}
 				var hair := Map.hair(appearance, sex)
 				var expected := RLHeadAppearance.NONE
-				if style == 1 and sex == "male":
-					expected = "rowan_shag"
-				elif style == 3 and sex == "female":
-					expected = "mira_bun"
-				elif style > 0:
-					expected = RLHeadLibrary.LEGACY_PREFIX + RLHeadLibrary.LEGACY_HAIR_STYLES[style - 1]
+				if style > 0:
+					expected = str(MODERN_STYLE_NAMES[style]) + "_" + sex
 				_expect(hair == expected, "%s %s (style %d, colour %d) -> %s (got %s)" % [sex, names[style],
 					style, colour, expected, hair])
 				if hair.begins_with(RLHeadLibrary.LEGACY_PREFIX):
@@ -157,8 +162,17 @@ func _check_hair() -> void:
 						hair.trim_prefix(RLHeadLibrary.LEGACY_PREFIX))), "%s's fitted file exists for %s" % [hair, sex])
 				elif Map.is_module(hair):
 					_expect(FileAccess.file_exists(RLHeadLibrary.hair_path(hair)), "module %s exists" % hair)
+		for style: int in range(1, 10):
+			var expected := "rowan_shag" if sex == "male" and style == 1 else \
+				("mira_bun" if sex == "female" and style == 3 else Map.legacy_name(style))
+			var old_hair := Map.hair({"hair": AppearanceVariants.pack_hair(style, 0)}, sex, LEGACY_MODULE_FIXTURE)
+			_expect(old_hair == expected, "%s style %d retains the original rule without a qualified replacement" % [sex, style])
+			var legacy := Map.legacy_name(style)
+			_expect(Map.legacy_style(legacy) == style, "%s round-trips to style %d" % [legacy, style])
+			_expect(FileAccess.file_exists(RLHeadLibrary.legacy_hair_path(sex,
+				legacy.trim_prefix(RLHeadLibrary.LEGACY_PREFIX))), "%s's compatibility file exists for %s" % [legacy, sex])
 	# Legacy packed values (0-19) and the extended range decode the same way.
-	_expect(Map.hair({"hair": 1}, "male") == "rowan_shag" and Map.hair({"hair": 0}, "male") == RLHeadAppearance.NONE,
+	_expect(Map.hair({"hair": 1}, "male") == "parted_sweep_male" and Map.hair({"hair": 0}, "male") == RLHeadAppearance.NONE,
 		"legacy hair bytes decode through AppearanceVariants.hair_style")
 
 
@@ -238,15 +252,18 @@ func _check_details() -> void:
 
 
 func _check_hair_shapes() -> void:
-	for pair: Array in [["male", 1, "rowan_shag", "Rowan"], ["female", 3, "mira_bun", "Mira"]]:
+	# These calibrations describe the original modules, selected explicitly;
+	# Auto now chooses the replacement family authored at neutral grooming.
+	for pair: Array in [["male", 1, "rowan_shag", "Rowan", 2], ["female", 3, "mira_bun", "Mira", 3]]:
 		var preset := PRESETS.shape(pair[3])
 		var at_preset := Map.face({"hair": AppearanceVariants.pack_hair(pair[1], 0),
+			"hair_module": pair[4],
 			"hair_length": preset.hair_length, "hair_volume": preset.hair_volume,
 			"hair_detail": preset.hair_detail}, pair[0])
 		_expect(at_preset.hair == pair[2] and at_preset.hair_length == 0.0 and at_preset.hair_volume == 0.0
 			and at_preset.hair_detail == RLHeadAppearance.DEFAULT_HAIR_DETAIL,
 			"%s at %s's length, volume and finish draws the module as authored" % [pair[2], pair[3]])
-		var longer := Map.face({"hair": AppearanceVariants.pack_hair(pair[1], 0), "hair_length": 100,
+		var longer := Map.face({"hair": AppearanceVariants.pack_hair(pair[1], 0), "hair_module": pair[4], "hair_length": 100,
 			"hair_volume": 0}, pair[0])
 		_expect(longer.hair_length > 0.0 and longer.hair_volume < 0.0,
 			"%s: longer and thinner move the hl_ shapes (%.2f, %.2f)" % [pair[2], longer.hair_length,
@@ -254,14 +271,14 @@ func _check_hair_shapes() -> void:
 		for field: String in ["hair_length", "hair_volume"]:
 			var edges := []
 			for value: int in [0, 50, 100]:
-				var face := Map.face({"hair": AppearanceVariants.pack_hair(pair[1], 0), field: value}, pair[0])
+				var face := Map.face({"hair": AppearanceVariants.pack_hair(pair[1], 0), "hair_module": pair[4], field: value}, pair[0])
 				edges.append(face.get(field))
 			var expected := []
 			for value: int in [0, 50, 100]:
 				expected.append(clampf((float(value) - float(preset[field])) / 50.0, -1.0, 1.0))
 			_expect(edges == expected, "%s: %s 0/50/100 is (v - %d) / 50 clamped %s" % [pair[2], field,
 				preset[field], edges])
-		var default := Map.face({"hair": AppearanceVariants.pack_hair(pair[1], 0)}, pair[0])
+		var default := Map.face({"hair": AppearanceVariants.pack_hair(pair[1], 0), "hair_module": pair[4]}, pair[0])
 		_expect(default.hair_length < 0.0, "%s: the default 50 is shorter than the preset (%.2f)" % [pair[2], default.hair_length])
 	# The finish -> fine-detail level (data hair.detail; owner decision, colour
 	# model spec revision 3, 4.7): the saved finishes sit at slider positions
@@ -269,10 +286,10 @@ func _check_hair_shapes() -> void:
 	# (0, 0), (the module's preset finish, 50) and (100, 100).
 	_expect(Map.finish_slider(0) == 50 and Map.finish_slider(1) == 75 and Map.finish_slider(2) == 25,
 		"the saved finishes sit at slider positions Classic 50, Tousled 75, Swept 25")
-	for row: Array in [["male", 1, "rowan_shag", "Rowan", [33, 50, 17]], ["female", 3, "mira_bun", "Mira", [67, 83, 50]]]:
+	for row: Array in [["male", 1, "rowan_shag", "Rowan", [33, 50, 17], 2], ["female", 3, "mira_bun", "Mira", [67, 83, 50], 3]]:
 		var levels := []
 		for finish: int in 3:
-			levels.append(Map.face({"hair": AppearanceVariants.pack_hair(row[1], 0), "hair_detail": finish},
+			levels.append(Map.face({"hair": AppearanceVariants.pack_hair(row[1], 0), "hair_module": row[5], "hair_detail": finish},
 				row[0]).hair_detail)
 		_expect(levels == row[4], "%s: Classic, Tousled, Swept give detail levels %s" % [row[2], levels])
 		var preset_finish := Map.finish_slider(int(PRESETS.shape(row[3]).hair_detail))
@@ -287,11 +304,11 @@ func _check_hair_shapes() -> void:
 			steady = steady and curve[s + 1] >= curve[s] and curve[s + 1] - curve[s] <= 2
 		_expect(curve[0] == 0 and curve[preset_finish] == RLHeadAppearance.DEFAULT_HAIR_DETAIL and curve[100] == 100
 			and steady, "%s: slider 0, the preset finish and 100 give 0, 50 and 100, rising without a jump" % row[2])
-	_expect(Map.face({"hair": AppearanceVariants.pack_hair(1, 0), "hair_detail": 7}, "male").hair_detail == 17
-		and Map.face({"hair": AppearanceVariants.pack_hair(1, 0), "hair_detail": 1.5}, "male").hair_detail == 33,
+	_expect(Map.face({"hair": AppearanceVariants.pack_hair(1, 0), "hair_module": 2, "hair_detail": 7}, "male").hair_detail == 17
+		and Map.face({"hair": AppearanceVariants.pack_hair(1, 0), "hair_module": 2, "hair_detail": 1.5}, "male").hair_detail == 33,
 		"an out-of-range finish clamps and a non-integer one counts as Classic")
-	var legacy := Map.face({"hair": AppearanceVariants.pack_hair(2, 0), "hair_length": 100, "hair_detail": 2}, "male")
-	_expect(legacy.hair_length == 0.0 and legacy.hair_detail == RLHeadAppearance.DEFAULT_HAIR_DETAIL,
+	var legacy := Map.hair_shapes({"hair_length": 100, "hair_detail": 2}, "legacy:long")
+	_expect(legacy.length == 0.0 and legacy.detail == RLHeadAppearance.DEFAULT_HAIR_DETAIL,
 		"a game hairstyle is groomed by the actor, not by hl_ shapes or the detail level")
 	var rl_face := RLHeadAppearance.from_dict({"preset": "rowan", "hair_detail": 140})
 	_expect(rl_face.hair_detail == 100 and RLHeadAppearance.from_dict(rl_face.to_dict()).hair_detail == 100
@@ -328,14 +345,18 @@ func _check_v3() -> void:
 			"%s: explicit PC/3 details win over the defaults" % sex)
 		_expect(is_equal_approx(explicit.stubble_amount(), 1.0 if sex == "male" else 0.0),
 			"%s: explicit stubble only on a male head" % sex)
-	_expect(Map.hair({"hair": AppearanceVariants.pack_hair(1, 0), "hair_module": 1}, "male") == "legacy:parted",
-		"hair_module 1 forces the game hairstyle")
+	_expect(Map.hair({"hair": AppearanceVariants.pack_hair(1, 0), "hair_module": 1}, "male") == "parted_sweep_male",
+		"hair_module 1 selects the qualified saved family")
+	_expect(Map.hair({"hair": AppearanceVariants.pack_hair(1, 0), "hair_module": 1}, "male", LEGACY_MODULE_FIXTURE) == "legacy:parted",
+		"hair_module 1 retains game hair when no family replacement is registered")
 	_expect(Map.hair({"hair": AppearanceVariants.pack_hair(2, 0), "hair_module": 2}, "male") == "rowan_shag",
 		"hair_module 2 draws rowan_shag on a male head")
-	_expect(Map.hair({"hair": AppearanceVariants.pack_hair(2, 0), "hair_module": 2}, "female") == "legacy:long",
-		"a module of the other sex falls back to the rule")
-	_expect(Map.hair({"hair": AppearanceVariants.pack_hair(3, 0), "hair_module": 17}, "female") == "mira_bun",
-		"an unknown module id is the rule")
+	_expect(Map.hair({"hair": AppearanceVariants.pack_hair(2, 0), "hair_module": 2}, "female") == "layered_long_female",
+		"a module of the other sex falls back to the qualified family")
+	_expect(Map.hair({"hair": AppearanceVariants.pack_hair(2, 0), "hair_module": 2}, "female", LEGACY_MODULE_FIXTURE) == "legacy:long",
+		"a module of the other sex retains game hair without a family replacement")
+	_expect(Map.hair({"hair": AppearanceVariants.pack_hair(3, 0), "hair_module": 17}, "female", LEGACY_MODULE_FIXTURE) == "mira_bun",
+		"an unknown module in the explicit legacy fixture uses the original rule")
 	_expect(Map.hair({"hair": AppearanceVariants.pack_hair(0, 0), "hair_module": 3}, "female") == RLHeadAppearance.NONE,
 		"Bald stays bald whatever the module")
 
