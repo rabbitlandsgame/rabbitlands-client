@@ -13,3 +13,21 @@ Players can see creatures at twice the usual distance inside gauntlets. Once a w
 Killing the boss breaks that movement anchor. Surviving followers and creatures the boss summoned stay alive and return to normal wandering. Finish the remaining enemies to clear the wave. Invasion bosses follow the same rule, and an invasion can still have queued reinforcements after its leader falls.
 
 The encounter card beside the combat HUD separates the wave number, current enemies and future pulses. Ordinary roaming pulses release at their remaining-enemy threshold. Hunted and swarm pulses also have a clock; the displayed countdown is an upper bound because kills can release the next pulse earlier. Arrival cues follow authoritative pulse updates. A countdown reaching zero waits for the server's release.
+
+## Companion orders
+
+Inside an active gauntlet, use `#party bot status` to see companion numbers,
+roles, orders and recovery. The living party leader can order one standing
+companion by number, or use `all` for every standing companion:
+
+| Command | Order |
+| --- | --- |
+| `#party bot follow all` | Resume normal following and support. |
+| `#party bot hold 1` | Stay on the current tile, defending and healing within reach. |
+| `#party bot assist 1` | Prioritize the opponent you are attacking or shooting. Start your attack first. |
+| `#party bot help` | Show the available orders. |
+
+Hold pauses travel through gates. Follow resumes travel through gates the party
+has already authorized. Orders reset after a companion's defeat, the leader's
+absence or the expedition's end. Assist also returns to Follow when its target
+ends or becomes unavailable. Orders do not carry into another expedition.
