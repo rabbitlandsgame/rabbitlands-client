@@ -67,7 +67,7 @@ func check_preview_budget(phase: String) -> void:
 		phase + ": only the existing scene viewports and one creation preview, no card bake viewport")
 	check(flow.picker.find_children("*", "SubViewport", true, false).is_empty()
 		and flow.picker.find_children("*", "Node3D", true, false).is_empty(),
-		phase + ": 25 cards contain no live 3D stage")
+		phase + ": 11 Human cards contain no live 3D stage")
 
 func run() -> void:
 	root.size = Vector2i(1366, 768)
@@ -188,17 +188,17 @@ func run() -> void:
 	for actor_type: int in [41, 42]:
 		flow.open(false)
 		var id := ssarathi_id(actor_type)
-		check(not id.is_empty(), "Ssarathi body %d is available" % actor_type)
-		await choose(id)
-		check((main.get_node("%CreateGender") as OptionButton).get_selected_id() == actor_type
-			and (main.get_node("%CreateRace") as OptionButton).get_selected_metadata() == "ssarathi",
-			"Ssarathi selection updates race and sex together")
-		check(int(main.get("_creation_preview_actor_type")) == actor_type,
-			"Ssarathi selection reaches the actual preview actor")
+		check(id.is_empty(), "Non-Human body %d is absent from the player picker" % actor_type)
+		var before_stale_basis := form_state()
+		flow._use_basis("native_ssarathi_female" if actor_type == 41 else "native_ssarathi_male")
+		await settle()
+		check(form_state() == before_stale_basis, "A stale non-Human basis cannot change the player editor")
+		main.call("_refresh_creation_preview", {"actor_type": actor_type, "appearance": {}})
+		check(int(main.get("_creation_preview_actor_type")) in [0, 1], "Direct non-Human creation preview is refused")
 		var payload := appearance().duplicate(true)
 		payload["actor_type"] = actor_type
-		check(network.call("validate_creation_appearance", payload) == OK,
-			"Ssarathi form is valid without leaked Human customization")
+		check(network.call("validate_creation_appearance", payload) == ERR_UNAVAILABLE,
+			"Non-Human creation is unavailable regardless of appearance fields")
 	for version: int in [1, 2, 3]:
 		network.call("_set_appearance_protocol", version)
 		flow.open(false)
