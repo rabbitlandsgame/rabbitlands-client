@@ -14,6 +14,7 @@ def fixture(path,cap=False,head='a'*64,rest=0.,groom=False,occupied=False):
     if cap:P=np.vstack([base+[-2,0,0],[[0,0,0],[1,0,0],[0,1,0],[1,1,0]]])
     T=np.array([[0,1,2],[3,4,5],[6,7,8]]) if not cap else np.array([[0,1,2],[3,4,5],[4,6,5]])
     U=np.tile([[.02,.02],[.20,.02],[.02,.20]],(3,1)) if not cap else np.vstack([[[.02,.02],[.2,.02],[.02,.2]],[[0,0],[1,0],[0,1],[1,1]]])
+    if not cap:U[3:6]=[[.55,.05],[.75,.05],[.55,.25]]
     if occupied:U[:3]=[[0,0],[1,0],[0,1]]
     N=np.tile([0.,0,1],(len(P),1));C=np.tile([255,0,235,255],(len(P),1)).astype('u1');J=np.zeros((len(P),4),'u1');W=np.zeros((len(P),4));W[:,0]=1
     attrs={}
@@ -29,7 +30,7 @@ def fixture(path,cap=False,head='a'*64,rest=0.,groom=False,occupied=False):
         targets.append(target)
     ranges={'exterior':[0,3],'shell':[3,6],'tail_after':[6,9]} if not cap else {'reference':[0,3],'fixed_shell':[3,7]}
     mat=w.material('rl_hair_clump',extras={'texture':path.with_suffix('.png').name});primitive={'attributes':attrs,'indices':w.accessor(T.astype('u4').reshape(-1),'SCALAR',5125),'material':mat,'targets':targets,'extras':{'partVertexRanges':ranges}}
-    w.g['meshes']=[{'name':'hair_lod0','primitives':[primitive],'weights':[0.]*len(names),'extras':{'targetNames':names}}];root=w.node(name='hair_root',translation=[rest,0,0]);ibm=w.accessor(np.eye(4).reshape(1,16),'MAT4');w.g['skins']=[{'joints':[root],'inverseBindMatrices':ibm,'skeleton':root}];w.g['scenes'][0]['nodes']=[root,w.node(name='hair_lod0',mesh=0,skin=0)];w.g['asset']['extras']={'rlHair':{'version':1,'style':'fixture','sex':'female','headSHA256':head,'tris':{'lod0':3},'materials':{'rl_hair_clump':path.with_suffix('.png').name}}};w.save(str(path));Image.new('RGBA',(256,256),(160,160,160,255)).save(path.with_suffix('.png'))
+    w.g['meshes']=[{'name':'hair_lod0','primitives':[primitive],'weights':[0.]*len(names),'extras':{'targetNames':names}}];root=w.node(name='hair_root',translation=[rest,0,0]);ibm=w.accessor(np.eye(4).reshape(1,16),'MAT4');w.g['skins']=[{'joints':[root],'inverseBindMatrices':ibm,'skeleton':root}];w.g['scenes'][0]['nodes']=[root,w.node(name='hair_lod0',mesh=0,skin=0)];w.g['asset']['extras']={'rlHair':{'version':1,'style':'fixture','sex':'female','headSHA256':head,'tris':{'lod0':3},'materials':{'rl_hair_clump':path.with_suffix('.png').name}}};w.save(str(path));image=Image.new('RGBA',(256,256),(160,160,160,255));image.paste((30,60,200,255),(0,0,90,90));image.paste((200,40,60,255),(128,0,220,90));image.save(path.with_suffix('.png'))
 
 class CapReuse(unittest.TestCase):
     def setUp(self):
@@ -43,6 +44,11 @@ class CapReuse(unittest.TestCase):
         with self.assertRaises(AssertionError):reuse(self.source,self.cap,self.out,tile_sizes=[(32,32)])
         fixture(self.cap,cap=True,rest=.01)
         with self.assertRaises(AssertionError):reuse(self.source,self.cap,self.out,tile_sizes=[(32,32)])
+    def test_exterior_paint_default_is_distinct_from_old_shell(self):
+        report=reuse(self.source,self.cap,self.out,tile_sizes=[(32,32)]);other=self.folder/'shell/recipient.glb';shell=reuse(self.source,self.cap,other,tile_sizes=[(32,32)],paint_donor_range='shell')
+        self.assertEqual(report['reports'][0]['paint_donor_range'],'exterior');self.assertEqual(shell['reports'][0]['paint_donor_range'],'shell')
+        x,y,w,h=report['reports'][0]['tile'];blue=np.array(Image.open(self.out.with_suffix('.png')))[y+h//2,x+w//2,:3];red=np.array(Image.open(other.with_suffix('.png')))[y+h//2,x+w//2,:3]
+        self.assertGreater(int(blue[2]),int(blue[0]));self.assertGreater(int(red[0]),int(red[2]));self.assertEqual(report['cap_native_npz_sha256'],shell['cap_native_npz_sha256'])
     def test_nonzero_fixed_cap_groom_rejected(self):
         fixture(self.cap,cap=True,groom=True)
         with self.assertRaises(AssertionError):reuse(self.source,self.cap,self.out,tile_sizes=[(32,32)])

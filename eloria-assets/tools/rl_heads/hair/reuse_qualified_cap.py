@@ -3,6 +3,7 @@
 Authoring only. Output belongs in an ignored stage. The returned High GLB keeps
 the recipient target order; a sidecar NPZ holds the cap-only Native corrective
 with zero exterior. Independent combined High/coverage/Native gates still apply.
+Paint comes from the recipient's exterior; an old-shell donor requires opt-in.
 """
 from pathlib import Path
 import argparse,copy,hashlib,json,sys
@@ -54,7 +55,7 @@ def _tile(occupied,size):
                 return x,y,tw,th
     raise AssertionError('No unused cap tile; preserve existing charts and provide a deliberately repacked atlas')
 
-def reuse(source,qualified_cap,out,source_atlas=None,source_range='shell',cap_range='fixed_shell',tile_sizes=None):
+def reuse(source,qualified_cap,out,source_atlas=None,source_range='shell',cap_range='fixed_shell',tile_sizes=None,paint_donor_range='exterior'):
     source,qualified_cap,out=map(Path,(source,qualified_cap,out));source_atlas=Path(source_atlas) if source_atlas else source.with_suffix('.png')
     assert source.resolve()!=out.resolve() and source.name==out.name and not out.exists()
     assert not out.with_suffix('.png').exists() and not out.with_suffix('.cap-native.npz').exists()
@@ -80,7 +81,9 @@ def reuse(source,qualified_cap,out,source_atlas=None,source_range='shell',cap_ra
         assert mask.any() and len(capT);assert not (((T>=a)&(T<z)).any(1)&~mask).any(),'A face crosses the named cap boundary'
         for name in GROOMS:assert np.count_nonzero(_field(cg,cb,cap,cnames,name,'POSITION',len(rlglb.accessor(cg,cb,cap['attributes']['POSITION'])))[ca:cz])==0,'Qualified fixed cap has a nonzero groom'
         chart,chart_report=pack_chart_islands(new['TEXCOORD_0'],capT,padding=.05);tile=_tile(occupied,sizes[lod]);x,y,tw,th=tile;tiles.append(tile)
-        paint,bake_report=bake_chart_paint(old['POSITION'][a:z],old['TEXCOORD_0'][a:z],T[mask]-a,new['POSITION'],chart,capT,original_image,size=(tw,th),force_opaque=True)
+        assert paint_donor_range in p['extras']['partVertexRanges'],'A named recipient paint donor is required'
+        da,dz=p['extras']['partVertexRanges'][paint_donor_range];donor=(T>=da).all(1)&(T<dz).all(1);assert donor.any(),'The recipient paint donor is empty'
+        paint,bake_report=bake_chart_paint(old['POSITION'][da:dz],old['TEXCOORD_0'][da:dz],T[donor]-da,new['POSITION'],chart,capT,original_image,size=(tw,th),force_opaque=True)
         assert np.array_equal(paint[:,:,3],np.full((th,tw),255,dtype='u1'));image.paste(Image.fromarray(paint),(x,y));new['TEXCOORD_0']=(chart*[tw,th]+[x,y])/[width,height]
         addition=(cz-ca)-(z-a)
         def join(values,replacement):return np.concatenate([values[:a],replacement,values[z:]])
@@ -102,7 +105,7 @@ def reuse(source,qualified_cap,out,source_atlas=None,source_range='shell',cap_ra
         for semantic in ['POSITION','NORMAL']:
             values=np.zeros((len(old['POSITION'])+addition,3));values[a:a+cz-ca]=_field(cg,cb,cap,cnames,'hl_native_fit',semantic,len(rlglb.accessor(cg,cb,cap['attributes']['POSITION'])))[ca:cz];native_arrays[f'lod{lod}_{semantic}']=values.astype('f4')
         total=sum(g['accessors'][q['indices']]['count']//3 for q in mesh['primitives'])-int(mask.sum())+len(capT);assert total<=[18000,7000,2500][lod]
-        reports.append({'lod':lod,'mesh':mesh['name'],'primitive':pi,'old_range':[a,z],'new_range':[a,a+cz-ca],'cap_triangles':len(capT),'total_triangles':total,'tile':tile,'chart':chart_report,'paint':bake_report,'zero_all_cap_grooms':True,'native_maximum_mm':float(np.linalg.norm(native_arrays[f'lod{lod}_POSITION'],axis=1).max()*1000)})
+        reports.append({'lod':lod,'mesh':mesh['name'],'primitive':pi,'old_range':[a,z],'new_range':[a,a+cz-ca],'cap_triangles':len(capT),'total_triangles':total,'tile':tile,'chart':chart_report,'paint_donor_range':paint_donor_range,'paint':bake_report,'zero_all_cap_grooms':True,'native_maximum_mm':float(np.linalg.norm(native_arrays[f'lod{lod}_POSITION'],axis=1).max()*1000)})
         writer.g['asset']['extras']['rlHair']['tris'][f'lod{lod}']=total
     out.parent.mkdir(parents=True,exist_ok=True);png=out.with_suffix('.png');image.save(png);view=writer._view(png.read_bytes())
     for entry in writer.g.get('images',[]):entry.update(bufferView=view,mimeType='image/png');entry.pop('uri',None)
@@ -121,4 +124,4 @@ def reuse(source,qualified_cap,out,source_atlas=None,source_range='shell',cap_ra
     receipt={'source_sha256':sha(source),'qualified_cap_sha256':sha(qualified_cap),'output_sha256':sha(out),'atlas_sha256':sha(png),'cap_native_npz_sha256':sha(native_path),'head_sha256':info['headSHA256'],'head_and_rigid_rest_exact':True,'all_visible_attribute_and_target_prefix_suffix_values_exact':True,'all_other_primitives_exact':True,'all_non_tile_atlas_pixels_exact':True,'native_exterior_zero':True,'target_order_unchanged':True,'reports':reports,'qualified':False};out.with_suffix('.cap-reuse.json').write_text(json.dumps(receipt,indent=2)+'\n');return receipt
 
 if __name__=='__main__':
-    ap=argparse.ArgumentParser(description=__doc__);ap.add_argument('--source',required=True);ap.add_argument('--cap',required=True);ap.add_argument('--out',required=True);ap.add_argument('--atlas');args=ap.parse_args();print(json.dumps(reuse(args.source,args.cap,args.out,args.atlas),indent=2))
+    ap=argparse.ArgumentParser(description=__doc__);ap.add_argument('--source',required=True);ap.add_argument('--cap',required=True);ap.add_argument('--out',required=True);ap.add_argument('--atlas');ap.add_argument('--paint-donor-range',default='exterior');args=ap.parse_args();print(json.dumps(reuse(args.source,args.cap,args.out,args.atlas,paint_donor_range=args.paint_donor_range),indent=2))
