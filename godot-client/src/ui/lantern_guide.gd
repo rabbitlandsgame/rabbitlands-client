@@ -70,11 +70,18 @@ func campaign_identity() -> String:
 	return str(_campaign.get("kind", "opening")) + ":" + str(_campaign.get("run_id", "lead"))
 
 func has_campaign() -> bool:
+	# Map membership keeps the ending and Return action alive. It must not
+	# fabricate an active journal quest after the server archives this account.
+	if rescue_completed():
+		return false
 	var party: Dictionary = _campaign.get("party", {})
 	return not _campaign.is_empty() and (bool(_campaign.get("active", false)) \
 		or bool(_campaign.get("available", false)) \
 		or not (_campaign.get("travel", {}) as Dictionary).is_empty() \
 		or bool(party.get("can_join", false)) or bool(party.get("can_start_own", false)))
+
+func rescue_completed() -> bool:
+	return str(_campaign.get("kind", "")) == "rescue" and bool(_campaign.get("completed", false))
 
 func campaign_entry() -> Dictionary:
 	if not has_campaign():
@@ -242,23 +249,28 @@ func set_quest_tracked(tracked: bool) -> void:
 func _refresh() -> void:
 	if card == null:
 		return
-	var campaign := using_campaign()
+	var complete := rescue_completed() and bool(_campaign.get("active", false))
+	var campaign := using_campaign() or complete
 	if is_instance_valid(campaign_content):
-		campaign_content.visible = campaign and not compact and bool(campaign_content.call("presentation_available"))
+		campaign_content.visible = campaign and (complete or not compact) and bool(campaign_content.call("presentation_available"))
 	if campaign:
+		collapse.visible = not complete
+		untrack.visible = not complete
 		visible = AppState.authenticated and is_instance_valid(campaign_content) \
 			and bool(campaign_content.call("presentation_available"))
 		card.visible = visible
-		chapter.text = "CURRENT EXPEDITION"
-		heading.text = str(campaign_entry().get("title", "The Missing Measure"))
+		chapter.text = "RESCUE COMPLETE" if complete else "CURRENT EXPEDITION"
+		heading.text = str(_campaign.get("title", "The Missing Measure"))
 		campaign_content.call("embed_instruction", instruction)
-		instruction.text = str(campaign_entry().get("objective", ""))
-		instruction.visible = not compact
+		instruction.text = "Your rewards and account are saved." if complete else str(campaign_entry().get("objective", ""))
+		instruction.visible = complete or not compact
 		skip.hide()
 		help.hide()
 		collapse.text = "Instructions" if compact else "Less"
 		card.reset_size()
 		return
+	collapse.show()
+	untrack.show()
 	if instruction.get_parent() != _body:
 		instruction.reparent(_body)
 		_body.move_child(instruction, heading.get_index() + 1)

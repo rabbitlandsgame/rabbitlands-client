@@ -99,6 +99,12 @@
     "gallop": "Gallop"
   },
   "notes": "Adds the approved Gallop clip in the isolated mounted preview. The original seven pony clips, mesh/skin/rest, current rider fit and visible reins are preserved. Production run mapping remains Jog. Mounted v6 revises only Gallop hind-leg recovery to clear the saddle; rider, reins, stride, contact events and all other pony clips remain unchanged. Mounted v7 adds two cloth-only corrective shapes during Gallop, with neutral resets in all other actions; existing bone animations and rider settings are exact. Mounted v8 replaces stretching cloth shapes with two rigid panel hinges and locally corrects olive cloth texels while protecting saddle/body texels.",
+  "capeContact": [
+    {"bone": "hips", "center": [0, 1.02, -0.29], "radii": [0.41, 0.50, 0.90]},
+    {"bone": "Bone_021", "center": [0, 1.30, 0.12], "radii": [0.31, 0.22, 0.29]},
+    {"bone": "tail_1", "center": [0.01446543, 1.00824390, -0.97657770], "radii": [0.188538, 0.283667, 0.163134]},
+    {"bone": "tail_2", "center": [0.00104583, 0.94163780, -0.98640688], "radii": [0.195301, 0.157095, 0.148489]}
+  ],
   "maximumCyclesPerSecond": {
     "trot": 2.2,
     "gallop": 3.0

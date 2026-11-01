@@ -53,15 +53,23 @@ At the default Carry attribute of 4, carrying capacity is 160 EMU through overal
 
 In storage, **Store All** moves eligible items together. **Protection…** chooses the slots it should leave alone.
 
+If another actor covers a ground bag, select **Pick** and click the bag to approach it. You must reach its tile to open it. A blocked approach closes the waiting view and explains why it could not open.
+
 The **Exchange** menu icon or **Ctrl+Shift+E** opens prices from anywhere. **My listings** includes your own listings and listings owned by your original gauntlet parties. Use **Edit price…** for your own items or **Propose price…** for a party vote; **Party votes…** opens that listing's saved party ledger. Buying, posting new listings, cancelling listings and collecting escrow require an Exchange NPC within four tiles. The window updates its available actions as you move.
 
 The **Storage preview** chest icon or **Ctrl+Shift+S** opens a view-only copy of your personal storage. You can browse categories, inspect goods and use the usual sorting and filters. Transfers and favorite-list collection are disabled. Open normal storage through a nearby keeper or chest to transfer items. Both shortcuts can be changed in **Settings → Controls** and are saved with your other hotkeys.
 
 ## Fighting and gauntlets
 
+Select a living creature and use **Look** to read its native species level, current Attack and Defense, health and estimated live strength in chat. You can also right-click over the creature until the pointer selects **Look**, then click to inspect it. Scaled bosses show their current name and rolled strength.
+
 Landed hits and dodges share a refund limit of two action points per combat round. Technique costs and ordinary timed recovery still apply.
 
 Gauntlet death keeps your carried items and returns you at full health at a safe return point. Wave messages name the completed wave; the enemy count distinguishes present enemies from later reinforcement pulses.
+
+The encounter card follows your combat HUD and shows the current wave, enemies remaining and future reinforcement pulses. Ordinary reinforcements name the remaining-enemy threshold. Timed waves show an upper-bound countdown and can arrive earlier when that threshold is reached. An arrival cue appears when the server releases the next pulse. Hiding the combat HUD also hides this card.
+
+The **Sit** button and **Alt+S** stop keyboard walking before toggling posture.
 
 Creature drops are held in the party's loot ledger until the run ends. Rare finds are announced to the party. The leader can split common stacks equally, choose recipients, or edit individual quantities, then send every share directly to personal storage. Successful runs add each participant's reserved cache reward. Closing the ledger keeps the items reserved; reopen it with **Gauntlet loot**, the reward cache, or `#gauntletloot`.
 

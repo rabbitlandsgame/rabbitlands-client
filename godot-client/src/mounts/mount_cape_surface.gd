@@ -107,6 +107,46 @@ func _back_height(profile: Array, z: float) -> float:
 				clampf((float(ahead[0]) - z) / (float(ahead[0]) - float(behind[0])), 0.0, 1.0))
 	return float(profile[-1][1])
 
+func contact_plane(point: Vector3) -> Plane:
+	var result := Plane()
+	var deepest := 0.0
+	for envelope: Dictionary in envelopes:
+		var inverse: Transform3D = envelope.inverse
+		var frame: Transform3D = envelope.frame
+		var p := inverse * point
+		var center: Vector3 = envelope.center
+		var radii: Vector3 = envelope.radii
+		var x := (p.x - center.x) / radii.x
+		var z := (p.z - center.z) / radii.z
+		var radial := x * x + z * z
+		if radial >= 1.0 or p.y <= center.y - radii.y:
+			continue
+		var root := sqrt(maxf(.0001, 1.0 - radial))
+		var top := center.y + radii.y * root
+		var dx := -radii.y * x / (radii.x * root)
+		var dz := -radii.y * z / (radii.z * root)
+		var profile: Array = envelope.get("idle_back_profile", [])
+		if not profile.is_empty() and idle_blend > 0.0:
+			top = lerpf(top, _back_height(profile, p.z), idle_blend)
+			var slope := 0.0
+			for i: int in range(1, profile.size()):
+				if p.z >= float(profile[i][0]):
+					slope = (float(profile[i][1]) - float(profile[i - 1][1])) / (float(profile[i][0]) - float(profile[i - 1][0]))
+					break
+			dx *= 1.0 - idle_blend
+			dz = lerpf(dz, slope, idle_blend)
+		top += clearance / maxf(.01, frame.basis.y.length())
+		if p.y >= top:
+			continue
+		var normal := (inverse.basis.transposed() * Vector3(-dx, 1.0, -dz)).normalized()
+		var contact := frame * Vector3(p.x, top, p.z)
+		var plane := Plane(normal, contact.dot(normal))
+		var depth := -plane.distance_to(point)
+		if depth > deepest:
+			deepest = depth
+			result = plane
+	return result
+
 func flow_acceleration(chain: int, fraction: float) -> Vector3:
 	# A travelling wave reaches the hem after the upper sheet. Phase the
 	# columns slightly apart so the whole cape does not flap like a board.
@@ -124,7 +164,8 @@ func flow_acceleration(chain: int, fraction: float) -> Vector3:
 	var settle := Vector3.DOWN * (28.0 * (1.0 - moving_blend))
 	return weight * (lift + settle + ripple * moving_blend * float(motion.get("rippleMultiplier", 1.0)))
 
-func limit_lift(point: Vector3, root: Vector3, material_length: float, fraction: float) -> Vector3:
+func limit_lift(point: Vector3, root: Vector3, material_length: float, fraction: float,
+		material_side_offset := 0.0) -> Vector3:
 	# Keep the lower sheet draped while travelling rather than letting all
 	# four links stream horizontally from the shoulders. Contact wins where
 	# the rump stands above the free-hanging limit.
@@ -136,7 +177,7 @@ func limit_lift(point: Vector3, root: Vector3, material_length: float, fraction:
 	var wave := .0166 * moving_blend * (1.0 + gallop_blend) * fraction * fraction \
 		* sin(TAU * 2.2 * flow_time - fraction * 4.2) * float(motion.get("rippleMultiplier", 1.0))
 	var sideways := (point - root).dot(side)
-	point += side * (wave - sideways)
+	point += side * (wave + material_side_offset - sideways)
 	var hang := lerpf(float(motion.get("hangFraction", .68)),
 		float(motion.get("gallopHangFraction", .45)), gallop_blend)
 	hang = lerpf(hang, float(motion.get("idleHangFraction", hang)), idle_blend)

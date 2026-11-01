@@ -65,6 +65,10 @@ func run() -> void:
 	root.size = Vector2i(1280, 720)
 	expect("campaign_rescue_v1" in EloriaProtocol.CLIENT_CAPABILITIES and "landfall_underground_v1" in EloriaProtocol.CLIENT_CAPABILITIES, "rescue admission advertises both its implementation and the ordinary underground map support")
 	expect(decode(snapshot()).type == "campaign", "the full rescue packet and both native choice options decode")
+	var completed_account := snapshot();completed_account.completed=true
+	expect(decode(completed_account).type == "campaign", "personal completion can coexist with a still-active private ending")
+	completed_account.completed="yes"
+	expect(decode(completed_account).type == "invalid", "personal rescue completion requires a boolean")
 	var current_schema := snapshot(); current_schema.rescue.patient.erase("learned_patient_only")
 	current_schema.stage = "boss_confrontation"; current_schema.rescue.stage = "boss_confrontation"
 	current_schema.scene = {}; current_schema.rescue.daughter.returned = false

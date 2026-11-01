@@ -1,6 +1,25 @@
 extends SkeletonModifier3D
 const ApprovedPlayer := preload("res://src/actors/cape_approved_player.gd")
+const MountedFit := preload("res://src/actors/cape_mounted_fit.gd")
+const MountedAttachment := preload("res://src/actors/cape_mounted_attachment.gd")
+const MountedBodySurface := preload("res://src/actors/cape_mounted_body_surface.gd")
+const MountedStatic := preload("res://src/actors/cape_mounted_static.gd")
 var _approved_player: RefCounted
+var _mounted_fit: RefCounted
+var _mounted_body_surface: RefCounted
+var _mounted_static: RefCounted
+var _mounted_static_active := false
+var _mounted_static_bootstrap_started := false
+var _mounted_static_recovery := false
+var _mounted_static_recovery_elapsed := 0.0
+var _mounted_wake_active := false
+var _mounted_wake_elapsed := 0.0
+const MOUNTED_WAKE_SECONDS := .25
+var _fitting_mounted_static := false
+var _mounted_static_margin_m := 0.0
+var _approved_actor: WeakRef
+var _mounted_sources: Array[Dictionary] = []
+var _unmounted_lengths: Array[PackedFloat32Array] = []
 var _approved_profile := ""
 var _approved_geometry_guard := true
 ## Verlet cloth for the cape chains on the player rig.
@@ -203,7 +222,12 @@ func configure_approved_motion(actor: Node, profile: String) -> void:
 	var skeleton := get_skeleton()
 	if skeleton == null:
 		return
+	_restore_mounted_attachment()
 	_approved_profile = ""
+	_approved_actor = weakref(actor)
+	if not _unmounted_lengths.is_empty():
+		_lengths = _unmounted_lengths
+		_unmounted_lengths = []
 	if _approved_player != null:
 		for side: String in CHAINS:
 			for link: int in LINKS:
@@ -211,6 +235,9 @@ func configure_approved_motion(actor: Node, profile: String) -> void:
 				if bone >= 0:
 					skeleton.reset_bone_pose(bone)
 	_approved_player = null
+	_mounted_fit = null
+	_mounted_body_surface = null
+	_clear_mounted_static()
 	if not profile.is_empty():
 		var player := ApprovedPlayer.new()
 		if player.configure(actor, skeleton, profile):
@@ -219,11 +246,310 @@ func configure_approved_motion(actor: Node, profile: String) -> void:
 			player.hold_idle(skeleton)
 	reset()
 
+func _ensure_mounted_fit() -> void:
+	if _mounted_fit != null or _approved_player == null or _approved_actor == null:
+		return
+	var actor := _approved_actor.get_ref() as Node
+	if actor == null:
+		return
+	_install_mounted_attachment(actor)
+	if _mounted_sources.is_empty():
+		return
+	var fitted := MountedFit.new()
+	if fitted.configure(actor, get_skeleton(), _approved_profile):
+		_mounted_fit = fitted
+		var body := MountedBodySurface.new()
+		if body.configure(actor, get_skeleton(), _approved_profile):
+			_mounted_body_surface = body
+	else:
+		_restore_mounted_attachment()
+
+func _install_mounted_attachment(actor: Node) -> void:
+	if not _mounted_sources.is_empty():
+		return
+	var equipment: Dictionary = actor.get("_equipment_nodes")
+	for value: Variant in equipment.get(2, []):
+		var node := value as MeshInstance3D
+		if node == null or not node.has_meta("cape_approved_profile"):
+			continue
+		var fitted := MountedAttachment.build(_approved_profile, node.mesh, get_skeleton(),
+			"spine_neck", MountedAttachment.recommended_relief(_approved_profile))
+		if fitted.is_empty():
+			continue
+		_mounted_sources.append({"node": weakref(node), "mesh": node.mesh, "skin": node.skin,
+			"fitted_mesh": fitted.mesh, "fitted_skin": fitted.skin})
+		node.mesh = fitted.mesh
+		node.skin = fitted.skin
+		node.set_meta("cape_mounted_attachment", fitted.get("reference_error_m", 0.0))
+	if not _mounted_sources.is_empty():
+		_refresh_attachment_silhouette()
+
+func _refresh_attachment_silhouette() -> void:
+	var actor := _approved_actor.get_ref() as Node if _approved_actor != null else null
+	if actor == null:
+		return
+	var silhouette: Variant = actor.get("_silhouette")
+	if silhouette != null and bool(silhouette.call("is_enabled")):
+		silhouette.call("rebuild")
+
+func _restore_mounted_attachment() -> void:
+	var changed := false
+	for source: Dictionary in _mounted_sources:
+		var node := (source.node as WeakRef).get_ref() as MeshInstance3D
+		if node == null:
+			continue
+		if node.mesh == source.fitted_mesh and node.skin == source.fitted_skin:
+			node.mesh = source.mesh
+			node.skin = source.skin
+			node.remove_meta("cape_mounted_attachment")
+			changed = true
+	_mounted_sources.clear()
+	if changed:
+		_refresh_attachment_silhouette()
+
 func set_approved_geometry_guard(enabled: bool) -> void:
 	_approved_geometry_guard = enabled
 
 func approved_motion_stats() -> Dictionary:
-	return _approved_player.call("stats") if _approved_player != null else {"enabled": false, "fallback": true, "profile": "", "clip": ""}
+	var result: Dictionary = _approved_player.call("stats") if _approved_player != null else {"enabled": false, "fallback": true, "profile": "", "clip": ""}
+	result["mounted_fit"] = _approved_player != null and _mount_surface != null
+	result["mounted_ready"] = _mounted_fit != null and _mount_surface != null
+	if result["mounted_ready"]:
+		result["mounted"] = _mounted_fit.call("stats")
+		if _mounted_body_surface != null:
+			result["mounted_body"] = _mounted_body_surface.call("stats")
+	result["mounted_static"] = _mounted_static_active
+	result["mounted_static_bootstrap"] = _mounted_static_bootstrap_started
+	result["mounted_static_recovery"] = _mounted_static_recovery
+	result["mounted_wake_recovery"] = _mounted_wake_active
+	if _mounted_static != null:
+		result["mounted_static_pose"] = _mounted_static.call("stats")
+	return result
+
+func _clear_mounted_static() -> void:
+	if _mounted_static != null:
+		_mounted_static.call("clear")
+	_mounted_static_active = false
+	_mounted_static_bootstrap_started = false
+	_mounted_static_recovery = false
+	_mounted_static_recovery_elapsed = 0.0
+	_mounted_wake_active = false
+	_mounted_wake_elapsed = 0.0
+
+func hold_mounted_static_pose(context: Dictionary) -> void:
+	var skeleton := get_skeleton()
+	var actor := _approved_actor.get_ref() as Node3D if _approved_actor != null else null
+	if _mount_surface == null or _approved_player == null or actor == null \
+			or skeleton == null or not actor.is_visible_in_tree() or not skeleton.is_visible_in_tree():
+		return
+	if actor.has_method("is_drawn") and not bool(actor.call("is_drawn")):
+		return
+	if not _cached and not _cache(skeleton):
+		return
+	_ensure_mounted_fit()
+	if _mounted_fit == null:
+		return
+	_ensure_mounted_lengths(skeleton)
+	if _mounted_static == null:
+		_mounted_static = MountedStatic.new()
+	var key := context.duplicate(true)
+	key["profile"] = _approved_profile
+	if not _mounted_static_active and bool(_mounted_static.call("has_pose")) \
+			and int((_mounted_static.call("stats") as Dictionary).get("rendered_palette_updates", 0)) > 0:
+		_mounted_static_recovery = true
+		_mounted_static_recovery_elapsed = 0.0
+	_mounted_static_active = true
+	_mounted_wake_active = false
+	if _mounted_static_recovery:
+		_mounted_static.call("invalidate_context")
+	if bool(_mounted_static.call("request_context", key)):
+		# Start from the last accepted displayed material pose, not the rest
+		# hang. A failed candidate must never become the next visible hold.
+		var frame: Transform3D = _approved_player.call("skin_frame", skeleton)
+		_mounted_fit.call("prepare_attachment", skeleton, skeleton.global_transform, frame)
+		var previous_roots: Array[Transform3D] = []
+		for chain: int in 3:
+			previous_roots.append(_mounted_fit.call("bone_pose", frame, chain * LINKS))
+		var had_pose := bool(_mounted_static.call("has_pose"))
+		var warm_start := had_pose
+		if had_pose:
+			_mounted_static.call("apply", actor, skeleton, previous_roots)
+		var previous_poses: Array[Transform3D] = []
+		for chain: PackedInt32Array in _bones:
+			for bone: int in chain:
+				previous_poses.append(skeleton.get_bone_pose(bone))
+		if warm_start:
+			_seed_mounted_material_pose(skeleton)
+			_mounted_static_bootstrap_started = false
+		elif not _mounted_static_bootstrap_started:
+			# A first LOW-quality mount has no accepted cape palette to carry.
+			# Seed from the mount once, then retain only the private candidate
+			# particles across bounded retries until a valid pose is available.
+			reset()
+			_mounted_static_bootstrap_started = true
+		# Fit once with conservative mount clearance. Ordinary display blends
+		# and full-quality collision settings survive this bounded attempt.
+		var old := Vector4(float(_mount_surface.get("idle_blend")),
+			float(_mount_surface.get("moving_blend")), float(_mount_surface.get("gallop_blend")),
+			float(_mount_surface.get("clearance")))
+		var gait := str(context.get("gait", "idle"))
+		var recovery_step := FIXED_STEP
+		var tier := int(actor.get("_animation_tier"))
+		if tier == AnimationGate.Tier.QUARTER:
+			recovery_step *= 4.0
+		elif tier == AnimationGate.Tier.HALF:
+			recovery_step *= 2.0
+		var recovery := 1.0
+		if _mounted_static_recovery:
+			_mounted_static_recovery_elapsed += recovery_step
+			recovery = pow(clampf(_mounted_static_recovery_elapsed / MOUNTED_WAKE_SECONDS, 0.0, 1.0), 2.0)
+		_mount_surface.set("idle_blend", lerpf(old.x, 1.0 if gait == "idle" else 0.0, recovery))
+		_mount_surface.set("moving_blend", lerpf(old.y, 1.0 if gait in ["trot", "gallop"] else 0.0, recovery))
+		_mount_surface.set("gallop_blend", lerpf(old.z, 1.0 if gait == "gallop" else 0.0, recovery))
+		_mount_surface.call("update", 0.0, gait)
+		_mount_surface.set("clearance", float(_mount_surface.get("clearance")) + MountedStatic.MOUNT_FIT_MARGIN_M * recovery)
+		_mounted_static_margin_m = MountedStatic.BODY_FIT_MARGIN_M
+		_fitting_mounted_static = true
+		if warm_start:
+			_fit_mounted_static_material(skeleton)
+		else:
+			_process_modification_with_delta(FIXED_STEP)
+		_fitting_mounted_static = false
+		_mounted_static_margin_m = 0.0
+		_mount_surface.set("idle_blend", old.x)
+		_mount_surface.set("moving_blend", old.y)
+		_mount_surface.set("gallop_blend", old.z)
+		_mount_surface.call("update", 0.0, gait)
+		_mount_surface.set("clearance", old.w)
+		var fitness: Dictionary = _mounted_fit.call("stats")
+		fitness["finite"] = _mounted_material_pose_is_finite()
+		var blending := not str(context.get("upper", "")).is_empty() \
+			and (not bool(context.get("blend_settled", true)) or bool(context.get("returning", false)))
+		_mounted_static_recovery = _mounted_static_recovery and recovery < 1.0
+		if not bool(_mounted_static.call("capture", actor, skeleton, fitness, blending or _mounted_static_recovery)):
+			var at := 0
+			for chain: PackedInt32Array in _bones:
+				for bone: int in chain:
+					var pose := previous_poses[at]
+					skeleton.set_bone_pose_position(bone, pose.origin)
+					skeleton.set_bone_pose_rotation(bone, pose.basis.get_rotation_quaternion())
+					skeleton.set_bone_pose_scale(bone, pose.basis.get_scale())
+					at += 1
+			skeleton.force_update_all_bone_transforms()
+			# Discard rejected projector history; the next attempt starts from
+			# the accepted palette again, with no failed velocity or warm carry.
+			_mounted_fit.call("reset")
+			if not warm_start:
+				if bool(fitness["finite"]):
+					for chain: int in _points.size():
+						_previous[chain] = _points[chain].duplicate()
+				else:
+					_mounted_static_bootstrap_started = false
+		else:
+			_mounted_static_bootstrap_started = false
+	var frame: Transform3D = _approved_player.call("skin_frame", skeleton)
+	_mounted_fit.call("prepare_attachment", skeleton, skeleton.global_transform, frame)
+	var roots: Array[Transform3D] = []
+	for chain: int in 3:
+		roots.append(_mounted_fit.call("bone_pose", frame, chain * LINKS))
+	_mounted_static.call("apply", actor, skeleton, roots)
+	_remember_chain_pose(skeleton)
+
+func _fit_mounted_static_material(skeleton: Skeleton3D) -> void:
+	# A held panel already has a material-space shape. Project that exact
+	# shape against the new rider pose; gravity and the legacy straight-chain
+	# relaxation would rebuild it on every short upper-body blend.
+	var world := skeleton.global_transform
+	var source_frame: Transform3D = _approved_player.call("skin_frame", skeleton)
+	_mounted_fit.call("prepare_pose", skeleton, world, source_frame)
+	if _mounted_body_surface != null:
+		_mounted_body_surface.call("prepare_pose", skeleton, world, source_frame)
+	_snapshot_collision_world(skeleton, world)
+	var frame: Transform3D = _mounted_fit.call("shape_frame", source_frame, _mount_surface)
+	var fabrics: Array[PackedVector3Array] = []
+	for chain: int in 3:
+		fabrics.append(_mounted_fit.call("material_line", world * frame, chain))
+	_project_mounted_skin(skeleton, world, fabrics)
+	var anchor_pose := skeleton.get_bone_global_pose(_anchor)
+	for chain: int in 3:
+		var points := _points[chain]
+		points[LINKS] = fabrics[chain][LINKS] + points[LINKS - 1] - fabrics[chain][LINKS - 1]
+		_points[chain] = points
+		_previous[chain] = points.duplicate()
+		_write_chain_bones(skeleton, chain, fabrics[chain], anchor_pose, world, world.affine_inverse())
+	_settled = true
+
+func _ensure_mounted_lengths(skeleton: Skeleton3D) -> void:
+	if _mount_surface == null or _mounted_fit == null or not _unmounted_lengths.is_empty():
+		return
+	_unmounted_lengths = _lengths.duplicate()
+	for chain: int in 3:
+		_lengths[chain] = _mounted_fit.call("lengths", chain)
+		for link: int in LINKS:
+			_lengths[chain][link] *= skeleton.global_basis.x.length()
+	_settled = false
+
+func _seed_mounted_material_pose(skeleton: Skeleton3D) -> void:
+	var world := skeleton.global_transform
+	for chain: int in 3:
+		var points: PackedVector3Array = _mounted_fit.call("posed_material_line", skeleton,
+			world, chain, _bones[chain])
+		_points[chain] = points
+		_previous[chain] = points.duplicate()
+	_settled = true
+	_step_owed = 0.0
+	_previous_frame_world = world
+	_frame_world_ready = true
+	_mount_last_frame = world
+	_mount_frame_ready = true
+	_last_translation = world.origin
+	_last_simulation_translation = world.origin
+	_last_anchor = world * skeleton.get_bone_global_pose(_anchor).origin
+
+func _mounted_material_pose_is_finite() -> bool:
+	for chain: PackedVector3Array in _points:
+		for point: Vector3 in chain:
+			if not point.is_finite():
+				return false
+	for chain: PackedVector3Array in _previous:
+		for point: Vector3 in chain:
+			if not point.is_finite():
+				return false
+	return true
+
+func _mounted_fit_stats_are_valid(fitness: Dictionary) -> bool:
+	var gap := float(fitness.get("gap_m", INF))
+	var strain := float(fitness.get("strain", INF))
+	return int(fitness.get("iterations", 0)) > 0 and is_finite(gap) and is_finite(strain) \
+		and gap <= MountedStatic.MAX_GAP_M and strain <= MountedStatic.MAX_STRAIN
+
+func _resume_mounted_static(skeleton: Skeleton3D) -> void:
+	var actor := _approved_actor.get_ref() as Node3D if _approved_actor != null else null
+	if actor == null or _mounted_fit == null or _mounted_static == null:
+		_clear_mounted_static()
+		return
+	reset()
+	_mount_frame_ready = false
+	var world := skeleton.global_transform
+	var frame: Transform3D = _approved_player.call("skin_frame", skeleton)
+	_mounted_fit.call("prepare_attachment", skeleton, world, frame)
+	var roots: Array[Transform3D] = []
+	for chain: int in 3:
+		roots.append(_mounted_fit.call("bone_pose", frame, chain * LINKS))
+	if not bool(_mounted_static.call("apply", actor, skeleton, roots)):
+		_clear_mounted_static()
+		return
+	_seed_mounted_material_pose(skeleton)
+	_remember_chain_pose(skeleton)
+	# Keep the accepted Actor-space palette for a later FULL -> static tier
+	# change. It is refreshed only by accepted full-quality rendered frames.
+	_mounted_static.call("invalidate_context")
+	_mounted_static_active = false
+	_mounted_static_bootstrap_started = false
+	_mounted_static_recovery = false
+	_mounted_static_recovery_elapsed = 0.0
+	_mounted_wake_active = true
+	_mounted_wake_elapsed = 0.0
 
 func hold_approved_idle() -> void:
 	# These local cape poses remain under spine_03. Body clips name only the
@@ -284,6 +610,15 @@ func set_mount_surface(surface: RefCounted) -> void:
 	_native_mounted_constraint_kernel = null
 	_native_mounted_constraint_disabled = false
 	_mount_surface = surface
+	if surface == null:
+		_restore_mounted_attachment()
+	_mounted_fit = null
+	_mounted_body_surface = null
+	_clear_mounted_static()
+	_mounted_static_margin_m = 0.0
+	if surface == null and not _unmounted_lengths.is_empty():
+		_lengths = _unmounted_lengths
+		_unmounted_lengths = []
 	_mount_frame_ready = false
 	reset()
 
@@ -958,6 +1293,13 @@ func _snapshot_collision_world(skeleton: Skeleton3D,
 
 func _push_out_of_collision_snapshot(to_world: Transform3D,
 		point: Vector3) -> Vector3:
+	if _mount_surface != null and _mounted_fit != null and _mounted_body_surface != null:
+		for iteration: int in 2:
+			var plane := _mounted_skin_plane(point)
+			if plane.normal == Vector3.ZERO or plane.distance_to(point) >= 0.0:
+				break
+			point -= plane.normal * plane.distance_to(point)
+		return point
 	for capsule: int in range(_collision_pairs.size()):
 		var pair: Vector2i = _collision_pairs[capsule]
 		point = _push_out_of_capsule_axis(to_world, point,
@@ -1014,6 +1356,13 @@ func _process_modification_with_delta(delta: float) -> void:
 	var skeleton := get_skeleton()
 	if skeleton == null or (not _cached and not _cache(skeleton)) or _anchor < 0:
 		return
+	if _mount_surface != null and _approved_player != null and _mounted_fit == null:
+		# Delay the mounted-only allocation until the first visible rider pose.
+		# Its attachment adapter uses a deterministic canonical reference.
+		_ensure_mounted_fit()
+	_ensure_mounted_lengths(skeleton)
+	if _mounted_static_active and not _fitting_mounted_static:
+		_resume_mounted_static(skeleton)
 	var world := skeleton.global_transform
 	var anchor_world := world * skeleton.get_bone_global_pose(_anchor).origin
 	# Measure input motion once per display frame. Re-reading it in two fixed
@@ -1056,6 +1405,7 @@ func _process_modification_with_delta(delta: float) -> void:
 	# otherwise a fast display alternates between the solved and authored hang.
 	if stepped:
 		_remember_chain_pose(skeleton)
+		_remember_valid_mounted_rendered_pose(skeleton)
 	elif _held_chain_positions.size() == _bones.size() * LINKS:
 		var index := 0
 		for chain: PackedInt32Array in _bones:
@@ -1066,6 +1416,21 @@ func _process_modification_with_delta(delta: float) -> void:
 	if _approved_player != null and _mount_surface == null:
 		_approved_player.call("observe_fallback", skeleton, delta)
 
+
+func _remember_valid_mounted_rendered_pose(skeleton: Skeleton3D) -> void:
+	if _mount_surface == null or _mounted_fit == null or _mounted_static_active \
+			or _fitting_mounted_static:
+		return
+	var fitness: Dictionary = _mounted_fit.call("stats")
+	if not _mounted_fit_stats_are_valid(fitness):
+		return
+	fitness["finite"] = _mounted_material_pose_is_finite()
+	var actor := _approved_actor.get_ref() as Node3D if _approved_actor != null else null
+	if actor == null:
+		return
+	if _mounted_static == null:
+		_mounted_static = MountedStatic.new()
+	_mounted_static.call("remember_rendered", actor, skeleton, fitness)
 
 func _simulate_step(delta: float, simulation_world: Transform3D) -> void:
 	var skeleton := get_skeleton()
@@ -1093,6 +1458,10 @@ func _simulate_step(delta: float, simulation_world: Transform3D) -> void:
 				_previous[chain] = carried_previous
 		_mount_last_frame = to_world
 		_mount_frame_ready = true
+	var wake_from: Array[PackedVector3Array] = []
+	if _mounted_wake_active and _mount_surface != null and _mounted_fit != null:
+		for points: PackedVector3Array in _points:
+			wake_from.append(points.duplicate())
 	var step := minf(maxf(delta, 0.0), MAX_STEP)
 	# Snapshot all animated inputs before any cape output is written. Cape bones
 	# are descendants; their writes cannot leak into a later chain's body reads.
@@ -1119,7 +1488,7 @@ func _simulate_step(delta: float, simulation_world: Transform3D) -> void:
 	var anchor_carry := to_world.basis * anchor_pose.basis * _anchor_rest_inverse
 	# Both paths share the existing capsule/Verlet arithmetic. The mounted
 	# extension adds the sampled mount surface, flow and sixteen relaxations.
-	if _mount_surface != null and _native_mounted_constraint_kernel != null and _try_native_constraint_step(
+	if _mount_surface != null and _mounted_fit == null and _native_mounted_constraint_kernel != null and _try_native_constraint_step(
 			skeleton, to_world, to_local, anchor_pose, down, anchor_carry, fall,
 			damping, forward, plane_at, anchor_world.y, true, step):
 		_settled = true
@@ -1131,9 +1500,18 @@ func _simulate_step(delta: float, simulation_world: Transform3D) -> void:
 		return
 
 	var fabrics: Array[PackedVector3Array] = []
+	if _mount_surface != null and _mounted_fit != null:
+		var source_frame: Transform3D = _approved_player.call("skin_frame", skeleton)
+		_mounted_fit.call("prepare_pose", skeleton, to_world, source_frame)
+		if _mounted_body_surface != null:
+			_mounted_body_surface.call("prepare_pose", skeleton, to_world, source_frame)
 	for chain in range(_bones.size()):
 		var rest := _rest_joints_from_pose(to_world, chain, anchor_pose, down)
 		var fabric := _fabric_joints(rest, chain, anchor_carry)
+		if _mount_surface != null and _mounted_fit != null:
+			var frame: Transform3D = _approved_player.call("skin_frame", skeleton)
+			frame = _mounted_fit.call("shape_frame", frame, _mount_surface)
+			fabric = _mounted_fit.call("material_line", to_world * frame, chain)
 		fabrics.append(fabric)
 		if _fabric_measured(chain):
 			rest = _hang_from(fabric[0], chain, down)
@@ -1166,7 +1544,7 @@ func _simulate_step(delta: float, simulation_world: Transform3D) -> void:
 			for index in range(1, points.size()):
 				material_length += _lengths[chain][index - 1]
 				points[index] = _push_out_of_collision_snapshot(to_world, points[index])
-				if forward != Vector3.ZERO:
+				if forward != Vector3.ZERO and not (_mount_surface != null and _mounted_fit != null):
 					var ahead := points[index].dot(forward) - plane_at
 					if ahead > 0.0:
 						points[index] -= forward * ahead
@@ -1175,10 +1553,14 @@ func _simulate_step(delta: float, simulation_world: Transform3D) -> void:
 				# crests the anchor is going over the shoulder, not trailing.
 				# The anchor clears even a hard run's lift by half a metre, so
 				# this frees the whole billow and only stops the spike.
-				if points[index].y > anchor_world.y:
+				if points[index].y > anchor_world.y and not (_mount_surface != null and _mounted_fit != null):
 					points[index].y = anchor_world.y
 				if _mount_surface != null:
-					points[index] = _mount_surface.call("limit_lift", points[index], rest[0], material_length, float(index) / LINKS)
+					var material_side_offset := 0.0
+					if _mounted_fit != null:
+						var side: Vector3 = _mount_surface.get("side")
+						material_side_offset = (fabric[index] - fabric[0]).dot(side)
+					points[index] = _mount_surface.call("limit_lift", points[index], rest[0], material_length, float(index) / LINKS, material_side_offset)
 		_points[chain] = points
 		_previous[chain] = previous
 	_keep_sheet_coherent(anchor_carry, forward)
@@ -1186,9 +1568,110 @@ func _simulate_step(delta: float, simulation_world: Transform3D) -> void:
 		_keep_off_legs(forward, anchor_carry)
 	_keep_sheet_coherent(anchor_carry, forward)
 	_keep_surface_clear(fabrics, anchor_world, anchor_carry, forward)
+	if _mount_surface != null and _mounted_fit != null:
+		_keep_mounted_material_spacing(fabrics)
+		if not wake_from.is_empty():
+			var blend := pow(clampf(_mounted_wake_elapsed / MOUNTED_WAKE_SECONDS, 0.0, 1.0), 2.0)
+			for chain: int in _points.size():
+				var points := _points[chain]
+				var previous := _previous[chain]
+				for link: int in range(1, points.size()):
+					points[link] = wake_from[chain][link].lerp(points[link], blend)
+					previous[link] = wake_from[chain][link]
+				_points[chain] = points
+				_previous[chain] = previous
+			_mounted_wake_elapsed += step
+			_mounted_wake_active = _mounted_wake_elapsed < MOUNTED_WAKE_SECONDS
+		_project_mounted_skin(skeleton, to_world, fabrics)
 	for chain in range(_bones.size()):
 		_write_chain_bones(skeleton, chain, fabrics[chain], anchor_pose, to_world, to_local)
 	_settled = true
+
+func _keep_mounted_material_spacing(fabrics: Array[PackedVector3Array]) -> void:
+	# Legacy helper columns are straight. The approved cape's weighted row
+	# centres widen toward the hem; pinning every row to its root's X would
+	# pull each side inward by almost ten centimetres. Carry one lateral wave
+	# through the original material spacing instead.
+	var side: Vector3 = _mount_surface.get("side")
+	for link: int in range(1, LINKS + 1):
+		var wave := clampf((_points[1][link] - fabrics[1][link]).dot(side), -.04, .04)
+		for chain: int in 3:
+			var points := _points[chain]
+			var previous := _previous[chain]
+			var correction := side * ((fabrics[chain][link] - points[link]).dot(side) + wave)
+			points[link] += correction
+			previous[link] += correction
+			_points[chain] = points
+			_previous[chain] = previous
+
+func _mounted_skin_contact(point: Vector3) -> Vector3:
+	var plane := _mounted_skin_plane(point)
+	return point - plane.normal * minf(0.0, plane.distance_to(point))
+
+func _mounted_skin_plane(point: Vector3) -> Plane:
+	var result: Plane = _mount_surface.call("contact_plane", point)
+	var depth := -result.distance_to(point) if result.normal != Vector3.ZERO else 0.0
+	var covered := false
+	if _mounted_body_surface != null:
+		var body: Dictionary = _mounted_body_surface.call("contact", point)
+		covered = bool(body.get("covered", false))
+		var plane: Plane = body.get("plane", Plane())
+		if plane.normal != Vector3.ZERO and (result.normal == Vector3.ZERO or -plane.distance_to(point) > depth):
+			result = plane
+			depth = maxf(depth, -plane.distance_to(point))
+	for capsule: int in _collision_pairs.size():
+		if covered and _collision_kinds[capsule] in [CapsuleKind.TORSO, CapsuleKind.LUMBAR]:
+			continue
+		var pair: Vector2i = _collision_pairs[capsule]
+		var a := _collision_world[pair.x]
+		var axis := _collision_axes[capsule]
+		var span := _collision_spans[capsule]
+		var travel := 0.0 if span < 0.000001 else clampf((point - a).dot(axis) / span, 0.0, 1.0)
+		var radius := _collision_radii[capsule]
+		var reach: PackedFloat32Array = _collision_reaches[capsule]
+		if not reach.is_empty():
+			var at := travel * float(reach.size() - 1)
+			radius = maxf(radius, lerpf(reach[int(at)], reach[mini(int(at) + 1, reach.size() - 1)], at - int(at)))
+		radius = radius * get_skeleton().global_basis.x.length() + .015 + _mounted_static_margin_m
+		var near := a + axis * travel
+		var away := point - near
+		var gap := radius - away.length()
+		if gap > depth and away.length_squared() > .000001:
+			var normal := away.normalized()
+			result = Plane(normal, (near + normal * radius).dot(normal))
+			depth = gap
+	return result
+
+func _project_mounted_skin(skeleton: Skeleton3D, world: Transform3D, fabrics: Array[PackedVector3Array]) -> void:
+	var frame: Transform3D = _approved_player.call("skin_frame", skeleton)
+	frame = _mounted_fit.call("shape_frame", frame, _mount_surface)
+	var translations := PackedVector3Array()
+	for chain: int in 3:
+		for link: int in LINKS:
+			translations.append(_points[chain][link] - fabrics[chain][link])
+	# The numeric batch replaces the complete contact query, including the
+	# actual garment surface. Keep the script path when that surface has no
+	# native handle; capsules alone cannot safely stand in for it.
+	var native_body: RefCounted = null
+	if _mounted_body_surface != null:
+		native_body = _mounted_body_surface.call("get_native_handle") as RefCounted
+	if native_body != null:
+		_mounted_fit.call("set_native_contacts", {
+			"collision_world": _collision_world, "collision_pairs": _collision_pairs,
+			"collision_axes": _collision_axes, "collision_spans": _collision_spans,
+			"collision_radii": _collision_radii, "collision_reaches": _collision_reaches,
+			"collision_kinds": _collision_kinds,
+			"body_margin_m": .015 + _mounted_static_margin_m},
+			_mount_surface.call("native_snapshot", FIXED_STEP), native_body)
+	else:
+		_mounted_fit.call("set_native_contacts", {}, PackedFloat64Array(), null)
+	var projected: PackedVector3Array = _mounted_fit.call("project", skeleton, world, frame, translations, _mounted_skin_contact, _mounted_skin_plane)
+	for chain: int in 3:
+		for link: int in LINKS:
+			var bone := chain * LINKS + link
+			var correction := projected[bone] - translations[bone]
+			_points[chain][link] += correction
+			_previous[chain][link] += correction
 
 
 func _try_native_constraint_step(skeleton: Skeleton3D, to_world: Transform3D,
@@ -1261,6 +1744,10 @@ func _write_chain_bones(skeleton: Skeleton3D, chain: int,
 			# The fitted skin's neutral frame differs from the original helper
 			# rest. Use it for legacy/mounted motion as well as authored cages.
 			authored = to_world * (_approved_player.call("neutral_bone_pose", skeleton, chain * LINKS + link) as Transform3D)
+			if _mount_surface != null and _mounted_fit != null:
+				var frame: Transform3D = _approved_player.call("skin_frame", skeleton)
+				frame = _mounted_fit.call("shape_frame", frame, _mount_surface)
+				authored = to_world * (_mounted_fit.call("bone_pose", frame, chain * LINKS + link) as Transform3D)
 		if measured:
 			rest_direction = (fabric[link + 1] - fabric[link]).normalized()
 		var wanted := (points[link + 1] - points[link]).normalized()
@@ -1269,7 +1756,7 @@ func _write_chain_bones(skeleton: Skeleton3D, chain: int,
 			turn = Basis(Quaternion(rest_direction, wanted))
 		var posed := to_local * Transform3D(turn * authored.basis,
 			points[link] + turn * (authored.origin - fabric[link]))
-		if measured and _mount_surface == null:
+		if measured and (_mount_surface == null or _mounted_fit != null):
 			# Measured rows are a displacement lattice for the actual skin.
 			# Rotating an off-line bind frame about each independently tilted
 			# segment folds its vertices over the neighbouring row in a run.
@@ -1303,3 +1790,5 @@ func reset() -> void:
 	_held_chain_rotations.clear()
 	if _approved_player != null:
 		_approved_player.call("reset")
+	if _mounted_fit != null:
+		_mounted_fit.call("reset")

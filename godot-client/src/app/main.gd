@@ -2336,6 +2336,8 @@ func _update_keyboard_movement() -> void:
 ## direction is sent when it changes, when the server changes the epoch (a map
 ## change) and as a keep-alive, instead of a MOVE_TO every 360 ms.
 func _update_keyboard_intent(direction: Vector2i, run: bool, now: int) -> void:
+	if direction != Vector2i.ZERO:
+		_door_approach.clear()
 	if _keyboard_moving and _keyboard_intent_epoch == Network.move_intent_epoch \
 			and direction == _keyboard_direction and run == _keyboard_running \
 			and now < _keyboard_refresh_msec:
@@ -3090,6 +3092,9 @@ func _on_walk_button_pressed() -> void:
 	_sync_hud_button_states(true)
 
 func _on_sit_button_pressed() -> void:
+	# A legacy keyboard stop is a MOVE_TO. Send it before the posture request
+	# so the next process frame cannot stand us back up on a stale client tile.
+	_stop_keyboard_movement()
 	var local_actor: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
 	var error: Error = Network.set_sitting(not bool(local_actor.get("sitting", false)))
 	if error != OK:
@@ -3100,12 +3105,12 @@ func _on_attack_button_pressed() -> void:
 	_attack_selected_actor()
 	_sync_hud_button_states(true)
 
-## Asks the server to describe the selected player. The window that opens is
-## the server's reply and nothing else: the client does not remember what it
-## asked about, because the reply names the actor itself.
+## Players retain their information window. A visible ordinary creature's
+## server-owned combat inspection appears in chat without arming an attack.
 func _on_look_button_pressed() -> void:
 	var actor_id: int = AppState.selected_actor_id
-	if not _is_tradeable_player(actor_id, AppState.actors.get(actor_id, {})):
+	var dto: Dictionary = AppState.actors.get(actor_id, {})
+	if not _is_tradeable_player(actor_id, dto) and not _can_inspect_creature(actor_id, dto):
 		return
 	var error: Error = Network.look_at_player(actor_id)
 	if error != OK:
@@ -3142,7 +3147,9 @@ func _available_world_actions_at(viewport_position: Vector2) -> Array[String]:
 	var actions: Array[String] = ["walk"]
 	var actor_id: int = _pick_actor(viewport_position)
 	if actor_id >= 0:
-		if actor_id == AppState.local_actor_id and _ground_bag_below_player() >= 0:
+		if _deliberate_ground_bag_at(viewport_position, actor_id, false, "pick") >= 0 \
+				or (actor_id == AppState.local_actor_id and AppState.pending_spell_target != "actor"
+					and _ground_bag_below_player() >= 0):
 			actions.append("pick")
 		var dto: Dictionary = AppState.actors.get(actor_id, {})
 		for action: String in MouseCursors.WORLD_ACTIONS:
@@ -3157,6 +3164,18 @@ func _available_world_actions_at(viewport_position: Vector2) -> Array[String]:
 		actions.append("harvest" if map_object.is_harvestable() else "use")
 		actions.append("look")
 	return actions
+
+## Pick explicitly reaches the bag's own ray layer through an overlapping
+## body. Default combat clicks and armed actor actions retain their priority.
+func _deliberate_ground_bag_at(viewport_position: Vector2, actor_id: int,
+		alt_pressed: bool, mode := "") -> int:
+	if mode.is_empty(): mode = _interaction_mode
+	if mode != "pick" or alt_pressed or _carried_slot >= 0 \
+			or not AppState.pending_spell_target.is_empty() or not Network.magic_pending.is_empty():
+		return -1
+	if actor_id >= 0 and techniques_panel != null and not str(techniques_panel.get("pending_key")).is_empty():
+		return -1
+	return _pick_ground_bag(viewport_position)
 
 func _cycle_world_action(viewport_position: Vector2) -> void:
 	var actions: Array[String] = _available_world_actions_at(viewport_position)
@@ -3992,8 +4011,7 @@ func _on_inventory_get_all_pressed() -> void:
 		var sent: int = _request_all_ground_bag_items()
 		inventory_description.text = _ground_bag_get_all_message(sent)
 		return
-	AppState.begin_ground_bag_inspection(bag_id)
-	var error: Error = Network.inspect_bag(bag_id)
+	var error: Error = _request_ground_bag_inspection(bag_id)
 	if error != OK:
 		_ground_bag_get_all_requested_msec = -1
 		_ground_bag_get_all_bag_id = -1
@@ -5175,11 +5193,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed("toggle_sit"):
-		var local_actor: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
-		var wants_to_sit: bool = not bool(local_actor.get("sitting", false))
-		var sit_error: Error = Network.set_sitting(wants_to_sit)
-		if sit_error != OK:
-			push_warning("SIT_DOWN failed: " + error_string(sit_error))
+		_on_sit_button_pressed()
 		get_viewport().set_input_as_handled()
 		return
 
@@ -6161,6 +6175,10 @@ func _handle_world_click(event: InputEventMouseButton, viewport_position: Vector
 		if techniques_panel != null and bool(techniques_panel.call("fire_at", picked_actor_id)):
 			AppState.select_actor(picked_actor_id)
 			return
+		var deliberate_bag := _deliberate_ground_bag_at(viewport_position, picked_actor_id, event.alt_pressed)
+		if deliberate_bag >= 0:
+			_open_ground_bag(deliberate_bag)
+			return
 		# A bag at your own feet outranks your own body: you are not a click
 		# target for yourself, so the click opens the sack you are standing
 		# over. A pending actor spell still wins - clicking yourself casts
@@ -6252,10 +6270,17 @@ func _handle_world_click(event: InputEventMouseButton, viewport_position: Vector
 func _open_ground_bag(bag_id: int) -> void:
 	print_debug("ground_bag_input command=INSPECT_BAG bag_id=", bag_id,
 		" redacted_bytes=not_sensitive")
-	AppState.begin_ground_bag_inspection(bag_id)
-	var inspect_error: Error = Network.inspect_bag(bag_id)
+	var inspect_error: Error = _request_ground_bag_inspection(bag_id)
 	if inspect_error != OK:
 		push_warning("INSPECT_BAG failed: " + error_string(inspect_error))
+
+## Both world Pick and inventory Get All replace tracked keyboard movement.
+## A legacy stop must precede INSPECT_BAG so its late MOVE_TO cannot cancel
+## the server's new bag approach and leave the optimistic inspection waiting.
+func _request_ground_bag_inspection(bag_id: int) -> Error:
+	_stop_keyboard_movement()
+	AppState.begin_ground_bag_inspection(bag_id)
+	return Network.inspect_bag(bag_id)
 
 ## The legacy client's click feedback: a walk order marks its destination
 ## with a collapsing green cross, so the player sees where the click landed
@@ -8834,6 +8859,15 @@ func _place_ground_bag_on_surface(bag: GroundBag3D) -> void:
 		bag.set_surface_height(adapter.walking_height)
 
 func _sync_ground_bag() -> void:
+	if _ground_bag_get_all_requested_msec >= 0 \
+			and int(AppState.ground_bag.get("bag_id", -1)) != _ground_bag_get_all_bag_id:
+		# CLOSE_BAG and DESTROY_BAG clear the reducer's bag identity even
+		# before an inspection opens. Retire its one-shot Get All intent too;
+		# a later reuse of the same wire ID must not inherit that request.
+		_ground_bag_get_all_requested_msec = -1
+		_ground_bag_get_all_bag_id = -1
+		if inventory_description.text == "Opening the ground bag below you…":
+			inventory_description.text = "Ground bag request cancelled."
 	var is_open: bool = bool(AppState.ground_bag.get("open", false))
 	ground_bag_panel.visible = is_open
 	if not is_open:
@@ -9770,6 +9804,8 @@ func _release_bodies(releases: Array) -> void:
 ## A creature yields only to visible player banners; the combat target stays
 ## readable even there. NPC and player banners retain their overlap filtering.
 ## Bodies and interaction targets remain independent of overhead visibility.
+const OVERHEAD_REVEAL_GAP_PIXELS := 6.0
+
 func _declutter_actor_overheads(target_id: int) -> void:
 	var candidates: Array[Dictionary] = []
 	for raw_id: Variant in actor_nodes:
@@ -9815,18 +9851,25 @@ func _declutter_actor_overheads(target_id: int) -> void:
 		occupied.append(own_rect)
 		player_occupied.append(own_rect)
 	for candidate: Dictionary in candidates:
+		var candidate_actor := candidate.actor as ReplicatedActor3D
 		var crowded := false
 		var creature: bool = candidate.type in [&"creature", &"invasion"]
 		var obstacles: Array[Rect2] = player_occupied if creature else occupied
+		# A shown block hides on actual overlap; a hidden block returns only
+		# once it is six render pixels clear. Camera movement inside this band
+		# keeps the previous answer instead of toggling names and health bars.
+		var padding := OVERHEAD_REVEAL_GAP_PIXELS if candidate_actor.overhead_crowded() else 0.0
 		if candidate.id != target_id:
 			for previous: Rect2 in obstacles:
-				if previous.grow(3).intersects(candidate.rect):
+				if previous.grow(padding).intersects(candidate.rect):
 					crowded = true
 					break
-		(candidate.actor as ReplicatedActor3D).set_overhead_crowded(crowded)
-		if not crowded and not creature:
+		candidate_actor.set_overhead_crowded(crowded)
+		# Hidden banners do not claim screen space. In particular a disabled
+		# NPC/player name must not hide the next visible player's health.
+		if not crowded and not creature and candidate_actor._overhead_shown():
 			occupied.append(candidate.rect)
-			if candidate.type == &"player" and (candidate.actor as ReplicatedActor3D)._overhead_shown():
+			if candidate.type == &"player":
 				player_occupied.append(candidate.rect)
 
 ## The screen space an actor's overhead block claims when names are
@@ -15431,8 +15474,7 @@ func _cast_power_for(spell_id: int) -> int:
 	var effect: String = spell_catalog.effect_for(spell_id)
 	if not AppState.spell_power.has(effect):
 		return 0
-	var stated: Dictionary = AppState.spell_power[effect] as Dictionary
-	return mini(requested_spell_power, maxi(1, int(stated.get("limit", 1))))
+	return mini(requested_spell_power, maxi(1, spell_catalog.cast_power_limit(spell_id, AppState.spell_power, AppState.stats)))
 
 func _spell_result_text(result: Dictionary) -> String:
 	if result.is_empty():
@@ -15465,8 +15507,12 @@ func _magic_ring_ui(action: int) -> void:
 		Network.tutorial_ui(action)
 
 func _begin_prepared_cast(spell_id: int, power: int) -> void:
-	var stated: Dictionary = AppState.spell_power.get(spell_catalog.effect_for(spell_id), {})
-	power = mini(power, maxi(1, int(stated.get("limit", 1))))
+	var ceiling: int = spell_catalog.cast_power_limit(spell_id, AppState.spell_power, AppState.stats)
+	if ceiling < 1:
+		var reasons: Array[String] = spell_catalog.unavailable_reasons(spell_id, AppState.known_knowledge, AppState.stats, AppState.inventory)
+		magic_selection.status_changed.emit(reasons[0] if not reasons.is_empty() else "This spell requires more Magic or Magic Nexus.")
+		return
+	power = mini(power, ceiling)
 	magic_selection.begin(spell_id, power, AppState.selected_actor_id)
 	spells_window.close()
 
@@ -15635,6 +15681,8 @@ func _report_health_change(actor_id: int, health: int, max_health: int,
 	var delta: int = health - int(previous)
 	if delta == 0:
 		return
+	if delta < 0 and health > 0 and is_instance_valid(actor):
+		actor.receive_damage_reaction(-delta)
 	var is_self: bool = actor_id == AppState.local_actor_id
 	var option: String = ("damage_numbers_self" if is_self
 		else ("damage_numbers_players" if _is_player_actor(actor_id)
@@ -16832,9 +16880,10 @@ func _sync_selection() -> void:
 	attack_button.tooltip_text = ("Attack selected target [A] or Alt-click; the server approaches and validates combat"
 		if can_attack else "Select a living player or creature to attack")
 	var can_trade: bool = _is_tradeable_player(AppState.selected_actor_id, dto)
-	look_button.disabled = not can_trade
-	look_button.tooltip_text = ("Ask the server to describe the selected player"
-		if can_trade else "Select a player to look at")
+	var inspect_creature := _can_inspect_creature(AppState.selected_actor_id, dto)
+	look_button.disabled = not (can_trade or inspect_creature)
+	look_button.tooltip_text = ("Inspect the selected creature's live strength in chat" if inspect_creature \
+		else "Ask the server to describe the selected player" if can_trade else "Select a living player or creature to inspect")
 	# Never disabled: with nobody selected it arms trade mode instead.
 	trade_button.tooltip_text = ("Request or accept trade with the selected player; both players must be within four tiles"
 		if can_trade else "Arm trade, then click a player to request or accept a trade; both players must be within four tiles")
@@ -16872,7 +16921,7 @@ func _actor_click_action(actor_id: int, dto: Dictionary,
 	# included; every other action here is about somebody else.
 	if AppState.pending_spell_target == "actor":
 		return "spell"
-	if mode == "look" and int(dto.get("kind", 0)) in [1, 4] \
+	if mode == "look" and (int(dto.get("kind", 0)) in [1, 4] or _can_inspect_creature(actor_id, dto)) \
 			and not alt_pressed:
 		return "look"
 	if actor_id == AppState.local_actor_id:
@@ -16902,6 +16951,10 @@ func _actor_click_action(actor_id: int, dto: Dictionary,
 ## both halves of the promise draw the line in the same place.
 func _is_creature_actor(dto: Dictionary) -> bool:
 	return int(dto.get("kind", 0)) in [3, 5]
+
+func _can_inspect_creature(actor_id: int, dto: Dictionary) -> bool:
+	return _is_creature_actor(dto) and _is_attackable_actor(actor_id, dto) \
+		and int(dto.get("health", 1)) > 0 and not ReplicatedActor3D.is_summon(dto)
 
 func _is_tutorial_companion(actor_id: int) -> bool:
 	var tutorial: Dictionary = AppState.lantern_tutorial
@@ -17207,7 +17260,7 @@ func _activate_map_object(map_object: MapObject3D, inspect: bool) -> void:
 		if harvest_error != OK:
 			push_warning("HARVEST failed: " + error_string(harvest_error))
 		return
-	if (map_object.building_door or map_object.building_exit or map_object.is_stair_end()) \
+	if (map_object.building_door or map_object.building_exit or map_object.cave_entrance or map_object.is_stair_end()) \
 			and _approach_door(map_object):
 		return
 	var use_error: Error = Network.use_map_object(map_object.object_id)
@@ -17224,6 +17277,9 @@ func _approach_door(map_object: MapObject3D) -> bool:
 	var local: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
 	if local.is_empty() or _movement_locked(false):
 		return false
+	# The click replaces held-key movement. A legacy release sends MOVE_TO;
+	# retire it before the entrance route/use, including an immediate map change.
+	_stop_keyboard_movement()
 	var at := Vector2i(int(local.get("x", 0)), int(local.get("y", 0)))
 	var reach := maxi(absi(at.x - map_object.server_tile.x), absi(at.y - map_object.server_tile.y))
 	if reach <= DOOR_REACH_TILES:
@@ -17243,9 +17299,12 @@ func _update_door_approach() -> void:
 		return
 	var object_id := int(_door_approach.object_id)
 	var local: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
-	if AppState.current_map != str(_door_approach.map) or not AppState.map_objects.has(object_id) \
-			or Time.get_ticks_msec() > int(_door_approach.until_msec) or local.is_empty():
+	if AppState.current_map != str(_door_approach.map) or not AppState.map_objects.has(object_id) or local.is_empty():
 		_door_approach = {}
+		return
+	if Time.get_ticks_msec() > int(_door_approach.until_msec):
+		_door_approach = {}
+		AppState.append_local_message("Could not reach the entrance. Move closer or choose another route.")
 		return
 	var door: Vector2i = _door_approach.tile
 	var reach := maxi(absi(int(local.get("x", 0)) - door.x), absi(int(local.get("y", 0)) - door.y))
@@ -18191,10 +18250,13 @@ func _cursor_context_at(viewport_position: Vector2) -> Dictionary:
 		"alt": _alt_attack_preview,
 		"spell_target": AppState.pending_spell_target,
 	}
-	# The same ray order the click handler resolves in: actors win over bags,
-	# bags over world objects, so the pointer promises what the click does.
+	# Actors normally win over bags. Explicit Pick reaches the bag's own layer,
+	# using the same predicate as cycling and click dispatch.
 	var actor_id: int = _pick_actor(viewport_position)
 	if actor_id >= 0:
+		if _deliberate_ground_bag_at(viewport_position, actor_id, _alt_attack_preview) >= 0:
+			context["target"] = "bag"
+			return context
 		var dto: Dictionary = AppState.actors.get(actor_id, {})
 		var kind: int = int(dto.get("kind", 0))
 		if actor_id == AppState.local_actor_id:

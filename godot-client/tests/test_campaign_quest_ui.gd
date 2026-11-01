@@ -125,6 +125,27 @@ func run() -> void:
 	expect(guide.has_campaign() and campaign_row()>=0,"unfinished optional travel retains its real expedition entry")
 	await show_state(state)
 	expect(guide.has_campaign(),"an active private ending remains available for local replay even after main rewards")
+	var rescue_complete := sample();rescue_complete.kind="rescue";rescue_complete.completed=true
+	rescue_complete.title="The Missing Family";rescue_complete.hint="Speak with the woman."
+	guide.compact=true
+	await show_state(rescue_complete)
+	expect(not guide.has_campaign() and not guide.is_campaign_tracked() and campaign_row()==-1,
+		"personal rescue completion removes the active journal row and tracked objective while still in the private map")
+	expect(guide.card.visible and guide.chapter.text=="RESCUE COMPLETE" and hud.visible
+		and hud._leave.visible and not hud._scroll.visible and not hud._rescue_rewards.visible,
+		"completed rescue retains Return and replay without stale conversation or reward targets, even after minimizing instructions")
+	expect(not guide.collapse.visible and not guide.untrack.visible and not guide.instruction.text.contains("Speak"),
+		"the completion notice offers no active quest tracking or repeated conversation")
+	await capture("rescue-complete-return-1280x720")
+	var returned := rescue_complete.duplicate(true);returned.active=false
+	await show_state(returned)
+	expect(not guide.has_campaign() and guide.quest_title()=="Signed Ashore",
+		"returning from a completed rescue restores the ordinary quest guide")
+	rescue_complete.completed=false;rescue_complete.run_id="another-rescue"
+	await show_state(rescue_complete)
+	expect(guide.has_campaign() and guide.is_campaign_tracked() and guide.untrack.visible,
+		"helping a new rescue retains its own active guidance after a completed personal account")
+	guide.compact=false
 	app.quest_journal.clear();app.quest_journal.append({"title":"The Ferry That Arrived Twice","objective":"Original server objective","location":"Greenlight","current":0,"target":3,"ready":false});app.state_changed.emit(&"quest_journal")
 	state=sample();await show_state(state)
 	expect(windows._quest_entries.size()==1 and campaign_row()==0,"an exact opening title reuses its existing journal row")

@@ -8,6 +8,7 @@ const CAPE_PREFIX := "EquipmentSkin_2_"
 var _checks := 0
 var _failures: Array[String] = []
 var _rows: Array = []
+var _quality_rows: Array = []
 var _models: Dictionary
 var _equipment: Dictionary
 var _next_id := 9760
@@ -27,6 +28,9 @@ func _json(path: String) -> Dictionary:
 	return value as Dictionary if value is Dictionary else {}
 
 func _run() -> void:
+	# This short-lived fixture owns no live session that should retain Human
+	# resources or deferred release timers after its last actor is removed.
+	RLHeadLibrary.retain_seconds = 0.0
 	var catalog := _json(CATALOG)
 	_check(not catalog.is_empty(), "portable approved-motion catalog is installed")
 	if catalog.is_empty():
@@ -53,7 +57,65 @@ func _run() -> void:
 	for rig: String in ["orun_male", "orun_female", "ssarathi_male", "ssarathi_female"]:
 		await _guard_case(rig)
 	await _lifecycle_case()
+	await _retiring_material_case()
+	for torso: int in [0,184]:await _budget_animation_case(torso)
+	await _shutdown_fixture()
 	_finish()
+
+func _shutdown_fixture() -> void:
+	RLHeadLibrary.cancel_warm()
+	while RLHeadLibrary.warming():await process_frame
+	await process_frame
+	ReplicatedActor3D.clear_wardrobe_texture_cache()
+	NativeAnimationImporter.clear()
+	GlbSceneCache.clear()
+	# Renderer resource releases are queued separately from Node deletion.
+	await process_frame
+	await process_frame
+	_check(int(NativeAnimationImporter.retention_snapshot().get("strong_source_scenes",-1))==0,
+		"fixture releases detached native animation source scenes")
+	_check(Node.get_orphan_node_ids().is_empty(),"fixture leaves no orphan scene nodes")
+
+func _retiring_material_case() -> void:
+	var actor := _spawn("luminous_male",0)
+	var materials: Array[WeakRef] = []
+	for mesh: MeshInstance3D in _cape_meshes(actor.get_skeleton()):
+		for surface: int in mesh.mesh.get_surface_count():
+			materials.append(weakref(mesh.get_active_material(surface)))
+	_check(materials.size()==3,"retirement checks the three outgoing cape materials")
+	actor.apply_equipment_visuals({})
+	actor.queue_free()
+	await process_frame
+	var retained := true
+	for material: WeakRef in materials:retained = retained and material.get_ref()!=null
+	_check(retained,"outgoing cape materials survive actor deletion through pending renderer work")
+	await process_frame
+	await process_frame
+	var released := true
+	for material: WeakRef in materials:released = released and material.get_ref()==null
+	_check(released,"outgoing cape material retention ends after the bounded frame wait")
+
+func _budget_animation_case(torso: int) -> void:
+	var actor := _spawn("luminous_male",torso)
+	actor.play_action(&"walk",true)
+	actor.animation_player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+	actor.apply_render_quality(ActorRenderQuality.Quality.LOW,false)
+	var rig := actor.get_skeleton()
+	var held: Array = []
+	for bone: int in rig.get_bone_count():
+		if rig.get_bone_name(bone).begins_with("cape_"):held.append(rig.get_bone_pose(bone))
+	var body := _body_poses(rig)
+	actor.animation_player.advance(.2)
+	var after: Array = []
+	for bone: int in rig.get_bone_count():
+		if rig.get_bone_name(bone).begins_with("cape_"):after.append(rig.get_bone_pose(bone))
+	var cape_change := _transform_error(held,after)
+	var body_change := _transform_error(body,_body_poses(rig))
+	_check(held.size()==12 and cape_change<.000001,"LOW held cape survives ordinary body animation advancement")
+	_check(body_change>.00001,"LOW body animation keeps advancing while cape holds")
+	_check(not actor._cape_cloth.active and not actor.cape_cloth_should_simulate(),"LOW hold requires no per-frame cape modification")
+	_quality_rows.append({"profile":"armour" if torso else "wardrobe","cape_local_pose_change":cape_change,"body_pose_change":body_change})
+	actor.queue_free();await process_frame;await process_frame
 
 func _spawn(rig: String, torso: int, appearance: Dictionary = {}) -> ReplicatedActor3D:
 	var actor := ReplicatedActor3D.new()
@@ -135,8 +197,9 @@ func _cape_meshes(rig: Skeleton3D) -> Array[MeshInstance3D]:
 	return result
 
 func _cape_surface_contract(rig: Skeleton3D) -> Dictionary:
-	var materials: Array = [];var weights: Array = [];var bones: Array = []
+	var materials: Array = [];var weights: Array = [];var bones: Array = [];var resources: Array = []
 	for mesh: MeshInstance3D in _cape_meshes(rig):
+		resources.append({"node":mesh,"mesh":mesh.mesh,"skin":mesh.skin})
 		for surface: int in mesh.mesh.get_surface_count():
 			var arrays := mesh.mesh.surface_get_arrays(surface)
 			weights.append((arrays[Mesh.ARRAY_WEIGHTS] as PackedFloat32Array).to_byte_array())
@@ -152,7 +215,7 @@ func _cape_surface_contract(rig: Skeleton3D) -> Dictionary:
 					"emission":material.emission,"emission_texture":material.emission_texture,
 					"transparency":material.transparency,"cull":material.cull_mode})
 			materials.append(value)
-	return {"materials":materials,"weights":weights,"bones":bones}
+	return {"materials":materials,"weights":weights,"bones":bones,"resources":resources}
 
 func _samples(rig: Skeleton3D) -> Dictionary:
 	var groups: Array = []
@@ -323,12 +386,16 @@ func _lifecycle_case() -> void:
 	var actor := _spawn("luminous_male",0)
 	_sample(actor,&"walk",.4)
 	actor.apply_equipment_visuals({2:5,5:184,4:171,6:192})
+	await process_frame
 	_check(str(_sample(actor,&"idle",.4).get("profile",""))=="armour","equipping torso updates cape fit")
 	actor.apply_equipment_visuals({2:5})
+	await process_frame
 	_check(str(_sample(actor,&"idle",.4).get("profile",""))=="wardrobe","removing torso restores bare fit")
 	actor.apply_equipment_visuals({})
+	await process_frame
 	_check(not actor.wears_cape_cloth(),"removing cape stops its layer")
 	actor.apply_equipment_visuals({2:140})
+	await process_frame
 	_check(bool(_sample(actor,&"idle",.4).get("enabled",false)),"tinted/emblem cape retains approved generic geometry")
 	actor.apply_render_quality(ActorRenderQuality.Quality.LOW,false)
 	_check(not actor.cape_cloth_should_simulate(),"nonlocal low quality disables per-frame cape work")
@@ -351,12 +418,29 @@ func _lifecycle_case() -> void:
 	_check(original.materials.size()==3,"styled cape has three material surfaces before mounting")
 	actor.set_mount_state({"mode":"mounted","mount_id":"moor_pony","gait":"walk","step_us":600000},_models)
 	_check(is_instance_valid(actor._mount_visual),"mount presentation configures")
+	if is_instance_valid(actor._mount_visual):actor._mount_visual.call("_process",STEP)
 	_check(not actor._cape_cloth.active,"mounted owner suppresses automatic cape pass")
-	_check(not bool(_stats(actor).get("enabled",true)),"mounted cape selects the legacy mesh and disables approved playback")
+	var mounted := _stats(actor)
+	_check(bool(mounted.get("enabled",false)) and bool(mounted.get("mounted_fit",false)) and str(mounted.get("profile",""))=="wardrobe",
+		"mounted cape keeps the approved geometry and activates its mounted driver")
+	for mesh: MeshInstance3D in _cape_meshes(rig):
+		_check(mesh.skin.get_bind_count()==17,"mounted cape keeps all seventeen approved named binds")
 	_check(_cape_surface_contract(rig).materials==original.materials,"mounting preserves the styled cape's three material slots")
+	var seated_contract := _cape_surface_contract(rig)
+	_check(seated_contract.weights==original.weights and seated_contract.bones==original.bones,"mounted cape retains approved eight-slot weights and bone indices exactly")
 	if is_instance_valid(actor._mount_visual):
 		actor._mount_visual.call("_process",STEP)
-		_check(_fallback(_stats(actor)),"mounted mode suspends authored action playback")
+		_check(bool(_stats(actor).get("mounted_fit",false)),"mounted mode uses the approved fit's seated bone driver")
+	await process_frame
+	actor.set_mount_state({"mode":"mounted","mount_id":"golden_plains_horse","gait":"idle","step_us":600000},_models)
+	if is_instance_valid(actor._mount_visual):actor._mount_visual.call("_process",STEP)
+	var changed_mount:=_stats(actor)
+	_check(is_instance_valid(actor._mount_visual) and bool(changed_mount.get("mounted_fit",false)) and str(changed_mount.get("profile",""))=="wardrobe",
+		"switching mounts rebuilds the same approved fit's contact and attachment")
+	var changed_contract:=_cape_surface_contract(rig)
+	_check(changed_contract.weights==original.weights and changed_contract.bones==original.bones and changed_contract.materials==original.materials,
+		"switching mounts preserves original GPU weights and styled material slots")
+	await process_frame
 	actor.set_mount_state({},_models)
 	var restored := _sample(actor,&"idle",.4)
 	_check(bool(restored.get("enabled",false)),"dismount restores approved idle")
@@ -364,6 +448,8 @@ func _lifecycle_case() -> void:
 	var contract := _cape_surface_contract(rig)
 	_check(contract.materials==original.materials,"dismount preserves all three styled cape material slots")
 	_check(contract.weights==original.weights and contract.bones==original.bones,"dismount restores approved eight-slot weights and bone indices exactly")
+	_check(contract.resources==original.resources,"dismount restores the exact original mesh and Skin resources")
+	_fit_surface_arrays(_samples(rig),"wardrobe","after dismount")
 	actor.queue_free();await process_frame
 
 func _finish() -> void:
@@ -371,6 +457,6 @@ func _finish() -> void:
 	if folder.is_empty():folder=ProjectSettings.globalize_path("res://test-artifacts/cape-approved-motion")
 	DirAccess.make_dir_recursive_absolute(folder)
 	var out := FileAccess.open(folder.path_join("approved-motion.json"),FileAccess.WRITE)
-	out.store_string(JSON.stringify({"checks":_checks,"failures":_failures,"cases":_rows},"\t"))
+	out.store_string(JSON.stringify({"checks":_checks,"failures":_failures,"cases":_rows,"quality_cases":_quality_rows},"\t"))
 	print("APPROVED_CAPE_MOTION ",_checks," checks; failures=",_failures)
 	quit(0 if _failures.is_empty() else 1)
