@@ -1,0 +1,279 @@
+{
+  "_doc": "Frozen authoring recipe for the qualified source-guided wave ponytail. Normalized slider domains are separate from dimensionless shape-authoring factors; this record is not a procedural build_hair input. The approved source and local processing evidence remain private.",
+  "name": "painted_ponytail_female",
+  "version": 1,
+  "sex": "female",
+  "family": "ponytail",
+  "seed": 1712,
+  "source": {
+    "approved_input_sha256": "488c338a6e0f0d281229c2856c50e17d26a6ea7ba16966a420087a278e196661",
+    "fit_sha256": "1e8a2489356c8f299b874d6ba3b8ac5a44488043901d3f1ebd962781c5f59b4f",
+    "fitted_female_guide_sha256": "189aa4e96189ff1b4b47f24f5af313600f383d4fedde2839ca0872ebbf4bb051",
+    "new_paid_generation": false
+  },
+  "preparation": {
+    "neutralize_identity_only": true,
+    "preserve_prepared_exterior": true,
+    "preserve_curtain_depth": true,
+    "source_fitted_as_female_first": true,
+    "variant_mapping": "Fit source to the female RL head before constructing rounded guides.",
+    "transport_normals": true
+  },
+  "geometry": {
+    "method": "Source-sampled smooth swept envelope, overlapping rounded tapered wave locks, closed takeoff and knot support; preserve full source wave and tip.",
+    "hairline": {
+      "ear_margin": 3.0,
+      "nape_below_lobe_mm": 20.0,
+      "noise": 0.25,
+      "adjust": [
+        [
+          -180,
+          0
+        ],
+        [
+          -90,
+          0
+        ],
+        [
+          -50,
+          -2
+        ],
+        [
+          0,
+          -3
+        ],
+        [
+          50,
+          -2
+        ],
+        [
+          90,
+          0
+        ],
+        [
+          180,
+          0
+        ]
+      ]
+    },
+    "envelope": {
+      "grid_rows_by_lod": [
+        20,
+        11,
+        6
+      ],
+      "grid_sectors_by_lod": [
+        96,
+        60,
+        24
+      ],
+      "boundary_ring_mm": [
+        1,
+        2
+      ],
+      "source_standoff_m": [
+        0.004,
+        0.048
+      ],
+      "source_ridge_amplitude_mm": 1.0,
+      "meridian_ridges": 12,
+      "root_feather_mm": 2
+    },
+    "tail": {
+      "source_slice_count": 26,
+      "source_slice_halfwidth_mm": 9,
+      "spine_smoothing_sigma": 1.2,
+      "radii_smoothing_sigma": 1.15,
+      "lock_count": 16,
+      "lock_samples_by_lod": [
+        56,
+        28,
+        16
+      ],
+      "lock_sections_by_lod": [
+        5,
+        4,
+        4
+      ],
+      "shared_root_lon_lat_degrees": [
+        180,
+        68
+      ],
+      "shared_root_offset_mm": 19,
+      "spine_interpolation": "Natural cubic spline",
+      "volume_spine_interpolation": "PCHIP",
+      "full_source_tip_preserved": true,
+      "slice_xz_percentiles": [
+        3,
+        97
+      ]
+    },
+    "face_guides": {
+      "count": 8,
+      "rings_by_lod": [
+        12,
+        8,
+        5
+      ],
+      "sections_by_lod": [
+        7,
+        5,
+        4
+      ],
+      "terminal_curves_preserved": true,
+      "optional_surface_groups": [
+        1,
+        2,
+        5,
+        6
+      ],
+      "hanging_groups": [
+        0,
+        3,
+        4,
+        7
+      ]
+    },
+    "hidden_cap": {
+      "qualified_buzz_asset_sha256": "07495acf193a1e45dbaf60c6425a35bcd4fd4d0a8fa525a28036d78da89b9eab",
+      "matching_head_and_rigid_rest": true,
+      "zero_four_groom_position_targets": true,
+      "paint": "Continuous recipient chart sampled from the visible ponytail exterior."
+    }
+  },
+  "controls": {
+    "length": {
+      "range": [
+        -1,
+        1
+      ],
+      "neutral": 0,
+      "negative_target": "hl_length_n",
+      "positive_target": "hl_length_p",
+      "units": "normalized",
+      "behavior": "Pinned takeoff; scale the source tail down its shared root and taper face-guide endpoints."
+    },
+    "volume": {
+      "range": [
+        -1,
+        1
+      ],
+      "neutral": 0,
+      "negative_target": "hl_volume_n",
+      "positive_target": "hl_volume_p",
+      "units": "normalized",
+      "behavior": "Expand or contract tail cross-sections around the source spine and the swept envelope along scalp normals."
+    },
+    "messiness_detail": {
+      "range": [
+        0,
+        100
+      ],
+      "behavior": "Use existing shader keep/detail coverage for fine and messy ribbons and optional surface guides; retain four hanging face locks.",
+      "optional_surface_lock_alpha_byte": 64
+    },
+    "tie_height": {
+      "supported": false
+    }
+  },
+  "shape_authoring": {
+    "_doc": "All factors below are dimensionless construction coefficients, not slider domains or millimeter displacements. Final endpoint fields include measured local clearance repairs and root inheritance.",
+    "tail_length_factors": {
+      "negative": -0.24,
+      "positive": 0.3
+    },
+    "tail_volume_factors": {
+      "negative": -0.24,
+      "positive": 0.4
+    },
+    "envelope_volume_factors": {
+      "negative": -0.2,
+      "positive": 0.28
+    },
+    "face_length_factors": {
+      "negative": -0.13,
+      "positive": 0.16
+    },
+    "face_volume_factors": {
+      "negative": -0.12,
+      "positive": 0.16
+    },
+    "identity_attachment": {
+      "follow_mm": 20,
+      "fade_mm": 35,
+      "stretch": 0.5,
+      "inverse_exact_collision_correction": false
+    },
+    "fine_detail": {
+      "fine_count_by_lod": [
+        24,
+        8,
+        2
+      ],
+      "messy_count_by_lod": [
+        32,
+        12,
+        4
+      ],
+      "segments_by_lod": [
+        5,
+        4,
+        3
+      ],
+      "final_roots_inherit_all_parent_fields": true
+    }
+  },
+  "materials": {
+    "color_encoding": "Normalized UINT8 RGBA",
+    "clump": {
+      "softHairline": true,
+      "softRootCoverage": true,
+      "uvStrandHighlights": false,
+      "paintFlatness": 0
+    },
+    "card": {
+      "softRootDetails": true,
+      "uvStrandHighlights": false,
+      "paintFlatness": 0
+    },
+    "fiber_paint": "Reused neutral fibre atlas with restrained contrast; continuous chart on hidden fill."
+  },
+  "native_fit": {
+    "shape": "hl_native_fit",
+    "separate_from_identity_and_groom_targets": true,
+    "high_weight": 0,
+    "native_weight": 1,
+    "maximum_total_shift_mm": 14,
+    "minimum_clearance_mm": 2.0,
+    "pose_count": 31,
+    "groom_cases": 9,
+    "horizontal_slice_proof": true,
+    "closest_section_proof": true,
+    "closest_section_fallback_planes": 64,
+    "delta_sha256": "79f4ef62b5c37e1cc6d43485f60ead8e4e75c3283a0d27808d6b770891c8c7d6"
+  },
+  "output": {
+    "head_sha256": "f767679b773ed68071f0ad70d37cc17a7690425ef866707e52b96bfe1c7b76f6",
+    "asset_sha256": "f01128228e4acf970dc87079107add1380ef34315d4346aa71b3ea8f762c04ed",
+    "texture_sha256": "09410b20b847b97fe29e3320517f6a59182f77b8b4dd199ad2591185b17f4a3b",
+    "triangles_by_lod": [
+      17720,
+      5846,
+      2330
+    ],
+    "identity_targets": 46,
+    "groom_targets": 4,
+    "native_targets": 1,
+    "total_targets": 51,
+    "semantic_module": 15,
+    "saved_hairstyle_byte": 6
+  },
+  "qualification": {
+    "high_head_body_cases": 222,
+    "coverage_cases": 42,
+    "coverage_hole_samples": 0,
+    "independent_native_cases": 1674,
+    "native_failures": 0,
+    "final_imported_texture_views_per_mode": 23
+  }
+}
