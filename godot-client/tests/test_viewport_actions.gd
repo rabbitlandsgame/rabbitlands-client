@@ -39,6 +39,7 @@ func _run() -> void:
 	_check_cycle()
 	_check_actions()
 	_check_covered_bag()
+	_check_bag_keyboard_handoff()
 	_check_get_all_cancellation()
 	_check_creature_inspection()
 	_check_camera()
@@ -298,6 +299,48 @@ func _check_covered_bag() -> void:
 	panel.set("request_sender", sender)
 	panel.call("cancel_pending")
 	state.call("close_ground_bag")
+	state.set("ground_bags", {})
+	main.set("picked_bag", -1)
+	main.set("picked_actor", 2)
+	main.set("_interaction_mode", "walk")
+
+func _check_bag_keyboard_handoff() -> void:
+	(state.get("actors") as Dictionary)[1].merge({"x":10,"y":20})
+	state.set("ground_bags", {9:{"x":10,"y":20}})
+	main.set("picked_bag", 9)
+	main.set("picked_actor", 4)
+	main.set("_interaction_mode", "pick")
+	var frames: Array = network.get("frames") as Array
+	for source: String in ["world Pick", "inventory Get All"]:
+		for modern: bool in [false, true]:
+			state.call("close_ground_bag")
+			main.call("_sync_ground_bag")
+			if modern:
+				network.call("apply_move_intent_state", {"enabled":true,"epoch":3,"keepalive_msec":1000})
+			else:
+				network.set("move_intent_enabled", false)
+			main.set("_keyboard_moving", true)
+			main.set("_keyboard_intent_epoch", 3 if modern else -1)
+			frames.clear()
+			if source == "world Pick": _mouse(MOUSE_BUTTON_LEFT)
+			else: main.call("_on_inventory_get_all_pressed")
+			# The following frame releases the held key. It must have no late
+			# stop capable of superseding the just-issued bag inspection.
+			main.call("_stop_keyboard_movement")
+			var stop := EloriaProtocol.move_intent(3, Vector2i.ZERO, false) if modern \
+				else EloriaProtocol.move_to(10,20,false)
+			_expect(frames.size() == 2 and frames[0] == stop and frames[1] == EloriaProtocol.inspect_bag(9),
+				"%s retires %s keyboard motion before inspection, with no late move" % [source, "modern" if modern else "legacy"])
+			_expect(not bool(main.get("_keyboard_moving")) and int(main.get("_keyboard_intent_epoch")) == -1,
+				"%s retires keyboard tracking after the inspection handoff" % source)
+			if source == "inventory Get All":
+				_expect(int(main.get("_ground_bag_get_all_requested_msec")) >= 0
+					and int(main.get("_ground_bag_get_all_bag_id")) == 9,
+					"Get All preserves its current one-shot pickup intent after retiring movement")
+			frames.clear()
+	state.call("close_ground_bag")
+	main.call("_sync_ground_bag")
+	network.set("move_intent_enabled", false)
 	state.set("ground_bags", {})
 	main.set("picked_bag", -1)
 	main.set("picked_actor", 2)

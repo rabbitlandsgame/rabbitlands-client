@@ -4010,8 +4010,7 @@ func _on_inventory_get_all_pressed() -> void:
 		var sent: int = _request_all_ground_bag_items()
 		inventory_description.text = _ground_bag_get_all_message(sent)
 		return
-	AppState.begin_ground_bag_inspection(bag_id)
-	var error: Error = Network.inspect_bag(bag_id)
+	var error: Error = _request_ground_bag_inspection(bag_id)
 	if error != OK:
 		_ground_bag_get_all_requested_msec = -1
 		_ground_bag_get_all_bag_id = -1
@@ -6270,10 +6269,17 @@ func _handle_world_click(event: InputEventMouseButton, viewport_position: Vector
 func _open_ground_bag(bag_id: int) -> void:
 	print_debug("ground_bag_input command=INSPECT_BAG bag_id=", bag_id,
 		" redacted_bytes=not_sensitive")
-	AppState.begin_ground_bag_inspection(bag_id)
-	var inspect_error: Error = Network.inspect_bag(bag_id)
+	var inspect_error: Error = _request_ground_bag_inspection(bag_id)
 	if inspect_error != OK:
 		push_warning("INSPECT_BAG failed: " + error_string(inspect_error))
+
+## Both world Pick and inventory Get All replace tracked keyboard movement.
+## A legacy stop must precede INSPECT_BAG so its late MOVE_TO cannot cancel
+## the server's new bag approach and leave the optimistic inspection waiting.
+func _request_ground_bag_inspection(bag_id: int) -> Error:
+	_stop_keyboard_movement()
+	AppState.begin_ground_bag_inspection(bag_id)
+	return Network.inspect_bag(bag_id)
 
 ## The legacy client's click feedback: a walk order marks its destination
 ## with a collapsing green cross, so the player sees where the click landed
@@ -17261,6 +17267,9 @@ func _approach_door(map_object: MapObject3D) -> bool:
 	var local: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
 	if local.is_empty() or _movement_locked(false):
 		return false
+	# The click replaces held-key movement. A legacy release sends MOVE_TO;
+	# retire it before the entrance route/use, including an immediate map change.
+	_stop_keyboard_movement()
 	var at := Vector2i(int(local.get("x", 0)), int(local.get("y", 0)))
 	var reach := maxi(absi(at.x - map_object.server_tile.x), absi(at.y - map_object.server_tile.y))
 	if reach <= DOOR_REACH_TILES:

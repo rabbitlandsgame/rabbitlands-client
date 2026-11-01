@@ -44,6 +44,11 @@ offered only where it would act.
 - Both sit entry points call `_on_sit_button_pressed`. Retire keyboard movement
   before sending `SIT_DOWN`: a legacy stop is `MOVE_TO`, and sending it after
   the sit request can stand the player again on a stale client tile.
+- Door/cave approaches and ground-bag inspection retire tracked keyboard movement
+  before sending their new route, use or inspection request. A later key release
+  must not send a legacy stop that cancels that approach. World Pick and inventory
+  Get All share `_request_ground_bag_inspection`; both legacy movement and modern
+  held intent have packet-order coverage in the offline input fixtures.
 - Explicit Pick uses `_deliberate_ground_bag_at` in cycling, cursor resolution
   and click dispatch to reach a bag beneath another actor. Armed actor spells,
   techniques and Alt attacks keep their priority. The server approaches the

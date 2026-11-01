@@ -41,6 +41,33 @@ func run() -> void:
 	mouth.server_tile = Vector2i(332,86)
 	mouth.cave_entrance = true
 	var sent: Array = network.get("sent_frames")
+	# Releasing a tracked legacy key on the next frame used to send a stop
+	# MOVE_TO after the new cave route, cancelling the click's approach.
+	network.move_intent_enabled = false
+	main._keyboard_moving = true
+	main._keyboard_intent_epoch = -1
+	main._activate_map_object(mouth, false)
+	main._stop_keyboard_movement()
+	expect(sent.size() == 2 and sent[0] == EloriaProtocol.move_to(310,86,false)
+		and sent[1] == EloriaProtocol.move_to(332,86,false)
+		and not main._keyboard_moving and main._keyboard_intent_epoch == -1
+		and main._door_approach.get("object_id") == 59001,
+		"a cave click retires legacy keyboard motion before its route, with no late origin move")
+	# Modern held intent also releases before the new click route, without
+	# leaving an intent that could be refreshed or released after the click.
+	network.apply_move_intent_state({"enabled":true,"epoch":1,"keepalive_msec":1000})
+	main._keyboard_moving = true
+	main._keyboard_intent_epoch = 1
+	sent.clear()
+	main._activate_map_object(mouth, false)
+	main._stop_keyboard_movement()
+	expect(sent.size() == 2 and sent[0] == EloriaProtocol.move_intent(1, Vector2i.ZERO, false)
+		and sent[1] == EloriaProtocol.move_to(332,86,false)
+		and not main._keyboard_moving and main._keyboard_intent_epoch == -1
+		and main._door_approach.get("object_id") == 59001,
+		"a cave click releases modern held intent before its route and keeps the one-use approach")
+	network.move_intent_enabled = false
+	sent.clear()
 	main._activate_map_object(mouth, false)
 	expect(main._door_approach.get("object_id") == 59001 and sent.size() == 1,
 		"one distant cave click starts a walk instead of an out-of-range use")
@@ -74,6 +101,17 @@ func run() -> void:
 	main._activate_map_object(mouth, false)
 	expect(main._door_approach.is_empty() and sent.size() == count + 1,
 		"an entrance already in reach is used immediately")
+	# A nearby use can change map immediately; its late keyboard stop must
+	# not become an old-coordinate movement order on the destination map.
+	main._keyboard_moving = true
+	main._keyboard_intent_epoch = -1
+	sent.clear()
+	main._activate_map_object(mouth, false)
+	main._stop_keyboard_movement()
+	expect(sent.size() == 2 and sent[0] == EloriaProtocol.move_to(326,86,false)
+		and int((sent[1] as PackedByteArray)[0]) == EloriaProtocol.ClientMessage.USE_MAP_OBJECT
+		and main._door_approach.is_empty() and not main._keyboard_moving,
+		"an immediate entrance use retires legacy movement before teleporting, with no late old-map stop")
 	app.actors[1].x = 310
 	main._activate_map_object(mouth, false)
 	main._door_approach.until_msec = 0
