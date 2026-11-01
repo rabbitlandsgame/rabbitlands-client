@@ -208,6 +208,12 @@ func configure(source: WorldManifest, cache_enabled: bool) -> void:
 	var config: Dictionary = source.data.streamingChunks
 	preload_distance = maxf(0, float(config.get("preloadDistance", DEFAULT_PRELOAD_DISTANCE)))
 	retain_distance = maxf(preload_distance, float(config.get("retainDistance", DEFAULT_RETAIN_DISTANCE)))
+	if OS.has_feature("web"):
+		# Main-thread browser imports need a shorter off-camera lead. Keep the
+		# existing framed-ground admission, explicit view holds and arrival ring.
+		preload_distance = minf(preload_distance, 128.0)
+		retain_distance = maxf(preload_distance, minf(retain_distance, 192.0))
+		_import_recovery_msec = maxi(_import_recovery_msec, 250)
 	maximum_chunks = maxi(1, int(config.get("maximumLoadedChunks", DEFAULT_MAXIMUM_CHUNKS)))
 	maximum_resident_bytes = maxi(1, int(config.get("maximumResidentBytes", DEFAULT_RESIDENT_BYTES)))
 	# The sidecar indexes of every image this territory names, read before any

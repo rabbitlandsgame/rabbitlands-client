@@ -81,11 +81,51 @@ gameplay, accounts, persistence and the normal state/message traffic, with an
 optional WebSocket listener for browsers. It does not render frames or unpack
 player assets.
 
-A local cold-load sample used about 997 MB of external downloads and a 1.6 MB
-launch folder. A dedicated Chrome process group used about 5.6 GB private memory
-and one CPU core during a short Landfall sample on Intel graphics. Frame rate
-was uneven, including very slow frames during loading/travel. These are measured
-prototype costs, not minimum hardware requirements or production targets.
+A local build uses about 913 MB of external payloads and a 1.6 MB launch folder.
+Browser-only exported hair albedo textures are limited to 1024 pixels, reducing
+the imported package by about 84 MB. Authored PNGs, raw actors and desktop art
+are unchanged. The loader transfers ownership of its immutable package/archive
+buffers to the virtual filesystem instead of making an extra full copy.
+
+Browser streaming uses a 128 m preparation lead and 192 m retention distance,
+with 250 ms recovery between off-camera imports. The existing 64 m framed-ground
+admission, arrival ring and explicit view holds remain intact. The desktop
+worker path and its distances are unchanged. A fixed-position comparison kept
+14 cells instead of 17 with the former browser lead. Short frame-timing samples
+varied with shader warm-up and game lighting, so no broad FPS improvement is
+claimed. Medium graphics and full 3D resolution remain the defaults.
+
+Dedicated Chrome process groups still used roughly 5.1-5.5 GB private memory in
+the local Intel graphics samples. Loading and travel can stall while raw actor
+and scene resources are constructed. These are measured prototype costs, not
+minimum hardware requirements or production targets.
+
+## Saved downloads
+
+The launcher stores verified runtime, package parts and art archives in the
+origin's `rabbitlands-browser-assets-v1` Cache storage. Entries are keyed by
+SHA-256 rather than the GitHub commit URL, so unchanged files survive an asset
+hosting/version change. Every reuse checks length and SHA-256; a damaged or
+missing entry is fetched and repaired independently. Incomplete downloads are
+never cached. Only public game files are stored here, never account credentials
+or server databases. User graphics preferences retain their separate browser
+application storage.
+
+A real Chrome profile was closed and reopened with the ordinary HTTP cache
+disabled and the asset hosts blocked. All 50 payloads (913 MB) were reused, with
+zero asset requests. This verifies disk reuse across browser sessions. The
+small launch page and multiplayer server still need to be reachable; this is
+not an offline game.
+
+The browser is asked for persistent-storage protection. It can deny protection
+while still allowing saved files to work across visits. Browsers can evict
+unprotected storage, and clearing the site's data removes these files. Storage
+quota or access failures leave gameplay available and show that future visits
+may need to download again. Protection denial alone is not treated as a save
+failure. See the browser's [Cache API](https://developer.mozilla.org/en-US/docs/Web/API/Cache)
+and [persistent storage](https://developer.mozilla.org/en-US/docs/Web/API/StorageManager/persist)
+documentation. Use a stable launch origin: changing the hostname or port uses a
+different browser storage area.
 
 ## Current limits
 
@@ -98,8 +138,9 @@ prototype costs, not minimum hardware requirements or production targets.
   leave capacity for existing map and actor loading threads.
 - Each downloaded art archive uses temporary memory-backed storage, outside IndexedDB,
   and is removed after extraction. The ordinary package and extracted art remain
-  in browser memory for the session. HTTP caching depends on the asset host;
-  this build has no persistent offline game installation.
+  in browser memory for the session, while compressed downloads persist in Cache
+  storage. A subsequent visit still reconstructs runtime resources from saved
+  files; the cache removes the repeated network transfer, not all startup work.
   Browser settings use a separate application storage directory. Login
   credentials remain in process memory and clear through the existing logout
   and failed-authentication paths. Closing a tab loses an active connection;

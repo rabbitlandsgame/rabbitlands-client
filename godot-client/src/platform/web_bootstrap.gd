@@ -1,6 +1,8 @@
 extends Control
 ## Prepare the existing loose runtime assets in the browser's virtual filesystem.
-var request: HTTPRequest
+signal archive_ready(ok: bool, message: String)
+var bridge: JavaScriptObject
+var archive_callback: JavaScriptObject
 var label: Label
 var completed_bytes := 0
 var part_number := 0
@@ -17,10 +19,8 @@ func _ready() -> void:
 	if not OS.has_feature("web"):
 		label.text = "Use the browser build to run this prototype."
 		return
-	request = HTTPRequest.new()
-	request.download_chunk_size = 1024 * 1024
-	request.body_size_limit = 64 * 1024 * 1024
-	add_child(request)
+	bridge = JavaScriptBridge.get_interface("RabbitLandsBrowser")
+	archive_callback = JavaScriptBridge.create_callback(_archive_ready)
 	var manifest: Variant = JSON.parse_string(str(JavaScriptBridge.eval("JSON.stringify(window.RL_BROWSER_ASSETS)")))
 	var expected: Array = WebPrototype.configuration().get("archives", [])
 	if not manifest is Dictionary or expected.is_empty() or manifest.get("archives") != expected:
@@ -30,42 +30,32 @@ func _ready() -> void:
 	var count := 0
 	for row: Dictionary in expected:
 		part_number += 1
-		var url := str(manifest.base_url) + str(row.file)
-		if request.request(url) != OK:
-			label.text = "Could not start the game download. Reload to retry."
+		bridge.fetch_archive(part_number - 1, archive_callback)
+		var response: Array = await archive_ready
+		if not bool(response[0]):
+			label.text = "Cannot load game files: " + str(response[1])
 			return
-		var response: Array = await request.request_completed
-		if response[0] != HTTPRequest.RESULT_SUCCESS or response[1] != 200:
-			label.text = "Game download failed (%d/%d). Reload to retry." % [response[0], response[1]]
-			return
-		var body: PackedByteArray = response[3]
-		response.clear()
-		if body.size() != int(row.bytes):
-			label.text = "Game download is incomplete. Reload to retry."
-			return
-		completed_bytes += body.size()
-		var unpacked := await _unpack(body, str(row.sha256))
+		completed_bytes += int(row.bytes)
+		var unpacked := await _unpack(str(row.sha256))
 		if unpacked < 0: return
 		count += unpacked
 	set_process(false)
+	print("browser_asset_cache ", JavaScriptBridge.eval("JSON.stringify(window.RL_BROWSER_CACHE_STATS)"))
+	if not str(bridge.stats.storage_error).is_empty():
+		label.text = "Game files could not be saved by this browser. Future visits may download again."
+		await get_tree().create_timer(3.0).timeout
 	print("browser_assets_ready ", count, " root=", ProjectSettings.globalize_path("res://"))
 	get_tree().change_scene_to_file("res://src/app/main.tscn")
 
 func _process(_delta: float) -> void:
-	if request != null and request.get_http_client_status() == HTTPClient.STATUS_BODY:
-		label.text = "Downloading game assets: %.1f MB (%d/%d)" % [
-			(completed_bytes + request.get_downloaded_bytes()) / 1048576.0, part_number, part_count]
+	if bridge != null:
+		label.text = "Loading game files: %d/%d (%d reused from this device)" % [part_number, part_count, int(bridge.stats.hits)]
 
-func _unpack(body: PackedByteArray, expected: String) -> int:
+func _archive_ready(args: Array) -> void:
+	archive_ready.emit(bool(args[0]), str(args[1]))
+
+func _unpack(expected: String) -> int:
 	label.text = "Preparing Landfall (%d/%d)…" % [part_number, part_count]
-	DirAccess.make_dir_recursive_absolute(ARCHIVE.get_base_dir())
-	var downloaded := FileAccess.open(ARCHIVE, FileAccess.WRITE)
-	if downloaded == null:
-		label.text = "Cannot prepare the downloaded game assets."
-		return -1
-	downloaded.store_buffer(body)
-	downloaded.close()
-	body.clear()
 	await get_tree().process_frame
 	if FileAccess.get_sha256(ARCHIVE) != expected:
 		label.text = "Game download is incomplete or outdated. Reload to retry."

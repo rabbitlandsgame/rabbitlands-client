@@ -83,6 +83,11 @@ def finish_site(stage: Path, assets_base_url: str):
     if text.count(hook) != 1:
         raise ValueError("Web template WASM hook changed; qualify the new engine before exporting")
     script.write_text(text.replace(hook, 'preloader.loadPromise(globalThis.RL_BROWSER_WASM_URL || `${loadPath}.wasm`, size, true)'), encoding="utf-8")
+    text = script.read_text(encoding="utf-8")
+    hook = 'FS.writeFile(path,new Uint8Array(buffer))'
+    if text.count(hook) != 1:
+        raise ValueError("Web template filesystem hook changed; qualify buffer ownership before exporting")
+    script.write_text(text.replace(hook, 'FS.writeFile(path,new Uint8Array(buffer),{canOwn:globalThis.RL_BROWSER_TAKE_BUFFER===true})'), encoding="utf-8")
     shell = site / "index.html"
     text = shell.read_text(encoding="utf-8")
     if text.count("engine.startGame({") != 1:
@@ -250,6 +255,11 @@ def stage_project(stage: Path, endpoint: str) -> dict:
         target = project / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, target)
+        if relative.parts[:4] == ("assets", "actors", "native", "rl_head_textures") and relative.name.endswith(".png.import"):
+            # Browser-only import limit for ordinary hair albedo images. Raw
+            # actors and the authored PNGs remain unchanged, as does desktop art.
+            import re
+            target.write_text(re.sub(r'process/size_limit=\d+', 'process/size_limit=1024', target.read_text()), encoding="utf-8")
     # Nothing raw is editor-imported: the unchanged game reads these loose files.
     config_path = project / "project.godot"
     config = config_path.read_text()

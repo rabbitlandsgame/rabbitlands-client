@@ -12,30 +12,51 @@ const describe = (text, extension) => {
     return {file: `${sha256}.${extension}`, bytes: bytes.length, sha256};
 };
 
-async function run(change = () => {}) {
+async function run(change = () => {}, stored = new Map(), runOptions = {}) {
     const wasm = describe('wasm fixture', 'wasm');
     const parts = [describe('first', 'bin'), describe('second', 'bin')];
     const manifest = {schema: 1, base_url: 'https://raw.githubusercontent.com/example/assets/commit/',
-        wasm, pack: {bytes: 11, parts}, archives: []};
-    const payloads = new Map([[wasm.file, 'wasm fixture'], [parts[0].file, 'first'], [parts[1].file, 'second']]);
+        wasm, pack: {bytes: 11, parts}, archives: [describe('art fixture', 'zip')]};
+    const payloads = new Map([[wasm.file, 'wasm fixture'], [parts[0].file, 'first'], [parts[1].file, 'second'], [manifest.archives[0].file, 'art fixture']]);
     change(manifest, payloads);
     const calls = [], downloads = [];
-    const context = vm.createContext({URL, Blob, crypto: webcrypto,
+    const context = vm.createContext({URL, Blob, Response, crypto: webcrypto,
+        console: {warn() {}}, navigator: {storage: {persist: async () => {
+            if (runOptions.denyPersist) throw new Error('Protection unavailable');
+            return true;
+        }}},
+        caches: {open: async () => ({
+            match: async key => stored.has(key) ? new Response(stored.get(key)) : undefined,
+            put: async (key, response) => {
+                if (runOptions.quota) throw Object.assign(new Error('quota'), {name: 'QuotaExceededError'});
+                stored.set(key, await response.arrayBuffer());
+            },
+            delete: async key => stored.delete(key)
+        })},
         location: {href: 'http://127.0.0.1:8060/'},
         fetch: async (url, options) => {
             if (url === 'browser-assets.json') return new Response(JSON.stringify(manifest));
             downloads.push({url: String(url), options});
+            if (runOptions.blockNetwork) throw new Error('Network blocked');
             const payload = payloads.get(new URL(url).pathname.split('/').at(-1));
             return new Response(payload ?? '', {status: payload === undefined ? 404 : 200});
         }});
     vm.runInContext(source, context);
     const engine = {init: async exe => calls.push(['init', exe]),
-        preloadFile: async (buffer, name) => calls.push(['pack', Buffer.from(buffer).toString(), name]),
+        copyToFS: (name, buffer) => {
+            assert.equal(context.RL_BROWSER_TAKE_BUFFER, true);
+            calls.push([name === 'index.pck' ? 'pack' : 'archive', Buffer.from(buffer).toString(), name]);
+        },
         start: async cfg => calls.push(['start', ...cfg.args])};
     let error;
-    try { await context.RabbitLandsBrowser.start(engine, {executable: 'index', args: ['--verbose']}); }
+    try {
+        await context.RabbitLandsBrowser.start(engine, {executable: 'index', args: ['--verbose']});
+        if (runOptions.archives) await new Promise((resolve, reject) =>
+            context.RabbitLandsBrowser.fetch_archive(0, (ok, error) => ok ? resolve() : reject(new Error(error))));
+    }
     catch (err) { error = err; }
-    return {calls, downloads, error};
+    assert.equal(context.RL_BROWSER_TAKE_BUFFER, undefined);
+    return {calls, downloads, error, stats: context.RL_BROWSER_CACHE_STATS};
 }
 
 test('verified cross-origin payloads start the ordinary package and preserve arguments', async () => {
@@ -66,4 +87,49 @@ test('remote plaintext asset hosting is refused before runtime initialization', 
     const result = await run(m => m.base_url = 'http://assets.example.com/');
     assert.match(result.error.message, /HTTPS/);
     assert.deepEqual(result.calls, []);
+});
+
+
+test('a new browser session reuses runtime, package and art without network, even after a base URL change', async () => {
+    const stored = new Map();
+    const cold = await run(() => {}, stored, {archives: true});
+    assert.equal(cold.error, undefined);
+    assert.equal(cold.downloads.length, 4);
+    assert.equal(stored.size, 4);
+    const warm = await run(m => m.base_url = 'https://raw.githubusercontent.com/example/assets/new-commit/', stored,
+        {archives: true, blockNetwork: true});
+    assert.equal(warm.error, undefined);
+    assert.equal(warm.downloads.length, 0);
+    assert.equal(warm.stats.hits, 4);
+    assert.equal(warm.calls.at(-1)[1], 'art fixture');
+});
+
+test('a corrupt cached part is fetched again and repaired without discarding other files', async () => {
+    const stored = new Map();
+    await run(() => {}, stored);
+    const key = [...stored.keys()].find(k => k.endsWith(describe('first', 'bin').sha256));
+    stored.set(key, Buffer.from('wrong'));
+    const repaired = await run(() => {}, stored);
+    assert.equal(repaired.error, undefined);
+    assert.equal(repaired.downloads.length, 1);
+    assert.equal(repaired.stats.hits, 2);
+    const warm = await run(() => {}, stored, {blockNetwork: true});
+    assert.equal(warm.error, undefined);
+    assert.equal(warm.downloads.length, 0);
+});
+
+test('storage quota failure remains visible and does not stop a valid game load', async () => {
+    const result = await run(() => {}, new Map(), {quota: true});
+    assert.equal(result.error, undefined);
+    assert.equal(result.stats.storage_error, 'QuotaExceededError');
+    assert.ok(result.calls.some(c => c[0] === 'start'));
+});
+
+test('denied eviction protection still permits saving files across visits', async () => {
+    const stored = new Map();
+    const result = await run(() => {}, stored, {denyPersist: true});
+    assert.equal(result.error, undefined);
+    assert.equal(result.stats.storage_error, '');
+    assert.equal(result.stats.persistent, false);
+    assert.equal(stored.size, 3);
 });
