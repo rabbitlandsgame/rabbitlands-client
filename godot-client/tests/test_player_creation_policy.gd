@@ -3,12 +3,6 @@ extends SceneTree
 const POLICY := preload("res://src/actors/player_creation_policy.gd")
 const BASES := preload("res://src/ui/creation_base_library.gd")
 
-class RecordingNetwork extends "res://src/network/network_client.gd":
-	var frames: Array[PackedByteArray] = []
-	func send_frame(frame: PackedByteArray, _sensitive := false) -> Error:
-		frames.append(frame)
-		return OK
-
 var checks := 0
 var failures := 0
 
@@ -45,7 +39,9 @@ func run() -> void:
 			"registered body asset remains available: " + str(option.model))
 		check(POLICY.allows_actor_type(actor_type) == (actor_type in [0, 1]),
 			"non-Human catalog bodies do not become player options")
-	var network := RecordingNetwork.new()
+	# Defer loading the Network subclass until AppState and the other autoloads
+	# exist; an inner/preloaded subclass would create an autoload compile cycle.
+	var network: Variant = load("res://tests/fixtures/creation_policy_recording_network.gd").new()
 	network._set_appearance_protocol(4)
 	for actor_type: int in [0, 1]:
 		check(network.create_character("Policy test", "dummy", {"actor_type": actor_type}) == OK,
