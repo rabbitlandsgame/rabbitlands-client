@@ -90,6 +90,9 @@ const BEARDS: Array[String] = ["none", "stubble", "moustache", "goatee", "short_
 const HAIR_MODULES := HAIR_MODULE_LOOKUP.ENTRIES
 ## D5: the style slots an RL module draws, per body sex.
 const HAIR_RULES := {"male": {1: "rowan_shag"}, "female": {3: "mira_bun"}}
+## Preserve a named single-bun selection below High using a separately
+## qualified fit. This never grants Native capability to the original asset.
+const NATIVE_NAMED_FALLBACKS := {"mira_bun": {"sex": "female", "module": 25}}
 ## Each RL module's length and volume are centred on its own likeness preset.
 const MODULE_PRESETS := {"rowan_shag": "Rowan", "mira_bun": "Mira",
 	# New modules are authored at neutral grooming (50/50 and Classic).
@@ -289,6 +292,11 @@ static func native_hair(appearance: Dictionary, sex: String, modules: Dictionary
 	var id := HAIR_MODULE_LOOKUP.find(selected, sex, modules)
 	if HAIR_MODULE_LOOKUP.supports_native_head(id, sex, modules):
 		return selected
+	var named: Dictionary = NATIVE_NAMED_FALLBACKS.get(selected, {})
+	var named_id := int(named.get("module", 0))
+	if str(named.get("sex", "")) == sex \
+			and HAIR_MODULE_LOOKUP.supports_native_head(named_id, sex, modules):
+		return str(HAIR_MODULE_LOOKUP.resolve(named_id, sex, modules).name)
 	var style := AppearanceVariants.hair_style(int(field(appearance, "hair", 0, 1 << 30)))
 	var replacement := HAIR_MODULE_LOOKUP.replacement_id(style, sex, modules)
 	if HAIR_MODULE_LOOKUP.supports_native_head(replacement, sex, modules):
@@ -764,6 +772,12 @@ static func to_portrait_fields(rl_face: RLHeadAppearance, sex: String,
 		for style: Variant in (HAIR_RULES.get(sex, {}) as Dictionary):
 			if str((HAIR_RULES[sex] as Dictionary)[style]) == rl_face.hair:
 				result["hair_style"] = int(style)
+		# Its saved family now defaults to twin buns. The inverse must retain
+		# Mira's selected module rather than silently converting it to Auto.
+		if sex == "female" and rl_face.hair == "mira_bun":
+			var mira_id := HAIR_MODULE_LOOKUP.find(rl_face.hair, sex, modules)
+			if mira_id > 0:
+				result["hair_module"] = mira_id
 		if not result.has("hair_style"):
 			var module_id := HAIR_MODULE_LOOKUP.find(rl_face.hair, sex, modules)
 			if module_id > 0:

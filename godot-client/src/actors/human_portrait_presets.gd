@@ -53,7 +53,8 @@ const COLOURS := {
 const DETAILS := {
 	"Rowan": {"brow_style": 5, "brow_thickness": 81, "freckles": 1, "liner": 16,
 		"liner_wing": 1, "stubble": 61, "lip_tint": 4},
-	"Mira": {"brow_style": 1, "brow_thickness": 61, "freckles": 66, "liner": 71,
+	# PC/3+ keeps Mira's explicit single bun; older protocols retain their byte.
+	"Mira": {"hair_module": 3, "brow_style": 1, "brow_thickness": 61, "freckles": 66, "liner": 71,
 		"liner_wing": 81, "stubble": 0, "lip_tint": 2},
 	"Tavi": {"brow_style": 5, "brow_thickness": 91, "freckles": 1, "liner": 21,
 		"liner_wing": 1, "stubble": 51, "lip_tint": 3,
