@@ -72,6 +72,8 @@ var _resource_timings: Dictionary = {}
 var _last_preparation: Dictionary = {}
 var _cache_enabled := true
 var _thread: Thread
+var _web_pending := false
+var _web_generation := 0
 var _pending: Dictionary = {}
 var _pending_started_usec := 0
 var _paused := false
@@ -176,6 +178,7 @@ static func drain_workers(tree: SceneTree, timeout_msec := 30000) -> bool:
 	return false
 
 func _release_worker(position: Vector3, install_if_near: bool) -> void:
+	_cancel_web_pending()
 	if _thread == null:
 		return
 	var pending := _pending
@@ -572,7 +575,7 @@ func update_focus(position: Vector3) -> void:
 	for identity: String in cells.keys():
 		if not wanted.has(identity):
 			_retire_cell(identity)
-	if _thread != null or not _retiring.is_empty():
+	if _thread != null or _web_pending or not _retiring.is_empty():
 		return
 	# The focus's own ground first, then whatever a prefetch is holding ready.
 	var queue: Array[Dictionary] = selected.duplicate()
@@ -595,8 +598,18 @@ func update_focus(position: Vector3) -> void:
 			return
 		_pending = entry.duplicate()
 		_pending["_admission_token"] = request.get("token", {})
-		_thread = Thread.new()
 		_pending_started_usec = Time.get_ticks_usec()
+		if OS.has_feature("web"):
+			# WebGL mesh materialization belongs to the browser's main thread.
+			# One deferred chunk keeps the loading curtain drawable between cells;
+			# desktop builds retain the existing background importer.
+			_web_generation += 1
+			_web_pending = true
+			ResourceAdmission.event(_pending.get("_admission_token", {}), ResourceAdmission.LAUNCHED)
+			_prepare_web_chunk.call_deferred(_pending.duplicate(), _web_generation)
+			_record("requested", str(entry.id))
+			break
+		_thread = Thread.new()
 		var error := _thread.start(WorldLoader.prepare_detached.bind(str(entry.path), _cache_enabled))
 		if error != OK:
 			ResourceAdmission.event(_pending.get("_admission_token", {}), ResourceAdmission.FAILED)
@@ -606,6 +619,24 @@ func update_focus(position: Vector3) -> void:
 			ResourceAdmission.event(_pending.get("_admission_token", {}), ResourceAdmission.LAUNCHED)
 			_record("requested", str(entry.id))
 		break
+
+func _cancel_web_pending() -> void:
+	if not _web_pending: return
+	_web_generation += 1
+	ResourceAdmission.event(_pending.get("_admission_token", {}), ResourceAdmission.CANCEL)
+	_web_pending = false
+	_pending = {}
+
+func _prepare_web_chunk(entry: Dictionary, generation: int) -> void:
+	if generation != _web_generation or not _web_pending or str(_pending.get("id", "")) != str(entry.get("id", "")): return
+	if _paused or not is_inside_tree():
+		_cancel_web_pending()
+		return
+	_web_pending = false
+	_pending = {}
+	var builder := WorldLoader.prepare_detached(str(entry.path), _cache_enabled)
+	ResourceDiagnostics.record(_resource_timings, &"web_chunk_prepare", _pending_started_usec)
+	_install(entry, builder)
 
 func _process(_delta: float) -> void:
 	poll_pending()
@@ -699,12 +730,13 @@ func pause_streaming() -> void:
 	if _paused:
 		return
 	_paused = true
+	_cancel_web_pending()
 	ResourceAdmission.event(_pending.get("_admission_token", {}), ResourceAdmission.CANCEL)
 	RetirementBudget.cancel(self)
 
 func can_retire() -> bool:
 	poll_pending()
-	return _thread == null
+	return _thread == null and not _web_pending
 
 func _retire_cell(identity: String) -> void:
 	var began := Time.get_ticks_usec()
@@ -791,10 +823,10 @@ func resource_estimates(shared: Dictionary) -> Dictionary:
 		active_bytes += incremental_cost(resident.entry, shared)
 	for retired: Dictionary in _retiring:
 		retiring_bytes += incremental_cost(retired.entry, shared)
-	if _thread != null and not _pending.is_empty():
+	if (_thread != null or _web_pending) and not _pending.is_empty():
 		pending_bytes = incremental_cost(_pending, shared)
 	return {"active_cells": cells.size(), "retiring_cells": _retiring.size(),
-		"in_flight_cells": 1 if _thread != null else 0,
+		"in_flight_cells": 1 if _thread != null or _web_pending else 0,
 		"active_estimated_bytes": active_bytes,
 		"retiring_incremental_estimated_bytes": retiring_bytes,
 		"in_flight_incremental_estimated_bytes": pending_bytes,
@@ -805,7 +837,7 @@ func diagnostic_snapshot() -> Dictionary:
 	var result := resource_estimates({})
 	result["territory"] = territory.asset_id() if territory != null else ""
 	result["pending_cell"] = str(_pending.get("id", ""))
-	result["in_flight_age_us"] = maxi(0, Time.get_ticks_usec() - _pending_started_usec) if _thread != null else 0
+	result["in_flight_age_us"] = maxi(0, Time.get_ticks_usec() - _pending_started_usec) if _thread != null or _web_pending else 0
 	result["soft_budget_bytes"] = maximum_resident_bytes
 	result["import_recovery_msec"] = _import_recovery_msec
 	result["recovery_deferrals"] = _recovery_deferrals
@@ -846,6 +878,7 @@ func _record(kind: String, identity: String, details := {}) -> void:
 	print("continent_chunk ", JSON.stringify(event))
 
 func _exit_tree() -> void:
+	_cancel_web_pending()
 	RetirementBudget.cancel(self)
 	_paused = true
 	# Normal exterior retirement polls completion before freeing any descendant.

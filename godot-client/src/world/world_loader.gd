@@ -385,6 +385,7 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 	_road_ground_prepared = RoadGround.prepare(manifest.road_ground_config(), manifest.source_path)
 	ResourceDiagnostics.record(_resource_timings, &"road_ground_prepare", road_began)
 	if not bool(_road_ground_prepared.get("ok", false)):
+		push_error("world_load stage=road_ground error=" + str(_road_ground_prepared.get("error", "invalid road data")))
 		load_failed.emit(["road_ground_prepare: " + str(_road_ground_prepared.get("error", "invalid road data"))])
 		return
 	var road_data := _road_ground_prepared.get("data") as Resource

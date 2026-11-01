@@ -26,6 +26,7 @@ static func startup_stage(next_stage: String) -> void:
 	_startup_stage_started = now
 
 func _ready() -> void:
+	if OS.has_feature("web"): WebPrototype.prepare_preferences()
 	GraphicsOptions.active_texture_skip()
 	var renderer := LaunchOptions.saved_renderer()
 	if LaunchOptions.needs_renderer_restart(renderer, RenderingServer.get_current_rendering_method(),

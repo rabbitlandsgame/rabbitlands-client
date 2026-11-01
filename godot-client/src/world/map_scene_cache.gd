@@ -245,6 +245,7 @@ static func format_version_note() -> String:
 # --------------------------------------------------------------------------
 
 static func is_enabled() -> bool:
+	if OS.has_feature("web"): return false
 	if OS.get_environment(DISABLE_ENVIRONMENT).strip_edges() not in ["", "0"]:
 		return false
 	if DISABLE_ARGUMENT in OS.get_cmdline_args():

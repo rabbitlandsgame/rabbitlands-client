@@ -1377,6 +1377,7 @@ func _log_optimization_startup() -> void:
 ## Its own root-level canvas stays visible while this scene and its existing
 ## child controls are suspended, so no unfinished game UI runs behind it.
 func _prepare_geometry_before_login() -> bool:
+	if OS.has_feature("web"): return false
 	var explicit := "--prepare-map-geometry" in OS.get_cmdline_args() \
 		or "--prepare-map-geometry" in OS.get_cmdline_user_args()
 	# This harness inherits Main and starts driving it after a single frame.
@@ -2430,6 +2431,14 @@ func _turn_local_actor(left: bool) -> void:
 
 func _apply_connection_launch_options(arguments: PackedStringArray) -> void:
 	_dev_plain_tcp = arguments.has("--dev-plain-tcp")
+	if OS.has_feature("web"):
+		host_edit.text = WebPrototype.endpoint()
+		host_edit.editable = false
+		port_edit.editable = false
+		host_edit.hide()
+		port_edit.hide()
+		new_character_button.hide()
+		return
 	host_edit.text = "127.0.0.1" if _dev_plain_tcp else "game.rabbitlandsgame.com"
 	port_edit.value = 2000 if _dev_plain_tcp else 2001
 	for argument: String in arguments:
@@ -2466,6 +2475,9 @@ func _trusted_certificate_path() -> String:
 	return path if FileAccess.file_exists(path) else ""
 
 func _on_new_character_pressed() -> void:
+	if OS.has_feature("web"):
+		status_label.text = "Prototype: use an existing test character on Landfall."
+		return
 	if AppState.connection_state != "connected":
 		status_label.text = "Connect to the server before creating a character."
 		return
@@ -6557,6 +6569,10 @@ func _load_server_map() -> void:
 		return
 	camera_shader_warmup.cancel()
 	var normalized_map: String = MapRegistry.normalize_server_map_id(AppState.current_map)
+	if not WebPrototype.supports_map(AppState.current_map):
+		AppState.append_local_message("This browser prototype includes Landfall only. Use the desktop client for this character's current area.", 3)
+		Network.disconnect_from_server()
+		return
 	Diagnostics.record("map_requested", {"server_map": AppState.current_map, "map": normalized_map})
 	var entry: Dictionary = MapRegistry.resolve(map_registry, AppState.current_map)
 	if entry.is_empty():
@@ -7075,7 +7091,7 @@ func _update_arrival() -> void:
 			arrival_curtain.set_progress(0.15 + 0.75 * float(progress.x) / maxf(1.0, float(progress.y)))
 			if progress.x >= progress.y:
 				_arrival.ready = true
-			elif waited > ARRIVAL_TIMEOUT_MSEC:
+			elif waited > ARRIVAL_TIMEOUT_MSEC and not OS.has_feature("web"):
 				# Never strand a player behind the curtain: ground the arrival the
 				# way the client did before it loaded in the background.
 				push_warning("arrival: %d of %d cells after %d ms; loading the rest now" % [
@@ -7121,6 +7137,7 @@ func _update_arrival() -> void:
 		_arrival_settle_frames = 0
 		return
 	if standing and not character_intro.pending and not campaign_scene.playing \
+			and not OS.has_feature("web") \
 			and RenderingServer.get_current_rendering_method() == "gl_compatibility" \
 			and DisplayServer.get_name() != "headless" \
 			and OS.get_environment("ELORIA_CAMERA_SHADER_WARMUP") != "0":
@@ -7170,6 +7187,7 @@ func _report_arrival() -> void:
 	if AppState.authenticated and Network._link_ready():
 		Network.send_chat("#arrived " + AppState.current_map)
 	Diagnostics.record("arrival_reported", {"map": AppState.current_map})
+	if OS.has_feature("web"): _record_client_snapshot_after_frames()
 
 ## Prepare the server's beam destination while the completed loot is reviewed.
 ## The hidden stream is adopted by _load_server_map when the party exits.

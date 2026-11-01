@@ -209,8 +209,11 @@ func dispatch_statistics() -> Dictionary:
 
 signal reconnect_progress(attempt: int, total: int, delay_msec: int)
 
-var _peer := StreamPeerTCP.new()
-var _tls := StreamPeerTLS.new()
+var _peer: StreamPeerTCP = null if OS.has_feature("web") else StreamPeerTCP.new()
+var _tls: StreamPeerTLS = null if OS.has_feature("web") else StreamPeerTLS.new()
+var _websocket: WebSocketPeer
+var _websocket_url := ""
+var _websocket_origin := ""
 var _rx := PackedByteArray()
 var _state := "disconnected"
 var _host := ""
@@ -248,6 +251,9 @@ var _handshaking := false
 ## True once the socket is usable for protocol traffic. With TLS that means
 ## the handshake finished, not merely that TCP connected.
 func _link_ready() -> bool:
+	if _websocket != null:
+		return _websocket.get_ready_state() == WebSocketPeer.STATE_OPEN
+	if _peer == null: return false
 	if _secure:
 		return _tls.get_status() == StreamPeerTLS.STATUS_CONNECTED
 	return _peer.get_status() == StreamPeerTCP.STATUS_CONNECTED
@@ -257,8 +263,11 @@ func _link() -> StreamPeer:
 
 func connect_to_server(host: String, port: int, secure := true,
 		trusted_certificate_path := "") -> Error:
+	if OS.has_feature("web"):
+		return connect_to_websocket(WebPrototype.endpoint())
 	if offline_hud_preview: return ERR_UNAVAILABLE
 	disconnect_from_server()
+	_websocket_url = ""
 	Diagnostics.record("connection_requested", {"host": host, "port": port, "tls": secure})
 	_reset_coordinate_session()
 	_host = host
@@ -273,6 +282,36 @@ func connect_to_server(host: String, port: int, secure := true,
 		Diagnostics.record("connection_start_failed", {"error": error_string(error)})
 		_set_state("disconnected")
 	return error
+
+## Web and native test clients share packet decoding, authentication and reconnects.
+func connect_to_websocket(url: String, origin := "") -> Error:
+	if offline_hud_preview: return ERR_UNAVAILABLE
+	if not WebPrototype.valid_endpoint(url): return ERR_INVALID_PARAMETER
+	disconnect_from_server()
+	_websocket_url = url
+	_websocket_origin = origin
+	_secure = url.begins_with("wss://")
+	_set_state("connecting")
+	var error := _open_link()
+	if error != OK: _set_state("disconnected")
+	return error
+
+func _open_link() -> Error:
+	if not _websocket_url.is_empty():
+		_websocket = WebSocketPeer.new()
+		if not OS.has_feature("web") and not _websocket_origin.is_empty():
+			_websocket.handshake_headers = PackedStringArray(["Origin: " + _websocket_origin])
+		_websocket.inbound_buffer_size = 4 * 1024 * 1024
+		_websocket.outbound_buffer_size = 1024 * 1024
+		return _websocket.connect_to_url(_websocket_url)
+	return _peer.connect_to_host(_host, _port)
+
+func _close_link() -> void:
+	if _websocket != null:
+		_websocket.close()
+		_websocket = null
+	if _tls != null: _tls.disconnect_from_stream()
+	if _peer != null: _peer.disconnect_from_host()
 
 func is_secure() -> bool:
 	return _secure and _link_ready()
@@ -311,10 +350,8 @@ func disconnect_from_server() -> void:
 	_reconnect_started_msec = 0
 	_reconnect_timeout_at_msec = 0
 	last_disconnect_reason = ""
-	if _secure:
-		_tls.disconnect_from_stream()
+	_close_link()
 	_handshaking = false
-	_peer.disconnect_from_host()
 	_rx.clear()
 	# Logout while already dormant still needs to clear the reducer's saved
 	# chat/channel session now that can_resume_session() is false.
@@ -403,10 +440,8 @@ func _drop_connection(reason: String) -> void:
 	if not _reconnect_enabled:
 		_reconnect_at_msec = 0
 	_reset_coordinate_session()
-	if _secure:
-		_tls.disconnect_from_stream()
+	_close_link()
 	_handshaking = false
-	_peer.disconnect_from_host()
 	_rx.clear()
 	protocol_error.emit(reason)
 	_set_state("disconnected")
@@ -420,7 +455,7 @@ func send_frame(frame: PackedByteArray, sensitive := false) -> Error:
 	# a no-op outside debug builds but its arguments were evaluated regardless.
 	if not sensitive and OS.is_debug_build():
 		print_debug("protocol tx bytes=", frame.hex_encode())
-	return _link().put_data(frame)
+	return _websocket.put_packet(frame) if _websocket != null else _link().put_data(frame)
 
 func login(username: String, password: String) -> Error:
 	Diagnostics.record("login_requested")
@@ -766,11 +801,20 @@ func _process(_delta: float) -> void:
 		# to resume a handshake against a socket that no longer exists.
 		_handshaking = false
 		_no_delay_set = false
-		if _secure:
-			_tls.disconnect_from_stream()
-		if _peer.connect_to_host(_host, _port) != OK:
+		_close_link()
+		if _open_link() != OK:
 			_drop_connection("connection_start_failed")
 			return
+	if not _websocket_url.is_empty():
+		if _websocket == null: return
+		_websocket.poll()
+		match _websocket.get_ready_state():
+			WebSocketPeer.STATE_OPEN:
+				_process_connected()
+			WebSocketPeer.STATE_CLOSED:
+				if _state in ["connecting", "connected"]: _drop_connection("connection_closed")
+		return
+	if _peer == null: return
 	_peer.poll()
 	var status := _peer.get_status()
 	if status == StreamPeerTCP.STATUS_ERROR:
@@ -817,6 +861,9 @@ func _process(_delta: float) -> void:
 					_drop_connection("connection_closed")
 				return
 
+	_process_connected()
+
+func _process_connected() -> void:
 	if _state != "connected":
 		_handshaking = false
 		_last_heartbeat_msec = Time.get_ticks_msec()
@@ -863,7 +910,9 @@ func _read_late() -> void:
 	# set_process(false) on Network stops both reads, as it stopped the one.
 	if not is_processing() or _state != "connected" or not _link_ready():
 		return
-	if _secure:
+	if _websocket != null:
+		_websocket.poll()
+	elif _secure:
 		_tls.poll()
 		if _tls.get_status() != StreamPeerTLS.STATUS_CONNECTED:
 			return
@@ -881,6 +930,16 @@ func _read_late() -> void:
 ## read here is followed by another poll until the socket is empty. Plain TCP
 ## already returned everything buffered in one read.
 func _read_link() -> void:
+	if _websocket != null:
+		for _message in MAXIMUM_RECORDS_PER_READ:
+			if _websocket.get_available_packet_count() == 0: break
+			var bytes := _websocket.get_packet()
+			if _websocket.was_string_packet():
+				_drop_connection("binary_packets_required")
+				return
+			_rx.append_array(bytes)
+		if not _rx.is_empty(): _drain_packets()
+		return
 	var link := _link()
 	var received := false
 	for _record in MAXIMUM_RECORDS_PER_READ:

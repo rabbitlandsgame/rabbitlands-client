@@ -57,6 +57,9 @@ func _ready() -> void:
 			selected_id = saved
 		var motion: Variant = config.get_value("start_screen", "animated", true)
 		animation_enabled = motion if motion is bool else true
+	if OS.has_feature("web"):
+		animation_enabled = false
+		animation_toggle.disabled = true
 	animation_toggle.set_pressed_no_signal(animation_enabled)
 	_select(selected_id, false)
 	if migrated:

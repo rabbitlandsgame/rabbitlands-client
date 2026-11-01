@@ -99,7 +99,7 @@ static func renderer_arguments(renderer: String) -> PackedStringArray:
 ## restart loop if the engine falls back from the requested renderer.
 static func needs_renderer_restart(renderer: String, current: String,
 		engine_args: PackedStringArray, user_args: PackedStringArray, headless: bool) -> bool:
-	if headless or renderer == "auto" or renderer == current or RENDERER_RESTART in user_args:
+	if OS.has_feature("web") or headless or renderer == "auto" or renderer == current or RENDERER_RESTART in user_args:
 		return false
 	for argument: String in engine_args:
 		if argument in ["--script", "-s", "--editor", "-e", "--editor-pid", "--rendering-method", "--rendering-driver"] \
