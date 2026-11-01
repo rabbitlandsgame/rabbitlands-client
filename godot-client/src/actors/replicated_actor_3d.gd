@@ -2166,6 +2166,9 @@ func set_overhead_crowded(crowded: bool) -> void:
 	_overhead_crowded = crowded
 	_refresh_overhead()
 
+func overhead_crowded() -> bool:
+	return _overhead_crowded
+
 func _fade_label(label: Label3D) -> void:
 	var alpha := 1.0
 	if label == _nameplate: alpha = _nameplate_colour(_name_dto).a

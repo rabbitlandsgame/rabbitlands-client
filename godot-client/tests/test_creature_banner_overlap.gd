@@ -45,6 +45,66 @@ func expect_creatures_visible(visible: bool, message: String, target_id := -1) -
 		expect(actor.get_node("HealthBarFill").visible == visible,
 			"%s: creature %d health" % [message, actor.actor_id])
 
+## Position real actor blocks by projecting through the gameplay camera. This
+## controls the actual gap fed to Main's declutter, without a rendered frame,
+## an artificial overlap predicate, or relying on a fixed font/name width.
+func place_banner_with_gap(actor: ReplicatedActor3D, reference: ReplicatedActor3D,
+		camera: Camera3D, gap: float) -> void:
+	var point := reference.global_position + Vector3.UP * (reference.head_height() + 0.35)
+	var screen := camera.unproject_position(point)
+	var reference_dto: Dictionary = state.get("actors")[reference.actor_id]
+	var actor_dto: Dictionary = state.get("actors")[actor.actor_id]
+	var reference_rect: Rect2 = main.overhead_block_rect(screen, str(reference_dto.name))
+	var actor_rect: Rect2 = main.overhead_block_rect(Vector2.ZERO, str(actor_dto.name))
+	var separation := (reference_rect.size.x + actor_rect.size.x) * 0.5 + gap
+	var camera_point := camera.global_transform.affine_inverse() * point
+	actor.global_position = camera.project_position(screen + Vector2(separation, 0.0), -camera_point.z) \
+		- Vector3.UP * (actor.head_height() + 0.35)
+	var placed := camera.unproject_position(actor.global_position + Vector3.UP * (actor.head_height() + 0.35))
+	var placed_rect: Rect2 = main.overhead_block_rect(placed, str(actor_dto.name))
+	expect(absf(placed_rect.position.x - reference_rect.end.x - gap) < 0.1,
+		"the real camera projects the requested %.1f-pixel banner gap" % gap)
+
+func exercise_overlap_hysteresis(camera: Camera3D) -> void:
+	var player := make_actor(907, 1)
+	place_banner_with_gap(player, creatures[0], camera, 12.0)
+	expect_creatures_visible(true, "a clear player banner starts with visible creature banners")
+	for gap: float in [2.0, 4.0, 2.0, 4.0]:
+		place_banner_with_gap(player, creatures[0], camera, gap)
+		expect_creatures_visible(true, "small clear-edge motion keeps visible names and health stable")
+	place_banner_with_gap(player, creatures[0], camera, -2.0)
+	expect_creatures_visible(false, "actual player-banner overlap still hides creatures immediately")
+	for gap: float in [2.0, 4.0, 2.0, 4.0]:
+		place_banner_with_gap(player, creatures[0], camera, gap)
+		expect_creatures_visible(false, "small clear-edge motion keeps overlap-hidden names and health stable")
+	place_banner_with_gap(player, creatures[0], camera, 8.0)
+	expect_creatures_visible(true, "clearing the reveal gap restores names and health in the same pass")
+	place_banner_with_gap(player, creatures[0], camera, -2.0)
+	main._declutter_actor_overheads(902)
+	expect(creatures[1].get_node("Nameplate").visible
+		and creatures[1].get_node("HealthBarFill").visible,
+		"the combat target bypasses overlap hiding immediately inside the hysteresis band")
+	creatures[1].set_nameplate_visible(false)
+	main._declutter_actor_overheads(902)
+	expect(not creatures[1].get_node("Nameplate").visible
+		and not creatures[1].get_node("HealthBarFill").visible,
+		"an explicit visibility choice still hides the combat target immediately")
+	creatures[1].set_nameplate_visible(true)
+	creatures[1].set_overhead_fade(0.0)
+	main._declutter_actor_overheads(902)
+	expect(not creatures[1].get_node("Nameplate").visible
+		and not creatures[1].get_node("HealthBarFill").visible,
+		"the hard distance fade still hides name and health immediately")
+	creatures[1].set_overhead_fade(1.0)
+	creatures[1].set_drawn(false)
+	main._declutter_actor_overheads(902)
+	expect(not creatures[1].get_node("Nameplate").visible
+		and not creatures[1].get_node("HealthBarFill").visible,
+		"an undrawn actor cannot regain a name or health through hysteresis")
+	creatures[1].set_drawn(true)
+	remove_actor(player)
+	expect_creatures_visible(true, "removing the only obstacle restores banners without retained history")
+
 func _run() -> void:
 	root.size = Vector2i(1280, 720)
 	state = root.get_node("AppState")
@@ -117,6 +177,7 @@ func _run() -> void:
 	expect_creatures_visible(false, "the local player's banner also protects its space")
 	overlay.hide()
 	expect_creatures_visible(true, "creature banners return when the local banner clears")
+	exercise_overlap_hysteresis(camera)
 	for actor: ReplicatedActor3D in creatures:
 		remove_actor(actor)
 	main.queue_free()

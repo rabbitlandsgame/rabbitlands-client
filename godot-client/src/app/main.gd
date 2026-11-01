@@ -9803,6 +9803,8 @@ func _release_bodies(releases: Array) -> void:
 ## A creature yields only to visible player banners; the combat target stays
 ## readable even there. NPC and player banners retain their overlap filtering.
 ## Bodies and interaction targets remain independent of overhead visibility.
+const OVERHEAD_REVEAL_GAP_PIXELS := 6.0
+
 func _declutter_actor_overheads(target_id: int) -> void:
 	var candidates: Array[Dictionary] = []
 	for raw_id: Variant in actor_nodes:
@@ -9848,15 +9850,19 @@ func _declutter_actor_overheads(target_id: int) -> void:
 		occupied.append(own_rect)
 		player_occupied.append(own_rect)
 	for candidate: Dictionary in candidates:
+		var candidate_actor := candidate.actor as ReplicatedActor3D
 		var crowded := false
 		var creature: bool = candidate.type in [&"creature", &"invasion"]
 		var obstacles: Array[Rect2] = player_occupied if creature else occupied
+		# A shown block hides on actual overlap; a hidden block returns only
+		# once it is six render pixels clear. Camera movement inside this band
+		# keeps the previous answer instead of toggling names and health bars.
+		var padding := OVERHEAD_REVEAL_GAP_PIXELS if candidate_actor.overhead_crowded() else 0.0
 		if candidate.id != target_id:
 			for previous: Rect2 in obstacles:
-				if previous.grow(3).intersects(candidate.rect):
+				if previous.grow(padding).intersects(candidate.rect):
 					crowded = true
 					break
-		var candidate_actor := candidate.actor as ReplicatedActor3D
 		candidate_actor.set_overhead_crowded(crowded)
 		# Hidden banners do not claim screen space. In particular a disabled
 		# NPC/player name must not hide the next visible player's health.
