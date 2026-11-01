@@ -16,6 +16,16 @@ from short_surface_guard import guard
 def sha(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+def transported_normals(points,triangles,normals,delta,weld):
+    result=normals+assemble.morph_normals(points,triangles,normals,delta,weld)
+    length=np.linalg.norm(result,axis=1)
+    collapsed=length<1e-8
+    result[collapsed]=normals[collapsed]
+    length=np.linalg.norm(result,axis=1)
+    assert np.isfinite(result).all() and (length>1e-8).all(),'Input needs valid authored fallback normals'
+    return result/length[:,None]
+
+
 def fit(source,out,range_name='exterior'):
     source,out=map(Path,(source,out));assert source.resolve()!=out.resolve() and source.name==out.name and not out.exists()
     g,b=rlglb.read(str(source));info=g['asset']['extras']['rlHair'];head=BoundedHead(info['sex'])
@@ -40,7 +50,9 @@ def fit(source,out,range_name='exterior'):
             fields={n:rlglb.accessor(g,b,t['POSITION'])[a:z] for n,t in zip(names,p['targets'])}
             Q,proof=guard(contact,P[a:z],T[selected]-a,fields,ids,combos,margin=.0032,max_shift_mm=14,max_iterations=12,all_faces=True,geometric_projection=True)
             full=P.copy();full[a:z]=Q;D=full-P;_,weld=np.unique(np.round(P/1e-6),axis=0,return_inverse=True)
-            normal=N+assemble.morph_normals(P,T,N,D,weld);normal/=np.linalg.norm(normal,axis=1,keepdims=True)
+            # Imported coarse triangles can collapse at a welded support row.
+            # Preserve its valid authored shading instead of dividing by zero.
+            normal=transported_normals(P,T,N,D,weld)
             # Fixed-cap normals, like its positions and targets, remain exact.
             normal[:a]=N[:a];normal[z:]=N[z:]
             dst['attributes']['POSITION']=writer.accessor(full,'VEC3',target=34962,minmax=True)
