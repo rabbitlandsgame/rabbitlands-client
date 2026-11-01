@@ -47,7 +47,7 @@ def native_digest(document, blob):
 def inherit(source, output, max_root_distance_mm=.5, max_delta_mm=14):
     source, output = Path(source), Path(output)
     assert source.name == output.name and source.resolve() != output.resolve()
-    assert not output.exists() and 0 < max_root_distance_mm <= 5 and 0 < max_delta_mm <= 14
+    assert not output.exists() and 0 < max_root_distance_mm <= 5 and 0 < max_delta_mm <= 20
     g, blob = rlglb.read(str(source))
     assert len(g['buffers']) == 1 and 'uri' not in g['buffers'][0]
     metadata = g['asset']['extras']['rlHair']['nativeFit']
@@ -163,6 +163,7 @@ def inherit(source, output, max_root_distance_mm=.5, max_delta_mm=14):
     return {'source_sha256': sha(source), 'output_sha256': sha(output), 'records': records,
             'native_position_normal_digest': native['deltaSHA256'],
             'maximum_encoded_native_root_error_mm': maximum_root_error_mm,
+            'requested_native_delta_limit_mm': max_delta_mm,
             'all_high_attributes_shapes_indices_skin_scene_exact': True,
             'core_native_corrective_exact': True, 'authoring_source_preserved': True,
             'qualified': False}
@@ -173,7 +174,9 @@ if __name__ == '__main__':
     parser.add_argument('--source', required=True)
     parser.add_argument('--out', required=True)
     parser.add_argument('--report', required=True, help='Ignored/private root binding receipt')
+    parser.add_argument('--max-delta-mm', type=float, default=14,
+                        help='Explicit reviewed style-local limit; default 14, maximum 20')
     args = parser.parse_args()
-    report = inherit(args.source, args.out)
+    report = inherit(args.source, args.out, max_delta_mm=args.max_delta_mm)
     Path(args.report).write_text(json.dumps(report, indent=2) + '\n')
     print('NATIVE_DETAIL_ROOTS_INHERITED', report['output_sha256'])

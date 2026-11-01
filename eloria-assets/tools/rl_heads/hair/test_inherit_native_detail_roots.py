@@ -9,7 +9,7 @@ from inherit_native_detail_roots import inherit, native_digest
 
 
 class NativeDetailRoots(unittest.TestCase):
-    def fixture(self, path, far=False, wrong_skin=False):
+    def fixture(self, path, far=False, wrong_skin=False, native_y=.005):
         w = glbwriter.GLB()
         w.g['asset']['extras'] = {'rlHair': {'nativeFit': {'shape': 'hl_native_fit', 'deltaSHA256': 'previous'}}}
         w.g['materials'] = [{'name': 'rl_hair_clump'}, {'name': 'rl_hair_card'}]
@@ -28,7 +28,7 @@ class NativeDetailRoots(unittest.TestCase):
             targets = []
             for at, name in enumerate(names):
                 D = np.zeros((n, 3), dtype='f4')
-                D[:, 1] = (.005 + P[:, 0] * .001) if at == 4 and not pi else .001 * at
+                D[:, 1] = (native_y + P[:, 0] * .001) if at == 4 and not pi else .001 * at
                 if at == 4 and not pi: D[0, 0] = -0.
                 targets.append({'POSITION': w.accessor(D, 'VEC3')})
             T = [0, 1, 2] if pi == 0 else [0, 1, 2, 1, 3, 2]
@@ -64,6 +64,21 @@ class NativeDetailRoots(unittest.TestCase):
                 root = Path(directory); source = root / 'hair.glb'; self.fixture(source, **kwargs); out = root / 'out' / source.name
                 with self.assertRaises(AssertionError): inherit(source, out)
                 self.assertFalse(out.exists())
+
+    def test_reviewed_native_skin_mismatch_requires_explicit_local_bound(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory); source = root / 'hair.glb'; self.fixture(source, native_y=.018)
+            refused = root / 'default' / source.name
+            with self.assertRaises(AssertionError): inherit(source, refused)
+            self.assertFalse(refused.exists())
+            accepted = root / 'reviewed' / source.name
+            report = inherit(source, accepted, max_delta_mm=20)
+            self.assertLessEqual(report['maximum_encoded_native_root_error_mm'], .001)
+            actual, blob = rlglb.read(str(accepted)); detail = actual['meshes'][0]['primitives'][1]
+            delta = rlglb.accessor(actual, blob, detail['targets'][-1]['POSITION'])
+            self.assertGreater(np.linalg.norm(delta, axis=1).max()*1000, 14)
+            self.assertLess(np.linalg.norm(delta, axis=1).max()*1000, 20)
+            with self.assertRaises(AssertionError): inherit(source, root / 'too-far' / source.name, max_delta_mm=21)
 
 
 if __name__ == '__main__': unittest.main()
