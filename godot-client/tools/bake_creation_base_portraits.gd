@@ -25,6 +25,16 @@ func run() -> void:
 		return
 	var registry: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json"))
 	var equipment: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/equipment.json"))
+	# Preserve art for temporarily disabled bodies. Reuse an enabled portrait
+	# only when both its complete look and the image bytes still match.
+	var previous: Variant = JSON.parse_string(FileAccess.get_file_as_string(MANIFEST))
+	var retained: Dictionary = previous.get("portraits", {}) if previous is Dictionary else {}
+	var enabled: Dictionary = {}
+	for row: Dictionary in BASES.rows(registry, PC.LATEST):
+		enabled[str(row.id)] = true
+	for id: String in retained:
+		if not enabled.has(id):
+			result[id] = retained[id].duplicate(true)
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUTPUT))
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(MANIFEST.get_base_dir()))
 	renderer = PORTRAIT_RENDERER.new()
@@ -36,6 +46,7 @@ func run() -> void:
 	renderer._create_stage()
 	renderer._viewport.size = Vector2i(SIZE,SIZE)
 	var total := 0
+	var reused := 0
 	var expected_count := -1
 	for protocol: int in range(PC.LATEST, -1, -1):
 		var rows: Array[Dictionary] = BASES.rows(registry,protocol)
@@ -57,6 +68,27 @@ func run() -> void:
 					break
 			if not same.is_empty():
 				same.protocol_versions.append(protocol)
+				continue
+			var old: Dictionary = retained.get(id, {})
+			var old_candidates: Array = [old]
+			old_candidates.append_array(old.get("variants", []))
+			for candidate: Dictionary in old_candidates:
+				var image_path := str(candidate.get("texture", ""))
+				if candidate.get("look_sha256", "") == fingerprint \
+						and image_path.begins_with(OUTPUT) and image_path.ends_with(".png") \
+						and FileAccess.file_exists(image_path) \
+						and FileAccess.get_sha256(image_path) == str(candidate.get("texture_sha256", "")):
+					same = candidate.duplicate(true)
+					same.erase("variants")
+					same["protocol_versions"] = [protocol]
+					break
+			if not same.is_empty():
+				if entry.is_empty():
+					same["variants"] = []
+					result[id] = same
+				else:
+					entry.variants.append(same)
+				reused += 1
 				continue
 			# _render owns one actor and frees it after readback. The stage is
 			# authoring-only and this is the existing in-game portrait framing.
@@ -85,7 +117,12 @@ func run() -> void:
 			total += 1
 			print("BAKED_STATIC_BASE ",id," PC/",protocol," ",path)
 	assert(failures.is_empty(),"Portrait failures: "+str(failures))
-	assert(result.size() == expected_count)
+	assert(result.size() >= expected_count)
+	var image_paths: Dictionary = {}
+	for entry: Dictionary in result.values():
+		image_paths[str(entry.texture)] = true
+		for variant: Dictionary in entry.get("variants", []):
+			image_paths[str(variant.texture)] = true
 	var commit := ""
 	for argument: String in OS.get_cmdline_user_args():
 		if argument.begins_with("--source-commit="):
@@ -95,7 +132,7 @@ func run() -> void:
 		"renderer_sha256":FileAccess.get_sha256("res://src/ui/leaderboard_portraits.gd"),
 		"catalog_sha256":FileAccess.get_sha256("res://src/ui/creation_base_library.gd"),
 		"archetypes_sha256":FileAccess.get_sha256("res://data/actors/rl_head_archetypes.json"),
-		"portrait_size":[SIZE,SIZE],"portrait_count":total,
+		"portrait_size":[SIZE,SIZE],"portrait_count":image_paths.size(),
 		"lighting":"Existing client portrait key/fill on dark blue background",
 		"portraits":result}
 	FileAccess.open(MANIFEST,FileAccess.WRITE).store_string(JSON.stringify(manifest,"  ")+"\n")
@@ -106,5 +143,6 @@ func run() -> void:
 	ReplicatedActor3D.clear_wardrobe_texture_cache()
 	RLHeadLibrary.clear()
 	GlbSceneCache.clear()
-	print("STATIC_BASE_PORTRAITS_READY ",result.size()," IDs / ",total," images")
+	print("STATIC_BASE_PORTRAITS_READY ",result.size()," IDs / ",image_paths.size(),
+		" images (",total," baked, ",reused," reused)")
 	quit()

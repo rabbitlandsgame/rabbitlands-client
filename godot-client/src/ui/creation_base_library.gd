@@ -17,6 +17,16 @@ const HUMAN_NAMES := {
 	"study_mira": "Mira", "study_rowan": "Rowan", "study_tavi": "Tavi",
 	"human_01": "Amara", "human_08": "Corin", "human_14": "Nessa",
 	"human_20": "Darian", "human_27": "Elowen", "human_34": "Bram",
+	"human_02": "Stellan", "human_03": "Selene", "human_04": "Valen",
+	"human_05": "Orla", "human_06": "Oren", "human_07": "Fenna",
+	"human_09": "Sabine", "human_10": "Kieran", "human_11": "Imani",
+	"human_12": "Renwick", "human_13": "Ferris", "human_15": "Maelis",
+	"human_16": "Kethan", "human_17": "Rhea", "human_18": "Osric",
+	"human_19": "Cerys", "human_21": "Zadie", "human_22": "Lucan",
+	"human_23": "Isolde", "human_24": "Garron", "human_25": "Edda",
+	"human_26": "Soren", "human_28": "Cael", "human_29": "Adira",
+	"human_30": "Emeric", "human_31": "Bastien", "human_32": "Veda",
+	"human_33": "Thalia", "human_35": "Lenora", "human_36": "Ewan",
 }
 const PUBLIC_DESCRIPTIONS := {
 	"human_01": "Cornrows and low knot", "human_08": "Receding sweep and short beard",
