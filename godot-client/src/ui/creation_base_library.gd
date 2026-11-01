@@ -181,6 +181,7 @@ static func _hair_tags(appearance: Dictionary, sex: String, human: bool) -> Arra
 		"mira_bun": tags.assign(["Tied", "Bun"])
 		"layered_long": tags.assign(["Long", "Wavy", "Layered"])
 		"swept_low_bun": tags.assign(["Tied", "Bun"])
+		"smooth_low_bun": tags.assign(["Tied", "Bun", "Low bun"])
 		"soft_wavy_bob": tags.assign(["Short", "Wavy", "Bob"])
 		"braided_crown": tags.assign(["Tied", "Braided", "Crown"])
 		"layered_pixie": tags.assign(["Short", "Layered", "Pixie"])
