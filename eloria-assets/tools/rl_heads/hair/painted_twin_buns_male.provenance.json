@@ -1,0 +1,141 @@
+{
+  "version": 2,
+  "status": "qualified_candidate_pending_registration",
+  "style": "painted_twin_buns_male",
+  "semantic_family": "twin_buns",
+  "module_id": 24,
+  "sex": "male",
+  "legacy_hairstyle_slot": 3,
+  "additional_generation_credits": 0,
+  "method": "Approved painted twin-bun exterior, fixed inset scalp cap, continuous bounded ear/nape contour, rooted detail and independent Native-skull corrective",
+  "glb_sha256": "1d98d76c26c0652fbad4dbdab922c94005e4a2d57805a428c337020951a9903b",
+  "texture_sha256": "e1b7ff0c027b83cec7537961807ccf8426b5f32f7fa2a6c2b1a998095feb5347",
+  "texture_import_sha256": "7f0df38cc1fb70cb29db188f1c076a291de5888f99ed603397d35ef978228189",
+  "source_reference_sha256": "02345827ecd8383e6c03f9ca32d34d8b14b86becde91784f6a9c7e32548880c4",
+  "head_sha256": "6b3549331bacbb7ba1664f569b34a9babd57dd93b14345f627a9791231c53619",
+  "profile_sha256": "8e9b052b218fd347f7df64cbc642409ed4647dd1b77139eb4a2e9c265e408e35",
+  "triangles": {
+    "lod0": 13150,
+    "lod1": 5286,
+    "lod2": 1642
+  },
+  "vertices": {
+    "lod0": 9708,
+    "lod1": 4561,
+    "lod2": 1741
+  },
+  "contract": {
+    "identity_targets": 46,
+    "grooming_targets": [
+      "hl_length_p",
+      "hl_length_n",
+      "hl_volume_p",
+      "hl_volume_n"
+    ],
+    "cap_grooming_deltas_exact_zero": true,
+    "length": "Both knot radial masses and rooted strand lengths",
+    "volume": "Both knot axial depths and swept-hair stand-off",
+    "detail_range": [
+      0,
+      100
+    ],
+    "tie_height": false,
+    "optional_native_target": "hl_native_fit",
+    "native_default_weight": 0,
+    "native_hair_only_ignores_high_identities": true,
+    "springs": false
+  },
+  "qualification": {
+    "structural_errors": 0,
+    "high_physical": {
+      "states_per_lod": 74,
+      "lods": 3,
+      "failures": 0,
+      "minimum_clearance_mm": 2.050234422223782,
+      "scope": "Full original corner and posed large-face probes; exact unchanged field/triangle inheritance plus independently replayed new or changed probes",
+      "final_array_preservation_checks": 559,
+      "medium_changed_detail_states": 74
+    },
+    "scalp_coverage": {
+      "cases": 42,
+      "detail_level": 0,
+      "hole_samples_max": 0
+    },
+    "native": {
+      "evaluated_cases": 1674,
+      "qualities": [
+        "Low",
+        "Medium"
+      ],
+      "groom_cases": 9,
+      "lods": 3,
+      "failures": 0,
+      "minimum_clearance_mm": 2.0346798574836424,
+      "fixture_manifest_sha256": "de6a4f42543f4e004e602091170048bbd550a862907da921f70fb1c704002b5a",
+      "maximum_core_corrective_shift_mm": 10.79396558241874,
+      "corrective_limit_mm": 14,
+      "horizontal_slice_proof": true,
+      "scope": "Only exact old geometry/fields/skin inherit old probes; all added/changed vertices and per-posed large-face probes are independently queried"
+    },
+    "client": {
+      "renderer": "Forward+",
+      "texture_loading": "Actual imported BPTC resource with no texture or material overrides",
+      "high_frames": 22,
+      "native_frames": 40,
+      "clean_logs": true,
+      "controls": [
+        "Length minimum/maximum",
+        "Volume minimum/maximum",
+        "Messiness minimum/maximum"
+      ],
+      "identity_extrema": 2,
+      "poses": [
+        "Rest",
+        "Idle",
+        "Walk"
+      ],
+      "both_native_ear_three_quarters": [
+        "neutral",
+        "minimum grooming",
+        "maximum grooming"
+      ],
+      "closed_headwear_items": [
+        134,
+        159
+      ],
+      "open_headwear_items": [
+        111,
+        170
+      ],
+      "native_default_path": true,
+      "native_developer_switch": false,
+      "global_native_headwear_default": false,
+      "open_headwear_data_commit_separate": true,
+      "registration_pending": true
+    },
+    "art_repairs": {
+      "source_polish_limit_mm": 8,
+      "medium_pinna_aperture_index_only_faces_removed": 52,
+      "changed_medium_detail_strips": 1,
+      "unchanged_high_and_low_indices": true,
+      "preserved_buns_and_face_tendrils": true
+    }
+  },
+  "provenance_hashes": {
+    "metadata_equivalence": "761890a3d21f9d19d7ff9374271e35c32eaffd61cbc6afb4e26f9c40605b9d9d",
+    "compaction_equivalence": "d42575064b248cb6eebff5cff7aa9b7c959904657b6475c274c726c086650298",
+    "structural": "7f036b467ae740aada2f2a1ef5ff545db1887bdcb8efa88345aa0b8fbbfe7e7d",
+    "combined_array_proof": "fa1f4ab58fd73ade7b5ae5e87854ede3c571c633f9011ad2690f8590594a9abc",
+    "high_lod0_physical": "83a7f947b4d3522cc62159910e0ae52f5bc0fa48ab86505489cddbed78eb4da4",
+    "high_lod1_2_physical": "d948dac4f002f557ad4a89e859d01974a664573305098fa08bbfe91567f6a43a",
+    "medium_changed_detail_physical": "57068f59134e3e54cf8e160ab896649072beb23cb203be055327581d0b2e876e",
+    "native_original_complete_scan": "36ea35187b404a55c46b7bacd5e7e1f1a57efc682c87000410fbec0835a5304b",
+    "native_changed_or_new_probes": "69935e47d2bc28cf5a61028394fd623d17276730c706896bd138fff25fade826",
+    "coverage": "7518822a56caecf1a7b7655c4a8361d34266e445fb4fd23606bb6ab0023a8081",
+    "detail_attachment": "432e10f605d899da2e9101f2ea6a009445037dcd2596d7148049afede1cd0340",
+    "high_client": "5e1227640e54f6d7742c7c3ad292586b434cb6a71c05d0b8266caef118d4aaf1",
+    "native_client": "9788adeb21e8f04c68f9fd57a27e79db731b62407a89a6da40bde49af5d43bb9",
+    "high_clean_execution": "76cbe7458d5f262c31ee81e1d93fc81c4bf27d8a075d589852885bdfdde436a4",
+    "native_clean_execution": "d6f42ff1676eeb1155092716e10b99a8f4d62c22780c7cf5d406e9922af1b836"
+  }
+}

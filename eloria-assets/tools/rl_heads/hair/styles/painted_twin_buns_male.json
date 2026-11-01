@@ -1,0 +1,253 @@
+{
+  "name": "painted_twin_buns_male",
+  "seed": 1412,
+  "painted_backing": true,
+  "clearance_mm": 3.2,
+  "native_head_clearance_mm": 0,
+  "hairline": {
+    "ear_margin": 3.0,
+    "nape_below_lobe_mm": 20.0,
+    "noise": 0.25,
+    "adjust": [
+      [
+        -180,
+        0
+      ],
+      [
+        -90,
+        0
+      ],
+      [
+        -50,
+        -2
+      ],
+      [
+        0,
+        -3
+      ],
+      [
+        50,
+        -2
+      ],
+      [
+        90,
+        0
+      ],
+      [
+        180,
+        0
+      ]
+    ]
+  },
+  "shell": {
+    "pole": [
+      180,
+      62
+    ],
+    "v": "from_pole",
+    "tip_band": 0,
+    "offset_mm": [
+      3.8,
+      3.2
+    ],
+    "face_clear": 0.9,
+    "edge_inset": [
+      [
+        -180,
+        -2
+      ],
+      [
+        -145,
+        -2
+      ],
+      [
+        -125,
+        3
+      ],
+      [
+        -65,
+        3
+      ],
+      [
+        -50,
+        -2
+      ],
+      [
+        0,
+        -2
+      ],
+      [
+        50,
+        -2
+      ],
+      [
+        65,
+        3
+      ],
+      [
+        125,
+        3
+      ],
+      [
+        145,
+        -2
+      ],
+      [
+        180,
+        -2
+      ]
+    ],
+    "u_repeat": 12,
+    "ao": 0.92,
+    "boundary_rows": [
+      0.97,
+      0.99
+    ],
+    "lod": {
+      "0": [
+        7,
+        60
+      ],
+      "1": [
+        6,
+        48
+      ],
+      "2": [
+        6,
+        48
+      ]
+    }
+  },
+  "outer_triangles": [
+    11000,
+    4000,
+    850
+  ],
+  "backing_triangles": [
+    3000,
+    1200,
+    450
+  ],
+  "backing": {
+    "pitch_mm": 1.8,
+    "inflate_mm": 1.8,
+    "close_mm": 6.0,
+    "erode_mm": 2.6,
+    "head_margin_mm": 3.0,
+    "body_margin_mm": 3.5
+  },
+  "groom": {
+    "length_positive": 0.35,
+    "length_negative": 0.25,
+    "volume_positive": 0.45,
+    "volume_negative": 0.25,
+    "root_fade_mm": [
+      8,
+      28
+    ]
+  },
+  "tied_mass": {
+    "centers": [
+      [
+        70,
+        55
+      ],
+      [
+        -70,
+        55
+      ]
+    ],
+    "angular_radius_degrees": 35,
+    "angular_feather_degrees": 10,
+    "attachment_mm": 8,
+    "root_ramp_mm": [
+      3,
+      10
+    ],
+    "clearance_mm": 3.2
+  },
+  "details": {
+    "fine_count": [
+      24,
+      8,
+      1
+    ],
+    "messy_count": [
+      32,
+      12,
+      4
+    ],
+    "segments": [
+      5,
+      4,
+      3
+    ],
+    "fine_length_mm": [
+      10,
+      22
+    ],
+    "messy_length_mm": [
+      18,
+      35
+    ],
+    "fine_lift_mm": 0.8,
+    "messy_lift_mm": 3.0,
+    "width_mm": [
+      1.0,
+      2.0
+    ],
+    "root_inset_mm": 0.7,
+    "flow": [
+      0,
+      -0.4,
+      -1
+    ]
+  },
+  "paint": {
+    "sigma_source_pixels": 24.0,
+    "contrast_exponent": 0.85,
+    "luminance_bounds": [
+      0.1,
+      0.85
+    ],
+    "shader_flatness": 0
+  },
+  "soft_hairline_mm": 2.0,
+  "root_sector_degrees": 115,
+  "root_band_degrees": 12,
+  "_doc": "Qualified painted twin-bun male fit. Source/profile parameters describe the initial preparation; final bounded contour, cap refinement, pinna aperture and detail binding are recorded by the accompanying provenance. Registration is integration-owned.",
+  "backing_mode": "none",
+  "native_fit_authoring": "Separate corrective target; High baseline is fitted only to the RL head",
+  "root_boundary_smooth": {
+    "sector_degrees": 130,
+    "below_hairline_degrees": 20,
+    "above_hairline_degrees": 40,
+    "head_distance_mm": 20,
+    "max_displacement_mm": 2,
+    "strength": 0.45,
+    "iterations": 4
+  },
+  "soft_cap_edge_mm": 2,
+  "neutralize_identity_only": true,
+  "transport_normals": true,
+  "posterior_nape_fit": {
+    "below_eye_mm": [
+      135,
+      35
+    ],
+    "half_width_mm": 75,
+    "max_z_from_center_mm": -10,
+    "rear_margin_mm": 6,
+    "rear_sample_up_mm": 12,
+    "max_shift_mm": 70,
+    "feather_mm": 5
+  },
+  "preserve_source_openings": true,
+  "final_surface_polish": {
+    "ear_nape_maximum_source_shift_mm": 8,
+    "ear_nape_coverage_feather_mm": 2.5,
+    "medium_pinna_aperture_removed_faces": 52,
+    "medium_rebound_detail_strips": 1,
+    "native_corrective_limit_mm": 14
+  }
+}
