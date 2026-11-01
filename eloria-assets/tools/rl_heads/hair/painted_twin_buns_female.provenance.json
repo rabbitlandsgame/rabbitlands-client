@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "status": "qualified_candidate_pending_registration",
   "style": "painted_twin_buns_female",
   "semantic_family": "twin_buns",
@@ -7,21 +7,22 @@
   "sex": "female",
   "legacy_hairstyle_slot": 3,
   "additional_generation_credits": 0,
-  "method": "Approved painted twin-bun exterior, fixed inset scalp coverage, bounded root-edge polish, independent knot grooms and separate Native-skull corrective",
-  "glb_sha256": "e359785b941366250b46b830eb9f86efe1209f56dd7ee4217398c8ac6ea36ebd",
-  "texture_sha256": "a6302c682782700b6d1036afa0808428fd0976e039c54da32ec9bb9a16c075d6",
+  "method": "Approved painted twin-bun exterior, fixed inset scalp cap, continuous bounded ear/nape contour, rooted detail and independent Native-skull corrective",
+  "glb_sha256": "6239d28a99909840608517823a67a94e375a20cfffaf051cced875084ba0b6c9",
+  "texture_sha256": "a1a8f5cd2fe0dc6a96a4c59d596f0c4ac59f68bf9461c83ef848dc2793121a22",
   "texture_import_sha256": "65f1d117ddcf4d7a5aed318bc872e1a627c21106b319cefcea60e4259a894f80",
   "source_reference_sha256": "02345827ecd8383e6c03f9ca32d34d8b14b86becde91784f6a9c7e32548880c4",
   "head_sha256": "f767679b773ed68071f0ad70d37cc17a7690425ef866707e52b96bfe1c7b76f6",
+  "profile_sha256": "7eacee25d40405e831d7f2f8caabe6a7a82822da62303d739ab8be698920a099",
   "triangles": {
-    "lod0": 13294,
-    "lod1": 5400,
-    "lod2": 2228
+    "lod0": 13437,
+    "lod1": 5647,
+    "lod2": 2094
   },
   "vertices": {
-    "lod0": 9202,
-    "lod1": 4255,
-    "lod2": 1902
+    "lod0": 9863,
+    "lod1": 4821,
+    "lod2": 1986
   },
   "contract": {
     "identity_targets": 46,
@@ -32,8 +33,8 @@
       "hl_volume_n"
     ],
     "cap_grooming_deltas_exact_zero": true,
-    "length": "Each knot radial mass and rooted strand length",
-    "volume": "Each knot axial depth and swept-hair stand-off",
+    "length": "Both knot radial masses and rooted strand lengths",
+    "volume": "Both knot axial depths and swept-hair stand-off",
     "detail_range": [
       0,
       100
@@ -45,11 +46,22 @@
     "springs": false
   },
   "qualification": {
-    "high_structural_errors": 0,
+    "structural_errors": 0,
+    "high_physical": {
+      "states_per_lod": 74,
+      "lods": 3,
+      "cases": 222,
+      "failures": 0,
+      "minimum_head_clearance_mm": 2.0286441496371452,
+      "minimum_body_clearance_mm": 7.475980603358523,
+      "scope": "Complete physical basis; final candidate is an exact retained triangle subset with every vertex, field, skin row and per-posed large-face probe unchanged. No new probe locations.",
+      "exact_array_and_triangle_checks": 960
+    },
     "scalp_coverage": {
       "cases": 42,
+      "detail_level": 0,
       "hole_samples_max": 0,
-      "report_sha256": "1b6f04879160bcea567be63f39e366b7da35b019c44ff327f8b2f15f8ff25029"
+      "scope": "Independently repeated on the final geometry subset"
     },
     "native": {
       "evaluated_cases": 1674,
@@ -60,22 +72,24 @@
       "groom_cases": 9,
       "lods": 3,
       "failures": 0,
-      "minimum_clearance_mm": 2.128618072132556,
+      "minimum_clearance_mm": 2.013828693846148,
       "fixture_manifest_sha256": "de6a4f42543f4e004e602091170048bbd550a862907da921f70fb1c704002b5a",
-      "report_sha256": "5804917303c6256c3e2439632250684b1da394cc72b5d4ccdb56a64a3edcb0b5",
-      "maximum_corrective_shift_mm": 15.12994521684213,
+      "maximum_core_corrective_shift_mm": 15.12994521684213,
       "style_local_cap_limit_mm": 16,
-      "horizontal_slice_proof": false
+      "exterior_corrective_limit_mm": 14,
+      "horizontal_slice_proof": false,
+      "scope": "Complete source scan plus independent added/changed-probe scan; final subset inherits only through exact evaluated geometry, field and skin preservation."
     },
     "client": {
       "renderer": "Forward+",
-      "texture_loading": "actual imported BPTC resource; no private texture overrides",
+      "texture_loading": "Actual public GLB and imported BPTC resource; no private geometry, texture or material override",
       "high_frames": 22,
-      "native_frames": 4,
+      "native_frames": 40,
+      "clean_logs": true,
       "controls": [
-        "length minimum/maximum",
-        "volume minimum/maximum",
-        "detail minimum/maximum"
+        "Length minimum/maximum",
+        "Volume minimum/maximum",
+        "Messiness minimum/maximum"
       ],
       "identity_extrema": 2,
       "poses": [
@@ -83,42 +97,51 @@
         "Idle",
         "Walk"
       ],
+      "both_native_ear_three_quarters": [
+        "neutral",
+        "minimum grooming",
+        "maximum grooming"
+      ],
       "closed_headwear_items": [
         134,
         159
       ],
-      "closed_headwear_hides_hair": true,
-      "activation_held": false,
       "open_headwear_items": [
         111,
         170
       ],
-      "open_headwear_fit_keys": [
+      "native_default_path": true,
+      "native_developer_switch": false,
+      "global_native_headwear_default": false,
+      "exact_native_fit_keys": [
         "female/painted_twin_buns_female",
         "luminous_female/painted_twin_buns_female"
       ],
-      "additional_high_headwear_frames": 13,
-      "additional_native_headwear_frames": 8,
-      "headband_groom_cases": 9,
-      "native_default_path_assertions": 18,
-      "native_default_path_cases": 4,
-      "headband_rigid_lift_from_trial_mm": 4,
-      "headband_cloth_added_triangles": 4781,
-      "prepared_headwear_cache_reused": true,
       "registration_pending": true
+    },
+    "art_repairs": {
+      "source_polish_limit_mm": 8,
+      "medium_pinna_aperture_index_only_faces_removed": 100,
+      "medium_unsupported_secondary_wisps_removed": 2,
+      "medium_detail_triangles_removed": 16,
+      "unchanged_high_low_and_cap_indices": true,
+      "preserved_buns_and_face_tendrils": true,
+      "retained_detail_parent_checks": 4108,
+      "maximum_retained_detail_parent_error_mm": 5.491469446340137e-05
     }
   },
   "provenance_hashes": {
-    "original_source_preparation": "c9c31e7565cb9545ee6bc78855fe2bf5b8c76f2d6ab9ce301d34a2930fc5fddc",
-    "full_groom_report": "343b52b55c76f6bc38c683ccfad424e369c12d448253c2a42f1030952fe524db",
-    "native_authoring": "489be69f174feab1cefa4b23bbfba73bf19c579dc716648db3f62a15b4415ec2",
-    "native_face_support": "f5fc4048e3832e027237f9071fd8cc76a8e4d5ae7740ed064d5a290c2fe9f0f4",
-    "final_metadata_equality": "efb832203bebb99799317dacfdff13d28d7502c67e3961ea7cabf042db69784b",
-    "texture_import": "ed18e790bb996689e5613d88f2ec3cf09e262f1d5a6d54314a075de0ec749d91",
-    "high_headwear_circlet": "8e79192d617a69d0921fa72c2adb57dcb0e58d0eef8047ec9762ec9f00016288",
-    "high_headwear_headband_nine_grooms": "492f1153e8c2b1eef1ff53c9f756a362a690a4204ffc7e3d04eb72dfbf841b6a",
-    "native_circlet_default": "f570316beb2878271d3053074132de9b78753dad153c4685a3fd5ae889ea6145",
-    "native_headband_explicit_fit": "db6e1a715a57b15b11edde53037bda11c343802bd7cadad23c4b2bd200bb2175",
-    "native_both_headwear_default_checks": "1a606800d9374fcee8880e4d44addb06e80b32df443d0280026ca4baad85b18c"
+    "metadata_equivalence": "63f04969497191380db12c07b08f93af39a635dafb61d594c6011ea82da76f98",
+    "compaction_equivalence": "c8671e16e3396291fdcae6e67307564ffe2ca6697ef6e152265923877a71865e",
+    "structural": "74f495e147f1ea64296d22c31b13f9093a1888702e199bc8131b99c52a40d740",
+    "exact_subset_physical_inheritance": "7a449309c380bd909dc31a42da5e3504b1e4fdc48d706c29cbcb0c5c3556d6bb",
+    "detail_curation_and_parent_binding": "6c994efcacd25deb8f89c7a71fb651d0f4fe3a877f9dfb39844f456dd81355d2",
+    "high_complete_basis": "3114879b789e7c9b2bef3a8fc4fcb45d8f1d63a64a2342d8f50040c2f8b73715",
+    "native_original_and_new_probe_gate": "f3d9ff9a109d6198ae6f8a9ed0de1746565a2b5a328a1fc97ce6b85dfb91734c",
+    "coverage": "863a92fd2c517268e2fab56cb73333711df8f3649904a2fdd35270d890696b90",
+    "high_client": "977467e2170450c96814b5cc3422d47a5cd7d8bcc8c153a0fdc17b221d482fae",
+    "native_client": "3d070f465fc6e615762e989ed436e7a26d9b0d4b5a3ac065f8a8407ef5ce7d88",
+    "high_clean_execution": "0409a28c3c64ec17df5a6153a9ef555b52170003d308ff146d705ec8961fc811",
+    "native_clean_execution": "c740777fb60e9a5a8ca394c6b82c4f0465ec06a03214142f2ed474b961661ce9"
   }
 }
