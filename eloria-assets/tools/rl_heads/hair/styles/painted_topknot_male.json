@@ -1,0 +1,251 @@
+{
+  "name": "painted_topknot_male",
+  "seed": 1212,
+  "painted_backing": true,
+  "clearance_mm": 3.2,
+  "native_head_clearance_mm": 0,
+  "hairline": {
+    "ear_margin": 3.0,
+    "nape_below_lobe_mm": 20.0,
+    "noise": 0.25,
+    "adjust": [
+      [
+        -180,
+        0
+      ],
+      [
+        -90,
+        0
+      ],
+      [
+        -50,
+        -2
+      ],
+      [
+        0,
+        -3
+      ],
+      [
+        50,
+        -2
+      ],
+      [
+        90,
+        0
+      ],
+      [
+        180,
+        0
+      ]
+    ]
+  },
+  "shell": {
+    "pole": [
+      180,
+      62
+    ],
+    "v": "from_pole",
+    "tip_band": 0,
+    "offset_mm": [
+      3.8,
+      3.2
+    ],
+    "face_clear": 0.9,
+    "edge_inset": [
+      [
+        -180,
+        -2
+      ],
+      [
+        -145,
+        -2
+      ],
+      [
+        -125,
+        3
+      ],
+      [
+        -65,
+        3
+      ],
+      [
+        -50,
+        -2
+      ],
+      [
+        0,
+        -2
+      ],
+      [
+        50,
+        -2
+      ],
+      [
+        65,
+        3
+      ],
+      [
+        125,
+        3
+      ],
+      [
+        145,
+        -2
+      ],
+      [
+        180,
+        -2
+      ]
+    ],
+    "u_repeat": 12,
+    "ao": 0.92,
+    "lod": {
+      "0": [
+        7,
+        60
+      ],
+      "1": [
+        6,
+        48
+      ],
+      "2": [
+        6,
+        48
+      ]
+    },
+    "boundary_ring_mm": [
+      1,
+      2
+    ]
+  },
+  "outer_triangles": [
+    14500,
+    4500,
+    1000
+  ],
+  "backing_triangles": [
+    3000,
+    1200,
+    450
+  ],
+  "backing": {
+    "pitch_mm": 1.8,
+    "inflate_mm": 1.8,
+    "close_mm": 6.0,
+    "erode_mm": 2.6,
+    "head_margin_mm": 3.0,
+    "body_margin_mm": 3.5
+  },
+  "groom": {
+    "length_positive": 0.35,
+    "length_negative": 0.25,
+    "volume_positive": 0.45,
+    "volume_negative": 0.25,
+    "root_fade_mm": [
+      8,
+      28
+    ]
+  },
+  "tied_mass": {
+    "centers": [
+      [
+        180,
+        78
+      ]
+    ],
+    "angular_radius_degrees": 40,
+    "angular_feather_degrees": 12,
+    "attachment_mm": 8,
+    "root_ramp_mm": [
+      3,
+      10
+    ],
+    "clearance_mm": 3.2
+  },
+  "details": {
+    "fine_count": [
+      24,
+      8,
+      2
+    ],
+    "messy_count": [
+      32,
+      12,
+      4
+    ],
+    "segments": [
+      5,
+      4,
+      3
+    ],
+    "fine_length_mm": [
+      10,
+      22
+    ],
+    "messy_length_mm": [
+      18,
+      35
+    ],
+    "fine_lift_mm": 0.8,
+    "messy_lift_mm": 3.0,
+    "width_mm": [
+      1.0,
+      2.0
+    ],
+    "root_inset_mm": 0.7,
+    "flow": [
+      0,
+      -0.4,
+      -1
+    ]
+  },
+  "paint": {
+    "sigma_source_pixels": 24.0,
+    "contrast_exponent": 0.85,
+    "luminance_bounds": [
+      0.1,
+      0.85
+    ],
+    "shader_flatness": 0
+  },
+  "soft_hairline_mm": 2.0,
+  "root_sector_degrees": 115,
+  "root_band_degrees": 12,
+  "native_fit_authoring": "Separate corrective target; High baseline is fitted only to the RL head",
+  "backing_mode": "none",
+  "neutralize_identity_only": true,
+  "preserve_prepared_exterior": true,
+  "preserve_curtain_depth": true,
+  "preserve_source_openings": true,
+  "transport_normals": true,
+  "outer_head_margin_mm": 4,
+  "outer_body_margin_mm": 4,
+  "soft_cap_edge_mm": 2,
+  "posterior_nape_fit": {
+    "below_eye_mm": [
+      155,
+      0
+    ],
+    "half_width_mm": 85,
+    "max_z_from_center_mm": -5,
+    "rear_margin_mm": 6,
+    "rear_sample_up_mm": 12,
+    "max_shift_mm": 70,
+    "feather_mm": 8
+  },
+  "semantic_family": "topknot",
+  "paint_flatness": 0.0,
+  "runtime_contract": {
+    "groom_control_range": [
+      -1,
+      1
+    ],
+    "fine_detail_range": [
+      0,
+      100
+    ],
+    "native_corrective": "hl_native_fit",
+    "native_corrective_limit_mm": 14,
+    "separate_native_and_high": true
+  }
+}

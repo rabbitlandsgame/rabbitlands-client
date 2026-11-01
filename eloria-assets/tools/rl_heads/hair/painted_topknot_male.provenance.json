@@ -1,0 +1,105 @@
+{
+  "version": 1,
+  "status": "qualified_hair_and_open_circlet",
+  "style": "painted_topknot_male",
+  "semantic_family": "topknot",
+  "module_id": 25,
+  "legacy_hairstyle_slot": 8,
+  "sex": "male",
+  "additional_generation_credits": 0,
+  "glb_sha256": "22b41bef8b39148c4fcf39b626abf8d5ba5af3af8bed74f1293b52807cb0f060",
+  "texture_sha256": "a3396cfe6817c24288e68812ac375a0b975df3e1b305e556b42c1cea23be7f82",
+  "texture_import_sha256": "1dec3cbc9647cec248b19d7d13ad62fd33a171226657e05ff0d75ed40047c016",
+  "head_sha256": "6b3549331bacbb7ba1664f569b34a9babd57dd93b14345f627a9791231c53619",
+  "source_reference_sha256": "2aad519ff8ac19c4c559bbb0771ffe6df92bca177e63b5cdcd6973840abaad54",
+  "triangles": {
+    "lod0": 15948,
+    "lod1": 5372,
+    "lod2": 2212
+  },
+  "identity_targets": 46,
+  "groom_targets": [
+    "hl_length_p",
+    "hl_length_n",
+    "hl_volume_p",
+    "hl_volume_n"
+  ],
+  "cap_groom_fields_exact_zero": true,
+  "native_corrective": "hl_native_fit",
+  "native_default_weight": 0,
+  "native_bounds_mm": [
+    {
+      "lod": 0,
+      "cap_max_mm": 10.572283597130816,
+      "exterior_max_mm": 9.7844378187934,
+      "fine_max_mm": 9.433993389526997
+    },
+    {
+      "lod": 1,
+      "cap_max_mm": 11.449916053932611,
+      "exterior_max_mm": 9.741993488071778,
+      "fine_max_mm": 9.433987120809292
+    },
+    {
+      "lod": 2,
+      "cap_max_mm": 11.449916053932611,
+      "exterior_max_mm": 13.135533296621464,
+      "fine_max_mm": 9.23394403167583
+    }
+  ],
+  "native_limit_mm": 14,
+  "springs": false,
+  "tie_height": false,
+  "paint_flatness": 0.0,
+  "fine_detail_range": [
+    0,
+    100
+  ],
+  "qualification": {
+    "high_surface_body_cases": 222,
+    "high_failures": 0,
+    "minimum_high_head_mm": 2.022689277291643,
+    "minimum_high_body_mm": 3.5974280140593784,
+    "high_report_sha256": "272d6ca96f4eeeaa0469c9eb8db4d641c34b089cf97e1b724577e8eac2db64c2",
+    "high_evidence_inheritance": "All original attributes, indices and50 fields exact after separate Native correction",
+    "source_preservation_checks": 563,
+    "structural_report_sha256": "bac8681de680911717041e0c3889a8dad5da25fc787b758ba4daa0b6ef570e80",
+    "native_evaluated_cases": 1674,
+    "native_failures": 0,
+    "native_minimum_clearance_mm": 2.020518461923101,
+    "native_report_sha256": "056261b7ef1c4bb7cca9f8fa3af12c6089cc14d13495a04b3b6aea011aee383f",
+    "scalp_coverage_cases": 42,
+    "scalp_hole_samples_max": 0,
+    "coverage_report_sha256": "e25552e4b81404e985f5ad74b72e7d0fb2d62c4f0dd9ccfdff77a4e2d45544d5",
+    "actual_imported_BPTC": true,
+    "client_logs_clean": true,
+    "accepted_capture_receipts": {
+      "high_hair": {
+        "frames": 16,
+        "execution_sha256": "be9c386bb3748541f4a887a8fdc13a3f25074c6c06edb4862bd3a4463a4c1a39",
+        "captures_sha256": "6e9546ebbcec8a266bd9ef019a9d8c630b54da4cc2c9b2dfd9a0ef5c34eb5f36"
+      },
+      "native_hair": {
+        "frames": 40,
+        "execution_sha256": "8e916927e19d1c07fe26139d6dc05f0bea7604ed4ba308081f3e037253acae66",
+        "captures_sha256": "111dc141eaeb9e51a59bd69e2aa66111b06cdc946958ffeebb57faa8e3884194"
+      },
+      "open_headwear_111": {
+        "frames": 18,
+        "execution_sha256": "d8a2ebbb81915a52a87e5f63072a70ae05ba06f9524d2a437bf8814fadb7122b",
+        "captures_sha256": "4daf1663a565e9cc7bc9166d672f127e2c18afa92b809820ad190fc12b1a2589"
+      }
+    }
+  },
+  "headwear": {
+    "qualified_items": [
+      111
+    ],
+    "native_pairing_only": true,
+    "global_native_fit_default": false,
+    "unqualified_items": [
+      170
+    ],
+    "known_limitation": "The tall exposed knot needs a separate under-hat groom profile for closed pillbox caps. Closed-cap lift, crown stretch and pitch experiments were rejected and are not shipped."
+  }
+}

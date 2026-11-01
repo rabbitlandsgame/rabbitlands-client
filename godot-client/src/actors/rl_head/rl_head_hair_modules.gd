@@ -39,6 +39,8 @@ const ENTRIES := {
 		"male": {"name": "feathered_mohawk_male", "native_head": true}}},
 	24: {"name": "twin_buns", "fallback_style": 3, "variants": {
 		"male": {"name": "painted_twin_buns_male", "native_head": true, "tie_height": false}}},
+	25: {"name": "topknot", "fallback_style": 8, "variants": {
+		"male": {"name": "painted_topknot_male", "native_head": true, "tie_height": false}}},
 }
 
 ## The original saved hairstyle byte remains the player's family choice.
