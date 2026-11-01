@@ -95,13 +95,20 @@ def load_hair(path):
 
 class EvaluatedNativeSurface(NativeHeadSurface):
     """Keep open-cut shading normals from misclassifying distant outside points."""
-    def __init__(self,P,N,T,horizontal_slice_proof=False,complete_fixture_mesh=None):
+    def __init__(self,P,N,T,horizontal_slice_proof=False,complete_fixture_mesh=None,
+                 closest_section_proof=False):
         super().__init__(P,N,T)
         self.horizontal_slice_proof=bool(horizontal_slice_proof);self._slice_bounds=None
         if self.horizontal_slice_proof:
             assert complete_fixture_mesh is not None,'Horizontal proof requires the complete verified evaluated fixture, before contact-region filtering'
             from native_slice_bounds import HorizontalSliceBounds
             self._slice_bounds=HorizontalSliceBounds(complete_fixture_mesh)
+        self.closest_section_proof=bool(closest_section_proof)
+        self._closest_section_bounds=None
+        if self.closest_section_proof:
+            assert complete_fixture_mesh is not None,'Closest-section proof requires the complete verified evaluated fixture'
+            from closest_section_outside import ClosestSectionOutside
+            self._closest_section_bounds=ClosestSectionOutside(complete_fixture_mesh)
 
     def proven_outside(self,points):
         points=np.asarray(points);outside=np.zeros(len(points),bool);bounds=self.mesh.bounds
@@ -127,10 +134,17 @@ class EvaluatedNativeSurface(NativeHeadSurface):
         else:
             outside=self.proven_outside(points)
             distance[outside] = np.abs(distance[outside])
+        if self._closest_section_bounds is not None:
+            negative=np.flatnonzero(np.signbit(distance))
+            if len(negative):
+                proven=self._closest_section_bounds.outside(np.asarray(points)[negative],closest[negative])
+                corrected=negative[proven]
+                distance[corrected]=np.abs(distance[corrected])
         return distance, closest, normal
 
 
-def load_fixture(manifest_path, record, horizontal_slice_proof=False):
+def load_fixture(manifest_path, record, horizontal_slice_proof=False,
+                 closest_section_proof=False):
     stage = Path(manifest_path).parent
     points, normals, triangles, offset = [], [], [], 0
     full_points,full_triangles,full_offset=[],[],0
@@ -140,7 +154,7 @@ def load_fixture(manifest_path, record, horizontal_slice_proof=False):
         assert sha(path) == part['sha256'], 'Evaluated fixture changed: ' + str(path)
         with np.load(path) as data:
             P, N, T = data['P'], data['N'], data['I']
-        if horizontal_slice_proof:
+        if horizontal_slice_proof or closest_section_proof:
             full_ids,full_inverse=np.unique(T,return_inverse=True)
             full_points.append(P[full_ids]);full_triangles.append(full_inverse.reshape(-1,3)+full_offset);full_offset+=len(full_ids)
         # Lower body and arms outside this region cannot contact head hair.
@@ -152,11 +166,12 @@ def load_fixture(manifest_path, record, horizontal_slice_proof=False):
         offset += len(ids)
     assert points, 'No actual native collision surfaces in fixture'
     complete=None
-    if horizontal_slice_proof:
+    if horizontal_slice_proof or closest_section_proof:
         import trimesh
         complete=trimesh.Trimesh(np.vstack(full_points),np.vstack(full_triangles),process=False)
     return EvaluatedNativeSurface(np.vstack(points), np.vstack(normals), np.vstack(triangles),
-        horizontal_slice_proof=horizontal_slice_proof,complete_fixture_mesh=complete)
+        horizontal_slice_proof=horizontal_slice_proof,complete_fixture_mesh=complete,
+        closest_section_proof=closest_section_proof)
 
 def interior_samples(points, triangles, minimum_edge_mm=5):
     if not len(triangles): return np.empty((0, 3))
@@ -184,7 +199,8 @@ def verified_fixture_signature(manifest_path, record):
 
 def check_hair(path, manifest_path, lods=(0, 1, 2), grooms=None, minimum_mm=2,
                minimum_edge_mm=5, stop_on_first=False, case_names=None,
-               cache_results=True, horizontal_slice_proof=False):
+               cache_results=True, horizontal_slice_proof=False,
+               closest_section_proof=False):
     manifest = json.loads(Path(manifest_path).read_text())
     assert manifest.get('hair_identity_policy') == 'native_fixed_skull', 'Use evaluated native fixture v2 or later; High identity targets do not belong to the fixed native skull'
     hair = load_hair(path)
@@ -203,7 +219,8 @@ def check_hair(path, manifest_path, lods=(0, 1, 2), grooms=None, minimum_mm=2,
                 weights = identity_weights(record['rl_hair_identity_controls']) | groom | {'hl_native_fit': 1}
                 key=(signature,hair['sha256'],lod,
                      json.dumps(weights,sort_keys=True,separators=(',',':'),allow_nan=False),
-                     float(minimum_mm),float(minimum_edge_mm),bool(horizontal_slice_proof))
+                     float(minimum_mm),float(minimum_edge_mm),bool(horizontal_slice_proof),
+                     bool(closest_section_proof))
                 cached=exact_results.get(key) if cache_results and signature is not None else None
                 if cached is not None:
                     numerical,origin=cached;result=copy.deepcopy(numerical)
@@ -216,7 +233,10 @@ def check_hair(path, manifest_path, lods=(0, 1, 2), grooms=None, minimum_mm=2,
                     if violations and stop_on_first:break
                     continue
                 if native is None:
-                    native=load_fixture(manifest_path,record,horizontal_slice_proof=True) if horizontal_slice_proof else load_fixture(manifest_path,record)
+                    options={}
+                    if horizontal_slice_proof:options['horizontal_slice_proof']=True
+                    if closest_section_proof:options['closest_section_proof']=True
+                    native=load_fixture(manifest_path,record,**options)
                 queries+=1
                 minimum = float('inf'); violations = 0; samples = 0; worst = None
                 for part in hair['levels'][lod]:
@@ -246,6 +266,8 @@ def check_hair(path, manifest_path, lods=(0, 1, 2), grooms=None, minimum_mm=2,
     return {'hair_sha256': hair['sha256'], 'manifest_sha256': sha(manifest_path),
         'native_fit_weight': 1,
         'horizontal_slice_proof':bool(horizontal_slice_proof),
+        'closest_section_proof':bool(closest_section_proof),
+        'closest_section_tool_sha256':sha(Path(__file__).with_name('closest_section_outside.py')) if closest_section_proof else None,
         'minimum_clearance_mm': minimum_mm, 'triangle_sample_minimum_edge_mm': minimum_edge_mm,
         'grooms': list(grooms), 'cases': results,
         'result_cache':{'enabled':bool(cache_results),'reused_cases':cache_hits,'evaluated_queries':queries,
@@ -261,11 +283,13 @@ def main():
     parser.add_argument('--cases'); parser.add_argument('--stop-on-first', action='store_true')
     parser.add_argument('--no-result-cache', action='store_true',help='Evaluate duplicate cases through the full reference path')
     parser.add_argument('--horizontal-slice-proof',action='store_true',help='Opt into conservative outside proof from each complete evaluated fixture')
+    parser.add_argument('--closest-section-proof',action='store_true',help='Opt into outside-only simple closed sections normal to each point-minus-closest vector')
     args = parser.parse_args()
     result = check_hair(args.hair, args.manifest, tuple(map(int, args.lods.split(','))),
         {'neutral': {}} if args.neutral_groom_only else None,
         stop_on_first=args.stop_on_first, case_names=args.cases.split(',') if args.cases else None,
-        cache_results=not args.no_result_cache,horizontal_slice_proof=args.horizontal_slice_proof)
+        cache_results=not args.no_result_cache,horizontal_slice_proof=args.horizontal_slice_proof,
+        closest_section_proof=args.closest_section_proof)
     Path(args.out).write_text(json.dumps(result, indent=2) + '\n')
     raise SystemExit(int(result['failures'] > 0))
 

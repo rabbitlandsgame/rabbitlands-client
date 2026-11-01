@@ -12,7 +12,8 @@ from native_hair_fixtures import load_fixture, matrix, verified_fixture_signatur
 
 class RigidNativePoseUnion:
     def __init__(self, manifest, sex, case_names=None, quality=0,
-                 carrier_bone='Head', horizontal_slice_proof=False):
+                 carrier_bone='Head', horizontal_slice_proof=False,
+                 closest_section_proof=False):
         manifest = Path(manifest)
         document = json.loads(manifest.read_text())
         assert document.get('hair_identity_policy') == 'native_fixed_skull'
@@ -33,8 +34,10 @@ class RigidNativePoseUnion:
             assert np.allclose(basis.T @ basis, np.eye(3), atol=1e-6, rtol=0), 'Carrier must be rigid'
             assert np.linalg.det(basis) > 0, 'Carrier must preserve orientation'
             signature, _ = verified_fixture_signature(manifest, record)
-            surface = load_fixture(manifest, record,
-                                   horizontal_slice_proof=horizontal_slice_proof)
+            options = {'horizontal_slice_proof': horizontal_slice_proof}
+            if closest_section_proof:
+                options['closest_section_proof'] = True
+            surface = load_fixture(manifest, record, **options)
             self.poses.append((surface, transform, np.linalg.inv(basis)))
             found.add(record['case'])
             sources.append({'case': record['case'], 'quality': record['quality'],
@@ -47,6 +50,10 @@ class RigidNativePoseUnion:
                        'sex': sex, 'quality': quality, 'carrier_bone': carrier_bone,
                        'horizontal_slice_proof': bool(horizontal_slice_proof),
                        'poses': sources, 'authoring_only': True, 'qualified': False}
+        if closest_section_proof:
+            self.source['closest_section_proof'] = True
+            self.source['closest_section_tool_sha256'] = hashlib.sha256(
+                Path(__file__).with_name('closest_section_outside.py').read_bytes()).hexdigest()
 
     def signed(self, points):
         points = np.asarray(points, dtype=np.float64)
