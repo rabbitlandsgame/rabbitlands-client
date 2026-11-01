@@ -66,7 +66,7 @@ func fixture(token: String, owner := true) -> Dictionary:
 		"actors":actors, "state":state, "original":camera.global_transform, "ordinary":ordinary, "replay":replay, "requests":requests}
 
 func tick(f: Dictionary, delta: float) -> void:
-	f.scene.update(delta, f.state, f.rig, f.actors, 1, "greenlight", true, f.adapter)
+	f.scene.update(delta, f.state, f.rig, f.actors, 1, str(f.state.map), true, f.adapter)
 func at(f: Dictionary, time: float) -> void: tick(f, maxf(0, time-float(f.scene.elapsed)))
 func confirm(f: Dictionary, id: String) -> void:
 	f.state.scene.choice.selected = id
@@ -149,6 +149,44 @@ func run() -> void:
 		at(f, 16)
 		expect(f.replay == [["plan-"+id,"finished"]] and f.ordinary.size() == 1 and JSON.stringify(f.state) == selected_source, "replay completion changes no authoritative state and emits no normal acknowledgement")
 		dispose(f)
+	var resumed := fixture("confirmed-live-plan")
+	resumed.state.scene.choice.selected = "repair"
+	resumed.state.scene.choice.response = RESPONSES.repair
+	resumed.state.scene.choice.can_choose = false
+	tick(resumed, 0); at(resumed, 6)
+	expect(resumed.scene._choice_completed and not resumed.scene._choice_waiting \
+		and not resumed.scene.is_replaying(), "a confirmed live choice resumes its response without reopening a replay review")
+	expect(not resumed.scene._choice_scroll.visible and resumed.scene._caption.text == RESPONSES.repair \
+		and resumed.requests.is_empty(), "rejoining a confirmed conversation neither asks for another choice nor sends another request")
+	at(resumed, 16)
+	expect(not resumed.scene.is_active() and resumed.ordinary == [["confirmed-live-plan", "finished"]], \
+		"the confirmed live conversation finishes without an extra choice Continue")
+	dispose(resumed)
+	var rewarded := fixture("confirmed-rescue-reward")
+	rewarded.scene.set_auto_dialogue(true, false)
+	rewarded.state.kind = "rescue"
+	rewarded.state.map = "landfall"
+	rewarded.state.actors = {"mother":2,"daughter":3,"protagonist":1,"recipient":1}
+	rewarded.state.scene.id = "measure.rescue.resolved"
+	rewarded.state.scene.actors = rewarded.state.actors.duplicate()
+	rewarded.state.anchors.reward = [444,322]
+	rewarded.state.scene.choice = {"id":"rescue_reward","title":"Choose your reward",
+		"selected":"sword","response":"The sword is yours. Thank you for bringing Liora home.",
+		"can_choose":false,"owner":"MeasureHuman0","owner_is_you":true,
+		"options":[{"id":"sword","label":"Sword","detail":"A sword for close combat."},
+			{"id":"bow","label":"Bow","detail":"A bow for ranged combat."},
+			{"id":"wand","label":"Wand","detail":"A wand for spellcasting."}]}
+	expect(EloriaProtocol.campaign_scene_choice_valid(rewarded.state.scene.choice),
+		"the confirmed rescue weapon uses the real validated choice contract")
+	tick(rewarded,0); at(rewarded,30)
+	expect(rewarded.scene._choice_completed and not rewarded.scene._choice_scroll.visible
+		and rewarded.scene._caption.text == rewarded.state.scene.choice.response,
+		"the authored rescue reward scene resumes the server-confirmed weapon response without another reward prompt")
+	at(rewarded,60); tick(rewarded,2)
+	expect(not rewarded.scene.is_active() and rewarded.requests.is_empty()
+		and rewarded.ordinary == [["confirmed-rescue-reward","finished"]],
+		"the resumed rescue reward reaches its ending once without another weapon request")
+	dispose(rewarded)
 	var helper := fixture("helper-plan", false)
 	tick(helper, 0); at(helper, 6)
 	expect(helper.scene._choice_waiting and "Waiting for MeasureHuman0" in helper.scene._choice_dialog.status_label.text, "a party helper waits for the named story owner")

@@ -5,7 +5,9 @@ extends RefCounted
 const SECTION := "lantern_mine"
 const SECTIONS := ["lantern_upper_galleries", SECTION, "old_seam"]
 const MAP := "landfall_insides"
-const AMBIENT_ENERGY := 0.015
+# Keep unlit actors and connecting paths readable between the warm lantern
+# pools. This cool fill also reaches surfaces facing away from a lamp.
+const AMBIENT_ENERGY := 0.30
 const LANTERN_ENERGY := 2.4
 const LANTERN_RANGE := 16.0
 const COMPATIBILITY_LIGHT_LIMIT := 8

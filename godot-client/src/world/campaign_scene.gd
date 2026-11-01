@@ -60,7 +60,6 @@ var _choice_revealed := false
 var _choice_waiting := false
 var _choice_completed := false
 var _choice_review := false
-var _choice_initially_selected := false
 var _choice_pending_at := -1
 var _choice_error := ""
 var _inspection_state: Dictionary = {}
@@ -942,7 +941,9 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 			if not _choice_revealed:
 				_choice_revealed = true
 				_choice_waiting = true
-				_choice_review = _replaying or _choice_initially_selected
+				# A confirmed live choice resumes its response, including after
+				# reconnect. Only an explicit replay opens a read-only review.
+				_choice_review = _replaying
 			if not _choice_review and not str(_choice_state.get("selected", "")).is_empty():
 				_finish_choice()
 			else:
@@ -987,7 +988,6 @@ func _start(rig: Node3D, camera: Camera3D, local: Node3D, nodes: Dictionary,
 	_choice_waiting = false
 	_choice_completed = false
 	_choice_review = false
-	_choice_initially_selected = not str(_choice_state.get("selected", "")).is_empty()
 	_choice_pending_at = -1
 	_choice_error = ""
 	_inspection_sent = false
