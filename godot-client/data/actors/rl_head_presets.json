@@ -1,2460 +1,2460 @@
 {
-  "version": 1,
-  "_note": "RL head prototype presets. controls: id_<name> blend-shape control values in [-1, 1] (missing = 0). Colours are linear-ish sRGB triples 0..1. hair/beard name files under assets/actors/native/rl_heads/{hair,beards}/<name>.glb ('none' = bald / clean-shaven). hair 'legacy:<style>' reuses the shipped fitted hairstyle for the body (parted, long, buns, buzzed, bob, ponytail, braid, topknot, mohawk). stubble 0..1 drives the skin-shader stubble mask. brow_style is one of arched, straight, soft, angled (head_<sex>_brows.png R, G, B, A; a number 0..3 blends neighbours), brow_thickness -1..1, liner_wing 0..1 (features B). eye_style +1 already sets the eye 1.6 mm deeper (half of eye_depth +1, coupled), so the stylised presets leave eye_depth at 0 and the slider moves the eye from there.",
-  "presets": {
-    "mira": {
-      "sex": "female",
-      "label": "Mira",
-      "controls": {},
-      "skin": [
-        0.93,
-        0.74,
-        0.62
-      ],
-      "eyes": [
-        0.36,
-        0.55,
-        0.3
-      ],
-      "hair_color": [
-        0.82,
-        0.4,
-        0.17
-      ],
-      "brow_color": [
-        0.5,
-        0.22,
-        0.12
-      ],
-      "lip_tint": [
-        0.8,
-        0.44,
-        0.38
-      ],
-      "freckles": 0.65,
-      "liner": 0.7,
-      "hair": "mira_bun",
-      "beard": "none",
-      "brow_style": "arched",
-      "brow_thickness": 0.2,
-      "liner_wing": 0.8
-    },
-    "mira_stylised": {
-      "sex": "female",
-      "label": "Mira (stylised eyes)",
-      "controls": {
-        "eye_style": 1.0,
-        "eye_depth": 0.0
-      },
-      "skin": [
-        0.93,
-        0.74,
-        0.62
-      ],
-      "eyes": [
-        0.36,
-        0.55,
-        0.3
-      ],
-      "hair_color": [
-        0.82,
-        0.4,
-        0.17
-      ],
-      "brow_color": [
-        0.5,
-        0.22,
-        0.12
-      ],
-      "lip_tint": [
-        0.8,
-        0.44,
-        0.38
-      ],
-      "freckles": 0.65,
-      "liner": 0.7,
-      "hair": "mira_bun",
-      "beard": "none",
-      "brow_style": "arched",
-      "brow_thickness": 0.2,
-      "liner_wing": 0.8
-    },
-    "rowan": {
-      "sex": "male",
-      "label": "Rowan",
-      "controls": {},
-      "skin": [
-        0.8,
-        0.565,
-        0.4
-      ],
-      "eyes": [
-        0.3,
-        0.19,
-        0.1
-      ],
-      "hair_color": [
-        0.36,
-        0.22,
-        0.12
-      ],
-      "brow_color": [
-        0.16,
-        0.095,
-        0.055
-      ],
-      "lip_tint": [
-        0.7,
-        0.44,
-        0.36
-      ],
-      "freckles": 0.0,
-      "liner": 0.15,
-      "hair": "rowan_shag",
-      "beard": "stubble",
-      "brow_style": "straight",
-      "brow_thickness": 0.6,
-      "liner_wing": 0.0
-    },
-    "rowan_stylised": {
-      "sex": "male",
-      "label": "Rowan (stylised eyes)",
-      "controls": {
-        "eye_style": 1.0,
-        "eye_depth": 0.0
-      },
-      "skin": [
-        0.8,
-        0.565,
-        0.4
-      ],
-      "eyes": [
-        0.3,
-        0.19,
-        0.1
-      ],
-      "hair_color": [
-        0.36,
-        0.22,
-        0.12
-      ],
-      "brow_color": [
-        0.16,
-        0.095,
-        0.055
-      ],
-      "lip_tint": [
-        0.7,
-        0.44,
-        0.36
-      ],
-      "freckles": 0.0,
-      "liner": 0.15,
-      "hair": "rowan_shag",
-      "beard": "stubble",
-      "brow_style": "straight",
-      "brow_thickness": 0.6,
-      "liner_wing": 0.0
-    },
-    "ilse": {
-      "sex": "female",
-      "label": "Ilse",
-      "controls": {
-        "nose_width": -0.5,
-        "nose_length": -0.3,
-        "lip_fullness": -0.45,
-        "eye_tilt": -0.35,
-        "jaw_width": -0.45,
-        "chin_length": 0.35,
-        "brow_height": 0.35,
-        "cheekbones": 0.6,
-        "cheek_fullness": -0.4,
-        "eye_spacing": -0.2
-      },
-      "skin": [
-        0.91,
-        0.8,
-        0.729
-      ],
-      "eyes": [
-        0.45,
-        0.55,
-        0.62
-      ],
-      "hair_color": [
-        0.86,
-        0.8,
-        0.64
-      ],
-      "brow_color": [
-        0.55,
-        0.48,
-        0.36
-      ],
-      "lip_tint": [
-        0.76,
-        0.52,
-        0.52
-      ],
-      "freckles": 0.12,
-      "liner": 0.25,
-      "hair": "legacy:long",
-      "beard": "none",
-      "brow_style": "soft",
-      "brow_thickness": -0.3,
-      "liner_wing": 0.0
-    },
-    "sera": {
-      "sex": "female",
-      "label": "Sera",
-      "controls": {
-        "cheek_fullness": 0.6,
-        "jaw_width": 0.15,
-        "chin_length": -0.45,
-        "eye_size": 0.35,
-        "nose_width": 0.45,
-        "nose_bridge": -0.45,
-        "lip_fullness": 0.65,
-        "cupid_bow": 0.5,
-        "eye_spacing": 0.3,
-        "nose_tip": 0.3
-      },
-      "skin": [
-        0.769,
-        0.592,
-        0.388
-      ],
-      "eyes": [
-        0.33,
-        0.2,
-        0.1
-      ],
-      "hair_color": [
-        0.17,
-        0.1,
-        0.06
-      ],
-      "brow_color": [
-        0.12,
-        0.07,
-        0.04
-      ],
-      "lip_tint": [
-        0.62,
-        0.36,
-        0.33
-      ],
-      "freckles": 0.0,
-      "liner": 0.5,
-      "hair": "legacy:braid",
-      "beard": "none",
-      "brow_style": "arched",
-      "brow_thickness": 0.0,
-      "liner_wing": 0.0
-    },
-    "ari": {
-      "sex": "female",
-      "label": "Ari",
-      "controls": {
-        "cheekbones": 0.75,
-        "eye_tilt": 0.6,
-        "nose_width": 0.55,
-        "nose_depth": -0.3,
-        "lip_fullness": 0.8,
-        "chin_projection": 0.3,
-        "ear_size": -0.3,
-        "brow_ridge": 0.2,
-        "eyelid": 0.2
-      },
-      "skin": [
-        0.404,
-        0.259,
-        0.184
-      ],
-      "eyes": [
-        0.22,
-        0.13,
-        0.07
-      ],
-      "hair_color": [
-        0.05,
-        0.04,
-        0.035
-      ],
-      "brow_color": [
-        0.04,
-        0.03,
-        0.025
-      ],
-      "lip_tint": [
-        0.42,
-        0.24,
-        0.22
-      ],
-      "freckles": 0.0,
-      "liner": 0.45,
-      "hair": "legacy:buns",
-      "beard": "none",
-      "brow_style": "angled",
-      "brow_thickness": 0.1,
-      "liner_wing": 0.6
-    },
-    "tavi": {
-      "sex": "male",
-      "label": "Tavi",
-      "controls": {
-        "brow_ridge": 0.6,
-        "jaw_width": 0.6,
-        "nose_width": 0.4,
-        "nose_bridge": 0.5,
-        "eyelid": -0.5,
-        "cheek_fullness": 0.3,
-        "mouth_width": 0.3,
-        "chin_width": 0.3,
-        "nose_length": 0.2
-      },
-      "skin": [
-        0.769,
-        0.592,
-        0.431
-      ],
-      "eyes": [
-        0.28,
-        0.17,
-        0.09
-      ],
-      "hair_color": [
-        0.22,
-        0.13,
-        0.07
-      ],
-      "brow_color": [
-        0.13,
-        0.08,
-        0.05
-      ],
-      "lip_tint": [
-        0.68,
-        0.46,
-        0.4
-      ],
-      "freckles": 0.0,
-      "liner": 0.2,
-      "stubble": 0.5,
-      "hair": "rowan_shag",
-      "beard": "full_beard",
-      "brow_style": "straight",
-      "brow_thickness": 0.8,
-      "liner_wing": 0.0
-    },
-    "bren": {
-      "sex": "male",
-      "label": "Bren",
-      "controls": {
-        "nose_length": 0.45,
-        "nose_tip": -0.4,
-        "eye_size": -0.2,
-        "eye_spacing": 0.3,
-        "chin_length": 0.35,
-        "cheekbones": -0.35,
-        "ear_size": 0.4,
-        "lip_fullness": -0.3,
-        "brow_height": 0.2
-      },
-      "skin": [
-        0.91,
-        0.745,
-        0.647
-      ],
-      "eyes": [
-        0.35,
-        0.48,
-        0.62
-      ],
-      "hair_color": [
-        0.62,
-        0.32,
-        0.13
-      ],
-      "brow_color": [
-        0.5,
-        0.26,
-        0.12
-      ],
-      "lip_tint": [
-        0.72,
-        0.46,
-        0.42
-      ],
-      "freckles": 0.35,
-      "liner": 0.15,
-      "stubble": 0.0,
-      "hair": "legacy:parted",
-      "beard": "short_beard",
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "liner_wing": 0.0
-    },
-    "kellan": {
-      "sex": "male",
-      "label": "Kellan",
-      "controls": {
-        "eye_size": 0.4,
-        "eye_tilt": 0.3,
-        "nose_width": -0.4,
-        "nose_length": -0.3,
-        "jaw_width": -0.5,
-        "chin_width": -0.3,
-        "lip_fullness": 0.3,
-        "cheek_fullness": -0.2,
-        "brow_ridge": -0.3
-      },
-      "skin": [
-        0.863,
-        0.714,
-        0.6
-      ],
-      "eyes": [
-        0.36,
-        0.42,
-        0.3
-      ],
-      "hair_color": [
-        0.42,
-        0.3,
-        0.17
-      ],
-      "brow_color": [
-        0.28,
-        0.19,
-        0.11
-      ],
-      "lip_tint": [
-        0.7,
-        0.47,
-        0.43
-      ],
-      "freckles": 0.1,
-      "liner": 0.15,
-      "stubble": 0.2,
-      "hair": "legacy:buzzed",
-      "beard": "none",
-      "brow_style": "soft",
-      "brow_thickness": -0.2,
-      "liner_wing": 0.0
-    },
-    "orin": {
-      "sex": "male",
-      "label": "Orin",
-      "controls": {
-        "brow_ridge": 0.45,
-        "nose_width": 0.7,
-        "lip_fullness": 0.6,
-        "jaw_width": 0.3,
-        "chin_projection": 0.4,
-        "nose_depth": -0.2,
-        "eye_size": -0.1,
-        "cupid_bow": 0.3
-      },
-      "skin": [
-        0.357,
-        0.227,
-        0.165
-      ],
-      "eyes": [
-        0.18,
-        0.11,
-        0.06
-      ],
-      "hair_color": [
-        0.04,
-        0.035,
-        0.03
-      ],
-      "brow_color": [
-        0.035,
-        0.03,
-        0.025
-      ],
-      "lip_tint": [
-        0.4,
-        0.24,
-        0.22
-      ],
-      "freckles": 0.0,
-      "liner": 0.2,
-      "stubble": 0.3,
-      "hair": "legacy:buzzed",
-      "beard": "goatee",
-      "brow_style": "straight",
-      "brow_thickness": 0.3,
-      "liner_wing": 0.0
-    },
-    "human_01": {
-      "beard": "none",
-      "beard_color": null,
-      "brow_color": [
-        0.0506,
-        0.0494,
-        0.0473
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "brow_height": 0.004,
-        "brow_ridge": 0.552,
-        "cheek_fullness": -0.32,
-        "chin_length": -0.414,
-        "chin_projection": 0.14,
-        "chin_width": 0.16,
-        "ear_size": -0.26,
-        "mouth_width": 0.78,
-        "nose_length": 0.01,
-        "nose_tip": -0.56
-      },
-      "eyes": [
-        0.5016,
-        0.398,
-        0.3239
-      ],
-      "freckles": 0.0,
-      "hair": "cornrows_low_knot",
-      "hair_color": [
-        0.0779,
-        0.076,
-        0.0727
-      ],
-      "hair_detail": 50,
-      "hair_length": 0.0,
-      "hair_volume": 0.0,
-      "label": "Amara",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.8,
-        0.44,
-        0.38
-      ],
-      "preset": "",
-      "sex": "female",
-      "skin": [
-        0.5576,
-        0.3293,
-        0.1937
-      ],
-      "stubble": 0.0,
-      "version": 2
-    },
-    "human_20": {
-      "beard": "none",
-      "beard_color": [
-        0.0073,
-        0.0071,
-        0.0071
-      ],
-      "brow_color": [
-        0.0459,
-        0.0446,
-        0.0423
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "cheek_fullness": 0.14,
-        "cheekbones": -0.8256,
-        "chin_length": -0.1616,
-        "chin_projection": 0.24,
-        "chin_width": 0.18,
-        "ear_size": -0.28,
-        "mouth_width": 0.84,
-        "nose_bridge": -0.396,
-        "nose_depth": -0.2304,
-        "nose_length": 0.36,
-        "nose_tip": -0.14,
-        "nose_width": 0.168
-      },
-      "eyes": [
-        0.4028,
-        0.3457,
-        0.2799
-      ],
-      "freckles": 0.0,
-      "hair": "rounded_afro",
-      "hair_color": [
-        0.0706,
-        0.0687,
-        0.0651
-      ],
-      "hair_detail": 50,
-      "hair_length": 0.0,
-      "hair_volume": 0.0,
-      "label": "Darian",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.7,
-        0.44,
-        0.36
-      ],
-      "preset": "",
-      "sex": "male",
-      "skin": [
-        0.4082,
-        0.2252,
-        0.1338
-      ],
-      "stubble": 0.0,
-      "version": 2
-    },
-    "human_08": {
-      "beard": "short_beard",
-      "beard_color": [
-        0.2986,
-        0.164,
-        0.0458
-      ],
-      "brow_color": [
-        0.2136,
-        0.1307,
-        0.0706
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "brow_ridge": 0.327,
-        "cheek_fullness": 0.08,
-        "cheekbones": -0.9976,
-        "nose_width": 0.336
-      },
-      "eyes": [
-        0.368,
-        0.3938,
-        0.4419
-      ],
-      "freckles": 0.0,
-      "hair": "receding_sweep",
-      "hair_color": [
-        0.3286,
-        0.2011,
-        0.1087
-      ],
-      "hair_detail": 50,
-      "hair_length": 0.0,
-      "hair_volume": 0.0,
-      "label": "Corin",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.7,
-        0.46,
-        0.42
-      ],
-      "preset": "",
-      "sex": "male",
-      "skin": [
-        0.901,
-        0.6684,
-        0.5155
-      ],
-      "stubble": 0.22,
-      "version": 2
-    },
-    "human_14": {
-      "beard": "none",
-      "beard_color": null,
-      "brow_color": [
-        0.2454,
-        0.1227,
-        0.0665
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "brow_height": -0.008,
-        "brow_ridge": 0.161,
-        "cheek_fullness": -0.2,
-        "cheekbones": -0.72,
-        "chin_length": -0.396,
-        "chin_projection": 0.12,
-        "nose_depth": -0.642
-      },
-      "eyes": [
-        0.4485,
-        0.4559,
-        0.346
-      ],
-      "freckles": 0.24,
-      "hair": "curly_twin_buns",
-      "hair_color": [
-        0.3776,
-        0.1887,
-        0.1023
-      ],
-      "hair_detail": 50,
-      "hair_length": 0.0,
-      "hair_volume": 0.0,
-      "label": "Nessa",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.7,
-        0.44,
-        0.36
-      ],
-      "preset": "",
-      "sex": "female",
-      "skin": [
-        0.9446,
-        0.7028,
-        0.5508
-      ],
-      "stubble": 0.0,
-      "version": 2
-    },
-    "human_27": {
-      "beard": "none",
-      "beard_color": null,
-      "brow_color": [
-        0.3851,
-        0.3633,
-        0.3666
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "cheek_fullness": -0.5,
-        "chin_length": 0.126,
-        "chin_projection": -0.08,
-        "chin_width": 0.12,
-        "nose_length": 0.01
-      },
-      "eyes": [
-        0.4666,
-        0.4008,
-        0.3325
-      ],
-      "freckles": 0.0,
-      "hair": "shoulder_waves",
-      "hair_color": [
-        0.5925,
-        0.5589,
-        0.5641
-      ],
-      "hair_detail": 50,
-      "hair_length": 0.0,
-      "hair_volume": 0.0,
-      "label": "Elowen",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.62,
-        0.36,
-        0.33
-      ],
-      "preset": "",
-      "sex": "female",
-      "skin": [
-        0.6673,
-        0.4805,
-        0.3312
-      ],
-      "stubble": 0.0,
-      "version": 2
-    },
-    "human_34": {
-      "beard": "full_beard",
-      "beard_color": [
-        0.6822,
-        0.6277,
-        0.5669
-      ],
-      "brow_color": [
-        0.4665,
-        0.4306,
-        0.3909
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "brow_height": 0.328,
-        "brow_ridge": 0.2834,
-        "cheek_fullness": -0.52,
-        "ear_size": 0.28,
-        "nose_bridge": -0.008,
-        "nose_depth": 0.6528,
-        "nose_tip": -0.24
-      },
-      "eyes": [
-        0.3636,
-        0.2957,
-        0.2573
-      ],
-      "freckles": 0.0,
-      "hair": "none",
-      "hair_color": [
-        0.7177,
-        0.6624,
-        0.6014
-      ],
-      "hair_detail": 50,
-      "hair_length": 0.0,
-      "hair_volume": 0.0,
-      "label": "Bram",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.62,
-        0.36,
-        0.33
-      ],
-      "preset": "",
-      "sex": "male",
-      "skin": [
-        0.7959,
-        0.5283,
-        0.3337
-      ],
-      "stubble": 0.22,
-      "version": 2
-    },
-    "human_02": {
-      "beard": "none",
-      "beard_color": [
-        0.5648,
-        0.3705,
-        0.1672
-      ],
-      "brow_color": [
-        0.3865,
-        0.259,
-        0.1314
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "brow_ridge": 0.327,
-        "cheek_fullness": -0.12,
-        "cheekbones": -0.8944,
-        "chin_length": -0.1414,
-        "chin_projection": 0.5,
-        "chin_width": -0.06,
-        "mouth_width": 0.64,
-        "nose_bridge": 0.328,
-        "nose_depth": -0.0768,
-        "nose_length": -0.39,
-        "nose_width": -0.396
-      },
-      "eyes": [
-        0.3636,
-        0.2955,
-        0.2587
-      ],
-      "freckles": 0.0,
-      "hair": "parted_sweep_male",
-      "hair_color": [
-        0.5947,
-        0.3985,
-        0.2021
-      ],
-      "hair_detail": 78,
-      "hair_grey": 0.0,
-      "hair_length": 0.64,
-      "hair_tie_height": 0.0,
-      "hair_volume": 0.4,
-      "label": "Stellan",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.8,
-        0.44,
-        0.38
-      ],
-      "preset": "",
-      "sex": "male",
-      "skin": [
-        0.8913,
-        0.637,
-        0.4518
-      ],
-      "skin_age": 0.0,
-      "stubble": 0.0,
-      "version": 2
-    },
-    "human_03": {
-      "beard": "none",
-      "beard_color": null,
-      "brow_color": [
-        0.0495,
-        0.0483,
-        0.0463
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "chin_projection": 0.14,
-        "chin_width": -0.06,
-        "ear_size": -0.44,
-        "mouth_width": 0.8,
-        "nose_bridge": 0.00800000000000001,
-        "nose_depth": -0.5136
-      },
-      "eyes": [
-        0.4472,
-        0.4197,
-        0.4127
-      ],
-      "freckles": 0.0,
-      "hair": "cornrows_low_knot",
-      "hair_color": [
-        0.0762,
-        0.0744,
-        0.0712
-      ],
-      "hair_detail": 15,
-      "hair_grey": 0.0,
-      "hair_length": -0.1,
-      "hair_tie_height": 0.0,
-      "hair_volume": -0.3,
-      "label": "Selene",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.7,
-        0.44,
-        0.36
-      ],
-      "preset": "",
-      "sex": "female",
-      "skin": [
-        0.8289,
-        0.5413,
-        0.363
-      ],
-      "skin_age": 0.0,
-      "stubble": 0.0,
-      "version": 2
-    },
-    "human_05": {
-      "beard": "none",
-      "beard_color": null,
-      "brow_color": [
-        0.4917,
-        0.4422,
-        0.3918
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "brow_height": 0.00799999999999999,
-        "brow_ridge": 0.299,
-        "cheek_fullness": -0.76,
-        "chin_length": -0.234,
-        "chin_projection": 0.78,
-        "chin_width": 0.3,
-        "nose_bridge": -0.076,
-        "nose_depth": 0.0642,
-        "nose_length": -0.05,
-        "nose_width": 0.2552
-      },
-      "eyes": [
-        0.4152,
-        0.3472,
-        0.3106
-      ],
-      "freckles": 0.0,
-      "hair": "painted_topknot_female",
-      "hair_color": [
-        0.7565,
-        0.6804,
-        0.6028
-      ],
-      "hair_detail": 22,
-      "hair_grey": 0.0,
-      "hair_length": -0.16,
-      "hair_tie_height": 0.0,
-      "hair_volume": 0.0,
-      "label": "Orla",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.62,
-        0.36,
-        0.33
-      ],
-      "preset": "",
-      "sex": "female",
-      "skin": [
-        0.9102,
-        0.6242,
-        0.4302
-      ],
-      "skin_age": 0.72,
-      "stubble": 0.0,
-      "version": 2
-    },
-    "human_07": {
-      "beard": "none",
-      "beard_color": null,
-      "brow_color": [
-        0.2487,
-        0.0898,
-        0.0745
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "cheek_fullness": -0.52,
-        "cheekbones": -0.828,
-        "chin_length": -0.63,
-        "chin_projection": 0.7,
-        "chin_width": -0.002,
-        "jaw_width": -0.3366,
-        "mouth_width": 0.5,
-        "nose_bridge": -0.748,
-        "nose_depth": -0.6634,
-        "nose_length": 0.01,
-        "nose_width": -0.2552
-      },
-      "eyes": [
-        0.4152,
-        0.3472,
-        0.3106
-      ],
-      "freckles": 0.0,
-      "hair": "parted_sweep_female",
-      "hair_color": [
-        0.3826,
-        0.1381,
-        0.1146
-      ],
-      "hair_detail": 58,
-      "hair_grey": 0.0,
-      "hair_length": 0.0,
-      "hair_tie_height": 0.0,
-      "hair_volume": 0.0,
-      "label": "Fenna",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.8,
-        0.44,
-        0.38
-      ],
-      "preset": "",
-      "sex": "female",
-      "skin": [
-        0.8289,
-        0.5413,
-        0.363
-      ],
-      "skin_age": 0.0,
-      "stubble": 0.0,
-      "version": 2
-    },
-    "human_09": {
-      "beard": "none",
-      "beard_color": null,
-      "brow_color": [
-        0.4089,
-        0.3777,
-        0.3747
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "brow_height": 0.00800000000000001,
-        "brow_ridge": 0.414,
-        "cheek_fullness": -0.5,
-        "cheekbones": -0.54,
-        "chin_length": 0.432,
-        "chin_projection": 0.38,
-        "chin_width": 0.08,
-        "jaw_width": -0.396,
-        "mouth_width": 0.84,
-        "nose_bridge": 0.00799999999999998,
-        "nose_depth": -0.2996,
-        "nose_tip": -0.66,
-        "nose_width": 0.7192
-      },
-      "eyes": [
-        0.4945,
-        0.3947,
-        0.3237
-      ],
-      "freckles": 0.0,
-      "hair": "soft_wavy_bob_female",
-      "hair_color": [
-        0.6291,
-        0.5811,
-        0.5765
-      ],
-      "hair_detail": 58,
-      "hair_grey": 0.0,
-      "hair_length": 0.0,
-      "hair_tie_height": 0.0,
-      "hair_volume": 0.1,
-      "label": "Sabine",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.8,
-        0.44,
-        0.38
-      ],
-      "preset": "",
-      "sex": "female",
-      "skin": [
-        0.2961,
-        0.1922,
-        0.1392
-      ],
-      "skin_age": 0.63,
-      "stubble": 0.0,
-      "version": 2
-    },
-    "human_10": {
-      "beard": "none",
-      "beard_color": [
-        0.0167,
-        0.0146,
-        0.0128
-      ],
-      "brow_color": [
-        0.0504,
-        0.0485,
-        0.0455
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "brow_ridge": 0.327,
-        "cheek_fullness": -0.22,
-        "cheekbones": -0.2408,
-        "chin_length": -0.1818,
-        "chin_projection": 0.34,
-        "chin_width": -0.22,
-        "mouth_width": 0.48,
-        "nose_bridge": 0.32,
-        "nose_length": 0.01,
-        "nose_width": -0.444
-      },
-      "eyes": [
-        0.3966,
-        0.3717,
-        0.3671
-      ],
-      "freckles": 0.0,
-      "hair": "parted_sweep_male",
-      "hair_color": [
-        0.0775,
-        0.0746,
-        0.0699
-      ],
-      "hair_detail": 88,
-      "hair_grey": 0.0,
-      "hair_length": -0.54,
-      "hair_tie_height": 0.0,
-      "hair_volume": 0.44,
-      "label": "Kieran",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.62,
-        0.36,
-        0.33
-      ],
-      "preset": "",
-      "sex": "male",
-      "skin": [
-        0.8166,
-        0.5413,
-        0.359
-      ],
-      "skin_age": 0.0,
-      "stubble": 0.0,
-      "version": 2
-    },
-    "human_11": {
-      "beard": "none",
-      "beard_color": null,
-      "brow_color": [
-        0.0497,
-        0.0485,
-        0.0464
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "brow_height": 0.66,
-        "brow_ridge": 0.23,
-        "chin_length": 0.216,
-        "chin_projection": 0.74,
-        "chin_width": 0.2,
-        "mouth_width": 0.5,
-        "nose_bridge": -0.452,
-        "nose_depth": -0.1926,
-        "nose_tip": -0.14,
-        "nose_width": 0.464
-      },
-      "eyes": [
-        0.4152,
-        0.3472,
-        0.3106
-      ],
-      "freckles": 0.0,
-      "hair": "layered_long_female",
-      "hair_color": [
-        0.0764,
-        0.0746,
-        0.0714
-      ],
-      "hair_detail": 20,
-      "hair_grey": 0.0,
-      "hair_length": 0.56,
-      "hair_tie_height": 0.0,
-      "hair_volume": -0.44,
-      "label": "Imani",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.8,
-        0.44,
-        0.38
-      ],
-      "preset": "",
-      "sex": "female",
-      "skin": [
-        0.2985,
-        0.1895,
-        0.1483
-      ],
-      "skin_age": 0.17,
-      "stubble": 0.0,
-      "version": 2
-    },
-    "human_12": {
-      "beard": "goatee",
-      "beard_color": [
-        0.6776,
-        0.6168,
-        0.5589
-      ],
-      "brow_color": [
-        0.4934,
-        0.451,
-        0.4113
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "cheek_fullness": 0.08,
-        "cheekbones": -0.9976,
-        "chin_width": 0.002,
-        "ear_size": 0.22,
-        "jaw_width": 0.323,
-        "nose_bridge": 0.26,
-        "nose_depth": 0.096
-      },
-      "eyes": [
-        0.3694,
-        0.3781,
-        0.2981
-      ],
-      "freckles": 0.0,
-      "hair": "painted_topknot_male",
-      "hair_color": [
-        0.7591,
-        0.6939,
-        0.6327
-      ],
-      "hair_detail": 65,
-      "hair_grey": 0.0,
-      "hair_length": 0.2,
-      "hair_tie_height": 0.0,
-      "hair_volume": 0.24,
-      "label": "Renwick",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.7,
-        0.44,
-        0.36
-      ],
-      "preset": "",
-      "sex": "male",
-      "skin": [
-        0.6833,
-        0.4649,
-        0.296
-      ],
-      "skin_age": 0.76,
-      "stubble": 0.3,
-      "version": 2
-    },
-    "human_13": {
-      "beard": "stubble",
-      "beard_color": [
-        0.541,
-        0.2053,
-        0.043
-      ],
-      "brow_color": [
-        0.3716,
-        0.1552,
-        0.0702
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "chin_length": -0.202,
-        "chin_projection": 0.18,
-        "chin_width": 0.2,
-        "mouth_width": -0.1,
-        "nose_bridge": 0.148,
-        "nose_depth": -0.1728,
-        "nose_width": -0.144
-      },
-      "eyes": [
-        0.404,
-        0.3515,
-        0.2822
-      ],
-      "freckles": 0.0,
-      "hair": "rounded_afro",
-      "hair_color": [
-        0.5716,
-        0.2387,
-        0.108
-      ],
-      "hair_detail": 35,
-      "hair_grey": 0.0,
-      "hair_length": -0.2,
-      "hair_tie_height": 0.0,
-      "hair_volume": -0.2,
-      "label": "Ferris",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.7,
-        0.44,
-        0.36
-      ],
-      "preset": "",
-      "sex": "male",
-      "skin": [
-        0.8792,
-        0.5951,
-        0.4248
-      ],
-      "skin_age": 0.11,
-      "stubble": 0.6,
-      "version": 2
-    },
-    "human_15": {
-      "beard": "none",
-      "beard_color": null,
-      "brow_color": [
-        0.5475,
-        0.5103,
-        0.5072
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "brow_ridge": 0.345,
-        "cheek_fullness": -0.68,
-        "chin_projection": 0.84,
-        "chin_width": 0.336,
-        "ear_size": -0.22,
-        "jaw_width": -0.4752
-      },
-      "eyes": [
-        0.4152,
-        0.3472,
-        0.3106
-      ],
-      "freckles": 0.0,
-      "hair": "parted_sweep_female",
-      "hair_color": [
-        0.8423,
-        0.7851,
-        0.7803
-      ],
-      "hair_detail": 70,
-      "hair_grey": 0.0,
-      "hair_length": -0.36,
-      "hair_tie_height": 0.0,
-      "hair_volume": -0.08,
-      "label": "Maelis",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.5,
-        0.31,
-        0.27
-      ],
-      "preset": "",
-      "sex": "female",
-      "skin": [
-        0.6976,
-        0.4577,
-        0.2845
-      ],
-      "skin_age": 0.68,
-      "stubble": 0.0,
-      "version": 2
-    },
-    "human_16": {
-      "beard": "none",
-      "beard_color": [
-        0.0153,
-        0.0147,
-        0.0126
-      ],
-      "brow_color": [
-        0.0497,
-        0.0483,
-        0.0451
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "cheek_fullness": 0.18,
-        "cheekbones": -0.4472,
-        "chin_projection": 0.42,
-        "chin_width": 0.004,
-        "jaw_width": -0.114,
-        "mouth_width": 0.82
-      },
-      "eyes": [
-        0.4448,
-        0.3458,
-        0.2729
-      ],
-      "freckles": 0.0,
-      "hair": "rear_braid_male",
-      "hair_color": [
-        0.0764,
-        0.0743,
-        0.0694
-      ],
-      "hair_detail": 56,
-      "hair_grey": 0.0,
-      "hair_length": 0.64,
-      "hair_tie_height": 0.0,
-      "hair_volume": 0.3,
-      "label": "Kethan",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.7,
-        0.44,
-        0.36
-      ],
-      "preset": "",
-      "sex": "male",
-      "skin": [
-        0.3999,
-        0.2498,
-        0.1695
-      ],
-      "skin_age": 0.0,
-      "stubble": 0.0,
-      "version": 2
-    },
-    "human_17": {
-      "beard": "none",
-      "beard_color": null,
-      "brow_color": [
-        0.1575,
-        0.0879,
-        0.0637
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "brow_height": 0.348,
-        "brow_ridge": 0.069,
-        "cheek_fullness": -0.68,
-        "chin_projection": 0.3,
-        "chin_width": 0.308,
-        "jaw_width": -0.4356,
-        "mouth_width": 0.66,
-        "nose_bridge": -0.496,
-        "nose_depth": -0.5778,
-        "nose_length": 0.1,
-        "nose_width": -0.2552
-      },
-      "eyes": [
-        0.4207,
-        0.4396,
-        0.4923
-      ],
-      "freckles": 0.0,
-      "hair": "painted_ponytail_female",
-      "hair_color": [
-        0.2423,
-        0.1352,
-        0.0981
-      ],
-      "hair_detail": 65,
-      "hair_grey": 0.0,
-      "hair_length": 0.7,
-      "hair_tie_height": 0.0,
-      "hair_volume": 0.3,
-      "label": "Rhea",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.62,
-        0.36,
-        0.33
-      ],
-      "preset": "",
-      "sex": "female",
-      "skin": [
-        0.8155,
-        0.5336,
-        0.3448
-      ],
-      "skin_age": 0.21,
-      "stubble": 0.0,
-      "version": 2
-    },
-    "human_18": {
-      "beard": "moustache",
-      "beard_color": [
-        0.6302,
-        0.5626,
-        0.5046
-      ],
-      "brow_color": [
-        0.4678,
-        0.4197,
-        0.379
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "brow_height": 0.00799999999999999,
-        "brow_ridge": 0.2834,
-        "chin_projection": -0.38,
-        "chin_width": 0.19,
-        "ear_size": -0.22,
-        "jaw_width": 0.095,
-        "nose_bridge": -0.004,
-        "nose_depth": 0.2304,
-        "nose_width": 0.084
-      },
-      "eyes": [
-        0.3966,
-        0.3717,
-        0.3671
-      ],
-      "freckles": 0.0,
-      "hair": "rounded_afro",
-      "hair_color": [
-        0.7197,
-        0.6457,
-        0.5831
-      ],
-      "hair_detail": 45,
-      "hair_grey": 0.0,
-      "hair_length": -0.24,
-      "hair_tie_height": 0.0,
-      "hair_volume": -0.24,
-      "label": "Osric",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.7,
-        0.44,
-        0.36
-      ],
-      "preset": "",
-      "sex": "male",
-      "skin": [
-        0.8756,
-        0.5933,
-        0.419
-      ],
-      "skin_age": 0.85,
-      "stubble": 0.3,
-      "version": 2
-    },
-    "human_19": {
-      "beard": "none",
-      "beard_color": null,
-      "brow_color": [
-        0.3435,
-        0.1373,
-        0.0691
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "brow_height": 0.764,
-        "brow_ridge": 0.092,
-        "cheek_fullness": -0.54,
-        "cheekbones": -0.972,
-        "chin_length": 0.054,
-        "chin_projection": 0.66,
-        "nose_bridge": -0.52,
-        "nose_depth": -0.428,
-        "nose_length": 0.31,
-        "nose_tip": -0.4
-      },
-      "eyes": [
-        0.4152,
-        0.3472,
-        0.3106
-      ],
-      "freckles": 0.0,
-      "hair": "shoulder_waves",
-      "hair_color": [
-        0.5284,
-        0.2113,
-        0.1063
-      ],
-      "hair_detail": 65,
-      "hair_grey": 0.0,
-      "hair_length": -0.16,
-      "hair_tie_height": 0.0,
-      "hair_volume": -0.04,
-      "label": "Cerys",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.8,
-        0.44,
-        0.38
-      ],
-      "preset": "",
-      "sex": "female",
-      "skin": [
-        0.9532,
-        0.7026,
-        0.5497
-      ],
-      "skin_age": 0.0,
-      "stubble": 0.0,
-      "version": 2
-    },
-    "human_21": {
-      "beard": "none",
-      "beard_color": null,
-      "brow_color": [
-        0.1334,
-        0.0708,
-        0.0628
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "cheekbones": -0.252,
-        "chin_length": -0.396,
-        "nose_bridge": 0.004,
-        "nose_depth": -0.6848
-      },
-      "eyes": [
-        0.4207,
-        0.4396,
-        0.4923
-      ],
-      "freckles": 0.0,
-      "hair": "soft_wavy_bob_female",
-      "hair_color": [
-        0.2052,
-        0.1089,
-        0.0966
-      ],
-      "hair_detail": 68,
-      "hair_grey": 0.0,
-      "hair_length": -0.22,
-      "hair_tie_height": 0.0,
-      "hair_volume": 0.3,
-      "label": "Zadie",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.8,
-        0.44,
-        0.38
-      ],
-      "preset": "",
-      "sex": "female",
-      "skin": [
-        0.3602,
-        0.2192,
-        0.1475
-      ],
-      "skin_age": 0.25,
-      "stubble": 0.0,
-      "version": 2
-    },
-    "human_22": {
-      "beard": "goatee",
-      "beard_color": [
-        0.1662,
-        0.0802,
-        0.0181
-      ],
-      "brow_color": [
-        0.1354,
-        0.0872,
-        0.0591
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "brow_height": -0.68,
-        "brow_ridge": 0.327,
-        "cheekbones": -0.8256,
-        "chin_width": 0.004,
-        "jaw_width": -0.494,
-        "mouth_width": 0.56,
-        "nose_length": 0.16
-      },
-      "eyes": [
-        0.4448,
-        0.3458,
-        0.2729
-      ],
-      "freckles": 0.0,
-      "hair": "painted_topknot_male",
-      "hair_color": [
-        0.2084,
-        0.1342,
-        0.0909
-      ],
-      "hair_detail": 52,
-      "hair_grey": 0.2,
-      "hair_length": -0.16,
-      "hair_tie_height": 0.0,
-      "hair_volume": 0.3,
-      "label": "Lucan",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.62,
-        0.36,
-        0.33
-      ],
-      "preset": "",
-      "sex": "male",
-      "skin": [
-        0.7778,
-        0.5066,
-        0.3205
-      ],
-      "skin_age": 0.13,
-      "stubble": 0.3,
-      "version": 2
-    },
-    "human_23": {
-      "beard": "none",
-      "beard_color": null,
-      "brow_color": [
-        0.4001,
-        0.3619,
-        0.3252
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "brow_height": 0.184,
-        "brow_ridge": 0.207,
-        "cheek_fullness": -0.56,
-        "cheekbones": -0.648,
-        "chin_length": 0.054,
-        "chin_projection": 0.52,
-        "chin_width": 0.14,
-        "ear_size": -0.56,
-        "mouth_width": 0.24,
-        "nose_bridge": 0.34,
-        "nose_length": 0.21,
-        "nose_tip": -0.26,
-        "nose_width": 0.2552
-      },
-      "eyes": [
-        0.4207,
-        0.4259,
-        0.3469
-      ],
-      "freckles": 0.0,
-      "hair": "cornrows_low_knot",
-      "hair_color": [
-        0.6155,
-        0.5568,
-        0.5003
-      ],
-      "hair_detail": 12,
-      "hair_grey": 0.0,
-      "hair_length": -0.24,
-      "hair_tie_height": 0.0,
-      "hair_volume": -0.5,
-      "label": "Isolde",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.62,
-        0.36,
-        0.33
-      ],
-      "preset": "",
-      "sex": "female",
-      "skin": [
-        0.903,
-        0.6166,
-        0.4252
-      ],
-      "skin_age": 0.78,
-      "stubble": 0.0,
-      "version": 2
-    },
-    "human_24": {
-      "beard": "short_beard",
-      "beard_color": [
-        0.4023,
-        0.3358,
-        0.2965
-      ],
-      "brow_color": [
-        0.2828,
-        0.2394,
-        0.2139
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "cheek_fullness": -0.1,
-        "ear_size": 0.18,
-        "nose_bridge": 0.00400000000000003,
-        "nose_depth": 0.4416,
-        "nose_length": -0.56,
-        "nose_width": 0.552
-      },
-      "eyes": [
-        0.3636,
-        0.2955,
-        0.2587
-      ],
-      "freckles": 0.0,
-      "hair": "none",
-      "hair_color": [
-        0.4351,
-        0.3683,
-        0.3291
-      ],
-      "hair_detail": 50,
-      "hair_grey": 0.35,
-      "hair_length": 0.0,
-      "hair_tie_height": 0.0,
-      "hair_volume": 0.0,
-      "label": "Garron",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.7,
-        0.44,
-        0.36
-      ],
-      "preset": "",
-      "sex": "male",
-      "skin": [
-        0.275,
-        0.1674,
-        0.1209
-      ],
-      "skin_age": 0.66,
-      "stubble": 0.3,
-      "version": 2
-    },
-    "human_25": {
-      "beard": "none",
-      "beard_color": null,
-      "brow_color": [
-        0.0506,
-        0.0494,
-        0.0472
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "brow_height": -0.12,
-        "cheek_fullness": -0.58,
-        "chin_width": 0.06,
-        "ear_size": -0.28,
-        "nose_bridge": -0.26,
-        "nose_length": -0.38,
-        "nose_width": -0.116
-      },
-      "eyes": [
-        0.4472,
-        0.4197,
-        0.4127
-      ],
-      "freckles": 0.0,
-      "hair": "rear_braid_female",
-      "hair_color": [
-        0.0778,
-        0.0759,
-        0.0726
-      ],
-      "hair_detail": 48,
-      "hair_grey": 0.0,
-      "hair_length": 0.4,
-      "hair_tie_height": 0.0,
-      "hair_volume": 0.1,
-      "label": "Edda",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.62,
-        0.36,
-        0.33
-      ],
-      "preset": "",
-      "sex": "female",
-      "skin": [
-        0.9362,
-        0.6954,
-        0.5331
-      ],
-      "skin_age": 0.0,
-      "stubble": 0.0,
-      "version": 2
-    },
-    "human_26": {
-      "beard": "stubble",
-      "beard_color": [
-        0.0073,
-        0.0071,
-        0.0071
-      ],
-      "brow_color": [
-        0.0459,
-        0.0446,
-        0.0423
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "brow_ridge": 0.327,
-        "cheek_fullness": -0.06,
-        "chin_length": -0.3434,
-        "chin_projection": 0.32,
-        "chin_width": 0.26,
-        "ear_size": -0.38,
-        "nose_bridge": 0.24,
-        "nose_length": 0.00999999999999998,
-        "nose_tip": -0.06
-      },
-      "eyes": [
-        0.3694,
-        0.3781,
-        0.2981
-      ],
-      "freckles": 0.0,
-      "hair": "buzz_cut_male",
-      "hair_color": [
-        0.0706,
-        0.0687,
-        0.0651
-      ],
-      "hair_detail": 35,
-      "hair_grey": 0.0,
-      "hair_length": 0.28,
-      "hair_tie_height": 0.0,
-      "hair_volume": 0.12,
-      "label": "Soren",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.7,
-        0.44,
-        0.36
-      ],
-      "preset": "",
-      "sex": "male",
-      "skin": [
-        0.2741,
-        0.1684,
-        0.1173
-      ],
-      "skin_age": 0.34,
-      "stubble": 0.6,
-      "version": 2
-    },
-    "human_28": {
-      "beard": "none",
-      "beard_color": [
-        0.6047,
-        0.4441,
-        0.3277
-      ],
-      "brow_color": [
-        0.4141,
-        0.308,
-        0.2321
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "brow_ridge": 0.327,
-        "cheekbones": -0.8944,
-        "chin_projection": 0.82,
-        "chin_width": 0.35,
-        "jaw_width": -0.095,
-        "nose_bridge": 0.00799999999999995,
-        "nose_depth": 0.6912,
-        "nose_width": 0.396
-      },
-      "eyes": [
-        0.4448,
-        0.3458,
-        0.2729
-      ],
-      "freckles": 0.0,
-      "hair": "buzz_cut_male",
-      "hair_color": [
-        0.6371,
-        0.4739,
-        0.3571
-      ],
-      "hair_detail": 5,
-      "hair_grey": 0.0,
-      "hair_length": -1.0,
-      "hair_tie_height": 0.0,
-      "hair_volume": -1.0,
-      "label": "Cael",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.7,
-        0.44,
-        0.36
-      ],
-      "preset": "",
-      "sex": "male",
-      "skin": [
-        0.8766,
-        0.6032,
-        0.4127
-      ],
-      "skin_age": 0.02,
-      "stubble": 0.0,
-      "version": 2
-    },
-    "human_29": {
-      "beard": "none",
-      "beard_color": null,
-      "brow_color": [
-        0.0552,
-        0.0539,
-        0.0519
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "cheek_fullness": -0.76,
-        "chin_length": -0.144,
-        "chin_projection": 0.3,
-        "chin_width": 0.12,
-        "jaw_width": -0.594,
-        "mouth_width": 0.5,
-        "nose_length": 0.68
-      },
-      "eyes": [
-        0.4152,
-        0.3472,
-        0.3106
-      ],
-      "freckles": 0.0,
-      "hair": "shoulder_waves",
-      "hair_color": [
-        0.085,
-        0.083,
-        0.0799
-      ],
-      "hair_detail": 78,
-      "hair_grey": 0.0,
-      "hair_length": 0.52,
-      "hair_tie_height": 0.0,
-      "hair_volume": 0.56,
-      "label": "Adira",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.8,
-        0.44,
-        0.38
-      ],
-      "preset": "",
-      "sex": "female",
-      "skin": [
-        0.3129,
-        0.1994,
-        0.1413
-      ],
-      "skin_age": 0.23,
-      "stubble": 0.0,
-      "version": 2
-    },
-    "human_30": {
-      "beard": "moustache",
-      "beard_color": [
-        0.6095,
-        0.5424,
-        0.4784
-      ],
-      "brow_color": [
-        0.4528,
-        0.4051,
-        0.36
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "brow_ridge": 0.327,
-        "chin_length": 0.4646,
-        "chin_projection": 0.34,
-        "chin_width": 0.288,
-        "ear_size": 0.1,
-        "jaw_width": -0.228,
-        "mouth_width": 0.42,
-        "nose_bridge": 0.536,
-        "nose_depth": 0.2304,
-        "nose_length": 0.71,
-        "nose_tip": -0.32,
-        "nose_width": 0.336
-      },
-      "eyes": [
-        0.3694,
-        0.3922,
-        0.4481
-      ],
-      "freckles": 0.0,
-      "hair": "receding_sweep",
-      "hair_color": [
-        0.6966,
-        0.6233,
-        0.5539
-      ],
-      "hair_detail": 30,
-      "hair_grey": 0.55,
-      "hair_length": -0.72,
-      "hair_tie_height": 0.0,
-      "hair_volume": -0.6,
-      "label": "Emeric",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.7,
-        0.44,
-        0.36
-      ],
-      "preset": "",
-      "sex": "male",
-      "skin": [
-        0.8653,
-        0.6372,
-        0.4443
-      ],
-      "skin_age": 0.8,
-      "stubble": 0.3,
-      "version": 2
-    },
-    "human_31": {
-      "beard": "full_beard",
-      "beard_color": [
-        0.0549,
-        0.0166,
-        0.0117
-      ],
-      "brow_color": [
-        0.0661,
-        0.0525,
-        0.0482
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "cheek_fullness": -0.06,
-        "ear_size": 0.12,
-        "nose_bridge": 0.00800000000000001,
-        "nose_depth": -0.4608
-      },
-      "eyes": [
-        0.3966,
-        0.3717,
-        0.3671
-      ],
-      "freckles": 0.0,
-      "hair": "parted_sweep_male",
-      "hair_color": [
-        0.1017,
-        0.0808,
-        0.0742
-      ],
-      "hair_detail": 65,
-      "hair_grey": 0.0,
-      "hair_length": -0.6,
-      "hair_tie_height": 0.0,
-      "hair_volume": 0.4,
-      "label": "Bastien",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.7,
-        0.44,
-        0.36
-      ],
-      "preset": "",
-      "sex": "male",
-      "skin": [
-        0.3193,
-        0.188,
-        0.1239
-      ],
-      "skin_age": 0.3,
-      "stubble": 0.3,
-      "version": 2
-    },
-    "human_32": {
-      "beard": "none",
-      "beard_color": null,
-      "brow_color": [
-        0.1609,
-        0.0857,
-        0.0639
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "cheek_fullness": -0.72,
-        "cheekbones": -0.72,
-        "chin_length": -0.63,
-        "chin_projection": 0.68,
-        "ear_size": -0.2,
-        "jaw_width": -0.594,
-        "nose_bridge": 0.004,
-        "nose_depth": -0.6848,
-        "nose_length": 0.29,
-        "nose_tip": -0.16,
-        "nose_width": 0.1044
-      },
-      "eyes": [
-        0.4543,
-        0.4001,
-        0.3322
-      ],
-      "freckles": 0.0,
-      "hair": "painted_ponytail_female",
-      "hair_color": [
-        0.2475,
-        0.1319,
-        0.0984
-      ],
-      "hair_detail": 60,
-      "hair_grey": 0.0,
-      "hair_length": 0.24,
-      "hair_tie_height": 0.0,
-      "hair_volume": 0.0,
-      "label": "Veda",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.62,
-        0.36,
-        0.33
-      ],
-      "preset": "",
-      "sex": "female",
-      "skin": [
-        0.8378,
-        0.5534,
-        0.3672
-      ],
-      "skin_age": 0.0,
-      "stubble": 0.0,
-      "version": 2
-    },
-    "human_33": {
-      "beard": "none",
-      "beard_color": null,
-      "brow_color": [
-        0.6027,
-        0.5737,
-        0.5544
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "brow_height": 0.492,
-        "brow_ridge": 0.391,
-        "cheek_fullness": -0.5,
-        "chin_length": 0.234,
-        "chin_projection": 0.54,
-        "chin_width": 0.336,
-        "jaw_width": 0.1188,
-        "nose_bridge": -0.172,
-        "nose_depth": -0.1926,
-        "nose_length": 0.01,
-        "nose_width": 0.7656
-      },
-      "eyes": [
-        0.4207,
-        0.4259,
-        0.3469
-      ],
-      "freckles": 0.0,
-      "hair": "layered_long_female",
-      "hair_color": [
-        0.9273,
-        0.8826,
-        0.8529
-      ],
-      "hair_detail": 12,
-      "hair_grey": 0.0,
-      "hair_length": 0.5,
-      "hair_tie_height": 0.0,
-      "hair_volume": -0.24,
-      "label": "Thalia",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.8,
-        0.44,
-        0.38
-      ],
-      "preset": "",
-      "sex": "female",
-      "skin": [
-        0.2964,
-        0.1919,
-        0.1402
-      ],
-      "skin_age": 0.74,
-      "stubble": 0.0,
-      "version": 2
-    },
-    "human_35": {
-      "beard": "none",
-      "beard_color": null,
-      "brow_color": [
-        0.0499,
-        0.0487,
-        0.0466
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "brow_ridge": 0.345,
-        "cheek_fullness": -0.26,
-        "chin_projection": 0.66,
-        "chin_width": 0.3,
-        "mouth_width": 0.72,
-        "nose_bridge": -0.576,
-        "nose_depth": -0.6848,
-        "nose_width": -0.2204
-      },
-      "eyes": [
-        0.4945,
-        0.3947,
-        0.3237
-      ],
-      "freckles": 0.0,
-      "hair": "rear_braid_female",
-      "hair_color": [
-        0.0768,
-        0.075,
-        0.0718
-      ],
-      "hair_detail": 28,
-      "hair_grey": 0.0,
-      "hair_length": 0.7,
-      "hair_tie_height": 0.0,
-      "hair_volume": -0.16,
-      "label": "Lenora",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.7,
-        0.44,
-        0.36
-      ],
-      "preset": "",
-      "sex": "female",
-      "skin": [
-        0.9347,
-        0.7037,
-        0.5574
-      ],
-      "skin_age": 0.08,
-      "stubble": 0.0,
-      "version": 2
-    },
-    "human_36": {
-      "beard": "none",
-      "beard_color": [
-        0.5687,
-        0.3672,
-        0.18
-      ],
-      "brow_color": [
-        0.3894,
-        0.257,
-        0.139
-      ],
-      "brow_style": "soft",
-      "brow_thickness": 0.0,
-      "controls": {
-        "brow_height": 0.46,
-        "brow_ridge": 0.327,
-        "cheek_fullness": -0.06,
-        "chin_length": -0.0606,
-        "chin_projection": 0.36,
-        "chin_width": 0.12,
-        "mouth_width": 0.36,
-        "nose_depth": -0.192,
-        "nose_length": 0.21
-      },
-      "eyes": [
-        0.3694,
-        0.3922,
-        0.4481
-      ],
-      "freckles": 0.0,
-      "hair": "layered_long_male",
-      "hair_color": [
-        0.599,
-        0.3955,
-        0.2138
-      ],
-      "hair_detail": 72,
-      "hair_grey": 0.0,
-      "hair_length": 0.16,
-      "hair_tie_height": 0.0,
-      "hair_volume": 0.3,
-      "label": "Ewan",
-      "liner": 0.0,
-      "liner_wing": 0.0,
-      "lip_tint": [
-        0.62,
-        0.36,
-        0.33
-      ],
-      "preset": "",
-      "sex": "male",
-      "skin": [
-        0.7656,
-        0.4924,
-        0.3114
-      ],
-      "skin_age": 0.0,
-      "stubble": 0.0,
-      "version": 2
-    }
+ "version": 1,
+ "_note": "RL head prototype presets. controls: id_<name> blend-shape control values in [-1, 1] (missing = 0). Colours are linear-ish sRGB triples 0..1. hair/beard name files under assets/actors/native/rl_heads/{hair,beards}/<name>.glb ('none' = bald / clean-shaven). hair 'legacy:<style>' reuses the shipped fitted hairstyle for the body (parted, long, buns, buzzed, bob, ponytail, braid, topknot, mohawk). stubble 0..1 drives the skin-shader stubble mask. brow_style is one of arched, straight, soft, angled (head_<sex>_brows.png R, G, B, A; a number 0..3 blends neighbours), brow_thickness -1..1, liner_wing 0..1 (features B). eye_style +1 already sets the eye 1.6 mm deeper (half of eye_depth +1, coupled), so the stylised presets leave eye_depth at 0 and the slider moves the eye from there.",
+ "presets": {
+  "mira": {
+   "sex": "female",
+   "label": "Mira",
+   "controls": {},
+   "skin": [
+    0.93,
+    0.74,
+    0.62
+   ],
+   "eyes": [
+    0.36,
+    0.55,
+    0.3
+   ],
+   "hair_color": [
+    0.82,
+    0.4,
+    0.17
+   ],
+   "brow_color": [
+    0.5,
+    0.22,
+    0.12
+   ],
+   "lip_tint": [
+    0.8,
+    0.44,
+    0.38
+   ],
+   "freckles": 0.65,
+   "liner": 0.7,
+   "hair": "mira_bun",
+   "beard": "none",
+   "brow_style": "arched",
+   "brow_thickness": 0.2,
+   "liner_wing": 0.8
+  },
+  "mira_stylised": {
+   "sex": "female",
+   "label": "Mira (stylised eyes)",
+   "controls": {
+    "eye_style": 1.0,
+    "eye_depth": 0.0
+   },
+   "skin": [
+    0.93,
+    0.74,
+    0.62
+   ],
+   "eyes": [
+    0.36,
+    0.55,
+    0.3
+   ],
+   "hair_color": [
+    0.82,
+    0.4,
+    0.17
+   ],
+   "brow_color": [
+    0.5,
+    0.22,
+    0.12
+   ],
+   "lip_tint": [
+    0.8,
+    0.44,
+    0.38
+   ],
+   "freckles": 0.65,
+   "liner": 0.7,
+   "hair": "mira_bun",
+   "beard": "none",
+   "brow_style": "arched",
+   "brow_thickness": 0.2,
+   "liner_wing": 0.8
+  },
+  "rowan": {
+   "sex": "male",
+   "label": "Rowan",
+   "controls": {},
+   "skin": [
+    0.8,
+    0.565,
+    0.4
+   ],
+   "eyes": [
+    0.3,
+    0.19,
+    0.1
+   ],
+   "hair_color": [
+    0.36,
+    0.22,
+    0.12
+   ],
+   "brow_color": [
+    0.16,
+    0.095,
+    0.055
+   ],
+   "lip_tint": [
+    0.7,
+    0.44,
+    0.36
+   ],
+   "freckles": 0.0,
+   "liner": 0.15,
+   "hair": "rowan_shag",
+   "beard": "stubble",
+   "brow_style": "straight",
+   "brow_thickness": 0.6,
+   "liner_wing": 0.0
+  },
+  "rowan_stylised": {
+   "sex": "male",
+   "label": "Rowan (stylised eyes)",
+   "controls": {
+    "eye_style": 1.0,
+    "eye_depth": 0.0
+   },
+   "skin": [
+    0.8,
+    0.565,
+    0.4
+   ],
+   "eyes": [
+    0.3,
+    0.19,
+    0.1
+   ],
+   "hair_color": [
+    0.36,
+    0.22,
+    0.12
+   ],
+   "brow_color": [
+    0.16,
+    0.095,
+    0.055
+   ],
+   "lip_tint": [
+    0.7,
+    0.44,
+    0.36
+   ],
+   "freckles": 0.0,
+   "liner": 0.15,
+   "hair": "rowan_shag",
+   "beard": "stubble",
+   "brow_style": "straight",
+   "brow_thickness": 0.6,
+   "liner_wing": 0.0
+  },
+  "ilse": {
+   "sex": "female",
+   "label": "Ilse",
+   "controls": {
+    "nose_width": -0.5,
+    "nose_length": -0.3,
+    "lip_fullness": -0.45,
+    "eye_tilt": -0.35,
+    "jaw_width": -0.45,
+    "chin_length": 0.35,
+    "brow_height": 0.35,
+    "cheekbones": 0.6,
+    "cheek_fullness": -0.4,
+    "eye_spacing": -0.2
+   },
+   "skin": [
+    0.91,
+    0.8,
+    0.729
+   ],
+   "eyes": [
+    0.45,
+    0.55,
+    0.62
+   ],
+   "hair_color": [
+    0.86,
+    0.8,
+    0.64
+   ],
+   "brow_color": [
+    0.55,
+    0.48,
+    0.36
+   ],
+   "lip_tint": [
+    0.76,
+    0.52,
+    0.52
+   ],
+   "freckles": 0.12,
+   "liner": 0.25,
+   "hair": "legacy:long",
+   "beard": "none",
+   "brow_style": "soft",
+   "brow_thickness": -0.3,
+   "liner_wing": 0.0
+  },
+  "sera": {
+   "sex": "female",
+   "label": "Sera",
+   "controls": {
+    "cheek_fullness": 0.6,
+    "jaw_width": 0.15,
+    "chin_length": -0.45,
+    "eye_size": 0.35,
+    "nose_width": 0.45,
+    "nose_bridge": -0.45,
+    "lip_fullness": 0.65,
+    "cupid_bow": 0.5,
+    "eye_spacing": 0.3,
+    "nose_tip": 0.3
+   },
+   "skin": [
+    0.769,
+    0.592,
+    0.388
+   ],
+   "eyes": [
+    0.33,
+    0.2,
+    0.1
+   ],
+   "hair_color": [
+    0.17,
+    0.1,
+    0.06
+   ],
+   "brow_color": [
+    0.12,
+    0.07,
+    0.04
+   ],
+   "lip_tint": [
+    0.62,
+    0.36,
+    0.33
+   ],
+   "freckles": 0.0,
+   "liner": 0.5,
+   "hair": "legacy:braid",
+   "beard": "none",
+   "brow_style": "arched",
+   "brow_thickness": 0.0,
+   "liner_wing": 0.0
+  },
+  "ari": {
+   "sex": "female",
+   "label": "Ari",
+   "controls": {
+    "cheekbones": 0.75,
+    "eye_tilt": 0.6,
+    "nose_width": 0.55,
+    "nose_depth": -0.3,
+    "lip_fullness": 0.8,
+    "chin_projection": 0.3,
+    "ear_size": -0.3,
+    "brow_ridge": 0.2,
+    "eyelid": 0.2
+   },
+   "skin": [
+    0.404,
+    0.259,
+    0.184
+   ],
+   "eyes": [
+    0.22,
+    0.13,
+    0.07
+   ],
+   "hair_color": [
+    0.05,
+    0.04,
+    0.035
+   ],
+   "brow_color": [
+    0.04,
+    0.03,
+    0.025
+   ],
+   "lip_tint": [
+    0.42,
+    0.24,
+    0.22
+   ],
+   "freckles": 0.0,
+   "liner": 0.45,
+   "hair": "legacy:buns",
+   "beard": "none",
+   "brow_style": "angled",
+   "brow_thickness": 0.1,
+   "liner_wing": 0.6
+  },
+  "tavi": {
+   "sex": "male",
+   "label": "Tavi",
+   "controls": {
+    "brow_ridge": 0.6,
+    "jaw_width": 0.6,
+    "nose_width": 0.4,
+    "nose_bridge": 0.5,
+    "eyelid": -0.5,
+    "cheek_fullness": 0.3,
+    "mouth_width": 0.3,
+    "chin_width": 0.3,
+    "nose_length": 0.2
+   },
+   "skin": [
+    0.769,
+    0.592,
+    0.431
+   ],
+   "eyes": [
+    0.28,
+    0.17,
+    0.09
+   ],
+   "hair_color": [
+    0.22,
+    0.13,
+    0.07
+   ],
+   "brow_color": [
+    0.13,
+    0.08,
+    0.05
+   ],
+   "lip_tint": [
+    0.68,
+    0.46,
+    0.4
+   ],
+   "freckles": 0.0,
+   "liner": 0.2,
+   "stubble": 0.5,
+   "hair": "rowan_shag",
+   "beard": "full_beard",
+   "brow_style": "straight",
+   "brow_thickness": 0.8,
+   "liner_wing": 0.0
+  },
+  "bren": {
+   "sex": "male",
+   "label": "Bren",
+   "controls": {
+    "nose_length": 0.45,
+    "nose_tip": -0.4,
+    "eye_size": -0.2,
+    "eye_spacing": 0.3,
+    "chin_length": 0.35,
+    "cheekbones": -0.35,
+    "ear_size": 0.4,
+    "lip_fullness": -0.3,
+    "brow_height": 0.2
+   },
+   "skin": [
+    0.91,
+    0.745,
+    0.647
+   ],
+   "eyes": [
+    0.35,
+    0.48,
+    0.62
+   ],
+   "hair_color": [
+    0.62,
+    0.32,
+    0.13
+   ],
+   "brow_color": [
+    0.5,
+    0.26,
+    0.12
+   ],
+   "lip_tint": [
+    0.72,
+    0.46,
+    0.42
+   ],
+   "freckles": 0.35,
+   "liner": 0.15,
+   "stubble": 0.0,
+   "hair": "legacy:parted",
+   "beard": "short_beard",
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "liner_wing": 0.0
+  },
+  "kellan": {
+   "sex": "male",
+   "label": "Kellan",
+   "controls": {
+    "eye_size": 0.4,
+    "eye_tilt": 0.3,
+    "nose_width": -0.4,
+    "nose_length": -0.3,
+    "jaw_width": -0.5,
+    "chin_width": -0.3,
+    "lip_fullness": 0.3,
+    "cheek_fullness": -0.2,
+    "brow_ridge": -0.3
+   },
+   "skin": [
+    0.863,
+    0.714,
+    0.6
+   ],
+   "eyes": [
+    0.36,
+    0.42,
+    0.3
+   ],
+   "hair_color": [
+    0.42,
+    0.3,
+    0.17
+   ],
+   "brow_color": [
+    0.28,
+    0.19,
+    0.11
+   ],
+   "lip_tint": [
+    0.7,
+    0.47,
+    0.43
+   ],
+   "freckles": 0.1,
+   "liner": 0.15,
+   "stubble": 0.2,
+   "hair": "legacy:buzzed",
+   "beard": "none",
+   "brow_style": "soft",
+   "brow_thickness": -0.2,
+   "liner_wing": 0.0
+  },
+  "orin": {
+   "sex": "male",
+   "label": "Orin",
+   "controls": {
+    "brow_ridge": 0.45,
+    "nose_width": 0.7,
+    "lip_fullness": 0.6,
+    "jaw_width": 0.3,
+    "chin_projection": 0.4,
+    "nose_depth": -0.2,
+    "eye_size": -0.1,
+    "cupid_bow": 0.3
+   },
+   "skin": [
+    0.357,
+    0.227,
+    0.165
+   ],
+   "eyes": [
+    0.18,
+    0.11,
+    0.06
+   ],
+   "hair_color": [
+    0.04,
+    0.035,
+    0.03
+   ],
+   "brow_color": [
+    0.035,
+    0.03,
+    0.025
+   ],
+   "lip_tint": [
+    0.4,
+    0.24,
+    0.22
+   ],
+   "freckles": 0.0,
+   "liner": 0.2,
+   "stubble": 0.3,
+   "hair": "legacy:buzzed",
+   "beard": "goatee",
+   "brow_style": "straight",
+   "brow_thickness": 0.3,
+   "liner_wing": 0.0
+  },
+  "human_01": {
+   "beard": "none",
+   "beard_color": null,
+   "brow_color": [
+    0.0506,
+    0.0494,
+    0.0473
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "brow_height": 0.004,
+    "brow_ridge": 0.552,
+    "cheek_fullness": -0.32,
+    "chin_length": -0.414,
+    "chin_projection": 0.14,
+    "chin_width": 0.16,
+    "ear_size": -0.26,
+    "mouth_width": 0.78,
+    "nose_length": 0.01,
+    "nose_tip": -0.56
+   },
+   "eyes": [
+    0.5016,
+    0.398,
+    0.3239
+   ],
+   "freckles": 0.0,
+   "hair": "cornrows_low_knot",
+   "hair_color": [
+    0.0779,
+    0.076,
+    0.0727
+   ],
+   "hair_detail": 50,
+   "hair_length": 0.0,
+   "hair_volume": 0.0,
+   "label": "Amara",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.8,
+    0.44,
+    0.38
+   ],
+   "preset": "",
+   "sex": "female",
+   "skin": [
+    0.5576,
+    0.3293,
+    0.1937
+   ],
+   "stubble": 0.0,
+   "version": 2
+  },
+  "human_20": {
+   "beard": "none",
+   "beard_color": [
+    0.0073,
+    0.0071,
+    0.0071
+   ],
+   "brow_color": [
+    0.0459,
+    0.0446,
+    0.0423
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "cheek_fullness": 0.14,
+    "cheekbones": -0.8256,
+    "chin_length": -0.1616,
+    "chin_projection": 0.24,
+    "chin_width": 0.18,
+    "ear_size": -0.28,
+    "mouth_width": 0.84,
+    "nose_bridge": -0.396,
+    "nose_depth": -0.2304,
+    "nose_length": 0.36,
+    "nose_tip": -0.14,
+    "nose_width": 0.168
+   },
+   "eyes": [
+    0.4028,
+    0.3457,
+    0.2799
+   ],
+   "freckles": 0.0,
+   "hair": "rounded_afro",
+   "hair_color": [
+    0.0706,
+    0.0687,
+    0.0651
+   ],
+   "hair_detail": 50,
+   "hair_length": 0.0,
+   "hair_volume": 0.0,
+   "label": "Darian",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.7,
+    0.44,
+    0.36
+   ],
+   "preset": "",
+   "sex": "male",
+   "skin": [
+    0.4082,
+    0.2252,
+    0.1338
+   ],
+   "stubble": 0.0,
+   "version": 2
+  },
+  "human_08": {
+   "beard": "short_beard",
+   "beard_color": [
+    0.2986,
+    0.164,
+    0.0458
+   ],
+   "brow_color": [
+    0.2136,
+    0.1307,
+    0.0706
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "brow_ridge": 0.327,
+    "cheek_fullness": 0.08,
+    "cheekbones": -0.9976,
+    "nose_width": 0.336
+   },
+   "eyes": [
+    0.368,
+    0.3938,
+    0.4419
+   ],
+   "freckles": 0.0,
+   "hair": "receding_sweep",
+   "hair_color": [
+    0.3286,
+    0.2011,
+    0.1087
+   ],
+   "hair_detail": 50,
+   "hair_length": 0.0,
+   "hair_volume": 0.0,
+   "label": "Corin",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.7,
+    0.46,
+    0.42
+   ],
+   "preset": "",
+   "sex": "male",
+   "skin": [
+    0.901,
+    0.6684,
+    0.5155
+   ],
+   "stubble": 0.22,
+   "version": 2
+  },
+  "human_14": {
+   "beard": "none",
+   "beard_color": null,
+   "brow_color": [
+    0.2454,
+    0.1227,
+    0.0665
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "brow_height": -0.008,
+    "brow_ridge": 0.161,
+    "cheek_fullness": -0.2,
+    "cheekbones": -0.72,
+    "chin_length": -0.396,
+    "chin_projection": 0.12,
+    "nose_depth": -0.642
+   },
+   "eyes": [
+    0.4485,
+    0.4559,
+    0.346
+   ],
+   "freckles": 0.24,
+   "hair": "curly_twin_buns",
+   "hair_color": [
+    0.3776,
+    0.1887,
+    0.1023
+   ],
+   "hair_detail": 50,
+   "hair_length": 0.0,
+   "hair_volume": 0.0,
+   "label": "Nessa",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.7,
+    0.44,
+    0.36
+   ],
+   "preset": "",
+   "sex": "female",
+   "skin": [
+    0.9446,
+    0.7028,
+    0.5508
+   ],
+   "stubble": 0.0,
+   "version": 2
+  },
+  "human_27": {
+   "beard": "none",
+   "beard_color": null,
+   "brow_color": [
+    0.3851,
+    0.3633,
+    0.3666
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "cheek_fullness": -0.5,
+    "chin_length": 0.126,
+    "chin_projection": -0.08,
+    "chin_width": 0.12,
+    "nose_length": 0.01
+   },
+   "eyes": [
+    0.4666,
+    0.4008,
+    0.3325
+   ],
+   "freckles": 0.0,
+   "hair": "shoulder_waves",
+   "hair_color": [
+    0.5925,
+    0.5589,
+    0.5641
+   ],
+   "hair_detail": 50,
+   "hair_length": 0.0,
+   "hair_volume": 0.0,
+   "label": "Elowen",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.62,
+    0.36,
+    0.33
+   ],
+   "preset": "",
+   "sex": "female",
+   "skin": [
+    0.6673,
+    0.4805,
+    0.3312
+   ],
+   "stubble": 0.0,
+   "version": 2
+  },
+  "human_34": {
+   "beard": "full_beard",
+   "beard_color": [
+    0.6822,
+    0.6277,
+    0.5669
+   ],
+   "brow_color": [
+    0.4665,
+    0.4306,
+    0.3909
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "brow_height": 0.328,
+    "brow_ridge": 0.2834,
+    "cheek_fullness": -0.52,
+    "ear_size": 0.28,
+    "nose_bridge": -0.008,
+    "nose_depth": 0.6528,
+    "nose_tip": -0.24
+   },
+   "eyes": [
+    0.3636,
+    0.2957,
+    0.2573
+   ],
+   "freckles": 0.0,
+   "hair": "none",
+   "hair_color": [
+    0.7177,
+    0.6624,
+    0.6014
+   ],
+   "hair_detail": 50,
+   "hair_length": 0.0,
+   "hair_volume": 0.0,
+   "label": "Bram",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.62,
+    0.36,
+    0.33
+   ],
+   "preset": "",
+   "sex": "male",
+   "skin": [
+    0.7959,
+    0.5283,
+    0.3337
+   ],
+   "stubble": 0.22,
+   "version": 2
+  },
+  "human_02": {
+   "beard": "none",
+   "beard_color": [
+    0.5648,
+    0.3705,
+    0.1672
+   ],
+   "brow_color": [
+    0.3865,
+    0.259,
+    0.1314
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "brow_ridge": 0.327,
+    "cheek_fullness": -0.12,
+    "cheekbones": -0.8944,
+    "chin_length": -0.1414,
+    "chin_projection": 0.5,
+    "chin_width": -0.06,
+    "mouth_width": 0.64,
+    "nose_bridge": 0.328,
+    "nose_depth": -0.0768,
+    "nose_length": -0.39,
+    "nose_width": -0.396
+   },
+   "eyes": [
+    0.3636,
+    0.2955,
+    0.2587
+   ],
+   "freckles": 0.0,
+   "hair": "parted_sweep_male",
+   "hair_color": [
+    0.5947,
+    0.3985,
+    0.2021
+   ],
+   "hair_detail": 78,
+   "hair_grey": 0.0,
+   "hair_length": 0.64,
+   "hair_tie_height": 0.0,
+   "hair_volume": 0.4,
+   "label": "Stellan",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.8,
+    0.44,
+    0.38
+   ],
+   "preset": "",
+   "sex": "male",
+   "skin": [
+    0.8913,
+    0.637,
+    0.4518
+   ],
+   "skin_age": 0.0,
+   "stubble": 0.0,
+   "version": 2
+  },
+  "human_03": {
+   "beard": "none",
+   "beard_color": null,
+   "brow_color": [
+    0.0495,
+    0.0483,
+    0.0463
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "chin_projection": 0.14,
+    "chin_width": -0.06,
+    "ear_size": -0.44,
+    "mouth_width": 0.8,
+    "nose_bridge": 0.00800000000000001,
+    "nose_depth": -0.5136
+   },
+   "eyes": [
+    0.4472,
+    0.4197,
+    0.4127
+   ],
+   "freckles": 0.0,
+   "hair": "cornrows_low_knot",
+   "hair_color": [
+    0.0762,
+    0.0744,
+    0.0712
+   ],
+   "hair_detail": 15,
+   "hair_grey": 0.0,
+   "hair_length": -0.1,
+   "hair_tie_height": 0.0,
+   "hair_volume": -0.3,
+   "label": "Selene",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.7,
+    0.44,
+    0.36
+   ],
+   "preset": "",
+   "sex": "female",
+   "skin": [
+    0.8289,
+    0.5413,
+    0.363
+   ],
+   "skin_age": 0.0,
+   "stubble": 0.0,
+   "version": 2
+  },
+  "human_05": {
+   "beard": "none",
+   "beard_color": null,
+   "brow_color": [
+    0.4917,
+    0.4422,
+    0.3918
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "brow_height": 0.00799999999999999,
+    "brow_ridge": 0.299,
+    "cheek_fullness": -0.76,
+    "chin_length": -0.234,
+    "chin_projection": 0.78,
+    "chin_width": 0.3,
+    "nose_bridge": -0.076,
+    "nose_depth": 0.0642,
+    "nose_length": -0.05,
+    "nose_width": 0.2552
+   },
+   "eyes": [
+    0.4152,
+    0.3472,
+    0.3106
+   ],
+   "freckles": 0.0,
+   "hair": "painted_topknot_female",
+   "hair_color": [
+    0.7565,
+    0.6804,
+    0.6028
+   ],
+   "hair_detail": 22,
+   "hair_grey": 0.0,
+   "hair_length": -0.16,
+   "hair_tie_height": 0.0,
+   "hair_volume": 0.0,
+   "label": "Orla",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.62,
+    0.36,
+    0.33
+   ],
+   "preset": "",
+   "sex": "female",
+   "skin": [
+    0.9102,
+    0.6242,
+    0.4302
+   ],
+   "skin_age": 0.72,
+   "stubble": 0.0,
+   "version": 2
+  },
+  "human_07": {
+   "beard": "none",
+   "beard_color": null,
+   "brow_color": [
+    0.2487,
+    0.0898,
+    0.0745
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "cheek_fullness": -0.52,
+    "cheekbones": -0.828,
+    "chin_length": -0.63,
+    "chin_projection": 0.7,
+    "chin_width": -0.002,
+    "jaw_width": -0.3366,
+    "mouth_width": 0.5,
+    "nose_bridge": -0.748,
+    "nose_depth": -0.6634,
+    "nose_length": 0.01,
+    "nose_width": -0.2552
+   },
+   "eyes": [
+    0.4152,
+    0.3472,
+    0.3106
+   ],
+   "freckles": 0.0,
+   "hair": "parted_sweep_female",
+   "hair_color": [
+    0.3826,
+    0.1381,
+    0.1146
+   ],
+   "hair_detail": 58,
+   "hair_grey": 0.0,
+   "hair_length": 0.0,
+   "hair_tie_height": 0.0,
+   "hair_volume": 0.0,
+   "label": "Fenna",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.8,
+    0.44,
+    0.38
+   ],
+   "preset": "",
+   "sex": "female",
+   "skin": [
+    0.8289,
+    0.5413,
+    0.363
+   ],
+   "skin_age": 0.0,
+   "stubble": 0.0,
+   "version": 2
+  },
+  "human_09": {
+   "beard": "none",
+   "beard_color": null,
+   "brow_color": [
+    0.4089,
+    0.3777,
+    0.3747
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "brow_height": 0.00800000000000001,
+    "brow_ridge": 0.414,
+    "cheek_fullness": -0.5,
+    "cheekbones": -0.54,
+    "chin_length": 0.432,
+    "chin_projection": 0.38,
+    "chin_width": 0.08,
+    "jaw_width": -0.396,
+    "mouth_width": 0.84,
+    "nose_bridge": 0.00799999999999998,
+    "nose_depth": -0.2996,
+    "nose_tip": -0.66,
+    "nose_width": 0.7192
+   },
+   "eyes": [
+    0.4945,
+    0.3947,
+    0.3237
+   ],
+   "freckles": 0.0,
+   "hair": "soft_wavy_bob_female",
+   "hair_color": [
+    0.6291,
+    0.5811,
+    0.5765
+   ],
+   "hair_detail": 58,
+   "hair_grey": 0.0,
+   "hair_length": 0.0,
+   "hair_tie_height": 0.0,
+   "hair_volume": 0.1,
+   "label": "Sabine",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.8,
+    0.44,
+    0.38
+   ],
+   "preset": "",
+   "sex": "female",
+   "skin": [
+    0.2961,
+    0.1922,
+    0.1392
+   ],
+   "skin_age": 0.63,
+   "stubble": 0.0,
+   "version": 2
+  },
+  "human_10": {
+   "beard": "none",
+   "beard_color": [
+    0.0167,
+    0.0146,
+    0.0128
+   ],
+   "brow_color": [
+    0.0504,
+    0.0485,
+    0.0455
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "brow_ridge": 0.327,
+    "cheek_fullness": -0.22,
+    "cheekbones": -0.2408,
+    "chin_length": -0.1818,
+    "chin_projection": 0.34,
+    "chin_width": -0.22,
+    "mouth_width": 0.48,
+    "nose_bridge": 0.32,
+    "nose_length": 0.01,
+    "nose_width": -0.444
+   },
+   "eyes": [
+    0.3966,
+    0.3717,
+    0.3671
+   ],
+   "freckles": 0.0,
+   "hair": "parted_sweep_male",
+   "hair_color": [
+    0.0775,
+    0.0746,
+    0.0699
+   ],
+   "hair_detail": 88,
+   "hair_grey": 0.0,
+   "hair_length": -0.54,
+   "hair_tie_height": 0.0,
+   "hair_volume": 0.44,
+   "label": "Kieran",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.62,
+    0.36,
+    0.33
+   ],
+   "preset": "",
+   "sex": "male",
+   "skin": [
+    0.8166,
+    0.5413,
+    0.359
+   ],
+   "skin_age": 0.0,
+   "stubble": 0.0,
+   "version": 2
+  },
+  "human_11": {
+   "beard": "none",
+   "beard_color": null,
+   "brow_color": [
+    0.0497,
+    0.0485,
+    0.0464
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "brow_height": 0.66,
+    "brow_ridge": 0.23,
+    "chin_length": 0.216,
+    "chin_projection": 0.74,
+    "chin_width": 0.2,
+    "mouth_width": 0.5,
+    "nose_bridge": -0.452,
+    "nose_depth": -0.1926,
+    "nose_tip": -0.14,
+    "nose_width": 0.464
+   },
+   "eyes": [
+    0.4152,
+    0.3472,
+    0.3106
+   ],
+   "freckles": 0.0,
+   "hair": "layered_long_female",
+   "hair_color": [
+    0.0764,
+    0.0746,
+    0.0714
+   ],
+   "hair_detail": 20,
+   "hair_grey": 0.0,
+   "hair_length": 0.56,
+   "hair_tie_height": 0.0,
+   "hair_volume": -0.44,
+   "label": "Imani",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.8,
+    0.44,
+    0.38
+   ],
+   "preset": "",
+   "sex": "female",
+   "skin": [
+    0.2985,
+    0.1895,
+    0.1483
+   ],
+   "skin_age": 0.17,
+   "stubble": 0.0,
+   "version": 2
+  },
+  "human_12": {
+   "beard": "goatee",
+   "beard_color": [
+    0.6776,
+    0.6168,
+    0.5589
+   ],
+   "brow_color": [
+    0.4934,
+    0.451,
+    0.4113
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "cheek_fullness": 0.08,
+    "cheekbones": -0.9976,
+    "chin_width": 0.002,
+    "ear_size": 0.22,
+    "jaw_width": 0.323,
+    "nose_bridge": 0.26,
+    "nose_depth": 0.096
+   },
+   "eyes": [
+    0.3694,
+    0.3781,
+    0.2981
+   ],
+   "freckles": 0.0,
+   "hair": "painted_topknot_male",
+   "hair_color": [
+    0.7591,
+    0.6939,
+    0.6327
+   ],
+   "hair_detail": 65,
+   "hair_grey": 0.0,
+   "hair_length": 0.2,
+   "hair_tie_height": 0.0,
+   "hair_volume": 0.24,
+   "label": "Renwick",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.7,
+    0.44,
+    0.36
+   ],
+   "preset": "",
+   "sex": "male",
+   "skin": [
+    0.6833,
+    0.4649,
+    0.296
+   ],
+   "skin_age": 0.76,
+   "stubble": 0.3,
+   "version": 2
+  },
+  "human_13": {
+   "beard": "stubble",
+   "beard_color": [
+    0.541,
+    0.2053,
+    0.043
+   ],
+   "brow_color": [
+    0.3716,
+    0.1552,
+    0.0702
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "chin_length": -0.202,
+    "chin_projection": 0.18,
+    "chin_width": 0.2,
+    "mouth_width": -0.1,
+    "nose_bridge": 0.148,
+    "nose_depth": -0.1728,
+    "nose_width": -0.144
+   },
+   "eyes": [
+    0.404,
+    0.3515,
+    0.2822
+   ],
+   "freckles": 0.0,
+   "hair": "rounded_afro",
+   "hair_color": [
+    0.5716,
+    0.2387,
+    0.108
+   ],
+   "hair_detail": 35,
+   "hair_grey": 0.0,
+   "hair_length": -0.2,
+   "hair_tie_height": 0.0,
+   "hair_volume": -0.2,
+   "label": "Ferris",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.7,
+    0.44,
+    0.36
+   ],
+   "preset": "",
+   "sex": "male",
+   "skin": [
+    0.8792,
+    0.5951,
+    0.4248
+   ],
+   "skin_age": 0.11,
+   "stubble": 0.6,
+   "version": 2
+  },
+  "human_15": {
+   "beard": "none",
+   "beard_color": null,
+   "brow_color": [
+    0.5475,
+    0.5103,
+    0.5072
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "brow_ridge": 0.345,
+    "cheek_fullness": -0.68,
+    "chin_projection": 0.84,
+    "chin_width": 0.336,
+    "ear_size": -0.22,
+    "jaw_width": -0.4752
+   },
+   "eyes": [
+    0.4152,
+    0.3472,
+    0.3106
+   ],
+   "freckles": 0.0,
+   "hair": "parted_sweep_female",
+   "hair_color": [
+    0.8423,
+    0.7851,
+    0.7803
+   ],
+   "hair_detail": 70,
+   "hair_grey": 0.0,
+   "hair_length": -0.36,
+   "hair_tie_height": 0.0,
+   "hair_volume": -0.08,
+   "label": "Maelis",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.5,
+    0.31,
+    0.27
+   ],
+   "preset": "",
+   "sex": "female",
+   "skin": [
+    0.6976,
+    0.4577,
+    0.2845
+   ],
+   "skin_age": 0.68,
+   "stubble": 0.0,
+   "version": 2
+  },
+  "human_16": {
+   "beard": "none",
+   "beard_color": [
+    0.0153,
+    0.0147,
+    0.0126
+   ],
+   "brow_color": [
+    0.0497,
+    0.0483,
+    0.0451
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "cheek_fullness": 0.18,
+    "cheekbones": -0.4472,
+    "chin_projection": 0.42,
+    "chin_width": 0.004,
+    "jaw_width": -0.114,
+    "mouth_width": 0.82
+   },
+   "eyes": [
+    0.4448,
+    0.3458,
+    0.2729
+   ],
+   "freckles": 0.0,
+   "hair": "rear_braid_male",
+   "hair_color": [
+    0.0764,
+    0.0743,
+    0.0694
+   ],
+   "hair_detail": 56,
+   "hair_grey": 0.0,
+   "hair_length": 0.64,
+   "hair_tie_height": 0.0,
+   "hair_volume": 0.3,
+   "label": "Kethan",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.7,
+    0.44,
+    0.36
+   ],
+   "preset": "",
+   "sex": "male",
+   "skin": [
+    0.3999,
+    0.2498,
+    0.1695
+   ],
+   "skin_age": 0.0,
+   "stubble": 0.0,
+   "version": 2
+  },
+  "human_17": {
+   "beard": "none",
+   "beard_color": null,
+   "brow_color": [
+    0.1575,
+    0.0879,
+    0.0637
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "brow_height": 0.348,
+    "brow_ridge": 0.069,
+    "cheek_fullness": -0.68,
+    "chin_projection": 0.3,
+    "chin_width": 0.308,
+    "jaw_width": -0.4356,
+    "mouth_width": 0.66,
+    "nose_bridge": -0.496,
+    "nose_depth": -0.5778,
+    "nose_length": 0.1,
+    "nose_width": -0.2552
+   },
+   "eyes": [
+    0.4207,
+    0.4396,
+    0.4923
+   ],
+   "freckles": 0.0,
+   "hair": "painted_ponytail_female",
+   "hair_color": [
+    0.2423,
+    0.1352,
+    0.0981
+   ],
+   "hair_detail": 65,
+   "hair_grey": 0.0,
+   "hair_length": 0.7,
+   "hair_tie_height": 0.0,
+   "hair_volume": 0.3,
+   "label": "Rhea",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.62,
+    0.36,
+    0.33
+   ],
+   "preset": "",
+   "sex": "female",
+   "skin": [
+    0.8155,
+    0.5336,
+    0.3448
+   ],
+   "skin_age": 0.21,
+   "stubble": 0.0,
+   "version": 2
+  },
+  "human_18": {
+   "beard": "moustache",
+   "beard_color": [
+    0.6302,
+    0.5626,
+    0.5046
+   ],
+   "brow_color": [
+    0.4678,
+    0.4197,
+    0.379
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "brow_height": 0.00799999999999999,
+    "brow_ridge": 0.2834,
+    "chin_projection": -0.38,
+    "chin_width": 0.19,
+    "ear_size": -0.22,
+    "jaw_width": 0.095,
+    "nose_bridge": -0.004,
+    "nose_depth": 0.2304,
+    "nose_width": 0.084
+   },
+   "eyes": [
+    0.3966,
+    0.3717,
+    0.3671
+   ],
+   "freckles": 0.0,
+   "hair": "rounded_afro",
+   "hair_color": [
+    0.7197,
+    0.6457,
+    0.5831
+   ],
+   "hair_detail": 45,
+   "hair_grey": 0.0,
+   "hair_length": -0.24,
+   "hair_tie_height": 0.0,
+   "hair_volume": -0.24,
+   "label": "Osric",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.7,
+    0.44,
+    0.36
+   ],
+   "preset": "",
+   "sex": "male",
+   "skin": [
+    0.8756,
+    0.5933,
+    0.419
+   ],
+   "skin_age": 0.85,
+   "stubble": 0.3,
+   "version": 2
+  },
+  "human_19": {
+   "beard": "none",
+   "beard_color": null,
+   "brow_color": [
+    0.3435,
+    0.1373,
+    0.0691
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "brow_height": 0.764,
+    "brow_ridge": 0.092,
+    "cheek_fullness": -0.54,
+    "cheekbones": -0.972,
+    "chin_length": 0.054,
+    "chin_projection": 0.66,
+    "nose_bridge": -0.52,
+    "nose_depth": -0.428,
+    "nose_length": 0.31,
+    "nose_tip": -0.4
+   },
+   "eyes": [
+    0.4152,
+    0.3472,
+    0.3106
+   ],
+   "freckles": 0.0,
+   "hair": "shoulder_waves",
+   "hair_color": [
+    0.5284,
+    0.2113,
+    0.1063
+   ],
+   "hair_detail": 65,
+   "hair_grey": 0.0,
+   "hair_length": -0.16,
+   "hair_tie_height": 0.0,
+   "hair_volume": -0.04,
+   "label": "Cerys",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.8,
+    0.44,
+    0.38
+   ],
+   "preset": "",
+   "sex": "female",
+   "skin": [
+    0.9532,
+    0.7026,
+    0.5497
+   ],
+   "skin_age": 0.0,
+   "stubble": 0.0,
+   "version": 2
+  },
+  "human_21": {
+   "beard": "none",
+   "beard_color": null,
+   "brow_color": [
+    0.1334,
+    0.0708,
+    0.0628
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "cheekbones": -0.252,
+    "chin_length": -0.396,
+    "nose_bridge": 0.004,
+    "nose_depth": -0.6848
+   },
+   "eyes": [
+    0.4207,
+    0.4396,
+    0.4923
+   ],
+   "freckles": 0.0,
+   "hair": "soft_wavy_bob_female",
+   "hair_color": [
+    0.2052,
+    0.1089,
+    0.0966
+   ],
+   "hair_detail": 68,
+   "hair_grey": 0.0,
+   "hair_length": -0.22,
+   "hair_tie_height": 0.0,
+   "hair_volume": 0.3,
+   "label": "Zadie",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.8,
+    0.44,
+    0.38
+   ],
+   "preset": "",
+   "sex": "female",
+   "skin": [
+    0.3602,
+    0.2192,
+    0.1475
+   ],
+   "skin_age": 0.25,
+   "stubble": 0.0,
+   "version": 2
+  },
+  "human_22": {
+   "beard": "goatee",
+   "beard_color": [
+    0.1662,
+    0.0802,
+    0.0181
+   ],
+   "brow_color": [
+    0.1354,
+    0.0872,
+    0.0591
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "brow_height": -0.68,
+    "brow_ridge": 0.327,
+    "cheekbones": -0.8256,
+    "chin_width": 0.004,
+    "jaw_width": -0.494,
+    "mouth_width": 0.56,
+    "nose_length": 0.16
+   },
+   "eyes": [
+    0.4448,
+    0.3458,
+    0.2729
+   ],
+   "freckles": 0.0,
+   "hair": "painted_topknot_male",
+   "hair_color": [
+    0.2084,
+    0.1342,
+    0.0909
+   ],
+   "hair_detail": 52,
+   "hair_grey": 0.2,
+   "hair_length": -0.16,
+   "hair_tie_height": 0.0,
+   "hair_volume": 0.3,
+   "label": "Lucan",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.62,
+    0.36,
+    0.33
+   ],
+   "preset": "",
+   "sex": "male",
+   "skin": [
+    0.7778,
+    0.5066,
+    0.3205
+   ],
+   "skin_age": 0.13,
+   "stubble": 0.3,
+   "version": 2
+  },
+  "human_23": {
+   "beard": "none",
+   "beard_color": null,
+   "brow_color": [
+    0.4001,
+    0.3619,
+    0.3252
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "brow_height": 0.184,
+    "brow_ridge": 0.207,
+    "cheek_fullness": -0.56,
+    "cheekbones": -0.648,
+    "chin_length": 0.054,
+    "chin_projection": 0.52,
+    "chin_width": 0.14,
+    "ear_size": -0.56,
+    "mouth_width": 0.24,
+    "nose_bridge": 0.34,
+    "nose_length": 0.21,
+    "nose_tip": -0.26,
+    "nose_width": 0.2552
+   },
+   "eyes": [
+    0.4207,
+    0.4259,
+    0.3469
+   ],
+   "freckles": 0.0,
+   "hair": "cornrows_low_knot",
+   "hair_color": [
+    0.6155,
+    0.5568,
+    0.5003
+   ],
+   "hair_detail": 12,
+   "hair_grey": 0.0,
+   "hair_length": -0.24,
+   "hair_tie_height": 0.0,
+   "hair_volume": -0.5,
+   "label": "Isolde",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.62,
+    0.36,
+    0.33
+   ],
+   "preset": "",
+   "sex": "female",
+   "skin": [
+    0.903,
+    0.6166,
+    0.4252
+   ],
+   "skin_age": 0.78,
+   "stubble": 0.0,
+   "version": 2
+  },
+  "human_24": {
+   "beard": "short_beard",
+   "beard_color": [
+    0.4023,
+    0.3358,
+    0.2965
+   ],
+   "brow_color": [
+    0.2828,
+    0.2394,
+    0.2139
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "cheek_fullness": -0.1,
+    "ear_size": 0.18,
+    "nose_bridge": 0.00400000000000003,
+    "nose_depth": 0.4416,
+    "nose_length": -0.56,
+    "nose_width": 0.552
+   },
+   "eyes": [
+    0.3636,
+    0.2955,
+    0.2587
+   ],
+   "freckles": 0.0,
+   "hair": "none",
+   "hair_color": [
+    0.4351,
+    0.3683,
+    0.3291
+   ],
+   "hair_detail": 50,
+   "hair_grey": 0.35,
+   "hair_length": 0.0,
+   "hair_tie_height": 0.0,
+   "hair_volume": 0.0,
+   "label": "Garron",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.7,
+    0.44,
+    0.36
+   ],
+   "preset": "",
+   "sex": "male",
+   "skin": [
+    0.275,
+    0.1674,
+    0.1209
+   ],
+   "skin_age": 0.66,
+   "stubble": 0.3,
+   "version": 2
+  },
+  "human_25": {
+   "beard": "none",
+   "beard_color": null,
+   "brow_color": [
+    0.0506,
+    0.0494,
+    0.0472
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "brow_height": -0.12,
+    "cheek_fullness": -0.58,
+    "chin_width": 0.06,
+    "ear_size": -0.28,
+    "nose_bridge": -0.26,
+    "nose_length": -0.38,
+    "nose_width": -0.116
+   },
+   "eyes": [
+    0.4472,
+    0.4197,
+    0.4127
+   ],
+   "freckles": 0.0,
+   "hair": "rear_braid_female",
+   "hair_color": [
+    0.0778,
+    0.0759,
+    0.0726
+   ],
+   "hair_detail": 48,
+   "hair_grey": 0.0,
+   "hair_length": 0.4,
+   "hair_tie_height": 0.0,
+   "hair_volume": 0.1,
+   "label": "Edda",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.62,
+    0.36,
+    0.33
+   ],
+   "preset": "",
+   "sex": "female",
+   "skin": [
+    0.9362,
+    0.6954,
+    0.5331
+   ],
+   "skin_age": 0.0,
+   "stubble": 0.0,
+   "version": 2
+  },
+  "human_26": {
+   "beard": "stubble",
+   "beard_color": [
+    0.0073,
+    0.0071,
+    0.0071
+   ],
+   "brow_color": [
+    0.0459,
+    0.0446,
+    0.0423
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "brow_ridge": 0.327,
+    "cheek_fullness": -0.06,
+    "chin_length": -0.3434,
+    "chin_projection": 0.32,
+    "chin_width": 0.26,
+    "ear_size": -0.38,
+    "nose_bridge": 0.24,
+    "nose_length": 0.00999999999999998,
+    "nose_tip": -0.06
+   },
+   "eyes": [
+    0.3694,
+    0.3781,
+    0.2981
+   ],
+   "freckles": 0.0,
+   "hair": "buzz_cut_male",
+   "hair_color": [
+    0.0706,
+    0.0687,
+    0.0651
+   ],
+   "hair_detail": 35,
+   "hair_grey": 0.0,
+   "hair_length": 0.28,
+   "hair_tie_height": 0.0,
+   "hair_volume": 0.12,
+   "label": "Soren",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.7,
+    0.44,
+    0.36
+   ],
+   "preset": "",
+   "sex": "male",
+   "skin": [
+    0.2741,
+    0.1684,
+    0.1173
+   ],
+   "skin_age": 0.34,
+   "stubble": 0.6,
+   "version": 2
+  },
+  "human_28": {
+   "beard": "none",
+   "beard_color": [
+    0.6047,
+    0.4441,
+    0.3277
+   ],
+   "brow_color": [
+    0.4141,
+    0.308,
+    0.2321
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "brow_ridge": 0.327,
+    "cheekbones": -0.8944,
+    "chin_projection": 0.82,
+    "chin_width": 0.35,
+    "jaw_width": -0.095,
+    "nose_bridge": 0.00799999999999995,
+    "nose_depth": 0.6912,
+    "nose_width": 0.396
+   },
+   "eyes": [
+    0.4448,
+    0.3458,
+    0.2729
+   ],
+   "freckles": 0.0,
+   "hair": "buzz_cut_male",
+   "hair_color": [
+    0.6371,
+    0.4739,
+    0.3571
+   ],
+   "hair_detail": 5,
+   "hair_grey": 0.0,
+   "hair_length": -1.0,
+   "hair_tie_height": 0.0,
+   "hair_volume": -1.0,
+   "label": "Cael",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.7,
+    0.44,
+    0.36
+   ],
+   "preset": "",
+   "sex": "male",
+   "skin": [
+    0.8766,
+    0.6032,
+    0.4127
+   ],
+   "skin_age": 0.02,
+   "stubble": 0.0,
+   "version": 2
+  },
+  "human_29": {
+   "beard": "none",
+   "beard_color": null,
+   "brow_color": [
+    0.0552,
+    0.0539,
+    0.0519
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "cheek_fullness": -0.76,
+    "chin_length": -0.144,
+    "chin_projection": 0.3,
+    "chin_width": 0.12,
+    "jaw_width": -0.594,
+    "mouth_width": 0.5,
+    "nose_length": 0.68
+   },
+   "eyes": [
+    0.4152,
+    0.3472,
+    0.3106
+   ],
+   "freckles": 0.0,
+   "hair": "shoulder_waves",
+   "hair_color": [
+    0.085,
+    0.083,
+    0.0799
+   ],
+   "hair_detail": 78,
+   "hair_grey": 0.0,
+   "hair_length": 0.52,
+   "hair_tie_height": 0.0,
+   "hair_volume": 0.56,
+   "label": "Adira",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.8,
+    0.44,
+    0.38
+   ],
+   "preset": "",
+   "sex": "female",
+   "skin": [
+    0.3129,
+    0.1994,
+    0.1413
+   ],
+   "skin_age": 0.23,
+   "stubble": 0.0,
+   "version": 2
+  },
+  "human_30": {
+   "beard": "moustache",
+   "beard_color": [
+    0.6095,
+    0.5424,
+    0.4784
+   ],
+   "brow_color": [
+    0.4528,
+    0.4051,
+    0.36
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "brow_ridge": 0.327,
+    "chin_length": 0.4646,
+    "chin_projection": 0.34,
+    "chin_width": 0.288,
+    "ear_size": 0.1,
+    "jaw_width": -0.228,
+    "mouth_width": 0.42,
+    "nose_bridge": 0.536,
+    "nose_depth": 0.2304,
+    "nose_length": 0.71,
+    "nose_tip": -0.32,
+    "nose_width": 0.336
+   },
+   "eyes": [
+    0.3694,
+    0.3922,
+    0.4481
+   ],
+   "freckles": 0.0,
+   "hair": "receding_sweep",
+   "hair_color": [
+    0.6966,
+    0.6233,
+    0.5539
+   ],
+   "hair_detail": 30,
+   "hair_grey": 0.55,
+   "hair_length": -0.72,
+   "hair_tie_height": 0.0,
+   "hair_volume": -0.6,
+   "label": "Emeric",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.7,
+    0.44,
+    0.36
+   ],
+   "preset": "",
+   "sex": "male",
+   "skin": [
+    0.8653,
+    0.6372,
+    0.4443
+   ],
+   "skin_age": 0.8,
+   "stubble": 0.3,
+   "version": 2
+  },
+  "human_31": {
+   "beard": "full_beard",
+   "beard_color": [
+    0.0549,
+    0.0166,
+    0.0117
+   ],
+   "brow_color": [
+    0.0661,
+    0.0525,
+    0.0482
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "cheek_fullness": -0.06,
+    "ear_size": 0.12,
+    "nose_bridge": 0.00800000000000001,
+    "nose_depth": -0.4608
+   },
+   "eyes": [
+    0.3966,
+    0.3717,
+    0.3671
+   ],
+   "freckles": 0.0,
+   "hair": "parted_sweep_male",
+   "hair_color": [
+    0.1017,
+    0.0808,
+    0.0742
+   ],
+   "hair_detail": 65,
+   "hair_grey": 0.0,
+   "hair_length": -0.6,
+   "hair_tie_height": 0.0,
+   "hair_volume": 0.4,
+   "label": "Bastien",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.7,
+    0.44,
+    0.36
+   ],
+   "preset": "",
+   "sex": "male",
+   "skin": [
+    0.3193,
+    0.188,
+    0.1239
+   ],
+   "skin_age": 0.3,
+   "stubble": 0.3,
+   "version": 2
+  },
+  "human_32": {
+   "beard": "none",
+   "beard_color": null,
+   "brow_color": [
+    0.1609,
+    0.0857,
+    0.0639
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "cheek_fullness": -0.72,
+    "cheekbones": -0.72,
+    "chin_length": -0.63,
+    "chin_projection": 0.68,
+    "ear_size": -0.2,
+    "jaw_width": -0.594,
+    "nose_bridge": 0.004,
+    "nose_depth": -0.6848,
+    "nose_length": 0.29,
+    "nose_tip": -0.16,
+    "nose_width": 0.1044
+   },
+   "eyes": [
+    0.4543,
+    0.4001,
+    0.3322
+   ],
+   "freckles": 0.0,
+   "hair": "painted_ponytail_female",
+   "hair_color": [
+    0.2475,
+    0.1319,
+    0.0984
+   ],
+   "hair_detail": 60,
+   "hair_grey": 0.0,
+   "hair_length": 0.24,
+   "hair_tie_height": 0.0,
+   "hair_volume": 0.0,
+   "label": "Veda",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.62,
+    0.36,
+    0.33
+   ],
+   "preset": "",
+   "sex": "female",
+   "skin": [
+    0.8378,
+    0.5534,
+    0.3672
+   ],
+   "skin_age": 0.0,
+   "stubble": 0.0,
+   "version": 2
+  },
+  "human_33": {
+   "beard": "none",
+   "beard_color": null,
+   "brow_color": [
+    0.6027,
+    0.5737,
+    0.5544
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "brow_height": 0.492,
+    "brow_ridge": 0.391,
+    "cheek_fullness": -0.5,
+    "chin_length": 0.234,
+    "chin_projection": 0.54,
+    "chin_width": 0.336,
+    "jaw_width": 0.1188,
+    "nose_bridge": -0.172,
+    "nose_depth": -0.1926,
+    "nose_length": 0.01,
+    "nose_width": 0.7656
+   },
+   "eyes": [
+    0.4207,
+    0.4259,
+    0.3469
+   ],
+   "freckles": 0.0,
+   "hair": "layered_long_female",
+   "hair_color": [
+    0.9273,
+    0.8826,
+    0.8529
+   ],
+   "hair_detail": 12,
+   "hair_grey": 0.0,
+   "hair_length": 0.5,
+   "hair_tie_height": 0.0,
+   "hair_volume": -0.24,
+   "label": "Thalia",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.8,
+    0.44,
+    0.38
+   ],
+   "preset": "",
+   "sex": "female",
+   "skin": [
+    0.2964,
+    0.1919,
+    0.1402
+   ],
+   "skin_age": 0.74,
+   "stubble": 0.0,
+   "version": 2
+  },
+  "human_35": {
+   "beard": "none",
+   "beard_color": null,
+   "brow_color": [
+    0.0499,
+    0.0487,
+    0.0466
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "brow_ridge": 0.345,
+    "cheek_fullness": -0.26,
+    "chin_projection": 0.66,
+    "chin_width": 0.3,
+    "mouth_width": 0.72,
+    "nose_bridge": -0.576,
+    "nose_depth": -0.6848,
+    "nose_width": -0.2204
+   },
+   "eyes": [
+    0.4945,
+    0.3947,
+    0.3237
+   ],
+   "freckles": 0.0,
+   "hair": "rear_braid_female",
+   "hair_color": [
+    0.0768,
+    0.075,
+    0.0718
+   ],
+   "hair_detail": 28,
+   "hair_grey": 0.0,
+   "hair_length": 0.7,
+   "hair_tie_height": 0.0,
+   "hair_volume": -0.16,
+   "label": "Lenora",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.7,
+    0.44,
+    0.36
+   ],
+   "preset": "",
+   "sex": "female",
+   "skin": [
+    0.9347,
+    0.7037,
+    0.5574
+   ],
+   "skin_age": 0.08,
+   "stubble": 0.0,
+   "version": 2
+  },
+  "human_36": {
+   "beard": "none",
+   "beard_color": [
+    0.5687,
+    0.3672,
+    0.18
+   ],
+   "brow_color": [
+    0.3894,
+    0.257,
+    0.139
+   ],
+   "brow_style": "soft",
+   "brow_thickness": 0.0,
+   "controls": {
+    "brow_height": 0.46,
+    "brow_ridge": 0.327,
+    "cheek_fullness": -0.06,
+    "chin_length": -0.0606,
+    "chin_projection": 0.36,
+    "chin_width": 0.12,
+    "mouth_width": 0.36,
+    "nose_depth": -0.192,
+    "nose_length": 0.21
+   },
+   "eyes": [
+    0.3694,
+    0.3922,
+    0.4481
+   ],
+   "freckles": 0.0,
+   "hair": "layered_long_male",
+   "hair_color": [
+    0.599,
+    0.3955,
+    0.2138
+   ],
+   "hair_detail": 72,
+   "hair_grey": 0.0,
+   "hair_length": 0.16,
+   "hair_tie_height": 0.0,
+   "hair_volume": 0.3,
+   "label": "Ewan",
+   "liner": 0.0,
+   "liner_wing": 0.0,
+   "lip_tint": [
+    0.62,
+    0.36,
+    0.33
+   ],
+   "preset": "",
+   "sex": "male",
+   "skin": [
+    0.7656,
+    0.4924,
+    0.3114
+   ],
+   "skin_age": 0.0,
+   "stubble": 0.0,
+   "version": 2
   }
+ }
 }
