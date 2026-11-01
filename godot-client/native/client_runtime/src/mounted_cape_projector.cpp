@@ -195,7 +195,7 @@ struct Template {
     std::array<Vector3, COUNT> idle{}, centres{};
     std::array<std::array<float, 3>, 3> spans{};
     double edge_limit = 1.79, gap_limit = .003, strain_tolerance = .005;
-    int cold_iterations = 24, warm_iterations = 12;
+    int cold_iterations = 24, warm_iterations = 12, edge_priority_after = 0;
     bool activate_contacts = true, covered_clear = true, exact_memo = false, trusted_body = false, parallel_contacts = false, parallel_residuals = false, refresh_clear_contacts = false;
 };
 bool read_template(const Dictionary &d, Template &t) {
@@ -242,6 +242,11 @@ bool read_template(const Dictionary &d, Template &t) {
     const Variant refresh = solver.get("refresh_clear_contacts", false);
     if (refresh.get_type() != Variant::BOOL) return false;
     t.refresh_clear_contacts = refresh;
+    const Variant priority = solver.get("edge_priority_after", 0);
+    if (priority.get_type() != Variant::INT) return false;
+    const int64_t priority_after = priority;
+    if (priority_after < 0 || priority_after > 96) return false;
+    t.edge_priority_after = static_cast<int>(priority_after);
     std::vector<Vector3> positions, idle, centres, weighted_idle;
     if (!packed_vectors(field(d, "positions"), positions) || positions.empty()
         || !packed_vectors(field(d, "idle"), idle, COUNT)
@@ -525,7 +530,7 @@ struct RabbitLandsCapeProjector::Impl {
     std::vector<double> planes, multipliers, edge_maximum;
     std::vector<Vector3> edge_base;
     double gap = 0., correction = 0., strain = 1.;
-    int iterations = 0;
+    int iterations = 0, worst_edge = -1, priority_visits = 0;
     uint64_t refreshed_contacts = 0;
     uint64_t project_usec = 0, prepare_usec = 0, calls = 0, rejected = 0;
     String last_error;
@@ -572,7 +577,7 @@ struct RabbitLandsCapeProjector::Impl {
         residual_hits += residual_accesses_per_scan - static_cast<uint64_t>(residual_needed.size());
     }
     bool parallel_residual_strain(double scale, double &maximum) {
-        struct alignas(64) Maximum { double value = 1.; bool bad = false; };
+        struct alignas(64) Maximum { double value = 1.; int edge = -1; bool bad = false; };
         std::array<Maximum, 6> maxima{};
         ++parallel_strain_batches;
         contact_workers.run(data.edges.size(), [&](size_t first, size_t end, size_t worker) {
@@ -590,15 +595,19 @@ struct RabbitLandsCapeProjector::Impl {
                 if (std::isfinite(squared) && static_cast<double>(squared) * rounding_guard < bound * bound) continue;
                 const double ratio = static_cast<double>(delta.length()) / denominator;
                 if (!std::isfinite(ratio)) result.bad = true;
-                else result.value = std::max(result.value, ratio);
+                else if (ratio > result.value || (ratio == result.value && result.edge >= 0 && static_cast<int>(i) < result.edge)) {
+                    result.value = ratio;result.edge = static_cast<int>(i);
+                }
             }
         });
         // Max selects an existing finite value, rather than accumulating a sum.
         // Reducing in worker-index order gives exactly the original finite max.
-        maximum = 1.;
+        maximum = 1.;worst_edge = -1;
         for (const auto &result : maxima) {
             if (result.bad) return false;
-            maximum = std::max(maximum, result.value);
+            if (result.value > maximum || (result.value == maximum && result.edge >= 0 && (worst_edge < 0 || result.edge < worst_edge))) {
+                maximum = result.value;worst_edge = result.edge;
+            }
         }
         return true;
     }
@@ -697,7 +706,7 @@ bool RabbitLandsCapeProjector::configure(const Dictionary &values) {
             state->residual_accesses_per_scan += 2;include(edge.a);include(edge.b);
         }
     }
-    state->gap = state->correction = 0.;state->strain = 1.;state->iterations = 0;
+    state->gap = state->correction = 0.;state->strain = 1.;state->iterations = 0;state->worst_edge = -1;state->priority_visits = 0;
     state->project_usec = state->prepare_usec = 0;state->last_error = "";
     return true;
 }
@@ -724,12 +733,13 @@ Dictionary RabbitLandsCapeProjector::stats() const {
     out["residual_unique_real_points"] = static_cast<int64_t>(state->residual_needed.size());
     out["plane_queries"] = static_cast<int64_t>(state->plane_queries);out["plane_memo_hits"] = static_cast<int64_t>(state->plane_hits);
     out["residual_point_hits"] = static_cast<int64_t>(state->residual_hits);out["residual_point_misses"] = static_cast<int64_t>(state->residual_misses);
+    out["worst_edge"] = state->worst_edge;out["edge_priority_visits"] = state->priority_visits;out["edge_priority_after"] = state->data.edge_priority_after;
     out["edge_limit"] = state->data.edge_limit;out["gap_limit_m"] = state->data.gap_limit;
     return out;
 }
 Dictionary RabbitLandsCapeProjector::runtime_info() const {
     Dictionary out;out["api"] = 2;out["implementation"] = "native";
-    out["refresh_clear_contacts"] = true;out["kind"] = "mounted_cape_material";out["virtual_factors"] = true;out["exact_memo"] = true;out["trusted_body"] = true;out["parallel_contacts"] = true;out["parallel_residuals"] = true;out["parallel_workers"] = static_cast<int64_t>(CONTACT_WORKERS_LIMIT);out["parallel_workers_limit"] = static_cast<int64_t>(CONTACT_WORKERS_LIMIT);out["parallel_serial_fallback"] = CONTACT_WORKERS_LIMIT < 2;out["parallel_chunk"] = 256;return out;
+    out["edge_priority"] = true;out["refresh_clear_contacts"] = true;out["kind"] = "mounted_cape_material";out["virtual_factors"] = true;out["exact_memo"] = true;out["trusted_body"] = true;out["parallel_contacts"] = true;out["parallel_residuals"] = true;out["parallel_workers"] = static_cast<int64_t>(CONTACT_WORKERS_LIMIT);out["parallel_workers_limit"] = static_cast<int64_t>(CONTACT_WORKERS_LIMIT);out["parallel_serial_fallback"] = CONTACT_WORKERS_LIMIT < 2;out["parallel_chunk"] = 256;return out;
 }
 Dictionary RabbitLandsCapeProjector::project(const Transform3D &world, const Transform3D &frame,
     const Array &roots_in, const Array &bodies_in, const PackedVector3Array &incoming,
@@ -838,26 +848,31 @@ Dictionary RabbitLandsCapeProjector::project(const Transform3D &world, const Tra
         state->edge_base[i] = state->world[edge.a] - state->world[edge.b];
         state->edge_maximum[i] = edge.length * scale * data.edge_limit;
     }
-    state->refreshed_contacts = 0;
+    state->refreshed_contacts = 0;state->worst_edge = -1;state->priority_visits = 0;
     double correction = 0., gap = 0., strain = 1.;int iterations = 0;
-    for (int iteration = 0; iteration < (cold ? data.cold_iterations : data.warm_iterations); ++iteration) {
+    const int iteration_limit = cold ? data.cold_iterations : data.warm_iterations;
+    for (int iteration = 0; iteration < iteration_limit; ++iteration) {
         iterations = iteration + 1;
         const auto updates_started = Clock::now();
-        for (size_t i = 0; i < data.edges.size(); ++i) {
+        const auto project_edge = [&](size_t i) {
             const auto &edge = data.edges[i];
-            if (edge.norm < .0000001) continue;
+            if (edge.norm < .0000001) return;
             Vector3 delta = state->edge_base[i];
             for (size_t slot = 0; slot < edge.active.size(); ++slot) delta += translations[edge.active[slot]] * edge.weights[slot];
             const double norm = edge.norm;delta += state->edge_dual[i] * static_cast<real_t>(norm);
             const double length = delta.length(), maximum = state->edge_maximum[i];
-            if (norm < .0000001) continue;
+            if (norm < .0000001) return;
             const Vector3 dual = delta * static_cast<real_t>(std::max(0., length - maximum) / std::max(length, .000001) / norm);
             const Vector3 change = state->edge_dual[i] - dual;
             if (change.length_squared() > .000000000001) for (size_t slot = 0; slot < FREE.size(); ++slot) {
                 translations[FREE[slot]] += change * static_cast<real_t>(edge.gains[slot]);
             }
             state->edge_dual[i] = dual;
-        }
+        };
+        const auto project_edges = [&]() {
+            for (size_t i = 0; i < data.edges.size(); ++i) project_edge(i);
+        };
+        const auto project_contacts = [&]() {
         for (size_t i = 0; i < data.samples.size(); ++i) {
             const auto &sample = data.samples[i];const double norm = sample.norm;
             if (norm < .0001 || state->norm(sample.id) < .02) continue;
@@ -876,6 +891,15 @@ Dictionary RabbitLandsCapeProjector::project(const Transform3D &world, const Tra
                 correction = std::max(correction, static_cast<double>(Math::sqrt(maximum_move_squared)));
             }
             state->multipliers[i] = multiplier;
+        }
+        };
+        project_edges();project_contacts();
+        // Later updates can disturb an earlier material edge. Revisit the
+        // previous limiting edge with its CURRENT stored dual; the full contact
+        // and all-edge scan below still decide whether this pose is accepted.
+        if (data.edge_priority_after > 0 && iteration >= data.edge_priority_after && state->worst_edge >= 0
+            && strain >= data.edge_limit + data.strain_tolerance) {
+            project_edge(static_cast<size_t>(state->worst_edge));++state->priority_visits;
         }
         state->serial_updates_usec += elapsed_us(updates_started);
         if (iteration % 2 == 0) continue;
@@ -941,9 +965,17 @@ Dictionary RabbitLandsCapeProjector::project(const Transform3D &world, const Tra
         strain = 1.;
         if (data.parallel_residuals) {
             if (!state->parallel_residual_strain(scale, strain)) return fail("nonfinite_residual_strain");
-        } else for (const auto &edge : data.edges) strain = std::max(strain, static_cast<double>(state->residual_point(edge.a, translations).distance_to(state->residual_point(edge.b, translations))) / (edge.length * scale));
+        } else {
+            state->worst_edge = -1;
+            for (size_t i = 0; i < data.edges.size(); ++i) {
+                const auto &edge = data.edges[i];
+                const double ratio = static_cast<double>(state->residual_point(edge.a, translations).distance_to(state->residual_point(edge.b, translations))) / (edge.length * scale);
+                if (ratio > strain) {strain = ratio;state->worst_edge = static_cast<int>(i);}
+            }
+        }
         state->strain_scan_usec += elapsed_us(strain_started);
         if (gap < data.gap_limit && strain < data.edge_limit + data.strain_tolerance) break;
+
     }
     for (const auto &v : translations) if (!finite(v)) return fail("nonfinite_output");
     if (contacts.bad || !std::isfinite(gap) || !std::isfinite(strain) || !std::isfinite(correction)) return fail("nonfinite_contact");

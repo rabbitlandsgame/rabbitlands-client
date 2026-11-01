@@ -38,6 +38,7 @@ func _make_mirrors() -> bool:
 	_parity_template.solver = {"edge_limit": EDGE_LIMIT, "gap_limit_m": GAP_LIMIT,
 		"strain_tolerance": .005, "cold_iterations": COLD_ITERATIONS,
 		"warm_iterations": WARM_ITERATIONS, "activate_contacts": true,
+		"edge_priority_after": EDGE_PRIORITY_AFTER,
 		"covered_clear": true, "exact_memo": true, "trusted_body": true,
 		"parallel_contacts": true, "parallel_residuals": false,
 		"refresh_clear_contacts": true}
@@ -87,7 +88,7 @@ func project(skeleton: Skeleton3D, world: Transform3D, frame: Transform3D,
 		var left: PackedVector3Array = a.translations
 		var right: PackedVector3Array = b.translations
 		_expect_equal(left.to_byte_array() == right.to_byte_array(), "all twelve controls are byte-identical")
-		for key: String in ["gap_m", "strain", "iterations", "residual_point_hits", "residual_point_misses"]:
+		for key: String in ["gap_m", "strain", "iterations", "residual_point_hits", "residual_point_misses", "worst_edge", "edge_priority_visits"]:
 			_expect_equal(a.stats.has(key) and b.stats.has(key) and a.stats[key] == b.stats[key], "identical " + key)
 		if debug:
 			for key: String in ["world", "virtual_world", "posed_world", "posed_virtual_world"]:
@@ -114,7 +115,8 @@ func _probe_rejections(packet: Array) -> void:
 	for solver: Dictionary in [{"parallel_residuals": 1},
 			{"parallel_residuals": true, "parallel_contacts": false},
 			{"parallel_residuals": true, "parallel_contacts": true, "trusted_body": true, "exact_memo": false},
-			{"parallel_contacts": true, "trusted_body": false}, {"refresh_clear_contacts": 1}]:
+			{"parallel_contacts": true, "trusted_body": false}, {"refresh_clear_contacts": 1},
+			{"edge_priority_after": 12.0}, {"edge_priority_after": -1}, {"edge_priority_after": 97}]:
 		var malformed := _parity_template.duplicate()
 		malformed.solver = solver
 		_expect_equal(not bool(_parity_optimized.call("configure", malformed)), "invalid optional flags are rejected")

@@ -20,7 +20,7 @@ func _run() -> void:
 	if ready and ClassDB.class_exists("RabbitLandsCapeProjector") and ClassDB.class_exists("RabbitLandsCapeBodySurface"):
 		var projector: RefCounted = ClassDB.instantiate("RabbitLandsCapeProjector")
 		capabilities = projector.call("runtime_info")
-	for key: String in ["exact_memo", "trusted_body", "parallel_contacts", "parallel_residuals", "refresh_clear_contacts"]:
+	for key: String in ["exact_memo", "trusted_body", "parallel_contacts", "parallel_residuals", "refresh_clear_contacts", "edge_priority"]:
 		ready = ready and bool(capabilities.get(key, false))
 	if not ready:
 		var reason := "compatible optional mounted-native arithmetic is unavailable"

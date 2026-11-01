@@ -6,6 +6,7 @@ const NativeMath := preload("res://src/actors/cape_native_math.gd")
 const COUNT := 12
 const FREE := [1, 2, 3, 5, 6, 7, 9, 10, 11]
 const EDGE_LIMIT := 1.79
+const EDGE_PRIORITY_AFTER := 2
 # Residual against an 8 mm posterior guard; 6 mm still leaves 2 mm outside it.
 const GAP_LIMIT := .006
 const COLD_ITERATIONS := 96
@@ -72,6 +73,8 @@ var _last_projected := PackedVector3Array()
 var _last_basis := Basis.IDENTITY
 var _project_usec := 0
 var _last_iterations := 0
+var _last_worst_edge := -1
+var _last_priority_visits := 0
 var _template_cache_hit := false
 var _configure_usec := 0
 # Presentation state belongs to this helper, never to a cached skin template.
@@ -130,6 +133,8 @@ func _clear_configuration() -> void:
 	_last_strain = 1.0
 	_project_usec = 0
 	_last_iterations = 0
+	_last_worst_edge = -1
+	_last_priority_visits = 0
 	_template_cache_hit = false
 	_configure_usec = 0
 	_actor_ref = null
@@ -799,6 +804,8 @@ func _contact_norm(index: int) -> float:
 func project(skeleton: Skeleton3D, world: Transform3D, frame: Transform3D,
 		translations: PackedVector3Array, contact: Callable, plane_contact: Callable) -> PackedVector3Array:
 	var started := Time.get_ticks_usec()
+	_last_worst_edge = -1
+	_last_priority_visits = 0
 	if _native != null and _native_enabled and not _native_contacts.is_empty():
 		var bodies: Array[Transform3D] = []
 		for bone: int in _body_bones:
@@ -813,6 +820,8 @@ func project(skeleton: Skeleton3D, world: Transform3D, frame: Transform3D,
 			_last_strain = float(_native_stats.get("strain", 1.0))
 			_last_correction = float(_native_stats.get("correction_m", 0.0))
 			_last_iterations = int(_native_stats.get("iterations", 0))
+			_last_worst_edge = int(_native_stats.get("worst_edge", -1))
+			_last_priority_visits = int(_native_stats.get("edge_priority_visits", 0))
 			_last_projected = projected.duplicate()
 			_last_basis = world.basis * frame.basis
 			_project_usec = Time.get_ticks_usec() - started
@@ -879,6 +888,7 @@ func project(skeleton: Skeleton3D, world: Transform3D, frame: Transform3D,
 			_virtual_world[at] = _world[face.x] * factors.x + _world[face.y] * factors.y + _world[face.z] * factors.z
 	_last_correction = 0.0
 	_last_gap = 0.0
+	var worst_edge := -1
 	var edge_dual := PackedVector3Array()
 	edge_dual.resize(_edges.size())
 	var normals := PackedVector3Array()
@@ -936,6 +946,29 @@ func project(skeleton: Skeleton3D, world: Transform3D, frame: Transform3D,
 					translations[FREE[slot]] += move
 					_last_correction = maxf(_last_correction, move.length())
 			multipliers[at] = multiplier
+		# Revisit one violated material coordinate after contacts, retaining its
+		# current Dykstra dual. The complete residual scan still follows it.
+		if iteration >= EDGE_PRIORITY_AFTER and worst_edge >= 0 and _last_strain >= EDGE_LIMIT + .005:
+			var at := worst_edge
+			var edge := _edges[at]
+			var delta := _world[edge.x] - _world[edge.y]
+			var bones := _edge_bones[at]
+			var weights := _edge_weights[at]
+			for slot: int in bones.size():
+				delta += translations[bones[slot]] * weights[slot]
+			var norm := _edge_norms[at]
+			delta += edge_dual[at] * norm
+			var length := delta.length()
+			var maximum := _edge_lengths[at] * material_scale * EDGE_LIMIT
+			if norm >= 0.0000001:
+				var dual := delta * (maxf(0.0, length - maximum) / maxf(length, .000001) / norm)
+				var change := edge_dual[at] - dual
+				var gains := _edge_gains[at]
+				if change.length_squared() > 0.000000000001:
+					for slot: int in FREE.size():
+						translations[FREE[slot]] += change * gains[slot]
+				edge_dual[at] = dual
+			_last_priority_visits += 1
 		if iteration % 2 == 0:
 			continue
 		_last_gap = 0.0
@@ -956,9 +989,14 @@ func project(skeleton: Skeleton3D, world: Transform3D, frame: Transform3D,
 					normals[at] = plane.normal
 					planes[at] = plane.d
 		_last_strain = 1.0
+		worst_edge = -1
 		for at: int in _edges.size():
 			var edge := _edges[at]
-			_last_strain = maxf(_last_strain, _point(edge.x, translations).distance_to(_point(edge.y, translations)) / (_edge_lengths[at] * material_scale))
+			var ratio := _point(edge.x, translations).distance_to(_point(edge.y, translations)) / (_edge_lengths[at] * material_scale)
+			if ratio > _last_strain:
+				_last_strain = ratio
+				worst_edge = at
+		_last_worst_edge = worst_edge
 		if _last_gap < GAP_LIMIT and _last_strain < EDGE_LIMIT + .005:
 			break
 	_last_projected = translations.duplicate()
@@ -977,16 +1015,17 @@ func _configure_native() -> void:
 	var candidate := ClassDB.instantiate("RabbitLandsCapeProjector") as RefCounted
 	if candidate == null:
 		return
-	# Older API2 payloads only understand centroid samples. Their complete
-	# script fallback remains correct for the nonuniform edge factors.
+	# Older payloads may lack nonuniform edge factors or the retained-dual
+	# priority visit. Use the complete script solver unless both are supported.
 	var capabilities: Dictionary = candidate.call("runtime_info")
-	if not bool(capabilities.get("virtual_factors", false)):
+	if not bool(capabilities.get("virtual_factors", false)) or not bool(capabilities.get("edge_priority", false)):
 		return
 	var template := {}
 	for field: StringName in TEMPLATE_FIELDS:
 		template[field] = get(field)
 	template["solver"] = {"edge_limit": EDGE_LIMIT, "gap_limit_m": GAP_LIMIT,
 		"cold_iterations": COLD_ITERATIONS, "warm_iterations": WARM_ITERATIONS,
+		"edge_priority_after": EDGE_PRIORITY_AFTER,
 		"strain_tolerance": .005, "activate_contacts": true, "covered_clear": true,
 		"exact_memo": true, "trusted_body": true, "parallel_contacts": true,
 		"parallel_residuals": bool(capabilities.get("parallel_residuals", false)),
@@ -1013,6 +1052,8 @@ func set_native_contacts(collisions: Dictionary, mount: PackedFloat64Array,
 func stats() -> Dictionary:
 	return {"samples": _samples.size(), "edges": _edges.size(),
 		"edge_limit": EDGE_LIMIT, "gap_limit_m": GAP_LIMIT,
+		"edge_priority_after": EDGE_PRIORITY_AFTER, "edge_priority_visits": _last_priority_visits,
+		"worst_edge": _last_worst_edge,
 		"native_projector": _native != null and _native_enabled,
 		"native_stats": _native_stats,
 		"triangle_interior_samples": _virtual_sources.size(),

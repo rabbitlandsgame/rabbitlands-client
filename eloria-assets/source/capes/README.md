@@ -46,6 +46,11 @@ instead of exhausting the iteration budget against stale support. The script
 fallback follows the same contact policy. The internal source-edge target is 1.79; independent
 posed-mesh checks retain the 1.8 acceptance limit. Near-immovable edges retain
 the solver's numerical cutoff and are still included in the independent audit.
+After the first two ordinary sweeps, a source-limited pose also revisits the
+last measured worst material edge with its retained metric correction. Full
+contact and source-edge checks follow the extra visit. This changes scheduling
+within the same projection objective, rather than discarding corrections or
+relaxing fit/clearance limits. The script fallback uses the same ordering.
 The convergence target is a 6 mm residual against the body's 8 mm posterior
 guard. This retains 2 mm outside the sampled body surface without spending the full
 iteration budget on an unnecessary additional gap. Independent physical checks

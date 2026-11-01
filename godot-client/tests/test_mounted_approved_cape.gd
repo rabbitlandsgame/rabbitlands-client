@@ -105,6 +105,7 @@ func _case(mount_id: String, sex: String, torso: int) -> void:
 		var hem_history:=PackedVector3Array()
 		var samples: Array=[];var jump_witness: Dictionary={}
 		var solve_times: Array[float]=[];var project_times: Array[float]=[];var measurement_ms:=0.
+		var dense_projection:=_dense_projection_trace(prior_native_calls)
 		for frame: int in 90:
 			if gait!="idle":actor.global_position+=actor.global_basis*Vector3(0,0,-actor._presentation_speed*STEP)
 			var started:=Time.get_ticks_usec()
@@ -112,6 +113,7 @@ func _case(mount_id: String, sex: String, torso: int) -> void:
 			solve_times.append(float(Time.get_ticks_usec()-started)/1000.)
 			var arithmetic: Dictionary=_stats(actor).get("mounted",{})
 			project_times.append(float(arithmetic.get("project_usec",0))/1000.)
+			_record_dense_projection(dense_projection,arithmetic,frame)
 			var current:=_motion_points_in(groups,actor.global_transform.affine_inverse())
 			var shape_current:=_motion_points(rig,groups)
 			var anchor: Vector3=actor.to_local(rig.global_transform*rig.get_bone_global_pose(rig.find_bone("spine_03")).origin)
@@ -171,6 +173,8 @@ func _case(mount_id: String, sex: String, torso: int) -> void:
 		var backend:=_stats(actor)
 		row["backend_stats"]={"projection":backend.get("mounted",{}),"body":backend.get("mounted_body",{})}
 		row["contact_frames"]=_contact_frames
+		row["dense_native_source"]=dense_projection
+		_check_dense_projection(dense_projection,90,label+" "+gait)
 		if OS.get_environment("RL_MOUNT_REQUIRE_NATIVE")=="1":
 			var projection: Dictionary=backend.get("mounted",{})
 			var arithmetic: Dictionary=projection.get("native_stats",{})
@@ -338,6 +342,8 @@ func _upper_action_cases(actor: ReplicatedActor3D, visual: Node3D, rig: Skeleton
 			var motion_finite:=true
 			var excess_run:=0;var longest_excess_run:=0;var quiet_excess:=0;var excess_candidates: Array=[]
 			var upper_visual_times: Array[float]=[];var upper_project_times: Array[float]=[]
+			var before_projection: Dictionary=(_stats(actor).get("mounted",{}) as Dictionary).get("native_stats",{})
+			var dense_projection:=_dense_projection_trace(int(before_projection.get("calls",0)))
 			for frame: int in 60:
 				if moving:actor.global_position+=actor.global_basis*Vector3(0,0,-5.*STEP)
 				var process_started:=Time.get_ticks_usec()
@@ -345,6 +351,7 @@ func _upper_action_cases(actor: ReplicatedActor3D, visual: Node3D, rig: Skeleton
 				upper_visual_times.append(float(Time.get_ticks_usec()-process_started)/1000.)
 				var arithmetic: Dictionary=_stats(actor).get("mounted",{})
 				upper_project_times.append(float(arithmetic.get("project_usec",0))/1000.)
+				_record_dense_projection(dense_projection,arithmetic,frame)
 				var current:=_motion_points_in(groups,actor.global_transform.affine_inverse())
 				var shape_current:=_motion_points(rig,groups)
 				var anchor: Vector3=actor.to_local(rig.global_transform*rig.get_bone_global_pose(rig.find_bone("spine_03")).origin)
@@ -421,6 +428,7 @@ func _upper_action_cases(actor: ReplicatedActor3D, visual: Node3D, rig: Skeleton
 			_check(rider_inside<=CONTACT_TOLERANCE,label+" "+str(requested)+" clears rider/gear during "+("travel" if moving else "standing")+": "+str(rider_inside))
 			_check(nape_inside<=CONTACT_TOLERANCE,label+" "+str(requested)+" body-owned nape clears Head: "+str(nape_inside))
 			_check(stretch<MAX_EDGE_RATIO,label+" "+str(requested)+" keeps source material edges below the strain limit: "+str(stretch))
+			_check_dense_projection(dense_projection,60,label+" "+str(requested)+(" moving" if moving else " standing"))
 			_check(not previous.is_empty() and motion_finite,label+" "+str(requested)+" has finite actual-skin motion samples on all60frames")
 			_check(quiet_excess==0,label+" "+str(requested)+" has no quiet-body or history-expired cape reset: "+str(quiet_excess))
 			_check(longest_excess_run<2,label+" "+str(requested)+" has no sustained body-unexplained cape excess: "+str(longest_excess_run))
@@ -433,8 +441,35 @@ func _upper_action_cases(actor: ReplicatedActor3D, visual: Node3D, rig: Skeleton
 			actor._cape_cloth.call("_process_modification_with_delta",STEP)
 			_check(_transform_error(before,_body_poses(rig))<.000002,label+" cape does not overwrite Body65 during "+str(requested))
 			_anchor_check(rig,groups,label+"/"+str(requested))
-			rows.append({"moving":moving,"action":str(requested),"mount_inside_m":mount_inside,"rider_inside_m":rider_inside,"maximum_edge_ratio":stretch,"maximum_all_edge_ratio":all_stretch,"upper_motion_nominal_limit_m":MAX_FRAME_STEP,"upper_motion_visual_review_margin_m":UPPER_MOTION_REVIEW_MARGIN,"upper_motion_measurement_resolution_m":UPPER_MOTION_RESOLUTION,"unexplained_excess_nearest_mm_m":roundf(excess_peak/UPPER_MOTION_RESOLUTION)*UPPER_MOTION_RESOLUTION,"upper_body_history_retained_fraction":UPPER_BODY_MEMORY,"body_sweep_peak_m":sweep_peak,"spine_body_sweep_peak_m":spine_sweep_peak,"neck_body_sweep_peak_m":neck_sweep_peak,"mounted_visual_timing_ms":_timing_summary(upper_visual_times),"native_project_timing_ms":_timing_summary(upper_project_times),"unexplained_excess_peak_m":excess_peak,"excess_candidates":excess_candidates,"quiet_body_excess_frames":quiet_excess,"longest_consecutive_excess_frames":longest_excess_run,"active_body_motion_scale_m":MAX_FRAME_STEP,"single_active_excess_review_basis":"Native frame30-38 geometry review found coherent multi-frame anatomical recovery/constraint settling, attached neckline and aligned panel motion. A lone active-body excess is advisory and retained for review; quiet, sustained and isolated out/back resets remain failures.","excess_witness":excess_witness,"isolated_reversals":reversals,"trajectory":trajectory,"dense_motion_frames":60,"motion_samples":previous.size(),"largest_vertex_frame_step_m":step_error,"largest_actor_frame_step_m":actor_step,"largest_spine_relative_step_m":shape_step,"largest_spine_translation_step_m":translated_step,"jump_witness":jump_witness,"samples":samples})
+			rows.append({"dense_native_source":dense_projection,"moving":moving,"action":str(requested),"mount_inside_m":mount_inside,"rider_inside_m":rider_inside,"maximum_edge_ratio":stretch,"maximum_all_edge_ratio":all_stretch,"upper_motion_nominal_limit_m":MAX_FRAME_STEP,"upper_motion_visual_review_margin_m":UPPER_MOTION_REVIEW_MARGIN,"upper_motion_measurement_resolution_m":UPPER_MOTION_RESOLUTION,"unexplained_excess_nearest_mm_m":roundf(excess_peak/UPPER_MOTION_RESOLUTION)*UPPER_MOTION_RESOLUTION,"upper_body_history_retained_fraction":UPPER_BODY_MEMORY,"body_sweep_peak_m":sweep_peak,"spine_body_sweep_peak_m":spine_sweep_peak,"neck_body_sweep_peak_m":neck_sweep_peak,"mounted_visual_timing_ms":_timing_summary(upper_visual_times),"native_project_timing_ms":_timing_summary(upper_project_times),"unexplained_excess_peak_m":excess_peak,"excess_candidates":excess_candidates,"quiet_body_excess_frames":quiet_excess,"longest_consecutive_excess_frames":longest_excess_run,"active_body_motion_scale_m":MAX_FRAME_STEP,"single_active_excess_review_basis":"Native frame30-38 geometry review found coherent multi-frame anatomical recovery/constraint settling, attached neckline and aligned panel motion. A lone active-body excess is advisory and retained for review; quiet, sustained and isolated out/back resets remain failures.","excess_witness":excess_witness,"isolated_reversals":reversals,"trajectory":trajectory,"dense_motion_frames":60,"motion_samples":previous.size(),"largest_vertex_frame_step_m":step_error,"largest_actor_frame_step_m":actor_step,"largest_spine_relative_step_m":shape_step,"largest_spine_translation_step_m":translated_step,"jump_witness":jump_witness,"samples":samples})
 	return rows
+
+func _dense_projection_trace(previous_native_calls: int) -> Dictionary:
+	return {"observations":0,"finite_available":true,"fresh_native":true,"previous_native_calls":previous_native_calls,"maximum_source_ratio":0.,"maximum_iterations":0,"iterations_histogram":{},"iterations_96_frames":[],"peak":{},"maximum_native_project_usec":0,"slowest":{}}
+
+func _record_dense_projection(trace: Dictionary, arithmetic: Dictionary, frame: int) -> void:
+	var native: Dictionary=arithmetic.get("native_stats",{})
+	var ratio:=float(arithmetic.get("strain",-1.))
+	var calls:=int(native.get("calls",0))
+	var iterations:=int(arithmetic.get("iterations",0))
+	var elapsed:=int(native.get("project_usec",arithmetic.get("project_usec",0)))
+	var witness: Dictionary={"frame":frame,"source_ratio":ratio if is_finite(ratio) else null,"gap_m":float(arithmetic.get("gap_m",-1.)),"iterations":iterations,"native_calls":calls,"native_projector":bool(arithmetic.get("native_projector",false)),"native_project_usec":elapsed}
+	trace["observations"]=int(trace.observations)+1
+	trace["finite_available"]=bool(trace.finite_available) and is_finite(ratio) and ratio>0.
+	trace["fresh_native"]=bool(trace.fresh_native) and bool(witness.native_projector) and calls>int(trace.previous_native_calls)
+	trace["previous_native_calls"]=calls
+	trace["maximum_iterations"]=maxi(int(trace.maximum_iterations),iterations)
+	var histogram: Dictionary=trace.iterations_histogram
+	histogram[str(iterations)]=int(histogram.get(str(iterations),0))+1
+	if iterations>=96:(trace.iterations_96_frames as Array).append(witness)
+	if ratio>float(trace.maximum_source_ratio):trace["maximum_source_ratio"]=ratio;trace["peak"]=witness
+	if elapsed>int(trace.maximum_native_project_usec):trace["maximum_native_project_usec"]=elapsed;trace["slowest"]=witness
+
+func _check_dense_projection(trace: Dictionary, expected: int, label: String) -> void:
+	var complete:=int(trace.observations)==expected and bool(trace.finite_available)
+	if OS.get_environment("RL_MOUNT_REQUIRE_NATIVE")=="1":complete=complete and bool(trace.fresh_native)
+	_check(complete,label+" records finite current material source data on every frame")
+	_check(float(trace.maximum_source_ratio)<MAX_EDGE_RATIO,label+" dense material source stays below unchanged strain limit: "+str(trace.peak))
 
 func _timing_summary(values: Array[float]) -> Dictionary:
 	if values.is_empty():return {"samples":0}
@@ -804,6 +839,6 @@ func _finish() -> void:
 	if output.is_empty():output=ProjectSettings.globalize_path("res://test-artifacts/mounted-approved-cape")
 	DirAccess.make_dir_recursive_absolute(output)
 	var file:=FileAccess.open(output.path_join("mounted-approved-motion.json"),FileAccess.WRITE)
-	file.store_string(JSON.stringify({"checks":_checks,"failures":_failures,"cases":_mounted_rows,"contact_method":"Raw GPU skin weights; Cape-influenced vertices+triangle centroids and independent original-source long-edge quarters/midpoints/thirds; worst contact includes exact Cape coefficients and nearest finite target face; per-mesh local parity-ray intervals followed by exact nearest finite-triangle distance for inside samples; mountY/riderZ; open rays and original ray-plane depth reported separately. Body-only clasp and thin/open features require the independent full triangle audit.","strain_scope":"Original approved source material edge lengths remain the denominator after mounting. Every Cape-influenced edge is gated; body-owned attachment and alternate rebased-rest ratios are reported separately.","contact_tolerance_m":CONTACT_TOLERANCE,"edge_ratio_limit":MAX_EDGE_RATIO,"frame_step_limit_m":MAX_FRAME_STEP,"upper_motion_heuristic":"Unexplained step after maximum measured Spine03/Neck01 body sweep and65% retained history; explicit1mm visual-review margin on nominal80mm, compared at nearest1mm resolution. Lone excess during measured anatomical motion>=80mm is advisory; quiet/history-expired excess, two consecutive excess frames or unexplained out/back fail; raw steps and all reversal candidates retained; quiet reset/sustained positive controls required.","upper_motion_visual_review_margin_m":UPPER_MOTION_REVIEW_MARGIN,"upper_motion_measurement_resolution_m":UPPER_MOTION_RESOLUTION},"\t"))
+	file.store_string(JSON.stringify({"checks":_checks,"failures":_failures,"cases":_mounted_rows,"contact_method":"Raw GPU skin weights; Cape-influenced vertices+triangle centroids and independent original-source long-edge quarters/midpoints/thirds; worst contact includes exact Cape coefficients and nearest finite target face; per-mesh local parity-ray intervals followed by exact nearest finite-triangle distance for inside samples; mountY/riderZ; open rays and original ray-plane depth reported separately. Body-only clasp and thin/open features require the independent full triangle audit.","dense_source_scope":"Every90-frame gait and60-frame upper-action interval records the numeric driver full material-edge maximum, finite/fresh observation coverage, exact peak frame/call and iteration histogram; independent GPU source/contact samples remain unchanged.","strain_scope":"Original approved source material edge lengths remain the denominator after mounting. Every Cape-influenced edge is gated; body-owned attachment and alternate rebased-rest ratios are reported separately.","contact_tolerance_m":CONTACT_TOLERANCE,"edge_ratio_limit":MAX_EDGE_RATIO,"frame_step_limit_m":MAX_FRAME_STEP,"upper_motion_heuristic":"Unexplained step after maximum measured Spine03/Neck01 body sweep and65% retained history; explicit1mm visual-review margin on nominal80mm, compared at nearest1mm resolution. Lone excess during measured anatomical motion>=80mm is advisory; quiet/history-expired excess, two consecutive excess frames or unexplained out/back fail; raw steps and all reversal candidates retained; quiet reset/sustained positive controls required.","upper_motion_visual_review_margin_m":UPPER_MOTION_REVIEW_MARGIN,"upper_motion_measurement_resolution_m":UPPER_MOTION_RESOLUTION},"\t"))
 	print("MOUNTED_APPROVED_CAPE ",_checks," checks; failures=",_failures)
 	quit(0 if _failures.is_empty() else 1)
