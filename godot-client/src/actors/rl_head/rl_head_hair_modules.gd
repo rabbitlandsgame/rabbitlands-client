@@ -28,6 +28,8 @@ const ENTRIES := {
 	11: {"name": "soft_wavy_bob", "fallback_style": 5, "variants": {
 		"female": {"name": "soft_wavy_bob_female", "native_head": true},
 		"male": {"name": "soft_wavy_bob_male", "native_head": true}}},
+	12: {"name": "short_coils", "fallback_style": 4, "variants": {
+		"male": {"name": "short_coils_male"}}},
 	15: {"name": "ponytail", "fallback_style": 6, "variants": {
 		"female": {"name": "painted_ponytail_female", "native_head": true, "tie_height": false},
 		"male": {"name": "painted_ponytail_male", "native_head": true, "tie_height": false}}},
