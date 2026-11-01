@@ -322,9 +322,15 @@ static func _build(owner: Node, source_path: String, skeleton_path: String,
 	# A runtime glTF library has no RESET animation. Without a stable blend
 	# reference, the first played idle's turned root becomes the rotation base
 	# for subsequent crossfades (including a bow aimed 23 degrees off target).
+	var complete_defaults := source_path.get_file() == "Universal_Animation_Library.glb"
 	var reset := Animation.new()
 	reset.length = 0.0
 	for bone: int in target_skeleton.get_bone_count():
+		# Universal body clips do not author these helpers. The cape owner
+		# writes them, including a single held idle for budget-disabled actors.
+		# Implicit body defaults would overwrite that hold every body frame.
+		if complete_defaults and str(target_skeleton.get_bone_name(bone)).begins_with("cape_"):
+			continue
 		var rest := target_skeleton.get_bone_rest(bone)
 		for type: Animation.TrackType in [Animation.TYPE_POSITION_3D, Animation.TYPE_ROTATION_3D, Animation.TYPE_SCALE_3D]:
 			var track := reset.add_track(type)
@@ -345,7 +351,6 @@ static func _build(owner: Node, source_path: String, skeleton_path: String,
 	if library.has_animation(&"RESET"):
 		library.remove_animation(&"RESET")
 	library.add_animation(&"RESET", reset)
-	var complete_defaults := source_path.get_file() == "Universal_Animation_Library.glb"
 	if complete_defaults:
 		_complete_default_channels(library, reset)
 	built["complete_defaults"] = complete_defaults

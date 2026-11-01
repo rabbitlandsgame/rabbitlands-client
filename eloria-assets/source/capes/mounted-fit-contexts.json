@@ -1,0 +1,553 @@
+{
+  "schema_version": 1,
+  "product": "Rabbit Lands",
+  "purpose": "Portable original-source body-pose contexts and actual high-strain edges for sparse cape constraint selection. These analysis inputs are separate from approved on-foot data and the final mounted attachment.",
+  "coordinate_space": "Original source body skin matrices relative to the unrotated cape skin frame; row-major4x4. No actor/world origin is retained.",
+  "runtime_distinction": "The mounted runtime selects spine_neck: body slot 12 follows Spine, slots 13 through 16 follow Neck. Cape roots use a canonical-normalized rigid Spine/Neck blend, with .50 Neck fractions for all three roots. Canonical global-rest rebasing is followed by explicit bounded shoulder relief: 8 mm posterior for wardrobe; 20 mm posterior and 20 mm upward for armour. The central neckline and source Y at or below 1.22 m receive zero deliberate relief; the neckline follows the neck during motion. Pure-rebase precision is separate from intentional-target precision. The matrices below remain the original-body-palette selection context, not the final mounted bind or fit policy.",
+  "profiles": {
+    "wardrobe": {
+      "fit_sha256": "fa6cd48e51550c617fdeaac3376b177425baff20928545705e2f749006267e7c",
+      "source_pose": "Moor Pony idle; mounted prototype4, frame0",
+      "source_metadata_sha256": "a9c66d9cded6507bcf130d25e9d75988145d10c23615a826ae6fcc20d6a6612b",
+      "source_world_skin_sha256": "f8be6235341dcfdc95158dc09246b728204025de5802c3d4f7d3df40ec43af06",
+      "body_skin_matrices": {
+        "spine_03": [
+          1.0,
+          -7.837765956444231e-24,
+          7.466438851178183e-23,
+          6.668097470670029e-17,
+          -2.3165791464302554e-23,
+          1.0000000000000002,
+          8.737694969241814e-18,
+          0.0,
+          5.1293806092404427e-23,
+          -6.071837619662426e-18,
+          1.0,
+          1.0408340855860843e-17,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "clavicle_l": [
+          0.9765967586133669,
+          -0.05317062361310286,
+          0.20840235259640946,
+          0.055738144895250974,
+          0.05896279461877979,
+          0.9980246828747571,
+          -0.02167577012882783,
+          -0.014106607436450869,
+          -0.20683804768797667,
+          0.03345646105261699,
+          0.9778029663600274,
+          -0.0006057701835630452,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "clavicle_r": [
+          0.9765967594851367,
+          0.05316964698639843,
+          -0.20840248683647983,
+          -0.05573691722907946,
+          -0.058961789560425755,
+          0.9980248740460254,
+          -0.021675655551047078,
+          -0.014108853238623098,
+          0.2068384850934688,
+          0.03345604444888262,
+          0.9778026926700226,
+          -0.0006057842058845297,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "neck_01": [
+          0.9999999410628724,
+          -5.854839419884238e-07,
+          -1.0978373904271283e-07,
+          -4.423558552475876e-06,
+          4.993862228694427e-07,
+          0.9813132608335338,
+          -0.19241754385756835,
+          0.015583499002135959,
+          1.5401666574726753e-07,
+          0.19241735756344971,
+          0.981312994030112,
+          -0.28555082828674894,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "Head": [
+          0.9999999454995946,
+          -3.069560318930185e-07,
+          -2.661256767185135e-09,
+          -2.24469796452454e-06,
+          2.625320360699357e-07,
+          0.9987683976428839,
+          -0.04961439974508547,
+          -0.011934839455763235,
+          -2.348130628443401e-08,
+          0.04961424613268105,
+          0.9987683805749622,
+          -0.057896958715666066,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "observed_critical_edges": [
+        {
+          "vertices": [
+            3039,
+            3041
+          ],
+          "observed_strain": 1.6746401546993195
+        },
+        {
+          "vertices": [
+            9550,
+            9552
+          ],
+          "observed_strain": 1.649985419282485
+        },
+        {
+          "vertices": [
+            9840,
+            9847
+          ],
+          "observed_strain": 1.6495579322834755
+        },
+        {
+          "vertices": [
+            9841,
+            9940
+          ],
+          "observed_strain": 1.6346071275116936
+        },
+        {
+          "vertices": [
+            9803,
+            9805
+          ],
+          "observed_strain": 1.6333333036466706
+        },
+        {
+          "vertices": [
+            9804,
+            9805
+          ],
+          "observed_strain": 1.6244085085347428
+        },
+        {
+          "vertices": [
+            9869,
+            9870
+          ],
+          "observed_strain": 1.6066809396535207
+        },
+        {
+          "vertices": [
+            9551,
+            9576
+          ],
+          "observed_strain": 1.6028348397225016
+        },
+        {
+          "vertices": [
+            9684,
+            9716
+          ],
+          "observed_strain": 1.5978149231943313
+        },
+        {
+          "vertices": [
+            4981,
+            4982
+          ],
+          "observed_strain": 1.5967175341109263
+        },
+        {
+          "vertices": [
+            9912,
+            9913
+          ],
+          "observed_strain": 1.5878673859081127
+        },
+        {
+          "vertices": [
+            841,
+            845
+          ],
+          "observed_strain": 1.5878508970192344
+        },
+        {
+          "vertices": [
+            11350,
+            11410
+          ],
+          "observed_strain": 1.5745840077135493
+        },
+        {
+          "vertices": [
+            3002,
+            3018
+          ],
+          "observed_strain": 1.5649153774506142
+        },
+        {
+          "vertices": [
+            10096,
+            10161
+          ],
+          "observed_strain": 1.5630707947687257
+        },
+        {
+          "vertices": [
+            10192,
+            10194
+          ],
+          "observed_strain": 1.561927838204862
+        },
+        {
+          "vertices": [
+            11118,
+            11119
+          ],
+          "observed_strain": 1.5546325762334847
+        },
+        {
+          "vertices": [
+            11435,
+            11468
+          ],
+          "observed_strain": 1.5543309895694357
+        },
+        {
+          "vertices": [
+            9646,
+            9650
+          ],
+          "observed_strain": 1.5538726896952164
+        },
+        {
+          "vertices": [
+            5014,
+            5016
+          ],
+          "observed_strain": 1.5536139140487466
+        },
+        {
+          "vertices": [
+            10161,
+            10162
+          ],
+          "observed_strain": 1.5520052082782174
+        },
+        {
+          "vertices": [
+            9648,
+            9650
+          ],
+          "observed_strain": 1.5516430636084668
+        },
+        {
+          "vertices": [
+            3621,
+            3622
+          ],
+          "observed_strain": 1.5434953777801053
+        },
+        {
+          "vertices": [
+            9649,
+            9727
+          ],
+          "observed_strain": 1.5401599768351857
+        }
+      ]
+    },
+    "armour": {
+      "fit_sha256": "79e6baf79e64314b7fb203ad279e829c98bc23672fd4c587c801bfa540d7b0ed",
+      "source_pose": "Moor Pony idle; mounted prototype4, frame0",
+      "source_metadata_sha256": "1f539e42d16c5c850137cbaae2834fc86348d3c6f3c13d160c473a9d78bc2fac",
+      "source_world_skin_sha256": "230f176f3d692d942def94295ccd53bd23f99bd487bfcb45c67e24ed8974f553",
+      "body_skin_matrices": {
+        "spine_03": [
+          1.0,
+          -7.837765956444231e-24,
+          7.466438851178183e-23,
+          6.668097470670029e-17,
+          -2.3165791464302554e-23,
+          1.0000000000000002,
+          8.737694969241814e-18,
+          0.0,
+          5.1293806092404427e-23,
+          -6.071837619662426e-18,
+          1.0,
+          1.0408340855860843e-17,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "clavicle_l": [
+          0.9765967586133669,
+          -0.05317062361310286,
+          0.20840235259640946,
+          0.055738144895250974,
+          0.05896279461877979,
+          0.9980246828747571,
+          -0.02167577012882783,
+          -0.014106607436450869,
+          -0.20683804768797667,
+          0.03345646105261699,
+          0.9778029663600274,
+          -0.0006057701835630452,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "clavicle_r": [
+          0.9765967594851367,
+          0.05316964698639843,
+          -0.20840248683647983,
+          -0.05573691722907946,
+          -0.058961789560425755,
+          0.9980248740460254,
+          -0.021675655551047078,
+          -0.014108853238623098,
+          0.2068384850934688,
+          0.03345604444888262,
+          0.9778026926700226,
+          -0.0006057842058845297,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "neck_01": [
+          0.9999999410628724,
+          -5.854839419884238e-07,
+          -1.0978373904271283e-07,
+          -4.423558552475876e-06,
+          4.993862228694427e-07,
+          0.9813132608335338,
+          -0.19241754385756835,
+          0.015583499002135959,
+          1.5401666574726753e-07,
+          0.19241735756344971,
+          0.981312994030112,
+          -0.28555082828674894,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "Head": [
+          0.9999999454995946,
+          -3.069560318930185e-07,
+          -2.661256767185135e-09,
+          -2.24469796452454e-06,
+          2.625320360699357e-07,
+          0.9987683976428839,
+          -0.04961439974508547,
+          -0.011934839455763235,
+          -2.348130628443401e-08,
+          0.04961424613268105,
+          0.9987683805749622,
+          -0.057896958715666066,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "observed_critical_edges": [
+        {
+          "vertices": [
+            2971,
+            2972
+          ],
+          "observed_strain": 1.7639429250736938
+        },
+        {
+          "vertices": [
+            5551,
+            5699
+          ],
+          "observed_strain": 1.6722003507311853
+        },
+        {
+          "vertices": [
+            9728,
+            9760
+          ],
+          "observed_strain": 1.6500009355869187
+        },
+        {
+          "vertices": [
+            11350,
+            11410
+          ],
+          "observed_strain": 1.649972346007553
+        },
+        {
+          "vertices": [
+            9550,
+            9552
+          ],
+          "observed_strain": 1.649765289490349
+        },
+        {
+          "vertices": [
+            9840,
+            9847
+          ],
+          "observed_strain": 1.6482127988076558
+        },
+        {
+          "vertices": [
+            3002,
+            3018
+          ],
+          "observed_strain": 1.6478777838284604
+        },
+        {
+          "vertices": [
+            11184,
+            11189
+          ],
+          "observed_strain": 1.6417771357611475
+        },
+        {
+          "vertices": [
+            9842,
+            9941
+          ],
+          "observed_strain": 1.6415735018940496
+        },
+        {
+          "vertices": [
+            4981,
+            4982
+          ],
+          "observed_strain": 1.6382515039272685
+        },
+        {
+          "vertices": [
+            9550,
+            9577
+          ],
+          "observed_strain": 1.6241183806362
+        },
+        {
+          "vertices": [
+            11435,
+            11468
+          ],
+          "observed_strain": 1.6236737691346605
+        },
+        {
+          "vertices": [
+            9853,
+            9884
+          ],
+          "observed_strain": 1.614338866397796
+        },
+        {
+          "vertices": [
+            11118,
+            11119
+          ],
+          "observed_strain": 1.6072174427532204
+        },
+        {
+          "vertices": [
+            841,
+            845
+          ],
+          "observed_strain": 1.604316219078719
+        },
+        {
+          "vertices": [
+            9804,
+            9805
+          ],
+          "observed_strain": 1.5998543206667115
+        },
+        {
+          "vertices": [
+            3621,
+            3622
+          ],
+          "observed_strain": 1.598887900239854
+        },
+        {
+          "vertices": [
+            5035,
+            5036
+          ],
+          "observed_strain": 1.595994449614983
+        },
+        {
+          "vertices": [
+            11198,
+            11230
+          ],
+          "observed_strain": 1.591519295616982
+        },
+        {
+          "vertices": [
+            9577,
+            9609
+          ],
+          "observed_strain": 1.5832597333192384
+        },
+        {
+          "vertices": [
+            8857,
+            8880
+          ],
+          "observed_strain": 1.5787891653789523
+        },
+        {
+          "vertices": [
+            11142,
+            11198
+          ],
+          "observed_strain": 1.5769372496963956
+        },
+        {
+          "vertices": [
+            9912,
+            9913
+          ],
+          "observed_strain": 1.573880568229064
+        },
+        {
+          "vertices": [
+            11107,
+            11132
+          ],
+          "observed_strain": 1.5727760541362328
+        },
+        {
+          "vertices": [
+            8775,
+            8777
+          ],
+          "observed_strain": 1.8453,
+          "observation": "Mounted armour ranged draw holdout; original Trim surface vertices 4487 and 4489. Edge selection only; no fit or body-palette changes."
+        }
+      ]
+    }
+  }
+}

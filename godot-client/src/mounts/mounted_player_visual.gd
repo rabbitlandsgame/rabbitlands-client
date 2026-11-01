@@ -39,10 +39,14 @@ var _pending_delta := 0.0
 var _sample_tick := 0
 var _parked := false
 var _cloth_was_enabled := false
+var _cape_pose_was_hidden := true
+var _cape_visibility_revision := 0
 var _rider_modifier_process := Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_IDLE
 var _pose_steps := 0
 var _stepped_seconds := 0.0
 var _presentation_view_radius := 0.0
+var _gait_blend_poses: Array[Transform3D] = []
+var _gait_blend_elapsed := 0.0
 
 func configure(player: ReplicatedActor3D, models: Dictionary, mount_id := "moor_pony",
 		visual_profile: Dictionary = {}) -> Array[String]:
@@ -207,6 +211,7 @@ func _update_effective_tier(force := false) -> void:
 
 func pause_for_parking() -> void:
 	_parked = true
+	_cape_pose_was_hidden = true
 	_pending_delta = 0.0
 	_update_effective_tier(true)
 
@@ -231,6 +236,7 @@ func _process(delta: float) -> void:
 		return
 	_update_effective_tier()
 	if _effective_tier == AnimationGate.Tier.PAUSED:
+		_cape_pose_was_hidden = true
 		return
 	_pending_delta += maxf(0.0, delta)
 	_sample_tick += 1
@@ -246,6 +252,7 @@ func _process(delta: float) -> void:
 	var frustum_paused := _gating_enabled and _requested_tier == AnimationGate.Tier.PAUSED \
 		and not actor.mounted_presentation_priority()
 	if frustum_paused or not actor.is_drawn() or not is_visible_in_tree():
+		_cape_pose_was_hidden = true
 		if _has_one_shot():
 			upper.advance(step)
 		_update_effective_tier()
@@ -262,6 +269,12 @@ func _step_visual(delta: float) -> void:
 	if moving:
 		next = "walk" if state.get("gait") == "walk" else ("gallop" if state.get("gait") == "burst" else "trot")
 	if next != action:
+		_gait_blend_poses.clear()
+		_gait_blend_elapsed = 0.0
+		if not action.is_empty() and float(profile.get("gaitBlendSeconds", 0.0)) > 0.0:
+			var mount_rig := pony.get_skeleton()
+			for bone: int in mount_rig.get_bone_count():
+				_gait_blend_poses.append(mount_rig.get_bone_pose(bone))
 		action = next
 		elapsed = 0.0
 	var rate := 1.0
@@ -286,6 +299,7 @@ func _step_visual(delta: float) -> void:
 		pony.animation_player.pause()
 	pony.get_skeleton().force_update_all_bone_transforms()
 	hind_legs.apply(action)
+	_blend_mount_gait(delta)
 	actor.animation_player.pause()
 	var bone := pony.get_skeleton().global_transform * pony.get_skeleton().get_bone_global_pose(saddle)
 	var seat: Transform3D
@@ -307,18 +321,52 @@ func _step_visual(delta: float) -> void:
 	pose.fit(seat, action, elapsed, duration)
 	_finish_visual(delta, seat, action)
 
+func _blend_mount_gait(delta: float) -> void:
+	if _gait_blend_poses.is_empty():
+		return
+	var rig := pony.get_skeleton()
+	var duration := float(profile.get("gaitBlendSeconds", 0.0))
+	if duration <= 0.0 or _gait_blend_poses.size() != rig.get_bone_count():
+		_gait_blend_poses.clear()
+		return
+	_gait_blend_elapsed += maxf(delta, 0.0)
+	var weight := smoothstep(0.0, duration, _gait_blend_elapsed)
+	# Blend the visible mount before sampling its saddle and collision bones.
+	# Rider, tack and cape therefore see the same continuous gait transition.
+	for bone: int in rig.get_bone_count():
+		var blended := _gait_blend_poses[bone].interpolate_with(rig.get_bone_pose(bone), weight)
+		rig.set_bone_pose_position(bone, blended.origin)
+		rig.set_bone_pose_rotation(bone, blended.basis.orthonormalized().get_rotation_quaternion())
+		rig.set_bone_pose_scale(bone, blended.basis.get_scale())
+	rig.force_update_all_bone_transforms()
+	if _gait_blend_elapsed >= duration:
+		_gait_blend_poses.clear()
+
 func _finish_visual(delta: float, seat: Transform3D, gait: String) -> void:
+	if _cape_pose_was_hidden:
+		_cape_visibility_revision += 1
+		_cape_pose_was_hidden = false
 	var native_secondary := rust_pose.consume_native_upper_applied()
 	if not native_secondary:
 		upper.apply()
 	refresh_cloth_permission(true)
 	if actor._cape_cloth != null:
 		actor._cape_cloth.call("set_native_mounted_constraint_kernel", rust_pose.mounted_constraint_backend())
+	cape_surface.update(delta, gait)
 	if cape_simulation_enabled():
 		# Pose the body first, then cloth, once. The ordinary automatic modifier
 		# remains paused so it cannot overwrite this mounted pass afterward.
-		cape_surface.update(delta, gait)
 		actor._cape_cloth.call("_process_modification_with_delta", delta)
+		actor.get_skeleton().force_update_all_bone_transforms()
+	elif actor._cape_cloth != null:
+		actor._cape_cloth.call("hold_mounted_static_pose", {
+			"mount": str(state.get("mount_id", "")), "gait": gait,
+			"equipment": actor._equipment_visuals.duplicate(),
+			"requested": str(actor.current_action), "upper": str(upper.action),
+			"upper_revision": upper._capture_revision, "clip_revision": upper._clip_revision,
+			"visibility_revision": _cape_visibility_revision,
+			"returning": upper._returning,
+			"blend_settled": upper._blend_time >= upper.BLEND_SECONDS})
 		actor.get_skeleton().force_update_all_bone_transforms()
 	actor._lift_overhead(actor.server_scale)
 	if not native_secondary or rust_pose._mode() != "rust":
@@ -357,6 +405,8 @@ func restore() -> void:
 		actor._cape_cloth.call("set_mount_surface", null)
 	if pose.skeleton != null:
 		pose.restore()
+	if actor._cape_cloth != null:
+		actor._cape_cloth.call("hold_approved_idle")
 	for modifier: Node in modifiers:
 		if is_instance_valid(modifier):
 			(modifier as SkeletonModifier3D).active = bool(modifiers[modifier])

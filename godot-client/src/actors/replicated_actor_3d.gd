@@ -435,7 +435,6 @@ var _silhouette: OccludedSilhouette
 var _animation_tier: int = AnimationGate.Tier.FULL
 var _animation_gate_owner: AnimationGate
 var _cape_cloth_worn := false
-var _cape_mounted_fit := false
 var _cape_cloth_allowed := true
 ## The resolved graphics quality and whether this is the player's own actor.
 ## Main supplies both after configure; keeping them here makes appearance and
@@ -3558,16 +3557,41 @@ func _clear_equipment_part(part: int) -> void:
 		_trail_weapon_mesh = null
 		_invalidate_hand_prop_ranged_cache()
 	var nodes_value: Variant = _equipment_nodes.get(part, [])
+	var retiring_materials: Array[Material] = []
+	var seen_materials := {}
 	if nodes_value is Array:
 		for node_value: Variant in nodes_value:
 			var node: Node = node_value as Node
 			if is_instance_valid(node):
+				var meshes: Array[Node] = [node]
+				meshes.append_array(node.find_children("*", "MeshInstance3D", true, false))
+				for candidate: Node in meshes:
+					var mesh := candidate as MeshInstance3D
+					if mesh == null:continue
+					var materials: Array[Material] = [mesh.material_override, mesh.material_overlay]
+					if mesh.mesh != null:
+						for surface: int in mesh.mesh.get_surface_count():materials.append(mesh.get_active_material(surface))
+					for material: Material in materials:
+						if material == null or seen_materials.has(material.get_instance_id()):continue
+						seen_materials[material.get_instance_id()] = true
+						retiring_materials.append(material)
 				node.queue_free()
+	if not retiring_materials.is_empty():
+		var tree := Engine.get_main_loop() as SceneTree
+		if tree != null:_release_equipment_materials_after_frames(tree, retiring_materials)
 	_equipment_nodes.erase(part)
 	_equipment_visuals.erase(part)
 	_release_equipment_hides(part)
 	if part == CAPE_PART:
 		_set_cape_cloth_active(false)
+
+static func _release_equipment_materials_after_frames(tree: SceneTree, materials: Array[Material]) -> void:
+	# Mesh deletion and renderer dependency updates run on separate queues.
+	# Keep the outgoing per-instance materials alive across both; the SceneTree
+	# owns this bounded wait even when the actor itself leaves during the swap.
+	await tree.process_frame
+	await tree.process_frame
+	materials.clear()
 
 func _create_equipment_part(part: int, visual_id: int, allow_fallback: bool) -> void:
 	# Modified 2026-08-28 for Eloria Client: equipment used to be parented to a
@@ -4159,9 +4183,6 @@ func _set_mount_state_legacy(state: Dictionary, models: Dictionary) -> void:
 		was_mounted = false
 	mount_state = state.duplicate(true)
 	if riding and not was_mounted:
-		# Seated cloth retains its qualified mesh/skin and solver together.
-		# The new fitted skin is restored when ordinary locomotion resumes.
-		_rebuild_cape_for_mount(true)
 		# Seat fitting records the neutral imported root, without terrain lean.
 		_clear_native_surface_tilt()
 		# A previously stepped player must leave the gate before mounted sampling
@@ -4179,7 +4200,6 @@ func _set_mount_state_legacy(state: Dictionary, models: Dictionary) -> void:
 		if not errors.is_empty():
 			visual.call("restore")
 			visual.free()
-			_rebuild_cape_for_mount(false)
 			_restore_unmounted_animation_gate()
 			push_warning("Mount: " + str(errors))
 			play_action(&"idle", true)
@@ -4201,7 +4221,6 @@ func _set_mount_state_legacy(state: Dictionary, models: Dictionary) -> void:
 		_mount_visual = null
 		previous.call("restore")
 		previous.free()
-		_rebuild_cape_for_mount(false)
 		_restore_unmounted_animation_gate()
 		_pace_histories.clear()
 		_last_movement_update_msec = -1
@@ -4213,24 +4232,6 @@ func _set_mount_state_legacy(state: Dictionary, models: Dictionary) -> void:
 	if riding != was_mounted:
 		_surface_applied_up = Vector3(NAN, NAN, NAN)
 		_apply_surface_orientation()
-
-func _rebuild_cape_for_mount(mounted: bool) -> void:
-	if _cape_mounted_fit == mounted:
-		return
-	_cape_mounted_fit = mounted
-	if not _equipment_nodes.has(CAPE_PART):
-		return
-	var visual := int(_equipment_visuals.get(CAPE_PART, 0))
-	_clear_equipment_part(CAPE_PART)
-	_equipment_visuals[CAPE_PART] = visual
-	_create_equipment_part(CAPE_PART, visual, false)
-	if is_instance_valid(_native_model):
-		CHARACTER_PROPORTIONS.apply_body_refinement(_native_model, _native_skeleton, _model_config)
-		OLDCRAFT_ACTOR_STYLE.apply_surface_finish(_native_model)
-	_apply_render_quality_to_visuals()
-	_refresh_quiver_cape_fit()
-	if _silhouette != null and _silhouette.is_enabled():
-		_silhouette.rebuild()
 
 func _equipment_model_config(part: int, visual_id: int) -> Dictionary:
 	var aliases: Dictionary = _equipment_config.get("aliases", {}) as Dictionary
@@ -4357,7 +4358,7 @@ func _socket_placement(socket: Dictionary, bone_rest: Transform3D, fit: float,
 		bone_rest.origin + _vector3(socket.get("offset", []), Vector3.ZERO) * fit)
 
 func _approved_cape_profile(scene_path: String, part: int) -> String:
-	if not _cape_mounted_fit and part == CAPE_PART and scene_path == CapeApprovedData.TEMPLATE and CapeApprovedData.compatible(_native_skeleton):
+	if part == CAPE_PART and scene_path == CapeApprovedData.TEMPLATE and CapeApprovedData.compatible(_native_skeleton):
 		return "wardrobe" if _worn_torso_scene().is_empty() else "armour"
 	return ""
 

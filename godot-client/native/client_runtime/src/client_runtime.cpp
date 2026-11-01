@@ -2,6 +2,8 @@
 #include "client_remote.h"
 #include "client_residency.h"
 #include "client_flights.h"
+#include "mounted_cape_body_surface.h"
+#include "mounted_cape_projector.h"
 #include "../../native_crowd/src/native_spell_flight_geometry.h"
 #include <godot_cpp/classes/class_db_singleton.hpp>
 #include "../../shared/cape_constraint_math.h"
@@ -102,6 +104,8 @@ Dictionary RabbitLandsClientRuntime::runtime_info() const {
     info["mounted_profile_api"] = 1;
     info["mounted_upper_api"] = 1;
     info["mounted_cape_api"] = 1;
+    info["mounted_cape_body_surface_api"] = 1;
+    info["mounted_cape_material_api"] = 2;
     info["mounted_reins_api"] = 1;
     info["rein_attempts"] = static_cast<int64_t>(rein_attempts);
     info["rein_failures"] = static_cast<int64_t>(rein_failures);
@@ -473,6 +477,8 @@ void RabbitLandsClientRuntime::_bind_methods() {
 static void initialize_runtime(ModuleInitializationLevel level) {
     if (level == MODULE_INITIALIZATION_LEVEL_SCENE) {
         ClassDB::register_class<RabbitLandsClientRuntime>();
+        ClassDB::register_class<RabbitLandsCapeBodySurface>();
+        ClassDB::register_class<RabbitLandsCapeProjector>();
         ClassDB::register_class<RabbitLandsRemotePresentationRuntime>();
         ClassDB::register_class<RabbitLandsSpellFlightRuntime>();
         if (!ClassDBSingleton::get_singleton()->class_exists("NativeSpellFlightGeometry")) {
@@ -481,7 +487,10 @@ static void initialize_runtime(ModuleInitializationLevel level) {
         }
     }
 }
-static void terminate_runtime(ModuleInitializationLevel) {}
+extern void rl_cape_shutdown_contact_workers();
+static void terminate_runtime(ModuleInitializationLevel level) {
+    if (level == MODULE_INITIALIZATION_LEVEL_SCENE) rl_cape_shutdown_contact_workers();
+}
 extern "C" GDExtensionBool GDE_EXPORT rl_client_runtime_library_init(GDExtensionInterfaceGetProcAddress address,
     GDExtensionClassLibraryPtr library, GDExtensionInitialization *initialization) {
     GDExtensionBinding::InitObject object(address, library, initialization);
