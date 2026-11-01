@@ -34,3 +34,7 @@ zero. Triangle order, material and scene metadata, core/cap streams and default
 weights stay intact. The default path is unchanged. The private receipt includes
 an old-to-new vertex map for updating private root bindings; removed rows map to
 `-1`. Keep source bindings and apply the map before further strand authoring.
+If a Native corrective is present, the option refreshes its canonical full-array
+POSITION/NORMAL digest for the new layout and retains the prior digest as a
+safe provenance hash. Signed zeros are included in that digest. A malformed or
+inconsistent Native shape/header fails before output.

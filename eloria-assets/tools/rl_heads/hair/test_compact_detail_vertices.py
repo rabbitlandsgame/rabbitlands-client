@@ -1,4 +1,6 @@
 import copy
+import hashlib
+import json
 import unittest
 import numpy as np
 import glbwriter
@@ -10,6 +12,7 @@ class CompactDetailVertices(unittest.TestCase):
     def fixture(self):
         w = glbwriter.GLB()
         w.g['asset']['extras'] = {'rlHair': {'style': 'fixture'}}
+        w.g['asset']['extras']['rlHair']['nativeFit'] = {'shape': 'hl_native_fit', 'deltaSHA256': 'old-layout'}
         w.g['materials'] = [{'name': 'rl_hair_clump'}, {'name': 'rl_hair_card'}]
         arrays = {'POSITION': (np.arange(15, dtype='f4').reshape(5, 3), 'VEC3', 5126, False),
                   'NORMAL': (np.eye(5, 3, dtype='f4'), 'VEC3', 5126, False),
@@ -68,6 +71,26 @@ class CompactDetailVertices(unittest.TestCase):
             bad = copy.deepcopy(g)
             bad['meshes'][0]['primitives'][1]['extras']['partVertexRanges'] = ranges
             with self.assertRaises(AssertionError): compact_detail_vertices(bad, blob)
+
+    def test_native_digest_matches_selected_layout_and_signed_zero(self):
+        g, blob = self.fixture()
+        out, packed, _ = compact_detail_vertices(g, blob)
+        digest = hashlib.sha256()
+        for mesh in out['meshes']:
+            at = mesh['extras']['targetNames'].index('hl_native_fit')
+            for pi, primitive in enumerate(mesh['primitives']):
+                count = out['accessors'][primitive['attributes']['POSITION']]['count']
+                digest.update(json.dumps([mesh['name'], pi], separators=(',', ':')).encode())
+                for name in ['POSITION', 'NORMAL']:
+                    target = primitive['targets'][at]
+                    data = rlglb.accessor(out, packed, target[name], False) if name in target else np.zeros((count, 3))
+                    digest.update(name.encode()); digest.update(np.asarray(data.shape, dtype='<i8').tobytes())
+                    digest.update(np.asarray(data, dtype='<f4').tobytes())
+        metadata = out['asset']['extras']['rlHair']['nativeFit']
+        self.assertEqual(metadata['deltaSHA256'], digest.hexdigest())
+        self.assertEqual(metadata['layoutSourceDeltaSHA256'], 'old-layout')
+        p = out['meshes'][0]['primitives'][1]
+        self.assertTrue(np.signbit(rlglb.accessor(out, packed, p['targets'][1]['POSITION'])[0, 0]))
 
 
 if __name__ == '__main__': unittest.main()

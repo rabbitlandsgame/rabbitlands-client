@@ -189,6 +189,31 @@ def compact_detail_vertices(document, blob):
                     after = rlglb.accessor(writer.g, writer.blob, new_group[name], normalize=False)[remap[old_indices].reshape(-1)]
                     dtype = rlglb.COMPONENT[document['accessors'][index]['componentType']]
                     assert np.asarray(before, dtype=dtype).tobytes() == np.asarray(after, dtype=dtype).tobytes()
+    if any(r['old_count'] != r['new_count'] for r in reports):
+        native_meshes = [mesh for mesh in writer.g['meshes']
+                         if 'hl_native_fit' in mesh.get('extras', {}).get('targetNames', [])]
+        if native_meshes:
+            assert len(native_meshes) == len(writer.g['meshes']), 'Inconsistent Native corrective layout'
+            metadata = writer.g['asset']['extras']['rlHair'].get('nativeFit', {})
+            assert metadata.get('shape') == 'hl_native_fit' and 'deltaSHA256' in metadata
+            digest = hashlib.sha256()
+            for mesh in writer.g['meshes']:
+                names = mesh['extras']['targetNames']
+                assert names.count('hl_native_fit') == 1
+                target_index = names.index('hl_native_fit')
+                for pi, primitive in enumerate(mesh['primitives']):
+                    target = primitive['targets'][target_index]
+                    count = writer.g['accessors'][primitive['attributes']['POSITION']]['count']
+                    digest.update(json.dumps([mesh['name'], pi], separators=(',', ':')).encode())
+                    for name in ['POSITION', 'NORMAL']:
+                        data = rlglb.accessor(writer.g, writer.blob, target[name], normalize=False) if name in target else np.zeros((count, 3))
+                        assert data.shape == (count, 3) and np.isfinite(data).all()
+                        digest.update(name.encode())
+                        digest.update(np.asarray(data.shape, dtype='<i8').tobytes())
+                        digest.update(np.ascontiguousarray(data, dtype='<f4').tobytes())
+            metadata['layoutSourceDeltaSHA256'] = metadata['deltaSHA256']
+            metadata['deltaSHA256'] = digest.hexdigest()
+            metadata['layoutToolSHA256'] = sha(__file__)
     writer.g['buffers'][0]['byteLength'] = len(writer.blob)
     return writer.g, bytes(writer.blob), reports
 
