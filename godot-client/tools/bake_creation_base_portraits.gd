@@ -18,7 +18,7 @@ var failures: Array[String] = []
 func dependency_files(folder: String) -> Array[String]:
 	var result: Array[String] = []
 	for name: String in DirAccess.get_files_at(folder):
-		if name.get_extension() in ["gd", "gdshader", "json", "glb", "png"]:
+		if name.get_extension() in ["gd", "gdshader", "json", "glb", "png", "import"]:
 			result.append(folder.path_join(name))
 	for name: String in DirAccess.get_directories_at(folder):
 		if not name.begins_with("."):
@@ -29,7 +29,7 @@ func render_dependencies() -> String:
 	var files: Array[String] = ["res://src/ui/leaderboard_portraits.gd",
 		"res://tools/bake_creation_base_portraits.gd",
 		"res://data/actors/models.json", "res://data/actors/equipment.json"]
-	for folder: String in ["res://src/actors", "res://assets/actors/native/rl_heads",
+	for folder: String in ["res://src/actors", "res://data/actors", "res://assets/actors/native/rl_heads",
 			"res://assets/actors/native/rl_head_textures", "res://assets/actors/native/race_textures/luminous_female",
 			"res://assets/actors/native/race_textures/luminous_male", "res://assets/actors/native/neck_textures"]:
 		files.append_array(dependency_files(folder))
