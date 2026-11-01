@@ -39,6 +39,7 @@ var _visibility_posts: Dictionary = {}
 # Only exact departed cast nodes are hidden through an acknowledged handoff.
 # Their next native movement/identity or lifecycle change releases the lease.
 var _handoff_hidden: Dictionary = {}
+var _entry_hidden: Dictionary = {}
 var _portrait_only_roles: Dictionary = {}
 var _staged_actor_roles: Dictionary = {}
 var _rig: Node3D
@@ -627,6 +628,69 @@ func _body_ready(value: Variant) -> bool:
 	return is_instance_valid(value) and value is Node3D \
 		and (not value.has_method("is_model_deferred") or not bool(value.call("is_model_deferred")))
 
+func _entry_reveal_context(snapshot: Dictionary, current_map: String) -> Dictionary:
+	if not bool(snapshot.get("active", false)) or map_key(str(snapshot.get("map", ""))) != map_key(current_map):
+		return {}
+	var scene: Dictionary = snapshot.get("scene", {})
+	var token := str(scene.get("token", ""))
+	var identity := str(snapshot.get("run_id", "")) + ":" + token
+	if token.is_empty() or not bool(scene.get("requires_ack", false)) \
+			or (_replaying and _run + ":" + _token == identity) \
+			or _replay_requested_identity == identity:
+		return {}
+	if playing and _run + ":" + _token == identity:
+		return {}
+	if (_handled.has(identity) or _failed.has(identity)) and _interactive_requested_identity != identity:
+		return {}
+	if _definitions.is_empty(): _definitions = scene_definitions()
+	var definition: Dictionary = _definitions.get(str(scene.get("id", "")), {})
+	var roles: Array = definition.get("reveal_on_start", [])
+	if roles.is_empty(): return {}
+	return {"identity":identity,"roles":roles,"bindings":scene.get("actors",snapshot.get("actors",{}))}
+
+## New staged NPCs can arrive before the required cast or terrain is ready.
+## Keep their exact nodes out of gameplay rendering/picking until the film starts.
+func prepare_actor_visibility(snapshot: Dictionary, actor: Node3D, actor_id: int, current_map: String) -> void:
+	var context := _entry_reveal_context(snapshot, current_map)
+	var wanted := false
+	for role: String in context.get("roles", []):
+		if int((context.bindings as Dictionary).get(role, -1)) == actor_id:
+			wanted = true
+			break
+	var key := actor.get_instance_id()
+	if _entry_hidden.has(key) and (not wanted or _entry_hidden[key].identity != context.identity):
+		_release_entry_visibility(key)
+	if not wanted: return
+	if not _entry_hidden.has(key):
+		var lease := {"actor":weakref(actor),"actor_id":actor_id,"identity":context.identity,"visible":actor.visible}
+		if actor is CollisionObject3D: lease["collision_layer"] = actor.collision_layer
+		_entry_hidden[key] = lease
+	actor.hide()
+	if actor is CollisionObject3D: actor.collision_layer = 0
+
+func _release_entry_visibility(key := 0, identity := "") -> void:
+	for held_key: int in _entry_hidden.keys():
+		if key != 0 and held_key != key: continue
+		var lease: Dictionary = _entry_hidden[held_key]
+		if not identity.is_empty() and str(lease.identity) != identity: continue
+		var actor := (lease.actor as WeakRef).get_ref() as Node3D
+		if is_instance_valid(actor) and not actor.is_queued_for_deletion():
+			actor.visible = bool(lease.visible)
+			if actor is CollisionObject3D: actor.collision_layer = int(lease.collision_layer)
+		_entry_hidden.erase(held_key)
+
+func _update_entry_visibility(snapshot: Dictionary, nodes: Dictionary, current_map: String) -> void:
+	var context := _entry_reveal_context(snapshot, current_map)
+	for key: int in _entry_hidden.keys():
+		var lease: Dictionary = _entry_hidden[key]
+		if context.is_empty() or context.identity != lease.identity \
+				or nodes.get(int(lease.actor_id)) != (lease.actor as WeakRef).get_ref():
+			_release_entry_visibility(key)
+	for role: String in context.get("roles", []):
+		var id := int((context.bindings as Dictionary).get(role, -1))
+		var actor := nodes.get(id) as Node3D
+		if is_instance_valid(actor): prepare_actor_visibility(snapshot, actor, id, current_map)
+
 ## Retry an interrupted first viewing, or reopen an unanswered conversation.
 ## This remains native play: choices and completion still go to the server.
 func request_interactive(snapshot: Dictionary, current_map: String) -> bool:
@@ -725,6 +789,7 @@ func set_reduced_motion(value: bool, persist := true) -> void:
 func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictionary,
 		local_actor_id: int, current_map: String, world_ready := true,
 		coordinate_adapter: CoordinateAdapter = null, surface_sample := Callable()) -> void:
+	_update_entry_visibility(snapshot, actor_nodes, current_map)
 	_update_handoff_visibility(snapshot, actor_nodes, current_map)
 	if not _exit_fade.is_empty():
 		var leaving := str(_exit_fade.phase) == "out"
@@ -752,6 +817,9 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 	var next_run := str(snapshot.get("run_id", ""))
 	if is_active() and (_token != next_token or _run != next_run or _map != here):
 		cancel("replaced")
+		# The old film restores its cast's visibility while relinquishing poses.
+		# Reapply the incoming lease before rendering any replacement frame.
+		_update_entry_visibility(snapshot, actor_nodes, current_map)
 	if next_token.is_empty() or scene.is_empty():
 		_replay_requested_identity = ""
 		_interactive_requested_identity = ""
@@ -970,6 +1038,7 @@ func _start(rig: Node3D, camera: Camera3D, local: Node3D, nodes: Dictionary,
 		_view_focus.name = "CampaignViewFocus"
 		add_child(_view_focus)
 	_release_ambient()
+	_release_entry_visibility()
 	_release_handoff_visibility()
 	_clear_exit_fade()
 	_rig = rig
@@ -1472,6 +1541,9 @@ func cancel(reason := "cancelled") -> void:
 	if not _exit_fade_committing and not (reason == "inactive" and str(_exit_fade.get("phase", "")) == "in"):
 		_clear_exit_fade()
 	_stop_inspection()
+	# A replacement may already have concealed its new cast in Main's spawn
+	# path. Finishing the old presentation must not release the new one's lease.
+	_release_entry_visibility(0, _run + ":" + _token if reason in ["replaced", "finished", "skipped"] else "")
 	var owned := is_active()
 	var was_replay := _replaying
 	if owned and not was_replay:

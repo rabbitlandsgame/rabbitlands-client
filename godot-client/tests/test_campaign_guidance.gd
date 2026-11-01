@@ -33,6 +33,10 @@ func run()->void:
 	var odo:=Node3D.new();root.add_child(odo);odo.position=adapter.tile_center(450,313)
 	var guidance:=Guidance.new();root.add_child(guidance)
 	guidance.apply_snapshot(state,objects,{20:odo},"maps/nymara/greenlight.elm",Vector2i(450,308),true,false)
+	var guided_colour: Color = objects[61001].get_node("Ring").material_override.albedo_color
+	for object: MapObject3D in objects.values():object.set_active(false)
+	expect(objects[61001].get_node("Ring").material_override.albedo_color == guided_colour,"ordinary harvest refresh cannot replace the guided action colour")
+	expect(not objects[61002].get_node("Ring").visible,"ordinary harvest refresh cannot reveal unavailable quest circles")
 	expect((objects[61001].get_node("Ring") as Node3D).visible and objects[61001].collision_layer==MapObject3D.PICK_LAYER,"the available landing work keeps its existing clickable ground circle")
 	expect(not (objects[61002].get_node("Ring") as Node3D).visible and objects[61002].collision_layer==0,"unavailable future work stops advertising a circle or intercepting ground clicks")
 	var all_hidden := objects.size()==19
@@ -59,6 +63,7 @@ func run()->void:
 	choices.targets[1].id="damage"
 	expect(Guidance.work_targets(choices)[0].id=="damage" and Guidance.work_targets(choices).size()==4,"the selected approach leads the checklist without removing alternate available methods")
 	guidance.apply_snapshot(state,objects,{20:odo},"greenlight",Vector2i(450,310),true,true)
+	for object: MapObject3D in objects.values():object.set_active(false)
 	expect(not guidance._labels.assess.visible and not (objects[61001].get_node("Ring") as Node3D).visible and objects[61001].collision_layer==0,"cinematic entry, playback and return hide field clutter and disable its picks")
 	guidance.apply_snapshot(state,objects,{20:odo},"greenlight",Vector2i(450,310),false,false)
 	expect(not guidance._labels.assess.visible and objects[61001].collision_layer==MapObject3D.PICK_LAYER,"Untrack hides guidance text while preserving ordinary available world work")
@@ -96,6 +101,10 @@ func run()->void:
 	expect(objects[61002].collision_layer==0,"a removed owned target cannot leave a stale clickable circle")
 	guidance.apply_snapshot(state,objects,{20:odo},"twinbrook",Vector2i.ZERO,true,false)
 	expect(guidance._labels.is_empty() and objects[61001].collision_layer==MapObject3D.PICK_LAYER and not objects[61001].has_meta("campaign_work_available"),"map changes restore original object presentation and remove guidance labels")
+	objects[61001].set_active(true)
+	var harvest_colour := MapObject3D.ACTIVE_COLOUR
+	harvest_colour.a = 0.75
+	expect(objects[61001].get_node("Ring").visible and objects[61001].get_node("Ring").material_override.albedo_color == harvest_colour,"releasing campaign guidance restores ordinary harvest presentation")
 	var network:=root.get_node("Network");var recorder:=GDScript.new()
 	recorder.source_code='extends "res://src/network/network_client.gd"\nvar sent_frames:Array=[]\nfunc send_frame(frame:PackedByteArray,_sensitive:=false)->Error:\n\tsent_frames.append(frame)\n\treturn OK\n'
 	expect(recorder.reload()==OK,"the offline production transport recorder compiles")

@@ -7595,6 +7595,7 @@ func _present_actor(id: Variant) -> void:
 	existing_actor.apply_vitals(int(dto.get("health", 0)),
 		int(dto.get("max_health", 0)))
 	_apply_actor_banner_options(int(id), existing_actor)
+	campaign_scene.prepare_actor_visibility(AppState.campaign, existing_actor, int(id), AppState.current_map)
 	# A deferred actor out of draw range shows nothing to stand on the ground:
 	# its map dot needs only the tile. Its body is put on the ground when built.
 	if not existing_actor.is_model_deferred() or existing_actor.is_drawn():
@@ -7650,6 +7651,7 @@ func _spawn_actor(id: Variant, build := true,
 	_place_actor_on_surface(node, true, actor_adapter.fallback_height())
 	node.adopt_presentation_from(previous)
 	node.set_selected(int(id) == AppState.selected_actor_id)
+	campaign_scene.prepare_actor_visibility(AppState.campaign, node, int(id), AppState.current_map)
 	if int(id) == AppState.local_actor_id:
 		# Built behind the curtain, shown once its ground is resident.
 		node.visible = not _arrival_pending()
@@ -7695,6 +7697,7 @@ func _revive_actor(id: Variant, node: ReplicatedActor3D, dto: Dictionary,
 	_apply_actor_mount(id)
 	_place_actor_on_surface(node, true, actor_adapter.fallback_height())
 	node.set_selected(int(id) == AppState.selected_actor_id)
+	campaign_scene.prepare_actor_visibility(AppState.campaign, node, int(id), AppState.current_map)
 	node.set_drawn(_crowd_reference_point().distance_to(node.global_position)
 		<= ACTOR_DRAW_DISTANCE_METRES)
 	# Paused while parked; it animates meanwhile, as a body coming into view
