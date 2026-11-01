@@ -9856,10 +9856,13 @@ func _declutter_actor_overheads(target_id: int) -> void:
 				if previous.grow(3).intersects(candidate.rect):
 					crowded = true
 					break
-		(candidate.actor as ReplicatedActor3D).set_overhead_crowded(crowded)
-		if not crowded and not creature:
+		var candidate_actor := candidate.actor as ReplicatedActor3D
+		candidate_actor.set_overhead_crowded(crowded)
+		# Hidden banners do not claim screen space. In particular a disabled
+		# NPC/player name must not hide the next visible player's health.
+		if not crowded and not creature and candidate_actor._overhead_shown():
 			occupied.append(candidate.rect)
-			if candidate.type == &"player" and (candidate.actor as ReplicatedActor3D)._overhead_shown():
+			if candidate.type == &"player":
 				player_occupied.append(candidate.rect)
 
 ## The screen space an actor's overhead block claims when names are

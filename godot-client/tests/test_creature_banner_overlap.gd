@@ -74,8 +74,22 @@ func _run() -> void:
 	creatures[0].position = Vector3.ZERO
 	var npc := make_actor(904, 2)
 	expect_creatures_visible(true, "an NPC banner does not suppress creature names")
-	remove_actor(npc)
+	npc.set_nameplate_visible(false)
 	var player := make_actor(905, 1)
+	main._declutter_actor_overheads(-1)
+	expect(player.get_node("Nameplate").visible
+		and player.get_node("HealthBarFill").visible,
+		"a hidden NPC banner does not claim the visible player's name or health space")
+	npc.set_nameplate_visible(true)
+	main._declutter_actor_overheads(-1)
+	expect(npc.get_node("Nameplate").visible and not player.get_node("Nameplate").visible,
+		"a visible NPC retains the existing stable same-distance ordering")
+	npc.set_nameplate_visible(false)
+	main._declutter_actor_overheads(-1)
+	expect(player.get_node("Nameplate").visible
+		and player.get_node("HealthBarFill").visible,
+		"disabling the blocking NPC restores the player's name and health in the same pass")
+	remove_actor(npc)
 	expect_creatures_visible(false, "a visible player banner hides overlapping creature names")
 	expect(player.get_node("Nameplate").visible, "the player keeps their banner")
 	main._declutter_actor_overheads(902)
@@ -85,6 +99,11 @@ func _run() -> void:
 		"a creature target does not suppress a player's banner")
 	player.set_nameplate_visible(false)
 	expect_creatures_visible(true, "a disabled player banner does not reserve space")
+	var later_npc := make_actor(906, 2)
+	main._declutter_actor_overheads(-1)
+	expect(later_npc.get_node("Nameplate").visible,
+		"a disabled earlier player banner does not hide a later NPC name")
+	remove_actor(later_npc)
 	player.set_nameplate_visible(true)
 	player.position.x = 6.0
 	expect_creatures_visible(true, "creature banners return when the player moves clear")
