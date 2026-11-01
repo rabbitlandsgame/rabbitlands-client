@@ -67,6 +67,7 @@ def process(source, metadata, texture, head_path, output, centre, style):
               'prior_style_sha256': sha(metadata), 'texture_sha256': sha(texture),
               'tool_sha256': sha(__file__), 'region_centre': centre.tolist(),
               'head_sha256': sha(head_path), 'edge_feather_mm': 3, 'root_offset_mm': .4, 'lods': {},
+              'central_moustache_coverage_gain': 1.65 if style == 'moustache' else 1.0,
               'source_morphs_skin_and_uvs_interpolated': True,
               'canonical_surface_bind_recalculated_at_new_feather_roots': True,
               'new_free_floating_cards': False, 'head_body_skeleton_modified': False}
@@ -114,7 +115,11 @@ def process(source, metadata, texture, head_path, output, centre, style):
         delta_start = 12+joint_count
         deltas = [data[:, delta_start+k*3:delta_start+(k+1)*3] for k in range(len(names))]
         distance = field(pos, centre, style)
-        colour[:, 0] = np.minimum(colour[:, 0], .5 * smoothstep(distance / .003))
+        source_coverage = colour[:, 0]*2
+        if style == 'moustache':
+            central = smoothstep((.028-np.abs(pos[:, 0]))/.012)
+            source_coverage = np.minimum(1, source_coverage*(1+.65*central))
+        colour[:, 0] = .5*np.minimum(source_coverage, smoothstep(distance / .003))
         # A trimmed opaque cap edge was previously an interior point standing
         # 3.25mm off skin. Rebind the new feather boundary onto the head instead
         # of merely making that floating interior point transparent.
