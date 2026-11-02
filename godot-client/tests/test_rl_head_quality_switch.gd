@@ -329,38 +329,60 @@ func _check_release() -> void:
 	RLHeadLibrary.retain_seconds = RLHeadLibrary.RETAIN_SECONDS
 
 
-## prewarm parses every RL file on the WorkerThreadPool and publishes it to
-## GlbSceneCache without the main thread waiting; the first High actor then
-## parses nothing; release_if_unused lets unused prewarmed files go.
+## prewarm with a face's files parses them on the WorkerThreadPool and
+## publishes them to GlbSceneCache without the main thread waiting; the first
+## High actor of that face then parses nothing; release_if_unused lets unused
+## prewarmed files go. prewarm with none parses only the few files the
+## pipeline warm-up instances (never every RL file), and lets them go after it.
 func _check_prewarm() -> void:
 	RLHeadLibrary.retain_seconds = 0.0
 	RLHeadLibrary.clear()
 	await process_frame
 	var paths := RLHeadLibrary.warm_paths()
-	_expect(paths.size() >= 4, "every head, hairstyle and beard is prewarmed (%d files)" % paths.size())
 	RLHeadLibrary.prewarm()
-	_expect(RLHeadLibrary.warming() or GlbSceneCache.missing(_global(paths)).is_empty(),
-		"prewarm starts worker parses")
 	var began := Time.get_ticks_msec()
-	while RLHeadLibrary.warming() and Time.get_ticks_msec() - began < 20000:
+	var chosen := PackedStringArray()
+	while RLHeadLibrary.warming() and Time.get_ticks_msec() - began < 60000:
+		if chosen.is_empty():
+			chosen = RLHeadLibrary._pipeline_paths
 		await process_frame
-	_expect(not RLHeadLibrary.warming() and GlbSceneCache.missing(_global(paths)).is_empty(),
+	_expect(not RLHeadLibrary.warming() and not chosen.is_empty() and chosen.size() * 4 < paths.size(),
+		"a pipeline prewarm parses only %d of the %d RL files (%d ms)" % [chosen.size(), paths.size(),
+			Time.get_ticks_msec() - began])
+	await process_frame
+	_expect(not RLHeadLibrary.is_loaded() and GlbSceneCache.missing(_global(paths)).size() == paths.size(),
+		"and lets them go once its warm-up ran, no RL head drawing them")
+	RLHeadLibrary.retain_seconds = 30.0
+	var face := RLHeadPortraitMap.face(PRESETS.appearance("Mira"), "female")
+	var files := RLHeadLibrary.face_paths(face)
+	_expect(files.size() >= 2, "Mira draws a head and a hairstyle module (%s)" % [files])
+	RLHeadLibrary.prewarm(files)
+	_expect(RLHeadLibrary.warming() or GlbSceneCache.missing(_global(files)).is_empty(),
+		"prewarm starts worker parses")
+	began = Time.get_ticks_msec()
+	while RLHeadLibrary.warming() and Time.get_ticks_msec() - began < 30000:
+		await process_frame
+	_expect(not RLHeadLibrary.warming() and GlbSceneCache.missing(_global(files)).is_empty(),
 		"every prewarmed file is published (%d ms)" % (Time.get_ticks_msec() - began))
+	_expect(RLHeadLibrary.is_loaded() and RLHeadLibrary.users() == 0, "a prewarm with no RL head holds the parsed files")
 	var misses := int(GlbSceneCache.retention_snapshot()["lookup_misses"])
 	var actor := _spawn("female", PRESETS.appearance("Mira"), {}, HIGH)
 	await process_frame
 	_expect(actor.rl_head() != null and int(GlbSceneCache.retention_snapshot()["lookup_misses"]) == misses,
 		"the first High actor after a prewarm parses nothing on the main thread")
+	RLHeadLibrary.retain_seconds = 0.0
 	actor.free()
 	await process_frame
 	await process_frame
 	_expect(not RLHeadLibrary.is_loaded(), "the prewarmed files go with the last RL head")
-	RLHeadLibrary.prewarm()
+	RLHeadLibrary.retain_seconds = 30.0
+	RLHeadLibrary.prewarm(files)
 	began = Time.get_ticks_msec()
-	while RLHeadLibrary.warming() and Time.get_ticks_msec() - began < 20000:
+	while RLHeadLibrary.warming() and Time.get_ticks_msec() - began < 30000:
 		await process_frame
 	await process_frame
 	_expect(RLHeadLibrary.is_loaded() and RLHeadLibrary.users() == 0, "a prewarm with no RL head holds the parsed files")
+	RLHeadLibrary.retain_seconds = 0.0
 	RLHeadLibrary.release_if_unused()
 	await process_frame
 	_expect(not RLHeadLibrary.is_loaded(), "release_if_unused lets unused prewarmed files go")

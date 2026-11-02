@@ -378,6 +378,9 @@ var _rl_head_ready := false
 ## The head could not be built for this appearance (a broken asset): the
 ## actor keeps develop's head until its appearance changes.
 var _rl_head_failed := false
+## The face's RL files are being parsed on a worker (_rl_head_files_ready):
+## the actor draws the classic High head until they are in.
+var _rl_head_waiting := false
 ## True while a tier switch swaps heads in place: develop's grooming (hair and
 ## beard shell) is left exactly as it is, as develop's own switch leaves it.
 var _rl_switching := false
@@ -1476,20 +1479,46 @@ static func rl_heads_renderer_supported() -> bool:
 		or RenderingServer.get_current_rendering_method() != "gl_compatibility"
 
 ## The graphics quality is now `level` (main.gd's quality pass, before the
-## actors switch): at High, where this renderer draws the RL head, its files
-## are parsed on worker threads ahead of the first High Human - the first
-## creation preview, the first Humans in sight, or the switch itself, whose
-## first head module is parsed on this thread while the rest go to workers
-## (RLHeadLibrary.prewarm). Below High, caches no RL head uses are let go
-## after RLHeadLibrary's retention time. A headless process (tests, tools)
-## draws nothing and never prewarms.
+## actors switch): at High, where this renderer draws the RL head, the few RL
+## files that carry every RL shader and vertex format are parsed on a worker
+## and their render pipelines prepared behind the login or a loading screen
+## (RLHeadLibrary.prewarm), then let go unless drawn. No Human's own files:
+## the local player's and the creation preview's are prewarmed by name
+## (prewarm_rl_head_files, prewarm_rl_head_choices), and every other Human
+## draws the classic High head while its files are parsed on a worker
+## (_rl_head_files_ready). Below High, caches no RL head uses are let go after
+## RLHeadLibrary's retention time. A headless process (tests, tools) draws
+## nothing and never prewarms.
 static func prewarm_rl_heads(level: int) -> void:
-	if rl_heads_classic() or not rl_heads_renderer_supported() or DisplayServer.get_name() == "headless":
+	if not _rl_heads_prewarmable():
 		return
 	if ActorRenderQuality.normalized_quality(level) == ActorRenderQuality.Quality.HIGH:
 		RLHeadLibrary.prewarm()
 	else:
 		RLHeadLibrary.release_if_unused()
+
+static func _rl_heads_prewarmable() -> bool:
+	return not rl_heads_classic() and rl_heads_renderer_supported() and DisplayServer.get_name() != "headless"
+
+## Parses on worker threads, ahead of its first High build, the RL files a
+## Human of `appearance` with `model_config`'s body draws at `level` (Main:
+## the character chosen to play, before its actor is configured; at High
+## only). Let go after RLHeadLibrary's retention time unless drawn.
+static func prewarm_rl_head_files(appearance: Dictionary, model_config: Dictionary, level: int) -> void:
+	if not _rl_heads_prewarmable() or ActorRenderQuality.normalized_quality(level) != ActorRenderQuality.Quality.HIGH \
+			or str(model_config.get("culture", "")) != "luminous" \
+			or str(model_config.get("bodyTemplate", "")) not in ["luminous_male", "luminous_female"]:
+		return
+	var face := RLHeadPortraitMap.face(appearance, str(model_config.get("gender", "female")))
+	RLHeadLibrary.prewarm(RLHeadLibrary.face_paths(face))
+
+## Parses on worker threads every RL file a Human of `sex` can choose (Main:
+## while character creation shows its High preview, whose every choice is
+## then drawn without a parse). Let go after RLHeadLibrary's retention time
+## once the preview no longer draws them.
+static func prewarm_rl_head_choices(sex: String, level: int) -> void:
+	if _rl_heads_prewarmable() and ActorRenderQuality.normalized_quality(level) == ActorRenderQuality.Quality.HIGH:
+		RLHeadLibrary.prewarm(RLHeadLibrary.choice_paths("male" if sex == "male" else "female"))
 
 ## The lab's explicit face, `appearance.rl_head` (a preset name or
 ## RLHeadAppearance's dictionary form), or null. Neither the game nor the wire
@@ -1507,6 +1536,7 @@ static func _rl_head_override(appearance: Dictionary) -> Variant:
 ## quality in a renderer that draws it, with the head module for its sex on
 ## disk. Low and Medium keep the native head and may draw modern hair alone.
 func _rl_head_wanted() -> bool:
+	_rl_head_waiting = false
 	if _native_skeleton == null or not _uses_portrait_customization() or rl_heads_classic():
 		return false
 	if _appearance.has("rl_head"):
@@ -1514,7 +1544,33 @@ func _rl_head_wanted() -> bool:
 	if _render_quality != ActorRenderQuality.Quality.HIGH or _rl_head_failed \
 			or not rl_heads_renderer_supported():
 		return false
+	if not _rl_head_files_ready():
+		_rl_head_waiting = true
+		return false
 	return not RLHeadLibrary.head(str(_model_config.get("gender", "female"))).is_empty()
+
+## Whether the face's RL files can be drawn now without a parse on this
+## thread. The player's own actor and portraits (render_quality_is_local: the
+## creation preview, the appearance editor, leaderboard cards) always build at
+## once, from the files prewarmed for them; so does every actor outside the
+## game (RLHeadLibrary.defers_loading). Any other Human whose files are not
+## parsed yet has them parsed on a worker and draws the classic High head
+## until they are in (_on_rl_head_files_ready).
+func _rl_head_files_ready() -> bool:
+	if _render_quality_local_actor or not RLHeadLibrary.defers_loading():
+		return true
+	var face := _rl_head_face(_appearance)
+	return face == null or RLHeadLibrary.request(RLHeadLibrary.face_paths(face), _on_rl_head_files_ready)
+
+## The files a waiting face asked for are in: the RL head takes the classic
+## head's place in place, as a switch up to High does. Where one of them
+## failed, the actor draws what any High Human without its RL head draws.
+func _on_rl_head_files_ready() -> void:
+	if not _rl_head_waiting or not _rl_head_ready or _native_skeleton == null or _rl_head != null:
+		return
+	# Still waiting: a newer request (another face) calls back again.
+	if _rl_head_wanted() or not _rl_head_waiting:
+		_switch_rl_head_in_place()
 
 ## The face for `appearance`: the lab's override, else the saved fields mapped
 ## onto the RL controls, palettes and grooming. Its sex is always the body's.
@@ -1556,7 +1612,9 @@ func _apply_rl_head_and_hair(appearance: Dictionary, hair_tint: Color, rebuild_n
 		_rl_head_failed = true
 	_remove_rl_head()
 	var hair_face: RLHeadAppearance = null
-	if _uses_portrait_customization() and not rl_heads_classic():
+	# A face waiting for its files draws the classic High head whole, its game
+	# hairstyle included.
+	if _uses_portrait_customization() and not rl_heads_classic() and not _rl_head_waiting:
 		hair_face = _rl_head_face(appearance, true)
 	if hair_face != null and hair_face.hair != RLHeadAppearance.NONE \
 			and not hair_face.hair.begins_with(RLHeadLibrary.LEGACY_PREFIX) \
@@ -1668,8 +1726,12 @@ func _remove_rl_head() -> void:
 func _switch_rl_head_in_place() -> void:
 	# Retire any High finish before replacing its source node or material.
 	# An unchanged compatibility hairstyle keeps its original resource identity.
+	# The classic High portrait goes too (a High head waiting for its RL files,
+	# or RL_HEADS switched back): the RL head's body patch takes the body's own
+	# material, and its cut the body's own mesh, as from any other tier.
 	if is_instance_valid(_native_model):
 		HIGH_HAIR.restore(_native_model)
+		HIGH_PORTRAIT.restore(_native_model)
 	var previous_style := _legacy_hair_style_drawn()
 	_apply_rl_head_and_hair(_appearance, _hair_tint, false)
 	var current_style := _legacy_hair_style_drawn()
@@ -1924,10 +1986,15 @@ func render_diagnostics() -> Dictionary:
 ## one body-level fallback and follows explicitly.
 func apply_render_quality(level: int, is_local_actor: bool = false) -> void:
 	var rl_before := _rl_head != null or _rl_head_pending != null
+	var waiting_before := _rl_head_waiting
 	_render_quality_selected = true
 	_render_quality = ACTOR_RENDER_QUALITY.normalized_quality(level)
 	_render_quality_local_actor = is_local_actor
-	if _rl_head_ready and _native_skeleton != null and _rl_head_wanted() != rl_before:
+	var rl_now := _rl_head_ready and _native_skeleton != null and _rl_head_wanted()
+	# A head that stopped waiting for its RL files without drawing them (a
+	# switch down from High) takes the hair it would have had at once.
+	if _rl_head_ready and _native_skeleton != null \
+			and (rl_now != rl_before or (waiting_before and not _rl_head_waiting)):
 		# Crossing High swaps the RL head and develop's head in place.
 		_switch_rl_head_in_place()
 	else:

@@ -202,17 +202,38 @@ shipped bodies, hair and equipment are untouched.
   as a user of `RLHeadLibrary`'s caches; when the last one goes they are kept for
   `RETAIN_SECONDS` (120 s) and released then if no RL head took them again (heads,
   beards, textures, materials, GlbSceneCache entries, body cuts, headwear refits), so a
-  switch down and back up, or the next creation preview, reads and parses nothing.
-* **Prewarm.** When the graphics quality is or becomes High (`main.gd`'s quality pass,
-  `ReplicatedActor3D.prewarm_rl_heads`), every RL GLB a High Human can draw is parsed on
-  the WorkerThreadPool, one file at a time, and published to GlbSceneCache on the main
-  thread when its task has finished (the main thread never waits for one: a file it
-  needs first it parses itself); the maps are then loaded one a frame and, in Forward+,
-  one instance of every RL surface stays out of sight for 30 frames so its render
-  pipelines are compiled before the first RL head is drawn. Below High, prewarmed caches
-  no head uses go after the retention time. A headless process never prewarms; closing
-  the client waits for a parse still on a worker; `RL_HEAD_PREWARM=0` turns it off. At
-  High this holds every RL file and map (about 55 MB) from the login screen on.
+  switch down and back up, or the next creation preview, reads and parses nothing. Each
+  rig also holds the RL files it draws (`hold_file` / `drop_file`): a file no rig draws
+  any more - a passer-by's hairstyle, a prewarmed file never drawn - is let go on its own
+  after the same 120 s (its scene, pieces, document and identity-bake sources), while
+  other RL heads are drawn. Maps and shared materials go with the rest.
+* **Loading and prewarm.** RL files are never parsed wholesale (the develop checkout has
+  46 GLBs, 540 MB on disk; parsed, they held 1.9 GB of video memory at High from the
+  login screen on: 0.9-1.1 GB of dense blend shapes, 0.6 GB of embedded images the
+  shaders never sample, plus every map). In the game (`RLHeadLibrary.defers_loading`: Main
+  registered its context) a remote Human whose files are not parsed yet draws the
+  classic High head, its game hairstyle included (one switched up from Medium keeps the
+  modern hairstyle it already draws), while they are parsed on the WorkerThreadPool
+  ahead of any prewarm, one file at a time, and the RL head then takes its place in
+  place (`ReplicatedActor3D._rl_head_files_ready`): the only visible change is that
+  brief swap on a style's first sight. Nothing is parsed on the main thread for it; a
+  file that fails leaves the actor as a High Human without an RL head is drawn. The
+  player's own actor and portraits (`render_quality_is_local`: the creation preview,
+  the appearance editor, leaderboard cards) build at once, as do labs, tools and tests;
+  `ReplicatedActor3D.prewarm_rl_head_files` (the chosen character) and
+  `prewarm_rl_head_choices` (the creation preview's choices) let Main prewarm their
+  files by name, with the maps of the heads among them loaded one a frame. When the graphics
+  quality is or becomes High (`main.gd`'s quality pass, `prewarm_rl_heads`), only the
+  render pipelines are prepared: a worker reads the RL files' glTF JSON, the few files
+  that carry every pair of shader variant and vertex format the RL surfaces draw at High
+  are parsed (5 files, 20 MB on disk, in the develop checkout), and in Forward+ one
+  instance of each stays out of sight for 30 frames, behind the login or a loading
+  screen, with each surface's shared shader in a material without maps, so the first RL
+  head is not held up compiling (1.5-2.6 s for the first preview without it, below);
+  those files then go after the retention time unless drawn. Below High, prewarmed
+  caches no head uses go after the retention time. A headless process never prewarms;
+  closing the client waits for a parse still on a worker; `RL_HEAD_PREWARM=0` turns
+  prewarming and the deferred loading off.
 * **Packaging** (`tools/package_client.py`; the route develop ships its native actors
   by). The head, hair and beard GLBs are the loose-only actor folder
   `assets/actors/native/rl_heads/`: never imported (the local `.gdignore` AGENTS.md

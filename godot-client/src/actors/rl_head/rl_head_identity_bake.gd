@@ -268,6 +268,34 @@ static func clear() -> void:
 	_idle_bytes = 0
 
 
+## Drops the source data of `meshes` and their idle entries (one RL file
+## RLHeadLibrary lets go of while other RL heads are drawn); an entry still
+## shown keeps its source. A source still being prepared is waited for.
+static func forget_sources(meshes: Array) -> void:
+	var ids := {}
+	for mesh: Variant in meshes:
+		if mesh is Mesh:
+			ids[(mesh as Mesh).get_instance_id()] = true
+	if ids.is_empty():
+		return
+	var shown := {}
+	for entry: Dictionary in _entries.values().duplicate():
+		var id := (entry["source"] as Object).get_instance_id()
+		if not ids.has(id):
+			continue
+		if int(entry["users"]) > 0:
+			shown[id] = true
+		else:
+			_drop(entry)
+	for id: Variant in ids:
+		if shown.has(id) or not _sources.has(id):
+			continue
+		var source: Dictionary = _sources[id]
+		if int(source.get("task", -1)) >= 0:
+			WorkerThreadPool.wait_for_task_completion(int(source["task"]))
+		_sources.erase(id)
+
+
 ## What the cache holds, for diagnostics and the budget evidence.
 static func describe() -> Dictionary:
 	var users := 0

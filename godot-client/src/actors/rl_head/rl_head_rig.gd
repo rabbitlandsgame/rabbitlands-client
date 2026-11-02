@@ -212,6 +212,9 @@ var _expression_paused := false
 var _head_bone := -2
 ## The native head stays in place while modern hair uses its own lower LODs.
 var _hair_only := false
+## Part ("head", "beard", "hair") -> the global path of the RL file it draws
+## from, held in RLHeadLibrary (hold_file) while drawn.
+var _held_files: Dictionary = {}
 
 ## Mesh resource id -> {blend shape name: index}, shared by every actor.
 static var _shape_indices: Dictionary = {}
@@ -296,6 +299,8 @@ func _notification(what: int) -> void:
 		for entry_key: Variant in _bakes.values():
 			IDENTITY_BAKE.release(str(entry_key))
 		_bakes.clear()
+		for part: Variant in _held_files.keys():
+			_hold_file(str(part), "")
 		if _counted:
 			_counted = false
 			RLHeadLibrary.release()
@@ -588,6 +593,7 @@ func _build_head() -> bool:
 	_free_levels(_head_lods)
 	_head_lods = []
 	_head_info = RLHeadLibrary.head(appearance.sex)
+	_hold_file("head", str(_head_info.get("path", "")), _piece_meshes(_head_info.get("lods", []) as Array))
 	if _head_info.is_empty():
 		return false
 	_head_lods = _instance_levels(_head_info["lods"] as Array, "RLHead", "")
@@ -608,9 +614,12 @@ func _build_beard() -> void:
 	_free_levels(_beard_lods)
 	_beard_lods = []
 	_beard_style = appearance.beard
+	var held := ""
 	if _beard_style != RLHeadAppearance.NONE:
 		var lods := RLHeadLibrary.beard(_beard_style)
 		if not lods.is_empty():
+			held = RLHeadLibrary.beard_path(_beard_style)
+			_hold_file("beard", held, _piece_meshes(lods))
 			_beard_lods = _instance_levels(lods, "RLBeard", _beard_style)
 			for level: Array in _beard_lods:
 				for mesh_node: MeshInstance3D in level:
@@ -618,22 +627,29 @@ func _build_beard() -> void:
 		elif _beard_style != RLHeadAppearance.STUBBLE:
 			RLHeadLibrary.warn_once("beard:" + _beard_style,
 				"facial hair %s missing, drawing the face clean-shaven" % _beard_style, true)
+	if held.is_empty():
+		_hold_file("beard", "")
 	if _expression != null:
 		_expression.set_targets(expression_targets())
 
 
 func _build_hair() -> void:
-	_free_hair()
+	# The file held stays held until the new one is, so a rebuild of the same
+	# hairstyle never lets it go in between.
+	_free_hair(true)
 	_hair_style = appearance.hair
 	_hair_external = false
 	if _hair_style == RLHeadAppearance.NONE or _skeleton.find_bone("Head") < 0:
+		_hold_file("hair", "")
 		return
 	if _hair_style.begins_with(RLHeadLibrary.LEGACY_PREFIX):
 		# The actor's own fitted hairstyle (ReplicatedActor3D._add_hair_variant).
 		_hair_external = true
+		_hold_file("hair", "")
 		return
 	var instance := RLHeadLibrary.instantiate_hair(_hair_style, appearance.sex)
 	if instance == null:
+		_hold_file("hair", "")
 		return
 	var attachment := BoneAttachment3D.new()
 	attachment.name = HAIR_NODE_NAME
@@ -676,6 +692,11 @@ func _build_hair() -> void:
 			_present(mesh_node)
 			kept.append(mesh_node)
 		_hair_lods.append(kept)
+	var drawn: Array = []
+	for level: Array in _hair_lods:
+		for mesh_node: MeshInstance3D in level:
+			drawn.append(mesh_node.mesh)
+	_hold_file("hair", str(RLHeadLibrary.hair_info(_hair_style, appearance.sex).get("path", "")), drawn)
 	_show_band(_lod_band)
 	var skeleton: Skeleton3D = null
 	for node_value: Node in instance.find_children("*", "Skeleton3D", true, false):
@@ -690,9 +711,11 @@ func _build_hair() -> void:
 		_refresh_hair_motion()
 
 
-func _free_hair() -> void:
+func _free_hair(keep_file: bool = false) -> void:
 	_release_bakes(_hair_lods)
 	_hair_lods = []
+	if not keep_file:
+		_hold_file("hair", "")
 	_hair_motion = null
 	if is_instance_valid(_hair_attachment):
 		if _hair_attachment.get_parent() != null:
@@ -704,6 +727,32 @@ func _free_hair() -> void:
 func _refresh_hair_motion() -> void:
 	if _hair_motion != null:
 		_hair_motion.enabled = hair_motion_allowed and quality == ActorRenderQuality.Quality.HIGH
+
+
+## Holds the RL file at `path` for `part` (RLHeadLibrary.hold_file, with the
+## `meshes` drawn from it), letting go of the file the part held before; an
+## empty path holds none.
+func _hold_file(part: String, path: String, meshes: Array = []) -> void:
+	var key := ProjectSettings.globalize_path(path) if not path.is_empty() else ""
+	var previous := str(_held_files.get(part, ""))
+	if key == previous:
+		return
+	if not key.is_empty():
+		RLHeadLibrary.hold_file(key, meshes)
+		_held_files[part] = key
+	else:
+		_held_files.erase(part)
+	if not previous.is_empty():
+		RLHeadLibrary.drop_file(previous)
+
+
+## The meshes of a head's or beard's pieces (RLHeadLibrary._skinned_lods).
+static func _piece_meshes(lods: Array) -> Array:
+	var meshes: Array = []
+	for level: Variant in lods:
+		for piece: Variant in level as Array:
+			meshes.append((piece as Dictionary).get("mesh"))
+	return meshes
 
 
 ## Skinned pieces rebound onto the actor's skeleton, one Array per LOD level

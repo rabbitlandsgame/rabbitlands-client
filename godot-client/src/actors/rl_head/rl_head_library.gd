@@ -28,7 +28,11 @@ extends RefCounted
 ## or the last one left the scene - `release_unused` drops the cached pieces,
 ## textures, materials and parsed documents, GlbSceneCache's scenes of the RL
 ## files, the body cuts, the headwear refits and the baked identities, as
-## develop's own High portrait releases its caches with its last user.
+## develop's own High portrait releases its caches with its last user. Each
+## RL file is also held by the rigs drawing from it (`hold_file` /
+## `drop_file`): one that no rig draws, a prewarmed one never drawn among
+## them, is let go on its own after the same retention time, while other RL
+## heads are drawn (a parsed hairstyle holds about 40 MB of video memory).
 
 const REST_COORDS := preload("res://src/actors/mesh_rest_coordinates.gd")
 const NECK_NORMALS := preload("res://src/actors/rl_head/rl_head_neck_normals.gd")
@@ -114,15 +118,36 @@ static var _warm_queue: PackedStringArray = PackedStringArray()
 ## Global GLB paths a prewarm published to GlbSceneCache (let go with the rest).
 static var _warmed: Dictionary = {}
 static var _warm_polling := false
-## A full prewarm asked for the renderer's pipelines too (see _warm_pipelines).
+## A pipeline prewarm is wanted (see _warm_pipelines); `_pipeline_paths` are
+## the files it instances, chosen on a worker (`_surveying`) and held by it.
 static var _pipelines_wanted := false
 static var _pipelines_done := false
-## The out-of-sight node holding one instance of every RL surface, while it is up.
+static var _pipeline_paths: PackedStringArray = PackedStringArray()
+## {"task", "holder"} while _survey reads the RL files' glTF JSON on a worker.
+static var _surveying: Dictionary = {}
+## The out-of-sight node holding one instance of the RL surfaces, while it is up.
 static var _pipeline_holder: Node3D = null
 ## Frames the pipeline holder stays in the scene.
 const PIPELINE_WARM_FRAMES := 30
-## Map files a full prewarm queued; the per-frame poll loads one a frame.
+## Map files a prewarm queued (the head maps of the heads it was given); the
+## per-frame poll loads one a frame.
 static var _texture_queue: PackedStringArray = PackedStringArray()
+## Global GLB paths requested for an actor waiting to draw them (`request`):
+## parsed before any prewarm's, in the order asked.
+static var _requested: Dictionary = {}
+## [{"keys": PackedStringArray, "callback": Callable}]: called once their files are in.
+static var _waiters: Array = []
+## Global GLB path -> how many rigs (and a pending pipeline prewarm) hold it.
+static var _file_users: Dictionary = {}
+## Global GLB path -> {mesh instance id: true}: the meshes rigs drew from it.
+static var _file_meshes: Dictionary = {}
+## Global GLB path -> bumped by every hold and drop: a pending timed release
+## of the file only acts if nothing happened to it since it was scheduled.
+static var _file_generation: Dictionary = {}
+## Whether Humans' missing RL files are parsed on a worker while they draw the
+## classic head (`defers_loading`): -1 when Main registered its context (the
+## game), 0 never, 1 always (tests).
+static var deferred_loading := -1
 ## Main supplies a live presentation gate. The callable captures only a WeakRef
 ## and a method name, so neither the library nor its poll keeps Main alive.
 ## Standalone labs/tests that register no context retain ordinary prewarming.
@@ -233,48 +258,150 @@ static func release_if_unused() -> void:
 		release()
 
 
-## Parses RL GLBs on the WorkerThreadPool ahead of their use (by default every
-## one a High Human can draw: both head modules, every hairstyle and beard),
-## each file its own task, each published to GlbSceneCache on the main thread
-## once its task has finished (a per-frame poll, and every `head`, `beard` and
-## `hair_info` lookup). Main gates speculative texture/pipeline publication to
-## login or a drawn loading screen; CPU parsing still runs while playing.
-## The main thread never waits for a task (GlbSceneCache
-## "Threads": a parse can need the main thread): a file it needs before its
-## task has finished is parsed there as before, and the task's copy is dropped
-## when it arrives. The RL files name no texture by URI, so a worker parse
-## reads no texture back. Called when the graphics quality is or becomes High
-## (ReplicatedActor3D.prewarm_rl_heads): before the actors switch up, so the
-## files the first High Humans need are parsed on the worker while this thread
-## parses the first of them. A client closing waits for the running parse
-## (cancel_warm, then `warming` until false): a process that quits while a
-## worker parses can hang.
+## Parses RL GLBs on the WorkerThreadPool ahead of their use, each file its
+## own task, each published to GlbSceneCache on the main thread once its task
+## has finished (a per-frame poll, and every `head`, `beard` and `hair_info`
+## lookup). With `paths` (the local player's character, the creation
+## preview's choices: ReplicatedActor3D.prewarm_rl_head_files and
+## prewarm_rl_head_choices) those files, and the maps of the heads among
+## them; with none, only what the renderer's pipelines need (see
+## _warm_pipelines): never every RL file, whose 46 GLBs at High held 1.9 GB
+## of video memory from the login screen on. A prewarmed file no rig draws is
+## let go after the retention time (`drop_file`). Main gates speculative
+## texture/pipeline publication to login or a drawn loading screen; CPU
+## parsing still runs while playing. The main thread never waits for a task
+## (GlbSceneCache "Threads": a parse can need the main thread): a file it
+## needs before its task has finished is parsed there as before, and the
+## task's copy is dropped when it arrives. The RL files name no texture by
+## URI, so a worker parse reads no texture back. Called with no paths when the
+## graphics quality is or becomes High (ReplicatedActor3D.prewarm_rl_heads). A
+## client closing waits for the running parse (cancel_warm, then `warming`
+## until false): a process that quits while a worker parses can hang.
 static func prewarm(paths: PackedStringArray = PackedStringArray()) -> void:
 	if OS.get_thread_caller_id() != OS.get_main_thread_id() or not prewarm_enabled():
 		return
-	if paths.is_empty():
-		paths = warm_paths()
 	if not GlbSceneCache.GltfQuantization.ensure_registered():
 		return
 	var started := false
-	for path: String in paths:
-		var key := ProjectSettings.globalize_path(path)
-		if _warming.has(key) or _warm_queue.has(key) or not FileAccess.file_exists(key) \
-				or GlbSceneCache.missing(PackedStringArray([key])).is_empty():
-			continue
-		_warm_queue.append(key)
-		started = true
-	_start_next_warm()
-	if paths == warm_paths():
-		started = _queue_textures() or started
-		if _pipeline_holder == null and not _pipelines_done:
+	if paths.is_empty():
+		if not _pipelines_compiled_ahead():
+			# Nothing to prepare: these compile at first draw.
+			_pipelines_done = true
+		elif _pipeline_holder == null and not _pipelines_done and not _pipelines_wanted:
 			_pipelines_wanted = true
 			started = true
-	if started and not _warm_polling:
-		var tree := Engine.get_main_loop() as SceneTree
-		if tree != null:
-			_warm_polling = true
-			tree.process_frame.connect(_poll_warm)
+			# A survey a cancelled prewarm left running is taken up instead: its
+			# task is still waited for by the poll, never dropped.
+			if _surveying.is_empty():
+				var listed := warm_paths()
+				var holder := {}
+				_surveying = {"holder": holder, "task": WorkerThreadPool.add_task(func() -> void:
+					holder["survey"] = _survey(listed), false, "RL head pipeline survey")}
+	else:
+		for path: String in paths:
+			started = _queue_warm(ProjectSettings.globalize_path(path)) or started
+		started = _queue_textures(paths) or started
+	_start_next_warm()
+	if started:
+		_start_warm_polling()
+
+
+static func _start_warm_polling() -> void:
+	if _warm_polling:
+		return
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree != null:
+		_warm_polling = true
+		tree.process_frame.connect(_poll_warm)
+
+
+## Queues a speculative parse of `key` (behind the files actors wait for);
+## false when it is parsed, parsing, queued or not on disk.
+static func _queue_warm(key: String) -> bool:
+	if _warming.has(key) or _warm_queue.has(key) or not FileAccess.file_exists(key) \
+			or GlbSceneCache.missing(PackedStringArray([key])).is_empty():
+		return false
+	_warm_queue.append(key)
+	return true
+
+
+## Whether every RL file in `paths` can be drawn without a parse: in
+## GlbSceneCache, or failed or missing (drawn without, as before). Otherwise
+## the rest are parsed on the worker, ahead of every prewarm's files, and
+## `callback` is called on the main thread (deferred) once none of them is
+## parsing or queued any more; a later request with the same callback replaces
+## its files. Never parses here. True as well where no worker parse can be
+## started, so the caller parses as it always did.
+static func request(paths: PackedStringArray, callback: Callable) -> bool:
+	if OS.get_thread_caller_id() != OS.get_main_thread_id():
+		return true
+	collect_warm()
+	var keys := PackedStringArray()
+	for path: String in paths:
+		var key := ProjectSettings.globalize_path(path)
+		if not path.is_empty() and FileAccess.file_exists(key) \
+				and not GlbSceneCache.missing(PackedStringArray([key])).is_empty():
+			keys.append(key)
+	if keys.is_empty() or not GlbSceneCache.GltfQuantization.ensure_registered():
+		return true
+	for key: String in keys:
+		if _warming.has(key) or _requested.has(key):
+			continue
+		var queued := _warm_queue.find(key)
+		if queued >= 0:
+			_warm_queue.remove_at(queued)
+		var at := 0
+		while at < _warm_queue.size() and _requested.has(_warm_queue[at]):
+			at += 1
+		_warm_queue.insert(at, key)
+		_requested[key] = true
+	var waiting := false
+	for waiter: Dictionary in _waiters:
+		if waiter["callback"] == callback:
+			waiter["keys"] = keys
+			waiting = true
+	if not waiting:
+		_waiters.append({"keys": keys, "callback": callback})
+	_start_next_warm()
+	_start_warm_polling()
+	return false
+
+
+## Calls back (deferred) the waiters none of whose files is parsing or queued
+## any more. Their files no rig took up by then go after the retention time,
+## as any published file nothing holds.
+static func _notify_waiters() -> void:
+	var delivered := PackedStringArray()
+	for waiter: Dictionary in _waiters.duplicate():
+		var pending := false
+		for key: String in waiter["keys"] as PackedStringArray:
+			pending = pending or _warming.has(key) or _warm_queue.has(key)
+		if pending:
+			continue
+		_waiters.erase(waiter)
+		delivered.append_array(waiter["keys"] as PackedStringArray)
+		var callback: Callable = waiter["callback"]
+		if callback.is_valid():
+			callback.call_deferred()
+	if not delivered.is_empty():
+		_release_untaken.call_deferred(delivered)
+
+
+static func _release_untaken(keys: PackedStringArray) -> void:
+	for key: String in keys:
+		if not _file_users.has(key) and not _awaited(key) and _warmed.has(key):
+			_release_file_later(key)
+
+
+## Whether a Human whose RL files are not parsed yet draws the classic head
+## while they are parsed on a worker (ReplicatedActor3D._rl_head_files_ready)
+## instead of parsing them on the main thread: in the game (Main registered
+## its context) with prewarming on, unless `deferred_loading` says otherwise.
+## Standalone labs, tools and tests build at once, as before.
+static func defers_loading() -> bool:
+	if deferred_loading >= 0:
+		return deferred_loading == 1
+	return prewarm_enabled() and _render_warm_owner != null and _render_warm_owner.get_ref() != null
 
 
 ## Starts the next queued parse when none is running: one worker parse at a
@@ -284,6 +411,7 @@ static func _start_next_warm() -> void:
 	while _warming.is_empty() and not _warm_queue.is_empty():
 		var key := _warm_queue[0]
 		_warm_queue.remove_at(0)
+		_requested.erase(key)
 		if GlbSceneCache.missing(PackedStringArray([key])).is_empty():
 			continue
 		# The task writes only its own holder, read here once it has finished.
@@ -309,111 +437,314 @@ static func warm_paths() -> PackedStringArray:
 	return paths
 
 
+## The RL GLBs `face` draws, those on disk: its head module (not for
+## `hair_only`), its hairstyle module and its beard (stubble is painted).
+static func face_paths(face: RLHeadAppearance, hair_only: bool = false) -> PackedStringArray:
+	var paths := PackedStringArray()
+	if face == null:
+		return paths
+	if not hair_only:
+		paths.append(head_path(face.sex))
+	if face.hair != RLHeadAppearance.NONE and not face.hair.begins_with(LEGACY_PREFIX):
+		paths.append(hair_path(face.hair, face.sex))
+	if not hair_only and face.beard != RLHeadAppearance.NONE and face.beard != RLHeadAppearance.STUBBLE:
+		paths.append(beard_path(face.beard))
+	var found := PackedStringArray()
+	for path: String in paths:
+		if not path.is_empty() and glb_exists(path):
+			found.append(path)
+	return found
+
+
+## Every RL GLB a Human of `sex` can choose: its head, the hairstyles it can
+## wear and, for a male, the beards (the creation preview's choices).
+static func choice_paths(sex: String) -> PackedStringArray:
+	var paths := PackedStringArray([head_path(sex)])
+	for style: String in hair_styles(sex):
+		paths.append(hair_path(style))
+	if sex == "male":
+		for style: String in _glb_names(BEARD_DIR):
+			paths.append(beard_path(style))
+	return paths
+
+
 ## Publishes every finished prewarm parse (main thread only). A file the main
-## thread parsed meanwhile keeps its own copy.
+## thread parsed meanwhile keeps its own copy; one whose parse failed is
+## marked failed, as a failed main-thread parse is. A published file no rig
+## holds goes after the retention time unless one takes it (drop_file).
 static func collect_warm() -> void:
 	if (_warming.is_empty() and _warm_queue.is_empty()) or OS.get_thread_caller_id() != OS.get_main_thread_id():
 		return
+	var finished := false
 	for key: Variant in _warming.keys():
 		var entry: Dictionary = _warming[key]
 		if not WorkerThreadPool.is_task_completed(int(entry["task"])):
 			continue
 		WorkerThreadPool.wait_for_task_completion(int(entry["task"]))
 		_warming.erase(key)
+		finished = true
 		var scenes: Dictionary = (entry["holder"] as Dictionary).get("scenes", {})
 		if not scenes.is_empty():
 			GlbSceneCache.install_prepared(scenes)
 			_warmed[str(key)] = true
+			if not _file_users.has(key) and not _awaited(str(key)):
+				_release_file_later(str(key))
+		if not GlbSceneCache.missing(PackedStringArray([str(key)])).is_empty():
+			# Failed, or its result could not be published: drawn without, as
+			# after a failed main-thread parse, rather than asked for again.
+			GlbSceneCache._failed[str(key)] = true
 	_start_next_warm()
+	if finished:
+		_notify_waiters()
+
+
+## Whether a waiter (request) asked for the file `key`.
+static func _awaited(key: String) -> bool:
+	for waiter: Dictionary in _waiters:
+		if (waiter["keys"] as PackedStringArray).has(key):
+			return true
+	return false
 
 
 ## Stops the queued prewarm work (the client closing): the parse already
 ## running finishes on its worker and is published when it arrives; `warming`
-## stays true until then. Never waits here.
+## stays true until then, and while the pipeline survey runs. Never waits here.
 static func cancel_warm() -> void:
 	_warm_queue.clear()
+	_requested.clear()
+	_waiters.clear()
 	_texture_queue.clear()
 	_pipelines_wanted = false
 	if is_instance_valid(_pipeline_holder):
 		_pipeline_holder.queue_free()
 	_pipeline_holder = null
+	_drop_pipeline_files()
 
 
-## Whether a prewarm is still at work: parses, queued maps, the pipeline warm-up.
+## Whether a prewarm is still at work: parses, the pipeline survey, queued
+## maps, the pipeline warm-up.
 static func warming() -> bool:
 	return not _warming.is_empty() or not _warm_queue.is_empty() or not _texture_queue.is_empty() or _pipelines_wanted \
-		or _pipeline_holder != null
+		or _pipeline_holder != null or not _surveying.is_empty()
 
 
 ## Forward+ compiles a surface's render pipelines when the surface first enters
 ## a scene, on worker threads, and the first frame that draws it waits for
 ## them (2.8 s for the first RL head in a fresh session, against 0.1 s for
-## develop's classic head: 49 surface pipelines). Once a full prewarm has
-## parsed every file, one instance of every RL surface - each head level, beard
-## and hairstyle, skinned as the game draws them, with the shared materials
-## the game gives them at High - stays out of sight for PIPELINE_WARM_FRAMES,
-## so a permitted login/loading context can prepare them before use. Pending
-## work defers while playing or editing; it never starts a bulk render there.
-## The Compatibility renderer compiles at first draw instead and skips this.
-## RL_HEAD_PIPELINE_PREWARM=0 skips only this stage for diagnostic comparisons.
+## develop's classic head: 49 surface pipelines). A pipeline is the shader
+## (its RL_* variant included) and the surface's vertex format, whatever the
+## material's maps and values: so a pipeline prewarm parses only the few RL
+## files that hold, between them, every combination of the two the RL files
+## draw at High (chosen from their glTF JSON on a worker: _survey,
+## _choose_pipeline_files), and once they are in, one instance of each such
+## file - skinned as the game draws it, each surface given the shared shader
+## the game gives it at High in a material without maps - stays out of sight
+## for PIPELINE_WARM_FRAMES, so a permitted login/loading context can prepare
+## them before use. The files then go after the retention time unless a rig
+## draws them. Pending work defers while playing or editing; it never starts a
+## bulk render there. The Compatibility renderer compiles at first draw
+## instead and skips this. RL_HEAD_PIPELINE_PREWARM=0 skips only this stage
+## for diagnostic comparisons.
 static func _warm_pipelines() -> void:
 	if not render_warm_allowed():
 		return
 	_pipelines_wanted = false
 	var tree := Engine.get_main_loop() as SceneTree
-	if tree == null or tree.root == null \
-			or RenderingServer.get_current_rendering_method() == "gl_compatibility" \
-			or OS.get_environment("RL_HEAD_PIPELINE_PREWARM") == "0":
+	if tree == null or tree.root == null or not _pipelines_compiled_ahead():
 		_pipelines_done = true
+		_drop_pipeline_files()
 		return
 	var holder := Node3D.new()
 	holder.name = "RLHeadPipelineWarmup"
 	# Far below the world, in no camera's sight.
 	holder.position = Vector3(0.0, -10000.0, 0.0)
 	var quality := ActorRenderQuality.Quality.HIGH
-	for path: String in warm_paths():
-		var instance := GlbSceneCache.instantiate(ProjectSettings.globalize_path(path))
+	var warm_materials := {}
+	for path: String in _pipeline_paths:
+		var key := ProjectSettings.globalize_path(path)
+		# Parsed files only: never a parse here.
+		var instance := GlbSceneCache.instantiate(key) \
+			if GlbSceneCache.missing(PackedStringArray([key])).is_empty() else null
 		if instance == null:
 			continue
-		var sex := ""
-		var style := ""
-		if path.begins_with(HAIR_DIR) or path.begins_with(BEARD_DIR):
-			style = path.get_file().get_basename()
-			sex = "female" if style.begins_with("mira") else "male"
-		else:
-			sex = path.get_file().get_basename().trim_prefix("rl_head_")
+		var sex_style := _file_sex_style(path)
 		for node: Node in instance.find_children("*", "MeshInstance3D", true, false):
 			var mesh_node := node as MeshInstance3D
 			if mesh_node.mesh == null:
 				continue
 			for surface: int in mesh_node.mesh.get_surface_count():
 				var imported := mesh_node.mesh.surface_get_material(surface)
-				var shared := material(imported.resource_name if imported != null else "", sex, style, quality)
-				if shared != null:
-					mesh_node.set_surface_override_material(surface, shared)
+				var shader := material_shader(imported.resource_name if imported != null else "",
+					str(sex_style[0]), str(sex_style[1]), quality)
+				if shader == null:
+					continue
+				if not warm_materials.has(shader):
+					var warm := ShaderMaterial.new()
+					warm.shader = shader
+					warm_materials[shader] = warm
+				mesh_node.set_surface_override_material(surface, warm_materials[shader])
 		holder.add_child(instance)
 	tree.root.add_child(holder)
 	_pipeline_holder = holder
 
 
-## Queues every map under TEXTURE_DIR not loaded yet (an export lists them by
-## their .import files); true when any was queued. The maps are loaded on the
-## main thread, one a frame (`_poll_warm`): a texture load needs the main
-## thread, so waiting for one on ResourceLoader's threads from here can hang.
-static func _queue_textures() -> bool:
-	if not DirAccess.dir_exists_absolute(TEXTURE_DIR):
+## Whether this renderer compiles a surface's pipelines when it enters the
+## scene (not Compatibility, which compiles at first draw) and the warm-up is
+## not switched off.
+static func _pipelines_compiled_ahead() -> bool:
+	return RenderingServer.get_current_rendering_method() != "gl_compatibility" \
+		and OS.get_environment("RL_HEAD_PIPELINE_PREWARM") != "0"
+
+
+## [sex, style] an RL file is drawn with: a head's sex and no style; a beard's
+## or hairstyle's file name and a body that wears it (nothing else of the
+## materials depends on the sex).
+static func _file_sex_style(path: String) -> Array:
+	var name := path.get_file().get_basename()
+	if path.begins_with(BEARD_DIR):
+		return ["male", name]
+	if path.begins_with(HAIR_DIR):
+		return ["female" if HAIR_MODULE_LOOKUP.file_name(name, "female") == name else "male", name]
+	return [name.trim_prefix("rl_head_"), ""]
+
+
+## On a worker: for each RL file in `paths`, its size and the distinct
+## surfaces its glTF JSON declares, as [material name, material extras, vertex
+## format: the attributes with their component types, the primitive mode and
+## whether it has morph targets]. Reads only the JSON chunks; touches no
+## Object.
+static func _survey(paths: PackedStringArray) -> Dictionary:
+	var result := {}
+	for path: String in paths:
+		var key := ProjectSettings.globalize_path(path)
+		var document: Variant = GLB_MESH_EXTRAS._read_glb_json(key) if FileAccess.file_exists(key) else null
+		if document is not Dictionary:
+			continue
+		var materials: Array = (document as Dictionary).get("materials", []) as Array
+		var accessors: Array = (document as Dictionary).get("accessors", []) as Array
+		var surfaces := {}
+		for mesh: Variant in (document as Dictionary).get("meshes", []) as Array:
+			if mesh is not Dictionary:
+				continue
+			for primitive: Variant in (mesh as Dictionary).get("primitives", []) as Array:
+				if primitive is not Dictionary:
+					continue
+				var material := {}
+				var index := int((primitive as Dictionary).get("material", -1))
+				if index >= 0 and index < materials.size() and materials[index] is Dictionary:
+					material = materials[index]
+				var attributes := PackedStringArray()
+				var declared: Dictionary = (primitive as Dictionary).get("attributes", {}) as Dictionary
+				for attribute: Variant in declared:
+					var accessor := int(declared[attribute])
+					var detail: Dictionary = accessors[accessor] as Dictionary \
+						if accessor >= 0 and accessor < accessors.size() and accessors[accessor] is Dictionary else {}
+					attributes.append("%s:%s:%s:%s" % [attribute, detail.get("componentType", ""),
+						detail.get("normalized", false), detail.get("type", "")])
+				attributes.sort()
+				var name := str(material.get("name", ""))
+				var extras: Variant = material.get("extras", {})
+				var format := "%s|%s|%s" % [",".join(attributes), (primitive as Dictionary).get("mode", 4),
+					(primitive as Dictionary).has("targets")]
+				surfaces[name + "|" + format] = [name, extras if extras is Dictionary else {}, format]
+		var file := FileAccess.open(key, FileAccess.READ)
+		result[path] = {"size": file.get_length() if file != null else 0, "surfaces": surfaces.values()}
+	return result
+
+
+## The RL files a pipeline prewarm instances: for every pair of shader (as
+## material_shader gives it at High, from the surveyed extras) and vertex
+## format an RL surface is drawn with, the smallest file that has one.
+static func _choose_pipeline_files(survey: Dictionary) -> PackedStringArray:
+	var files: Array = survey.keys()
+	files.sort_custom(func(a: String, b: String) -> bool:
+		var size_a := int((survey[a] as Dictionary).get("size", 0))
+		var size_b := int((survey[b] as Dictionary).get("size", 0))
+		return size_a < size_b or (size_a == size_b and a < b))
+	var covered := {}
+	var chosen := PackedStringArray()
+	for path: String in files:
+		var sex_style := _file_sex_style(path)
+		var adds := false
+		for surface: Array in (survey[path] as Dictionary)["surfaces"] as Array:
+			var shader := _material_shader_with(str(surface[0]), str(sex_style[0]), str(sex_style[1]),
+				ActorRenderQuality.Quality.HIGH, surface[1] as Dictionary)
+			if shader == null:
+				continue
+			var signature := "%d|%s" % [shader.get_instance_id(), surface[2]]
+			if not covered.has(signature):
+				covered[signature] = true
+				adds = true
+		if adds:
+			chosen.append(path)
+	return chosen
+
+
+## Holds the pipeline prewarm's files, and queues their parses, until it has
+## run (or was cancelled).
+static func _hold_pipeline_files(paths: PackedStringArray) -> void:
+	_drop_pipeline_files()
+	_pipeline_paths = paths
+	for path: String in _pipeline_paths:
+		hold_file(path)
+		_queue_warm(ProjectSettings.globalize_path(path))
+
+
+static func _drop_pipeline_files() -> void:
+	var paths := _pipeline_paths
+	_pipeline_paths = PackedStringArray()
+	for path: String in paths:
+		drop_file(path)
+
+
+## Whether none of the pipeline prewarm's files is parsing or queued any more.
+static func _pipeline_files_in() -> bool:
+	for path: String in _pipeline_paths:
+		var key := ProjectSettings.globalize_path(path)
+		if _warming.has(key) or _warm_queue.has(key):
+			return false
+	return true
+
+
+## Queues the maps of the head modules among `paths` (head_<sex>_*.png under
+## TEXTURE_DIR; an export lists them by their .import files) not loaded yet;
+## true when any was queued. The maps are loaded on the main thread, one a
+## frame (`_poll_warm`): a texture load needs the main thread, so waiting for
+## one on ResourceLoader's threads from here can hang.
+static func _queue_textures(paths: PackedStringArray) -> bool:
+	var prefixes := PackedStringArray()
+	for sex: String in RLHeadAppearance.SEXES:
+		var head_key := ProjectSettings.globalize_path(head_path(sex))
+		for path: String in paths:
+			if ProjectSettings.globalize_path(path) == head_key:
+				prefixes.append("head_%s_" % sex)
+				break
+	if prefixes.is_empty() or not DirAccess.dir_exists_absolute(TEXTURE_DIR):
 		return false
+	var queued := false
 	for listed: String in DirAccess.get_files_at(TEXTURE_DIR):
 		var file := listed.trim_suffix(".import").trim_suffix(".remap")
 		if file.get_extension().to_lower() != "png" or _texture_queue.has(file) \
 				or _textures.has(TEXTURE_DIR + file) or not ResourceLoader.exists(TEXTURE_DIR + file):
 			continue
-		_texture_queue.append(file)
-	return not _texture_queue.is_empty()
+		for prefix: String in prefixes:
+			if file.begins_with(prefix):
+				_texture_queue.append(file)
+				queued = true
+				break
+	return queued
 
 
 static func _poll_warm() -> void:
 	collect_warm()
+	if not _surveying.is_empty() and WorkerThreadPool.is_task_completed(int(_surveying["task"])):
+		WorkerThreadPool.wait_for_task_completion(int(_surveying["task"]))
+		var survey: Dictionary = (_surveying["holder"] as Dictionary).get("survey", {})
+		_surveying = {}
+		# A cancelled or released prewarm wants no files any more.
+		if _pipelines_wanted:
+			_hold_pipeline_files(_choose_pipeline_files(survey))
+			_start_next_warm()
 	if _render_warm_owner != null and _render_warm_owner.get_ref() == null:
 		# An owner that disappeared without its normal exit hook must never
 		# leave a late root-level render holder behind.
@@ -429,23 +760,108 @@ static func _poll_warm() -> void:
 			_pipeline_holder.queue_free()
 			_pipeline_holder = null
 			_pipelines_done = true
+			_drop_pipeline_files()
 		return
 	if not _texture_queue.is_empty() and render_warm_allowed():
 		texture(_texture_queue[0])
 		_texture_queue.remove_at(0)
 		return
-	if _warming.is_empty() and _warm_queue.is_empty() and _texture_queue.is_empty() \
-			and _pipelines_wanted and render_warm_allowed():
+	if _pipelines_wanted and _surveying.is_empty() and _texture_queue.is_empty() and _pipeline_files_in() \
+			and render_warm_allowed():
 		_warm_pipelines()
 	if render_warm_active():
 		return
-	if _warming.is_empty():
+	if _warming.is_empty() and _surveying.is_empty():
 		var tree := Engine.get_main_loop() as SceneTree
 		if not _warm_queue.is_empty() or not _texture_queue.is_empty() or _pipelines_wanted:
 			return
 		if tree != null and tree.process_frame.is_connected(_poll_warm):
 			tree.process_frame.disconnect(_poll_warm)
 		_warm_polling = false
+
+
+## One more rig (or the pending pipeline prewarm) draws from the RL file at
+## `path`; `meshes` are the ones it draws, whose identity bake sources go with
+## the file. A timed release of the file pending is called off.
+static func hold_file(path: String, meshes: Array = []) -> void:
+	var key := ProjectSettings.globalize_path(path)
+	_file_users[key] = int(_file_users.get(key, 0)) + 1
+	_file_generation[key] = int(_file_generation.get(key, 0)) + 1
+	if not meshes.is_empty():
+		var ids: Dictionary = _file_meshes.get(key, {})
+		for mesh: Variant in meshes:
+			if mesh is Mesh:
+				ids[(mesh as Mesh).get_instance_id()] = true
+		_file_meshes[key] = ids
+
+
+## One fewer: with none left the file goes after the retention time
+## (retain_seconds; at once at 0) unless something holds it again meanwhile.
+static func drop_file(path: String) -> void:
+	var key := ProjectSettings.globalize_path(path)
+	if not _file_users.has(key):
+		return
+	var users := int(_file_users[key]) - 1
+	if users > 0:
+		_file_users[key] = users
+		return
+	_file_users.erase(key)
+	_release_file_later(key)
+
+
+## How many hold the RL file at `path` (hold_file).
+static func file_users(path: String) -> int:
+	return int(_file_users.get(ProjectSettings.globalize_path(path), 0))
+
+
+static func _release_file_later(key: String) -> void:
+	var generation := int(_file_generation.get(key, 0)) + 1
+	_file_generation[key] = generation
+	var tree := Engine.get_main_loop() as SceneTree
+	if retain_seconds <= 0.0 or tree == null:
+		_release_file(key)
+		return
+	tree.create_timer(retain_seconds, true, false, true).timeout.connect(func() -> void:
+		if int(_file_generation.get(key, 0)) == generation and not _file_users.has(key):
+			_release_file(key))
+
+
+## Lets go of one RL file nothing holds: its GlbSceneCache scene, the head or
+## beard pieces and hairstyle details read from it, its document, and the
+## identity bake's sources and idle bakes of its meshes. Its maps and shared
+## materials stay with the rest of the caches (release_unused).
+static func _release_file(key: String) -> void:
+	if _file_users.has(key) or _warming.has(key):
+		return
+	var path := ProjectSettings.localize_path(key)
+	var meshes: Array = []
+	for id: Variant in _file_meshes.get(key, {}) as Dictionary:
+		var mesh := instance_from_id(int(id)) as Mesh
+		if mesh != null:
+			meshes.append(mesh)
+	var name := path.get_file().get_basename()
+	for sex: Variant in _heads.keys():
+		var info: Dictionary = _heads[sex]
+		if str(info.get("path", "")) != path:
+			continue
+		for level: Variant in info.get("lods", []) as Array:
+			for piece: Dictionary in level as Array:
+				meshes.append(piece["mesh"])
+		_heads.erase(sex)
+	if path.begins_with(BEARD_DIR) and _beards.has(name):
+		for level: Variant in _beards[name] as Array:
+			for piece: Dictionary in level as Array:
+				meshes.append(piece["mesh"])
+		_beards.erase(name)
+	if path.begins_with(HAIR_DIR):
+		_hair_info.erase(name)
+	_documents.erase(path)
+	_warmed.erase(key)
+	_file_meshes.erase(key)
+	IDENTITY_BAKE.forget_sources(meshes)
+	for mesh: Variant in meshes:
+		RLHeadRig.forget_mesh(mesh as Mesh)
+	_forget_scene(path)
 
 
 ## How many RL heads hold the caches.
@@ -484,9 +900,18 @@ static func release_unused() -> void:
 	_pipeline_holder = null
 	_pipelines_wanted = false
 	_pipelines_done = false
+	_pipeline_paths = PackedStringArray()
 	_textures.clear()
 	_texture_queue.clear()
-	_warm_queue.clear()
+	# Only the parses actors wait for (request) stay queued.
+	var waited := PackedStringArray()
+	for key: String in _warm_queue:
+		if _requested.has(key):
+			waited.append(key)
+	_warm_queue = waited
+	_file_users.clear()
+	_file_meshes.clear()
+	_file_generation.clear()
 	_materials.clear()
 	_soft_root_shaders.clear()
 	_face_materials.clear()
@@ -992,18 +1417,7 @@ static func material(material_name: String, sex: String, style: String, quality:
 	if _materials.has(key):
 		return _materials[key] as ShaderMaterial
 	var result := ShaderMaterial.new()
-	result.shader = _values_shader(SHADERS[kind]) if material_values() else SHADERS[kind]
-	if role == "rl_hair_clump" and style == "curly_twin_buns":
-		var source: Shader = result.shader
-		if not _soft_root_shaders.has(source):
-			var shader := Shader.new()
-			shader.code = "#define RL_SOFT_ROOTS\n" + source.code
-			shader.set_meta(&"rl_base_shader", source)
-			_soft_root_shaders[source] = shader
-		result.shader = _soft_root_shaders[source]
-	if (material_name == "rl_brow" and not DRAW_BROW_CARDS) \
-			or (material_name == "rl_cornea" and quality < CORNEA_QUALITY):
-		result.shader = SHADERS["rl_hidden"]
+	result.shader = _material_shader(material_name, role, kind, style, quality)
 	result.resource_name = material_name
 	match role:
 		"rl_skin":
@@ -1025,17 +1439,7 @@ static func material(material_name: String, sex: String, style: String, quality:
 			var asset := beard_path(style) if role == "rl_beard" else hair_path(style)
 			var extras := material_extras(asset, material_name)
 			var feathered_beard := role == "rl_beard" and bool(extras.get("featheredRoots", false))
-			var soft_details := role == "rl_hair_card" and bool(extras.get("softRootDetails", false))
 			var soft_clump := role == "rl_hair_clump" and bool(extras.get("softRootCoverage", false))
-			if feathered_beard or soft_details or soft_clump:
-				var source: Shader = result.shader
-				var shader_key: Variant = "beard_feather:%d" % source.get_instance_id() if feathered_beard else source
-				if not _soft_root_shaders.has(shader_key):
-					var shader := Shader.new()
-					shader.code = ("#define RL_BEARD_FEATHER\n" if feathered_beard else "#define RL_SOFT_ROOTS\n") + source.code
-					shader.set_meta(&"rl_base_shader", source)
-					_soft_root_shaders[shader_key] = shader
-				result.shader = _soft_root_shaders[shader_key]
 			var file := str(extras.get("texture", ""))
 			if file.is_empty():
 				file = "beard.png" if role == "rl_beard" else "hair_%s.png" % style
@@ -1071,6 +1475,64 @@ static func material(material_name: String, sex: String, style: String, quality:
 				and bool(extras.get("uvStrandHighlights", true)))
 	_materials[key] = result
 	return result
+
+
+## The shader `material` draws an imported material name with, or null for a
+## name outside the contract: its role's shared shader in the variant the
+## material asks for - the same Shader object for every material, style and
+## actor drawing that variant, so its render pipelines compile once (see
+## _warm_pipelines).
+static func material_shader(material_name: String, sex: String, style: String, quality: int) -> Shader:
+	return _material_shader_with(material_name, sex, style, quality)
+
+
+## material_shader with the material's glTF `extras` given (null: read from
+## its asset).
+static func _material_shader_with(material_name: String, sex: String, style: String, quality: int,
+		extras: Variant = null) -> Shader:
+	var role := material_role(material_name)
+	var kind := str(MATERIAL_SHADERS.get(role, ""))
+	if kind.is_empty():
+		return null
+	if role in ["rl_hair_clump", "rl_hair_card"]:
+		style = HAIR_MODULE_LOOKUP.file_name(style, sex)
+		if style.is_empty():
+			return null
+	return _material_shader(material_name, role, kind, style, quality, extras)
+
+
+## The shader of a material whose role, shader kind and style (a hairstyle's
+## file name) are resolved: soft roots for curly_twin_buns' clumps and for the
+## clumps and cards whose extras ask for them, feathered roots for such
+## beards, the hidden shader for brow cards and, below CORNEA_QUALITY, the
+## cornea; in the Compatibility renderer each is its RL_MATERIAL_VALUES compile.
+static func _material_shader(material_name: String, role: String, kind: String, style: String, quality: int,
+		extras: Variant = null) -> Shader:
+	var shader: Shader = _values_shader(SHADERS[kind]) if material_values() else SHADERS[kind]
+	if role == "rl_hair_clump" and style == "curly_twin_buns":
+		shader = _variant_shader(shader, shader, "#define RL_SOFT_ROOTS\n")
+	if (material_name == "rl_brow" and not DRAW_BROW_CARDS) \
+			or (material_name == "rl_cornea" and quality < CORNEA_QUALITY):
+		shader = SHADERS["rl_hidden"]
+	if role in ["rl_hair_clump", "rl_hair_card", "rl_beard"]:
+		var details: Dictionary = extras as Dictionary if extras is Dictionary else material_extras(
+			beard_path(style) if role == "rl_beard" else hair_path(style), material_name)
+		var feathered_beard := role == "rl_beard" and bool(details.get("featheredRoots", false))
+		if feathered_beard or (role == "rl_hair_card" and bool(details.get("softRootDetails", false))) \
+				or (role == "rl_hair_clump" and bool(details.get("softRootCoverage", false))):
+			shader = _variant_shader("beard_feather:%d" % shader.get_instance_id() if feathered_beard else shader,
+				shader, "#define RL_BEARD_FEATHER\n" if feathered_beard else "#define RL_SOFT_ROOTS\n")
+	return shader
+
+
+## `source` compiled with `define` first, made once per `key`.
+static func _variant_shader(key: Variant, source: Shader, define: String) -> Shader:
+	if not _soft_root_shaders.has(key):
+		var shader := Shader.new()
+		shader.code = define + source.code
+		shader.set_meta(&"rl_base_shader", source)
+		_soft_root_shaders[key] = shader
+	return _soft_root_shaders[key]
 
 
 static func _set_texture(target: ShaderMaterial, uniform_name: String, flag: String, value: Texture2D) -> void:
