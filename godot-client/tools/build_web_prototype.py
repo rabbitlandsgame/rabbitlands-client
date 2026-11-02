@@ -58,6 +58,8 @@ def raw_archives(files: list[Path], assets: Path) -> list[dict]:
 def finish_site(stage: Path, assets_base_url: str):
     site, assets = stage / "site", stage / "assets"
     pack = site / "index.pck"
+    if pack.stat().st_size > 512 * 1024 * 1024:
+        raise ValueError("Browser package exceeds 512 MiB; use a fresh --stage folder to exclude stale editor-extracted images")
     parts = []
     with pack.open("rb") as source:
         while data := source.read(PART_BYTES):
