@@ -248,6 +248,13 @@ static func _bind(object: Object, role: String, property: String, theme: bool) -
 	if object == null or not DEFAULTS.has(role):
 		return
 	var key := "%d:%s" % [object.get_instance_id(), property]
+	# HUD, chat tab and book refreshes rebind the same role on every packet;
+	# such a binding is already registered and only needs its color checked.
+	var existing: Dictionary = _bindings.get(key, {})
+	if not existing.is_empty() and existing.role == role and existing.theme == theme \
+			and existing.reference.get_ref() == object and object.get_meta("text_color_role", "") == role:
+		_apply_binding(existing)
+		return
 	if object is Node:
 		var owner_id := object.get_instance_id()
 		if not object.has_meta("text_color_entry_hook"):
@@ -291,10 +298,17 @@ static func _apply_binding(binding: Dictionary) -> bool:
 		var component_color: Variant = object.get_meta("hud_text_color_override")
 		if component_color is Color:
 			chosen = component_color
+	var property := str(binding.property)
 	if bool(binding.theme):
-		(object as Control).add_theme_color_override(str(binding.property), chosen)
-	else:
-		object.set(str(binding.property), chosen)
+		var control := object as Control
+		# An override notifies the control (theme cache, minimum size, text
+		# reshaping) even when unchanged, and only does so inside the tree.
+		if control.is_inside_tree() and control.has_theme_color_override(property) \
+				and control.get_theme_color(property) == chosen:
+			return true
+		control.add_theme_color_override(property, chosen)
+	elif object.get(property) != chosen:
+		object.set(property, chosen)
 	return true
 
 static func _notify(role: String) -> void:

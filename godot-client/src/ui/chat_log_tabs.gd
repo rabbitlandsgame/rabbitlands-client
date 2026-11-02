@@ -67,15 +67,21 @@ func select(key: String) -> void:
 		TextColors.bind(button, "chat_unread" if _unread.has(candidate) else "chat_tab")
 
 func observe(line: Dictionary) -> void:
+	# Tabs are recoloured only when one is added or becomes unread; a line
+	# for tabs that are already marked changes nothing on screen.
+	var changed := false
 	var number := Messages.channel_number(line)
 	if number > 0 and not buttons.has("channel:%d" % number):
 		_add_tab("channel:%d" % number, "#%d" % number)
+		changed = true
 	var person := Messages.peer(line)
 	var key := "pm:" + person.to_lower()
 	if not person.is_empty() and not buttons.has(key):
 		_add_tab(key, "Private · " + person)
+		changed = true
 	if not Messages.matches(line, selected):
 		for candidate: String in buttons:
-			if candidate != selected and Messages.matches(line, candidate):
+			if candidate != selected and not _unread.has(candidate) and Messages.matches(line, candidate):
 				_unread[candidate] = true
-	select(selected)
+				changed = true
+	if changed: select(selected)

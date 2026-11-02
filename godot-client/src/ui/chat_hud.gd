@@ -331,10 +331,13 @@ func select_tab(key: String) -> void:
 func observe(line: Dictionary) -> void:
 	if Messages.matches(line, _selected_tab):
 		return
+	# Recolour the tabs only when the unread set grows.
+	var changed := false
 	for key: String in buttons:
-		if key != _selected_tab and Messages.matches(line, key):
+		if key != _selected_tab and not _unread.has(key) and Messages.matches(line, key):
 			_unread[key] = true
-	select_tab(_selected_tab)
+			changed = true
+	if changed: select_tab(_selected_tab)
 
 func _layout_key() -> String:
 	return "system_chat_soft" if feed_role == "system" else "chat_soft"
