@@ -98,6 +98,8 @@ static func prepare(paths: PackedStringArray) -> Dictionary:
 
 static func install_prepared(scenes: Dictionary) -> void:
 	for path: String in scenes:
+		# A browser file may have been retired while this worker finished.
+		if OS.has_feature("web") and not FileAccess.file_exists(path): continue
 		if not _scenes.has(path):
 			var prepared: Variant = scenes[path]
 			if prepared is Dictionary:
@@ -276,6 +278,20 @@ static func clear() -> void:
 
 static func cached_scene_count() -> int:
 	return _scenes.size() + _direct_raw_scenes.size()
+
+static func _file_key(path: String) -> String:
+	var value := _canonical_path(path)
+	if value.begins_with("res://"): value = value.trim_prefix("res://")
+	if not value.is_absolute_path(): value = "/".path_join(value)
+	return value.simplify_path()
+
+## Main-thread retirement of memoized templates, not their live instances.
+static func release_sources(paths: PackedStringArray) -> void:
+	var wanted := {}
+	for path: String in paths: wanted[_file_key(path)] = true
+	for cache: Dictionary in [_scenes, _direct_raw_scenes, _failed, _prepared_entries, _geometry_entries]:
+		for source: String in cache.keys():
+			if wanted.has(_file_key(source)): cache.erase(source)
 
 ## Read on the main thread, where cache publication/clearing already lives.
 ## Worker builds only update timing data behind the separate mutex. Counts do

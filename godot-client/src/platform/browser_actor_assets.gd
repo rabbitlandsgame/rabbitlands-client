@@ -61,3 +61,6 @@ func prune(live: Dictionary, parked: Array = []) -> void:
 
 func clear() -> void:
 	prune({})
+
+func pending_for(id: int) -> bool:
+	return _pending.has(id)

@@ -515,7 +515,7 @@ func turn(left: bool) -> Error:
 var declared_actor_cap: int = preload("res://src/network/interest_protocol.gd").ACTOR_CAP_DEFAULT
 
 func send_client_capabilities() -> Error:
-	return send_frame(EloriaProtocol.client_capabilities(declared_actor_cap))
+	return send_frame(EloriaProtocol.client_capabilities(declared_actor_cap, OS.has_feature("web")))
 
 func send_chat(text: String) -> Error:
 	if text.strip_edges().to_lower().begins_with("#appearance "):

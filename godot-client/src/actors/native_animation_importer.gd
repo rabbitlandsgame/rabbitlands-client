@@ -101,6 +101,9 @@ static func prepare_detached(owner: Node, source: Node, path: String,
 		"built": _build(owner, path, skeleton_path, skeleton, aliases, wanted, loops, defaults, source)}
 
 static func install_prepared(record: Dictionary) -> void:
+	if OS.has_feature("web") and not record.is_empty() \
+			and not FileAccess.file_exists(str(record.key).get_slice("|", 0)):
+		return
 	if not record.is_empty() and not _libraries.has(record.key):
 		_libraries[record.key] = record.built
 
@@ -116,6 +119,36 @@ static func clear() -> void:
 		if is_instance_valid(scene_value):
 			(scene_value as Node).free()
 	_sources.clear()
+
+static func _file_key(path: String) -> String:
+	var value := ProjectSettings.globalize_path(path) if path.begins_with("res://") else path
+	if value.begins_with("res://"): value = value.trim_prefix("res://")
+	if not value.is_absolute_path(): value = "/".path_join(value)
+	return value.simplify_path()
+
+## Never join a running worker during a frame. The caller retries later;
+## live AnimationPlayers keep their own references to admitted libraries.
+static func release_sources(paths: PackedStringArray) -> bool:
+	var wanted := {}
+	for path: String in paths: wanted[_file_key(path)] = true
+	var pending := false
+	for source: String in _prewarming.keys():
+		if not wanted.has(_file_key(source)): continue
+		var thread: Thread = _prewarming[source]
+		if thread.is_alive():
+			pending = true
+			continue
+		var completion: Variant = thread.wait_to_finish()
+		if completion is Node: (completion as Node).free()
+		_prewarming.erase(source)
+	for source: String in _sources.keys():
+		if not wanted.has(_file_key(source)): continue
+		var node: Variant = _sources[source]
+		if is_instance_valid(node): (node as Node).free()
+		_sources.erase(source)
+	for key: String in _libraries.keys():
+		if wanted.has(_file_key(key.get_slice("|", 0))): _libraries.erase(key)
+	return not pending
 
 ## Parses `source_path` on a worker thread, so the first actor to need it
 ## finds the scene ready instead of paying for the parse on the main thread

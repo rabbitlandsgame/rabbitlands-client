@@ -410,8 +410,9 @@ const CLIENT_CAPABILITIES: Array[String] = [
 ## `#clientcaps` is an ordinary chat command; the server parses it out of
 ## RAW_TEXT and stores the set on the session. A positive `actor_cap` adds the
 ## player's cap as a value token after the list, which stays a list of names.
-static func client_capabilities(actor_cap := 0) -> PackedByteArray:
+static func client_capabilities(actor_cap := 0, browser_loading := false) -> PackedByteArray:
 	var declared := PackedStringArray(CLIENT_CAPABILITIES)
+	if browser_loading: declared.append("browser_asset_loading_v1")
 	if actor_cap > 0:
 		declared.append(InterestProtocol.actor_cap_token(actor_cap))
 	return chat("#clientcaps " + ",".join(declared))

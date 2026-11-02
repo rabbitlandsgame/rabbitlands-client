@@ -935,6 +935,9 @@ var _deferred_map_load := false
 var _arrival_settle_frames := 0
 var _browser_mount_warmup: RefCounted
 var _browser_actor_assets: RefCounted
+var _browser_source_retirement: RefCounted
+var _browser_loading_lease: RefCounted
+var _browser_pinned_maps: Array = []
 ## The local character was spawned and the server has not yet been told it
 ## stands on loaded ground (`_report_arrival`).
 var _arrival_unreported := false
@@ -1430,6 +1433,12 @@ func _prepare_geometry_before_login() -> bool:
 	return false
 
 func _ready() -> void:
+	if OS.has_feature("web"):
+		_browser_loading_lease = preload("res://src/platform/browser_loading_lease.gd").new()
+		var browser_assets := get_tree().root.get_node_or_null("BrowserAssetService")
+		if browser_assets != null and browser_assets.has_signal("files_evicted"):
+			_browser_source_retirement = preload("res://src/platform/browser_source_retirement.gd").new()
+			browser_assets.connect("files_evicted", Callable(_browser_source_retirement, "enqueue"))
 	RLHeadLibrary.set_render_warm_context(self, &"_rl_head_render_warm_allowed")
 	Diagnostics.startup_stage("geometry_preparation")
 	if await _prepare_geometry_before_login():
@@ -1528,6 +1537,7 @@ func _ready() -> void:
 	world_park.name = "WorldPark"
 	add_child(world_park)
 	world_park.configure(map_registry)
+	if OS.has_feature("web"): world_park.budget_bytes = mini(world_park.budget_bytes, 512 * 1024 * 1024)
 	Network.movement_requested.connect(_on_door_movement_requested)
 	Network.coordinate_route_cancelled.connect(func() -> void:
 		exterior_stream.pending_walk.clear()
@@ -2099,6 +2109,7 @@ func _bind_shared_world() -> void:
 	print_debug("world_binding stage=shared world=", gameplay_world)
 
 func _process(delta: float) -> void:
+	if _browser_source_retirement != null: _browser_source_retirement.call("advance")
 	if _browser_actor_assets != null:
 		for actor_id: int in _browser_actor_assets.call("poll"):
 			if AppState.actors.has(actor_id):
@@ -2120,6 +2131,9 @@ func _process(delta: float) -> void:
 			if AppState.authenticated and outdoors else {})
 	_update_arrival()
 	_update_browser_asset_pins()
+	if _browser_loading_lease != null:
+		_browser_loading_lease.call("update", AppState.authenticated and Network._link_ready() \
+			and arrival_curtain.blocks_input(), AppState.current_map, Time.get_ticks_msec(), Network.send_chat)
 	_report_arrival()
 	if _spawn_backlog:
 		_spawn_backlog = false
@@ -6598,6 +6612,8 @@ func _update_browser_asset_pins() -> void:
 	for prewarm: RefCounted in [respawn_prewarm, gauntlet_prewarm]:
 		if not str(prewarm.get("map_id")).is_empty(): maps.append(str(prewarm.get("map_id")))
 	if character_intro.pending or character_intro.is_active(): maps.append(NewCharacterIntroScript.MAP)
+	if maps == _browser_pinned_maps: return
+	_browser_pinned_maps = maps.duplicate()
 	WebPrototype.pin_maps("world-residents", maps)
 
 func _load_server_map() -> void:
@@ -6674,6 +6690,7 @@ func _load_server_map() -> void:
 		_rebase_streamed_world(rebase)
 	var previous_map: String = MapRegistry.normalize_server_map_id(loaded_server_map)
 	loaded_server_map = AppState.current_map
+	if OS.has_feature("web"): _arrival_unreported = true
 	_actor_surface_samples.clear()
 	if not _continuous_map_handoff:
 		_grounded_actors.clear()
