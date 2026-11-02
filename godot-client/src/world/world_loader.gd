@@ -26,6 +26,7 @@ const GeometrySources := preload("res://src/world/map_geometry_texture_sources.g
 const MaterialOwnership := preload("res://src/world/prepared_material_ownership.gd")
 const MapMaterialPreparation := preload("res://src/world/map_material_preparation.gd")
 const RoadGround := preload("res://src/world/road_ground/road_ground.gd")
+const MapImageExtension := preload("res://src/world/map_image_extension.gd")
 
 # Static-instance batching. A region such as Four Gates imports ~1700 mesh
 # nodes that between them reference only 42 meshes, so almost every draw call
@@ -156,6 +157,11 @@ var _cpu_meshes: Dictionary = {}
 var _cached_paving: Dictionary = {}
 var _road_ground_prepared: Dictionary = {}
 var _road_ground_bound := false
+## This load's external verification failures, kept until load_world fails.
+var _external_failures: Array[String] = []
+## Map ids whose unread legacy scene-cache entries this session has retired
+## (`_retire_scene_cache_entries`). Main thread only.
+static var _retired_scene_cache: Dictionary = {}
 
 # A preloader builds a private tree on one worker. It never enters the active
 # SceneTree, writes a disk cache, or mutates the shared digest registry there.
@@ -322,6 +328,7 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 	var mark: int = began
 	load_phases = {}
 	_resource_timings = {}
+	_external_failures = []
 	print("world_load stage=manifest_open path=", manifest_path)
 	load_started.emit(manifest_path)
 	manifest = WorldManifest.load_file(manifest_path)
@@ -375,7 +382,11 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 		load_phases[&"total"] = mark - began
 		load_completed.emit(manifest)
 		return
-	var external_errors := manifest.verify_external_resources()
+	# Strict per-load verification, hashed where the bytes are consumed. Each
+	# step below that relies on this load's proof or stands for these files
+	# without reading them completes it first; the raw parse attests the images
+	# it reads. The preparer's capture keeps the whole pass up front.
+	var external_errors := manifest.verify_external_resources(not geometry_capture and not GeometryCache.cooking)
 	mark = _phase(&"externalVerify", mark)
 	if not external_errors.is_empty():
 		load_failed.emit(external_errors)
@@ -396,6 +407,9 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 	# verification above remains mandatory. Workers publish Resources only;
 	# release_world() materializes their Node tree on the main thread.
 	if not geometry_capture and PreparedContent.selected_mode() != "raw" and not _skip_prepared_lookup:
+		if not _complete_external_verification():
+			_fail_external_verification()
+			return
 		var prepared := PreparedContent.acquire("world", manifest_path, package_digest,
 			VramTextures.cache_token(manifest.data, resolved_glb_path.get_base_dir()))
 		if str(prepared.status) == "hit":
@@ -410,6 +424,8 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 			load_failed.emit(["required_prepared_content: " + str(prepared.reason)])
 			return
 	var geometry_scoped := GeometryCache.eligible("world",manifest_path)
+	if geometry_scoped and not detached_build and not geometry_capture and not manifest.asset_id().contains("__chunk_"):
+		_retire_scene_cache_entries(manifest.asset_id())
 	# Warm background cells already reuse the raw prototype/image pools. Full
 	# native publication checks cost more there and move work onto the frame.
 	# Keep that proven worker path; foreground/whole-map loads use prepared
@@ -419,7 +435,11 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 	if not geometry_capture and geometry_scoped and not _skip_geometry_lookup and not raw_background_chunk:
 		_geometry_native = GeometryCache.acquire("world",manifest_path,package_digest,
 			GeometryCache.world_proof(manifest,package_digest),
-			detached_cache_enabled if detached_build else MapSceneCache.is_enabled())
+			detached_cache_enabled if detached_build else MapSceneCache.is_enabled(), _verified_world_proof)
+		if not _external_failures.is_empty():
+			_geometry_native.clear()
+			_fail_external_verification()
+			return
 		if str(_geometry_native.get("status","")) == "hit":
 			load_phases.merge(_geometry_native.get("timings_us",{}),true)
 			cache_status = &"geometry"
@@ -446,6 +466,9 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 			and OS.get_environment("ELORIA_CACHED_COLLISION") != "0" \
 			and (detached_cache_enabled if detached_build else MapSceneCache.is_enabled()) \
 			and not (LookProfile.full_painted() and GraphicsOptions.decorative_grass):
+		if not _complete_external_verification():
+			_fail_external_verification()
+			return
 		var collision_began := Time.get_ticks_usec()
 		var collision := CollisionCache.acquire(manifest_path,package_digest,GeometryCache.world_proof(manifest,package_digest))
 		if bool(collision.ok):
@@ -457,6 +480,9 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 			and OS.get_environment("ELORIA_CACHED_PAVING") != "0" and LookProfile.enabled() \
 			and not LookProfile.kit_paving(manifest.asset_id().get_slice("__chunk_",0)).is_empty() \
 			and (detached_cache_enabled if detached_build else MapSceneCache.is_enabled()):
+		if not _complete_external_verification():
+			_fail_external_verification()
+			return
 		var paving_began := Time.get_ticks_usec()
 		_cached_paving = PavingCache.acquire(manifest_path,package_digest,GeometryCache.world_proof(manifest,package_digest))
 		load_phases[&"pavingCacheHit"] = 1 if bool(_cached_paving.get("ok",false)) else 0
@@ -475,10 +501,17 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 	# external images before the parse uploads them; see vram_textures.gd.
 	var image_plan: Dictionary = VramTextures.plan_for(manifest.data)
 	if not image_plan.is_empty():
+		# Images this load has not hashed yet are hashed as the extension reads
+		# them, or replaced by the VRAM sidecar it hashes instead.
+		if manifest.external_hashes_pending():
+			image_plan["verify_source_sha"] = true
 		state.set_additional_data(VramTextures.PLAN_KEY, image_plan)
 	var operation_began := Time.get_ticks_usec()
 	var error: Error = document.append_from_file(resolved_glb_path, state)
 	ResourceDiagnostics.record(_resource_timings, &"gltf_parse", operation_began, true)
+	if not _attest_consumed_images(state):
+		_fail_external_verification()
+		return
 	if error != OK:
 		push_error("world_load stage=glb_import error=%s path=%s" % [
 			error_string(error), resolved_glb_path])
@@ -616,6 +649,57 @@ func _bind_road_ground() -> bool:
 		return false
 	_road_ground_bound = true
 	return true
+
+## Hashes whatever this load's external verification still has pending, except
+## `attested` images (verified as the raw parse consumed them) and failing the
+## `mismatched` ones. False, keeping the failures for
+## `_fail_external_verification`, when verification fails.
+func _complete_external_verification(attested: Dictionary = {}, mismatched: Dictionary = {}) -> bool:
+	if manifest.external_hashes_pending():
+		var began := Time.get_ticks_usec()
+		_external_failures = manifest.verify_pending_external(attested, mismatched)
+		load_phases[&"externalVerifyDeferred"] = int(load_phases.get(&"externalVerifyDeferred", 0)) \
+			+ Time.get_ticks_usec() - began
+	return _external_failures.is_empty()
+
+## Fails the load exactly as the up-front external check always has.
+func _fail_external_verification() -> void:
+	load_failed.emit(_external_failures)
+	push_error("world_load stage=external_resources errors=%s" % [_external_failures])
+
+## GeometryCache's proof, asked only by an entry that reached its inputs: this
+## load's verification completed first, or null when it failed (load_world
+## then fails the load once acquire returns).
+func _verified_world_proof() -> Variant:
+	return GeometryCache.world_proof(manifest, package_digest) if _complete_external_verification() else null
+
+## After a raw parse that hashed its images as it consumed them: a source whose
+## bytes failed their digest is reported as the up-front check reports it, and
+## every listed file the parse did not read (an image another map's pool
+## supplied, one this GLB never samples) is hashed now. False when the load
+## must fail.
+func _attest_consumed_images(state: GLTFState) -> bool:
+	if not manifest.external_hashes_pending():
+		return true
+	var resources: Dictionary = manifest.data.get("externalResources", {})
+	var images: Array = state.get_json().get("images", [])
+	var done: Variant = state.get_additional_data(VramTextures.DONE_KEY)
+	var pooled: Variant = state.get_additional_data(VramTextures.POOLED_KEY)
+	var source_errors: Variant = state.get_additional_data(MapImageExtension.SOURCE_ERRORS_KEY)
+	var attested := {}
+	var mismatched := {}
+	for index: int in images.size():
+		var descriptor: Variant = images[index]
+		if not descriptor is Dictionary or not resources.has((descriptor as Dictionary).get("uri")):
+			continue
+		var uri: Variant = (descriptor as Dictionary).uri
+		if source_errors is Dictionary and (source_errors as Dictionary).has(index):
+			if str(source_errors[index]) == "source_sha256":
+				mismatched[uri] = true
+		elif done is Dictionary and (done as Dictionary).has(index) \
+				and not (pooled is Dictionary and (pooled as Dictionary).has(index)):
+			attested[uri] = true
+	return _complete_external_verification(attested, mismatched)
 
 func ensure_chunk_arrival(position: Vector3) -> bool:
 	if not world_root is ContinentChunkStream:
@@ -801,6 +885,28 @@ func _materialize_prepared_world() -> bool:
 	load_completed.emit(manifest)
 	return true
 
+## A geometry-scoped whole map never reads or writes the legacy scene cache
+## (it loads prepared geometry, or the raw package when that is missing), so an
+## entry an older client wrote for it is only disk: 145-229 MB for a gauntlet.
+## Removes exactly that map's entries (its name, then a cache key), once per
+## map per session; every other entry, and any write in flight, is kept.
+static func _retire_scene_cache_entries(map_id: String) -> int:
+	if _retired_scene_cache.has(map_id):
+		return 0
+	_retired_scene_cache[map_id] = true
+	var prefix := MapSceneCache._safe_name(map_id) + "-"
+	var removed := 0
+	for path: String in MapSceneCache.entries():
+		var name := path.get_file()
+		var key := name.trim_prefix(prefix).trim_suffix(MapSceneCache.CACHE_EXTENSION)
+		if name.begins_with(prefix) and name.ends_with(MapSceneCache.CACHE_EXTENSION) \
+				and key.length() == MapSceneCache.KEY_CHARACTERS and key.is_valid_hex_number() \
+				and DirAccess.remove_absolute(path) == OK:
+			removed += 1
+	if removed > 0:
+		print("map cache: removed %d unread entr%s for geometry-scoped %s" % [removed, "y" if removed == 1 else "ies", map_id])
+	return removed
+
 func _load_from_cache(mark: int, began: int) -> bool:
 	# Road data is bound to pristine native/raw geometry after the snapshot;
 	# never serialize its per-load Resource carriers into a legacy scene cache.
@@ -815,6 +921,10 @@ func _load_from_cache(mark: int, began: int) -> bool:
 	if not FileAccess.file_exists(cache_file):
 		cache_status = &"miss"
 		return false
+	# The entry stands for this package's images without reading them.
+	if not _complete_external_verification():
+		_fail_external_verification()
+		return true
 	# IGNORE_DEEP so a second load in one session builds its own meshes and
 	# materials rather than handing back the ones the last load is still
 	# holding. That is what a fresh load does, and the point of the cache is to

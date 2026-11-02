@@ -34,6 +34,9 @@ static var _hits := 0
 static var _misses := 0
 static var _installed_coverage := "not_declared"
 static var _release_root := ""
+## True when `_targets` came from the installed catalog's keys (ids unknown);
+## `targets()` then replaces them with the scope manifests' description.
+static var _catalog_targets := false
 
 static func _read(path: String) -> Dictionary:
 	var file := FileAccess.open(path,FileAccess.READ)
@@ -50,54 +53,111 @@ static func logical(path: String) -> String:
 static func _digest(value: Variant) -> String:
 	return Sources.digest_bytes(JSON.stringify(value,"",true,true).to_utf8_buffer())
 
+static func _policy_digest() -> String:
+	var engine := Engine.get_version_info()
+	return _digest([VERSION,Writer.POLICY,Sources.POLICY,Bindings.POLICY,MapCache.CACHE_FORMAT_VERSION,engine.get("hash",""),
+		engine.get("string",""),RenderingServer.get_current_rendering_method(),Archived.cache_token()])
+
 static func initialize() -> void:
 	_mutex.lock()
 	if _initialized:
 		_mutex.unlock()
 		return
-	var engine := Engine.get_version_info()
-	_policy = _digest([VERSION,Writer.POLICY,Sources.POLICY,Bindings.POLICY,MapCache.CACHE_FORMAT_VERSION,engine.get("hash",""),
-		engine.get("string",""),RenderingServer.get_current_rendering_method(),Archived.cache_token()])
-	var scope := _read(SCOPE)
-	var registry: Dictionary = _read(REGISTRY).get("maps",{})
-	if int(scope.get("schema",0)) != 1 or not scope.get("maps") is Array:
-		_scope_error = "geometry_scope_invalid"
+	_policy = _policy_digest()
+	var installed := _installed_target_keys(_policy)
+	if installed.is_empty():
+		_scope_error = _scan(_targets,_roots,true)
 	else:
-		for id: String in scope.maps:
-			var resolved := MapRegistry.resolve(registry,id)
-			var path := str(resolved.get("manifest",""))
-			var document := _read(path)
-			if document.is_empty():
-				_scope_error = "geometry_scope_manifest_missing: "+id
-				break
-			_roots[logical(path)] = true
-			if document.has("streamingChunks"):
-				for chunk: Dictionary in document.streamingChunks.get("chunks",[]):
-					var child := path.get_base_dir().path_join(str(chunk.get("manifest",""))).simplify_path()
-					# The parent declares the complete leaf list. Opening every leaf
-					# merely for a progress label adds thousands of startup reads.
-					_add_target("world",child,str(document.get("asset",{}).get("id",id))+"__chunk_"+str(chunk.get("id","")))
-			else:
-				_add_target("world",path,str(document.get("asset",{}).get("id",id)))
-		for overlay: Dictionary in scope.get("asset_overlays",[]):
-			var config := _read(str(overlay.get("config","")))
-			var assets: Dictionary = config.get("assets",{})
-			for placement: Dictionary in config.get("placements",[]):
-				var key := str(placement.get("asset",""))
-				var path := str(assets.get(key,""))
-				_add_target("asset",path,str(overlay.get("owner",""))+":"+key)
+		# A bound release catalog cooked for exactly this scope, registry and
+		# policy set lists the targets those scope manifests declare. Reading its
+		# keys spares every launch parsing all of them (11 MB of JSON).
+		_scope_error = _scan({},_roots,false)
+		for key: String in installed:
+			_targets[key] = {"kind":key.get_slice("|",0),"source":key.get_slice("|",1),"id":""}
+		_catalog_targets = true
 	_initialized = true
 	_mutex.unlock()
 
+## The target keys of the bound installed catalog prepared for this scope,
+## registry and policy set, or empty. Never while cooking: a producer needs each
+## target's id, which only the scope manifests carry.
+static func _installed_target_keys(geometry_policy: String) -> Array:
+	if cooking: return []
+	var catalogs := Installed._available()
+	if catalogs.is_empty(): return []
+	var policies := {"geometry":geometry_policy,"collision":CollisionCache.policy(),"paving":PavingCache.policy()}
+	var scope_sha := FileAccess.get_sha256(SCOPE)
+	var registry_sha := FileAccess.get_sha256(REGISTRY)
+	for catalog: Dictionary in catalogs:
+		var keys: Variant = catalog.get("target_keys",[])
+		if keys is Array and not (keys as Array).is_empty() and Installed.complete(policies,scope_sha,registry_sha,keys):
+			return keys as Array
+	return []
+
+## Reads the scope: each map's root manifest into `roots` and, when `describe`,
+## every target its manifests and asset overlays declare into `targets`.
+## Returns the scope error, empty when the scope is usable.
+static func _scan(targets: Dictionary, roots: Dictionary, describe: bool) -> String:
+	var error := ""
+	var scope := _read(SCOPE)
+	var registry: Dictionary = _read(REGISTRY).get("maps",{})
+	if int(scope.get("schema",0)) != 1 or not scope.get("maps") is Array:
+		return "geometry_scope_invalid"
+	for id: String in scope.maps:
+		var resolved := MapRegistry.resolve(registry,id)
+		var path := str(resolved.get("manifest",""))
+		var document := _read(path) if describe else {}
+		if document.is_empty() and (describe or not FileAccess.file_exists(path)):
+			error = "geometry_scope_manifest_missing: "+id
+			break
+		roots[logical(path)] = true
+		if not describe:
+			continue
+		if document.has("streamingChunks"):
+			for chunk: Dictionary in document.streamingChunks.get("chunks",[]):
+				var child := path.get_base_dir().path_join(str(chunk.get("manifest",""))).simplify_path()
+				# The parent declares the complete leaf list. Opening every leaf
+				# merely for a progress label adds thousands of startup reads.
+				error = _declare_target(targets,"world",child,str(document.get("asset",{}).get("id",id))+"__chunk_"+str(chunk.get("id","")),error)
+		else:
+			error = _declare_target(targets,"world",path,str(document.get("asset",{}).get("id",id)),error)
+	if not describe:
+		return error
+	for overlay: Dictionary in scope.get("asset_overlays",[]):
+		var config := _read(str(overlay.get("config","")))
+		var assets: Dictionary = config.get("assets",{})
+		for placement: Dictionary in config.get("placements",[]):
+			var key := str(placement.get("asset",""))
+			var path := str(assets.get(key,""))
+			error = _declare_target(targets,"asset",path,str(overlay.get("owner",""))+":"+key,error)
+	return error
+
 static func _add_target(kind: String, path: String, id: String) -> void:
+	_scope_error = _declare_target(_targets,kind,path,id,_scope_error)
+
+## Adds one target to `targets`; returns the scope error after it (`error`
+## unless this target is invalid).
+static func _declare_target(targets: Dictionary, kind: String, path: String, id: String, error: String) -> String:
 	var source := logical(path)
 	if source.is_empty() or id.is_empty():
-		_scope_error = "geometry_scope_target_invalid"
-		return
-	_targets[kind+"|"+source] = {"kind":kind,"source":source,"id":id}
+		return "geometry_scope_target_invalid"
+	targets[kind+"|"+source] = {"kind":kind,"source":source,"id":id}
+	return error
 
 static func targets() -> Array:
 	initialize()
+	if _catalog_targets:
+		# Eligibility came from the installed catalog's keys. Producers and
+		# maintenance (the only callers, before login) need each target's id,
+		# which the scope manifests carry: from here on those manifests decide
+		# eligibility too, exactly as without a catalog.
+		_mutex.lock()
+		if _catalog_targets:
+			var described := {}
+			_scope_error = _scan(described,{},true)
+			_targets = described
+			_catalog_targets = false
+		_mutex.unlock()
 	var keys: Array = _targets.keys()
 	keys.sort()
 	var result: Array = []
@@ -198,15 +258,18 @@ static func _validate_inputs(entry: Dictionary, verified: Dictionary = {}, diagn
 		if digest != str(row.sha256): return false
 	return true
 
-static func _valid_entry(kind: String, path: String, source_digest: String, verified: Dictionary = {}, diagnostics: Dictionary = {}) -> Dictionary:
+static func _valid_entry(kind: String, path: String, source_digest: String, verified: Dictionary = {}, diagnostics: Dictionary = {}, prove := Callable()) -> Dictionary:
 	if not eligible(kind,path): return _miss("outside_geometry_scope")
 	var installed := Installed.entry("geometry", kind + "|" + logical(path), policy())
 	if not installed.is_empty():
-		var result := _validate_entry(installed,kind,path,source_digest,verified,diagnostics)
+		var result := _validate_entry(installed,kind,path,source_digest,verified,diagnostics,prove)
 		if str(result.status) == "hit": return result
-	return _validate_entry(_read(entry_path(kind,path)),kind,path,source_digest,verified,diagnostics)
+	return _validate_entry(_read(entry_path(kind,path)),kind,path,source_digest,verified,diagnostics,prove)
 
-static func _validate_entry(entry: Dictionary, kind: String, path: String, source_digest: String, verified: Dictionary = {}, diagnostics: Dictionary = {}) -> Dictionary:
+## `prove`, when valid, returns the caller's load-scoped proof (or null when its
+## verification failed) and is asked only once an entry reaches its inputs: a
+## load with no current entry keeps its hashes for the step that consumes them.
+static func _validate_entry(entry: Dictionary, kind: String, path: String, source_digest: String, verified: Dictionary = {}, diagnostics: Dictionary = {}, prove := Callable()) -> Dictionary:
 	var capture := not diagnostics.is_empty()
 	var began := Time.get_ticks_usec() if capture else 0
 	if capture: _diagnostic_add(diagnostics,"counts","entryValidationCalls",1)
@@ -233,6 +296,10 @@ static func _validate_entry(entry: Dictionary, kind: String, path: String, sourc
 			if not row is Dictionary or declared_inputs.get(str(row.get("path","")),"") != str(row.get("sha256","")):
 				return _miss("geometry_binding_input_undeclared")
 	if capture: _diagnostic_add(diagnostics,"timings_us","geometryVerifyEntrySchema",Time.get_ticks_usec()-began)
+	if prove.is_valid():
+		var proof: Variant = prove.call()
+		if not proof is Dictionary: return _miss("source_verification_failed")
+		verified = proof
 	if not _validate_inputs(entry,verified,diagnostics): return _miss("geometry_dependency_changed")
 	for blob: Variant in entry.payloads:
 		began = Time.get_ticks_usec() if capture else 0
@@ -253,25 +320,27 @@ static func _validate_entry(entry: Dictionary, kind: String, path: String, sourc
 
 static func world_proof(manifest: WorldManifest, _source_digest: String) -> Dictionary:
 	# This proof lives for this load call only. It reuses the immediately
-	# completed production full-hash verification, never file timestamps.
+	# completed production full-hash verification, never file timestamps, and
+	# names only files that verification actually hashed (a deferred hash is not
+	# a proof until it has run).
 	var proof := {}
 	if manifest == null or not manifest.verification_diagnostics.has("failures") \
 			or int(manifest.verification_diagnostics.failures) != 0: return proof
-	for uri: String in manifest.data.get("externalResources",{}):
-		proof[logical(manifest.glb_path().get_base_dir().path_join(uri).simplify_path())] = str(manifest.data.externalResources[uri])
+	for uri: String in manifest.external_verified:
+		proof[logical(manifest.glb_path().get_base_dir().path_join(uri).simplify_path())] = str(manifest.external_verified[uri])
 	for path: String in manifest.road_ground_verified:
 		proof[logical(path)] = str(manifest.road_ground_verified[path])
 	# package_digest normalizes manifest line endings, while geometry inputs
 	# record exact bytes. Do not treat that combined digest as a raw-file proof.
 	return proof
 
-static func acquire(kind: String, path: String, source_digest: String, verified: Dictionary = {}, allowed := true) -> Dictionary:
+static func acquire(kind: String, path: String, source_digest: String, verified: Dictionary = {}, allowed := true, prove := Callable()) -> Dictionary:
 	if cooking or not allowed or OS.get_environment("ELORIA_NO_GEOMETRY_CACHE") == "1": return _miss("geometry_disabled")
 	var timings_us := {"geometryVerify":0,"geometryRead":0,"geometryImagePrepare":0,
 		"geometryTextureBind":0,"geometryInstantiate":0}
 	var diagnostics: Dictionary = {"timings_us":{},"counts":{}} if OS.get_environment(DIAGNOSTICS_ENVIRONMENT) == "1" else {}
 	var began := Time.get_ticks_usec()
-	var result := _valid_entry(kind,path,source_digest,verified,diagnostics)
+	var result := _valid_entry(kind,path,source_digest,verified,diagnostics,prove)
 	timings_us["geometryVerify"] = Time.get_ticks_usec()-began
 	_copy_diagnostic_timings(timings_us,diagnostics)
 	if str(result.status) != "hit": return result
@@ -435,11 +504,13 @@ static func needs_preparation() -> bool:
 		# corrupt or incompatible installed data retains user/raw loading rather
 		# than unexpectedly starting an all-world cook before login. Explicit
 		# --prepare-map-geometry still invokes the normal local producer.
+		# Coverage is a bound catalog prepared for this exact scope, registry and
+		# policy set, whose own keys are the scope's targets: with one, no scope
+		# manifest is parsed to answer it. Without one (another renderer) the
+		# manifest scan still runs here, before login, not at a first lookup.
 		initialize()
-		var installed_keys: Array = _targets.keys()
-		installed_keys.sort()
-		_installed_coverage = "complete" if Installed.complete({"geometry":policy(),"collision":CollisionCache.policy(),"paving":PavingCache.policy()},
-			FileAccess.get_sha256(SCOPE),FileAccess.get_sha256(REGISTRY),installed_keys) else "raw_fallback"
+		_installed_coverage = "complete" if _catalog_targets \
+			or not _installed_target_keys(policy()).is_empty() else "raw_fallback"
 		return false
 	var complete := _read(root_path().path_join("complete.json"))
 	var keys: Array = _targets.keys()

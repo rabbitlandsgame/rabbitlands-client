@@ -13,6 +13,13 @@ var warnings: Array[String] = []
 var verification_diagnostics: Dictionary = {}
 ## Exact road dependency hashes verified for this load, never a persistent cache.
 var road_ground_verified: Dictionary = {}
+## External resource URI -> sha256 of each file this load hashed and found
+## matching; the load-scoped proof GeometryCache.world_proof hands on.
+var external_verified: Dictionary = {}
+## URI -> [path, expected sha256] whose hash `verify_external_resources(true)`
+## left to the step that consumes the file (`verify_pending_external`).
+var _external_pending: Dictionary = {}
+var _verification_timings: Dictionary = {}
 
 static func load_file(path: String) -> WorldManifest:
 	var result := WorldManifest.new()
@@ -54,12 +61,23 @@ static func external_verification_policy() -> Dictionary:
 	return {"mode": "full_hash", "reuse_enabled": false, "sealed_generation": "",
 		"reason": "no_enforceable_sealed_installed_content_provider"}
 
-func verify_external_resources() -> Array[String]:
+## Checks every external resource of this load and hashes each file (at most
+## once per path). With `defer_hashes` every check still runs now, but the
+## hashes wait for the step that consumes the files: the loader's raw import
+## hashes the very source bytes it decodes, and a VRAM sidecar (hashed as it is
+## read) stands in for a source it never reads; `verify_pending_external`
+## hashes whatever else is left, with the same failures. Nothing is reused
+## from another load.
+func verify_external_resources(defer_hashes := false) -> Array[String]:
 	var began := Time.get_ticks_usec()
 	var timings: Dictionary = {}
 	verification_diagnostics = {"resource_references": 0, "hashes_attempted": 0,
 		"paths_rejected": 0, "failures": 0, "elapsed_us": 0, "timings": {},
 		"policy": external_verification_policy()}
+	external_verified = {}
+	_external_pending = {}
+	_verification_timings = timings
+	var digests: Dictionary = {}
 	var failures: Array[String] = []
 	failures.append_array(VramTextures.image_policy_errors(data, glb_path().get_base_dir()))
 	if not failures.is_empty():
@@ -92,16 +110,79 @@ func verify_external_resources() -> Array[String]:
 		# Preserve the original short-circuit: invalid expected digests never
 		# cause a file read merely for instrumentation.
 		if expected.length() == 64:
-			var hash_began := Time.get_ticks_usec()
-			actual = FileAccess.get_sha256(path)
-			ResourceDiagnostics.record(timings, &"external_image_hash", hash_began, true)
-			verification_diagnostics.hashes_attempted += 1
+			# Only a URI the import reads under this very spelling is deferred; a
+			# backslashed or escaped one names another file there, so hash it now.
+			if defer_hashes and uri == str(raw_uri) and uri.uri_file_decode() == uri:
+				_external_pending[raw_uri] = [path, expected]
+				continue
+			actual = _hash_once(path, digests)
 		if expected.length() != 64 or actual != expected:
 			failures.append("external resource missing or digest mismatch: " + uri)
+		else:
+			external_verified[raw_uri] = expected
+	if defer_hashes and not failures.is_empty():
+		# A load that fails here reports every failure, hashes included.
+		return verify_external_resources(false)
 	verification_diagnostics.failures = failures.size()
+	verification_diagnostics.hashes_deferred = _external_pending.size()
 	verification_diagnostics.elapsed_us = Time.get_ticks_usec() - began
 	verification_diagnostics.timings = ResourceDiagnostics.snapshot(timings)
 	return failures
+
+## Whether some external resource of this load still waits for its hash.
+func external_hashes_pending() -> bool:
+	return not _external_pending.is_empty()
+
+## Completes a deferred `verify_external_resources`: hashes every pending file
+## once, except the URIs in `attested` (consumed and verified as read: decoded
+## source bytes that matched, or a sidecar uploaded in place of the source),
+## and fails the URIs in `mismatched` (consumed bytes that did not match)
+## without reading them again. Returns the failures the up-front pass would
+## have reported for those URIs, in manifest order.
+func verify_pending_external(attested: Dictionary = {}, mismatched: Dictionary = {}) -> Array[String]:
+	var began := Time.get_ticks_usec()
+	var digests: Dictionary = {}
+	var failures: Array[String] = []
+	# A consumer reads one file per distinct digest; when two pending URIs share
+	# a digest but not a path, which file was read is unknown, so neither counts.
+	var paths_by_sha: Dictionary = {}
+	for raw_uri: Variant in _external_pending:
+		var pending: Array = _external_pending[raw_uri]
+		var paths: Dictionary = paths_by_sha.get(pending[1], {})
+		paths[pending[0]] = true
+		paths_by_sha[pending[1]] = paths
+	var consumed := 0
+	for raw_uri: Variant in data.get("externalResources", {}):
+		if not _external_pending.has(raw_uri):
+			continue
+		var pending: Array = _external_pending[raw_uri]
+		var expected := str(pending[1])
+		if mismatched.has(raw_uri):
+			failures.append("external resource missing or digest mismatch: " + str(raw_uri).replace("\\", "/"))
+		elif attested.has(raw_uri) and (paths_by_sha[expected] as Dictionary).size() == 1:
+			consumed += 1
+		elif _hash_once(str(pending[0]), digests) == expected:
+			external_verified[raw_uri] = expected
+		else:
+			failures.append("external resource missing or digest mismatch: " + str(raw_uri).replace("\\", "/"))
+	_external_pending.clear()
+	verification_diagnostics.failures = int(verification_diagnostics.get("failures", 0)) + failures.size()
+	verification_diagnostics.consumption_attested = int(verification_diagnostics.get("consumption_attested", 0)) + consumed
+	verification_diagnostics.elapsed_us = int(verification_diagnostics.get("elapsed_us", 0)) + Time.get_ticks_usec() - began
+	verification_diagnostics.timings = ResourceDiagnostics.snapshot(_verification_timings)
+	return failures
+
+## FileAccess.get_sha256 of `path`, read once per verification pass however
+## many URIs name it.
+func _hash_once(path: String, digests: Dictionary) -> String:
+	if digests.has(path):
+		return str(digests[path])
+	var hash_began := Time.get_ticks_usec()
+	var actual := FileAccess.get_sha256(path)
+	ResourceDiagnostics.record(_verification_timings, &"external_image_hash", hash_began, true)
+	verification_diagnostics.hashes_attempted += 1
+	digests[path] = actual
+	return actual
 
 func coordinate_adapter() -> CoordinateAdapter:
 	var asset: Dictionary = data.get("asset", {})
