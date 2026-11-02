@@ -1,4 +1,4 @@
-"""Open the local prototype in a separate Chrome profile, requesting the faster GPU."""
+"""Open the local prototype with its own saved downloads and graphics profile."""
 import argparse
 import os
 from pathlib import Path
@@ -13,6 +13,9 @@ def main():
     parser.add_argument("--url", default="http://127.0.0.1:8060/")
     parser.add_argument("--profile", type=Path, default=REPO / ".local/browser-prototype/browser-profile")
     parser.add_argument("--chrome", type=Path, help="Chrome executable; detected on Windows by default")
+    parser.add_argument("--graphics-backend", choices=("auto", "gl", "d3d11"),
+                        default="gl" if os.name == "nt" else "auto",
+                        help="Prototype Chrome backend; Windows GL avoids the observed D3D11 map shader reset")
     args = parser.parse_args()
     url = urlsplit(args.url)
     if url.username or url.password or url.fragment or not url.hostname or not (
@@ -27,8 +30,10 @@ def main():
     if chrome is None or not chrome.is_file():
         parser.error("Chrome was not found; supply its executable with --chrome")
     profile.mkdir(parents=True, exist_ok=True)
+    graphics = [] if args.graphics_backend == "auto" else [f"--use-angle={args.graphics_backend}"]
     subprocess.Popen([str(chrome), f"--user-data-dir={profile}", "--new-window",
-                      "--no-first-run", "--no-default-browser-check", "--force-high-performance-gpu", args.url],
+                      "--no-first-run", "--no-default-browser-check", "--force-high-performance-gpu",
+                      *graphics, args.url],
                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     print(f"Opened Rabbit Lands: {args.url}")
 

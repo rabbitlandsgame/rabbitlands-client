@@ -180,7 +180,13 @@ desktop retains its existing 20-second bound.
 The page requests a high-performance graphics context, which the browser or OS
 can override. On Windows, start the local site and then use
 `python godot-client/tools/open_web_prototype.py` to open a separate Chrome
-profile requesting the faster GPU. It leaves normal Chrome settings unchanged.
+profile requesting the faster GPU. On Windows this helper selects Chrome's
+OpenGL backend: the tested NVIDIA D3D11 backend lost its WebGL context on Four
+Gates, including with the original materials and a disabled shader disk cache.
+This is an unresolved browser/graphics compatibility limit. `--graphics-backend
+auto` restores Chrome's ordinary choice for comparison. A website cannot choose
+Chrome's backend for a player, so this local workaround must be qualified or
+removed before a general browser release. It leaves normal Chrome settings unchanged.
 That profile has its own saved downloads: keep the same profile and launch
 address on subsequent visits. A public website cannot force a particular GPU;
 the launcher is a local testing aid.
