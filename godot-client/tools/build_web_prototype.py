@@ -58,8 +58,6 @@ def raw_archives(files: list[Path], assets: Path) -> list[dict]:
 def finish_site(stage: Path, assets_base_url: str):
     site, assets = stage / "site", stage / "assets"
     pack = site / "index.pck"
-    if pack.stat().st_size > 512 * 1024 * 1024:
-        raise ValueError("Browser package exceeds the loader's 512 MiB limit; check for duplicate scene imports")
     parts = []
     with pack.open("rb") as source:
         while data := source.read(PART_BYTES):
@@ -315,33 +313,6 @@ def raw_files() -> list[Path]:
     return sorted(found)
 
 
-def raw_underground_images(project: Path, raw_models: set[Path]) -> set[Path]:
-    """Keep loose-only scenery images out of the PCK, retaining every byte.
-
-    These images already travel in verified raw archives. Retain an editor
-    import for any independent runtime reference or imported scene consumer.
-    """
-    if not raw_models: return set()
-    from package_client import SOURCE_LITERAL, WORLD_RESOURCE_LITERAL
-    import re
-    images = {p.relative_to(project).as_posix(): p for p in (project / "assets/world/underground").rglob("*")
-              if p.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp"}}
-    imported = set()
-    for path in project.rglob("*"):
-        if path.suffix not in {".gd", ".gdshader", ".tscn", ".tres", ".json"} or ".godot" in path.relative_to(project).parts:
-            continue
-        source = path.read_text(encoding="utf-8-sig", errors="replace")
-        imported.update(WORLD_RESOURCE_LITERAL.findall(source))
-        for _, literal in SOURCE_LITERAL.findall(source) if path != project / "src/actors/glb_scene_cache.gd" else []:
-            if literal.startswith("res://assets/world/") and (literal.endswith("/") or "%" in literal or "{" in literal):
-                prefix = re.split(r"[%{]", literal[6:], maxsplit=1)[0]
-                imported.update(name for name in images if name.startswith(prefix))
-    for model in (project / "assets/world").rglob("*.glb"):
-        if model not in raw_models:
-            imported.update(p.relative_to(project).as_posix() for p in glb_dependencies(model) if p.is_relative_to(project))
-    return {path for name, path in images.items() if name not in imported}
-
-
 def stage_project(stage: Path, endpoint: str) -> dict:
     project = stage / "project"
     site = stage / "site"
@@ -396,12 +367,6 @@ def stage_project(stage: Path, endpoint: str) -> dict:
     for model in raw_scenes:
         model.with_name(model.name + ".import").write_text('[remap]\n\nimporter="skip"\n', encoding="utf-8")
     files = raw_files()
-    loose_images = raw_underground_images(project, raw_scenes)
-    source_files = set(files)
-    for image in loose_images:
-        source = CLIENT / image.relative_to(project)
-        if source in source_files and str(source.relative_to(REPO)).replace("\\", "/") + ".import" not in tracked:
-            image.with_name(image.name + ".import").write_text('[remap]\n\nimporter="skip"\n', encoding="utf-8")
     # Source scenery can point into several shared map image pools, not only
     # world/_shared/images. Mirror the already verified raw dependency closure
     # for the editor too, preserving relative URIs without importing raw maps.
