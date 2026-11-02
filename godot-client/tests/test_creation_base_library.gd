@@ -22,7 +22,7 @@ func _run() -> void:
 	var registry: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json"))
 	var before := JSON.stringify(registry)
 	var entries: Array[Dictionary] = LIBRARY.rows(registry)
-	check(entries.size() == 11, "Two Human bodies, three studies and six qualified Humans are offered")
+	check(entries.size() == 41, "Two Human bodies, three studies and 36 Human archetypes are offered")
 	var ids: Dictionary = {}
 	var native_types: Dictionary = {}
 	var human_names: Dictionary = {}
@@ -70,10 +70,10 @@ func _run() -> void:
 	check(LIBRARY.find(entries, "native_luminous_female").label == "Lyra" \
 		and LIBRARY.find(entries, "native_luminous_male").label == "Alden", "Native Human bases have distinct names")
 	check(cornrows.label == "Amara" and afro.label == "Darian" and bearded.label == "Corin", "Qualified Human bases use their given names")
-	check(LIBRARY.HUMAN_NAMES.size() == 11 and LIBRARY.HUMAN_NAMES.human_08 == "Corin" \
-		and LIBRARY.HUMAN_NAMES.human_14 == "Nessa" and LIBRARY.HUMAN_NAMES.human_27 == "Elowen", "The central mapping retains all six qualified pilot names")
+	check(LIBRARY.HUMAN_NAMES.size() == 41 and LIBRARY.HUMAN_NAMES.human_08 == "Corin" \
+		and LIBRARY.HUMAN_NAMES.human_14 == "Nessa" and LIBRARY.HUMAN_NAMES.human_27 == "Elowen", "The central mapping retains all Human names")
 	check(LIBRARY.find(entries, "human_34").label == "Bram" and LIBRARY.HUMAN_NAMES.human_34 == "Bram", "Approved Bram uses his reserved name as a selectable base")
-	check(human_names.size() == 11, "Exactly eleven Human starting looks are selectable")
+	check(human_names.size() == 41, "Exactly 41 Human starting looks are selectable")
 	check(LIBRARY.find(entries, "human_14").label == "Nessa" and LIBRARY.find(entries, "human_27").label == "Elowen", "Qualified female bases retain their names")
 	check(cornrows.sex == "female" and "Cornrows" in cornrows.hair_tags and not "Long braid" in cornrows.hair_tags, "Cornrows use their actual female module, not the fallback Long braid byte")
 	check(afro.sex == "male" and "Afro" in afro.hair_tags and "Curly" in afro.hair_tags and not "Parted" in afro.hair_tags, "Afro uses its actual male module, not the fallback Parted byte")
@@ -128,7 +128,7 @@ func _run() -> void:
 	check(LIBRARY.find(entries, "missing").is_empty(), "Unknown base does not select an arbitrary look")
 	var incomplete := registry.duplicate(true)
 	incomplete.creationOptions = [registry.creationOptions[0], registry.creationOptions[0], {"actorType": -1, "model": "missing"}]
-	check(LIBRARY.rows(incomplete).size() == 5, "Only the valid body's native, study and qualified bases remain")
+	check(LIBRARY.rows(incomplete).size() == 20, "Only the valid female body's native, study and 18 archetypes remain")
 	print("creation base library: %d choices, %d failures" % [pristine.size(), failures.size()])
 	quit(0 if failures.is_empty() else 1)
 

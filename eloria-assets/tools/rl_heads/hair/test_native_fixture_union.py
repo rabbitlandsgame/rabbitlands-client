@@ -46,6 +46,42 @@ class UnionTest(unittest.TestCase):
             self.assertFalse(union.last_query_stats['baseline_witness_requery'])
             with self.assertRaisesRegex(AssertionError,'optimize=False'):union.signed(points,optimize=True)
             with self.assertRaisesRegex(AssertionError,'optimize=False'):NativeFixtureUnion(manifest,'female',horizontal_slice_proof=True)
+    def test_optional_closest_sections_match_complete_fixture_queries(self):
+        with tempfile.TemporaryDirectory() as folder:
+            manifest=self.make(Path(folder))
+            union=NativeFixtureUnion(manifest,'female',optimize=False,
+                horizontal_slice_proof=True,closest_section_proof=True,
+                closest_section_fallback_planes=64)
+            self.assertTrue(union.closest_section_proof)
+            self.assertEqual(union.closest_section_fallback_planes,64)
+            self.assertTrue(all(surface.horizontal_slice_proof and
+                surface._closest_section_bounds is not None and
+                surface._closest_section_bounds.fallback_plane_count==64
+                for surface in union.surfaces))
+            points=np.array([[.15,1.7,0],[0,1.803,0],[.2,1.82,.1],[0,1.7,0]])
+            expected=[array.copy() for array in union.surfaces[0].signed(points)]
+            for surface in union.surfaces[1:]:
+                row=surface.signed(points);take=row[0]<expected[0]
+                for old,new in zip(expected,row):old[take]=new[take]
+            for actual,wanted in zip(union.signed(points),expected):
+                np.testing.assert_array_equal(actual,wanted)
+            self.assertFalse(union.last_query_stats['baseline_witness_requery'])
+            with self.assertRaisesRegex(AssertionError,'optimize=False'):
+                union.signed(points,optimize=True)
+            with self.assertRaisesRegex(AssertionError,'optimize=False'):
+                NativeFixtureUnion(manifest,'female',closest_section_proof=True)
+    def test_closest_section_fallback_validation_and_unchanged_defaults(self):
+        with tempfile.TemporaryDirectory() as folder:
+            manifest=self.make(Path(folder));union=NativeFixtureUnion(manifest,'female')
+            self.assertFalse(union.closest_section_proof)
+            self.assertEqual(union.closest_section_fallback_planes,0)
+            self.assertTrue(all(surface._closest_section_bounds is None for surface in union.surfaces))
+            with self.assertRaisesRegex(AssertionError,'require closest_section_proof'):
+                NativeFixtureUnion(manifest,'female',optimize=False,closest_section_fallback_planes=64)
+            for invalid in (-1,65,1.5,True):
+                with self.assertRaises(AssertionError):
+                    NativeFixtureUnion(manifest,'female',optimize=False,
+                        closest_section_proof=True,closest_section_fallback_planes=invalid)
 
 
 class OptimizedUnionTest(unittest.TestCase):

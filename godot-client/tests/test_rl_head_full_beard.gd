@@ -11,7 +11,7 @@ func _initialize() -> void:
 	for material_values: int in [0, 1]:
 		RLHeadLibrary.clear()
 		RLHeadLibrary._values_switch = material_values
-		for style: String in ["short_beard", "full_beard"]:
+		for style: String in ["short_beard", "full_beard", "goatee", "moustache"]:
 			var beard := RLHeadLibrary.material("rl_beard", "male", style, ActorRenderQuality.Quality.HIGH)
 			check(beard.shader.code.begins_with("#define RL_BEARD_FEATHER\n"), style + " must opt into continuous alpha")
 			check(beard.get_shader_parameter("lock_variation") == 0.0, "Coverage red must not change beard pigment")
@@ -21,9 +21,6 @@ func _initialize() -> void:
 			var colour := Color(0.4, 0.2, 0.8)
 			var individual := RLHeadLibrary.face_material(beard, {"hair_color": colour, "hair_detail": 0.5})
 			check(individual.get_shader_parameter("hair_color") == colour, "Material values retain each actor's beard colour")
-		for style: String in ["goatee", "moustache"]:
-			var other := RLHeadLibrary.material("rl_beard", "male", style, ActorRenderQuality.Quality.HIGH)
-			check(not other.shader.code.begins_with("#define RL_BEARD_FEATHER\n"), style + " must retain its original shader route")
 		for item: Array in [["male", "rowan_shag"], ["female", "mira_bun"], ["male", "rounded_afro"], ["female", "cornrows_low_knot"]]:
 			var hair := RLHeadLibrary.material("rl_hair_clump", item[0], item[1], ActorRenderQuality.Quality.HIGH)
 			check(not hair.shader.code.begins_with("#define RL_BEARD_FEATHER\n"), item[1] + " must retain its original shader route")

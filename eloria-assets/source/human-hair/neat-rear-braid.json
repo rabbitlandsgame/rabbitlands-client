@@ -1,0 +1,460 @@
+{
+  "schema": "rl.human-hair.provenance.v1",
+  "style": "neat_rear_braid",
+  "semantic_module_id": 16,
+  "status": "technically_qualified_pending_user_visual_approval",
+  "user_approved": false,
+  "sources": {
+    "qualified_reuse_module": 18,
+    "original_style_preserved": true,
+    "new_paid_generation": false
+  },
+  "processing": [
+    "Derive a separate style from the current imported rear-braid exterior, cap and ribbon source; preserve the existing source module.",
+    "Apply a smooth frontal stand-off contraction toward the exact current detailed head, preserving an 18 mm floor and the rear braid; transport original identity and grooming fields through the local modifier.",
+    "Guard all detailed-head identity/groom states with a constant bounded baseline correction and explicit Native corrective rebase.",
+    "Feather only the geometric frontal face-root border over 4 mm; coverage interiors remain opaque. Remove whole ribbons whose parent is clipped or whose tips contact a qualified surface.",
+    "Keep the male last-LOD cap height anchored under ear-size controls, retaining lateral/depth attachment, and apply a bounded 3.631 mm maximum detailed-head contact correction.",
+    "Reencode new outputs with standard unsigned triangle indices, preserving every decoded attribute, target and index. Refresh the canonical decoded Native POSITION/NORMAL digest.",
+    "Female variant only: Remove the pixel-traced disconnected opaque island by exact ordered triangle subsets, preserving the original invisible boundary, every retained stream and all independent rooted ribbons. Repeat all 42 intended-profile scalp coverage cases and inspect four matching High client views."
+  ],
+  "variants": [
+    {
+      "body_sex": "male",
+      "style": "neat_rear_braid_male",
+      "artifacts": {
+        "glb": {
+          "path": "godot-client/assets/actors/native/rl_heads/hair/neat_rear_braid_male.glb",
+          "sha256": "2d40667b80bbca231a584f699b5b6653521f063051342812abf8aed527ea13b5",
+          "bytes": 15972180
+        },
+        "paint": {
+          "path": "godot-client/assets/actors/native/rl_head_textures/neat_rear_braid_male.png",
+          "sha256": "3413a9886642edef052bcccb8fab97117bf1c4d92ea3ce2a79251f5030bcc70c",
+          "dimensions": [
+            2048,
+            2048
+          ]
+        }
+      },
+      "sources": {
+        "method": "reference exterior with independent scalp coverage and surface-rooted detail",
+        "fit_sha256": "f841a533151d71f1ef8464b291c877a80fefdc01349fa43f6ac36a68b9533b5f",
+        "reference_sha256": "c9e5199ee732b89ac3b1e0c16ac63283bd837376b1b329337ab2d49c5257bfee",
+        "source_extraction_sha256": "32dd87329e1e19370f7ad719a44fdd4f428a472eb1e0f15668fe7ae84c2c93c3",
+        "profile_sha256": "60a51a155f18045b91c695b58b21fcc13f31d01984f8e07888cf9fd9376a9219",
+        "source_head_sha256": "6b3549331bacbb7ba1664f569b34a9babd57dd93b14345f627a9791231c53619",
+        "head_sha256": "6b3549331bacbb7ba1664f569b34a9babd57dd93b14345f627a9791231c53619",
+        "body_sha256": "1cc5bd8cd2761e71f711dc33aabd500ea88cb918c0806223991cb5bd87bb2d75",
+        "current_head_sha256": "6b3549331bacbb7ba1664f569b34a9babd57dd93b14345f627a9791231c53619",
+        "new_paid_generation": false
+      },
+      "customization": {
+        "saved_length_and_volume_range": [
+          0,
+          100
+        ],
+        "neutral_saved_value": 50,
+        "mapped_shape_range": [
+          -1,
+          1
+        ],
+        "shape_gain": 1,
+        "length_authoring_range": [
+          -0.3,
+          0.4
+        ],
+        "volume_authoring_range": [
+          -0.25,
+          0.35
+        ],
+        "length": "Root-pinned hanging braid or tail length, using independent opposing imported-source fields.",
+        "volume": "Independent cross-section and stand-off about the authored spine.",
+        "messiness_range": [
+          0,
+          100
+        ],
+        "messiness": "Continuous material finish plus progressive source ribbon visibility. Scalp coverage remains solid at zero finish.",
+        "fixed_scalp_cap": true,
+        "active_detail_vertices_by_lod_at_finish_0_50_100": [
+          [
+            0,
+            288,
+            576
+          ],
+          [
+            0,
+            90,
+            210
+          ],
+          [
+            0,
+            8,
+            32
+          ]
+        ],
+        "tie_height_qualified": false
+      },
+      "lods": [
+        {
+          "lod": 0,
+          "triangles": 16394,
+          "shape_targets": 51,
+          "rooted_detail_ribbons": 48,
+          "maximum_groom_displacements_mm": {
+            "hl_length_p": 128.54786217212677,
+            "hl_length_n": 96.41090035438538,
+            "hl_volume_p": 47.96105487634495,
+            "hl_volume_n": 35.19744570044211
+          }
+        },
+        {
+          "lod": 1,
+          "triangles": 6273,
+          "shape_targets": 51,
+          "rooted_detail_ribbons": 21,
+          "maximum_groom_displacements_mm": {
+            "hl_length_p": 128.49070131778717,
+            "hl_length_n": 96.36802226305008,
+            "hl_volume_p": 47.3215002111881,
+            "hl_volume_n": 34.73131463147824
+          }
+        },
+        {
+          "lod": 2,
+          "triangles": 2350,
+          "shape_targets": 51,
+          "rooted_detail_ribbons": 4,
+          "maximum_groom_displacements_mm": {
+            "hl_length_p": 128.2646358013153,
+            "hl_length_n": 96.19847685098648,
+            "hl_volume_p": 46.672896177568404,
+            "hl_volume_n": 34.248995985029175
+          }
+        }
+      ],
+      "qualification": {
+        "identity_targets": 46,
+        "grooming_targets": 4,
+        "native_corrective_targets": 1,
+        "rigid_joint_count": 1,
+        "finite_fields_and_three_LOD_budgets_pass": true,
+        "high_surface": {
+          "evaluations": 444,
+          "cases_per_primitive": 74,
+          "primitives": 6,
+          "vertices_centres_and_all_edge_midpoints": true,
+          "includes_actual_saved_look": true,
+          "failures": 0,
+          "minimum_clearance_mm": 2.543062729342292
+        },
+        "scalp_coverage": {
+          "cases": 42,
+          "lods": 3,
+          "hole_samples": 0,
+          "detail_level": 0,
+          "evidence": {
+            "sha256": "51fd5e5726b779f0d8fcd019817eaae7bdaadebbb29d293c7083b4c91331fee1",
+            "name": "coverage.json"
+          }
+        },
+        "maximum_detail_root_field_error_mm": 7.05299466967367e-06,
+        "minimum_parent_coverage_R_at_fine_root": 0.3058823529411765,
+        "native": {
+          "evaluations": 1674,
+          "failures": 0,
+          "minimum_clearance_mm": 2.1502879,
+          "method": "Exact decoded Native geometry continuation for the first two LODs; independent final 558-case last-LOD scan; unsigned index encoding and final digest metadata do not alter any decoded input.",
+          "evidence": {
+            "sha256": "a477a47f91badfd45b2b34c10de4d01c76641faa6d6f5a962163e0031132b5cd",
+            "name": "native-all.json"
+          }
+        },
+        "fresh_blender_import": {
+          "passed": true,
+          "factory_scene": true,
+          "glb_only_bundle": true,
+          "meshes": 3,
+          "shape_targets_per_mesh": 51,
+          "packed_paint_dimensions": [
+            2048,
+            2048
+          ]
+        },
+        "actual_client_visual_review": "Technical review completed on matching detailed-head pilots; user visual approval remains pending.",
+        "evidence": [
+          {
+            "sha256": "afd4284f533903b78fe780f3e2e3f65a8f7a4e266a1e3e242db4fc8746b00896",
+            "name": "neat_rear_braid_male.audit.json"
+          },
+          {
+            "sha256": "7481f236f62e79cb85b6158d8c3dfe1d09cac181f63ea49009415e69a702eda2",
+            "name": "neat_rear_braid_male.high-surface-saved.json"
+          },
+          {
+            "sha256": "87d059dd87c418ba6d1234e45db203a55881dffb464992aa8701b2609af6d920",
+            "name": "neat_rear_braid_male.metadata-continuation.json"
+          }
+        ]
+      },
+      "runtime_capabilities": {
+        "high_head": true,
+        "native_head": true,
+        "native_identity_policy": "native_fixed_skull",
+        "native_corrective": "hl_native_fit",
+        "native_corrective_weight": 1,
+        "native_high_identity_weights": 0,
+        "native_position_normal_digest_sha256": "ada7fcadce27b3f1730eaaa66d042d805ec7896695e89998e6b2be0f10007057"
+      }
+    },
+    {
+      "body_sex": "female",
+      "style": "neat_rear_braid_female",
+      "artifacts": {
+        "glb": {
+          "path": "godot-client/assets/actors/native/rl_heads/hair/neat_rear_braid_female.glb",
+          "sha256": "8b039444cc456f682e9ec64ee6746fb0e6e34e2cf06ba177505b50f52d06066b",
+          "bytes": 17702780
+        },
+        "paint": {
+          "path": "godot-client/assets/actors/native/rl_head_textures/neat_rear_braid_female.png",
+          "sha256": "a5227e7a357c6fbedc81c9ddfe4cd7717b150f810f802418472052055622d55f",
+          "dimensions": [
+            2048,
+            2048
+          ]
+        }
+      },
+      "sources": {
+        "method": "reference exterior with independent scalp coverage and surface-rooted detail",
+        "fit_sha256": "f841a533151d71f1ef8464b291c877a80fefdc01349fa43f6ac36a68b9533b5f",
+        "reference_sha256": "c9e5199ee732b89ac3b1e0c16ac63283bd837376b1b329337ab2d49c5257bfee",
+        "source_extraction_sha256": "bf3d4a91dd90835dd72acafc86014de65118803adf3fd909fa62e086f1019501",
+        "profile_sha256": "88238a5e46fef444dbe562ab1a5421ee34083f3c08e1ec3c1aa1504626471390",
+        "source_head_sha256": "6b3549331bacbb7ba1664f569b34a9babd57dd93b14345f627a9791231c53619",
+        "head_sha256": "f767679b773ed68071f0ad70d37cc17a7690425ef866707e52b96bfe1c7b76f6",
+        "body_sha256": "3a8ff81e9f152102ee1e57d892759c0a8e69ab49064ab8e473f5cb9ed3e8fc94",
+        "garment_sha256": "21824f2f58e3ce92dc226302ebcb60e8e569163b5a735fa47ab19b3fc9aa0cb9",
+        "current_head_sha256": "f767679b773ed68071f0ad70d37cc17a7690425ef866707e52b96bfe1c7b76f6",
+        "new_paid_generation": false
+      },
+      "customization": {
+        "saved_length_and_volume_range": [
+          0,
+          100
+        ],
+        "neutral_saved_value": 50,
+        "mapped_shape_range": [
+          -1,
+          1
+        ],
+        "shape_gain": 1,
+        "length_authoring_range": [
+          -0.3,
+          0.4
+        ],
+        "volume_authoring_range": [
+          -0.25,
+          0.35
+        ],
+        "length": "Root-pinned hanging braid or tail length, using independent opposing imported-source fields.",
+        "volume": "Independent cross-section and stand-off about the authored spine.",
+        "messiness_range": [
+          0,
+          100
+        ],
+        "messiness": "Continuous material finish plus progressive source ribbon visibility. Scalp coverage remains solid at zero finish.",
+        "fixed_scalp_cap": true,
+        "active_detail_vertices_by_lod_at_finish_0_50_100": [
+          [
+            0,
+            288,
+            636
+          ],
+          [
+            0,
+            70,
+            180
+          ],
+          [
+            0,
+            8,
+            24
+          ]
+        ],
+        "tie_height_qualified": false
+      },
+      "lods": [
+        {
+          "lod": 0,
+          "triangles": 16130,
+          "shape_targets": 51,
+          "rooted_detail_ribbons": 53,
+          "maximum_groom_displacements_mm": {
+            "hl_length_p": 127.08882987499237,
+            "hl_length_n": 95.31662613153458,
+            "hl_volume_p": 53.67410539233659,
+            "hl_volume_n": 39.4775452490215
+          }
+        },
+        {
+          "lod": 1,
+          "triangles": 5947,
+          "shape_targets": 51,
+          "rooted_detail_ribbons": 18,
+          "maximum_groom_displacements_mm": {
+            "hl_length_p": 126.6048401594162,
+            "hl_length_n": 94.95363384485245,
+            "hl_volume_p": 53.67410539233659,
+            "hl_volume_n": 39.4775452490215
+          }
+        },
+        {
+          "lod": 2,
+          "triangles": 2239,
+          "shape_targets": 51,
+          "rooted_detail_ribbons": 3,
+          "maximum_groom_displacements_mm": {
+            "hl_length_p": 126.3691633939743,
+            "hl_length_n": 94.77686882019043,
+            "hl_volume_p": 53.6517252498953,
+            "hl_volume_n": 39.46133688797058
+          }
+        }
+      ],
+      "qualification": {
+        "identity_targets": 46,
+        "grooming_targets": 4,
+        "native_corrective_targets": 1,
+        "rigid_joint_count": 1,
+        "finite_fields_and_three_LOD_budgets_pass": true,
+        "high_surface": {
+          "evaluations": 444,
+          "cases_per_primitive": 74,
+          "primitives": 6,
+          "vertices_centres_and_all_edge_midpoints": true,
+          "includes_actual_saved_look": true,
+          "failures": 0,
+          "minimum_clearance_mm": 2.601932130959807,
+          "method": "Exact ordered retained-triangle subset of the accepted detailed-head source. All vertex attributes and all 50 linear fields remain exact; no new distance scan is claimed.",
+          "inherited_from_artifact_sha256": "8bff215d171109722c1733b22b6727ebc3ba2800eaf56b0c9195a6a407ee80c8"
+        },
+        "scalp_coverage": {
+          "cases": 42,
+          "hole_samples": 0,
+          "detail_level": 0,
+          "samples_per_case": 900,
+          "directions": 165,
+          "profile_sha256": "c64df56a7ae1bb3cd40e49110b5d42b0c7c0457a8466cbb5a03bc476c7ed9f2e",
+          "evidence": {
+            "name": "coverage.json",
+            "sha256": "c7a1480759f3ec9d75512895d0443ebff83148da8ab9ebec381bb5b1bbd090eb"
+          },
+          "lods": 3
+        },
+        "maximum_detail_root_field_error_mm": 1.962321451452648e-05,
+        "minimum_parent_coverage_R_at_fine_root": 0.3607843137254902,
+        "native": {
+          "evaluations": 1674,
+          "failures": 0,
+          "minimum_clearance_mm": 2.150184,
+          "method": "Exact ordered retained triangle subset of the previously accepted Native geometry. All 51 fields, roots, skin and groom inputs are exact. This inherits the measured source bound; it is not a new distance scan.",
+          "evidence": {
+            "sha256": "2dbf4f47b18c5e0aa8c588870979438bb79a00c7b53182d35c5af11b7883a99c",
+            "name": "neat_rear_braid_female.native-subset.json"
+          },
+          "inherited_from_artifact_sha256": "8bff215d171109722c1733b22b6727ebc3ba2800eaf56b0c9195a6a407ee80c8"
+        },
+        "fresh_blender_import": {
+          "passed": true,
+          "factory_scene": true,
+          "glb_only_bundle": true,
+          "meshes": 3,
+          "shape_targets_per_mesh": 51,
+          "packed_paint_dimensions": [
+            2048,
+            2048
+          ],
+          "inherited_from_source_sha256": "8bff215d171109722c1733b22b6727ebc3ba2800eaf56b0c9195a6a407ee80c8",
+          "scope": "Earlier fresh Blender import inherited through unchanged streams, shape arrays, materials and skin. The new triangle subset is freshly loaded in the matching client."
+        },
+        "actual_client_visual_review": "Fresh matching High front, three-quarter, side and back verify the isolated forehead spike is removed, with the original braid and reduced frontal projection retained. User visual approval remains pending.",
+        "evidence": [
+          {
+            "sha256": "372f96f73b3fd76c659f03b697a7b2f9a55aca1fb4a363078240e8f4273ac668",
+            "name": "neat_rear_braid_female.audit.json"
+          },
+          {
+            "sha256": "a58f20c35a0a0b0f5ada000b67bc907fe8a4c76ed55548945e531b1512df9b1f",
+            "name": "neat_rear_braid_female.high-surface-saved.json"
+          },
+          {
+            "sha256": "2a71ce3e62692efa6b137aa561399a8e2650c030a2a257fb2be769a3e3d94019",
+            "name": "neat_rear_braid_female.metadata-continuation.json"
+          }
+        ],
+        "fresh_matching_client_load": {
+          "passed": true,
+          "quality": "High",
+          "views": [
+            "front",
+            "three_quarter",
+            "side",
+            "back"
+          ],
+          "resolution": [
+            1024,
+            1024
+          ],
+          "no_raw_or_scalp_paint_override": true,
+          "renderer_commit": "eb1f49a7293409843b4b83766e9851409f330156",
+          "source_manifest_sha256": "48453801b92dca24a8d9518e5a53eef4f3e493ebcd125dd187b8beabba1037a3",
+          "image_sha256_by_view": {
+            "front": "5f2048bf397b4d0a7c23ecee0a46cf7fbdca7f2e7b1962875301178ce7fef450",
+            "three_quarter": "90a4fcc8ca9862b35f88cf803f63b0de46446d66033919874d551ce9dd5290e2",
+            "side": "08c7626933f7c756227ce383a0fc6b4eb48fc407d3d9abec76b2612744826d06",
+            "back": "e28d8f52e9bba708bcbe2e7ce92bc32d26fda1fb512957fc5ba59203d3a8f7f7"
+          }
+        },
+        "visual_island_repair": {
+          "source_sha256": "8bff215d171109722c1733b22b6727ebc3ba2800eaf56b0c9195a6a407ee80c8",
+          "method": "Trace the actual saved-client pixels to imported opaque triangles. Remove only complete render-visible islands disconnected by the authored coverage feather; retain the original invisible boundary. No geometry positions, normals, UVs, colours, skin, paint or retained linear fields change.",
+          "removed_triangles_by_lod": [
+            14,
+            4,
+            0
+          ],
+          "all_retained_indices_exact_ordered_subset": true,
+          "cap_and_whole_ribbon_geometry_unchanged": true,
+          "maximum_boundary_coverage_R": 0.0,
+          "fine_root_all_field_error_max_mm": 1.962321451452648e-05,
+          "no_new_visible_coverage_opening_observed": true,
+          "evidence": [
+            {
+              "name": "neat_rear_braid_female.island-removal.json",
+              "sha256": "c089c7401209fb9f03d1232e7cee612353d7904bc9280aac8220b33ab13b50e2"
+            },
+            {
+              "name": "neat_rear_braid_female.final-qualification.json",
+              "sha256": "70a18bd4aa33832de4f7e5420687f962ddbdcf1360476e6280a7b7e1bd56fd83"
+            }
+          ]
+        }
+      },
+      "runtime_capabilities": {
+        "high_head": true,
+        "native_head": true,
+        "native_identity_policy": "native_fixed_skull",
+        "native_corrective": "hl_native_fit",
+        "native_corrective_weight": 1,
+        "native_high_identity_weights": 0,
+        "native_position_normal_digest_sha256": "70144cbee456f5677fa3de54d89fc5cbce54b30fba976e45db4f8373e415d4f4"
+      }
+    }
+  ],
+  "known_limits": [
+    "Fixed rear tie placement; no tie-height slider is enabled.",
+    "Messiness changes rooted detail and finish while retaining the braided core.",
+    "Technical qualification does not imply user visual acceptance."
+  ]
+}

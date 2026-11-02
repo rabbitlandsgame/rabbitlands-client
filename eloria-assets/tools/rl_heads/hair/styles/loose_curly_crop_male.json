@@ -1,0 +1,119 @@
+{
+  "_doc": "Imported reference curls/waves: preserve original surface and UV paint; this profile never creates a source hairstyle.",
+  "name": "loose_curly_crop_male",
+  "sex": "male",
+  "seed": 1113,
+  "hairline": {
+    "ear_margin": 4,
+    "nape_below_lobe_mm": 14,
+    "noise": 0.25
+  },
+  "shell": {
+    "pole": [
+      180,
+      75
+    ],
+    "v": "from_pole",
+    "u_repeat": 8,
+    "face_clear": 0.9,
+    "lod": {
+      "0": [
+        12,
+        72
+      ],
+      "1": [
+        9,
+        48
+      ],
+      "2": [
+        8,
+        36
+      ]
+    }
+  },
+  "groom_clearance_mm": 3.2,
+  "soft_hairline_mm": 2,
+  "joint_groom_clearance": true,
+  "freeze_shell_grooming": true,
+  "painted_backing": true,
+  "source_shaped_cap": {
+    "inset_mm": 0.8,
+    "minimum_head_mm": 2.4,
+    "maximum_expansion_mm": 3
+  },
+  "paint_flatness": 0.25,
+  "control_kind": "reference_loose",
+  "loose_controls": {
+    "length_positive": 0.3,
+    "length_negative": 0.24,
+    "volume_positive": 0.28,
+    "volume_negative": 0.2,
+    "root_fade_mm": 8
+  },
+  "details": {
+    "fine_count": [
+      95,
+      36,
+      10
+    ],
+    "messy_count": [
+      55,
+      20,
+      6
+    ],
+    "segments": [
+      6,
+      4,
+      3
+    ],
+    "minimum_eye_mm": 15,
+    "fine_length_mm": [
+      5,
+      12
+    ],
+    "messy_length_mm": [
+      12,
+      24
+    ],
+    "root_spacing_mm": 8,
+    "fine_radius_mm": 1.3,
+    "messy_radius_mm": 2.0
+  },
+  "detail_cull_max_fraction": 0.1,
+  "sampled_surface_guard": true,
+  "surface_margin_mm": 3.0,
+  "surface_max_shift_mm": 14,
+  "groom_root_depth_fade_mm": 16,
+  "exact_final_gate": true,
+  "defer_groom_to_final": true,
+  "final_attachment_pass": true,
+  "surface_geometric_projection": true,
+  "trim_interior_reference": true,
+  "reference_trim_inside_mm": 0,
+  "surface_max_iterations": 12,
+  "runtime_contract": {
+    "groom_control_range": [
+      -1,
+      1
+    ],
+    "fine_detail_range": [
+      0,
+      100
+    ],
+    "native_supported": false,
+    "native_corrective": null
+  },
+  "high_repair": {
+    "head_authoring_cushion_mm": 2.05,
+    "head_maximum_shift_mm": 14,
+    "body_local_allowance_mm": 20,
+    "body_region_maximum_y_m": 1.595,
+    "maximum_ear_positive_ID_mean_reconciliation_mm": 7.2,
+    "maximum_other_ID_mean_reconciliation_mm": 2.8,
+    "maximum_groom_mean_reconciliation_mm": 5,
+    "original_position_welds": true,
+    "fine_root_binding": "Exact exterior triangle barycentrics for all50linear fields",
+    "fixed_cap_paint_and_retained_skin_exact": true,
+    "topology": "Exact source triangle subset; only complete detached central-nape remnants removed"
+  }
+}

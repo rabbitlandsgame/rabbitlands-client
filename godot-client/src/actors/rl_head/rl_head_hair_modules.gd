@@ -23,15 +23,30 @@ const ENTRIES := {
 	9: {"name": "layered_long", "fallback_style": 2, "variants": {
 		"female": {"name": "layered_long_female", "native_head": true},
 		"male": {"name": "layered_long_male", "native_head": true, "tie_height": false}}},
+	10: {"name": "smooth_low_bun", "fallback_style": 8, "variants": {
+		"female": {"name": "smooth_low_bun_female"}}},
 	11: {"name": "soft_wavy_bob", "fallback_style": 5, "variants": {
 		"female": {"name": "soft_wavy_bob_female", "native_head": true},
 		"male": {"name": "soft_wavy_bob_male", "native_head": true}}},
+	12: {"name": "short_coils", "fallback_style": 4, "variants": {
+		"male": {"name": "short_coils_male"}}},
+	13: {"name": "loose_curly_crop", "fallback_style": 4, "variants": {
+		"male": {"name": "loose_curly_crop_male"}}},
+	14: {"name": "swept_curly_crop", "fallback_style": 1, "variants": {
+		"male": {"name": "swept_curly_crop_male"}}},
 	15: {"name": "ponytail", "fallback_style": 6, "variants": {
 		"female": {"name": "painted_ponytail_female", "native_head": true, "tie_height": false},
 		"male": {"name": "painted_ponytail_male", "native_head": true, "tie_height": false}}},
+	16: {"name": "neat_rear_braid", "fallback_style": 7, "variants": {
+		"female": {"name": "neat_rear_braid_female", "native_head": true},
+		"male": {"name": "neat_rear_braid_male", "native_head": true}}},
+	17: {"name": "twin_braids", "fallback_style": 7, "variants": {
+		"female": {"name": "twin_braids_female"}}},
 	18: {"name": "rear_braid", "fallback_style": 7, "variants": {
 		"female": {"name": "rear_braid_female", "native_head": true},
 		"male": {"name": "rear_braid_male", "native_head": true}}},
+	19: {"name": "low_ponytail", "fallback_style": 6, "variants": {
+		"female": {"name": "low_ponytail_female", "native_head": true}}},
 	21: {"name": "buzz_cut", "fallback_style": 4, "variants": {
 		"female": {"name": "buzz_cut_female", "native_head": true},
 		"male": {"name": "buzz_cut_male", "native_head": true}}},
@@ -47,6 +62,19 @@ const ENTRIES := {
 	25: {"name": "topknot", "fallback_style": 8, "variants": {
 		"female": {"name": "painted_topknot_female", "native_head": true, "tie_height": false},
 		"male": {"name": "painted_topknot_male", "native_head": true, "tie_height": false}}},
+	26: {"name": "rounded_wavy_bob", "fallback_style": 5, "variants": {
+		"female": {"name": "rounded_wavy_bob_female", "native_head": true}}},
+	27: {"name": "high_top_fade", "fallback_style": 4, "variants": {
+		"male": {"name": "high_top_fade_male", "native_head": true}}},
+	28: {"name": "wavy_layers", "fallback_style": 2, "variants": {
+		"female": {"name": "wavy_layers_female"}}},
+	29: {"name": "curly_waves", "fallback_style": 2, "variants": {
+		"female": {"name": "curly_waves_female"}}},
+	30: {"name": "braided_crown", "fallback_style": 7, "variants": {
+		"female": {"name": "braided_crown_female"},
+		"male": {"name": "braided_crown_male", "native_head": true}}},
+	31: {"name": "shoulder_curls", "fallback_style": 2, "variants": {
+		"male": {"name": "shoulder_curls_male"}}},
 }
 
 ## The original saved hairstyle byte remains the player's family choice.

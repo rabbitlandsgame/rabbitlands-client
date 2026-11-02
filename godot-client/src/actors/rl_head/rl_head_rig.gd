@@ -143,6 +143,7 @@ const CONTROL_UNIFORMS := {"iris_scale": 1.0, "eye_paint": 0.0}
 ## hairstyle is drawn (features2 B); none on a bald head, nor while the chosen
 ## hairstyle's file is missing.
 const HAIRLINE_UNDER_HAIR := 0.35
+const SCALP_OVERLAY := preload("res://src/actors/rl_head/rl_head_scalp_overlay.gd")
 ## The hair-shape blend shapes (see the asset contract above).
 const HAIR_LENGTH_SHAPES := ["hl_length_p", "hl_length_n"]
 const HAIR_VOLUME_SHAPES := ["hl_volume_p", "hl_volume_n"]
@@ -150,7 +151,7 @@ const HAIR_VOLUME_SHAPES := ["hl_volume_p", "hl_volume_n"]
 const NATIVE_HAIR_FIT_SHAPE := "hl_native_fit"
 ## The instance uniforms on an RL hairstyle's meshes. A beard keeps the
 ## shader's default `hair_detail` (0.5, nothing dropped).
-const HAIR_INSTANCE_UNIFORMS := ["hair_color", "hair_detail", "eye_color"]
+const HAIR_INSTANCE_UNIFORMS := ["hair_color", "hair_detail", "eye_color", "skin_color"]
 const AGE := preload("res://src/actors/character_age.gd")
 const HAIR_MODULE_LOOKUP := preload("res://src/actors/rl_head/rl_head_hair_modules.gd")
 
@@ -1233,7 +1234,8 @@ func _apply_colours() -> void:
 		"brow_color": brow, "hair_color": hair,
 		"freckles": appearance.freckles, "liner": appearance.liner,
 		"stubble": appearance.stubble_amount(), "eye_color": eyes,
-		"hairline": HAIRLINE_UNDER_HAIR if haired else 0.0,
+		"hairline": SCALP_OVERLAY.amount(HAIR_MODULE_LOOKUP.file_name(_hair_style, appearance.sex),
+			haired, HAIRLINE_UNDER_HAIR),
 		"brow_style": appearance.brow_style, "brow_thickness": appearance.brow_thickness,
 		"liner_wing": appearance.liner_wing, "hair_detail": hair_detail_uniform(),
 		"eye_style_paint": eye_style_paint(),

@@ -1,0 +1,269 @@
+{
+  "schema": "rl.human-hair.provenance.v1",
+  "style": "twin_braids_female",
+  "semantic_module_id": 17,
+  "body_sex": "female",
+  "status": "high_head_candidate_pending_user_visual_approval",
+  "user_approved": false,
+  "artifacts": {
+    "glb": {
+      "path": "godot-client/assets/actors/native/rl_heads/hair/twin_braids_female.glb",
+      "sha256": "c362c8ed39ba8942f364274500010995d342c7e2e2b901540201359c80a795bc",
+      "bytes": 26716620
+    },
+    "paint": {
+      "path": "godot-client/assets/actors/native/rl_head_textures/twin_braids_female.png",
+      "sha256": "5d40e389f7377eac1773f05d81e494b3934702b32d3bebd0f1278022baba4729",
+      "dimensions": [
+        2048,
+        2048
+      ]
+    }
+  },
+  "sources": {
+    "method": "reference exterior with independent scalp coverage and surface-rooted detail",
+    "fit_sha256": "c27d6bdc3c470177cc8fa589f973e93a2588a7814a608044409f94eba12780dd",
+    "reference_sha256": "e508f7984296e8c82922e6d0575651a52a87bfaa4c11ac618a0edf50dc33999f",
+    "source_extraction_sha256": "2a83afdf39f92f68bb8922f2e130ceea890e01a444b1e1bf8aa90f8987e57dee",
+    "profile_sha256": "dde6f362da5ccb9eea110804b65a253975dbd2b620aae3a70a460f577f317c4a",
+    "source_head_sha256": "f767679b773ed68071f0ad70d37cc17a7690425ef866707e52b96bfe1c7b76f6",
+    "head_sha256": "f767679b773ed68071f0ad70d37cc17a7690425ef866707e52b96bfe1c7b76f6",
+    "body_sha256": "3a8ff81e9f152102ee1e57d892759c0a8e69ab49064ab8e473f5cb9ed3e8fc94",
+    "garment_sha256": "21824f2f58e3ce92dc226302ebcb60e8e569163b5a735fa47ab19b3fc9aa0cb9",
+    "current_head_sha256": "f767679b773ed68071f0ad70d37cc17a7690425ef866707e52b96bfe1c7b76f6",
+    "qualified_reuse_module": 18,
+    "qualified_cap_reuse": {
+      "sourceSHA256": "b0eafe26524656021fbc883574f4376bea449443106b075e047f69f0db1614c9",
+      "qualifiedCapSHA256": "4c5ddf47f4728d629fe2f0fbc161587da6bb3378453296aeef2c5859ae5ac441",
+      "toolSHA256": "fb07ac09df6e5a8449d232fbebbc21ff7b6fbc90ef2f44e8a1fec0c01815f3b5",
+      "headAndRigidRestExact": true,
+      "zeroCapGrooms": true,
+      "method": "Qualified hidden cap geometry/fields, continuous recipient flow bake; visible recipient arrays unchanged"
+    },
+    "new_paid_generation": false
+  },
+  "processing": [
+    "Extract the genuine original imported paired front-braid exterior and source paint; preserve the imported model as authoring input.",
+    "Reduce frontal stand-off by a smooth 17 mm imported-surface modifier; preserve the two separate braided lengths and their rooted silhouette.",
+    "Author independent root-pinned paired length and volume fields with the maintained imported tied-hair processor. Reuse the qualified female fixed scalp cap with all four cap grooming fields zero.",
+    "Reuse rooted source ribbons and progressive finish bands. Remove entire unsafe ribbons before the detailed-head output is frozen. Root fields follow fixed exterior triangle barycentrics.",
+    "Use modern source-paint settings with paintFlatness 0 and opt-in soft root coverage. Feather the geometric frontal source edge over 2 mm and the scalp border over 1 mm; keep interiors opaque.",
+    "Retain local shape-preserving support authored before the frozen detailed-head surface. Qualify all final detailed-head vertices, triangle centres and edge midpoints, including the actual saved mixed identity and grooming values.",
+    "Remove the unapproved Native target, default weight and Native metadata from the runtime candidate. Compact away every unreferenced Native payload. Every retained High attribute, all 50 targets, material, index and paint byte remains identical to the frozen accepted detailed-head source.",
+    "Remove the pixel-traced disconnected opaque island by exact ordered triangle subsets, preserving the original invisible boundary, every retained stream and all independent rooted ribbons. Repeat all 42 intended-profile scalp coverage cases and inspect four matching High client views."
+  ],
+  "customization": {
+    "saved_length_and_volume_range": [
+      0,
+      100
+    ],
+    "neutral_saved_value": 50,
+    "mapped_shape_range": [
+      -1,
+      1
+    ],
+    "shape_gain": 1,
+    "length_authoring_range": [
+      -0.25,
+      0.3
+    ],
+    "volume_authoring_range": [
+      -0.2,
+      0.3
+    ],
+    "length": "Independent hanging length of both front braids about their pinned roots.",
+    "volume": "Independent braid cross-section and swept-hair stand-off about the authored paired spines.",
+    "messiness_range": [
+      0,
+      100
+    ],
+    "messiness": "Continuous material finish plus progressive rooted ribbon visibility; the braided core and scalp coverage remain intact at zero finish.",
+    "fixed_scalp_cap": true,
+    "active_detail_vertices_by_lod_at_finish_0_50_100": [
+      [
+        0,
+        192,
+        492
+      ],
+      [
+        0,
+        60,
+        170
+      ],
+      [
+        0,
+        8,
+        24
+      ]
+    ],
+    "tie_height_qualified": false
+  },
+  "lods": [
+    {
+      "lod": 0,
+      "triangles": 16435,
+      "shape_targets": 50,
+      "rooted_detail_ribbons": 41,
+      "maximum_groom_displacements_mm": {
+        "hl_length_p": 90.38453549146652,
+        "hl_length_n": 75.32044500112534,
+        "hl_volume_p": 26.152848029581538,
+        "hl_volume_n": 17.92503575949374
+      }
+    },
+    {
+      "lod": 1,
+      "triangles": 6083,
+      "shape_targets": 50,
+      "rooted_detail_ribbons": 17,
+      "maximum_groom_displacements_mm": {
+        "hl_length_p": 90.00730514526367,
+        "hl_length_n": 75.00609010457993,
+        "hl_volume_p": 25.6493228581655,
+        "hl_volume_n": 17.54080868081748
+      }
+    },
+    {
+      "lod": 2,
+      "triangles": 2421,
+      "shape_targets": 50,
+      "rooted_detail_ribbons": 3,
+      "maximum_groom_displacements_mm": {
+        "hl_length_p": 89.0129953622818,
+        "hl_length_n": 74.17749613523483,
+        "hl_volume_p": 21.646139147242575,
+        "hl_volume_n": 16.95034353551372
+      }
+    }
+  ],
+  "qualification": {
+    "identity_targets": 46,
+    "grooming_targets": 4,
+    "native_corrective_targets": 0,
+    "rigid_joint_count": 1,
+    "finite_High_fields_and_three_LOD_budgets_pass": true,
+    "high_surface": {
+      "evaluations": 444,
+      "cases_per_primitive": 74,
+      "primitives": 6,
+      "vertices_centres_and_all_edge_midpoints": true,
+      "includes_actual_saved_look": true,
+      "failures": 0,
+      "minimum_clearance_mm": 2.4316151910635173,
+      "scope": "Detailed head contact with the maintained neck-rim exclusions; this does not claim full posed torso or garment contact.",
+      "method": "Exact ordered retained-triangle subset of the accepted detailed-head source. All vertex attributes and all 50 linear fields remain exact; no new distance scan is claimed.",
+      "inherited_from_artifact_sha256": "33d0cece5df2e93be4a1eb6d07e13c55678f0f73f0769c77c986be2a109ff21b"
+    },
+    "scalp_coverage": {
+      "cases": 42,
+      "hole_samples": 0,
+      "detail_level": 0,
+      "samples_per_case": 900,
+      "directions": 165,
+      "profile_sha256": "dde6f362da5ccb9eea110804b65a253975dbd2b620aae3a70a460f577f317c4a",
+      "evidence": {
+        "name": "coverage.json",
+        "sha256": "3aa01bfd6d36556b306ec5127788360824ec24445cee4f00da4ba3089666536e"
+      },
+      "lods": 3
+    },
+    "maximum_High_detail_root_field_error_upper_bound_mm": 1.7223133113556945e-05,
+    "minimum_parent_coverage_R_at_fine_root": 0.85795217301115,
+    "fresh_blender_import": {
+      "passed": true,
+      "factory_scene": true,
+      "glb_only_bundle": true,
+      "meshes": 3,
+      "shape_targets_per_mesh": 50,
+      "packed_paint_dimensions": [
+        2048,
+        2048
+      ],
+      "inherited_from_source_sha256": "33d0cece5df2e93be4a1eb6d07e13c55678f0f73f0769c77c986be2a109ff21b",
+      "scope": "Earlier fresh Blender import inherited through unchanged streams, shape arrays, materials and skin. The new triangle subset is freshly loaded in the matching client."
+    },
+    "actual_client_High_visual_review": "Fresh matching High front, three-quarter, side and back verify the detached cheek strand is removed without a new visible opening. User visual approval remains pending.",
+    "Native_visual_review": "Rejected at the lowest detail tier: discontinuous front braids and garment penetration in the actual matching client view. Cause remains unresolved. Numeric fixture contact results do not supersede this rejection.",
+    "evidence": [
+      {
+        "name": "twin_braids_female.high-surface-saved.json",
+        "sha256": "f25559b752f2fef84c3d128b6c821696987693e3abf053f79dfc2dede312cabe"
+      },
+      {
+        "name": "coverage.json",
+        "sha256": "3aa01bfd6d36556b306ec5127788360824ec24445cee4f00da4ba3089666536e"
+      },
+      {
+        "name": "twin_braids_female.high-only-proof.json",
+        "sha256": "229cd23b74e99be065a765633b2d5522081836df8d44ac74711ab35efffe2a41"
+      },
+      {
+        "name": "fresh-blender-import.json",
+        "sha256": "48f0079baf5cd1290d56576a308aad36a3c434fc3827e25f2bd2982df982b2f7"
+      },
+      {
+        "name": "visual-rejection-and-scan-stop.json",
+        "sha256": "f520e6d696a97e4cdbad0a9277333bb721d907a42aa067d802cb443848b4917c"
+      }
+    ],
+    "fresh_matching_client_load": {
+      "passed": true,
+      "quality": "High",
+      "views": [
+        "front",
+        "three_quarter",
+        "side",
+        "back"
+      ],
+      "resolution": [
+        1024,
+        1024
+      ],
+      "no_raw_or_scalp_paint_override": true,
+      "renderer_commit": "eb1f49a7293409843b4b83766e9851409f330156",
+      "source_manifest_sha256": "48453801b92dca24a8d9518e5a53eef4f3e493ebcd125dd187b8beabba1037a3",
+      "image_sha256_by_view": {
+        "front": "e7ad1c93ff911326ac5f8d38d0c49c0a01d91b15983253195cc5079196b7d12e",
+        "three_quarter": "437c48f679e6a02f91fda3aad5bbc7bbf56f051814cf75facd561c8b30fd3ed1",
+        "side": "2bfcc5d0f79c87638b72daa91e21e235d437bcff57a72d612d2e57fd70c5b096",
+        "back": "52a1abd396c5fae60584539e53b507b3641083e89d66db2f690d24094cec575e"
+      }
+    },
+    "visual_island_repair": {
+      "source_sha256": "33d0cece5df2e93be4a1eb6d07e13c55678f0f73f0769c77c986be2a109ff21b",
+      "method": "Trace the actual saved-client pixels to imported opaque triangles. Remove only complete render-visible islands disconnected by the authored coverage feather; retain the original invisible boundary. No geometry positions, normals, UVs, colours, skin, paint or retained linear fields change.",
+      "removed_triangles_by_lod": [
+        70,
+        27,
+        4
+      ],
+      "all_retained_indices_exact_ordered_subset": true,
+      "cap_and_whole_ribbon_geometry_unchanged": true,
+      "maximum_boundary_coverage_R": 0.0,
+      "fine_root_all_field_error_max_mm": 1.7223133113556945e-05,
+      "no_new_visible_coverage_opening_observed": true,
+      "evidence": [
+        {
+          "name": "twin_braids_female.island-removal.json",
+          "sha256": "ad47115a2de83245eb0e69bf081bdb9618ff3650220a822dbc29aed26c98af98"
+        },
+        {
+          "name": "twin_braids_female.final-qualification.json",
+          "sha256": "cba515b3f2ec79f52ad6d42de7abc8b6e448a5d5afe11e2cb4fe477b61e23ad5"
+        }
+      ]
+    }
+  },
+  "runtime_capabilities": {
+    "high_head": true,
+    "native_head": false,
+    "native_corrective_present": false,
+    "unapproved_Native_payload_removed": true
+  },
+  "known_limits": [
+    "Native presentation is withheld pending a successful matching client visual review and reconciled actual geometry.",
+    "Fixed twin-braid attachment; no tie-height slider is enabled.",
+    "Messiness retains the braided core.",
+    "Technical qualification does not imply user visual acceptance."
+  ]
+}

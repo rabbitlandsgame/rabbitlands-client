@@ -28,7 +28,7 @@ func run() -> void:
 	enabled.sort()
 	check(enabled == [0, 1], "enabled player actor types agree with server Human policy")
 	var rows := BASES.rows(registry)
-	check(rows.size() == 11, "all eleven Human starting looks remain available")
+	check(rows.size() == 41, "all 41 Human starting looks remain available")
 	for row: Dictionary in rows:
 		check(row.race_id == "luminous" and POLICY.allows_actor_type(row.look.actor_type), "every base is a Human player choice")
 	for option: Dictionary in registry.creationOptions:

@@ -10,8 +10,11 @@ Native corrective also stays exact. Existing Native ribbon targets are replaced.
 Parents must be non-cap, nondegenerate core faces with root coverage at least
 0.55. Each indexed ribbon must have two roots with matching parent skin binds.
 The default source-root distance ceiling is 0.5 mm and inherited fine correction
-ceiling is 14 mm. Far roots, unindexed detail rows or mismatched skin fail before
-output. Keep the authoring input and private root-binding receipt.
+ceiling is 14 mm. An explicitly reviewed style may pass `max_delta_mm` (or
+`--max-delta-mm`) up to 20 mm, matching the existing Native vertex fitter. Record
+the actual skull mismatch and style-local allowance; the default and independent
+2 mm physical acceptance gate stay unchanged. Far roots, unindexed detail rows
+or mismatched skin fail before output. Keep the authoring input and private receipt.
 
 ```
 python inherit_native_detail_roots.py --source PRIVATE/core-fitted/style_male.glb \

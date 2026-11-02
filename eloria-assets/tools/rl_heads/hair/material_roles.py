@@ -4,6 +4,7 @@ Concrete names remain the keys for metadata, textures and material caches.
 Unknown names are not accepted by prefix or substring matching.
 """
 CLUMP_ROLES={
+    'rl_hair_clump_backing':'rl_hair_clump',
     'rl_hair_clump_crest':'rl_hair_clump',
     'rl_hair_clump_crest_lod1':'rl_hair_clump',
     'rl_hair_clump_crest_lod2':'rl_hair_clump',
@@ -29,5 +30,5 @@ def validate_roles(materials):
         if name not in CLUMP_ROLES:continue
         texture=(material.get('extras') or {}).get('texture')
         if not isinstance(texture,str) or not texture.strip():
-            errors.append(f'{name}: explicit crest clump requires its own declared texture')
+            errors.append(f'{name}: explicit clump role requires its own declared texture')
     return errors

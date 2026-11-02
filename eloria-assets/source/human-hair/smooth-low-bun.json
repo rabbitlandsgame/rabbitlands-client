@@ -1,0 +1,197 @@
+{
+  "schema": "rl.human-hair.provenance.v1",
+  "style": "smooth_low_bun_female",
+  "semantic_module_id": 10,
+  "body_sex": "female",
+  "status": "high_head_candidate_pending_user_visual_approval",
+  "user_approved": false,
+  "artifacts": {
+    "glb": {
+      "path": "godot-client/assets/actors/native/rl_heads/hair/smooth_low_bun_female.glb",
+      "sha256": "fef57bbea1d3a26d1904f1980e89b5403b30f74db8e7e14a7fd162dbb1b61d5c",
+      "bytes": 8274376
+    },
+    "paint": {
+      "path": "godot-client/assets/actors/native/rl_head_textures/smooth_low_bun_female.png",
+      "sha256": "45f75357aa7ccaaa404bad4f1dc5121121b18ef714c1c8ae025fa54b1110a3c0",
+      "dimensions": [
+        2048,
+        2048
+      ]
+    }
+  },
+  "sources": {
+    "imported_reference_model_sha256": "0ff785fd80f0cdb222629150df877c201dfb80d104174a6879409b545d6e1844",
+    "preserved_imported_low_bun_sha256": "d4383feba85e6bcdc422bdbe12b9c3b80eda39ddf597c2caa11a51b625e8ba75",
+    "preserved_imported_paint_sha256": "ac48ddee681cc863f72fdd446ef677e3e5d585a2ec9d497a42f0946fcd8f03f4",
+    "head_sha256": "f767679b773ed68071f0ad70d37cc17a7690425ef866707e52b96bfe1c7b76f6",
+    "qualified_reuse_module": 25,
+    "qualified_cap_and_fine_source_glb_sha256": "1c32a03907e99291d057ef3ea89c4dfe4a4eee53a1d3f7766a6123e004923bfe",
+    "qualified_fine_source_paint_sha256": "0edc047fc0c222b278f93056426a6fff846c683333464e60e6fbff6a065036b4",
+    "new_paid_generation": false
+  },
+  "processing": [
+    "Preserve the original imported sculpt and paint; author a separate versioned output.",
+    "Fair true geometric face-root contours with a 7.5 mm bound; apply a smooth 22 mm lateral nape recenter and measured contact corrections.",
+    "Replace the old scalp support with the qualified module 25 female fixed cap, using the same head and rigid rest. Reuse its geometry and identity fields; keep its four grooming fields zero. Bake recipient exterior paint into unused cap atlas tiles.",
+    "Reuse module 25 fine-ribbon topology and finish bands. Reroot each ribbon on the recipient exterior using fixed triangle barycentrics, including all identity and grooming POSITION fields.",
+    "Remove one whole contacting ribbon at each of LOD0 and LOD1. Preserve every retained ribbon value and its attachment; retain all six LOD2 ribbons.",
+    "Author opposing wrapped-knot Length fields through the maintained tied-hair processor. Keep neutral, identity and Volume geometry unchanged; guard new endpoint triangle centres and edge midpoints.",
+    "Apply modern source-paint material settings: paintFlatness 0, soft root coverage, 3 mm frontal feather and 2 mm scalp-edge feather. Preserve detail A bands.",
+    "Discard unreferenced authoring payloads only. The compacted runtime graph retains every live accessor and image byte exactly."
+  ],
+  "customization": {
+    "saved_length_and_volume_range": [
+      0,
+      100
+    ],
+    "neutral_saved_value": 50,
+    "mapped_shape_range": [
+      -1,
+      1
+    ],
+    "shape_gain": 1.0,
+    "length": "Root-pinned radial size of the wrapped low knot; positive and negative fields oppose each other.",
+    "length_authoring_radius_scale": [
+      -0.2,
+      0.3
+    ],
+    "volume": "Independent stand-off and fullness of the imported swept hair and wrapped knot.",
+    "messiness_range": [
+      0,
+      100
+    ],
+    "messiness": "Continuous material finish and progressive visibility of rooted source ribbon geometry. Core scalp coverage remains intact at the sleekest setting.",
+    "active_detail_vertices_by_lod_at_finish_0_50_100": [
+      [
+        0,
+        276,
+        660
+      ],
+      [
+        0,
+        80,
+        190
+      ],
+      [
+        0,
+        16,
+        48
+      ]
+    ],
+    "tie_height_qualified": false
+  },
+  "lods": [
+    {
+      "lod": 0,
+      "triangles": 16569,
+      "shape_targets": 50,
+      "maximum_shape_displacement_mm": {
+        "hl_length_p": 22.686322986170797,
+        "hl_length_n": 15.124215599309302,
+        "hl_volume_p": 48.43289337614868,
+        "hl_volume_n": 30.2705587325657
+      },
+      "rooted_detail_ribbons": 55
+    },
+    {
+      "lod": 1,
+      "triangles": 6271,
+      "shape_targets": 50,
+      "maximum_shape_displacement_mm": {
+        "hl_length_p": 22.765412630990262,
+        "hl_length_n": 15.176941337949538,
+        "hl_volume_p": 48.15011856401827,
+        "hl_volume_n": 30.093822796308867
+      },
+      "rooted_detail_ribbons": 19
+    },
+    {
+      "lod": 2,
+      "triangles": 2256,
+      "shape_targets": 50,
+      "maximum_shape_displacement_mm": {
+        "hl_length_p": 23.018258557363804,
+        "hl_length_n": 15.345505902910618,
+        "hl_volume_p": 47.95766225637139,
+        "hl_volume_n": 29.97353878205048
+      },
+      "rooted_detail_ribbons": 6
+    }
+  ],
+  "qualification": {
+    "structural_errors": 0,
+    "rigid_joint_count": 1,
+    "identity_targets": 46,
+    "grooming_targets": 4,
+    "skin_rest_roundtrip_error_metres": 3.957160643608404e-07,
+    "hair_root_to_body_head_error_metres": 2.7024913906714687e-07,
+    "high_vertex_contact": {
+      "cases_per_primitive": 72,
+      "primitives": 6,
+      "failures": 0,
+      "minimum_clearance_mm": 2.13495667413221
+    },
+    "triangle_contact_samples": "Triangle centres and edge midpoints on the polished core, new Length endpoints, and retained detail ribbons. Inherited cap geometry retains its source qualification.",
+    "scalp_coverage": {
+      "cases": 42,
+      "lods": 3,
+      "hole_samples": 0,
+      "detail_level": 0
+    },
+    "maximum_detail_root_attachment_error_mm": 5.860374708673287e-05,
+    "maximum_detail_root_field_error_mm": 2.504850291307131e-05,
+    "fresh_blender_import": {
+      "passed": true,
+      "factory_scene": true,
+      "glb_only_bundle": true,
+      "external_paint_required": false,
+      "meshes": 3,
+      "shape_targets_per_mesh": 50,
+      "packed_paint_dimensions": [
+        2048,
+        2048
+      ]
+    },
+    "actual_client_visual_review": "Pending final exact-version rendering and user approval.",
+    "evidence_sha256": {
+      "coverage.json": "3a83e521db5f459c9d2261884720af823b5d44cc199808c342351bd90ced1c13",
+      "smooth_low_bun_female.high-clearance.json": "2a821c856b6cdc6e5d8bf467ce0ff41d73ab82603efa1470c00dc465bc2c4d6f",
+      "smooth_low_bun_female.final-audit.json": "52d5c1424a799ff755149323e03ba51ac4bd081755fe04cecc29cd2d1d7f278f",
+      "fresh-blender-import.json": "54250dd39709cf2697ea5f224f35a0e2c65c2069780116fc36622ee6374aa119",
+      "compaction.json": "f62968f6b2cb3db883b4ce4fd2efa0af63025580b46081570d4baf5139755ece"
+    },
+    "core_triangle_guard_report_sha256": "f5c102ab589e60120f2b684111c554a1f3106ebca27e6549dee6fb095fd3ae4f",
+    "length_endpoint_guard_report_sha256": "6388764b5b8444669a73d1f7870526b0fad4e3ad2c9af9c170006e6b301d5abd"
+  },
+  "runtime_capabilities": {
+    "high_head": true,
+    "native_head": false,
+    "fallback_style": 8,
+    "native_fallback_module": 25,
+    "native_fallback_limit": "The qualified existing updo has a higher bun placement than this High-head low bun.",
+    "native_cap_corrective": "Retained only as private authoring evidence; not installed as a qualified corrective on this output.",
+    "unchanged_existing_runtime_modules": [
+      3,
+      25
+    ]
+  },
+  "known_limits": [
+    "The imported nape wrap retains a slightly oblique silhouette.",
+    "No tie-height capability is enabled.",
+    "Technical qualification does not imply user visual acceptance."
+  ],
+  "authoring_pipeline_sha256": {
+    "polish_low_bun.py": "9dc5aaa1da586a4549848cc294339a0cbd2d1d1cca51f01afc925cd1924a2e9a",
+    "guard_low_bun_high.py": "68599f29045f8f6102abce6f526cb4e13b0adc6b97a29b338c1635be56b21dbc",
+    "modernize_low_bun_material.py": "50b86de031ce4976b5a4928a0e68b72b5c8f3ad70abb82680add9a0bfe87c325",
+    "reuse_low_bun_cap.py": "6e647e3be8345ff5a3486c08dd0dd3a4cb5e7502dd2c6d5f8ba34ce3f2abab03",
+    "author_low_bun_length.py": "19e65dbf79a85d9a7b13da4d3047506461542ffc7ee21bb3138f5131f79e9a7e",
+    "append_low_bun_details.py": "930a4fe5b251a0970033d1d041a37733b80736b9e16cdb1cc018ab26b4cf7544",
+    "cull_contacting_details.py": "61472cf1733ab3956d30057b20782f962adc21fb23fc0aac711bcbb02385e82c",
+    "check_low_bun_high.py": "89db2543f989a9a3002f73b8d79e5ff5aa946de3093df9985c9aba9f79cc8f1c",
+    "check_final_low_bun.py": "f10bcf26712a72d0d4842c612a907f7fd405ea5bf977e1c3eb27c1e5e180ba8d",
+    "fresh_import_low_bun.py": "fc257b882ff3d3099a375ff913468f0d254f5624afb3731886b420af265fdaed",
+    "run_cpu.py": "ee638911410bd038aad9d82ddece09f0f5e3fcc08992b301adf63df86ec010db"
+  }
+}

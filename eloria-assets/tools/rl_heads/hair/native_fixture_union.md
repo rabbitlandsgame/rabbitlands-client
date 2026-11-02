@@ -1,7 +1,8 @@
 # Evaluated Native Rest union
 
 `NativeFixtureUnion(manifest, sex, case_names=None, optimize=True,
-horizontal_slice_proof=False)` in `native_fixture_union.py`
+horizontal_slice_proof=False, closest_section_proof=False,
+closest_section_fallback_planes=0)` in `native_fixture_union.py`
 loads complete body/scalp/shirt surfaces through the shared evaluated-fixture
 reader, verifying every NPZ SHA. It requires fixturev2's `native_fixed_skull`
 policy and zero High hair identity controls. Only Rest_Pose/fraction0 records
@@ -43,3 +44,21 @@ proof. The existing default is unchanged. This initial optional route rejects
 optimized queries until reused witness reconstruction has been independently
 qualified against the same per-fixture proof. It does not alter distance,
 closest point, normal, clearance thresholds or the total fitting bound.
+
+Authoring can explicitly use the same complete closest-section outside proof as
+the independent Native checker:
+
+```python
+NativeFixtureUnion(manifest, sex, optimize=False,
+    horizontal_slice_proof=True, closest_section_proof=True,
+    closest_section_fallback_planes=64)
+```
+
+Each retained fixture builds both proofs from its own complete hash-verified
+body/scalp/shirt surface. Fallback planes require the closest-section proof and
+an integer count from 0 through 64. Either outside proof rejects optimized
+witness reuse, including an explicit later `signed(..., optimize=True)` call.
+Defaults and the existing horizontal-only behavior stay unchanged. This is a
+geometric sign proof, not a different clearance or fitting bound; exact physical
+distances remain unchanged. The full independent pose/control/groom checker is
+still required after fitting.

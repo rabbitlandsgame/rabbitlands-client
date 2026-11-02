@@ -7,15 +7,15 @@
   "sex": "female",
   "legacy_hairstyle_slot": 2,
   "additional_generation_credits": 0,
-  "method": "Approved painted long-hair exterior with preserved bulk and parting, rounded rooted face locks, a closed painted Low proxy, surface-bound detail and separate Native-skull/pose corrective",
-  "glb_sha256": "e820e50571ba68820ab855ccc96463f36f29a22827b0c30d96fff2b52807b6cd",
+  "method": "Approved painted long-hair exterior with preserved bulk and parting, rounded rooted face locks, a closed painted Low proxy, surface-bound detail and separate Native-skull/pose corrective; a topology-only repair closes one isolated triangular rear-exterior gap at High and Medium using existing vertices",
+  "glb_sha256": "3bae239843081adbe1dae5a14a2aeff88fc90bc5414b995aa2969181b2c043b6",
   "texture_sha256": "6c414086e16cb538d597ad255cefd9ae591dda2089ad21ddf65f871990d9a1fb",
   "texture_import_sha256": "e11a9f68d5e7e9020b1209ec5a1d52c2c5e5540ab35e8c472147c6717c366e83",
   "source_reference_sha256": "38970e9b3c55194644731060a8b88da5e2a42cf79e4b8f09209821d0f3d08647",
   "head_sha256": "f767679b773ed68071f0ad70d37cc17a7690425ef866707e52b96bfe1c7b76f6",
   "triangles": {
-    "lod0": 16062,
-    "lod1": 5808,
+    "lod0": 16063,
+    "lod1": 5809,
     "lod2": 2142
   },
   "vertices": {
@@ -116,7 +116,9 @@
       "grey_midpoint_actual_amount": 0.5,
       "previous_mislabeled_grey_frame_retained_as_full_grey_evidence": true,
       "errors": 0,
-      "warnings": 0
+      "warnings": 0,
+      "source_asset_sha256": "e820e50571ba68820ab855ccc96463f36f29a22827b0c30d96fff2b52807b6cd",
+      "candidate_recapture_pending": false
     },
     "headwear111": {
       "exact_keys": [
@@ -135,6 +137,76 @@
       "front_and_band_plane_exact": true,
       "trial_data_sha256": "c65b1059896a4ef6321b098c088beb8b80f4f62fd94248e4e3178cccf12089e5",
       "actual_wider_head_geometry_audit_sha256": "58c8762712f554dd4d573ccd79058858b4d4990c6acd29d9489bb313867c40d7"
+    },
+    "topology_closure": {
+      "scope": "Exactly one added existing-index triangle in opaque exterior primitive0 at High and Medium; Low and every existing vertex/attribute/all51 POSITION+NORMAL stream/index prefix/skin/material/embedded image remain exact. No source point or broad silhouette moves.",
+      "source_binary_payload_is_exact_prefix": true,
+      "added_existing_rows_by_lod": {
+        "0": [
+          5036,
+          5081,
+          5113
+        ],
+        "1": [
+          2017,
+          1952,
+          2205
+        ]
+      },
+      "new_vertex_rows": 0,
+      "paint_changed": false,
+      "profile_changed": false,
+      "winding": "Each new edge opposes its existing single incident boundary edge; all three become two-incident edges.",
+      "coincident_boundary_all51_field_spread_mm": 0.0,
+      "new_face_dense91_minimum_texture_alpha": 1.0,
+      "new_face_core_color_alpha": 1.0,
+      "preservation_and_opacity_report_sha256": "d7d81a5933cab369196e580c5c9cf6783c5a1519f7e5cc06cbf4a78f50089100",
+      "head_body_states": 75,
+      "head_body_results": 150,
+      "new_face_dense_barycentric_samples_per_state": 91,
+      "independent_minimum_required_mm": 2,
+      "new_face_High_head_conservative_minimum_mm": 36.63280386679867,
+      "new_face_actual_cutbody_skin_bodypatch_shirt_minimum_mm": 60.700455187575116,
+      "new_face_High_body_report_sha256": "4817af1ab49c9731b4b61f966e96f40a3a1404b83bc4108969f67bd638dfd984",
+      "new_face_Native_results": 1116,
+      "new_face_Native_minimum_mm": 58.79623312295082,
+      "new_face_Native_report_sha256": "6d4aaea603f224c0de53dc6d106ac87ac885fb250347f3148384bf25f37bbff8",
+      "new_face_only_diagnostic_sha256": "2a9defb0740ac6917cc8936259711ad0d27a01d882c91f708b66f3c95c1fc256",
+      "Native_fixture_manifest_sha256": "de6a4f42543f4e004e602091170048bbd550a862907da921f70fb1c704002b5a",
+      "new_face_normal_report_sha256": "6e4642b3b302276e1e04c7c6d470e91317dc77915a748c80edf107821eb9dcf4",
+      "fresh_full_asset_scalp_coverage": {
+        "cases": 45,
+        "lods": 3,
+        "samples": 900,
+        "requested_directions": 165,
+        "retained_directions": 124,
+        "level": 0,
+        "hole_samples": 0,
+        "report_sha256": "dc87c865ea74a5bf6baee5ccef6c1e8a2993d1aee97a81e0ae0800f5f8ba9aba"
+      },
+      "standalone_GLB_only_Blender_import_sha256": "a79f08487d8a94deaa4c6417721919bef95eadb74e09b17f1a2ee3233a84e7dd",
+      "whole_asset_physical_acceptance_method": "Existing surfaces inherit source full-surface checks through exact stream/index-prefix proof. Only the two added triangles were newly checked against High/actual body and evaluated Native fixtures; no fresh full-asset physical scan is claimed.",
+      "actual_saved_looks_included": [
+        "human_11",
+        "human_33"
+      ],
+      "actual_export_frozen_sha256": "76f2d6dd7bbeec90a2f8f93993f7078f881da4511903f414686ae2f1e98f5a9e",
+      "visual_gate": "Independent fitting-agent review of eight actual saved-PC4 client views (front, three-quarter, profile and back for Imani and Thalia) confirms the small central rear opening is closed, with no new local repair artifact observed. Existing pale under-cap, stiff shoulder sheets and wavy-vs-straight concept differences remain explicit.",
+      "client_visual_report_sha256": "4267c29740859a7b6b247ae68e8402be5590b86729498d1681e44d12236ab1fc",
+      "client_capture_manifest_sha256": "48453801b92dca24a8d9518e5a53eef4f3e493ebcd125dd187b8beabba1037a3",
+      "client_render_verification_sha256": "ac49b3723d413f19e8aa748be7e91e4c3a7eae2f0e62cf9ff1140dc5b2af73be",
+      "client_views": 8,
+      "client_view_size": [
+        1024,
+        1024
+      ],
+      "raw_diagnostic_overrides": false,
+      "production_hairline_policy": true,
+      "same_saved_PC4_as_frozen_physical_inputs": true,
+      "colour_response_verification_sha256": "0d686ebea20c79801f630ec5ac214de5c6b8bd6fc9868d0cb5a4ce5fc09bc7e0",
+      "colour_response_maximum_linear_difference": 0.0,
+      "colour_five_levels_pixel_counts_identical": true,
+      "existing_colour_policy_retained": true
     }
   },
   "provenance_hashes": {
@@ -151,5 +223,10 @@
     "high_client_capture_manifest_sha256": "07326a71a1dc88ebc545f2a198d87469116927e291d2ab974c7e93cb59bbe3a0",
     "native_client_capture_manifest_sha256": "3a3dc0f43a26a89e1293202fedfd6f49b6f44c12cd116262b8cf6fc01d4474d0",
     "ordinary_headwear_capture_manifest_sha256": "a6347caab25fd13d460d69e779acf6668dcde90ec3c9d9d1c67348a7ba1c7b6c"
+  },
+  "source_before_triangle_closure": {
+    "glb_sha256": "e820e50571ba68820ab855ccc96463f36f29a22827b0c30d96fff2b52807b6cd",
+    "provenance_sha256": "1cbb38ea135b96f0cac904c27514af6dedff718ad813073f8f583e66fe512d95",
+    "full_source_qualification_records_remain_historical": true
   }
 }
