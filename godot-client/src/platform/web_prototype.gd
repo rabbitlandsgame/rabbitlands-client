@@ -97,6 +97,11 @@ static func map_groups(map_id: String) -> Array:
 static func ensure_map(map_id: String, owner := "") -> bool:
 	return ensure_groups(map_groups(map_id), owner)
 
+static func map_ready(map_id: String) -> bool:
+	if not OS.has_feature("web"): return true
+	var service := _service()
+	return service != null and bool(service.call("groups_ready", map_groups(map_id)))
+
 static func pin_maps(owner: String, ids: Array) -> void:
 	var out: Array = []
 	for map_id: String in ids:

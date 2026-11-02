@@ -53,8 +53,11 @@ func _run() -> void:
 	zip.close()
 	var bytes: int = await service._unpack(FileAccess.get_sha256(service.archive_path))
 	assert(bytes == 6 and FileAccess.get_file_as_bytes("res://assets/test_group.bin").get_string_from_utf8() == "abcdef")
+	var evicted: Array = []
+	service.files_evicted.connect(func(paths: PackedStringArray) -> void: evicted.append(paths))
 	service._remove_files("fixture")
 	assert(not FileAccess.file_exists("res://assets/test_group.bin"))
+	assert(evicted.size() == 1 and "res://assets/test_group.bin" in evicted[0])
 	assert(service._destination("eloria-assets/../private.txt").is_empty())
 	assert(service._destination("godot-client/assets/C:/private.txt").is_empty())
 	service.free()

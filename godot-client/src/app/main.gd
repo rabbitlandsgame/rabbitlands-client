@@ -6610,6 +6610,7 @@ func _update_browser_asset_pins() -> void:
 	maps.append_array(exterior_stream.residents.keys())
 	if not exterior_stream._pending_map.is_empty(): maps.append(exterior_stream._pending_map)
 	maps.append_array(world_park.parked_maps())
+	maps.append_array(world_park._estimating.keys())
 	if not world_park._preload.is_empty(): maps.append(str(world_park._preload.get("map", "")))
 	for prewarm: RefCounted in [respawn_prewarm, gauntlet_prewarm]:
 		if not str(prewarm.get("map_id")).is_empty(): maps.append(str(prewarm.get("map_id")))

@@ -7,11 +7,21 @@ import unittest
 import zipfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
-from browser_asset_catalog import factor_groups
+from browser_asset_catalog import factor_groups, creation_models
 import build_web_prototype as web
 
 
 class BrowserGroupCatalogTests(unittest.TestCase):
+    def test_only_current_playable_models_are_required_before_character_creation(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            client = Path(temporary)
+            policy = client / "src/actors/player_creation_policy.gd"
+            policy.parent.mkdir(parents=True)
+            policy.write_text('const ACTOR_TYPES: Array[int] = [0, 1]\n')
+            registry = {"creationOptions":[{"actorType":0,"model":"human_female"},
+                {"actorType":1,"model":"human_male"}, {"actorType":3,"model":"npc_male"}]}
+            self.assertEqual(creation_models(client, registry), {"human_female","human_male"})
+
     def test_shared_files_have_one_owner_and_dependency_pins_can_retain_them(self):
         a, b, shared, startup = map(Path, ("a", "b", "shared", "startup"))
         source = {"startup":{startup}, "map:a":{a, shared, startup}, "model:b":{b, shared}}

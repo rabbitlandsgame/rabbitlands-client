@@ -12,6 +12,7 @@ var groups: Dictionary = {}
 var states: Dictionary = {}
 var pins: Dictionary = {}
 var files: Dictionary = {}
+var _source_paths: Dictionary = {}
 var sizes: Dictionary = {}
 var touched: Dictionary = {}
 var queue: Array[String] = []
@@ -88,6 +89,13 @@ func ensure_groups(ids: Array, owner := "") -> bool:
 			else: background.append(id)
 		queue = foreground + background
 	return ready
+
+func groups_ready(ids: Array) -> bool:
+	var required := {}
+	if not _closure(ids, required): return false
+	for id: String in required:
+		if states.get(id, "") != "ready": return false
+	return true
 
 func _queue_group(id: String) -> void:
 	if states.has(id): return
@@ -206,7 +214,9 @@ func _unpack(expected: String) -> int:
 		file.store_buffer(buffer)
 		file.close()
 		bytes += buffer.size()
-		if offset <= 0: (files[current] as Array).append(destination)
+		if offset <= 0:
+			(files[current] as Array).append(destination)
+			_source_paths[destination] = "res://" + logical.trim_prefix("godot-client/") if logical.begins_with("godot-client/") else "res://../" + logical
 		if Time.get_ticks_usec() - slice >= UNPACK_SLICE_USEC:
 			await get_tree().process_frame
 			slice = Time.get_ticks_usec()
@@ -215,8 +225,15 @@ func _unpack(expected: String) -> int:
 	return bytes
 
 func _remove_files(id: String) -> void:
-	files_evicted.emit(PackedStringArray(files.get(id, [])))
+	var aliases := PackedStringArray()
+	for path: String in files.get(id, []):
+		aliases.append(path)
+		# Web exports can have an empty resource root. Supply the original
+		# resource alias as well as the concrete MEMFS path for parsed caches.
+		if _source_paths.has(path): aliases.append(str(_source_paths[path]))
+	files_evicted.emit(aliases)
 	for path: String in files.get(id, []): DirAccess.remove_absolute(path)
+	for path: String in files.get(id, []): _source_paths.erase(path)
 	files.erase(id)
 	if id != "startup": live_bytes -= int(sizes.get(id, 0))
 	sizes.erase(id)

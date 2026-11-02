@@ -301,6 +301,7 @@ static func _portals_of(interior: String, manifest: Dictionary) -> Dictionary:
 ## map-load frame, all at once; without one, spread (`_step_warmups`). Once a
 ## session; a spread warm-up cut short by travel starts again at the next bind.
 func _warm_interior(interior: String, curtained := true) -> void:
+	if OS.has_feature("web") and (not curtained or not WebPrototype.map_ready(interior)): return
 	if not warm_materials or _warmed.has(interior) or _warming.has(interior):
 		return
 	var glb := str(_shell_glbs.get(interior, ""))
@@ -420,6 +421,7 @@ func _reap_warm_orphans(wait := false) -> void:
 ## (WorldParkPolicy.interior_estimate). The files are read and the embedded
 ## images hashed (to find their sidecars) on a worker: ~20 MB for the Town.
 func _estimate_interior(interior: String, manifest: Dictionary) -> void:
+	if OS.has_feature("web") and not WebPrototype.map_ready(interior): return
 	if _interior_bytes.has(interior) or _estimating.has(interior) or manifest.is_empty() \
 			or manifest.get("asset") is not Dictionary:
 		return
@@ -582,6 +584,10 @@ func start_preload(interior: String, door := -1, distance := INF) -> bool:
 		_retry_at[interior] = _now() + Policy.PRELOAD_RETRY_MSEC
 		_record("preload_skip", interior, {"reason": "package_missing"})
 		return false
+	if OS.has_feature("web") and not _interior_bytes.has(interior):
+		_estimate_interior(interior, _read_manifest(entry))
+		finish_estimates(false)
+		if not _interior_bytes.has(interior): return false
 	if _estimating.has(interior):
 		finish_estimates(true)
 	var bytes := int(_interior_bytes.get(interior, _estimate_package(path)))

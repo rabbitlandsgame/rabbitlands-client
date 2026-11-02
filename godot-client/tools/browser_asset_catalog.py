@@ -4,24 +4,42 @@ import hashlib
 import json
 import shutil
 import subprocess
+import re
 from collections import defaultdict
 from pathlib import Path
 
 IMAGE = {".png", ".jpg", ".jpeg", ".webp"}
 INPUTS = ("godot-client/assets", "godot-client/data/actors", "godot-client/data/maps",
           "godot-client/data/assets", "godot-client/src/ui/creation_archetypes.gd",
+          "godot-client/src/actors/player_creation_policy.gd",
           "eloria-assets/maps", "eloria-assets/world", "eloria-assets/fonts")
-POLICY = "rl-browser-groups-zip2m-v2"
+POLICY = "rl-browser-groups-zip2m-v3"
 
 class Sources(set):
     def __init__(self, paths, root):
         super().__init__(paths)
         self.source_root = root
 
+def actor_asset_literals(client):
+    literals = set()
+    for folder in ("src/actors", "src/mounts"):
+        for source in (client / folder).rglob("*.gd"):
+            literals.update(re.findall(r'''["'](res://assets/actors/[^"'\s]+\.(?:glb|gltf|json|bin|png|jpg|jpeg|webp))["']''', source.read_text(encoding="utf-8-sig")))
+    return literals
+
 def fingerprint(root):
     if subprocess.check_output(["git", "diff", "HEAD", "--name-only", "--", *INPUTS], cwd=root).strip():
         raise ValueError("Commit asset/catalog inputs before building or reusing an asset catalog")
-    return {name: subprocess.check_output(["git", "rev-parse", "HEAD:" + name], cwd=root, text=True).strip() for name in INPUTS}
+    result = {name: subprocess.check_output(["git", "rev-parse", "HEAD:" + name], cwd=root, text=True).strip() for name in INPUTS}
+    result["$actor_asset_literals"] = hashlib.sha256("\0".join(sorted(actor_asset_literals(root / "godot-client"))).encode()).hexdigest()
+    return result
+
+def creation_models(client, registry):
+    policy = (client / "src/actors/player_creation_policy.gd").read_text()
+    allowed = re.search(r"const ACTOR_TYPES:\s*Array\[int\]\s*=\s*(\[[^\]]+\])", policy)
+    if allowed is None: raise ValueError("Unknown player creation availability policy")
+    types = set(json.loads(allowed.group(1)))
+    return {str(row["model"]) for row in registry["creationOptions"] if row.get("actorType") in types}
 
 def save(web, directory):
     directory.mkdir(parents=True, exist_ok=True)
@@ -48,7 +66,8 @@ def load(web, path, assets):
     catalog = payload["catalog"]
     for group in catalog["groups"].values():
         for row in group["archives"]:
-            if row["file"] != row["sha256"] + ".zip": raise ValueError("Invalid prebuilt archive filename")
+            if not re.fullmatch(r"[0-9a-f]{64}", row["sha256"]) or row["file"] != row["sha256"] + ".zip":
+                raise ValueError("Invalid prebuilt archive filename")
             source = path.parent / "assets" / row["file"]
             if web.describe(source) != row: raise ValueError("Prebuilt browser archive changed")
             target = assets / source.name
@@ -62,7 +81,7 @@ def load(web, path, assets):
     return catalog, Sources(files, provider)
 
 
-def group_sources(web):
+def group_sources(web, *, include_map_geometry=True):
     repository, client = web.REPO, web.CLIENT
     tracked = set(web.subprocess.check_output(["git", "ls-files", "-z"], cwd=repository).decode().split("\0"))
     hashes = {}
@@ -118,20 +137,25 @@ def group_sources(web):
         return [client / value[6:] for value in web.strings(document)
                 if value.startswith("res://assets/") and Path(value).suffix.lower() not in {".svg", ".tres", ".tscn"}]
 
-    models = json.loads((client / "data/actors/models.json").read_text())["models"]
+    model_registry = json.loads((client / "data/actors/models.json").read_text())
+    models = model_registry["models"]
     equipment = json.loads((client / "data/actors/equipment.json").read_text())["models"]
     registry = json.loads((client / "data/maps/registry.json").read_text())["maps"]
     groups = {}; model_groups = {}; equipment_groups = {}; map_groups = {}
     startup = set()
     for root in ("rl_heads", "rl_head_textures", "face_masks"):
         startup.update(path for path in (client / "assets/actors/native" / root).rglob("*")
-                       if path.is_file() and path.suffix not in {".uid", ".import", ".md"})
+                       if path.is_file() and path.suffix not in {".uid", ".import", ".md"}
+                       and path.relative_to(repository).as_posix() in tracked)
     startup.add(client / "assets/actors/native/equipment/generic_cape.glb")
-    # Includes the runtime female shirt-neckline repair scene, selected by
-    # its renderer helper rather than the base model's scene field.
-    startup.update((client / "assets/actors/native/races").glob("*.glb"))
+    # Renderer-selected repair; the canonical model must remain unchanged.
+    startup.add(client / "assets/actors/native/races/luminous_female_shirt.glb")
+    for value in actor_asset_literals(client):
+        path = client / value[6:]
+        if path.is_file(): startup.add(path)
     for root in (repository / "eloria-assets/fonts", repository / "eloria-assets/world/_shared/images", client / "assets/world"):
-        startup.update(path for path in root.rglob("*") if path.is_file() and path.suffix.lower() in {".glb", ".json", ".png", ".jpg", ".jpeg", ".webp", ".ttf", ".otf"})
+        startup.update(path for path in root.rglob("*") if path.is_file() and path.suffix.lower() in {".glb", ".json", ".png", ".jpg", ".jpeg", ".webp", ".ttf", ".otf"}
+                       and path.relative_to(repository).as_posix() in tracked)
     startup.update((client / "assets/ui/cursors").glob("*.png"))
     # World-map browsing must not download the terrain of every region shown.
     # The small prerendered maps travel with shared UI files and decode lazily.
@@ -152,17 +176,17 @@ def group_sources(web):
         for value in web.strings(json.loads((client / "data/maps" / name).read_text())):
             if value.startswith("res://") and Path(value).suffix.lower() in IMAGE:
                 startup.add((client / value[6:]).resolve())
+    playable = creation_models(client, model_registry)
     for name, model in models.items():
         key = "model:" + name
         groups[key] = closure(resources(model))
         model_groups[name] = [key]
-        if name.endswith(("_male", "_female")): startup.update(groups[key])
+        if name in playable: startup.update(groups[key])
     for name, model in equipment.items():
         key = "equipment:" + name
         groups[key] = closure(resources(model))
         equipment_groups[name] = [key]
     # The existing four starter kits render before an account exists.
-    import re
     for part, visual in re.findall(r'(\d+):\s*(\d+)', (client / "src/ui/creation_archetypes.gd").read_text()):
         startup.update(groups.get("equipment:" + part + ":" + visual, set()))
     groups["startup"] = closure(startup)
@@ -173,13 +197,11 @@ def group_sources(web):
             seen.add(canonical); canonical = registry[canonical]["alias"]
         key = "map:" + canonical
         map_groups[name] = [key]
-        if key not in groups:
-            manifest = client / registry[canonical]["manifest"].removeprefix("res://")
-            groups[key] = closure([manifest])
-            # Small root metadata enables portal relationships, route planning
-            # and streamed-map detection before a territory is downloaded.
-            # Add only the JSON itself, never its geometry closure, to startup.
-            groups["startup"].add(manifest.resolve())
+        manifest = client / registry[canonical]["manifest"].removeprefix("res://")
+        if include_map_geometry and key not in groups: groups[key] = closure([manifest])
+        # Small root metadata enables portal relationships, route planning and
+        # streamed-map detection before a territory is downloaded.
+        groups["startup"].add(manifest.resolve())
     return groups, {"maps": map_groups, "model_groups": model_groups, "equipment_groups": equipment_groups}
 
 
