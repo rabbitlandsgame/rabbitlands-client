@@ -8,7 +8,11 @@
 // weight, so a recoloured neck meets a recoloured body without a seam.
 // Lighting is the body's own model (Burley diffuse, Schlick-GGX specular,
 // the body's roughness on the rim); the head's own roughness and an optional
-// Forward+ subsurface term fade in from the rim with the same weight. (No
+// Forward+ subsurface term fade in from the rim with the same weight. The
+// subsurface term is compiled only with RL_SUBSURFACE defined (no material
+// does today): a shader that writes SSS_STRENGTH at all, even 0, makes
+// Forward+ run its screen-space subsurface pass and a separate specular buffer
+// for the whole opaque pass, every frame an RL head is drawn. (No
 // BACKLIGHT: it is transmission for thin sheets, and through a whole skull it
 // lit the back of the head from the front key and left the neck-weighted nape
 // as a dark patch.)
@@ -59,7 +63,9 @@ uniform float specular_value : hint_range(0.0, 1.0) = 0.35;
 uniform float rim_roughness : hint_range(0.0, 1.0) = 0.85;
 uniform float rim_specular : hint_range(0.0, 1.0) = 0.5;
 uniform float normal_strength : hint_range(0.0, 2.0) = 0.65;
+#ifdef RL_SUBSURFACE
 uniform float subsurface : hint_range(0.0, 1.0) = 0.0;
+#endif
 uniform vec3 freckle_shade : source_color = vec3(0.62, 0.45, 0.36);
 // The painted stubble mask peaks near 0.4; this lifts it so full stubble reads
 // as a five o'clock shadow rather than a faint tint.
@@ -210,7 +216,9 @@ void fragment() {
 		ROUGHNESS = mix(rim_roughness, mix(roughness_value, 0.5, features.g), face);
 		if (age.x > 0.0) { ROUGHNESS = min(1.0, ROUGHNESS + 0.10 * age.x * face * (1.0 - features.g)); }
 		SPECULAR = mix(rim_specular, specular_value, face);
+#ifdef RL_SUBSURFACE
 		SSS_STRENGTH = subsurface * face;
+#endif
 	}
 	if (has_normal) {
 		NORMAL_MAP = texture(normal_texture, UV).rgb;
