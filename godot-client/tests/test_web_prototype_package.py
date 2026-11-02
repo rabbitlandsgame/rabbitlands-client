@@ -82,6 +82,23 @@ var b = load(PATH)
             reader.write_text("changed reader")
             self.assertEqual(web.raw_world_models(root), set())
 
+    def test_loose_scenery_images_keep_independent_resource_references(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            reader = root / "src/actors/glb_scene_cache.gd"
+            reader.parent.mkdir(parents=True)
+            reader.write_text('if not resource_path.begins_with("res://assets/actors/"):\n pass\nconst ROOT="res://assets/world/"')
+            folder = root / "assets/world/underground"
+            folder.mkdir(parents=True)
+            raw_model = folder / "raw.glb"
+            raw_model.write_bytes(b"fixture")
+            for name in ("loose.jpg", "used.jpg"):
+                (folder / name).write_bytes(b"fixture")
+            (root / "data").mkdir()
+            (root / "data/images.json").write_text('{"icon":"res://assets/world/underground/used.jpg"}')
+            self.assertEqual(web.raw_underground_images(root, {raw_model}), {folder / "loose.jpg"})
+            self.assertEqual(web.raw_underground_images(root, set()), set())
+
 
 if __name__ == "__main__":
     unittest.main()
