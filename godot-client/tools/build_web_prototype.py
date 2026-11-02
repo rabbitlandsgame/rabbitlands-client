@@ -88,6 +88,21 @@ def finish_site(stage: Path, assets_base_url: str):
     if text.count(hook) != 1:
         raise ValueError("Web template filesystem hook changed; qualify buffer ownership before exporting")
     script.write_text(text.replace(hook, 'FS.writeFile(path,new Uint8Array(buffer),{canOwn:globalThis.RL_BROWSER_TAKE_BUFFER===true})'), encoding="utf-8")
+    # Emscripten's offscreen frame blit asks whether scissoring is enabled.
+    # Chromium's generic getParameter path waits for the GPU command queue;
+    # isEnabled reads the same capability through its cached state. Keep the
+    # renderer's framebuffer validation and the blit's save/restore intact.
+    text = script.read_text(encoding="utf-8")
+    hook = 'var prevScissorTest=gl.getParameter(3089);'
+    if text.count(hook) != 1:
+        raise ValueError("Web template frame-presentation hook changed; qualify the new engine before exporting")
+    text = text.replace(hook, 'var prevScissorTest=gl.isEnabled(3089);')
+    # This is a browser hint, not a guarantee: OS/browser GPU selection may
+    # override it. The local launcher can request Chrome's faster adapter too.
+    hook = 'powerPreference:webglPowerPreferences[powerPreference]'
+    if text.count(hook) != 1:
+        raise ValueError("Web template GPU-preference hook changed; qualify the new engine before exporting")
+    script.write_text(text.replace(hook, 'powerPreference:"high-performance"'), encoding="utf-8")
     shell = site / "index.html"
     text = shell.read_text(encoding="utf-8")
     if text.count("engine.startGame({") != 1:

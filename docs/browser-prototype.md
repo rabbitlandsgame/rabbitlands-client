@@ -92,8 +92,32 @@ with 250 ms recovery between off-camera imports. The existing 64 m framed-ground
 admission, arrival ring and explicit view holds remain intact. The desktop
 worker path and its distances are unchanged. A fixed-position comparison kept
 14 cells instead of 17 with the former browser lead. Short frame-timing samples
-varied with shader warm-up and game lighting, so no broad FPS improvement is
-claimed. Medium graphics and full 3D resolution remain the defaults.
+varied with shader warm-up and game lighting, so those streaming changes alone
+did not establish an FPS gain. Medium graphics and full 3D resolution remain the defaults.
+
+The web runtime's frame-presentation blit now queries `SCISSOR_TEST` with
+`isEnabled` instead of `getParameter`. Both read the same capability, but
+Chromium can answer `isEnabled` from its cached state instead of waiting for
+the graphics command queue. Framebuffer validation, graphics detail and the
+blit's state restoration are unchanged. The builder checks the exact supported
+template hook and fails if it changes. See Chromium's
+[capability query implementation](https://chromium.googlesource.com/chromium/src/+/main/gpu/command_buffer/client/gles2_implementation.cc).
+
+A paired 1280 x 900 visible Chrome window test on the RTX 5080 laptop GPU
+measured typical frame times of 29.2 ms before and 20.8-24.9 ms after this
+change (about 34 to 40-48 FPS). The 95th percentile improved from 37.5 to
+29.2 ms. A separate headless test improved from about 27 to 34 FPS. This does
+not establish a steady 60 FPS target. The heavily occupied Intel GPU was too
+variable for a useful performance comparison. These are local prototype
+measurements, not minimum hardware requirements.
+
+The page requests a high-performance graphics context, which the browser or OS
+can override. On Windows, start the local site and then use
+`python godot-client/tools/open_web_prototype.py` to open a separate Chrome
+profile requesting the faster GPU. It leaves normal Chrome settings unchanged.
+That profile has its own saved downloads: keep the same profile and launch
+address on subsequent visits. A public website cannot force a particular GPU;
+the launcher is a local testing aid.
 
 Dedicated Chrome process groups still used roughly 5.1-5.5 GB private memory in
 the local Intel graphics samples. Loading and travel can stall while raw actor

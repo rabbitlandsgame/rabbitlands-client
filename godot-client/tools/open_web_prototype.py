@@ -1,0 +1,37 @@
+"""Open the local prototype in a separate Chrome profile, requesting the faster GPU."""
+import argparse
+import os
+from pathlib import Path
+import subprocess
+from urllib.parse import urlsplit
+
+REPO = Path(__file__).resolve().parents[2]
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--url", default="http://127.0.0.1:8060/")
+    parser.add_argument("--profile", type=Path, default=REPO / ".local/browser-prototype/browser-profile")
+    parser.add_argument("--chrome", type=Path, help="Chrome executable; detected on Windows by default")
+    args = parser.parse_args()
+    url = urlsplit(args.url)
+    if url.username or url.password or url.fragment or not url.hostname or not (
+            url.scheme == "https" or url.scheme == "http" and url.hostname in {"localhost", "127.0.0.1", "::1"}):
+        parser.error("Use an HTTPS address or the local prototype address, without credentials or fragments")
+    profile = args.profile.resolve()
+    if not profile.is_relative_to(REPO / ".local"):
+        parser.error("Keep the prototype's separate browser profile inside this worktree's ignored .local folder")
+    candidates = [Path(os.environ.get(key, "C:/Program Files")) / "Google/Chrome/Application/chrome.exe"
+                  for key in ("PROGRAMFILES", "PROGRAMFILES(X86)", "LOCALAPPDATA")]
+    chrome = args.chrome or next((path for path in candidates if path.is_file()), None)
+    if chrome is None or not chrome.is_file():
+        parser.error("Chrome was not found; supply its executable with --chrome")
+    profile.mkdir(parents=True, exist_ok=True)
+    subprocess.Popen([str(chrome), f"--user-data-dir={profile}", "--new-window",
+                      "--no-first-run", "--no-default-browser-check", "--force-high-performance-gpu", args.url],
+                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    print(f"Opened Rabbit Lands: {args.url}")
+
+
+if __name__ == "__main__":
+    main()
