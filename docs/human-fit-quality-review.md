@@ -1,7 +1,7 @@
 # Remaining Human fit review
 
 This task candidate revises the starting looks for Valen, Orla, Sabine,
-Ferris, Kethan, Osric, Cerys, Zadie, Idris, Edda, Adira, Bastien, Veda,
+Ferris, Kethan, Osric, Cerys, Zadie, Lucan, Edda, Adira, Bastien, Veda,
 Lenora and Ewan. The other starting looks retain their saved appearance.
 The original six Human presets and Mira's single bun remain unchanged by
 value. No additional paid model generation was used.
