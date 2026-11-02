@@ -781,6 +781,7 @@ func _build_graphics() -> void:
 		vsync.disabled = true
 		vsync.tooltip_text = "The browser controls frame synchronization. Use the frame limit and 3D resolution to adjust performance."
 		_add_button(page, "download_screenshot", "Download screenshot")
+		_add_button(page, "retry_downloads", "Retry game downloads")
 	_add_fps_limit_row(page)
 	# The look above the quality: whether it is on decides most of what the
 	# quality changes.

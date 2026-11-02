@@ -1,4 +1,5 @@
 extends CanvasLayer
+signal retry_requested
 ## The loading screen between signing in (or a far arrival) and the first frame
 ## the player's character stands on loaded ground: black, the Rabbit Lands logo
 ## and a short progress bar. main.gd raises it, reports the arrival's progress
@@ -27,6 +28,8 @@ var _began_msec := 0
 var _drawn_frames := 0
 var _fading := false
 var _tween: Tween
+var _retry: Button
+var _retry_restore_layer := -1
 
 func _ready() -> void:
 	name = "ArrivalCurtain"
@@ -76,6 +79,14 @@ func _ready() -> void:
 	_label.add_theme_color_override("font_color", TEXT_COLOUR)
 	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	column.add_child(_label)
+	_retry = Button.new()
+	_retry.name = "Retry"
+	_retry.text = "Retry"
+	_retry.custom_minimum_size = Vector2(160, 40)
+	_retry.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_retry.pressed.connect(_on_retry_pressed)
+	column.add_child(_retry)
+	_retry.hide()
 	get_viewport().size_changed.connect(_fit)
 	_fit()
 	visible = false
@@ -92,6 +103,7 @@ func _fit() -> void:
 	_bar.custom_minimum_size = Vector2(width * 0.8, 8.0)
 
 func begin(text: String) -> void:
+	clear_retry()
 	if _tween != null:
 		_tween.kill()
 		_tween = null
@@ -109,11 +121,40 @@ func begin(text: String) -> void:
 func set_text(text: String) -> void:
 	_label.text = text
 
+## Browser bytes can take longer than terrain settling. Holding the optional
+## asset wait keeps drawn/progress state and does not reopen or fade the UI.
+func hold_asset_wait() -> void:
+	if is_showing(): _began_msec = Time.get_ticks_msec()
+
+## Optional recovery for browser downloads. The ordinary native curtain has
+## no action and retains its existing layer, input and fade behavior.
+func offer_retry(text: String, button_text := "Retry", overlay_layer := LAYER) -> void:
+	_label.text = text
+	if _retry_restore_layer < 0:
+		_retry_restore_layer = layer
+	layer = overlay_layer
+	_retry.text = button_text
+	if not _retry.visible:
+		_retry.show()
+		_retry.grab_focus.call_deferred()
+
+func clear_retry() -> void:
+	if _retry != null: _retry.hide()
+	if _retry_restore_layer >= 0:
+		layer = _retry_restore_layer
+		_retry_restore_layer = -1
+
+func _on_retry_pressed() -> void:
+	if not _retry.visible: return
+	clear_retry()
+	retry_requested.emit()
+
 func set_progress(value: float) -> void:
 	_target = maxf(_target, clampf(value, 0.0, 1.0))
 
 ## Fills the bar and fades out; input is released as the fade starts.
 func finish() -> void:
+	clear_retry()
 	if not visible or _fading:
 		return
 	_fading = true
@@ -131,6 +172,7 @@ func cancel() -> void:
 	_hidden()
 
 func _hidden() -> void:
+	clear_retry()
 	visible = false
 	_fading = false
 	_tween = null

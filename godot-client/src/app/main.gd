@@ -6616,6 +6616,15 @@ func _update_browser_asset_pins() -> void:
 	_browser_pinned_maps = maps.duplicate()
 	WebPrototype.pin_maps("world-residents", maps)
 
+func _retry_browser_area_files() -> void:
+	if not OS.has_feature("web") or not _deferred_map_load: return
+	var failed: Array = WebPrototype.asset_snapshot().get("failed_groups", [])
+	if failed.is_empty():
+		JavaScriptBridge.eval("location.reload()")
+		return
+	WebPrototype.retry_failed()
+	arrival_curtain.set_text("Retrying area files…")
+
 func _load_server_map() -> void:
 	if AppState.current_map.is_empty() or loaded_server_map == AppState.current_map:
 		return
@@ -6623,11 +6632,25 @@ func _load_server_map() -> void:
 	var normalized_map: String = MapRegistry.normalize_server_map_id(AppState.current_map)
 	if OS.has_feature("web") and not WebPrototype.ensure_map(AppState.current_map, "destination"):
 		if not arrival_curtain.is_showing(): arrival_curtain.begin("Entering %s…" % _friendly_map_name(AppState.current_map))
+		arrival_curtain.hold_asset_wait()
+		character_intro.hold_asset_wait()
 		var assets := WebPrototype.asset_snapshot()
 		var message := str(assets.get("error", ""))
-		arrival_curtain.set_text("Preparing area files…" if message.is_empty() else "Cannot load area: " + message)
+		if message.is_empty():
+			arrival_curtain.clear_retry()
+			arrival_curtain.set_text("Preparing area files…")
+		else:
+			var retryable: bool = not (assets.get("failed_groups", []) as Array).is_empty()
+			var text := "Area files could not be loaded.\nCheck your connection and try again." if retryable \
+				else "Area files do not match this game version.\nReload to get the matching files."
+			# Creation's cinematic curtain is above the ordinary arrival layer.
+			# Recovery must remain visible and clickable there too.
+			arrival_curtain.offer_retry(text, "Retry" if retryable else "Reload", 125)
+			if not arrival_curtain.retry_requested.is_connected(_retry_browser_area_files):
+				arrival_curtain.retry_requested.connect(_retry_browser_area_files)
 		_deferred_map_load = true
 		return
+	if OS.has_feature("web"): arrival_curtain.clear_retry()
 	Diagnostics.record("map_requested", {"server_map": AppState.current_map, "map": normalized_map})
 	var entry: Dictionary = MapRegistry.resolve(map_registry, AppState.current_map)
 	if OS.has_feature("web") and character_intro.pending and normalized_map == NewCharacterIntroScript.MAP:
@@ -15219,6 +15242,10 @@ func _on_client_setting_changed(section: String, key: String,
 			_apply_window_mode(value, false, true)
 		"download_screenshot":
 			_save_screenshot()
+			return
+		"retry_downloads":
+			var retried := WebPrototype.retry_failed()
+			AppState.append_local_line("Retrying game downloads…" if retried > 0 else "No game downloads need to be retried.")
 			return
 		"performance_preset":
 			_apply_performance_preset()

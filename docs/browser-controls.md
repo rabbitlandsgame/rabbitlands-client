@@ -19,6 +19,11 @@ limit to adjust performance.
 download interface. The screenshot key also downloads the current screen.
 Browser downloads replace the desktop client's screenshots folder.
 
+If game files cannot be downloaded, **Retry** resumes loading and reuses files
+already saved on the device. **Settings → Graphics → Retry game downloads**
+also retries interrupted character or equipment downloads during play. If files
+belong to a different game version, **Reload** fetches the matching launch page.
+
 Browsers reserve some keyboard shortcuts. The game's on-screen controls remain
 available, and **Settings → Controls** lets you choose different keys. Keep the
 game canvas focused when using game shortcuts; text fields retain their normal

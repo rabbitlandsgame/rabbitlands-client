@@ -92,6 +92,11 @@ func prewarm(entry: Dictionary, parent: Node3D) -> void:
 	points.append_array(build_shot(spawn).samples(0.5))
 	_stream.preload_views(points, VIEW_RADIUS)
 
+## Network download time is not part of the ordinary terrain/guide timeout.
+## The browser asset gate calls this only before those files are available.
+func hold_asset_wait() -> void:
+	if pending: _wait_started = Time.get_ticks_msec()
+
 func take_preload(map_id: String) -> Dictionary:
 	if map_id != MAP or not is_instance_valid(_loader) or _stream == null:
 		discard_preload()
