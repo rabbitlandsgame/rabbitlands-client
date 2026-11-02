@@ -811,7 +811,7 @@ func _build_graphics() -> void:
 ## (HardwareTier), so a fresh install that began low is not a mystery. Read
 ## once while the window is built, from the file's text rather than a second
 ## full parse at startup; nothing is shown for a profile that was never seeded
-## or was seeded High.
+## or kept High (the medium and high tiers).
 func _add_hardware_tier_note(page: VBoxContainer) -> void:
 	var text := hardware_tier_note(HardwareTier.recorded_tier(HardwareTier.SETTINGS_PATH))
 	if text.is_empty():
@@ -826,8 +826,6 @@ static func hardware_tier_note(tier: String) -> String:
 	match tier:
 		"low":
 			return "This computer started on the Performance preset, chosen from its graphics, memory and processor at first launch. Your own changes are kept."
-		"medium":
-			return "This computer started on Medium graphics quality, chosen from its memory and processor at first launch. Your own changes are kept."
 	return ""
 
 static func window_preference(value: Variant) -> String:

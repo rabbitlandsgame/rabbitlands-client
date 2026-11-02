@@ -204,11 +204,11 @@ func _check_seeding() -> void:
 		_machine(RenderingDevice.DEVICE_TYPE_DISCRETE_GPU, "NVIDIA GeForce RTX 3060", "vulkan", 15.8, 12), _launch())
 	config = ConfigFile.new()
 	config.load(TEMP_SETTINGS)
-	expect(result.applied and result.tier == "medium" and config.get_value("graphics", "quality") == "medium"
+	expect(result.applied and result.tier == "medium" and config.get_value("graphics", "quality") == "high"
 		and config.get_value("start_screen", "backdrop") == "amberwood"
 		and config.get_section_keys("graphics").size() == 2
 		and HardwareTier.recorded_tier(TEMP_SETTINGS) == "medium",
-		"the medium tier pins only Medium quality and keeps other sections")
+		"the medium tier is recorded, keeps High quality and keeps other sections")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEMP_SETTINGS))
 	expect(not HardwareTier.has_saved_graphics(TEMP_SETTINGS) and HardwareTier.recorded_tier(TEMP_SETTINGS) == "",
 		"a missing settings file has no section and no tier")
@@ -281,8 +281,9 @@ func _check_client() -> void:
 	var note := (window.get("panel") as Control).find_child("HardwareTierNote", true, false) as Label
 	expect(note != null and note.text == Settings.hardware_tier_note("low"),
 		"the graphics settings say the Performance preset was chosen at first launch")
-	expect(Settings.hardware_tier_note("high").is_empty() and Settings.hardware_tier_note("").is_empty(),
-		"High and unseeded profiles show no note")
+	expect(Settings.hardware_tier_note("high").is_empty() and Settings.hardware_tier_note("medium").is_empty()
+		and Settings.hardware_tier_note("").is_empty(),
+		"High, medium-tier (still High) and unseeded profiles show no note")
 	main.call("_on_client_setting_changed", "Graphics", "quality", LookProfile.Quality.HIGH)
 	main.call("_on_client_setting_changed", "Graphics", "renderer", "auto")
 	main.call("_apply_performance_preset")

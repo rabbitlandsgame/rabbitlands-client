@@ -35,9 +35,8 @@ A new installation chooses its starting graphics from the computer, once, before
 any graphics setting has been saved. Computers with integrated graphics (other
 than Apple silicon), about 8 GB of memory or less, or four CPU threads or fewer
 start on the Performance preset (without its renderer change), and the start
-screen shows its still image. Other computers with about 16 GB of memory or
-less, or eight CPU threads or fewer, start on Medium quality; the rest keep
-High. Settings → Graphics notes a Low or Medium start, and every setting can
+screen shows its still image. Other computers keep the High defaults.
+Settings → Graphics notes a Performance preset start, and every setting can
 still be changed. Existing settings and the renderer choice are never changed,
 and launches with graphics overrides choose nothing.
 

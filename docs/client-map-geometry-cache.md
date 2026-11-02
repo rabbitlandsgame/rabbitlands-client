@@ -185,8 +185,13 @@ for diagnosis and resumption.
 Release packages supply the complete scoped preparation as read-only loose
 assets. A checksum-bound catalog provides geometry, collision and paving entries
 for a compatible engine/renderer. Ordinary launches consume these in place and
-skip the whole-world preparation screen. Missing or incompatible packaged data
-retains source/local-cache fallback, rather than rebuilding every map before
+skip the whole-world preparation screen. When that catalog is bound to the
+current scope, registry and policies, its own keys are the preparation targets,
+so startup parses none of the scope's manifests; a locally changed manifest
+then still fails its entry's source hashes and loads from source. Producers
+(`--prepare-map-geometry`) scan the manifests as before. Missing or
+incompatible packaged data retains source/local-cache fallback, rather than
+rebuilding every map before
 login. The updater owns these installed assets; clearing player caches does not
 delete the shipped preparation.
 

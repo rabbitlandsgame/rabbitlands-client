@@ -48,7 +48,7 @@ before the map texture tier is read for the session:
 | Tier | Machine | Saved starting settings |
 | --- | --- | --- |
 | Low | integrated (not Apple silicon), software or virtual GPU, about 8 GB of memory or less, or four CPU threads or fewer | the Performance preset (Low, 30 FPS cap, vertical sync off, 75% 3D resolution, half map textures, 60 bodies, no swaying capes, no shadows, no extra grass, 20 m names), without its renderer change; the entry screen starts on its still |
-| Medium | otherwise, about 16 GB or less, or eight CPU threads or fewer | Medium graphics quality |
+| Medium | otherwise, about 16 GB or less, or eight CPU threads or fewer | High graphics quality, as before; the tier is only recorded (a discrete GPU with 16 GB or eight threads is not the weak hardware these defaults are for, and Medium there would drop RL heads and SSIL: an owner decision for the per-class budgets) |
 | High | everything else | High graphics quality (the previous defaults) |
 
 The GPU type comes from `RenderingServer.get_video_adapter_type()`. Under
@@ -70,7 +70,7 @@ player's file holds HUD presets and notes (about 0.5 MB, 14–20 ms per parse),
 so only a fresh profile is parsed. The values are saved like any
 other preference, with the tier recorded as `[graphics] hardware_tier`, so the
 choice is stable and every control stays editable. Settings → Graphics shows a
-note when a profile started Low or Medium. The renderer is unchanged:
+note when a profile started Low. The renderer is unchanged:
 Automatic stays Automatic. Nothing is seeded for headless runs, the browser
 build, `--script`/`--editor` launches (tests, tools, `client_benchmarks.gd`),
 the crowd benchmark (`RABBITLANDS_CROWD_BENCH_START_TOKEN`), optimisation-profile
@@ -96,7 +96,7 @@ previous behaviour for measurements:
 
 | Pass | What changed | A/B switch |
 | --- | --- | --- |
-| Overhead text (`world_text_overlay.gd`, `world_text_presence.gd`) | The second camera that draws names, bars and markers stops rendering, and its full-screen composite is hidden, while no layer-20 text can show. It resumes in the frame text appears, except that a title with a visibility range coming into range while nothing else shows can be drawn up to 200 ms late. | `ELORIA_WORLD_TEXT_IDLE=0` |
+| Overhead text (`world_text_overlay.gd`, `world_text_presence.gd`) | The second camera that draws names, bars and markers stops rendering, and its full-screen composite is hidden, while no layer-20 text can show. It resumes in the frame text appears. One exception: while nothing else shows, a title with a visibility range that is itself moved into range faster than 30 m/s, or given a longer range, can be drawn up to 200 ms late (a camera moving into range is never late). | `ELORIA_WORLD_TEXT_IDLE=0` |
 | Sun shadow distance (`sun_shadow_fit.gd`) | `directional_shadow_max_distance` follows the ground the camera can see, found with 28 rays against the walk surface, and never exceeds the scene's own 100 m. A ray that meets no walk surface (sky, open water, ground not loaded, or a hole in a town's walk surface), an orthographic camera or a warm-up keeps the scene's value. | `ELORIA_SHADOW_FIT=0` |
 | Arrival shader warm-up (`camera_shader_warmup.gd`) | A world whose drawable content was already covered by a full sweep this session gets a 60-view sweep instead of 240 views. New content keys always get the full sweep. | `ELORIA_CAMERA_WARMUP_REUSE=0` |
 
@@ -1164,6 +1164,20 @@ chunk stream's 256 MiB budget, so the stream refused most of its neighbours.
   every other package builds exactly as before and keeps its players' entries.
   Live continent chunks are detached builds and never write the cache, so the
   sidecar formats reach it through whole-map loads only.
+* **Verification** (2026-11, perf audit HITCHES-05). Every load still hashes
+  each listed image in full itself: no timestamp or size shortcut, nothing
+  reused from another load (`WorldManifest.verify_external_resources`). It now
+  hashes where the bytes are consumed. The cheap checks run first; a raw parse
+  then hashes the very bytes it decodes, and a sidecar uploaded in place of a
+  source is checked against its index as it is read, so the source behind it
+  is not read or hashed. Every listed file the parse did not read is hashed
+  after it, before anything is published, and any mismatch fails the load with
+  the messages the up-front pass gave. Prepared content, the geometry,
+  collision and paving caches and a legacy scene-cache entry stand for the
+  images without reading them, so they complete the full hash first; their
+  proofs also take the glb's and the manifest's raw digests from the package
+  digest this load just computed instead of hashing those files again. The
+  preparer's capture and cooking keep the whole pass up front.
 * **Switch.** `ELORIA_VRAM_TEXTURES=0` turns sidecars (and the budget
   correction) off; `force` uses them whatever the renderer says (tests). The
   client logs `vram_textures mode=... formats=... index=...` once at startup;

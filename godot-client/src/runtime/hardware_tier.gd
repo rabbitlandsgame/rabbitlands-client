@@ -13,7 +13,7 @@ extends RefCounted
 ##          8 GB of memory or less, or four CPU threads or fewer: the
 ##          Performance preset;
 ##   medium otherwise, about 16 GB of memory or less, or eight CPU threads or
-##          fewer: Medium graphics quality;
+##          fewer: recorded, but High as before (see TIER_SETTINGS);
 ##   high   everything else: the defaults as they were.
 ##
 ## Only a profile with no [graphics] section is seeded, so a player who has
@@ -48,13 +48,17 @@ const MEDIUM_CPU_THREADS := 8
 ## What each tier writes to [graphics], in the settings file's own spelling.
 ## LOW is the settings window's Performance preset (main.gd
 ## `_apply_performance_preset`; the crowd benchmark's PERFORMANCE_GRAPHICS)
-## without its renderer. MEDIUM and HIGH pin only the quality.
+## without its renderer. MEDIUM and HIGH pin only the quality, and both keep
+## High: a discrete GPU with 16 GB or eight threads is not the weak hardware
+## these defaults are for, and Medium there would trade RL heads and SSIL for
+## time that machine has. Medium as its default waits for the owner's call on
+## the per-class budgets; the tier is recorded meanwhile.
 const TIER_SETTINGS := {
 	Tier.LOW: {"quality": "low", "appearance": "painted_ground", "fps_limit": 30,
 		"vsync_mode": "off", "render_scale": 0.75, "map_texture_quality": "half",
 		"crowd_bodies": 60, "swaying_capes": 0, "shadows": false, "particles": true,
 		"decorative_grass": false, "name_distance": 20.0},
-	Tier.MEDIUM: {"quality": "medium"},
+	Tier.MEDIUM: {"quality": "high"},
 	Tier.HIGH: {"quality": "high"},
 }
 
