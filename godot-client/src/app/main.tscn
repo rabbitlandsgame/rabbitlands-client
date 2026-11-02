@@ -168,10 +168,12 @@ far = 1800.0
 unique_name_in_owner = true
 visible = false
 layers = 4
+cast_shadow = 0
 mesh = SubResource("Mesh_map_marker")
 
 [node name="PlayerMapMarkerOutline" type="MeshInstance3D" parent="GameView/ViewportContainer/Viewport/WorldRoot/PlayerMapMarker"]
 layers = 4
+cast_shadow = 0
 mesh = SubResource("Mesh_map_marker_outline")
 
 [node name="Hud" type="PanelContainer" parent="GameView" unique_id=794390329]

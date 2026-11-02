@@ -177,6 +177,7 @@ const GuildWindowScript := preload("res://src/ui/guild_window.gd")
 const LeaderboardsWindowScript := preload("res://src/ui/leaderboards_window.gd")
 const SettingsWindowScript := preload("res://src/ui/settings_window.gd")
 const GraphicsOptions := preload("res://src/world/graphics_options.gd")
+const HardwareTier := preload("res://src/runtime/hardware_tier.gd")
 const GraphicsLaunchOptions := preload("res://src/updates/launch_options.gd")
 const CapeEmblems := preload("res://src/actors/cape_emblems.gd")
 const TargetMarkerStyle := preload("res://src/actors/target_marker_style.gd")
@@ -639,6 +640,10 @@ var _creation_preview_model_id := ""
 var _creation_preview_actor_type := -1
 var _creation_preview_appearance: Dictionary = {}
 var _creation_preview_errors: Array[String] = []
+## What the creation preview last prewarmed (_prewarm_creation_rl_heads), and
+## the look the local character's files were last prewarmed for.
+var _creation_rl_prewarm_key := ""
+var _local_rl_prewarm_key := 0
 var pending_create_username := ""
 var pending_create_password := ""
 var preview_yaw := PI + 0.28
@@ -1710,7 +1715,7 @@ func _ready() -> void:
 	cartography = _json("res://data/maps/cartography.json")
 	cartography_regions = (cartography.get("regions", []) as Array).duplicate()
 	_v2_cartography = _json("res://data/maps/cartography-continent-v2.json")
-	cartography_regions.append_array(_continent_v2_tab_maps(cartography))
+	cartography_regions.append_array(_continent_v2_tab_maps(cartography, _v2_cartography))
 	var detail_maps: Dictionary = _json("res://data/maps/map-details.json").get("regions", {}) as Dictionary
 	for region: Dictionary in cartography_regions:
 		var detail: Dictionary = detail_maps.get(str(region.get("serverMap", "")), {}) as Dictionary
@@ -2081,7 +2086,10 @@ func client_diagnostic_snapshot() -> Dictionary:
 		"window_mode_launch_override": _window_mode_launch_override,
 		"container_size": str(viewport_container.size),
 		"viewport_update_mode": main_viewport.render_target_update_mode,
+		"world_text_pass": bool(_world_text_overlay.get(&"drawing")) if is_instance_valid(_world_text_overlay) else false,
+		"sun_shadow_distance": world_sun.directional_shadow_max_distance,
 		"render_scale": _render_scale,
+		"scaling_3d_mode": main_viewport.scaling_3d_mode,
 		"vsync_preference": _vsync_preference,
 		"vsync_mode": DisplayServer.window_get_vsync_mode(),
 		"window_focused": get_window().has_focus(),
@@ -2626,6 +2634,10 @@ func _on_new_character_pressed() -> void:
 func _on_creation_visibility_changed() -> void:
 	var showing := creation_panel.is_visible_in_tree()
 	_update_preview_viewport()
+	if not showing:
+		# Its prewarmed files go after their retention time; a later visit
+		# prewarms again.
+		_creation_rl_prewarm_key = ""
 	if not showing and is_instance_valid(creation_base_flow):
 		creation_base_flow.close_for_exit()
 	if showing and not is_instance_valid(preview_actor) and not creation_base_flow.entry_opening:
@@ -2849,12 +2861,32 @@ func _refresh_creation_preview(starting_look: Dictionary = {}, reset_actor: bool
 		preview_actor.apply_appearance_variants(appearance)
 	preview_actor.apply_equipment_visuals(dto.equipment_visuals)
 	_creation_preview_appearance = appearance.duplicate(true)
+	_prewarm_creation_rl_heads(model_config)
 	_frame_preview_actor()
 	if not _creation_preview_errors.is_empty():
 		create_status.text = "Preview warnings: " + "; ".join(_creation_preview_errors)
 	else:
 		create_status.text = "%s starting items will be granted. Drag to rotate." % \
 			creation_class_title.text
+
+## Character creation's High preview draws every choice of its Human body
+## without a main-thread parse: each RL file of the preview's sex is parsed on
+## a worker while creation shows (prewarm_rl_head_choices), and let go after
+## RLHeadLibrary's retention time once the preview no longer draws it. A style
+## holds about 40 MB and a sex has twenty or so, so a machine of about 8 GB or
+## less (HardwareTier's low limit) parses only what the preview draws, as it is
+## drawn. Once per body and quality while creation is open.
+func _prewarm_creation_rl_heads(model_config: Dictionary) -> void:
+	var sex := str(model_config.get("gender", "female"))
+	var key := "%s|%s|%d" % [model_config.get("bodyTemplate", ""), sex, LookProfile.quality()]
+	if key == _creation_rl_prewarm_key:
+		return
+	_creation_rl_prewarm_key = key
+	if str(model_config.get("culture", "")) != "luminous" \
+			or str(model_config.get("bodyTemplate", "")) not in ["luminous_male", "luminous_female"] \
+			or int(OS.get_memory_info().get("physical", -1)) <= HardwareTier.LOW_MEMORY_BYTES:
+		return
+	ReplicatedActor3D.prewarm_rl_head_choices(sex, LookProfile.quality())
 
 func _populate_creation_races() -> void:
 	var races: Dictionary = {}
@@ -7493,6 +7525,25 @@ func _prefetch_rescue_return(stream: ContinentChunkStream) -> bool:
 		stream.set_meta(&"rescue_return_prefetch", tile)
 	return true
 
+## The player's own RL head files, parsed on a worker while its arrival waits
+## for a whole map or creation's arrival import (prewarm_rl_head_files, at High
+## only): its build then finds them parsed instead of parsing them on the main
+## thread. Not for the frame or two a streamed arrival waits for its curtain,
+## where the build would parse the same file again beside the worker. Once a
+## look until the character is built; files already parsed queue nothing.
+func _prewarm_local_rl_head() -> void:
+	var id := AppState.local_actor_id
+	if not AppState.actors.has(id) or actor_nodes.has(id):
+		return
+	var record: Dictionary = AppState.actors[id]
+	var key := [id, record.get("actor_type"), record.get("appearance"), LookProfile.quality()].hash()
+	if key == _local_rl_prewarm_key:
+		return
+	_local_rl_prewarm_key = key
+	var dto := _presentation_dto(record)
+	ReplicatedActor3D.prewarm_rl_head_files(dto.get("appearance", {}) as Dictionary,
+		models.get(_model_for_actor(dto), {}) as Dictionary, LookProfile.quality())
+
 ## Brings the actor nodes in line with AppState. Given `changed` - the ids
 ## AppState has written since the last pass - only those actors are visited;
 ## without it every actor is, which is what a map load and the fixtures need.
@@ -7503,6 +7554,8 @@ func _sync_world(changed: Variant = null) -> void:
 	# streaming in: nothing is placed on ground that is not there yet.
 	if _deferred_map_load or _hold_for_arrival():
 		_spawn_backlog = true
+		if _deferred_map_load:
+			_prewarm_local_rl_head()
 		return
 	# The background worker owns arrival imports during creation. Let it finish
 	# the actual spawn instead of falling back to a synchronous login prime.
@@ -7513,6 +7566,7 @@ func _sync_world(changed: Variant = null) -> void:
 		if not (world_loader.world_root as ContinentChunkStream).arrival_resident(
 				adapter.tile_center(int(arriving.x), int(arriving.y))):
 			_spawn_backlog = true
+			_prewarm_local_rl_head()
 			return
 	if adapter != null and AppState.actors.has(AppState.local_actor_id):
 		var arrival_actor: Dictionary = AppState.actors[AppState.local_actor_id]
@@ -7890,6 +7944,11 @@ func _spawn_actor(id: Variant, build := true,
 	actor_nodes[id] = node
 	var model_id := _model_for_actor(dto)
 	var model_config: Dictionary = models.get(model_id, {}) as Dictionary
+	if int(id) == AppState.local_actor_id:
+		# The player's own from its first build, as the creation preview is: its
+		# RL head is built at once, not a classic head while a worker parses.
+		node.apply_render_quality(LookProfile.quality(), true)
+		_local_rl_prewarm_key = 0
 	var errors := node.configure(dto, actor_adapter, model_config,
 		_animation_for_model(model_config), equipment_config,
 		build or int(id) == AppState.local_actor_id or not crowd.lazy)
@@ -11146,10 +11205,15 @@ func _save_hud_settings() -> void:
 	for key: String in _mount_banner_options:
 		config.set_value("mount_banner", key, _mount_banner_options[key])
 	CreatureBannerSettings.write(config, _creature_banner_options)
+	# The HUD presets ride in this same write rather than a second whole-file
+	# load and save after it.
+	var presets_joined: bool = hud_workspace != null and hud_workspace.sync_settings_into(config, SETTINGS_PATH)
 	var error: Error = config.save(SETTINGS_PATH)
 	if error != OK:
 		push_warning("HUD settings save failed: " + error_string(error))
-	if hud_workspace != null:
+	if presets_joined:
+		hud_workspace.settings_saved(error)
+	elif hud_workspace != null:
 		hud_workspace.sync_settings()
 	if settings_window.is_open():
 		_refresh_unified_settings()
@@ -13427,7 +13491,7 @@ func _sync_hud_indicators() -> void:
 		var colour: Color = INDICATOR_UNAVAILABLE_COLOUR
 		if is_available:
 			colour = INDICATOR_ACTIVE_COLOUR if is_active else INDICATOR_INACTIVE_COLOUR
-		letter.add_theme_color_override("font_color", colour)
+		_set_font_colour(letter, colour)
 		var described: String = str(spec[1]) if is_active else str(spec[2])
 		if letter_key == "M" and _unseen_pm_count > 0:
 			described += " [%d]" % _unseen_pm_count
@@ -13627,9 +13691,16 @@ static func _paint_banner_row(row: HBoxContainer, colour: Color) -> void:
 	var bar := row.get_node("Bar") as ProgressBar
 	var label := row.get_node("Number") as Label
 	var fill: StyleBoxFlat = bar.get_theme_stylebox("fill") as StyleBoxFlat
-	if fill != null:
+	# Both notify their control on every call, changed or not (per stats tick).
+	if fill != null and fill.bg_color != colour:
 		fill.bg_color = colour
-	label.add_theme_color_override("font_color", colour)
+	_set_font_colour(label, colour)
+
+## A font colour override only where it changes: an override re-themes its
+## control even when the colour is the same.
+static func _set_font_colour(control: Control, colour: Color) -> void:
+	if not control.has_theme_color_override(&"font_color") or control.get_theme_color(&"font_color") != colour:
+		control.add_theme_color_override(&"font_color", colour)
 
 ## Eternal Lands recolours a banner meter as it drains rather than fixing one
 ## colour per stat: actors.c set_health_color() ramps green to red, and
@@ -14504,18 +14575,23 @@ func _save_hud_layout() -> void:
 		config.set_value("lower_hud", "show_" + meter_key,
 			bool(_hud_meter_visible.get(meter_key, true)))
 	config.set_value("lower_hud", "experience_skill", _selected_experience_skill)
+	var presets_joined: bool = hud_workspace != null and hud_workspace.sync_settings_into(config, SETTINGS_PATH)
 	var error: Error = config.save(SETTINGS_PATH)
 	if error != OK:
 		push_warning("Unable to save lower HUD preferences: " + error_string(error))
-	if hud_workspace != null:
+	if presets_joined:
+		hud_workspace.settings_saved(error)
+	elif hud_workspace != null:
 		hud_workspace.sync_settings()
 
 ## Writes a stack count over a slot at the largest size that still fits it.
 static func _set_slot_quantity(label: Label, quantity: int) -> void:
 	var text: String = str(quantity)
 	label.text = text
-	label.add_theme_font_size_override("font_size",
-		11 if text.length() <= 4 else (9 if text.length() <= 6 else 8))
+	var font_size: int = 11 if text.length() <= 4 else (9 if text.length() <= 6 else 8)
+	# Every slot on every inventory sync: an override re-themes even unchanged.
+	if not label.has_theme_font_size_override(&"font_size") or label.get_theme_font_size(&"font_size") != font_size:
+		label.add_theme_font_size_override(&"font_size", font_size)
 
 func _add_slot_quantity_label(button: Button) -> Label:
 	var quantity: Label = Label.new()
@@ -15100,7 +15176,10 @@ func _apply_graphics_quality() -> void:
 	print("look_quality stage=applied quality=", LookProfile.quality_name(LookProfile.quality()))
 
 func _apply_render_scale() -> void:
-	main_viewport.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
+	# Below 100 %, FSR 1 where the renderer has it (GraphicsOptions.scaling_mode).
+	# ELORIA_FSR=0 keeps bilinear upscaling, for A/B measurements.
+	main_viewport.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR if OS.get_environment("ELORIA_FSR") == "0" \
+		else GraphicsOptions.scaling_mode(_render_scale, RenderingServer.get_current_rendering_method())
 	main_viewport.scaling_3d_scale = _render_scale
 
 func _refresh_graphics_restart_notice() -> void:
@@ -19100,8 +19179,9 @@ func _animation_for_model(model_config: Dictionary) -> Dictionary:
 ## of cartography.json's shape, on their own frame and with no rectangle on its
 ## picture, appended after its regions. Their outlines are in its pixel lattice;
 ## a file written for another lattice is left out rather than misplaced.
-static func _continent_v2_tab_maps(legacy: Dictionary) -> Array:
-	var tab_maps: Dictionary = _json("res://data/maps/cartography-continent-v2.json")
+## `tab_maps` is that file, already parsed (Main keeps it for its overview,
+## boats and interiors).
+static func _continent_v2_tab_maps(legacy: Dictionary, tab_maps: Dictionary) -> Array:
 	var lattice: Dictionary = tab_maps.get("lattice", {}) as Dictionary
 	var continent: Dictionary = legacy.get("continent", {}) as Dictionary
 	if (str(lattice.get("originMetres", [])) != str(continent.get("originMetres", []))

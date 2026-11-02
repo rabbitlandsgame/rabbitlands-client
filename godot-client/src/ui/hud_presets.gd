@@ -869,6 +869,11 @@ func load_file(path: String) -> void:
 func save_file(path: String) -> Error:
 	var config := ConfigFile.new()
 	config.load(path)
+	write(config)
+	return config.save(path)
+
+## save_file's section, set in `config` for a caller that saves it itself.
+func write(config: ConfigFile) -> void:
 	config.set_value(SECTION, "working", normalise(working))
 	config.set_value(SECTION, "custom", custom)
 	config.set_value(SECTION, "archived_custom", archived_custom)
@@ -876,7 +881,6 @@ func save_file(path: String) -> Error:
 	if BUILT_INS.has(active): builtin_overrides[active] = normalise(working)
 	config.set_value(SECTION, "builtin_overrides", builtin_overrides)
 	config.set_value(SECTION, "editor_position", editor_position)
-	return config.save(path)
 
 func select(id: String, factory_default := false) -> void:
 	if id == "current": id = DEFAULT_PRESET

@@ -84,7 +84,26 @@ tier still matches the in-game Performance preset.
 
 Below 100% 3D resolution, Forward+ and Mobile upscale with AMD FSR 1 rather
 than bilinear filtering (`GraphicsOptions.scaling_mode`); Compatibility, which
-has no FSR, keeps bilinear.
+has no FSR, keeps bilinear. FSR adds one full-resolution pass, which on the
+seeded low tier (an iGPU at 75%) is unmeasured: `ELORIA_FSR=0` keeps bilinear
+for an A/B capture.
+
+## Idle render passes and their A/B switches (2026-11)
+
+Three render-side passes now do less while nothing needs them (perf audit
+UI-01, GPU-04, HITCHES-01). Each has an environment switch that restores the
+previous behaviour for measurements:
+
+| Pass | What changed | A/B switch |
+| --- | --- | --- |
+| Overhead text (`world_text_overlay.gd`, `world_text_presence.gd`) | The second camera that draws names, bars and markers stops rendering, and its full-screen composite is hidden, while no layer-20 text can show. It resumes in the frame text appears, except that a title with a visibility range coming into range while nothing else shows can be drawn up to 200 ms late. | `ELORIA_WORLD_TEXT_IDLE=0` |
+| Sun shadow distance (`sun_shadow_fit.gd`) | `directional_shadow_max_distance` follows the ground the camera can see, found with 28 rays against the walk surface, and never exceeds the scene's own 100 m. A ray that meets no walk surface (sky, open water, ground not loaded, or a hole in a town's walk surface), an orthographic camera or a warm-up keeps the scene's value. | `ELORIA_SHADOW_FIT=0` |
+| Arrival shader warm-up (`camera_shader_warmup.gd`) | A world whose drawable content was already covered by a full sweep this session gets a 60-view sweep instead of 240 views. New content keys always get the full sweep. | `ELORIA_CAMERA_WARMUP_REUSE=0` |
+
+The warm-up reuse still needs a `camera_rotation_probe` qualification after a
+door exit before it is relied on there. The client's `viewport_snapshot`
+diagnostic records `world_text_pass`, `sun_shadow_distance` and
+`scaling_3d_mode`, so a capture shows how often each one is active.
 
 ## First-use camera rotation on Compatibility
 

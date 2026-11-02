@@ -232,6 +232,31 @@ func _check_settings_bursts(main: Control) -> void:
 	_expect(_notes_on_disk() == "closing", "closing the client writes a waiting change")
 	main.call("_on_notes_changed", "")
 	main.call("_save_hud_settings")
+	_check_presets_in_one_save(main)
+
+## Main's settings save carries the HUD presets in its own write instead of the
+## workspace loading and saving the whole file again after it: what the
+## workspace captures live (here the minimap switch) is in the file after one
+## save, and the presets file path decides whether it may join.
+func _check_presets_in_one_save(main: Control) -> void:
+	var workspace: Control = main.get("hud_workspace") as Control
+	var model: Variant = workspace.get("model")
+	if not bool(workspace.get("ready_to_layout")) or bool(workspace.call("is_open")) \
+			or (not bool(model.get("loaded")) and bool((model.get("working") as Dictionary).get("legacy", false))):
+		_expect(false, "the HUD workspace can store presets in this fixture")
+		return
+	_expect(not bool(workspace.call("sync_settings_into", ConfigFile.new(), "user://another_settings.cfg")),
+		"presets kept in another file never join Main's write")
+	var shown: bool = main.get("_minimap_visible")
+	for value: bool in [not shown, shown]:
+		main.set("_minimap_visible", value)
+		main.call("_save_hud_settings")
+		var config := ConfigFile.new()
+		config.load(SETTINGS_PATH)
+		var working: Variant = config.get_value("hud_presets", "working", {})
+		_expect(working is Dictionary and bool(((working as Dictionary).get("parts", {}) as Dictionary)
+				.get("minimap", {}).get("enabled", not value)) == value,
+			"one Main save writes the presets as captured (minimap %s)" % ("shown" if value else "hidden"))
 
 func _check_chat_history_bound(main: Control) -> void:
 	# A detached AppState: Main is not listening to this one.

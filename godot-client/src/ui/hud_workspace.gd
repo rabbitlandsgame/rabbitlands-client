@@ -1413,6 +1413,26 @@ func sync_settings() -> void:
 	_capture_live(model.working)
 	_store()
 
+## sync_settings for Main's own save of the settings file: the presets join
+## `config` (the file at `path`, loaded and about to be saved) instead of a
+## second load and write of the whole file (about 0.5 MB with presets and
+## notes). False where sync_settings would store nothing, or the presets live
+## in another file: Main then calls sync_settings after its save, as before.
+## Otherwise Main hands the save's result to settings_saved.
+func sync_settings_into(config: ConfigFile, path: String) -> bool:
+	if path != preferences_path or not ready_to_layout or _applying or is_open(): return false
+	if not model.loaded and bool(model.working.legacy): return false
+	_capture_live(model.working)
+	model.write(config)
+	return true
+
+## What _store does with its own save's result, for sync_settings_into's.
+func settings_saved(error: Error) -> void:
+	if error == OK: model.loaded = true
+	if error != OK:
+		push_warning("Could not save HUD presets: " + error_string(error))
+		if message != null: message.text = "Could not save your HUD: " + error_string(error)
+
 func commit() -> Error:
 	_capture_positions()
 	_capture_live(model.working)

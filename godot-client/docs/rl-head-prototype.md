@@ -220,9 +220,13 @@ shipped bodies, hair and equipment are untouched.
   file that fails leaves the actor as a High Human without an RL head is drawn. The
   player's own actor and portraits (`render_quality_is_local`: the creation preview,
   the appearance editor, leaderboard cards) build at once, as do labs, tools and tests;
-  `ReplicatedActor3D.prewarm_rl_head_files` (the chosen character) and
-  `prewarm_rl_head_choices` (the creation preview's choices) let Main prewarm their
-  files by name, with the maps of the heads among them loaded one a frame. When the graphics
+  Main prewarms their files by name, with the maps of the heads among them loaded one a
+  frame: `ReplicatedActor3D.prewarm_rl_head_files` for the player's character while its
+  arrival waits for a whole map or creation's arrival import (not for the frame or two a
+  streamed arrival waits, where the build would parse the same file again), and
+  `prewarm_rl_head_choices` for every choice of the creation preview's sex while
+  creation shows (skipped on machines of about 8 GB or less, where each style is parsed
+  as it is picked). When the graphics
   quality is or becomes High (`main.gd`'s quality pass, `prewarm_rl_heads`), only the
   render pipelines are prepared: a worker reads the RL files' glTF JSON, the few files
   that carry every pair of shader variant and vertex format the RL surfaces draw at High
@@ -231,8 +235,10 @@ shipped bodies, hair and equipment are untouched.
   screen, with each surface's shared shader in a material without maps, so the first RL
   head is not held up compiling (1.5-2.6 s for the first preview without it, below);
   those files then go after the retention time unless drawn. Below High, prewarmed
-  caches no head uses go after the retention time. A headless process never prewarms;
-  closing the client waits for a parse still on a worker; `RL_HEAD_PREWARM=0` turns
+  caches no head uses go after the retention time. A headless process never prewarms
+  and never defers (a headless Main, in tests, builds RL heads at once: a process that
+  quits while a worker parses can hang); closing the client waits for a parse still on a
+  worker; `RL_HEAD_PREWARM=0` turns
   prewarming and the deferred loading off.
 * **Packaging** (`tools/package_client.py`; the route develop ships its native actors
   by). The head, hair and beard GLBs are the loose-only actor folder
