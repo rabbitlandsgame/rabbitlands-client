@@ -428,7 +428,8 @@ def main():
     parser.add_argument("--templates", required=True, type=Path)
     parser.add_argument("--stage", type=Path, default=REPO / ".local/browser-prototype/build")
     parser.add_argument("--endpoint", default="ws://127.0.0.1:2002")
-    parser.add_argument("--assets-base-url", default="http://127.0.0.1:8061/", help="CORS-enabled asset folder; HTTPS outside loopback")
+    parser.add_argument("--assets-base-url", default="https://assets.rabbitlandsgame.com/browser/assets/",
+                        help="Public R2 asset folder; use http://127.0.0.1:8061/ for isolated local asset tests")
     parser.add_argument("--prepare-only", action="store_true")
     parser.add_argument("--release", action="store_true", help="Use the optimized web runtime instead of the diagnostic debug template")
     parser.add_argument("--asset-catalog", type=Path, help="Reuse verified task-local grouped assets with identical committed source inputs")

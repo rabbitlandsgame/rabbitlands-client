@@ -6,6 +6,11 @@ the launcher and gameplay server. The player's browser runs the client, decodes
 assets and renders the world on their CPU/GPU. Hosting assets does not move that
 work to the server.
 
+The prototype's current asset origin is
+`https://assets.rabbitlandsgame.com/browser/assets/` on R2. The launch website
+remains a local development prototype; connecting the asset domain does not
+publish the launch page or deploy the gameplay server.
+
 ## Recommended setup
 
 | Component | Suggested location |

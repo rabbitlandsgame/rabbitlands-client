@@ -33,6 +33,7 @@ python godot-client/tools/build_browser_cape.py `
 python godot-client/tools/build_web_prototype.py `
   --godot C:/rabbitlands/rabbitlands-client/godot-client/Godot_v4.7.2-stable_win64.exe `
   --templates .local/browser-prototype/templates `
+  --assets-base-url http://127.0.0.1:8061/ `
   --release `
   --cape-runtime .local/browser-prototype/cape-runtime/payload/browser_cape.wasm `
   --editor-runtime .local/browser-prototype/cape-runtime/payload/browser_cape.dll
@@ -64,10 +65,18 @@ for playable riding.
 configuration. The ordinary desktop client continues using TCP/TLS.
 
 `--assets-base-url https://.../folder/` selects the external asset origin. The
-default is the separate loopback server on port 8061. Only the small `site/`
+default is `https://assets.rabbitlandsgame.com/browser/assets/` on R2. The
+example above explicitly uses a separate loopback asset server for isolated
+tests. Only the small `site/`
 folder belongs on the launch host. The `assets/` folder contains every large
 payload, including the WASM runtime, imported game package and raw art archives.
-The launch page never proxies these downloads through the game server.
+The launch page never proxies these downloads through the game server. Upload
+only the exact manifest dependency set with `tools/upload_browser_assets.py`;
+it verifies local hashes before any upload, resumes matching objects, and checks
+remote size, hash metadata, MIME type and cache headers. Supply operator
+credentials through an ignored local JSON file; they never belong in the
+launcher or browser manifest. Public HTTPS and bucket CORS must be verified
+before switching an existing launcher to the new asset origin.
 
 For a GitHub prototype, publish the generated hash-named payload files on a
 separate asset branch, then set `site/browser-assets.json`'s `base_url` to
