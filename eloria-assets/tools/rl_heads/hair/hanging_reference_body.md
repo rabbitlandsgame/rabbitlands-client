@@ -40,6 +40,13 @@ For each lower reference surface:
    reconcile that separately with `shared_control_vectors` and an explicit
    small bound before body attenuation. This operation requires fresh physical
    checks; it must not average away a large independent-attenuation seam.
+   Audit the 46 identity position fields on those original groups as well.
+   Their local binding can tear around the ear even when the neutral surface
+   and all four grooming fields are coherent. A measured, bounded identity
+   reconciliation keeps every default input and all grooming fields exact;
+   preserve the cap's existing identity motion and update detail identity roots.
+   The helper's `fixed` flag means zero motion for anchored grooming fields.
+   Cap identity fields continue to follow the head and retain their source data.
 5. Recompute valid normals and reattach separate detail to the final exterior
    and its linear shape fields. Preserve real curl openings; fill unintended
    scalp exposure with a continuous source-painted cap rather than filling

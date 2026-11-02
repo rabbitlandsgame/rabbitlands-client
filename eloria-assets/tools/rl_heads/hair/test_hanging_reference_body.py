@@ -88,6 +88,13 @@ class HangingReferenceBodyTests(unittest.TestCase):
             high_body_triangle_mask(7, cut, source_sha256='actual-source-hash',
                                     head_materials=['rl_skin'])
 
+    def test_identity_reconciliation_preserves_independent_cap_motion(self):
+        delta = np.array([[.011, 0, 0], [.006, 0, 0], [.004, .001, 0]])
+        result = shared_control_vectors(delta, np.array([0, 0, 1]),
+                                        maximum_reconciliation_mm=3)
+        np.testing.assert_array_equal(result[0], result[1])
+        np.testing.assert_array_equal(result[2], delta[2])
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -9,7 +9,7 @@
   "method": "Existing completed source reconstruction; preserved real curl/wave topology, source-painted continuous scalp, source-preserving reductions, editable opposite Length/Volume and surface-rooted detail",
   "source_reference_sha256": "bc401b6e11e8c58c202bfd7f5e3296fd2a16359958fbd472b702956580ea4b6b",
   "source_fit_sha256": "6893d5474daf7cbecd234886c8c38de5919bb747c89597fbe7b2f92ef4f6b6b7",
-  "high_source_glb_sha256": "4c6d011d3d95aca973caaecfe615fb43e26a2315d03ae9728d526deb96a2e308",
+  "high_source_glb_sha256": "b1073aa4b189d9b187433ca607aecca4d56b677b5d94d06a2eecca1ff79a943f",
   "texture_sha256": "04442c96fef42ad079553bba177f4429a6eae1e8e5ea97df49c31b80388189ce",
   "high_head_sha256": "6b3549331bacbb7ba1664f569b34a9babd57dd93b14345f627a9791231c53619",
   "identity_targets": 46,
@@ -31,9 +31,8 @@
     "high_head": {
       "cases": 444,
       "failures": 0,
-      "minimum_mm": 2.196220563970922,
-      "method": "exact unchanged High/Medium source and Low reference/detail plus fresh148-case Low cap scan",
-      "composed_report_sha256": "703d11b16ebfda744571610921323edbaf69bf32c0f2f1afe3b299efcfa40a36"
+      "minimum_mm": 2.4678917161090603,
+      "report_sha256": "0bc2915569aedb587ed4a25fc13d7cc7d8436e0f77abe670ef7e5f83eab0bd10"
     },
     "high_lower_body": {
       "scope": "No hairstyle probes below current High head rim in60case screening; full Native neck/skull placement remains unqualified",
@@ -43,7 +42,7 @@
     "scalp_coverage": {
       "cases": 45,
       "maximum_hole_samples": 0,
-      "report_sha256": "6cd10b8b16f28f7273c6b8894b9a6a4d8f96c04defa590bb3ca3ae2ca61aebf6"
+      "report_sha256": "3e54dc2fbee8af5c9098ca33f5db0e56f870e9fd009d25e0eb2604472ab410da"
     },
     "grooming": {
       "finite_geometry_and50_targets": true,
@@ -69,11 +68,25 @@
           "volume_maximum_endpoint_separation_mm": 11.011057671103172
         }
       ],
-      "metrics_sha256": "883d6860167e404ea329fe4fdad82f669182f0fa89c35a70be89d031e9114c5c",
-      "weld_report_sha256": "97c41bf26a406e1158900cbb0e12e2f97166ef6382794e00be3bc2e3e6e146c3"
+      "metrics_sha256": "94e774e7ffa581597342f017a9a2d7f6e6795cfa9aa3739f642e6c92bb36e9a3",
+      "weld_report_sha256": "cbb98c41362c57f0c9267edb61512ee8da7e4032e6d0a2fa4cacc4892370cf53"
+    },
+    "original_position_welds": {
+      "all46_identity_and4_groom_fields_checked": true,
+      "standard_mixed_endpoints_checked": true,
+      "maximum_neutral_mm": 0.0006447470243764032,
+      "maximum_field_delta_mm": 3.4759212201657545e-06,
+      "maximum_endpoint_mm": 0.0006447470243764032,
+      "report_sha256": "5de118c68ba3cfed1fd7bb15f6c37a460834be3ce0c8ddf9e50aeb74414ee8b3"
     }
   },
   "visual_review": "Final client front/side/back review remains separate from numeric qualification",
   "processing_preservation": "Original source, failed attempts, authoring recipes, tool snapshots and reports retained in ignored authoring storage; hashes only published",
-  "source_preservation": "Low fixed scalp reuses the exact already-passing Medium cap; all High/Medium and Low source curls/detail and all50 existing fields preserved byte-exact"
+  "source_preservation": "Low fixed scalp reuses the exact already-passing Medium cap; all High/Medium and Low source curls/detail and all50 existing fields preserved byte-exact",
+  "identity_seam_repair": {
+    "method": "Bounded local reference-position weld means; default geometry, colour inputs, cap identity fields and all grooming fields preserved exactly; detail identity roots inherit the repaired exterior",
+    "maximum_allowed_vector_change_mm": 4.2,
+    "maximum_measured_vector_change_mm": 3.945526603189111,
+    "preservation_report_sha256": "09d7ce3a83a43cb41c51d7ef0ebd6891f608d28d2407abe78b26697e27fa756a"
+  }
 }
