@@ -38,3 +38,11 @@ braids, low ponytail, backed bob and fade have separately checked Native
 correctives. Valen's face remains a concept-guided draft. Existing shirt and
 collar artifacts and some brow/hair colour differences remain visible in the
 review; hair clearance checks do not certify clothing or all animated poses.
+
+The subsequent close-up pass removes isolated visible cheek/brow strands from
+the twin and neat rear braids without changing retained vertex or control
+streams. It closes the small long-hair rear opening with one existing-vertex
+triangle at High and Medium; Low is unchanged. Oren's exposed nape patch is
+the skin's scalp-colour overlay rather than hair geometry, so the overlay is
+disabled only for the short-coils style. Other hairstyles retain their prior
+scalp-paint policy. Bastien's saved hair colour is darker and less red.
