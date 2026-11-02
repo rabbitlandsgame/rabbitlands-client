@@ -2,6 +2,7 @@
 import argparse
 import os
 from pathlib import Path
+import re
 import subprocess
 from urllib.parse import urlsplit
 
@@ -18,9 +19,10 @@ def main():
                         help="Prototype Chrome backend; Windows GL avoids the observed D3D11 map shader reset")
     args = parser.parse_args()
     url = urlsplit(args.url)
-    if url.username or url.password or url.fragment or not url.hostname or not (
+    storage_fragment = re.fullmatch(r"rl-assets=(browser|[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[89abAB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})", url.fragment)
+    if url.username or url.password or (url.fragment and not storage_fragment) or not url.hostname or not (
             url.scheme == "https" or url.scheme == "http" and url.hostname in {"localhost", "127.0.0.1", "::1"}):
-        parser.error("Use an HTTPS address or the local prototype address, without credentials or fragments")
+        parser.error("Use HTTPS or the local prototype address, without credentials; only a saved asset-location fragment is supported")
     profile = args.profile.resolve()
     if not profile.is_relative_to(REPO / ".local"):
         parser.error("Keep the prototype's separate browser profile inside this worktree's ignored .local folder")

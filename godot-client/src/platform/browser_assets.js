@@ -4,7 +4,7 @@ globalThis.RabbitLandsBrowser = (() => {
     const LIMIT = 64 * 1024 * 1024;
     const CACHE = 'rabbitlands-browser-assets-v1';
     let runtime, manifest, base, cache;
-    let canWrite = true;
+    let canWrite = true, cacheFailure = '';
     const stats = {hits: 0, hit_bytes: 0, network_files: 0, download_bytes: 0,
         saved_files: 0, storage_error: '', persistent: false};
     globalThis.RL_BROWSER_CACHE_STATS = stats;
@@ -23,11 +23,22 @@ globalThis.RabbitLandsBrowser = (() => {
     }
     const key = row => new URL(`__rabbitlands_assets__/${row.sha256}`, location.origin || location.href).href;
     function storageError(error) {
-        stats.storage_error = String(error?.name || error || 'Browser storage unavailable');
+        cacheFailure = stats.storage_error = String(error?.name || error || 'Browser storage unavailable');
         console.warn('rabbitlands_asset_storage', stats.storage_error);
     }
     async function verified(row) {
         validate(row);
+        const folder = globalThis.RabbitLandsAssetStorage;
+        if (folder) {
+            const bytes = await folder.read(row);
+            if (bytes && await matches(bytes, row)) {
+                folder.hit(row);
+                stats.hits++;
+                stats.hit_bytes += bytes.byteLength;
+                return bytes;
+            }
+            if (bytes) folder.corrupt();
+        }
         if (cache) {
             try {
                 const saved = await cache.match(key(row));
@@ -36,6 +47,7 @@ globalThis.RabbitLandsBrowser = (() => {
                     if (await matches(bytes, row)) {
                         stats.hits++;
                         stats.hit_bytes += bytes.byteLength;
+                        if (await folder?.write(row, bytes)) stats.saved_files++;
                         return bytes;
                     }
                     await cache.delete(key(row));
@@ -48,7 +60,10 @@ globalThis.RabbitLandsBrowser = (() => {
         if (!await matches(bytes, row)) throw new Error('Game download is incomplete or outdated.');
         stats.network_files++;
         stats.download_bytes += bytes.byteLength;
-        if (cache && canWrite) {
+        const folderSaved = await folder?.write(row, bytes);
+        if (folderSaved) stats.saved_files++;
+        else if (cacheFailure) stats.storage_error = cacheFailure;
+        if (!folderSaved && cache && canWrite) {
             try {
                 // Store decoded bytes, without the remote response's compression
                 // headers. Integrity is checked again before each local reuse.
@@ -116,6 +131,8 @@ globalThis.RabbitLandsBrowser = (() => {
             if (typeof caches === 'undefined') throw new Error('Browser storage unavailable');
             cache = await caches.open(CACHE);
         } catch (error) { storageError(error); }
+        await globalThis.RabbitLandsAssetStorage?.prepare(manifest, cache);
+        if (globalThis.RabbitLandsAssetStorage?.status().mode === 'folder') stats.storage_error = '';
         if (globalThis.navigator?.storage?.persist) {
             // Eviction protection is separate from saving files. A denial
             // still permits ordinary persistent-across-visits Cache storage.

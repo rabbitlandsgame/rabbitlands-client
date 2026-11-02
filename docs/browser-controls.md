@@ -1,5 +1,21 @@
 # Playing in a desktop browser
 
+Before the first large download, choose **Use browser storage** or **Choose asset
+folder**. Folder selection is available in supported desktop browsers, including
+Chrome and Edge, when the game is open in its own tab. The game creates a
+`RabbitLandsAssets` subfolder and downloads only files it needs. Previously saved
+browser downloads are copied there when possible. Damaged files are verified and
+repaired; an unavailable folder falls back to browser storage.
+
+The login screen's **Asset storage & shortcut** button reopens these settings.
+**Download Windows shortcut** saves a ZIP; extract `Rabbit Lands.url` and open
+that shortcut to return with the saved storage choice. It contains a random
+reference to the folder permission saved in this browser, rather than a local
+path or permission grant. Use the same site and browser profile. The browser may
+ask for access again; if site data is cleared or another browser opens the link,
+select the existing folder again to reuse its files. The shortcut opens the
+default browser and cannot choose its graphics backend.
+
 Connect to the game, then choose **New character** to use the same starting
 looks, appearance controls and callings as the desktop client. The connected
 server determines which appearance options are available. Cancelling the

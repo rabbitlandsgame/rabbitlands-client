@@ -237,7 +237,9 @@ not an offline game.
 
 The browser is asked for persistent-storage protection. It can deny protection
 while still allowing saved files to work across visits. Browsers can evict
-unprotected storage, and clearing the site's data removes these files. Storage
+unprotected browser storage, and clearing the site's data removes its cached
+files and remembered folder permissions. It does not delete files in a chosen
+asset folder. Storage
 quota or access failures leave gameplay available and show that future visits
 may need to download again. Protection denial alone is not treated as a save
 failure. See the browser's [Cache API](https://developer.mozilla.org/en-US/docs/Web/API/Cache)
@@ -258,7 +260,13 @@ different browser storage area.
 - Each downloaded art archive uses temporary memory-backed storage, outside IndexedDB,
   and is removed after extraction. The ordinary package and startup art remain
   in browser memory; unpinned dynamic groups can be evicted. Compressed downloads
-  persist in Cache storage. A subsequent visit still reconstructs runtime resources from saved
+  persist in browser Cache storage or a player-selected asset folder. The small
+  HTML storage dialog runs before large runtime downloads and is also available
+  from login; it performs no directory scans or work during ordinary frames.
+  Folder handles are saved in IndexedDB, with explicit user permission recovery.
+  Shortcuts carry only an opaque handle reference and are packaged as a ZIP to
+  preserve the Windows `.url` extension. See [browser controls](browser-controls.md)
+  for browser and permission limits. A subsequent visit still reconstructs runtime resources from saved
   files; the cache removes the repeated network transfer, not all startup work.
   Browser settings use a separate application storage directory. Login
   credentials remain in process memory and clear through the existing logout
@@ -282,6 +290,7 @@ Focused packaging and loader checks:
 ```powershell
 python -m unittest discover -s godot-client/tests -p test_web_prototype_package.py -v
 node --test godot-client/tests/test_browser_asset_loader.cjs
+node --test godot-client/tests/test_browser_storage.cjs
 python -m unittest discover -s godot-client/tests -p test_browser_group_catalog.py -v
 python -m unittest discover -s godot-client/tests -p test_browser_cape_build.py -v
 ```

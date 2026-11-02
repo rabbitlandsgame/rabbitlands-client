@@ -105,6 +105,14 @@ def finish_site(stage: Path, assets_base_url: str):
     if libraries: manifest["libraries"] = libraries
     (site / "browser-assets.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     shutil.copy2(CLIENT / "src/platform/browser_assets.js", site / "browser-assets.js")
+    shutil.copy2(CLIENT / "src/platform/browser_storage.js", site / "browser-storage.js")
+    shutil.copy2(CLIENT / "src/platform/browser_storage.css", site / "browser-storage.css")
+    # Static hosts such as Cloudflare Pages can apply these without a server.
+    # Threaded WASM and its same-origin worker require cross-origin isolation.
+    (site / "_headers").write_text("/*\n  Cross-Origin-Opener-Policy: same-origin\n"
+                                 "  Cross-Origin-Embedder-Policy: require-corp\n"
+                                 "  Cross-Origin-Resource-Policy: same-origin\n"
+                                 "  Cache-Control: no-cache\n", encoding="utf-8")
     # Keep the worker script on the launch origin while loading verified WASM
     # from the asset origin. Assert the supported engine hook rather than
     # silently producing a broken build after an export-template upgrade.
@@ -138,7 +146,8 @@ def finish_site(stage: Path, assets_base_url: str):
     text = shell.read_text(encoding="utf-8")
     if text.count("engine.startGame({") != 1:
         raise ValueError("Web template startup changed")
-    text = text.replace('<script src="index.js"></script>', '<script src="index.js"></script>\n<script src="browser-assets.js"></script>')
+    text = text.replace('<script src="index.js"></script>', '<link rel="stylesheet" href="browser-storage.css">\n'
+                        '<script src="index.js"></script>\n<script src="browser-storage.js"></script>\n<script src="browser-assets.js"></script>')
     shell.write_text(text.replace("engine.startGame({", "RabbitLandsBrowser.start(engine, GODOT_CONFIG, {"), encoding="utf-8")
     # The launch folder cannot accidentally serve the large payloads.
     pack.unlink()

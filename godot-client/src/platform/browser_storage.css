@@ -1,0 +1,35 @@
+.rl-storage {
+    box-sizing: border-box;
+    width: min(580px, calc(100vw - 32px));
+    max-height: calc(100vh - 32px);
+    overflow: auto;
+    color: #e5e3da;
+    background: #142127;
+    border: 2px solid #ad8948;
+    border-radius: 12px;
+    padding: 26px;
+    font: 16px/1.5 system-ui, sans-serif;
+    box-shadow: 0 20px 70px #000a;
+}
+.rl-storage::backdrop { background: #081015e8; }
+.rl-storage h1 { margin: 0 0 16px; font: 30px Georgia, serif; color: #e7c680; }
+.rl-storage h2 { margin: 18px 0 6px; font-size: 19px; }
+.rl-storage p { margin: 8px 0 14px; }
+.rl-storage button {
+    font: inherit;
+    color: #f3e2bd;
+    background: #2d4339;
+    border: 1px solid #a48a52;
+    border-radius: 5px;
+    padding: 9px 14px;
+    cursor: pointer;
+}
+.rl-storage button:hover:not(:disabled) { background: #405d4b; }
+.rl-storage button:focus-visible, .rl-storage a:focus-visible { outline: 3px solid #edca74; outline-offset: 3px; }
+.rl-storage button:disabled { opacity: .5; cursor: default; }
+.rl-storage .rl-storage-muted { color: #b7c0bd; font-size: 13px; }
+.rl-storage-location { padding: 12px; margin-bottom: 12px; background: #0b1418; border-radius: 5px; overflow-wrap: anywhere; }
+.rl-storage-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.rl-storage-footer { display: flex; justify-content: flex-end; margin-top: 24px; }
+.rl-storage hr { border: 0; border-top: 1px solid #4f5b57; margin: 24px 0 8px; }
+.rl-storage a { color: #edca74; }
