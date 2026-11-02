@@ -77,6 +77,10 @@ The build writes only under this worktree's ignored `.local` directory. It
 copies runtime source to an isolated export project, disables editor plugins,
 uses a separate editor profile and temporary directory, and selects Compatibility
 rendering. Runtime code shared with the desktop client remains shared.
+Use a fresh `--stage` directory after an unsuccessful scene import: old editor
+extracted images can otherwise be mistaken for additional source resources.
+The builder skips raw-world scene imports and rejects packages over 512 MiB.
+The verified raw art archives retain the original scenery and image bytes.
 
 Landfall's declared chunks, shared prototypes, verified image dependencies,
 current humanoids, supported creatures, home NPC clothing and starter equipment
@@ -99,7 +103,7 @@ gameplay, accounts, persistence and the normal state/message traffic, with an
 optional WebSocket listener for browsers. It does not render frames or unpack
 player assets.
 
-A local build uses about 919 MB of external payloads and a 1.7 MB launch folder.
+A local build uses about 892 MB of external payloads and a 7.0 MB launch folder.
 Browser-only exported hair albedo textures are limited to 1024 pixels, reducing
 the imported package by about 84 MB. Authored PNGs, raw actors and desktop art
 are unchanged. The loader transfers ownership of its immutable package/archive
@@ -173,7 +177,7 @@ or server databases. User graphics preferences retain their separate browser
 application storage.
 
 A real Chrome profile was closed and reopened with the ordinary HTTP cache
-disabled and the asset hosts blocked. All 50 payloads (913 MB) were reused, with
+disabled and the asset hosts blocked. All 51 payloads (892 MB) were reused, with
 zero asset requests. This verifies disk reuse across browser sessions. The
 small launch page and multiplayer server still need to be reachable; this is
 not an offline game.
@@ -190,8 +194,8 @@ different browser storage area.
 
 ## Current limits
 
-- The first load is large: this proof uses the existing desktop art and one
-  compressed art archives, without on-demand territory downloads or a smaller
+- The first load is large: this proof uses the existing desktop art in
+  compressed archives, without on-demand territory downloads or a smaller
   browser art profile. The loader displays progress and verifies the payloads.
 - The threaded build requires cross-origin isolation. The local serving tool
   supplies the required headers and serves only the chosen generated site folder.
