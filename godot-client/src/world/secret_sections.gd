@@ -17,9 +17,23 @@ extends RefCounted
 var _sections: Array[Dictionary] = []
 var _members: Dictionary = {}          # section id -> Array[Node3D]
 var _loose: Array[Node3D] = []         # nodes no section claims: left visible
-var _culled: Array[Node3D] = []        # actors and objects hidden by position
+var _culled: Dictionary = {}           # actors and objects hidden by position (a set)
 var _current: String = ""
 const MARGIN := 3.0
+## The sections' bounds grown by MARGIN, in list order, four numbers each
+## (min x, min z, max x, max z), and their ids: the per-frame position test
+## reads these rather than a Dictionary per section.
+var _ids := PackedStringArray()
+var _bounds := PackedFloat64Array()
+## Per section, the earlier sections whose grown bounds touch its own. The
+## first section in list order holds a point, so these are the only ones that
+## can take a point inside a section away from it.
+var _earlier_overlaps: Array[PackedInt32Array] = []
+## Each dynamic node's last judged position and section: instance id ->
+## Vector3(x, z, section index). A node that has not moved costs no scan, and
+## one that moved is first tested against the section it was in.
+var _placed: Dictionary = {}
+const PLACED_LIMIT := 8192
 
 
 func is_active() -> bool:
@@ -50,6 +64,10 @@ func reset() -> void:
 	_members.clear()
 	_loose.clear()
 	_culled.clear()
+	_ids.clear()
+	_bounds.clear()
+	_earlier_overlaps.clear()
+	_placed.clear()
 	_current = ""
 
 
@@ -84,6 +102,7 @@ func configure(manifest: WorldManifest, world_root: Node3D) -> int:
 		_members[str(entry.get("id", ""))] = []
 	if _sections.is_empty():
 		return 0
+	_index_bounds()
 	var claimed := 0
 	for node: Node3D in _spatial_nodes(world_root):
 		var section := _section_of_node(node)
@@ -121,6 +140,8 @@ func update(player_position: Vector3, force: bool = false) -> void:
 func cull_dynamic(nodes: Array, keep: Node3D = null) -> void:
 	if _sections.is_empty() or _current.is_empty():
 		return
+	if _placed.size() > PLACED_LIMIT:
+		_placed.clear()
 	for value: Variant in nodes:
 		if not is_instance_valid(value):
 			continue
@@ -130,13 +151,78 @@ func cull_dynamic(nodes: Array, keep: Node3D = null) -> void:
 		if not node.is_inside_tree():
 			continue
 		var position := node.global_position
-		var shown := _section_at(Vector2(position.x, position.z)) == _current
+		var index := _placed_index(node.get_instance_id(), Vector2(position.x, position.z))
+		var shown := index >= 0 and _ids[index] == _current
 		node.visible = shown
 		if not shown and not _culled.has(node):
-			_culled.append(node)
+			_culled[node] = true
+
+
+## The section index holding a dynamic node's point, as `_index_at` finds it,
+## reusing the node's last answer while it stands still.
+func _placed_index(id: int, point: Vector2) -> int:
+	var memo: Variant = _placed.get(id)
+	var last := -1
+	if memo != null:
+		var placed: Vector3 = memo
+		last = int(placed.z)
+		if placed.x == point.x and placed.y == point.y:
+			return last
+	var index := -1
+	if last >= 0 and _inside(last, point):
+		index = last
+		for earlier: int in _earlier_overlaps[last]:
+			if _inside(earlier, point):
+				index = earlier
+				break
+	else:
+		index = _index_at(point)
+	_placed[id] = Vector3(point.x, point.y, index)
+	return index
+
+
+## The first section, in list order, whose grown bounds hold the point.
+func _index_at(point: Vector2) -> int:
+	for index: int in range(_ids.size()):
+		if _inside(index, point):
+			return index
+	return -1
+
+
+func _inside(index: int, point: Vector2) -> bool:
+	var at := index * 4
+	return point.x >= _bounds[at] and point.x <= _bounds[at + 2] \
+		and point.y >= _bounds[at + 1] and point.y <= _bounds[at + 3]
+
+
+## Packs the sections' grown bounds and which earlier sections touch each.
+func _index_bounds() -> void:
+	_ids.clear()
+	_bounds.clear()
+	_earlier_overlaps.clear()
+	_placed.clear()
+	for section: Dictionary in _sections:
+		var lo: Vector2 = section["min"]
+		var hi: Vector2 = section["max"]
+		_ids.append(str(section["id"]))
+		# The same float sums `_section_at` compares against.
+		_bounds.append_array(PackedFloat64Array([lo.x - MARGIN, lo.y - MARGIN,
+			hi.x + MARGIN, hi.y + MARGIN]))
+	for index: int in range(_ids.size()):
+		var earlier := PackedInt32Array()
+		var at := index * 4
+		for other: int in range(index):
+			var from := other * 4
+			if _bounds[from] <= _bounds[at + 2] and _bounds[from + 2] >= _bounds[at] \
+					and _bounds[from + 1] <= _bounds[at + 3] and _bounds[from + 3] >= _bounds[at + 1]:
+				earlier.append(other)
+		_earlier_overlaps.append(earlier)
 
 
 func _section_at(point: Vector2, margin: float = MARGIN) -> String:
+	if margin == MARGIN and not _ids.is_empty():
+		var index := _index_at(point)
+		return _ids[index] if index >= 0 else ""
 	for section: Dictionary in _sections:
 		var lo: Vector2 = section["min"]
 		var hi: Vector2 = section["max"]

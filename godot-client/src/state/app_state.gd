@@ -127,8 +127,9 @@ var game_minute_anchor_msec := 0
 var game_minute_interval_msec := 0
 var server_timestamp := 0
 var chat_lines: Array[Dictionary] = []
-## The console retains the complete connection session independently of the
-## bounded recent messages used by HUD consumers. Both arrays share line DTOs.
+## The console retains the connection session independently of the bounded
+## recent messages used by HUD consumers, up to its own much larger bound
+## (CHAT_HISTORY_LIMIT). Both arrays share line DTOs.
 var chat_history: Array[Dictionary] = []
 var active_channels: Array[int] = [0, 0, 0]
 var active_channel_index := 0
@@ -485,6 +486,9 @@ var _pending_map_marker_removals: Dictionary = {}
 const LOCAL_CHAT_CHANNEL := 254
 ## How many recent lines HUD consumers keep; the console uses chat_history.
 const CHAT_LINE_LIMIT := 1000
+## How many lines the console keeps. A whole session's history grew without
+## bound, and every console tab or filter change re-renders all of it.
+const CHAT_HISTORY_LIMIT := 5000
 
 func append_local_line(text: String) -> void:
 	_record_chat_line({"channel": LOCAL_CHAT_CHANNEL, "text": text,
@@ -492,6 +496,8 @@ func append_local_line(text: String) -> void:
 
 func _record_chat_line(line: Dictionary) -> void:
 	chat_history.append(line)
+	if chat_history.size() > CHAT_HISTORY_LIMIT:
+		chat_history.pop_front()
 	chat_lines.append(line)
 	if chat_lines.size() > CHAT_LINE_LIMIT:
 		chat_lines.pop_front()

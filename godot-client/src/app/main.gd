@@ -883,7 +883,37 @@ var _hud_inactive_atlas: Texture2D
 var _hud_button_state_mask := -1
 var _hud_state_buttons: Array[Button] = []
 var _minimap_refresh_msec := 0
+var _minimap_detail_refresh_msec := 0
+## While the minimap's marks are collected: how far from `_minimap_mark_centre`
+## (the camera's ground point) a mark can land on the image. INF otherwise.
+var _minimap_mark_reach := INF
+var _minimap_mark_centre := Vector2.ZERO
 var _full_map_refresh_msec := 0
+## The current map's registry answer for the weather, kept until the map or
+## the registry changes rather than resolved again every frame.
+var _outdoors_map := ""
+var _outdoors_registry: Dictionary = {}
+var _outdoors_registry_size := -1
+var _outdoors := false
+## Map objects stand still once placed, so on a sectioned map they are culled
+## when the player's section changes or the objects change, not every frame.
+var _section_objects_dirty := true
+## True once every cooldown shade is hidden and no cooldown is running, for
+## as long as AppState.inventory_cooldowns still hashes to `_cooldown_idle_hash`.
+## The shade and seconds label per slot button, by the button's instance id.
+var _cooldown_shades_idle := false
+var _cooldown_idle_hash := 0
+var _cooldown_nodes: Dictionary = {}
+## The campaign scenery's last applied inputs and when they were applied; see
+## `_apply_campaign_world`.
+var _campaign_world_key: Array = []
+var _campaign_world_applied_msec := 0
+## A pending throttled settings write (`_queue_hud_settings_save`) and when
+## that path last wrote (-1: never).
+var _hud_settings_dirty := false
+var _hud_settings_saved_msec := -1
+## The inventory window was not on screen for a refresh it would have drawn.
+var _inventory_view_stale := false
 var _preview_updates_enabled := true
 var _paused_preview: WeakRef
 var _preview_process_mode := Node.PROCESS_MODE_INHERIT
@@ -1145,6 +1175,12 @@ const BANNER_HEAD_CLEARANCE := 0.15
 const SPEECH_BUBBLE_MSEC := 5000
 
 const SETTINGS_PATH := "user://eloria_hud.cfg"
+## A wheel spin, a slider drag or typed notes save at most this often; the
+## last change in a burst is written when the interval has passed.
+const HUD_SETTINGS_SAVE_INTERVAL_MSEC := 1000
+## The campaign scenery is applied when its inputs change, and at this
+## interval while they do not, so ground that streams in late is retried.
+const CAMPAIGN_WORLD_REFRESH_MSEC := 250
 const KEYBOARD_LOOKAHEAD_TILES := 4
 const KEYBOARD_REFRESH_MSEC := 360
 const GROUND_BAG_GET_ALL_TIMEOUT_MSEC := 1000
@@ -1292,6 +1328,11 @@ const UI_SCALE_MAX := 1.5
 # tripled the client's raster and shadow cost for two top-down views that read
 # identically at a fraction of the rate.
 const MINIMAP_REFRESH_MSEC := 66
+## Which neighbouring regions get their detailed picture under the minimap.
+const MINIMAP_DETAIL_REFRESH_MSEC := 250
+## The minimap's mark culling keeps this much more than the view's half
+## diagonal, for a camera that moves between two refreshes.
+const MINIMAP_MARK_REACH_MARGIN := 1.25
 const FULL_MAP_REFRESH_MSEC := 200
 ## The action pointer re-reads what it is over ten times a second: quick
 ## enough that the swap reads as immediate, and rare enough that its three
@@ -1342,8 +1383,10 @@ const ACTOR_SPAWN_BUDGET := 4
 ## Shared cooperative allowance includes presentation, animation gates and nodes.
 const ACTOR_SPAWN_BUDGET_USEC := 4000
 ## The chat panel shows this many of the newest lines. The console shows the
-## whole buffer AppState keeps.
+## whole buffer AppState keeps (AppState.CHAT_HISTORY_LIMIT).
 const CHAT_PANEL_LINES := 100
+## The console title's tooltip, with the number of lines the console keeps.
+const CONSOLE_TITLE_TOOLTIP := "This session's history, up to its newest %d lines. Press ~ to close."
 ## How many submitted lines the console remembers for its up/down history.
 const CONSOLE_HISTORY_LIMIT := 60
 ## The fork's spell quickbar. Twelve slots on Alt+1-0, Alt+- and Alt+=,
@@ -1975,6 +2018,10 @@ func _ready() -> void:
 	inventory_workspace = preload("res://src/ui/inventory_workspace.gd").new()
 	game_view.add_child(inventory_workspace)
 	_configure_startup_workspace.call_deferred(inventory_workspace, "inventory_workspace")
+	inventory_panel.visibility_changed.connect(_on_inventory_view_visibility_changed)
+	var item_card: Variant = extension_windows.get("detail_panel")
+	if is_instance_valid(item_card):
+		(item_card as Control).visibility_changed.connect(_on_inventory_view_visibility_changed)
 	mixing_workspace = preload("res://src/ui/mixing_workspace.gd").new()
 	game_view.add_child(mixing_workspace)
 	_configure_startup_workspace.call_deferred(mixing_workspace, "mixing_workspace")
@@ -2128,11 +2175,8 @@ func _process(delta: float) -> void:
 	_update_preview_viewport()
 	_update_action_cursor()
 	if audio_director != null and weather_layer != null:
-		var weather_map := MapRegistry.resolve(map_registry, AppState.current_map)
-		var outdoors := not weather_map.is_empty() and not weather_map.has("interiorOf") \
-			and not weather_map.has("insidesOf")
 		audio_director.set_weather(weather_layer.look() \
-			if AppState.authenticated and outdoors else {})
+			if AppState.authenticated and _current_map_outdoors() else {})
 	if OS.has_feature("web"): _update_browser_actor_wait()
 	_update_arrival()
 	_update_browser_asset_pins()
@@ -2226,6 +2270,20 @@ func _process(delta: float) -> void:
 			if stats_panel.visible and stats_tabs.current_tab == 3:
 				_sync_session_experience()
 		_sync_hud_button_states()
+	_flush_hud_settings_save()
+
+## Whether weather falls on the current map: a registered map that is not an
+## interior or a map's insides. The registry is resolved again only when the
+## map or the registry changes, not every frame.
+func _current_map_outdoors() -> bool:
+	if AppState.current_map != _outdoors_map or not is_same(map_registry, _outdoors_registry) \
+			or map_registry.size() != _outdoors_registry_size:
+		var entry := MapRegistry.resolve(map_registry, AppState.current_map)
+		_outdoors = not entry.is_empty() and not entry.has("interiorOf") and not entry.has("insidesOf")
+		_outdoors_map = AppState.current_map
+		_outdoors_registry = map_registry
+		_outdoors_registry_size = map_registry.size()
+	return _outdoors
 
 ## Refresh direct 2D pictures and markers only while their panel is visible.
 ## Projection-only SubViewports remain disabled, including missing-image cases.
@@ -2233,11 +2291,19 @@ func _update_map_viewports() -> void:
 	var now: int = Time.get_ticks_msec()
 	if minimap_frame.visible and now >= _minimap_refresh_msec:
 		_minimap_refresh_msec = now + MINIMAP_REFRESH_MSEC
-		_update_map_detail_levels()
+		# Which neighbours under the view get their detailed picture follows
+		# the camera's every move; deciding it four times a second is plenty.
+		if now >= _minimap_detail_refresh_msec:
+			_minimap_detail_refresh_msec = now + MINIMAP_DETAIL_REFRESH_MSEC
+			_update_map_detail_levels()
 		minimap_background.refresh(map_viewport.size)
 		# The marks are drawn over that image and follow the same camera, so
 		# they are collected when it is redrawn and never while it is hidden.
+		# A mark whose centre is off the image is never drawn, so the minimap's
+		# collection skips what stands beyond its corners.
+		_begin_minimap_mark_cull()
 		minimap_marker_overlay.set_marks(_collect_minimap_marks())
+		_minimap_mark_reach = INF
 	if _day_night_active and now >= _day_night_refresh_msec:
 		_day_night_refresh_msec = now + DAY_NIGHT_REFRESH_MSEC
 		_apply_day_night()
@@ -2274,7 +2340,41 @@ func _update_preview_viewport() -> void:
 
 func _request_map_redraw() -> void:
 	_minimap_refresh_msec = 0
+	_minimap_detail_refresh_msec = 0
 	_full_map_refresh_msec = 0
+
+## Culls the next mark collection to the minimap's view: a mark's centre can
+## land on the image only within half the view's diagonal of the camera's
+## ground point, given a margin for the camera moving before the marks are
+## drawn. Left unculled (INF) when the camera is not the straight-down
+## orthographic view this assumes.
+func _begin_minimap_mark_cull() -> void:
+	_minimap_mark_reach = INF
+	var view := Vector2(map_viewport.size)
+	if view.x <= 0.0 or view.y <= 0.0 or map_camera.projection != Camera3D.PROJECTION_ORTHOGONAL \
+			or not map_camera.is_inside_tree():
+		return
+	var basis := map_camera.global_transform.basis
+	if absf(basis.z.normalized().y) < 0.999:
+		return
+	var aspect := view.x / view.y
+	var height := map_camera.size if map_camera.keep_aspect == Camera3D.KEEP_HEIGHT \
+		else map_camera.size / aspect
+	_minimap_mark_reach = 0.5 * Vector2(height * aspect, height).length() * MINIMAP_MARK_REACH_MARGIN
+	var centre := map_camera.global_position
+	# The camera is put over the player after the marks are collected and
+	# before they are drawn (`_update_local_actor_follow`), so a player who
+	# jumped since the last frame is where the picture will be centred.
+	var local_value: Variant = actor_nodes.get(AppState.local_actor_id)
+	if is_instance_valid(local_value) and local_value is Node3D and (local_value as Node3D).is_inside_tree():
+		centre = (local_value as Node3D).global_position
+	_minimap_mark_centre = Vector2(centre.x, centre.z)
+
+## Whether a mark at this world position can land on the minimap image while
+## its collection is culled (`_begin_minimap_mark_cull`).
+func _within_minimap_reach(point: Vector3) -> bool:
+	return _minimap_mark_reach == INF or Vector2(point.x, point.z).distance_squared_to(
+		_minimap_mark_centre) <= _minimap_mark_reach * _minimap_mark_reach
 
 func _text_entry_active() -> bool:
 	var focus: Control = get_viewport().gui_get_focus_owner()
@@ -3285,7 +3385,7 @@ func _build_chat_surfaces() -> void:
 	# Keep actions beside the title, clear of HUD rails at the right edge.
 	var log_title: Label = log_header.get_node("Title")
 	log_title.text = "CHAT LOG · ~ to close"
-	log_title.tooltip_text = "Full session history. Press ~ to close."
+	log_title.tooltip_text = CONSOLE_TITLE_TOOLTIP % AppState.CHAT_HISTORY_LIMIT
 	log_title.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	log_header.add_child(urls_button)
 	log_header.move_child(urls_button, 1)
@@ -3376,7 +3476,7 @@ func _sync_console_session_controls() -> void:
 	var title: Label = console_panel.get_node("Content/Header/Title")
 	title.text = "DISCONNECTED" if _disconnect_console_active else "CHAT LOG · ~ to close"
 	title.tooltip_text = ("Press a key to reconnect, or use the disconnect icon to return to login."
-		if _disconnect_console_active else "Full session history. Press ~ to close.")
+		if _disconnect_console_active else CONSOLE_TITLE_TOOLTIP % AppState.CHAT_HISTORY_LIMIT)
 	%ConsoleClose.disabled = _disconnect_console_active
 
 ## World annotations belong to the covered scene beneath the map and console.
@@ -4518,6 +4618,7 @@ func _on_disconnect_pressed() -> void:
 	_leaving_session = false
 
 func _close_client() -> void:
+	_flush_hud_settings_save(true)
 	# Keep serving rendering/physics commands until a private loader completes;
 	# joining a live import while the rendering server shuts down can deadlock.
 	_actor_preparation_closing = true
@@ -4652,6 +4753,7 @@ func _on_connection_state_changed(value: String) -> void:
 		campaign_crossing.clear()
 		campaign_cart.clear()
 		campaign_rescue.clear()
+		_campaign_world_key = []
 		_end_arrival()
 		if not game_view.visible or _leaving_session:
 			respawn_prewarm.discard()
@@ -4735,6 +4837,7 @@ func _on_reconnect_progress(attempt: int, _total: int, delay_msec: int) -> void:
 func _clear_world_presentation(retain_map_resources := false) -> void:
 	lantern_mine_lighting.clear()
 	campaign_rescue.clear()
+	_campaign_world_key = []
 	# The disconnect console still belongs to this session. Keep its terrain,
 	# neighbours and parsed visuals ready for reconnect, but discard live
 	# entities so the next connection rebuilds them from server snapshots.
@@ -5691,7 +5794,7 @@ func _zoom_minimap(closer: bool) -> void:
 	if is_equal_approx(previous, _minimap_zoom):
 		return
 	_apply_minimap_zoom()
-	_save_hud_settings()
+	_queue_hud_settings_save()
 
 ## The live minimap's span on the map just bound: its manifest's
 ## `minimap.liveSpanMetres` (Landfall Town: 40 m, so a room reads at minimap
@@ -6400,6 +6503,7 @@ func _on_state_changed(path: StringName) -> void:
 			campaign_crossing.clear()
 			campaign_cart.clear()
 			campaign_rescue.clear()
+			_campaign_world_key = []
 			_pickpoint_draft.clear()
 			_pickpoint_submitting = false
 			_load_server_map()
@@ -6477,7 +6581,7 @@ func _on_state_changed(path: StringName) -> void:
 		&"inventory", &"inventory_text", &"inventory_state":
 			if path == &"inventory_text" and manufacturing_panel.visible:
 				manufacturing_server_status = AppState.inventory_text
-			_sync_inventory()
+			_sync_inventory_if_shown()
 			_queue_character_ui_sync(CHARACTER_UI_SPELLS | CHARACTER_UI_CRAFTING)
 			# The stored side does not change with the backpack, and rebuilding
 			# it for every inventory line and every command 226 cost three full
@@ -6511,7 +6615,7 @@ func _on_state_changed(path: StringName) -> void:
 		&"worn_slots", &"degraded_items":
 			# Which slots are worn changes independently of what is in them,
 			# so the icons are redrawn on the mask as well as on the contents.
-			_sync_inventory()
+			_sync_inventory_if_shown()
 			if bool(AppState.storage.get("open", false)):
 				_sync_storage()
 		&"world_objects":
@@ -8063,6 +8167,7 @@ func _update_campaign(delta: float) -> void:
 		campaign_guidance.clear()
 		campaign_crossing.clear()
 		campaign_cart.clear()
+		_campaign_world_key = []
 		if _rescue_static_during_death():
 			campaign_rescue.apply_snapshot(AppState.campaign, adapter, AppState.current_map, _campaign_surface_height)
 			campaign_rescue.apply_environment(world_environment, world_sun, world_moon)
@@ -8077,21 +8182,7 @@ func _update_campaign(delta: float) -> void:
 	var scene_view: Dictionary = campaign_cutaway.view_context(AppState.campaign, actor_nodes,
 		AppState.actors, adapter, _campaign_surface_height, campaign_scene.uses_replay_cast())
 	if ready:
-		campaign_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
-			_campaign_surface_height, campaign_scene.reduced_motion)
-		campaign_bank_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
-			_campaign_surface_height, campaign_scene.reduced_motion)
-		campaign_road_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
-			_campaign_surface_height, campaign_scene.reduced_motion)
-		campaign_lamps_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
-			_campaign_surface_height, campaign_scene.reduced_motion)
-		campaign_crossing.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
-			_campaign_surface_height)
-		campaign_cart.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
-			_campaign_surface_height)
-		campaign_rescue.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
-			_campaign_surface_height)
-		campaign_rescue.apply_environment(world_environment, world_sun, world_moon)
+		_apply_campaign_world()
 	campaign_scene.update_ambient(AppState.campaign, actor_nodes, adapter, _campaign_surface_height, delta)
 	campaign_scene.remember_replay_cast(scene_view.snapshot, scene_view.dtos)
 	var scene_delta := delta
@@ -8100,12 +8191,16 @@ func _update_campaign(delta: float) -> void:
 	campaign_scene.update(scene_delta, scene_view.snapshot, camera_rig, scene_view.nodes,
 		AppState.local_actor_id, AppState.current_map, ready and bool(scene_view.ready), scene_view.adapter, scene_view.surface)
 	campaign_cutaway.set_presenting(bool(scene_view.remote) and campaign_scene.playing, not campaign_scene.uses_replay_cast())
+	var cinematic_lighting: bool = lantern_mine_lighting.has_cinematic_region()
 	if campaign_cutaway.presenting:
 		lantern_mine_lighting.set_cinematic_region(campaign_cutaway.manifest,
 			campaign_cutaway.focus_world, campaign_cutaway.map_lights)
 	else:
 		lantern_mine_lighting.clear_cinematic_region()
-	_apply_lantern_mine_lighting()
+	# The section pass later this frame applies the mine lighting every frame;
+	# a film taking or giving back the mine's lighting is applied at once.
+	if cinematic_lighting != lantern_mine_lighting.has_cinematic_region():
+		_apply_lantern_mine_lighting()
 	var presentation := campaign_scene.presentation_state()
 	var rescue_cast: Dictionary = presentation.get("actors", {})
 	campaign_rescue.apply_cinematic(presentation, rescue_cast if bool(presentation.get("playing", false)) and not rescue_cast.is_empty() else actor_nodes)
@@ -8135,6 +8230,35 @@ func _update_campaign(delta: float) -> void:
 		AppState.current_map, tile if tile is Vector2i else Vector2i.ZERO,
 		lantern_guide.using_campaign(), not ready or campaign_scene.is_active())
 	extension_windows.sync_campaign_replay()
+
+## The campaign's scenery (works, carts, the rescue's cage) follows the
+## snapshot, the map and the ground under its anchors, and each apply grounds
+## every anchor again with a long ray. It is applied when the snapshot or the
+## map changes, and four times a second otherwise, so an anchor whose ground
+## streams in later is still retried.
+func _apply_campaign_world() -> void:
+	var key: Array = [AppState.campaign.hash(), AppState.current_map, adapter,
+		campaign_scene.reduced_motion]
+	var now := Time.get_ticks_msec()
+	if key == _campaign_world_key and now - _campaign_world_applied_msec < CAMPAIGN_WORLD_REFRESH_MSEC:
+		return
+	_campaign_world_key = key
+	_campaign_world_applied_msec = now
+	campaign_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
+		_campaign_surface_height, campaign_scene.reduced_motion)
+	campaign_bank_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
+		_campaign_surface_height, campaign_scene.reduced_motion)
+	campaign_road_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
+		_campaign_surface_height, campaign_scene.reduced_motion)
+	campaign_lamps_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
+		_campaign_surface_height, campaign_scene.reduced_motion)
+	campaign_crossing.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
+		_campaign_surface_height)
+	campaign_cart.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
+		_campaign_surface_height)
+	campaign_rescue.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
+		_campaign_surface_height)
+	campaign_rescue.apply_environment(world_environment, world_sun, world_moon)
 
 func _clear_campaign_cutaway() -> void:
 	if is_instance_valid(campaign_cutaway): campaign_cutaway.clear()
@@ -10091,6 +10215,7 @@ static func nameplate_fade(distance: float, name_distance: float) -> float:
 ## map off the viewport, the minimap and the full map.
 func _configure_secret_sections(manifest: WorldManifest) -> void:
 	var count: int = secret_sections.call("configure", manifest, world_root)
+	_section_objects_dirty = true
 	if count > 0:
 		_update_secret_sections(true)
 
@@ -10106,6 +10231,7 @@ func _update_secret_sections(force: bool = false) -> void:
 	var previous_section: String = secret_sections.current_section()
 	secret_sections.call("update", local_actor_node.global_position, force)
 	if secret_sections.current_section() != previous_section:
+		_section_objects_dirty = true
 		_full_map_panned = false
 		_configure_full_map(world_loader.manifest)
 		_install_map_picture(world_loader.manifest)
@@ -10113,7 +10239,12 @@ func _update_secret_sections(force: bool = false) -> void:
 		_apply_day_night()
 	# whoever and whatever stands in another secret stays unseen
 	secret_sections.call("cull_dynamic", actor_nodes.values(), local_actor_node)
-	secret_sections.call("cull_dynamic", map_object_nodes.values())
+	# Map objects keep the ground position they were placed at (only their
+	# height follows the surface), so they are judged again only when the
+	# section or the set of objects changes (`_sync_map_objects`).
+	if _section_objects_dirty or force:
+		secret_sections.call("cull_dynamic", map_object_nodes.values())
+		_section_objects_dirty = secret_sections.current_section().is_empty()
 	_apply_lantern_mine_lighting()
 
 
@@ -10856,7 +10987,7 @@ func _load_hud_settings() -> void:
 func _on_ui_scale_changed(value: float) -> void:
 	_ui_scale = clampf(value, UI_SCALE_MIN, UI_SCALE_MAX)
 	_apply_ui_scale()
-	_save_hud_settings()
+	_queue_hud_settings_save()
 
 ## The window already scales the HUD with its size; this factor rides on top of
 ## that so players can trade HUD size for screen space. It only moves the canvas
@@ -10887,7 +11018,7 @@ func _apply_ui_scale() -> void:
 func _on_minimap_size_changed(value: float) -> void:
 	_minimap_scale = clampf(value, 0.75, 1.75)
 	_apply_minimap_scale()
-	_save_hud_settings()
+	_queue_hud_settings_save()
 
 ## Sound is the player's own choice about their own machine, so it is kept in
 ## the same settings file as the rest of the HUD preferences.
@@ -10907,9 +11038,35 @@ func _on_sound_enabled_toggled(pressed: bool) -> void:
 func _on_sound_volume_changed(value: float) -> void:
 	audio_director.volume_linear = value
 	sound_volume_value.text = "%d%%" % roundi(value * 100.0)
-	_save_hud_settings()
+	_queue_hud_settings_save()
+
+## For changes that come in bursts - a wheel spin over the minimap, a slider
+## drag, notes typed a key at a time - where each `_save_hud_settings` reads
+## and rewrites the whole settings file. The first change after a quiet
+## interval is written at once; the rest of the burst is written once, when
+## the interval has passed (`_flush_hud_settings_save`), or with any earlier
+## direct save, which writes every current value.
+func _queue_hud_settings_save() -> void:
+	var now := Time.get_ticks_msec()
+	if _hud_settings_saved_msec < 0 or now - _hud_settings_saved_msec >= HUD_SETTINGS_SAVE_INTERVAL_MSEC:
+		_hud_settings_saved_msec = now
+		_save_hud_settings()
+		return
+	_hud_settings_dirty = true
+	if settings_window.is_open():
+		_refresh_unified_settings()
+
+## Writes a queued settings change once its interval has passed, or at once.
+func _flush_hud_settings_save(immediately := false) -> void:
+	if not _hud_settings_dirty:
+		return
+	var now := Time.get_ticks_msec()
+	if immediately or now - _hud_settings_saved_msec >= HUD_SETTINGS_SAVE_INTERVAL_MSEC:
+		_hud_settings_saved_msec = now
+		_save_hud_settings()
 
 func _save_hud_settings() -> void:
+	_hud_settings_dirty = false
 	var config: ConfigFile = ConfigFile.new()
 	config.load(SETTINGS_PATH)
 	config.set_value("notes", "text", _player_notes)
@@ -11399,18 +11556,23 @@ func _collect_minimap_marks() -> Array[Dictionary]:
 		var actor: ReplicatedActor3D = actor_value as ReplicatedActor3D
 		if actor == null or not actor.is_visible_in_tree():
 			continue
+		var actor_position := actor.global_position
+		if not _within_minimap_reach(actor_position):
+			continue
 		var dto: Dictionary = AppState.actors.get(actor_id, {}) as Dictionary
 		if int(dto.get("kind", 0)) == ReplicatedActor3D.CREATURE_ACTOR_KIND \
 				and (int(dto.get("health", 1)) <= 0 or not bool(dto.get("alive", true))):
 			continue
 		if int(dto.get("kind", 0)) == 2 and service_names.has(str(dto.get("name", "")).to_lower()):
 			continue
-		marks.append(_map_actor_marker_cache.mark(actor_id, actor.global_position, dto))
+		marks.append(_map_actor_marker_cache.mark(actor_id, actor_position, dto))
 	for raw_object: Variant in map_object_nodes.values():
 		if not is_instance_valid(raw_object):
 			continue
 		var map_object: MapObject3D = raw_object as MapObject3D
 		if map_object == null or not map_object.is_visible_in_tree():
+			continue
+		if not _within_minimap_reach(map_object.global_position):
 			continue
 		if map_object.has_meta("campaign_work_available") and not bool(map_object.get_meta("campaign_work_available")):
 			continue
@@ -11434,6 +11596,8 @@ func _collect_minimap_marks() -> Array[Dictionary]:
 			continue
 		var marker: MapMarker3D = raw_marker as MapMarker3D
 		if marker == null or not marker.is_visible_in_tree():
+			continue
+		if not _within_minimap_reach(marker.global_position):
 			continue
 		marks.append({"position": marker.global_position, "type": &"marker",
 			"colour": MapMarker3D.MARKER_COLOUR,
@@ -11758,7 +11922,7 @@ func _sync_console() -> void:
 		return
 	chat_log_tabs.sync(AppState.active_channels, AppState.chat_history)
 	_render_chat_feed(console_output, AppState.chat_history.filter(
-		func(line: Dictionary) -> bool: return _console_line_shown(line)))
+		func(line: Dictionary) -> bool: return _console_line_shown(line)), AppState.CHAT_HISTORY_LIMIT)
 	_console_tail = _last_chat_line()
 
 func _last_chat_line() -> Dictionary:
@@ -11802,7 +11966,9 @@ func _append_chat_line() -> void:
 	if count >= 2 and is_same(previous, _console_tail):
 		_console_tail = line
 		if _console_line_shown(line):
-			_append_to_chat_feed(console_output, line)
+			# Bounded like the history it shows, so a long session's console
+			# neither grows nor slows each new line.
+			_append_to_chat_feed(console_output, line, AppState.CHAT_HISTORY_LIMIT)
 	else:
 		_sync_console()
 
@@ -14508,7 +14674,35 @@ func _bind_spell_slots() -> void:
 			slot += 1
 	_sync_spells()
 
+## Inventory packets come several to a harvested item, and redrawing the
+## inventory window and its workspace for each restyles every slot. While
+## neither the window nor its item card is on screen, a packet only marks them
+## stale (`_inventory_view_stale`) and they are redrawn when one is shown
+## (`_on_inventory_view_visibility_changed`). The quick slots on the HUD and
+## the selection are kept current either way.
+func _sync_inventory_if_shown() -> void:
+	if _inventory_view_shown():
+		_sync_inventory()
+		return
+	_inventory_view_stale = true
+	if selected_inventory_slot >= 0 and not AppState.inventory.get(selected_inventory_slot) is Dictionary:
+		selected_inventory_slot = -1
+	_sync_quick_slots()
+	if ground_bag_panel.visible:
+		_sync_ground_bag_actions()
+
+func _inventory_view_shown() -> bool:
+	if inventory_panel.is_visible_in_tree():
+		return true
+	var card: Variant = extension_windows.get("detail_panel") if extension_windows != null else null
+	return is_instance_valid(card) and (card as Control).is_visible_in_tree()
+
+func _on_inventory_view_visibility_changed() -> void:
+	if _inventory_view_stale and _inventory_view_shown():
+		_sync_inventory()
+
 func _sync_inventory() -> void:
+	_inventory_view_stale = false
 	inventory_load.text = "Load: %d / %d" % [int(AppState.stats.get("carried", 0)),
 		int(AppState.stats.get("capacity", 0))]
 	for slot: int in range(inventory_slot_buttons.size()):
@@ -15378,7 +15572,7 @@ func _on_binding_changed(_action: String) -> void:
 
 func _on_notes_changed(text: String) -> void:
 	_player_notes = text
-	_save_hud_settings()
+	_queue_hud_settings_save()
 
 ## A bookmark is the player's own, like a note: it is kept in the client's
 ## settings file and never goes near the server.
@@ -15783,35 +15977,47 @@ func _update_magic_preview() -> void:
 ## the quick bar and the inventory grid. `maximum_msec` came off the wire in
 ## every cooldown packet and was stored and never read, so a cooldown was a
 ## disabled button with a number in a tooltip and no sense of how far through
-## it was. Runs every frame: it only moves an anchor and sets a label, and a
-## chunky one-second step would defeat the point of showing progress at all.
+## it was. Runs every frame while a cooldown runs: it only moves an anchor and
+## sets a label, and a chunky one-second step would defeat the point of showing
+## progress at all. Once every shade is down it waits for the next cooldown.
 func _update_cooldown_overlays() -> void:
+	if _cooldown_shades_idle and AppState.inventory_cooldowns.hash() == _cooldown_idle_hash:
+		return
+	var running := false
 	for slot: int in range(quick_slot_buttons.size()):
-		_apply_cooldown_shade(quick_slot_buttons[slot], slot)
+		running = _apply_cooldown_shade(quick_slot_buttons[slot], slot) or running
 	for slot: int in range(inventory_slot_buttons.size()):
-		_apply_cooldown_shade(inventory_slot_buttons[slot], slot)
+		running = _apply_cooldown_shade(inventory_slot_buttons[slot], slot) or running
+	_cooldown_shades_idle = not running
+	_cooldown_idle_hash = AppState.inventory_cooldowns.hash()
 
-func _apply_cooldown_shade(button: Button, slot: int) -> void:
-	var shade: ColorRect = _cooldown_shade(button)
-	var seconds_label: Label = button.get_node("Seconds") as Label
+## Draws one slot's shade; true while its cooldown is still running.
+func _apply_cooldown_shade(button: Button, slot: int) -> bool:
+	var nodes: Variant = _cooldown_nodes.get(button.get_instance_id())
+	if nodes == null or not is_instance_valid((nodes as Array)[0]) or not is_instance_valid((nodes as Array)[1]):
+		nodes = [_cooldown_shade(button), button.get_node("Seconds") as Label]
+		_cooldown_nodes[button.get_instance_id()] = nodes
+	var shade: ColorRect = (nodes as Array)[0]
+	var seconds_label: Label = (nodes as Array)[1]
 	var cooldown_value: Variant = AppState.inventory_cooldowns.get(slot)
 	if not cooldown_value is Dictionary:
 		shade.visible = false
 		seconds_label.visible = false
-		return
+		return false
 	var cooldown: Dictionary = cooldown_value as Dictionary
 	var remaining_msec: int = int(cooldown.get("end_msec", 0)) - Time.get_ticks_msec()
 	var maximum_msec: int = maxi(1, int(cooldown.get("maximum_msec", 0)))
 	if remaining_msec <= 0:
 		shade.visible = false
 		seconds_label.visible = false
-		return
+		return false
 	shade.visible = true
 	seconds_label.visible = true
 	# The shade drains from full to empty as the cooldown runs out.
 	shade.anchor_top = 1.0 - clampf(float(remaining_msec) / float(maximum_msec),
 		0.0, 1.0)
 	seconds_label.text = str(maxi(1, ceili(float(remaining_msec) / 1000.0)))
+	return true
 
 ## The shade's own anchor moves as it drains, so the seconds label is added
 ## as its sibling rather than its child: nested inside the shade, the label
@@ -17538,6 +17744,7 @@ func _on_door_movement_requested(tile: Vector2i) -> void:
 		_door_approach = {}
 
 func _sync_map_objects() -> void:
+	_section_objects_dirty = true
 	for raw_id: Variant in map_object_nodes.keys():
 		var object_id: int = int(raw_id)
 		if not AppState.map_objects.has(object_id):

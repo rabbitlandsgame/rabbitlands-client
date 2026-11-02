@@ -56,6 +56,11 @@ const EntranceOverlayScript := preload("res://src/ui/entrance_map_overlay.gd")
 var _camera: Camera3D
 var _viewport_size := Vector2i.ZERO
 var _marks: Array[Dictionary] = []
+## The marks and the camera view (`_view_key`) the picture on screen was drawn
+## with, and whether a `set_marks` is waiting to compare the camera with it.
+var _drawn_marks: Array[Dictionary] = []
+var _drawn_view: Array = []
+var _view_check_queued := false
 var _enabled_types: Dictionary = {}
 var _marker_scale := 1.0
 var _round := false
@@ -109,7 +114,30 @@ func _draw_boundaries() -> void:
 
 func set_marks(marks: Array[Dictionary]) -> void:
 	_marks = marks
-	queue_redraw()
+	# A refresh in which neither a mark nor the camera moved would draw the
+	# same picture again. Marks are compared by value against a copy: the actor
+	# marks are the same dictionaries, moved in place between refreshes.
+	if _drawn_view.is_empty() or marks != _drawn_marks:
+		queue_redraw()
+		return
+	# main.gd moves the camera after it collects the marks, and the picture is
+	# drawn once the frame's moves are done, so the camera is compared then.
+	if not _view_check_queued:
+		_view_check_queued = true
+		_redraw_if_view_moved.call_deferred()
+
+func _redraw_if_view_moved() -> void:
+	_view_check_queued = false
+	var view := _view_key()
+	if view.is_empty() or view != _drawn_view:
+		queue_redraw()
+
+## What the marks' projection depends on besides the marks themselves.
+func _view_key() -> Array:
+	if not is_instance_valid(_camera) or not _camera.is_inside_tree():
+		return []
+	return [_camera.get_instance_id(), _camera.global_transform, _camera.size, _camera.fov,
+		_camera.projection, _viewport_size, size]
 
 func set_walk_target(position: Variant) -> void:
 	if _walk_target == position:
@@ -176,6 +204,8 @@ func draw_order(marks: Array[Dictionary]) -> Array[Dictionary]:
 	return others + own
 
 func _draw() -> void:
+	_drawn_view = _view_key()
+	_drawn_marks = _marks.duplicate(true)
 	if not is_instance_valid(_camera):
 		return
 	_draw_boundaries()

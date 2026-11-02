@@ -11,7 +11,12 @@ const AMBIENT_ENERGY := 0.30
 const LANTERN_ENERGY := 2.4
 const LANTERN_RANGE := 16.0
 const COMPATIBILITY_LIGHT_LIMIT := 8
+# Lighting is re-asserted every frame, so lamps are chosen again only once the
+# focus has moved this far (metres) from where they were last chosen.
+const LIMIT_STEP := 1.0
 var lamps: Array[OmniLight3D] = []
+var _limited_focus := Vector3.INF
+var _compatibility := RenderingServer.get_current_rendering_method() == "gl_compatibility"
 var _owner: WeakRef
 var _original: Environment
 var _dark: Environment
@@ -37,6 +42,9 @@ func set_cinematic_region(manifest: WorldManifest, focus: Vector3, markers: Node
 func clear_cinematic_region() -> void:
 	_cinematic_manifest = null
 	_cinematic_markers = null
+
+func has_cinematic_region() -> bool:
+	return _cinematic_manifest != null
 
 static func section_at(manifest: WorldManifest, point: Vector3) -> String:
 	if manifest == null or not point.is_finite(): return ""
@@ -71,35 +79,50 @@ func apply(manifest: WorldManifest, section: String, owner: WorldEnvironment,
 	if owner.environment != _dark or _dark == null:
 		_original = owner.environment
 		_dark = _original.duplicate(true) if _original != null else Environment.new()
-	owner.environment = _dark
-	_dark.background_mode = Environment.BG_COLOR
-	_dark.background_color = Color("080a13")
-	_dark.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	_dark.ambient_light_color = Color("59616f")
-	_dark.ambient_light_energy = AMBIENT_ENERGY
-	_dark.ambient_light_sky_contribution = 0.0
-	_dark.reflected_light_source = Environment.REFLECTION_SOURCE_DISABLED
-	_dark.sdfgi_enabled = false
-	_dark.ssil_enabled = false
-	_dark.fog_enabled = false
+	if owner.environment != _dark: owner.environment = _dark
+	# Runs every frame in the mine, and the clock's regrading may have written
+	# any of these since: setters notify the renderer even when unchanged.
+	_write(_dark, &"background_mode", Environment.BG_COLOR)
+	_write(_dark, &"background_color", Color("080a13"))
+	_write(_dark, &"ambient_light_source", Environment.AMBIENT_SOURCE_COLOR)
+	_write(_dark, &"ambient_light_color", Color("59616f"))
+	_write(_dark, &"ambient_light_energy", AMBIENT_ENERGY)
+	_write(_dark, &"ambient_light_sky_contribution", 0.0)
+	_write(_dark, &"reflected_light_source", Environment.REFLECTION_SOURCE_DISABLED)
+	_write(_dark, &"sdfgi_enabled", false)
+	_write(_dark, &"ssil_enabled", false)
+	_write(_dark, &"fog_enabled", false)
 	for light: DirectionalLight3D in [sun, moon]:
 		if not is_instance_valid(light): continue
 		var key := light.get_instance_id()
 		if not _directionals.has(key) or not is_zero_approx(light.light_energy):
 			_directionals[key] = {"node":weakref(light), "energy":light.light_energy}
-		light.light_energy = 0.0
+		if light.light_energy != 0.0: light.light_energy = 0.0
 	if _cinematic_manifest != null:
 		markers = _cinematic_markers.get_ref() as Node3D if _cinematic_markers != null else null
 	_apply_markers(markers, section_at(_cinematic_manifest, _cinematic_focus) if _cinematic_manifest != null else section)
 	if _cinematic_manifest != null: focus = _cinematic_focus
-	if RenderingServer.get_current_rendering_method() == "gl_compatibility" and focus.is_finite():
+	if _compatibility and focus.is_finite() \
+			and _limited_focus.distance_squared_to(focus) >= LIMIT_STEP * LIMIT_STEP:
 		limit_lamps(focus)
+
+static func _write(target: Object, property: StringName, value: Variant) -> void:
+	var current: Variant = target.get(property)
+	if typeof(value) == TYPE_FLOAT:
+		if is_equal_approx(float(current), float(value)): return
+	elif current == value:
+		return
+	target.set(property, value)
 
 func _apply_markers(root: Node3D, section: String) -> void:
 	var previous := _marker_root.get_ref() as Node3D if _marker_root != null else null
 	if previous != root or _marker_section != section: _restore_markers()
 	if not is_instance_valid(root): return
+	# The section's lamps were found and lit when it was entered. Nothing else
+	# writes their energy, range, colour or mask, so the next frame keeps them.
+	if previous == root and _marker_section == section: return
 	_marker_root = weakref(root)
+	_limited_focus = Vector3.INF
 	_marker_section = section
 	lamps.clear()
 	for node: Node in root.find_children("*", "OmniLight3D", true, false):
@@ -125,7 +148,8 @@ func limit_lamps(focus: Vector3) -> void:
 	# so distant lamps otherwise consume its entire budget and black out the
 	# room being played. A separate parent gate preserves SecretSections' own
 	# light visibility; mask=0 alone still consumes a GLES per-mesh light slot.
-	var nearest := lamps.duplicate()
+	_limited_focus = focus
+	var nearest := lamps.filter(func(light: Variant) -> bool: return is_instance_valid(light))
 	nearest.sort_custom(func(a: OmniLight3D, b: OmniLight3D) -> bool:
 		return a.global_position.distance_squared_to(focus) < b.global_position.distance_squared_to(focus))
 	for index in nearest.size():
@@ -159,7 +183,7 @@ func _restore_markers() -> void:
 			light.omni_range = float(row.range)
 			light.light_color = row.color
 			light.light_cull_mask = int(row.mask)
-	_markers.clear(); lamps.clear(); _marker_root = null; _marker_section = ""
+	_markers.clear(); lamps.clear(); _marker_root = null; _marker_section = ""; _limited_focus = Vector3.INF
 
 func _restore() -> void:
 	var owner := _owner.get_ref() as WorldEnvironment if _owner != null else null
