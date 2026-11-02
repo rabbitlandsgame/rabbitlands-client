@@ -150,7 +150,7 @@ const HAIR_VOLUME_SHAPES := ["hl_volume_p", "hl_volume_n"]
 const NATIVE_HAIR_FIT_SHAPE := "hl_native_fit"
 ## The instance uniforms on an RL hairstyle's meshes. A beard keeps the
 ## shader's default `hair_detail` (0.5, nothing dropped).
-const HAIR_INSTANCE_UNIFORMS := ["hair_color", "hair_detail", "eye_color"]
+const HAIR_INSTANCE_UNIFORMS := ["hair_color", "hair_detail", "eye_color", "skin_color"]
 const AGE := preload("res://src/actors/character_age.gd")
 const HAIR_MODULE_LOOKUP := preload("res://src/actors/rl_head/rl_head_hair_modules.gd")
 

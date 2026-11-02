@@ -58,6 +58,7 @@ const MATERIAL_SHADERS := {
 }
 ## Explicit clump roles with independent concrete names, extras and textures.
 const MATERIAL_ROLES := {
+	"rl_hair_clump_backing": "rl_hair_clump",
 	"rl_hair_clump_crest": "rl_hair_clump",
 	"rl_hair_clump_crest_lod1": "rl_hair_clump",
 	"rl_hair_clump_crest_lod2": "rl_hair_clump",
@@ -170,7 +171,7 @@ const SHADER_VALUES := {
 	"rl_eye": ["eye_color", "eye_look", "eye_style_paint"],
 	"rl_lash": ["hair_color"],
 	"rl_brow": ["brow_color"],
-	"rl_hair": ["hair_color", "hair_detail", "eye_color"],
+	"rl_hair": ["hair_color", "hair_detail", "eye_color", "skin_color"],
 	"rl_cornea": [],
 	"rl_mouth": [],
 }
@@ -1042,6 +1043,8 @@ static func material(material_name: String, sex: String, style: String, quality:
 				slot_texture(keys, "albedo", file, quality))
 			result.set_shader_parameter("card", role != "rl_hair_clump")
 			result.set_shader_parameter("scalp_channels", style == "cornrows_low_knot")
+			result.set_shader_parameter("shaved_scalp_blend", role == "rl_hair_clump"
+				and bool(extras.get("shavedScalpBlend", false)))
 			result.set_shader_parameter("soft_hairline", bool(extras.get("softHairline", false)))
 			result.set_shader_parameter("soft_root_coverage", soft_clump)
 			if bool(extras.get("referenceSurface", false)):

@@ -103,6 +103,9 @@ uniform bool has_texture = false;
 uniform bool card = false;
 // Tight braids intentionally expose the actor's scalp between their rows.
 uniform bool scalp_channels = false;
+// Opt-in imported close fades: blue carries scalp coverage instead of AO.
+// The dense top and detail cards keep the ordinary hair response.
+uniform bool shaved_scalp_blend = false;
 uniform bool soft_hairline = false;
 // Reference clumps can use card shading while carrying root coverage in R.
 uniform bool soft_root_coverage = false;
@@ -166,7 +169,7 @@ void fragment() {
 	float root = mix(1.0 - root_darkening, 1.0, smoothstep(0.0, 0.55, COLOR.g));
 	float lock_random = soft_hairline && (!card || beard || soft_root_coverage) ? 0.5 : COLOR.r;
 	float lock = 1.0 + (lock_random - 0.5) * 2.0 * lock_variation * (1.0 + boost);
-	float shade = mix(1.0, COLOR.b, occlusion);
+	float shade = mix(1.0, shaved_scalp_blend ? 0.92 : COLOR.b, occlusion);
 	float painted = has_texture ? dot(atlas.rgb, LUMA) : atlas.r / 1.5;
 	if (has_texture && (boost > 0.0 || flatness > 0.0)) {
 		float mean = dot(textureLod(strand_texture, UV, MEAN_LOD).rgb, LUMA);
@@ -175,6 +178,13 @@ void fragment() {
 	}
 	float luminance = painted * exposure;
 	ALBEDO = rl_grey_colour(hair_color.rgb, UV, rl_age_amounts().y) * clamp(luminance, 0.0, 2.0) * root * lock * shade * (beard ? beard_gain : 1.0);
+	if (shaved_scalp_blend) {
+		// Keep the short painted stubble relief while exposing the actor's own
+		// skin dye. Hair pigment and greying still affect the remaining stubble.
+		float coverage = clamp(COLOR.b, 0.0, 1.0);
+		vec3 scalp = skin_color.rgb * mix(0.88, 1.0, clamp(painted * 2.0, 0.0, 1.0));
+		ALBEDO = mix(ALBEDO, scalp, coverage * 0.96);
+	}
 	// A dropped detail fragment fails the scissor below like uncovered atlas
 	// (alpha_scissor is above 0 on every RL hair material).
 	ALPHA = kept ? atlas.a : 0.0;
