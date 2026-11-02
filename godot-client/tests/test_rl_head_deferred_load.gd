@@ -50,6 +50,13 @@ func _run() -> void:
 	await _check_deferred_build()
 	await _check_file_release()
 	RLHeadLibrary.deferred_loading = -1
+	# A headless Main (every test that loads main.tscn) builds at once: a worker
+	# parse still running when the process quits can hang it.
+	var context := Node.new()
+	RLHeadLibrary.set_render_warm_context(context, &"is_inside_tree")
+	_expect(not RLHeadLibrary.defers_loading(), "a headless process never defers, with Main's context registered")
+	RLHeadLibrary.clear_render_warm_context(context)
+	context.free()
 	RLHeadLibrary.retain_seconds = RLHeadLibrary.RETAIN_SECONDS
 	RLHeadLibrary.clear()
 	NativeAnimationImporter.clear()

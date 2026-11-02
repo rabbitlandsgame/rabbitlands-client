@@ -396,12 +396,15 @@ static func _release_untaken(keys: PackedStringArray) -> void:
 ## Whether a Human whose RL files are not parsed yet draws the classic head
 ## while they are parsed on a worker (ReplicatedActor3D._rl_head_files_ready)
 ## instead of parsing them on the main thread: in the game (Main registered
-## its context) with prewarming on, unless `deferred_loading` says otherwise.
-## Standalone labs, tools and tests build at once, as before.
+## its context, in a window) with prewarming on, unless `deferred_loading` says
+## otherwise. Standalone labs, tools and tests build at once, as before; so does
+## a headless Main (tests), which draws nothing and never waits for a worker
+## parse at quit (a process that quits while one runs can hang: prewarm).
 static func defers_loading() -> bool:
 	if deferred_loading >= 0:
 		return deferred_loading == 1
-	return prewarm_enabled() and _render_warm_owner != null and _render_warm_owner.get_ref() != null
+	return prewarm_enabled() and DisplayServer.get_name() != "headless" \
+		and _render_warm_owner != null and _render_warm_owner.get_ref() != null
 
 
 ## Starts the next queued parse when none is running: one worker parse at a
