@@ -32,6 +32,15 @@ var preload_distance := DEFAULT_PRELOAD_DISTANCE
 var retain_distance := DEFAULT_RETAIN_DISTANCE
 var maximum_neighbours := MAXIMUM_NEIGHBOURS
 var _thread: Thread
+## Browser workers may read bytes, but must not construct WebGL Resources.
+## Stream skeletons are prepared on Main; their cells keep the existing
+## incremental browser loader. Whole neighbours wait for their actual arrival.
+var _browser_background := OS.has_feature("web")
+var _web_pending := false
+var _web_generation := 0
+var _web_builder: WorldLoader
+var _pending_arrival := Vector3.INF
+var _prepare_browser_function: Callable = _prepare_browser_stream
 var _pending_map := ""
 var _admission_token: Dictionary = {}
 var _pending_started_usec := 0
@@ -114,12 +123,17 @@ func update_position(position: Vector3) -> void:
 	_admission_token = request.get("token", {})
 	_pending_map = map_id
 	_pending_generation = _generation
-	_thread = Thread.new()
 	var visuals := GlbSceneCache.missing(PackedStringArray(candidate.there.get("visualScenes", [])))
 	var arrival := Vector3.INF
 	if candidate.here.has("frame") and candidate.there.has("frame"):
 		arrival = frame_transform(candidate.here.frame, candidate.there.frame).affine_inverse() * position
 	_pending_started_usec = Time.get_ticks_usec()
+	if _browser_background:
+		_queue_web_preload(path, arrival)
+		ResourceAdmission.event(_admission_token, ResourceAdmission.LAUNCHED)
+		_record("requested", map_id, {"distance": candidate.distance, "main_thread": true})
+		return
+	_thread = Thread.new()
 	var error := _thread.start(WorldLoader.prepare_detached.bind(path, MapSceneCache.is_enabled(), visuals, arrival, ResourceAdmission.requested()))
 	if error != OK:
 		ResourceAdmission.event(_admission_token, ResourceAdmission.FAILED)
@@ -130,6 +144,65 @@ func update_position(position: Vector3) -> void:
 	else:
 		ResourceAdmission.event(_admission_token, ResourceAdmission.LAUNCHED)
 		_record("requested", map_id, {"distance": candidate.distance})
+
+func _queue_web_preload(path: String, arrival: Vector3) -> void:
+	_pending_arrival = arrival
+	_web_generation += 1
+	_web_pending = true
+	_prepare_web_region.call_deferred(path, _web_generation)
+
+static func _prepare_browser_stream(path: String) -> WorldLoader:
+	if OS.get_thread_caller_id() != OS.get_main_thread_id():
+		return null
+	var manifest := WorldManifest.load_file(path)
+	if not manifest.is_valid() or not manifest.has_streaming_chunks():
+		return null
+	var builder := WorldLoader.new()
+	# true suppresses the synchronous prime: no GLB/mesh is imported here.
+	builder.load_world(path, Vector3.INF, true)
+	if not builder.world_root is ContinentChunkStream:
+		builder.free()
+		return null
+	return builder
+
+func _prepare_web_region(path: String, generation: int) -> void:
+	if not _web_pending or generation != _web_generation or _pending_generation != _generation:
+		return
+	_web_pending = false
+	_web_builder = _prepare_browser_function.call(path) as WorldLoader
+	if _web_builder == null:
+		ResourceAdmission.event(_admission_token, ResourceAdmission.CANCEL)
+		ResourceAdmission.hold(_admission_token, null, false)
+		_retry_after[_pending_map] = Time.get_ticks_msec() + 30000
+		_record("preload_skip", _pending_map, {"reason": "browser_whole_map_or_invalid"})
+		_pending_map = ""
+		_pending_started_usec = 0
+		_admission_token = {}
+		return
+	var stream := _web_builder.world_root as ContinentChunkStream
+	var focus := _pending_arrival
+	if not focus.is_finite():
+		var spawns: Array = _web_builder.manifest.data.get("spawnPoints", [])
+		var at: Array = spawns[0].get("position", [0, 0, 0]) if not spawns.is_empty() else [0, 0, 0]
+		focus = Vector3(float(at[0]), float(at[1]), float(at[2]))
+	# Set focus without prime(). Once attached, normal web chunk scheduling
+	# materializes one deferred cell at a time on Main.
+	stream.begin_arrival(focus)
+
+func _has_pending_preload() -> bool:
+	return _thread != null or _web_pending or _web_builder != null
+
+func _cancel_web_preload() -> void:
+	_web_generation += 1
+	_web_pending = false
+	if _web_builder != null:
+		_web_builder.free()
+		_web_builder = null
+		ResourceAdmission.hold(_admission_token, null, false)
+	if _thread == null:
+		_pending_map = ""
+		_pending_started_usec = 0
+		_admission_token = {}
 
 func _wanted_neighbours(candidates: Array[Dictionary]) -> Dictionary:
 	var wanted: Dictionary = {}
@@ -156,12 +229,17 @@ func _process(_delta: float) -> void:
 		_retirement_scheduled = true
 		_drain_retired_deferred.call_deferred()
 	ContinentChunkStream.reap_orphans()
-	if _thread == null or _thread.is_alive():
+	if (_thread == null and _web_builder == null) or (_thread != null and _thread.is_alive()):
 		return
 	if not ResourceAdmission.can_publish():
 		return
 	var install_began := Time.get_ticks_usec()
-	var builder := _thread.wait_to_finish() as WorldLoader
+	var builder: WorldLoader
+	if _thread != null:
+		builder = _thread.wait_to_finish() as WorldLoader
+	else:
+		builder = _web_builder
+		_web_builder = null
 	if _pending_started_usec > 0:
 		ResourceDiagnostics.record(_resource_timings, &"prepare_request_to_poll", _pending_started_usec)
 	_thread = null
@@ -425,7 +503,7 @@ func _evict(map_id: String) -> void:
 	residents_changed.emit()
 
 func _can_dispatch_preload() -> bool:
-	return (_thread == null and _retiring.is_empty()
+	return (not _has_pending_preload() and _retiring.is_empty()
 		and residents.size() < mini(maximum_neighbours, MAXIMUM_NEIGHBOURS))
 
 func _retire(resident: Dictionary, map_id: String) -> void:
@@ -539,9 +617,9 @@ func diagnostic_snapshot() -> Dictionary:
 			unknown_whole_maps += 1
 	return {"roots": roots, "known_chunk_estimated_bytes": known_bytes,
 		"unknown_whole_map_roots": unknown_whole_maps,
-		"in_flight_maps": 1 if _thread != null else 0,
-		"in_flight_map": _pending_map if _thread != null else "",
-		"in_flight_map_age_us": maxi(0, Time.get_ticks_usec() - _pending_started_usec) if _thread != null else 0,
+		"in_flight_maps": 1 if _has_pending_preload() else 0,
+		"in_flight_map": _pending_map if _has_pending_preload() else "",
+		"in_flight_map_age_us": maxi(0, Time.get_ticks_usec() - _pending_started_usec) if _has_pending_preload() else 0,
 		"outer_worker_bytes_known": false,
 		"orphan_workers": ContinentChunkStream.orphan_diagnostic_snapshot(),
 		"shared_retirement": RetirementBudget.diagnostic_snapshot(),
@@ -631,6 +709,7 @@ static func _blend(a: Variant, b: Variant, weight: float) -> Variant:
 
 func clear(preserve_expected_walk := false) -> void:
 	ResourceAdmission.event(_admission_token, ResourceAdmission.CANCEL)
+	_cancel_web_preload()
 	# Keep existing retirement jobs; surrender only the old waiting turn.
 	RetirementBudget.cancel(self)
 	var tree := Engine.get_main_loop() as SceneTree
@@ -1026,7 +1105,7 @@ func _first_walk_leg(source: String, destination: String) -> Dictionary:
 
 func is_idle() -> bool:
 	ContinentChunkStream.reap_orphans()
-	return _thread == null and _retiring.is_empty() and ContinentChunkStream.orphans_pending() == 0
+	return not _has_pending_preload() and _retiring.is_empty() and ContinentChunkStream.orphans_pending() == 0
 
 func _record(kind: String, map_id: String, detail := {}) -> void:
 	var entry := {"event": kind, "map": map_id, "at_ms": Time.get_ticks_msec()}
@@ -1038,6 +1117,9 @@ func _record(kind: String, map_id: String, detail := {}) -> void:
 
 func _exit_tree() -> void:
 	RetirementBudget.cancel(self)
+	if _web_pending or _web_builder != null:
+		ResourceAdmission.event(_admission_token, ResourceAdmission.CANCEL)
+		_cancel_web_preload()
 	if _thread != null and not _admission_token.is_empty():
 		# Preserve the already-owned worker across an unexpected owner exit.
 		# The existing reaper joins only after completion on a later main frame.

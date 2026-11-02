@@ -90,6 +90,10 @@ var warm_materials := true
 ## The worker's entry point: (path, cache_enabled, visual_paths) -> WorldLoader.
 ## Tests substitute a builder that needs no package on disk.
 var prepare_function: Callable = WorldLoader.prepare_detached
+## Browser geometry cannot be constructed on a worker. Keep parking and byte
+## prefetch, but build a first whole interior on Main behind its arrival curtain.
+var _browser_background := OS.has_feature("web")
+var _browser_prefetched := false
 ## A test's clock in milliseconds; negative uses the engine's.
 var now_override := -1
 var events: Array[Dictionary] = []
@@ -523,6 +527,12 @@ func observe(map_id: String, tile: Vector2i, map_objects: Dictionary = {}, settl
 			_drop_preload("anticipated_travel")
 		nearest = _prioritize(nearest, interior)
 		break # One background slot; the first eligible destination has priority.
+	_browser_prefetched = false
+	if _browser_background and not nearest.is_empty():
+		var closest := str(nearest.keys()[0])
+		for interior: String in nearest:
+			if float(nearest[interior]) < float(nearest[closest]): closest = interior
+		nearest = _prioritize(nearest, closest)
 	for interior: String in nearest:
 		if _parked.has(interior):
 			# A parked interior is the preload already done, and is kept as one:
@@ -536,6 +546,8 @@ func observe(map_id: String, tile: Vector2i, map_objects: Dictionary = {}, settl
 		if not _preload.is_empty() and str(_preload.map) != interior:
 			continue # One preload at a time; the other is judged below.
 		_judge_preload(interior, float(nearest[interior]), int(nearest_door[interior]), now, settled)
+		if _browser_background and _browser_prefetched:
+			break # At most the nearest eligible door's bytes, never every room.
 	if not _preload.is_empty() and not nearest.has(str(_preload.map)):
 		_judge_preload(str(_preload.map), INF, -1, now, settled)
 
@@ -575,7 +587,10 @@ func _judge_preload(interior: String, distance: float, door: int, now: int, sett
 ## (no package, a thread error, a preload already running).
 func start_preload(interior: String, door := -1, distance := INF) -> bool:
 	interior = MapRegistry.normalize_server_map_id(interior)
-	if OS.has_feature("web") and not WebPrototype.ensure_map(interior): return false
+	if _browser_background:
+		_browser_prefetched = true
+		if not WebPrototype.map_ready(interior): WebPrototype.ensure_map(interior)
+		return false
 	if not _preload.is_empty() or _parked.has(interior):
 		return false
 	var entry := MapRegistry.resolve(registry, interior)
