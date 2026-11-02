@@ -26,6 +26,14 @@ func _run() -> void:
 	service.release_groups("active")
 	service._evict()
 	assert(service.live_bytes == 0 and service.states.is_empty())
+	service.states = {"startup":"ready", "shared":"ready", "map:a":"failed"}
+	service.errors = {"map:a":"temporary network failure"}
+	service.error = "temporary network failure"
+	assert(service.retry_failed() == 1)
+	assert(service.states == {"startup":"ready", "shared":"ready"} and service.error.is_empty())
+	assert(not service.ensure_groups(["map:a"], "active"))
+	assert(service.queue == ["map:a"])
+	service.queue.clear()
 	# The same original file is assembled across independently compressed pieces.
 	service.current = "fixture"
 	service.files.fixture = []

@@ -86,3 +86,7 @@ static func pin_maps(owner: String, ids: Array) -> void:
 static func asset_snapshot() -> Dictionary:
 	var service := _service() if OS.has_feature("web") else null
 	return service.call("snapshot") if service != null else {}
+
+static func retry_failed() -> int:
+	var service := _service() if OS.has_feature("web") else null
+	return int(service.call("retry_failed")) if service != null else 0

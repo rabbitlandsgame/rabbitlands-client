@@ -18,6 +18,7 @@ var queue: Array[String] = []
 var busy := false
 var current := ""
 var error := ""
+var errors: Dictionary = {}
 var completed_archives := 0
 var live_bytes := 0
 var budget_bytes := 768 * 1024 * 1024
@@ -57,6 +58,16 @@ func pin_groups(owner: String, ids: Array) -> void:
 
 func release_groups(owner: String) -> void:
 	pins.erase(owner)
+
+func retry_failed() -> int:
+	var count := 0
+	for id: String in states.keys():
+		if states[id] == "failed":
+			states.erase(id)
+			count += 1
+	errors.clear()
+	error = ""
+	return count
 
 func ensure_groups(ids: Array, owner := "") -> bool:
 	if not owner.is_empty(): pin_groups(owner, ids)
@@ -122,6 +133,7 @@ func _archive_ready(args: Array) -> void:
 
 func _fail(message: String) -> void:
 	error = message
+	errors[current] = message
 	states[current] = "failed"
 	_remove_files(current)
 	current = ""
@@ -221,5 +233,6 @@ func _evict() -> void:
 
 func snapshot() -> Dictionary:
 	return {"busy":busy, "current":current, "queued":queue.size(), "error":error,
+		"failed_groups":errors.keys(),
 		"live_bytes":live_bytes, "budget_bytes":budget_bytes, "over_budget":live_bytes > budget_bytes,
 		"evictions":_evictions, "completed_archives":completed_archives}
