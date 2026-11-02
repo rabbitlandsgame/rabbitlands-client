@@ -421,6 +421,7 @@ def main():
     parser.add_argument("--endpoint", default="ws://127.0.0.1:2002")
     parser.add_argument("--assets-base-url", default="http://127.0.0.1:8061/", help="CORS-enabled asset folder; HTTPS outside loopback")
     parser.add_argument("--prepare-only", action="store_true")
+    parser.add_argument("--release", action="store_true", help="Use the optimized web runtime instead of the diagnostic debug template")
     parser.add_argument("--asset-catalog", type=Path, help="Reuse verified task-local grouped assets with identical committed source inputs")
     parser.add_argument("--cape-runtime", type=Path, help="Optional compiled browser_cape.wasm; enables extension-capable templates")
     parser.add_argument("--editor-runtime", type=Path, help="Matching browser_cape editor library; required with --cape-runtime")
@@ -471,7 +472,7 @@ progressive_web_app/enabled=false
     for folder in (env["APPDATA"], env["LOCALAPPDATA"], env["TEMP"]):
         Path(folder).mkdir(parents=True, exist_ok=True)
     for label, options in (("import", ["--editor", "--import"]),
-                           ("export", ["--export-debug", "Browser Prototype", str(stage / "site/index.html")])):
+                           ("export", ["--export-release" if args.release else "--export-debug", "Browser Prototype", str(stage / "site/index.html")])):
         log = stage / f"{label}.log"
         configuration = project / "project.godot"
         original = configuration.read_bytes()
@@ -491,6 +492,9 @@ progressive_web_app/enabled=false
         if result.returncode or any(s in text for s in ("SCRIPT ERROR", "Parse Error", "ERROR:")):
             raise SystemExit(f"Browser {label} failed; inspect {log}")
     finish_site(stage, args.assets_base_url)
+    final_report = json.loads((stage / "build.json").read_text(encoding="utf-8"))
+    final_report["export_mode"] = "release" if args.release else "debug"
+    (stage / "build.json").write_text(json.dumps(final_report, indent=2), encoding="utf-8")
     print(f"Browser build ready: {stage / 'site/index.html'}", flush=True)
 
 
