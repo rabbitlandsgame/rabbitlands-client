@@ -27,5 +27,25 @@ func _run() -> void:
 	index.maps.town = "invalid"
 	expect(Catalog.select_entry(index, "town").is_empty(), "invalid map metadata fails closed")
 	expect(Catalog.select_entry({"maps": []}, "town").is_empty(), "invalid catalog cannot select a picture")
-	print("Map background catalog: 10 checks, ", failures, " failures")
+	var provenance := {"maps": {"town": {"path": "town.webp", "worldMin": [0, 0], "worldMax": [8, 8],
+		"sourceInputs": {"a.png": "00"}, "sections": {}}}}
+	Catalog.runtime_index(provenance)
+	expect(not provenance.maps.town.has("sourceInputs") and Catalog.select_entry(provenance, "town").worldMax == [8, 8],
+		"runtime index drops build provenance and keeps the picture fields")
+	# The shipped index selects exactly the same rows once its provenance is gone.
+	var shipped: Variant = JSON.parse_string(FileAccess.get_file_as_string(Catalog.INDEX))
+	var trimmed: Variant = JSON.parse_string(FileAccess.get_file_as_string(Catalog.INDEX))
+	var same := shipped is Dictionary and trimmed is Dictionary
+	if same:
+		Catalog.runtime_index(trimmed)
+		for map_id: String in (shipped as Dictionary).get("maps", {}):
+			var sections: Array = [""]
+			sections.append_array(((shipped as Dictionary).maps[map_id].get("sections", {}) as Dictionary).keys())
+			for section: String in sections:
+				var expected := Catalog.select_entry(shipped, map_id, section)
+				expected.erase("sourceInputs")
+				same = same and Catalog.select_entry(trimmed, map_id, section) == expected \
+					and not ((trimmed as Dictionary).maps[map_id] as Dictionary).has("sourceInputs")
+	expect(same, "shipped index selects identical runtime rows without sourceInputs")
+	print("Map background catalog: 12 checks, ", failures, " failures")
 	quit(1 if failures else 0)

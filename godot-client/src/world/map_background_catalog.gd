@@ -35,13 +35,25 @@ static func select_entry(index: Dictionary, map_id: String, section := "") -> Di
 		row = selected
 	return row if not str(row.get("path", "")).is_empty() else {}
 
+## The index as the session keeps it. Each map row's `sourceInputs` (the digests
+## of every input its picture was rendered from, 98% of the 4.4 MB file) is
+## build provenance only the packager reads; nothing select_entry or picture
+## reads is removed.
+static func runtime_index(index: Dictionary) -> Dictionary:
+	var maps: Variant = index.get("maps", {})
+	if maps is Dictionary:
+		for row: Variant in (maps as Dictionary).values():
+			if row is Dictionary:
+				(row as Dictionary).erase("sourceInputs")
+	return index
+
 func picture(map_id: String, section: String, height: float) -> Dictionary:
 	if not _loaded:
 		_loaded = true
 		if FileAccess.file_exists(INDEX):
 			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(INDEX))
 			if parsed is Dictionary and parsed.get("schemaVersion") == 1:
-				_index = parsed
+				_index = runtime_index(parsed)
 	var row := select_entry(_index, map_id, section)
 	if row.is_empty():
 		return {}
