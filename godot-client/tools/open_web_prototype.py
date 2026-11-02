@@ -13,7 +13,7 @@ def main():
     parser.add_argument("--url", default="http://127.0.0.1:8060/")
     parser.add_argument("--profile", type=Path, default=REPO / ".local/browser-prototype/browser-profile")
     parser.add_argument("--chrome", type=Path, help="Chrome executable; detected on Windows by default")
-    parser.add_argument("--graphics-backend", choices=("auto", "gl", "d3d11"),
+    parser.add_argument("--graphics-backend", choices=("auto", "gl", "vulkan", "d3d11"),
                         default="gl" if os.name == "nt" else "auto",
                         help="Prototype Chrome backend; Windows GL avoids the observed D3D11 map shader reset")
     args = parser.parse_args()
