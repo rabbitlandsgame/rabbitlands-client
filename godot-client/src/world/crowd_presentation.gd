@@ -101,6 +101,9 @@ var builds := 0
 var releases := 0
 var revivals := 0
 
+func parked_actor_ids() -> Array:
+	return _parked.keys()
+
 ## The policy the environment asks for: Main passes
 ## `RABBITLANDS_CROWD_PRESENTATION` and `RABBITLANDS_CROWD_BODY_CAP`. The first
 ## is empty or `all` for everything, `legacy` (or `0`/`off`) for none, or a

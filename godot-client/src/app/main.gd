@@ -931,6 +931,7 @@ var _deferred_map_load := false
 ## Frames the curtain stays up after the character is grounded.
 var _arrival_settle_frames := 0
 var _browser_mount_warmup: RefCounted
+var _browser_actor_assets: RefCounted
 ## The local character was spawned and the server has not yet been told it
 ## stands on loaded ground (`_report_arrival`).
 var _arrival_unreported := false
@@ -2095,6 +2096,11 @@ func _bind_shared_world() -> void:
 	print_debug("world_binding stage=shared world=", gameplay_world)
 
 func _process(delta: float) -> void:
+	if _browser_actor_assets != null:
+		for actor_id: int in _browser_actor_assets.call("poll"):
+			if AppState.actors.has(actor_id):
+				AppState.mark_actor_changed(actor_id)
+				_queue_world_sync()
 	_flush_character_ui_sync()
 	if AppState.authenticated and AppState.inventory_metadata_dirty and Network._link_ready() \
 			and Time.get_ticks_msec() >= _inventory_metadata_at:
@@ -4722,6 +4728,7 @@ func _clear_world_presentation(retain_map_resources := false) -> void:
 		if is_instance_valid(raw_node):
 			(raw_node as Node).queue_free()
 	actor_nodes.clear()
+	if _browser_actor_assets != null: _browser_actor_assets.call("clear")
 	_map_actor_marker_cache.clear()
 	crowd.clear()
 	_built_bodies = 0
@@ -7424,6 +7431,8 @@ func _remove_stale_actor_nodes(changed: Variant) -> void:
 		# held it before, and the next update floats a change nobody took.
 		_actor_health_seen.erase(id)
 	crowd.expire_parked(now)
+	if _browser_actor_assets != null:
+		_browser_actor_assets.call("prune", AppState.actors, crowd.parked_actor_ids())
 
 ## Gives each arriving actor a node. The player's own is always built at once.
 ## With lazy bodies (crowd_presentation.gd) the nearest arrivals inside the
@@ -7549,10 +7558,24 @@ func _charge_actor_work(usec: int) -> void:
 func _remote_model_ready(id: int) -> bool:
 	if _actor_preparation_closing:
 		return false
+	if OS.has_feature("web") and not _browser_actor_ready(id, _presentation_dto(AppState.actors[id])):
+		return false
 	if id == AppState.local_actor_id:
 		return true
 	var config: Dictionary = models.get(_model_for_actor(AppState.actors[id]), {})
 	return actor_resource_warmup.request(config, _animation_for_model(config))
+
+func _browser_actor_ready(id: int, dto: Dictionary) -> bool:
+	if not OS.has_feature("web"): return true
+	if _browser_actor_assets == null:
+		_browser_actor_assets = preload("res://src/platform/browser_actor_assets.gd").new(WebPrototype)
+	var state := AppState.mount_state_for_actor(id)
+	var mount := str(state.get("mount_id", "")) if state.get("mode") == "mounted" else ""
+	# Prepare the local selected mount before the loading curtain releases it.
+	if mount.is_empty() and id == AppState.local_actor_id:
+		mount = str(state.get("selected_mount_id", ""))
+	return bool(_browser_actor_assets.call("admit", id, _model_for_actor(dto),
+		dto.get("equipment_visuals", {}), mount))
 
 func _crowd_reference_point() -> Vector3:
 	var local_value: Variant = actor_nodes.get(AppState.local_actor_id)
@@ -7615,6 +7638,11 @@ func _present_actor(id: Variant) -> void:
 	var actor_adapter: CoordinateAdapter = _adapter_for_actor(dto)
 	if actor_adapter == null:
 		return
+	if OS.has_feature("web") and not existing_actor.is_model_deferred() and not _browser_actor_ready(int(id), dto):
+		# Movement, combat and vitals keep updating while a new outfit arrives.
+		dto = dto.duplicate()
+		dto["appearance"] = existing_actor.get("_appearance")
+		dto["equipment_visuals"] = existing_actor.get("_equipment_visuals")
 	existing_actor.apply_server_state(dto, actor_adapter)
 	_apply_actor_mount(id)
 	# Before apply_vitals, which is what overwrites the old value.
@@ -7647,6 +7675,9 @@ func _spawn_actor(id: Variant, build := true,
 			_revive_actor(id, parked, dto, actor_adapter)
 			return true
 	var creates_body: bool = build or int(id) == AppState.local_actor_id or not crowd.lazy
+	if OS.has_feature("web") and creates_body and not _browser_actor_ready(int(id), dto):
+		_spawn_backlog = true
+		return false
 	if creates_body and not _actor_creation_may_start(int(id)):
 		_spawn_backlog = true
 		return false
@@ -7812,7 +7843,11 @@ func _apply_actor_mount(id: Variant) -> void:
 	var node := actor_nodes.get(id) as ReplicatedActor3D
 	if node == null:
 		return
-	node.set_mount_state(AppState.mount_state_for_actor(int(id)), models)
+	var state := AppState.mount_state_for_actor(int(id))
+	if OS.has_feature("web") and state.get("mode") == "mounted" and not _browser_actor_ready(int(id),
+			_presentation_dto(AppState.actors.get(id, {}))):
+		return
+	node.set_mount_state(state, models)
 
 func _gauntlet_creature_deaths_pending() -> bool:
 	for value: Variant in actor_nodes.values():
