@@ -1,6 +1,6 @@
 class_name MapMarkerDisc
 extends RefCounted
-## The coloured disc a mark shows on the full map.
+## The coloured disc a mark carries for the full map.
 ##
 ## Every circular mark on the full map is the same disc in a different colour
 ## and size - the actor dots, the harvest nodes and interactives, a dropped
@@ -21,8 +21,16 @@ extends RefCounted
 ## something depth can decide - it never runs. Both materials are transparent
 ## instead, and `render_priority` orders them, which keeps every outline behind
 ## every fill no matter which way the map camera is facing.
+##
+## No camera renders them now: both maps draw their marks in 2D, and their
+## cameras keep only the projection (cull mask 0, 3D disabled). The nodes stay
+## because callers find, scale and hide them by name and read their colour.
+## So the mesh and its material are shared by every disc of one size and
+## colour, and no disc casts a shadow: a disc no longer costs a mesh build,
+## an upload and two materials per actor and per map object, and never enters
+## a shadow caster cull.
 
-## The visual layer the full-map camera renders, and nothing else does.
+## The visual layer the full-map camera rendered. No camera renders it now.
 const MAP_MARKER_LAYER := 4
 ## How far the outline stands out past the disc, in metres. The full map frames
 ## 1600 metres across, so this is about a pixel there: enough to hold a disc
@@ -35,6 +43,9 @@ const OUTLINE_COLOUR := Color(0.04, 0.04, 0.05)
 const DISC_HEIGHT := 0.08
 const OUTLINE_PRIORITY := 0
 const FILL_PRIORITY := 1
+
+## The shared meshes, each carrying its material, by size, colour and order.
+static var _meshes: Dictionary = {}
 
 ## A disc of `radius` metres in `colour`, outlined in black.
 ##
@@ -51,19 +62,31 @@ static func build(node_name: String, radius: float, colour: Color,
 
 static func _disc(node_name: String, radius: float, colour: Color,
 		priority: int, height: float) -> MeshInstance3D:
+	var node := MeshInstance3D.new()
+	node.name = node_name
+	node.mesh = _mesh(radius, colour, priority, height)
+	node.layers = MAP_MARKER_LAYER
+	node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return node
+
+## The one disc mesh of this size, colour and order. Nothing may change it in
+## place: every disc of the same look draws it.
+static func _mesh(radius: float, colour: Color, priority: int,
+		height: float) -> CylinderMesh:
+	var key := [radius, colour, priority, height]
+	var mesh: CylinderMesh = _meshes.get(key) as CylinderMesh
+	if mesh != null:
+		return mesh
 	var material := StandardMaterial3D.new()
 	material.albedo_color = colour
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.no_depth_test = true
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	material.render_priority = priority
-	var mesh := CylinderMesh.new()
+	mesh = CylinderMesh.new()
 	mesh.top_radius = radius
 	mesh.bottom_radius = radius
 	mesh.height = height
 	mesh.material = material
-	var node := MeshInstance3D.new()
-	node.name = node_name
-	node.mesh = mesh
-	node.layers = MAP_MARKER_LAYER
-	return node
+	_meshes[key] = mesh
+	return mesh

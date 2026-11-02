@@ -528,9 +528,9 @@ func _marker_colour() -> Color:
 		return STORAGE_COLOUR
 	return HARVEST_COLOUR if is_harvestable() else INTERACTIVE_COLOUR
 
-## The colour this object is marked in on either map. The full map draws the
-## modelled disc below; the minimap draws its own mark and asks for the colour
-## here, so both maps mark an ore seam in one green rather than two.
+## The colour this object is marked in on either map. Both maps draw their own
+## marks in 2D and ask for the colour here (the MapMarker disc below carries it
+## too), so both mark an ore seam in one green rather than two.
 func map_dot_colour() -> Color:
 	return _marker_colour()
 
