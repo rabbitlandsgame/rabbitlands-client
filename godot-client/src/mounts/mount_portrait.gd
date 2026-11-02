@@ -4,8 +4,25 @@ const Profiles := preload("res://src/mounts/mount_profiles.gd")
 var viewport: SubViewport
 var actor: ReplicatedActor3D
 var coat := preload("res://src/mounts/mount_coat_visual.gd").new()
+var _id := ""
+var _active := false
+var _allow_download := false
+var _coat_id := "original"
+var _next_poll := 0
+static var _build_frame := -1
+
+func _owner() -> String:
+	return "mount_portrait:%d" % get_instance_id()
 
 func configure(id: String) -> void:
+	_id = id
+	if OS.has_feature("web"):
+		set_process(false)
+		return
+	_build(id)
+	set_process(false)
+
+func _build(id: String) -> void:
 	viewport = SubViewport.new()
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	stretch = true
@@ -65,15 +82,53 @@ func configure(id: String) -> void:
 		# Static portrait uses the native rest frame; its saddle stays aligned.
 		actor.animation_player.pause()
 	coat.configure(actor,id,profile)
+	coat.apply(_coat_id)
 	set_active(true)
 
 func set_coat(coat_id: String) -> void:
-	if actor != null: coat.apply(coat_id)
+	if _coat_id == coat_id: return
+	_coat_id = coat_id
+	if actor != null:
+		coat.apply(coat_id)
+		if OS.has_feature("web") and _active:
+			viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+
+func set_browser_preview(active: bool, allow_download: bool) -> void:
+	_allow_download = allow_download
+	set_active(active)
 
 func set_active(active: bool) -> void:
+	if OS.has_feature("web"):
+		if _active == active: return
+		_active = active
+		set_process(active)
+		if not active:
+			WebPrototype.release_groups(_owner())
+			# Offscreen cards retain no model, animation library or GPU stage.
+			if is_instance_valid(viewport): viewport.queue_free()
+			viewport = null
+			actor = null
+			coat = preload("res://src/mounts/mount_coat_visual.gd").new()
+		return
 	if viewport == null:
 		return
 	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS if active else SubViewport.UPDATE_DISABLED
 	if actor != null and actor.animation_player != null:
 		# A still card avoids a second animation/attachment clock in the HUD.
 		actor.animation_player.pause()
+
+func _process(_delta: float) -> void:
+	if not _active or not _allow_download or viewport != null or _id.is_empty(): return
+	var now := Time.get_ticks_msec()
+	if now < _next_poll: return
+	_next_poll = now + 100
+	if not WebPrototype.ensure_groups(WebPrototype.mount_groups(_id), _owner(), 1): return
+	var frame := Engine.get_process_frames()
+	if _build_frame == frame: return
+	_build_frame = frame
+	_build(_id)
+	viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+	set_process(false)
+
+func _exit_tree() -> void:
+	if OS.has_feature("web"): WebPrototype.release_groups(_owner())

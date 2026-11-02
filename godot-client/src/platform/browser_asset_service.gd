@@ -28,6 +28,7 @@ var live_bytes := 0
 var budget_bytes := 768 * 1024 * 1024
 var _evictions := 0
 var archive_path := ARCHIVE
+var _archive_response: Array = []
 
 func configure(configuration: Dictionary, manifest: Dictionary) -> bool:
 	groups = configuration.get("groups", {})
@@ -132,11 +133,13 @@ func _load_next() -> void:
 	var archives: Array = groups[current].get("archives", [])
 	var total := 0
 	for index: int in archives.size():
-		if str(WebPrototype.configuration().get("schema", 2)) == "3":
+		_archive_response = []
+		if int(WebPrototype.configuration().get("schema", 2)) == 3:
 			bridge.fetch_group_archive(current, index, callback)
 		else:
 			bridge.fetch_archive(index, callback)
-		var response: Array = await archive_ready
+		# A rejected JS request can call back before the bridge method returns.
+		var response: Array = _archive_response if not _archive_response.is_empty() else await archive_ready
 		if not bool(response[0]):
 			_fail(str(response[1]))
 			return
@@ -159,6 +162,7 @@ func _load_next() -> void:
 	_evict()
 
 func _archive_ready(args: Array) -> void:
+	_archive_response = [bool(args[0]), str(args[1])]
 	archive_ready.emit(bool(args[0]), str(args[1]))
 
 func _fail(message: String) -> void:

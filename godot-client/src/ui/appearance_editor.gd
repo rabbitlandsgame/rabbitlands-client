@@ -34,6 +34,12 @@ var _show_equipment := false
 ## picks another entry (a merged dye, e.g. Human pants 11, typed on develop).
 var _unlisted: Dictionary = {}
 var quality_level := -1
+var _browser_asset_pending := false
+var _browser_asset_poll := 0
+var _preview_equipment: Dictionary = {}
+
+func _asset_owner() -> String:
+	return "appearance_preview:%d" % get_instance_id()
 
 func set_preview_quality(level: int) -> void:
 	quality_level = clampi(level, 0, 2)
@@ -139,7 +145,9 @@ func _ready() -> void:
 	actions.add_child(gear)
 	gear.toggled.connect(func(enabled: bool) -> void:
 		_show_equipment = enabled
-		if is_instance_valid(_actor):
+		if OS.has_feature("web"):
+			_refresh()
+		elif is_instance_valid(_actor):
 			_actor.apply_equipment_visuals(_dto.get("equipment_visuals", {}) if enabled else {}))
 	var zoom := Button.new()
 	zoom.text = "Face / full body"
@@ -159,6 +167,7 @@ func _ready() -> void:
 		if not is_visible_in_tree():
 			_release_preview())
 	hide()
+	set_process(false)
 
 ## `version` returns the negotiated appearance protocol (Network's
 ## appearance_protocol_version); without one the editor behaves as offline (1).
@@ -269,6 +278,13 @@ func _values() -> Dictionary:
 func _refresh() -> void:
 	if not is_visible_in_tree():
 		return
+	var visuals: Dictionary = _dto.get("equipment_visuals", {}) if _show_equipment else {}
+	if OS.has_feature("web"):
+		var groups := WebPrototype.scene_groups(str(_model.get("scene", ""))).duplicate()
+		groups.append_array(WebPrototype.equipment_groups(visuals))
+		_browser_asset_pending = not WebPrototype.ensure_groups(groups, _asset_owner(), 1)
+		set_process(_browser_asset_pending)
+		if _browser_asset_pending: return
 	var look := _values()
 	_form.set_hair_style(AppearanceVariants.hair_style(int(look.get("hair", 0))))
 	_form.update_derived(look)
@@ -286,10 +302,21 @@ func _refresh() -> void:
 		dto.equipment_fallback_parts = []
 		_actor.configure(dto, CoordinateAdapter.new({"walkingHeight": 0.0}), _model, _animations, _equipment)
 		_actor.set_nameplate_visible(false)
+		_preview_equipment = visuals.duplicate(true)
 	else:
 		_actor.apply_appearance_variants(look)
+		if OS.has_feature("web") and _preview_equipment != visuals:
+			_actor.apply_equipment_visuals(visuals)
+			_preview_equipment = visuals.duplicate(true)
 	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	_frame()
+
+func _process(_delta: float) -> void:
+	if not _browser_asset_pending: return
+	var now := Time.get_ticks_msec()
+	if now < _browser_asset_poll: return
+	_browser_asset_poll = now + 100
+	_refresh()
 
 func _frame() -> void:
 	if not is_instance_valid(_actor):
@@ -328,6 +355,10 @@ func _apply() -> void:
 		_status.text = "Could not send. Reconnect and try again."
 
 func _release_preview() -> void:
+	_browser_asset_pending = false
+	set_process(false)
+	_preview_equipment.clear()
+	if OS.has_feature("web"): WebPrototype.release_groups(_asset_owner())
 	if is_instance_valid(_actor):
 		_actor.queue_free()
 		_actor = null
@@ -336,3 +367,6 @@ func _release_preview() -> void:
 
 func _close() -> void:
 	hide()
+
+func _exit_tree() -> void:
+	if OS.has_feature("web"): WebPrototype.release_groups(_asset_owner())

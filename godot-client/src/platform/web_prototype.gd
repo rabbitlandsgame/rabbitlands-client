@@ -49,20 +49,26 @@ static func _service() -> Node:
 static func model_groups(model_id: String) -> Array:
 	return configuration().get("model_groups", {}).get(model_id, [])
 
+static func _load_model_sources() -> void:
+	if _model_sources_loaded: return
+	_model_sources_loaded = true
+	var registry: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json"))
+	if registry is Dictionary:
+		for id: String in registry.get("models", {}):
+			var scene := str(registry.models[id].get("scene", ""))
+			if not model_groups(id).is_empty() and not _model_sources.has(scene): _model_sources[scene] = id
+
+static func scene_groups(source: String) -> Array:
+	_load_model_sources()
+	return model_groups(str(_model_sources.get(source, "")))
+
 static func mount_groups(mount_id: String) -> Array:
 	if _mount_group_cache.has(mount_id): return _mount_group_cache[mount_id]
 	var out := model_groups(mount_id).duplicate()
 	var profile: Dictionary = preload("res://src/mounts/mount_profiles.gd").read(mount_id)
 	var source := str((profile.get("borrowedTack", {}) as Dictionary).get("source", ""))
 	if not source.is_empty():
-		if not _model_sources_loaded:
-			_model_sources_loaded = true
-			var registry: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json"))
-			if registry is Dictionary:
-				for id: String in registry.get("models", {}):
-					var scene := str(registry.models[id].get("scene", ""))
-					if not model_groups(id).is_empty() and not _model_sources.has(scene): _model_sources[scene] = id
-		for group: String in model_groups(str(_model_sources.get(source, ""))):
+		for group: String in scene_groups(source):
 			if not out.has(group): out.append(group)
 	_mount_group_cache[mount_id] = out
 	return out

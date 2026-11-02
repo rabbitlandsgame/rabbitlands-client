@@ -33,6 +33,7 @@ var _reveal_candidate := false
 var coat_choice: OptionButton
 var apply_coat: Button
 var coat_drafts := {}
+var _browser_portrait_poll := 0
 
 func _ready() -> void:
 	name = "MountsLayer"
@@ -223,8 +224,8 @@ func open() -> void:
 		_portraits_built = true
 		for id: String in portraits:
 			portraits[id].configure(id)
-	for portrait: Variant in portraits.values():
-		portrait.set_active(true)
+	if not OS.has_feature("web"):
+		for portrait: Variant in portraits.values(): portrait.set_active(true)
 	sync()
 	_queue_fit()
 	if _first_layout:
@@ -251,7 +252,7 @@ func _filter_cards() -> void:
 	var matches := 0
 	for id: String in cards:
 		cards[id].visible = query.is_empty() or Profiles.display_name(id).to_lower().contains(query)
-		if _portraits_built:
+		if _portraits_built and not OS.has_feature("web"):
 			portraits[id].set_active(is_open() and cards[id].visible)
 		if cards[id].visible:
 			matches += 1
@@ -295,6 +296,18 @@ func close() -> void:
 	if _portraits_built:
 		for portrait: Variant in portraits.values():
 			portrait.set_active(false)
+
+func _process(_delta: float) -> void:
+	if not OS.has_feature("web") or not _portraits_built or not is_open(): return
+	var now := Time.get_ticks_msec()
+	if now < _browser_portrait_poll: return
+	_browser_portrait_poll = now + 100
+	var owned: Array = _state().get("owned_mount_ids", [_state().get("selected_mount_id", "")])
+	var clip := scroll.get_global_rect()
+	for id: String in portraits:
+		var image: Control = portraits[id]
+		var visible_card := image.is_visible_in_tree() and clip.intersects(image.get_global_rect())
+		image.set_browser_preview(visible_card, id in owned or id == candidate)
 
 func choose(id: String) -> void:
 	if Profiles.supports(id):
