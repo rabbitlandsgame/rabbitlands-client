@@ -183,12 +183,15 @@ The page requests a high-performance graphics context, which the browser or OS
 can override. On Windows, start the local site and then use
 `python godot-client/tools/open_web_prototype.py` to open a separate Chrome
 profile requesting the faster GPU. On Windows this helper selects Chrome's
-OpenGL backend: the tested NVIDIA D3D11 backend lost its WebGL context on Four
-Gates, including with the original materials and a disabled shader disk cache.
-This is an unresolved browser/graphics compatibility limit. `--graphics-backend
-auto` restores Chrome's ordinary choice for comparison. A website cannot choose
-Chrome's backend for a player, so this local workaround must be qualified or
-removed before a general browser release. It leaves normal Chrome settings unchanged.
+OpenGL backend. That selected the integrated Intel graphics on the test laptop.
+The faster NVIDIA profile passed the same map and mount route using
+`--graphics-backend vulkan`; select that option for this qualified machine.
+The tested NVIDIA D3D11 backend lost its WebGL context on Four Gates, including
+with the original materials and a disabled shader disk cache. This remains a
+browser/graphics compatibility limit. `--graphics-backend auto` restores
+Chrome's ordinary choice for comparison. A website cannot choose Chrome's
+backend for a player, so these local launch profiles need broader qualification
+before a general browser release.
 That profile has its own saved downloads: keep the same profile and launch
 address on subsequent visits. A public website cannot force a particular GPU;
 the launcher is a local testing aid.
@@ -201,6 +204,11 @@ gauntlet routes also loaded and returned to Landfall. This is representative
 coverage, not a complete gameplay or hardware qualification. Cold terrain/shader
 work still caused a roughly 1.45-second worst mounted-route frame; saved network
 data does not remove resource-construction stalls.
+
+The dedicated NVIDIA Vulkan profile then passed the same release-build route.
+Typical walking, mounted and Four Gates frames were 16.7 ms (60 FPS); the mounted
+95th percentile was 17.4 ms. A cold-terrain pause of about 1.01 seconds remains.
+These short local samples do not establish a minimum hardware requirement.
 
 Dedicated Chrome process groups still used roughly 5.1-5.5 GB private memory in
 the local Intel graphics samples. Loading and travel can stall while raw actor
