@@ -331,6 +331,14 @@ def stage_project(stage: Path, endpoint: str) -> dict:
     (project / "data/maps/geometry-cache-scope.json").write_text(
         json.dumps({"schema": 1, "version": 1, "maps": [], "groups": {}, "asset_overlays": []}), encoding="utf-8")
     files = raw_files()
+    # Source scenery can point into several shared map image pools, not only
+    # world/_shared/images. Mirror the already verified raw dependency closure
+    # for the editor too, preserving relative URIs without importing raw maps.
+    for source in files:
+        if not source.is_relative_to(CLIENT) and source.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp"}:
+            target = stage / source.relative_to(REPO)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, target)
     archives = raw_archives(files, assets)
     cfg = {"schema": 2, "maps": list(MAPS), "endpoint": endpoint, "archives": archives}
     (project / "data/web_prototype.json").write_text(json.dumps(cfg, indent=2), encoding="utf-8")
@@ -401,9 +409,20 @@ progressive_web_app/enabled=false
     for label, options in (("import", ["--editor", "--import"]),
                            ("export", ["--export-debug", "Browser Prototype", str(stage / "site/index.html")])):
         log = stage / f"{label}.log"
-        with log.open("w", encoding="utf-8") as output:
-            result = subprocess.run([str(args.godot.resolve()), "--headless", "--path", str(project), *options],
-                                    env=env, stdout=output, stderr=subprocess.STDOUT, timeout=600)
+        configuration = project / "project.godot"
+        original = configuration.read_bytes()
+        # On the first import CSV translations do not exist yet. Avoid loading
+        # those generated files at startup; restore the exact authored setting
+        # before exporting, once the CSV importer has produced them.
+        if label == "import":
+            import re
+            configuration.write_bytes(re.sub(rb'^locale/translations=.+\r?\n', b'', original, flags=re.MULTILINE))
+        try:
+            with log.open("w", encoding="utf-8") as output:
+                result = subprocess.run([str(args.godot.resolve()), "--headless", "--path", str(project), *options],
+                                        env=env, stdout=output, stderr=subprocess.STDOUT, timeout=600)
+        finally:
+            configuration.write_bytes(original)
         text = log.read_text(encoding="utf-8", errors="replace")
         if result.returncode or any(s in text for s in ("SCRIPT ERROR", "Parse Error", "ERROR:")):
             raise SystemExit(f"Browser {label} failed; inspect {log}")
