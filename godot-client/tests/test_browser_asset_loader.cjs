@@ -70,6 +70,8 @@ async function run(change = () => {}, stored = new Map(), runOptions = {}) {
         await context.RabbitLandsBrowser.start(engine, {executable: 'index', args: ['--verbose']});
         if (runOptions.archives) await new Promise((resolve, reject) =>
             context.RabbitLandsBrowser.fetch_archive(0, (ok, error) => ok ? resolve() : reject(new Error(error))));
+        for (const group of runOptions.groupIds || []) await new Promise((resolve, reject) =>
+            context.RabbitLandsBrowser.fetch_group_archive(group, 0, (ok, error) => ok ? resolve() : reject(new Error(error))));
     }
     catch (err) { error = err; }
     assert.equal(context.RL_BROWSER_TAKE_BUFFER, undefined);
@@ -86,6 +88,36 @@ test('verified cross-origin payloads start the ordinary package and preserve arg
     assert.equal(result.downloads.length, 3);
     assert.ok(result.downloads.every(d => d.url.startsWith('https://raw.githubusercontent.com/')));
     assert.ok(result.downloads.every(d => d.options.credentials === 'omit' && d.options.mode === 'cors'));
+});
+
+const addMap = (manifest, payloads) => {
+    const row = describe('lazy map fixture', 'zip');
+    manifest.groups = {'map:a': {archives:[row], dependencies:[], unpacked_bytes:16}};
+    payloads.set(row.file, 'lazy map fixture');
+};
+
+test('map payloads are lazy and reuse verified disk entries across hosting changes', async () => {
+    const idle = await run(addMap);
+    assert.equal(idle.error, undefined);
+    assert.equal(idle.downloads.length, 3, 'engine startup must not fetch the map');
+    const stored = new Map();
+    const first = await run(addMap, stored, {groupIds:['map:a']});
+    assert.equal(first.error, undefined);
+    assert.equal(first.downloads.length, 4);
+    const second = await run((manifest, payloads) => {addMap(manifest, payloads); manifest.base_url = 'https://example.com/another-commit/';},
+        stored, {groupIds:['map:a'], blockNetwork:true});
+    assert.equal(second.error, undefined);
+    assert.equal(second.downloads.length, 0);
+    assert.equal(second.stats.hits, 4);
+});
+
+test('corrupt or unknown lazy groups never reach the runtime filesystem', async () => {
+    const corrupted = await run((manifest, payloads) => {addMap(manifest,payloads); payloads.set(manifest.groups['map:a'].archives[0].file,'bad');},
+        new Map(), {groupIds:['map:a']});
+    assert.match(corrupted.error.message, /incomplete or outdated/);
+    assert.equal(corrupted.calls.filter(call => call[2] === '/tmp/rabbitlands-prototype-assets.zip').length, 0);
+    const unknown = await run(addMap, new Map(), {groupIds:['map:missing']});
+    assert.match(unknown.error.message, /Invalid game archive/);
 });
 
 test('dynamic arithmetic libraries reuse verified saved bytes across launches', async () => {

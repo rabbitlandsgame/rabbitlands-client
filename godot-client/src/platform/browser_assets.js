@@ -65,15 +65,19 @@ globalThis.RabbitLandsBrowser = (() => {
         try { runtime.copyToFS(path, buffer); }
         finally { delete globalThis.RL_BROWSER_TAKE_BUFFER; }
     }
-    async function fetch_archive(index, callback) {
+    async function archive(rows, index, callback) {
         try {
-            if (!runtime || !Number.isSafeInteger(index) || index < 0 || index >= manifest.archives.length) {
+            if (!runtime || !Array.isArray(rows) || !Number.isSafeInteger(index) || index < 0 || index >= rows.length) {
                 throw new Error('Invalid game archive request.');
             }
-            const bytes = await verified(manifest.archives[index]);
+            const bytes = await verified(rows[index]);
             takeFile('/tmp/rabbitlands-prototype-assets.zip', bytes);
             callback(true, '');
         } catch (error) { callback(false, error.message); }
+    }
+    async function fetch_archive(index, callback) { return archive(manifest.archives, index, callback); }
+    async function fetch_group_archive(group, index, callback) {
+        return archive(Object.hasOwn(manifest.groups || {}, group) ? manifest.groups[group].archives : null, index, callback);
     }
     async function start(engine, config, callbacks = {}) {
         const response = await fetch('browser-assets.json', {cache: 'no-cache'});
@@ -89,6 +93,16 @@ globalThis.RabbitLandsBrowser = (() => {
             throw new Error('Invalid browser asset manifest.');
         }
         [manifest.wasm, ...manifest.pack.parts, ...manifest.archives].forEach(validate);
+        if (manifest.groups !== undefined) {
+            if (!manifest.groups || typeof manifest.groups !== 'object' || Array.isArray(manifest.groups) ||
+                    Object.keys(manifest.groups).length > 16384) throw new Error('Invalid game asset groups.');
+            for (const [name, group] of Object.entries(manifest.groups)) {
+                if (!/^[a-zA-Z0-9_.:-]{1,160}$/.test(name) || !Array.isArray(group.archives) ||
+                        !Array.isArray(group.dependencies) || !Number.isSafeInteger(group.unpacked_bytes) || group.unpacked_bytes < 0 ||
+                        group.dependencies.some(dep => !Object.hasOwn(manifest.groups, dep))) throw new Error('Invalid game asset group.');
+                group.archives.forEach(validate);
+            }
+        }
         const libraries = manifest.libraries || [];
         if (!Array.isArray(libraries) || libraries.length > 16) throw new Error('Invalid browser libraries.');
         const names = new Set();
@@ -157,5 +171,5 @@ globalThis.RabbitLandsBrowser = (() => {
         pack = null;
         await engine.start({args: ['--main-pack', 'index.pck', ...config.args]});
     }
-    return {start, fetch_archive, stats};
+    return {start, fetch_archive, fetch_group_archive, stats};
 })();

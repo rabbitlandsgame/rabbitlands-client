@@ -18,6 +18,7 @@ var _stream: ContinentChunkStream
 var _streams: Dictionary = {}
 
 func prewarm(entry: Dictionary, destination_map: String, destination_tile: Vector2i, parent: Node3D) -> void:
+	if OS.has_feature("web") and not WebPrototype.ensure_map(destination_map): return
 	if is_instance_valid(_loader) and map_id == destination_map and tile == destination_tile:
 		return
 	discard()
@@ -78,6 +79,8 @@ func is_ready() -> bool:
 ## Whether the manifest at `path` streams its ground in chunks. A whole map is
 ## built synchronously on load (WorldLoader.load_world).
 func streams(path: String) -> bool:
+	# A browser map manifest can arrive after the first prewarm request.
+	if not FileAccess.file_exists(path): return false
 	if not _streams.has(path):
 		_streams[path] = FileAccess.file_exists(path) \
 			and FileAccess.get_file_as_string(path).contains("\"streamingChunks\"")

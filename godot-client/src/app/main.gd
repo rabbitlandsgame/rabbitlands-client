@@ -2119,6 +2119,7 @@ func _process(delta: float) -> void:
 		audio_director.set_weather(weather_layer.look() \
 			if AppState.authenticated and outdoors else {})
 	_update_arrival()
+	_update_browser_asset_pins()
 	_report_arrival()
 	if _spawn_backlog:
 		_spawn_backlog = false
@@ -6587,17 +6588,36 @@ func _flush_storage_sync() -> void:
 	_storage_sync_queued = false
 	_sync_storage()
 
+func _update_browser_asset_pins() -> void:
+	if not OS.has_feature("web"): return
+	var maps: Array = [loaded_server_map, AppState.current_map]
+	maps.append_array(exterior_stream.residents.keys())
+	if not exterior_stream._pending_map.is_empty(): maps.append(exterior_stream._pending_map)
+	maps.append_array(world_park.parked_maps())
+	if not world_park._preload.is_empty(): maps.append(str(world_park._preload.get("map", "")))
+	for prewarm: RefCounted in [respawn_prewarm, gauntlet_prewarm]:
+		if not str(prewarm.get("map_id")).is_empty(): maps.append(str(prewarm.get("map_id")))
+	if character_intro.pending or character_intro.is_active(): maps.append(NewCharacterIntroScript.MAP)
+	WebPrototype.pin_maps("world-residents", maps)
+
 func _load_server_map() -> void:
 	if AppState.current_map.is_empty() or loaded_server_map == AppState.current_map:
 		return
 	camera_shader_warmup.cancel()
 	var normalized_map: String = MapRegistry.normalize_server_map_id(AppState.current_map)
-	if not WebPrototype.supports_map(AppState.current_map):
-		AppState.append_local_message("This browser prototype includes Landfall only. Use the desktop client for this character's current area.", 3)
-		Network.disconnect_from_server()
+	if OS.has_feature("web") and not WebPrototype.ensure_map(AppState.current_map, "destination"):
+		if not arrival_curtain.is_showing(): arrival_curtain.begin("Entering %s…" % _friendly_map_name(AppState.current_map))
+		var assets := WebPrototype.asset_snapshot()
+		var message := str(assets.get("error", ""))
+		arrival_curtain.set_text("Preparing area files…" if message.is_empty() else "Cannot load area: " + message)
+		_deferred_map_load = true
 		return
 	Diagnostics.record("map_requested", {"server_map": AppState.current_map, "map": normalized_map})
 	var entry: Dictionary = MapRegistry.resolve(map_registry, AppState.current_map)
+	if OS.has_feature("web") and character_intro.pending and normalized_map == NewCharacterIntroScript.MAP:
+		# Creation does not build a world while its appearance preview renders.
+		# Once verified files exist, retain the cinematic's own view-readiness gate.
+		character_intro.prewarm(entry, world_root)
 	if entry.is_empty():
 		Diagnostics.record("map_registry_missing", {"map": normalized_map})
 		map_label.text = "Map: " + AppState.current_map + " (GLB package unavailable)"

@@ -105,6 +105,7 @@ func update_position(position: Vector3) -> void:
 	if candidate.is_empty():
 		return
 	var map_id := str(candidate.map)
+	if OS.has_feature("web") and not WebPrototype.ensure_map(map_id): return
 	var entry := MapRegistry.resolve(registry, map_id)
 	var path := ProjectSettings.globalize_path(str(entry.get("manifest", "")))
 	var request := ResourceAdmission.request(self, {"id": map_id, "path": path}, "exterior")

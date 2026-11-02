@@ -47,8 +47,25 @@ def raw_archives(files: list[Path], assets: Path) -> list[dict]:
         temporary = assets / "packing.zip"
         with zipfile.ZipFile(temporary, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
             for source in group:
-                archive.write(source, source.relative_to(REPO).as_posix())
+                # Stable archives survive new worktrees and source checkouts;
+                # timestamps and local permissions never invalidate disk cache.
+                # Independently compressed 2 MiB entries let the browser yield
+                # between pieces of a large model instead of blocking a frame
+                # to decompress/write the complete creature or hairstyle.
+                with source.open("rb") as incoming:
+                    offset = 0
+                    multipart = source.stat().st_size > 2 * 1024 * 1024
+                    while data := incoming.read(2 * 1024 * 1024):
+                        name = source.relative_to(REPO).as_posix()
+                        if multipart: name += ".__rlpart_%012d" % offset
+                        entry = zipfile.ZipInfo(name, (1980, 1, 1, 0, 0, 0))
+                        entry.compress_type = zipfile.ZIP_DEFLATED
+                        entry.external_attr = 0o100644 << 16
+                        archive.writestr(entry, data, compresslevel=6)
+                        offset += len(data)
         row = describe(temporary)
+        if row["bytes"] > 64 * 1024 * 1024:
+            raise ValueError("An asset archive exceeds the 64 MiB browser payload limit: " + str(group[0]))
         target = assets / (row["sha256"] + ".zip")
         temporary.replace(target)
         result.append({**row, "file": target.name})
@@ -83,6 +100,8 @@ def finish_site(stage: Path, assets_base_url: str):
     manifest = {"schema": 1, "base_url": assets_base_url.rstrip("/") + "/",
                 "pack": {"bytes": pack.stat().st_size, "parts": parts},
                 "wasm": {**wasm, "file": wasm["sha256"] + ".wasm"}, "archives": report["archives"]}
+    for name in ("groups", "maps", "model_groups", "equipment_groups"):
+        if name in report: manifest[name] = report[name]
     if libraries: manifest["libraries"] = libraries
     (site / "browser-assets.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     shutil.copy2(CLIENT / "src/platform/browser_assets.js", site / "browser-assets.js")
@@ -126,8 +145,12 @@ def finish_site(stage: Path, assets_base_url: str):
     (site / "index.wasm").unlink()
     for row in libraries: (site / row["name"]).unlink()
     (site / "assets.zip").unlink(missing_ok=True)
+    all_archives = {row["sha256"]: row for row in report["archives"]}
+    for group in report.get("groups", {}).values():
+        all_archives.update({row["sha256"]: row for row in group["archives"]})
     report.update({"assets_base_url": assets_base_url,
-                   "asset_download_bytes": sum(row["bytes"] for row in [*report["archives"], *parts, wasm, *libraries]),
+                   "asset_download_bytes": sum(row["bytes"] for row in [*all_archives.values(), *parts, wasm, *libraries]),
+                   "startup_download_bytes": sum(row["bytes"] for row in [*report["archives"], *parts, wasm, *libraries]),
                    "launch_site_bytes": sum(p.stat().st_size for p in site.iterdir() if p.is_file())})
     (stage / "build.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
 
@@ -361,14 +384,14 @@ def stage_project(stage: Path, endpoint: str) -> dict:
     config_path.write_text(config, encoding="utf-8")
     registry_path = project / "data/maps/registry.json"
     registry = json.loads(registry_path.read_text())
-    registry["maps"] = {key: row for key, row in registry["maps"].items() if key in MAPS}
     registry_path.write_text(json.dumps(registry, indent=2), encoding="utf-8")
     (project / "data/maps/geometry-cache-scope.json").write_text(
         json.dumps({"schema": 1, "version": 1, "maps": [], "groups": {}, "asset_overlays": []}), encoding="utf-8")
     raw_scenes = raw_world_models(project)
     for model in raw_scenes:
         model.with_name(model.name + ".import").write_text('[remap]\n\nimporter="skip"\n', encoding="utf-8")
-    files = raw_files()
+    import browser_asset_catalog
+    catalog, files = browser_asset_catalog.build(__import__(__name__), assets)
     # Source scenery can point into several shared map image pools, not only
     # world/_shared/images. Mirror the already verified raw dependency closure
     # for the editor too, preserving relative URIs without importing raw maps.
@@ -377,8 +400,9 @@ def stage_project(stage: Path, endpoint: str) -> dict:
             target = stage / source.relative_to(REPO)
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(source, target)
-    archives = raw_archives(files, assets)
-    cfg = {"schema": 2, "maps": list(MAPS), "endpoint": endpoint, "archives": archives}
+    archives = catalog["groups"]["startup"]["archives"]
+    cfg = {"schema": 3, **catalog, "endpoint": endpoint, "archives": archives,
+           "live_asset_budget_bytes": 768 * 1024 * 1024}
     (project / "data/web_prototype.json").write_text(json.dumps(cfg, indent=2), encoding="utf-8")
     # A static login picture is enough for the prototype; save player choices separately.
     report = {**cfg, "raw_files": len(files), "raw_world_scenes": len(raw_scenes), "raw_bytes": sum(p.stat().st_size for p in files),

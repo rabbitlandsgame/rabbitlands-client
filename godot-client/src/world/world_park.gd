@@ -573,6 +573,7 @@ func _judge_preload(interior: String, distance: float, door: int, now: int, sett
 ## (no package, a thread error, a preload already running).
 func start_preload(interior: String, door := -1, distance := INF) -> bool:
 	interior = MapRegistry.normalize_server_map_id(interior)
+	if OS.has_feature("web") and not WebPrototype.ensure_map(interior): return false
 	if not _preload.is_empty() or _parked.has(interior):
 		return false
 	var entry := MapRegistry.resolve(registry, interior)
