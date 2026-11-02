@@ -21,17 +21,6 @@ func run() -> void:
 	window._choose_coat(3)
 	for frame: int in 8:
 		await process_frame
-	# Cards in view build their portraits one per frame after opening.
-	var started := Time.get_ticks_msec()
-	while Time.get_ticks_msec() - started < 10000:
-		var clip: Rect2 = window.scroll.get_global_rect()
-		var waiting := false
-		for image: Control in window.portraits.values():
-			if image.is_visible_in_tree() and clip.intersects(image.get_global_rect()) and image.get("viewport") == null: waiting = true
-		if not waiting: break
-		await process_frame
-	for frame: int in 2:
-		await process_frame
 	print("MOUNTS_WINDOW_LAYOUT ", window.panel.size, " minimum=", window.panel.get_combined_minimum_size(),
 		" card=", window.cards["moor_pony"].size, " portrait=", window.portraits["moor_pony"].size)
 	await RenderingServer.frame_post_draw

@@ -231,8 +231,11 @@ func open() -> void:
 	if not _portraits_built:
 		_portraits_built = true
 		for id: String in portraits:
-			portraits[id].configure(id, false)
-	# Cards in view build their stage on the next frames, one per frame.
+			portraits[id].configure(id)
+	# Desktop cards keep their stills; each renders once more as it opens. The
+	# browser builds the cards in view on the next frames, one per frame.
+	if not OS.has_feature("web"):
+		for portrait: Variant in portraits.values(): portrait.set_active(true)
 	_browser_portrait_poll = 0
 	sync()
 	_queue_fit()
@@ -304,18 +307,16 @@ func close() -> void:
 			portrait.set_active(false)
 
 func _process(_delta: float) -> void:
-	if not _portraits_built or not is_open(): return
+	if not OS.has_feature("web") or not _portraits_built or not is_open(): return
 	var now := Time.get_ticks_msec()
 	if now < _browser_portrait_poll: return
 	_browser_portrait_poll = now + 100
 	var owned: Array = _state().get("owned_mount_ids", [_state().get("selected_mount_id", "")])
 	var clip := scroll.get_global_rect()
-	# Only cards in the scrolled view keep a model and a rendered still.
 	for id: String in portraits:
 		var image: Control = portraits[id]
 		var visible_card := image.is_visible_in_tree() and clip.intersects(image.get_global_rect())
-		if OS.has_feature("web"): image.set_browser_preview(visible_card, id in owned or id == candidate)
-		else: image.set_active(visible_card)
+		image.set_browser_preview(visible_card, id in owned or id == candidate)
 
 func choose(id: String) -> void:
 	if Profiles.supports(id):

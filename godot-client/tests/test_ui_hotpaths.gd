@@ -281,7 +281,9 @@ func _check_mounts_window() -> void:
 	var before: String = window.status.text
 	state.state_changed.emit(&"mount_countdowns")
 	expect(window.status.text == before, "a closed mounts window ignores countdown packets")
+	var opening := Time.get_ticks_msec()
 	window.open()
+	timings["mount_window_first_open_ms"] = Time.get_ticks_msec() - opening
 	expect(window.status.text.begins_with("Calling"), "opening shows the current call")
 	var frames := {}
 	for id: String in window.cards: frames[window.cards[id].get_theme_stylebox("panel")] = true
@@ -292,32 +294,29 @@ func _check_mounts_window() -> void:
 	window.choose("rabbit")
 	expect(card_changes[0] == 1 and window.cards.rabbit.get_theme_stylebox("panel") == window._card_box(true),
 		"choosing another mount moves the selected frame")
-	# Cards in view build one still each; cards scrolled out keep no stage.
-	var waited := Time.get_ticks_msec()
-	var clip: Rect2 = window.scroll.get_global_rect()
-	var pending := true
-	while pending and Time.get_ticks_msec() - waited < 20000:
+	# Every card has its still as the window opens (none shows empty) and
+	# renders it once, in or out of the scrolled view.
+	for frame: int in 3:
 		await process_frame
-		clip = window.scroll.get_global_rect()
-		pending = false
-		for id: String in window.portraits:
-			var image: Control = window.portraits[id]
-			var in_view: bool = image.is_visible_in_tree() and clip.intersects(image.get_global_rect())
-			if in_view == (image.get("viewport") == null): pending = true
-	expect(not pending, "every card in view builds its portrait and no other card keeps one")
-	timings["mount_portraits_settled_ms"] = Time.get_ticks_msec() - waited
-	var offscreen := 0
 	for id: String in window.portraits:
 		var image: Control = window.portraits[id]
-		var in_view: bool = image.is_visible_in_tree() and clip.intersects(image.get_global_rect())
 		var viewport: SubViewport = image.get("viewport")
-		if in_view:
-			expect(viewport != null and viewport.render_target_update_mode == SubViewport.UPDATE_ONCE,
-				"%s renders its still once rather than every frame" % id)
-		else:
-			offscreen += 1
-			expect(viewport == null and image.get("actor") == null, "%s is out of view and keeps no model" % id)
+		expect(viewport != null and image.get("actor") != null
+			and viewport.render_target_update_mode == SubViewport.UPDATE_ONCE,
+			"%s keeps its still and renders it once rather than every frame" % id)
+	var clip: Rect2 = window.scroll.get_global_rect()
+	var offscreen := 0
+	for image: Control in window.portraits.values():
+		if not (image.is_visible_in_tree() and clip.intersects(image.get_global_rect())): offscreen += 1
 	expect(offscreen > 0 and offscreen < window.portraits.size(), "the shorter window scrolls some cards out of view: %d" % offscreen)
+	window.scroll.scroll_vertical = 100000
+	await process_frame
+	await process_frame
+	var scrolled := true
+	for image: Control in window.portraits.values():
+		var viewport: SubViewport = image.get("viewport")
+		scrolled = scrolled and viewport != null and viewport.render_target_update_mode == SubViewport.UPDATE_ONCE
+	expect(scrolled, "scrolling shows each kept still without rendering it every frame")
 	# SubViewportContainer returns its viewport to UPDATE_ALWAYS when shown again.
 	window.panel.hide()
 	window.panel.show()
@@ -329,8 +328,19 @@ func _check_mounts_window() -> void:
 	expect(single, "a window shown again renders each built still once more, not every frame")
 	window.close()
 	for id: String in window.portraits:
-		expect(window.portraits[id].get("viewport") == null and window.portraits[id].get("actor") == null,
-			"closing releases the %s portrait" % id)
+		var viewport: SubViewport = window.portraits[id].get("viewport")
+		expect(viewport != null and viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED,
+			"closing stops the %s portrait rendering and keeps its still for the next opening" % id)
+	var reopening := Time.get_ticks_usec()
+	window.open()
+	timings["mount_window_reopen_us"] = Time.get_ticks_usec() - reopening
+	await process_frame
+	var reopened := true
+	for image: Control in window.portraits.values():
+		var viewport: SubViewport = image.get("viewport")
+		reopened = reopened and viewport != null and viewport.render_target_update_mode == SubViewport.UPDATE_ONCE
+	expect(reopened, "opening again shows every still at once and renders each once more")
+	window.close()
 	window.free()
 	state.actor_mounts.clear()
 	state.authenticated = false

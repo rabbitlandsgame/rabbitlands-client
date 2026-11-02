@@ -21,13 +21,14 @@ static func _model_catalog() -> Dictionary:
 func _owner() -> String:
 	return "mount_portrait:%d" % get_instance_id()
 
-## A card renders its still once after each build or resize. Unless built now,
-## the stage is built when the card is activated, and released when it is not.
-func configure(id: String, build_now := true) -> void:
+## A card renders its still once after each build, resize or show. The browser
+## builds a card when it scrolls into view and releases it when it leaves;
+## desktop builds it here and keeps it, so a card never opens empty.
+func configure(id: String) -> void:
 	_id = id
 	if not resized.is_connected(_redraw): resized.connect(_redraw)
 	if not visibility_changed.is_connected(_shown): visibility_changed.connect(_shown)
-	if OS.has_feature("web") or not build_now:
+	if OS.has_feature("web"):
 		set_process(false)
 		return
 	_build(id)
@@ -124,26 +125,30 @@ func set_browser_preview(active: bool, allow_download: bool) -> void:
 	set_active(active)
 
 func set_active(active: bool) -> void:
-	if _active == active: return
+	if OS.has_feature("web"):
+		if _active == active: return
+		_active = active
+		set_process(active)
+		if not active:
+			WebPrototype.release_groups(_owner())
+			# Offscreen cards retain no model, animation library or GPU stage.
+			if is_instance_valid(viewport): viewport.queue_free()
+			viewport = null
+			actor = null
+			coat = preload("res://src/mounts/mount_coat_visual.gd").new()
+		return
 	_active = active
-	set_process(active)
-	if not active:
-		if OS.has_feature("web"): WebPrototype.release_groups(_owner())
-		# Offscreen and closed cards retain no model, animation library or GPU stage.
-		if is_instance_valid(viewport): viewport.queue_free()
-		viewport = null
-		actor = null
-		coat = preload("res://src/mounts/mount_coat_visual.gd").new()
+	if is_instance_valid(viewport):
+		# The still is kept while closed and rendered once more on opening.
+		viewport.render_target_update_mode = SubViewport.UPDATE_ONCE if active else SubViewport.UPDATE_DISABLED
 
 func _process(_delta: float) -> void:
-	if not _active or viewport != null or _id.is_empty(): return
-	if OS.has_feature("web"):
-		if not _allow_download: return
-		var now := Time.get_ticks_msec()
-		if now < _next_poll: return
-		_next_poll = now + 100
-		if not WebPrototype.ensure_groups(WebPrototype.mount_groups(_id), _owner(), 1): return
-		if not _browser_resources_ready(): return
+	if not _active or not _allow_download or viewport != null or _id.is_empty(): return
+	var now := Time.get_ticks_msec()
+	if now < _next_poll: return
+	_next_poll = now + 100
+	if not WebPrototype.ensure_groups(WebPrototype.mount_groups(_id), _owner(), 1): return
+	if not _browser_resources_ready(): return
 	var frame := Engine.get_process_frames()
 	if _build_frame == frame: return
 	_build_frame = frame

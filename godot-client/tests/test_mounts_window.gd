@@ -88,10 +88,6 @@ func run() -> void:
 		window._ride()
 		expect(sent.back() == "#mount ride "+id,"new mount uses production ride command")
 	window._choose_coat(3)
-	# The chosen card scrolls into view and builds its still on a following frame.
-	var waited := Time.get_ticks_msec()
-	while window.portraits.cheetah.actor == null and Time.get_ticks_msec() - waited < 5000:
-		await process_frame
 	expect(window.portraits.cheetah.coat.current == "dappled" and not window.apply_coat.disabled,"coat preview is available")
 	expect(not state.actor_mounts[42].mount_coats.has("cheetah"),"preview does not predict server confirmation")
 	window._apply_coat()
@@ -125,7 +121,7 @@ func run() -> void:
 	window.close()
 	expect(not window.is_open(), "window closes")
 	for portrait: Variant in window.portraits.values():
-		expect(portrait.viewport == null and portrait.actor == null, "closed window releases portrait models and stages")
+		expect(portrait.viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED, "closed window stops portrait rendering")
 	window.free()
 	state.actor_mounts.clear()
 	state.authenticated = false
