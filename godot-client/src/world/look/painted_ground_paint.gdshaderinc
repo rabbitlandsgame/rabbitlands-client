@@ -260,8 +260,16 @@ float look_paving_at(vec2 xz) {
 // together where they add up to more than 1. The neighbour's own material
 // sees the same segments reversed, so the two meet exactly (LookBorders).
 vec4 look_border_weights(vec2 xz) {
+#ifdef LOOK_WEB_BORDERS
+	// Avoid dynamically indexed local arrays inside this loop. ANGLE's D3D11
+	// compiler expands their conditional writes into a pathological program.
+	// Each lane is the same neighbour slot the native arrays hold below.
+	vec4 best = vec4(1e9);
+	vec4 side = vec4(1.0);
+#else
 	float best[4] = float[4](1e9, 1e9, 1e9, 1e9);
 	float side[4] = float[4](1.0, 1.0, 1.0, 1.0);
+#endif
 	for (int index = 0; index < 32; index++) {
 		if (index >= look_border_count) {
 			break;
@@ -273,11 +281,22 @@ vec4 look_border_weights(vec2 xz) {
 		float t = clamp(dot(ap, ab) / max(dot(ab, ab), 0.000001), 0.0, 1.0);
 		float gap = length(ap - ab * t);
 		int slot = clamp(int(look_border_neighbour[index] + 0.5), 0, 3);
+#ifdef LOOK_WEB_BORDERS
+		vec4 selected = vec4(equal(ivec4(slot), ivec4(0, 1, 2, 3)));
+		bvec4 update = greaterThan(selected * vec4(lessThan(vec4(gap), best)), vec4(0.5));
+		best = mix(best, vec4(gap), update);
+		side = mix(side, vec4((ab.x * ap.y - ab.y * ap.x) >= 0.0 ? 1.0 : -1.0), update);
+#else
 		if (gap < best[slot]) {
 			best[slot] = gap;
 			side[slot] = (ab.x * ap.y - ab.y * ap.x) >= 0.0 ? 1.0 : -1.0;
 		}
+#endif
 	}
+#ifdef LOOK_WEB_BORDERS
+	vec4 weights = mix(vec4(0.0), vec4(1.0) - smoothstep(vec4(-look_border_feather),
+		vec4(look_border_feather), side * best), lessThan(best, vec4(1e8)));
+#else
 	float taken[4] = float[4](0.0, 0.0, 0.0, 0.0);
 	for (int slot = 0; slot < 4; slot++) {
 		if (best[slot] < 1e8) {
@@ -286,6 +305,7 @@ vec4 look_border_weights(vec2 xz) {
 		}
 	}
 	vec4 weights = vec4(taken[0], taken[1], taken[2], taken[3]);
+#endif
 	float total = weights.x + weights.y + weights.z + weights.w;
 	return total > 1.0 ? weights / total : weights;
 }
