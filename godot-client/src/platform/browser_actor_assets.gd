@@ -12,26 +12,29 @@ func _init(provider: Variant) -> void:
 func _owner(id: int, pending: bool) -> String:
 	return "actor_%s:%d" % ["pending" if pending else "active", id]
 
-func admit(id: int, model: String, equipment: Dictionary, mount := "") -> bool:
+func admit(id: int, model: String, equipment: Dictionary, mount := "", high_priority := false) -> bool:
 	var row: Dictionary = _actors.get(id, {})
 	if row.is_empty() or row.model != model or row.equipment != equipment or row.mount != mount:
 		var groups: Array = service.model_groups(model).duplicate()
 		groups.append_array(service.equipment_groups(equipment))
-		if not mount.is_empty(): groups.append_array(service.model_groups(mount))
+		if not mount.is_empty(): groups.append_array(service.mount_groups(mount))
 		# Catalog dependencies handle shared files; duplicate group IDs need no
 		# second request or ownership entry.
 		var unique := {}
 		for group: String in groups: unique[group] = true
 		row = {"model":model, "equipment":equipment.duplicate(true), "mount":mount,
-			"groups":unique.keys(), "ready":false}
+			"groups":unique.keys(), "ready":false, "high_priority":high_priority}
 		_actors[id] = row
 		_pending[id] = true
 	else:
+		if not bool(row.ready) and high_priority and not bool(row.high_priority):
+			row.high_priority = true
+			return _try_ready(id, row)
 		return bool(row.ready)
 	return _try_ready(id, row)
 
 func _try_ready(id: int, row: Dictionary) -> bool:
-	if not bool(service.ensure_groups(row.groups, _owner(id, true))): return false
+	if not bool(service.ensure_groups(row.groups, _owner(id, true), 2 if bool(row.high_priority) else 1)): return false
 	service.pin_groups(_owner(id, false), row.groups)
 	service.release_groups(_owner(id, true))
 	row.ready = true

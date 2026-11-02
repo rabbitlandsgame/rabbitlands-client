@@ -6,11 +6,12 @@ class Assets extends RefCounted:
 	var pins := {}
 	var queries := 0
 	func model_groups(model: String) -> Array: return ["model:" + model] if not model.is_empty() else []
+	func mount_groups(model: String) -> Array: return model_groups(model)
 	func equipment_groups(visuals: Dictionary) -> Array:
 		var result := []
 		for part: Variant in visuals: result.append("equipment:%s:%s" % [part, visuals[part]])
 		return result
-	func ensure_groups(groups: Array, owner: String) -> bool:
+	func ensure_groups(groups: Array, owner: String, _priority := -1) -> bool:
 		queries += 1
 		pin_groups(owner, groups)
 		for group: String in groups:

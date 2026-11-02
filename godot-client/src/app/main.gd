@@ -7665,7 +7665,7 @@ func _browser_actor_ready(id: int, dto: Dictionary) -> bool:
 	if mount.is_empty() and id == AppState.local_actor_id:
 		mount = str(state.get("selected_mount_id", ""))
 	return bool(_browser_actor_assets.call("admit", id, _model_for_actor(dto),
-		dto.get("equipment_visuals", {}), mount))
+		dto.get("equipment_visuals", {}), mount, _crowd_priority_actor(id)))
 
 func _crowd_reference_point() -> Vector3:
 	var local_value: Variant = actor_nodes.get(AppState.local_actor_id)
