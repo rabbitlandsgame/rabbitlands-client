@@ -138,37 +138,50 @@ static func set_mismatch_sink(sink: Callable) -> void:
 ## be hashed is a package that is about to fail to load anyway, and the loader
 ## should be the one to say so.
 static func package_digest(manifest_path: String, glb_path: String) -> String:
+	return str(package_digest_parts(manifest_path, glb_path).digest)
+
+## `package_digest` and the two file digests it was built from: `glb_sha256`,
+## the glb's own sha256, and `manifest_sha256`, the manifest's own sha256 when
+## normalising its line endings changed no byte (else ""). All "" when either
+## file cannot be read. A load can name the two file digests in its load-scoped
+## proof (GeometryCache.world_proof) instead of hashing the same files again;
+## the combined digest is never a file's.
+static func package_digest_parts(manifest_path: String, glb_path: String) -> Dictionary:
+	var parts := {"digest": "", "glb_sha256": "", "manifest_sha256": ""}
 	var glb_hash: String = FileAccess.get_sha256(glb_path)
 	if glb_hash.is_empty():
-		return ""
-	var manifest_hash: String = _normalised_sha256(manifest_path)
-	if manifest_hash.is_empty():
-		return ""
-	return _sha256_text("%s\n%s\n%s\n" % [
-		PACKAGE_DIGEST_VERSION, glb_hash, manifest_hash])
-
-## The manifest hashed with CRLF folded to LF.
-##
-## `world.json` is written by Python on Windows and read back through git, so
-## the same package is CRLF in one checkout and LF in another. The bytes differ
-## and the map does not, so hashing them raw would make the server's digest
-## disagree with the client's for a reason that has nothing to do with the
-## content. The server's own catalog digests already normalise the same way.
-static func _normalised_sha256(path: String) -> String:
-	var file := FileAccess.open(path, FileAccess.READ)
+		return parts
+	var file := FileAccess.open(manifest_path, FileAccess.READ)
 	if file == null:
-		return ""
+		return parts
 	var raw: PackedByteArray = file.get_buffer(file.get_length())
 	file.close()
+	# The manifest is hashed with CRLF folded to LF. `world.json` is written by
+	# Python on Windows and read back through git, so the same package is CRLF
+	# in one checkout and LF in another. The bytes differ and the map does not,
+	# so hashing them raw would make the server's digest disagree with the
+	# client's for a reason that has nothing to do with the content. The
+	# server's own catalog digests already normalise the same way.
+	var normalised := _strip_carriage_returns(raw)
 	var context := HashingContext.new()
 	context.start(HashingContext.HASH_SHA256)
-	context.update(_strip_carriage_returns(raw))
-	return context.finish().hex_encode()
+	context.update(normalised)
+	var manifest_hash := context.finish().hex_encode()
+	parts["digest"] = _sha256_text("%s\n%s\n%s\n" % [
+		PACKAGE_DIGEST_VERSION, glb_hash, manifest_hash])
+	parts["glb_sha256"] = glb_hash
+	if normalised.size() == raw.size():
+		parts["manifest_sha256"] = manifest_hash
+	return parts
 
 ## CRLF to LF over a byte buffer. A lone CR is left alone: it is not a line
 ## ending any of these writers produces, and dropping it would fold two
 ## different files onto one hash.
 static func _strip_carriage_returns(raw: PackedByteArray) -> PackedByteArray:
+	# No CR at all (every shipped manifest): nothing to fold, and no per-byte
+	# loop over up to a megabyte of JSON on every load.
+	if raw.find(13) < 0:
+		return raw
 	var out := PackedByteArray()
 	var size: int = raw.size()
 	out.resize(size)

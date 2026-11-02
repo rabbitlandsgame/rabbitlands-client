@@ -97,6 +97,10 @@ static func _inputs(inputs: Variant, source: String, verified: Dictionary = {}, 
 			if slow.size()>4: slow.resize(4)
 			diagnostics["slow_files"] = slow
 		if actual != row.sha256: return false
+		# Hashed and matching: `verified` is the caller's load-scoped proof, so
+		# the next cache this load consults (paving after collision) need not
+		# hash the same file again.
+		verified[path] = actual
 	return seen.has(source)
 
 static func _faces(value: Variant) -> Dictionary:

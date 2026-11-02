@@ -331,7 +331,10 @@ static func world_proof(manifest: WorldManifest, _source_digest: String) -> Dict
 	for path: String in manifest.road_ground_verified:
 		proof[logical(path)] = str(manifest.road_ground_verified[path])
 	# package_digest normalizes manifest line endings, while geometry inputs
-	# record exact bytes. Do not treat that combined digest as a raw-file proof.
+	# record exact bytes. Do not treat that combined digest as a raw-file proof:
+	# only the raw file digests it was built from are named.
+	for path: String in manifest.package_files_verified:
+		proof[logical(path)] = str(manifest.package_files_verified[path])
 	return proof
 
 static func acquire(kind: String, path: String, source_digest: String, verified: Dictionary = {}, allowed := true, prove := Callable()) -> Dictionary:

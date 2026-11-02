@@ -16,6 +16,10 @@ var road_ground_verified: Dictionary = {}
 ## External resource URI -> sha256 of each file this load hashed and found
 ## matching; the load-scoped proof GeometryCache.world_proof hands on.
 var external_verified: Dictionary = {}
+## Path -> sha256 of this package's own glb and manifest, as this load hashed
+## them for its package digest (MapSceneCache.package_digest_parts; the
+## manifest only when its bytes needed no normalising). Load-scoped, as above.
+var package_files_verified: Dictionary = {}
 ## URI -> [path, expected sha256] whose hash `verify_external_resources(true)`
 ## left to the step that consumes the file (`verify_pending_external`).
 var _external_pending: Dictionary = {}

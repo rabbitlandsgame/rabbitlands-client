@@ -347,7 +347,13 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 	# region, which is the price of the whole contract: an entry that does not
 	# match the package on disk is never read, so a client update rebuilds
 	# itself with nothing to remember.
-	package_digest = MapSceneCache.package_digest(manifest_path, resolved_glb_path)
+	var digest_parts := MapSceneCache.package_digest_parts(manifest_path, resolved_glb_path)
+	package_digest = str(digest_parts.digest)
+	# The two files' own digests stand in this load's proof for the geometry,
+	# collision and paving inputs that name them, instead of a second full hash.
+	for pair: Array in [[resolved_glb_path, digest_parts.glb_sha256], [manifest_path, digest_parts.manifest_sha256]]:
+		if not str(pair[1]).is_empty():
+			manifest.package_files_verified[str(pair[0])] = str(pair[1])
 	if not detached_build:
 		MapSceneCache.note_local_digest(manifest.asset_id(), package_digest)
 	# The token names the texture formats a package with external images is
@@ -462,6 +468,10 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 	# detached GLTF path; baked faces avoid downloading its new GPU meshes.
 	# Grass currently relies on Mesh's triangle memo, which the original
 	# collision builder primes, so keep that path for the full painted mode.
+	# One load-scoped proof serves both caches below: the collision cache adds
+	# each input it hashed, so the paving cache does not hash the same shared
+	# prototypes again. (Paving's apply, after the parse, still hashes its own.)
+	var cache_proof: Variant = null
 	if not geometry_capture and geometry_scoped and manifest.asset_id().contains("__chunk_") \
 			and OS.get_environment("ELORIA_CACHED_COLLISION") != "0" \
 			and (detached_cache_enabled if detached_build else MapSceneCache.is_enabled()) \
@@ -470,7 +480,8 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 			_fail_external_verification()
 			return
 		var collision_began := Time.get_ticks_usec()
-		var collision := CollisionCache.acquire(manifest_path,package_digest,GeometryCache.world_proof(manifest,package_digest))
+		cache_proof = GeometryCache.world_proof(manifest,package_digest)
+		var collision := CollisionCache.acquire(manifest_path,package_digest,cache_proof)
 		if bool(collision.ok):
 			_cached_collision_faces = collision.faces
 			load_phases[&"collisionFacesBytes"] = int(collision.bytes)
@@ -484,7 +495,9 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 			_fail_external_verification()
 			return
 		var paving_began := Time.get_ticks_usec()
-		_cached_paving = PavingCache.acquire(manifest_path,package_digest,GeometryCache.world_proof(manifest,package_digest))
+		if cache_proof == null:
+			cache_proof = GeometryCache.world_proof(manifest,package_digest)
+		_cached_paving = PavingCache.acquire(manifest_path,package_digest,cache_proof)
 		load_phases[&"pavingCacheHit"] = 1 if bool(_cached_paving.get("ok",false)) else 0
 		ResourceDiagnostics.record(_resource_timings, &"paving_cache_read", paving_began)
 		load_phases.merge(_cached_paving.get("acquire_timings_us",{}),true)
