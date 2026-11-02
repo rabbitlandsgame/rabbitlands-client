@@ -41,6 +41,8 @@ const MIN_SUN_SHADOW_OPACITY := 0.5
 ## Point lights spawned from a manifest are tagged so the next map can clear
 ## them without touching lights that belong to the scene.
 const MANIFEST_LIGHT_GROUP := "manifest_lights"
+## Fits the sun's shadow distance to the ground the camera can see.
+const SunShadowFit := preload("res://src/world/sun_shadow_fit.gd")
 
 static func apply(manifest: WorldManifest, world_environment: WorldEnvironment,
 		sun: DirectionalLight3D, light_parent: Node = null) -> bool:
@@ -48,6 +50,7 @@ static func apply(manifest: WorldManifest, world_environment: WorldEnvironment,
 		return false
 	if sun != null:
 		sun.directional_shadow_pancake_size = SUN_SHADOW_CASTER_DEPTH
+		_fit_shadows(sun)
 	var raw: Variant = manifest.data.get("environment")
 	if raw is not Dictionary:
 		_restore_defaults(sun)
@@ -277,6 +280,15 @@ static func _set_if_changed(rig: Node, property: String, value: float) -> bool:
 		return false
 	rig.set(property, value)
 	return true
+
+## Gives the sun its shadow fit once (sun_shadow_fit.gd), as an internal child
+## so nothing that walks the scene's children meets it.
+## ELORIA_SHADOW_FIT=0 leaves the sun to Godot's default distance.
+static func _fit_shadows(sun: DirectionalLight3D) -> void:
+	if sun.get_node_or_null(NodePath(SunShadowFit.NODE_NAME)) != null \
+			or OS.get_environment(SunShadowFit.DISABLE_VARIABLE) == "0":
+		return
+	sun.add_child(SunShadowFit.new(), false, Node.INTERNAL_MODE_BACK)
 
 static func _restore_defaults(sun: DirectionalLight3D) -> void:
 	if sun == null:
