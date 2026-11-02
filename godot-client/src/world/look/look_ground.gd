@@ -53,6 +53,13 @@ const SHADER_OVERLAY := preload("res://src/world/look/painted_ground_overlay.gds
 const SHADER_BLEND := preload("res://src/world/look/painted_ground_blend.gdshader")
 const SHADER_DECK := preload("res://src/world/look/painted_ground_deck.gdshader")
 
+static func ground_alpha_shader(kind: Kind, browser: bool) -> Shader:
+	# The opaque dither path preserves coverage/depth without a transparent
+	# prepass or a second ground draw. ANGLE's D3D11 compiler can lose the
+	# context compiling the large painted alpha/depth specialization.
+	if browser: return SHADER_CUTOUT
+	return SHADER_DECK if kind == Kind.DECK else SHADER_OVERLAY
+
 const BIOME_SHADER_PATH := "res://src/world/biome_blend.gdshader"
 const CONTINENT_WATER_PATH := "res://src/world/continent_water.gdshader"
 const PAINT_INCLUDE := "res://src/world/look/painted_ground_paint.gdshaderinc"
@@ -689,7 +696,7 @@ static func painted_source_for(source: Material, kind: Kind, has_colour: bool,
 			elif standard.cull_mode == BaseMaterial3D.CULL_DISABLED:
 				shader = SHADER_TWO_SIDED
 		BaseMaterial3D.TRANSPARENCY_ALPHA_DEPTH_PRE_PASS:
-			shader = SHADER_DECK if kind == Kind.DECK else SHADER_OVERLAY
+			shader = ground_alpha_shader(kind, OS.has_feature("web"))
 			blended = true
 		BaseMaterial3D.TRANSPARENCY_ALPHA:
 			shader = SHADER_BLEND
