@@ -930,6 +930,7 @@ var _arrival: Dictionary = {}
 var _deferred_map_load := false
 ## Frames the curtain stays up after the character is grounded.
 var _arrival_settle_frames := 0
+var _browser_mount_warmup: RefCounted
 ## The local character was spawned and the server has not yet been told it
 ## stands on loaded ground (`_report_arrival`).
 var _arrival_unreported := false
@@ -7132,6 +7133,14 @@ func _update_arrival() -> void:
 		return
 	var local_id: int = AppState.local_actor_id
 	var standing: bool = actor_nodes.has(local_id) and _grounded_actors.has(local_id)
+	if OS.has_feature("web") and standing and arrival_curtain.blocks_input() \
+			and not character_intro.pending and not campaign_scene.playing:
+		if _browser_mount_warmup == null:
+			_browser_mount_warmup = preload("res://src/platform/browser_mount_warmup.gd").new()
+		if bool(_browser_mount_warmup.call("advance", actor_nodes[local_id], models,
+				AppState.actor_mounts.get(local_id, {}))):
+			_arrival_settle_frames = 0
+			return
 	if camera_shader_warmup.active():
 		if not standing or character_intro.pending or campaign_scene.playing:
 			camera_shader_warmup.cancel()
@@ -7143,7 +7152,6 @@ func _update_arrival() -> void:
 		_arrival_settle_frames = 0
 		return
 	if standing and not character_intro.pending and not campaign_scene.playing \
-			and not OS.has_feature("web") \
 			and RenderingServer.get_current_rendering_method() == "gl_compatibility" \
 			and DisplayServer.get_name() != "headless" \
 			and OS.get_environment("ELORIA_CAMERA_SHADER_WARMUP") != "0":
@@ -7169,6 +7177,8 @@ func _arrival_pending() -> bool:
 	return not _arrival.is_empty() and not bool(_arrival.ready)
 
 func _end_arrival() -> void:
+	if _browser_mount_warmup != null:
+		_browser_mount_warmup.call("cancel", models)
 	camera_shader_warmup.cancel()
 	_arrival = {}
 	_deferred_map_load = false

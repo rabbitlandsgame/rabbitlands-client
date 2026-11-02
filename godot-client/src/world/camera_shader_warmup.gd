@@ -8,6 +8,7 @@ extends RefCounted
 
 const FRAMES_PER_VIEW := 2
 const LIMIT_MSEC := 20000
+const WEB_LIMIT_MSEC := 30000
 const PITCHES := [-60.0, -15.0]
 const YAW_STEP := 3
 
@@ -83,7 +84,9 @@ func begin(world: Node3D, source: Camera3D, focus: Vector3) -> bool:
 	if _uncapped:
 		_saved_fps = Engine.max_fps
 		Engine.max_fps = 0
-		if DisplayServer.get_name() != "headless":
+		# Browser presentation stays on requestAnimationFrame; changing window
+		# VSync is unsupported there. Keep the native warmup policy unchanged.
+		if DisplayServer.get_name() != "headless" and not OS.has_feature("web"):
 			_window_id = source.get_window().get_window_id()
 			_saved_vsync = DisplayServer.window_get_vsync_mode(_window_id)
 			DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED, _window_id)
@@ -129,7 +132,8 @@ func advance(draw_count := Engine.get_frames_drawn()) -> void:
 			or (_mode == "small" and _source.get_viewport().get_camera_3d() != _source):
 		cancel()
 		return
-	if Time.get_ticks_msec() - _started > LIMIT_MSEC:
+	var limit := WEB_LIMIT_MSEC if OS.has_feature("web") else LIMIT_MSEC
+	if Time.get_ticks_msec() - _started > limit:
 		_timed_out = true
 		_finish()
 		return

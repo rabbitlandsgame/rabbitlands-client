@@ -68,10 +68,20 @@ def finish_site(stage: Path, assets_base_url: str):
     wasm = describe(site / "index.wasm")
     target = assets / (wasm["sha256"] + ".wasm")
     shutil.copy2(site / "index.wasm", target)
+    libraries = []
+    for name in ("index.side.wasm", "browser_cape.wasm"):
+        source = site / name
+        if not source.is_file(): continue
+        row = describe(source)
+        target = assets / (row["sha256"] + ".wasm")
+        shutil.copy2(source, target)
+        libraries.append({**row, "file": target.name, "name": name,
+                          "extension": name != "index.side.wasm"})
     report = json.loads((stage / "build.json").read_text())
     manifest = {"schema": 1, "base_url": assets_base_url.rstrip("/") + "/",
                 "pack": {"bytes": pack.stat().st_size, "parts": parts},
-                "wasm": {**wasm, "file": target.name}, "archives": report["archives"]}
+                "wasm": {**wasm, "file": wasm["sha256"] + ".wasm"}, "archives": report["archives"]}
+    if libraries: manifest["libraries"] = libraries
     (site / "browser-assets.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     shutil.copy2(CLIENT / "src/platform/browser_assets.js", site / "browser-assets.js")
     # Keep the worker script on the launch origin while loading verified WASM
@@ -112,11 +122,41 @@ def finish_site(stage: Path, assets_base_url: str):
     # The launch folder cannot accidentally serve the large payloads.
     pack.unlink()
     (site / "index.wasm").unlink()
+    for row in libraries: (site / row["name"]).unlink()
     (site / "assets.zip").unlink(missing_ok=True)
     report.update({"assets_base_url": assets_base_url,
-                   "asset_download_bytes": sum(row["bytes"] for row in [*report["archives"], *parts, wasm]),
+                   "asset_download_bytes": sum(row["bytes"] for row in [*report["archives"], *parts, wasm, *libraries]),
                    "launch_site_bytes": sum(p.stat().st_size for p in site.iterdir() if p.is_file())})
     (stage / "build.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
+
+
+def stage_browser_cape(stage: Path, module: Path, editor_runtime: Path):
+    """Register arithmetic at engine startup using a valid editor counterpart."""
+    if module.read_bytes()[:4] != b"\0asm":
+        raise ValueError("The browser cape module must be WebAssembly")
+    platform = {".dll": "windows.x86_64", ".so": "linux.x86_64", ".dylib": "macos"}.get(editor_runtime.suffix)
+    if platform is None: raise ValueError("Supply the matching editor's client_runtime library")
+    notice = module.parent / "godot-cpp-LICENSE.md"
+    if not notice.is_file(): raise ValueError("Build the cape payload with its godot-cpp-LICENSE.md notice")
+    shutil.copy2(notice, stage / "site/godot-cpp-LICENSE.md")
+    directory = stage / "project/assets/platform/browser_cape"
+    directory.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(module, directory / "browser_cape.wasm")
+    shutil.copy2(editor_runtime, directory / editor_runtime.name)
+    descriptor = f'''[configuration]
+entry_symbol="rl_client_runtime_library_init"
+compatibility_minimum="4.7"
+compatibility_maximum="4.7"
+reloadable=false
+[libraries]
+web.wasm32="./browser_cape.wasm"
+{platform}="./{editor_runtime.name}"
+'''
+    (directory / "browser_cape.gdextension").write_text(descriptor, encoding="utf-8")
+    path = stage / "build.json"
+    document = json.loads(path.read_text())
+    document["browser_cape_sha256"] = describe(module)["sha256"]
+    path.write_text(json.dumps(document, indent=2), encoding="utf-8")
 
 
 def strings(value):
@@ -310,6 +350,8 @@ def main():
     parser.add_argument("--endpoint", default="ws://127.0.0.1:2002")
     parser.add_argument("--assets-base-url", default="http://127.0.0.1:8061/", help="CORS-enabled asset folder; HTTPS outside loopback")
     parser.add_argument("--prepare-only", action="store_true")
+    parser.add_argument("--cape-runtime", type=Path, help="Optional compiled browser_cape.wasm; enables extension-capable templates")
+    parser.add_argument("--editor-runtime", type=Path, help="Matching browser_cape editor library; required with --cape-runtime")
     args = parser.parse_args()
     stage = args.stage.resolve()
     if not stage.is_relative_to(REPO / ".local"):
@@ -321,11 +363,15 @@ def main():
             (url.scheme == "http" and url.hostname in {"localhost", "127.0.0.1", "::1"})):
         parser.error("Assets require HTTPS without credentials, query or fragments; HTTP is allowed only on loopback")
     report = stage_project(stage, args.endpoint)
+    if args.cape_runtime:
+        if not args.editor_runtime: parser.error("--cape-runtime requires --editor-runtime for extension registration during export")
+        stage_browser_cape(stage, args.cape_runtime.resolve(), args.editor_runtime.resolve())
     print(f"Prepared {report['raw_files']} raw files in {len(report['archives'])} verified archives", flush=True)
     if args.prepare_only:
         return
     project = stage / "project"
     template_dir = args.templates.resolve()
+    variant = "web_dlink" if args.cape_runtime else "web"
     preset = f'''[preset.0]
 name="Browser Prototype"
 platform="Web"
@@ -335,9 +381,9 @@ include_filter="*.json,*.csv,*.txt,*.bin"
 exclude_filter="assets/ui/start_screen/*.ogv"
 export_path="../site/index.html"
 [preset.0.options]
-custom_template/debug="{(template_dir / 'web_debug.zip').as_posix()}"
-custom_template/release="{(template_dir / 'web_release.zip').as_posix()}"
-variant/extensions_support=false
+custom_template/debug="{(template_dir / (variant + '_debug.zip')).as_posix()}"
+custom_template/release="{(template_dir / (variant + '_release.zip')).as_posix()}"
+variant/extensions_support={str(bool(args.cape_runtime)).lower()}
 variant/thread_support=true
 threads/emscripten_pool_size=16
 threads/godot_pool_size=4

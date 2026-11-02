@@ -89,6 +89,15 @@ globalThis.RabbitLandsBrowser = (() => {
             throw new Error('Invalid browser asset manifest.');
         }
         [manifest.wasm, ...manifest.pack.parts, ...manifest.archives].forEach(validate);
+        const libraries = manifest.libraries || [];
+        if (!Array.isArray(libraries) || libraries.length > 16) throw new Error('Invalid browser libraries.');
+        const names = new Set();
+        for (const library of libraries) {
+            validate(library);
+            if (!/^[a-zA-Z0-9_.-]+\.wasm$/.test(library.name) || library.file !== `${library.sha256}.wasm` || names.has(library.name) ||
+                    typeof library.extension !== 'boolean') throw new Error('Invalid browser library name.');
+            names.add(library.name);
+        }
         try {
             if (typeof caches === 'undefined') throw new Error('Browser storage unavailable');
             cache = await caches.open(CACHE);
@@ -100,7 +109,7 @@ globalThis.RabbitLandsBrowser = (() => {
             catch (_) { stats.persistent = false; }
         }
         let completed = 0;
-        const total = manifest.pack.bytes + manifest.wasm.bytes;
+        const total = manifest.pack.bytes + manifest.wasm.bytes + libraries.reduce((n, row) => n + row.bytes, 0);
         async function load(row) {
             const bytes = await verified(row);
             completed += bytes.byteLength;
@@ -110,8 +119,27 @@ globalThis.RabbitLandsBrowser = (() => {
         const wasmURL = URL.createObjectURL(new Blob([await load(manifest.wasm)], {type: 'application/wasm'}));
         globalThis.RL_BROWSER_WASM_URL = wasmURL;
         globalThis.RL_BROWSER_ASSETS = {...manifest, base_url: base.href};
-        try { await engine.init(config.executable); }
+        const libraryURLs = new Map();
+        const originalFetch = globalThis.fetch;
+        try {
+            for (const library of libraries) {
+                const url = new URL(library.name, location.href).href;
+                libraryURLs.set(url, URL.createObjectURL(new Blob([await load(library)], {type: 'application/wasm'})));
+            }
+            if (libraries.length) {
+                // Preserve the engine's library names for dlopen, while its
+                // initial dynamic linker fetches only already verified bytes.
+                engine.config.update({gdextensionLibs: libraries.filter(row => row.extension).map(row => row.name)});
+                globalThis.fetch = (input, options) => {
+                    const url = new URL(typeof input === 'string' || input instanceof URL ? input : input.url, location.href).href;
+                    return originalFetch(libraryURLs.get(url) || input, options);
+                };
+            }
+            await engine.init(config.executable);
+        }
         finally {
+            globalThis.fetch = originalFetch;
+            for (const url of libraryURLs.values()) URL.revokeObjectURL(url);
             URL.revokeObjectURL(wasmURL);
             delete globalThis.RL_BROWSER_WASM_URL;
         }

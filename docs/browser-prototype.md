@@ -15,14 +15,21 @@ does not move or rewrite production characters.
 ## Build and run
 
 Work in a task worktree based on `origin/develop`. Use the supported Godot 4.7.2
-editor and its matching standard web export templates. Extract `web_debug.zip`
-and `web_release.zip` from the official export templates into an ignored local
-folder. This tool does not download tools or publish anything.
+editor and its matching web export templates. Extract `web_dlink_debug.zip`
+and `web_dlink_release.zip` from the official export templates into an ignored
+local folder. The playable riding profile also needs CMake, Ninja, native C++
+build tools and an activated task-local Emscripten **4.0.20** SDK (`--embedded`).
+That SDK version matches the supported Godot templates.
 
 ```powershell
+python godot-client/tools/build_browser_cape.py `
+  --emsdk .local/browser-prototype/toolchain/emsdk
+
 python godot-client/tools/build_web_prototype.py `
   --godot C:/rabbitlands/rabbitlands-client/godot-client/Godot_v4.7.2-stable_win64.exe `
-  --templates .local/browser-prototype/templates
+  --templates .local/browser-prototype/templates `
+  --cape-runtime .local/browser-prototype/cape-runtime/payload/browser_cape.wasm `
+  --editor-runtime .local/browser-prototype/cape-runtime/payload/browser_cape.dll
 
 python godot-client/tools/serve_web_prototype.py .local/browser-prototype/build/site
 
@@ -34,6 +41,17 @@ Open `http://127.0.0.1:8060/` in Chrome or Edge, then connect and log in. The lo
 game server must expose its opt-in WebSocket listener on `127.0.0.1:2002` and
 allow the origin `http://127.0.0.1:8060`. Server operators should follow their
 server handbook for test database setup and listener configuration.
+
+The cape builder uses the existing two C++ cape arithmetic classes with the
+pinned Godot bindings, four contact workers and qualified O2 compilation. It
+removes debug metadata without rewriting executable WebAssembly sections. Its
+manifest records compiler/bindings versions and payload hashes. The matching
+minimal native library is only for the export editor; players download the
+WebAssembly module, not a Windows DLL or a compiler. Include the generated
+`godot-cpp-LICENSE.md` notice with a distributed build. Omitting both cape flags
+and using the ordinary `web_debug.zip`/`web_release.zip` templates retains an
+unoptimized networking/control build; mounted cape fitting is too slow there
+for playable riding.
 
 `--endpoint` chooses another WebSocket URL at build time. Outside loopback, use
 `wss://` with a trusted certificate. Do not put credentials in URLs or build
@@ -81,7 +99,7 @@ gameplay, accounts, persistence and the normal state/message traffic, with an
 optional WebSocket listener for browsers. It does not render frames or unpack
 player assets.
 
-A local build uses about 913 MB of external payloads and a 1.6 MB launch folder.
+A local build uses about 919 MB of external payloads and a 1.7 MB launch folder.
 Browser-only exported hair albedo textures are limited to 1024 pixels, reducing
 the imported package by about 84 MB. Authored PNGs, raw actors and desktop art
 are unchanged. The loader transfers ownership of its immutable package/archive
@@ -110,6 +128,25 @@ change (about 34 to 40-48 FPS). The 95th percentile improved from 37.5 to
 not establish a steady 60 FPS target. The heavily occupied Intel GPU was too
 variable for a useful performance comparison. These are local prototype
 measurements, not minimum hardware requirements.
+
+Mounted browsers now register the existing compiled body-contact/projector
+arithmetic at engine startup, before gameplay threads exist. Late-loading a
+threaded library after gameplay starts is deliberately refused. The mounted
+cape uses a 30 Hz simulation clock with adjusted damping; rider animation,
+input and rendering retain their ordinary display clock. Desktop cape clocks,
+solver iterations, contact tolerances and authored art are unchanged.
+
+A visible 1280 x 900 Chrome travel test on the RTX 5080 laptop GPU improved
+mounted play from roughly 1-2 FPS to typical 23-25 ms game frames (40-44 FPS).
+The first mount's longest frame fell from over two seconds to 41-68 ms after
+preparing the owned mount under the arrival curtain. Shader waits accounted
+for more than five seconds of a ten-second first-run profile. Enabling the
+existing arrival camera sweep moved that compilation behind loading: a
+subsequent route had 16.7 ms median foot frames, with a 233 ms worst frame,
+instead of a roughly 2.5-second first-run pause. These are route-specific local
+results; fresh terrain imports still pause, and other views/GPU workloads can
+run slower. Browser arrival shader preparation is bounded at 30 seconds;
+desktop retains its existing 20-second bound.
 
 The page requests a high-performance graphics context, which the browser or OS
 can override. On Windows, start the local site and then use
@@ -187,4 +224,10 @@ Focused packaging and loader checks:
 ```powershell
 python -m unittest discover -s godot-client/tests -p test_web_prototype_package.py -v
 node --test godot-client/tests/test_browser_asset_loader.cjs
+python -m unittest discover -s godot-client/tests -p test_browser_cape_build.py -v
 ```
+
+The staged editor project can also run `tests/test_browser_mount_warmup.gd`
+(with its minimal editor cape extension) and `tests/test_camera_shader_warmup.gd`
+to check authoritative-state restoration, cancellation and camera/frame-cap
+restoration. Keep these test scripts out of the exported game package.

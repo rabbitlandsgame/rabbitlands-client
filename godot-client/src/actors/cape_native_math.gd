@@ -16,6 +16,11 @@ static func ready() -> bool:
 		_ready = true
 		_reason = "registered"
 		return true
+	if OS.has_feature("web"):
+		# Web extensions must register during engine startup, before game
+		# threads exist. A late dlopen can wait on those threads indefinitely.
+		_reason = "browser_payload_absent"
+		return false
 	var directory := ProjectSettings.globalize_path("res://bin/client_runtime") if OS.has_feature("editor") else \
 		OS.get_executable_path().get_base_dir().path_join("bin/client_runtime")
 	var path := directory.path_join("runtime-manifest.json")

@@ -26,8 +26,18 @@ using namespace godot;
 namespace {
 // Persistent workers read only an immutable numeric contact batch.
 const size_t CONTACT_WORKERS_LIMIT = [] {
+#ifdef __EMSCRIPTEN__
+    // Only the browser package that preloads this module and reserves its
+    // pthread pool may opt into contact workers. Other web builds stay serial.
+#ifdef RL_BROWSER_CAPE_WORKERS
+    return size_t(RL_BROWSER_CAPE_WORKERS);
+#else
+    return size_t(0);
+#endif
+#else
     const unsigned cores = std::thread::hardware_concurrency();
     return cores > 3 ? std::min<size_t>(6, cores - 2) : size_t(0);
+#endif
 }();
 class ContactWorkers {
     const size_t worker_limit;

@@ -2,6 +2,7 @@
 import json
 from pathlib import Path
 import sys
+import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
@@ -38,6 +39,28 @@ class LandfallPackageTests(unittest.TestCase):
             self.assertNotIn(".local", path.relative_to(web.REPO).parts)
             self.assertNotIn(path.suffix, {".sqlite3", ".key", ".pem", ".py"})
         self.assertNotIn(web.REPO / "eloria-assets/maps/lantern-reach/world.json", self.files)
+
+    def test_cape_export_registers_only_the_small_platform_payload(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "site").mkdir()
+            (root / "build.json").write_text('{"archives":[]}')
+            module = root / "browser_cape.wasm"
+            module.write_bytes(b"\0asm\1\0\0\0")
+            editor = root / "browser_cape.dll"
+            editor.write_bytes(b"editor fixture")
+            notice = root / "godot-cpp-LICENSE.md"
+            notice.write_text("MIT fixture")
+            web.stage_browser_cape(root, module, editor)
+            directory = root / "project/assets/platform/browser_cape"
+            self.assertEqual((directory / module.name).read_bytes(), module.read_bytes())
+            self.assertEqual((directory / editor.name).read_bytes(), editor.read_bytes())
+            self.assertEqual((root / "site" / notice.name).read_text(), notice.read_text())
+            descriptor = (directory / "browser_cape.gdextension").read_text()
+            self.assertIn('web.wasm32="./browser_cape.wasm"', descriptor)
+            self.assertIn('windows.x86_64="./browser_cape.dll"', descriptor)
+            self.assertEqual(json.loads((root / "build.json").read_text())["browser_cape_sha256"],
+                             web.describe(module)["sha256"])
 
 
 if __name__ == "__main__":

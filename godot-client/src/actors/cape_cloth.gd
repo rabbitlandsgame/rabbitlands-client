@@ -1350,6 +1350,12 @@ func _push_out_of_capsule_axis(to_world: Transform3D, point: Vector3,
 	return point
 
 
+func _simulation_step() -> float:
+	# Mounted browser cloth runs at 30 Hz; body, input and riding animation
+	# retain their display-frame clock. Static fitting and desktop keep 60 Hz.
+	return MAX_STEP if OS.has_feature("web") and _mount_surface != null \
+		and not _fitting_mounted_static else FIXED_STEP
+
 func _process_modification_with_delta(delta: float) -> void:
 	# Verlet gravity scales with dt squared. Feeding display-frame jitter into
 	# it made an idle cape continually change its equilibrium and wiggle.
@@ -1386,16 +1392,17 @@ func _process_modification_with_delta(delta: float) -> void:
 	if not _frame_world_ready or _previous_frame_world.origin.distance_to(world.origin) > TELEPORT:
 		_previous_frame_world = world
 		_frame_world_ready = true
-	var next_step_time := FIXED_STEP - _step_owed
+	var fixed_step := _simulation_step()
+	var next_step_time := fixed_step - _step_owed
 	_step_owed += elapsed
 	var stepped := false
-	while _step_owed + 0.000001 >= FIXED_STEP:
-		_step_owed -= FIXED_STEP
+	while _step_owed + 0.000001 >= fixed_step:
+		_step_owed -= fixed_step
 		# Spread a display frame's root motion across its fixed steps. Giving
 		# both steps the final root position produces a jump followed by a stop.
 		var fraction := clampf(next_step_time / maxf(elapsed, 0.000001), 0.0, 1.0)
-		_simulate_step(FIXED_STEP, _previous_frame_world.interpolate_with(world, fraction))
-		next_step_time += FIXED_STEP
+		_simulate_step(fixed_step, _previous_frame_world.interpolate_with(world, fraction))
+		next_step_time += fixed_step
 		stepped = true
 	_previous_frame_world = world
 	if skeleton == null or not _settled:
@@ -1471,6 +1478,8 @@ func _simulate_step(delta: float, simulation_world: Transform3D) -> void:
 	var still := _frame_anchor_speed < SETTLE_SPEED
 	var fall := GRAVITY * (SETTLE_GRAVITY if still and _mount_surface == null else 1.0) * step * step
 	var damping := SETTLE_DAMPING if still or _mount_surface != null else DAMPING
+	if OS.has_feature("web") and _mount_surface != null and step > FIXED_STEP:
+		damping = pow(damping, step / FIXED_STEP)
 	if not still and _mount_surface == null:
 		damping = lerpf(WALK_DAMPING, DAMPING, smoothstep(2.0, 4.0, _frame_travel_speed))
 		if _last_simulation_translation.is_finite() and step > 0.0:
@@ -1662,7 +1671,7 @@ func _project_mounted_skin(skeleton: Skeleton3D, world: Transform3D, fabrics: Ar
 			"collision_radii": _collision_radii, "collision_reaches": _collision_reaches,
 			"collision_kinds": _collision_kinds,
 			"body_margin_m": .015 + _mounted_static_margin_m},
-			_mount_surface.call("native_snapshot", FIXED_STEP), native_body)
+			_mount_surface.call("native_snapshot", _simulation_step()), native_body)
 	else:
 		_mounted_fit.call("set_native_contacts", {}, PackedFloat64Array(), null)
 	var projected: PackedVector3Array = _mounted_fit.call("project", skeleton, world, frame, translations, _mounted_skin_contact, _mounted_skin_plane)
