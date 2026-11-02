@@ -938,6 +938,7 @@ var _browser_actor_assets: RefCounted
 var _browser_source_retirement: RefCounted
 var _browser_loading_lease: RefCounted
 var _browser_pinned_maps: Array = []
+var _browser_character_waiting := false
 ## The local character was spawned and the server has not yet been told it
 ## stands on loaded ground (`_report_arrival`).
 var _arrival_unreported := false
@@ -1437,7 +1438,7 @@ func _ready() -> void:
 		_browser_loading_lease = preload("res://src/platform/browser_loading_lease.gd").new()
 		var browser_assets := get_tree().root.get_node_or_null("BrowserAssetService")
 		if browser_assets != null and browser_assets.has_signal("files_evicted"):
-			_browser_source_retirement = preload("res://src/platform/browser_source_retirement.gd").new()
+			_browser_source_retirement = preload("res://src/platform/browser_source_retirement.gd").new(actor_resource_warmup)
 			browser_assets.connect("files_evicted", Callable(_browser_source_retirement, "enqueue"))
 	RLHeadLibrary.set_render_warm_context(self, &"_rl_head_render_warm_allowed")
 	Diagnostics.startup_stage("geometry_preparation")
@@ -2129,6 +2130,7 @@ func _process(delta: float) -> void:
 			and not weather_map.has("insidesOf")
 		audio_director.set_weather(weather_layer.look() \
 			if AppState.authenticated and outdoors else {})
+	if OS.has_feature("web"): _update_browser_actor_wait()
 	_update_arrival()
 	_update_browser_asset_pins()
 	if _browser_loading_lease != null:
@@ -6615,6 +6617,24 @@ func _update_browser_asset_pins() -> void:
 	if maps == _browser_pinned_maps: return
 	_browser_pinned_maps = maps.duplicate()
 	WebPrototype.pin_maps("world-residents", maps)
+
+func _update_browser_actor_wait() -> void:
+	var waiting := _browser_actor_assets != null and arrival_curtain.blocks_input() \
+		and bool(_browser_actor_assets.call("pending_for", AppState.local_actor_id))
+	if waiting:
+		arrival_curtain.hold_asset_wait()
+		character_intro.hold_asset_wait()
+		var assets := WebPrototype.asset_snapshot()
+		if str(assets.get("error", "")).is_empty():
+			arrival_curtain.clear_retry()
+			arrival_curtain.set_text("Preparing character…")
+		else:
+			arrival_curtain.offer_retry("Character files could not be loaded.\nCheck your connection and try again.", "Retry", 125)
+			if not arrival_curtain.retry_requested.is_connected(_retry_browser_area_files):
+				arrival_curtain.retry_requested.connect(_retry_browser_area_files)
+	elif _browser_character_waiting:
+		arrival_curtain.clear_retry()
+	_browser_character_waiting = waiting
 
 func _retry_browser_area_files() -> void:
 	if not OS.has_feature("web") or not _deferred_map_load: return

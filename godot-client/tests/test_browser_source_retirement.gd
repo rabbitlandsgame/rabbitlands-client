@@ -30,6 +30,14 @@ func _run() -> void:
 	NativeAnimationImporter._libraries[path + "|fixture"] = {"library":library}
 	NativeAnimationImporter._sources[path] = Node3D.new()
 	assert(NativeAnimationImporter.release_sources(PackedStringArray([physical])))
+	var warmer := preload("res://src/actors/actor_resource_warmup.gd").new()
+	warmer._known = {"warm":true, "other":true}
+	warmer._known_sources = {"warm":[GlbSceneCache._file_key(path)], "other":[GlbSceneCache._file_key(other)]}
+	warmer._queue.assign([{"key":"warm"}, {"key":"other"}])
+	warmer._active = "warm"
+	warmer.invalidate_sources(PackedStringArray([physical]))
+	assert(not warmer._known.has("warm") and warmer._known.has("other"))
+	assert(warmer._queue.size() == 1 and warmer._discard_active)
 	assert(not NativeAnimationImporter._sources.has(path))
 	assert(not NativeAnimationImporter._libraries.has(path + "|fixture"))
 	assert(player.get_animation_library("retained") == library)
