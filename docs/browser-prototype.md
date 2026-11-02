@@ -1,16 +1,21 @@
 # Desktop browser prototype
 
-The prototype runs the existing Godot client in a desktop browser and uses the
-same game protocol and server. Its current playable map is **Landfall**. First-launch browser settings use
-Medium graphics, half-size map textures, a 60 FPS cap and no decorative grass;
-these preferences stay separate from the desktop client. It is a
-local development build, not a published web release.
+The prototype runs the shared Godot client locally in a desktop browser using the
+same game protocol and server. The build catalog covers all registered maps
+(90 canonical maps and their aliases), supported runtime actors and equipment.
+Maps, remote bodies and equipment download on demand rather than all at startup.
+Server configuration still determines which maps players can enter.
 
-Use an existing isolated test character saved on Landfall. Character creation,
-other maps, the desktop updater and animated login backgrounds are outside this
-prototype. A character arriving on another map is disconnected with a message
-directing them to the desktop client. Use a separate test database: this build
-does not move or rewrite production characters.
+New character creation uses the same Human starting looks, four callings,
+appearance negotiation, server validation and automatic login as the desktop
+client. Shared gameplay windows and commands remain available. Browser controls
+for screenshots and fullscreen are described in [browser-controls.md](browser-controls.md).
+This is a local development build, not a published web release or a claim that
+every map and gameplay combination has been qualified in a browser.
+
+First-launch settings use Medium graphics, half-size map textures, a 60 FPS cap
+and no decorative grass. Browser preferences stay separate from the desktop
+client. Use an isolated test database and accounts for development.
 
 ## Build and run
 
@@ -82,17 +87,35 @@ extracted images can otherwise be mistaken for additional source resources.
 The builder skips raw-world scene imports and rejects packages over 512 MiB.
 The verified raw art archives retain the original scenery and image bytes.
 
-Landfall's declared chunks, shared prototypes, verified image dependencies,
-current humanoids, supported creatures, home NPC clothing and starter equipment
-and starter mounts and verified road-ground fields are packaged from tracked source files. Raw actor and map files are extracted
-into the browser's private virtual filesystem before the ordinary client starts;
-they are not editor-imported or installed onto the desktop game. The generated
-`build.json` records file counts, byte sizes, source base commit and archive hashes.
-The browser checks the SHA-256 and length of the runtime, each package part and
-every raw archive. Downloads use no credentials. Missing or corrupt payloads stop
-loading. Independently unpacked art archives are about 24 MiB each or smaller;
-the package parts are capped at 24 MiB. No generated payload approaches GitHub's
-100 MiB per-file Git limit.
+The catalog factors tracked map and actor dependencies into shared bundles. Each
+source file has one physical owner, while map/model/equipment groups reference
+that bundle through dependencies. Startup contains playable Human creation
+resources, common presentation files, map metadata and small cartography images;
+it does not contain every map's terrain or every creature. Borrowed mount tack
+is requested with the mount. Retired runtime assets remain excluded.
+
+The generated `build.json` records file counts, byte sizes, source base commit
+and archive hashes. The browser checks SHA-256 and length before saving or using
+runtime files, package parts and raw archives. Source files larger than 2 MiB
+are split into deterministic archive entries and reconstructed before readiness.
+Archive extraction yields after a 2 ms frame slice; an individual entry remains
+an atomic operation. Archive files stay below 64 MiB and package parts at 24 MiB,
+below GitHub's 100 MiB per-file limit.
+
+Raw files are reconstructed into the browser's private memory filesystem, without
+installing or editor-importing them into the desktop game. A soft 768 MiB budget
+covers dynamic raw assets outside startup. Active/parked maps and displayed or
+pending actors pin their dependencies. Unpinned least-recently-used groups can
+be removed; their compressed downloads remain saved on disk. Source retirement
+also invalidates parsed model/animation and warmup caches. Live objects retain
+their own resource references. A required working set can exceed the soft budget;
+the diagnostic snapshot reports that condition rather than removing live assets.
+
+Destination/local-player downloads have priority over remote actors and optional
+previews. World loading stays behind the arrival curtain until source assets are
+ready. Browser-capable servers can renew an existing arrival protection while
+assets load, bounded to ten minutes; normal gameplay or arrival consumes that
+protection. Desktop arrival and transport behavior remain unchanged.
 
 Rendering, animations, input, decompression, map construction, client CPU, GPU
 and RAM all run on the player's machine. That machine needs a current desktop
@@ -103,7 +126,9 @@ gameplay, accounts, persistence and the normal state/message traffic, with an
 optional WebSocket listener for browsers. It does not render frames or unpack
 player assets.
 
-A local build uses about 892 MB of external payloads and a 7.0 MB launch folder.
+The expanded local catalog contains about 2.6 GB of external payloads in total.
+Startup needs roughly 963 MB before destination-specific assets; the rest is
+downloaded when used. These are current build sizes, not per-visit transfers.
 Browser-only exported hair albedo textures are limited to 1024 pixels, reducing
 the imported package by about 84 MB. Authored PNGs, raw actors and desktop art
 are unchanged. The loader transfers ownership of its immutable package/archive
@@ -177,7 +202,7 @@ or server databases. User graphics preferences retain their separate browser
 application storage.
 
 A real Chrome profile was closed and reopened with the ordinary HTTP cache
-disabled and the asset hosts blocked. All 51 payloads (892 MB) were reused, with
+disabled and the asset hosts blocked. All 51 payloads (892 MB) in the earlier Landfall build were reused, with
 zero asset requests. This verifies disk reuse across browser sessions. The
 small launch page and multiplayer server still need to be reachable; this is
 not an offline game.
@@ -195,16 +220,17 @@ different browser storage area.
 ## Current limits
 
 - The first load is large: this proof uses the existing desktop art in
-  compressed archives, without on-demand territory downloads or a smaller
-  browser art profile. The loader displays progress and verifies the payloads.
+  compressed archives. Territory, actor and equipment downloads are on demand;
+  startup still includes the complete playable Human creation profile. The loader
+  displays progress and verifies payloads.
 - The threaded build requires cross-origin isolation. The local serving tool
   supplies the required headers and serves only the chosen generated site folder.
   The export reserves 16 browser workers, with four in Godot's worker pool, to
   leave capacity for existing map and actor loading threads.
 - Each downloaded art archive uses temporary memory-backed storage, outside IndexedDB,
-  and is removed after extraction. The ordinary package and extracted art remain
-  in browser memory for the session, while compressed downloads persist in Cache
-  storage. A subsequent visit still reconstructs runtime resources from saved
+  and is removed after extraction. The ordinary package and startup art remain
+  in browser memory; unpinned dynamic groups can be evicted. Compressed downloads
+  persist in Cache storage. A subsequent visit still reconstructs runtime resources from saved
   files; the cache removes the repeated network transfer, not all startup work.
   Browser settings use a separate application storage directory. Login
   credentials remain in process memory and clear through the existing logout
@@ -228,6 +254,7 @@ Focused packaging and loader checks:
 ```powershell
 python -m unittest discover -s godot-client/tests -p test_web_prototype_package.py -v
 node --test godot-client/tests/test_browser_asset_loader.cjs
+python -m unittest discover -s godot-client/tests -p test_browser_group_catalog.py -v
 python -m unittest discover -s godot-client/tests -p test_browser_cape_build.py -v
 ```
 
