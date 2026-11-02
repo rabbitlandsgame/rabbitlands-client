@@ -80,6 +80,13 @@ func ensure_groups(ids: Array, owner := "") -> bool:
 		ready = false
 		if str(states.get(id, "")) in ["queued", "loading", "failed"]: continue
 		_queue_group(id)
+	if not owner.is_empty() and not queue.is_empty():
+		var foreground: Array[String] = []
+		var background: Array[String] = []
+		for id: String in queue:
+			if required.has(id): foreground.append(id)
+			else: background.append(id)
+		queue = foreground + background
 	return ready
 
 func _queue_group(id: String) -> void:

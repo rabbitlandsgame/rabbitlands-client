@@ -338,7 +338,7 @@ def raw_files() -> list[Path]:
     return sorted(found)
 
 
-def stage_project(stage: Path, endpoint: str) -> dict:
+def stage_project(stage: Path, endpoint: str, asset_catalog: Path | None = None) -> dict:
     project = stage / "project"
     site = stage / "site"
     project.mkdir(parents=True, exist_ok=True)
@@ -391,13 +391,14 @@ def stage_project(stage: Path, endpoint: str) -> dict:
     for model in raw_scenes:
         model.with_name(model.name + ".import").write_text('[remap]\n\nimporter="skip"\n', encoding="utf-8")
     import browser_asset_catalog
-    catalog, files = browser_asset_catalog.build(__import__(__name__), assets)
+    catalog, files = browser_asset_catalog.load(__import__(__name__), asset_catalog, assets) if asset_catalog else browser_asset_catalog.build(__import__(__name__), assets)
+    asset_source = files.source_root
     # Source scenery can point into several shared map image pools, not only
     # world/_shared/images. Mirror the already verified raw dependency closure
     # for the editor too, preserving relative URIs without importing raw maps.
     for source in files:
-        if not source.is_relative_to(CLIENT) and source.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp"}:
-            target = stage / source.relative_to(REPO)
+        if not source.is_relative_to(asset_source / "godot-client") and source.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp"}:
+            target = stage / source.relative_to(asset_source)
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(source, target)
     archives = catalog["groups"]["startup"]["archives"]
@@ -420,6 +421,7 @@ def main():
     parser.add_argument("--endpoint", default="ws://127.0.0.1:2002")
     parser.add_argument("--assets-base-url", default="http://127.0.0.1:8061/", help="CORS-enabled asset folder; HTTPS outside loopback")
     parser.add_argument("--prepare-only", action="store_true")
+    parser.add_argument("--asset-catalog", type=Path, help="Reuse verified task-local grouped assets with identical committed source inputs")
     parser.add_argument("--cape-runtime", type=Path, help="Optional compiled browser_cape.wasm; enables extension-capable templates")
     parser.add_argument("--editor-runtime", type=Path, help="Matching browser_cape editor library; required with --cape-runtime")
     args = parser.parse_args()
@@ -432,7 +434,7 @@ def main():
     if not url.hostname or url.username or url.password or url.query or url.fragment or (url.scheme != "https" and not
             (url.scheme == "http" and url.hostname in {"localhost", "127.0.0.1", "::1"})):
         parser.error("Assets require HTTPS without credentials, query or fragments; HTTP is allowed only on loopback")
-    report = stage_project(stage, args.endpoint)
+    report = stage_project(stage, args.endpoint, args.asset_catalog.resolve() if args.asset_catalog else None)
     if args.cape_runtime:
         if not args.editor_runtime: parser.error("--cape-runtime requires --editor-runtime for extension registration during export")
         stage_browser_cape(stage, args.cape_runtime.resolve(), args.editor_runtime.resolve())

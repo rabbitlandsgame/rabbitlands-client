@@ -34,6 +34,12 @@ func _run() -> void:
 	assert(not service.ensure_groups(["map:a"], "active"))
 	assert(service.queue == ["map:a"])
 	service.queue.clear()
+	service.states.clear()
+	service.groups.optional = {"archives":[], "dependencies":[]}
+	assert(not service.ensure_groups(["optional"]))
+	assert(not service.ensure_groups(["map:a"], "active"))
+	assert(service.queue == ["shared", "map:a", "optional"])
+	service.queue.clear()
 	# The same original file is assembled across independently compressed pieces.
 	service.current = "fixture"
 	service.files.fixture = []

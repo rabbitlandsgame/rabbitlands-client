@@ -2,10 +2,64 @@
 from __future__ import annotations
 import hashlib
 import json
+import shutil
+import subprocess
 from collections import defaultdict
 from pathlib import Path
 
 IMAGE = {".png", ".jpg", ".jpeg", ".webp"}
+INPUTS = ("godot-client/assets", "godot-client/data/actors", "godot-client/data/maps",
+          "godot-client/data/assets", "godot-client/src/ui/creation_archetypes.gd",
+          "eloria-assets/maps", "eloria-assets/world", "eloria-assets/fonts")
+POLICY = "rl-browser-groups-zip2m-v2"
+
+class Sources(set):
+    def __init__(self, paths, root):
+        super().__init__(paths)
+        self.source_root = root
+
+def fingerprint(root):
+    if subprocess.check_output(["git", "diff", "HEAD", "--name-only", "--", *INPUTS], cwd=root).strip():
+        raise ValueError("Commit asset/catalog inputs before building or reusing an asset catalog")
+    return {name: subprocess.check_output(["git", "rev-parse", "HEAD:" + name], cwd=root, text=True).strip() for name in INPUTS}
+
+def save(web, directory):
+    directory.mkdir(parents=True, exist_ok=True)
+    assets = directory / "assets"; assets.mkdir(exist_ok=True)
+    inputs = fingerprint(web.REPO)
+    catalog, files = build(web, assets)
+    if fingerprint(web.REPO) != inputs: raise ValueError("Asset inputs changed during packaging")
+    payload = {"policy":POLICY, "source_root":str(web.REPO),
+               "inputs":inputs, "catalog":catalog,
+               "files":[path.relative_to(web.REPO).as_posix() for path in sorted(files)]}
+    (directory / "catalog.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    return catalog, files
+
+def load(web, path, assets):
+    payload = json.loads(path.read_text())
+    if payload.get("policy") != POLICY or payload.get("inputs") != fingerprint(web.REPO):
+        raise ValueError("Prebuilt browser assets do not match the current committed runtime inputs")
+    provider = Path(payload["source_root"]).resolve()
+    def common(root):
+        value = subprocess.check_output(["git", "rev-parse", "--git-common-dir"], cwd=root, text=True).strip()
+        return (root / value).resolve()
+    if common(provider) != common(web.REPO) or fingerprint(provider) != payload["inputs"]:
+        raise ValueError("Prebuilt assets must come from the same sanitized repository and unchanged public source")
+    catalog = payload["catalog"]
+    for group in catalog["groups"].values():
+        for row in group["archives"]:
+            if row["file"] != row["sha256"] + ".zip": raise ValueError("Invalid prebuilt archive filename")
+            source = path.parent / "assets" / row["file"]
+            if web.describe(source) != row: raise ValueError("Prebuilt browser archive changed")
+            target = assets / source.name
+            if target.resolve() != source.resolve(): shutil.copy2(source, target)
+    files = []
+    for name in payload["files"]:
+        source = (provider / name).resolve()
+        if not source.is_relative_to(provider) or not name.startswith(("godot-client/assets/", "eloria-assets/")):
+            raise ValueError("Invalid prebuilt public source path")
+        files.append(source)
+    return catalog, Sources(files, provider)
 
 
 def group_sources(web):
@@ -73,6 +127,9 @@ def group_sources(web):
         startup.update(path for path in (client / "assets/actors/native" / root).rglob("*")
                        if path.is_file() and path.suffix not in {".uid", ".import", ".md"})
     startup.add(client / "assets/actors/native/equipment/generic_cape.glb")
+    # Includes the runtime female shirt-neckline repair scene, selected by
+    # its renderer helper rather than the base model's scene field.
+    startup.update((client / "assets/actors/native/races").glob("*.glb"))
     for root in (repository / "eloria-assets/fonts", repository / "eloria-assets/world/_shared/images", client / "assets/world"):
         startup.update(path for path in root.rglob("*") if path.is_file() and path.suffix.lower() in {".glb", ".json", ".png", ".jpg", ".jpeg", ".webp", ".ttf", ".otf"})
     startup.update((client / "assets/ui/cursors").glob("*.png"))
@@ -91,6 +148,10 @@ def group_sources(web):
         elif isinstance(value, list):
             for item in value: add_backgrounds(item)
     add_backgrounds(backgrounds.get("maps", {}))
+    for name in ("cartography.json", "cartography-continent-v2.json"):
+        for value in web.strings(json.loads((client / "data/maps" / name).read_text())):
+            if value.startswith("res://") and Path(value).suffix.lower() in IMAGE:
+                startup.add((client / value[6:]).resolve())
     for name, model in models.items():
         key = "model:" + name
         groups[key] = closure(resources(model))
@@ -148,4 +209,4 @@ def build(web, assets):
                         "dependencies": dependencies.get(name, []),
                         "unpacked_bytes": sum(path.stat().st_size for path in paths)}
     catalog["groups"] = groups
-    return catalog, set().union(*sources.values())
+    return catalog, Sources(set().union(*sources.values()), web.REPO)
