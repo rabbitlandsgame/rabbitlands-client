@@ -122,24 +122,6 @@ static var _biome_mutex := Mutex.new()
 static var _biome_tried := false
 static var _biome_shader: Shader
 static var _biome_uniforms := PackedStringArray()
-static var _browser_shader_mutex := Mutex.new()
-static var _browser_shaders: Dictionary = {}
-
-## Reuse one browser program per source, including the generated biome paint.
-## Native callers retain the original Resource and program byte for byte.
-static func shader_for_renderer(source: Shader, browser := OS.has_feature("web")) -> Shader:
-	if source == null or not browser:
-		return source
-	_browser_shader_mutex.lock()
-	var key := source.get_instance_id()
-	if not _browser_shaders.has(key):
-		var variant := Shader.new()
-		variant.code = source.code.replace("shader_type spatial;",
-			"shader_type spatial;\n#define LOOK_WEB_BORDERS\n")
-		_browser_shaders[key] = variant
-	var result := _browser_shaders[key] as Shader
-	_browser_shader_mutex.unlock()
-	return result
 
 ## Paints a continent map's root as the loader finishes it. Maps outside the
 ## continent wait for `paint_bound`. Returns the surfaces painted.
@@ -725,13 +707,13 @@ static func painted_source_for(source: Material, kind: Kind, has_colour: bool,
 	var painted := ShaderMaterial.new()
 	painted.resource_name = standard.resource_name
 	painted.set_meta(LookProfile.SOURCE_META, source)
-	painted.shader = shader_for_renderer(shader)
+	painted.shader = shader
 	painted.render_priority = standard.render_priority
 	painted.next_pass = standard.next_pass
 	# A blended painted surface dithers itself out if OccluderFade fades it
 	# (layer L3, LookFade); it already carries the dither.
 	if blended:
-		painted.set_meta(LookFade.FADED_SHADER_META, painted.shader)
+		painted.set_meta(LookFade.FADED_SHADER_META, shader)
 	painted.set_shader_parameter(&"albedo_texture", standard.albedo_texture)
 	painted.set_shader_parameter(&"albedo_color", standard.albedo_color)
 	painted.set_shader_parameter(&"use_vertex_albedo",
@@ -960,7 +942,7 @@ static func _painted_biome(source: ShaderMaterial, region: String,
 	var painted := ShaderMaterial.new()
 	painted.resource_name = source.resource_name
 	painted.set_meta(LookProfile.SOURCE_META, source)
-	painted.shader = shader_for_renderer(shader)
+	painted.shader = shader
 	painted.render_priority = source.render_priority
 	painted.next_pass = source.next_pass
 	for uniform_name: String in _biome_uniforms:
