@@ -72,13 +72,18 @@ var afk_reason := ""
 var current_map := ""
 var current_tile: Variant = null
 
+## The two patterns below, compiled once rather than for every chat line.
+static var _url_pattern: RegEx
+static var _host_pattern: RegEx
+
 ## Every address in a line the server said. Detection only: nothing is opened,
 ## nothing is fetched, and the text is left exactly as it arrived.
 static func urls_in(text: String) -> Array[String]:
 	var found: Array[String] = []
-	var pattern := RegEx.create_from_string(
-		"(?i)(?<![a-z0-9_@/:])(?:https?://|www\\.)[^\\s<>\"\\x00-\\x1f]+")
-	for match_value: RegExMatch in pattern.search_all(text):
+	if _url_pattern == null:
+		_url_pattern = RegEx.create_from_string(
+			"(?i)(?<![a-z0-9_@/:])(?:https?://|www\\.)[^\\s<>\"\\x00-\\x1f]+")
+	for match_value: RegExMatch in _url_pattern.search_all(text):
 		var candidate := match_value.get_string()
 		# Keep balanced parentheses that belong to a path, while removing
 		# surrounding chat/PM brackets and sentence punctuation.
@@ -105,8 +110,9 @@ static func web_url(address: String) -> String:
 	if scheme_end < 0 or url.left(scheme_end).to_lower() not in ["http", "https"]:
 		return ""
 	var authority := url.substr(scheme_end + 3).get_slice("/", 0).get_slice("?", 0).get_slice("#", 0)
-	var host := RegEx.create_from_string("^(?:\\[[0-9a-fA-F:.]+\\]|[\\p{L}\\p{N}_.-]+)(?::[0-9]{1,5})?$")
-	if authority.is_empty() or host.search(authority) == null:
+	if _host_pattern == null:
+		_host_pattern = RegEx.create_from_string("^(?:\\[[0-9a-fA-F:.]+\\]|[\\p{L}\\p{N}_.-]+)(?::[0-9]{1,5})?$")
+	if authority.is_empty() or _host_pattern.search(authority) == null:
 		return ""
 	return url.left(scheme_end).to_lower() + url.substr(scheme_end)
 

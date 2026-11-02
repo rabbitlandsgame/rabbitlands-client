@@ -2,6 +2,10 @@ extends RefCounted
 ## Presentation only. Names sent to the server and saved item identities stay canonical.
 static var _names: Dictionary = {}
 static var _loaded := false
+## The alias names longest first, for in_text: sorted once, not on every
+## inventory sync.
+static var _longest_first: Array = []
+static var _sorted := false
 
 static func aliases() -> Dictionary:
 	if not _loaded:
@@ -22,7 +26,9 @@ static func tooltip(canonical: String) -> String:
 	return label if label == canonical else label + "\nAlso searchable as: " + canonical
 
 static func in_text(value: String) -> String:
-	var names: Array = aliases().keys()
-	names.sort_custom(func(a: String, b: String) -> bool: return a.length() > b.length())
-	for name: String in names: value = value.replace(name, display(name))
+	if not _sorted:
+		_sorted = true
+		_longest_first = aliases().keys()
+		_longest_first.sort_custom(func(a: String, b: String) -> bool: return a.length() > b.length())
+	for name: String in _longest_first: value = value.replace(name, display(name))
 	return value

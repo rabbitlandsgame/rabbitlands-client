@@ -19,6 +19,9 @@ var drop_button: Button
 var grab_button: Button
 var selected := -1
 var references: Array[int] = []
+## A state change arrived while the pouch was hidden with the inventory: caught
+## up when it is shown (_shown) or synced directly (the workspace, presented).
+var _sync_pending := false
 
 func configure(owner_main: Control) -> void:
 	main = owner_main
@@ -99,6 +102,7 @@ func _ready() -> void:
 	mix_button.tooltip_text = "Mix · Left: crafting · Right: mix all · Middle: mixing options"
 
 	AppState.state_changed.connect(_changed)
+	visibility_changed.connect(_shown)
 	sync()
 
 static func grouped(value: int) -> String:
@@ -187,11 +191,18 @@ func _select(reference: int) -> void:
 	_sync_actions()
 
 func _changed(path: StringName) -> void:
-	if path in [&"inventory", &"inventory_names", &"storage", &"trade"]: sync()
-	elif path in [&"ground_bags", &"actors"]: _sync_actions()
+	if path not in [&"inventory", &"inventory_names", &"storage", &"trade", &"ground_bags", &"actors"]: return
+	# Every actor packet and inventory change: nothing to show while hidden.
+	if not is_visible_in_tree(): _sync_pending = true
+	elif path in [&"inventory", &"inventory_names", &"storage", &"trade"]: sync()
+	else: _sync_actions()
+
+func _shown() -> void:
+	if _sync_pending and is_visible_in_tree(): sync()
 
 func sync() -> void:
 	if grid == null: return
+	_sync_pending = false
 	if main != null: selected = main.selected_inventory_slot if main.selected_inventory_slot >= 127 else -1
 	references.clear()
 	for reference: int in AppState.inventory:
