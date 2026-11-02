@@ -759,6 +759,10 @@ func _build_graphics() -> void:
 		["Automatic", "Forward+", "OpenGL Compatibility"], ["auto", "forward_plus", "gl_compatibility"])
 	(page.find_child("renderer", true, false) as OptionButton).tooltip_text = "Currently running: %s. Close and reopen the game to apply a change. Compatibility launchers take precedence." % (
 		"OpenGL Compatibility" if RenderingServer.get_current_rendering_method() == "gl_compatibility" else "Forward+")
+	if OS.has_feature("web"):
+		var renderer := page.find_child("renderer", true, false) as OptionButton
+		renderer.disabled = true
+		renderer.tooltip_text = "The browser uses OpenGL Compatibility. Change 3D resolution or graphics quality to adjust performance."
 	graphics_restart_notice = Label.new()
 	graphics_restart_notice.name = "GraphicsRestartNotice"
 	graphics_restart_notice.text = "Restart the game to apply texture or renderer changes."
@@ -771,6 +775,12 @@ func _build_graphics() -> void:
 	add_choice("Graphics", "vsync_mode", "Vertical sync",
 		["Low latency", "On", "Off"], VSYNC_PREFERENCES)
 	(page.find_child("vsync_mode", true, false) as OptionButton).tooltip_text = "On prevents screen tearing. Low latency can make controls feel more responsive. Off may allow tearing. Changes apply immediately."
+	if OS.has_feature("web"):
+		(page.find_child("window_mode", true, false) as OptionButton).tooltip_text = "Choose Fullscreen to fill the display. Press Escape to return to the browser window."
+		var vsync := page.find_child("vsync_mode", true, false) as OptionButton
+		vsync.disabled = true
+		vsync.tooltip_text = "The browser controls frame synchronization. Use the frame limit and 3D resolution to adjust performance."
+		_add_button(page, "download_screenshot", "Download screenshot")
 	_add_fps_limit_row(page)
 	# The look above the quality: whether it is on decides most of what the
 	# quality changes.

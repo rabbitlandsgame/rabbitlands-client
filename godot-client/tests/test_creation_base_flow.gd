@@ -69,6 +69,49 @@ func check_preview_budget(phase: String) -> void:
 		and flow.picker.find_children("*", "Node3D", true, false).is_empty(),
 		phase + ": 41 Human cards contain no live 3D stage")
 
+func check_hidden_preview() -> void:
+	var viewport := main.get_node("%CharacterPreview").get_node("Viewport") as SubViewport
+	var actor := main.get("preview_actor") as ReplicatedActor3D
+	var previous_mode := actor.process_mode
+	var original_scale := root.content_scale_size
+	actor.process_mode = Node.PROCESS_MODE_ALWAYS
+	root.content_scale_size = Vector2i(960, 768)
+	root.size = Vector2i(960, 768)
+	await settle()
+	check(not main.get_node("%CharacterPreview").is_visible_in_tree()
+		and viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED,
+		"Compact starting-look browsing does not render an invisible preview")
+	check(actor.process_mode == Node.PROCESS_MODE_DISABLED,
+		"Invisible preview actor and its animation children are paused")
+	root.content_scale_size = Vector2i(1366, 768)
+	root.size = Vector2i(1366, 768)
+	await settle()
+	check(actor.process_mode == Node.PROCESS_MODE_ALWAYS,
+		"Resuming retains the preview owner's original process mode")
+	actor.process_mode = previous_mode
+	root.content_scale_size = Vector2i(960, 768)
+	root.size = Vector2i(960, 768)
+	await settle()
+	var selected: String = flow.picker.selected_id()
+	flow.picker._select_card("human_08" if selected != "human_08" else "human_01")
+	await settle()
+	actor = main.get("preview_actor") as ReplicatedActor3D
+	check(actor.process_mode == Node.PROCESS_MODE_DISABLED,
+		"A replacement body selected while hidden is paused too")
+	check_preview_budget("compact replacement")
+	flow.picker._select_card(selected)
+	await settle()
+	root.content_scale_size = Vector2i(1366, 768)
+	root.size = Vector2i(1366, 768)
+	await settle()
+	actor = main.get("preview_actor") as ReplicatedActor3D
+	check(main.get_node("%CharacterPreview").is_visible_in_tree()
+		and viewport.render_target_update_mode == SubViewport.UPDATE_ALWAYS,
+		"Widening the picker resumes its visible preview")
+	check(actor.process_mode == Node.PROCESS_MODE_INHERIT,
+		"Resuming preserves the replacement preview's original process mode")
+	root.content_scale_size = original_scale
+
 func run() -> void:
 	root.size = Vector2i(1366, 768)
 	var state := root.get_node("AppState")
@@ -102,6 +145,7 @@ func run() -> void:
 	await settle()
 	check(flow.is_open() and flow.picker.is_open(), "First creation entry opens the picker")
 	check_preview_budget("first open")
+	await check_hidden_preview()
 	await capture("picker-first-open")
 	check(not main.get_node("%FormPanel").visible and not main.get_node("%ClassRail").visible,
 		"First entry chooses a look before exposing the editor")

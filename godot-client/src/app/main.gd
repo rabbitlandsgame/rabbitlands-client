@@ -1,6 +1,7 @@
 extends Control
 
 const Diagnostics = preload("res://src/diagnostics/client_diagnostics.gd")
+const BrowserCapture = preload("res://src/platform/browser_capture.gd")
 const ClientRuntime = preload("res://src/runtime/client_runtime.gd")
 const RustSpellFlights = preload("res://src/world/rust_spell_flights.gd")
 const RustRiderPose = preload("res://src/mounts/rust_rider_pose.gd")
@@ -882,6 +883,8 @@ var _hud_state_buttons: Array[Button] = []
 var _minimap_refresh_msec := 0
 var _full_map_refresh_msec := 0
 var _preview_updates_enabled := true
+var _paused_preview: WeakRef
+var _preview_process_mode := Node.PROCESS_MODE_INHERIT
 var _world_sync_queued := false
 var _storage_sync_queued := false
 var _actor_surface_samples: Dictionary = {}
@@ -2232,15 +2235,22 @@ func _update_map_viewports() -> void:
 		map_marker_overlay.set_waypoints(_collect_map_waypoints())
 		map_marker_overlay.queue_redraw()
 
-## The character preview renders its own 3D scene. It only needs to run while
-## the creation panel is on screen.
+## Hidden starting-look previews own no render or animation work. A newly
+## selected body can arrive while the narrow-window preview remains hidden.
 func _update_preview_viewport() -> void:
-	var wanted: bool = creation_panel.visible
-	if wanted == _preview_updates_enabled:
-		return
+	var wanted: bool = creation_panel.is_visible_in_tree() and preview_container.is_visible_in_tree()
 	_preview_updates_enabled = wanted
-	preview_viewport.render_target_update_mode = (SubViewport.UPDATE_ALWAYS
-		if wanted else SubViewport.UPDATE_DISABLED)
+	var mode := SubViewport.UPDATE_ALWAYS if wanted else SubViewport.UPDATE_DISABLED
+	if preview_viewport.render_target_update_mode != mode:
+		preview_viewport.render_target_update_mode = mode
+	var paused := _paused_preview.get_ref() as ReplicatedActor3D if _paused_preview != null else null
+	if is_instance_valid(paused) and (wanted or paused != preview_actor):
+		paused.process_mode = _preview_process_mode
+		_paused_preview = null
+	if not wanted and is_instance_valid(preview_actor) and paused != preview_actor:
+		_preview_process_mode = preview_actor.process_mode
+		_paused_preview = weakref(preview_actor)
+		preview_actor.process_mode = Node.PROCESS_MODE_DISABLED
 
 func _request_map_redraw() -> void:
 	_minimap_refresh_msec = 0
@@ -2445,7 +2455,6 @@ func _apply_connection_launch_options(arguments: PackedStringArray) -> void:
 		port_edit.editable = false
 		host_edit.hide()
 		port_edit.hide()
-		new_character_button.hide()
 		return
 	host_edit.text = "127.0.0.1" if _dev_plain_tcp else "game.rabbitlandsgame.com"
 	port_edit.value = 2000 if _dev_plain_tcp else 2001
@@ -2483,9 +2492,6 @@ func _trusted_certificate_path() -> String:
 	return path if FileAccess.file_exists(path) else ""
 
 func _on_new_character_pressed() -> void:
-	if OS.has_feature("web"):
-		status_label.text = "Prototype: use an existing test character on Landfall."
-		return
 	if AppState.connection_state != "connected":
 		status_label.text = "Connect to the server before creating a character."
 		return
@@ -2494,12 +2500,12 @@ func _on_new_character_pressed() -> void:
 	creation_panel.show()
 	creation_base_flow.open(true)
 	creation_base_flow.entry_opening = false
-	character_intro.prewarm(MapRegistry.resolve(map_registry, NewCharacterIntroScript.MAP), world_root)
+	if not OS.has_feature("web"):
+		character_intro.prewarm(MapRegistry.resolve(map_registry, NewCharacterIntroScript.MAP), world_root)
 
 func _on_creation_visibility_changed() -> void:
 	var showing := creation_panel.is_visible_in_tree()
-	preview_viewport.render_target_update_mode = (SubViewport.UPDATE_ALWAYS
-		if showing else SubViewport.UPDATE_DISABLED)
+	_update_preview_viewport()
 	if not showing and is_instance_valid(creation_base_flow):
 		creation_base_flow.close_for_exit()
 	if showing and not is_instance_valid(preview_actor) and not creation_base_flow.entry_opening:
@@ -2639,7 +2645,10 @@ func _on_character_created() -> void:
 	# logins, reconnects and later map changes never replay it.
 	if pending_create_username.is_empty():
 		return
-	character_intro.prewarm(MapRegistry.resolve(map_registry, NewCharacterIntroScript.MAP), world_root)
+	# Browser map assets arrive on demand. The asset-ready map handoff owns
+	# its cinematic prewarm; do not compete with the creation preview here.
+	if not OS.has_feature("web"):
+		character_intro.prewarm(MapRegistry.resolve(map_registry, NewCharacterIntroScript.MAP), world_root)
 	character_intro.arm(main_viewport)
 	create_status.text = "Character created. Entering Eloria…"
 	user_edit.text = pending_create_username
@@ -14660,6 +14669,15 @@ func _save_screenshot() -> String:
 		AppState.append_local_line(tr("ELORIA_SCREENSHOT_FAILED").format(
 			{"reason": "there is nothing rendered yet"}))
 		return ""
+	var filename := "rabbitlands-%s.png" % Time.get_datetime_string_from_system(false, true).replace(":", "-")
+	if OS.has_feature("web"):
+		var download_error := BrowserCapture.download_png(image, filename)
+		if download_error != OK:
+			AppState.append_local_line(tr("ELORIA_SCREENSHOT_FAILED").format({"reason": error_string(download_error)}))
+			return ""
+		AppState.append_local_line("Screenshot download: " + filename)
+		audio_director.play("ui_click")
+		return filename
 	var directory := "user://screenshots"
 	DirAccess.make_dir_recursive_absolute(directory)
 	var path: String = "%s/rabbitlands-%s.png" % [directory,
@@ -14675,18 +14693,37 @@ func _save_screenshot() -> String:
 	return path
 
 ## Apply the same validated frame cap at startup and after a settings change.
-func _apply_window_mode(value: Variant, preserve_launch_arguments := false) -> void:
+func _apply_window_mode(value: Variant, preserve_launch_arguments := false, user_gesture := false) -> void:
 	_window_mode_preference = SettingsWindowScript.window_preference(value)
 	_window_mode_launch_override = preserve_launch_arguments \
 		and SettingsWindowScript.has_display_argument(OS.get_cmdline_args())
 	_window_mode_initialized = true
-	if DisplayServer.get_name() != "headless" and not _window_mode_launch_override:
+	if OS.has_feature("web"):
+		if not get_window().size_changed.is_connected(_sync_browser_window_mode):
+			get_window().size_changed.connect(_sync_browser_window_mode)
+		# A saved fullscreen preference cannot open fullscreen without a user
+		# gesture. The settings selector remains the direct gesture owner.
+		if user_gesture:
+			DisplayServer.window_set_mode(SettingsWindowScript.display_mode(_window_mode_preference))
+		else:
+			_window_mode_preference = "fullscreen" if DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN else "windowed"
+	elif DisplayServer.get_name() != "headless" and not _window_mode_launch_override:
 		DisplayServer.window_set_mode(SettingsWindowScript.display_mode(_window_mode_preference))
 	settings_window.restore_value("window_mode", _window_mode_preference)
 
+func _sync_browser_window_mode() -> void:
+	# Escape can leave fullscreen outside Godot's input path. Reflect that in
+	# the selector so choosing Fullscreen again still produces a fresh gesture.
+	var actual := "fullscreen" if DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN else "windowed"
+	if actual != _window_mode_preference:
+		_window_mode_preference = actual
+		settings_window.restore_value("window_mode", actual)
+
 func _apply_vsync_mode(value: Variant) -> void:
 	_vsync_preference = SettingsWindowScript.vsync_preference(value)
-	if DisplayServer.get_name() != "headless":
+	if OS.has_feature("web"):
+		_vsync_preference = "on" # Presentation timing belongs to the browser.
+	elif DisplayServer.get_name() != "headless":
 		DisplayServer.window_set_vsync_mode(SettingsWindowScript.vsync_mode(_vsync_preference))
 	settings_window.restore_value("vsync_mode", _vsync_preference)
 
@@ -15142,7 +15179,10 @@ func _on_client_setting_changed(section: String, key: String,
 		"vsync_mode":
 			_apply_vsync_mode(value)
 		"window_mode":
-			_apply_window_mode(value)
+			_apply_window_mode(value, false, true)
+		"download_screenshot":
+			_save_screenshot()
+			return
 		"performance_preset":
 			_apply_performance_preset()
 			return
