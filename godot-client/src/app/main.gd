@@ -6637,13 +6637,14 @@ func _update_browser_actor_wait() -> void:
 	_browser_character_waiting = waiting
 
 func _retry_browser_area_files() -> void:
-	if not OS.has_feature("web") or not _deferred_map_load: return
+	if not OS.has_feature("web") or not (_deferred_map_load or _browser_character_waiting): return
 	var failed: Array = WebPrototype.asset_snapshot().get("failed_groups", [])
 	if failed.is_empty():
 		JavaScriptBridge.eval("location.reload()")
 		return
 	WebPrototype.retry_failed()
-	arrival_curtain.set_text("Retrying area files…")
+	arrival_curtain.clear_retry()
+	arrival_curtain.set_text("Retrying character files…" if _browser_character_waiting else "Retrying area files…")
 
 func _load_server_map() -> void:
 	if AppState.current_map.is_empty() or loaded_server_map == AppState.current_map:
