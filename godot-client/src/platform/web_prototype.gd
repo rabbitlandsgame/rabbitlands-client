@@ -75,10 +75,10 @@ static func equipment_groups(visuals: Dictionary) -> Array:
 			if not out.has(group): out.append(group)
 	return out
 
-static func ensure_groups(ids: Array, owner := "") -> bool:
+static func ensure_groups(ids: Array, owner := "", priority := -1) -> bool:
 	if not OS.has_feature("web"): return true
 	var service := _service()
-	return service != null and bool(service.call("ensure_groups", ids, owner))
+	return service != null and bool(service.call("ensure_groups", ids, owner, priority))
 
 static func pin_groups(owner: String, ids: Array) -> void:
 	if not OS.has_feature("web"): return

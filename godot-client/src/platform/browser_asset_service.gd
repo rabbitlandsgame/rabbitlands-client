@@ -16,6 +16,9 @@ var _source_paths: Dictionary = {}
 var sizes: Dictionary = {}
 var touched: Dictionary = {}
 var queue: Array[String] = []
+var _priorities: Dictionary = {}
+var _queue_order: Dictionary = {}
+var _next_order := 0
 var busy := false
 var current := ""
 var error := ""
@@ -70,24 +73,25 @@ func retry_failed() -> int:
 	error = ""
 	return count
 
-func ensure_groups(ids: Array, owner := "") -> bool:
+func ensure_groups(ids: Array, owner := "", priority := -1) -> bool:
 	if not owner.is_empty(): pin_groups(owner, ids)
+	if priority < 0:
+		priority = 2 if owner in ["startup", "destination"] else (1 if not owner.is_empty() else 0)
 	var required := {}
 	if not _closure(ids, required): return false
 	var ready := true
+	var changed := false
 	for id: String in required:
 		touched[id] = Time.get_ticks_msec()
 		if str(states.get(id, "")) == "ready": continue
 		ready = false
-		if str(states.get(id, "")) in ["queued", "loading", "failed"]: continue
-		_queue_group(id)
-	if not owner.is_empty() and not queue.is_empty():
-		var foreground: Array[String] = []
-		var background: Array[String] = []
-		for id: String in queue:
-			if required.has(id): foreground.append(id)
-			else: background.append(id)
-		queue = foreground + background
+		if str(states.get(id, "")) in ["loading", "failed"]: continue
+		changed = _queue_group(id, priority) or changed
+	if changed:
+		queue.sort_custom(func(a: String, b: String) -> bool:
+			var first := int(_priorities.get(a, 0))
+			var second := int(_priorities.get(b, 0))
+			return first > second if first != second else int(_queue_order[a]) < int(_queue_order[b]))
 	return ready
 
 func groups_ready(ids: Array) -> bool:
@@ -97,11 +101,20 @@ func groups_ready(ids: Array) -> bool:
 		if states.get(id, "") != "ready": return false
 	return true
 
-func _queue_group(id: String) -> void:
-	if states.has(id): return
+func _queue_group(id: String, priority: int) -> bool:
+	if states.has(id):
+		if states[id] == "queued" and priority > int(_priorities.get(id, 0)):
+			_priorities[id] = priority
+			for dependency: String in groups[id].get("dependencies", []): _queue_group(dependency, priority)
+			return true
+		return false
 	states[id] = "queued"
-	for dependency: String in groups[id].get("dependencies", []): _queue_group(dependency)
+	for dependency: String in groups[id].get("dependencies", []): _queue_group(dependency, priority)
+	_priorities[id] = priority
+	_queue_order[id] = _next_order
+	_next_order += 1
 	queue.append(id)
+	return true
 
 func _process(_delta: float) -> void:
 	if not busy and not queue.is_empty():
@@ -112,6 +125,8 @@ func _process(_delta: float) -> void:
 
 func _load_next() -> void:
 	current = queue.pop_front()
+	_priorities.erase(current)
+	_queue_order.erase(current)
 	states[current] = "loading"
 	files[current] = []
 	var archives: Array = groups[current].get("archives", [])

@@ -40,6 +40,16 @@ func _run() -> void:
 	assert(not service.ensure_groups(["map:a"], "active"))
 	assert(service.queue == ["shared", "map:a", "optional"])
 	service.queue.clear()
+	service.states.clear()
+	service.groups.remote_a = {"archives":[], "dependencies":[]}
+	service.groups.remote_b = {"archives":[], "dependencies":[]}
+	assert(not service.ensure_groups(["remote_a"], "actor_a", 1))
+	assert(not service.ensure_groups(["map:a"], "local_actor", 2))
+	assert(not service.ensure_groups(["remote_b"], "actor_b", 1))
+	assert(service.queue == ["shared", "map:a", "remote_a", "remote_b"])
+	assert(not service.ensure_groups(["remote_b"], "actor_b", 1))
+	assert(service.queue == ["shared", "map:a", "remote_a", "remote_b"])
+	service.queue.clear()
 	# The same original file is assembled across independently compressed pieces.
 	service.current = "fixture"
 	service.files.fixture = []
