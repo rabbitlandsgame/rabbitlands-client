@@ -31,6 +31,16 @@ Renderer selection uses [Godot's command-line options](https://docs.godotengine.
 Original map textures can use more memory; bypassing the cache can slow loading.
 Safe mode is a diagnostic option, not necessarily the fastest option.
 
+A new installation chooses its starting graphics from the computer, once, before
+any graphics setting has been saved. Computers with integrated graphics (other
+than Apple silicon), about 8 GB of memory or less, or four CPU threads or fewer
+start on the Performance preset (without its renderer change), and the start
+screen shows its still image. Other computers with about 16 GB of memory or
+less, or eight CPU threads or fewer, start on Medium quality; the rest keep
+High. Settings → Graphics notes a Low or Medium start, and every setting can
+still be changed. Existing settings and the renderer choice are never changed,
+and launches with graphics overrides choose nothing.
+
 Send the three logs and identify which modes worked, whether the login panel or
 the world after login went blue, and whether the HUD or minimap remained visible.
 Keep earlier logs before retrying the same launcher, which overwrites its named

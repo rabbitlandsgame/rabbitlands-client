@@ -16,6 +16,15 @@ static func render_scale(value: Variant) -> float:
 				return scale
 	return 1.0
 
+## How the 3D buffer is upscaled to the window. Below 100 % Forward+ and Mobile
+## use AMD FSR 1, which keeps edges and fine detail sharper than bilinear at
+## the same scale for one extra full-resolution pass; Compatibility has no FSR
+## and keeps bilinear, as does 100 %, where nothing is scaled.
+static func scaling_mode(scale: float, rendering_method: String) -> Viewport.Scaling3DMode:
+	if scale < 1.0 and rendering_method in ["forward_plus", "mobile"]:
+		return Viewport.SCALING_3D_MODE_FSR
+	return Viewport.SCALING_3D_MODE_BILINEAR
+
 static func texture_quality(value: Variant) -> String:
 	return str(value) if value is String and value in TEXTURE_QUALITIES else "full"
 

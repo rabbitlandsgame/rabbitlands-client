@@ -52,6 +52,8 @@ const PavingCache := preload("res://src/world/map_paving_cache.gd")
 const CacheDiskUsage := preload("res://src/ui/cache_disk_usage.gd")
 ## The look pass's switch and quality names; preloaded for the same reason.
 const LookProfileScript := preload("res://src/world/look/look_profile.gd")
+## The tier a fresh profile's graphics defaults were chosen for.
+const HardwareTier := preload("res://src/runtime/hardware_tier.gd")
 ## keys.ini, Eternal Lands-style: the file every key binding is kept in.
 const KeyBindings := preload("res://src/ui/key_bindings.gd")
 const TargetMarkerStyle := preload("res://src/actors/target_marker_style.gd")
@@ -750,6 +752,7 @@ func _build_graphics() -> void:
 	var page := _new_page("Graphics", tr("ELORIA_SETTINGS_GRAPHICS"))
 	_add_button(page, "performance_preset", "Apply Performance preset")
 	(page.find_child("performance_preset", true, false) as Button).tooltip_text = "Reduce graphics and memory use. On Linux, Automatic renderer switches to OpenGL Compatibility. Restart the game to apply texture and renderer changes."
+	_add_hardware_tier_note(page)
 	add_choice("Graphics", "render_scale", "3D resolution", ["100%", "75%", "50%"], [1.0, 0.75, 0.5])
 	(page.find_child("render_scale", true, false) as OptionButton).tooltip_text = "Lower the world's resolution to improve performance. Text and menus stay sharp."
 	add_choice("Graphics", "map_texture_quality", "Map textures (restart required)",
@@ -803,6 +806,29 @@ func _build_graphics() -> void:
 	# The combat box can also be dismissed from its own right-click menu, so
 	# this is the way back once a player has done that.
 	_add_map_cache_row(page)
+
+## Says which starting graphics a first run chose for this computer
+## (HardwareTier), so a fresh install that began low is not a mystery. Read
+## once while the window is built, from the file's text rather than a second
+## full parse at startup; nothing is shown for a profile that was never seeded
+## or was seeded High.
+func _add_hardware_tier_note(page: VBoxContainer) -> void:
+	var text := hardware_tier_note(HardwareTier.recorded_tier(HardwareTier.SETTINGS_PATH))
+	if text.is_empty():
+		return
+	var note := Label.new()
+	note.name = "HardwareTierNote"
+	note.text = text
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	page.add_child(note)
+
+static func hardware_tier_note(tier: String) -> String:
+	match tier:
+		"low":
+			return "This computer started on the Performance preset, chosen from its graphics, memory and processor at first launch. Your own changes are kept."
+		"medium":
+			return "This computer started on Medium graphics quality, chosen from its memory and processor at first launch. Your own changes are kept."
+	return ""
 
 static func window_preference(value: Variant) -> String:
 	return value if value is String and value in WINDOW_PREFERENCES else WINDOW_DEFAULT

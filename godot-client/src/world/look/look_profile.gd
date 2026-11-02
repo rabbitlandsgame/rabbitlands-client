@@ -1376,7 +1376,9 @@ static func set_player_look(on: bool) -> bool:
 
 ## The graphics quality in use (Quality): ELORIA_LOOK_QUALITY's when it names
 ## one, otherwise the player's (`set_player_quality`, the settings file's
-## [graphics] quality), HIGH for a player who never chose.
+## [graphics] quality), HIGH for a player who never chose. A fresh profile is
+## first given its hardware's quality (src/runtime/hardware_tier.gd), saved
+## there like a choice.
 static func quality() -> Quality:
 	var forced := quality_named(OS.get_environment(QUALITY_VARIABLE))
 	return (forced if forced >= 0 else _player_quality) as Quality

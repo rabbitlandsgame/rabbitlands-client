@@ -33,6 +33,59 @@ See [the measurements](../../docs/qa/linux-low-vram-2026-10-30.json).
 launch arguments and preservation of explicit renderer choices. All 46 checks
 passed headlessly against the modified source and installed resource dependencies.
 
+## Hardware-aware first-run defaults (2026-11)
+
+Every install used to start on Forward+, High quality, full map textures, 100%
+3D resolution and 160 crowd bodies. On an integrated GPU with 8 GB of memory
+that measured 24–27 FPS in a market crowd and 7.4–7.6 GB of process memory,
+which does not fit; Low on the same machine needed about 3.7 GB, and the
+Performance preset 3.2–3.35 GB while holding 30 FPS (perf audit GPU-01, RAM-01,
+TEXTURES-08, GAP-PROCESS-MEMORY-ATTRIBUTION-08).
+
+`src/runtime/hardware_tier.gd` now classifies a fresh profile once, at startup,
+before the map texture tier is read for the session:
+
+| Tier | Machine | Saved starting settings |
+| --- | --- | --- |
+| Low | integrated (not Apple silicon), software or virtual GPU, about 8 GB of memory or less, or four CPU threads or fewer | the Performance preset (Low, 30 FPS cap, vertical sync off, 75% 3D resolution, half map textures, 60 bodies, no swaying capes, no shadows, no extra grass, 20 m names), without its renderer change; the entry screen starts on its still |
+| Medium | otherwise, about 16 GB or less, or eight CPU threads or fewer | Medium graphics quality |
+| High | everything else | High graphics quality (the previous defaults) |
+
+The GPU type comes from `RenderingServer.get_video_adapter_type()`. Under
+D3D12 an Intel iGPU reports itself as discrete, and the Compatibility renderer
+reports no type at all, so there the adapter name decides (Intel names without
+an Arc A/B model number, AMD APU names such as "Radeon Graphics", "Vega 8
+Graphics" or "780M"). Apple silicon reports an integrated GPU but is judged by
+memory and threads alone, because the measurements behind Low are Intel and
+AMD iGPUs that Windows lets share at most half of system memory; an 8 GB Mac
+still starts Low. Memory is `OS.get_memory_info()` physical memory, with
+each limit half a GiB above its nominal size; threads are
+`OS.get_processor_count()`. Dedicated video memory is not readable from
+GDScript, so a 2 GB discrete card is not detected by itself.
+
+Only a profile with no `[graphics]` section is seeded: a player who has ever
+saved a graphics preference is never touched. That check, and the settings
+note below, read the file's text instead of parsing it: an established
+player's file holds HUD presets and notes (about 0.5 MB, 14–20 ms per parse),
+so only a fresh profile is parsed. The values are saved like any
+other preference, with the tier recorded as `[graphics] hardware_tier`, so the
+choice is stable and every control stays editable. Settings → Graphics shows a
+note when a profile started Low or Medium. The renderer is unchanged:
+Automatic stays Automatic. Nothing is seeded for headless runs, the browser
+build, `--script`/`--editor` launches (tests, tools, `client_benchmarks.gd`),
+the crowd benchmark (`RABBITLANDS_CROWD_BENCH_START_TOKEN`), optimisation-profile
+arguments, or any graphics, crowd or runtime override variable
+(`ELORIA_LOOK`, `ELORIA_LOOK_QUALITY`, `ELORIA_LOOK_QUALITY_TRIM`,
+`ELORIA_VRAM_TEXTURES` and the `RABBITLANDS_*` knobs). Startup logs one
+`hardware_tier` diagnostic with the inputs, the tier, whether it was applied
+and why. `tests/test_hardware_tier.gd` covers the classifier, the launch and
+saved-profile guards, the client reading a seeded profile, and that the low
+tier still matches the in-game Performance preset.
+
+Below 100% 3D resolution, Forward+ and Mobile upscale with AMD FSR 1 rather
+than bilinear filtering (`GraphicsOptions.scaling_mode`); Compatibility, which
+has no FSR, keeps bilinear.
+
 ## First-use camera rotation on Compatibility
 
 The follow-up online session reached 51–56 FPS but still hitched while turning.

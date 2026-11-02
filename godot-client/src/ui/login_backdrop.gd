@@ -4,6 +4,7 @@ extends Control
 signal backdrop_changed(backdrop_id: String)
 
 const SETTINGS_PATH := "user://eloria_hud.cfg"
+const HardwareTier := preload("res://src/runtime/hardware_tier.gd")
 const ASSET_ROOT := "res://assets/ui/start_screen/"
 const BACKDROPS: Array[Dictionary] = [
 	{"id": "oldcraft_landfall", "label": "Oldcraft · Landfall", "file": "06-oldcraft-landfall"},
@@ -55,8 +56,11 @@ func _ready() -> void:
 			migrated = true
 		if saved is String and _index_of(saved) >= 0:
 			selected_id = saved
-		var motion: Variant = config.get_value("start_screen", "animated", true)
-		animation_enabled = motion if motion is bool else true
+		# A low-tier first run (HardwareTier) starts on the still; a saved
+		# choice wins either way.
+		var default_motion := HardwareTier.animated_backdrop_default(config)
+		var motion: Variant = config.get_value("start_screen", "animated", default_motion)
+		animation_enabled = motion if motion is bool else default_motion
 	if OS.has_feature("web"):
 		animation_enabled = false
 		animation_toggle.disabled = true
