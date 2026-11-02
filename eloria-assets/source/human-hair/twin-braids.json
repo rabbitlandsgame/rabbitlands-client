@@ -8,8 +8,8 @@
   "artifacts": {
     "glb": {
       "path": "godot-client/assets/actors/native/rl_heads/hair/twin_braids_female.glb",
-      "sha256": "33d0cece5df2e93be4a1eb6d07e13c55678f0f73f0769c77c986be2a109ff21b",
-      "bytes": 26717328
+      "sha256": "c362c8ed39ba8942f364274500010995d342c7e2e2b901540201359c80a795bc",
+      "bytes": 26716620
     },
     "paint": {
       "path": "godot-client/assets/actors/native/rl_head_textures/twin_braids_female.png",
@@ -49,7 +49,8 @@
     "Reuse rooted source ribbons and progressive finish bands. Remove entire unsafe ribbons before the detailed-head output is frozen. Root fields follow fixed exterior triangle barycentrics.",
     "Use modern source-paint settings with paintFlatness 0 and opt-in soft root coverage. Feather the geometric frontal source edge over 2 mm and the scalp border over 1 mm; keep interiors opaque.",
     "Retain local shape-preserving support authored before the frozen detailed-head surface. Qualify all final detailed-head vertices, triangle centres and edge midpoints, including the actual saved mixed identity and grooming values.",
-    "Remove the unapproved Native target, default weight and Native metadata from the runtime candidate. Compact away every unreferenced Native payload. Every retained High attribute, all 50 targets, material, index and paint byte remains identical to the frozen accepted detailed-head source."
+    "Remove the unapproved Native target, default weight and Native metadata from the runtime candidate. Compact away every unreferenced Native payload. Every retained High attribute, all 50 targets, material, index and paint byte remains identical to the frozen accepted detailed-head source.",
+    "Remove the pixel-traced disconnected opaque island by exact ordered triangle subsets, preserving the original invisible boundary, every retained stream and all independent rooted ribbons. Repeat all 42 intended-profile scalp coverage cases and inspect four matching High client views."
   ],
   "customization": {
     "saved_length_and_volume_range": [
@@ -100,7 +101,7 @@
   "lods": [
     {
       "lod": 0,
-      "triangles": 16505,
+      "triangles": 16435,
       "shape_targets": 50,
       "rooted_detail_ribbons": 41,
       "maximum_groom_displacements_mm": {
@@ -112,7 +113,7 @@
     },
     {
       "lod": 1,
-      "triangles": 6110,
+      "triangles": 6083,
       "shape_targets": 50,
       "rooted_detail_ribbons": 17,
       "maximum_groom_displacements_mm": {
@@ -124,7 +125,7 @@
     },
     {
       "lod": 2,
-      "triangles": 2425,
+      "triangles": 2421,
       "shape_targets": 50,
       "rooted_detail_ribbons": 3,
       "maximum_groom_displacements_mm": {
@@ -149,13 +150,22 @@
       "includes_actual_saved_look": true,
       "failures": 0,
       "minimum_clearance_mm": 2.4316151910635173,
-      "scope": "Detailed head contact with the maintained neck-rim exclusions; this does not claim full posed torso or garment contact."
+      "scope": "Detailed head contact with the maintained neck-rim exclusions; this does not claim full posed torso or garment contact.",
+      "method": "Exact ordered retained-triangle subset of the accepted detailed-head source. All vertex attributes and all 50 linear fields remain exact; no new distance scan is claimed.",
+      "inherited_from_artifact_sha256": "33d0cece5df2e93be4a1eb6d07e13c55678f0f73f0769c77c986be2a109ff21b"
     },
     "scalp_coverage": {
       "cases": 42,
-      "lods": 3,
       "hole_samples": 0,
-      "detail_level": 0
+      "detail_level": 0,
+      "samples_per_case": 900,
+      "directions": 165,
+      "profile_sha256": "dde6f362da5ccb9eea110804b65a253975dbd2b620aae3a70a460f577f317c4a",
+      "evidence": {
+        "name": "coverage.json",
+        "sha256": "3aa01bfd6d36556b306ec5127788360824ec24445cee4f00da4ba3089666536e"
+      },
+      "lods": 3
     },
     "maximum_High_detail_root_field_error_upper_bound_mm": 1.7223133113556945e-05,
     "minimum_parent_coverage_R_at_fine_root": 0.85795217301115,
@@ -168,9 +178,11 @@
       "packed_paint_dimensions": [
         2048,
         2048
-      ]
+      ],
+      "inherited_from_source_sha256": "33d0cece5df2e93be4a1eb6d07e13c55678f0f73f0769c77c986be2a109ff21b",
+      "scope": "Earlier fresh Blender import inherited through unchanged streams, shape arrays, materials and skin. The new triangle subset is freshly loaded in the matching client."
     },
-    "actual_client_High_visual_review": "Matching saved-look technical review completed; user visual approval remains pending.",
+    "actual_client_High_visual_review": "Fresh matching High front, three-quarter, side and back verify the detached cheek strand is removed without a new visible opening. User visual approval remains pending.",
     "Native_visual_review": "Rejected at the lowest detail tier: discontinuous front braids and garment penetration in the actual matching client view. Cause remains unresolved. Numeric fixture contact results do not supersede this rejection.",
     "evidence": [
       {
@@ -193,7 +205,54 @@
         "name": "visual-rejection-and-scan-stop.json",
         "sha256": "f520e6d696a97e4cdbad0a9277333bb721d907a42aa067d802cb443848b4917c"
       }
-    ]
+    ],
+    "fresh_matching_client_load": {
+      "passed": true,
+      "quality": "High",
+      "views": [
+        "front",
+        "three_quarter",
+        "side",
+        "back"
+      ],
+      "resolution": [
+        1024,
+        1024
+      ],
+      "no_raw_or_scalp_paint_override": true,
+      "renderer_commit": "eb1f49a7293409843b4b83766e9851409f330156",
+      "source_manifest_sha256": "48453801b92dca24a8d9518e5a53eef4f3e493ebcd125dd187b8beabba1037a3",
+      "image_sha256_by_view": {
+        "front": "e7ad1c93ff911326ac5f8d38d0c49c0a01d91b15983253195cc5079196b7d12e",
+        "three_quarter": "437c48f679e6a02f91fda3aad5bbc7bbf56f051814cf75facd561c8b30fd3ed1",
+        "side": "2bfcc5d0f79c87638b72daa91e21e235d437bcff57a72d612d2e57fd70c5b096",
+        "back": "52a1abd396c5fae60584539e53b507b3641083e89d66db2f690d24094cec575e"
+      }
+    },
+    "visual_island_repair": {
+      "source_sha256": "33d0cece5df2e93be4a1eb6d07e13c55678f0f73f0769c77c986be2a109ff21b",
+      "method": "Trace the actual saved-client pixels to imported opaque triangles. Remove only complete render-visible islands disconnected by the authored coverage feather; retain the original invisible boundary. No geometry positions, normals, UVs, colours, skin, paint or retained linear fields change.",
+      "removed_triangles_by_lod": [
+        70,
+        27,
+        4
+      ],
+      "all_retained_indices_exact_ordered_subset": true,
+      "cap_and_whole_ribbon_geometry_unchanged": true,
+      "maximum_boundary_coverage_R": 0.0,
+      "fine_root_all_field_error_max_mm": 1.7223133113556945e-05,
+      "no_new_visible_coverage_opening_observed": true,
+      "evidence": [
+        {
+          "name": "twin_braids_female.island-removal.json",
+          "sha256": "ad47115a2de83245eb0e69bf081bdb9618ff3650220a822dbc29aed26c98af98"
+        },
+        {
+          "name": "twin_braids_female.final-qualification.json",
+          "sha256": "cba515b3f2ec79f52ad6d42de7abc8b6e448a5d5afe11e2cb4fe477b61e23ad5"
+        }
+      ]
+    }
   },
   "runtime_capabilities": {
     "high_head": true,
