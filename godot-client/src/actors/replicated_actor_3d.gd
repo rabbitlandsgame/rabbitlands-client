@@ -550,10 +550,28 @@ const NEGATIVE_STATUS_GAP := 3.0
 const NEGATIVE_STATUS_RISE := 24.0
 const STATUS_TEXTURES := STATUS_ICONS.TEXTURES
 static var _health_gradient: GradientTexture2D
+## Neutral wardrobe atlases (_wardrobe_dye_texture) by their source's content:
+## the race GLBs embed one byte-identical TintableAtlas per sex, and every GLB
+## parse - each race, and each again after a session's end released them -
+## brings a new Texture of it. At most WARDROBE_TEXTURE_CACHE_LIMIT kept, the
+## most recently used last.
 static var _wardrobe_texture_cache: Dictionary = {}
+## Texture instance id -> its _wardrobe_texture_cache key, for sources already
+## seen (and each neutral atlas itself), so they are not read back again.
+static var _wardrobe_texture_keys: Dictionary = {}
+const WARDROBE_TEXTURE_CACHE_LIMIT := 4
+## Bound on the texture ids remembered: beyond it, ids of freed textures go.
+const WARDROBE_TEXTURE_KEY_LIMIT := 64
+## Threads a neutral atlas is made on at most (_neutral_wardrobe_image).
+const WARDROBE_DYE_BANDS := 8
+## Color.get_luminance of every RGBA8 red-green pair and blue level, and the
+## alpha byte set_pixel writes back for each alpha get_pixel read (see
+## _neutral_wardrobe_image); built once.
+static var _wardrobe_luminance: Array = []
 
 static func clear_wardrobe_texture_cache() -> void:
 	_wardrobe_texture_cache.clear()
+	_wardrobe_texture_keys.clear()
 	NecklineSkin.clear()
 	FEMALE_SHIRT_NECKLINE.clear()
 	CHARACTER_PROPORTIONS.clear()
@@ -1084,42 +1102,227 @@ func _set_mesh_color(mesh_node: MeshInstance3D, color: Color) -> void:
 	mesh_node.material_override = material
 
 ## Remove the atlas's baked brown dye while retaining fabric grain and seams.
-## Shared once per source texture; character and equipment textures stay intact.
+## Shared once per source content (see _wardrobe_texture_cache); character and
+## equipment textures stay intact.
 static func _wardrobe_dye_texture(source: Texture2D) -> Texture2D:
 	if source == null:
 		return null
-	var key := source.get_instance_id()
-	if _wardrobe_texture_cache.has(key):
-		return _wardrobe_texture_cache[key]
+	var known: Variant = _wardrobe_texture_keys.get(source.get_instance_id())
+	if known != null and _wardrobe_texture_cache.has(known):
+		return _touch_wardrobe_texture(known)
 	var original := source.get_image()
 	if original == null or original.is_empty():
 		return source
+	# The content identity of the disk cache (layout and every byte); an image
+	# it does not key (oversized, float formats) is keyed by its texture.
+	var key: String = WARDROBE_DYE_CACHE.source_key(original)
+	if key.is_empty():
+		key = "texture:%d" % source.get_instance_id()
+	_remember_wardrobe_texture(source, key)
+	if _wardrobe_texture_cache.has(key):
+		return _touch_wardrobe_texture(key)
 	var neutral: Image = WARDROBE_DYE_CACHE.load_image(original)
 	if neutral == null:
-		neutral = original.duplicate() as Image
-		if neutral.is_compressed():
-			neutral.decompress()
-		neutral.convert(Image.FORMAT_RGBA8)
-		var reference := 0.0
-		var count := 0
-		for y: int in neutral.get_height():
-			for x: int in neutral.get_width():
-				var pixel := neutral.get_pixel(x, y)
-				if pixel.a > 0.0:
-					reference += pixel.get_luminance()
-					count += 1
-		reference = maxf(0.01, reference / maxi(1, count))
-		for y: int in neutral.get_height():
-			for x: int in neutral.get_width():
-				var pixel := neutral.get_pixel(x, y)
-				var value := clampf(pixel.get_luminance() / reference, 0.0, 1.0)
-				neutral.set_pixel(x, y, Color(value, value, value, pixel.a))
-		neutral.generate_mipmaps()
+		neutral = _neutral_wardrobe_image(original)
+		if neutral == null:
+			return source
 		WARDROBE_DYE_CACHE.store_image(original, neutral)
 	var texture := ImageTexture.create_from_image(neutral)
 	_wardrobe_texture_cache[key] = texture
-	_wardrobe_texture_cache[texture.get_instance_id()] = texture
+	_remember_wardrobe_texture(texture, key)
+	while _wardrobe_texture_cache.size() > WARDROBE_TEXTURE_CACHE_LIMIT:
+		_wardrobe_texture_cache.erase(_wardrobe_texture_cache.keys()[0])
 	return texture
+
+static func _touch_wardrobe_texture(key: Variant) -> Texture2D:
+	var texture: Texture2D = _wardrobe_texture_cache[key]
+	_wardrobe_texture_cache.erase(key)
+	_wardrobe_texture_cache[key] = texture
+	return texture
+
+static func _remember_wardrobe_texture(texture: Texture2D, key: String) -> void:
+	if _wardrobe_texture_keys.size() >= WARDROBE_TEXTURE_KEY_LIMIT:
+		for id: Variant in _wardrobe_texture_keys.keys():
+			if not is_instance_id_valid(int(id)) or not _wardrobe_texture_cache.has(_wardrobe_texture_keys[id]):
+				_wardrobe_texture_keys.erase(id)
+	_wardrobe_texture_keys[texture.get_instance_id()] = key
+
+## The neutral atlas of `original` (RGBA8 with a mip chain): each pixel's grey
+## is its Color.get_luminance over the mean luminance of the pixels with any
+## alpha (at least 0.01), clamped to 1, and keeps its alpha. Null when the
+## image cannot be read as RGBA8. Byte for byte what the per-pixel
+## get_pixel/set_pixel loop it replaced made (tests/test_wardrobe_dye_neutral.gd)
+## in a third to a quarter of its time: each luminance is the engine's own,
+## read from tables of it (Color.get_luminance rounds the red and green
+## shares' sum before adding blue's, so a red-green table and a blue table give
+## it exactly), the mean adds the same values in the same order on this
+## thread, and each grey level is found between the luminances at which the
+## engine's own set_pixel steps to the next level. The per-pixel work runs in
+## horizontal bands on up to WARDROBE_DYE_BANDS threads (packed arrays only:
+## GDScript calls on Objects from several threads at once contend), a band
+## whose thread cannot start here.
+static func _neutral_wardrobe_image(original: Image) -> Image:
+	var neutral := original.duplicate() as Image
+	if neutral.is_compressed():
+		neutral.decompress()
+	neutral.convert(Image.FORMAT_RGBA8)
+	if neutral.is_empty() or neutral.get_format() != Image.FORMAT_RGBA8:
+		return null
+	var width := neutral.get_width()
+	var height := neutral.get_height()
+	var count := width * height
+	var opaque_image := neutral.detect_alpha() == Image.ALPHA_NONE
+	if _wardrobe_luminance.is_empty():
+		_wardrobe_luminance = _wardrobe_luminance_tables()
+	# Level 0 only, one little-endian int per pixel (R in the low byte): the
+	# old loop wrote level 0 and generate_mipmaps rebuilt every level from it.
+	var pixels := neutral.get_data().slice(0, count * 4).to_int32_array()
+	neutral = null
+	var bands: Array[PackedInt32Array] = []
+	var rows := ceili(float(height) / clampi(mini(OS.get_processor_count(), floori(height / 64.0)), 1,
+		WARDROBE_DYE_BANDS))
+	for top: int in range(0, height, rows):
+		bands.append(pixels.slice(top * width, mini(height, top + rows) * width))
+	pixels = PackedInt32Array()
+	var luminances := _wardrobe_bands(bands, _wardrobe_band_luminances.bind(_wardrobe_luminance[0],
+		_wardrobe_luminance[1]))
+	var reference := 0.0
+	var opaque := 0
+	for index: int in bands.size():
+		var band_luminances: PackedFloat32Array = luminances[index]
+		if opaque_image:
+			for luminance: float in band_luminances:
+				reference += luminance
+			opaque += band_luminances.size()
+			continue
+		var band := bands[index]
+		for pixel_index: int in band.size():
+			if band[pixel_index] & 0xFF000000:
+				reference += band_luminances[pixel_index]
+				opaque += 1
+	reference = maxf(0.01, reference / maxi(1, opaque))
+	var greys := _wardrobe_bands(bands, _wardrobe_band_greys.bind(luminances, _wardrobe_grey_steps(reference),
+		255.0 / reference, _wardrobe_luminance[2]))
+	var result := PackedInt32Array()
+	for band_greys: PackedInt32Array in greys:
+		result.append_array(band_greys)
+	var image := Image.create_from_data(width, height, false, Image.FORMAT_RGBA8, result.to_byte_array())
+	image.generate_mipmaps()
+	return image
+
+## `work(band, band index, ...its bound arguments)` for each band, each on its
+## own thread but the first (here); their results in band order. Pure work on
+## packed arrays only.
+static func _wardrobe_bands(bands: Array[PackedInt32Array], work: Callable) -> Array:
+	var threads: Array[Thread] = []
+	for index: int in range(1, bands.size()):
+		var thread := Thread.new()
+		threads.append(thread if thread.start(work.bind(bands[index], index)) == OK else null)
+	var results: Array = [work.call(bands[0], 0)] if not bands.is_empty() else []
+	for index: int in threads.size():
+		results.append(threads[index].wait_to_finish() if threads[index] != null \
+			else work.call(bands[index + 1], index + 1))
+	return results
+
+## Each pixel's luminance, stored as a float: the engine's float sum of the two
+## shares.
+static func _wardrobe_band_luminances(band: PackedInt32Array, _index: int, red_green: PackedFloat64Array,
+		blue: PackedFloat64Array) -> PackedFloat32Array:
+	var luminances := PackedFloat32Array()
+	luminances.resize(band.size())
+	for index: int in band.size():
+		var pixel := band[index]
+		luminances[index] = red_green[pixel & 0xFFFF] + blue[(pixel >> 16) & 0xFF]
+	return luminances
+
+## Each pixel's neutral RGBA8 value: its grey level (between `steps`, guessed
+## from `scale`) in red, green and blue, and its alpha as set_pixel writes it
+## back (`alphas`). `all_luminances` holds every band's.
+static func _wardrobe_band_greys(band: PackedInt32Array, band_index: int, all_luminances: Array,
+		steps: PackedFloat64Array, scale: float, alphas: PackedInt32Array) -> PackedInt32Array:
+	var luminances: PackedFloat32Array = all_luminances[band_index]
+	var same_alpha := true
+	for level: int in 256:
+		same_alpha = same_alpha and alphas[level] == level
+	var greys := PackedInt32Array()
+	greys.resize(band.size())
+	for index: int in band.size():
+		var value := luminances[index]
+		var grey := int(value * scale)
+		if grey > 255:
+			grey = 255
+		while grey < 255 and value >= steps[grey + 1]:
+			grey += 1
+		while grey > 0 and value < steps[grey]:
+			grey -= 1
+		var pixel := band[index]
+		var alpha: int = pixel & 0xFF000000 if same_alpha else alphas[(pixel >> 24) & 0xFF] << 24
+		greys[index] = alpha | grey * 0x010101
+	return greys
+
+## [the luminance of every red (low byte) and green pair, of every blue level,
+## the alpha byte set_pixel stores for each alpha byte get_pixel read], all
+## through the engine's own RGBA8 get_pixel, get_luminance and set_pixel.
+static func _wardrobe_luminance_tables() -> Array:
+	var bytes := PackedByteArray()
+	bytes.resize(65536 * 4)
+	bytes.fill(0)
+	for index: int in 65536:
+		bytes[index * 4] = index & 0xFF
+		bytes[index * 4 + 1] = index >> 8
+		bytes[index * 4 + 3] = 255
+	var pairs := Image.create_from_data(256, 256, false, Image.FORMAT_RGBA8, bytes)
+	var red_green := PackedFloat64Array()
+	red_green.resize(65536)
+	for index: int in 65536:
+		red_green[index] = pairs.get_pixel(index & 0xFF, index >> 8).get_luminance()
+	var levels := PackedByteArray()
+	levels.resize(256 * 4)
+	levels.fill(0)
+	for level: int in 256:
+		levels[level * 4 + 2] = level
+		levels[level * 4 + 3] = level
+	var row := Image.create_from_data(256, 1, false, Image.FORMAT_RGBA8, levels)
+	var probe := Image.create(1, 1, false, Image.FORMAT_RGBA8)
+	var blue := PackedFloat64Array()
+	blue.resize(256)
+	var alphas := PackedInt32Array()
+	alphas.resize(256)
+	for level: int in 256:
+		var pixel := row.get_pixel(level, 0)
+		blue[level] = pixel.get_luminance()
+		probe.set_pixel(0, 0, Color(0.0, 0.0, 0.0, pixel.a))
+		alphas[level] = probe.get_data()[3]
+	return [red_green, blue, alphas]
+
+## steps[k] (k 1-255): the least luminance (a float, as Color holds one) whose
+## grey - Color(clampf(luminance / reference, 0, 1)) written by set_pixel - is
+## at least k; steps[0] is below and steps[256] above every luminance. Found by
+## bisecting the float's bits (non-negative floats order as their bits do),
+## each level from the last one's step.
+static func _wardrobe_grey_steps(reference: float) -> PackedFloat64Array:
+	var probe := Image.create(1, 1, false, Image.FORMAT_RGBA8)
+	var bits := PackedByteArray()
+	bits.resize(4)
+	var steps := PackedFloat64Array()
+	steps.resize(257)
+	steps[0] = -1.0
+	steps[256] = INF
+	var low := 0
+	for level: int in range(1, 256):
+		var high := 0x7F800000
+		while low < high:
+			var middle := (low + high) >> 1
+			bits.encode_u32(0, middle)
+			var value := clampf(bits.decode_float(0) / reference, 0.0, 1.0)
+			probe.set_pixel(0, 0, Color(value, value, value, 1.0))
+			if probe.get_data()[0] >= level:
+				high = middle
+			else:
+				low = middle + 1
+		bits.encode_u32(0, low)
+		steps[level] = bits.decode_float(0)
+	return steps
 
 ## Lifts a garment off the skin it is fitted to. Reuses the override the tint
 ## pass already installed so a garment keeps its colour.
