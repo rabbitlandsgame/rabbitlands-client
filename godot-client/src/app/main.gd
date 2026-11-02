@@ -2,6 +2,7 @@ extends Control
 
 const Diagnostics = preload("res://src/diagnostics/client_diagnostics.gd")
 const BrowserCapture = preload("res://src/platform/browser_capture.gd")
+const BrowserStorageControls = preload("res://src/platform/browser_storage_controls.gd")
 const ClientRuntime = preload("res://src/runtime/client_runtime.gd")
 const RustSpellFlights = preload("res://src/world/rust_spell_flights.gd")
 const RustRiderPose = preload("res://src/mounts/rust_rider_pose.gd")
@@ -1841,6 +1842,7 @@ func _ready() -> void:
 	start_screen_backdrop = LoginBackdropScript.new()
 	login_background.add_child(start_screen_backdrop)
 	_configure_banner_menu()
+	BrowserStorageControls.attach_to(login_button.get_parent() as Control)
 	Diagnostics.startup_stage("interface_theme")
 	_apply_eloria_theme()
 	# The crest is deliberately outside the compact login card so the painted
