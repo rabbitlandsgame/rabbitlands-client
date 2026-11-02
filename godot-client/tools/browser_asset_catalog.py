@@ -76,6 +76,21 @@ def group_sources(web):
     for root in (repository / "eloria-assets/fonts", repository / "eloria-assets/world/_shared/images", client / "assets/world"):
         startup.update(path for path in root.rglob("*") if path.is_file() and path.suffix.lower() in {".glb", ".json", ".png", ".jpg", ".jpeg", ".webp", ".ttf", ".otf"})
     startup.update((client / "assets/ui/cursors").glob("*.png"))
+    # World-map browsing must not download the terrain of every region shown.
+    # The small prerendered maps travel with shared UI files and decode lazily.
+    backgrounds = json.loads((client / "data/maps/map-backgrounds.json").read_text())
+    def add_backgrounds(value):
+        if isinstance(value, dict):
+            if str(value.get("path", "")).startswith("res://"):
+                path = (client / value["path"][6:]).resolve()
+                if "sha256" in value:
+                    with path.open("rb") as source: actual = hashlib.file_digest(source, "sha256").hexdigest()
+                    if actual != value["sha256"]: raise ValueError(f"Map background changed: {path}")
+                startup.add(path)
+            for item in value.values(): add_backgrounds(item)
+        elif isinstance(value, list):
+            for item in value: add_backgrounds(item)
+    add_backgrounds(backgrounds.get("maps", {}))
     for name, model in models.items():
         key = "model:" + name
         groups[key] = closure(resources(model))

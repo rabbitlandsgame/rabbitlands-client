@@ -2,6 +2,7 @@ extends Node
 ## One verified archive at a time. Compressed downloads live in CacheStorage;
 ## this service bounds the extracted, session-only filesystem separately.
 signal archive_ready(ok: bool, message: String)
+signal files_evicted(paths: PackedStringArray)
 const ARCHIVE := "/tmp/rabbitlands-prototype-assets.zip"
 const UNPACK_SLICE_USEC := 2000
 const READY_GRACE_MSEC := 1500
@@ -195,6 +196,7 @@ func _unpack(expected: String) -> int:
 	return bytes
 
 func _remove_files(id: String) -> void:
+	files_evicted.emit(PackedStringArray(files.get(id, [])))
 	for path: String in files.get(id, []): DirAccess.remove_absolute(path)
 	files.erase(id)
 	if id != "startup": live_bytes -= int(sizes.get(id, 0))
