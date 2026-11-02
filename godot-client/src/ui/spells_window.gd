@@ -104,6 +104,10 @@ var _short := false
 var _hero: HBoxContainer
 var _details_column: VBoxContainer
 var _power_row: HBoxContainer
+## State changed since the grid was last painted. Packets only mark this; the
+## open Magic tab repaints once per frame and a closed book when it opens.
+var _sync_pending := false
+var _sync_queued := false
 
 func _ready() -> void:
 	name = "SpellsLayer"
@@ -222,22 +226,42 @@ func _on_state_changed(path: StringName) -> void:
 		_quote_request = ""
 		_last_quote.clear()
 		_power_notice = ""
-		sync()
+		# Combat and harvesting send several of these a second. A closed book
+		# (or the Techniques tab) catches up when the grid is shown again.
+		_sync_pending = true
+		_queue_sync()
+
+func _grid_shown() -> bool:
+	return panel != null and panel.visible and current_tab == "magic"
+
+func _queue_sync() -> void:
+	if _sync_pending and _grid_shown() and not _sync_queued:
+		_sync_queued = true
+		_flush_sync.call_deferred()
+
+func _flush_sync() -> void:
+	_sync_queued = false
+	if _sync_pending and _grid_shown(): sync()
 
 func sync() -> void:
 	if catalog == null: return
+	_refresh_availability()
+	if _grid_shown():
+		_filter_spells()
+		_refresh_details()
+
+func _refresh_availability() -> void:
+	_sync_pending = false
 	_reasons.clear()
+	var totals := SpellCatalog.reagent_totals(AppState.inventory)
 	for id: int in catalog.spell_ids():
-		var reasons := catalog.unavailable_reasons(id, AppState.known_knowledge, AppState.stats, AppState.inventory)
+		var reasons := catalog.unavailable_reasons(id, AppState.known_knowledge, AppState.stats, AppState.inventory, totals)
 		_reasons[id] = reasons
 		var button: Button = _buttons.get(id)
 		if button != null:
 			UI.icon_availability(button, reasons.is_empty())
 			button.tooltip_text = "%s\n%s" % [catalog.spell(id).name, str(catalog.spell(id).get("scope", "self")).capitalize()]
 			if not reasons.is_empty(): button.tooltip_text += "\n" + "\n".join(reasons)
-	if panel.visible and current_tab == "magic":
-		_filter_spells()
-		_refresh_details()
 
 func set_filter(value: String, save := true) -> void:
 	_filter = value if value in _filter_buttons else "all"
@@ -273,6 +297,8 @@ func _matches(id: int) -> bool:
 
 func _filter_spells() -> void:
 	if catalog == null: return
+	# The Ready filter reads availability, which packets for a closed book only mark.
+	if _sync_pending and _filter == "ready": _refresh_availability()
 	for id: int in _buttons:
 		(_buttons[id] as Button).visible = _matches(id)
 	var any_matches := false
@@ -338,6 +364,8 @@ func _set_status(text: String, ready: bool) -> void:
 	cast_button.disabled = not ready
 
 func _refresh_details() -> void:
+	# The inspector reads availability, which packets for a closed book only mark.
+	if _sync_pending and catalog != null: _refresh_availability()
 	UI.clear(reagents_rows)
 	UI.clear(requirements_rows)
 	if selected_spell_id < 0 or catalog == null:
@@ -544,6 +572,7 @@ func _build() -> void:
 	panel.add_theme_stylebox_override("panel", UI.box(UI.SURFACE, Color("987542"), 10))
 	panel.hide()
 	add_child(panel)
+	panel.visibility_changed.connect(_queue_sync)
 	# Wrapped requirements can briefly raise the minimum during a tab switch;
 	# refit after the containers have their final width, not just on resize.
 	panel.minimum_size_changed.connect(func(): _fit_panel.call_deferred())

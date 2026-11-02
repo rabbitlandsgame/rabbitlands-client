@@ -101,6 +101,8 @@ func _run() -> void:
 	state.stance = "brace"
 	state.techniques[5]["active"] = true
 	app_state.call("_on_packet", 212, JSON.stringify(state).to_utf8_buffer())
+	# Using a technique closed the window; its rows repaint when it is shown.
+	window.call("open_tab", "techniques")
 	tab.call("select_technique", "brace")
 	_expect(not (tab.get("use_button") as Button).disabled and "Held" in tab.get("_row_controls")["brace"].get_node("Cooldown").text
 		and (tab.get("use_button") as Button).text == "Release Brace",

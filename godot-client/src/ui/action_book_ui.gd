@@ -51,6 +51,9 @@ static func icon_availability(control: Button, ready: bool) -> void:
 	control.modulate = Color.WHITE
 	var tint := Color(1, 1, 1, 1.0 if ready else 0.45)
 	for state: String in ["icon_normal_color", "icon_hover_color", "icon_pressed_color", "icon_hover_pressed_color"]:
+		# Every override notifies the button even when unchanged; books refresh
+		# whole grids on each stats packet, so only real changes are applied.
+		if control.has_theme_color_override(state) and control.get_theme_color(state) == tint: continue
 		control.add_theme_color_override(state, tint)
 
 static func label(text := "", font_size := 14, wrap := false) -> Label:

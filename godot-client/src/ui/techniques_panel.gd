@@ -65,6 +65,8 @@ var _short := false
 var _hero: HBoxContainer
 var _requirements_heading: Label
 var _displayed_requirements: Array = []
+## Rows changed while the tab was hidden; it repaints when shown.
+var _buttons_pending := false
 
 func _ready() -> void:
 	name = "TechniquesTab"
@@ -72,6 +74,8 @@ func _ready() -> void:
 	add_theme_constant_override("separation", 7)
 	_build()
 	AppState.state_changed.connect(_on_state_changed)
+	visibility_changed.connect(func() -> void:
+		if _buttons_pending and is_visible_in_tree(): _refresh_buttons())
 	sync()
 
 func configure(sender: Callable, creature_check: Callable = Callable(), player_check: Callable = Callable()) -> void:
@@ -204,6 +208,12 @@ func _rounds_text(rounds: float) -> String:
 
 func _refresh_buttons() -> void:
 	if points_label == null: return
+	# Rows, tooltips and the inspector are only seen in the open tab; the
+	# technique state itself (rows, pending_key) is kept current by sync().
+	if not is_visible_in_tree():
+		_buttons_pending = true
+		return
+	_buttons_pending = false
 	var pool := action_points(AppState.techniques)
 	points_label.text = "Action points %d / %d" % [pool.x, pool.y] if pool.x >= 0 else "Action points —"
 	points_meter.max_value = maxi(1, pool.y)

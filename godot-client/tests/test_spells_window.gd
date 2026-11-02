@@ -60,7 +60,9 @@ func run() -> void:
 	check(cast_ids.is_empty(), "a disabled cast cannot be activated by a signal")
 	state.inventory[1].quantity = 3
 	state.state_changed.emit(&"inventory")
-	check(not book.cast_button.disabled, "inventory updates immediately enable a valid base cast")
+	check(book._sync_pending, "an open book coalesces packet refreshes")
+	await process_frame
+	check(not book.cast_button.disabled, "inventory updates enable a valid base cast by the next frame")
 	book.cast_button.pressed.emit()
 	check(cast_ids == [1] and not book.is_open(), "Cast uses the selected id and releases the world for targeting")
 	book.toggle()

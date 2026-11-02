@@ -56,6 +56,14 @@ var _drag_cell := 36.0
 var _drag_dimensions := Vector2.ZERO
 var reagent_pouch
 var _pouch_side_width := 75.0
+## The design's theme and slot frames, rebuilt only when the design changes.
+var _theme: Theme
+var _style_key: Array = []
+var _empty_box: StyleBoxFlat
+var _slot_styles: Dictionary = {}
+## Inventory packets arrived while neither the window nor its item card was shown.
+var _sync_pending := false
+var _sync_queued := false
 
 func configure(owner_main: Control) -> void:
 	main = owner_main
@@ -196,6 +204,7 @@ func configure(owner_main: Control) -> void:
 	main.window_stack.register(editor, true)
 	main.extension_windows.item_detail_presenter = present_detail
 	main.inventory_panel.visibility_changed.connect(_visibility_changed)
+	main.extension_windows.detail_panel.visibility_changed.connect(_queue_presented_sync)
 	get_viewport().size_changed.connect(queue_layout)
 	ready_to_layout = true
 	sync_inventory()
@@ -574,37 +583,43 @@ func _layout_contents() -> void:
 
 func _style() -> void:
 	var config: Dictionary = model.working
-	var theme := Theme.new()
-	theme.default_font_size = config.font_size
-	for kind: String in ["Label", "Button", "LineEdit", "TabBar"]: theme.set_color("font_color", kind, config.text)
-	theme.set_color("default_color", "RichTextLabel", config.text)
-	theme.set_stylebox("panel", "PanelContainer", Chrome.box(config.background, config.border, 8))
-	main.inventory_panel.theme = theme
-	var empty_box := Chrome.box(Color.TRANSPARENT, Color.TRANSPARENT, 8)
-	empty_box.set_border_width_all(0)
-	main.inventory_panel.add_theme_stylebox_override("panel", empty_box)
-	main.extension_windows.detail_panel.theme = theme
-	main.extension_windows.detail_panel.add_theme_stylebox_override("panel", empty_box)
-	for panel: Control in [main.inventory_panel, main.extension_windows.detail_panel]:
-		var ornament := panel.get_node_or_null("InventoryFrame") as Node2D
-		if ornament == null:
-			ornament = Frame.new()
-			ornament.name = "InventoryFrame"
-			panel.add_child(ornament)
-		ornament.config = {"show_background": true, "background_color": config.background, "show_border": true, "border_color": config.border, "hud_border_style": config.border_style}
-		ornament.queue_redraw()
+	var panels: Array[Control] = [main.inventory_panel, main.extension_windows.detail_panel]
+	# A new Theme re-caches every control under both panels, so it is only
+	# replaced when the design changes; the slot frames are shared per design.
+	var key: Array = [config.font_size, config.text, config.background, config.border, config.border_style]
+	var restyle := key != _style_key
+	for panel: Control in panels:
+		restyle = restyle or panel.theme != _theme or panel.get_node_or_null("InventoryFrame") == null
+	if restyle:
+		_style_key = key
+		var theme := Theme.new()
+		theme.default_font_size = config.font_size
+		for kind: String in ["Label", "Button", "LineEdit", "TabBar"]: theme.set_color("font_color", kind, config.text)
+		theme.set_color("default_color", "RichTextLabel", config.text)
+		theme.set_stylebox("panel", "PanelContainer", Chrome.box(config.background, config.border, 8))
+		_theme = theme
+		_empty_box = Chrome.box(Color.TRANSPARENT, Color.TRANSPARENT, 8)
+		_empty_box.set_border_width_all(0)
+		for panel: Control in panels:
+			panel.theme = theme
+			var ornament := panel.get_node_or_null("InventoryFrame") as Node2D
+			if ornament == null:
+				ornament = Frame.new()
+				ornament.name = "InventoryFrame"
+				panel.add_child(ornament)
+			ornament.config = {"show_background": true, "background_color": config.background, "show_border": true, "border_color": config.border, "hud_border_style": config.border_style}
+			ornament.queue_redraw()
+		_slot_styles = {"normal": Chrome.box(Color("181713"), config.border.darkened(0.35), 3),
+			"selected": Chrome.box(Color("181713"), Color("e2b854"), 3),
+			"hover": Chrome.box(Color("30291c"), config.border.lightened(0.3), 3),
+			"pressed": Chrome.box(Color("463b23"), Color("e2b854"), 3)}
+	for panel: Control in panels: _override_box(panel, "panel", _empty_box)
 	for label: RichTextLabel in [main.inventory_description, inspection_text]:
-		label.add_theme_font_size_override("normal_font_size", config.font_size)
-		label.add_theme_color_override("default_color", config.text)
-	inspection_title.add_theme_font_size_override("font_size", config.font_size + 2)
-	for key: String in ["backpack", "equipment"]:
-		var buttons: Array = main.inventory_slot_buttons if key == "backpack" else main.equipment_slot_buttons
-		for index: int in buttons.size():
-			var button: Button = buttons[index]
-			var selected: bool = int(main.selected_inventory_slot) == index + (36 if key == "equipment" else 0)
-			button.add_theme_stylebox_override("normal", Chrome.box(Color("181713"), Color("e2b854") if selected else config.border.darkened(0.35), 3))
-			button.add_theme_stylebox_override("hover", Chrome.box(Color("30291c"), config.border.lightened(0.3), 3))
-			button.add_theme_stylebox_override("pressed", Chrome.box(Color("463b23"), Color("e2b854"), 3))
+		_override_font_size(label, "normal_font_size", config.font_size)
+		if not label.has_theme_color_override("default_color") or label.get_theme_color("default_color") != config.text:
+			label.add_theme_color_override("default_color", config.text)
+	_override_font_size(inspection_title, "font_size", config.font_size + 2)
+	_style_slots()
 	for index: int in main.inventory_quantity_labels.size():
 		var label: Label = main.inventory_quantity_labels[index]
 		label.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
@@ -612,6 +627,30 @@ func _style() -> void:
 		label.offset_right = -2
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		label.visible = config.parts.backpack.show_quantity
+
+## The selected slot's frame follows the selection; every slot shares the
+## design's frames and only a frame that differs is replaced.
+func _style_slots() -> void:
+	if _slot_styles.is_empty():
+		_style()
+		return
+	for key: String in ["backpack", "equipment"]:
+		var buttons: Array = main.inventory_slot_buttons if key == "backpack" else main.equipment_slot_buttons
+		for index: int in buttons.size():
+			var button: Button = buttons[index]
+			var selected: bool = int(main.selected_inventory_slot) == index + (36 if key == "equipment" else 0)
+			_override_box(button, "normal", _slot_styles.selected if selected else _slot_styles.normal)
+			_override_box(button, "hover", _slot_styles.hover)
+			_override_box(button, "pressed", _slot_styles.pressed)
+
+## Theme overrides notify their control even when unchanged.
+static func _override_box(control: Control, item: StringName, box: StyleBox) -> void:
+	if not control.has_theme_stylebox_override(item) or control.get_theme_stylebox(item) != box:
+		control.add_theme_stylebox_override(item, box)
+
+static func _override_font_size(control: Control, item: StringName, font_size: int) -> void:
+	if not control.has_theme_font_size_override(item) or control.get_theme_font_size(item) != font_size:
+		control.add_theme_font_size_override(item, font_size)
 
 func _available_rect() -> Rect2:
 	# Respect the active HUD's actual edge surfaces, not a hard-coded old rail width.
@@ -807,10 +846,10 @@ func close_inspection() -> void:
 
 func sync_inventory() -> void:
 	if not ready_to_layout: return
-	reagent_pouch.sync()
 	var slot: int = main.selected_inventory_slot
 	var item: Dictionary = AppState.inventory.get(slot, {})
 	preview_icon.texture = main._slot_icon(int(item.get("image_id", 0)), slot) if not item.is_empty() else null
+	# The status line keeps whatever was written last, so it follows every sync.
 	var description: Dictionary = main._inventory_description_for(slot) if slot >= 0 else {}
 	var cached: Dictionary = _detail_cache.get(slot, {})
 	if int(cached.get("image_id", -1)) != int(item.get("image_id", -2)): cached = {}
@@ -822,6 +861,33 @@ func sync_inventory() -> void:
 			main._grouped(int(item.get("quantity", 0))), str(cached.get("stats", "Weight %s" % description.emu if description.has("emu") else "Choose Look for item details"))] if not item.is_empty() else "Select an item to inspect it."
 	main.inventory_description.text = ItemNames.in_text(main.inventory_description.text)
 	main.inventory_description.tooltip_text = main.inventory_description.text
+	# Inventory packets arrive several times per harvested item; what follows
+	# only paints the window and its item card, so a closed inventory catches
+	# up when either is shown.
+	if not is_presented():
+		_sync_pending = true
+		return
+	_sync_presented()
+
+## Whether the inventory window or its detached item card is on screen.
+func is_presented() -> bool:
+	return ready_to_layout and (main.inventory_panel.is_visible_in_tree()
+		or main.extension_windows.detail_panel.is_visible_in_tree())
+
+func _queue_presented_sync() -> void:
+	if _sync_pending and not _sync_queued:
+		_sync_queued = true
+		_flush_presented_sync.call_deferred()
+
+func _flush_presented_sync() -> void:
+	_sync_queued = false
+	if _sync_pending and is_presented(): _sync_presented()
+
+func _sync_presented() -> void:
+	_sync_pending = false
+	reagent_pouch.sync()
+	var slot: int = main.selected_inventory_slot
+	var item: Dictionary = AppState.inventory.get(slot, {})
 	if not quantity_value.has_focus(): quantity_value.text = _quantity_text()
 	main.inventory_use_button.disabled = item.is_empty() or slot >= 36 or not item.get("inventory_usable", false) or main._inventory_cooldown_remaining(slot) > 0
 	main.inventory_equip_button.visible = not item.is_empty() and slot < 36 and not item.get("inventory_usable", false)
@@ -833,9 +899,9 @@ func sync_inventory() -> void:
 		if count >= 1000:
 			var label: Label = main.inventory_quantity_labels[index]
 			label.text = ("%.1fM" % (count / 1000000.0) if count >= 1000000 else "%.1fK" % (count / 1000.0)).replace(".0", "")
-			label.add_theme_font_size_override("font_size", 11)
+			_override_font_size(label, "font_size", 11)
 	_render_detail()
-	_style()
+	_style_slots()
 	_filter_slots()
 
 func _filter_slots() -> void:
@@ -848,6 +914,7 @@ func _filter_slots() -> void:
 
 func _visibility_changed() -> void:
 	if not main.inventory_panel.visible and _detail_slot >= 0 and not _pinned: close_inspection()
+	_queue_presented_sync()
 	queue_layout()
 
 func store() -> bool:

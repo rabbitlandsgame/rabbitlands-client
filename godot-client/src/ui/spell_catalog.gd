@@ -15,6 +15,9 @@ var _families: Dictionary = {}
 ## tome's index is among them.
 var _knowledge: Array = []
 var _knowledge_loaded := false
+## Name to its first index in `_knowledge`, so availability checks for every
+## spell do not search the whole list once per spell.
+var _knowledge_indices: Dictionary = {}
 var _atlas_path := ""
 var _atlas_texture: Texture2D
 var _columns := 8
@@ -76,7 +79,10 @@ func knowledge_index(name: String) -> int:
 			FileAccess.get_file_as_string("res://data/knowledge/catalog.json"))
 		if parsed is Dictionary and (parsed as Dictionary).get("entries") is Array:
 			_knowledge = (parsed as Dictionary).get("entries") as Array
-	return _knowledge.find(name)
+		for index: int in _knowledge.size():
+			if not _knowledge_indices.has(_knowledge[index]):
+				_knowledge_indices[_knowledge[index]] = index
+	return int(_knowledge_indices.get(name, -1))
 
 ## The name and icon for one of the server's buff ids. The server states which
 ## buffs are active and for how long; only the label lives here, the same way
@@ -152,8 +158,10 @@ func _icon(icon_id: int) -> Texture2D:
 
 ## Why a spell cannot be cast, as the server would say it, or nothing. The
 ## server decides; this is only so the window can dim what is out of reach.
+## `totals` is an optional `reagent_totals(inventory)`, built once by callers
+## that check many spells against the same inventory.
 func unavailable_reasons(spell_id: int, known_knowledge: Array[int], stats: Dictionary,
-		inventory: Dictionary) -> Array[String]:
+		inventory: Dictionary, totals: Dictionary = {}) -> Array[String]:
 	var definition: Dictionary = spell(spell_id)
 	if definition.is_empty():
 		return ["Unknown spell"]
@@ -174,12 +182,14 @@ func unavailable_reasons(spell_id: int, known_knowledge: Array[int], stats: Dict
 		reasons.append("Requires %d mana (current %d)" % [required_mana, current_mana])
 	var reagents_value: Variant = definition.get("reagents", [])
 	if reagents_value is Array:
+		if totals.is_empty() and not (reagents_value as Array).is_empty():
+			totals = reagent_totals(inventory)
 		for raw_reagent: Variant in reagents_value:
 			if not raw_reagent is Dictionary:
 				continue
 			var reagent: Dictionary = raw_reagent as Dictionary
 			var required_quantity: int = int(reagent.get("quantity", 0))
-			var available_quantity: int = reagent_quantity(reagent, inventory)
+			var available_quantity: int = int(totals.get(int(reagent.get("image_id", -1)), 0))
 			if available_quantity < required_quantity:
 				reasons.append("Requires %d %s (have %d)" % [
 					required_quantity, reagent_name(reagent), available_quantity])
@@ -210,3 +220,17 @@ func inventory_quantity(image_id: int, inventory: Dictionary) -> int:
 			if int(item.get("image_id", -1)) == image_id:
 				total += int(item.get("quantity", 0))
 	return total
+
+## Every `inventory_quantity` at once: image id to the backpack and pouch total,
+## from one pass over the inventory.
+static func reagent_totals(inventory: Dictionary) -> Dictionary:
+	var totals := {}
+	for raw_slot: Variant in inventory:
+		if int(raw_slot) >= 24 and int(raw_slot) < 127:
+			continue
+		var raw_item: Variant = inventory[raw_slot]
+		if raw_item is Dictionary:
+			var item: Dictionary = raw_item as Dictionary
+			var image_id := int(item.get("image_id", -1))
+			totals[image_id] = int(totals.get(image_id, 0)) + int(item.get("quantity", 0))
+	return totals

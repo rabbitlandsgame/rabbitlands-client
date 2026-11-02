@@ -247,10 +247,59 @@ func run() -> void:
 	invalid.parts.backpack.enabled = false
 	var repaired := Presets.normalise(invalid)
 	expect(is_finite(repaired.scale) and repaired.position.is_finite() and repaired.parts.backpack.columns >= 1 and repaired.parts.backpack.enabled, "invalid preferences recover safely")
+	await _check_packet_refreshes()
 	print("INVENTORY WORKSPACE: ", checks, " checks, ", failures, " failures")
 	main.queue_free()
 	await frames()
 	quit(1 if failures > 0 else 0)
+
+## Inventory packets repaint data only: the design's theme and slot frames
+## survive them, and a closed inventory catches up when it is shown.
+func _check_packet_refreshes() -> void:
+	workspace.close_inspection()
+	main.inventory_panel.show()
+	main.selected_inventory_slot = 1
+	app.get("inventory")[2] = {"image_id": 1, "quantity": 7, "inventory_usable": true}
+	main._sync_inventory()
+	await frames(2)
+	var design_theme: Theme = main.inventory_panel.theme
+	var subtree_changes := [0]
+	main.inventory_grid.theme_changed.connect(func() -> void: subtree_changes[0] += 1)
+	var slot_changes := [0]
+	main.inventory_slot_buttons[5].theme_changed.connect(func() -> void: slot_changes[0] += 1)
+	var started := Time.get_ticks_usec()
+	for index: int in 20: main._sync_inventory()
+	var shown_us := float(Time.get_ticks_usec() - started) / 20.0
+	expect(main.inventory_panel.theme == design_theme and subtree_changes[0] == 0 and slot_changes[0] == 0,
+		"inventory packets keep the design's theme and slot frames: %d / %d" % [subtree_changes[0], slot_changes[0]])
+	var normal: StyleBox = main.inventory_slot_buttons[2].get_theme_stylebox("normal")
+	expect(normal == main.inventory_slot_buttons[3].get_theme_stylebox("normal") and normal != main.inventory_slot_buttons[1].get_theme_stylebox("normal")
+		and main.equipment_slot_buttons[0].get_theme_stylebox("normal") == normal, "slots share the design's frames and the selected slot has its own")
+	main.selected_inventory_slot = 2
+	main._sync_inventory()
+	expect(main.inventory_slot_buttons[1].get_theme_stylebox("normal") == normal and main.inventory_slot_buttons[2].get_theme_stylebox("normal") != normal,
+		"the selected frame follows the selection")
+	started = Time.get_ticks_usec()
+	for index: int in 20:
+		workspace._style_key = []
+		workspace._style()
+	var restyle_us := float(Time.get_ticks_usec() - started) / 20.0
+	main.inventory_panel.hide()
+	await frames(2)
+	expect(not workspace.is_presented(), "a closed inventory is not presented")
+	app.get("inventory")[2].quantity = 2500
+	started = Time.get_ticks_usec()
+	for index: int in 20: main._sync_inventory()
+	var hidden_us := float(Time.get_ticks_usec() - started) / 20.0
+	expect(workspace._sync_pending and main.inventory_quantity_labels[2].text == "2500", "a closed inventory defers its painting")
+	main.inventory_panel.show()
+	await frames(2)
+	expect(not workspace._sync_pending and main.inventory_quantity_labels[2].text == "2.5K", "showing the inventory catches up")
+	design_theme = main.inventory_panel.theme
+	workspace.change_option("text", Color("f1e2c3"))
+	expect(main.inventory_panel.theme != design_theme and main.inventory_panel.theme == main.extension_windows.detail_panel.theme
+		and main.inventory_panel.theme.get_color("font_color", "Label") == Color("f1e2c3"), "a design change still rebuilds the shared theme")
+	print("inventory_sync_us ", JSON.stringify({"shown_main_sync": shown_us, "hidden_main_sync": hidden_us, "forced_restyle": restyle_us}))
 
 func _bread() -> Dictionary:
 	return {"open": true, "image_id": 1, "name": "Hearth Bread", "category": "Food", "quantity": 24,
