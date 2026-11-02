@@ -527,6 +527,7 @@ var _vsync_preference := SettingsWindowScript.VSYNC_DEFAULT
 var _window_mode_preference := SettingsWindowScript.WINDOW_DEFAULT
 var _window_mode_initialized := false
 var _window_mode_launch_override := false
+var _browser_fullscreen_callback: JavaScriptObject
 var _render_scale := 1.0
 var _map_texture_quality := "full"
 var _renderer_preference := "auto"
@@ -4542,6 +4543,9 @@ func _close_client() -> void:
 	get_tree().quit()
 
 func _exit_tree() -> void:
+	if OS.has_feature("web") and _browser_fullscreen_callback != null:
+		JavaScriptBridge.get_interface("document").removeEventListener("fullscreenchange", _browser_fullscreen_callback)
+		_browser_fullscreen_callback = null
 	camera_shader_warmup.cancel()
 	RLHeadLibrary.clear_render_warm_context(self)
 	lantern_mine_lighting.clear()
@@ -14783,6 +14787,9 @@ func _apply_window_mode(value: Variant, preserve_launch_arguments := false, user
 	if OS.has_feature("web"):
 		if not get_window().size_changed.is_connected(_sync_browser_window_mode):
 			get_window().size_changed.connect(_sync_browser_window_mode)
+		if _browser_fullscreen_callback == null:
+			_browser_fullscreen_callback = JavaScriptBridge.create_callback(_on_browser_fullscreen_changed)
+			JavaScriptBridge.get_interface("document").addEventListener("fullscreenchange", _browser_fullscreen_callback)
 		# A saved fullscreen preference cannot open fullscreen without a user
 		# gesture. The settings selector remains the direct gesture owner.
 		if user_gesture:
@@ -14792,6 +14799,11 @@ func _apply_window_mode(value: Variant, preserve_launch_arguments := false, user
 	elif DisplayServer.get_name() != "headless" and not _window_mode_launch_override:
 		DisplayServer.window_set_mode(SettingsWindowScript.display_mode(_window_mode_preference))
 	settings_window.restore_value("window_mode", _window_mode_preference)
+
+func _on_browser_fullscreen_changed(_args: Array) -> void:
+	# Fullscreen can change while the canvas keeps the same logical size.
+	# Let Godot's own browser listener publish the mode before reading it.
+	_sync_browser_window_mode.call_deferred()
 
 func _sync_browser_window_mode() -> void:
 	# Escape can leave fullscreen outside Godot's input path. Reflect that in
