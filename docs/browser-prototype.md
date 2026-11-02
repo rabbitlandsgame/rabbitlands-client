@@ -33,6 +33,7 @@ python godot-client/tools/build_browser_cape.py `
 python godot-client/tools/build_web_prototype.py `
   --godot C:/rabbitlands/rabbitlands-client/godot-client/Godot_v4.7.2-stable_win64.exe `
   --templates .local/browser-prototype/templates `
+  --release `
   --cape-runtime .local/browser-prototype/cape-runtime/payload/browser_cape.wasm `
   --editor-runtime .local/browser-prototype/cape-runtime/payload/browser_cape.dll
 
@@ -82,7 +83,8 @@ The build writes only under this worktree's ignored `.local` directory. It
 copies runtime source to an isolated export project, disables editor plugins,
 uses a separate editor profile and temporary directory, and selects Compatibility
 rendering. Runtime code shared with the desktop client remains shared.
-Use a fresh `--stage` directory after an unsuccessful scene import: old editor
+`--release` selects the optimized matching engine template for play; omit it
+for the diagnostic debug runtime. Use a fresh `--stage` directory after an unsuccessful scene import: old editor
 extracted images can otherwise be mistaken for additional source resources.
 The builder skips raw-world scene imports and rejects packages over 512 MiB.
 The verified raw art archives retain the original scenery and image bytes.
@@ -191,6 +193,15 @@ That profile has its own saved downloads: keep the same profile and launch
 address on subsequent visits. A public website cannot force a particular GPU;
 the launcher is a local testing aid.
 
+The expanded release build was checked at 1280 x 900 through the local Windows
+OpenGL launch profile. Short game-clock samples measured about 16.7 ms typical
+walking frames, 17.5 ms mounted frames and 20.9 ms in the tested Four Gates view
+(roughly 60, 57 and 48 FPS). Stormglass House, the shared vault interior and two
+gauntlet routes also loaded and returned to Landfall. This is representative
+coverage, not a complete gameplay or hardware qualification. Cold terrain/shader
+work still caused a roughly 1.45-second worst mounted-route frame; saved network
+data does not remove resource-construction stalls.
+
 Dedicated Chrome process groups still used roughly 5.1-5.5 GB private memory in
 the local Intel graphics samples. Loading and travel can stall while raw actor
 and scene resources are constructed. These are measured prototype costs, not
@@ -209,7 +220,10 @@ application storage.
 
 A real Chrome profile was closed and reopened with the ordinary HTTP cache
 disabled and the asset hosts blocked. All 51 payloads (892 MB) in the earlier Landfall build were reused, with
-zero asset requests. This verifies disk reuse across browser sessions. The
+zero asset requests. The expanded build also reached playable Landfall after a browser restart with
+191 saved payloads (1.07 GB) reused and zero download bytes while the asset host
+was blocked and ordinary HTTP caching disabled. These checks verify disk reuse
+across browser sessions. The
 small launch page and multiplayer server still need to be reachable; this is
 not an offline game.
 
