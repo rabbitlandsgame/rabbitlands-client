@@ -17,6 +17,7 @@ func _owner() -> String:
 func configure(id: String) -> void:
 	_id = id
 	if OS.has_feature("web"):
+		resized.connect(_redraw)
 		set_process(false)
 		return
 	_build(id)
@@ -83,7 +84,14 @@ func _build(id: String) -> void:
 		actor.animation_player.pause()
 	coat.configure(actor,id,profile)
 	coat.apply(_coat_id)
+	if OS.has_feature("web") and actor.animation_player != null:
+		actor.animation_player.pause()
+		actor.process_mode = Node.PROCESS_MODE_DISABLED
 	set_active(true)
+
+func _redraw() -> void:
+	if _active and is_instance_valid(viewport):
+		viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 
 func set_coat(coat_id: String) -> void:
 	if _coat_id == coat_id: return
