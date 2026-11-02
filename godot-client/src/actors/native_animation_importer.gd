@@ -202,12 +202,33 @@ static func _source_scene(source_path: String) -> Node:
 		var completion: Variant = thread.wait_to_finish()
 		scene = _publish_source(completion)
 	if scene == null:
+		scene = _cached_runtime_instance(source_path)
+	if scene == null:
 		scene = _publish_source(_parse_library(source_path))
 	if scene == null and PreparedContent.selected_mode() == "auto":
 		scene = _publish_source(_parse_library(source_path, false))
 	if scene != null:
 		_sources[source_path] = scene
 	return scene
+
+## Whether `packed`, GlbSceneCache's scene for `scene_path`, is the parse
+## `_parse_library(source_path, false)` would make: the same file, built from it
+## at runtime. An imported or prepared scene has a resource path and may have
+## been processed differently, so it never stands in for the library.
+static func is_runtime_parse_of(packed: PackedScene, scene_path: String, source_path: String) -> bool:
+	return packed != null and packed.resource_path.is_empty() and not source_path.is_empty() \
+		and _file_key(scene_path) == _file_key(source_path)
+
+## An instance of GlbSceneCache's scene for `source_path` when that scene is the
+## runtime parse `_parse_library` would repeat (every creature names its own GLB
+## as its library). It shares the cached meshes and textures rather than
+## decoding and uploading a second copy to hold for the session. Main only,
+## where that cache lives.
+static func _cached_runtime_instance(source_path: String) -> Node:
+	if PreparedContent.selected_mode() != "raw" or OS.get_thread_caller_id() != OS.get_main_thread_id():
+		return null
+	var packed := GlbSceneCache.runtime_parse(source_path)
+	return packed.instantiate() if is_runtime_parse_of(packed, source_path, source_path) else null
 
 ## The glTF parse itself. Safe off the main thread: it builds resources and
 ## nodes that belong to no tree.

@@ -236,6 +236,16 @@ static func _packed_scene(path: String, allow_prepared: bool) -> PackedScene:
 		_lookup_hits += 1
 	return packed
 
+## The cached scene for `path` when it is the plain runtime glTF parse of that
+## file: not imported, prepared, geometry-bound or given the world-object image
+## pass. Null otherwise; never builds. Main thread, like the cache itself.
+static func runtime_parse(path: String) -> PackedScene:
+	path = _canonical_path(path)
+	if is_world_asset(path) or _prepared_entries.has(path) or _geometry_entries.has(path):
+		return null
+	var packed := _scenes.get(path) as PackedScene
+	return packed if packed != null and packed.resource_path.is_empty() else null
+
 ## Returns a fresh instance of `path`, or null when the file cannot be imported.
 static func instantiate(path: String) -> Node3D:
 	var packed := _packed_scene(path, true)

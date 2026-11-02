@@ -96,13 +96,18 @@ static func _prepare(config: Dictionary, animation: Dictionary) -> Dictionary:
 	var skeletons := model.find_children("*", "Skeleton3D", true, false)
 	var library := {}
 	var source_path := ProjectSettings.globalize_path(str(config.get("animationLibrary", "")))
-	var source: Node = NativeAnimationImporter._parse_library(source_path, false) as Node
+	# Creatures name their own GLB as their animation library, and the scene just
+	# prepared is the very parse _parse_library would repeat: its instance is the
+	# clip source. A second parse would decode and upload every texture and mesh
+	# again only to free them.
+	var shared := NativeAnimationImporter.is_runtime_parse_of(packed, path, source_path)
+	var source: Node = model if shared else NativeAnimationImporter._parse_library(source_path, false) as Node
 	if source != null and not skeletons.is_empty():
 		var resolver := AnimationResolver.new(animation)
 		library = NativeAnimationImporter.prepare_detached(owner, source, source_path,
 			skeletons[0] as Skeleton3D, config.get("boneAliases", {}),
 			resolver.required_clips(), resolver.looping_clips)
-	if source != null:
+	if source != null and not shared:
 		source.free()
 	owner.free()
 	return {"scenes": scenes, "library": library}
