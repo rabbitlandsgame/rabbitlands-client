@@ -1,0 +1,208 @@
+{
+  "schema": "rl.human-hair.provenance.v1",
+  "semantic_module_id": 19,
+  "status": "technically_qualified_pending_user_visual_approval",
+  "user_approved": false,
+  "body_sex": "female",
+  "style": "low_ponytail_female",
+  "artifacts": {
+    "glb": {
+      "path": "godot-client/assets/actors/native/rl_heads/hair/low_ponytail_female.glb",
+      "sha256": "b56ab2942f6f97d15dc5759f9280eeafd28d980b4df78abe228ee7ab707ced4e",
+      "bytes": 28733784
+    },
+    "paint": {
+      "path": "godot-client/assets/actors/native/rl_head_textures/low_ponytail_female.png",
+      "sha256": "7b9dd57e1b241b155780f4a8a9d3fea32737a07093fa660db8e74781a805a6a7",
+      "dimensions": [
+        2048,
+        2048
+      ]
+    }
+  },
+  "sources": {
+    "method": "Painted reference exterior with scalp coverage and rooted detail; no mass backing",
+    "fit_sha256": "86884633ffe9980873d56845daede9fa167bcecf214e4179de22661361fd45b9",
+    "reference_sha256": "b4ba328497f1dab5c28f95a1045e968d68a8eedadec8584f26579f950159167e",
+    "source_extraction_sha256": "28ddf9770c2f3a069b815c01a387674cef8355a03849c9ab279831ffc8894f29",
+    "profile_sha256": "065f356659a187b01d3fcbb9f90fc48567e230f78a3c7c7ac8dede208e64ce2a",
+    "source_head_sha256": "f767679b773ed68071f0ad70d37cc17a7690425ef866707e52b96bfe1c7b76f6",
+    "head_sha256": "f767679b773ed68071f0ad70d37cc17a7690425ef866707e52b96bfe1c7b76f6",
+    "body_sha256": "3a8ff81e9f152102ee1e57d892759c0a8e69ab49064ab8e473f5cb9ed3e8fc94",
+    "garment_sha256": "21824f2f58e3ce92dc226302ebcb60e8e569163b5a735fa47ab19b3fc9aa0cb9",
+    "current_head_sha256": "f767679b773ed68071f0ad70d37cc17a7690425ef866707e52b96bfe1c7b76f6",
+    "new_paid_generation": false
+  },
+  "customization": {
+    "saved_length_and_volume_range": [
+      0,
+      100
+    ],
+    "neutral_saved_value": 50,
+    "mapped_shape_range": [
+      -1,
+      1
+    ],
+    "shape_gain": 1,
+    "length_authoring_range": [
+      -0.25,
+      0.3
+    ],
+    "volume_authoring_range": [
+      -0.2,
+      0.3
+    ],
+    "length": "Root-pinned hanging braid or tail length, using independent opposing imported-source fields.",
+    "volume": "Independent cross-section and stand-off about the authored spine.",
+    "messiness_range": [
+      0,
+      100
+    ],
+    "messiness": "Continuous material finish plus progressive source ribbon visibility. Scalp coverage remains solid at zero finish.",
+    "fixed_scalp_cap": true,
+    "active_detail_vertices_by_lod_at_finish_0_50_100": [
+      [
+        0,
+        204,
+        504
+      ],
+      [
+        0,
+        80,
+        170
+      ],
+      [
+        0,
+        8,
+        24
+      ]
+    ],
+    "tie_height_qualified": false
+  },
+  "lods": [
+    {
+      "lod": 0,
+      "triangles": 16040,
+      "shape_targets": 51,
+      "rooted_detail_ribbons": 42,
+      "maximum_groom_displacements_mm": {
+        "hl_length_p": 63.54571298202272,
+        "hl_length_n": 44.408515095710754,
+        "hl_volume_p": 64.06975653484564,
+        "hl_volume_n": 38.2077355435184
+      }
+    },
+    {
+      "lod": 1,
+      "triangles": 5828,
+      "shape_targets": 51,
+      "rooted_detail_ribbons": 17,
+      "maximum_groom_displacements_mm": {
+        "hl_length_p": 63.393364637963145,
+        "hl_length_n": 43.756451457738876,
+        "hl_volume_p": 62.714918079932,
+        "hl_volume_n": 37.00243290100373
+      }
+    },
+    {
+      "lod": 2,
+      "triangles": 2006,
+      "shape_targets": 51,
+      "rooted_detail_ribbons": 3,
+      "maximum_groom_displacements_mm": {
+        "hl_length_p": 55.958526158642066,
+        "hl_length_n": 42.88990795612335,
+        "hl_volume_p": 59.67618198728542,
+        "hl_volume_n": 35.94000518089362
+      }
+    }
+  ],
+  "qualification": {
+    "identity_targets": 46,
+    "grooming_targets": 4,
+    "native_corrective_targets": 1,
+    "rigid_joint_count": 1,
+    "finite_fields_and_three_LOD_budgets_pass": true,
+    "high_surface": {
+      "evaluations": 444,
+      "cases_per_primitive": 74,
+      "primitives": 6,
+      "vertices_centres_and_all_edge_midpoints": true,
+      "includes_actual_saved_look": true,
+      "failures": 0,
+      "minimum_clearance_mm": 2.4586424473127275
+    },
+    "scalp_coverage": {
+      "cases": 42,
+      "lods": 3,
+      "hole_samples": 0,
+      "detail_level": 0,
+      "evidence": {
+        "sha256": "b612e6f9e5d40dd80285cee781eb22a6202762ab5133959949d72886b019ff0e",
+        "name": "coverage.json"
+      }
+    },
+    "maximum_detail_root_field_error_mm": 8.6042932866054e-06,
+    "minimum_parent_coverage_R_at_fine_root": 0.9999999999999999,
+    "native": {
+      "evaluations": 1674,
+      "failures": 0,
+      "minimum_clearance_lower_bound_mm": 2.1501840795734677,
+      "method": "Direct accepted 1674-case source scan followed by a compensating Native rebase. Every fixture hash and complete bone transform is reverified; all posed input probes move at most 0.0000422 mm and the selected triangle-probe set remains identical. Reported clearance is the measured source lower bound minus that movement, not a new distance measurement.",
+      "maximum_pose_probe_movement_mm": 4.219265156460511e-05,
+      "evidence": {
+        "sha256": "db109d695939291ef745b5fc2b119a15f52831581d894208c73a2f869e8cb2dc",
+        "name": "native-all.json"
+      }
+    },
+    "fresh_blender_import": {
+      "passed": true,
+      "factory_scene": true,
+      "glb_only_bundle": true,
+      "meshes": 3,
+      "shape_targets_per_mesh": 51,
+      "packed_paint_dimensions": [
+        2048,
+        2048
+      ]
+    },
+    "actual_client_visual_review": "Technical review completed on matching detailed-head pilots; user visual approval remains pending.",
+    "evidence": [
+      {
+        "sha256": "4b986a3b7a207ffab84a57031a0d9895e05137b83cf15c8af899872811a7603c",
+        "name": "low_ponytail_female.audit.json"
+      },
+      {
+        "sha256": "e245706799577256190206011b8b4621b33e5679fb47e05e2da9b610d10d6686",
+        "name": "low_ponytail_female.high-surface-saved.json"
+      },
+      {
+        "sha256": "394a3696336fbde2f3cd2f2e4d0836df06875896004d27d5e7a6834c54710b22",
+        "name": "low_ponytail_female.metadata-continuation.json"
+      }
+    ]
+  },
+  "runtime_capabilities": {
+    "high_head": true,
+    "native_head": true,
+    "native_identity_policy": "native_fixed_skull",
+    "native_corrective": "hl_native_fit",
+    "native_corrective_weight": 1,
+    "native_high_identity_weights": 0,
+    "native_position_normal_digest_sha256": "eaf49eacf762c976461d6db9c377f6ec55bdc8e26625a726b195f96f3de62457"
+  },
+  "processing": [
+    "Extract the original imported low-nape ponytail reference and source paint; preserve the original input model.",
+    "Use the maintained imported hanging-tail processor with independent root-pinned length and volume. Preserve the true nape attachment rather than translating a high tie through the head.",
+    "Reuse the qualified module18 female fixed cap and rooted source detail system. Keep all four scalp-cap grooming fields zero; bake coherent recipient paint into the cap atlas.",
+    "Retain the imported first two LOD source surfaces; simplify only the last LOD with a 7 mm voxel cleanup and source-corner paint transfer.",
+    "Add local shape-preserving Native contact support, a widest/narrowest/walking corrective, and root-pinned Native detail-tip corrections. Remove whole unsafe source ribbons before freezing the detailed-head output.",
+    "Apply a constant 0.65 mm LOD1 support to two edge endpoints. Rebase Native POSITION/NORMAL to preserve the accepted Native surfaces within 0.0000422 mm in every actual pose. All first/last-LOD and fine geometry remains unchanged.",
+    "Refresh the canonical Native delta digest only after final geometry; preserve all decoded arrays during metadata continuation."
+  ],
+  "known_limits": [
+    "Fixed low nape tie; no tie-height slider is enabled.",
+    "Messiness changes rooted detail and finish while retaining the ponytail core.",
+    "Technical qualification does not imply user visual acceptance."
+  ]
+}
