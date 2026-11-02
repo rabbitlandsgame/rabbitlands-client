@@ -34,6 +34,8 @@ var coat_choice: OptionButton
 var apply_coat: Button
 var coat_drafts := {}
 var _browser_portrait_poll := 0
+## Card frames shared by every card: one selected, one plain.
+static var _card_boxes: Array[StyleBoxFlat] = []
 
 func _ready() -> void:
 	name = "MountsLayer"
@@ -195,6 +197,12 @@ static func _box(background: Color, border: Color, width: int, margin: int) -> S
 	style.content_margin_bottom = margin
 	return style
 
+static func _card_box(selected: bool) -> StyleBoxFlat:
+	if _card_boxes.is_empty():
+		_card_boxes.append(_box(Color("1b262b"), Color("5d605a"), 1, 6))
+		_card_boxes.append(_box(Color("1b262b"), Color("e1bd6b"), 2, 6))
+	return _card_boxes[1 if selected else 0]
+
 func is_open() -> bool:
 	return panel.visible
 
@@ -223,9 +231,9 @@ func open() -> void:
 	if not _portraits_built:
 		_portraits_built = true
 		for id: String in portraits:
-			portraits[id].configure(id)
-	if not OS.has_feature("web"):
-		for portrait: Variant in portraits.values(): portrait.set_active(true)
+			portraits[id].configure(id, false)
+	# Cards in view build their stage on the next frames, one per frame.
+	_browser_portrait_poll = 0
 	sync()
 	_queue_fit()
 	if _first_layout:
@@ -252,8 +260,6 @@ func _filter_cards() -> void:
 	var matches := 0
 	for id: String in cards:
 		cards[id].visible = query.is_empty() or Profiles.display_name(id).to_lower().contains(query)
-		if _portraits_built and not OS.has_feature("web"):
-			portraits[id].set_active(is_open() and cards[id].visible)
 		if cards[id].visible:
 			matches += 1
 	collection_count.text = "%d mounts" % cards.size() if query.is_empty() else "%d / %d mounts" % [matches, cards.size()]
@@ -298,16 +304,18 @@ func close() -> void:
 			portrait.set_active(false)
 
 func _process(_delta: float) -> void:
-	if not OS.has_feature("web") or not _portraits_built or not is_open(): return
+	if not _portraits_built or not is_open(): return
 	var now := Time.get_ticks_msec()
 	if now < _browser_portrait_poll: return
 	_browser_portrait_poll = now + 100
 	var owned: Array = _state().get("owned_mount_ids", [_state().get("selected_mount_id", "")])
 	var clip := scroll.get_global_rect()
+	# Only cards in the scrolled view keep a model and a rendered still.
 	for id: String in portraits:
 		var image: Control = portraits[id]
 		var visible_card := image.is_visible_in_tree() and clip.intersects(image.get_global_rect())
-		image.set_browser_preview(visible_card, id in owned or id == candidate)
+		if OS.has_feature("web"): image.set_browser_preview(visible_card, id in owned or id == candidate)
+		else: image.set_active(visible_card)
 
 func choose(id: String) -> void:
 	if Profiles.supports(id):
@@ -333,7 +341,9 @@ func _changed(section: StringName) -> void:
 	if section in [&"mount_states", &"mount_deltas", &"mount_countdowns", &"map", &"local_actor", &"authentication"]:
 		if not AppState.authenticated:
 			close()
-		sync()
+		# Any rider's deltas and the 10 Hz gallop countdowns land here; a
+		# closed window has nothing to show and syncs again when opened.
+		if panel.visible: sync()
 
 func sync() -> void:
 	if panel == null:
@@ -351,8 +361,9 @@ func sync() -> void:
 	apply_coat.tooltip_text = "Saved for this mount and visible to other players."
 	for id: String in cards:
 		var selected := candidate == id
-		(cards[id] as PanelContainer).add_theme_stylebox_override("panel",
-			_box(Color("1b262b"), Color("e1bd6b") if selected else Color("5d605a"), 2 if selected else 1, 6))
+		var frame := _card_box(selected)
+		if (cards[id] as PanelContainer).get_theme_stylebox("panel") != frame:
+			(cards[id] as PanelContainer).add_theme_stylebox_override("panel", frame)
 		(labels[id] as Button).text = "Riding" if mode == "mounted" and str(state.get("mount_id", "")) == id else ("Selected" if selected else ("Available" if id in owned else "Unavailable"))
 		(labels[id] as Button).disabled = id not in owned
 		if _portraits_built:

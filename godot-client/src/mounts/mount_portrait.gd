@@ -21,10 +21,13 @@ static func _model_catalog() -> Dictionary:
 func _owner() -> String:
 	return "mount_portrait:%d" % get_instance_id()
 
-func configure(id: String) -> void:
+## A card renders its still once after each build or resize. Unless built now,
+## the stage is built when the card is activated, and released when it is not.
+func configure(id: String, build_now := true) -> void:
 	_id = id
-	if OS.has_feature("web"):
-		resized.connect(_redraw)
+	if not resized.is_connected(_redraw): resized.connect(_redraw)
+	if not visibility_changed.is_connected(_shown): visibility_changed.connect(_shown)
+	if OS.has_feature("web") or not build_now:
 		set_process(false)
 		return
 	_build(id)
@@ -40,6 +43,9 @@ func _build(id: String) -> void:
 	viewport.own_world_3d = true
 	viewport.size = Vector2i(2, 2)
 	viewport.msaa_3d = Viewport.MSAA_2X
+	# The pose is a paused rest frame: one render shows exactly what every
+	# later frame would, until the card is resized or its coat changes.
+	viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 	add_child(viewport)
 	var stage := Node3D.new()
 	viewport.add_child(stage)
@@ -91,7 +97,8 @@ func _build(id: String) -> void:
 		actor.animation_player.pause()
 	coat.configure(actor,id,profile)
 	coat.apply(_coat_id)
-	if OS.has_feature("web") and actor.animation_player != null:
+	if actor.animation_player != null:
+		# A still card avoids a second animation/attachment clock in the HUD.
 		actor.animation_player.pause()
 		actor.process_mode = Node.PROCESS_MODE_DISABLED
 	set_active(true)
@@ -100,45 +107,43 @@ func _redraw() -> void:
 	if _active and is_instance_valid(viewport):
 		viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 
+## SubViewportContainer turns its viewport back to UPDATE_ALWAYS whenever it
+## (or a parent window) is shown again; the still needs only one more render.
+func _shown() -> void:
+	if is_visible_in_tree(): _redraw.call_deferred()
+
 func set_coat(coat_id: String) -> void:
 	if _coat_id == coat_id: return
 	_coat_id = coat_id
 	if actor != null:
 		coat.apply(coat_id)
-		if OS.has_feature("web") and _active:
-			viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+		_redraw()
 
 func set_browser_preview(active: bool, allow_download: bool) -> void:
 	_allow_download = allow_download
 	set_active(active)
 
 func set_active(active: bool) -> void:
-	if OS.has_feature("web"):
-		if _active == active: return
-		_active = active
-		set_process(active)
-		if not active:
-			WebPrototype.release_groups(_owner())
-			# Offscreen cards retain no model, animation library or GPU stage.
-			if is_instance_valid(viewport): viewport.queue_free()
-			viewport = null
-			actor = null
-			coat = preload("res://src/mounts/mount_coat_visual.gd").new()
-		return
-	if viewport == null:
-		return
-	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS if active else SubViewport.UPDATE_DISABLED
-	if actor != null and actor.animation_player != null:
-		# A still card avoids a second animation/attachment clock in the HUD.
-		actor.animation_player.pause()
+	if _active == active: return
+	_active = active
+	set_process(active)
+	if not active:
+		if OS.has_feature("web"): WebPrototype.release_groups(_owner())
+		# Offscreen and closed cards retain no model, animation library or GPU stage.
+		if is_instance_valid(viewport): viewport.queue_free()
+		viewport = null
+		actor = null
+		coat = preload("res://src/mounts/mount_coat_visual.gd").new()
 
 func _process(_delta: float) -> void:
-	if not _active or not _allow_download or viewport != null or _id.is_empty(): return
-	var now := Time.get_ticks_msec()
-	if now < _next_poll: return
-	_next_poll = now + 100
-	if not WebPrototype.ensure_groups(WebPrototype.mount_groups(_id), _owner(), 1): return
-	if not _browser_resources_ready(): return
+	if not _active or viewport != null or _id.is_empty(): return
+	if OS.has_feature("web"):
+		if not _allow_download: return
+		var now := Time.get_ticks_msec()
+		if now < _next_poll: return
+		_next_poll = now + 100
+		if not WebPrototype.ensure_groups(WebPrototype.mount_groups(_id), _owner(), 1): return
+		if not _browser_resources_ready(): return
 	var frame := Engine.get_process_frames()
 	if _build_frame == frame: return
 	_build_frame = frame

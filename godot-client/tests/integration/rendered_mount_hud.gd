@@ -12,9 +12,24 @@ func settle(frames := 8) -> void:
 
 func capture(filename: String) -> void:
 	await settle()
+	await portraits_built()
 	await RenderingServer.frame_post_draw
 	var result := root.get_texture().get_image().save_png(folder.path_join(filename))
 	if result != OK: failures += 1
+
+## Mount cards in view build their portraits one per frame after opening.
+func portraits_built() -> void:
+	var window: Variant = main.mounts_window if main != null else null
+	if window == null or not window.is_open(): return
+	var started := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - started < 10000:
+		var clip: Rect2 = window.scroll.get_global_rect()
+		var waiting := false
+		for image: Control in window.portraits.values():
+			if image.is_visible_in_tree() and clip.intersects(image.get_global_rect()) and image.get("viewport") == null: waiting = true
+		if not waiting: break
+		await process_frame
+	await settle(2)
 
 func click(control: Control, button := MOUSE_BUTTON_LEFT) -> void:
 	var at := control.get_global_rect().get_center()
