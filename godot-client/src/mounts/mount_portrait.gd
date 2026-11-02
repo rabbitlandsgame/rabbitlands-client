@@ -10,6 +10,13 @@ var _allow_download := false
 var _coat_id := "original"
 var _next_poll := 0
 static var _build_frame := -1
+static var _models: Dictionary = {}
+var _warm_jobs: Array[Dictionary] = []
+
+static func _model_catalog() -> Dictionary:
+	if _models.is_empty():
+		_models = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json")).models
+	return _models
 
 func _owner() -> String:
 	return "mount_portrait:%d" % get_instance_id()
@@ -56,7 +63,7 @@ func _build(id: String) -> void:
 	var center := float(profile.get("portraitLookAtHeight", 1.05 if id == "golden_plains_horse" else .73))
 	camera.position = Vector3(3.5, 2.2, -4.8)
 	camera.look_at(Vector3(0, center, 0))
-	var models: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json")).models
+	var models := _model_catalog()
 	var config: Dictionary = models[id].duplicate(true)
 	config.import.scale = float(config.import.scale) * float(profile.get("visualScale", 1.0))
 	actor = ReplicatedActor3D.new()
@@ -131,12 +138,32 @@ func _process(_delta: float) -> void:
 	if now < _next_poll: return
 	_next_poll = now + 100
 	if not WebPrototype.ensure_groups(WebPrototype.mount_groups(_id), _owner(), 1): return
+	if not _browser_resources_ready(): return
 	var frame := Engine.get_process_frames()
 	if _build_frame == frame: return
 	_build_frame = frame
 	_build(_id)
 	viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 	set_process(false)
+
+func _browser_resources_ready() -> bool:
+	var main := get_node_or_null("/root/Main")
+	var warmer: Variant = main.get("actor_resource_warmup") if main != null else null
+	if warmer == null: return true
+	if _warm_jobs.is_empty():
+		var models := _model_catalog()
+		var config: Dictionary = models.get(_id, {})
+		_warm_jobs.append({"model":config, "animation":JSON.parse_string(FileAccess.get_file_as_string(config.animationMap))})
+		var borrowed := str((Profiles.read(_id).get("borrowedTack", {}) as Dictionary).get("source", ""))
+		if not borrowed.is_empty() and borrowed != str(config.get("scene", "")):
+			for model: Dictionary in models.values():
+				if str(model.get("scene", "")) == borrowed:
+					_warm_jobs.append({"model":model, "animation":JSON.parse_string(FileAccess.get_file_as_string(model.animationMap))})
+					break
+	var ready := true
+	for job: Dictionary in _warm_jobs:
+		if not warmer.request(job.model, job.animation): ready = false
+	return ready
 
 func _exit_tree() -> void:
 	if OS.has_feature("web"): WebPrototype.release_groups(_owner())
