@@ -31,7 +31,7 @@ def main() -> None:
     scripts = root / "src/updates"
     scripts.mkdir(parents=True, exist_ok=True)
     for name in ("release.gd", "client_updates.gd", "package_updates.gd", "package_download.gd",
-                 "startup_update.gd", "launch_options.gd", "update_transport.gd"):
+                 "startup_update.gd", "launch_options.gd", "update_transport.gd", "bootstrap.gd"):
         shutil.copyfile(SOURCE / "src/updates" / name, scripts / name)
     # The real update notice uses the shared text-color binding.
     (root / "src/ui").mkdir(parents=True, exist_ok=True)
@@ -54,6 +54,7 @@ def main() -> None:
             raise RuntimeError(result.stderr or f"{script} exited {result.returncode}")
 
     run("tests/test_client_updates.gd", root / "install-fixture")
+    run("tests/test_client_update_cleanup.gd", root / "cleanup-fixture")
     run("tests/test_store_updates.gd", root / "store-install-fixture")
     private, public, certificate = (root / name for name in ("private.pem", "public.pem", "localhost.crt"))
     # An output folder can be reused without overwriting its test key.

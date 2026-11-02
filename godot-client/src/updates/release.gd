@@ -278,8 +278,9 @@ static func check_file(path: String, size: int, digest: String) -> bool:
 	file.close()
 	return length == size and FileAccess.get_sha256(path) == digest
 
-static func remove_tree(path: String) -> Error:
+static func remove_tree(path: String, stop := Callable()) -> Error:
 	# Never follow a symlink/junction out of an updater-owned directory.
+	# An optional stop callable runs before each file and can end the removal.
 	if is_link(path) or not DirAccess.dir_exists_absolute(path):
 		return DirAccess.remove_absolute(path) if FileAccess.file_exists(path) or is_link(path) else OK
 	var directory := DirAccess.open(path)
@@ -287,11 +288,13 @@ static func remove_tree(path: String) -> Error:
 		return ERR_CANT_OPEN
 	directory.include_hidden = true
 	for name: String in directory.get_files():
+		if stop.is_valid() and stop.call():
+			return ERR_SKIP
 		var error := DirAccess.remove_absolute(path.path_join(name))
 		if error != OK:
 			return error
 	for name: String in directory.get_directories():
-		var error := remove_tree(path.path_join(name))
+		var error := remove_tree(path.path_join(name), stop)
 		if error != OK:
 			return error
 	return DirAccess.remove_absolute(path)
@@ -436,6 +439,18 @@ static func recover(root: String) -> String:
 				return "The interrupted fresh installation could not be recovered."
 	DirAccess.remove_absolute(journal)
 	return ""
+
+static func remove_backup(root: String, checkpoint := Callable()) -> Error:
+	# recover() is the only reader of the previous installation, and only while
+	# a journal exists. Every update empties it before writing a new journal,
+	# so once the journal is gone it can be removed in any order or in parts.
+	# The caller holds the installation lock and has seen the new game start.
+	var journal := root.path_join(".eloria-update-journal.json")
+	var backup := root.path_join(".eloria-previous")
+	if FileAccess.file_exists(journal) or is_link(backup):
+		return ERR_BUSY
+	return remove_tree(backup, func() -> bool:
+		return FileAccess.file_exists(journal) or (checkpoint.is_valid() and checkpoint.call()))
 
 static func _rename_for_install(source: String, destination: String) -> Error:
 	var error := DirAccess.rename_absolute(source, destination)

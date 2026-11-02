@@ -1,5 +1,7 @@
 extends RefCounted
 const Release = preload("res://src/updates/release.gd")
+# A handover worker finishes within a few minutes of its copy being made.
+const HANDOFF_GRACE_SEC := 600
 var _lock := ""
 var _guard: FileAccess
 
@@ -181,3 +183,92 @@ static func promote_helpers(root: String, release: Dictionary, identity: Diction
 		if identity.platform == "linux":
 			FileAccess.set_unix_permissions(target, 493)
 	return ""
+
+static func prune_cache(root: String, identity: Dictionary, installed_helper_running: bool, grace_sec := HANDOFF_GRACE_SEC) -> Array[String]:
+	# Call only while holding the installation lock, so no helper staging,
+	# handover or promotion of ours is in progress. Only names this updater
+	# creates are matched, and anything that may still be in use is kept.
+	var notes: Array[String] = []
+	var cache := Release.cache_for(root)
+	var directory := DirAccess.open(cache) if not Release.is_link(cache) else null
+	if directory != null:
+		var manifest := cache.path_join("bootstrap-manifest.json")
+		var handed_over := FileAccess.get_modified_time(manifest) if FileAccess.file_exists(manifest) else 0
+		var now := int(Time.get_unix_time_from_system())
+		for name: String in directory.get_files():
+			var pid := _handoff_pid(name)
+			var path := cache.path_join(name)
+			if pid <= 0 or pid == OS.get_process_id() or Release.is_link(path):
+				continue
+			# A worker runs from its copy, which is named after the launcher that
+			# started it. Linux reports any live pid; Windows reports only child
+			# processes, but refuses to delete an executable that is running.
+			var modified := FileAccess.get_modified_time(path)
+			if modified <= 0 or now - maxi(modified, handed_over) < grace_sec or Release.lease_process_running(pid):
+				continue
+			_remove_file(path, "updater handover copy", notes)
+		_prune_staged(cache, identity, notes)
+	var previous := root.path_join(".rabbitlands-bootstrap-previous")
+	if installed_helper_running and DirAccess.dir_exists_absolute(previous) and not Release.is_link(previous):
+		# promote_helpers keeps replaced helpers only to undo its own failed
+		# rename. The installed helper is running, so its handover finished.
+		var complete := true
+		for kind: String in ["updater", "uninstall"]:
+			var target := root.path_join(helper_name(kind, identity))
+			complete = complete and FileAccess.file_exists(target) and not Release.is_link(target) and not FileAccess.file_exists(target + ".next")
+		if complete:
+			for kind: String in ["updater", "uninstall"]:
+				var path := previous.path_join(helper_name(kind, identity))
+				if FileAccess.file_exists(path) and not Release.is_link(path):
+					_remove_file(path, "previous updater", notes)
+			# Only an empty folder is removed; unexpected files keep it.
+			DirAccess.remove_absolute(previous)
+	return notes
+
+static func _prune_staged(cache: String, identity: Dictionary, notes: Array[String]) -> void:
+	var folder := cache.path_join("bootstrap")
+	var directory := DirAccess.open(folder) if not Release.is_link(folder) else null
+	if directory == null:
+		return
+	var staged: Array[String] = []
+	for name: String in directory.get_files():
+		if Release.valid_hash(name.trim_suffix(".tmp")):
+			staged.append(name)
+	# One staged helper is the steady state. Read the signed handover record,
+	# which carries the whole package inventory, only when there is more.
+	if staged.is_empty() or (staged.size() == 1 and Release.valid_hash(staged[0])):
+		return
+	var envelope: Variant = Release.read_json(cache.path_join("bootstrap-manifest.json")).get("envelope")
+	var release: Dictionary = verify(envelope, identity) if envelope is Dictionary else {}
+	if release.is_empty() or release.has("error"):
+		return
+	# The latest handover's helpers are the installed ones once it completes,
+	# or the ones an unfinished handover still needs. A .tmp is never resumed.
+	var current: Array = [release.updater.sha256, release.uninstall.sha256]
+	for name in staged:
+		if not name in current:
+			_remove_file(folder.path_join(name), "staged updater", notes)
+
+static func _handoff_pid(name: String) -> int:
+	# start_handoff names copies handoff-<launcher pid>.exe or .x86_64.
+	for extension: String in [".exe", ".x86_64"]:
+		if name.begins_with("handoff-") and name.ends_with(extension):
+			var digits := name.trim_prefix("handoff-").trim_suffix(extension)
+			if digits.is_empty() or digits.length() > 10 or digits.begins_with("0"):
+				return 0
+			for letter in digits:
+				if not letter in "0123456789":
+					return 0
+			return int(digits)
+	return 0
+
+static func _remove_file(path: String, kind: String, notes: Array[String]) -> void:
+	var file := FileAccess.open(path, FileAccess.READ)
+	var size := file.get_length() if file != null else -1
+	if file != null:
+		file.close()
+	var error := DirAccess.remove_absolute(path)
+	if error == OK:
+		notes.append("Removed %s %s (%d bytes)." % [kind, path, size])
+	else:
+		notes.append("Kept %s %s (%s); it is retried at the next launch." % [kind, path, error_string(error)])

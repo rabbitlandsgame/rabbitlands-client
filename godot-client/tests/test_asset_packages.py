@@ -3,6 +3,7 @@ import base64
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 import functools
+import hashlib
 import http.server
 import json
 import os
@@ -501,6 +502,7 @@ def export_test_updater(f, version, platform="windows"):
             '\treturn await super.fetch(base + "/" + url.get_file(), path, limit)\n')
         (project / "fixture_launcher.gd").write_text('extends "res://src/updates/launcher.gd"\n'
             'func _new_transport() -> Node:\n\treturn load("res://fixture_transport.gd").new()\n'
+            'func _backup_cleanup_delay_msec() -> int:\n\treturn 0\n'
             'func _ready() -> void:\n'
             '\tvar args := OS.get_cmdline_user_args()\n'
             '\tvar index := args.find("--root")\n'
@@ -545,6 +547,15 @@ def test_exported_updater_replaces_itself_then_installs_and_uninstalls(fixture, 
     (f["tmp_path"] / "RabbitLands-windows.json").write_text(json.dumps({} if shared else envelope))
     pinned = f["tmp_path"] / "pinned-installer.json"
     pinned.write_text(json.dumps(envelope))
+    # Leftovers of an earlier handover: the replacement updater prunes the
+    # staged helper this handover does not name, and keeps a recent copy.
+    cache = (f["tmp_path"] / "userdata/Godot/app_userdata/Eloria/client-updates"
+             / hashlib.sha256(f["installed"].as_posix().encode()).hexdigest()[:24])
+    stale_helper = cache / "bootstrap" / ("0" * 64)
+    stale_helper.parent.mkdir(parents=True)
+    stale_helper.write_bytes(b"stale staged helper")
+    recent_copy = cache / "handoff-999999999.exe"
+    recent_copy.write_bytes(b"recent handover copy")
     log = f["tmp_path"] / "native-updater.log"
     with log.open("w") as output:
         process = subprocess.Popen([str(f["installed"] / "RabbitLands-updater.exe"), "--headless",
@@ -563,6 +574,9 @@ def test_exported_updater_replaces_itself_then_installs_and_uninstalls(fixture, 
         time.sleep(0.1)
     for kind in ("updater", "uninstall"):
         assert client_release.digest(f["installed"] / f"RabbitLands-{kind}.exe") == client_release.digest(new)
+    assert sorted(p.name for p in (cache / "bootstrap").iterdir()) == [client_release.digest(new)]
+    assert recent_copy.is_file(), "A handover copy inside its grace period was removed."
+    assert not (f["installed"] / ".rabbitlands-bootstrap-previous").exists(), "The running installed updater kept the helpers it replaced."
     updater_download = "/" + payload["updater"]["url"].rsplit("/", 1)[1]
     client_part = next(p for p in payload["packages"] if p["id"] == "client")["parts"][0]
     client_download = "/" + client_part["url"].rsplit("/", 1)[1]
@@ -704,3 +718,58 @@ def test_downloaded_updater_launches_game_with_loose_assets(fixture):
     assert result.returncode == 0, result.stdout + result.stderr
     probe = json.loads((f["installed"] / "game-probe.json").read_text())
     assert probe["content"] == "old rabbit", probe
+
+
+def test_updated_game_start_removes_previous_installation_backup(fixture):
+    f = fixture
+    updater = export_test_updater(f, "backup-probe")
+    project = f["tmp_path"] / "backup-probe-project"
+    project.mkdir()
+    shutil.copytree(CLIENT / "assets/branding", project / "assets/branding")
+    # Same user folder as the real game: it records its running lease where
+    # the launcher looks, then waits to see whether the backup is removed.
+    (project / "project.godot").write_text('config_version=5\n[application]\nconfig/name="Backup probe"\nrun/main_scene="res://main.tscn"\n'
+        'config/use_custom_user_dir=true\nconfig/custom_user_dir_name="Godot/app_userdata/Eloria"\n'
+        '[rendering]\nrenderer/rendering_method="gl_compatibility"\n')
+    (project / "main.gd").write_text('extends Node\nfunc _ready() -> void:\n'
+        '\tvar root := OS.get_executable_path().get_base_dir().get_base_dir().simplify_path()\n'
+        '\tvar backup := root.path_join(".eloria-previous")\n'
+        '\tvar had_backup := DirAccess.dir_exists_absolute(backup)\n'
+        '\tvar cache := ProjectSettings.globalize_path("user://client-updates/" + root.sha256_text().left(24))\n'
+        '\tDirAccess.make_dir_recursive_absolute(cache)\n'
+        '\tvar lease := cache.path_join("running-%d.json" % OS.get_process_id())\n'
+        '\tvar file := FileAccess.open(lease, FileAccess.WRITE)\n'
+        '\tfile.store_string(JSON.stringify({"pid": OS.get_process_id()}))\n'
+        '\tfile.close()\n'
+        '\tvar deadline := Time.get_ticks_msec() + 20000\n'
+        '\twhile DirAccess.dir_exists_absolute(backup) and Time.get_ticks_msec() < deadline:\n'
+        '\t\tawait get_tree().create_timer(0.25).timeout\n'
+        '\tvar live := FileAccess.get_file_as_string(root.path_join("app/assets/actors/native/creatures/rabbit.glb"))\n'
+        '\tfile = FileAccess.open(root.path_join("game-probe.json"), FileAccess.WRITE)\n'
+        '\tfile.store_string(JSON.stringify({"had_backup": had_backup, "removed_while_running": not DirAccess.dir_exists_absolute(backup), "live": live}))\n'
+        '\tfile.close()\n'
+        '\tDirAccess.remove_absolute(lease)\n\tget_tree().quit()\n')
+    (project / "main.tscn").write_text('[gd_scene load_steps=2 format=3]\n[ext_resource type="Script" path="res://main.gd" id="1"]\n[node name="Probe" type="Node"]\nscript=ExtResource("1")\n')
+    (project / "export_presets.cfg").write_text(package_client.EXPORT_PRESETS)
+    stage = f["tmp_path"] / "RabbitLands-Windows-20261026-bbbbbbbbb"
+    shutil.copytree(f["stage"], stage)
+    for args in (["--headless", "--path", str(project), "--import"],
+                 ["--headless", "--path", str(project), "--export-release", "Windows Desktop", str(stage / "app/RabbitLands.exe")]):
+        result = subprocess.run([str(f["godot"]), *args], capture_output=True, text=True, timeout=90)
+        assert result.returncode == 0 and "SCRIPT ERROR" not in result.stdout + result.stderr, result.stdout + result.stderr
+    metadata = json.loads((stage / "app/client-release.json").read_text())
+    payload = manifest(stage, metadata, {kind: updater.read_bytes() for kind in ("updater", "uninstall")})
+    (f["tmp_path"] / "RabbitLands-windows.json").write_text(json.dumps(signed(payload, f["key"])))
+    for kind in ("updater", "uninstall"):
+        shutil.copyfile(updater, f["installed"] / f"RabbitLands-{kind}.exe")
+    result = subprocess.run([str(f["installed"] / "RabbitLands-updater.exe"), "--headless", "--", "--root", str(f["installed"])],
+        env=f["env"], capture_output=True, text=True, timeout=60)
+    assert result.returncode == 0, result.stdout + result.stderr
+    probe = json.loads((f["installed"] / "game-probe.json").read_text())
+    # The update installed a backup; the started game saw it removed while
+    # the launcher still held the lock, and the live game was untouched.
+    assert probe == {"had_backup": True, "removed_while_running": True, "live": "old rabbit"}, probe
+    assert json.loads((f["installed"] / "app/client-release.json").read_text())["commit"] == "b" * 40
+    assert not (f["installed"] / ".eloria-previous").exists()
+    assert not (f["installed"] / ".eloria-update-journal.json").exists()
+    assert "Removed the previous installation backup" in result.stdout, result.stdout

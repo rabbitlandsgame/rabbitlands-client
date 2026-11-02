@@ -6,10 +6,16 @@ const Bootstrap = preload("res://src/updates/bootstrap.gd")
 const Transport = preload("res://src/updates/update_transport.gd")
 const Uninstall = preload("res://src/updates/uninstall.gd")
 const LaunchOptions = preload("res://src/updates/launch_options.gd")
+# Give the updated game time to load before its old copy is removed.
+const BACKUP_CLEANUP_DELAY_MSEC := 60000
 var _root := ""
 var _guard := Bootstrap.new()
 var _transport
 var _game_pid := 0
+var _backup_cleanup: Thread
+var _backup_cleanup_checked := false
+var _backup_cleanup_stop := false
+var _backup_cleanup_files := 0
 
 func _ready() -> void:
 	_transport = _new_transport()
@@ -66,6 +72,11 @@ func _ready() -> void:
 	var own := OS.get_executable_path().simplify_path()
 	var installed_helper := _root.path_join(Bootstrap.helper_name("updater", identity))
 	var managed_launcher := own.to_lower() == installed_helper.to_lower() if OS.get_name() == "Windows" else own == installed_helper
+	# With the lock held, drop helper copies left by earlier handovers.
+	var pruned: Variant = await _transport.worker(func() -> Array: return Bootstrap.prune_cache(_root, identity, managed_launcher))
+	if pruned is Array:
+		for line: Variant in pruned:
+			print(line)
 	# Downloaded, checksum-named updaters are explicit repair/install entry points.
 	# Older shortcuts to the installed canonical helper still open the game first.
 	var launch_only: bool = "--launch-only" in args or (managed_launcher and installed.get("release_build", false) == true and not "--install-update" in args and not "--update-only" in args)
@@ -183,11 +194,52 @@ func _launch_game(identity: Dictionary, args: PackedStringArray) -> void:
 		return
 	if DisplayServer.get_name() != "headless":
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MINIMIZED)
+	var started := Time.get_ticks_msec()
+	var lease := Release.cache_for(_root).path_join("running-%d.json" % _game_pid)
 	while OS.is_process_running(_game_pid):
+		# The game's running lease shows the installed build started. This
+		# launcher keeps the lock until the game exits, so no update can begin.
+		if not _backup_cleanup_checked and Time.get_ticks_msec() - started >= _backup_cleanup_delay_msec() and FileAccess.file_exists(lease):
+			_start_backup_cleanup()
 		await get_tree().create_timer(1.0).timeout
+	_finish_backup_cleanup()
 	_game_pid = 0
 	_guard.release_lock()
 	get_tree().quit()
+
+func _start_backup_cleanup() -> void:
+	_backup_cleanup_checked = true
+	var backup := _root.path_join(".eloria-previous")
+	if not DirAccess.dir_exists_absolute(backup):
+		return
+	print("Removing the previous installation backup %s; the updated game has started." % backup)
+	var root := _root
+	_backup_cleanup = Thread.new()
+	if _backup_cleanup.start(func() -> Error: return Release.remove_backup(root, _backup_cleanup_checkpoint), Thread.PRIORITY_LOW) != OK:
+		_backup_cleanup = null
+
+func _backup_cleanup_checkpoint() -> bool:
+	# Runs on the cleanup thread before each file. Short pauses keep this
+	# one-off burst of deletions from competing with the game's disk reads.
+	if _backup_cleanup_stop:
+		return true
+	_backup_cleanup_files += 1
+	if _backup_cleanup_files % 32 == 0:
+		OS.delay_msec(10)
+	return false
+
+func _finish_backup_cleanup() -> void:
+	if _backup_cleanup == null:
+		return
+	# Stop at the next file so a waiting updater can take the lock. Whatever
+	# remains is removed after the next confirmed game start.
+	_backup_cleanup_stop = true
+	var error: Variant = _backup_cleanup.wait_to_finish()
+	_backup_cleanup = null
+	if error == OK:
+		print("Removed the previous installation backup (%d files)." % _backup_cleanup_files)
+	else:
+		print("Paused removing the previous installation backup after %d files (%s); it continues after the next game start." % [_backup_cleanup_files, error_string(int(error))])
 
 func _handoff(root: String, manifest: String) -> void:
 	var error := Bootstrap.root_error(root)
@@ -221,6 +273,9 @@ func _handoff(root: String, manifest: String) -> void:
 func _new_transport() -> Node:
 	return Transport.new()
 
+func _backup_cleanup_delay_msec() -> int:
+	return BACKUP_CLEANUP_DELAY_MSEC
+
 func _progress(phase: String, completed: int, total: int, detail := "") -> void:
 	var text := phase + (": " + detail if detail != "" else "")
 	if total > 1:
@@ -236,5 +291,6 @@ func _fail(message: String) -> void:
 	get_tree().quit(1)
 
 func _exit_tree() -> void:
+	_finish_backup_cleanup()
 	if _game_pid == 0:
 		_guard.release_lock()

@@ -145,6 +145,18 @@ the original, replaces the executables, and restarts. Windows never overwrites
 its running updater in place. Game revisions do not enter the bootstrap's
 embedded trust identity. The same existing signing key is retained.
 
+Each launcher start removes what earlier handovers left in the update cache
+while it holds the installation lock, and logs every removal in the Godot log.
+A `handoff-<pid>` copy is removed once its starting launcher has exited and
+both the copy and the latest handover record are more than ten minutes old.
+Linux checks the pid in `/proc`. Godot on Windows reports only child processes,
+but Windows refuses to delete an executable that is still running, so a copy in
+use stays until a later start. Staged `bootstrap/<sha256>` helpers other than
+those named by the latest verified handover record are removed; an unfinished
+handover keeps the helper it still needs. When the installed updater itself is
+running and both installed helpers are complete,
+`.rabbitlands-bootstrap-previous/` is removed. Unrecognized files are kept.
+
 Before-package clients cannot understand schema 2. For their first upgrade,
 run the new setup file, or put the new standalone updater in the game folder
 and run it once. The new updater checks their installed files and downloads
@@ -396,8 +408,15 @@ the compatibility notice and download nothing.
 The game never overwrites itself while running. On the next launch, the small
 restart launcher verifies the download again, extracts to a sibling staging
 folder, validates paths/checksums, and replaces `app/` and `eloria-assets/`
-together. It retains the previous version in `.eloria-previous/`. A journal
-recovers an interrupted replacement on the next launch. A lock protects an
+together. The previous version moves to `.eloria-previous/`, and a journal
+recovers an interrupted replacement from it on the next launch. Nothing reads
+that backup once the journal is cleared and there is no rollback command, so
+when the updated game has been running for a minute and has recorded its
+running lease, the launcher removes the backup on a low-priority thread. It
+still holds the lock while the game runs, and it never removes the backup while
+a journal exists. Closing the game pauses the removal and the next confirmed
+start continues it; the next update would empty the folder anyway before
+writing its own journal. A lock protects an
 installation from concurrent launchers and from installation while its game
 process is still running. Downloads and readiness records are scoped to each
 installation under the player's game user directory; account preferences stay
@@ -406,7 +425,10 @@ in the existing user directory.
 Only changed or damaged asset packages are downloaded. The local staging area
 also contains unchanged files so both game roots can be replaced together.
 Keep enough free space for the changed downloads and staged game; the previous
-installation is retained by renaming its folders. ZIP entries use 8 MiB chunks
+installation is kept by renaming its folders until the updated game has
+started. A planned follow-up stages only changed packages and moves just the
+replaced originals into a per-update backup covered by the journal, instead of
+copying and rehashing every unchanged file. ZIP entries use 8 MiB chunks
 and 64-bit archive offsets, so even a large PCK uses bounded extraction memory.
 On Windows, each folder move retries for up to five seconds to allow temporary
 file locks to clear. If a move still fails, recovery attempts to restore the
@@ -438,6 +460,8 @@ Choose the minimum checks for the behavior being changed. For example:
 The older full modules above remain available manually when broader coverage is
 needed. `godot-client/tests/test_client_updates.gd` covers runtime signatures,
 restart install, corrupted data, archive paths, ancestry, backups and recovery.
+`godot-client/tests/test_client_update_cleanup.gd` covers backup removal around
+journals and the helper cache returning to one staged helper after handovers.
 For relevant download/retry changes, the optional local HTTPS harness is
 `python godot-client/tests/run_client_update_tests.py --godot <godot-path>`.
 
