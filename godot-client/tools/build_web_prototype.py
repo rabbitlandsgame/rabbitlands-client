@@ -190,6 +190,39 @@ def glb_dependencies(path: Path):
                 yield (path.parent / unquote(uri)).resolve()
 
 
+def raw_world_models(project: Path) -> set[Path]:
+    """Use the production raw-scenery policy without requiring other maps.
+
+    Explicit ResourceLoader users win. Keep images imported and make no
+    changes to geometry, materials, raw files or runtime source selection.
+    """
+    from package_client import SOURCE_LITERAL, WORLD_RESOURCE_LITERAL, WORLD_LOAD_LITERAL
+    import re
+    reader = project / "src/actors/glb_scene_cache.gd"
+    if not reader.is_file() or 'if not resource_path.begins_with("res://assets/actors/")' not in reader.read_text():
+        return set()  # Unknown reader: conservatively retain scene imports.
+    models = {p.relative_to(project).as_posix(): p for p in (project / "assets/world").rglob("*")
+              if p.suffix.lower() in {".glb", ".gltf"}}
+    imported = set()
+    for path in project.rglob("*"):
+        if path.suffix not in {".gd", ".tscn", ".tres"} or ".godot" in path.relative_to(project).parts:
+            continue
+        source = path.read_text(encoding="utf-8-sig", errors="replace")
+        if path != reader:
+            for _, literal in SOURCE_LITERAL.findall(source):
+                if literal.startswith("res://assets/world/") and (literal.endswith("/") or "%" in literal or "{" in literal):
+                    prefix = re.split(r"[%{]", literal[6:], maxsplit=1)[0]
+                    imported.update(name for name in models if name.startswith(prefix))
+        references = {name for name in WORLD_RESOURCE_LITERAL.findall(source) if name in models}
+        if path.suffix in {".tscn", ".tres"}:
+            imported.update(references)
+        else:
+            imported.update(WORLD_LOAD_LITERAL.findall(source))
+            if re.search(r"\b(?:load|preload)\s*\(\s*[A-Za-z_]", source):
+                imported.update(references)
+    return {path for name, path in models.items() if name not in imported}
+
+
 def raw_files() -> list[Path]:
     tracked = set(subprocess.check_output(["git", "ls-files", "-z"], cwd=REPO).decode().split("\0"))
     models = json.loads((CLIENT / "data/actors/models.json").read_text())
@@ -330,6 +363,9 @@ def stage_project(stage: Path, endpoint: str) -> dict:
     registry_path.write_text(json.dumps(registry, indent=2), encoding="utf-8")
     (project / "data/maps/geometry-cache-scope.json").write_text(
         json.dumps({"schema": 1, "version": 1, "maps": [], "groups": {}, "asset_overlays": []}), encoding="utf-8")
+    raw_scenes = raw_world_models(project)
+    for model in raw_scenes:
+        model.with_name(model.name + ".import").write_text('[remap]\n\nimporter="skip"\n', encoding="utf-8")
     files = raw_files()
     # Source scenery can point into several shared map image pools, not only
     # world/_shared/images. Mirror the already verified raw dependency closure
@@ -343,7 +379,7 @@ def stage_project(stage: Path, endpoint: str) -> dict:
     cfg = {"schema": 2, "maps": list(MAPS), "endpoint": endpoint, "archives": archives}
     (project / "data/web_prototype.json").write_text(json.dumps(cfg, indent=2), encoding="utf-8")
     # A static login picture is enough for the prototype; save player choices separately.
-    report = {**cfg, "raw_files": len(files), "raw_bytes": sum(p.stat().st_size for p in files),
+    report = {**cfg, "raw_files": len(files), "raw_world_scenes": len(raw_scenes), "raw_bytes": sum(p.stat().st_size for p in files),
               "download_bytes": sum(row["bytes"] for row in archives),
               "client_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO, text=True).strip()}
     (stage / "build.json").write_text(json.dumps(report, indent=2), encoding="utf-8")

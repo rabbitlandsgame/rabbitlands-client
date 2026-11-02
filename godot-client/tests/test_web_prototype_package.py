@@ -62,6 +62,26 @@ class LandfallPackageTests(unittest.TestCase):
             self.assertEqual(json.loads((root / "build.json").read_text())["browser_cape_sha256"],
                              web.describe(module)["sha256"])
 
+    def test_raw_world_scenes_do_not_duplicate_the_runtime_but_explicit_users_win(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            reader = root / "src/actors/glb_scene_cache.gd"
+            reader.parent.mkdir(parents=True)
+            reader.write_text('if not resource_path.begins_with("res://assets/actors/"):\n pass\n')
+            models = root / "assets/world"
+            models.mkdir(parents=True)
+            for name in ("raw", "direct", "scene", "dynamic"):
+                (models / (name + ".glb")).write_bytes(b"fixture")
+            (root / "src/users.gd").write_text('''var a = load("res://assets/world/direct.glb")
+const PATH = "res://assets/world/dynamic.glb"
+var b = load(PATH)
+''')
+            (root / "scene.tscn").write_text('[ext_resource path="res://assets/world/scene.glb"]')
+            self.assertEqual(web.raw_world_models(root), {models / "raw.glb"})
+            # An unrecognized reader retains all ordinary editor imports.
+            reader.write_text("changed reader")
+            self.assertEqual(web.raw_world_models(root), set())
+
 
 if __name__ == "__main__":
     unittest.main()
