@@ -658,6 +658,7 @@ func _set_up_main() -> void:
 		var world_viewport := _main.get("main_viewport") as SubViewport
 		if world_viewport != null:
 			RenderingServer.viewport_set_measure_render_time(world_viewport.get_viewport_rid(), true)
+		_main.call("benchmark_measure_text_pass", true)
 	# The player stands on the centre tile for the map's own readiness wait, so
 	# the streamed ground around the crowd is resident before any cell starts.
 	var standing := _record(0, true, _centre, {})
@@ -748,6 +749,10 @@ func _prewarm() -> void:
 
 func _run_cell(spec: Dictionary) -> void:
 	var replay := str(spec["shape"]) == "replay"
+	# Every cell starts from the shipping world-text pass (OV-0): a pass that an
+	# earlier cell stopped must not shrink this cell's before/withCrowd video
+	# memory, which the in-process deltas compare against.
+	var text_pass_at_start: Dictionary = _main.call("benchmark_set_text_pass", "auto")
 	if str(spec.shape) == "herd":
 		await _prepare_authored_herd(spec)
 		if str(spec.get("status", "")) == "unavailable_content":
@@ -798,12 +803,18 @@ func _run_cell(spec: Dictionary) -> void:
 		_heat_bolt_benchmark.configure(_main, _app_state, plan, _send_packet)
 		_main.set("benchmark_heat_bolt", _heat_bolt_benchmark)
 	# Attribution diagnostics, never an acceptance configuration: the benchmark
-	# Main subclass freezes every AnimationPlayer, hides the overhead block or
-	# skips the ground rays (RABBITLANDS_CROWD_BENCH_DIAG=no_animation,...).
+	# Main subclass freezes every AnimationPlayer, hides the overhead block,
+	# skips the ground rays, stops the world-text pass or keeps it rendering
+	# (RABBITLANDS_CROWD_BENCH_DIAG=no_animation,...; text_pass_mode()).
 	var diagnostics := OS.get_environment("RABBITLANDS_CROWD_BENCH_DIAG").split(",", false)
+	var overhead_before_diagnostics: Dictionary = _main.call("benchmark_overhead_census")
 	_main.set("benchmark_animation_enabled", not diagnostics.has("no_animation"))
 	_main.set("benchmark_overhead_enabled", not diagnostics.has("no_overhead"))
 	_main.set("benchmark_ground_enabled", not diagnostics.has("no_ground"))
+	_main.call("benchmark_apply_overhead_switch")
+	var text_pass: Dictionary = _main.call("benchmark_set_text_pass", text_pass_mode(diagnostics))
+	if not _expect(bool(text_pass.get("ok", false)), "world-text pass mode applies: %s" % str(text_pass)):
+		return
 	_attribution = OS.get_environment("RABBITLANDS_CROWD_BENCH_ATTRIBUTION").strip_edges() == "1"
 	_main.set("benchmark_attribution_enabled", _attribution)
 	_main.set("benchmark_detailed_profile_enabled", _attribution)
@@ -845,7 +856,10 @@ func _run_cell(spec: Dictionary) -> void:
 		"physicsPhaseMilliseconds": [], "mainProcessMilliseconds": [],
 		"gateSweepEndMilliseconds": [], "declutterMilliseconds": [],
 		"halfRateStepMilliseconds": [], "combatPoseMilliseconds": [], "skeletonUpdates": [],
-		"actorRecords": [], "actorNodes": []}
+		"actorRecords": [], "actorNodes": [],
+		"textPassDrawn": [], "textPassRenderCpuMilliseconds": [], "textPassRenderGpuMilliseconds": [],
+		"textPassDrawCalls": [], "renderGpuSumMilliseconds": [], "totalDrawCalls": [],
+		"totalObjects": [], "totalPrimitives": []}
 	var heat_start: Dictionary = _heat_bolt_benchmark.begin_sample() if is_instance_valid(_heat_bolt_benchmark) else {}
 	var sample_started := Time.get_ticks_msec()
 	var window_started := _replay_stats.duplicate(true)
@@ -858,10 +872,16 @@ func _run_cell(spec: Dictionary) -> void:
 			row[3] = 0
 			commands[command] = row
 	var profile_frames: Array = []
+	var overhead_at_start: Dictionary = _main.call("benchmark_overhead_census")
 	_set_stage("cell:%s:sample" % str(spec.id))
 	await _drive_for(plan, int((_report["measurement"] as Dictionary)["sampleMilliseconds"]), raw, profile_frames)
 	_set_stage("cell:%s:after-sample" % str(spec.id))
 	var elapsed := Time.get_ticks_msec() - sample_started
+	# Video memory with this cell's crowd and diagnostics in effect (OV-0): the
+	# withCrowd sample precedes the diagnostics, afterDespawn follows removal.
+	var sampled_memory := _memory_sample()
+	var overhead_after: Dictionary = _main.call("benchmark_overhead_census")
+	var text_pass_state: Dictionary = _main.call("benchmark_text_pass_snapshot")
 	var census_after := _census("afterSample")
 	var pacing_after := _steady_pacing_snapshot()
 	_accept_steady_pacing(spec, pacing_after, "afterSample")
@@ -892,6 +912,8 @@ func _run_cell(spec: Dictionary) -> void:
 	if replay:
 		var actors := _app_state.get("actors") as Dictionary
 		remaining = {_local_id: actors[_local_id]} if actors.has(_local_id) else {}
+	# The shipping pass again before the removal, so afterDespawn compares with before.
+	_main.call("benchmark_set_text_pass", "auto")
 	_app_state.set("actors", remaining)
 	_main.call("_sync_world")
 	await _settle_frames(12)
@@ -940,9 +962,21 @@ func _run_cell(spec: Dictionary) -> void:
 	if not heat_report.is_empty():
 		result["spellWorkload"] = heat_report
 	result["memory"] = {"before": before, "withCrowd": spawned_memory, "afterDespawn": after,
+		"afterSample": sampled_memory,
 		"crowdDelta": _memory_delta(before, spawned_memory),
 		"perActorStaticBytes": int((int(spawned_memory.staticBytes) - int(before.staticBytes))
 			/ maxi(1, count - 1))}
+	var drawn_frames := 0
+	for drawn: Variant in raw["textPassDrawn"] as Array:
+		drawn_frames += int(drawn)
+	text_pass_state["drawnFrames"] = drawn_frames
+	text_pass_state["sampledFrames"] = frames
+	text_pass_state["cellStart"] = {"ok": bool(text_pass_at_start.get("ok", false)),
+		"mode": text_pass_at_start.get("mode"), "overlayVisible": text_pass_at_start.get("overlayVisible"),
+		"passViewportSize": text_pass_at_start.get("passViewportSize")}
+	result["textPass"] = text_pass_state
+	result["overhead"] = {"beforeDiagnostics": overhead_before_diagnostics,
+		"sampleStart": overhead_at_start, "afterSample": overhead_after}
 	(_report["cells"] as Array).append(result)
 	print("crowd-presentation %s: %d actors, %d bodies, %d deferred, mean %.2f ms, p95 %.2f ms, p5 %.1f FPS" % [
 		spec["id"], count, int(census_before["builtBodies"]), int(census_before["deferred"]),
@@ -1199,6 +1233,16 @@ static func production_undead_activity_species(records: Dictionary, ids: Array) 
 	return counts
 
 
+## OV-0: the world-text pass mode a diagnostic list asks for (see
+## crowd_benchmark_main.gd). `no_text_pass` stops the pass while every label
+## remains; `text_pass_always` keeps it rendering every frame (wave-1 idle off).
+## The runner refuses both together.
+static func text_pass_mode(diagnostics: PackedStringArray) -> String:
+	if diagnostics.has("no_text_pass"):
+		return "off"
+	return "always" if diagnostics.has("text_pass_always") else "auto"
+
+
 func _plan(active: Array[int], activity: String) -> Dictionary:
 	var moving: Array[int] = []
 	var fighting: Array[int] = []
@@ -1299,6 +1343,7 @@ func _drive_for(plan: Dictionary, duration: int, raw: Variant, profile_frames: A
 		(raw["actorRecords"] as Array).append((_app_state.get("actors") as Dictionary).size())
 		(raw["actorNodes"] as Array).append((_main.get("actor_nodes") as Dictionary).size())
 		_append_render_sample(raw)
+		_append_text_pass_sample(raw)
 		if _attribution:
 			var profile: Dictionary = measured.get("profile", {}) as Dictionary
 			var metric_frames: Dictionary = profile.get("metric_frames", {})
@@ -1876,6 +1921,34 @@ func _append_render_sample(raw: Dictionary) -> void:
 		(raw["drawCalls"] as Array).append(RenderingServer.viewport_get_render_info(rid,
 			RenderingServer.VIEWPORT_RENDER_INFO_TYPE_VISIBLE,
 			RenderingServer.VIEWPORT_RENDER_INFO_DRAW_CALLS_IN_FRAME))
+
+
+## The world-text pass in the frame just drawn (OV-0). `textPassDrawn` is 1 or
+## 0 on every display. On a rendered display the pass viewport's own timings
+## and draws are recorded for frames it rendered (null otherwise), with
+## `renderGpuSumMilliseconds` = world + text pass (when drawn) + root viewport
+## GPU, each its most recently completed measurement, and the engine's totals
+## across every viewport and shadow pass of the frame.
+func _append_text_pass_sample(raw: Dictionary) -> void:
+	var pass_frame: Dictionary = _main.call("benchmark_text_pass_frame", not _headless)
+	var drawn := bool(pass_frame.get("drawn", false))
+	(raw["textPassDrawn"] as Array).append(int(drawn))
+	if _headless:
+		return
+	(raw["textPassRenderCpuMilliseconds"] as Array).append(pass_frame.get("cpuMilliseconds"))
+	(raw["textPassRenderGpuMilliseconds"] as Array).append(pass_frame.get("gpuMilliseconds"))
+	(raw["textPassDrawCalls"] as Array).append(pass_frame.get("drawCalls"))
+	var world_gpu: Array = raw["worldRenderGpuMilliseconds"]
+	var root_gpu: Array = raw["rootRenderGpuMilliseconds"]
+	if not world_gpu.is_empty() and not root_gpu.is_empty():
+		(raw["renderGpuSumMilliseconds"] as Array).append(float(world_gpu[-1]) + float(root_gpu[-1])
+			+ (float(pass_frame.get("gpuMilliseconds", 0.0)) if drawn else 0.0))
+	(raw["totalDrawCalls"] as Array).append(RenderingServer.get_rendering_info(
+		RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME))
+	(raw["totalObjects"] as Array).append(RenderingServer.get_rendering_info(
+		RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME))
+	(raw["totalPrimitives"] as Array).append(RenderingServer.get_rendering_info(
+		RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME))
 
 
 ## What the crowd looks like to the presentation right now.
@@ -2558,6 +2631,7 @@ func _stop_benchmark_instrumentation() -> void:
 			var viewport := _main.get("main_viewport") as SubViewport
 			if is_instance_valid(viewport):
 				RenderingServer.viewport_set_measure_render_time(viewport.get_viewport_rid(), false)
+			_main.call("benchmark_measure_text_pass", false)
 	_iteration_started_usec = -1
 	_process_started_usec = -1
 	_process_ended_usec = -1

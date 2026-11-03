@@ -30,7 +30,8 @@ from process_memory_sampler import ProcessMemorySampler
 
 from crowd_benchmark_support import (
     BenchmarkLock, EvidenceError, asset_files, clean_environment, configure_prepared_profile, configure_settings_profile, default_lock_path,
-    hash_files, manifest_identity, prepare_worker_overlay, read_json, require_private_replay_output, resolve_worker_threads,
+    hash_files, manifest_identity, parse_diagnostics, prepare_worker_overlay, read_json, require_private_replay_output,
+    resolve_worker_threads,
     seed_settings_profile, selected_cells, sha256_file, source_files, validate_report, validate_startup_ack,
 )
 
@@ -435,7 +436,10 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--tuning", default="")
     p.add_argument("--presence", type=int, default=0)
     p.add_argument("--server-time", action="store_true")
-    p.add_argument("--diagnostics", default="")
+    p.add_argument("--diagnostics", default="",
+                   help="comma-separated attribution switches, never acceptance timing: no_animation, no_overhead, "
+                        "no_ground, no_text_pass (stop the world-text pass; labels remain), text_pass_always "
+                        "(render it every frame: wave-1 idle off)")
     p.add_argument("--attribution", action="store_true",
                    help="source-project-only frame/gate/listener diagnostic; unsupported for exported/compiled scripts; never acceptance timing")
     p.add_argument("--capture-boundaries", action="store_true",
@@ -479,6 +483,7 @@ def main(argv: list[str] | None = None) -> int:
     args = p.parse_args(argv)
     try:
         configure_settings_profile(args)
+        parse_diagnostics(args.diagnostics)
         if args.attribution and args.executable_mode != "project":
             raise EvidenceError("--attribution is source-project-only; exported/compiled scripts are unsupported")
         if args.window_mode == "fullscreen" and args.mode != "windowed":

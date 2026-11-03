@@ -6,6 +6,26 @@ extends SceneTree
 ## Defaults to Landfall tile 61,250. Select another registered map with
 ## ELORIA_CAMERA_PROBE_MAP and an explicit ELORIA_CAMERA_PROBE_TILE=x,y.
 ## Use ELORIA_CAMERA_PROBE_MINIMAP=show to include the direct 2D minimap.
+##
+## World-distance baseline (wave 2 WD-C0): ELORIA_CAMERA_PROBE_DISTANCE and
+## ELORIA_CAMERA_PROBE_PITCH take one value or a comma list (defaults 14 m and
+## -60 degrees, unchanged); every distance x pitch pose after the first is
+## settled for ELORIA_CAMERA_PROBE_POSE_SETTLE_MSEC (default 2000) and turned
+## ELORIA_CAMERA_PROBE_TURNS times (default 3). ELORIA_CAMERA_PROBE_MINUTE sets
+## the game minute (default 600, mid-morning with sun shadows; 0 is midnight).
+## Each turn also records shadow-pass draws and primitives; each pose records
+## the camera near/far planes, the fitted sun shadow distance and the world
+## distance state. `poses` holds every pose; the top-level `turns`, `pitch`
+## and `distance` are the first pose's, as before.
+
+## Camera rig limits (IsometricCameraController min/max_distance, pitch clamp).
+const DISTANCE_RANGE := Vector2(1.5, 90.0)
+const PITCH_RANGE := Vector2(-80.0, -15.0)
+const MAX_POSES := 24
+## Main's before-login world geometry preparation in a fresh user root.
+const PREPARATION_LIMIT_MSEC := 1800000
+const GRAPHICS_KEYS: Array[String] = ["render_scale", "map_texture_quality", "quality", "shadows",
+	"decorative_grass", "crowd_bodies", "swaying_capes", "particles", "appearance"]
 
 ## Static validation is also usable by a headless test without constructing Main.
 static func probe_location(maps: Dictionary, map_text: String, tile_text: String) -> Dictionary:
@@ -29,6 +49,78 @@ static func probe_location(maps: Dictionary, map_text: String, tile_text: String
 			return {"error": "ELORIA_CAMERA_PROBE_TILE coordinates must fit unsigned 16-bit server fields."}
 		tile = Vector2i(x, y)
 	return {"map": map_id, "tile": tile, "manifest": str(entry.manifest)}
+
+## Every distance x pitch pose, distance-major, from ELORIA_CAMERA_PROBE_DISTANCE
+## and ELORIA_CAMERA_PROBE_PITCH (one number or a comma list each).
+static func probe_poses(distance_text: String, pitch_text: String) -> Dictionary:
+	var distances := _number_list(distance_text, 14.0, DISTANCE_RANGE, "ELORIA_CAMERA_PROBE_DISTANCE")
+	if distances.has("error"):
+		return distances
+	var pitches := _number_list(pitch_text, -60.0, PITCH_RANGE, "ELORIA_CAMERA_PROBE_PITCH")
+	if pitches.has("error"):
+		return pitches
+	var poses: Array[Dictionary] = []
+	for distance: float in distances["numbers"]:
+		for pitch: float in pitches["numbers"]:
+			poses.append({"distance": distance, "pitch": pitch})
+	if poses.size() > MAX_POSES:
+		return {"error": "At most %d distance x pitch poses per probe run." % MAX_POSES}
+	return {"poses": poses}
+
+## The game minute the probe pins (0-1439); 600 keeps the calibrated daylight.
+static func probe_minute(text: String) -> Dictionary:
+	return _integer_setting(text, 600, 0, 1439, "ELORIA_CAMERA_PROBE_MINUTE")
+
+## Timed 360-degree turns per pose.
+static func probe_turns(text: String) -> Dictionary:
+	return _integer_setting(text, 3, 1, 10, "ELORIA_CAMERA_PROBE_TURNS")
+
+## Settling before each pose after the first, for streaming and the shadow fit.
+static func probe_pose_settle(text: String) -> Dictionary:
+	return _integer_setting(text, 2000, 0, 120000, "ELORIA_CAMERA_PROBE_POSE_SETTLE_MSEC")
+
+## Supported Graphics controls (ELORIA_CAMERA_PROBE_GRAPHICS, a JSON object).
+## `quality` and `appearance` must name a quality and an appearance mode.
+static func probe_graphics(text: String) -> Dictionary:
+	if text.is_empty():
+		return {"overrides": {}}
+	var json := JSON.new()
+	var parsed: Variant = json.data if json.parse(text) == OK else null
+	if not (parsed is Dictionary):
+		return {"error": "ELORIA_CAMERA_PROBE_GRAPHICS must be a JSON object."}
+	var look: Variant = load("res://src/world/look/look_profile.gd")
+	for key: Variant in parsed:
+		if not (key is String) or str(key) not in GRAPHICS_KEYS:
+			return {"error": "Unsupported camera probe Graphics setting: " + str(key)}
+		if key == "quality" and look.quality_named(str(parsed[key])) < 0:
+			return {"error": "Unknown camera probe quality: " + str(parsed[key])}
+		if key == "appearance" and look.mode_named(str(parsed[key])) < 0:
+			return {"error": "Unknown camera probe appearance: " + str(parsed[key])}
+	return {"overrides": parsed}
+
+static func _number_list(text: String, fallback: float, limits: Vector2, variable: String) -> Dictionary:
+	if text.strip_edges().is_empty():
+		return {"numbers": [fallback]}
+	var values: Array[float] = []
+	for part: String in text.split(","):
+		var item := part.strip_edges()
+		if not item.is_valid_float():
+			return {"error": "%s must be a number or a comma list of numbers." % variable}
+		var value := float(item)
+		if not is_finite(value) or value < limits.x or value > limits.y:
+			return {"error": "%s values must lie in %s..%s." % [variable, limits.x, limits.y]}
+		if values.has(value):
+			return {"error": "%s repeats %s." % [variable, item]}
+		values.append(value)
+	return {"numbers": values}
+
+static func _integer_setting(text: String, fallback: int, low: int, high: int, variable: String) -> Dictionary:
+	var item := text.strip_edges()
+	if item.is_empty():
+		return {"value": fallback}
+	if not item.is_valid_int() or int(item) < low or int(item) > high:
+		return {"error": "%s must be an integer in %d..%d." % [variable, low, high]}
+	return {"value": int(item)}
 
 func _init() -> void:
 	_run.call_deferred()
@@ -54,20 +146,19 @@ func _run() -> void:
 	var tile: Vector2i = location.tile
 	# Only supported Graphics controls may vary. Seed the texture tier before
 	# loading main: changing its preference later cannot change this session.
-	var overrides: Dictionary = {}
-	if OS.has_environment("ELORIA_CAMERA_PROBE_GRAPHICS"):
-		var parsed: Variant = JSON.parse_string(OS.get_environment("ELORIA_CAMERA_PROBE_GRAPHICS"))
-		if not parsed is Dictionary:
-			push_error("ELORIA_CAMERA_PROBE_GRAPHICS must be a JSON object.")
+	var graphics := probe_graphics(OS.get_environment("ELORIA_CAMERA_PROBE_GRAPHICS"))
+	var pose_plan := probe_poses(OS.get_environment("ELORIA_CAMERA_PROBE_DISTANCE"),
+		OS.get_environment("ELORIA_CAMERA_PROBE_PITCH"))
+	var minute := probe_minute(OS.get_environment("ELORIA_CAMERA_PROBE_MINUTE"))
+	var turn_count := probe_turns(OS.get_environment("ELORIA_CAMERA_PROBE_TURNS"))
+	var pose_settle := probe_pose_settle(OS.get_environment("ELORIA_CAMERA_PROBE_POSE_SETTLE_MSEC"))
+	for setting: Dictionary in [graphics, pose_plan, minute, turn_count, pose_settle]:
+		if setting.has("error"):
+			push_error(str(setting.error))
 			quit(1)
 			return
-		overrides = parsed
-	for key: String in overrides:
-		if key not in ["render_scale", "map_texture_quality", "quality", "shadows",
-				"decorative_grass", "crowd_bodies", "swaying_capes", "particles"]:
-			push_error("Unsupported camera probe Graphics setting: " + key)
-			quit(1)
-			return
+	var overrides: Dictionary = graphics.overrides
+	var poses: Array[Dictionary] = pose_plan.poses
 	var config := ConfigFile.new()
 	var preferences := {"renderer": RenderingServer.get_current_rendering_method(),
 		"map_texture_quality": overrides.get("map_texture_quality", "half")}
@@ -83,11 +174,27 @@ func _run() -> void:
 		return
 	root.add_child(main)
 	await process_frame
+	# In a user root without prepared world geometry (every fresh isolated root)
+	# Main cooks it before login and finishes _ready() only afterwards; settings
+	# applied earlier reach half-built windows and an empty map registry.
+	var preparation_started := Time.get_ticks_msec()
+	var prepared_geometry := bool(main.get("_geometry_maintenance_active"))
+	while bool(main.get("_geometry_maintenance_active")) \
+			and Time.get_ticks_msec() - preparation_started < PREPARATION_LIMIT_MSEC:
+		await process_frame
+	var preparation_ms := Time.get_ticks_msec() - preparation_started
+	if bool(main.get("_geometry_maintenance_active")):
+		push_error("Main's world geometry preparation did not finish in time.")
+		quit(1)
+		return
+	await process_frame
 	main.call("_apply_performance_preset")
 	for key: String in overrides:
 		var value: Variant = overrides[key]
 		if key == "quality":
 			value = load("res://src/world/look/look_profile.gd").quality_named(str(value))
+		elif key == "appearance":
+			value = load("res://src/world/look/look_profile.gd").mode_named(str(value))
 		main.call("_on_client_setting_changed", "Graphics", key, value)
 	if OS.has_environment("ELORIA_CAMERA_PROBE_MINIMAP"):
 		main.call("_on_client_setting_changed", "HUD", "minimap_visible",
@@ -99,16 +206,15 @@ func _run() -> void:
 	main.call("_on_client_setting_changed", "Graphics", "vsync_mode", vsync)
 	var main_ready_msec := Time.get_ticks_msec()
 	var rig: Node3D = main.get("camera_rig")
-	rig.set("distance", 14.0)
-	var pitch := float(OS.get_environment("ELORIA_CAMERA_PROBE_PITCH")) \
-		if OS.has_environment("ELORIA_CAMERA_PROBE_PITCH") else -60.0
+	rig.set("distance", float(poses[0].distance))
+	var pitch := float(poses[0].pitch)
 	rig.set("pitch_degrees", pitch)
 	var state := root.get_node("AppState")
 	state.set("authenticated", true)
 	state.set("connection_state", "connected")
 	state.set("current_map", map_id)
 	state.set("local_actor_id", 99)
-	state.set("game_minute", 600)
+	state.set("game_minute", int(minute.value))
 	state.set("game_minute_anchor_msec", Time.get_ticks_msec())
 	state.set("actors", {99: {"actor_id": 99, "kind": 1, "actor_type": 0,
 		"name": "Camera probe", "map": map_id, "x": tile.x, "y": tile.y,
@@ -128,10 +234,13 @@ func _run() -> void:
 	if curtain.visible or not (main.get("_grounded_actors") as Dictionary).has(99) \
 			or MapRegistry.normalize_server_map_id(str(main.get("loaded_server_map"))) != map_id:
 		push_error("Offline arrival did not complete on loaded ground.")
+		# Awaited on its own line: a teardown that fails must still leave a report
+		# and the documented wait for the owning runner, not abort this coroutine.
+		var teardown: Variant = await _tear_down(main, state)
 		var failure := {"map": map_id, "tile": [tile.x, tile.y], "manifest": location.manifest,
-			"error": "arrival_not_ready", "teardown": await _tear_down(main, state)}
+			"error": "arrival_not_ready", "teardown": teardown}
 		FileAccess.open(report, FileAccess.WRITE).store_string(JSON.stringify(failure, "  "))
-		if not failure.teardown.ready:
+		if not (teardown is Dictionary and bool((teardown as Dictionary).get("ready", false))):
 			while true:
 				await process_frame
 		quit(1)
@@ -152,43 +261,25 @@ func _run() -> void:
 	RenderingServer.viewport_set_measure_render_time(viewport.get_viewport_rid(), true)
 	for frame: int in 3:
 		await process_frame
-	var turns := []
-	for turn: int in (0 if load_only else 3):
-		var times: Array[float] = []
-		var gpu_times: Array[float] = []
-		var cpu_times: Array[float] = []
-		var draw_calls: Array[float] = []
-		var primitives: Array[float] = []
-		var spikes := []
-		for yaw: int in 360:
-			var tick := Time.get_ticks_usec()
-			rig.set("yaw_degrees", float(yaw))
+	var pose_results := []
+	for pose_index: int in (0 if load_only else poses.size()):
+		var pose: Dictionary = poses[pose_index]
+		if pose_index > 0:
+			rig.set("distance", float(pose.distance))
+			rig.set("pitch_degrees", float(pose.pitch))
 			rig.call("_update_camera")
-			await process_frame
-			var elapsed := (Time.get_ticks_usec() - tick) / 1000.0
-			times.append(elapsed)
-			gpu_times.append(RenderingServer.viewport_get_measured_render_time_gpu(viewport.get_viewport_rid()))
-			cpu_times.append(RenderingServer.viewport_get_measured_render_time_cpu(viewport.get_viewport_rid()))
-			draw_calls.append(float(viewport.get_render_info(Viewport.RENDER_INFO_TYPE_VISIBLE,
-				Viewport.RENDER_INFO_DRAW_CALLS_IN_FRAME)))
-			primitives.append(float(viewport.get_render_info(Viewport.RENDER_INFO_TYPE_VISIBLE,
-				Viewport.RENDER_INFO_PRIMITIVES_IN_FRAME)))
-			if elapsed > 33.3:
-				spikes.append({"yaw": yaw, "ms": elapsed, "at_msec": Time.get_ticks_msec(), "gpu_ms": gpu_times[-1],
-					"render_cpu_ms": cpu_times[-1],
-					"process_ms": Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
-					"physics_ms": Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0})
-		times.sort()
-		turns.append({"turn": turn, "median_ms": times[179], "p95_ms": times[341],
-			"p99_ms": times[356], "max_ms": times[359], "spikes": spikes,
-			"mean_ms": _mean(times), "gpu_mean_ms": _mean(gpu_times),
-			"render_cpu_mean_ms": _mean(cpu_times), "draw_calls_mean": _mean(draw_calls),
-			"primitives_mean": _mean(primitives)})
-		print("camera_rotation_probe ", JSON.stringify(turns[-1]))
+			var pose_started := Time.get_ticks_msec()
+			while Time.get_ticks_msec() - pose_started < int(pose_settle.value):
+				await process_frame
+		var pose_turns := []
+		for turn: int in int(turn_count.value):
+			pose_turns.append(await _turn(rig, viewport, turn))
+			print("camera_rotation_probe ", JSON.stringify(pose_turns[-1]))
+		pose_results.append(_pose_result(main, rig, pose, pose_turns))
+	var turns: Array = pose_results[0].turns if not pose_results.is_empty() else []
 	config.load("user://eloria_hud.cfg")
 	var settings := {}
-	for key: String in ["quality", "render_scale", "map_texture_quality", "shadows",
-			"decorative_grass", "crowd_bodies", "swaying_capes", "particles"]:
+	for key: String in GRAPHICS_KEYS:
 		settings[key] = config.get_value("graphics", key)
 	var result := {"renderer": RenderingServer.get_current_rendering_method(),
 		"map": map_id, "tile": [tile.x, tile.y], "manifest": location.manifest,
@@ -208,6 +299,16 @@ func _run() -> void:
 		"arrival_ms": arrival_ms, "warmup": warmup, "requested_fps_cap": frame_cap,
 		"restored_fps_cap": restored_cap, "restored_vsync": restored_vsync,
 		"requested_vsync": vsync, "pitch": pitch, "turns": turns}
+	result["geometry_preparation"] = {"ran": prepared_geometry, "milliseconds": preparation_ms}
+	result["distance"] = float(poses[0].distance)
+	result["poses"] = pose_results
+	result["game_minute"] = int(minute.value)
+	result["turns_per_pose"] = int(turn_count.value)
+	result["pose_settle_msec"] = int(pose_settle.value)
+	result["graphics_overrides"] = overrides
+	result["appearance"] = load("res://src/world/look/look_profile.gd").mode_name(
+		load("res://src/world/look/look_profile.gd").mode())
+	result["world_distance_variable"] = OS.get_environment("ELORIA_WORLD_DISTANCE")
 	result["rotation_fps_cap"] = Engine.max_fps
 	result["probe_mode"] = "arrival_only" if load_only else "arrival_and_rotation"
 	# Snapshot only after timed turns, so cache-path and phase evidence does not
@@ -242,6 +343,74 @@ func _run() -> void:
 		while true:
 			await process_frame
 	quit()
+
+## One timed 360-degree turn at the rig's current distance and pitch. Shadow
+## draws and primitives are the world viewport's shadow passes (all cascades
+## and lights) in the same frame as the visible ones.
+func _turn(rig: Node3D, viewport: SubViewport, turn: int) -> Dictionary:
+	var times: Array[float] = []
+	var gpu_times: Array[float] = []
+	var cpu_times: Array[float] = []
+	var draw_calls: Array[float] = []
+	var primitives: Array[float] = []
+	var objects: Array[float] = []
+	var shadow_draw_calls: Array[float] = []
+	var shadow_primitives: Array[float] = []
+	var spikes := []
+	for yaw: int in 360:
+		var tick := Time.get_ticks_usec()
+		rig.set("yaw_degrees", float(yaw))
+		rig.call("_update_camera")
+		await process_frame
+		var elapsed := (Time.get_ticks_usec() - tick) / 1000.0
+		times.append(elapsed)
+		gpu_times.append(RenderingServer.viewport_get_measured_render_time_gpu(viewport.get_viewport_rid()))
+		cpu_times.append(RenderingServer.viewport_get_measured_render_time_cpu(viewport.get_viewport_rid()))
+		draw_calls.append(float(viewport.get_render_info(Viewport.RENDER_INFO_TYPE_VISIBLE,
+			Viewport.RENDER_INFO_DRAW_CALLS_IN_FRAME)))
+		primitives.append(float(viewport.get_render_info(Viewport.RENDER_INFO_TYPE_VISIBLE,
+			Viewport.RENDER_INFO_PRIMITIVES_IN_FRAME)))
+		objects.append(float(viewport.get_render_info(Viewport.RENDER_INFO_TYPE_VISIBLE,
+			Viewport.RENDER_INFO_OBJECTS_IN_FRAME)))
+		shadow_draw_calls.append(float(viewport.get_render_info(Viewport.RENDER_INFO_TYPE_SHADOW,
+			Viewport.RENDER_INFO_DRAW_CALLS_IN_FRAME)))
+		shadow_primitives.append(float(viewport.get_render_info(Viewport.RENDER_INFO_TYPE_SHADOW,
+			Viewport.RENDER_INFO_PRIMITIVES_IN_FRAME)))
+		if elapsed > 33.3:
+			spikes.append({"yaw": yaw, "ms": elapsed, "at_msec": Time.get_ticks_msec(), "gpu_ms": gpu_times[-1],
+				"render_cpu_ms": cpu_times[-1],
+				"process_ms": Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
+				"physics_ms": Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0})
+	var mean_gpu := _mean(gpu_times)
+	times.sort()
+	gpu_times.sort()
+	return {"turn": turn, "median_ms": times[179], "p95_ms": times[341],
+		"p99_ms": times[356], "max_ms": times[359], "spikes": spikes,
+		"mean_ms": _mean(times), "gpu_mean_ms": mean_gpu, "gpu_p95_ms": gpu_times[341],
+		"render_cpu_mean_ms": _mean(cpu_times), "draw_calls_mean": _mean(draw_calls),
+		"primitives_mean": _mean(primitives), "objects_mean": _mean(objects),
+		"shadow_draw_calls_mean": _mean(shadow_draw_calls),
+		"shadow_primitives_mean": _mean(shadow_primitives)}
+
+## A pose's camera planes, sun shadow fit and world-distance state, read after
+## its timed turns. WorldDistance (WD-C3) is read when Main has one.
+func _pose_result(main: Node, rig: Node3D, pose: Dictionary, pose_turns: Array) -> Dictionary:
+	var camera := rig.get("camera") as Camera3D
+	var sun := main.get("world_sun") as DirectionalLight3D
+	var distance_state: Variant = main.get("world_distance")
+	var world_distance := {"present": false}
+	if distance_state is Object and is_instance_valid(distance_state) \
+			and (distance_state as Object).has_method("snapshot"):
+		var snapshot: Variant = (distance_state as Object).call("snapshot")
+		world_distance = (snapshot as Dictionary).duplicate(true) if snapshot is Dictionary else {}
+		world_distance["present"] = true
+	return {"distance": float(pose.distance), "pitch": float(pose.pitch), "turns": pose_turns,
+		"camera_near": camera.near if camera != null else null,
+		"camera_far": camera.far if camera != null else null,
+		"camera_fov": camera.fov if camera != null else null,
+		"sun_shadows_enabled": sun.shadow_enabled if sun != null else null,
+		"sun_shadow_max_distance": sun.directional_shadow_max_distance if sun != null else null,
+		"world_distance": world_distance}
 
 func _mean(values: Array[float]) -> float:
 	return values.reduce(func(total: float, value: float) -> float: return total + value, 0.0) / values.size()

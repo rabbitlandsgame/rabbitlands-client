@@ -221,6 +221,149 @@ func _report_arrival() -> void:
 			benchmark_arrival_reports.pop_front()
 
 
+## Overhead-text attribution (wave 2 OV-0, the decision-8 gate). Main draws
+## every overhead name, bar, icon and world label on render layer 20 with a
+## second camera into a native-size SubViewport (WorldTextOverlay) that is
+## composited over the world; wave 1 idles that pass while no text can be
+## drawn. Text-pass modes, diagnostics only:
+## - "auto": the shipping behaviour;
+## - "always": the pass renders every frame (wave-1 idle off), for the idle
+##   saving; the same as ELORIA_WORLD_TEXT_IDLE=0, which the runner clears;
+## - "off" (`no_text_pass`): every label keeps existing and keeps being culled
+##   by every other camera, but the pass stops, its composite is hidden and its
+##   render target shrinks to 2x2 (the smallest a SubViewport keeps), so a
+##   cell's video memory shows the target's share. Once shown again, the
+##   overlay restores its own size and rendering.
+const BENCHMARK_TEXT_PASS_MODES: Array[String] = ["auto", "always", "off"]
+const BENCHMARK_WORLD_TEXT_OVERLAY := preload("res://src/ui/world_text_overlay.gd")
+## SubViewport keeps at least 2x2 (measured: a 1x1 request reads back 2x2).
+const BENCHMARK_STOPPED_PASS_SIZE := Vector2i(2, 2)
+var benchmark_text_pass_mode := "auto"
+
+
+func benchmark_set_text_pass(mode: String) -> Dictionary:
+	if mode not in BENCHMARK_TEXT_PASS_MODES:
+		return {"ok": false, "error": "unknown text pass mode: " + mode}
+	var overlay: Object = _world_text_overlay
+	if not is_instance_valid(overlay):
+		return {"ok": false, "error": "Main has no world text overlay"}
+	var presence: Object = overlay.get("presence")
+	var viewport := overlay.get("text_viewport") as SubViewport
+	if presence == null or viewport == null:
+		return {"ok": false, "error": "world text overlay has no pass to control"}
+	var previous := benchmark_text_pass_mode
+	benchmark_text_pass_mode = mode
+	if mode == "always":
+		presence.call("stop")
+	elif not bool(presence.call("watching")) \
+			and OS.get_environment(BENCHMARK_WORLD_TEXT_OVERLAY.IDLE_VARIABLE) != "0":
+		presence.call("watch", get_tree(), viewport.world_3d)
+	_sync_world_overlay_visibility()
+	if mode == "off":
+		# Hidden, the overlay no longer resizes the pass (`_sync_camera`).
+		viewport.size = BENCHMARK_STOPPED_PASS_SIZE
+	elif previous == "off":
+		# The overlay resizes its pass only before a frame it draws (never
+		# headless); give the target back now, so the next memory sample (the
+		# following cell's before/withCrowd) sees the shipping pass.
+		viewport.size = main_viewport.size
+	var out := benchmark_text_pass_snapshot()
+	out["ok"] = true
+	return out
+
+
+## Covered views (full map, console) still hide the overlay through Main; a
+## stopped pass stays hidden when they close.
+func _sync_world_overlay_visibility() -> void:
+	super._sync_world_overlay_visibility()
+	if benchmark_text_pass_mode == "off" and is_instance_valid(_world_text_overlay):
+		_world_text_overlay.visible = false
+
+
+## GPU/CPU timing of the text pass's own viewport, like the world viewport's.
+func benchmark_measure_text_pass(enabled: bool) -> bool:
+	var viewport := (_world_text_overlay.get("text_viewport") as SubViewport) \
+		if is_instance_valid(_world_text_overlay) else null
+	if viewport == null:
+		return false
+	RenderingServer.viewport_set_measure_render_time(viewport.get_viewport_rid(), enabled)
+	return true
+
+
+## The frame just drawn: whether the text pass rendered it and, on a rendered
+## display, the pass viewport's most recently completed measurements. A pass
+## that did not render keeps its previous readings, so they are left out.
+func benchmark_text_pass_frame(rendered: bool) -> Dictionary:
+	var overlay: Object = _world_text_overlay
+	var drawn := is_instance_valid(overlay) and bool(overlay.get("drawing"))
+	var out := {"drawn": drawn}
+	if not rendered or not drawn:
+		return out
+	var rid := (overlay.get("text_viewport") as SubViewport).get_viewport_rid()
+	out["cpuMilliseconds"] = RenderingServer.viewport_get_measured_render_time_cpu(rid)
+	out["gpuMilliseconds"] = RenderingServer.viewport_get_measured_render_time_gpu(rid)
+	out["drawCalls"] = RenderingServer.viewport_get_render_info(rid,
+		RenderingServer.VIEWPORT_RENDER_INFO_TYPE_VISIBLE,
+		RenderingServer.VIEWPORT_RENDER_INFO_DRAW_CALLS_IN_FRAME)
+	out["objects"] = RenderingServer.viewport_get_render_info(rid,
+		RenderingServer.VIEWPORT_RENDER_INFO_TYPE_VISIBLE,
+		RenderingServer.VIEWPORT_RENDER_INFO_OBJECTS_IN_FRAME)
+	return out
+
+
+## Outside timed frames: the pass's mode and state and what is on its layer.
+func benchmark_text_pass_snapshot() -> Dictionary:
+	var overlay: Object = _world_text_overlay
+	if not is_instance_valid(overlay):
+		return {"present": false, "mode": benchmark_text_pass_mode}
+	var presence: Object = overlay.get("presence")
+	var viewport := overlay.get("text_viewport") as SubViewport
+	var watching := presence != null and bool(presence.call("watching"))
+	var ranged: Variant = presence.get("_bounded") if presence != null else null
+	return {"present": true, "mode": benchmark_text_pass_mode,
+		"overlayVisible": (overlay as CanvasItem).visible,
+		"drawingLastFrame": bool(overlay.get("drawing")),
+		"idleVariable": OS.get_environment(BENCHMARK_WORLD_TEXT_OVERLAY.IDLE_VARIABLE),
+		"idleWatching": watching,
+		"textNodesTracked": int(presence.call("tracked")) if watching else null,
+		"visibleUnrangedText": int(presence.get("_unbounded")) if watching else null,
+		"visibleRangedText": (ranged as Dictionary).size() if watching and ranged is Dictionary else null,
+		"passViewportSize": [viewport.size.x, viewport.size.y] if viewport != null else null,
+		"worldViewportSize": [main_viewport.size.x, main_viewport.size.y]}
+
+
+## `no_overhead` takes effect on every actor at once. Before OV-0 it was applied
+## only as Main presented an actor again, and idle crowd members whose records
+## never change are not presented again, so their banners stayed up.
+func benchmark_apply_overhead_switch() -> int:
+	if benchmark_overhead_enabled:
+		return 0
+	var changed := 0
+	for actor_value: Variant in actor_nodes.values():
+		if is_instance_valid(actor_value) and actor_value is ReplicatedActor3D:
+			(actor_value as ReplicatedActor3D).set_nameplate_visible(false)
+			(actor_value as ReplicatedActor3D).set_health_visible(false)
+			changed += 1
+	return changed
+
+
+## Outside timed frames: how many actor banners the overhead switch leaves up.
+func benchmark_overhead_census() -> Dictionary:
+	var out := {"actors": 0, "nameplateEnabled": 0, "overheadShown": 0,
+		"healthShown": 0, "crowded": 0}
+	for actor_value: Variant in actor_nodes.values():
+		if not is_instance_valid(actor_value) or not (actor_value is ReplicatedActor3D):
+			continue
+		var actor := actor_value as ReplicatedActor3D
+		var shown := actor._overhead_shown()
+		out.actors += 1
+		out.nameplateEnabled += int(actor.get("_overhead_visible") == true)
+		out.overheadShown += int(shown)
+		out.healthShown += int(shown and actor.get("_health_shown") == true)
+		out.crowded += int(actor.overhead_crowded())
+	return out
+
+
 ## Installs diagnostic observers only after a benchmark fixture is complete.
 ## Every existing connection is snapshotted before mutation. The production
 ## combat callback is replaced in place by rebuilding the complete ordered

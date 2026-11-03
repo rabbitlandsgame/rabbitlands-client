@@ -52,12 +52,17 @@ ROUTE_LEGS = {"southern": ["first-southern-border", "consecutive-southern-border
 ROUTE_VERSION = 2
 # The configuration-overlay worker pools tools/continent_stream_benchmark_project.py supports.
 WORKER_POOL_THREADS = (4, 8)
+# Attribution switches (RABBITLANDS_CROWD_BENCH_DIAG). no_text_pass and
+# text_pass_always are the wave-2 OV-0 world-text pass modes.
+DIAGNOSTICS = ("no_animation", "no_overhead", "no_ground", "no_text_pass", "text_pass_always")
 ERROR_PATTERN = re.compile(r"SCRIPT ERROR|Parse Error|Failed to load|Error loading|ERROR:", re.I)
 OVERRIDE_PREFIXES = ("ELORIA_LOOK", "ELORIA_CROWD_", "ELORIA_NATIVE_", "RABBITLANDS_CROWD_")
 OVERRIDE_NAMES = {"ELORIA_VRAM_TEXTURES", "ELORIA_NO_MAP_CACHE", "ELORIA_SAFE_MODE", "RABBITLANDS_CLIENT_RUNTIME", "RABBITLANDS_RUST_EFFECTS"}
 OVERRIDE_NAMES.update({"RABBITLANDS_RESOURCE_ADMISSION", "RABBITLANDS_RESOURCE_BUDGET_MIB"})
 OVERRIDE_NAMES.update({"RABBITLANDS_PREPARED_CONTENT", "RABBITLANDS_PREPARED_NODE_POLICY"})
 OVERRIDE_NAMES.update({"ELORIA_WARDROBE_TEXTURE_CACHE", "ELORIA_ACTOR_BUILD_PROFILE"})
+# The world-text pass idle switch; --diagnostics text_pass_always is the recorded way.
+OVERRIDE_NAMES.add("ELORIA_WORLD_TEXT_IDLE")
 PERFORMANCE_GRAPHICS = {
     "quality": "low", "appearance": "painted_ground", "fps_limit": 30,
     "render_scale": .75, "map_texture_quality": "half", "crowd_bodies": 60,
@@ -352,6 +357,82 @@ def validate_worker_pool(data: dict, request: dict) -> None:
     pool = _object(data.get("workerPool"), "workerPool")
     if pool.get("maxThreadsSetting") != requested:
         raise EvidenceError("actual worker pool size differs from the requested overlay")
+
+
+def parse_diagnostics(text: str) -> list[str]:
+    """--diagnostics: attribution switches, never acceptance modes (RABBITLANDS_CROWD_BENCH_DIAG).
+
+    Split like the harness (`split(",", false)`: empty entries dropped, nothing
+    stripped), so a name the harness would ignore is refused here instead.
+    """
+    names = [name for name in (text or "").split(",") if name]
+    unknown = sorted(set(names) - set(DIAGNOSTICS))
+    if unknown:
+        raise EvidenceError(f"unknown --diagnostics {unknown}; known: {', '.join(DIAGNOSTICS)}")
+    if len(set(names)) != len(names):
+        raise EvidenceError("--diagnostics names a switch twice")
+    if "no_text_pass" in names and "text_pass_always" in names:
+        raise EvidenceError("--diagnostics no_text_pass and text_pass_always are opposite text-pass modes")
+    return names
+
+
+def text_pass_mode(names: list[str]) -> str:
+    """The harness's text_pass_mode(): the world-text pass mode a diagnostic list selects."""
+    return "off" if "no_text_pass" in names else "always" if "text_pass_always" in names else "auto"
+
+
+def _stopped_pass_size(size) -> bool:
+    """no_text_pass shrinks the pass target to the smallest a SubViewport keeps (2x2)."""
+    return isinstance(size, list) and len(size) == 2 and all(
+        type(value) is int and 0 < value <= 2 for value in size)
+
+
+def validate_overhead_diagnostics(data: dict, request: dict, require_records: bool = False) -> None:
+    """OV-0: an overhead or text-pass diagnostic took effect in every sampled crowd cell.
+
+    Reports from before OV-0 carry no textPass/overhead records; they are
+    accepted only when no such diagnostic was requested and `require_records`
+    is false (the decision-8 gate requires them of every report it compares).
+    Every cell starts from the shipping pass (`textPass.cellStart`), so a pass
+    stopped by an earlier cell never shrinks a later cell's withCrowd memory.
+    """
+    names = parse_diagnostics(request.get("diagnostics", ""))
+    mode = text_pass_mode(names)
+    required = require_records or mode != "auto" or "no_overhead" in names
+    for cell in data.get("cells", []):
+        if not isinstance(cell, dict) or "summary" not in cell or cell.get("status") == "unavailable_content":
+            continue
+        name = str(cell.get("id"))
+        if "textPass" not in cell and not required:
+            continue
+        state = _object(cell.get("textPass"), name + ".textPass")
+        if state.get("present") is not True or state.get("mode") != mode:
+            raise EvidenceError(f"{name}: world-text pass mode differs from the requested diagnostics")
+        if required or "cellStart" in state:
+            start = _object(state.get("cellStart"), name + ".textPass.cellStart")
+            if start.get("ok") is not True or start.get("mode") != "auto" \
+                    or _stopped_pass_size(start.get("passViewportSize")):
+                raise EvidenceError(f"{name}: the cell did not start from the shipping world-text pass")
+        if require_records:
+            overhead = _object(cell.get("overhead"), name + ".overhead")
+            for boundary in ("sampleStart", "afterSample"):
+                _object(overhead.get(boundary), f"{name}.overhead.{boundary}")
+        drawn = _integer(state.get("drawnFrames"), name + ".textPass.drawnFrames")
+        sampled = _integer(state.get("sampledFrames"), name + ".textPass.sampledFrames")
+        if drawn > sampled or sampled != cell.get("frames"):
+            raise EvidenceError(f"{name}: text-pass frame counts disagree with the sample")
+        if mode == "off" and (drawn != 0 or state.get("overlayVisible") is not False
+                              or not _stopped_pass_size(state.get("passViewportSize"))):
+            raise EvidenceError(f"{name}: no_text_pass left the world-text pass rendering or its target allocated")
+        if mode == "always" and (state.get("idleWatching") is not False
+                                 or (request["mode"] == "windowed" and drawn != sampled)):
+            raise EvidenceError(f"{name}: text_pass_always did not render the pass every frame")
+        if "no_overhead" in names:
+            overhead = _object(cell.get("overhead"), name + ".overhead")
+            for boundary in ("sampleStart", "afterSample"):
+                census = _object(overhead.get(boundary), f"{name}.overhead.{boundary}")
+                if census.get("overheadShown") != 0 or census.get("healthShown") != 0:
+                    raise EvidenceError(f"{name}: no_overhead left actor banners shown at {boundary}")
 
 
 def resolve_worker_threads(value: str, affinity: str) -> int:
@@ -744,6 +825,7 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
             or data.get("serverTime") is not request.get("server_time", False):
         raise EvidenceError("actual presence/server-time workload differs from request")
     validate_worker_pool(data, request)
+    validate_overhead_diagnostics(data, request)
     # New phase-one reports attest effective settings/backends; an old report cannot
     # establish a new reference merely by containing valid historical timing fields.
     validate_runtime(data, request, data.get("renderingMethod"), data["graphicsQuality"],
