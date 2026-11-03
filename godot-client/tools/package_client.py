@@ -56,6 +56,15 @@ What goes in, and why it is more than an export:
       source, no other text the package carries; the editor's extracted
       copies of embedded glTF images and the race and neck texture sources
       the race models were built from - ship nowhere.
+      Other imported resources - audio, UI and world images - ship once too
+      (W2-UD-02, loose_duplicate_plan): the export packs each as its .import
+      remap and products, so a loose copy serves only a raw read (FileAccess,
+      Image.load_from_file, a path from globalize_path), and it is left out
+      unless one can happen. That is decided from the running client's path
+      literals, each followed to the resource system or else counted as read
+      raw, from glTF URIs (a raw read unless the AW-03 actor parse takes the
+      image from the import), from the data a package carries, and from the
+      installer's own reads of the stage (check_loose_duplicates).
       Creature GLBs ship as verified ordinary uncompressed GLBs after native
       cooking. Their optimized meshes and curves reduce storage without a
       per-load decompression step. Legacy compressed payload readers remain
@@ -1626,6 +1635,1165 @@ def export_project(godot: Path, project: Path, app_dir: Path, logs: Path, platfo
             raise PackageError(f"export did not write {name}; log: {logs / 'export.log'}\n{text[-2000:]}")
 
 
+# --- loose duplicates of PCK-imported resources (W2-UD-02) -------------------
+#
+# The export packs an imported resource as its .import remap plus the products
+# that names (.godot/imported/...), and the resource system - load(),
+# preload(), a scene's ext_resource, anything on ResourceLoader - finds it
+# there. The loose copy beside the PCK is read only by a raw read: FileAccess,
+# DirAccess, Image/AudioStream load_from_file, an Image's or ConfigFile's
+# load(), anything through ProjectSettings.globalize_path(). In an export a
+# res:// path the PCK does not hold as itself falls through to the folder the
+# game starts in, so even a raw res:// read - FileAccess.file_exists() too -
+# finds exactly the loose copy. A loose copy nothing reads raw is the same bytes
+# twice: 132 MB in release 4a57cea4, 83 MB of it audio.
+#
+# So a loose file of these types is left out of app/ when its .import and every
+# product it names are in the PCK and nothing can read it raw
+# (loose_duplicate_plan). Other imported types (glTF scenes, fonts) still ship
+# loose: GlbSceneCache reads world glTFs raw whatever the PCK holds.
+LOOSE_DUPLICATE_SUFFIXES = (".ogg", ".wav", ".mp3", ".png", ".jpg", ".jpeg", ".webp", ".svg")
+# Loose whatever the PCK holds (godot-client-relative): the game data and
+# schemas, text records the launcher, the updater and the packager's own steps
+# read from disk (AUDIO-CREDITS is built from assets/audio/*.txt and
+# provenance.json) and the branding icon.
+LOOSE_ALWAYS_ROOTS = ("data", "schemas")
+LOOSE_ALWAYS_SUFFIXES = (".json", ".txt", ".csv")
+LOOSE_ALWAYS_FILES = ("assets/branding/rabbitlands-icon.ico",)
+# Staged files something other than the game reads from app/ (godot-client-
+# relative -> reader): the online installer helper copies both branding files
+# from the stage (client_release.export_installer_helper) and Inno Setup takes
+# its SetupIconFile there. export_launcher copies its branding from the build
+# tree, not the stage.
+LOOSE_STAGE_READERS = {
+    "assets/branding/rabbitlands-icon.ico": "Inno Setup SetupIconFile; client_release.export_installer_helper",
+    "assets/branding/rabbitlands-mark-64.png": "client_release.export_installer_helper",
+}
+# Data files whose content can name a loose file a raw read then opens.
+LOOSE_DATA_SUFFIXES = (".json", ".txt", ".csv", ".cfg")
+# A string naming a path under the client's assets folder ("res://assets/...",
+# "assets/...", ".../godot-client/assets/..."), not eloria-assets/.
+ASSET_PATH_IN_TEXT = re.compile(r"(?<![\w.-])assets(?=/|$)")
+DATA_PATH_IN_TEXT = re.compile(r"(?<![\w.-])(?:data|schemas)(?=/)")
+# One GDScript token. Strings keep their quotes and prefixes (&"", ^"", r"").
+GD_TOKEN = re.compile(r"""
+    (?P<comment>\#[^\n]*)
+  | (?P<string>[&^]?r?(?:\"\"\"[\s\S]*?\"\"\"|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'))
+  | (?P<name>[A-Za-z_]\w*)
+  | (?P<number>\d[\w.]*)
+  | (?P<newline>\n)
+  | (?P<space>[ \t\r\f]+|\\\r?\n)
+  | (?P<op>->|:=|==|!=|<=|>=|\+=|-=|\*=|/=|%=|\*\*|<<|>>|&&|\|\||\S)
+""", re.X)
+# How _LiteralUses judges a call a path literal's value reaches:
+#   raw reads - the path is read from disk: any static FileAccess or DirAccess call,
+#     load_from_file and the font loaders on any receiver, and a load()/open()-style
+#     method on any receiver but ResourceLoader (globalize_path() only builds the disk
+#     path: what consumes that decides);
+RAW_READ_STATICS = ("FileAccess", "DirAccess")
+RAW_READ_ANY_METHODS = ("load_from_file", "load_dynamic_font", "load_bitmap_font")
+RAW_READ_RECEIVER_METHODS = ("load", "load_encrypted", "load_encrypted_pass", "open", "open_compressed",
+                             "open_encrypted", "open_encrypted_with_pass")
+#   resource loads - the PCK answers: bare load()/preload() and every ResourceLoader call;
+RESOURCE_LOAD_CALLS = ("load", "preload")
+#   consumers that neither read nor pass the value on (logging, measuring, testing),
+#   and predicates on it;
+SAFE_CALLS = {"print", "prints", "printt", "printerr", "printraw", "print_rich", "print_verbose", "push_error",
+              "push_warning", "assert", "len", "hash", "typeof", "is_instance_valid", "int", "float", "bool",
+              "abs", "clamp", "clampi", "clampf", "min", "max", "mini", "maxi", "minf", "maxf", "range",
+              "round", "floor", "ceil", "sign", "posmod", "fmod", "snapped", "lerp", "is_same", "type_string",
+              "error_string", "Color", "Vector2", "Vector2i", "Vector3", "Vector3i", "Rect2", "Rect2i"}
+PREDICATE_METHODS = {"begins_with", "ends_with", "contains", "containsn", "find", "findn", "rfind", "rfindn",
+                     "has", "has_all", "is_empty", "match", "matchn", "is_absolute_path", "is_relative_path",
+                     "is_valid_filename", "length", "size", "count", "countn", "hash", "casecmp_to",
+                     "nocasecmp_to", "naturalcasecmp_to", "erase", "find_key", "is_valid_identifier"}
+#   string methods that take it as a pattern to compare, search or strip (replace()
+#   only as what it replaces: its replacement is passed on);
+PATTERN_METHODS = PREDICATE_METHODS | {"trim_prefix", "trim_suffix", "replace", "replacen", "split", "rsplit",
+                                       "get_slice", "get_slice_count", "lstrip", "rstrip"}
+#   functions and methods whose result still holds the value (a path built from it, a
+#   container holding it), of which JOINING_CALLS make it the start of a longer path;
+TRANSPARENT_CALLS = {"str", "String", "StringName", "NodePath", "Array", "PackedStringArray", "Dictionary",
+                     "var_to_str", "str_to_var", "parse_string", "stringify", "localize_path", "globalize_path",
+                     "simplify_path", "path_join", "plus_file", "format", "get_base_dir", "get_file",
+                     "get_basename", "get_extension", "replace", "replacen", "strip_edges", "to_lower",
+                     "to_upper", "uri_decode", "uri_file_decode", "uri_encode", "join", "left", "right", "substr",
+                     "duplicate", "get", "get_value", "keys", "values", "pick_random", "front", "back", "slice",
+                     "filter", "map", "get_as_text", "get_buffer", "get_line", "get_csv_line",
+                     "get_as_utf8_string", "get_string_from_utf8", "merged", "sorted"}
+JOINING_CALLS = {"path_join", "plus_file", "format", "get_base_dir"}
+#   and anything else - another script's function the scan cannot resolve, an engine
+#   method, a dynamic call or signal - counts as reading it raw.
+GD_SKIP_NAMES = {
+    "true", "false", "null", "self", "and", "or", "not", "in", "is", "as", "if", "elif", "else",
+    "for", "while", "return", "var", "const", "static", "func", "await", "match", "break", "continue",
+    "pass", "super", "PI", "TAU", "INF", "NAN", "when",
+}
+# Holders (locals, members) a literal is followed through, at most.
+LITERAL_USE_DEPTH = 6
+GD_COMPARISONS = {"==", "!=", "<", ">", "<=", ">=", "in", "not", "is", "and", "or"}
+# Native sources that read files themselves.
+NATIVE_RAW_READ = re.compile(r"FileAccess::|DirAccess::|\bfopen\b|\b_wfopen\b|ifstream|CreateFileW?\b")
+RES_SCRIPT_LITERAL = re.compile(r"""["'](res://[^"'\s]+\.(?:gd|tscn|tres|scn|res))["']""")
+
+
+def _gd_string(token: str) -> str:
+    text = token.lstrip("&^")
+    if text.startswith("r"):
+        text = text[1:]
+    quote = 3 if text[:3] in ('"""', "'''") else 1
+    return text[quote:-quote].replace("\\\\", "\\").replace('\\"', '"').replace("\\'", "'")
+
+
+def _gd_lines(text: str) -> list[tuple[int, int, list[tuple[str, str]]]]:
+    """GDScript as statements: (indent, first line, tokens), comments dropped.
+
+    A statement continues while a bracket is open or after a backslash; ";" splits one.
+    """
+    lines: list[tuple[int, int, list[tuple[str, str]]]] = []
+    tokens: list[tuple[str, str]] = []
+    depth = indent = 0
+    number = start = 1
+    at_start = True
+    for match in GD_TOKEN.finditer(text):
+        kind, value = match.lastgroup, match.group()
+        if kind == "newline":
+            number += 1
+            if depth == 0:
+                if tokens:
+                    lines.append((indent, start, tokens))
+                tokens, indent, at_start = [], 0, True
+            continue
+        if kind == "space":
+            number += value.count("\n")
+            if at_start and not tokens:
+                indent = len(value.expandtabs(4))
+            continue
+        if kind == "comment":
+            continue
+        if not tokens:
+            start = number
+        at_start = False
+        if kind == "string":
+            number += value.count("\n")
+        elif value in ("(", "[", "{"):
+            depth += 1
+        elif value in (")", "]", "}"):
+            depth = max(0, depth - 1)
+        if value == ";" and depth == 0:
+            if tokens:
+                lines.append((indent, start, tokens))
+            tokens = []
+            continue
+        tokens.append((kind, value))
+    if tokens:
+        lines.append((indent, start, tokens))
+    return lines
+
+
+def _gd_close(tokens: list, index: int) -> int:
+    """The index of the bracket closing the one at `index` (or the last token)."""
+    depth = 0
+    for position in range(index, len(tokens)):
+        value = tokens[position][1]
+        if value in ("(", "[", "{"):
+            depth += 1
+        elif value in (")", "]", "}"):
+            depth -= 1
+            if depth == 0:
+                return position
+    return len(tokens) - 1
+
+
+def _gd_arguments(tokens: list) -> list[list]:
+    """A call's argument tokens split at top-level commas."""
+    arguments, current, depth = [], [], 0
+    for token in tokens:
+        if token[1] in ("(", "[", "{"):
+            depth += 1
+        elif token[1] in (")", "]", "}"):
+            depth -= 1
+        if token[1] == "," and depth == 0:
+            arguments.append(current)
+            current = []
+        else:
+            current.append(token)
+    if current:
+        arguments.append(current)
+    return arguments
+
+
+class _GdFunction:
+    def __init__(self, name: str, line: int, params: list[str], defaults: dict):
+        self.name, self.line, self.params, self.defaults = name, line, params, defaults
+        self.statements: list[tuple[int, list]] = []  # (line, tokens)
+        self.locals: set[str] = set()  # var/const/for names
+
+
+class _GdFile:
+    """One GDScript as the forward scan reads it: its functions (statements, locals,
+    parameters and their defaults), the script's and its inner classes' members, its
+    class_name, its base script and its preload aliases. `top` holds the statements
+    outside functions (the member declarations)."""
+
+    def __init__(self, relative: str, text: str):
+        self.relative = relative
+        self.functions: list[_GdFunction] = []
+        self.by_name: dict[str, list[int]] = {}
+        self.members: set[str] = set()
+        self.aliases: dict[str, str] = {}  # NAME -> res:// path of a script it preloads
+        self.class_name = ""
+        self.extends = ""
+        self.top = _GdFunction("", 0, [], {})
+        current: _GdFunction | None = None
+        body_indent = -1
+        for indent, number, tokens in _gd_lines(text):
+            head = 0
+            while head < len(tokens) and tokens[head][1] in ("@", "static"):
+                if tokens[head][1] == "@":
+                    head += 2
+                    if head < len(tokens) and tokens[head][1] == "(":
+                        head = _gd_close(tokens, head) + 1
+                else:
+                    head += 1
+            if current is not None and indent <= body_indent:
+                current = None
+            if head + 2 < len(tokens) and tokens[head][1] == "func" and tokens[head + 1][0] == "name" \
+                    and tokens[head + 2][1] == "(":
+                close = _gd_close(tokens, head + 2)
+                params, defaults = [], {}
+                for argument in _gd_arguments(tokens[head + 3:close]):
+                    if argument and argument[0][0] == "name":
+                        params.append(argument[0][1])
+                        for split, token in enumerate(argument):
+                            if token[1] in ("=", ":="):
+                                defaults[argument[0][1]] = argument[split + 1:]
+                                break
+                current = _GdFunction(tokens[head + 1][1], number, params, defaults)
+                body_indent = indent
+                self.by_name.setdefault(current.name, []).append(len(self.functions))
+                self.functions.append(current)
+                colon = close + 1
+                while colon < len(tokens) and tokens[colon][1] != ":":
+                    colon += 1
+                if colon + 1 < len(tokens):  # a one-line body
+                    self._statement(current, number, tokens[colon + 1:])
+                continue
+            if current is None:
+                if indent == 0 and len(tokens) >= 2 and tokens[0][1] == "class_name":
+                    self.class_name = tokens[1][1]
+                elif indent == 0 and len(tokens) >= 2 and tokens[0][1] == "extends":
+                    self.extends = _gd_string(tokens[1][1]) if tokens[1][0] == "string" else tokens[1][1]
+                elif head + 1 < len(tokens) and tokens[head][1] in ("const", "var") and tokens[head + 1][0] == "name":
+                    self.members.add(tokens[head + 1][1])
+                    value = tokens[head + 2:]
+                    assigned = next((i for i, token in enumerate(value) if token[1] in ("=", ":=")), None)
+                    value = value[assigned + 1:] if assigned is not None else []
+                    if len(value) == 4 and value[0][1] in ("preload", "load") and value[2][0] == "string" \
+                            and _gd_string(value[2][1]).endswith(".gd"):
+                        self.aliases[tokens[head + 1][1]] = _gd_string(value[2][1])
+                self.top.statements.append((number, tokens))
+            else:
+                self._statement(current, number, tokens)
+
+    @staticmethod
+    def _statement(function: _GdFunction, number: int, tokens: list) -> None:
+        function.statements.append((number, tokens))
+        for position in range(len(tokens) - 1):
+            if tokens[position][1] in ("var", "const", "for") and tokens[position + 1][0] == "name":
+                function.locals.add(tokens[position + 1][1])
+
+
+def _path_like(literal: str) -> bool:
+    """Whether a string can be a path: it has a separator or a resource scheme."""
+    return "/" in literal or "\\" in literal or literal.startswith(("res:", "user:", "uid:"))
+
+
+def _literal_repo_path(literal: str) -> str | None:
+    """The repository path a path literal names under godot-client (res://, assets/... or
+    data/... forms), or None."""
+    text = unquote(literal).replace("\\", "/").strip()
+    if text.startswith("res://"):
+        rest = text[len("res://"):]
+        return None if rest.startswith("../") else "godot-client/" + rest
+    if "/" not in text:
+        return None  # a bare word ("assets" as a JSON key) is no path
+    match = ASSET_PATH_IN_TEXT.search(text) or DATA_PATH_IN_TEXT.search(text)
+    return "godot-client/" + text[match.start():] if match else None
+
+
+def _literal_reach(build_dir: Path, literal: str, joined: bool) -> tuple[set[str], set[str]]:
+    """({file}, {prefix}) a path literal can name, as repository paths.
+
+    A literal holding a format placeholder names everything starting with its text
+    before it. One the path is built on (joined) names its folder's contents if it names
+    a file, else everything starting with it. A whole literal names its file, or
+    everything in the folder it names.
+    """
+    path = _literal_repo_path(literal)
+    if path is None:
+        return set(), set()
+    placeholder = re.search(r"%|\{", path)
+    if placeholder:
+        return set(), {path[:placeholder.start()]}
+    file_like = bool(PurePosixPath(path).suffix) and not path.endswith("/") and not (build_dir / path).is_dir()
+    if joined:
+        return set(), {posixpath.dirname(path) + "/" if file_like else path}
+    if not file_like:
+        return set(), {path.rstrip("/") + "/"}
+    return {posixpath.normpath(path)}, set()
+
+
+def _data_names(build_dir: Path, relative: str) -> tuple[set[str], set[str]]:
+    """({file}, {prefix}) under godot-client a data file names: every JSON key and value,
+    or text token, as a res://, assets/ or data/ path, or relative to the file's folder."""
+    path = build_dir / relative
+    strings: list[str] = []
+    text = path.read_text(encoding="utf-8-sig", errors="replace")
+    if relative.lower().endswith(".json"):
+        try:
+            strings = list(_json_strings(json.loads(text)))
+        except ValueError:
+            strings = [m.group(2) for m in SOURCE_LITERAL.finditer(text)]
+    else:
+        strings = re.split(r"[\s\"',;=()\[\]{}<>|]+", text)
+    files: set[str] = set()
+    prefixes: set[str] = set()
+    folder = posixpath.dirname(relative)
+    for value in strings:
+        if not value or len(value) > 1024:
+            continue
+        named, under = _literal_reach(build_dir, value, False)
+        if not named and not under and "." in value and ":" not in value and not value.startswith(("/", "res:")):
+            target = posixpath.normpath(posixpath.join(folder, value.replace("\\", "/")))
+            if target.startswith("godot-client/"):
+                named = {target}
+        files |= named
+        prefixes |= under
+    return files, prefixes
+
+
+def runtime_client_sources(build_dir: Path) -> list[str]:
+    """The client sources a package runs: everything under godot-client/src, the project
+    settings, and every other shipped script or scene those name by res:// path, transitively.
+
+    The map editor's plugins (addons) and the developer prototypes stay out unless the
+    runtime names them: they run in the editor or from an explicit command line only.
+    """
+    sources = shipped_client_files(build_dir, SOURCE_SUFFIXES)
+    shipped = {"res://" + relative.removeprefix("godot-client/"): relative for relative in sources}
+    included = {relative for relative in sources
+                if relative.startswith("godot-client/src/") or relative == "godot-client/project.godot"}
+    queue = sorted(included)
+    while queue:
+        relative = queue.pop()
+        text = (build_dir / relative).read_text(encoding="utf-8", errors="replace")
+        for path in RES_SCRIPT_LITERAL.findall(text):
+            named = shipped.get(path)
+            if named is not None and named not in included:
+                included.add(named)
+                queue.append(named)
+    return sorted(included)
+
+
+class _LiteralUses:
+    """Where each path literal of the running client is used, one statement at a time.
+
+    A literal is followed outward through its statement: postfix calls on it (predicates
+    end the use; path_join, format and get_base_dir make it the start of a longer path,
+    "joined"; other string and container methods pass it on), subscripts, list and
+    dictionary literals, "+" and "%" (joined), str() and the like. The use ends safely at
+    the resource system (load, preload, ResourceLoader.*), a comparison, a predicate, a
+    subscript key or logging. Held in a local, a for variable or a script member (const or
+    var), every use of that name is followed the same way - a member's uses in the script,
+    its subclasses and through any other script's reference to it - up to
+    LITERAL_USE_DEPTH holders deep. A raw read whose whole path argument folds to a
+    constant (literals and constants joined by "+" and path_join) reads that exact file: a
+    data file read so is a "data" read, whose content is judged by the data rules. Any
+    other use - a raw read of a built path, a return, a call to any other function or
+    method, a dynamic call, an assignment into another object - counts as reading the
+    literal's file (or, joined, its folder) raw. So a literal is only ever cleared by
+    following it to the resource system; anything the scan does not understand keeps it.
+    A call on the script itself is followed into its definition and every subclass's
+    override (virtual dispatch), super.f() into the base's; a bare super(...) call, a match
+    branch's one-line body and a recursive call count as raw reads, and a holder extended in
+    place ("+=", "%=") is joined.
+    """
+
+    def __init__(self, files: dict[str, str], autoloads: dict[str, str]):
+        self.files = {relative: _GdFile(relative, text) for relative, text in sorted(files.items())}
+        self.by_path = {"res://" + relative.removeprefix("godot-client/"): gd for relative, gd in self.files.items()}
+        self.by_class = {gd.class_name: gd for gd in self.files.values() if gd.class_name}
+        self.by_class.update({name: self.by_path[path] for name, path in autoloads.items() if path in self.by_path})
+        self._subclass_map: dict[str, list[_GdFile]] | None = None
+        # name -> [(script, function index, statement index, token position)] of every name token.
+        self.mentions: dict[str, list[tuple[_GdFile, int, int, int]]] = {}
+        for gd in self.files.values():
+            for index, function in self._functions(gd):
+                for statement, (_line, tokens) in enumerate(function.statements):
+                    for position, (kind, value) in enumerate(tokens):
+                        if kind == "name":
+                            self.mentions.setdefault(value, []).append((gd, index, statement, position))
+
+    @staticmethod
+    def _functions(gd: _GdFile):
+        yield -1, gd.top
+        yield from enumerate(gd.functions)
+
+    @staticmethod
+    def _function(gd: _GdFile, index: int) -> _GdFunction:
+        return gd.top if index < 0 else gd.functions[index]
+
+    def _base(self, gd: _GdFile) -> _GdFile | None:
+        base = self.by_path.get(gd.extends) if gd.extends.startswith("res://") else self.by_class.get(gd.extends)
+        return base if base is not gd else None
+
+    def _chain(self, gd: _GdFile):
+        seen = set()
+        while gd is not None and gd.relative not in seen:
+            seen.add(gd.relative)
+            yield gd
+            gd = self._base(gd)
+
+    def _script(self, gd: _GdFile, name: str) -> _GdFile | None:
+        """The script a name stands for in `gd`: a preload alias, a class_name or an autoload."""
+        if name in gd.aliases:
+            return self.by_path.get(gd.aliases[name])
+        return self.by_class.get(name)
+
+    def _member_owner(self, gd: _GdFile, name: str) -> _GdFile | None:
+        return next((script for script in self._chain(gd) if name in script.members), None)
+
+    @staticmethod
+    def _local(function: _GdFunction, top: bool, name: str) -> bool:
+        return not top and (name in function.locals or name in function.params)
+
+    @staticmethod
+    def _assignments(function: _GdFunction, name: str) -> list[list]:
+        """The expressions a function assigns to its local `name` (var, const or "=")."""
+        found = []
+        for _line, tokens in function.statements:
+            for position in range(len(tokens) - 1):
+                if tokens[position][1] != name or tokens[position][0] != "name" \
+                        or (position and tokens[position - 1][1] == "."):
+                    continue
+                declared = position and tokens[position - 1][1] in ("var", "const")
+                if declared or (tokens[position + 1][1] in ("=", "+=") and _gd_depth(tokens, position) == 0):
+                    assigned = next((p for p in range(position + 1, len(tokens))
+                                     if tokens[p][1] in ("=", ":=", "+=") and _gd_depth(tokens, p) == 0), None)
+                    found.append(tokens[assigned + 1:] if assigned is not None else [])
+                elif position and tokens[position - 1][1] == "for":
+                    found.append([])
+        return found
+
+    def _constant(self, gd: _GdFile, function: _GdFunction | None, token, seen: frozenset) -> str | None:
+        """The literal a string token is, or a local assigned once or a script constant that
+        is one whole literal."""
+        kind, value = token
+        if kind == "string":
+            return _gd_string(value)
+        if kind != "name" or value in seen:
+            return None
+        if function is not None and (value in function.locals or value in function.params):
+            if value in function.params:
+                return None
+            assignments = self._assignments(function, value)
+            return self.fold(gd, assignments[0], seen | {value}, function) if len(assignments) == 1 else None
+        owner = self._member_owner(gd, value)
+        if owner is None:
+            return None
+        for _line, tokens in owner.top.statements:
+            head = next((p for p, token in enumerate(tokens) if token[1] in ("const", "var")), None)
+            if head is not None and head + 1 < len(tokens) and tokens[head + 1][1] == value \
+                    and tokens[head][1] == "const":
+                assigned = next((p for p in range(head, len(tokens)) if tokens[p][1] in ("=", ":=")), None)
+                if assigned is not None:
+                    return self.fold(owner, tokens[assigned + 1:], seen | {value})
+        return None
+
+    def fold(self, gd: _GdFile, tokens: list, seen: frozenset = frozenset(),
+             function: _GdFunction | None = None) -> str | None:
+        """A constant path: one literal, constant or once-assigned local, or such parts joined
+        by "+" and path_join()."""
+        if not tokens:
+            return None
+        text = self._constant(gd, function, tokens[0], seen)
+        position = 1
+        while text is not None and position < len(tokens):
+            if tokens[position][1] == "+" and position + 1 < len(tokens):
+                part = self._constant(gd, function, tokens[position + 1], seen)
+                text = None if part is None else text + part
+                position += 2
+            elif tokens[position][1] == "." and position + 3 < len(tokens) \
+                    and tokens[position + 1][1] in ("path_join", "plus_file") and tokens[position + 2][1] == "(":
+                close = _gd_close(tokens, position + 2)
+                inner = tokens[position + 3:close]
+                part = self._constant(gd, function, inner[0], seen) if len(inner) == 1 else None
+                text = None if part is None else text.rstrip("/") + "/" + part.lstrip("/")
+                position = close + 1
+            else:
+                return None
+        return text
+
+    def uses(self, relevant) -> dict:
+        """{literal: {"raw": {(joined, where)}, "exact": {(path, where)}, "data": {(path, where)},
+        "safe": count}} for every relevant literal in the runtime scripts (see the class notes):
+        raw uses, raw reads of the exact constant path it builds, and data files read so."""
+        found: dict[str, dict] = {}
+        for gd in self.files.values():
+            for index, function in self._functions(gd):
+                for statement, (line, tokens) in enumerate(function.statements):
+                    for position, (kind, value) in enumerate(tokens):
+                        if kind != "string":
+                            continue
+                        literal = _gd_string(value)
+                        if not relevant(literal):
+                            continue
+                        record = found.setdefault(literal, {"raw": set(), "exact": set(), "data": set(), "safe": 0})
+                        self._follow(gd, index, statement, position, position, False, 0, record, {})
+                for name, default in function.defaults.items():
+                    for kind, value in default:
+                        if kind == "string" and relevant(_gd_string(value)):
+                            record = found.setdefault(_gd_string(value), {"raw": set(), "exact": set(), "data": set(),
+                                                                         "safe": 0})
+                            self._follow_local(gd, index, name, False, 1, record, {})
+        return found
+
+    def _function_owners(self, gd: _GdFile | None, name: str, overrides: bool = False) -> list[tuple[_GdFile, int]]:
+        """The definition of `name` a call in `gd` binds to: the nearest in its chain and, with
+        overrides (a call on self dispatches virtually), every subclass's override of it too."""
+        found: list[tuple[_GdFile, int]] = []
+        for script in self._chain(gd):
+            if name in script.by_name:
+                found = [(script, index) for index in script.by_name[name]]
+                break
+        if overrides and gd is not None:
+            for script in self._subclasses(gd):
+                found += [(script, index) for index in script.by_name.get(name, ())]
+        return found
+
+    def _subclasses(self, gd: _GdFile) -> list[_GdFile]:
+        """Every script whose base chain holds `gd` (not `gd` itself)."""
+        if self._subclass_map is None:
+            self._subclass_map = {}
+            for script in self.files.values():
+                for base in list(self._chain(script))[1:]:
+                    self._subclass_map.setdefault(base.relative, []).append(script)
+        return self._subclass_map.get(gd.relative, [])
+
+    def _callees(self, gd, function, top, dotted, receiver, callee) -> list[tuple[_GdFile, int]]:
+        """The functions a call can only be: the script's own (or its base's) and any
+        subclass's override of it, the base's for super, or another script's through its
+        class_name, autoload or preload alias. An instance call on a value of unknown type
+        has none."""
+        if dotted and receiver == "super":
+            return self._function_owners(self._base(gd), callee)
+        if not dotted or receiver == "self":
+            return self._function_owners(gd, callee, overrides=True)
+        if not receiver or self._local(function, top, receiver):
+            return []
+        alias = next((script for script in self._chain(gd) if receiver in script.aliases), None)
+        if alias is not None:
+            script = self.by_path.get(alias.aliases[receiver])
+        elif self._member_owner(gd, receiver) is None:
+            script = self.by_class.get(receiver)
+        else:
+            script = None  # a member holding an instance of unknown type
+        return self._function_owners(script, callee) if script is not None else []
+
+    def _follow(self, gd, index, statement, start, end, joined, depth, record, visited, ret=None) -> None:
+        function = self._function(gd, index)
+        line, tokens = function.statements[statement]
+        where = f"{gd.relative.removeprefix('godot-client/')}:{line}"
+        top = index < 0
+        for _guard in range(len(tokens) + 4):
+            while end + 1 < len(tokens):
+                following = tokens[end + 1][1]
+                if following == "." and end + 2 < len(tokens) and tokens[end + 2][0] == "name":
+                    method = tokens[end + 2][1]
+                    if end + 3 < len(tokens) and tokens[end + 3][1] == "(":
+                        if method in PREDICATE_METHODS:
+                            record["safe"] += 1
+                            return
+                        joined = joined or method in JOINING_CALLS
+                        end = _gd_close(tokens, end + 3)
+                    else:
+                        end += 2
+                elif following == "[":
+                    end = _gd_close(tokens, end + 1)
+                else:
+                    break
+            before = tokens[start - 1][1] if start else ""
+            after = tokens[end + 1][1] if end + 1 < len(tokens) else ""
+            if before in ("+", "%") or after in ("+", "%"):
+                joined = True
+            opener, depth_seen = None, 0
+            for position in range(start - 1, -1, -1):
+                value = tokens[position][1]
+                if value in (")", "]", "}"):
+                    depth_seen += 1
+                elif value in ("(", "[", "{"):
+                    if depth_seen == 0:
+                        opener = position
+                        break
+                    depth_seen -= 1
+            in_for = opener is None and tokens[0][1] == "for" and before == "in"
+            if (before in GD_COMPARISONS or after in GD_COMPARISONS) and not in_for:
+                record["safe"] += 1
+                return
+            if opener is None:
+                self._statement_use(gd, index, statement, start, joined, depth, record, visited, where, ret)
+                return
+            close = _gd_close(tokens, opener)
+            keyword = opener > 0 and tokens[opener - 1][1] in GD_SKIP_NAMES
+            if tokens[opener][1] == "{" or (tokens[opener][1] == "[" and (
+                    not opener or keyword or not (tokens[opener - 1][0] == "name"
+                                                 or tokens[opener - 1][1] in (")", "]")))):
+                start, end = opener, close  # a list or dictionary holding it
+                continue
+            if tokens[opener][1] == "[":
+                record["safe"] += 1  # a subscript: the value is a key
+                return
+            if opener and tokens[opener - 1][1] == "super" and not (opener >= 2 and tokens[opener - 2][1] == "."):
+                record["raw"].add((joined, f"{where} passed to super()"))  # the base's own version
+                return
+            if not opener or tokens[opener - 1][0] != "name" or keyword:
+                start, end = opener, close  # a parenthesised expression
+                continue
+            callee = tokens[opener - 1][1]
+            dotted = opener >= 2 and tokens[opener - 2][1] == "."
+            receiver = tokens[opener - 3][1] if dotted and opener >= 3 else ""
+            if (not dotted and callee in RESOURCE_LOAD_CALLS) or receiver == "ResourceLoader" \
+                    or (not dotted and callee in SAFE_CALLS):
+                record["safe"] += 1
+                return
+            if receiver in RAW_READ_STATICS or callee in RAW_READ_ANY_METHODS \
+                    or (dotted and callee in RAW_READ_RECEIVER_METHODS and self._script(gd, receiver) is None):
+                arguments = _gd_arguments(tokens[opener + 1:close])
+                first = opener + 1 + len(arguments[0]) if arguments else opener + 1
+                path = self.fold(gd, arguments[0], function=None if top else function) \
+                    if arguments and end < first else None
+                if path is not None:
+                    target = _literal_repo_path(path)
+                    if target is not None and target.lower().endswith(LOOSE_DATA_SUFFIXES):
+                        record["data"].add((posixpath.normpath(target), where))
+                    else:  # exactly that file
+                        record["exact"].add((path, f"{where} {receiver + '.' if receiver else ''}{callee}"))
+                    return
+                record["raw"].add((joined, f"{where} {receiver + '.' if receiver else ''}{callee}"))
+                return
+            level = _gd_depth(tokens, start)
+            argument = sum(1 for position in range(opener + 1, start)
+                           if tokens[position][1] == "," and _gd_depth(tokens, position) == level)
+            if dotted and callee in PATTERN_METHODS and not (callee in ("replace", "replacen") and argument):
+                record["safe"] += 1  # the literal is what a path is compared with or stripped of
+                return
+            if callee in TRANSPARENT_CALLS:
+                joined = joined or callee in JOINING_CALLS
+                start, end = opener - 1, close
+                while start >= 2 and tokens[start - 1][1] == "." and tokens[start - 2][0] == "name":
+                    start -= 2
+                continue
+            callees = self._callees(gd, function, top, dotted, receiver, callee)
+            if callees and depth < LITERAL_USE_DEPTH:
+                # Into the parameter it fills; what the function returns of it comes back here.
+                returned: list = []
+                for script, callee_index in callees:
+                    params = script.functions[callee_index].params
+                    if argument < len(params):
+                        self._follow_local(script, callee_index, params[argument], joined, depth + 1, record,
+                                           visited, returned)
+                    else:
+                        record["raw"].add((joined, f"{where} passed to {callee}() beyond its parameters"))
+                if not returned:
+                    return
+                joined = joined or any(returned)
+                start, end = opener - 1, close
+                while start >= 2 and tokens[start - 1][1] == "." and tokens[start - 2][0] == "name":
+                    start -= 2
+                continue
+            record["raw"].add((joined, f"{where} passed to {receiver + '.' if receiver else ''}{callee}()"))
+            return
+        record["raw"].add((joined, f"{where} (not followed)"))
+
+    def _statement_use(self, gd, index, statement, start, joined, depth, record, visited, where, ret=None) -> None:
+        function = self._function(gd, index)
+        tokens = function.statements[statement][1]
+        top = index < 0
+        head = tokens[0][1]
+        if head in ("if", "elif", "while", "for", "else", "match"):
+            first = 0
+            if head == "for":
+                first = next((p for p in range(len(tokens)) if tokens[p][1] == "in"
+                              and _gd_depth(tokens, p) == 0), len(tokens))
+            colon = next((p for p in range(first + 1, len(tokens)) if tokens[p][1] == ":"
+                          and _gd_depth(tokens, p) == 0), None)
+            if head == "for" and len(tokens) > 1 and tokens[1][0] == "name" and first < start \
+                    and (colon is None or start < colon):
+                self._follow_local(gd, index, tokens[1][1], joined, depth + 1, record, visited, ret)
+            elif colon is not None and start > colon:
+                record["raw"].add((joined, f"{where} (one-line block)"))
+            else:
+                record["safe"] += 1  # a condition
+            return
+        declaration = head in ("static", "@") or head in ("var", "const") and any(
+            token[1] in ("=", ":=") and _gd_depth(tokens, p) == 0 for p, token in enumerate(tokens))
+        if head != "return" and not declaration:
+            # A match branch with its body on the pattern's line ("a": return PATH, also after a
+            # "var x when ..." binding): only the body after the pattern's colon uses the value.
+            branch = next((p for p in range(start) if tokens[p][1] == ":" and _gd_depth(tokens, p) == 0), None)
+            if branch is not None:
+                if branch + 1 < len(tokens) and tokens[branch + 1][1] == "return" and ret is not None:
+                    ret.append(joined)
+                else:
+                    record["raw"].add((joined, f"{where} (one-line block)"))
+                return
+        if head == "return":
+            if ret is not None:
+                ret.append(joined)  # back to the call being followed
+            else:
+                record["raw"].add((joined, f"{where} returned"))
+            return
+        assign = next((p for p, token in enumerate(tokens)
+                       if token[1] in ("=", ":=", "+=") and _gd_depth(tokens, p) == 0), None)
+        if assign is None:
+            record["safe"] += 1  # an expression statement whose value is not kept
+            return
+        if start < assign:
+            record["safe"] += 1  # on the left: a key
+            return
+        target = list(tokens[:assign])
+        while target and target[0][1] in ("@", "static"):
+            if target[0][1] == "@":
+                target = target[2:]
+                if target and target[0][1] == "(":
+                    target = target[_gd_close(target, 0) + 1:]
+            else:
+                target = target[1:]
+        declared = bool(target) and target[0][1] in ("var", "const") and len(target) > 1
+        name = target[1][1] if declared else (target[0][1] if len(target) == 1 and target[0][0] == "name" else "")
+        if declared and not top or (name and not declared and self._local(function, top, name)):
+            self._follow_local(gd, index, name, joined, depth + 1, record, visited, ret)
+            return
+        if declared and top or (name and self._member_owner(gd, name) is not None):
+            owner = self._member_owner(gd, name) or gd
+            self._follow_member(owner, name, joined, depth + 1, record, visited)
+            return
+        if len(target) == 3 and target[0][1] == "self" and target[1][1] == "." and target[2][0] == "name":
+            owner = self._member_owner(gd, target[2][1]) or gd
+            self._follow_member(owner, target[2][1], joined, depth + 1, record, visited)
+            return
+        record["raw"].add((joined, f"{where} stored in {''.join(t[1] for t in target)[:60]}"))
+
+    def _follow_local(self, gd, index, name, joined, depth, record, visited, ret=None) -> None:
+        function = self._function(gd, index)
+        mentions = [(statement, position) for statement, (_line, tokens) in enumerate(function.statements)
+                    for position, (kind, value) in enumerate(tokens)
+                    if kind == "name" and value == name and not (position and tokens[position - 1][1] == ".")]
+        # "name += more" builds a longer path on what it holds.
+        joined = joined or any(_gd_compound(function.statements[statement][1], position)
+                               for statement, position in mentions)
+        # `visited` remembers what each followed parameter returned: a second call of the same
+        # function takes the same returns (a value returned to a load() at one call and to a raw
+        # read at another is followed at both); one still being followed is a recursion.
+        key = ("local", gd.relative, index, name, joined, ret is not None)
+        if key in visited:
+            if ret is not None:
+                if visited[key] is None:
+                    record["raw"].add((joined, f"{gd.relative.removeprefix('godot-client/')}: {name} (recursive)"))
+                else:
+                    ret.extend(visited[key])
+            return
+        visited[key] = None
+        returns = [] if ret is not None else None
+        if depth > LITERAL_USE_DEPTH:
+            record["raw"].add((joined, f"{gd.relative.removeprefix('godot-client/')}: {name} (too deep)"))
+        else:
+            for statement, position in mentions:
+                if not self._assigned_here(function.statements[statement][1], position):
+                    self._follow(gd, index, statement, position, position, joined, depth, record, visited, returns)
+        visited[key] = returns or []
+        if ret is not None:
+            ret.extend(returns)
+
+    def _follow_member(self, owner, name, joined, depth, record, visited) -> None:
+        key = ("member", owner.relative, name, joined)
+        if key in visited:
+            return
+        visited[key] = []
+        if depth > LITERAL_USE_DEPTH:
+            record["raw"].add((joined, f"{owner.relative.removeprefix('godot-client/')}: {name} (too deep)"))
+            return
+        if not joined and any(_gd_compound(self._function(gd, index).statements[statement][1], position)
+                              for gd, index, statement, position in self.mentions.get(name, [])
+                              if self._member_owner(gd, name) is owner):
+            self._follow_member(owner, name, True, depth, record, visited)  # "name += more"
+            return
+        for gd, index, statement, position in self.mentions.get(name, []):
+            function = self._function(gd, index)
+            tokens = function.statements[statement][1]
+            dotted = position and tokens[position - 1][1] == "."
+            if dotted:
+                receiver = tokens[position - 2] if position >= 2 else ("", "")
+                if receiver[1] != "self":
+                    target = self._script(gd, receiver[1]) if receiver[0] == "name" else None
+                    if target is not None and self._member_owner(target, name) is not owner:
+                        continue  # another script's member of that name
+                elif self._member_owner(gd, name) is not owner:
+                    continue
+            else:
+                if self._local(function, index < 0, name) or self._member_owner(gd, name) is not owner:
+                    continue
+            if self._assigned_here(tokens, position):
+                continue
+            start = position - 2 if dotted else position
+            self._follow(gd, index, statement, start, position, joined, depth, record, visited)
+
+    @staticmethod
+    def _assigned_here(tokens: list, position: int) -> bool:
+        """Whether the name at `position` is what its statement declares or assigns."""
+        if position and tokens[position - 1][1] in ("var", "const", "for", "func"):
+            return True
+        after = tokens[position + 1][1] if position + 1 < len(tokens) else ""
+        if after in ("=", ":=", "+=", "%=") and _gd_depth(tokens, position) == 0:
+            return True
+        return after == ":" and position and tokens[position - 1][1] in ("var", "const")
+
+
+def _gd_compound(tokens: list, position: int) -> bool:
+    """Whether the name at `position` is extended in place ("name += ...", "name %= ...")."""
+    return position + 1 < len(tokens) and tokens[position + 1][1] in ("+=", "%=") and _gd_depth(tokens, position) == 0
+
+
+def _gd_depth(tokens: list, position: int) -> int:
+    """The bracket depth at `position` in a statement."""
+    depth = 0
+    for value in tokens[:position]:
+        if value[1] in ("(", "[", "{"):
+            depth += 1
+        elif value[1] in (")", "]", "}"):
+            depth -= 1
+    return depth
+
+
+def loose_read_allowlist(build_dir: Path, candidates: set[str]) -> dict:
+    """What of `candidates` (repository paths) the running client may read raw, from its
+    code (W2-UD-02): a generated allowlist.
+
+    Every literal in a runtime GDScript (runtime_client_sources) that names a candidate,
+    a folder or prefix holding one, or a data file (LOOSE_DATA_SUFFIXES) under godot-client,
+    is followed by _LiteralUses. One with any use that is not the resource system names its
+    file - joined, its folder - as read raw; if it names a data file, so is everything that
+    file names, and its folder. A data file read by its exact constant path is a "data"
+    read (data_reads). A folder or prefix literal used only by the resource system is
+    "resource only": composing paths under it never reads raw (resource_prefixes, used by
+    loose_data_names). Also read raw: the asset paths project.godot names (the engine reads
+    its icon and boot splash as images), any asset path in a scene or resource outside an
+    ext_resource header, every asset path a native source that reads files itself names,
+    and LOOSE_STAGE_READERS. Returns {"files": {repository path: {where}}, "prefixes":
+    {repository prefix: {where}}, "data_reads": {data file: {where}}, "resource_prefixes":
+    {prefix}, "literals": count}.
+    """
+    files: dict[str, set[str]] = {}
+    prefixes: dict[str, set[str]] = {}
+
+    def note(named, under, where) -> None:
+        for name in named:
+            files.setdefault(name, set()).update(where)
+        for name in under:
+            prefixes.setdefault(name, set()).update(where)
+
+    lowered = sorted(candidate.lower() for candidate in candidates)
+    candidate_set = set(lowered)
+    data_names: dict[str, tuple[set[str], set[str]]] = {}
+    for relative in tracked(build_dir, "godot-client"):
+        if relative.lower().endswith(LOOSE_DATA_SUFFIXES) and not relative.startswith(UNSHIPPED_CLIENT_DIRS):
+            data_names[relative.lower()] = _data_names(build_dir, relative)
+    naming = sorted(data for data, (named, under) in data_names.items()
+                    if {n.lower() for n in named} & candidate_set
+                    or any(c.startswith(u.lower()) for u in under for c in lowered))
+
+    def reaches(named: set[str], under: set[str]) -> bool:
+        if any(path.lower() in candidate_set or path.lower() in data_names and path.lower() in naming
+               for path in named):
+            return True
+        return any(any(c.startswith(prefix.lower()) for c in lowered)
+                   or any(d.startswith(prefix.lower()) for d in naming) for prefix in under)
+
+    relevant_cache: dict[str, bool] = {}
+
+    def relevant(literal: str) -> bool:
+        # The bare project root ("res://") names nothing by itself: what is joined to it
+        # does, and an asset path in data is loose_data_names' (a code literal naming
+        # assets/ or a folder under it is followed here).
+        if literal not in relevant_cache:
+            root = (_literal_repo_path(literal) or "").rstrip("/") in ("godot-client", "godot-client/.")
+            relevant_cache[literal] = _path_like(literal) and not root \
+                and (reaches(*_literal_reach(build_dir, literal, False))
+                     or reaches(*_literal_reach(build_dir, literal, True)))
+        return relevant_cache[literal]
+
+    def data_files_named(named: set[str], under: set[str]) -> list[str]:
+        found = [name.lower() for name in named if name.lower() in data_names]
+        found += [data for prefix in under for data in data_names if data.startswith(prefix.lower())]
+        return sorted(set(found))
+
+    sources = runtime_client_sources(build_dir)
+    scripts = {relative: (build_dir / relative).read_text(encoding="utf-8", errors="replace")
+               for relative in sources if relative.endswith(".gd")}
+    settings = build_dir / "godot-client/project.godot"
+    autoloads = dict(re.findall(r'(?m)^(\w+)="\*?(res://[^"]+\.gd)"', settings.read_text(encoding="utf-8"))) \
+        if settings.is_file() else {}
+    data_reads: dict[str, set[str]] = {}
+    resource_prefixes: set[str] = set()
+    for literal, record in sorted(_LiteralUses(scripts, autoloads).uses(relevant).items()):
+        for path, where in record["data"]:
+            data_reads.setdefault(path.lower(), set()).add(where)
+        for path, where in record["exact"]:
+            note(*_literal_reach(build_dir, path, False), {where})
+        if not record["raw"] and not record["exact"]:
+            named, under = _literal_reach(build_dir, literal, False)
+            if under and not named:
+                resource_prefixes |= {prefix.lower() for prefix in under}
+            continue
+        for joined, where in record["raw"]:
+            named, under = _literal_reach(build_dir, literal, joined)
+            note(named, under, {where})
+            for data in data_files_named(*_literal_reach(build_dir, literal, False)):
+                note(*data_names[data], {f"{where} via {data.removeprefix('godot-client/')}"})
+                note(set(), {posixpath.dirname(data) + "/"}, {f"{where} beside {data.removeprefix('godot-client/')}"})
+    for relative in sources:
+        if relative.endswith(".gd"):
+            continue
+        text = (build_dir / relative).read_text(encoding="utf-8", errors="replace")
+        if relative.endswith((".tscn", ".tres")):
+            text = SCENE_EXT_RESOURCE.sub("", text)  # what a scene loads, the resource system loads
+        elif relative != "godot-client/project.godot" and not NATIVE_RAW_READ.search(text):
+            continue
+        for match in SOURCE_LITERAL.finditer(text):
+            if relevant(match.group(2)):
+                note(*_literal_reach(build_dir, match.group(2), False), {relative.removeprefix("godot-client/")})
+    for local, reader in LOOSE_STAGE_READERS.items():
+        files.setdefault("godot-client/" + local, set()).add(reader)
+    return {"files": files, "prefixes": prefixes, "data_reads": data_reads,
+            "resource_prefixes": resource_prefixes, "literals": sum(relevant_cache.values())}
+
+
+def loose_data_names(build_dir: Path, candidates: set[str], resource_prefixes: set[str] = frozenset(),
+                     served=None) -> dict[str, set[str]]:
+    """{candidate: {data file}}: the candidates the data a package carries names (W2-UD-02).
+
+    Map data and the client's data drive raw reads whose path no code literal holds (a map
+    manifest's externalResources are hashed from disk, a registry names manifests), so:
+    a candidate any shipped data names by a res://, assets/ or data/ path - a godot-client
+    data file (LOOSE_DATA_SUFFIXES) outside docs/tests/tools, or an eloria-assets JSON that
+    ships - stays loose. A name relative to its data file's folder keeps a candidate too,
+    unless the data file's own folder is one the code uses only through the resource
+    system (loose_read_allowlist "resource_prefixes": the audio catalog names its tracks
+    relative to assets/audio/, and every literal naming that folder ends in a load()); a
+    data file another data file names by path has no such code, so its relative names
+    always count.
+    """
+    if not candidates:
+        return {}
+    lowered = {candidate.lower(): candidate for candidate in candidates}
+    resource_prefixes = {prefix.lower() for prefix in resource_prefixes}
+    if served is None:
+        served = read_served_v2_packages(build_dir) if (build_dir / REGISTRY_FILE).is_file() else []
+    data_files = [p for p in tracked(build_dir, "godot-client") if p.lower().endswith(LOOSE_DATA_SUFFIXES)
+                  and not p.startswith(UNSHIPPED_CLIENT_DIRS)]
+    data_files += [p for p in sorted(shipped_eloria_assets(build_dir, served=served)[0])
+                   if p.lower().endswith(".json")]
+    named: dict[str, set[str]] = {}
+    indirect: set[str] = set()
+    relative_names: dict[str, set[str]] = {}
+    for relative in data_files:
+        path = build_dir / relative
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8-sig", errors="replace")
+        try:
+            strings = list(_json_strings(json.loads(text))) if relative.lower().endswith(".json") else \
+                re.split(r"[\s\"',;=()\[\]{}<>|]+", text)
+        except ValueError:
+            strings = [m.group(2) for m in SOURCE_LITERAL.finditer(text)]
+        folder = posixpath.dirname(relative)
+        for value in strings:
+            if not value or len(value) > 1024:
+                continue
+            path_value = _literal_repo_path(value)
+            if path_value is not None:
+                low = posixpath.normpath(path_value).lower()
+                if low in lowered:
+                    named.setdefault(lowered[low], set()).add(relative)
+                if low.endswith(LOOSE_DATA_SUFFIXES):
+                    indirect.add(low)
+            elif "." in value and ":" not in value and not value.startswith("/") \
+                    and relative.startswith("godot-client/"):
+                target = posixpath.normpath(posixpath.join(folder, value.replace("\\", "/"))).lower()
+                if target in lowered:
+                    relative_names.setdefault(relative.lower(), set()).add(lowered[target])
+    for data, names in relative_names.items():
+        # Code that joins these names to exactly this folder only to load them clears them.
+        cleared = data not in indirect and posixpath.dirname(data) + "/" in resource_prefixes
+        for name in names:
+            if not cleared:
+                named.setdefault(name, set()).add(data)
+    return named
+
+
+# actor_images.gd PIXEL_READING_MATERIALS: material extensions that make it leave URI images to
+# GLTFDocument's own (raw) read.
+ACTOR_PIXEL_READING_MATERIALS = (b"KHR_materials_pbrSpecularGlossiness",)
+
+
+def _actor_glb_reads_imports(build_dir: Path) -> bool:
+    """Whether the build tree parses actor glTFs through actor_images.gd (AW-03), which loads
+    a URI image through ResourceLoader at the path GLTFDocument resolves before any raw read."""
+    images = build_dir / "godot-client/src/actors/actor_images.gd"
+    cache = build_dir / "godot-client/src/actors/glb_scene_cache.gd"
+    if not images.is_file() or not cache.is_file():
+        return False
+    text = images.read_text(encoding="utf-8", errors="replace")
+    return ("func resolve_uri" in text and "ResourceLoader.load(path" in text
+            and "ActorImages.enable(" in cache.read_text(encoding="utf-8", errors="replace"))
+
+
+def gltf_uri_raw_reads(build_dir: Path, imported: set[str]) -> dict[str, set[str]]:
+    """{repository path: {"<glTF> -> <uri>"}} of the images shipped glTFs name by URI and read raw.
+
+    A glTF URI is a raw read unless it resolves through an import: only an actor glTF
+    (under assets/actors, parsed by the AW-03 actor-parse path, actor_images.gd) takes a
+    URI image from ResourceLoader at the path GLTFDocument resolves, and only an image in
+    `imported` (repository paths whose .import and products the PCK holds) is there to take.
+    Every other glTF a package carries - world models through the scenery image pass, the
+    editor's imported scenes, anything else - reads the file. In a build tree without the
+    AW-03 path every URI counts as a raw read.
+    """
+    actor_imports = _actor_glb_reads_imports(build_dir)
+    reads: dict[str, set[str]] = {}
+    for relative in shipped_client_files(build_dir, GLTF_SUFFIXES):
+        # "unchecked" until a URI of an actor document names an imported image; then "imports"
+        # or, for a document with a pixel-reading material (actor_images.gd
+        # PIXEL_READING_MATERIALS: spec-gloss, left to GLTFDocument's own raw read), "raw".
+        actor = "unchecked" if actor_imports and relative.startswith("godot-client/assets/actors/") else "raw"
+        for uri in _possible_gltf_uris(build_dir / relative):
+            if not uri or uri.startswith("data:"):
+                continue
+            target = _resolve(relative, uri)
+            if actor != "raw" and target in imported:
+                if actor == "unchecked":
+                    text = _gltf_json_bytes(build_dir / relative)
+                    actor = "raw" if any(name in text for name in ACTOR_PIXEL_READING_MATERIALS) else "imports"
+                if actor == "imports":
+                    continue
+            reads.setdefault(target, set()).add(f"{relative.removeprefix('godot-client/')} -> {uri}")
+    return reads
+
+
+def loose_duplicate_candidates(build_dir: Path, packed: set[str], platform: str = "") -> dict[str, str]:
+    """{repository path: godot-client-relative path} of the loose files the PCK also holds
+    imported: a tracked file of LOOSE_DUPLICATE_SUFFIXES under godot-client/assets, outside
+    the actor tree (actor_shipping decides those) and LOOSE_ALWAYS_*, whose .import remap
+    and every product it names (exported_import_products) are in `packed` (pck_paths)."""
+    project = build_dir / "godot-client"
+    candidates: dict[str, str] = {}
+    for relative in tracked(build_dir, "godot-client/assets"):
+        local = PurePosixPath(relative).relative_to("godot-client").as_posix()
+        if relative.startswith(ACTOR_ROOT + "/") or not local.lower().endswith(LOOSE_DUPLICATE_SUFFIXES) \
+                or local in LOOSE_ALWAYS_FILES or local + ".import" not in packed:
+            continue
+        sidecar = project / (local + ".import")
+        products = exported_import_products(sidecar, platform) if sidecar.is_file() else []
+        if products and all(product in packed for product in products):
+            candidates[relative] = local
+    return candidates
+
+
+# One build tree's reads per candidate set: the check after a re-export asks again.
+# _main clears it, so a later run on the same build folder (another commit) reads afresh.
+_LOOSE_READ_CACHE: dict = {}
+
+
+def loose_duplicate_plan(build_dir: Path, packed: set[str], platform: str = "") -> dict:
+    """Which loose duplicates of PCK-imported resources ship in the PCK only (W2-UD-02).
+
+    Of loose_duplicate_candidates, a file stays loose when anything may read it raw: the
+    running client's code (loose_read_allowlist), a glTF URI that does not resolve
+    through an import (gltf_uri_raw_reads), the data a package carries
+    (loose_data_names) or a reader of the stage (LOOSE_STAGE_READERS). Every other one is
+    dropped from app/. Returns {"drop": {godot-client-relative: bytes}, "keep":
+    {godot-client-relative: [why]}, "literals": path literals followed}.
+    """
+    candidates = loose_duplicate_candidates(build_dir, packed, platform)
+    key = (str(build_dir.resolve()), frozenset(candidates))
+    if key not in _LOOSE_READ_CACHE:
+        allowlist = loose_read_allowlist(build_dir, set(candidates))
+        _LOOSE_READ_CACHE.clear()
+        _LOOSE_READ_CACHE[key] = (allowlist, gltf_uri_raw_reads(build_dir, set(candidates)),
+                                  loose_data_names(build_dir, set(candidates), allowlist["resource_prefixes"]))
+    allowlist, uri_reads, data_reads = _LOOSE_READ_CACHE[key]
+    prefixes = sorted((prefix.lower(), where) for prefix, where in allowlist["prefixes"].items())
+    files: dict[str, set[str]] = {}
+    for path, where in allowlist["files"].items():
+        files.setdefault(path.lower(), set()).update(where)
+    drop: dict[str, int] = {}
+    keep: dict[str, list[str]] = {}
+    for relative, local in sorted(candidates.items()):
+        lowered = relative.lower()
+        why = sorted(files.get(lowered, ()))
+        why += sorted(w for prefix, where in prefixes if lowered.startswith(prefix) for w in where)
+        why += sorted(uri_reads.get(relative, ()))
+        why += sorted(f"named by {data.removeprefix('godot-client/')}" for data in data_reads.get(relative, ()))
+        if why:
+            keep[local] = why
+        else:
+            drop[local] = (build_dir / relative).stat().st_size
+    return {"drop": drop, "keep": keep, "literals": allowlist["literals"]}
+
+
+def check_loose_duplicates(build_dir: Path, app_dir: Path, platform: str = "") -> dict:
+    """Every tracked file under godot-client/assets outside the actor tree ships somewhere,
+    and a file a raw read may open ships loose (W2-UD-02).
+
+    Run on the final PCK. A file not staged loose must be in the PCK as itself or as an
+    import whose products are all there, and must not be one loose_duplicate_plan keeps
+    (a raw read, a URI, data or a stage reader names it); LOOSE_ALWAYS_* and
+    LOOSE_STAGE_READERS files must be staged. Returns the plan.
+    """
+    packed = pck_paths(app_dir / "RabbitLands.pck")
+    plan = loose_duplicate_plan(build_dir, packed, platform)
+    world = world_import_shipping(build_dir)
+    project = build_dir / "godot-client"
+    problems: list[str] = []
+    for relative in tracked(build_dir, "godot-client/assets"):
+        if relative.endswith((".import", ".report.json")) or relative.startswith(ACTOR_ROOT + "/") \
+                or relative in world["dropped_images"]:
+            continue
+        local = PurePosixPath(relative).relative_to("godot-client").as_posix()
+        loose = (app_dir / local).is_file()
+        always = local in LOOSE_ALWAYS_FILES or local in LOOSE_STAGE_READERS \
+            or local.lower().endswith(LOOSE_ALWAYS_SUFFIXES)
+        if loose:
+            continue
+        if always:
+            problems.append(f"{local}: must ship loose ({LOOSE_STAGE_READERS.get(local, 'always loose')})")
+        elif local in plan["keep"]:
+            problems.append(f"{local}: read raw ({plan['keep'][local][0]}) but not staged loose")
+        elif local not in packed:
+            sidecar = project / (local + ".import")
+            products = exported_import_products(sidecar, platform) if sidecar.is_file() else []
+            if local + ".import" not in packed or not products or any(p not in packed for p in products):
+                problems.append(f"{local}: neither loose nor in the PCK")
+    if problems:
+        raise PackageError(f"{len(problems)} client assets are not shipped where they are read:\n  "
+                           + "\n  ".join(problems[:40]))
+    log(f"checked loose duplicates: {len(plan['drop'])} imported resources ({sum(plan['drop'].values()) / 1e6:.1f} MB) "
+        f"ship in the PCK only, {len(plan['keep'])} kept loose for raw reads "
+        f"({plan['literals']} path literals followed)")
+    return plan
+
+
 # --- staging -----------------------------------------------------------------
 
 def copy_file(source: Path, target: Path) -> int:
@@ -1638,7 +2806,7 @@ def copy_file(source: Path, target: Path) -> int:
     return source.stat().st_size
 
 
-def stage_loose_client_files(build_dir: Path, app_dir: Path) -> None:
+def stage_loose_client_files(build_dir: Path, app_dir: Path, platform: str = "") -> dict:
     # Actor files ship once: the PCK-only ones (face masks, equipment URI
     # textures) and the dropped images stay out of app/.
     shipping = actor_shipping(build_dir)
@@ -1647,11 +2815,14 @@ def stage_loose_client_files(build_dir: Path, app_dir: Path) -> None:
     # Anything the export recognised as a resource is IN the pack and loaded
     # from it (`load("res://assets/ui/start_screen/....ogv")`), so a loose copy
     # is the same bytes twice: the six start-screen videos alone were 142 MB.
+    # So is an imported resource nothing reads raw (W2-UD-02,
+    # loose_duplicate_plan): its .import and products are in the pack.
     # Text records stay loose wherever they live, whatever the pack holds:
     # the launcher, the updater and the packager's own steps read them from
     # disk rather than through Godot (AUDIO-CREDITS is built from the staged
     # assets/audio/provenance.json, which the pack also carries).
     packed = pck_paths(app_dir / "RabbitLands.pck")
+    duplicates = loose_duplicate_plan(build_dir, packed, platform)
     total = staged = pck_only = dropped = dropped_bytes = packed_only = packed_bytes = 0
     files = tracked(build_dir, "godot-client/assets", "godot-client/data", "godot-client/schemas")
     for relative in files:
@@ -1667,9 +2838,11 @@ def stage_loose_client_files(build_dir: Path, app_dir: Path) -> None:
                 pck_only += 1
             continue
         inside = PurePosixPath(relative).relative_to("godot-client")
-        if (str(inside) in packed and inside.parts[0] not in ("data", "schemas")
-                and inside.suffix.lower() not in (".json", ".txt", ".csv")
-                and str(inside) != "assets/branding/rabbitlands-icon.ico"):
+        local = inside.as_posix()
+        if local in duplicates["drop"] or (
+                local in packed and inside.parts[0] not in LOOSE_ALWAYS_ROOTS
+                and inside.suffix.lower() not in LOOSE_ALWAYS_SUFFIXES
+                and local not in LOOSE_ALWAYS_FILES and local not in LOOSE_STAGE_READERS):
             packed_only += 1
             packed_bytes += (build_dir / relative).stat().st_size
             continue
@@ -1678,7 +2851,10 @@ def stage_loose_client_files(build_dir: Path, app_dir: Path) -> None:
     log(f"staged {staged} loose client files ({total / 1e9:.2f} GB); "
         f"{pck_only} actor files ship in the PCK only; {dropped} unnamed actor images "
         f"({dropped_bytes / 1e6:.0f} MB) ship nowhere; {packed_only} resources "
-        f"({packed_bytes / 1e6:.0f} MB) ship in the PCK only")
+        f"({packed_bytes / 1e6:.0f} MB) ship in the PCK only, of them {len(duplicates['drop'])} imported "
+        f"duplicates ({sum(duplicates['drop'].values()) / 1e6:.0f} MB); {len(duplicates['keep'])} imported "
+        "resources stay loose for raw reads")
+    return duplicates
 
 
 def pck_paths(pck: Path) -> set[str]:
@@ -3554,6 +4730,7 @@ def make_online_installer(stage: Path, godot: Path, iscc: Path, version: str,
 
 def _main(argv=None, storage=None) -> int:
     global BENCHMARK_LINKS, BENCHMARK_ACTOR_PLANS
+    _LOOSE_READ_CACHE.clear()  # one build tree's commit per run
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--platform", choices=sorted(PLATFORMS), default="windows",
                         help="windows: folder + zip; linux: folder + tar.gz; macos: native app bundle")
@@ -3737,7 +4914,7 @@ def _main(argv=None, storage=None) -> int:
             storage.check("before export", 1_500_000_000)
         app_dir = stage / "app"
         export_project(godot, project, app_dir, logs, platform)
-        stage_loose_client_files(build_dir, app_dir)
+        stage_loose_client_files(build_dir, app_dir, options.platform)
         if options.client_runtime:
             client_runtime_package.stage_payload(options.client_runtime.resolve(), build_dir, app_dir, options.platform)
         (app_dir / "client-release.json").write_text(json.dumps(metadata), encoding="utf-8")
@@ -3750,6 +4927,7 @@ def _main(argv=None, storage=None) -> int:
             check_scene_texture_pack(build_dir, app_dir)
         check_editor_sources_unpacked(app_dir)
         check_world_import_pack(build_dir, app_dir)
+        check_loose_duplicates(build_dir, app_dir, options.platform)
         if storage:
             storage.check("export and staging validated")
             if not optimization and not want_prepared_world:
@@ -3799,6 +4977,7 @@ def _main(argv=None, storage=None) -> int:
                 export_project(godot, project, app_dir, logs / "prepared", platform)
                 check_actor_pack(build_dir, app_dir)
                 check_world_import_pack(build_dir, app_dir)
+                check_loose_duplicates(build_dir, app_dir, options.platform)
                 check_scene_texture_pack(build_dir, app_dir)
                 check_editor_sources_unpacked(app_dir)
                 prepared_receipt["export"] = prepared_content_package.check_export(
@@ -3816,6 +4995,7 @@ def _main(argv=None, storage=None) -> int:
             export_project(godot, project, app_dir, logs / "prepared-world", platform)
             check_actor_pack(build_dir, app_dir)
             check_world_import_pack(build_dir, app_dir)
+            check_loose_duplicates(build_dir, app_dir, options.platform)
             check_scene_texture_pack(build_dir, app_dir)
             check_editor_sources_unpacked(app_dir)
         # Keep loose creatures as ordinary GLBs after native cooking. Optimized
