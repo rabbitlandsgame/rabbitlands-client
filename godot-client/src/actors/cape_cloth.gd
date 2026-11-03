@@ -91,6 +91,9 @@ var _legs: Array[PackedInt32Array] = []
 var _settled := false
 var _step_owed := 0.0
 const FIXED_STEP := 1.0 / 60.0
+## The unmounted solver's step: FIXED_STEP, or MAX_STEP (30 Hz) where the Low
+## actor tier asks for it (`set_step_rate`). Mounted cloth keeps its own clock.
+var _rate_step := FIXED_STEP
 var _held_chain_positions := PackedVector3Array()
 var _held_chain_rotations: Array[Quaternion] = []
 var _last_anchor := Vector3.INF
@@ -1350,11 +1353,106 @@ func _push_out_of_capsule_axis(to_world: Transform3D, point: Vector3,
 	return point
 
 
+## Solve the unmounted cape `hz` times a second: 60, the rate every constant
+## here was tuned at, or 30 for the Low actor tier
+## (`ActorRenderQuality.local_cape_step_hz`). Under a 30 FPS cap a 60 Hz solver
+## runs twice per drawn frame. A display frame never feeds the solver more than
+## MAX_STEP, so rates below 30 mean 30; zero, negative or 60 and above mean 60.
+## Mounted cloth keeps its own clock (see `_simulation_step`).
+func set_step_rate(hz: int) -> void:
+	_rate_step = MAX_STEP if hz > 0 and hz <= 30 \
+		else (1.0 / float(hz) if hz > 30 and hz < 60 else FIXED_STEP)
+
+func step_rate() -> int:
+	return roundi(1.0 / _rate_step)
+
 func _simulation_step() -> float:
 	# Mounted browser cloth runs at 30 Hz; body, input and riding animation
-	# retain their display-frame clock. Static fitting and desktop keep 60 Hz.
-	return MAX_STEP if OS.has_feature("web") and _mount_surface != null \
-		and not _fitting_mounted_static else FIXED_STEP
+	# retain their display-frame clock. Static fitting and desktop mounted cloth
+	# keep 60 Hz. Unmounted cloth runs at the rate set_step_rate chose.
+	if _fitting_mounted_static:
+		return FIXED_STEP
+	if _mount_surface != null:
+		return MAX_STEP if OS.has_feature("web") else FIXED_STEP
+	return _rate_step
+
+## One solver step of `steps` x FIXED_STEP seconds (a 30 Hz cape: 2) stands
+## for that many steps of the 60 Hz solver its constants were tuned at.
+## Returns (damping, gravity scale) for it:
+## - x: velocity keeps `damping` per 1/60 s, so `damping ^ steps` per step;
+## - y: the gravity in `fall` grows with step^2, k^2 times a 60 Hz fall for k
+##   = `steps`, while k damped 60 Hz steps settle at the velocity that
+##   k (1 - d^k) / (1 - d) falls give. Scaling `fall` by
+##   (1 - d^k) / (k (1 - d)) keeps the 60 Hz terminal velocity, hence its
+##   trailing angle in a walk and its settling after a stop. With the settle
+##   damping 0.30 that is 0.65 of the step^2 gravity, 0.71-0.86 walking.
+## TRAVEL_CARRY needs no factor for that: it adds back (1 - damping) of the
+## wearer's travel in the step, which is the corrected per-step share already.
+## A bare chain at 30 Hz trails within 2 % of 60 Hz with these. A cape at rest
+## on a wearer standing still takes less gravity (`_long_step_rest_scale`).
+func _long_step_coefficients(damping: float, steps: float) -> Vector2:
+	var decayed := pow(damping, steps)
+	if steps <= 1.0 or damping >= 0.999:
+		return Vector2(decayed, 1.0)
+	return Vector2(decayed, (1.0 - decayed) / (steps * (1.0 - damping)))
+
+## Below the first speed a cape on a wearer standing still is at rest, above
+## the second it is still swinging down (m/s, its fastest simulated point).
+const REST_SPEED := Vector2(0.05, 0.5)
+
+## How much of a long step's gravity a cape on a wearer standing still takes,
+## from at rest to swinging. Where cloth rests on the body or the legs its
+## constraints settle it where one step's pull is balanced, so k 60 Hz steps'
+## worth in one step (`_long_step_coefficients`) hung a worn 30 Hz cape 2-14 mm
+## off the 60 Hz one. At rest it takes one 60 Hz step's pull,
+## 1 / (k (1 + d + ... + d^(k-1))) of that, and rests where 60 Hz rests (within
+## 0.3 mm measured); swinging it takes all of it and settles as fast as 60 Hz.
+## It blends by the cloth's speed over the previous step. Walking keeps the
+## whole pull: one 60 Hz step's worth there builds the trail at half speed.
+func _long_step_rest_scale(damping: float, steps: float) -> float:
+	if steps <= 1.0 or damping >= 0.999:
+		return 1.0
+	var settled := (1.0 - damping) / (steps * (1.0 - pow(damping, steps)))
+	var fastest := 0.0
+	for chain: int in range(mini(_points.size(), _previous.size())):
+		var points := _points[chain]
+		var previous := _previous[chain]
+		if points.size() != previous.size():
+			continue
+		for index: int in range(1, points.size()):
+			fastest = maxf(fastest, points[index].distance_squared_to(previous[index]))
+	var speed := sqrt(fastest) / (steps * FIXED_STEP)
+	return lerpf(settled, 1.0, smoothstep(REST_SPEED.x, REST_SPEED.y, speed))
+
+## The measured sheet's guards (`_keep_sheet_coherent`, `_keep_off_legs`,
+## `_keep_surface_clear`) move points without their previous positions, so
+## what they move is carried as velocity. Two 60 Hz steps carry such a kick
+## 1 + d times (d: the 60 Hz damping), one 30 Hz step once. Returns how far to
+## move each guarded point's previous position back, per metre of correction,
+## so that the next step carries the k-step share: (1 + d + ... + d^(k-1)) - 1
+## after the step's own damping d^k. Walking only: at rest the guards hold the
+## sheet against gravity, and an extra carry there would lift it off the body.
+## Measured on worn capes: the peak trail in a run went from 23 % to 10 % below
+## 60 Hz. What remains (walk about 16 %, steady run 21 % below) comes from
+## `_keep_sheet_coherent` moving every strip to the furthest-back one once per
+## step: twice a frame at 60 Hz. Without that guard both rates trail alike.
+func _long_step_guard_carry(damping: float, steps: float) -> float:
+	var decayed := pow(damping, steps)
+	if steps <= 1.0 or decayed < 0.001 or damping >= 0.999:
+		return 0.0
+	return ((1.0 - decayed) / (1.0 - damping) - 1.0) / decayed
+
+func _carry_guard_corrections(before: Array, carry: float) -> void:
+	for chain: int in mini(before.size(), _points.size()):
+		var was: PackedVector3Array = before[chain]
+		var now := _points[chain]
+		var previous := _previous[chain]
+		if was.size() != now.size() or previous.size() != now.size():
+			continue
+		# The root joint is carried by the spine and never simulated.
+		for index: int in range(1, now.size()):
+			previous[index] -= (now[index] - was[index]) * carry
+		_previous[chain] = previous
 
 func _process_modification_with_delta(delta: float) -> void:
 	# Verlet gravity scales with dt squared. Feeding display-frame jitter into
@@ -1478,14 +1576,26 @@ func _simulate_step(delta: float, simulation_world: Transform3D) -> void:
 	var still := _frame_anchor_speed < SETTLE_SPEED
 	var fall := GRAVITY * (SETTLE_GRAVITY if still and _mount_surface == null else 1.0) * step * step
 	var damping := SETTLE_DAMPING if still or _mount_surface != null else DAMPING
-	if OS.has_feature("web") and _mount_surface != null and step > FIXED_STEP:
-		damping = pow(damping, step / FIXED_STEP)
-	if not still and _mount_surface == null:
+	var walking := not still and _mount_surface == null
+	if walking:
 		damping = lerpf(WALK_DAMPING, DAMPING, smoothstep(2.0, 4.0, _frame_travel_speed))
-		if _last_simulation_translation.is_finite() and step > 0.0:
-			var travel := to_world.origin - _last_simulation_translation
-			if travel.length() < TELEPORT:
-				fall += travel * (1.0 - damping) * TRAVEL_CARRY
+	var guard_carry := 0.0
+	if step > FIXED_STEP:
+		# A 30 Hz step: the Low tier's unmounted cape, or a browser rider. The
+		# rider's gravity keeps its step^2 scale, as browser cloth always had.
+		var steps := step / FIXED_STEP
+		var coefficients := _long_step_coefficients(damping, steps)
+		if _mount_surface == null:
+			fall *= coefficients.y
+			if still:
+				fall *= _long_step_rest_scale(damping, steps)
+		if walking:
+			guard_carry = _long_step_guard_carry(damping, steps)
+		damping = coefficients.x
+	if walking and _last_simulation_translation.is_finite() and step > 0.0:
+		var travel := to_world.origin - _last_simulation_translation
+		if travel.length() < TELEPORT:
+			fall += travel * (1.0 - damping) * TRAVEL_CARRY
 	_last_simulation_translation = to_world.origin
 	# The back-of-the-torso plane, held for every chain this frame: a cape
 	# swings and cannot pass to the chest, which is what an attack's lean and
@@ -1504,7 +1614,7 @@ func _simulate_step(delta: float, simulation_world: Transform3D) -> void:
 		return
 	if _mount_surface == null and _native_constraint_kernel != null and _try_native_constraint_step(
 			skeleton, to_world, to_local, anchor_pose, down, anchor_carry, fall,
-			damping, forward, plane_at, anchor_world.y):
+			damping, forward, plane_at, anchor_world.y, false, 0.0, guard_carry):
 		_settled = true
 		return
 
@@ -1572,11 +1682,14 @@ func _simulate_step(delta: float, simulation_world: Transform3D) -> void:
 					points[index] = _mount_surface.call("limit_lift", points[index], rest[0], material_length, float(index) / LINKS, material_side_offset)
 		_points[chain] = points
 		_previous[chain] = previous
+	var guarded: Array = _points.duplicate(true) if guard_carry > 0.0 else []
 	_keep_sheet_coherent(anchor_carry, forward)
 	if _keeps_off_legs():
 		_keep_off_legs(forward, anchor_carry)
 	_keep_sheet_coherent(anchor_carry, forward)
 	_keep_surface_clear(fabrics, anchor_world, anchor_carry, forward)
+	if guard_carry > 0.0:
+		_carry_guard_corrections(guarded, guard_carry)
 	if _mount_surface != null and _mounted_fit != null:
 		_keep_mounted_material_spacing(fabrics)
 		if not wake_from.is_empty():
@@ -1686,7 +1799,8 @@ func _project_mounted_skin(skeleton: Skeleton3D, world: Transform3D, fabrics: Ar
 func _try_native_constraint_step(skeleton: Skeleton3D, to_world: Transform3D,
 		to_local: Transform3D, anchor_pose: Transform3D, down: Vector3,
 		carried: Basis, fall: Vector3, damping: float, forward: Vector3,
-		plane_at: float, anchor_y: float, mounted := false, step := 0.0) -> bool:
+		plane_at: float, anchor_y: float, mounted := false, step := 0.0,
+		guard_carry := 0.0) -> bool:
 	# The kernel simulates whatever line it is handed: the cloth's own hang
 	# when it was measured, the material line otherwise.
 	var rests: Array[PackedVector3Array] = []
@@ -1722,11 +1836,14 @@ func _try_native_constraint_step(skeleton: Skeleton3D, to_world: Transform3D,
 			_native_constraint_fallbacks += 1
 			return false
 		_native_constraint_calls += 1
+	var guarded: Array = _points.duplicate(true) if guard_carry > 0.0 else []
 	_keep_sheet_coherent(carried, forward)
 	if _keeps_off_legs():
 		_keep_off_legs(forward, carried)
 	_keep_sheet_coherent(carried, forward)
 	_keep_surface_clear(fabrics, to_world * anchor_pose.origin, carried, forward)
+	if guard_carry > 0.0:
+		_carry_guard_corrections(guarded, guard_carry)
 	for chain: int in range(_bones.size()):
 		_write_chain_bones(skeleton, chain, fabrics[chain], anchor_pose,
 			to_world, to_local)
