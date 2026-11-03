@@ -1,0 +1,183 @@
+{
+ "images": {
+  "wolf_base": {
+   "sha256": "05d62f39e5519f78e5d24c3a6734c6255b487492388f07ab7314a649bbae225f",
+   "bytes": 1413,
+   "mimeType": "image/jpeg",
+   "size": [
+    64,
+    64
+   ]
+  },
+  "wolf_normal": {
+   "sha256": "5e020e29b2ef6320b4c559847bcce5258e0940c72f8e15ea01e801854c997dd7",
+   "bytes": 5050,
+   "mimeType": "image/png",
+   "size": [
+    64,
+    64
+   ]
+  },
+  "wolf_orm": {
+   "sha256": "33da7b7729fdf28ed5f78d6ff1533ab5c8941e500fb85d16b8e972fe9fddff78",
+   "bytes": 1556,
+   "mimeType": "image/jpeg",
+   "size": [
+    64,
+    64
+   ]
+  },
+  "fox_cutout": {
+   "sha256": "e7eaa354fb05b3da19d9d9cae98954739e56dc55bce95134b4ec380ec304987f",
+   "bytes": 6205,
+   "mimeType": "image/png",
+   "size": [
+    64,
+    64
+   ]
+  },
+  "retired_base": {
+   "sha256": "459f5111eb151e423188158450226321d0443b6a9c005e2d594f5e3c4672f478",
+   "bytes": 5152,
+   "mimeType": "image/png",
+   "size": [
+    64,
+    64
+   ]
+  },
+  "race_atlas": {
+   "sha256": "0bec83ec7a9ab6484874c6c930a34cfb954833b5380d0f771259b7576dca7e76",
+   "bytes": 1421,
+   "mimeType": "image/jpeg",
+   "size": [
+    64,
+    64
+   ]
+  },
+  "race_eyes": {
+   "sha256": "71592b4ce9738a5a1b657fe143c1ffab53942a925398ef80429bb8633a02aeb2",
+   "bytes": 12420,
+   "mimeType": "image/png",
+   "size": [
+    64,
+    64
+   ]
+  },
+  "race_normal": {
+   "sha256": "fce9081fd8c4c6017ed1688442271d7c565dffffbf9f28ceb9c9660247eebed1",
+   "bytes": 12420,
+   "mimeType": "image/png",
+   "size": [
+    64,
+    64
+   ]
+  },
+  "hair_base": {
+   "sha256": "cddce38a8e769c4ff3c1159f0fac1d81130b18cad6ae44f2320d6bba56735998",
+   "bytes": 1358,
+   "mimeType": "image/jpeg",
+   "size": [
+    64,
+    64
+   ]
+  },
+  "mount_normal": {
+   "sha256": "29daab153370cf6562d101b72318c1e3f3b80443d6aeff6bd6c181251ebc8c25",
+   "bytes": 6065,
+   "mimeType": "image/png",
+   "size": [
+    64,
+    64
+   ]
+  },
+  "mount_odd": {
+   "sha256": "108baec7013a1e369a76e0b0f10d17b56ccaced2923218ecb66f826fc9935a3b",
+   "bytes": 1363,
+   "mimeType": "image/jpeg",
+   "size": [
+    62,
+    62
+   ]
+  },
+  "mount_conflict": {
+   "sha256": "2a12719f73608b4fef5688aaa2f065c7d98539db1d532f6e446f2a7018d12feb",
+   "bytes": 5204,
+   "mimeType": "image/png",
+   "size": [
+    64,
+    64
+   ]
+  },
+  "mount_unused": {
+   "sha256": "7812fcaa0ac58aa643b8ae067b52b5600225fe68b521c57ab9c0165d9ea09eb3",
+   "bytes": 1557,
+   "mimeType": "image/png",
+   "size": [
+    64,
+    64
+   ]
+  },
+  "sword_base": {
+   "sha256": "3ba0fb2643d7a5f532d73e7a10d6910bb0b341e7dc3bf3adea6bb87dca53dbde",
+   "bytes": 1364,
+   "mimeType": "image/jpeg",
+   "size": [
+    64,
+    64
+   ]
+  },
+  "rl_base": {
+   "sha256": "564c8f5aabda9c3700be4cc7f7afd8d8c379f0801e875eca4895f3aa1b82b253",
+   "bytes": 5127,
+   "mimeType": "image/png",
+   "size": [
+    64,
+    64
+   ]
+  }
+ },
+ "glbs": {
+  "creatures/wolf.glb": [
+   "wolf_base",
+   "wolf_normal",
+   "wolf_orm"
+  ],
+  "creatures/retired_beast.glb": [
+   "retired_base"
+  ],
+  "creatures/basic_expansion/fox.glb": [
+   "wolf_base",
+   "fox_cutout"
+  ],
+  "races/human_male.glb": [
+   "race_atlas",
+   "race_eyes",
+   "race_normal"
+  ],
+  "races/human_female.glb": [
+   "race_atlas"
+  ],
+  "hair/short.glb": [
+   "hair_base"
+  ],
+  "hair/fitted/short_fitted.glb": [
+   "hair_base"
+  ],
+  "mounts/rat.glb": [
+   "mount_normal",
+   "mount_odd",
+   "mount_conflict",
+   "mount_unused"
+  ],
+  "equipment/sword.glb": [
+   "sword_base",
+   "sword_engraving"
+  ],
+  "rl_heads/hair/rl_style.glb": [
+   "rl_base"
+  ]
+ },
+ "uriImages": {
+  "equipment/textures/sword_engraving.png": "34854864f774de644d3c27005399a94d1f51a47917c730e6d183f5d5729019b3"
+ }
+}

@@ -8,10 +8,16 @@ The recipe, schema and committed-fixture cases are pure Python. The encode
 cases run the tool for real against a copy of tests/fixtures/vram, which needs
 the Godot 4.7.2 editor binary (ELORIA_GODOT, the checkout's copy, or `godot`
 on PATH) plus numpy and Pillow; without them they skip and say why.
+
+The actor mode (--actor-dir) is planned against a copy of
+tests/fixtures/actor_vram (a client-shaped actor tree, see its
+make_fixture.py); ActorPlanning is pure Python, ActorBuild encodes it.
 """
 from __future__ import annotations
 
+import contextlib
 import hashlib
+import io
 import json
 import os
 import re
@@ -70,12 +76,19 @@ def _two_pools(maps: Path) -> tuple[Path, Path]:
     return (first / "shared-assets").resolve(), (second / "shared-assets").resolve()
 
 
+# Encoder (Godot) and quality-check processes per tool run; VRAM_TEST_PROCS=1 keeps a run to one Godot process on a
+# machine that limits headless Godot instances.
+TEST_PROCS = max(1, int(os.environ.get("VRAM_TEST_PROCS", "2")))
+MEASURE_PROCS = 2
+
+
 def _run_tool(maps: Path, cache: Path, *extra: str) -> tuple[int, dict, str]:
     env = dict(os.environ, PYTHONIOENCODING="utf-8")
     if GODOT is not None:
         env["ELORIA_GODOT"] = str(GODOT)
     result = subprocess.run([sys.executable, str(TOOL), "--maps", str(maps), "--cache", str(cache),
-                             "--procs", "2", *extra], capture_output=True, text=True, env=env, timeout=900)
+                             "--procs", str(TEST_PROCS), "--measure-procs", str(MEASURE_PROCS), *extra],
+                            capture_output=True, text=True, env=env, timeout=900)
     text = result.stdout
     start = text.find("\n{")
     summary = json.loads(text[start:]) if result.returncode == 0 and start >= 0 else {}
@@ -736,8 +749,8 @@ class Build(unittest.TestCase):
         stage = tree / "stage"
         with mock.patch.object(tool, "CLIENT", client), \
                 mock.patch.object(tool, "SCENERY_ROOT", client / "assets" / "world"):
-            summary = tool.build([maps], None, cache, GODOT, 2, prune=False, scenery_configs=[config],
-                                 scenery_out_root=stage)
+            summary = tool.build([maps], None, cache, GODOT, TEST_PROCS, prune=False, scenery_configs=[config],
+                                 scenery_out_root=stage, measure_procs=MEASURE_PROCS)
         self.assertEqual(summary["encoded"], 0)
         index = json.loads((stage / "props" / "vram" / "index.json").read_text(encoding="utf-8"))
         committed = json.loads((SIDECARS / "index.json").read_text(encoding="utf-8"))
@@ -776,6 +789,406 @@ class Build(unittest.TestCase):
         code, _, output = _run_tool(self.maps, repo / "cache", "--no-prune")
         self.assertEqual(code, 1)
         self.assertIn("not ignored", output)
+
+
+# --- actor mode (--actor-dir) ---------------------------------------------------------------------------------------
+
+ACTOR_FIXTURE = TESTS / "fixtures" / "actor_vram"
+ACTOR_RECORD = json.loads((ACTOR_FIXTURE / "fixture.json").read_text(encoding="utf-8"))
+ACTOR_SHA = {key: entry["sha256"] for key, entry in ACTOR_RECORD["images"].items()}
+# The five directories a package names (actor-textures plan, 3.2).
+ACTOR_DIRS = ["creatures", "races", "hair", "mounts", "equipment"]
+# What planning decides per GLB directory (relative to assets/actors/native): image key -> recipe, or "!" + reason.
+ACTOR_PLAN = {
+    "creatures": {"wolf_base": "base", "wolf_normal": "normal", "wolf_orm": "orm"},
+    "creatures/basic_expansion": {"wolf_base": "base", "fox_cutout": "base_alpha"},
+    "races": {"race_atlas": "base", "race_eyes": "base", "race_normal": "normal"},
+    "hair": {"hair_base": "base"},
+    "hair/fitted": {"hair_base": "base"},
+    "mounts": {"mount_normal": "normal", "mount_odd": "base", "mount_conflict": "!role_conflict: base+normal",
+               "mount_unused": "!no_material_role"},
+    "equipment": {"sword_base": "base"},
+}
+# ... and what the index then holds: the encoder refuses the 62 px base, and the mount's normal map is over the map
+# floors (p99 3.2 deg at mip 0) but within the plan's proposed actor floors (ACTOR_NORMAL_FLOORS).
+ACTOR_INDEX = {directory: dict(plan) for directory, plan in ACTOR_PLAN.items()}
+ACTOR_INDEX["mounts"]["mount_odd"] = "!size_not_multiple_of_4"
+ACTOR_INDEX["mounts"]["mount_normal"] = "!quality"
+# The actor-only normal floors the plan proposes (actor-textures open question 2), as a package would pass them.
+ACTOR_NORMAL_FLOORS = {"normal_mean_deg": 1.5, "normal_p99_deg": 8.0, "normal_mean_deg_mips": 2.0,
+                       "normal_p99_deg_mips": 10.0}
+ACTOR_ROLES = {"base": ["base"], "base_alpha": ["base_cutout"], "normal": ["normal"], "orm": ["occlusion", "orm"]}
+# The GLBs planned: none below rl_heads/, not the retired one.
+ACTOR_GLBS = ["creatures/basic_expansion/fox.glb", "creatures/wolf.glb", "equipment/sword.glb",
+              "hair/fitted/short_fitted.glb", "hair/short.glb", "mounts/rat.glb", "races/human_female.glb",
+              "races/human_male.glb"]
+
+
+def _actor_tree(root: Path) -> Path:
+    """A scratch copy of the actor fixture (a client-shaped tree); returns its root."""
+    shutil.copytree(ACTOR_FIXTURE, root, ignore=shutil.ignore_patterns("*.py", "vram"))
+    return root
+
+
+def _actor_patches(root: Path) -> list:
+    return [mock.patch.object(tool, "ACTORS_ROOT", root / "assets" / "actors"),
+            mock.patch.object(tool, "RETIRED_INDEX", root / "data" / "assets" / "retired_procedural_models.json")]
+
+
+def _git(*args: str) -> None:
+    subprocess.run(["git", "-c", "core.autocrlf=false", *args], check=True, capture_output=True)
+
+
+class ActorPlanning(unittest.TestCase):
+    """--actor-dir without encoding: which GLBs, which images, which directories, which outputs."""
+
+    def setUp(self):
+        self.scratch = Path(tempfile.mkdtemp(prefix="vram-actor-plan-")).resolve()
+        self.root = _actor_tree(self.scratch / "client")
+        self.native = self.root / "assets" / "actors" / "native"
+        self.patches = _actor_patches(self.root)
+        for patch in self.patches:
+            patch.start()
+
+    def tearDown(self):
+        for patch in self.patches:
+            patch.stop()
+        shutil.rmtree(self.scratch, ignore_errors=True)
+
+    def _relative(self, paths) -> list[str]:
+        return [path.relative_to(self.native).as_posix() for path in paths]
+
+    def test_glbs_are_recursive_sorted_and_never_rl_heads_or_retired(self):
+        self.assertEqual(self._relative(tool.actor_glbs(ACTOR_DIRS)), ACTOR_GLBS)
+        self.assertEqual(self._relative(tool.actor_glbs(["creatures", "creatures/basic_expansion"])),
+                         ["creatures/basic_expansion/fox.glb", "creatures/wolf.glb"], "each GLB once")
+        self.assertEqual(self._relative(tool.actor_glbs(["hair/fitted"])), ["hair/fitted/short_fitted.glb"])
+        # The retirement index is what keeps the retired creature out.
+        tool.RETIRED_INDEX.unlink()
+        self.assertIn("creatures/retired_beast.glb", self._relative(tool.actor_glbs(["creatures"])))
+
+    def test_actor_dir_names_a_directory_below_native(self):
+        for name in ("", ".", "/", "..", "../native/creatures", "creatures/../..", "rl_heads", "rl_heads/hair",
+                     "missing", "creatures/wolf.glb", str(self.native / "creatures"), "C:/creatures"):
+            with self.subTest(name=name), self.assertRaises(tool.BuildError):
+                tool.actor_glbs([name])
+        with self.assertRaisesRegex(tool.BuildError, "never planned"):
+            tool.actor_glbs(["rl_heads"])
+
+    def test_a_worktree_plans_only_its_tracked_glbs(self):
+        # The package's build tree is the commit: an untracked GLB in a checkout is not shipped, so it is not planned.
+        _git("init", "-q", str(self.root))
+        _git("-C", str(self.root), "add", "assets/actors/native/creatures/wolf.glb")
+        self.assertEqual(self._relative(tool.actor_glbs(["creatures"])), ["creatures/wolf.glb"])
+        _git("-C", str(self.root), "add", "assets/actors/native/creatures/retired_beast.glb")
+        self.assertEqual(self._relative(tool.actor_glbs(["creatures"])), ["creatures/wolf.glb"],
+                         "tracked but retired")
+
+    def test_retirement_index_must_be_readable(self):
+        tool.RETIRED_INDEX.write_text("{not json", encoding="utf-8")
+        with self.assertRaisesRegex(tool.BuildError, "retirement index"):
+            tool.actor_glbs(["creatures"])
+        tool.RETIRED_INDEX.write_text(json.dumps({"runtimePaths": "creatures/wolf.glb"}), encoding="utf-8")
+        with self.assertRaisesRegex(tool.BuildError, "retirement index"):
+            tool.actor_glbs(["creatures"])
+
+    def _inventory(self, dirs=None):
+        extract = self.scratch / "cache" / tool.EMBEDDED_DIR
+        return tool.inventory([], actors=tool.actor_glbs(dirs or ACTOR_DIRS), extract_dir=extract), extract
+
+    def test_images_are_keyed_by_their_glb_directory(self):
+        found, extract = self._inventory()
+        expected = {((self.native / directory).resolve(), ACTOR_SHA[key])
+                    for directory, plan in ACTOR_PLAN.items() for key in plan}
+        self.assertEqual(set(found), expected)
+        for (_, sha), record in found.items():
+            self.assertEqual(record["path"].parent, extract)
+            self.assertEqual(hashlib.sha256(record["path"].read_bytes()).hexdigest(), sha)
+        races = self.native.resolve() / "races"
+        self.assertEqual(found[(races, ACTOR_SHA["race_atlas"])]["maps"],
+                         {"actor:human_male.glb", "actor:human_female.glb"}, "one record for the shared atlas")
+        fox = (self.native / "creatures" / "basic_expansion").resolve()
+        self.assertEqual(found[(fox, ACTOR_SHA["fox_cutout"])]["roles"], {("base", "MASK")})
+        self.assertEqual(found[(fox, ACTOR_SHA["fox_cutout"])]["cutoffs"], {0.45})
+        self.assertEqual(found[(fox, ACTOR_SHA["wolf_base"])]["roles"], {("base", "OPAQUE")},
+                         "the fox directory's roles come from the fox only")
+        never = {ACTOR_SHA["rl_base"], ACTOR_SHA["retired_base"], *ACTOR_RECORD["uriImages"].values()}
+        self.assertFalse(never & {sha for _, sha in found}, "rl_heads, retired and URI images are never planned")
+        self.assertFalse(list(self.native.rglob("vram")), "planning writes nothing into the actor tree")
+
+    def test_recipes_and_exclusions_per_directory(self):
+        found, _ = self._inventory()
+        planned: dict[str, dict] = {}
+        for (directory, sha), record in found.items():
+            policy = tool.delivery_policy(record, directory)
+            key = next(k for k, v in ACTOR_SHA.items() if v == sha)
+            relative = directory.relative_to(self.native.resolve()).as_posix()
+            planned.setdefault(relative, {})[key] = policy["recipe"] or "!" + policy["reason"]
+            if policy["recipe"]:
+                self.assertEqual(policy["roles"], ACTOR_ROLES[policy["recipe"]], (relative, key))
+        self.assertEqual(planned, ACTOR_PLAN)
+
+    def test_an_rlcz_creature_is_planned_from_its_decoded_bytes(self):
+        try:
+            import creature_compression
+            creature_compression._zstd()
+        except Exception as error:  # noqa: BLE001 - the optional codec dependency
+            self.skipTest(f"creature_compression unavailable: {error}")
+        before, _ = self._inventory(["creatures"])
+        wolf = self.native / "creatures" / "wolf.glb"
+        wolf.write_bytes(creature_compression.encode(wolf.read_bytes()))
+        self.assertEqual(wolf.read_bytes()[:4], b"RLCZ")
+        after, _ = self._inventory(["creatures"])
+        self.assertEqual({key: (r["roles"], r["cutoffs"], r["maps"]) for key, r in after.items()},
+                         {key: (r["roles"], r["cutoffs"], r["maps"]) for key, r in before.items()})
+        wolf.write_bytes(wolf.read_bytes()[:-1])
+        with self.assertRaisesRegex(tool.BuildError, "cannot read actor GLB"):
+            self._inventory(["creatures"])
+
+    def test_targets_mirror_below_the_actor_root(self):
+        fox = self.native / "creatures" / "basic_expansion"
+        self.assertEqual(tool.actor_target(fox, None), fox / "vram")
+        out = self.scratch / "stage" / "app" / "assets" / "actors"
+        self.assertEqual(tool.actor_target(fox, out), out.resolve() / "native" / "creatures" / "basic_expansion" / "vram")
+        with self.assertRaisesRegex(tool.BuildError, "outside"):
+            tool.actor_target(self.scratch / "elsewhere", out)
+        (out / "native").mkdir(parents=True)
+        link = out / "native" / "creatures"
+        try:
+            link.symlink_to(self.native / "creatures", target_is_directory=True)
+        except (OSError, NotImplementedError) as error:
+            try:  # Windows without the symlink privilege: a directory junction redirects the same way
+                import _winapi
+                _winapi.CreateJunction(str(self.native / "creatures"), str(link))
+            except (ImportError, OSError):
+                self.skipTest(f"directory symlinks and junctions unavailable: {error}")
+        with self.assertRaisesRegex(tool.BuildError, "resolved sidecar output escapes"):
+            tool.actor_target(fox, out)
+
+    def test_an_actor_run_is_its_own_invocation(self):
+        # So its --floors (an owner choice for actor normals) and its cache pruning never reach a map's sidecars.
+        maps, cache, stage = self.scratch / "maps", self.scratch / "cache", self.scratch / "stage"
+        maps.mkdir()
+        conflicting = [dict(maps_roots=[maps]), dict(manifests=[maps / "world.json"]), dict(out_root=stage),
+                       dict(scenery_configs=[maps / "scenery.json"]), dict(scenery_out_root=stage),
+                       dict(skip=["_shared/images"]), dict(unskip=["landfall_town"])]
+        for options in conflicting:
+            arguments = dict(maps_roots=[], out_root=None, cache=cache, godot=Path("unused"), procs=1,
+                             actor_dirs=["creatures"])
+            arguments.update(options)
+            with self.subTest(options=list(options)), mock.patch.object(tool, "godot_version") as version:
+                with self.assertRaisesRegex(tool.BuildError, "run of its own"):
+                    tool.build(**arguments)
+                version.assert_not_called()
+        for options, message in ((dict(actor_out_root=stage), "needs --actor-dir"),
+                                 (dict(actor_dirs=["creatures"], link_output=True), "requires --actor-out-root"),
+                                 (dict(actor_dirs=["creatures"], actor_out_root=self.native / "stage"), "outside"),
+                                 (dict(actor_dirs=["creatures"], actor_out_root=cache / "out"), "outside")):
+            with self.subTest(options=list(options)), mock.patch.object(tool, "godot_version") as version:
+                with self.assertRaisesRegex(tool.BuildError, message):
+                    tool.build([], None, cache, Path("unused"), 1, **options)
+                version.assert_not_called()
+
+    def test_sidecar_folders_in_a_worktree_must_be_ignored(self):
+        _git("init", "-q", str(self.root))
+        _git("-C", str(self.root), "add", "assets")
+        target = tool.actor_target(self.native / "creatures", None)
+        with self.assertRaisesRegex(tool.BuildError, "not ignored"):
+            tool.ensure_output_ignored(target)
+        cache = self.scratch / "cache"
+        with mock.patch.object(tool, "godot_version") as version, mock.patch.object(tool, "run_encoders") as encoder:
+            with self.assertRaisesRegex(tool.BuildError, "not ignored"):
+                tool.build([], None, cache, Path("unused"), 1, actor_dirs=["creatures"])
+            version.assert_not_called()
+            encoder.assert_not_called()
+        self.assertFalse(target.exists(), "refused before anything is written")
+        (self.root / ".gitignore").write_text("vram/\n", encoding="utf-8")
+        tool.ensure_output_ignored(target)
+        tool.ensure_output_ignored(tool.actor_target(self.native / "creatures", self.scratch / "outside"))
+
+    def test_command_line_actor_run_scans_no_map_tree(self):
+        cache, stage = self.scratch / "cache", self.scratch / "stage"
+        argv = ["build_vram_textures.py", "--actor-dir", "creatures", "--actor-dir", "races", "--cache", str(cache),
+                "--actor-out-root", str(stage), "--measure-procs", "3", "--procs", "1"]
+        with mock.patch.object(tool, "find_godot", return_value=Path("godot")), \
+                mock.patch.object(tool, "build", return_value={"ok": 1}) as build, \
+                mock.patch.object(sys, "argv", argv), contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(tool.main(), 0)
+        arguments, keywords = build.call_args
+        self.assertEqual(arguments[0], [], "no default --maps for an actor run")
+        self.assertEqual((keywords["actor_dirs"], keywords["actor_out_root"], keywords["measure_procs"]),
+                         (["creatures", "races"], stage.resolve(), 3))
+        printed = io.StringIO()
+        with mock.patch.object(tool, "find_godot", return_value=Path("godot")), \
+                mock.patch.object(sys, "argv", argv + ["--maps", str(self.scratch)]), \
+                contextlib.redirect_stdout(printed):
+            self.assertEqual(tool.main(), 1)
+        self.assertIn("run of its own", printed.getvalue())
+
+
+@unittest.skipIf(SKIP_ENCODE, SKIP_ENCODE or "")
+class ActorBuild(unittest.TestCase):
+    """Encodes the actor fixture for real (one encoder process)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.scratch = Path(tempfile.mkdtemp(prefix="vram-actor-build-")).resolve()
+        cls.root = _actor_tree(cls.scratch / "client")
+        cls.native = cls.root / "assets" / "actors" / "native"
+        cls.patches = _actor_patches(cls.root)
+        for patch in cls.patches:
+            patch.start()
+        cls.cache = cls.scratch / "cache"
+        cls.out = cls.scratch / "stage" / "app" / "assets" / "actors"
+        with contextlib.redirect_stdout(io.StringIO()):
+            cls.summary = tool.build([], None, cls.cache, GODOT, 1, actor_dirs=ACTOR_DIRS, actor_out_root=cls.out,
+                                     measure_procs=MEASURE_PROCS)
+
+    @classmethod
+    def tearDownClass(cls):
+        for patch in cls.patches:
+            patch.stop()
+        shutil.rmtree(cls.scratch, ignore_errors=True)
+
+    def _build(self, **options) -> dict:
+        arguments = dict(actor_dirs=ACTOR_DIRS, measure_procs=MEASURE_PROCS)
+        arguments.update(options)
+        with contextlib.redirect_stdout(io.StringIO()):
+            return tool.build([], None, arguments.pop("cache", self.cache), GODOT, 1, **arguments)
+
+    def _indexes(self, out: Path) -> dict[str, dict]:
+        native = out / "native"
+        return {path.parent.parent.relative_to(native).as_posix(): json.loads(path.read_text(encoding="utf-8"))
+                for path in native.rglob("vram/index.json")}
+
+    @staticmethod
+    def _by_key(index: dict) -> dict:
+        names = {sha: key for key, sha in ACTOR_SHA.items()}
+        table = {names[sha]: entry["recipe"] for sha, entry in index["images"].items()}
+        table.update({names[sha]: "!" + ("quality" if reason.startswith("quality:") else reason)
+                      for sha, reason in index["excluded"].items()})
+        return table
+
+    def test_each_actor_directory_gets_its_own_index(self):
+        indexes = self._indexes(self.out)
+        self.assertEqual({directory: self._by_key(index) for directory, index in indexes.items()}, ACTOR_INDEX)
+        for directory, index in indexes.items():
+            vram = self.out / "native" / directory / "vram"
+            self.assertEqual((index["schema"], index["recipeVersion"]), (tool.SCHEMA, tool.RECIPE_VERSION))
+            self.assertEqual(sorted(path.name for path in vram.glob("*.evt")),
+                             sorted(entry["file"] for entry in index["images"].values()), directory)
+            self.assertTrue((vram / "report.json").is_file(), directory)
+            for sha, entry in index["images"].items():
+                data = (vram / entry["file"]).read_bytes()
+                self.assertEqual((hashlib.sha256(data).hexdigest(), len(data)), (entry["sha256"], entry["fileBytes"]))
+                self.assertEqual(entry["format"], tool.FORMAT_OF[entry["recipe"]])
+                self.assertEqual(entry["roles"], ACTOR_ROLES[entry["recipe"]], (directory, entry["file"]))
+                self.assertEqual((entry["width"], entry["mipmaps"]), (64, 6), "64 px carries its whole chain")
+        self.assertFalse(list(self.native.rglob("vram")), "--actor-out-root leaves the actor tree alone")
+        self.assertFalse((self.out / "native" / "rl_heads").exists())
+
+    def test_summary_counts_the_actor_images(self):
+        indexes = self._indexes(self.out).values()
+        images = [entry for index in indexes for entry in index["images"].values()]
+        self.assertEqual(self.summary["actorGlbs"], len(ACTOR_GLBS))
+        self.assertEqual(self.summary["actorImages"], sum(len(plan) for plan in ACTOR_PLAN.values()))
+        self.assertEqual(self.summary["actorAccepted"], len(images))
+        self.assertEqual(self.summary["actorExcluded"],
+                         {"size_not_multiple_of_4": 1, "role_conflict": 1, "no_material_role": 1, "quality": 1})
+        self.assertEqual(self.summary["actorGpuBytes"], sum(entry["gpuBytes"] for entry in images))
+        self.assertEqual(self.summary["actorFileBytes"], sum(entry["fileBytes"] for entry in images))
+        # One encode per (image, recipe): wolf_base and hair_base are encoded once for their two directories.
+        distinct = {(sha, recipe) for plan in ACTOR_PLAN.values() for sha, recipe in
+                    ((ACTOR_SHA[key], value) for key, value in plan.items()) if not recipe.startswith("!")}
+        self.assertEqual(self.summary["encoded"], len(distinct))
+        self.assertTrue(list((self.cache / tool.ACTOR_CACHE_DIR).glob("*.evt")), "encodes live in _actors/")
+        self.assertFalse(list(self.cache.glob("*.evt")), "and never at the cache root (the maps' entries)")
+
+    def test_a_rerun_encodes_nothing_and_writes_the_same_indexes(self):
+        out = self.scratch / "rerun"
+        again = self._build(actor_out_root=out, prune=False)
+        self.assertEqual((again["encoded"], again["cached"]), (0, self.summary["encoded"]))
+        for directory in ACTOR_INDEX:
+            relative = Path("native", directory, "vram", "index.json")
+            self.assertEqual((out / relative).read_bytes(), (self.out / relative).read_bytes(), directory)
+
+    def test_actor_floors_and_pruning_never_touch_a_map_run(self):
+        tree = self.scratch / "floors"
+        maps = tree / "maps"
+        shutil.copytree(FIXTURE, maps, ignore=shutil.ignore_patterns("vram", "*.py"))
+        cache = tree / "cache"
+        shutil.copytree(self.cache / tool.ACTOR_CACHE_DIR, cache / tool.ACTOR_CACHE_DIR)
+        with contextlib.redirect_stdout(io.StringIO()):
+            first = tool.build([maps], None, cache, GODOT, 1, measure_procs=MEASURE_PROCS)
+        map_entries = sorted(path.name for path in cache.glob("*.json"))
+        self.assertTrue(map_entries and first["encoded"] > 0)
+        actors = self._build(cache=cache, actor_out_root=tree / "actors", floors={"normal_mean_deg": 0.0})
+        self.assertEqual(actors["encoded"], 0)
+        indexes = self._indexes(tree / "actors")
+        refused = {key for index in indexes.values() for key, value in self._by_key(index).items()
+                   if value == "!quality"}
+        self.assertEqual(refused, {"wolf_normal", "race_normal", "mount_normal"}, "the floors apply to the actors")
+        self.assertEqual(sorted(path.name for path in cache.glob("*.json")), map_entries,
+                         "the actor run's pruning leaves the maps' encodes alone")
+        with contextlib.redirect_stdout(io.StringIO()):
+            again = tool.build([maps], None, cache, GODOT, 1, measure_procs=MEASURE_PROCS)
+        self.assertEqual(again["encoded"], 0)
+        index = json.loads((maps / "shared-assets" / "vram" / "index.json").read_text(encoding="utf-8"))
+        self.assertIn("normal", {entry["recipe"] for entry in index["images"].values()},
+                      "the map run keeps its own floors")
+        self.assertEqual(len(list((cache / tool.ACTOR_CACHE_DIR).glob("*.json"))), self.summary["encoded"],
+                         "and the map run's pruning leaves the actors' encodes alone")
+
+    def test_the_plans_actor_normal_floors_accept_the_mount_normal(self):
+        out = self.scratch / "relaxed"
+        summary = self._build(actor_out_root=out, prune=False, floors=ACTOR_NORMAL_FLOORS)
+        self.assertEqual(summary["encoded"], 0, "verdicts are taken again from the recorded numbers")
+        expected = {directory: dict(plan) for directory, plan in ACTOR_INDEX.items()}
+        expected["mounts"]["mount_normal"] = "normal"
+        self.assertEqual({d: self._by_key(index) for d, index in self._indexes(out).items()}, expected)
+        self.assertNotIn("quality", summary["actorExcluded"])
+
+    def test_link_output_links_from_the_actor_cache_and_the_budget_counts_the_whole_cache(self):
+        out = self.scratch / "linked"
+        self._build(actor_out_root=out, link_output=True, prune=False, cache_budget_bytes=1 << 30)
+        linked = 0
+        store = self.cache / tool.ACTOR_CACHE_DIR
+        for index_path in out.rglob("index.json"):
+            for sha, entry in json.loads(index_path.read_text(encoding="utf-8"))["images"].items():
+                self.assertTrue(any(os.path.samefile(index_path.parent / entry["file"], cached)
+                                    for cached in store.glob(f"{sha}.*.evt")), entry["file"])
+                linked += 1
+        self.assertEqual(linked, self.summary["actorAccepted"])
+        cache = self.scratch / "budget"
+        shutil.copytree(store, cache / tool.ACTOR_CACHE_DIR)
+        (cache / "map-encodes.evt").write_bytes(bytes(2 * 1024 * 1024))
+        used = sum(path.stat().st_size for path in cache.rglob("*") if path.is_file())
+        with self.assertRaisesRegex(tool.BuildError, "disk budget"):
+            self._build(cache=cache, actor_out_root=self.scratch / "linked-budget", link_output=True, prune=False,
+                        cache_budget_bytes=used + 4 * 1024 * 1024)
+
+    def test_without_an_out_root_the_sidecars_go_beside_the_glbs(self):
+        tree = _actor_tree(self.scratch / "in-place")
+        native = tree / "assets" / "actors" / "native"
+        with mock.patch.object(tool, "ACTORS_ROOT", tree / "assets" / "actors"):
+            summary = self._build(actor_dirs=["hair"], prune=False)
+        self.assertEqual(summary["encoded"], 0)
+        for directory in ("hair", "hair/fitted"):
+            index = json.loads((native / directory / "vram" / "index.json").read_text(encoding="utf-8"))
+            self.assertEqual(self._by_key(index), ACTOR_INDEX[directory])
+
+    def test_command_line(self):
+        out = self.scratch / "cli"
+        argv = ["build_vram_textures.py", "--actor-dir", "mounts", "--actor-dir", "equipment", "--cache",
+                str(self.cache), "--actor-out-root", str(out), "--godot", str(GODOT), "--procs", "1",
+                "--measure-procs", str(MEASURE_PROCS), "--no-prune"]
+        printed = io.StringIO()
+        with mock.patch.object(sys, "argv", argv), contextlib.redirect_stdout(printed):
+            self.assertEqual(tool.main(), 0)
+        text = printed.getvalue()
+        summary = json.loads(text[text.find("\n{") + 1:])
+        self.assertEqual((summary["encoded"], summary["actorGlbs"], summary["actorAccepted"]), (0, 2, 1))
+        self.assertEqual(set(self._indexes(out)), {"mounts", "equipment"})
 
 
 if __name__ == "__main__":

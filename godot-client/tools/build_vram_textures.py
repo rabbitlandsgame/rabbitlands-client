@@ -112,6 +112,41 @@ continent-v2/landfall_town) keeps planning the images that map's manifests
 name even inside a --skip-dir directory: the package skips the whole shared
 image pool (maps/_shared/images) but still ships sidecars for one map's images
 there.
+
+Actor GLBs (creatures, races, legacy hair, mounts, held props) embed their
+images too, and are planned the same way in a run of their own:
+
+    python godot-client/tools/build_vram_textures.py \
+        --actor-dir creatures --actor-dir races --actor-dir hair \
+        --actor-dir mounts --actor-dir equipment \
+        --actor-out-root STAGE/app/assets/actors ...
+
+--actor-dir names a directory below godot-client/assets/actors/native
+(repeatable). Every *.glb below it, recursively, is read from the checkout's
+tracked files (every file when the tree is not a git worktree); rl_heads/ is
+never planned (its hair and beard images are copies of the PCK-imported
+rl_head_textures maps, which the package strips instead:
+strip_rl_head_images.py), nor is any path that
+data/assets/retired_procedural_models.json retires. A staged RLCZ creature
+envelope (creature_compression.py) is read through its decoder. Each
+bufferView image is keyed, like a scenery image, by the GLB's own directory
+and the sha256 of its bytes, with the roles and cutoffs of every GLB in that
+directory that embeds it, so each actor directory gets its own vram/ index
+beside its GLBs (the GLTFState base path an image extension sees, as for
+scenery); URI images are left alone. --actor-out-root writes
+<root>/<GLB dir relative to godot-client/assets/actors>/vram instead (outside
+that tree); without it the sidecars go beside the GLBs, and a sidecar folder
+inside a git worktree must be one git ignores, so nothing becomes tracked
+content by accident.
+
+An actor run is its own invocation: --actor-dir refuses --maps, --manifest,
+--scope-group, --out-root, --scenery-config, --scenery-out-root, --skip-dir
+and --unskip-map, so its --floors (actor normal floors are an owner choice)
+never reach a map's sidecars. Its encodes live in the _actors/ folder of
+--cache, so neither run's pruning removes the other's encodes;
+--cache-budget-bytes still counts the whole --cache folder. The summary adds
+actorGlbs, actorImages, actorAccepted, actorExcluded {reason: n},
+actorGpuBytes and actorFileBytes.
 """
 from __future__ import annotations
 
@@ -175,6 +210,18 @@ SCENERY_ROOT = CLIENT / "assets" / "world"
 # Where the embedded images of scenery GLBs are extracted for the encoder, inside the (ignored) encode cache.
 EMBEDDED_DIR = "_embedded"
 EMBEDDED_TYPES = {"image/png": ".png", "image/jpeg": ".jpg", "image/webp": ".webp"}
+# Actor GLBs live below ACTORS_ROOT/native (res://assets/actors/native/...); --actor-out-root mirrors their
+# directories from ACTORS_ROOT, so a package passes <stage>/app/assets/actors.
+ACTORS_ROOT = CLIENT / "assets" / "actors"
+ACTOR_NATIVE_DIR = "native"
+# Never planned: the RL head's GLBs (their hair/beard images are byte copies of the PCK-imported
+# rl_head_textures maps; the package strips them, strip_rl_head_images.py).
+ACTOR_NEVER_PLANNED = ("rl_heads",)
+# Retired procedural models (runtimePaths, relative to ACTORS_ROOT's parent, res://assets).
+RETIRED_INDEX = CLIENT / "data" / "assets" / "retired_procedural_models.json"
+# An actor run keeps its encodes in this folder of --cache: each run prunes only its own entries.
+ACTOR_CACHE_DIR = "_actors"
+RLCZ_MAGIC = b"RLCZ"
 
 
 class BuildError(RuntimeError):
@@ -197,8 +244,12 @@ def glb_json(path: Path) -> dict:
 
 
 def glb_chunks(path: Path) -> tuple[dict, bytes]:
-    """A GLB's JSON document and its BIN chunk (b"" when it has none)."""
+    """A GLB's JSON document and its BIN chunk (b"" when it has none). A staged RLCZ creature envelope
+    (creature_compression.py) is decoded and verified first."""
     data = path.read_bytes()
+    if data[:4] == RLCZ_MAGIC:
+        import creature_compression
+        data = creature_compression.decode(data)  # PayloadError is a ValueError
     if len(data) < 20 or data[:4] != b"glTF":
         raise ValueError("not a GLB")
     length = struct.unpack_from("<I", data, 12)[0]
@@ -233,10 +284,70 @@ def scenery_glbs(configs: list[Path]) -> list[Path]:
     return glbs
 
 
-def embedded_images(glb: Path, extract_dir: Path) -> list[tuple[int, str, Path]]:
+def actor_glbs(dirs: list[str]) -> list[Path]:
+    """The GLBs below each named directory of ACTORS_ROOT/native, recursively, sorted, once each: the checkout's
+    tracked files when it is a git worktree (a dev checkout's untracked or import-extracted files never ship),
+    else every file. Never rl_heads/ (ACTOR_NEVER_PLANNED) and never a path the retirement index retires."""
+    native = (ACTORS_ROOT / ACTOR_NATIVE_DIR).resolve()
+    retired = retired_actor_paths()
+    glbs: set[Path] = set()
+    for name in dirs:
+        text = str(name).replace(chr(92), "/").strip("/")
+        if not text or text == "." or Path(text).is_absolute() or ":" in text or ".." in Path(text).parts:
+            raise BuildError(f"--actor-dir names a directory below {native}: {name!r}")
+        directory = (native / text).resolve()
+        if directory == native or not directory.is_relative_to(native):
+            raise BuildError(f"--actor-dir {name!r} is not a directory below {native}")
+        if directory.relative_to(native).parts[0] in ACTOR_NEVER_PLANNED:
+            raise BuildError(f"--actor-dir {name!r}: {directory.relative_to(native).parts[0]}/ is never planned")
+        if not directory.is_dir():
+            raise BuildError(f"--actor-dir {name!r} is missing: {directory}")
+        listed = _tracked_files(directory)
+        candidates = ([directory / item for item in listed] if listed is not None
+                      else [path for path in directory.rglob("*") if path.is_file()])
+        for path in candidates:
+            if path.suffix.lower() != ".glb" or not path.is_file():
+                continue
+            path = path.resolve()
+            if not path.is_relative_to(directory):
+                raise BuildError(f"actor GLB {path} resolves outside {directory}")
+            if path.relative_to(native).parts[0] in ACTOR_NEVER_PLANNED or path in retired:
+                continue
+            glbs.add(path)
+    return sorted(glbs)
+
+
+def _tracked_files(directory: Path) -> list[str] | None:
+    """Paths (relative to directory, posix) git tracks below it, or None when it is not inside a git worktree."""
+    try:
+        result = subprocess.run(["git", "-C", str(directory), "ls-files", "-z", "--", "."], capture_output=True)
+    except OSError:
+        return None
+    if result.returncode != 0:
+        return None
+    return [item for item in result.stdout.decode("utf-8").split("\0") if item]
+
+
+def retired_actor_paths() -> set[Path]:
+    """The resolved files retired_procedural_models.json retires (runtimePaths, relative to res://assets)."""
+    if not RETIRED_INDEX.is_file():
+        return set()
+    try:
+        paths = json.loads(RETIRED_INDEX.read_text(encoding="utf-8-sig")).get("runtimePaths", [])
+        if not isinstance(paths, list):
+            raise ValueError("runtimePaths is not a list")
+    except (OSError, ValueError, AttributeError) as error:
+        raise BuildError(f"cannot read the retirement index {RETIRED_INDEX}: {error}") from error
+    assets = ACTORS_ROOT.parent
+    return {(assets / item).resolve() for item in paths if isinstance(item, str) and item}
+
+
+def embedded_images(glb: Path, extract_dir: Path,
+                    chunks: tuple[dict, bytes] | None = None) -> list[tuple[int, str, Path]]:
     """(image index, sha256, extracted file) for each bufferView image of a GLB. The bytes are written once, by
-    sha, into extract_dir (the encoder and the quality check read files)."""
-    document, binary = glb_chunks(glb)
+    sha, into extract_dir (the encoder and the quality check read files). `chunks` is the GLB's already read
+    (document, BIN chunk), when the caller has it."""
+    document, binary = chunks if chunks is not None else glb_chunks(glb)
     views = document.get("bufferViews", [])
     found = []
     for index, image in enumerate(document.get("images", [])):
@@ -462,7 +573,8 @@ def declared_policy_directories(manifest: dict, uri: str, glb: Path, maps_roots:
 
 
 def inventory(maps_roots: list[Path], manifests: list[Path] | None = None, scenery: list[Path] | None = None,
-              extract_dir: Path | None = None, input_files: set[Path] | None = None) -> dict[tuple[Path, str], dict]:
+              extract_dir: Path | None = None, input_files: set[Path] | None = None,
+              actors: list[Path] | None = None) -> dict[tuple[Path, str], dict]:
     """(image directory, sha) -> {path, roles: {(role, alphaMode)}, maps: set, cutoffs: set}
 
     One record per COPY of an image: two pools can hold the same bytes (the
@@ -635,11 +747,32 @@ def inventory(maps_roots: list[Path], manifests: list[Path] | None = None, scene
             record["cutoffs"] |= cutoffs.get(index, set())
             record["maps"].add("scenery:" + glb.name)
             scenery_images += 1
+    # Actor GLBs (actor_glbs) embed their images: keyed like scenery by the GLB's own directory (its GLTFState base
+    # path), with the roles and cutoffs of every GLB there that embeds them.
+    actor_images = 0
+    for glb in actors or []:
+        if extract_dir is None:
+            raise BuildError("actor GLBs need an extraction directory")
+        try:
+            chunks = glb_chunks(glb)
+            extracted = embedded_images(glb, extract_dir, chunks)
+        except (OSError, ValueError, KeyError) as error:
+            raise BuildError(f"cannot read actor GLB {glb}: {error}") from error
+        roles = image_roles(chunks[0])
+        cutoffs = image_cutoffs(chunks[0])
+        for index, sha, path in extracted:
+            record = found.setdefault((glb.parent.resolve(), sha),
+                                      {"path": path, "roles": set(), "maps": set(), "cutoffs": set()})
+            record["roles"] |= roles.get(index, set())
+            record["cutoffs"] |= cutoffs.get(index, set())
+            record["maps"].add("actor:" + glb.name)
+            actor_images += 1
     shas = {sha for _, sha in found}
     log(f"inventory: {len(shas)} content-addressed images ({len(found)} copies in "
         f"{len({directory for directory, _ in found})} directories) from {manifest_count} map packages "
         f"and {prototypes} prototypes" + (f"; {scenery_images} embedded images of {len(scenery)} scenery GLBs"
-                                            if scenery else ""))
+                                            if scenery else "")
+        + (f"; {actor_images} embedded images of {len(actors)} actor GLBs" if actors else ""))
     return found
 
 
@@ -993,7 +1126,23 @@ def build(maps_roots: list[Path], out_root: Path | None, cache: Path, godot: Pat
           prune: bool = True, floors: dict | None = None, skip: list[str] | None = None,
           link_output: bool = False, cache_budget_bytes: int | None = None,
           manifests: list[Path] | None = None, scenery_configs: list[Path] | None = None,
-          scenery_out_root: Path | None = None, unskip: list[str] | None = None) -> dict:
+          scenery_out_root: Path | None = None, unskip: list[str] | None = None,
+          actor_dirs: list[str] | None = None, actor_out_root: Path | None = None,
+          measure_procs: int | None = None) -> dict:
+    if actor_dirs:
+        # Its own invocation: the floors and the encode-cache pruning of an actor run never touch a map's sidecars.
+        if (maps_roots or manifests is not None or out_root is not None or scenery_configs
+                or scenery_out_root is not None or skip or unskip):
+            raise BuildError("--actor-dir is a run of its own: it takes no --maps, --manifest, --scope-group, "
+                             "--out-root, --scenery-config, --scenery-out-root, --skip-dir or --unskip-map")
+        if actor_out_root is not None and (actor_out_root.resolve().is_relative_to(ACTORS_ROOT.resolve())
+                                           or actor_out_root.resolve().is_relative_to(cache.resolve())):
+            raise BuildError(f"--actor-out-root must be outside {ACTORS_ROOT} and the encode cache "
+                             "(omit it to write beside the GLBs)")
+        if link_output and actor_out_root is None:
+            raise BuildError("--link-output with --actor-dir requires --actor-out-root.")
+    elif actor_out_root is not None:
+        raise BuildError("--actor-out-root needs --actor-dir")
     if manifests is not None and (out_root is None or any(
             out_root.resolve().is_relative_to(root.resolve()) for root in maps_roots)):
         raise BuildError("scoped preparation requires --out-root outside the source --maps trees; "
@@ -1002,19 +1151,33 @@ def build(maps_roots: list[Path], out_root: Path | None, cache: Path, godot: Pat
             scenery_out_root is None or scenery_out_root.resolve().is_relative_to(SCENERY_ROOT.resolve())):
         raise BuildError("scoped preparation with --scenery-config requires --scenery-out-root outside "
                          f"{SCENERY_ROOT}; a partial scope must not replace a scenery folder's index")
-    if link_output and (out_root is None or out_root.resolve() == cache.resolve()):
+    if link_output and not actor_dirs and (out_root is None or out_root.resolve() == cache.resolve()):
         raise BuildError("--link-output requires a separate disposable output directory.")
     if link_output and scenery_configs and scenery_out_root is None:
         raise BuildError("--link-output with --scenery-config requires --scenery-out-root.")
     floors = dict(FLOORS, **(floors or {}))
     started = time.time()
     ensure_ignored(cache)
+    # The runner's disk budget covers the whole --cache folder; an actor run's encodes live in its _actors/.
+    budget_root = cache
+    if actor_dirs:
+        cache = cache / ACTOR_CACHE_DIR
+        cache.mkdir(parents=True, exist_ok=True)
+    actors = actor_glbs(actor_dirs) if actor_dirs else []
+    actor_dirs_found = {glb.parent.resolve() for glb in actors}
+    if actor_dirs:
+        # Before any encode: every sidecar folder this run writes must be outside git's tracking.
+        for directory in sorted(actor_dirs_found):
+            ensure_output_ignored(actor_target(directory, actor_out_root))
     version = godot_version(godot)
     scenery = scenery_glbs(scenery_configs or [])
     scenery_dirs = {glb.parent.resolve() for glb in scenery}
-    found = inventory(maps_roots, manifests=manifests, scenery=scenery, extract_dir=cache / EMBEDDED_DIR)
+    found = inventory(maps_roots, manifests=manifests, scenery=scenery, extract_dir=cache / EMBEDDED_DIR,
+                      actors=actors)
 
     def target_of(source_dir: Path) -> Path:
+        if source_dir in actor_dirs_found:
+            return actor_target(source_dir, actor_out_root)
         if source_dir in scenery_dirs:
             return scenery_target(source_dir, scenery_out_root)
         return sidecar_target(maps_roots, source_dir, out_root)
@@ -1061,10 +1224,10 @@ def build(maps_roots: list[Path], out_root: Path | None, cache: Path, godot: Pat
             for batch in texture_batches(list(grouped.values())):
                 # Reserve both a worst-case compressed sidecar and its raw DDS
                 # until quality measurement removes the latter.
-                check_cache_budget(cache, cache_budget_bytes,
+                check_cache_budget(budget_root, cache_budget_bytes,
                                    2 * sum(group["_dds_bytes"] for group in batch) + 4 * 1024**2)
                 ensure([item for group in batch for item in group["items"]], _bounded=True)
-                check_cache_budget(cache, cache_budget_bytes)
+                check_cache_budget(budget_root, cache_budget_bytes)
             return
         jobs, remeasure = [], []
         # Two directories' copies of one image share one encode (the cache key
@@ -1125,7 +1288,8 @@ def build(maps_roots: list[Path], out_root: Path | None, cache: Path, godot: Pat
                            "key": item["key"], "cutoffs": cutoffs_of(item)}, meta))
         if not tasks:
             return
-        with futures.ProcessPoolExecutor(max_workers=max(1, min(os.cpu_count() or 4, 16))) as pool:
+        workers = measure_procs if measure_procs else min(os.cpu_count() or 4, 16)
+        with futures.ProcessPoolExecutor(max_workers=max(1, workers)) as pool:
             quality = list(pool.map(measure, [(job["src"], job["dds"], job["recipe"], meta["format"], meta["width"],
                                                meta["height"], meta["mipmaps"], job["cutoffs"])
                                               for job, meta in tasks], chunksize=4))
@@ -1164,6 +1328,9 @@ def build(maps_roots: list[Path], out_root: Path | None, cache: Path, godot: Pat
     # one PSNR per distinct encode: the copies of a shared image in two pools are one encode, and counting each copy
     # would weigh shared images twice in the set-level median (and make it depend on which pools are in the tree)
     base_psnr, psnr_keys = [], set()
+    if actor_dirs:
+        summary.update({"actorGlbs": len(actors), "actorImages": 0, "actorAccepted": 0, "actorExcluded": {},
+                        "actorGpuBytes": 0, "actorFileBytes": 0})
     for source_dir, plan in sorted(plans.items()):
         target = targets[source_dir]
         # Recheck after encoding in case an existing stage's directory layout changed.
@@ -1214,6 +1381,14 @@ def build(maps_roots: list[Path], out_root: Path | None, cache: Path, godot: Pat
             "gpuMiB": round(sum(e["gpuBytes"] for e in index["images"].values()) / 1048576, 1),
             "fileMiB": round(sum(e["fileBytes"] for e in index["images"].values()) / 1048576, 1),
             "staleRemoved": len(stale)}
+        if source_dir in actor_dirs_found:
+            # One per (directory, image): an image two actor directories embed has a sidecar in each.
+            summary["actorImages"] += len(index["images"]) + len(index["excluded"])
+            summary["actorAccepted"] += len(index["images"])
+            for reason, count in reasons.items():
+                summary["actorExcluded"][reason] = summary["actorExcluded"].get(reason, 0) + count
+            summary["actorGpuBytes"] += sum(e["gpuBytes"] for e in index["images"].values())
+            summary["actorFileBytes"] += sum(e["fileBytes"] for e in index["images"].values())
     if base_psnr:
         base_psnr.sort()
         median = base_psnr[len(base_psnr) // 2]
@@ -1250,17 +1425,46 @@ def sidecar_target(maps_roots: list[Path], source_dir: Path, out_root: Path | No
 
 def scenery_target(source_dir: Path, scenery_out_root: Path | None) -> Path:
     """A scenery GLB directory's vram/: beside the GLBs, or below scenery_out_root mirroring SCENERY_ROOT."""
-    if scenery_out_root is None:
+    return _mirrored_target(source_dir, SCENERY_ROOT, scenery_out_root, "scenery")
+
+
+def actor_target(source_dir: Path, actor_out_root: Path | None) -> Path:
+    """An actor GLB directory's vram/: beside the GLBs, or below actor_out_root mirroring ACTORS_ROOT
+    (<stage>/app/assets/actors/native/<dir>/vram, where the packaged client reads it)."""
+    return _mirrored_target(source_dir, ACTORS_ROOT, actor_out_root, "actor")
+
+
+def _mirrored_target(source_dir: Path, source_root: Path, out_root: Path | None, kind: str) -> Path:
+    if out_root is None:
         return source_dir / SIDECAR_DIR
-    boundary = scenery_out_root.resolve()
+    boundary = out_root.resolve()
     try:
-        relative = source_dir.resolve().relative_to(SCENERY_ROOT.resolve())
+        relative = source_dir.resolve().relative_to(source_root.resolve())
     except ValueError as error:
-        raise BuildError(f"scenery directory {source_dir} is outside {SCENERY_ROOT}") from error
+        raise BuildError(f"{kind} directory {source_dir} is outside {source_root}") from error
     target = boundary / relative / SIDECAR_DIR
     if not target.resolve().is_relative_to(boundary):
         raise BuildError(f"resolved sidecar output escapes its destination root: {target}")
     return target
+
+
+def ensure_output_ignored(target: Path) -> None:
+    """A sidecar folder this run writes inside a git worktree must be one git ignores: sidecars are package output
+    (or a local trial of it), never tracked content. Checked before anything is created or encoded."""
+    probe = target
+    while not probe.is_dir():
+        if probe.parent == probe:
+            return
+        probe = probe.parent
+    inside = subprocess.run(["git", "-C", str(probe), "rev-parse", "--show-toplevel"], capture_output=True, text=True)
+    if inside.returncode != 0:
+        return  # not inside a git worktree
+    ignored = subprocess.run(["git", "-C", str(probe), "check-ignore", "-q", str(target / "index.json")],
+                             capture_output=True)
+    if ignored.returncode != 0:
+        raise BuildError(f"the sidecar folder {target} is inside a git worktree and not ignored; pass "
+                         "--actor-out-root outside it (or an ignored folder such as .local/texture-preparation/"
+                         "actors) or ignore the folder first")
 
 
 def common_root(maps_roots: list[Path], source_dir: Path) -> Path:
@@ -1312,10 +1516,21 @@ def main() -> int:
     parser.add_argument("--scenery-out-root", type=Path,
                         help="write the scenery sidecars to <root>/<GLB dir relative to godot-client/assets/world>"
                              "/vram instead of beside the GLBs (required with --manifest/--scope-group)")
+    parser.add_argument("--actor-dir", action="append", default=[],
+                        help="directory below godot-client/assets/actors/native (e.g. creatures) whose GLBs' "
+                             "embedded images get sidecars in the vram/ folder of each GLB's directory; repeatable. "
+                             "A run of its own: no map or scenery options, and no default --maps")
+    parser.add_argument("--actor-out-root", type=Path,
+                        help="write the actor sidecars to <root>/<GLB dir relative to godot-client/assets/actors>"
+                             "/vram instead of beside the GLBs (a package passes <stage>/app/assets/actors)")
+    parser.add_argument("--measure-procs", type=int,
+                        help="processes for the quality check (default: the CPU count, at most 16)")
     options = parser.parse_args()
     try:
         manifests = [path.resolve() for path in options.manifest] + scope_group_manifests(options.scope_group)
-        summary = build([p.resolve() for p in (options.maps or [REPO / "eloria-assets" / "maps"])],
+        # An actor run scans no map tree unless one is named (and then refuses it).
+        maps = options.maps or ([] if options.actor_dir else [REPO / "eloria-assets" / "maps"])
+        summary = build([p.resolve() for p in maps],
                         options.out_root.resolve() if options.out_root else None,
                         options.cache.resolve(), find_godot(options.godot), options.procs,
                         prune=not options.no_prune, floors=json.loads(options.floors) if options.floors else None,
@@ -1323,7 +1538,9 @@ def main() -> int:
                         manifests=manifests if options.manifest or options.scope_group else None,
                         scenery_configs=[path.resolve() for path in options.scenery_config],
                         scenery_out_root=options.scenery_out_root.resolve() if options.scenery_out_root else None,
-                        unskip=options.unskip_map)
+                        unskip=options.unskip_map, actor_dirs=options.actor_dir,
+                        actor_out_root=options.actor_out_root.resolve() if options.actor_out_root else None,
+                        measure_procs=options.measure_procs)
     except BuildError as error:
         log(f"FAILED: {error}")
         return 1
