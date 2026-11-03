@@ -144,6 +144,74 @@ native arithmetic alone does not establish a performance benefit. The family
 remains experimental despite activation in the human-testing profile;
 complete-scene performance qualification remains pending.
 
+## Content digest (SHA-256)
+
+`RabbitLandsContentDigest` (`src/client_digest.{h,cpp}` over
+`core/src/digest.rs` and `digest_ffi.rs`) produces the SHA-256 digests every
+manifest, cache key, prepared record and server value already carries:
+lowercase hex, byte-identical to `FileAccess.get_sha256`. It changes no format;
+it only makes the same digest cheaper. The `ContentDigest` facade
+(`src/runtime/content_digest.gd`) is its only intended caller; until NH-A2 wires
+it there, the facade keeps its GDScript backend and nothing on the player path
+calls this class.
+
+* The block function is chosen once per process: the x86 SHA extensions
+  (SHA-NI) when the CPU reports `sha`, `sse2`, `ssse3` and `sse4.1`, otherwise a
+  portable FIPS 180-4 implementation. `RABBITLANDS_CONTENT_DIGEST_SHA=portable`
+  forces the portable path, for measuring the no-SHA-NI cost on a SHA-NI machine.
+  The core stays dependency-free and builds and tests offline.
+* Files are streamed in reads of at most 1 MiB (smaller files get a buffer just
+  big enough); a whole file is never held in memory. Flag 1 (`FOLD_CRLF`) hashes
+  a file with every CR that is directly followed by LF dropped, deciding a CR at
+  the end of one read by the next read, exactly as `ContentDigest.FOLD_CRLF`; a
+  per-row `folded` result says whether any byte was dropped. Unknown flag bits
+  are ignored.
+* A batch runs on `threads` threads in all (1-64, the caller included):
+  `std::thread::scope` helpers take rows in caller order from one atomic index,
+  so the caller decides the order (largest first). It never uses the Godot
+  `WorkerThreadPool` and touches no engine object, so any thread may call it;
+  every method is const and the class holds no state. A helper thread that
+  cannot start leaves its share to the others; a row whose hashing panics is
+  status 4. Every FFI entry is wrapped in `catch_unwind`, and outputs are written
+  only after the whole batch succeeded.
+* Paths are absolute OS paths in UTF-8. Empty, relative, NUL-containing, longer
+  than the longest Windows path, and engine paths (`res://`, `user://`) are
+  status 3 without touching the file system: the caller globalizes `user://`
+  and installed `res://../` paths and keeps PCK paths on `FileAccess`.
+  Paths longer than 260 characters work (Rust's standard library adds the
+  `\\?\` prefix).
+
+GDScript API (results per row, in caller order):
+
+* `api_info()` -> `{digest_api: 1, sha256_backend: "sha_ni"|"portable", cpu_sha_ni,
+  logical_cpus, max_files, max_threads, max_path_bytes, read_bytes, flags: 1,
+  index: {supported: false, active: false}}`
+* `sha256_buffer(bytes)` -> lowercase hex
+* `sha256_files(paths, flags = [], threads = 1)` -> `{result, digests ("" on failure),
+  status (0 ok, 1 open, 2 read, 3 bad path, 4 internal), folded, bytes, threads,
+  backend, elapsed_us}`
+* `verify_files(paths, expected, flags = [], threads = 1)` -> the same plus `ok`
+  (1 when the row was read and equals its expected value exactly; an empty,
+  upper-case or malformed expected value never passes). Every row is hashed
+  even after a failure.
+
+`result` is 0, or 1 for a refused call (more than 1,048,576 rows, an expected
+list of the wrong length); a refused call reports every row as status 4.
+Nothing is remembered between calls: no path, size or modification-time key
+and no table of earlier results. The Phase B BLAKE3 equivalence index is not
+built; `index.supported` says so. The runtime ABI stays 1 (an added class is
+backward compatible); callers gate on `ClassDB.class_exists` and
+`digest_api == 1`.
+
+Checks: `cargo test --offline --locked` (NIST vectors on both backends, SHA-NI
+against portable on every length to 8 KiB and every split around block
+boundaries, CRLF folding at read sizes 1-4096, empty/missing/directory/
+non-ASCII/over-260-character files, batches on 1-1000 threads, FFI refusals),
+`tests/test_client_runtime_digest.gd` (engine and `ContentDigest` agreement),
+and `tools/native_digest_check.py` (every file of an install against Python's
+hashlib). `cargo run --release --offline --locked --example digest_bench` is a
+micro-benchmark over a list of files.
+
 ## Optional remote derived-state pilot
 
 `RABBITLANDS_REMOTE_PRESENTATION=rust` together with

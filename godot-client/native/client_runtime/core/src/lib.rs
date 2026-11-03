@@ -1,5 +1,9 @@
 //! Engine-independent, main-thread-owned presentation data. No Godot pointers.
+//! `digest` is the exception to main-thread ownership: stateless content
+//! hashing that any thread may call.
 pub mod flight;
+pub mod digest;
+mod digest_ffi;
 
 use std::panic::{AssertUnwindSafe, catch_unwind};
 mod residency;

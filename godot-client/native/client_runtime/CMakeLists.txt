@@ -28,6 +28,7 @@ target_sources(client_runtime PRIVATE src/client_flights.cpp src/client_flights.
     ${CMAKE_CURRENT_SOURCE_DIR}/../native_crowd/src/native_spell_flight_geometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../native_crowd/src/native_spell_flight_geometry.h)
 target_sources(client_runtime PRIVATE src/client_residency.cpp src/client_residency.h)
+target_sources(client_runtime PRIVATE src/client_digest.cpp src/client_digest.h)
 target_sources(client_runtime PRIVATE
     src/mounted_cape_body_surface.cpp src/mounted_cape_body_surface.h
     src/mounted_cape_projector.cpp src/mounted_cape_projector.h)
