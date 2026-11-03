@@ -8,11 +8,13 @@ and the RL head body cut keep reading the arrays they read today.
 
 Status: the shared format (`src/actors/actor_geometry_format.gd`) and the runtime
 applier (`src/actors/actor_geometry.gd`) exist and are tested
-(`tests/test_actor_geometry.gd`), and so does the offline tool that decides which
-lining triangles are hidden (`eloria-assets/tools/lining_visibility.py`, below).
-Nothing calls the applier yet: the call in the actor parse
-(`GlbSceneCache._build_raw`) and the cook arrive in later steps, so the game
-draws exactly what it drew before.
+(`tests/test_actor_geometry.gd`), and so do the cook that writes a developer
+catalogue (`tools/actor_geometry_cache.py`, below) and the offline tool that
+decides which lining triangles are hidden
+(`eloria-assets/tools/lining_visibility.py`, below). Nothing calls the applier
+yet: the call in the actor parse (`GlbSceneCache._build_raw`), lining masks in
+the cook and release packaging arrive in later steps, so the game draws exactly
+what it drew before.
 
 ## Sidecar
 
@@ -113,6 +115,121 @@ Every process on the editor binary reads the dev root, headless tests
 included. Once the actor parse calls the applier, a worktree with a cooked dev
 root draws (and tests) actors with sidecars; set
 `RABBITLANDS_ACTOR_GEOMETRY=off` to compare against the plain parse.
+
+## Cook
+
+`tools/actor_geometry_cache.py` decides what needs cooking and writes the
+catalogue; the headless Godot script `tools/actor_geometry/cook.gd` parses each
+file exactly as the runtime parses an actor glTF (the project's glTF
+extensions registered, `ActorImages` enabled, `CreaturePayload.append`) and
+plans every surface with `tools/actor_geometry/lod_policy.gd`. Nothing is
+written beside the sources.
+
+```
+python godot-client/tools/actor_geometry_cache.py cook   --godot <editor exe> [--wrapper "<prefix>"] [--jobs 2]
+python godot-client/tools/actor_geometry_cache.py verify --godot <editor exe> [--wrapper "<prefix>"] [--jobs 2]
+python godot-client/tools/actor_geometry_cache.py report
+python godot-client/tools/actor_geometry_cache.py compare <root A> <root B>
+python godot-client/tools/actor_geometry_cache.py predict --census <crowd census json>
+```
+
+- Scope: tracked `.glb`/`.gltf` files under `assets/actors/native/` (the
+  applier's `in_scope` rule: not `rl_heads/`), minus retired models; 2,072
+  files today. `--paths` cooks or verifies a subset and keeps every other
+  entry.
+- Output (default `<repository>/.local/actor-geometry/`, which must be
+  Git-ignored): the catalogue root `rl-actor-geometry-v1/` (`catalog.json`,
+  `blobs/`), read by an editor checkout, and the driver state `cook/`
+  (`summary.json` with every surface's plan, the newest eight run folders with
+  jobs, reports and Godot logs, and an isolated Godot profile). Unreferenced
+  blobs are removed after each cook.
+- Reuse: a file is cooked again only when its bytes, the external buffers it
+  reads (the `.bin` of a `.gltf`), its model scale or the policy digest
+  (engine build from `godot --version`, `cook.gd`, `lod_policy.gd`,
+  `actor_geometry_format.gd`) change, or its blob is damaged. The project's
+  glTF extensions are not in the digest: a parse change that alters vertex or
+  index counts or index buffers is caught at runtime (the file is drawn as
+  parsed) and by `verify`, one that only moves vertex data is not, so recook
+  with `--force` after changing them.
+- One driver per output folder: `cook` and `verify` hold an OS lock on
+  `cook/driver.lock`, and a second driver on the same folder stops with an
+  error.
+- Godot runs: headless, `--log-file` before `--path`, one process per batch
+  (`--batch-size`, default 250 files), up to `--jobs` at a time, each prefixed
+  by `--wrapper` (for example a machine-wide slot lock). The timeout
+  (`--timeout-seconds`) starts when Godot opens its log. Before each file the
+  script prints `actor geometry cook: <path>`; engine `ERROR:` lines are
+  attributed to that file in the summary, and a `SCRIPT ERROR` fails it (no
+  catalogue entry).
+- The catalogue is compact JSON with sorted keys and `source_check: "file"`
+  (`--source-check parsed` for a root verified with its actor files); entries
+  carry `inputs.policy_digest`. A file with no chain at all gets no entry (the
+  runtime counts it `not_listed`).
+- `verify` applies every catalogued sidecar with `ActorGeometry.apply` to a
+  fresh runtime parse and, after `generate_scene()`, compares the LOD levels
+  the RenderingServer holds with the sidecar's.
+- `predict` maps the pieces of a crowd triangle census (the wave-2 design
+  census format: `triangleCensus` per actor with distances) to cooked meshes
+  through `equipment.json` (one race variant) and the race body, and reports
+  the triangles the chains would draw at each body's distance and lod_bias,
+  plus the share of drawn triangles on surfaces with two or more levels.
+
+### LOD policy v1
+
+For every triangle surface of at least 64 triangles (`lod_policy.gd`):
+
+- Chain: `ImporterMesh.generate_lods(60, 25, [])` on a one-surface copy of the
+  exact parsed surface. Vertex buffers are never touched.
+- A triangle soup (one vertex per corner) whose corners, welded by position,
+  disagree on UV or skin for more than 5 % of corners has per-face atlas tiles
+  and gets no chain (`per_face_tiles`): simplifying it smears tiles. These are
+  the 128 torso linings, 7 other equipment pieces, 5 creatures (moth, badger,
+  golem, sprite, dryad queen) and the giant rat mount; vertex-colour linings
+  (C10) are their route.
+- A surface Godot gives no chain is simplified as a position-welded proxy, and
+  each proxy corner is mapped back to an original vertex at that position,
+  preferring one UV island for the whole triangle. A proxy level is kept only
+  when the surface's welded corners agree on UV and skin (>= 95 %) or >= 95 % of
+  the level's triangles stay on one UV island (`seams` otherwise: the generic
+  cape's three surfaces and `crystal_dire_wolf`, whose proxy levels would cross
+  seams on 40-50 % of triangles).
+- Kept levels: per target fraction 50 / 25 / 12 / 5 % of the base triangles,
+  the generated level nearest to it (within 1.5x, at least 32 triangles, each
+  smaller and later than the one before).
+- Edge length of the level kept for target k:
+  `max(band_k * 1.658 / (1920 * model_scale), error / 3)`, bands 8 / 18 / 36 /
+  70 m. Godot draws level i while `edge * model_scale * lod_bias / (depth *
+  1.658) <= 1 / viewport_width` (1.658 = 2 tan(hfov/2) at the 50 degree
+  gameplay FOV and 16:9; depth is the camera's distance to the near side of
+  the instance's AABB, model_scale its largest axis scale), so at 1920 px and lod_bias 1 (High) a level never
+  draws nearer than its band, and never before its geometric error (Godot's
+  own figure, in mesh units) covers at most 3 px. Medium (lod_bias 0.65) and
+  Low (0.35) reach the bands at 0.65x and 0.35x the depth, where the error
+  clamp allows 4.6 px and 8.6 px. A smaller viewport (1280 px) switches
+  proportionally nearer.
+- `model_scale` = the catalogue import scale of a `models.json` scene (red fox
+  0.176) times the smallest node scale that draws the mesh in the glTF, so the
+  bands hold in world metres; gameplay size scales are not known to the cook
+  (larger instances switch later).
+
+### Measured (2026-11-03, dev laptop, editor binary 4.7.2 headless)
+
+| | |
+| --- | --- |
+| Cook, all 2,072 files | 56-62 s wall with two Godot processes (68 s of process time: parse 34 s, planning 15 s); a rerun with nothing changed 1.6-2.1 s |
+| Output | 2,061 sidecars, 47.3 MB (i32 indices, zstd); catalogue 0.99 MB; 11 files without a chain |
+| Levels | 8,975 on 3,281 chained surfaces (1,253 with two levels, 551 with three, 1,113 with four, 364 with one) |
+| Coverage | 82 % of the 14.4 M source triangles on surfaces with >= 2 levels (hair 100 %, creatures 95 %, races 83 %, equipment 78 %); 141 per-face-tile surfaces hold 2.03 M triangles |
+| Determinism | two independent full cooks: catalogue and all 2,061 blobs byte-identical |
+| Editor vs release template | `generate_lods` on 24 surfaces of 10 files: identical indices and errors in the official 4.7.2 release template, which reports the same engine identity; the cook's chains (project parse) match them |
+| `verify` | 2,061 of 2,061 applied to the runtime parse; 8,967 levels on the RenderingServer, no mismatch (8 more on a mesh no node draws); apply median 2.0 ms, p95 12 ms, max 0.2-0.23 s, all with `source_check: "file"` hashing the actor file (the maximum is a 57 MB creature) |
+
+Census prediction (the design census of `s3-market-160`, 36 bodies in view at
+23-46 m, 1280 px, chains only, no lining masks or far tier): High 1.56 M ->
+1.06 M triangles (-32 %), lod_bias 0.65 -36 %, the Low capture at 0.35 1.54 M ->
+0.89 M (-42 %). Only 43-47 % of the drawn actor triangles are on surfaces with
+two or more levels: the torso lining soups (about 15k triangles per body) and
+the cape (6k) have none, and RL heads keep their authored levels.
 
 ## Lining visibility masks
 

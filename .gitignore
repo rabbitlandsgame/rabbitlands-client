@@ -148,6 +148,10 @@ godot-client/override.cfg
 # Disposable local game accounts, logs, screenshots and developer test profiles.
 /.local/qa/
 
+# Cooked actor geometry (LOD sidecars, catalogue, lining masks) and its cook
+# state: rebuilt by godot-client/tools/actor_geometry_cache.py.
+/.local/actor-geometry/
+
 # Local Claude Code files: settings, worktrees and skill discovery links.
 /.claude/
 
