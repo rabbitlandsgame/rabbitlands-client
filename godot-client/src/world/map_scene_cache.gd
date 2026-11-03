@@ -66,6 +66,11 @@ extends RefCounted
 ## 8 - archived procedural model copies are omitted before scene batching.
 const CACHE_FORMAT_VERSION := 11 # External scenery pixels retain their original texture policy.
 
+## The package's two files are hashed through the content-digest facade: the
+## same sha256, with the glb and the manifest read side by side on the main
+## thread (and the backend switch, `--content-digest=`, applying to both).
+const ContentDigest := preload("res://src/runtime/content_digest.gd")
+
 ## Wrapped into the digest so the hash of a package cannot be confused with the
 ## hash of anything else, and so the digest itself can be revised without
 ## colliding with the values a previous client wrote. This string is part of
@@ -148,52 +153,43 @@ static func package_digest(manifest_path: String, glb_path: String) -> String:
 ## the combined digest is never a file's.
 static func package_digest_parts(manifest_path: String, glb_path: String) -> Dictionary:
 	var parts := {"digest": "", "glb_sha256": "", "manifest_sha256": ""}
-	var glb_hash: String = FileAccess.get_sha256(glb_path)
-	if glb_hash.is_empty():
+	# One batch: the glb as it sits, and the manifest with CRLF folded to LF.
+	# `world.json` is written by Python on Windows and read back through git,
+	# so the same package is CRLF in one checkout and LF in another. The bytes
+	# differ and the map does not, so hashing them raw would make the server's
+	# digest disagree with the client's for a reason that has nothing to do
+	# with the content. The server's own catalog digests already normalise the
+	# same way. The glb goes first: it is the big one, and a batch on the main
+	# thread starts its biggest file first.
+	var batch: Dictionary = ContentDigest.hash_files(PackedStringArray([glb_path, manifest_path]),
+		PackedInt32Array([0, ContentDigest.FOLD_CRLF]))
+	var digests: PackedStringArray = batch.digests
+	var glb_hash := digests[0]
+	var manifest_hash := digests[1]
+	if glb_hash.is_empty() or manifest_hash.is_empty():
 		return parts
-	var file := FileAccess.open(manifest_path, FileAccess.READ)
-	if file == null:
-		return parts
-	var raw: PackedByteArray = file.get_buffer(file.get_length())
-	file.close()
-	# The manifest is hashed with CRLF folded to LF. `world.json` is written by
-	# Python on Windows and read back through git, so the same package is CRLF
-	# in one checkout and LF in another. The bytes differ and the map does not,
-	# so hashing them raw would make the server's digest disagree with the
-	# client's for a reason that has nothing to do with the content. The
-	# server's own catalog digests already normalise the same way.
-	var normalised := _strip_carriage_returns(raw)
-	var context := HashingContext.new()
-	context.start(HashingContext.HASH_SHA256)
-	context.update(normalised)
-	var manifest_hash := context.finish().hex_encode()
-	parts["digest"] = _sha256_text("%s\n%s\n%s\n" % [
-		PACKAGE_DIGEST_VERSION, glb_hash, manifest_hash])
+	parts["digest"] = compose_package_digest(glb_hash, manifest_hash)
 	parts["glb_sha256"] = glb_hash
-	if normalised.size() == raw.size():
+	var folded: PackedByteArray = batch.folded
+	if folded[1] == 0:
 		parts["manifest_sha256"] = manifest_hash
 	return parts
 
+## The package digest from its two file digests: the glb's own sha256 and the
+## sha256 of the manifest with CRLF folded to LF. "" when either is empty. A
+## caller that already hashed both files in a larger batch composes the digest
+## here instead of reading them again.
+static func compose_package_digest(glb_sha256: String, manifest_sha256: String) -> String:
+	if glb_sha256.is_empty() or manifest_sha256.is_empty():
+		return ""
+	return _sha256_text("%s\n%s\n%s\n" % [PACKAGE_DIGEST_VERSION, glb_sha256, manifest_sha256])
+
 ## CRLF to LF over a byte buffer. A lone CR is left alone: it is not a line
 ## ending any of these writers produces, and dropping it would fold two
-## different files onto one hash.
+## different files onto one hash. A buffer without CR (every shipped manifest)
+## comes back as it is. The rule is `ContentDigest.FOLD_CRLF`'s.
 static func _strip_carriage_returns(raw: PackedByteArray) -> PackedByteArray:
-	# No CR at all (every shipped manifest): nothing to fold, and no per-byte
-	# loop over up to a megabyte of JSON on every load.
-	if raw.find(13) < 0:
-		return raw
-	var out := PackedByteArray()
-	var size: int = raw.size()
-	out.resize(size)
-	var written: int = 0
-	for index: int in size:
-		var byte: int = raw[index]
-		if byte == 13 and index + 1 < size and raw[index + 1] == 10:
-			continue
-		out[written] = byte
-		written += 1
-	out.resize(written)
-	return out
+	return ContentDigest.fold_crlf(raw)
 
 static func _sha256_text(text: String) -> String:
 	var context := HashingContext.new()
