@@ -11,6 +11,10 @@ extends SceneTree
 ## the world moves the bed, not the tufts within it), stays inside its
 ## budget, draws in three MultiMeshes on the gameplay layer without shadows,
 ## and the tuft meshes are the tapered 5-9 blade tufts the shader expects.
+## Mobile grows Forward+'s grass (the linear renderers' scales, palette trims
+## and mottle); the compatibility renderer its own.
+
+const RendererFamily := preload("res://src/runtime/renderer_family.gd")
 
 var failures := 0
 
@@ -126,7 +130,7 @@ func _run() -> void:
 	var roots_array: PackedVector3Array = slotted._material.get_shader_parameter(&"look_roots")
 	var tips_array: PackedVector3Array = slotted._material.get_shader_parameter(&"look_tips")
 	var reach_root: Color = reach_palette.get("root", Color.BLACK)
-	var reach_trim := 1.7 if LookProfile.forward_plus() else 0.9
+	var reach_trim := 1.7 if LookProfile.linear_renderer() else 0.9
 	_expect(reach_slot == 1 and gates_slot == 2 and slotted._slot("lantern_reach") == 1
 		and slotted._slot("no_such_region") == 0 and slotted._slot("test_grass_region") == 0
 		and roots_array.size() == LookProfile.GRASS_PALETTE_SLOTS
@@ -136,6 +140,33 @@ func _run() -> void:
 		"regions with a palette take their own slot, with the renderer's value trim; others the default")
 	slotted.free()
 	LookProfile.reload_regions()
+	# The same under each rendering method: Mobile is a linear renderer and
+	# takes Forward+'s value and chroma scales, palette trims and mottle.
+	var grown := {}
+	for method: String in [RendererFamily.FORWARD_PLUS, RendererFamily.MOBILE,
+			RendererFamily.COMPATIBILITY]:
+		RendererFamily.override_for_tests(method)
+		var linear := method != RendererFamily.COMPATIBILITY
+		var beds := LookGrassBeds.new()
+		var slot: int = beds._slot("lantern_reach")
+		var slot_roots: PackedVector3Array = beds._material.get_shader_parameter(&"look_roots")
+		var expected_root := Color(0.05, 0.14, 0.05) * (1.7 if linear else 0.9)
+		_expect(float(beds._material.get_shader_parameter(&"look_value"))
+				== (LookProfile.GRASS_VALUE_FORWARD if linear else LookProfile.GRASS_VALUE_COMPAT)
+			and float(beds._material.get_shader_parameter(&"look_chroma"))
+				== (LookProfile.GRASS_CHROMA_FORWARD if linear else LookProfile.GRASS_CHROMA_COMPAT)
+			and slot_roots[slot].is_equal_approx(
+				Vector3(expected_root.r, expected_root.g, expected_root.b)),
+			"%s: the grass takes the %s scales and palette trim" % [method,
+				"linear renderers'" if linear else "compatibility renderer's"])
+		grown[method] = [beds._material.get_shader_parameter(&"look_value"),
+			beds._material.get_shader_parameter(&"look_chroma"), slot_roots,
+			LookGrassBeds.ground_mottle(Vector2(12.5, -7.25))]
+		beds.free()
+	RendererFamily.override_for_tests("")
+	_expect(grown[RendererFamily.MOBILE] == grown[RendererFamily.FORWARD_PLUS]
+		and grown[RendererFamily.COMPATIBILITY] != grown[RendererFamily.FORWARD_PLUS],
+		"Mobile grows Forward+'s grass exactly; the compatibility renderer differs")
 	var weights := LookGrassBeds.barycentric_xz(Vector3(0.25, 5.0, 0.25),
 		Vector3.ZERO, Vector3(1, 0, 0), Vector3(0, 0, 1))
 	_expect(weights.is_equal_approx(Vector3(0.5, 0.25, 0.25)), "barycentric weights across the ground")

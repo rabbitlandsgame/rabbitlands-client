@@ -138,17 +138,17 @@ static func paint_loaded(root: Node, manifest: WorldManifest) -> int:
 	decode_inland_water(root)
 	return paint(root, region_of(manifest), sun_heading_of(manifest))
 
-## Forward+ only: the continent's sea (continent_water.gdshader, which the
-## loader puts on every sea cell) is decoded to linear albedo at
-## LookProfile.CONTINENT_SEA_VALUE, as a copy put in as the surface's
-## override, so the loader's cache keeps the loader's own material. One value
-## for the whole continent: the sea runs on across every region's border. A
-## region whose sea meets no other's may name its own (`water.sea_value`,
-## `sea_chroma`, and `sea_tint`, a multiplier on the decoded linear colour):
-## sw_isle's lagoon sea read navy-teal where its concept paints turquoise.
-## Returns the surfaces changed.
+## Linear renderers only (Forward+ and Mobile): the continent's sea
+## (continent_water.gdshader, which the loader puts on every sea cell) is
+## decoded to linear albedo at LookProfile.CONTINENT_SEA_VALUE, as a copy put
+## in as the surface's override, so the loader's cache keeps the loader's own
+## material. One value for the whole continent: the sea runs on across every
+## region's border. A region whose sea meets no other's may name its own
+## (`water.sea_value`, `sea_chroma`, and `sea_tint`, a multiplier on the
+## decoded linear colour): sw_isle's lagoon sea read navy-teal where its
+## concept paints turquoise. Returns the surfaces changed.
 static func decode_continent_sea(root: Node, region := "") -> int:
-	if not LookProfile.full_painted() or root == null or not LookProfile.forward_plus():
+	if not LookProfile.full_painted() or root == null or not LookProfile.linear_renderer():
 		return 0
 	var value := float(LookProfile.region_value(region, "water", "sea_value",
 		LookProfile.CONTINENT_SEA_VALUE))
@@ -176,18 +176,19 @@ static func decode_continent_sea(root: Node, region := "") -> int:
 			changed += 1
 	return changed
 
-## Forward+ only: the rivers, canals, lakes, pools and small seas drawn by a
-## StandardMaterial3D (the continent exporter's authored_<river>_water, the
-## tutorial islands' `sea`, a lagoon's pool) take a copy whose tint is
-## multiplied by the region's `water.inland_tint` (LookProfile.INLAND_WATER_TINT
-## where it has none), as a surface override, so the loader's cache keeps its
-## own material. Their colours were picked in the compatibility renderer:
+## Linear renderers only (Forward+ and Mobile): the rivers, canals, lakes,
+## pools and small seas drawn by a StandardMaterial3D (the continent
+## exporter's authored_<river>_water, the tutorial islands' `sea`, a lagoon's
+## pool) take a copy whose tint is multiplied by the region's
+## `water.inland_tint` (LookProfile.INLAND_WATER_TINT where it has none), as a
+## surface override, so the loader's cache keeps its own material. Their
+## colours were picked in the compatibility renderer:
 ## lit as linear albedo in Forward+ and greyed by the grade, Manymouth's cyan
 ## channels (126, 207, 229) came out milky (149, 180, 183), as pale as the
 ## painted roads beside them, and Stillglass's pool went slate. Returns the
 ## surfaces changed.
 static func decode_inland_water(root: Node, region := "") -> int:
-	if not LookProfile.full_painted() or root == null or not LookProfile.forward_plus():
+	if not LookProfile.full_painted() or root == null or not LookProfile.linear_renderer():
 		return 0
 	var tint: Color = LookProfile.region_value(region, "water", "inland_tint",
 		LookProfile.INLAND_WATER_TINT)
@@ -262,13 +263,14 @@ static func paint_bound(root: Node, manifest: WorldManifest) -> int:
 	LookFoliage.keep_chroma(root, region_of(manifest))
 	return painted
 
-## Forward+ only: a sea whose shader's colours were picked in the
-## compatibility renderer (named in `region`'s file, `water.decode_albedo`,
-## LookProfile.water_decode_value) is told to decode them to linear albedo,
-## at that entry's value. Its scene script puts the shader on as a material
-## override, which `paint` leaves alone. Returns the meshes changed.
+## Linear renderers only (Forward+ and Mobile): a sea whose shader's colours
+## were picked in the compatibility renderer (named in `region`'s file,
+## `water.decode_albedo`, LookProfile.water_decode_value) is told to decode
+## them to linear albedo, at that entry's value. Its scene script puts the
+## shader on as a material override, which `paint` leaves alone. Returns the
+## meshes changed.
 static func decode_water(root: Node, region := "") -> int:
-	if not LookProfile.full_painted() or root == null or not LookProfile.forward_plus():
+	if not LookProfile.full_painted() or root == null or not LookProfile.linear_renderer():
 		return 0
 	var changed := 0
 	for node: Node in root.find_children("*", "MeshInstance3D", true, false):
@@ -805,7 +807,7 @@ static func painted_source_for(source: Material, kind: Kind, has_colour: bool,
 		painted.set_shader_parameter(&"look_keep_tint",
 			Vector3(meadow_tint.r, meadow_tint.g, meadow_tint.b) * value)
 		painted.set_shader_parameter(&"look_keep_chroma", float(_trim(region, "meadow_chroma",
-			LookProfile.MEADOW_CHROMA_FORWARD if LookProfile.forward_plus()
+			LookProfile.MEADOW_CHROMA_FORWARD if LookProfile.linear_renderer()
 				else LookProfile.MEADOW_CHROMA)))
 	elif kept:
 		# A named inlay keeps its own texture and colour, its chroma raised
@@ -815,7 +817,7 @@ static func painted_source_for(source: Material, kind: Kind, has_colour: bool,
 		painted.set_shader_parameter(&"look_keep", 1.0)
 		painted.set_shader_parameter(&"look_keep_tint", Vector3.ONE)
 		painted.set_shader_parameter(&"look_keep_chroma", float(LookProfile.region_value(region,
-			"props", "keep_chroma", LookProfile.KEEP_CHROMA_FORWARD if LookProfile.forward_plus()
+			"props", "keep_chroma", LookProfile.KEEP_CHROMA_FORWARD if LookProfile.linear_renderer()
 				else LookProfile.KEEP_CHROMA)) if LookProfile.full_painted() else 1.0)
 	elif rock:
 		# Rock keeps its own texture and colour at its region's rock value.

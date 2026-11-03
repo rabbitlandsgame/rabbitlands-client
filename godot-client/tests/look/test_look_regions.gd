@@ -9,15 +9,39 @@ extends SceneTree
 ## win in their renderer; colours arrive as Colors whatever JSON made of the
 ## numbers; the foliage lists extend every map's; and a continent region's
 ## grade trims are ignored.
+##
+## Every check runs once per renderer (RendererFamily.override_for_tests):
+## Mobile lights in linear space as Forward+ does, so it must read the
+## `_forward` values exactly as Forward+ does, and the compatibility renderer
+## its `_compat` ones.
+
+const RendererFamily := preload("res://src/runtime/renderer_family.gd")
 
 var failures := 0
+var _renderer := ""
 
 func _init() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
+	for method: String in ["", RendererFamily.FORWARD_PLUS, RendererFamily.MOBILE,
+			RendererFamily.COMPATIBILITY]:
+		RendererFamily.override_for_tests(method)
+		_renderer = RendererFamily.method() + (" (engine)" if method.is_empty() else "")
+		_check()
+	RendererFamily.override_for_tests("")
+
+	print("test_look_regions: %s (%d failures)" % [
+		"PASS" if failures == 0 else "FAIL", failures])
+	quit(1 if failures > 0 else 0)
+
+func _check() -> void:
 	LookProfile.reload_regions()
-	var forward := LookProfile.forward_plus()
+	var forward := LookProfile.linear_renderer()
+	_expect(forward == (RendererFamily.method() != RendererFamily.COMPATIBILITY)
+		and LookProfile.forward_plus() == forward
+		and LookProfile.screen_space_effects() == (RendererFamily.method() == RendererFamily.FORWARD_PLUS),
+		"Forward+ and Mobile are the linear renderers; only Forward+ has screen-space effects")
 
 	# --- Every shipped file ---------------------------------------------------
 	var ids := LookProfile.region_ids()
@@ -53,7 +77,7 @@ func _run() -> void:
 			== (0.55 if forward else -1.0)
 		and LookProfile.ground_value("lantern_reach", "verge_saturation", -1.0)
 			== (0.85 if forward else 0.92),
-		"Lantern Reach's ground trims, the `_forward` ones in Forward+ only")
+		"Lantern Reach's ground trims, the `_forward` ones in the linear renderers only")
 	var palettes := {
 		"four_gates": [Color(0.09, 0.17, 0.06), Color(0.52, 0.62, 0.28), 1.2 if forward else 1.0],
 		"amberwood": [Color(0.13, 0.1, 0.05), Color(0.56, 0.44, 0.23), 1.0],
@@ -161,13 +185,9 @@ func _run() -> void:
 	_expect(LookProfile.region("test_schema").is_empty(),
 		"reload_regions forgets defined regions")
 
-	print("test_look_regions: %s (%d failures)" % [
-		"PASS" if failures == 0 else "FAIL", failures])
-	quit(1 if failures > 0 else 0)
-
 func _expect(condition: bool, message: String) -> void:
 	if condition:
-		print("PASS " + message)
+		print("PASS [%s] %s" % [_renderer, message])
 	else:
 		failures += 1
-		push_error("FAIL " + message)
+		push_error("FAIL [%s] %s" % [_renderer, message])

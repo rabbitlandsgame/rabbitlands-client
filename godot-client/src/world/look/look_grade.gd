@@ -61,7 +61,7 @@ static func _grade_tone(environment: Environment, declared: Dictionary,
 	if curve.has("agx_white"):
 		environment.tonemap_agx_white = float(curve.agx_white)
 		environment.tonemap_agx_contrast = float(curve.get("agx_contrast_forward",
-			curve.agx_contrast)) if LookProfile.forward_plus() else float(curve.agx_contrast)
+			curve.agx_contrast)) if LookProfile.linear_renderer() else float(curve.agx_contrast)
 	# Main's border update writes the manifest's raw saturation here every
 	# 100 ms, but nothing ever enabled the adjustment, so it has never shown.
 	# The grade enables it and replaces the raw boost with a tempered one.

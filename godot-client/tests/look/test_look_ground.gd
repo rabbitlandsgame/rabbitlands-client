@@ -6,6 +6,14 @@ extends SceneTree
 ## mesh that used a source material, the source materials and meshes are never
 ## edited (a map cache is packed from them), and painting twice is harmless:
 ## a chunk can be finished by the loader and then seen again.
+##
+## The renderer decides the defaults and what water is decoded: Forward+ and
+## Mobile both light in linear space and take the same (`_forward`) trims and
+## decodes, the compatibility renderer its own. The main checks follow the
+## engine's renderer; `_renderer_family_checks` repeats the renderer-dependent
+## ones under each method (RendererFamily.override_for_tests).
+
+const RendererFamily := preload("res://src/runtime/renderer_family.gd")
 
 var failures := 0
 
@@ -116,14 +124,15 @@ func _run() -> void:
 		and tree.get_surface_override_material(0) == null
 		and batched.get_surface_override_material(0) == null,
 		"thresholds, bridge timber, trees and batched meshes are left alone")
-	# Inland water is not ground: in Forward+ it only takes its decoded tint.
+	# Inland water is not ground: in Forward+ and Mobile it only takes its
+	# decoded tint.
 	var water_paint := water.get_surface_override_material(0) as BaseMaterial3D
-	if LookProfile.forward_plus():
+	if LookProfile.linear_renderer():
 		var tint := LookProfile.INLAND_WATER_TINT
 		_expect(water_paint != null and water_paint != water_material
 			and water_paint.albedo_color == Color(tint.r, tint.g, tint.b, 1.0)
 			and water_material.albedo_color == Color.WHITE,
-			"inland water takes a decoded copy in Forward+, its source untouched")
+			"inland water takes a decoded copy in the linear renderers, its source untouched")
 	else:
 		_expect(water_paint == null, "inland water is left alone in the compatibility renderer")
 	var untouched := true
@@ -249,9 +258,10 @@ func _run() -> void:
 	_expect(trims.has("path_luma") and trims.path_tint is Color,
 		"Amberwood's ground trims are read from its region file, its tint as a colour")
 	# The default is the renderer's: GROUND_FORWARD's in Forward+ (which a
-	# headless run reports when the project names it), PATH_LUMA otherwise.
+	# headless run reports when the project names it) and Mobile, PATH_LUMA
+	# otherwise.
 	var default_luma := float(LookProfile.GROUND_FORWARD.get("path_luma",
-		LookProfile.PATH_LUMA)) if LookProfile.forward_plus() else LookProfile.PATH_LUMA
+		LookProfile.PATH_LUMA)) if LookProfile.linear_renderer() else LookProfile.PATH_LUMA
 	_expect(is_equal_approx(float(avenue_paint.get_shader_parameter(&"look_path_luma")),
 			float(trims.get("path_luma", -1.0)))
 		and is_equal_approx(float(deck_paint.get_shader_parameter(&"look_path_luma")),
@@ -259,11 +269,11 @@ func _run() -> void:
 		"a region's road value is its own trim; other regions keep the renderer's default")
 	var reach_trims := LookProfile.region_section("lantern_reach", "ground")
 	_expect(LookProfile.ground_value("lantern_reach", "verge_value_green", -1.0)
-			== (reach_trims.get("verge_value_green_forward") if LookProfile.forward_plus()
+			== (reach_trims.get("verge_value_green_forward") if LookProfile.linear_renderer()
 				else reach_trims.get("verge_value_green"))
 		and LookProfile.ground_value("no_such_region", "verge_value_green", -1.0)
-			== (LookProfile.GROUND_FORWARD["verge_value_green"] if LookProfile.forward_plus() else -1.0),
-		"a region's `_forward` trim wins in Forward+, and a region without one takes the renderer's default")
+			== (LookProfile.GROUND_FORWARD["verge_value_green"] if LookProfile.linear_renderer() else -1.0),
+		"a region's `_forward` trim wins in the linear renderers, and a region without one takes the renderer's default")
 
 	# An island map is painted at bind, with its scene's vertex colour.
 	var island_root := Node3D.new()
@@ -455,7 +465,8 @@ func _run() -> void:
 		"painting again keeps the one copy; a region that names no kit paving leaves it alone")
 	LookProfile.reload_regions()
 
-	# The continent's sea is decoded in Forward+ as a copy, never in place.
+	# The continent's sea is decoded in Forward+ and Mobile as a copy, never in
+	# place.
 	var sea_root := Node3D.new()
 	root.add_child(sea_root)
 	var sea := ShaderMaterial.new()
@@ -464,11 +475,11 @@ func _run() -> void:
 	sea_mesh.set_surface_override_material(0, sea)
 	var decoded := LookGround.decode_continent_sea(sea_root)
 	var decoded_sea := sea_mesh.get_surface_override_material(0) as ShaderMaterial
-	if LookProfile.forward_plus():
+	if LookProfile.linear_renderer():
 		_expect(decoded == 1 and decoded_sea != sea
 			and decoded_sea.get_shader_parameter(&"look_decode_albedo") == true
 			and sea.get_shader_parameter(&"look_decode_albedo") != true,
-			"the continent sea is decoded on a copy in Forward+")
+			"the continent sea is decoded on a copy in the linear renderers")
 		_expect(float(decoded_sea.get_shader_parameter(&"look_sea_value")) == LookProfile.CONTINENT_SEA_VALUE
 			and (decoded_sea.get_shader_parameter(&"look_sea_tint") as Vector3).is_equal_approx(Vector3.ONE),
 			"a region that names no sea of its own is decoded at the shared value")
@@ -490,10 +501,93 @@ func _run() -> void:
 		_expect(decoded == 0 and decoded_sea == sea,
 			"the continent sea is left alone in the compatibility renderer")
 
+	_renderer_family_checks()
+
 	OS.set_environment(LookProfile.ENABLE_VARIABLE, previous)
 	print("test_look_ground: %s (%d failures)" % [
 		"PASS" if failures == 0 else "FAIL", failures])
 	quit(1 if failures > 0 else 0)
+
+## The renderer-dependent painting under each rendering method: Mobile paints,
+## decodes and defaults exactly as Forward+ does (the linear renderers), the
+## compatibility renderer takes PATH_LUMA, MEADOW_CHROMA and leaves water alone.
+func _renderer_family_checks() -> void:
+	LookProfile.set_player_mode(LookProfile.Mode.FULL_PAINTED)
+	LookProfile.reload_regions()
+	var painted := {}
+	for method: String in [RendererFamily.FORWARD_PLUS, RendererFamily.MOBILE,
+			RendererFamily.COMPATIBILITY]:
+		RendererFamily.override_for_tests(method)
+		var linear := method != RendererFamily.COMPATIBILITY
+		_expect(LookProfile.linear_renderer() == linear
+			and LookProfile.forward_plus() == linear
+			and LookProfile.screen_space_effects() == (method == RendererFamily.FORWARD_PLUS),
+			"%s: linear lighting %s, screen-space effects only in Forward+" % [method, linear])
+		var world := Node3D.new()
+		root.add_child(world)
+		var deck_material := StandardMaterial3D.new()
+		deck_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_DEPTH_PRE_PASS
+		deck_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+		deck_material.albedo_color = Color("997a4f")
+		var meadow_material := deck_material.duplicate() as StandardMaterial3D
+		meadow_material.albedo_color = Color("6f9a3c")
+		var water_material := StandardMaterial3D.new()
+		var deck := _mesh(world, "Walk_family_highway-family-south_family_4_5", deck_material)
+		var meadow := _mesh(world, "AuthoredGround_family_ground-02_family_4_5", meadow_material)
+		var water := _mesh(world, "Water_family_4_5", water_material)
+		var sea := ShaderMaterial.new()
+		sea.shader = load(LookGround.CONTINENT_WATER_PATH) as Shader
+		var sea_mesh := _mesh(world, "Water_family_4_6", null)
+		sea_mesh.set_surface_override_material(0, sea)
+		LookGround.paint(world)
+		var seas := LookGround.decode_continent_sea(world)
+		var waters := LookGround.decode_inland_water(world)
+		var deck_paint := deck.get_surface_override_material(0) as ShaderMaterial
+		var meadow_paint := meadow.get_surface_override_material(0) as ShaderMaterial
+		var water_paint := water.get_surface_override_material(0) as BaseMaterial3D
+		var luma := float(LookProfile.GROUND_FORWARD.path_luma) if linear else LookProfile.PATH_LUMA
+		_expect(deck_paint != null
+			and is_equal_approx(float(deck_paint.get_shader_parameter(&"look_path_luma")), luma),
+			"%s: a region without trims paints roads at %s" % [method,
+				"GROUND_FORWARD's path luma" if linear else "PATH_LUMA"])
+		if linear:
+			var tint := LookProfile.INLAND_WATER_TINT
+			_expect(seas == 1 and waters == 1
+				and (sea_mesh.get_surface_override_material(0) as ShaderMaterial)
+					.get_shader_parameter(&"look_decode_albedo") == true
+				and water_paint != null
+				and water_paint.albedo_color == Color(tint.r, tint.g, tint.b, 1.0),
+				"%s: the continent sea and inland water are decoded" % method)
+		else:
+			_expect(seas == 0 and waters == 0 and water_paint == null
+				and sea_mesh.get_surface_override_material(0) == sea,
+				"%s: the continent sea and inland water are left alone" % method)
+		painted[method] = [deck_paint, meadow_paint]
+		root.remove_child(world)
+		world.free()
+	# Mobile's painted ground is Forward+'s, parameter for parameter; the
+	# compatibility renderer's differs.
+	var names := ["look_path_luma", "look_path_tint", "look_path_chroma", "look_keep_chroma",
+		"look_verge_value_green", "look_verge_value_earth", "look_verge_saturation",
+		"look_verge_green_red", "look_border_path_luma", "look_border_verge"]
+	var same := true
+	var differs := false
+	for index: int in 2:
+		var forward_paint := painted[RendererFamily.FORWARD_PLUS][index] as ShaderMaterial
+		var mobile_paint := painted[RendererFamily.MOBILE][index] as ShaderMaterial
+		var compat_paint := painted[RendererFamily.COMPATIBILITY][index] as ShaderMaterial
+		if forward_paint == null or mobile_paint == null or compat_paint == null:
+			same = false
+			continue
+		for name: String in names:
+			same = same and forward_paint.get_shader_parameter(name) \
+				== mobile_paint.get_shader_parameter(name)
+			differs = differs or forward_paint.get_shader_parameter(name) \
+				!= compat_paint.get_shader_parameter(name)
+	_expect(same and differs,
+		"Mobile paints the ground exactly as Forward+; the compatibility renderer differs")
+	RendererFamily.override_for_tests("")
+	LookProfile.reload_regions()
 
 func _mesh(parent: Node, node_name: String, material: Material,
 		coloured := true) -> MeshInstance3D:

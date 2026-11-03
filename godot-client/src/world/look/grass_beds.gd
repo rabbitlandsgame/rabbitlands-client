@@ -248,7 +248,7 @@ func _init() -> void:
 	_fill_slot(0, LookProfile.GRASS_PALETTE_DEFAULT)
 	_material.set_shader_parameter(&"look_gradient_power", LookProfile.GRASS_GRADIENT_POWER)
 	_material.set_shader_parameter(&"look_contrast", LookProfile.GRASS_CONTRAST)
-	var forward := LookProfile.forward_plus()
+	var forward := LookProfile.linear_renderer()
 	_material.set_shader_parameter(&"look_value", LookProfile.GRASS_VALUE_FORWARD
 		if forward else LookProfile.GRASS_VALUE_COMPAT)
 	_material.set_shader_parameter(&"look_chroma", LookProfile.GRASS_CHROMA_FORWARD
@@ -1358,7 +1358,7 @@ func _grow(data: Array[PackedFloat32Array], hit: Vector3, normal: Vector3, kind:
 ## mesh space is) as a colour multiplier: its low-frequency value and warmth
 ## variation and its fine verge mottle (painted_ground_paint.gdshaderinc,
 ## look_paint), on the colour as the renderer lights it (display-encoded in
-## the compatibility renderer, linear in Forward+).
+## the compatibility renderer, linear in Forward+ and Mobile).
 static func ground_mottle(xz: Vector2) -> Color:
 	var coarse := xz / LookProfile.VARIATION_METRES
 	var variation := 0.65 * paint_noise(coarse) \
@@ -1368,7 +1368,7 @@ static func ground_mottle(xz: Vector2) -> Color:
 			* 2.0 * LookProfile.VERGE_FINE)
 	var warm := variation * 2.0 * LookProfile.VARIATION_HUE
 	var mottle := Color(value * (1.0 + warm), value, value * (1.0 - warm))
-	if not LookProfile.forward_plus():
+	if not LookProfile.linear_renderer():
 		var encode := 1.0 / 2.2
 		mottle = Color(pow(maxf(mottle.r, 0.0), encode), pow(maxf(mottle.g, 0.0), encode),
 			pow(maxf(mottle.b, 0.0), encode))

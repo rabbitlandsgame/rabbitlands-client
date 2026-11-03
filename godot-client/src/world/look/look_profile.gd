@@ -6,7 +6,8 @@ extends RefCounted
 ## Overhead text is composited separately in every mode (WorldTextOverlay).
 ## LookSwitch updates loaded roots live; generations also distinguish the two
 ## painted modes so chunks completed on loader workers are reconciled safely.
-## Forward+ and the compatibility renderer keep their own material trims.
+## The linear renderers (Forward+ and Mobile) and the compatibility renderer
+## keep their own material trims; Mobile takes Forward+'s (`linear_renderer`).
 ##
 ## The constants live here, not beside the code that uses them, so the whole
 ## look can be read, compared and retuned in one place. They are every map's
@@ -405,11 +406,11 @@ const YARD_SATURATION := 0.9
 ## A green meadow or pasture patch (LookGround.is_meadow: its tint's green
 ## leads its red and blue by GRASS_PATCH_GREEN of itself, `green_tint`) is not
 ## a yard: it keeps its own colour at MEADOW_VALUE (a linear multiplier) and
-## MEADOW_CHROMA (MEADOW_CHROMA_FORWARD in Forward+), drawn at MEADOW_OPACITY
-## and faded in over its coverage by MEADOW_RIM rather than cut: the
-## exporter's weights fall off across most of a meadow (Mirrorhold's hub
-## meadow is under 0.42 over half its vertices, Sunmane's pastures dip to 0.1
-## inside), and cut at a threshold they drew the earth beneath as pale
+## MEADOW_CHROMA (MEADOW_CHROMA_FORWARD in Forward+ and Mobile), drawn at
+## MEADOW_OPACITY and faded in over its coverage by MEADOW_RIM rather than
+## cut: the exporter's weights fall off across most of a meadow (Mirrorhold's
+## hub meadow is under 0.42 over half its vertices, Sunmane's pastures dip to
+## 0.1 inside), and cut at a threshold they drew the earth beneath as pale
 ## blotches through the grass. Glazed as soil, Sunmane's pastures went khaki
 ## (hue 58 to 43) and Mirrorhold's hub meadow the scree's grey (saturation
 ## 0.57 to 0.16). Forward+ lights an already saturated grass texture under a
@@ -633,12 +634,13 @@ const TERRAIN_ROAD_TOLERANCE := Vector2(0.12, 0.34)
 const DECK_ROAD_TOLERANCE := Vector2(0.05, 0.15)
 
 ## A sea shader whose colours were picked in the compatibility renderer is
-## named, with the value its sea is drawn at in Forward+, in its map's region
-## file (`water.decode_albedo`, read by LookGround.decode_water): Lantern
-## Reach's lantern_water.gdshader is the only one.
+## named, with the value its sea is drawn at in Forward+ and Mobile, in its
+## map's region file (`water.decode_albedo`, read by LookGround.decode_water):
+## Lantern Reach's lantern_water.gdshader is the only one.
 ##
 ## The continent's sea (continent_water.gdshader) is the same case and is
-## decoded everywhere at this value in Forward+ (LookGround.decode_continent_sea):
+## decoded everywhere at this value in Forward+ and Mobile
+## (LookGround.decode_continent_sea):
 ## it runs on across every region's border, so it cannot be a region's. Lit as
 ## linear albedo it drew a milky pale turquoise as bright as the painted roads
 ## (Ssarathi's shore luminance 110-127 against develop's 51-52, Crownwater's
@@ -656,9 +658,9 @@ const CONTINENT_SEA_VALUE := 4.0
 const CONTINENT_SEA_CHROMA := 0.7
 ## Inland water drawn by a StandardMaterial3D (rivers, canals, lagoons, the
 ## tutorial islands' seas and pools) is tinted by this display multiplier in
-## Forward+ (LookGround.decode_inland_water): value down and red down most,
-## so the grade's greying lands it near the cyan develop drew and clearly
-## below the painted roads. A map outside the continent may set its own in its
+## Forward+ and Mobile (LookGround.decode_inland_water): value down and red
+## down most, so the grade's greying lands it near the cyan develop drew and
+## clearly below the painted roads. A map outside the continent may set its own in its
 ## region file (`water.inland_tint`); the continent has one, since its rivers
 ## cross the regions' borders.
 const INLAND_WATER_TINT := Color(0.55, 0.8, 0.9)
@@ -666,8 +668,9 @@ const INLAND_WATER_TINT := Color(0.55, 0.8, 0.9)
 ## Forward+ lights the painted ground's linear albedo as linear light, where
 ## the compatibility renderer lights it display-encoded: the same verge came
 ## out darker and more mustard (hue 57 against 64 degrees in the south gate's
-## field) and the same roads duller. In Forward+ these replace the constants
-## above as the defaults every region starts from. They are renderer defaults
+## field) and the same roads duller. In Forward+ (and Mobile, which lights the
+## same linear albedo: `linear_renderer`) these replace the constants above as
+## the defaults every region starts from. They are renderer defaults
 ## rather than a region's trims because the ground runs on across a region's
 ## border: tuned as Four Gates' own trims, they drew a straight seam across
 ## the south gate's field where Four Gates' grass meets its neighbour's.
@@ -1508,10 +1511,14 @@ static func _note_switch() -> bool:
 	_switch_mutex.unlock()
 	return now != Mode.ORIGINAL
 
-## True when the renderer has SSAO and SSIL. Only Forward+ does; the others
-## ignore the settings but warn about them, so they are not set there at all.
+## Which family the renderer in use belongs to (src/runtime/renderer_family.gd).
+const RendererFamily := preload("res://src/runtime/renderer_family.gd")
+
+## True when the renderer has SSAO and SSIL. Only Forward+ does; Mobile and the
+## compatibility renderer ignore the settings but warn about them, so they are
+## not set there at all.
 static func screen_space_effects() -> bool:
-	return RenderingServer.get_current_rendering_method() == "forward_plus"
+	return RendererFamily.screen_space_effects()
 
 ## False below HIGH quality, and when the client was started with
 ## ELORIA_LOOK_SSIL=0 (SSIL_VARIABLE).
@@ -1536,7 +1543,7 @@ static func tonemap_curve() -> Dictionary:
 
 ## The saturation to grade a map with, from what its manifest declares.
 static func saturation(declared: float) -> float:
-	var base := SATURATION_FORWARD if forward_plus() else SATURATION
+	var base := SATURATION_FORWARD if linear_renderer() else SATURATION
 	return base * (1.0 + (declared - 1.0) * SATURATION_BOOST_SHARE)
 
 ## A map's trim on `key` ("exposure" or "saturation") from its region file's
@@ -1560,25 +1567,30 @@ static func map_trim(map_id: String, key: String, continent := false) -> float:
 static func green_tint(tint: Color) -> bool:
 	return (tint.g - maxf(tint.r, tint.b)) / maxf(tint.g, 0.0001) >= GRASS_PATCH_GREEN
 
-## True in the Forward+ renderer, which some trims tell apart (see
-## SUN_WARMTH_FORWARD).
+## True in the renderers that light in linear space, Forward+ and Mobile,
+## which some trims tell apart from the compatibility renderer (see
+## SUN_WARMTH_FORWARD): the `_FORWARD` constants and a region file's `_forward`
+## keys were tuned in Forward+ and apply in Mobile too, which lights the same
+## linear albedo. RendererFamily asks the engine once (the renderer never
+## changes while the client runs), so the loader's worker threads, which paint
+## the ground too, may call this.
+static func linear_renderer() -> bool:
+	return RendererFamily.linear_lighting()
+
+## linear_renderer()'s name from before Mobile took the Forward+ trims, kept
+## for callers not yet moved over; prefer linear_renderer().
 static func forward_plus() -> bool:
-	# Asked once: the renderer never changes while the client runs, and the
-	# ground is painted on the loader's worker threads too.
-	if _forward_plus < 0:
-		_forward_plus = 1 if RenderingServer.get_current_rendering_method() == "forward_plus" else 0
-	return _forward_plus == 1
+	return RendererFamily.linear_lighting()
 
-## forward_plus()'s answer once asked: -1 not yet, 0 no, 1 yes.
-static var _forward_plus := -1
-
-## The exposure trim for the renderer in use (FORWARD_EXPOSURE in Forward+).
+## The exposure trim for the renderer in use (FORWARD_EXPOSURE in Forward+ and
+## Mobile).
 static func renderer_exposure() -> float:
-	return FORWARD_EXPOSURE if forward_plus() else 1.0
+	return FORWARD_EXPOSURE if linear_renderer() else 1.0
 
-## The key light's warmth for the renderer in use.
+## The key light's warmth for the renderer in use (SUN_WARMTH_FORWARD in
+## Forward+ and Mobile).
 static func sun_warmth() -> Color:
-	return SUN_WARMTH_FORWARD if forward_plus() else SUN_WARMTH
+	return SUN_WARMTH_FORWARD if linear_renderer() else SUN_WARMTH
 
 ## The depth fog's density at FOG_END for a manifest's exponential density.
 static func fog_density(declared: float) -> float:
@@ -1606,13 +1618,13 @@ static func haze_density(declared: float) -> float:
 		0.0, HAZE_DENSITY_MAX)
 
 ## A region's ground trim on `key` from its region file's `ground` section,
-## or the renderer's default when it has none: GROUND_FORWARD's entry in
-## Forward+, else `fallback`. A `<key>_forward` entry wins over `<key>` in
-## Forward+ (and `<key>_compat` in the compatibility renderer), as in every
-## section (`region_value`).
+## or the renderer's default when it has none: GROUND_FORWARD's entry in the
+## linear renderers (Forward+ and Mobile), else `fallback`. A `<key>_forward`
+## entry wins over `<key>` there (and `<key>_compat` in the compatibility
+## renderer), as in every section (`region_value`).
 static func ground_value(region_id: String, key: String, fallback: Variant) -> Variant:
 	var renderer_default: Variant = GROUND_FORWARD[key] \
-		if forward_plus() and GROUND_FORWARD.has(key) else fallback
+		if RendererFamily.linear_lighting() and GROUND_FORWARD.has(key) else fallback
 	return region_value(region_id, "ground", key, renderer_default)
 
 # --- Per-map and per-region data ---------------------------------------------
@@ -1627,10 +1639,11 @@ static func ground_value(region_id: String, key: String, fallback: Variant) -> V
 const REGIONS_DIRECTORY := "res://src/world/look/regions"
 ## The sections a region file may hold and the keys each may hold. A number
 ## or colour key may also carry a `_forward` or `_compat` suffix, which wins
-## over the bare key in that renderer. `grass.layers`, `water.decode_albedo`
-## and the `foliage` lists are tables, not trims, and take no suffix. `id`
-## (the file's own name), `schema` and `notes` (prose for whoever retunes the
-## region) sit beside the sections.
+## over the bare key in that renderer (`_forward`: Forward+ and Mobile, see
+## `region_value`). `grass.layers`, `water.decode_albedo` and the `foliage`
+## lists are tables, not trims, and take no suffix. `id` (the file's own
+## name), `schema` and `notes` (prose for whoever retunes the region) sit
+## beside the sections.
 const REGION_SECTIONS := {
 	"grade": ["exposure", "saturation", "background"],
 	"ground": ["path_luma", "path_tint", "path_chroma", "verge_value_green",
@@ -1713,12 +1726,16 @@ static func region_section(id: String, section: String) -> Dictionary:
 	var value: Variant = region(id).get(section)
 	return value if value is Dictionary else {}
 
-## `key` in `id`'s `section`: `<key>_forward` in Forward+ (`<key>_compat` in
-## the compatibility renderer) wins over `<key>`; `fallback` when neither is
-## there.
+## `key` in `id`'s `section`: `<key>_forward` in the linear renderers
+## (`<key>_compat` in the compatibility renderer) wins over `<key>`; `fallback`
+## when neither is there. The `_forward` suffix keeps the name it had when
+## Forward+ was the only linear renderer and now means "lit in linear space":
+## Mobile reads it as Forward+ does (`linear_renderer`). There are no `_mobile`
+## keys; a Mobile-only trim would be a runtime value, never one baked into the
+## prepared world, whose caches Mobile shares with Forward+.
 static func region_value(id: String, section: String, key: String, fallback: Variant) -> Variant:
 	var entries := region_section(id, section)
-	var renderer_key := key + ("_forward" if forward_plus() else "_compat")
+	var renderer_key := key + ("_forward" if RendererFamily.linear_lighting() else "_compat")
 	if entries.has(renderer_key):
 		return entries[renderer_key]
 	return entries.get(key, fallback)
@@ -1751,8 +1768,9 @@ static func grass_palette(id: String) -> Dictionary:
 ## Forward+ 1.6 drew near-white tips in the other.
 static func _grass_value(id: String, key: String, fallback: Variant) -> Variant:
 	var entries := region_section(id, "grass")
-	var own_key := key + ("_forward" if forward_plus() else "_compat")
-	var other_key := key + ("_compat" if forward_plus() else "_forward")
+	var linear := RendererFamily.linear_lighting()
+	var own_key := key + ("_forward" if linear else "_compat")
+	var other_key := key + ("_compat" if linear else "_forward")
 	if entries.has(own_key):
 		return entries[own_key]
 	if entries.has(key) or key == "value":
@@ -1810,8 +1828,9 @@ static func hole_words(id: String) -> Array:
 	var words: Variant = region_section(id, "props").get("hole_words")
 	return words if words is Array else []
 
-## The value a water shader at `shader_path` is decoded to in Forward+ on
-## `id`'s map (its file's `water.decode_albedo`); 0 when it is not listed.
+## The value a water shader at `shader_path` is decoded to in Forward+ and
+## Mobile on `id`'s map (its file's `water.decode_albedo`); 0 when it is not
+## listed.
 static func water_decode_value(id: String, shader_path: String) -> float:
 	var table: Variant = region_section(id, "water").get("decode_albedo")
 	return float((table as Dictionary).get(shader_path, 0.0)) if table is Dictionary else 0.0

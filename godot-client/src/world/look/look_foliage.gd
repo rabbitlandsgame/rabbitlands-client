@@ -153,7 +153,7 @@ static func keep_chroma(root: Node, region := "", targets: Array = []) -> int:
 	if words.is_empty():
 		return 0
 	var chroma := float(LookProfile.region_value(region, "props", "keep_chroma",
-		LookProfile.KEEP_CHROMA_FORWARD if LookProfile.forward_plus() else LookProfile.KEEP_CHROMA))
+		LookProfile.KEEP_CHROMA_FORWARD if LookProfile.linear_renderer() else LookProfile.KEEP_CHROMA))
 	var tint: Color = LookProfile.region_value(region, "props", "keep_tint", Color.WHITE)
 	var made := {}
 	var surfaces := 0
