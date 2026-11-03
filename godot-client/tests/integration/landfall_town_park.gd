@@ -49,9 +49,21 @@ extends SceneTree
 ## place of `interior_preloaded`, and an interior whose estimate is over the
 ## class budget (the underground) is refused parking on the way out
 ## (`park_refused`), so its re-entry is `interior_cold_again`.
+##
+## The same script runs on clients without memory classes (the wave-2 baseline,
+## wave 1): memory_budgets.gd is loaded by path, WorldPark's class fields are
+## read with get(), and the report's `memory_class` says {"available": false};
+## such a client preloads and keeps its wave-1 budget.
+##
+## Host memory (wave-2 measurement): every `_memory` phase also prints a
+## `LANDFALL_TOWN_PARK phase {...}` line with its unix time, which
+## tools/world_memory_phases.py matches to the process private bytes it samples.
+## --dwell-ms <ms> (default 0) holds Landfall for that long after the first
+## exit from the interior, with a `exit_dwell` phase about once a second, so
+## the private bytes show what leaving the interior freed.
 const WorldParkScript := preload("res://src/world/world_park.gd")
 const Policy := preload("res://src/world/world_park_policy.gd")
-const MemoryBudgets := preload("res://src/runtime/memory_budgets.gd")
+const MEMORY_BUDGETS_PATH := "res://src/runtime/memory_budgets.gd"
 const Rig := preload("res://tests/integration/interior_load_benchmark_rig.tscn")
 const EXTERIOR := "landfall"
 const HITCH_MSEC := 50.0
@@ -88,12 +100,39 @@ func _argument(name: String, fallback: String) -> String:
 	return arguments[at + 1] if at >= 0 and at + 1 < arguments.size() else fallback
 
 func _memory(label: String) -> void:
-	memory.append({"phase": label, "static_bytes": OS.get_static_memory_usage(),
+	var row := {"phase": label, "unix_time": Time.get_unix_time_from_system(),
+		"static_bytes": OS.get_static_memory_usage(),
 		"texture_gpu_bytes": Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED),
 		"buffer_gpu_bytes": Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED),
 		"video_gpu_bytes": Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED),
 		"objects": Performance.get_monitor(Performance.OBJECT_COUNT),
-		"nodes": Performance.get_monitor(Performance.OBJECT_NODE_COUNT)})
+		"nodes": Performance.get_monitor(Performance.OBJECT_NODE_COUNT),
+		"world_park_kept_bytes": park.call("kept_bytes") if is_instance_valid(park) and park.has_method("kept_bytes") else null,
+		"world_park_parked": park.call("parked_maps") if is_instance_valid(park) and park.has_method("parked_maps") else null}
+	memory.append(row)
+	print("LANDFALL_TOWN_PARK phase ", JSON.stringify(row))
+
+## MemoryBudgets.current() plus "available": true, or {"available": false} on a
+## client without memory classes.
+static func memory_class_record() -> Dictionary:
+	if not ResourceLoader.exists(MEMORY_BUDGETS_PATH):
+		return {"available": false, "class": null}
+	var budgets := load(MEMORY_BUDGETS_PATH) as Script
+	var record: Variant = budgets.call("current") if budgets != null else null
+	if not (record is Dictionary):
+		return {"available": false, "class": null, "error": "memory_budgets.gd did not load"}
+	var out := (record as Dictionary).duplicate(true)
+	out["available"] = true
+	return out
+
+## WorldPark's own package-size estimate for an interior it has not measured
+## (wave-2 WorldPark); -1 on a client without it.
+static func package_estimate(manifest_path: String) -> int:
+	var script: Script = WorldParkScript
+	for method: Dictionary in script.get_script_method_list():
+		if str(method.get("name", "")) == "_estimate_package":
+			return int(script.call("_estimate_package", manifest_path))
+	return -1
 
 func _ground(point: Vector3) -> bool:
 	var space := stage.get_world_3d().direct_space_state
@@ -212,9 +251,11 @@ func _run() -> void:
 	if OS.get_cmdline_user_args().has("--park-held"):
 		park.held_interiors = {}
 	# Small machines build nothing ahead of the player (WorldPark.configure).
-	var preloading: bool = park.preload_enabled
-	print("LANDFALL_TOWN_PARK memory class ", JSON.stringify(MemoryBudgets.current()),
-		" budget_mib=", park.budget_bytes / 1048576, " preload=", preloading)
+	# (A client without memory classes always preloads.)
+	var preload_value: Variant = park.get("preload_enabled")
+	var preloading: bool = preload_value == null or bool(preload_value)
+	print("LANDFALL_TOWN_PARK memory class ", JSON.stringify(memory_class_record()),
+		" budget_mib=", int(park.get("budget_bytes")) / 1048576, " preload=", preloading)
 	_check(park.parent_of(interior) == EXTERIOR, "the interior's parent is Landfall", park.parent_of(interior))
 	# The door: its exterior return tile and the interior's exit tile, from the
 	# interior's own portal rows (one object id serves both ends); the arrival
@@ -362,7 +403,7 @@ func _run() -> void:
 	# reads it (the texture estimate made when Landfall bound, else - an
 	# unflagged interior - its GLB-size guess) within the class budget (Landfall
 	# is taken back first, so nothing else is kept).
-	var interior_estimate := int(park._interior_bytes.get(interior, WorldParkScript._estimate_package(interior_path)))
+	var interior_estimate := int(park._interior_bytes.get(interior, package_estimate(interior_path)))
 	var interior_fits := interior_estimate <= int(park.budget_bytes)
 	var scenery := loader.world_root.get_node_or_null(preload("res://src/world/underground_scenery.gd").NODE_NAME)
 	var config := preload("res://src/world/underground_scenery.gd").config_for(interior)
@@ -380,6 +421,18 @@ func _run() -> void:
 		"Landfall comes back parked and the interior is kept" if interior_fits \
 			else "Landfall comes back parked and the interior, over the class budget, is refused parking",
 		{"estimated_mib": interior_estimate / 1048576, "budget_mib": int(park.budget_bytes) / 1048576, "refused": refused})
+	# --dwell-ms: stay on Landfall while the interior is freed (refused) or kept
+	# (parked), with a memory phase about once a second for the host sampler.
+	var dwell_msec := maxi(0, int(_argument("--dwell-ms", "0")))
+	if dwell_msec > 0:
+		var dwell_began := Time.get_ticks_msec()
+		var next_point := dwell_began
+		while Time.get_ticks_msec() - dwell_began < dwell_msec:
+			if Time.get_ticks_msec() >= next_point:
+				_memory("exit_dwell")
+				next_point += 1000
+			await process_frame
+		_memory("exit_dwell_end")
 
 	# 5. In again: the parked Town (cold again when it could not be parked).
 	var again: Dictionary = await _change("interior_parked" if interior_fits else "interior_cold_again",
@@ -442,8 +495,9 @@ func _run() -> void:
 func _finish(report_path: String, interior: String, extra := {}) -> void:
 	var park_events: Array = park.events.duplicate() if is_instance_valid(park) else []
 	var park_counters: Dictionary = park.counters.duplicate() if is_instance_valid(park) else {}
-	var park_budget_mib: int = int(park.budget_bytes) / 1048576 if is_instance_valid(park) else -1
-	var park_preload: bool = bool(park.preload_enabled) if is_instance_valid(park) else false
+	var park_budget_mib: int = int(park.get("budget_bytes")) / 1048576 if is_instance_valid(park) else -1
+	var park_preload_value: Variant = park.get("preload_enabled") if is_instance_valid(park) else false
+	var park_preload: bool = park_preload_value == null or bool(park_preload_value)
 	if is_instance_valid(park):
 		park.enabled = true
 		park.clear()
@@ -470,7 +524,7 @@ func _finish(report_path: String, interior: String, extra := {}) -> void:
 	var report := {"ok": ok, "interior": interior, "rendered": rendered,
 		"vsync": DisplayServer.window_get_vsync_mode() if rendered else -1,
 		"scope": "WorldLoader + WorldPark + environment/camera/section/cutaway controllers; no Main, network, avatar, occluder fade or curtain. Time to ready = change call + framing + binding + first draw + three grounded physics frames. The cold interior runs last with GlbSceneCache emptied but OS/driver caches warm.",
-		"engine": Engine.get_version_info(), "memory_class": MemoryBudgets.current(),
+		"engine": Engine.get_version_info(), "memory_class": memory_class_record(),
 		"world_park_budget_mib": park_budget_mib, "preload_enabled": park_preload,
 		"checks": checks, "transitions": transitions,
 		"memory": memory, "park_events": park_events, "park_counters": park_counters}

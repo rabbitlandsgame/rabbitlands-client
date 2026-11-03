@@ -89,9 +89,11 @@ const MIN_SAMPLE_FRAMES := 60
 ## DESPAWN_SETTLE_FRAMES after the removal.
 const CrowdPolicy := preload("res://src/world/crowd_presentation.gd")
 ## The session's memory class sets the park limit (16 or 48) and the world and
-## creature budgets; an inherited RABBITLANDS_MEMORY_CLASS changes it, so every
-## report records it (`memoryClass`).
-const MemoryBudgets := preload("res://src/runtime/memory_budgets.gd")
+## creature budgets; RABBITLANDS_MEMORY_CLASS (the runner's --memory-class)
+## changes it, so every report records it (`memoryClass`). Loaded by path: the
+## same harness runs on clients without memory classes (the wave-2 baseline),
+## where the record says the feature is absent.
+const MEMORY_BUDGETS_PATH := "res://src/runtime/memory_budgets.gd"
 const DESPAWN_SAMPLE_MARGIN_MSEC := 1000
 const DESPAWN_SETTLE_FRAMES := 12
 ## Longest wait before a cell for RL head prewarm work in flight (MEM-M7b).
@@ -265,6 +267,10 @@ static func cells_for(profile: String) -> Array:
 		"activity": "route", "visit": "cold", "routeId": "seam"})
 	if profile == "traversal":
 		return cells.filter(func(cell: Dictionary) -> bool: return str(cell.shape) == "traversal")
+	# Explicit only (wave-2 memory measurement, MEM-M2): Landfall to its
+	# underground and back twice, holding after each exit (Workloads.underground_route).
+	cells.append({"id": "traversal-underground-roundtrip", "count": 1, "shape": "traversal",
+		"activity": "route", "visit": "cold", "routeId": "underground"})
 	# Explicit Phase7 selector; existing profile memberships stay unchanged.
 	cells.append({"id":"combat-heat-bolt-160","count":160,"shape":"heat_bolt","activity":"heat_bolt_combat"})
 	if profile == "phase7":
@@ -449,6 +455,10 @@ func _run() -> void:
 	if _main == null:
 		_finish()
 		return
+	# The wave-2 switches the client parsed; the runner records the environment.
+	_report["hardwareSwitches"] = hardware_switches_record()
+	# A failure here stops before the first cell (the cell loop checks failures).
+	_frame_motion_ready()
 	Engine.max_fps = _fps_cap
 	# Main has loaded the player's settings since the first override. Keep
 	# benchmark pacing explicit and record the actual backend mode.
@@ -632,6 +642,10 @@ func _set_up_main() -> void:
 			return
 		map_id = authored_map
 	_report["map"] = map_id
+	# The first arrival (MOB-C6 "cold first arrival"): from the map request to
+	# the map root, to Main's first arrival report and to the readiness below.
+	var request_usec := Time.get_ticks_usec()
+	var loaded_usec := -1
 	if map_id != "none":
 		_app_state.set("current_map", map_id)
 		_main.call("_load_server_map")
@@ -640,6 +654,7 @@ func _set_up_main() -> void:
 		while loader.world_root == null and Time.get_ticks_msec() < deadline:
 			await process_frame
 		_expect(loader.world_root != null, "benchmark map loads")
+		loaded_usec = Time.get_ticks_usec()
 	_adapter = _main.get("adapter") as CoordinateAdapter
 	var centre_text := OS.get_environment("RABBITLANDS_CROWD_BENCH_CENTRE")
 	if _production_undead:
@@ -693,6 +708,8 @@ func _set_up_main() -> void:
 	_app_state.call("mark_all_actors_changed")
 	_main.call("_sync_world", _app_state.call("take_changed_actors"))
 	_report["worldReadiness"] = await _wait_for_world_readiness("initial map", 1500)
+	_report["firstArrival"] = first_arrival_record(request_usec, loaded_usec, Time.get_ticks_usec(),
+		_arrival_reports())
 
 
 ## The server supplies this actor-type table at login. Individual record
@@ -2441,6 +2458,8 @@ func _run_traversal_cell(spec: Dictionary) -> void:
 			"visibleMetric": "transitionStart to Main's first arrival report (arrival_ready_v1: drawn, grounded, no curtain); null when none (a continuous handoff keeps the traveller)",
 			"settleMetric": "transitionStart to readiness: streaming idle, stable resources, arrival complete and curtain gone",
 			"serverNavigationCertified": false, "unmeasuredPrimer": primer,
+			# Per-leg memory points (legs[].memory, legs[].dwell) and their maxima.
+			"memoryPeak": route_memory_peak(legs),
 			"iterationClock": {"index": int(spec.get("soakIndex", 0)),
 				"plannedIterations": int(spec.get("soakIterations", 1)), "visit": str(spec.visit),
 				"pid": OS.get_process_id(), "mainInstanceId": _main.get_instance_id(),
@@ -2480,6 +2499,8 @@ func _traverse_route(route_id: String) -> Array[Dictionary]:
 		var approach_settle := await _route_settle_at(Workloads.tile(leg.approach))
 		var actor := (_main.get("actor_nodes") as Dictionary).get(FIRST_ACTOR_ID) as Node3D
 		var old_identity := actor.get_instance_id() if is_instance_valid(actor) else -1
+		# Per-leg memory (MEM-M5/M2 measurement): before the change and on arrival.
+		var memory_before: Dictionary = _main.call("benchmark_memory_point", "beforeTransition")
 		var began := Time.get_ticks_msec()
 		var frames_before := _route_frame_series.size()
 		_set_stage("route:%s:transition" % str(leg.id))
@@ -2498,6 +2519,14 @@ func _traverse_route(route_id: String) -> Array[Dictionary]:
 		_set_stage("route:%s:capture" % str(leg.id))
 		var arrival_content := RouteContent.capture(_main)
 		var leg_end := RouteContent.clock()
+		var memory_arrival: Dictionary = _main.call("benchmark_memory_point", "arrival")
+		# A leg may hold the player on arrival (`dwellMsec`), sampling memory once
+		# a second, so freeing a refused or evicted world shows (MEM-M2).
+		var frames_at_dwell := _route_frame_series.size()
+		var dwell := {}
+		if int(leg.get("dwellMsec", 0)) > 0:
+			_set_stage("route:%s:dwell" % str(leg.id))
+			dwell = await _route_dwell(int(leg.dwellMsec))
 		var arrived_actor := (_main.get("actor_nodes") as Dictionary).get(FIRST_ACTOR_ID) as Node3D
 		var handoff := (_main.get("exterior_stream") as ExteriorRegionStream).last_handoff
 		var continuous := str(handoff.get("from", "")) == str(leg.map) \
@@ -2518,10 +2547,10 @@ func _traverse_route(route_id: String) -> Array[Dictionary]:
 			"content": {"start": start_content, "arrival": arrival_content},
 			"sampledFrames": _route_frame_series.size() - frames_before, "readiness": arrival,
 			# Indices into the cell's frameSeries/wallFrameSeries, [first, end).
-			"frameRanges": {"start": [frames_at_start, frames_at_walk],
-				"walk": [frames_at_walk, frames_before],
-				"transition": [frames_before, frames_after_transition],
-				"capture": [frames_after_transition, _route_frame_series.size()]},
+			"frameRanges": leg_frame_ranges(frames_at_start, frames_at_walk, frames_before,
+				frames_after_transition, frames_at_dwell, _route_frame_series.size(), not dwell.is_empty()),
+			"memory": {"beforeTransition": memory_before, "arrival": memory_arrival},
+			"dwell": dwell if not dwell.is_empty() else null,
 			"travellerRetained": is_instance_valid(arrived_actor) and arrived_actor.get_instance_id() == old_identity,
 			"expectContinuous": bool(leg.get("expectContinuous", false)),
 			"continuousHandoff": continuous,
@@ -2558,6 +2587,19 @@ static func leg_visible_times(reports: Array, start_usec: int, probe: Dictionary
 			"shownMs": snappedf(float(shown - start_usec) / 1000.0, 0.001) if shown >= 0 else null,
 			"hiddenMs": snappedf(float(hidden - start_usec) / 1000.0, 0.001) if hidden >= 0 else null,
 			"probeFrames": int(probe.get("frames", 0))}}
+
+
+## The initial map's first arrival (MOB-C6 "cold first arrival"), in ms from
+## the map request: `loadedMs` (the map root exists; null without a map),
+## `arrivalReportMs` (Main's first arrival report after the request, as
+## leg_visible_times reads them; null when none) and `readyMs` (the end of the
+## initial readiness wait, which lasts at least 1.5 s).
+static func first_arrival_record(request_usec: int, loaded_usec: int, ready_usec: int, reports: Array) -> Dictionary:
+	var visible := leg_visible_times(reports, request_usec, {})
+	return {"loadedMs": snappedf(float(loaded_usec - request_usec) / 1000.0, 0.001) if loaded_usec >= 0 else null,
+		"arrivalReportMs": visible.visibleMs, "readyMs": snappedf(float(ready_usec - request_usec) / 1000.0, 0.001),
+		"arrivalReports": visible.arrivalReports,
+		"basis": "map request to map root, Main's first arrival report and the initial readiness wait (>= 1.5 s)"}
 
 
 ## Main's arrival reports so far (crowd_benchmark_main.gd); empty for a Main
@@ -2639,6 +2681,83 @@ func _route_settle_at(tile: Vector2i) -> Dictionary:
 		await _next_drawn_frame()
 	return {"focusMetres": _finite_or_null(distance), "waitMilliseconds": Time.get_ticks_msec() - started,
 		"settled": distance <= APPROACH_SETTLE_METRES}
+
+
+## A leg's frame ranges in the route series, [first, end): start, walk,
+## transition and capture, plus `dwell` for a leg that holds on arrival (the
+## capture then ends where the dwell begins).
+static func leg_frame_ranges(at_start: int, at_walk: int, at_transition: int, after_transition: int,
+		at_dwell: int, at_end: int, dwelled: bool) -> Dictionary:
+	var ranges := {"start": [at_start, at_walk], "walk": [at_walk, at_transition],
+		"transition": [at_transition, after_transition],
+		"capture": [after_transition, at_dwell if dwelled else at_end]}
+	if dwelled:
+		ranges["dwell"] = [at_dwell, at_end]
+	return ranges
+
+
+## Holds the player where the leg arrived for `msec`, drawing frames (they stay
+## in the route series) and taking a memory point about once a second, so the
+## host's private bytes (runner sampler, by unixTime) and the client's own
+## counters show what leaving a world freed.
+const DWELL_POINT_MSEC := 1000
+
+func _route_dwell(msec: int) -> Dictionary:
+	var started := RouteContent.clock()
+	var began := Time.get_ticks_msec()
+	var points: Array = []
+	var next_point := began
+	var frames := 0
+	while Time.get_ticks_msec() - began < msec:
+		if Time.get_ticks_msec() >= next_point:
+			points.append(_main.call("benchmark_memory_point", "dwell"))
+			next_point += DWELL_POINT_MSEC
+		await _next_drawn_frame()
+		frames += 1
+	points.append(_main.call("benchmark_memory_point", "dwellEnd"))
+	return {"milliseconds": Time.get_ticks_msec() - began, "plannedMilliseconds": msec, "frames": frames,
+		"start": started, "end": RouteContent.clock(), "points": points}
+
+
+## The largest values a route's memory points reached (legs, dwells): static
+## and video bytes, the actor scene cache's bytes in total and per domain (null
+## when the client keeps no byte ledger), its entries, evictions and evicted
+## main-thread rebuilds, and WorldPark's kept bytes.
+static func route_memory_peak(legs: Array) -> Dictionary:
+	var points: Array = []
+	for leg: Variant in legs:
+		if not (leg is Dictionary):
+			continue
+		var memory: Variant = (leg as Dictionary).get("memory")
+		if memory is Dictionary:
+			points.append_array((memory as Dictionary).values())
+		var dwell: Variant = (leg as Dictionary).get("dwell")
+		if dwell is Dictionary:
+			points.append_array((dwell as Dictionary).get("points", []) as Array)
+	var peak := {"points": 0, "staticBytes": null, "videoBytes": null, "actorSceneBytes": null,
+		"actorSceneBytesByDomain": {}, "actorSceneEntries": null, "actorSceneEvictions": null,
+		"evictedMainRebuilds": null, "worldParkKeptBytes": null}
+	for point: Variant in points:
+		if not (point is Dictionary):
+			continue
+		var row := point as Dictionary
+		peak.points = int(peak.points) + 1
+		var scenes: Dictionary = row.get("actorScenes", {}) if row.get("actorScenes") is Dictionary else {}
+		var park: Dictionary = row.get("worldPark", {}) if row.get("worldPark") is Dictionary else {}
+		for pair: Array in [["staticBytes", row.get("staticBytes")], ["videoBytes", row.get("videoBytes")],
+				["actorSceneBytes", scenes.get("bytes")], ["actorSceneEntries", scenes.get("strong_scene_entries")],
+				["actorSceneEvictions", scenes.get("evictions")], ["evictedMainRebuilds", scenes.get("evicted_main_rebuilds")],
+				["worldParkKeptBytes", park.get("keptBytes")]]:
+			var value: Variant = pair[1]
+			if value is int or value is float:
+				peak[pair[0]] = value if peak[pair[0]] == null else maxi(int(peak[pair[0]]), int(value))
+		var domains: Variant = scenes.get("bytes_by_domain")
+		if domains is Dictionary:
+			for domain: Variant in domains:
+				var bytes := int((domains as Dictionary)[domain])
+				var by_domain: Dictionary = peak.actorSceneBytesByDomain
+				by_domain[str(domain)] = maxi(int(by_domain.get(str(domain), 0)), bytes)
+	return peak
 
 
 ## Measurement instrumentation belongs to this benchmark, not to Main or other
@@ -2795,11 +2914,51 @@ func _wait_for_rl_head_warm(label: String) -> Dictionary:
 
 
 ## This session's memory class and why: MemoryBudgets.current() ("class",
-## "source" = probe, environment or argument, "probed_class", "basis", ...).
-## The runner neither sets nor clears RABBITLANDS_MEMORY_CLASS, so a run that
-## inherited one says so here (MEM-M7b review).
+## "source" = probe, environment or argument, "probed_class", "basis", ...),
+## plus "available": true. A client without memory classes (before wave 2
+## MEM-M1) gives {"available": false, "class": null}: it ignores
+## RABBITLANDS_MEMORY_CLASS. The runner clears an inherited value and sets it
+## only for --memory-class, so the record says what the run asked for.
 static func memory_class_record() -> Dictionary:
-	return MemoryBudgets.current()
+	if not ResourceLoader.exists(MEMORY_BUDGETS_PATH):
+		return {"available": false, "class": null, "source": null,
+			"requested": OS.get_environment("RABBITLANDS_MEMORY_CLASS")}
+	var budgets := load(MEMORY_BUDGETS_PATH) as Script
+	var record: Variant = budgets.call("current") if budgets != null else null
+	if not (record is Dictionary):
+		return {"available": false, "class": null, "source": null, "error": "memory_budgets.gd did not load"}
+	var out := (record as Dictionary).duplicate(true)
+	out["available"] = true
+	return out
+
+
+## What HardwareTier.switches() reports: the wave-2 measurement switches the
+## client parsed (memory class, world distance, actor images, actor geometry,
+## actor VRAM self-test) and any it rejected. {"available": false} on a client
+## without it (the wave-2 baseline). Called through the loaded script, so the
+## harness compiles against both.
+const HARDWARE_TIER_PATH := "res://src/runtime/hardware_tier.gd"
+
+static func hardware_switches_record() -> Dictionary:
+	var tier := load(HARDWARE_TIER_PATH) as Script
+	if tier == null:
+		return {"available": false, "error": "hardware_tier.gd did not load"}
+	for method: Dictionary in tier.get_script_method_list():
+		if str(method.get("name", "")) == "switches":
+			var switches: Variant = tier.call("switches")
+			return {"available": true, "switches": switches if switches is Dictionary else {}}
+	return {"available": false}
+
+
+## Main's LAT-L7 frame-motion override (crowd_benchmark_main.gd) may only stand
+## in for Main's own step while that step's body is the one it repeats.
+func _frame_motion_ready() -> bool:
+	var state: Dictionary = _main.call("benchmark_frame_motion_state")
+	_report["frameMotion"] = state
+	if not bool(state.get("mainHasStep", false)) or not bool(state.get("sourceReadable", false)):
+		return true # No step, or an exported client: nothing to attest (recorded as unattested).
+	return _expect(bool(state.get("attested", false)),
+		"Main's frame-motion step is still the body the benchmark override repeats: %s" % str(state.get("body")))
 
 
 ## When `afterDespawn` is sampled, in milliseconds after the crowd's removal.

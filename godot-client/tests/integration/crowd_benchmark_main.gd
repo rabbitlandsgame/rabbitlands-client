@@ -81,11 +81,50 @@ func benchmark_resource_diagnostics() -> Dictionary:
 			"resource_retention", "resource_admission", "map_cache_enabled", "map_cache_status",
 			"map_load_phases_us", "chunks_resident", "chunk_resident_bytes",
 			"chunk_revision", "vram_mode", "vram_formats", "static_memory_bytes",
-			"video_memory_bytes"]:
+			"video_memory_bytes", "memory"]:
+		# "memory": the wave-2 MemoryCensus row (MEM-M3); absent on older clients.
 		if snapshot.has(key):
 			result[key] = snapshot[key]
 	result["prepared_placements"] = benchmark_placement_snapshot()
 	return result
+
+
+## Wave-2 memory census, when the client has it (MEM-M3). Loaded by path so the
+## harness also compiles against a client without it.
+const BENCHMARK_MEMORY_CENSUS_PATH := "res://src/runtime/memory_census.gd"
+
+## One cheap memory point for a traversal leg or dwell (outside the frame
+## timers, but inside the route's frame series like the boundary capture): the
+## clocks, Godot's static and video memory, the actor scene cache's entries and
+## byte ledger (bytes and evictions exist only on clients with MEM-M5: null
+## otherwise), WorldPark's budget, kept bytes and parked maps, and the
+## MemoryCensus row where the client has one. The host's private bytes come
+## from the runner's process sampler, matched by `unixTime`.
+func benchmark_memory_point(label: String) -> Dictionary:
+	var retention := {"actor_scenes": GlbSceneCache.retention_snapshot(),
+		"animations": NativeAnimationImporter.retention_snapshot(),
+		"world_meshes": ExternalMeshPool.retention_snapshot(),
+		"world_textures": ExternalTexturePool.retention_snapshot()}
+	var scenes: Dictionary = retention.actor_scenes
+	var out := {"label": label, "unixTime": Time.get_unix_time_from_system(), "ticksUsec": Time.get_ticks_usec(),
+		"map": str(AppState.current_map), "staticBytes": OS.get_static_memory_usage(),
+		"videoBytes": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_VIDEO_MEM_USED),
+		"actorScenes": {}}
+	for key: String in ["strong_scene_entries", "entries", "bytes_estimate_available", "bytes", "bytes_by_domain",
+			"budget", "evictions", "evicted_bytes", "evicted_awaiting", "evicted_main_rebuilds"]:
+		(out.actorScenes as Dictionary)[key] = scenes.get(key)
+	var park: Object = world_park
+	if is_instance_valid(park):
+		out["worldPark"] = {"budgetBytes": park.get("budget_bytes"),
+			"keptBytes": park.call("kept_bytes") if park.has_method("kept_bytes") else null,
+			"parked": park.call("parked_maps") if park.has_method("parked_maps") else null,
+			"memoryClass": park.get("memory_class"), "preloadEnabled": park.get("preload_enabled")}
+	if ResourceLoader.exists(BENCHMARK_MEMORY_CENSUS_PATH):
+		var census := load(BENCHMARK_MEMORY_CENSUS_PATH) as Script
+		if census != null:
+			out["memory"] = census.call("snapshot", {"world_park": world_park, "crowd": crowd,
+				"retention": retention})
+	return out
 
 
 func benchmark_placement_snapshot() -> Dictionary:
@@ -693,10 +732,63 @@ func _update_animation_gate(delta: float) -> void:
 ## LAT-L7: the frame-clock presentation step Main takes first in `_process` at
 ## Low (`frameMotionMilliseconds`); with it the physics-phase saving can be
 ## followed into the process phase.
+##
+## The same harness runs on clients with and without that step (the wave-2
+## baseline is the wave-1 client). A `super` call to a function Main lacks does
+## not compile, so this override repeats Main's one-line body through a dynamic
+## call instead: on a Main without the step nothing calls it, and on a Main with
+## it the benchmark checks before any cell that Main's body is still exactly
+## FRAME_MOTION_MAIN_BODY (benchmark_frame_motion_state), so the override can
+## never stand in for a different step.
+const FRAME_MOTION_FUNCTION := "_advance_remote_motion"
+const FRAME_MOTION_MAIN_SOURCE := "res://src/app/main.gd"
+const FRAME_MOTION_MAIN_BODY: Array[String] = ["ReplicatedActor3D.advance_frame_driven(delta)"]
+## The actor class as a plain Script value, so its static step is called
+## dynamically (an older actor class has no such function).
+var _frame_motion_class: Script = ReplicatedActor3D
+
 func _advance_remote_motion(delta: float) -> void:
 	var started := Time.get_ticks_usec()
-	super._advance_remote_motion(delta)
+	_frame_motion_class.call(&"advance_frame_driven", delta)
 	_benchmark_add(&"frame_motion", started)
+
+
+## Whether Main has the LAT-L7 frame-motion step and, when it does, whether its
+## body is still the one `_advance_remote_motion` above repeats. "attested" is
+## false when the source cannot be read (an exported client).
+func benchmark_frame_motion_state() -> Dictionary:
+	var base := (get_script() as Script).get_base_script()
+	var present := false
+	if base != null:
+		for method: Dictionary in base.get_script_method_list():
+			if str(method.get("name", "")) == FRAME_MOTION_FUNCTION:
+				present = true
+				break
+	var readable := FileAccess.file_exists(FRAME_MOTION_MAIN_SOURCE) and not OS.has_feature("template")
+	var out := {"mainHasStep": present, "sourceReadable": readable, "attested": false, "body": []}
+	if not present or not readable:
+		return out
+	var body := frame_motion_body(FileAccess.get_file_as_string(FRAME_MOTION_MAIN_SOURCE))
+	out["body"] = body
+	out["attested"] = body == FRAME_MOTION_MAIN_BODY
+	return out
+
+
+## The statements of `func _advance_remote_motion(...)` in `source`: its
+## indented lines up to the next unindented line, without comments or blanks.
+static func frame_motion_body(source: String) -> Array[String]:
+	var body: Array[String] = []
+	var inside := false
+	for line: String in source.replace("\r\n", "\n").split("\n"):
+		if not inside:
+			inside = line.begins_with("func %s(" % FRAME_MOTION_FUNCTION)
+			continue
+		if not line.is_empty() and not line.begins_with("\t") and not line.begins_with(" "):
+			break
+		var statement := line.strip_edges()
+		if not statement.is_empty() and not statement.begins_with("#"):
+			body.append(statement)
+	return body
 
 
 ## The crowd-wide work at the end of a gate sweep, and the overhead declutter

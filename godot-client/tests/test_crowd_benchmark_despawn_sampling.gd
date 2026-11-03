@@ -5,9 +5,12 @@ extends SceneTree
 ## (which never starts while the game view is shown). Runs the harness's static
 ## helpers against the real CrowdPresentation constants and a real RL head
 ## worker parse; headless, no Main.
+##
+## The harness also runs on clients without the wave-2 memory classes and park
+## expiry (the wave-2 baseline): those parts are read by name and checked as
+## absent there.
 const Benchmark := preload("res://tests/integration/crowd_presentation_benchmark.gd")
 const CrowdPolicy := preload("res://src/world/crowd_presentation.gd")
-const MemoryBudgets := preload("res://src/runtime/memory_budgets.gd")
 const PARSE_LIMIT_MSEC := 30000
 var failures := 0
 var checks := 0
@@ -42,8 +45,13 @@ func _check_despawn_timing() -> void:
 		"afterDespawn is sampled the margin past the park time (%d ms)" % wait)
 	# A body parked at the removal is due at PARK_MSEC and freed by the gate's
 	# next look, at most PARK_EXPIRY_PERIOD_MSEC later (MEM-M7a).
-	_check(wait > CrowdPolicy.PARK_MSEC + CrowdPolicy.PARK_EXPIRY_PERIOD_MSEC,
-		"the sample comes after the park time plus one gate expiry period")
+	var policy: Script = CrowdPolicy
+	var expiry: Variant = policy.get_script_constant_map().get("PARK_EXPIRY_PERIOD_MSEC")
+	if expiry == null:
+		print("NOTE: this client has no PARK_EXPIRY_PERIOD_MSEC (before MEM-M7a); the expiry-period check is skipped")
+	else:
+		_check(wait > CrowdPolicy.PARK_MSEC + int(expiry),
+			"the sample comes after the park time plus one gate expiry period")
 	_check(Benchmark.DESPAWN_SETTLE_FRAMES == 12, "afterRemoval keeps the earlier 12-frame sample point")
 	_check(Benchmark.RL_HEAD_WARM_WAIT_MSEC >= 10000, "the RL head wait is bounded but not short")
 
@@ -79,17 +87,26 @@ func _check_settled_rule() -> void:
 ## where it came from, so a run that inherited RABBITLANDS_MEMORY_CLASS says so.
 func _check_memory_class_record() -> void:
 	var probed := Benchmark.memory_class_record()
-	_check(str(probed.get("class", "")) in MemoryBudgets.CLASSES and probed.has("source"),
+	if not ResourceLoader.exists(Benchmark.MEMORY_BUDGETS_PATH):
+		_check(probed.get("available") == false and probed.get("class") == null,
+			"a client without memory classes records the feature as absent: %s" % JSON.stringify(probed))
+		return
+	var budgets := load(Benchmark.MEMORY_BUDGETS_PATH) as Script
+	var constants := budgets.get_script_constant_map()
+	var small := str(constants.get("SMALL"))
+	_check(probed.get("available") == true and str(probed.get("class", "")) in (constants.get("CLASSES") as Array)
+		and probed.has("source"),
 		"the report records the session's memory class and its source: %s" % JSON.stringify(probed))
-	_check(MemoryBudgets.override_for_tests(MemoryBudgets.SMALL), "a forced class for the record check")
+	_check(bool(budgets.call("override_for_tests", small)), "a forced class for the record check")
 	var forced := Benchmark.memory_class_record()
-	_check(str(forced.get("class")) == MemoryBudgets.SMALL and str(forced.get("source")) == "test",
+	_check(str(forced.get("class")) == small and str(forced.get("source")) == "test",
 		"a forced class is recorded with its source: %s" % JSON.stringify(forced))
 	forced["class"] = "changed"
-	_check(MemoryBudgets.memory_class() == MemoryBudgets.SMALL, "the record is a copy")
-	_check(CrowdPolicy.park_limit_for(str(Benchmark.memory_class_record().get("class"))) == 16,
+	_check(str(budgets.call("memory_class")) == small, "the record is a copy")
+	var policy: Script = CrowdPolicy
+	_check(int(policy.call("park_limit_for", str(Benchmark.memory_class_record().get("class")))) == 16,
 		"the recorded class names the park limit (16 on small)")
-	MemoryBudgets.reset()
+	budgets.call("reset")
 
 
 func _check_live_state() -> void:

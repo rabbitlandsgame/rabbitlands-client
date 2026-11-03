@@ -83,7 +83,26 @@ func _run() -> void:
 		"the historical all profile keeps its membership")
 	_check(Benchmark.cells_for("traversal-southern-cold")[0].get("routeId", "southern") == "southern",
 		"the southern cells keep the southern route")
-	_check_route_against_maps(route + seam)
+	# The Landfall underground round trip (wave-2 memory measurement): explicit only.
+	var underground := Workloads.underground_route()
+	_check(Workloads.route("underground") == underground and underground.size() == 4
+		and underground.map(func(leg: Dictionary) -> String: return str(leg.id)) == [
+			"underground-entry", "underground-exit", "underground-reentry", "underground-reexit"],
+		"the underground route is in, out, in and out")
+	for index: int in range(1, underground.size()):
+		_check(underground[index].map == underground[index - 1].destination
+			and underground[index].start == underground[index - 1].arrival,
+			"%s starts where %s arrived" % [underground[index].id, underground[index - 1].id])
+	_check(underground.all(func(leg: Dictionary) -> bool:
+			return (str(leg.kind) == "interior_return") == (int(leg.get("dwellMsec", 0)) > 0)),
+		"every exit, and only an exit, holds the player on arrival")
+	_check(underground[0].start != underground[0].approach
+		and Benchmark.cells_for("traversal-underground-roundtrip").size() == 1
+		and str(Benchmark.cells_for("traversal-underground-roundtrip")[0].get("routeId", "")) == "underground"
+		and not Benchmark.cells_for("traversal").any(func(cell: Dictionary) -> bool:
+			return str(cell.id) == "traversal-underground-roundtrip"),
+		"the underground cell walks up to the door, selects directly and stays out of the traversal profile")
+	_check_route_against_maps(route + seam + underground)
 	print("PERFORMANCE_WORKLOAD_CHECKS failures=", failures)
 	quit(1 if failures else 0)
 

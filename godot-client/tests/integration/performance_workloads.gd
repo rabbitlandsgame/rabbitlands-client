@@ -107,8 +107,36 @@ static func seam_route() -> Array[Dictionary]:
 			"destination": "whitehorn_range", "arrival": [601, 241]},
 	]
 
-## The route a traversal cell drives: `southern` (default) or `seam`.
+## Landfall and its underground, in and out twice (wave-2 memory measurement,
+## MEM-M2: "private bytes after leaving the underground are ~1.4 GB lower on
+## small"). The door is The Old Warren (object 59016): Landfall's exterior door
+## tile [56, 303], its return tile [56, 298] and the underground's portal tile
+## [142, 492] (landfall_insides world.json portals). The first entry walks up
+## from 30 tiles out, through the 24-tile preload radius, as a player would;
+## each exit holds the player on the return tile for `dwellMsec` while the
+## refused (small) or parked (medium, large) underground is freed or kept.
+const UNDERGROUND_DWELL_MSEC := 20000
+
+static func underground_route() -> Array[Dictionary]:
+	return [
+		{"id": "underground-entry", "kind": "interior", "map": "landfall",
+			"start": [56, 268], "approach": [56, 300],
+			"destination": "landfall_insides", "arrival": [142, 492]},
+		{"id": "underground-exit", "kind": "interior_return", "map": "landfall_insides",
+			"start": [142, 492], "approach": [142, 492], "dwellMsec": UNDERGROUND_DWELL_MSEC,
+			"destination": "landfall", "arrival": [56, 298]},
+		{"id": "underground-reentry", "kind": "interior", "map": "landfall",
+			"start": [56, 298], "approach": [56, 300],
+			"destination": "landfall_insides", "arrival": [142, 492]},
+		{"id": "underground-reexit", "kind": "interior_return", "map": "landfall_insides",
+			"start": [142, 492], "approach": [142, 492], "dwellMsec": UNDERGROUND_DWELL_MSEC,
+			"destination": "landfall", "arrival": [56, 298]},
+	]
+
+## The route a traversal cell drives: `southern` (default), `seam` or `underground`.
 static func route(route_id: String) -> Array[Dictionary]:
+	if route_id == "underground":
+		return underground_route()
 	return seam_route() if route_id == "seam" else southern_route()
 
 ## Milliseconds between a leg's walking steps.

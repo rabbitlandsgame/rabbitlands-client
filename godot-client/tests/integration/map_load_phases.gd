@@ -43,6 +43,13 @@ extends SceneTree
 ##   ELORIA_PHASE_REPEATS   loads per region, median kept (default 3)
 ##   ELORIA_PHASE_OUTPUT    the file name inside the artifact directory
 ##   ELORIA_PHASE_LABEL     a name for the run, written into the report
+##
+## Content digests (wave 2 NH-A0): the package digest goes through
+## ContentDigest where the client has it; RABBITLANDS_CONTENT_DIGEST or
+## `-- --content-digest=sequential|auto|gdscript|compare` selects the backend.
+## The report records the backend in force (`contentDigest`: at the start, per
+## region after its loads, and at the end, with the cumulative call/file/byte/
+## time counters), or {"available": false} on a client without ContentDigest.
 
 const REGIONS: Array[String] = [
 	"four_gates", "mirrorhold", "crownwater", "whitehorn_range",
@@ -64,6 +71,8 @@ const PHASES: Array[StringName] = [
 ]
 
 const SETTLE_FRAMES := 12
+## Loaded by path so this script also runs on a client without it.
+const CONTENT_DIGEST_PATH := "res://src/runtime/content_digest.gd"
 
 var _failures := 0
 var _artifacts := ""
@@ -117,6 +126,7 @@ func _run() -> void:
 		"unixTime": int(Time.get_unix_time_from_system()),
 		"phases": PHASES,
 		"regions": [],
+		"contentDigest": {"start": content_digest_record()},
 	}
 
 	print("%-18s %8s %8s %8s %8s %8s %8s %8s %8s %8s" % [
@@ -124,11 +134,13 @@ func _run() -> void:
 		"walks", "batch", "frame1"])
 	for region: String in _regions():
 		var measured: Dictionary = await _measure_region(loader, registry, region, repeats)
+		measured["contentDigest"] = content_digest_record()
 		(report["regions"] as Array).append(measured)
 
 	loader.unload_world()
 	stage.queue_free()
 	await _settle(4)
+	(report["contentDigest"] as Dictionary)["end"] = content_digest_record()
 
 	var name: String = OS.get_environment("ELORIA_PHASE_OUTPUT")
 	if name.is_empty():
@@ -142,6 +154,26 @@ func _run() -> void:
 		print("wrote ", _artifacts.path_join(name))
 	print("map load phases: ", "PASS" if _failures == 0 else "FAIL (%d)" % _failures)
 	quit(_failures)
+
+## The content-digest backend in force and its counters (ContentDigest.snapshot()),
+## with what was requested; {"available": false} on a client without it.
+static func content_digest_record() -> Dictionary:
+	var requested := {"environment": OS.get_environment("RABBITLANDS_CONTENT_DIGEST"),
+		"threadsEnvironment": OS.get_environment("RABBITLANDS_CONTENT_DIGEST_THREADS"), "argument": ""}
+	for argument: String in OS.get_cmdline_args() + OS.get_cmdline_user_args():
+		if argument.begins_with("--content-digest="):
+			requested["argument"] = argument.trim_prefix("--content-digest=")
+	if not ResourceLoader.exists(CONTENT_DIGEST_PATH):
+		return {"available": false, "requestedBy": requested,
+			"backend": "none (no ContentDigest: package digests use the loader's own hashing)"}
+	var digest := load(CONTENT_DIGEST_PATH) as Script
+	var snapshot: Variant = digest.call("snapshot") if digest != null else null
+	if not (snapshot is Dictionary):
+		return {"available": false, "requestedBy": requested, "error": "content_digest.gd did not load"}
+	var out := (snapshot as Dictionary).duplicate(true)
+	out["available"] = true
+	out["requestedBy"] = requested
+	return out
 
 func _regions() -> Array:
 	var raw: String = OS.get_environment("ELORIA_PHASE_REGIONS")

@@ -45,10 +45,22 @@ ALL_CELLS = OLD_CELLS + ["mixed-mounted-160", "authored-herd",
 # Explicit wave-2 selectors outside the historical `all` membership.
 SEAM_CELLS = ["traversal-seam-walk"]
 TRAVERSAL_CELLS = ["traversal-southern-cold", "traversal-southern-warm"] + SEAM_CELLS
-# performance_workloads.gd: the six-leg southern route and the walking seam route.
+# The Landfall underground round trip (wave-2 memory measurement): explicit only,
+# outside the `traversal` profile.
+UNDERGROUND_CELLS = ["traversal-underground-roundtrip"]
+# performance_workloads.gd: the six-leg southern route, the walking seam route and
+# the underground round trip.
 ROUTE_LEGS = {"southern": ["first-southern-border", "consecutive-southern-border", "interior-entry",
                            "interior-return", "teleport", "return"],
-              "seam": ["walking-seam"]}
+              "seam": ["walking-seam"],
+              "underground": ["underground-entry", "underground-exit", "underground-reentry",
+                              "underground-reexit"]}
+# The maps each route visits beyond the run's own, for the asset identity.
+ROUTE_MAPS = {"southern": ["whitehorn_range", "mirrorhold", "amethyst_barrens", "amethyst_barrens_secrets",
+                           "sunmane_steppe"],
+              "seam": ["whitehorn_range", "mirrorhold", "amethyst_barrens", "amethyst_barrens_secrets",
+                       "sunmane_steppe"],
+              "underground": ["landfall", "landfall_insides"]}
 # Route fixture version 2 (wave 2 AW-00) adds per-leg settle/visible times.
 ROUTE_VERSION = 2
 # The configuration-overlay worker pools tools/continent_stream_benchmark_project.py supports.
@@ -72,13 +84,36 @@ MAX_PLAUSIBLE_GPU_MILLISECONDS = 60000.0
 # --seed-profile copies into a run's fresh user root (MOB-C6a: warm repeats).
 PROFILE_SEED_DIRECTORIES = ("shader_cache", "vulkan", "d3d12")
 ERROR_PATTERN = re.compile(r"SCRIPT ERROR|Parse Error|Failed to load|Error loading|ERROR:", re.I)
-OVERRIDE_PREFIXES = ("ELORIA_LOOK", "ELORIA_CROWD_", "ELORIA_NATIVE_", "RABBITLANDS_CROWD_")
+# Inherited variables every run clears before applying its own. Since wave 2 that is
+# every client switch family: anything ELORIA_* or RABBITLANDS_* (graphics, crowd,
+# world, memory class, actor images/geometry, content digest, wave-1 FSR/shadow
+# fit/VRAM self-test/text idle, ...) and the RL head development switches, so an
+# inherited switch can never silently change a run. A run sets a switch only
+# through its own options (--memory-class, --switch).
+OVERRIDE_PREFIXES = ("ELORIA_LOOK", "ELORIA_CROWD_", "ELORIA_NATIVE_", "RABBITLANDS_CROWD_",
+                     "ELORIA_", "RABBITLANDS_", "RL_HEAD", "RL_BLEND_")
 OVERRIDE_NAMES = {"ELORIA_VRAM_TEXTURES", "ELORIA_NO_MAP_CACHE", "ELORIA_SAFE_MODE", "RABBITLANDS_CLIENT_RUNTIME", "RABBITLANDS_RUST_EFFECTS"}
 OVERRIDE_NAMES.update({"RABBITLANDS_RESOURCE_ADMISSION", "RABBITLANDS_RESOURCE_BUDGET_MIB"})
 OVERRIDE_NAMES.update({"RABBITLANDS_PREPARED_CONTENT", "RABBITLANDS_PREPARED_NODE_POLICY"})
 OVERRIDE_NAMES.update({"ELORIA_WARDROBE_TEXTURE_CACHE", "ELORIA_ACTOR_BUILD_PROFILE"})
 # The world-text pass idle switch; --diagnostics text_pass_always is the recorded way.
 OVERRIDE_NAMES.add("ELORIA_WORLD_TEXT_IDLE")
+# Measurement switches of waves 1 and 2 whose effective value every run records
+# (`switches` in the run metadata; None = unset), and which --switch NAME=VALUE may
+# set explicitly. RABBITLANDS_MEMORY_CLASS has its own --memory-class option.
+WAVE1_SWITCHES = ("ELORIA_FSR", "ELORIA_WORLD_TEXT_IDLE", "ELORIA_SHADOW_FIT", "ELORIA_VRAM_SELF_TEST",
+                  "ELORIA_VRAM_SELF_TEST_POOL", "ELORIA_VRAM_TEXTURES", "ELORIA_CAMERA_SHADER_WARMUP",
+                  "ELORIA_WORLD_PARK", "ELORIA_INTERIOR_WARMUP", "RABBITLANDS_OPTIMIZATION_PROFILE")
+WAVE2_SWITCHES = ("RABBITLANDS_MEMORY_CLASS", "ELORIA_WORLD_DISTANCE", "ELORIA_ACTOR_IMAGES",
+                  "ELORIA_ACTOR_VRAM_SELF_TEST", "RABBITLANDS_ACTOR_GEOMETRY", "RABBITLANDS_ACTOR_GEOMETRY_ROOT",
+                  "RABBITLANDS_CONTENT_DIGEST", "RABBITLANDS_CONTENT_DIGEST_THREADS", "RABBITLANDS_CAPE_MATH")
+SWITCH_NAMES = WAVE1_SWITCHES + WAVE2_SWITCHES
+# --switch may set these; the others have dedicated options (--memory-class,
+# --diagnostics text_pass_always) or are the runner's own (ELORIA_VRAM_TEXTURES).
+EXPLICIT_SWITCHES = tuple(name for name in SWITCH_NAMES
+                          if name not in ("RABBITLANDS_MEMORY_CLASS", "ELORIA_WORLD_TEXT_IDLE", "ELORIA_VRAM_TEXTURES"))
+MEMORY_CLASSES = ("small", "medium", "large")
+SWITCH_VALUE = re.compile(r"[A-Za-z0-9_.:/\\-]*")
 PERFORMANCE_GRAPHICS = {
     "quality": "low", "appearance": "painted_ground", "fps_limit": 30,
     "render_scale": .75, "map_texture_quality": "half", "crowd_bodies": 60,
@@ -412,8 +447,8 @@ def selected_cells(profile: str, replay: bool = False) -> list[str]:
                 "phase1": PHASE1_CELLS, "phase7": PHASE7_CELLS, "all": ALL_CELLS,
                 "production-undead": UNDEAD_CELLS, "traversal": TRAVERSAL_CELLS}
     names = list(profiles[profile]) if profile in profiles else profile.split(",")
-    if not names or any(not item or item not in ALL_CELLS + PHASE7_CELLS + SEAM_CELLS + UNDEAD_CELLS + [GAUNTLET_CELL]
-                        for item in names):
+    if not names or any(not item or item not in ALL_CELLS + PHASE7_CELLS + SEAM_CELLS + UNDERGROUND_CELLS
+                        + UNDEAD_CELLS + [GAUNTLET_CELL] for item in names):
         raise EvidenceError("unknown or empty benchmark cell selector")
     if len(set(names)) != len(names):
         raise EvidenceError("duplicate benchmark cell selector")
@@ -493,9 +528,25 @@ def validate_gauntlet_cell(cell: dict) -> None:
             raise EvidenceError(f"authored gauntlet census/profile/tile/alive mismatch at {boundary}")
 
 
+def route_id_for(cell_name: str) -> str:
+    """The route a traversal cell drives (crowd_presentation_benchmark.gd cells_for)."""
+    if cell_name.startswith("traversal-seam"):
+        return "seam"
+    return "underground" if cell_name in UNDERGROUND_CELLS else "southern"
+
+
 def route_legs_for(cell_name: str) -> list[str]:
     """The leg ids a traversal cell must report, in order."""
-    return ROUTE_LEGS["seam" if cell_name.startswith("traversal-seam") else "southern"]
+    return ROUTE_LEGS[route_id_for(cell_name)]
+
+
+def route_maps_for(cells: list[str]) -> list[str]:
+    """The maps the selected traversal cells visit (identity scope)."""
+    maps: list[str] = []
+    for name in cells:
+        if name.startswith("traversal-"):
+            maps += [item for item in ROUTE_MAPS[route_id_for(name)] if item not in maps]
+    return maps
 
 
 def validate_route_v2(route: dict, frames: int, name: str) -> None:
@@ -505,7 +556,7 @@ def validate_route_v2(route: dict, frames: int, name: str) -> None:
     be resident in time), so it is reported, never required.
     """
     if route.get("routeVersion") != ROUTE_VERSION or route.get("legSchema") != 2 \
-            or route.get("routeId") != ("seam" if name.startswith("traversal-seam") else "southern"):
+            or route.get("routeId") != route_id_for(name):
         raise EvidenceError(f"{name}: unexpected route fixture version/schema")
     previous_end = None
     for leg in route["legs"]:
@@ -529,13 +580,17 @@ def validate_route_v2(route: dict, frames: int, name: str) -> None:
             raise EvidenceError(f"{label}: handoff classification missing")
         ranges = _object(leg.get("frameRanges"), label + ".frameRanges")
         bounds = []
-        for phase in ("start", "walk", "transition", "capture"):
+        # A leg that holds on arrival (`dwellMsec`) adds a dwell range after its capture.
+        phases = ("start", "walk", "transition", "capture") + (("dwell",) if "dwell" in ranges else ())
+        if ("dwell" in ranges) != isinstance(leg.get("dwell"), dict):
+            raise EvidenceError(f"{label}: dwell range and dwell record disagree")
+        for phase in phases:
             pair = ranges.get(phase)
             if not isinstance(pair, list) or len(pair) != 2:
                 raise EvidenceError(f"{label}: frame range {phase} missing")
             bounds.append((_integer(pair[0], label + "." + phase), _integer(pair[1], label + "." + phase)))
         flat = [value for pair in bounds for value in pair]
-        if flat != sorted(flat) or any(bounds[i][1] != bounds[i + 1][0] for i in range(3)) \
+        if flat != sorted(flat) or any(bounds[i][1] != bounds[i + 1][0] for i in range(len(bounds) - 1)) \
                 or flat[-1] > frames or (previous_end is not None and flat[0] != previous_end):
             raise EvidenceError(f"{label}: frame ranges are not contiguous within the route series")
         if _integer(leg.get("sampledFrames"), label + ".sampledFrames") != flat[-1] - bounds[2][0]:
@@ -1043,6 +1098,7 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
             or data.get("serverTime") is not request.get("server_time", False):
         raise EvidenceError("actual presence/server-time workload differs from request")
     validate_worker_pool(data, request)
+    validate_memory_class(data, request)
     validate_overhead_diagnostics(data, request)
     # New phase-one reports attest effective settings/backends; an old report cannot
     # establish a new reference merely by containing valid historical timing fields.
@@ -1522,6 +1578,61 @@ class BenchmarkLock:
 def clean_environment(inherited: dict[str, str]) -> tuple[dict[str, str], list[str]]:
     cleared = sorted(k for k in inherited if k.startswith(OVERRIDE_PREFIXES) or k in OVERRIDE_NAMES)
     return {k: v for k, v in inherited.items() if k not in cleared}, cleared
+
+
+def parse_switches(values: list[str] | None, memory_class: str = "auto") -> dict[str, str]:
+    """The switches a run sets explicitly: --memory-class and --switch NAME=VALUE.
+
+    --memory-class small|medium|large sets RABBITLANDS_MEMORY_CLASS (a client without
+    memory classes ignores it, and its report says so); auto leaves the client's probe.
+    --switch takes only the recorded measurement switches (EXPLICIT_SWITCHES), each
+    once, with a value of letters, digits and _ . : / \\ -.
+    """
+    result: dict[str, str] = {}
+    if memory_class not in ("auto", *MEMORY_CLASSES):
+        raise EvidenceError("--memory-class must be small, medium, large or auto")
+    if memory_class != "auto":
+        result["RABBITLANDS_MEMORY_CLASS"] = memory_class
+    for value in values or []:
+        name, separator, setting = value.partition("=")
+        if not separator or name not in EXPLICIT_SWITCHES:
+            raise EvidenceError(f"--switch takes NAME=VALUE with NAME one of {', '.join(EXPLICIT_SWITCHES)}")
+        if name in result:
+            raise EvidenceError(f"--switch {name} given twice")
+        if not SWITCH_VALUE.fullmatch(setting):
+            raise EvidenceError(f"--switch {name}: unsupported characters in its value")
+        result[name] = setting
+    return result
+
+
+def switch_record(environment: dict[str, str]) -> dict[str, str | None]:
+    """Every recorded measurement switch as the child process sees it (None = unset)."""
+    return {name: environment.get(name) for name in SWITCH_NAMES}
+
+
+def validate_memory_class(data: dict, request: dict) -> None:
+    """A pinned --memory-class must be the class the client ran as, from the environment.
+
+    A client without memory classes reports {"available": false}; it runs as before and
+    the pin is recorded as ignored (the wave-2 baseline). When the client also reports
+    HardwareTier.switches(), its parsed memory_class must agree.
+    """
+    wanted = request.get("memory_class", "auto")
+    if wanted in (None, "auto"):
+        return
+    record = data.get("memoryClass")
+    if not isinstance(record, dict):
+        raise EvidenceError("the report does not record its memory class")
+    if record.get("available") is False:
+        return
+    if record.get("class") != wanted or record.get("source") != "environment":
+        raise EvidenceError(f"actual memory class {record.get('class')} ({record.get('source')}) differs from "
+                            f"--memory-class {wanted}")
+    switches = data.get("hardwareSwitches")
+    if isinstance(switches, dict) and switches.get("available") is True:
+        parsed = (switches.get("switches") or {}).get("memory_class")
+        if parsed != wanted:
+            raise EvidenceError(f"HardwareTier.switches() memory_class {parsed} differs from --memory-class {wanted}")
 
 
 def require_private_replay_output(output: Path, client: Path) -> None:

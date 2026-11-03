@@ -13,6 +13,15 @@ and --seed-profile copies only Godot's shader/pipeline caches into every fresh
 run root so repeats start warm (without it every run is cold). Comparisons at
 plain Low pin --body-cap, since LAT-L5 made Low follow the quality to 60 bodies.
 
+Switches (wave 2): every inherited ELORIA_*/RABBITLANDS_*/RL_HEAD* variable is
+cleared from the child. A run sets a measurement switch only explicitly:
+--memory-class small|medium|large (RABBITLANDS_MEMORY_CLASS; auto, the default,
+leaves the client's probe) and --switch NAME=VALUE for the recorded wave-1/wave-2
+switches (ELORIA_FSR, ELORIA_ACTOR_IMAGES, RABBITLANDS_CONTENT_DIGEST, ...). Each
+run's metadata records every such switch as the child saw it (`switches`), and the
+report records the client's own reading (`memoryClass`, `hardwareSwitches`). A
+client without memory classes ignores the pin and its report says so.
+
 Replay recordings and their raw reports contain player data. Replay output must
 remain outside the repository; summaries omit the recording path and contents.
 The advisory lock coordinates participating launchers, not unrelated programs.
@@ -36,9 +45,10 @@ from process_memory_sampler import ProcessMemorySampler
 
 from crowd_benchmark_support import (
     BenchmarkLock, EvidenceError, asset_files, clean_environment, configure_prepared_profile, configure_settings_profile, default_lock_path,
-    hash_files, manifest_identity, parse_diagnostics, parse_engine_args, prepare_worker_overlay, profile_seed_source, read_json,
-    require_pinned_body_cap, require_private_replay_output, resolve_worker_threads, seed_profile_caches,
-    seed_settings_profile, selected_cells, sha256_file, source_files, validate_report, validate_startup_ack,
+    hash_files, manifest_identity, parse_diagnostics, parse_engine_args, parse_switches, prepare_worker_overlay,
+    profile_seed_source, read_json, require_pinned_body_cap, require_private_replay_output, resolve_worker_threads,
+    route_maps_for, seed_profile_caches, seed_settings_profile, selected_cells, sha256_file, source_files,
+    switch_record, validate_report, validate_startup_ack, EXPLICIT_SWITCHES,
 )
 
 CLIENT = Path(__file__).resolve().parents[2]
@@ -135,7 +145,9 @@ def request_for(args) -> dict:
             "settings_profile": args.settings_profile,
             "worker_threads": getattr(args, "worker_threads_count", 0),
             "engine_args": list(getattr(args, "engine_args", None) or []),
-            "seed_profile": str(args.seed_profile) if getattr(args, "seed_profile", None) else None}
+            "seed_profile": str(args.seed_profile) if getattr(args, "seed_profile", None) else None,
+            "memory_class": getattr(args, "memory_class", "auto"),
+            "switches": dict(getattr(args, "switches", None) or {})}
 
 
 def launch_path(args) -> Path:
@@ -211,9 +223,7 @@ def wait_for_workload(process, failure_path: Path, request: dict,
 
 def identity(args) -> dict:
     maps = list(dict.fromkeys([args.map or "four_gates", *args.asset_map]))
-    if any(name.startswith("traversal-") for name in selected_cells(args.cells, bool(args.replay))):
-        maps = list(dict.fromkeys(maps + ["whitehorn_range", "mirrorhold", "amethyst_barrens",
-                                         "amethyst_barrens_secrets", "sunmane_steppe"]))
+    maps = list(dict.fromkeys(maps + route_maps_for(selected_cells(args.cells, bool(args.replay)))))
     result = {"source": hash_files(source_files(args.project_path), args.project_path.parent),
               "executable": {"path": str(args.godot), "sha256": sha256_file(args.godot)},
               "executionKind": "source-project" if args.executable_mode == "project"
@@ -300,6 +310,8 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
         overrides["RABBITLANDS_CROWD_BENCH_CENTRE"] = args.centre
     if args.disable_obs_vulkan_capture:
         overrides["DISABLE_VULKAN_OBS_CAPTURE"] = "1"
+    # Explicit measurement switches (--memory-class, --switch); all others were cleared.
+    overrides.update(getattr(args, "switches", None) or {})
     env.update(overrides)
     settings_seed = seed_settings_profile(args.settings_profile, args.project_path, user_root, env)
     # A warm repeat: only Godot's shader/pipeline caches from --seed-profile.
@@ -364,6 +376,7 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
            "seconds": round(process_seconds, 3), "report": str(report),
            "log": str(log), "launchLog": str(launch_log), "command": command,
            "clearedOverrideNames": cleared,
+           "switches": switch_record(env), "explicitSwitches": dict(getattr(args, "switches", None) or {}),
            "effectiveOverrides": {k: v for k, v in overrides.items() if k != "RABBITLANDS_CROWD_BENCH_REPLAY"},
            "identityBefore": before, "identityAfter": after,
            "identityStable": before == after, "interferenceLabel": args.interference_label,
@@ -490,6 +503,12 @@ def parser() -> argparse.ArgumentParser:
                    help="copy only Godot's shader_cache/, vulkan/ and d3d12/ from this user data directory (or a "
                         "run's userdata/<run> root) into every run's fresh user root, so repeats start warm; "
                         "without it every run starts cold. Driver caches are not controlled")
+    p.add_argument("--memory-class", default="auto", choices=["auto", "small", "medium", "large"],
+                   help="pin the client's memory class (RABBITLANDS_MEMORY_CLASS); auto leaves its probe. A client "
+                        "without memory classes ignores it and reports memoryClass.available false")
+    p.add_argument("--switch", action="append", default=[], metavar="NAME=VALUE",
+                   help="repeatable: set one recorded measurement switch for the child, one of "
+                        + ", ".join(EXPLICIT_SWITCHES) + "; every inherited client switch is cleared")
     p.add_argument("--worker-threads", default="0", choices=["0", "4", "8", "affinity"],
                    help="source-project runs only: launch through a private configuration overlay "
                         "(<checkout>/.local/crowd-benchmark-overlay) whose override.cfg sets "
@@ -517,6 +536,7 @@ def main(argv: list[str] | None = None) -> int:
         configure_settings_profile(args)
         parse_diagnostics(args.diagnostics)
         args.engine_args = parse_engine_args(args.engine_arg, args.renderer, args.mode)
+        args.switches = parse_switches(args.switch, args.memory_class)
         body_cap_note = require_pinned_body_cap(args)
         if body_cap_note:
             print("note: " + body_cap_note, file=sys.stderr)

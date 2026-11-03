@@ -34,7 +34,10 @@ class ContinentStreamEvidenceTests(unittest.TestCase):
         self.assertIn("runtime_or_import_inputs_changed", errors)
 
     def test_input_identity_covers_the_package_digest_facade(self):
-        # Every chunk and map load digests its packages through ContentDigest (NH-A0).
+        # Every chunk and map load digests its packages through ContentDigest (NH-A0). The
+        # same tool also measures the wave-1 baseline, which has no ContentDigest.
+        if not (Path(__file__).resolve().parents[1] / "src/runtime/content_digest.gd").is_file():
+            self.skipTest("this client has no ContentDigest (before wave-2 NH-A0)")
         self.assertIn("godot-client/src/runtime/content_digest.gd", bench.input_identity())
 
     def test_arrival_only_is_not_moving_route_evidence(self):
