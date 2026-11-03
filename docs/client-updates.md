@@ -119,22 +119,47 @@ a separate complete game archive. The helper embeds its signed manifest, so it
 installs the matching build even during a draft test. Shared downloads are
 public supporting files; the draft itself is not promoted to latest by a build.
 
-The updater checks actual installed file hashes. Matching packages use local
-files; missing or damaged packages download again. This also works with an older
-installation that has no package receipt. Downloads resume from checksum-verified
-cached parts. A corrupt or interrupted download never replaces the live game.
-Unchanged files and verified changed packages are staged locally, then `app/`
-and `eloria-assets/` are promoted together with a recovery journal and previous
-installation backup. Files absent from the new inventory are retired. Allow
-space for that local stage and the changed package downloads.
+The updater checks actual installed file hashes, file by file. A package with a
+missing, damaged or differently spelled member downloads again, but only those
+members are unpacked; matching files stay where they are and are never copied.
+This also works with an older installation that has no package receipt.
+Downloads resume from checksum-verified cached parts. A corrupt or interrupted
+download never replaces the live game.
+
+Changed files are unpacked into `.eloria-update-stage/` and hashed again from
+disk. Before any live file moves, the updater writes a per-update journal,
+`.eloria-update-journal-v2.json`, listing every operation in order:
+
+- **retire**: a file no package lists moves into `.eloria-update-backup/`;
+- **replace**: the installed file moves into that backup, then its new version
+  moves into place;
+- **add**: a new file moves into place.
+
+Every operation is a rename inside the installation folder. At the commit point
+the updater checks the installed descriptor, executable and pack again, and
+stats every file it did not replace. A file whose size or modification time
+changed since the scan, or whose time is within three seconds of the scan (file
+times have one-second resolution), is hashed again. It then deletes the journal,
+the backup, the stage and the downloaded packages, and removes folders that
+became empty. No backup is kept after a successful update. Before unpacking, the
+updater checks that the changed files plus 64 MiB fit on the installation's
+drive.
+
+On Windows, a file whose name changes only in case is replaced so that its new
+spelling lands. Folder spelling is left as installed, because Windows ignores it.
+A fresh installation (no `app/` or `eloria-assets/` yet), or one with a linked
+folder inside those roots, keeps the earlier two-root behavior: both roots are
+staged in full and promoted together with the two-root journal.
 
 The installer and updater keep the checked package plan in memory for their one
 locked transaction, avoiding a second scan after downloading. Folder checks are
-shared within each scan; every file still receives its signed SHA-256 check, and
-the completed staging files are checked again before the live game is replaced.
-The plan is never loaded from disk or reused by a later updater run. Single-part
-packages are promoted directly from their verified download instead of making
-another complete archive copy.
+shared within each scan. Every file still receives its signed SHA-256 check,
+staged files are hashed again before anything live changes, and untouched files
+are checked at the commit point as described above. The plan is never loaded
+from disk or reused by a later updater run, and a plan made before an
+interrupted update was recovered is discarded. Single-part packages are promoted
+directly from their verified download instead of making another complete archive
+copy.
 
 When explicitly run or accepted from the game, the updater checks the stable `RabbitLands-<platform>.json` alias in
 the latest published release. Its **bootstrap schema 1** contract verifies the
@@ -406,33 +431,41 @@ chosen commit supersedes an in-flight update. Compatible clients receive only
 the compatibility notice and download nothing.
 
 The game never overwrites itself while running. On the next launch, the small
-restart launcher verifies the download again, extracts to a sibling staging
-folder, validates paths/checksums, and replaces `app/` and `eloria-assets/`
-together. The previous version moves to `.eloria-previous/`, and a journal
-recovers an interrupted replacement from it on the next launch. Nothing reads
-that backup once the journal is cleared and there is no rollback command, so
-when the updated game has been running for a minute and has recorded its
-running lease, the launcher removes the backup on a low-priority thread. It
-still holds the lock while the game runs, and it never removes the backup while
-a journal exists. Closing the game pauses the removal and the next confirmed
-start continues it; the next update would empty the folder anyway before
-writing its own journal. A lock protects an
+restart launcher verifies the download again, unpacks the changed files to a
+sibling staging folder, validates paths/checksums, and moves them into `app/`
+and `eloria-assets/` under the per-file journal. If the launcher stops part-way,
+for example in a crash or power cut, the next start reads the journal and undoes
+the moves in reverse order. New files go back to the stage, and the originals
+return from `.eloria-update-backup/`, so the previous installation is restored
+file for file. A retry needs no new download, because verified packages are
+kept until the commit point. A backup left without its journal (a stop after
+the journal was cleared) holds only replaced originals and is deleted at the
+next start. If the journal itself cannot be read, for example because a power
+cut lost its bytes but kept the moves made after it, recovery still puts every
+original in the backup back; files the update added may stay until the next
+update checks the installation again and retires or keeps them.
+
+Journals and backups from earlier updaters stay readable: an interrupted
+two-root update (`.eloria-update-journal.json` with `.eloria-previous/`) is
+recovered as before. A whole-game `.eloria-previous/` left by an older updater,
+or by the two-root path for a linked folder, is not needed once no journal
+exists. The next update removes it before staging. The launcher also removes it
+once the updated game has been running for a minute and has recorded its
+running lease. That removal runs on a low-priority thread, never while a journal
+exists, and pauses when the game closes. A lock protects an
 installation from concurrent launchers and from installation while its game
 process is still running. Downloads and readiness records are scoped to each
 installation under the player's game user directory; account preferences stay
 in the existing user directory.
 
-Only changed or damaged asset packages are downloaded. The local staging area
-also contains unchanged files so both game roots can be replaced together.
-Keep enough free space for the changed downloads and staged game; the previous
-installation is kept by renaming its folders until the updated game has
-started. A planned follow-up stages only changed packages and moves just the
-replaced originals into a per-update backup covered by the journal, instead of
-copying and rehashing every unchanged file. ZIP entries use 8 MiB chunks
-and 64-bit archive offsets, so even a large PCK uses bounded extraction memory.
-On Windows, each folder move retries for up to five seconds to allow temporary
-file locks to clear. If a move still fails, recovery attempts to restore the
-previous installation and the error identifies the source, destination and error code.
+Only changed or damaged asset packages are downloaded, and only their changed
+members are unpacked. Keep enough free space for the changed downloads and the
+changed files. ZIP entries use 8 MiB chunks and 64-bit archive offsets, so even
+a large PCK uses bounded extraction memory. On Windows, each file move retries
+for up to five seconds to allow temporary file locks to clear. Game folders
+themselves are not moved, so a program holding a folder open no longer blocks
+an update. If a move still fails, recovery restores the previous files and the
+error identifies the source, destination and error code.
 It also gives the path to `last-install-error.json` in that installation's
 update cache, recording the failed move, target commit and recovery result.
 Close programs using the game folder and retry the updater; verified downloads
@@ -453,13 +486,19 @@ Choose the minimum checks for the behavior being changed. For example:
   `python -m pytest -q godot-client/tests/test_client_release.py::test_updating_shortcuts_use_restart_launcher_for_both_platforms`.
 - Package downloads, self-update and uninstall changes:
   `python -m pytest -q godot-client/tests/test_asset_packages.py`. Native checks use
-  the installed Godot/Inno tools on Windows and WSL Ubuntu-24.04 for Linux.
+  the installed Godot/Inno tools on Windows and WSL Ubuntu-24.04 for Linux. The
+  per-file install checks end the fixture's own process after every install step
+  and require the next start to restore the previous files byte for byte. Its
+  fixture project alone reads `RL_UPDATE_TEST_STOP_AFTER`, which shipped updaters
+  never do. The checks also cover locked files, case-only renames, and journals
+  and backups left by older updaters.
 - Login enforcement changes, from the sibling server repository:
   `python -m pytest -q tests/test_client_updates.py::test_login_denied_before_password_or_world_processing`.
 
 The older full modules above remain available manually when broader coverage is
 needed. `godot-client/tests/test_client_updates.gd` covers runtime signatures,
-restart install, corrupted data, archive paths, ancestry, backups and recovery.
+restart install, corrupted data, archive paths, ancestry, backups and recovery,
+including per-file journal validation, rollback and commit.
 `godot-client/tests/test_client_update_cleanup.gd` covers backup removal around
 journals and the helper cache returning to one staged helper after handovers.
 For relevant download/retry changes, the optional local HTTPS harness is

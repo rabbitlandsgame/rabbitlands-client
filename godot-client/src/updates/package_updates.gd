@@ -1,12 +1,29 @@
 extends RefCounted
 ## Independent ZIP packages. Only signed paths are reused, downloaded or installed.
 const Release = preload("res://src/updates/release.gd")
+# Room kept free beyond the changed files while they are staged.
+const FREE_SPACE_MARGIN := 64 * 1024 * 1024
+# File times have one-second (FAT: two-second) resolution. A matching file
+# whose time is this close to the scan is hashed again at the commit point.
+const RACY_SECONDS := 3
 
 # This receipt stays in memory for one locked download/install transaction.
-# Never persist it or use it to skip the final staged-file hashes.
+# Never persist it or use it to skip hashing a file it has not hashed itself.
 class CheckedPlan extends RefCounted:
 	var needed: Array = []
 	var unchanged: Dictionary = {}
+	# package id -> indices of members that are missing, damaged, behind a
+	# link or spelled in another case. Only these members are unpacked.
+	var changed: Dictionary = {}
+	# path -> [size, mtime, sha256] of members whose installed bytes matched.
+	var snapshot: Dictionary = {}
+	# path -> installed spelling, for a file whose name differs only in case.
+	var renamed: Dictionary = {}
+	# Installed files under app/ and eloria-assets/ that no package lists.
+	var retire: Array = []
+	# A linked folder inside the game roots keeps the two-root promotion.
+	var linked := false
+	var started := 0
 	var _root: String
 	var _inventory_hash: String
 	var _used := false
@@ -14,14 +31,13 @@ class CheckedPlan extends RefCounted:
 	func _init(root: String, release: Dictionary) -> void:
 		_root = root
 		_inventory_hash = JSON.stringify(release.packages).sha256_text()
+		started = int(Time.get_unix_time_from_system())
 
-	func take(root: String, release: Dictionary) -> Dictionary:
+	func take(root: String, release: Dictionary) -> bool:
 		if _used:
-			return {}
+			return false
 		_used = true
-		if root != _root or JSON.stringify(release.packages).sha256_text() != _inventory_hash:
-			return {}
-		return unchanged
+		return root == _root and JSON.stringify(release.packages).sha256_text() == _inventory_hash
 
 static func validate(release: Dictionary, identity: Dictionary) -> Dictionary:
 	if release.has("launch_args"):
@@ -91,36 +107,76 @@ static func matches(root: String, package: Dictionary, directories: Dictionary =
 	return true
 
 static func linked_path(root: String, relative: String, directories: Dictionary = {}) -> bool:
-	var path := root
-	var components := relative.split("/")
-	for index in components.size():
-		path = path.path_join(components[index])
-		# Share ancestor checks only within this scan. Always inspect the leaf,
-		# and start with a fresh cache when validating the completed stage.
-		if index == components.size() - 1:
-			if Release.is_link(path):
-				return true
-		elif not directories.has(path):
-			directories[path] = Release.is_link(path)
-		if directories.get(path, false):
-			return true
-	return false
+	return Release.linked_path(root, relative, directories)
 
 static func plan(root: String, release: Dictionary) -> Array:
 	return inspect(root, release).needed
 
 static func inspect(root: String, release: Dictionary, progress := Callable()) -> CheckedPlan:
+	# Per file: every installed file is still SHA-256 checked once, and only
+	# members that differ are downloaded, unpacked and replaced.
 	var checked := CheckedPlan.new(root, release)
+	var installed := _installed_files(root, checked)
+	# Windows folds case. A member whose installed name differs only in case
+	# is replaced so the new spelling lands; folder case is left as installed.
+	var folded := OS.get_name() == "Windows"
+	var spelled: Dictionary = {}
+	if folded:
+		for path: String in installed:
+			spelled[path.to_lower()] = path
+	var claimed: Dictionary = {}
 	var directories: Dictionary = {}
 	var completed := 0
 	for package: Dictionary in release.packages:
 		Release.report_progress(progress, "Checking installed packages", completed, release.packages.size(), package.id)
-		checked.unchanged[package.id] = matches(root, package, directories)
-		if not checked.unchanged[package.id]:
+		var members: Array = []
+		for index in package.files.size():
+			var entry: Dictionary = package.files[index]
+			var path: String = entry.path
+			var key := path.to_lower() if folded else path
+			var actual: String = spelled.get(key, "") if folded else (path if installed.has(path) else "")
+			claimed[key] = true
+			if actual != "" and actual.get_file() != path.get_file():
+				checked.renamed[path] = actual
+				members.append(index)
+			elif actual == "" or linked_path(root, path, directories) or not Release.check_file(root.path_join(path), int(entry.size), entry.sha256):
+				members.append(index)
+			else:
+				checked.snapshot[path] = [int(entry.size), FileAccess.get_modified_time(root.path_join(path)), entry.sha256]
+		checked.unchanged[package.id] = members.is_empty()
+		if not members.is_empty():
+			checked.changed[package.id] = members
 			checked.needed.append(package)
 		completed += 1
+	for path: String in installed:
+		if not claimed.has(path.to_lower() if folded else path):
+			checked.retire.append(path)
 	Release.report_progress(progress, "Checking installed packages", completed, release.packages.size())
 	return checked
+
+static func _installed_files(root: String, checked: CheckedPlan) -> Dictionary:
+	# Installed files under the game roots, spelled as on disk. Folder links
+	# are noted and never followed; a file link moves as the link itself.
+	var files: Dictionary = {}
+	for name: String in Release.ROOTS:
+		if Release.is_link(root.path_join(name)):
+			checked.linked = true
+		elif DirAccess.dir_exists_absolute(root.path_join(name)):
+			_list_files(root, name, files, checked)
+	return files
+
+static func _list_files(root: String, relative: String, files: Dictionary, checked: CheckedPlan) -> void:
+	var directory := DirAccess.open(root.path_join(relative))
+	if directory == null:
+		return
+	directory.include_hidden = true
+	for name: String in directory.get_files():
+		files[relative + "/" + name] = true
+	for name: String in directory.get_directories():
+		if directory.is_link(name):
+			checked.linked = true
+		else:
+			_list_files(root, relative + "/" + name, files, checked)
 
 static func assemble(cache: String, package: Dictionary) -> String:
 	var destination := package_path(cache, package)
@@ -157,7 +213,8 @@ static func assemble(cache: String, package: Dictionary) -> String:
 		DirAccess.remove_absolute(cache.path_join("packages/" + part.sha256 + ".part"))
 	return ""
 
-static func extract(archive: String, stage: String, package: Dictionary) -> String:
+static func extract(archive: String, stage: String, package: Dictionary, members: Array = []) -> String:
+	# members: inventory indices to unpack; empty unpacks every file.
 	if not Release.check_file(archive, int(package.size), package.sha256):
 		return "A package is missing or damaged. Run the updater again."
 	var zip := Release.PayloadArchive.new()
@@ -166,7 +223,7 @@ static func extract(archive: String, stage: String, package: Dictionary) -> Stri
 	var inventory: Variant = JSON.parse_string(zip.read_file("inventory.json").get_string_from_utf8())
 	if inventory != package.files:
 		return "A package's files do not match the signed inventory."
-	for index in package.files.size():
+	for index: int in (members if not members.is_empty() else range(package.files.size())):
 		var entry: Dictionary = package.files[index]
 		var path := stage.path_join(entry.path)
 		if DirAccess.make_dir_recursive_absolute(path.get_base_dir()) != OK:
@@ -189,42 +246,111 @@ static func extract(archive: String, stage: String, package: Dictionary) -> Stri
 		file.flush()
 		var error := file.get_error()
 		file.close()
-		# Validate the decoded bytes here; install() also reads and hashes the
-		# completed stage before promotion, including every copied local file.
+		# Validate the decoded bytes here; install() reads and hashes every
+		# staged file again before anything live changes.
 		if error != OK or hash.finish().hex_encode() != entry.sha256:
 			return "An unpacked package file failed verification."
 	return ""
 
 static func install(root: String, release: Dictionary, identity: Dictionary, progress := Callable(), checked: CheckedPlan = null) -> String:
-	# All staging is outside the live roots. A crash during promotion uses the
-	# same two-root journal and recovery as legacy full-game updates.
+	# All staging is outside the live roots. An existing installation receives
+	# only its changed files, each move recorded in a per-file journal first; a
+	# fresh one keeps the two-root promotion and legacy journal.
+	var interrupted := FileAccess.file_exists(root.path_join(Release.JOURNAL_V2)) or FileAccess.file_exists(root.path_join(".eloria-update-journal.json"))
 	var recovery := Release.recover(root)
 	if recovery != "":
 		return recovery
 	var cache := Release.cache_for(root)
-	var stage := root.path_join(".eloria-update-stage")
-	var backup := root.path_join(".eloria-previous")
-	var unchanged: Dictionary = checked.take(root, release) if checked != null else {}
-	if unchanged.is_empty():
-		unchanged = inspect(root, release, progress).unchanged
-	var complete := true
-	for package: Dictionary in release.packages:
-		complete = complete and unchanged[package.id]
-	if complete:
+	# A plan made before recovery describes files recovery has since moved.
+	if checked == null or not checked.take(root, release) or interrupted:
+		checked = inspect(root, release, progress)
+	if checked.needed.is_empty():
 		DirAccess.remove_absolute(cache.path_join("pending.json"))
 		return ""
-	if Release.remove_tree(stage) != OK or DirAccess.make_dir_recursive_absolute(stage) != OK:
-		return "The update staging folder cannot be created."
+	var fresh := true
 	for name: String in Release.ROOTS:
 		if Release.is_link(root.path_join(name)):
 			return "The installed game folders must not be links."
+		fresh = fresh and not DirAccess.dir_exists_absolute(root.path_join(name))
+	var error := _install_roots(root, release, identity, progress, checked) if fresh or checked.linked else _install_files(root, release, identity, progress, checked)
+	if error != "":
+		return error
+	Release.save_json(root.path_join(".rabbitlands-install.json"), {"schema": 1, "repository": identity.repository, "platform": identity.platform})
+	DirAccess.remove_absolute(cache.path_join("pending.json"))
+	Release.remove_tree(cache.path_join("packages"))
+	Release.remove_tree(root.path_join(Release.STAGE))
+	Release.report_progress(progress, "Game packages installed", 1, 1)
+	return ""
+
+static func _install_files(root: String, release: Dictionary, identity: Dictionary, progress: Callable, checked: CheckedPlan) -> String:
+	# Stage only the changed members. Matching files are never copied, and are
+	# hashed again only if their size or time changed after the scan.
+	var cache := Release.cache_for(root)
+	var stage := root.path_join(Release.STAGE)
+	# An older updater's whole-game backup: recover() has run, so nothing can
+	# read it, and this transaction keeps its own per-file backup.
+	Release.remove_backup(root)
+	var changed_bytes := 0
+	for package: Dictionary in checked.needed:
+		for member: int in checked.changed[package.id]:
+			changed_bytes += int(package.files[member].size)
+	var free := space_left(root)
+	# 0 also means the volume could not be queried; unpacking reports a real lack.
+	if free > 0 and free < changed_bytes + FREE_SPACE_MARGIN:
+		return "There is not enough free disk space for this update: %s needed, %s free. Free some space and run the updater again." % [String.humanize_size(changed_bytes + FREE_SPACE_MARGIN), String.humanize_size(free)]
+	if Release.remove_tree(stage) != OK or DirAccess.make_dir_recursive_absolute(stage) != OK:
+		return "The update staging folder cannot be created."
+	var staged: Dictionary = {}
+	var staged_directories: Dictionary = {}
+	for index in checked.needed.size():
+		var package: Dictionary = checked.needed[index]
+		Release.report_progress(progress, "Preparing game packages", index, checked.needed.size(), package.id)
+		var members: Array = checked.changed[package.id]
+		var unpacked := extract(package_path(cache, package), stage, package, members)
+		if unpacked != "":
+			return unpacked
+		for member: int in members:
+			var entry: Dictionary = package.files[member]
+			if linked_path(stage, entry.path, staged_directories) or not Release.check_file(stage.path_join(entry.path), int(entry.size), entry.sha256):
+				return "A staged package failed verification. The installed game was kept."
+			staged[entry.path] = entry
+	var binary := "RabbitLands.exe" if identity.platform == "windows" else "RabbitLands.x86_64"
+	var error := _required_files_error(func(path: String) -> String: return stage.path_join(path) if staged.has(path) else root.path_join(path), release, identity)
+	if error != "":
+		return error
+	if identity.platform == "linux" and staged.has("app/" + binary) and FileAccess.set_unix_permissions(stage.path_join("app/" + binary), 493) != OK:
+		return "The game cannot be marked executable."
+	var journal := operations(root, release, checked, staged)
+	error = Release.apply_operations(root, journal, progress)
+	if error != "":
+		return error
+	# Commit point: the live tree must now be exactly the signed release.
+	error = _required_files_error(func(path: String) -> String: return root.path_join(path), release, identity)
+	if error == "":
+		error = _placed_error(root, staged)
+	if error == "":
+		error = _snapshot_error(root, checked)
+	if error != "":
+		var restored := Release.recover(root)
+		return error if restored == "" else restored
+	return Release.commit_operations(root, journal)
+
+static func _install_roots(root: String, release: Dictionary, identity: Dictionary, progress: Callable, checked: CheckedPlan) -> String:
+	# A fresh installation, or one with a linked folder inside its roots: stage
+	# both complete roots and swap them with the legacy two-root journal.
+	var cache := Release.cache_for(root)
+	var stage := root.path_join(Release.STAGE)
+	var backup := root.path_join(".eloria-previous")
+	if Release.remove_tree(stage) != OK or DirAccess.make_dir_recursive_absolute(stage) != OK:
+		return "The update staging folder cannot be created."
+	for name: String in Release.ROOTS:
 		if DirAccess.make_dir_recursive_absolute(stage.path_join(name)) != OK:
 			return "The update staging folder cannot be created."
 	var staged_directories: Dictionary = {}
 	for index in release.packages.size():
 		var package: Dictionary = release.packages[index]
 		Release.report_progress(progress, "Preparing game packages", index, release.packages.size(), package.id)
-		if unchanged[package.id]:
+		if checked.unchanged[package.id]:
 			# The plan checked actual files, including pre-package installations.
 			# Final stage hashes catch changes made during downloading/copying.
 			for entry: Dictionary in package.files:
@@ -237,10 +363,10 @@ static func install(root: String, release: Dictionary, identity: Dictionary, pro
 				return error
 		if not matches(stage, package, staged_directories):
 			return "A staged package failed verification. The installed game was kept."
-	var descriptor := Release.read_json(stage.path_join("app/client-release.json"))
+	var required := _required_files_error(func(path: String) -> String: return stage.path_join(path), release, identity)
+	if required != "":
+		return required
 	var binary := "RabbitLands.exe" if identity.platform == "windows" else "RabbitLands.x86_64"
-	if descriptor.get("commit") != release.commit or descriptor.get("platform") != identity.platform or descriptor.get("public_key") != identity.public_key or Release.update_owner(descriptor) != "github" or not FileAccess.file_exists(stage.path_join("app/" + binary)) or not FileAccess.file_exists(stage.path_join("app/RabbitLands.pck")):
-		return "The update is missing required game files or has a different signing key."
 	if identity.platform == "linux" and FileAccess.set_unix_permissions(stage.path_join("app/" + binary), 493) != OK:
 		return "The game cannot be marked executable."
 	if Release.remove_tree(backup) != OK or DirAccess.make_dir_recursive_absolute(backup) != OK:
@@ -256,9 +382,84 @@ static func install(root: String, release: Dictionary, identity: Dictionary, pro
 		return promotion_error
 	if DirAccess.remove_absolute(root.path_join(".eloria-update-journal.json")) != OK:
 		return "The update recovery record could not be cleared. Restart the updater."
-	Release.save_json(root.path_join(".rabbitlands-install.json"), {"schema": 1, "repository": identity.repository, "platform": identity.platform})
-	DirAccess.remove_absolute(cache.path_join("pending.json"))
-	Release.remove_tree(cache.path_join("packages"))
-	Release.remove_tree(stage)
-	Release.report_progress(progress, "Game packages installed", 1, 1)
+	if original_roots.is_empty():
+		# A fresh installation replaced nothing; drop the empty backup folder.
+		Release.remove_backup(root)
+	return ""
+
+static func operations(root: String, release: Dictionary, checked: CheckedPlan, staged: Dictionary) -> Dictionary:
+	# The recovery journal: retirements first (they can free a path a new
+	# file needs), then replacements, then additions. Existence is read now,
+	# just before the journal is written, not taken from the earlier scan.
+	var retire: Array = []
+	var replace: Array = []
+	var add: Array = []
+	for path: String in checked.retire:
+		# Names the journal cannot represent safely stay where they are.
+		if Release.safe_path(path) and (FileAccess.file_exists(root.path_join(path)) or Release.is_link(root.path_join(path))):
+			retire.append({"path": path, "op": "retire"})
+	var created: Dictionary = {}
+	var existing: Dictionary = {}
+	for path: String in staged:
+		var original: String = checked.renamed.get(path, path)
+		var operation := {"path": path, "op": "add", "sha256": staged[path].sha256}
+		if FileAccess.file_exists(root.path_join(original)) or Release.is_link(root.path_join(original)):
+			operation.op = "replace"
+			if original != path:
+				operation["from"] = original
+			replace.append(operation)
+		else:
+			add.append(operation)
+		# Folders this transaction creates, so a rollback can remove them.
+		var components := path.split("/")
+		for depth in range(1, components.size()):
+			var folder := "/".join(components.slice(0, depth))
+			if created.has(folder) or existing.has(folder):
+				continue
+			if DirAccess.dir_exists_absolute(root.path_join(folder)):
+				existing[folder] = true
+			else:
+				created[folder] = true
+	return {"schema": 2, "commit": release.commit, "stage": Release.STAGE, "backup": Release.BACKUP_V2,
+		"operations": retire + replace + add, "directories": created.keys()}
+
+static func space_left(path: String) -> int:
+	# Free bytes on the volume holding path (or its nearest existing parent);
+	# 0 when it cannot be queried.
+	var probe := path
+	while probe != "":
+		var directory := DirAccess.open(probe)
+		if directory != null:
+			return directory.get_space_left()
+		if probe.get_base_dir() == probe:
+			break
+		probe = probe.get_base_dir()
+	return 0
+
+static func _required_files_error(locate: Callable, release: Dictionary, identity: Dictionary) -> String:
+	var descriptor := Release.read_json(locate.call("app/client-release.json"))
+	var binary := "RabbitLands.exe" if identity.platform == "windows" else "RabbitLands.x86_64"
+	if descriptor.get("commit") != release.commit or descriptor.get("platform") != identity.platform or descriptor.get("public_key") != identity.public_key or Release.update_owner(descriptor) != "github" or not FileAccess.file_exists(locate.call("app/" + binary)) or not FileAccess.file_exists(locate.call("app/RabbitLands.pck")):
+		return "The update is missing required game files or has a different signing key."
+	return ""
+
+static func _placed_error(root: String, staged: Dictionary) -> String:
+	# Renames keep content; this proves every staged file arrived in place.
+	for path: String in staged:
+		if not FileAccess.file_exists(root.path_join(path)) or FileAccess.get_size(root.path_join(path)) != int(staged[path].size):
+			return "An updated game file is missing after installation. The installed game was kept; run the updater again."
+	return ""
+
+static func _snapshot_error(root: String, checked: CheckedPlan) -> String:
+	# Matching files were hashed before the download and never moved. One stat
+	# proves each is unchanged, unless its size or time differs or its time is
+	# too close to the scan to tell; those are hashed again.
+	for path: String in checked.snapshot:
+		var expected: Array = checked.snapshot[path]
+		var absolute := root.path_join(path)
+		var modified := FileAccess.get_modified_time(absolute)
+		if modified == int(expected[1]) and modified + RACY_SECONDS < checked.started and FileAccess.file_exists(absolute) and FileAccess.get_size(absolute) == int(expected[0]):
+			continue
+		if not Release.check_file(absolute, int(expected[0]), expected[2]):
+			return "A game file changed while the update was being prepared: %s. The installed game was kept; run the updater again." % path
 	return ""

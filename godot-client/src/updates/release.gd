@@ -5,6 +5,13 @@ const CHUNK_BYTES := 8 * 1024 * 1024
 const MAX_MANIFEST_BYTES := 16 * 1024 * 1024
 const ROOTS := ["app", "eloria-assets"]
 const DISTRIBUTION_SCHEMA := 1
+# Per-file package installs (schema 2 manifests with live roots). Old updaters
+# never read these names, so they cannot "recover" a half-applied delta.
+const STAGE := ".eloria-update-stage"
+const JOURNAL_V2 := ".eloria-update-journal-v2.json"
+const BACKUP_V2 := ".eloria-update-backup"
+const OPERATION_KINDS := ["retire", "replace", "add"]
+const INSTALL_PHASE := "Installing verified game files"
 
 # Godot's ZIPReader uses 32-bit minizip seek/tell callbacks on Windows,
 # even in a 64-bit export. Read our bounded ZIP entries through FileAccess
@@ -419,6 +426,17 @@ static func extract(archive: String, destination: String, release: Dictionary, i
 	return ""
 
 static func recover(root: String) -> String:
+	# A per-file transaction is undone first; the legacy two-root journal and
+	# .eloria-previous stay readable for installs interrupted by older updaters.
+	var operations := root.path_join(JOURNAL_V2)
+	if FileAccess.file_exists(operations):
+		var undone := _recover_operations(root, read_json(operations))
+		if undone != "":
+			return undone
+	elif DirAccess.dir_exists_absolute(root.path_join(BACKUP_V2)) or is_link(root.path_join(BACKUP_V2)):
+		# The commit point clears the journal before this backup, so a backup
+		# without its journal holds only the files a finished update replaced.
+		remove_tree(root.path_join(BACKUP_V2))
 	var journal := root.path_join(".eloria-update-journal.json")
 	if not FileAccess.file_exists(journal):
 		return ""
@@ -467,7 +485,7 @@ static func _rename_for_install(source: String, destination: String) -> Error:
 
 static func _promotion_failed(root: String, source: String, destination: String, error: Error) -> String:
 	var report := {"timestamp_utc": Time.get_datetime_string_from_system(true),
-		"commit": read_json(root.path_join(".eloria-update-journal.json")).get("commit", ""),
+		"commit": read_json(root.path_join(".eloria-update-journal.json")).get("commit", read_json(root.path_join(JOURNAL_V2)).get("commit", "")),
 		"source": source, "destination": destination,
 		"error_code": int(error), "error": error_string(error), "recovery_error": "Recovery pending"}
 	var report_path := cache_for(root).path_join("last-install-error.json")
@@ -502,6 +520,257 @@ static func promote_staged(root: String, progress := Callable()) -> String:
 			return _promotion_failed(root, staged, current, error)
 		report_progress(progress, "Installing verified game files", ROOTS.find(name) + 1, ROOTS.size())
 	return ""
+
+static func linked_path(root: String, relative: String, directories: Dictionary = {}) -> bool:
+	var path := root
+	var components := relative.split("/")
+	for index in components.size():
+		path = path.path_join(components[index])
+		# Share ancestor checks only within one scan. Always inspect the leaf,
+		# and start with a fresh cache when validating the completed stage.
+		if index == components.size() - 1:
+			if is_link(path):
+				return true
+		elif not directories.has(path):
+			directories[path] = is_link(path)
+		if directories.get(path, false):
+			return true
+	return false
+
+static func valid_operations(record: Dictionary) -> bool:
+	if record.get("schema") != 2 or not valid_commit(record.get("commit")) or record.get("stage") != STAGE or record.get("backup") != BACKUP_V2:
+		return false
+	if not record.get("operations") is Array or not record.get("directories", []) is Array:
+		return false
+	var seen: Dictionary = {}
+	for operation: Variant in record.operations:
+		if not operation is Dictionary or not operation.get("op") in OPERATION_KINDS or not safe_path(operation.get("path")):
+			return false
+		if operation.has("sha256") and not valid_hash(operation.sha256):
+			return false
+		# "from" is the installed spelling of a file whose name changes case.
+		var original: Variant = operation.get("from", operation.path)
+		if not safe_path(original) or str(original).to_lower() != str(operation.path).to_lower() or seen.has(original) or seen.has(operation.path):
+			return false
+		seen[original] = true
+		seen[operation.path] = true
+	for directory: Variant in record.get("directories", []):
+		if not directory is String or not (directory in ROOTS or safe_path(directory)):
+			return false
+	return true
+
+static func apply_operations(root: String, journal: Dictionary, progress := Callable()) -> String:
+	# Each live change is a rename recorded in the journal before it happens:
+	# replace = live -> backup, then stage -> live; add = stage -> live;
+	# retire = live -> backup. recover() undoes them in reverse order, so a
+	# crash after any rename restores the previous files byte for byte.
+	if not valid_operations(journal):
+		return "The update operations are invalid."
+	var stage := root.path_join(STAGE)
+	var backup := root.path_join(BACKUP_V2)
+	if is_link(stage) or is_link(backup):
+		return "The update folders must not be links."
+	if remove_tree(backup) != OK:
+		return "The previous update backup cannot be replaced."
+	if save_json(root.path_join(JOURNAL_V2), journal) != OK:
+		return "The update recovery record cannot be saved."
+	var total := 0
+	for operation: Dictionary in journal.operations:
+		total += 2 if operation.op == "replace" else 1
+	var done := 0
+	var live_links: Dictionary = {}
+	report_progress(progress, INSTALL_PHASE, done, total)
+	for operation: Dictionary in journal.operations:
+		var path: String = operation.path
+		var original: String = operation.get("from", path)
+		# Never move through a linked folder. A linked file itself moves as a
+		# link (rename does not follow it), like the two-root promotion.
+		if linked_path(root, original.get_base_dir(), live_links) or linked_path(root, path.get_base_dir(), live_links):
+			return _promotion_failed(root, root.path_join(original), root.path_join(path), ERR_LINK_FAILED)
+		if operation.op != "add":
+			var moved := _move(root.path_join(original), backup.path_join(original))
+			if moved != OK:
+				return _promotion_failed(root, root.path_join(original), backup.path_join(original), moved)
+			done += 1
+			report_progress(progress, INSTALL_PHASE, done, total)
+		if operation.op != "retire":
+			var placed := _move(stage.path_join(path), root.path_join(path))
+			if placed != OK:
+				return _promotion_failed(root, stage.path_join(path), root.path_join(path), placed)
+			done += 1
+			report_progress(progress, INSTALL_PHASE, done, total)
+	return ""
+
+static func commit_operations(root: String, journal: Dictionary) -> String:
+	# The journal goes first. Afterwards the backup holds only originals that
+	# nothing reads, and recover() deletes one left by a crash at this point.
+	if DirAccess.remove_absolute(root.path_join(JOURNAL_V2)) != OK:
+		return "The update recovery record could not be cleared. Restart the updater."
+	remove_tree(root.path_join(BACKUP_V2))
+	remove_tree(root.path_join(STAGE))
+	for operation: Dictionary in journal.operations:
+		if operation.op == "retire":
+			_prune_empty_parents(root, operation.path)
+	return ""
+
+static func _recover_operations(root: String, record: Dictionary) -> String:
+	var stage := root.path_join(STAGE)
+	var backup := root.path_join(BACKUP_V2)
+	if is_link(stage) or is_link(backup):
+		return "The update recovery folder must not be a link."
+	if not valid_operations(record):
+		return _recover_from_backup(root)
+	var live_links: Dictionary = {}
+	var operations: Array = record.operations
+	for index in range(operations.size() - 1, -1, -1):
+		var operation: Dictionary = operations[index]
+		var path: String = operation.path
+		var original: String = operation.get("from", path)
+		if linked_path(root, path.get_base_dir(), live_links) or linked_path(root, original.get_base_dir(), live_links):
+			return "The game recovery folders must not be links."
+		var live := root.path_join(path)
+		var error := OK
+		if operation.op == "add":
+			if _file_present(live):
+				error = _move(live, stage.path_join(path))
+		elif _file_present(backup.path_join(original)):
+			# The original was moved, so a live file at this path is the new
+			# one. Park it in the stage (never delete) and put the original back.
+			if operation.op == "replace" and _file_present(live):
+				error = _move(live, stage.path_join(path))
+			if error == OK:
+				error = _move(backup.path_join(original), root.path_join(original))
+		if error != OK:
+			return "Close all running Rabbit Lands windows and restart the launcher to finish recovery."
+	# Remove folders the transaction created, deepest first, once empty again.
+	var created: Array = record.get("directories", []).duplicate()
+	created.sort_custom(func(a: String, b: String) -> bool: return a.length() > b.length())
+	for directory: String in created:
+		var path := root.path_join(directory)
+		if DirAccess.dir_exists_absolute(path) and not is_link(path) and not _contains_files(path):
+			remove_tree(path)
+	if DirAccess.remove_absolute(root.path_join(JOURNAL_V2)) != OK:
+		return "Close all running Rabbit Lands windows and restart the launcher to finish recovery."
+	remove_tree(backup)
+	remove_tree(stage)
+	return ""
+
+static func _recover_from_backup(root: String) -> String:
+	# The journal exists but cannot be read. A power cut can lose a new file's
+	# bytes yet keep the renames made after it, and setup recovers through the
+	# same call, so refusing here would leave no way back. apply_operations()
+	# empties the backup before it writes the journal, so the backup holds
+	# exactly the originals this transaction moved: put every one back. What
+	# occupies its place was put there by this transaction and is parked in the
+	# stage. Added files stay; install() plans again after any recovery and
+	# hashes every installed file, so the next update retires or keeps them.
+	var stage := root.path_join(STAGE)
+	var backup := root.path_join(BACKUP_V2)
+	var originals: Array = []
+	if not _backup_files(backup, "", originals):
+		return "The interrupted update's recovery folder cannot be read. Close other programs using the game folder and restart the launcher."
+	# The stage holds only unpacked copies of cached packages and parked files.
+	if remove_tree(stage) != OK:
+		return "Close all running Rabbit Lands windows and restart the launcher to finish recovery."
+	var live_links: Dictionary = {}
+	for relative: String in originals:
+		# Only safe game paths are ever moved into the backup; anything else in
+		# it was never live and goes with the backup below.
+		if not safe_path(relative):
+			continue
+		if linked_path(root, relative.get_base_dir(), live_links):
+			return "The game recovery folders must not be links."
+		var error := _clear_for_original(root, stage, relative)
+		if error == OK:
+			error = _move(backup.path_join(relative), root.path_join(relative))
+		if error != OK:
+			return "Close all running Rabbit Lands windows and restart the launcher to finish recovery."
+	if DirAccess.remove_absolute(root.path_join(JOURNAL_V2)) != OK:
+		return "Close all running Rabbit Lands windows and restart the launcher to finish recovery."
+	remove_tree(backup)
+	remove_tree(stage)
+	return ""
+
+static func _backup_files(path: String, relative: String, files: Array) -> bool:
+	# Files (and file links) under the backup as game-relative paths. Only files
+	# are ever moved into it, so a folder link there is refused.
+	if not DirAccess.dir_exists_absolute(path):
+		return true
+	var directory := DirAccess.open(path)
+	if directory == null:
+		return false
+	directory.include_hidden = true
+	for name: String in directory.get_files():
+		files.append(name if relative == "" else relative + "/" + name)
+	for name: String in directory.get_directories():
+		if directory.is_link(name) or not _backup_files(path.path_join(name), name if relative == "" else relative + "/" + name, files):
+			return false
+	return true
+
+static func _clear_for_original(root: String, stage: String, relative: String) -> Error:
+	# Before this transaction a folder stood on the way to relative and a file
+	# at it. So a file at a folder on the way, or anything but an empty folder
+	# at relative itself, was placed by this transaction: park it in the stage.
+	var components := relative.split("/")
+	for depth in range(2, components.size() + 1):
+		var part := "/".join(components.slice(0, depth))
+		var path := root.path_join(part)
+		var occupied := FileAccess.file_exists(path) or is_link(path)
+		if depth == components.size() and not occupied:
+			occupied = DirAccess.dir_exists_absolute(path) and _contains_files(path)
+		if occupied:
+			var target := stage.path_join(part)
+			var parent := DirAccess.make_dir_recursive_absolute(target.get_base_dir())
+			if parent != OK:
+				return parent
+			var parked := _rename_for_install(path, target)
+			if parked != OK:
+				return parked
+	return OK
+
+static func _file_present(path: String) -> bool:
+	return FileAccess.file_exists(path) or is_link(path)
+
+static func _contains_files(path: String) -> bool:
+	if is_link(path):
+		return true
+	var directory := DirAccess.open(path)
+	if directory == null:
+		return true
+	directory.include_hidden = true
+	if not directory.get_files().is_empty():
+		return true
+	for name: String in directory.get_directories():
+		if _contains_files(path.path_join(name)):
+			return true
+	return false
+
+static func _move(source: String, destination: String) -> Error:
+	# Only files move. An empty folder where a file now belongs (a folder that
+	# became a file in this release, or the reverse during rollback) is removed
+	# first; a folder that still holds files is never replaced.
+	if DirAccess.dir_exists_absolute(destination) and not is_link(destination):
+		if _contains_files(destination):
+			return ERR_ALREADY_EXISTS
+		var cleared := remove_tree(destination)
+		if cleared != OK:
+			return cleared
+	var parent := DirAccess.make_dir_recursive_absolute(destination.get_base_dir())
+	if parent != OK:
+		return parent
+	return _rename_for_install(source, destination)
+
+static func _prune_empty_parents(root: String, relative: String) -> void:
+	# Remove folders a retired file leaves empty, never a game root itself.
+	var components := relative.split("/")
+	for depth in range(components.size() - 1, 1, -1):
+		var path := root.path_join("/".join(components.slice(0, depth)))
+		var listing := DirAccess.open(path) if not is_link(path) else null
+		if listing == null:
+			return
+		listing.include_hidden = true
+		if not listing.get_files().is_empty() or not listing.get_directories().is_empty() or DirAccess.remove_absolute(path) != OK:
+			return
 
 static func install(root: String, identity: Dictionary, repair := false, progress := Callable()) -> String:
 	if update_owner(identity) != "github":

@@ -44,6 +44,65 @@ def locked_directory(path):
         kernel.CloseHandle(handle)
 
 
+@contextmanager
+def locked_file(path):
+    """Hold a real Windows file handle that refuses rename and delete sharing."""
+    import ctypes
+    from ctypes import wintypes
+
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel.CreateFileW.argtypes = [wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD,
+                                  wintypes.LPVOID, wintypes.DWORD, wintypes.DWORD, wintypes.HANDLE]
+    kernel.CreateFileW.restype = wintypes.HANDLE
+    kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+    # GENERIC_READ with FILE_SHARE_READ only: renaming the file now fails.
+    handle = kernel.CreateFileW(str(path), 0x80000000, 1, None, 3, 0, None)
+    assert handle != wintypes.HANDLE(-1).value, ctypes.get_last_error()
+    try:
+        yield
+    finally:
+        kernel.CloseHandle(handle)
+
+
+DESCRIPTOR = "app/client-release.json"
+UPDATE_DIRS = (".eloria-update-stage", ".eloria-update-backup", ".eloria-previous")
+JOURNALS = (".eloria-update-journal.json", ".eloria-update-journal-v2.json")
+
+
+def descriptor_package():
+    """The package holding the release descriptor (its own one after W2-UD-01)."""
+    return asset_packages.package_id(DESCRIPTOR)
+
+
+def part_name(payload, package_id):
+    package = next(p for p in payload["packages"] if p["id"] == package_id)
+    return "/" + package["parts"][0]["url"].rsplit("/", 1)[1]
+
+
+def tree(root):
+    """Files and folders under the game roots, spelled as on disk, with bytes."""
+    files, folders = {}, set()
+    for name in ("app", "eloria-assets"):
+        for folder, children, names in os.walk(root / name):
+            base = Path(folder)
+            folders.update((base / child).relative_to(root).as_posix() for child in children)
+            for entry in names:
+                files[(base / entry).relative_to(root).as_posix()] = (base / entry).read_bytes()
+    return files, folders
+
+
+def identities(root, paths):
+    """NTFS file IDs and times: a file that was never copied or rewritten keeps both."""
+    return {path: ((root / path).stat().st_ino, (root / path).stat().st_mtime_ns) for path in paths}
+
+
+def assert_no_transaction(root):
+    for name in UPDATE_DIRS:
+        assert not (root / name).exists(), name
+    for name in JOURNALS:
+        assert not (root / name).exists(), name
+
+
 def source(root, identity):
     (root / "app/assets/actors/native/creatures").mkdir(parents=True)
     (root / "eloria-assets/maps/landfall").mkdir(parents=True)
@@ -113,14 +172,21 @@ func _run() -> void:
     root.add_child(transport)
     var fetch := func(url: String, path: String, limit: int) -> Dictionary:
         return await transport.fetch(request.server + "/" + url.get_file(), path, limit)
+    if error == "" and request.action == "recover":
+        error = await transport.worker(func() -> String: return Release.recover(request.root))
     if error == "" and request.action == "update":
         var prepared_plan: Dictionary = {}
+        var stop_after := OS.get_environment("RL_UPDATE_TEST_STOP_AFTER")
         var progress := func(phase: String, completed: int, _total: int, _detail := "") -> void:
             if phase == "Checking installed packages" and completed == 0:
                 print("TEST_VERIFICATION_PASS")
-        if request.get("corrupt_cached_package", false):
+            # Crash injection exists only in this fixture project: it ends its
+            # own process right after install step k, like a power cut.
+            if stop_after != "" and phase == "Installing verified game files" and completed == int(stop_after):
+                OS.kill(OS.get_process_id())
+        if request.get("corrupt_package", "") != "":
             for package: Dictionary in release.packages:
-                if package.id == "client":
+                if package.id == request.corrupt_package:
                     var path := Packages.package_path(Release.cache_for(request.root), package)
                     DirAccess.make_dir_recursive_absolute(path.get_base_dir())
                     var file := FileAccess.open(path, FileAccess.WRITE)
@@ -176,17 +242,21 @@ func _run() -> void:
     source(installed, identity)
     env = {**os.environ, "APPDATA": str(tmp_path / "userdata"), "LOCALAPPDATA": str(tmp_path / "userdata")}
 
-    def run(action="update", payload=payload, **extra):
+    def run(action="update", payload=payload, stop_after=None, **extra):
         request = tmp_path / "request.json"
         result = tmp_path / "result.json"
         result.unlink(missing_ok=True)
         request.write_text(json.dumps({"root": installed.as_posix(), "identity": identity,
             "envelope": signed(payload, key), "action": action, "result": str(result),
             "server": f"http://127.0.0.1:{server.server_port}", **extra}))
+        run_env = env if stop_after is None else {**env, "RL_UPDATE_TEST_STOP_AFTER": str(stop_after)}
         completed = subprocess.run([str(godot), "--headless", "--path", str(project),
-            "--script", str(script), "--", str(request)], env=env, text=True, capture_output=True, timeout=40)
+            "--script", str(script), "--", str(request)], env=run_env, text=True, capture_output=True, timeout=40)
         output = completed.stdout + completed.stderr
         assert "SCRIPT ERROR" not in output, output
+        if stop_after is not None and not result.is_file():
+            # The fixture ended its own process at the requested install step.
+            return completed.returncode, "killed", output
         if action != "uninstall":
             assert result.is_file(), output
             return completed.returncode, json.loads(result.read_text())["error"], output
@@ -219,12 +289,19 @@ def test_packages_are_deterministic_and_only_changed_members_change(tmp_path):
 def test_real_download_skips_unchanged_packages_repairs_and_removes_obsolete_files(fixture):
     f = fixture
     (f["installed"] / "app/obsolete.txt").write_text("retired")
+    kept = ["app/RabbitLands.exe", "app/RabbitLands.pck", "app/assets/actors/native/creatures/rabbit.glb",
+            "eloria-assets/maps/landfall/world.json"]
+    before = identities(f["installed"], kept)
     code, error, output = f["run"]()
     assert code == 0 and not error, output
     assert output.count("TEST_VERIFICATION_PASS") == 1, "The locked transaction scanned installed files twice."
     # Only the client descriptor changed. The engine, actor and map stay local.
-    assert len(f["downloads"]) == 1 and ".pkg.client.zip." in f["downloads"][0]
+    assert f["downloads"] == [part_name(f["payload"], descriptor_package())]
     assert not (f["installed"] / "app/obsolete.txt").exists()
+    # Unchanged files were neither copied nor rewritten, and nothing is kept.
+    assert identities(f["installed"], kept) == before
+    assert tree(f["installed"]) == tree(f["stage"])
+    assert_no_transaction(f["installed"])
     f["downloads"].clear()
     assert f["run"]()[0] == 0
     assert not f["downloads"], "An up-to-date install must not redownload any ZIP."
@@ -238,58 +315,80 @@ def test_real_download_skips_unchanged_packages_repairs_and_removes_obsolete_fil
 
 def test_corrupt_package_preserves_existing_install(fixture):
     f = fixture
-    part = next(p for p in f["payload"]["parts"] if ".pkg.client.zip." in p["url"])
-    (f["tmp_path"] / part["url"].rsplit("/", 1)[1]).write_bytes(b"broken zip")
+    (f["tmp_path"] / part_name(f["payload"], descriptor_package()).lstrip("/")).write_bytes(b"broken zip")
     before = (f["installed"] / "app/client-release.json").read_bytes()
     code, error, output = f["run"]()
     assert code == 1 and ("verification" in error or "download failed" in error), output
     assert (f["installed"] / "app/client-release.json").read_bytes() == before
 
 
-@pytest.mark.skipif(os.name != "nt", reason="Native Windows folder locking")
-@pytest.mark.parametrize("locked_root", ["app", "eloria-assets"])
-def test_locked_installed_folder_reports_failure_and_rolls_back(fixture, locked_root):
+LOCKABLE = [DESCRIPTOR, "app/assets/actors/native/creatures/rabbit.glb", "eloria-assets/maps/landfall/world.json"]
+
+
+def damage_for_replacement(f):
+    """Damaged actor and map files make three replacements: first, middle and last."""
+    for path in LOCKABLE[1:]:
+        (f["installed"] / path).write_bytes(b"damaged " + path.encode())
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Native Windows file locking")
+@pytest.mark.parametrize("locked", LOCKABLE)
+def test_locked_live_file_reports_failure_and_rolls_back(fixture, locked):
     f = fixture
-    before = {path.relative_to(f["installed"]): path.read_bytes()
-              for path in f["installed"].rglob("*") if path.is_file()}
-    with locked_directory(f["installed"] / locked_root):
+    damage_for_replacement(f)
+    before = tree(f["installed"])
+    with locked_file(f["installed"] / locked):
         code, error, output = f["run"]()
     assert code == 1 and "previous game was restored" in error, output
-    assert "Could not move" in error and locked_root in error and "error " in error
+    assert "Could not move" in error and Path(locked).name in error and "error " in error
     report_path = Path(error.split("Error report: ", 1)[1])
     report = json.loads(report_path.read_text())
-    assert Path(report["source"]) == f["installed"] / locked_root
-    assert Path(report["destination"]) == f["installed"] / ".eloria-previous" / locked_root
+    assert Path(report["source"]) == f["installed"] / locked
+    assert Path(report["destination"]) == f["installed"] / ".eloria-update-backup" / locked
     assert report["error_code"] != 0 and report["error"]
     assert report["commit"] == f["payload"]["commit"] and report["timestamp_utc"]
     assert report["recovery_error"] == ""
-    assert not (f["installed"] / ".eloria-update-journal.json").exists()
-    assert all((f["installed"] / path).read_bytes() == data for path, data in before.items())
+    # Replacements made before the locked file were moved back as well.
+    assert tree(f["installed"]) == before
+    assert_no_transaction(f["installed"])
     f["downloads"].clear()
     assert f["run"]()[0] == 0
-    assert not f["downloads"], "A failed folder swap must retain verified downloads for retry."
+    assert not f["downloads"], "A failed file move must retain verified downloads for retry."
+    assert tree(f["installed"]) == tree(f["stage"])
 
 
 @pytest.mark.skipif(os.name != "nt", reason="Native Windows folder locking")
 @pytest.mark.parametrize("locked_root", ["app", "eloria-assets"])
-def test_temporary_folder_lock_is_retried(fixture, locked_root):
+def test_open_installed_folder_no_longer_blocks_a_file_update(fixture, locked_root):
+    # A scanner holding a game folder open blocked the old two-root swap. The
+    # per-file update renames files inside it and never moves the folder.
+    f = fixture
+    damage_for_replacement(f)
+    with locked_directory(f["installed"] / locked_root):
+        code, error, output = f["run"]()
+    assert code == 0 and not error, output
+    assert tree(f["installed"]) == tree(f["stage"])
+    assert_no_transaction(f["installed"])
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Native Windows file locking")
+def test_temporary_file_lock_is_retried(fixture):
     f = fixture
     with ThreadPoolExecutor(max_workers=1) as executor:
-        with locked_directory(f["installed"] / locked_root):
+        with locked_file(f["installed"] / DESCRIPTOR):
             future = executor.submit(f["run"])
             deadline = time.monotonic() + 15
-            while not (f["installed"] / ".eloria-update-journal.json").exists():
+            while not (f["installed"] / ".eloria-update-journal-v2.json").exists():
                 assert not future.done(), future.result()
-                assert time.monotonic() < deadline, "The updater never reached folder promotion."
+                assert time.monotonic() < deadline, "The updater never reached the file moves."
                 time.sleep(0.01)
             # Hold the lock through the first rename, then let the retry succeed.
             time.sleep(0.5)
-            assert not future.done(), "The updater abandoned a temporary folder lock."
+            assert not future.done(), "The updater abandoned a temporary file lock."
         code, error, output = future.result(timeout=15)
     assert code == 0 and not error, output
-    assert json.loads((f["installed"] / "app/client-release.json").read_text())["commit"] == "b" * 40
-    assert json.loads((f["installed"] / ".eloria-previous/app/client-release.json").read_text())["commit"] == "a" * 40
-    assert not (f["installed"] / ".eloria-update-journal.json").exists()
+    assert json.loads((f["installed"] / DESCRIPTOR).read_text())["commit"] == "b" * 40
+    assert_no_transaction(f["installed"])
 
 
 @pytest.mark.skipif(os.name != "nt", reason="Native Windows folder locking")
@@ -321,17 +420,22 @@ def test_fresh_install_fetches_every_package_once(fixture):
     assert code == 0 and not error, output
     assert len(f["downloads"]) == len(f["payload"]["parts"])
     assert json.loads((f["installed"] / "app/client-release.json").read_text())["commit"] == "b" * 40
+    # A fresh install keeps the two-root promotion; it leaves no empty backup.
+    assert tree(f["installed"]) == tree(f["stage"])
+    assert_no_transaction(f["installed"])
 
 
 def test_changed_local_file_after_planning_cannot_be_promoted(fixture):
     f = fixture
     descriptor = (f["installed"] / "app/client-release.json").read_bytes()
+    # Same size as the planned "old rabbit": only the commit point's check
+    # (time, then hash) can notice it.
     code, error, output = f["run"](tamper_after_prepare={
         "path": "app/assets/actors/native/creatures/rabbit.glb", "content": "bad rabbit"})
-    assert code == 1 and "staged package failed verification" in error, output
+    assert code == 1 and "changed while the update was being prepared" in error and "rabbit.glb" in error, output
     assert output.count("TEST_VERIFICATION_PASS") == 1
     assert (f["installed"] / "app/client-release.json").read_bytes() == descriptor
-    assert not (f["installed"] / ".eloria-update-journal.json").exists()
+    assert_no_transaction(f["installed"])
 
 
 def test_plan_for_another_installation_is_not_reused(fixture):
@@ -354,7 +458,7 @@ def test_a_consumed_plan_rechecks_the_installation_on_reuse(fixture):
 
 def test_single_part_download_replaces_a_damaged_cached_archive(fixture):
     f = fixture
-    code, error, output = f["run"](corrupt_cached_package=True)
+    code, error, output = f["run"](corrupt_package=descriptor_package())
     assert code == 0 and not error, output
     assert len(f["downloads"]) == 1
     assert json.loads((f["installed"] / "app/client-release.json").read_text())["commit"] == "b" * 40
@@ -386,6 +490,197 @@ def test_map_texture_and_metadata_updates_keep_mesh_packages_reusable(tmp_path):
         asset_packages.package_id(metadata.relative_to(stage).as_posix())}
     assert before[asset_packages.package_id(mesh.relative_to(stage).as_posix())] == after[
         asset_packages.package_id(mesh.relative_to(stage).as_posix())]
+
+
+def same_package_neighbour(relative):
+    """Another path that lands in the same package as relative."""
+    folder, want = relative.rsplit("/", 1)[0], asset_packages.package_id(relative)
+    return next(f"{folder}/neighbour-{index}.json" for index in range(4096)
+                if asset_packages.package_id(f"{folder}/neighbour-{index}.json") == want)
+
+
+def release_stage(f, name, change):
+    """Sign another release of commit b, built from the fixture's new stage."""
+    stage = f["tmp_path"] / name
+    shutil.copytree(f["stage"], stage)
+    change(stage)
+    return stage, manifest(stage, f["newer"])
+
+
+def every_operation(f):
+    """A release whose install needs every operation kind and both folder swaps."""
+    installed = f["installed"]
+    (installed / "app/retired.txt").write_bytes(b"retired file")
+    (installed / "app/data/folder").mkdir(parents=True)
+    (installed / "app/data/folder/member.txt").write_bytes(b"old folder member")
+    (installed / "app/data/thing").write_bytes(b"old thing file")
+    if os.name == "nt":
+        (installed / "app/notes").mkdir()
+        (installed / "app/notes/readme.txt").write_bytes(b"same words")
+
+    def change(stage):
+        (stage / "eloria-assets/maps/landfall/world.json").write_bytes(b"new world")
+        (stage / "app/notes").mkdir()
+        (stage / "app/notes/added.txt").write_bytes(b"added file")
+        (stage / "app/data/thing").mkdir(parents=True)
+        (stage / "app/data/thing/member.txt").write_bytes(b"new folder member")
+        (stage / "app/data/folder").write_bytes(b"new folder file")
+        if os.name == "nt":
+            (stage / "app/notes/ReadMe.txt").write_bytes(b"same words")
+
+    stage, payload = release_stage(f, "RabbitLands-Windows-20261102-ccccccccc", change)
+    # retire 3 (one step each), replace descriptor + map (+ case rename), add 3.
+    steps = 3 + 2 * (2 + (os.name == "nt")) + 3
+    return stage, payload, steps
+
+
+def test_a_crash_after_any_install_step_restores_the_previous_install(fixture):
+    f = fixture
+    installed = f["installed"]
+    stage, payload, steps = every_operation(f)
+    pristine = f["tmp_path"] / "pristine"
+    shutil.copytree(installed, pristine)
+    expected = tree(stage)
+    step = 0
+    while True:
+        shutil.rmtree(installed)
+        shutil.copytree(pristine, installed)
+        before = tree(installed)
+        moved = identities(installed, before[0])
+        code, error, output = f["run"](payload=payload, stop_after=step)
+        if error != "killed":
+            assert code == 0 and not error, output
+            break
+        assert (installed / ".eloria-update-journal-v2.json").is_file(), step
+        code, error, output = f["run"]("recover", payload)
+        assert code == 0 and not error, output
+        # The same files, names, bytes and folders; originals were moved back,
+        # never rewritten.
+        assert tree(installed) == before, step
+        assert identities(installed, before[0]) == moved, step
+        assert_no_transaction(installed)
+        f["downloads"].clear()
+        code, error, output = f["run"](payload=payload)
+        assert code == 0 and not error, output
+        assert not f["downloads"], "Verified downloads must survive an interrupted install."
+        assert tree(installed) == expected, step
+        assert_no_transaction(installed)
+        step += 1
+    assert step == steps + 1, "The install did not take the expected steps."
+    assert tree(installed) == expected
+    assert_no_transaction(installed)
+
+
+@pytest.mark.parametrize("point", ["middle", "last"])
+def test_a_journal_that_lost_its_bytes_still_restores_every_original(fixture, point):
+    # A power cut can lose the journal's bytes yet keep the renames made after
+    # it. Recovery must not stop for good (setup recovers through the same
+    # call): every original comes back from the backup, files the update added
+    # may stay, and the retry lands the release exactly.
+    f = fixture
+    installed = f["installed"]
+    stage, payload, steps = every_operation(f)
+    expected = tree(stage)
+    before = tree(installed)
+    moved = identities(installed, before[0])
+    code, error, output = f["run"](payload=payload, stop_after=steps // 2 if point == "middle" else steps)
+    assert error == "killed", output
+    journal = installed / ".eloria-update-journal-v2.json"
+    journal.write_bytes(b"\0" * journal.stat().st_size)
+    code, error, output = f["run"]("recover", payload)
+    assert code == 0 and not error, output
+    files, _ = tree(installed)
+    added = set(expected[0]) - set(before[0])
+    assert {path: data for path, data in files.items() if path not in added} == before[0]
+    assert set(files) - set(before[0]) <= added
+    assert identities(installed, before[0]) == moved, "Originals must be moved back, not rewritten."
+    assert_no_transaction(installed)
+    f["downloads"].clear()
+    code, error, output = f["run"](payload=payload)
+    assert code == 0 and not error, output
+    assert not f["downloads"], "Verified downloads must survive an interrupted install."
+    assert tree(installed) == expected
+    assert_no_transaction(installed)
+
+
+def test_only_changed_members_are_staged_and_unchanged_files_keep_their_identity(fixture):
+    f = fixture
+    world = "eloria-assets/maps/landfall/world.json"
+    neighbour = same_package_neighbour(world)
+    (f["installed"] / neighbour).write_bytes(b"stable neighbour")
+
+    def change(stage):
+        (stage / neighbour).write_bytes(b"stable neighbour")
+        (stage / world).write_bytes(b"new world")
+
+    stage, payload = release_stage(f, "RabbitLands-Windows-20261102-ddddddddd", change)
+    package = next(p for p in payload["packages"] if p["id"] == asset_packages.package_id(world))
+    assert {neighbour, world} <= {entry["path"] for entry in package["files"]}
+    kept = [neighbour, "app/RabbitLands.exe", "app/RabbitLands.pck", "app/assets/actors/native/creatures/rabbit.glb"]
+    before = identities(f["installed"], kept)
+    # Stopped once the journal is written: the stage holds only changed members.
+    code, error, output = f["run"](payload=payload, stop_after=0)
+    assert error == "killed", output
+    staged = f["installed"] / ".eloria-update-stage"
+    assert {p.relative_to(staged).as_posix() for p in staged.rglob("*") if p.is_file()} == {DESCRIPTOR, world}
+    assert sorted(f["downloads"]) == sorted([part_name(payload, descriptor_package()), part_name(payload, package["id"])])
+    code, error, output = f["run"](payload=payload)
+    assert code == 0 and not error, output
+    # The neighbour shares the downloaded package but was neither unpacked
+    # nor moved: same file ID and time.
+    assert identities(f["installed"], kept) == before
+    assert tree(f["installed"]) == tree(stage)
+    assert_no_transaction(f["installed"])
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Case-insensitive file names")
+def test_a_case_only_rename_lands(fixture):
+    f = fixture
+    (f["installed"] / "app/notes").mkdir()
+    (f["installed"] / "app/notes/readme.txt").write_bytes(b"same words")
+
+    def change(stage):
+        (stage / "app/notes").mkdir()
+        (stage / "app/notes/ReadMe.txt").write_bytes(b"same words")
+
+    stage, payload = release_stage(f, "RabbitLands-Windows-20261102-eeeeeeeee", change)
+    code, error, output = f["run"](payload=payload)
+    assert code == 0 and not error, output
+    assert os.listdir(f["installed"] / "app/notes") == ["ReadMe.txt"]
+    assert tree(f["installed"]) == tree(stage)
+    f["downloads"].clear()
+    assert f["run"](payload=payload)[0] == 0 and not f["downloads"], "The new spelling was not recognized."
+
+
+def test_an_older_updaters_interrupted_promotion_is_recovered_then_updated(fixture):
+    f = fixture
+    installed = f["installed"]
+    before = tree(installed)
+    # The two-root journal of an older updater, stopped between its renames.
+    (installed / ".eloria-previous").mkdir()
+    (installed / "app").rename(installed / ".eloria-previous/app")
+    shutil.copytree(f["stage"] / "app", installed / "app")
+    (installed / ".eloria-update-journal.json").write_text(json.dumps(
+        {"commit": "b" * 40, "original_roots": ["app", "eloria-assets"]}))
+    code, error, output = f["run"]("recover")
+    assert code == 0 and not error, output
+    assert tree(installed) == before
+    assert not (installed / ".eloria-update-journal.json").exists()
+    code, error, output = f["run"]()
+    assert code == 0 and not error, output
+    assert tree(installed) == tree(f["stage"])
+    assert_no_transaction(installed)
+
+
+def test_an_update_over_an_older_updaters_backup_removes_it(fixture):
+    f = fixture
+    installed = f["installed"]
+    for name in ("app", "eloria-assets"):
+        shutil.copytree(installed / name, installed / ".eloria-previous" / name)
+    code, error, output = f["run"]()
+    assert code == 0 and not error, output
+    assert tree(installed) == tree(f["stage"])
+    assert_no_transaction(installed)
 
 
 def test_uninstall_requires_confirmation_and_refuses_steam(fixture):
@@ -577,8 +872,9 @@ def test_exported_updater_replaces_itself_then_installs_and_uninstalls(fixture, 
     assert sorted(p.name for p in (cache / "bootstrap").iterdir()) == [client_release.digest(new)]
     assert recent_copy.is_file(), "A handover copy inside its grace period was removed."
     assert not (f["installed"] / ".rabbitlands-bootstrap-previous").exists(), "The running installed updater kept the helpers it replaced."
+    assert_no_transaction(f["installed"])
     updater_download = "/" + payload["updater"]["url"].rsplit("/", 1)[1]
-    client_part = next(p for p in payload["packages"] if p["id"] == "client")["parts"][0]
+    client_part = next(p for p in payload["packages"] if p["id"] == descriptor_package())["parts"][0]
     client_download = "/" + client_part["url"].rsplit("/", 1)[1]
     assert f["downloads"].count(updater_download) == 1
     assert f["downloads"].count(client_download) == 1
@@ -762,14 +1058,32 @@ def test_updated_game_start_removes_previous_installation_backup(fixture):
     (f["tmp_path"] / "RabbitLands-windows.json").write_text(json.dumps(signed(payload, f["key"])))
     for kind in ("updater", "uninstall"):
         shutil.copyfile(updater, f["installed"] / f"RabbitLands-{kind}.exe")
+    previous = f["installed"] / ".eloria-previous"
+
+    def leave_old_updater_backup():
+        # What an older updater leaves after its two-root update.
+        for name in ("app", "eloria-assets"):
+            shutil.copytree(f["tmp_path"] / "previous-roots" / name, previous / name)
+
+    shutil.copytree(f["installed"] / "app", f["tmp_path"] / "previous-roots/app")
+    shutil.copytree(f["installed"] / "eloria-assets", f["tmp_path"] / "previous-roots/eloria-assets")
+    leave_old_updater_backup()
     result = subprocess.run([str(f["installed"] / "RabbitLands-updater.exe"), "--headless", "--", "--root", str(f["installed"])],
         env=f["env"], capture_output=True, text=True, timeout=60)
     assert result.returncode == 0, result.stdout + result.stderr
     probe = json.loads((f["installed"] / "game-probe.json").read_text())
-    # The update installed a backup; the started game saw it removed while
-    # the launcher still held the lock, and the live game was untouched.
-    assert probe == {"had_backup": True, "removed_while_running": True, "live": "old rabbit"}, probe
+    # A per-file update needs no whole-game backup: the old updater's one was
+    # removed before staging, and the update kept none of its own.
+    assert probe == {"had_backup": False, "removed_while_running": True, "live": "old rabbit"}, probe
     assert json.loads((f["installed"] / "app/client-release.json").read_text())["commit"] == "b" * 40
-    assert not (f["installed"] / ".eloria-previous").exists()
-    assert not (f["installed"] / ".eloria-update-journal.json").exists()
+    assert_no_transaction(f["installed"])
+    # Launch-only starts still remove a backup an older updater left: the
+    # started game sees it removed while the launcher holds the lock.
+    leave_old_updater_backup()
+    result = subprocess.run([str(f["installed"] / "RabbitLands-updater.exe"), "--headless", "--", "--root", str(f["installed"]), "--launch-only"],
+        env=f["env"], capture_output=True, text=True, timeout=60)
+    assert result.returncode == 0, result.stdout + result.stderr
+    probe = json.loads((f["installed"] / "game-probe.json").read_text())
+    assert probe == {"had_backup": True, "removed_while_running": True, "live": "old rabbit"}, probe
+    assert_no_transaction(f["installed"])
     assert "Removed the previous installation backup" in result.stdout, result.stdout

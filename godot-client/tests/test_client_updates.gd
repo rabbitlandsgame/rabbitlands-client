@@ -1,5 +1,6 @@
 extends SceneTree
 const Release = preload("res://src/updates/release.gd")
+const Packages = preload("res://src/updates/package_updates.gd")
 var _failures := 0
 var _key: CryptoKey
 var _root := ""
@@ -65,6 +66,90 @@ func old_install() -> void:
 	write(_root.path_join("app/RabbitLands.pck"), "old pck")
 	write(_root.path_join("app/client-release.json"), JSON.stringify(_identity))
 	write(_root.path_join("eloria-assets/map.json"), "old map")
+
+func read(relative: String) -> String:
+	return FileAccess.get_file_as_string(_root.path_join(relative))
+
+func present(relative: String) -> bool:
+	return FileAccess.file_exists(_root.path_join(relative)) or DirAccess.dir_exists_absolute(_root.path_join(relative))
+
+func per_file_journal(commit: String) -> Dictionary:
+	# Retire a map file and a lone file in its own folder, replace the
+	# executable, add a file in a new folder.
+	var stage := _root.path_join(Release.STAGE)
+	write(stage.path_join("app/RabbitLands.exe"), "new exe")
+	write(stage.path_join("app/added/new.txt"), "added")
+	return {"schema": 2, "commit": commit, "stage": Release.STAGE, "backup": Release.BACKUP_V2,
+		"operations": [{"path": "eloria-assets/map.json", "op": "retire"}, {"path": "app/lone/only.txt", "op": "retire"},
+			{"path": "app/RabbitLands.exe", "op": "replace", "sha256": "new exe".sha256_text()},
+			{"path": "app/added/new.txt", "op": "add", "sha256": "added".sha256_text()}],
+		"directories": ["app/added"]}
+
+func check_per_file_operations() -> void:
+	var b := "b".repeat(40)
+	var good := per_file_journal(b)
+	var bad_records: Array = []
+	for change: Dictionary in [{"schema": 1}, {"commit": "short"}, {"stage": "elsewhere"}, {"backup": ".eloria-previous"},
+			{"operations": [{"path": "app/../x", "op": "add"}]}, {"operations": [{"path": "app/x", "op": "copy"}]},
+			{"operations": [{"path": "app/X", "op": "replace", "from": "app/y"}]},
+			{"operations": [{"path": "app/x", "op": "add"}, {"path": "app/x", "op": "retire"}]},
+			{"directories": ["../outside"]}]:
+		var record := good.duplicate(true)
+		record.merge(change, true)
+		bad_records.append(record)
+	expect(Release.valid_operations(good), "a valid per-file journal was refused")
+	for record: Dictionary in bad_records:
+		expect(not Release.valid_operations(record), "an unsafe per-file journal was accepted: %s" % [record])
+		expect(Release.apply_operations(_root, record) != "", "an unsafe per-file journal was applied")
+	# Applied, then interrupted before the commit point: every original returns,
+	# the new files are parked in the stage, and created folders go away.
+	old_install()
+	write(_root.path_join("app/lone/only.txt"), "lone")
+	var journal := per_file_journal(b)
+	expect(Release.apply_operations(_root, journal) == "", "per-file operations failed")
+	expect(read("app/RabbitLands.exe") == "new exe" and read("app/added/new.txt") == "added", "per-file operations did not place new files")
+	expect(not present("eloria-assets/map.json") and not present("app/lone/only.txt"), "per-file operations did not retire files")
+	expect(read(Release.BACKUP_V2 + "/app/RabbitLands.exe") == "old exe", "the replaced original is not in the per-update backup")
+	expect(FileAccess.file_exists(_root.path_join(Release.JOURNAL_V2)), "per-file operations ran without a journal")
+	expect(Release.remove_backup(_root) == OK, "the legacy backup cleanup refused an update without a legacy journal")
+	expect(Release.recover(_root) == "", "an interrupted per-file update could not recover")
+	expect(read("app/RabbitLands.exe") == "old exe" and read("eloria-assets/map.json") == "old map" and read("app/lone/only.txt") == "lone", "recovery did not restore the originals")
+	expect(not present("app/added"), "recovery kept a folder the update created")
+	for name: String in [Release.JOURNAL_V2, Release.BACKUP_V2, Release.STAGE]:
+		expect(not present(name), "recovery left " + name)
+	# Applied and committed: no backup is kept and emptied folders are removed.
+	journal = per_file_journal(b)
+	expect(Release.apply_operations(_root, journal) == "" and Release.commit_operations(_root, journal) == "", "per-file operations could not be committed")
+	expect(read("app/RabbitLands.exe") == "new exe" and not present("app/lone") and present("app"), "the commit did not finish the update")
+	for name: String in [Release.JOURNAL_V2, Release.BACKUP_V2, Release.STAGE, ".eloria-previous"]:
+		expect(not present(name), "the commit left " + name)
+	expect(Release.recover(_root) == "" and read("app/RabbitLands.exe") == "new exe", "recovery after a commit changed the game")
+	# A crash after the commit cleared its journal leaves a backup nothing reads.
+	write(_root.path_join(Release.BACKUP_V2 + "/app/RabbitLands.exe"), "old exe")
+	expect(Release.recover(_root) == "" and not present(Release.BACKUP_V2), "a backup without its journal was kept")
+	expect(read("app/RabbitLands.exe") == "new exe", "removing a stale backup changed the game")
+	# A journal that lost its bytes (a power cut can keep the renames made
+	# after it) is never applied. Every original in the backup returns, a new
+	# file in its place is parked, and an added file stays for the next plan.
+	old_install()
+	write(_root.path_join("app/lone/only.txt"), "lone")
+	journal = per_file_journal(b)
+	expect(Release.apply_operations(_root, journal) == "", "per-file operations failed before the journal was lost")
+	var lost := FileAccess.open(_root.path_join(Release.JOURNAL_V2), FileAccess.WRITE)
+	var zeros := PackedByteArray()
+	zeros.resize(256)
+	lost.store_buffer(zeros)
+	lost.close()
+	expect(Release.recover(_root) == "", "a journal that lost its bytes blocked recovery")
+	expect(read("app/RabbitLands.exe") == "old exe" and read("eloria-assets/map.json") == "old map" and read("app/lone/only.txt") == "lone", "a lost journal did not bring every original back")
+	expect(read("app/added/new.txt") == "added", "a lost journal's added file was not left for the next plan")
+	for name: String in [Release.JOURNAL_V2, Release.BACKUP_V2, Release.STAGE]:
+		expect(not present(name), "recovery without a readable journal left " + name)
+	# Damaged JSON is handled the same way; an empty backup changes nothing.
+	write(_root.path_join(Release.JOURNAL_V2), "{damaged")
+	expect(Release.recover(_root) == "" and read("app/RabbitLands.exe") == "old exe" and not present(Release.JOURNAL_V2), "a damaged journal without a backup changed the game")
+	var free := Packages.space_left(_root)
+	expect(free > 0 and Packages.space_left(_root.path_join("missing/child")) > 0, "free disk space could not be read")
 
 func _initialize() -> void:
 	_key = Crypto.new().generate_rsa(2048)
@@ -134,6 +219,7 @@ func _initialize() -> void:
 	expect(Release.recover(_root) == "", "interrupted install could not recover")
 	expect(FileAccess.get_file_as_string(_root.path_join("app/RabbitLands.exe")) == "old exe", "interrupted install did not restore old executable")
 	expect(FileAccess.get_file_as_string(_root.path_join("eloria-assets/map.json")) == "old map", "interrupted install changed untouched world")
+	check_per_file_operations()
 	Release.remove_tree(_root)
 	print("Client update runtime checks: ", "PASS" if _failures == 0 else "FAIL")
 	quit(0 if _failures == 0 else 1)
