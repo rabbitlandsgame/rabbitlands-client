@@ -47,12 +47,19 @@ not keep every body it has ever passed. The player, their target and their
 selection are never given up.
 
 **Parking.** A body the server removes (REMOVE_ACTOR) is hidden, stopped and made
-unpickable for `PARK_MSEC` (5 s) instead of freed, at most `PARK_LIMIT` (48) at a
-time. If the same actor - same type, kind, name, name colour and guild tag -
-comes back under its id in that time, it wears the parked body again: an actor
-stepping out of the view radius and back, or crossing an interest-cap boundary,
-is not rebuilt. A recycled id carrying someone else is built afresh. Every
-other spawn field is reapplied to a revived body. Map changes clear the parking.
+unpickable for `PARK_MSEC` (5 s) instead of freed, at most `park_limit` at a
+time: `PARK_LIMIT` (48) on medium and large machines and 16 on small ones (8.5 GiB
+of memory or less, or an integrated, software or virtual GPU; the memory class,
+`src/runtime/memory_budgets.gd`, owner decision 2026-11-02). The gate pass frees
+the bodies whose 5 s are up, looking every `PARK_EXPIRY_PERIOD_MSEC` (500 ms),
+so the bodies of a crowd that left are freed 5-5.5 s later even when no other
+actor arrives or leaves; before, only the next change to the actor list freed
+them. If the same actor - same type, kind,
+name, name colour and guild tag - comes back under its id in that time, it wears
+the parked body again: an actor stepping out of the view radius and back, or
+crossing an interest-cap boundary, is not rebuilt. A recycled id carrying
+someone else is built afresh. Every other spawn field is reapplied to a revived
+body. Map changes clear the parking.
 A parked body's animation is paused, so the gate does not go on stepping it
 while it waits; a revived one animates at half rate until the gate's next
 sweep gives it its tier.

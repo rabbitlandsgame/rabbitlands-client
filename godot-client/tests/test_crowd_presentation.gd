@@ -10,6 +10,7 @@ extends SceneTree
 
 const CROWD := preload("res://src/world/crowd_presentation.gd")
 const BUDGET := preload("res://src/world/live_effect_budget.gd")
+const MEMORY := preload("res://src/runtime/memory_budgets.gd")
 const LOCAL := 100
 const HUMANOID_KIT := {0: 114, 1: 106, 3: 117, 4: 171, 5: 184, 6: 192}
 
@@ -25,6 +26,8 @@ func _run() -> void:
 	_test_quality_caps()
 	_test_overhead_pass()
 	_test_effect_budget()
+	_test_park_pool_by_class()
+	_test_park_expiry_clock()
 	var main_script := load("res://src/app/main.gd") as GDScript
 	if not _expect(main_script != null and main_script.can_instantiate(), "main.gd compiles"):
 		quit(failures)
@@ -33,6 +36,8 @@ func _run() -> void:
 	await _test_lazy_bodies()
 	await _test_parking()
 	await _test_parked_body_paused()
+	await _test_park_expiry_on_gate()
+	await _test_park_expiry_keeps_shown_assets()
 	await _test_release()
 	await _test_body_cap()
 	_test_player_settings()
@@ -205,6 +210,80 @@ func _test_effect_budget() -> void:
 	budget.set("enabled", false)
 	parent.free()
 	_expect(budget.call("admit", &"spell", false), "a disabled budget admits everything")
+
+
+## The park pool's size follows the machine's memory class (memory-classes
+## M7a): 16 bodies on a small machine, today's PARK_LIMIT (48) on medium and
+## large ones. `configure` reads the class, so one policy follows a change.
+func _test_park_pool_by_class() -> void:
+	_expect(CROWD.PARK_LIMIT == 48 and CROWD.park_limit_for(MEMORY.SMALL) == 16
+		and CROWD.park_limit_for(MEMORY.MEDIUM) == CROWD.PARK_LIMIT
+		and CROWD.park_limit_for(MEMORY.LARGE) == CROWD.PARK_LIMIT,
+		"the pool holds 16 bodies on a small machine and 48 on medium and large ones")
+	_expect(CROWD.park_limit_for("unknown") == CROWD.PARK_LIMIT,
+		"a class the table does not know reads medium's")
+	_expect(int(CROWD.new().park_limit) == CROWD.PARK_LIMIT,
+		"an unconfigured policy keeps today's 48")
+	var policy: RefCounted = CROWD.new()
+	var cases := [[MEMORY.SMALL, 16], [MEMORY.MEDIUM, 48], [MEMORY.LARGE, 48], [MEMORY.SMALL, 16]]
+	for case: Array in cases:
+		MEMORY.override_for_tests(str(case[0]))
+		policy.call("configure", "")
+		var limit := int(case[1])
+		var nodes: Array[Node3D] = []
+		var accepted := 0
+		for index: int in range(limit + 1):
+			var node := Node3D.new()
+			nodes.append(node)
+			accepted += int(policy.call("park_node", 1000 + index, node, "key", 0))
+		_expect(int(policy.park_limit) == limit and accepted == limit
+			and int(policy.call("parked_count")) == limit
+			and (policy.call("describe") as Dictionary).get("parkLimit") == limit,
+			"as %s: %d bodies are parked and the next one is refused" % [case[0], limit])
+		policy.call("clear_parked")
+		for node: Node3D in nodes:
+			if is_instance_valid(node) and not node.is_queued_for_deletion():
+				node.free()
+	policy.call("configure", "legacy")
+	var refused := Node3D.new()
+	_expect(not bool(policy.call("park_node", 1, refused, "key", 0)),
+		"with parking off nothing is parked, whatever the class")
+	refused.free()
+	MEMORY.reset()
+
+
+## Parked bodies are freed once PARK_MSEC is up by a clock the gate pass asks
+## every frame (`expire_parked_due`) but which looks at most every
+## PARK_EXPIRY_PERIOD_MSEC.
+func _test_park_expiry_clock() -> void:
+	var policy: RefCounted = CROWD.new()
+	policy.call("configure", "")
+	var first := Node3D.new()
+	var second := Node3D.new()
+	policy.call("park_node", 1, first, "a", 0)
+	policy.call("park_node", 2, second, "b", 1000)
+	var period: int = CROWD.PARK_EXPIRY_PERIOD_MSEC
+	var look: int = CROWD.PARK_MSEC - period + 100
+	_expect(period == 500 and int(policy.call("expire_parked_due", look)) == 0
+		and int(policy.call("parked_count")) == 2, "nothing is freed before its time")
+	_expect(int(policy.call("expire_parked_due", CROWD.PARK_MSEC)) == 0
+		and int(policy.call("parked_count")) == 2 and not first.is_queued_for_deletion(),
+		"a body whose time is up waits for the clock's next look, at most %d ms" % period)
+	_expect(int(policy.call("expire_parked_due", look + period)) == 1
+		and first.is_queued_for_deletion() and not second.is_queued_for_deletion()
+		and policy.call("parked_actor_ids") == [2], "the next look frees it, and only it")
+	_expect(int(policy.call("expire_parked_due", 1000 + CROWD.PARK_MSEC)) == 1
+		and second.is_queued_for_deletion() and int(policy.call("parked_count")) == 0,
+		"and a look once the second one's time is up frees that one")
+	var third := Node3D.new()
+	policy.call("park_node", 3, third, "c", 0)
+	_expect(int(policy.call("expire_parked", CROWD.PARK_MSEC)) == 1 and third.is_queued_for_deletion(),
+		"expire_parked itself frees whatever is due and says how many")
+	var fourth := Node3D.new()
+	policy.call("park_node", 4, fourth, "d", 0)
+	policy.call("clear_parked")
+	_expect(int(policy.get("_park_expiry_at")) == 0 and fourth.is_queued_for_deletion(),
+		"clearing the pool frees its bodies and resets the clock")
 
 
 func _set_up() -> void:
@@ -409,6 +488,91 @@ func _test_parked_body_paused() -> void:
 	await _sync()
 	_expect(_nodes().get(body_id) == body and body.animation_tier() != AnimationGate.Tier.PAUSED
 		and body.animation_player.active, "the revived body animates again")
+
+
+## The gate pass frees a parked body once its time is up without any change
+## to the actor list (memory-classes M7a): a crowd that has gone sends nothing
+## more, and its bodies used to stay parked until the next arrival.
+func _test_park_expiry_on_gate() -> void:
+	var crowd: RefCounted = _main.get("crowd")
+	_expect(int(crowd.get("park_limit")) == CROWD.park_limit_for(MEMORY.memory_class()),
+		"Main's park pool is this session's memory class's (%s: %d bodies)"
+		% [MEMORY.memory_class(), int(crowd.get("park_limit"))])
+	_put([_record(150, 512, 500)])
+	await _wait_for_nodes([150])
+	await _wait_for_bodies([150])
+	var body := _nodes().get(150) as ReplicatedActor3D
+	if not _expect(body != null and not body.is_model_deferred(), "a built body to park for the expiry check"):
+		return
+	_app_state.call("_on_packet", EloriaProtocol.ServerMessage.REMOVE_ACTOR, PackedByteArray([150, 0]))
+	await _sync()
+	if not _expect(150 in (crowd.call("parked_actor_ids") as Array) and is_instance_valid(body)
+			and not body.is_queued_for_deletion(), "its body is parked when the server removes it"):
+		return
+	# Only the gate pass runs from here on: no `_sync_world`, no actor change.
+	crowd.set("_park_expiry_at", 0)
+	_main.call("_update_animation_gate", 0.0)
+	_expect(150 in (crowd.call("parked_actor_ids") as Array) and not body.is_queued_for_deletion(),
+		"a gate pass inside its %d ms keeps it parked" % CROWD.PARK_MSEC)
+	((crowd.get("_parked") as Dictionary)[150] as Dictionary)["until"] = Time.get_ticks_msec() - 1
+	crowd.set("_park_expiry_at", Time.get_ticks_msec() + 60000)
+	_main.call("_update_animation_gate", 0.0)
+	_expect(150 in (crowd.call("parked_actor_ids") as Array) and not body.is_queued_for_deletion(),
+		"between the clock's looks (every %d ms) the gate leaves the pool alone"
+		% CROWD.PARK_EXPIRY_PERIOD_MSEC)
+	crowd.set("_park_expiry_at", 0)
+	_main.call("_update_animation_gate", 0.0)
+	_expect(not (150 in (crowd.call("parked_actor_ids") as Array)) and body.is_queued_for_deletion(),
+		"once its time is up the clock's next look in the gate pass frees it, with no world sync")
+	await process_frame
+	_expect(not is_instance_valid(body), "and the body is gone after the frame")
+
+
+## Records what the gate's expiry asks the browser build's actor files to keep
+## (browser_actor_assets.gd `prune`); only the browser build has one.
+class PruneRecorder extends RefCounted:
+	var calls := 0
+	var kept: Array = []
+
+	func prune(_live: Dictionary, parked: Array = []) -> void:
+		calls += 1
+		kept = parked.duplicate()
+
+
+## On the browser build the gate's expiry also lets go of the files of actors
+## that are gone. An actor AppState has just removed keeps its node until the
+## deferred world sync parks or frees it, so the expiry keeps that actor's
+## files: only the expired body's are let go.
+func _test_park_expiry_keeps_shown_assets() -> void:
+	var crowd: RefCounted = _main.get("crowd")
+	_put([_record(151, 513, 500), _record(152, 514, 500)])
+	await _wait_for_nodes([151, 152])
+	await _wait_for_bodies([151, 152])
+	_app_state.call("_on_packet", EloriaProtocol.ServerMessage.REMOVE_ACTOR, PackedByteArray([151, 0]))
+	await _sync()
+	var shown := _nodes().get(152) as ReplicatedActor3D
+	if not _expect(151 in (crowd.call("parked_actor_ids") as Array) and shown != null
+			and not shown.is_model_deferred(), "a parked body to expire beside a shown one"):
+		return
+	((crowd.get("_parked") as Dictionary)[151] as Dictionary)["until"] = Time.get_ticks_msec() - 1
+	# No world sync before the gate pass: AppState no longer has 152, but its
+	# node is still on screen.
+	_app_state.call("_on_packet", EloriaProtocol.ServerMessage.REMOVE_ACTOR, PackedByteArray([152, 0]))
+	var recorder := PruneRecorder.new()
+	_main.set("_browser_actor_assets", recorder)
+	crowd.set("_park_expiry_at", 0)
+	_main.call("_update_animation_gate", 0.0)
+	_main.set("_browser_actor_assets", null)
+	_expect(recorder.calls == 1 and not (151 in recorder.kept) and 152 in recorder.kept
+		and not (_app_state.get("actors") as Dictionary).has(152)
+		and is_instance_valid(shown) and not shown.is_queued_for_deletion(),
+		"the expiry lets the expired body's files go and keeps those of a body still on screen")
+	await _sync()
+	if 152 in (crowd.call("parked_actor_ids") as Array):
+		((crowd.get("_parked") as Dictionary)[152] as Dictionary)["until"] = 0
+		crowd.set("_park_expiry_at", 0)
+		_main.call("_update_animation_gate", 0.0)
+	await process_frame
 
 
 func _test_release() -> void:

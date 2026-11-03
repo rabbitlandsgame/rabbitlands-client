@@ -9929,6 +9929,14 @@ func _update_animation_gate(delta: float) -> void:
 		_declutter_due = false
 		_declutter_actor_overheads(_declutter_due_target)
 	var now: int = Time.get_ticks_msec()
+	# Parked bodies are freed on time (every 500 ms at most), not only when
+	# the actor list next changes (`_remove_stale_actor_nodes`): a crowd that
+	# has left sends nothing more. The browser build's prune also keeps every
+	# actor that still has a node: one AppState has just removed keeps it until
+	# the deferred world sync parks or frees it, and that sync prunes it then.
+	if crowd.expire_parked_due(now) > 0 and _browser_actor_assets != null:
+		_browser_actor_assets.call("prune", AppState.actors,
+			crowd.parked_actor_ids() + actor_nodes.keys())
 	if not _gate_sweep_active:
 		if now < _animation_gate_refresh_msec:
 			return

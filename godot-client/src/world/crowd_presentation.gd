@@ -11,7 +11,10 @@ extends RefCounted
 ##   and a body that has been far out of range for a while is given up again.
 ## - **Parking.** A body the server removes is kept hidden for a few seconds,
 ##   so an actor that steps out of view and back - a creature on the edge of the
-##   view radius, an actor on the server's cap boundary - is not rebuilt.
+##   view radius, an actor on the server's cap boundary - is not rebuilt. The
+##   pool's size follows the machine's memory class (`park_limit`), and its
+##   bodies are freed on time from the gate pass, not only when the actor list
+##   next changes (`expire_parked_due`).
 ## - **A body cap**, for machines that cannot draw every actor the server
 ##   sends (`body_cap`). It follows the graphics quality unless the player
 ##   chose a number (`body_cap_auto`): 60 at Low, the server's 160 otherwise.
@@ -39,9 +42,18 @@ const BUILD_BUDGET_USEC := 6000
 ## dots and its stand-ins on the frame it arrives.
 const DEFERRED_SPAWNS_PER_PASS := 64
 ## How long a removed body is kept for the same actor to come back, and how
-## many are kept at most.
+## many are kept at most on medium and large machines: a small one (8 GB or an
+## integrated GPU) keeps 16 (`park_limit`, memory_budgets.gd; owner decision
+## 2026-11-02).
 const PARK_MSEC := 5000
 const PARK_LIMIT := 48
+## How often the gate pass (main.gd `_update_animation_gate`) frees the parked
+## bodies whose time is up (`expire_parked_due`). Before, only the next change
+## to the actor list did (`_remove_stale_actor_nodes`), so the bodies a crowd
+## left behind - about 17 nodes each for a creature and 47-52 for a High
+## Human, 0.27-0.42 MB of static memory each (perf audit 2026-11, measured) -
+## stayed parked however long that took (GAP-06).
+const PARK_EXPIRY_PERIOD_MSEC := 500
 ## Body cap hysteresis: with more actors in range than the cap, the cap's
 ## distance is that of the cap-th nearest. Deferred actors inside it are built;
 ## a body is given up only once it is this much farther out than that, so an
@@ -79,6 +91,7 @@ const FIRST_RUN_LOW_BODIES := 60
 const OVERHEAD_CAP_HYSTERESIS_METRES := 2.0
 
 const RenderQuality := preload("res://src/actors/actor_render_quality.gd")
+const MemoryBudgets := preload("res://src/runtime/memory_budgets.gd")
 
 var lazy := true
 var gate := true
@@ -131,6 +144,11 @@ var _candidates: Array[int] = []
 var _cursor := 0
 var _far_since: Dictionary = {}
 var _parked: Dictionary = {}
+## The most bodies parked at once: this machine's memory class's
+## (`park_limit_for`), read by `configure`; PARK_LIMIT until then.
+var park_limit := PARK_LIMIT
+## When `expire_parked_due` next looks at the parked bodies.
+var _park_expiry_at := 0
 var builds := 0
 var releases := 0
 var revivals := 0
@@ -146,6 +164,8 @@ func parked_actor_ids() -> Array:
 ## feature against the client without it. The third,
 ## RABBITLANDS_CROWD_TUNING, sets budgets: `full=24,half=16,cloth=8` and
 ## `banners=N` for the overhead banner cap (0 = none) at every quality.
+## The park pool's size is the memory class's (RABBITLANDS_MEMORY_CLASS or
+## `--memory-class=` force one for a measurement).
 func configure(features: String, cap: String = "", tuning: String = "") -> void:
 	var raw := features.strip_edges().to_lower()
 	var names := ["lazy", "gate", "effects", "park", "stagger", "quarter"]
@@ -172,6 +192,7 @@ func configure(features: String, cap: String = "", tuning: String = "") -> void:
 	gate = bool(enabled.get("gate", false))
 	effects = bool(enabled.get("effects", false))
 	park = bool(enabled.get("park", false))
+	park_limit = park_limit_for(MemoryBudgets.memory_class())
 	# Both refine the gate and mean nothing without it.
 	stagger = gate and bool(enabled.get("stagger", false))
 	quarter = gate and bool(enabled.get("quarter", false))
@@ -296,7 +317,7 @@ func describe() -> Dictionary:
 		"halfRateBodies": half_rate_bodies, "clothBodies": cloth_bodies,
 		"overheadCap": overhead_cap, "overheadsShown": _overheads_shown.size(),
 		"builds": builds, "releases": releases,
-		"revivals": revivals, "parked": _parked.size()}
+		"revivals": revivals, "parked": _parked.size(), "parkLimit": park_limit}
 
 ## Hands the gate pass's build candidates over, nearest first. `pairs` holds
 ## `[distance, id]` arrays.
@@ -341,10 +362,17 @@ static func identity_key(dto: Dictionary) -> String:
 		str(dto.get("name", "")), str(dto.get("guild_tag", "")),
 		int(dto.get("name_colour", 0))]
 
-## Keeps a removed body for `PARK_MSEC`. False when parking is off or full;
-## the caller frees the node then, as it always did.
+## The park pool's size for `memory_class` (memory_budgets.gd): 16 bodies on a
+## small machine, PARK_LIMIT on medium and large ones (and for a class the
+## table does not know, which reads medium's).
+static func park_limit_for(memory_class: String) -> int:
+	var limit: Variant = MemoryBudgets.value_for(memory_class, MemoryBudgets.CROWD_PARK_LIMIT)
+	return maxi(0, int(limit)) if limit is int or limit is float else PARK_LIMIT
+
+## Keeps a removed body for `PARK_MSEC`. False when parking is off or full
+## (`park_limit`); the caller frees the node then, as it always did.
 func park_node(id: int, node: Node3D, key: String, now: int) -> bool:
-	if not park or _parked.size() >= PARK_LIMIT or _parked.has(id):
+	if not park or _parked.size() >= park_limit or _parked.has(id):
 		return false
 	node.visible = false
 	node.process_mode = Node.PROCESS_MODE_DISABLED
@@ -371,9 +399,12 @@ func take_parked(id: int, key: String) -> Node3D:
 	revivals += 1
 	return node as Node3D
 
-func expire_parked(now: int) -> void:
+## Frees the parked bodies whose `PARK_MSEC` is up at `now`; how many left
+## the pool.
+func expire_parked(now: int) -> int:
 	if _parked.is_empty():
-		return
+		return 0
+	var expired := 0
 	for id: Variant in _parked.keys():
 		var entry: Dictionary = _parked[id]
 		if now < int(entry.get("until", 0)):
@@ -382,6 +413,18 @@ func expire_parked(now: int) -> void:
 		if is_instance_valid(node):
 			(node as Node).queue_free()
 		_parked.erase(id)
+		expired += 1
+	return expired
+
+## `expire_parked`, at most once every PARK_EXPIRY_PERIOD_MSEC: main.gd's gate
+## pass calls it every frame, so a parked body is freed at most that much
+## after its time is up whether or not the actor list changes. `now` is
+## Time.get_ticks_msec(), the clock `park_node` was given.
+func expire_parked_due(now: int) -> int:
+	if now < _park_expiry_at:
+		return 0
+	_park_expiry_at = now + PARK_EXPIRY_PERIOD_MSEC
+	return expire_parked(now)
 
 func clear_parked() -> void:
 	for entry: Dictionary in _parked.values():
@@ -389,6 +432,7 @@ func clear_parked() -> void:
 		if is_instance_valid(node):
 			(node as Node).queue_free()
 	_parked.clear()
+	_park_expiry_at = 0
 
 func parked_count() -> int:
 	return _parked.size()
