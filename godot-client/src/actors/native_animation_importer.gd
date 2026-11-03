@@ -10,6 +10,7 @@ const CreaturePayload := preload("res://src/actors/creature_payload.gd")
 const ArchivedModelPolicy := preload("res://src/actors/archived_model_policy.gd")
 const PreparedContent := preload("res://src/world/prepared_content.gd")
 const PreparedLifecycle := preload("res://src/world/prepared_scene_lifecycle.gd")
+const ResourceBytes := preload("res://src/runtime/resource_bytes.gd")
 ## Retargets a native glTF animation library onto an actor's skeleton.
 ##
 ## The shared universal library ships 162 clips built from roughly 226 000
@@ -40,6 +41,17 @@ static var _libraries: Dictionary = {}
 ## had the chance - and every rig reads from it.
 static var _sources: Dictionary = {}
 static var _prewarming: Dictionary = {}
+## Byte ledger (memory census): source path -> {"bytes", "mesh_bytes",
+## "texture_bytes", "animation_bytes", "shared"} of the scene `_sources` keeps,
+## measured once when it is published (ResourceBytes.node_resources; on the
+## prewarm worker when that parsed it). A scene shared with GlbSceneCache
+## (`_cached_runtime_instance`) counts its animations only: its meshes and
+## textures are that cache's. A library's own bytes travel in its entry
+## ("bytes", measured where `_build` ran).
+static var _source_bytes: Dictionary = {}
+## The prewarm worker's measurement, carried on the parsed scene until
+## `_source_scene` adopts it.
+const SOURCE_BYTES_META := &"native_animation_source_bytes"
 
 static func import_library(owner: Node, source_path: String,
 		target_skeleton: Skeleton3D, bone_aliases := {},
@@ -119,6 +131,7 @@ static func clear() -> void:
 		if is_instance_valid(scene_value):
 			(scene_value as Node).free()
 	_sources.clear()
+	_source_bytes.clear()
 
 static func _file_key(path: String) -> String:
 	var value := ProjectSettings.globalize_path(path) if path.begins_with("res://") else path
@@ -146,6 +159,7 @@ static func release_sources(paths: PackedStringArray) -> bool:
 		var node: Variant = _sources[source]
 		if is_instance_valid(node): (node as Node).free()
 		_sources.erase(source)
+		_source_bytes.erase(source)
 	for key: String in _libraries.keys():
 		if wanted.has(_file_key(key.get_slice("|", 0))): _libraries.erase(key)
 	return not pending
@@ -177,10 +191,19 @@ static func prewarm(source_path: String) -> bool:
 	if _sources.has(source_path) or _prewarming.has(source_path):
 		return true
 	var thread := Thread.new()
-	if thread.start(_parse_library.bind(source_path)) != OK:
+	if thread.start(_prewarm_parse.bind(source_path)) != OK:
 		return false
 	_prewarming[source_path] = thread
 	return true
+
+## The prewarm worker's job: `_parse_library`, plus the parsed scene's ledger
+## measurement made here rather than on the main thread that adopts it (the
+## shared library's 10,000 tracks take about 2 ms to count).
+static func _prewarm_parse(source_path: String) -> Variant:
+	var parsed: Variant = _parse_library(source_path)
+	if parsed is Node:
+		(parsed as Node).set_meta(SOURCE_BYTES_META, ResourceBytes.node_resources(parsed as Node))
+	return parsed
 
 static func is_prewarming(source_path: String) -> bool:
 	return _prewarming.has(source_path)
@@ -201,15 +224,37 @@ static func _source_scene(source_path: String) -> Node:
 		_prewarming.erase(source_path)
 		var completion: Variant = thread.wait_to_finish()
 		scene = _publish_source(completion)
+	var shared := false
 	if scene == null:
 		scene = _cached_runtime_instance(source_path)
+		shared = scene != null
 	if scene == null:
 		scene = _publish_source(_parse_library(source_path))
 	if scene == null and PreparedContent.selected_mode() == "auto":
 		scene = _publish_source(_parse_library(source_path, false))
 	if scene != null:
 		_sources[source_path] = scene
+		_note_source(source_path, scene, shared)
 	return scene
+
+## Writes the ledger row of a source scene `_sources` now keeps (see
+## `_source_bytes`): the prewarm worker's measurement when there is one.
+static func _note_source(source_path: String, scene: Node, shared: bool) -> void:
+	var measured: Variant = null
+	if scene.has_meta(SOURCE_BYTES_META):
+		measured = scene.get_meta(SOURCE_BYTES_META)
+		scene.remove_meta(SOURCE_BYTES_META)
+	var row: Dictionary = {}
+	if shared:
+		var animation := ResourceBytes.node_animation_bytes(scene)
+		row = {"bytes": animation, "mesh_bytes": 0, "texture_bytes": 0, "animation_bytes": animation}
+	elif measured is Dictionary:
+		row = measured
+	else:
+		row = ResourceBytes.node_resources(scene)
+	_source_bytes[source_path] = {"bytes": int(row.get("bytes", 0)),
+		"mesh_bytes": int(row.get("mesh_bytes", 0)), "texture_bytes": int(row.get("texture_bytes", 0)),
+		"animation_bytes": int(row.get("animation_bytes", 0)), "shared": shared}
 
 ## Whether `packed`, GlbSceneCache's scene for `scene_path`, is the parse
 ## `_parse_library(source_path, false)` would make: the same file, built from it
@@ -272,14 +317,33 @@ static func cached_library_count() -> int:
 
 ## Main-thread plain-data snapshot; does not join prewarm workers or traverse
 ## retained scenes/animations. These are session-lifetime strong caches.
+## "bytes" sum the ledger (ResourceBytes estimates made at publication): the
+## libraries' animations and the kept source scenes' animations, meshes and
+## textures ("bytes_by_kind"; a source shared with GlbSceneCache adds its
+## animations only).
 static func retention_snapshot() -> Dictionary:
 	var removed := 0
+	var library_bytes := 0
 	for entry: Dictionary in _libraries.values():
 		removed += int(entry.get("default_tracks_removed", 0))
+		library_bytes += int(entry.get("bytes", 0))
+	var kinds := {"libraries": library_bytes, "source_animations": 0, "source_meshes": 0,
+		"source_textures": 0}
+	var shared := 0
+	for source: String in _sources:
+		var row: Dictionary = _source_bytes.get(source, {})
+		kinds.source_animations += int(row.get("animation_bytes", 0))
+		kinds.source_meshes += int(row.get("mesh_bytes", 0))
+		kinds.source_textures += int(row.get("texture_bytes", 0))
+		shared += 1 if bool(row.get("shared", false)) else 0
 	return {"strong_library_entries": _libraries.size(),
 		"default_only_shape_tracks_removed": removed,
 		"strong_source_scenes": _sources.size(), "prewarming_sources": _prewarming.size(),
-		"bytes_estimate_available": false, "lifetime": "session"}
+		"bytes_estimate_available": true, "lifetime": "session",
+		"entries": _libraries.size() + _sources.size(),
+		"bytes": library_bytes + int(kinds.source_animations) + int(kinds.source_meshes)
+			+ int(kinds.source_textures),
+		"bytes_by_kind": kinds, "shared_source_scenes": shared}
 
 static func _blend_shape_defaults(owner: Node) -> Dictionary:
 	var defaults := {}
@@ -416,6 +480,9 @@ static func _build(owner: Node, source_path: String, skeleton_path: String,
 		if compact_rest_tracks and not complete_defaults else 0
 	built.clips = library.get_animation_list()
 	built.library = library
+	# The ledger's figure for this entry (memory census), counted on the thread
+	# that built it.
+	built["bytes"] = ResourceBytes.animation_library_bytes(library)
 	if built.clips.is_empty():
 		built.errors.append("no animation tracks matched the target skeleton")
 	return built

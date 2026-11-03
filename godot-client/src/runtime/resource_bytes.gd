@@ -35,6 +35,9 @@ extends RefCounted
 ##   only in the renderer, so they count 0).
 ## - `packed_bytes`: the payload of packed arrays, strings and images held on
 ##   the CPU (sidecars), without allocator or Variant overhead.
+## - Animations (`animation_bytes`, CPU memory): every track's keys at the
+##   engine's own key size, with the slack of a key array grown one insert at
+##   a time, plus a fixed cost per track (see ANIMATION_KEY_BYTES).
 ##
 ## No `class_name`: callers preload it (worker threads and early autoloads do
 ## not wait for the global class cache).
@@ -454,3 +457,106 @@ static func packed_bytes(value: Variant, depth := 0) -> int:
 
 static func _is_packed_array(value: Variant) -> bool:
 	return typeof(value) >= TYPE_PACKED_BYTE_ARRAY and typeof(value) <= TYPE_PACKED_VECTOR4_ARRAY
+
+## Bytes one key of each Animation.TrackType occupies (Godot 4.7: a time, a
+## transition and the value). Position, rotation, scale, blend-shape and value
+## keys were measured with the static memory counter (debug build, 4,096-key
+## tracks: 32, 32, 32, 24 and 40 B); the rest follow the same layout.
+const ANIMATION_KEY_BYTES := {
+	Animation.TYPE_VALUE: 40, Animation.TYPE_POSITION_3D: 32, Animation.TYPE_ROTATION_3D: 32,
+	Animation.TYPE_SCALE_3D: 32, Animation.TYPE_BLEND_SHAPE: 24, Animation.TYPE_METHOD: 48,
+	Animation.TYPE_BEZIER: 40, Animation.TYPE_AUDIO: 32, Animation.TYPE_ANIMATION: 24,
+}
+## A key type not in the table counts as a value key.
+const ANIMATION_DEFAULT_KEY_BYTES := 40
+## Key arrays grow by half again when an insert finds them full, and every
+## parse and Animation.copy_track inserts keys one at a time: on average a
+## track holds 1.23x its keys' bytes (the mean of a 1.5x growth step; measured
+## -12..+21 % per track for 100..4,096 keys).
+const ANIMATION_KEY_SLACK := 1.23
+## What a track costs before its first key: the track record and its path
+## (measured 196-204 B with a short bone path).
+const ANIMATION_TRACK_BYTES := 200
+
+## Estimated CPU bytes of `animation`'s tracks and keys (see the constants
+## above). Reads only key counts and track types: never a key.
+static func animation_bytes(animation: Animation) -> int:
+	if animation == null:
+		return 0
+	var keys := 0.0
+	var tracks := animation.get_track_count()
+	for track: int in tracks:
+		keys += animation.track_get_key_count(track) \
+			* int(ANIMATION_KEY_BYTES.get(animation.track_get_type(track), ANIMATION_DEFAULT_KEY_BYTES))
+	return tracks * ANIMATION_TRACK_BYTES + int(keys * ANIMATION_KEY_SLACK)
+
+## `animation_bytes` over every animation of `library`, each distinct
+## Animation once (`seen`, instance id -> true, shared across calls).
+static func animation_library_bytes(library: AnimationLibrary, seen: Dictionary = {}) -> int:
+	if library == null or not _first_sight(library, seen):
+		return 0
+	var total := 0
+	for name: StringName in library.get_animation_list():
+		var animation := library.get_animation(name)
+		if animation != null and _first_sight(animation, seen):
+			total += animation_bytes(animation)
+	return total
+
+## The animation bytes of every AnimationMixer (AnimationPlayer) under `root`,
+## root included: the libraries a parsed scene keeps. Walks nodes that belong
+## to no tree or to the caller's thread only.
+static func node_animation_bytes(root: Node, seen: Dictionary = {}) -> int:
+	var total := 0
+	for node: Node in _subtree(root):
+		total += _mixer_bytes(node, seen)
+	return total
+
+## What a live node tree holds (a parsed source scene kept by a cache): the
+## meshes of its MeshInstance3D and MultiMeshInstance3D nodes with their
+## materials and the materials' textures (as `scene_resources` counts them),
+## the material overrides of every GeometryInstance3D, and the animation
+## libraries of every AnimationMixer, each distinct object once (`seen`).
+## Counts only, no references: {"bytes", "mesh_bytes", "texture_bytes",
+## "animation_bytes", "meshes", "textures", "skipped_shader_materials"}.
+## Safe on a worker for a tree that belongs to no SceneTree (ShaderMaterial
+## parameters are skipped there, as in `scene_resources`).
+static func node_resources(root: Node, mipmaps := MIPMAPS_UNKNOWN, seen: Dictionary = {}) -> Dictionary:
+	var meshes: Array[Mesh] = []
+	var textures: Array[Texture2D] = []
+	var found := {"bytes": 0, "mesh_bytes": 0, "texture_bytes": 0,
+		"meshes": meshes, "textures": textures, "skipped_shader_materials": 0}
+	var animation := 0
+	for node: Node in _subtree(root):
+		animation += _mixer_bytes(node, seen)
+		if node is MeshInstance3D:
+			var instance := node as MeshInstance3D
+			_collect(instance.mesh, found, seen, mipmaps, 0)
+			for surface: int in instance.get_surface_override_material_count():
+				_collect(instance.get_surface_override_material(surface), found, seen, mipmaps, 0)
+		elif node is MultiMeshInstance3D:
+			_collect((node as MultiMeshInstance3D).multimesh, found, seen, mipmaps, 0)
+		if node is GeometryInstance3D:
+			_collect((node as GeometryInstance3D).material_override, found, seen, mipmaps, 0)
+			_collect((node as GeometryInstance3D).material_overlay, found, seen, mipmaps, 0)
+	return {"bytes": int(found.mesh_bytes) + int(found.texture_bytes) + animation,
+		"mesh_bytes": int(found.mesh_bytes), "texture_bytes": int(found.texture_bytes),
+		"animation_bytes": animation, "meshes": meshes.size(), "textures": textures.size(),
+		"skipped_shader_materials": int(found.skipped_shader_materials)}
+
+static func _mixer_bytes(node: Node, seen: Dictionary) -> int:
+	if node is not AnimationMixer:
+		return 0
+	var mixer := node as AnimationMixer
+	var total := 0
+	for name: StringName in mixer.get_animation_library_list():
+		total += animation_library_bytes(mixer.get_animation_library(name), seen)
+	return total
+
+## `root` and every node under it.
+static func _subtree(root: Node) -> Array[Node]:
+	var nodes: Array[Node] = []
+	if root == null:
+		return nodes
+	nodes.append(root)
+	nodes.append_array(root.find_children("*", "", true, false))
+	return nodes

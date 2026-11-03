@@ -2,6 +2,7 @@ extends RefCounted
 
 const VramTextures := preload("res://src/world/vram_textures.gd")
 const GraphicsOptions := preload("res://src/world/graphics_options.gd")
+const ResourceBytes := preload("res://src/runtime/resource_bytes.gd")
 
 ## External PNGs are immutable, content-addressed build products. Weak entries
 ## share actual GPU textures across separately imported chunks without keeping
@@ -19,6 +20,12 @@ static var _image_hash_reads := 0
 static var _image_decodes := 0
 static var _image_resource_fallbacks := 0
 static var _image_uploads := 0
+## Byte ledger (memory census): content key -> the published texture's
+## estimated GPU bytes (ResourceBytes.texture_bytes), written when a texture is
+## published and counted while its weak entry is alive. Aliases in
+## `_image_paths` name the same textures and add nothing.
+static var _bytes: Dictionary = {}
+static var _published_bytes := 0
 
 ## Runtime-owned shared maps use the same weak content cache as glTF textures.
 ## Assets are immutable for a running session, just like texture quality.
@@ -71,7 +78,10 @@ static func load_image(path: String) -> ImageTexture:
 	if image == null or image.is_empty():
 		return null
 	_note_image_work(&"upload")
-	return _remember_image_path(path_key, _publish_or_adopt(key, ImageTexture.create_from_image(image)))
+	var uploaded := ImageTexture.create_from_image(image)
+	var mipmaps := ResourceBytes.MIPMAPS_FULL if image.has_mipmaps() else ResourceBytes.MIPMAPS_NONE
+	return _remember_image_path(path_key,
+		_publish_or_adopt(key, uploaded, ResourceBytes.texture_bytes(uploaded, mipmaps)))
 
 
 static func _remember_image_path(path_key: String, texture: ImageTexture) -> ImageTexture:
@@ -104,13 +114,19 @@ static func _published(key: String) -> ImageTexture:
 
 
 ## Publishes `candidate` for `key` unless another sharer got there first, in
-## which case the earlier texture wins and the candidate is dropped.
-static func _publish_or_adopt(key: String, candidate: ImageTexture) -> ImageTexture:
+## which case the earlier texture wins and the candidate is dropped. `bytes` is
+## the candidate's estimate for the ledger (< 0: estimated here, with its mip
+## chain unknown, so counted whole); the caller computes it outside the lock.
+static func _publish_or_adopt(key: String, candidate: ImageTexture, bytes := -1) -> ImageTexture:
+	if bytes < 0:
+		bytes = ResourceBytes.texture_bytes(candidate)
 	_mutex.lock()
 	var reference: WeakRef = _textures.get(key)
 	var shared: ImageTexture = reference.get_ref() as ImageTexture if reference != null else null
 	if shared == null:
 		_textures[key] = weakref(candidate)
+		_bytes[key] = bytes
+		_published_bytes += bytes
 		shared = candidate
 		_publications += 1
 	else:
@@ -120,16 +136,23 @@ static func _publish_or_adopt(key: String, candidate: ImageTexture) -> ImageText
 
 ## Counts weak slots separately from live GPU resources. No readback, file IO,
 ## mutation/pruning, or retained strong references are added by this snapshot.
+## "bytes" are the ledger's estimates for the live entries ("entries"); the
+## textures are shared, so a scene cache that counts the same texture counts
+## it again. "published_bytes" totals every publication of the session.
 static func retention_snapshot() -> Dictionary:
 	_mutex.lock()
 	var live := 0
-	for reference: WeakRef in _textures.values():
+	var live_bytes := 0
+	for key: String in _textures:
+		var reference: WeakRef = _textures[key]
 		if reference != null and reference.get_ref() != null:
 			live += 1
+			live_bytes += int(_bytes.get(key, 0))
 	var result := {"weak_slots": _textures.size(), "live_entries": live,
 		"expired_slots": _textures.size() - live, "lookup_hits": _lookup_hits,
 		"lookup_misses": _lookup_misses, "publications": _publications,
-		"concurrent_adoptions": _adoptions, "bytes_estimate_available": false,
+		"concurrent_adoptions": _adoptions, "bytes_estimate_available": true,
+		"entries": live, "bytes": live_bytes, "published_bytes": _published_bytes,
 		"image_path_slots": _image_paths.size(), "image_load_calls": _image_load_calls,
 		"image_path_hits": _image_path_hits, "image_hash_reads": _image_hash_reads,
 		"image_decodes": _image_decodes, "image_resource_fallbacks": _image_resource_fallbacks,
@@ -191,7 +214,11 @@ static func share(state: GLTFState, resources: Dictionary) -> int:
 				if not image.is_compressed() or image.decompress() == OK:
 					image.generate_mipmaps()
 					current.set_image(image)
-			shared = _publish_or_adopt(key, current)
+			# Prepared images arrive with their chain (see above); an image whose
+			# chain could not be finished counts whole all the same (errs high).
+			shared = _publish_or_adopt(key, current, ResourceBytes.texture_bytes(current,
+				ResourceBytes.MIPMAPS_FULL if done.has(index) or (image != null and image.has_mipmaps())
+				else ResourceBytes.MIPMAPS_UNKNOWN))
 		if shared != current:
 			replacements[current.get_instance_id()] = shared
 			images[index] = shared

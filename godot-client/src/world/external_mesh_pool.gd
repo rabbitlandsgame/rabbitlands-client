@@ -9,6 +9,7 @@ const PreparedContent := preload("res://src/world/prepared_content.gd")
 const PreparedSharing := preload("res://src/world/prepared_material_sharing.gd")
 const GeometrySources := preload("res://src/world/map_geometry_texture_sources.gd")
 const MapMaterialPreparation := preload("res://src/world/map_material_preparation.gd")
+const ResourceBytes := preload("res://src/runtime/resource_bytes.gd")
 
 ## Prototype meshes that map packages name instead of carrying.
 ##
@@ -46,6 +47,12 @@ static var _lookup_hits := 0
 static var _lookup_misses := 0
 static var _publications := 0
 static var _adoptions := 0
+## Byte ledger (memory census): prototype key -> the published mesh's
+## estimated GPU bytes (ResourceBytes.mesh_bytes, its shadow mesh included),
+## written at publication and counted while the weak entry is alive. Only the
+## geometry: a prototype's images are ExternalTexturePool's.
+static var _bytes: Dictionary = {}
+static var _published_bytes := 0
 
 ## Statistics for the load report, keyed as `load_phases` counters.
 static var last_parsed := 0
@@ -161,11 +168,15 @@ static func _published(key: String) -> Mesh:
 ## Publishes `candidate` for `key` unless another sharer got there first, in
 ## which case the earlier mesh wins and the candidate is dropped.
 static func _publish_or_adopt(key: String, candidate: Mesh) -> Mesh:
+	# Measured outside the lock: CPU-side surface records only, no read-back.
+	var bytes := mesh_bytes(candidate)
 	_mutex.lock()
 	var reference: WeakRef = _meshes.get(key)
 	var shared: Mesh = reference.get_ref() as Mesh if reference != null else null
 	if shared == null:
 		_meshes[key] = weakref(candidate)
+		_bytes[key] = bytes
+		_published_bytes += bytes
 		shared = candidate
 		_publications += 1
 	else:
@@ -179,17 +190,34 @@ static func _record_operation(operation: StringName, started: int) -> void:
 	ResourceDiagnostics.record_elapsed(_resource_timings, operation, elapsed, true)
 	_mutex.unlock()
 
+## The ledger's figure for a prototype mesh: its surfaces and blend shapes
+## and those of a distinct shadow mesh (ResourceBytes.mesh_bytes; LOD index
+## buffers of an ArrayMesh are not exposed, so not counted).
+static func mesh_bytes(mesh: Mesh) -> int:
+	var bytes := ResourceBytes.mesh_bytes(mesh)
+	if mesh is ArrayMesh:
+		var shadow := (mesh as ArrayMesh).shadow_mesh
+		if shadow != null and shadow != mesh:
+			bytes += ResourceBytes.mesh_bytes(shadow)
+	return bytes
+
+## "bytes" are the ledger's estimates for the live entries ("entries");
+## "published_bytes" totals every publication of the session.
 static func retention_snapshot() -> Dictionary:
 	_mutex.lock()
 	var live := 0
-	for reference: WeakRef in _meshes.values():
+	var live_bytes := 0
+	for key: String in _meshes:
+		var reference: WeakRef = _meshes[key]
 		if reference != null and reference.get_ref() != null:
 			live += 1
+			live_bytes += int(_bytes.get(key, 0))
 	var result := {"weak_slots": _meshes.size(), "live_entries": live,
 		"expired_slots": _meshes.size() - live, "index_directories": _indexes.size(),
 		"lookup_hits": _lookup_hits, "lookup_misses": _lookup_misses,
 		"publications": _publications, "concurrent_adoptions": _adoptions,
-		"bytes_estimate_available": false,
+		"bytes_estimate_available": true, "entries": live, "bytes": live_bytes,
+		"published_bytes": _published_bytes,
 		"timings": ResourceDiagnostics.snapshot(_resource_timings)}
 	_mutex.unlock()
 	return result
