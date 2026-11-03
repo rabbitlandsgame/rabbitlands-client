@@ -73,7 +73,13 @@ What goes in, and why it is more than an export:
       hair and beard GLBs (native/rl_heads) loose only, and its maps
       (native/rl_head_textures, LOADED_IMAGE_FOLDERS) in the PCK only, each
       imported VRAM-compressed with mipmaps by the settings committed beside
-      it. Its interactive lab (prototypes/rl_heads) is not exported.
+      it. Its interactive lab (prototypes/rl_heads) is not exported. The
+      hair and beard GLBs lose their embedded copies of those maps in the
+      build tree before the import (AT-C0, strip_rl_head_stage and
+      tools/strip_rl_head_images.py; check_rl_head_strip_pack after the
+      export): the RL contract's shader materials sample the PCK maps, so
+      the copies were only decoded and uploaded unused. Receipt:
+      logs/rl-head-strip.json.
   eloria-assets/maps, eloria-assets/concepts
       "res://../eloria-assets/..." resolves beside app/. Every map package (a
       folder holding world.json) ships without its authoring snapshots,
@@ -155,6 +161,7 @@ import creature_compression
 import full_optimization_package
 import release_world_preparation
 import map_background_package
+import strip_rl_head_images
 from road_ground_dependencies import dependencies as road_dependencies, RoadGroundDependencyError
 from pathlib import Path, PurePosixPath
 from urllib.parse import unquote
@@ -2857,6 +2864,60 @@ def stage_loose_client_files(build_dir: Path, app_dir: Path, platform: str = "")
     return duplicates
 
 
+def strip_rl_head_stage(build_dir: Path, logs: Path, platform: str = "") -> dict:
+    """Strip the build tree's RL hair and beard GLBs' embedded copies of the RL head maps (AT-C0).
+
+    The first package-time actor transform, on the disposable build tree
+    before the import (wave-2 schedule 1.1 #6: RL image strip, attribute
+    quantisation, import, actor geometry cook, actor VRAM sidecars, export),
+    so the import, every cook and stage_loose_client_files see the stripped
+    bytes. The maps compared against are the RL head maps this package ships
+    in the PCK (actor_shipping's folder_textures); a removed copy's map must
+    have a committed import naming its products, and check_rl_head_strip_pack
+    proves them in the exported PCK. Files are replaced by new ones, so a
+    hard-linked source never writes through. The receipt is
+    logs/rl-head-strip.json.
+    """
+    folder = f"godot-client/{strip_rl_head_images.MAP_DIR}/"
+    maps: dict[str, list[str]] = {}
+    for relative in sorted(actor_shipping(build_dir)["folder_textures"]):
+        if relative.startswith(folder) and "/" not in relative[len(folder):]:
+            digest = hashlib.sha256((build_dir / relative).read_bytes()).hexdigest()
+            maps.setdefault(digest, []).append(PurePosixPath(relative).name)
+    project = build_dir / "godot-client"
+
+    def will_pack(local: str) -> bool:  # every map compared against is one the PCK ships
+        sidecar = project / (local + ".import")
+        return sidecar.is_file() and bool(exported_import_products(sidecar, platform))
+
+    try:
+        return strip_rl_head_images.strip_stage(
+            project, build_dir, receipt=logs / "rl-head-strip.json", pck_has=will_pack, maps=maps,
+            budget=STORAGE.check if STORAGE else None, log=log)
+    except strip_rl_head_images.StripError as error:
+        raise PackageError(f"RL head image strip: {error}") from error
+
+
+def check_rl_head_strip_pack(build_dir: Path, app_dir: Path, logs: Path, platform: str = "") -> int:
+    """Every map whose embedded copy strip_rl_head_stage removed is in the exported PCK
+    as its .import remap and every product it names (AT-C0); returns how many."""
+    receipt = json.loads((logs / "rl-head-strip.json").read_text(encoding="utf-8"))
+    named = sorted({f"{strip_rl_head_images.MAP_DIR}/{name}" for row in receipt["files"]
+                    for image in row["removed"] for name in image["named"]})
+    packed = pck_paths(app_dir / "RabbitLands.pck")
+    project = build_dir / "godot-client"
+    missing = []
+    for local in named:
+        sidecar = project / (local + ".import")
+        products = exported_import_products(sidecar, platform) if sidecar.is_file() else []
+        if local + ".import" not in packed or not products or any(p not in packed for p in products):
+            missing.append(local)
+    if missing:
+        raise PackageError(f"{len(missing)} RL head maps lost their embedded copies but are not imported in the "
+                           "PCK:\n  " + "\n  ".join(missing[:40]))
+    return len(named)
+
+
 def pck_paths(pck: Path) -> set[str]:
     """Every path in a Godot 4 PCK's directory (formats 2 to 4), without res://."""
     with open(pck, "rb") as handle:
@@ -4890,6 +4951,9 @@ def _main(argv=None, storage=None) -> int:
         asset_cache = getattr(storage, "asset_cache", None)
         if asset_cache:
             asset_cache.restore_imports(project)
+        # Package-time actor transforms run on the build tree before the import,
+        # in the wave-2 order (schedule 1.1 #6): the RL image strip first.
+        strip_rl_head_stage(build_dir, logs, options.platform)
         import_project(godot, project, logs)
         if optimization:
             optimization.check_native()
@@ -4915,6 +4979,7 @@ def _main(argv=None, storage=None) -> int:
         app_dir = stage / "app"
         export_project(godot, project, app_dir, logs, platform)
         stage_loose_client_files(build_dir, app_dir, options.platform)
+        check_rl_head_strip_pack(build_dir, app_dir, logs, options.platform)
         if options.client_runtime:
             client_runtime_package.stage_payload(options.client_runtime.resolve(), build_dir, app_dir, options.platform)
         (app_dir / "client-release.json").write_text(json.dumps(metadata), encoding="utf-8")
