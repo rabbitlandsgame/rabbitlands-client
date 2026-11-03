@@ -170,6 +170,41 @@ median of about 1 ms (mean 11-12 ms). Each finished actor references up to
 about 5 MB of derived mesh arrays; refinement results are shared through
 bounded caches, so the memory saved is smaller.
 
+**Remote motion on the frame clock (Low).** A moving remote actor's
+presentation step (`ReplicatedActor3D.advance_presentation`: the interpolation
+along its step, the turn, the facing and surface eases, the coast to idle and
+the settle check) ran on every 60 Hz physics tick, so under the 30 FPS cap of
+the Performance preset it ran twice per drawn frame. At Low
+(`ActorRenderQuality.frame_driven_motion`; Main sets
+`ReplicatedActor3D.set_frame_driven` in `_apply_graphics_quality`) an awake
+remote actor leaves physics and joins the frame clock instead:
+`Main._process` first calls `ReplicatedActor3D.advance_frame_driven`, which
+steps each of them exactly once with the real frame delta, capped at 0.25 s.
+Everything later in the frame - the local follow, the map marks, the
+animation gate's frustum and distance ranks - reads them where they now stand,
+as it did after the physics steps. Physics stays at 60 Hz
+(`physics_ticks_per_second` is not changed) and the player's own actor stays
+on it, so input and camera feel are unchanged; so do the actors marked local
+(creation preview, appearance editor, leaderboard cards, the campaign replay
+figure) and actors nobody gave a render role (portraits, previews,
+showcases, which freeze their actor with `set_physics_process(false)`). Every
+presentation toggle (settle, death, revival, charge leap, cinematic, a
+replacement body adopting its predecessor's step) goes through
+`_set_presenting`, so a body settles, dies and wakes the same way on either
+clock; a parked body (processing disabled) keeps its place in the set but is
+not stepped, a body leaving the tree leaves it and rejoins on re-entry, and a
+freed or queued one is dropped. Switching to Medium or High puts every awake
+frame-clock actor back on physics at once; switching to Low moves the world's
+actors as the quality pass gives them their role again, and any other awake
+remote actor on its next physics tick, before that tick steps it. A body the
+native remote presentation service owns is stepped by the service, never by
+the frame clock. The same paced walk arrives and settles within one frame of
+the physics-driven one at a steady 30 FPS and at an irregular 25-45 ms frame
+stream (`tests/test_frame_driven_motion.gd`), and positions follow the real
+frame time instead of 16.7 ms quanta, so walking reads smoother below the cap.
+Medium and High are unchanged. The crowd benchmark's per-actor census counts
+`framePresenting` and `physicsPresenting` bodies (`presentation_census`).
+
 **Live effects.** `live_effect_budget.gd` bounds the short-lived combat visuals
 alive at once: spells, impacts, bursts and portal flashes (`spell`, 48), arrows
 and bolts (`missile`, 48), melee technique visuals (`technique`, 32) and floating
@@ -345,3 +380,11 @@ covers the unfinished remote Human at Low: no refinement or sculpt result on
 any mesh, the neutral face's beard, finishing on a switch up or to local,
 giving the derived meshes back on the way down, wardrobe and appearance changes
 at Low, and Medium and High builds finished as before.
+`tests/test_frame_driven_motion.gd` covers remote motion on the frame clock:
+off by default, the paced walk's arrival and settle against physics (walk and
+run, arrival-time and server-time pacing, steady and irregular frames) with
+one step per frame, the roles that keep physics, settle, death and revival,
+charge leap, cinematic, parking, deletion and reparenting, the switch both
+ways and the delta cap; `tests/test_low_end_graphics.gd` checks that Main's
+quality switch turns it on at Low and off at High, that `_process` steps a
+frame-clock actor once, and that Main leaving the tree turns it off.

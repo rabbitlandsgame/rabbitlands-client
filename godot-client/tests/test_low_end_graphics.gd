@@ -8,6 +8,13 @@ const Launch := preload("res://src/updates/launch_options.gd")
 const Budget := preload("res://src/world/live_effect_budget.gd")
 var failures := 0
 
+## Counts presentation steps (Low actor tier, frame-driven remote motion).
+class CountingActor extends ReplicatedActor3D:
+	var steps := 0
+	func advance_presentation(delta: float) -> void:
+		steps += 1
+		super.advance_presentation(delta)
+
 func _init() -> void:
 	_run.call_deferred()
 
@@ -40,6 +47,7 @@ func _run() -> void:
 	main.set_process(false)
 	var layer: Weather3D = main.get("weather_layer")
 	var window: Control = main.get("settings_window")
+	_check_frame_clock(main)
 	main.call("_on_client_setting_changed", "Graphics", "quality", LookProfile.Quality.HIGH)
 	var rain: Array = [1, 100, 70, 20, 20, 10, 0]
 	layer.set_state(rain, rain, 0.0, true, true)
@@ -128,8 +136,11 @@ func _run() -> void:
 		var capture := OS.get_environment("RABBITLANDS_GRAPHICS_CAPTURE")
 		if not capture.is_empty():
 			expect(root.get_texture().get_image().save_png(capture) == OK, "graphics UI capture saved")
+	expect(ReplicatedActor3D.frame_driven(), "the Performance preset (Low) steps remote motion per frame")
 	main.queue_free()
 	await process_frame
+	expect(not ReplicatedActor3D.frame_driven(),
+		"Main leaving the tree turns the frame clock off (nothing else steps it)")
 	Engine.max_fps = 0
 	if saved_config != null:
 		var file := FileAccess.open(Options.SETTINGS_PATH, FileAccess.WRITE)
@@ -141,6 +152,30 @@ func _run() -> void:
 	OS.set_environment(LookProfile.ENABLE_VARIABLE, saved_look)
 	print("low end graphics tests: ", "PASS" if failures == 0 else "FAIL (%d)" % failures)
 	quit(0 if failures == 0 else 1)
+
+## Low actor tier (LAT-L7): Low moves awake remote actors to the frame clock,
+## Main's _process steps each once per frame, and High puts them back on
+## physics. The login view is up here, so _process does what it did on the
+## first frame.
+func _check_frame_clock(main: Control) -> void:
+	main.call("_on_client_setting_changed", "Graphics", "quality", LookProfile.Quality.LOW)
+	expect(ReplicatedActor3D.frame_driven(), "Low steps remote motion once per drawn frame")
+	var actor := CountingActor.new()
+	root.add_child(actor)
+	actor.apply_render_quality(LookProfile.Quality.LOW, false)
+	actor.apply_server_state({"x": 0, "y": 0, "rotation": 0, "command": 7},
+		CoordinateAdapter.new({"metresPerTile": 1.0}), true)
+	expect(actor.presents_on_frame_clock() and not actor.is_physics_processing(),
+		"a woken remote actor presents on the frame clock at Low")
+	main.call("_process", 1.0 / 30.0)
+	expect(actor.steps == 1, "Main's _process steps a frame-clock actor once per frame")
+	actor.apply_server_state({"x": 1, "y": 0, "rotation": 0, "command": 22},
+		CoordinateAdapter.new({"metresPerTile": 1.0}))
+	main.call("_on_client_setting_changed", "Graphics", "quality", LookProfile.Quality.HIGH)
+	expect(not ReplicatedActor3D.frame_driven() and actor.is_physics_processing()
+		and not actor.presents_on_frame_clock() and ReplicatedActor3D.frame_driven_count() == 0,
+		"High puts awake remote actors back on physics")
+	actor.free()
 
 func _check_images() -> void:
 	var source := Image.create(64, 64, false, Image.FORMAT_RGBA8)

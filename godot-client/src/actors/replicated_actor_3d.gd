@@ -444,6 +444,26 @@ var _health_shown := false
 var _drawn := true
 var _hidden_by_range: Array[Node3D] = []
 var _settled := false
+## Low actor tier (LAT-L7, owner decision 2026-11-02: "a physics or
+## interpolation tick consistent with the 30 FPS cap"). On the physics clock a
+## moving remote actor was stepped at 60 Hz, so under a 30 FPS cap it ran its
+## presentation step (`advance_presentation`) twice per drawn frame. With the
+## frame clock on (`set_frame_driven`, Main sets it from
+## `ActorRenderQuality.frame_driven_motion`: Low only) an awake remote actor
+## instead joins `_frame_awake` and `Main._process` steps it exactly once per
+## drawn frame with the real frame delta (`advance_frame_driven`, capped at
+## `FRAME_DRIVEN_MAX_DELTA`). The player's own actor and every actor not given
+## a remote render role stay on physics (`_frame_clock_role`). Physics ticks
+## stay at 60 Hz; nothing else moves to the frame clock. Every presentation
+## toggle goes through `_set_presenting`, so a body settles, dies, revives,
+## leaps and parks the same way on either clock.
+const FRAME_DRIVEN_MAX_DELTA := 0.25
+static var _frame_driven := false
+## Instance id -> actor, for the awake frame-clock actors inside the tree.
+static var _frame_awake: Dictionary = {}
+## This actor presents on the frame clock: it is in `_frame_awake` while it is
+## inside the tree, and goes back in when it re-enters it (a reparent).
+var _frame_presenting := false
 var _silhouette: OccludedSilhouette
 ## Which of the animation gate's tiers this actor is in, and whether a cape
 ## is worn: the cloth solver runs off the skeleton on its own clock, so a
@@ -2018,6 +2038,9 @@ func apply_render_quality(level: int, is_local_actor: bool = false) -> void:
 	_refresh_cape_cloth_activity(true)
 	if is_instance_valid(_mount_visual):
 		_mount_visual.call("apply_render_quality", _render_quality, _render_quality_local_actor)
+	# The role decides the clock (LAT-L7): a body Main has just made remote, or
+	# the player's own, moves to its clock now if it is presenting.
+	_rehome_presentation()
 
 func render_quality() -> int:
 	return _render_quality
@@ -5310,7 +5333,7 @@ func begin_charge_leap(route: PackedVector3Array, seconds: float) -> void:
 	if animation_player != null and str(animation_player.current_animation) == "Technique_Charge_Leap":
 		animation_player.speed_scale = animation_player.current_animation_length / _charge_leap.duration
 	_wake()
-	set_physics_process(true)
+	_set_presenting(true)
 
 func end_charge_leap() -> void:
 	if _charge_leap == null: return
@@ -5942,6 +5965,21 @@ static func scheduled_arrival(now: float, last_due: float, cadence: float,
 	return maxf(earliest, last_due + cadence / maxf(catch_up, 1.0))
 
 func _physics_process(delta: float) -> void:
+	# Physics came back on for an actor that presents on the frame clock (the
+	# native remote service handing a body back, which writes the physics flag
+	# itself, or the clock turned on while it was awake): it moves to the frame
+	# clock and Main steps it once this frame, with the frame's delta, instead
+	# of this tick's.
+	if _frame_driven and _frame_clock_role():
+		_set_presenting(true)
+		return
+	advance_presentation(delta)
+
+## One presentation step of `delta` seconds: the interpolation along the
+## current step, the turn, the facing and surface eases, the coast to idle and
+## the settle check. Physics calls it every tick (`_physics_process`); on the
+## frame clock `advance_frame_driven` calls it once per drawn frame.
+func advance_presentation(delta: float) -> void:
 	if not _remote_pending_transfer.is_empty():
 		RemotePresentationService.restore_pending(self)
 		if is_queued_for_deletion() or not _remote_pending_transfer.is_empty(): return
@@ -5953,7 +5991,7 @@ func _physics_process(delta: float) -> void:
 	if current_action == &"death":
 		global_position = server_target
 		_level_selection_ring()
-		set_physics_process(false)
+		_set_presenting(false)
 		return
 	if _cinematic_active:
 		if _cinematic_injury != null: _cinematic_injury.advance(delta)
@@ -6033,7 +6071,7 @@ func _settle_if_idle() -> void:
 	global_position = server_target
 	rotation.y = _target_yaw
 	_settled = true
-	set_physics_process(false)
+	_set_presenting(false)
 
 ## A per-view greeting temporarily owns the rendered pose. Network targets
 ## continue updating normally and are restored when the greeting ends.
@@ -6097,10 +6135,124 @@ func _wake() -> void:
 		if remote.owns(self): return
 	# Death can pause physics before a moving body settles. Revival must
 	# restart that body too, rather than waiting for a distance-correction snap.
-	if not _settled and is_physics_processing():
+	if not _settled and is_presenting():
 		return
 	_settled = false
-	set_physics_process(true)
+	_set_presenting(true)
+
+## Whether this actor's presentation is being stepped, on either clock.
+func is_presenting() -> bool:
+	return _frame_presenting or is_physics_processing()
+
+## Whether this actor presents on the frame clock (LAT-L7).
+func presents_on_frame_clock() -> bool:
+	return _frame_presenting
+
+## Whether this actor takes the frame clock when it is on: a body Main gave a
+## remote render role (`apply_render_quality(level, false)`). The player's own
+## and every actor marked local (the creation preview, the appearance editor,
+## leaderboard cards, the campaign replay figure) keep physics, so input and
+## camera feel are unchanged, as do actors nobody gave a role: portraits,
+## previews and showcases freeze theirs with `set_physics_process(false)`,
+## which a frame-clock actor would not hear.
+func _frame_clock_role() -> bool:
+	return _render_quality_selected and not _render_quality_local_actor
+
+## Starts or stops this actor's presentation steps: on the frame clock when it
+## is on and this actor takes it, otherwise on physics exactly as before.
+func _set_presenting(on: bool) -> void:
+	if on and _frame_driven and _frame_clock_role():
+		_frame_presenting = true
+		if is_inside_tree():
+			_frame_awake[get_instance_id()] = self
+		set_physics_process(false)
+		return
+	if _frame_presenting:
+		_frame_presenting = false
+		_frame_awake.erase(get_instance_id())
+	set_physics_process(on)
+
+## Puts a presenting actor on the clock its role and the switch now ask for.
+## A body the native remote service owns is stepped by the service: it only
+## leaves the frame set.
+func _rehome_presentation() -> void:
+	if _owned_by_remote():
+		_leave_frame_clock()
+	elif is_presenting():
+		_set_presenting(true)
+
+func _leave_frame_clock() -> void:
+	_frame_presenting = false
+	_frame_awake.erase(get_instance_id())
+
+func _owned_by_remote() -> bool:
+	if _remote_generation <= 0:
+		return false
+	var remote = RemotePresentationService.current()
+	return remote != null and remote.owns(self)
+
+## Turns the frame clock on or off for every remote actor (Main, from the
+## graphics quality). Off: every frame-clock actor goes back to physics at
+## once. On: a world actor moves when Main's quality pass gives it its role
+## again (`apply_render_quality`), and any other awake remote actor on its
+## next physics tick (`_physics_process`), before that tick steps it.
+static func set_frame_driven(on: bool) -> void:
+	if _frame_driven == on:
+		return
+	_frame_driven = on
+	if on:
+		return
+	for id: int in _frame_awake.keys():
+		var actor: Variant = _frame_awake.get(id)
+		_frame_awake.erase(id)
+		if is_instance_valid(actor):
+			(actor as ReplicatedActor3D)._rehome_presentation()
+
+static func frame_driven() -> bool:
+	return _frame_driven
+
+## How many actors the frame clock is stepping (awake, inside the tree).
+static func frame_driven_count() -> int:
+	return _frame_awake.size()
+
+## One presentation step for every awake frame-clock actor, with this drawn
+## frame's delta capped at FRAME_DRIVEN_MAX_DELTA (a hitch is not crossed in
+## one leap; physics bounds its catch-up the same way). Main calls it once per
+## frame, first in `_process`, so everything after it reads where remote
+## actors stand this frame. Like physics, it skips a body whose processing is
+## disabled (a parked one) and keeps it for when it is enabled again; a body
+## queued for deletion or gone leaves. Actors woken during the pass step from
+## the next frame. Returns how many actors were stepped.
+static func advance_frame_driven(delta: float) -> int:
+	if _frame_awake.is_empty():
+		return 0
+	var step := clampf(delta, 0.0, FRAME_DRIVEN_MAX_DELTA)
+	var stepped := 0
+	for id: int in _frame_awake.keys():
+		if not _frame_awake.has(id):
+			continue
+		var value: Variant = _frame_awake[id]
+		if not is_instance_valid(value):
+			_frame_awake.erase(id)
+			continue
+		var actor := value as ReplicatedActor3D
+		if actor.is_queued_for_deletion() or not actor.is_inside_tree():
+			_frame_awake.erase(id)
+			continue
+		if not actor.can_process():
+			continue
+		if actor._remote_generation > 0 and actor._owned_by_remote():
+			actor._leave_frame_clock()
+			continue
+		actor.advance_presentation(step)
+		stepped += 1
+	return stepped
+
+## Counters for the crowd benchmark's per-actor census (summed per scope):
+## which clock steps this actor's presentation.
+func presentation_census() -> Dictionary:
+	return {"framePresenting": _frame_presenting,
+		"physicsPresenting": is_physics_processing()}
 
 ## How far this actor reaches from its foot point, for the gate's frustum
 ## test: the body as drawn plus the banner over it, on the widest side of
@@ -6381,7 +6533,7 @@ func adopt_presentation_from(previous: ReplicatedActor3D) -> void:
 	_apply_surface_orientation()
 	_snap_pending = false
 	_settled = false
-	set_physics_process(true)
+	_set_presenting(true)
 	if (_segment_duration > 0.0 or _movement_coast_remaining > 0.0) \
 			and current_action in [&"idle", &"combat_idle", &"turn"]:
 		play_action(_paced_travel_action(&"run" if _previous_step_gait & 1 else &"walk"))
@@ -6589,6 +6741,10 @@ func set_spell_variant(effect: int) -> void:
 
 func _enter_tree() -> void:
 	call_deferred("_restore_remote_pending")
+	# A frame-clock actor that left the tree awake (a reparent) is stepped
+	# again, on whichever clock is in force now, as physics would resume it.
+	if _frame_presenting:
+		_set_presenting(true)
 
 func _restore_remote_pending() -> void:
 	RemotePresentationService.restore_pending(self)
@@ -6600,3 +6756,5 @@ func _exit_tree() -> void:
 		HIGH_PORTRAIT.release(_native_model)
 	var remote = RemotePresentationService.current()
 	if remote != null: remote.release_departing(self)
+	# Outside the tree nothing steps it; `_frame_presenting` remembers it was awake.
+	_frame_awake.erase(get_instance_id())

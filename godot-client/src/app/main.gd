@@ -2171,6 +2171,7 @@ func _bind_shared_world() -> void:
 	print_debug("world_binding stage=shared world=", gameplay_world)
 
 func _process(delta: float) -> void:
+	_advance_remote_motion(delta)
 	if _browser_source_retirement != null: _browser_source_retirement.call("advance")
 	if _browser_actor_assets != null:
 		for actor_id: int in _browser_actor_assets.call("poll"):
@@ -2282,6 +2283,15 @@ func _process(delta: float) -> void:
 				_sync_session_experience()
 		_sync_hud_button_states()
 	_flush_hud_settings_save()
+
+## Low actor tier (LAT-L7): remote actors on the frame clock take their one
+## presentation step of the frame here, first, so the local follow, the map
+## marks, the animation gate's frustum and distance ranks and everything else
+## this frame reads them where they now stand, as they did after the physics
+## steps. With the frame clock off (Medium, High) nothing is in it and this
+## returns at once; actors step on physics as before.
+func _advance_remote_motion(delta: float) -> void:
+	ReplicatedActor3D.advance_frame_driven(delta)
 
 ## Whether weather falls on the current map: a registered map that is not an
 ## interior or a map's insides. The registry is resolved again only when the
@@ -4693,6 +4703,8 @@ func _exit_tree() -> void:
 	RustSpellFlights.clear_for(world_root)
 	if is_instance_valid(remote_presentation): remote_presentation.close()
 	client_runtime.close()
+	# Nothing steps the frame clock without this node's _process.
+	ReplicatedActor3D.set_frame_driven(false)
 	mouse_cursors.release()
 	occluder_fade.reset()
 	ReplicatedActor3D.clear_wardrobe_texture_cache()
@@ -15243,6 +15255,8 @@ func _apply_graphics_quality() -> void:
 	if weather_layer != null:
 		weather_layer.set_effects_enabled(_effects_enabled)
 	ReplicatedActor3D.prewarm_rl_heads(LookProfile.quality())
+	# Before the actors' pass below, which puts each awake one on its clock.
+	ReplicatedActor3D.set_frame_driven(ActorRenderQuality.frame_driven_motion(LookProfile.quality()))
 	_apply_actor_render_quality()
 	_apply_ambient_render_quality()
 	_apply_day_night()
