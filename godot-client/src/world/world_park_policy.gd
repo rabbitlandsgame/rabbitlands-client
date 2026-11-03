@@ -20,6 +20,28 @@ extends RefCounted
 ##   pressure (the kept worlds' estimates over BUDGET_BYTES). One let go while
 ##   the player stood by is built again once they come within
 ##   PRELOAD_REARM_TILES of one of its doors (or after they have walked away).
+##
+## Amendment (2026-11, owner decision 10: memory budgets per machine class).
+## The budget is the machine's memory class's (memory_budgets.gd,
+## `budget_for`): 1,792 MiB on medium and large machines, as before, and
+## 384 MiB on small ones (an integrated, software or virtual GPU, or about
+## 8 GB of memory). On a small machine nothing is built ahead of the player
+## (`preload_allowed`): not near a door, not before anticipated (scripted)
+## travel. The 2026-10-27 rules above otherwise stand, with one rule made
+## explicit for every class: a world is parked only when its estimate fits
+## what the other kept worlds leave of the budget (`remaining`), never by
+## evicting them. Travel already evicts every other parked world first, so on
+## medium and large machines nothing changes. On a small machine:
+## - the Landfall underground (~1.58 GiB estimated on source fallback) is
+##   never parked: going back in after leaving it is a cold load;
+## - its parent territory (its own resident estimate, within the 256 MiB
+##   stream budget) is still parked while the player is in an interior, and
+##   kept for as long as they stay inside;
+## - the Town (~120 MiB) is parked after a visit, kept while the player stays
+##   in its area as above, but never built on approach: a first entry is a
+##   cold load.
+
+const MemoryBudgets := preload("res://src/runtime/memory_budgets.gd")
 
 ## How long a parked world is kept while the player stays away from it (a
 ## parked interior's clock only runs while the player is outside its area,
@@ -40,10 +62,12 @@ const PRELOAD_RETRY_MSEC := 30000
 ## How long a map change waits behind the curtain for a preload whose worker
 ## is still running, before it gives up and loads the map itself.
 const PRELOAD_WAIT_LIMIT_MSEC := 15000
-## The estimated bytes parked and preloaded worlds may hold together. An
-## interior is estimated from its textures' pixels (texture_footprint.gd), a
-## streamed territory by its own budget; the measured figures belong to the
-## integration run (tests/integration/landfall_town_park.gd).
+## The estimated bytes parked and preloaded worlds may hold together on medium
+## and large machines (the memory budget table's world_park_bytes for them;
+## `budget_for` gives any class's). An interior is estimated from its textures'
+## pixels (texture_footprint.gd), a streamed territory by its own budget; the
+## measured figures belong to the integration run
+## (tests/integration/landfall_town_park.gd).
 # The shared underground now includes all regional workings (~1.58 GiB on
 # source fallback). A 1.75 GiB ceiling admits that one world while retaining
 # the same eviction rules; no unbounded preload or texture downgrade.
@@ -55,6 +79,24 @@ const INTERIOR_FLOOR_BYTES := 32 * 1048576
 ## underground. The shared byte budget still bounds retained worlds. A caller
 ## may supply individual holds for diagnostics.
 const HELD_INTERIORS := {}
+
+## The kept worlds' byte budget on a machine of `memory_class` ("small",
+## "medium" or "large"; any other name reads medium's).
+static func budget_for(memory_class: String) -> int:
+	return int(MemoryBudgets.value_for(memory_class, MemoryBudgets.WORLD_PARK_BYTES))
+
+## Whether interiors are built ahead of the player - near a door, or before
+## anticipated (scripted) travel - on a machine of `memory_class`.
+static func preload_allowed(memory_class: String) -> bool:
+	return bool(MemoryBudgets.value_for(memory_class, MemoryBudgets.WORLD_PARK_PRELOAD))
+
+## What `budget` leaves for one more world beside the kept ones (`kept`: id ->
+## {"bytes": int}, the other parked worlds and a preload), never below 0.
+static func remaining(kept: Dictionary, budget: int = BUDGET_BYTES) -> int:
+	var total := 0
+	for map_id: Variant in kept:
+		total += maxi(0, int((kept[map_id] as Dictionary).get("bytes", 0)))
+	return maxi(0, budget - total)
 
 ## How `to` relates to `from`: "enter" when `to` is an interior of `from`,
 ## "leave" when `from` is an interior of `to`, else "". `parents` maps an

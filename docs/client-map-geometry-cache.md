@@ -17,8 +17,15 @@ Scripted rescue travel also prepares the mine while its opening conversation is
 playing. The outdoor cave-mouth cells are prefetched at the same time and kept
 with the parked territory for the family's return. Cinematic camera focus keeps
 visible terrain streaming while world input is blocked. The parked/preloaded
-world budget is 1,792 MiB; admission and eviction still apply. This preparation
-uses existing source validation and caches without changing their format.
+world budget is the machine's memory class's (`src/runtime/memory_budgets.gd`,
+2026-11): 1,792 MiB on medium and large machines and 384 MiB on small ones
+(an integrated, software or virtual GPU, or about 8 GB of memory); admission and
+eviction still apply. A small machine prepares no interior ahead of the player,
+neither at a door nor during the rescue conversation, and parks a world only
+when its estimate fits what the other kept worlds leave of the budget, so the
+underground (~1.58 GiB on source fallback) is loaded cold there each time. This
+preparation uses existing source validation and caches without changing their
+format.
 
 Published static map GLBs also consolidate byte-identical complete vertex records
 with `eloria-assets/tools/consolidate_map_vertices.py`, called by

@@ -52,7 +52,12 @@ extends Node
 ## each image's pixels from its header, or its VRAM sidecar's size when the
 ## client uploads that instead (texture_footprint.gd). Read on a small worker
 ## when the parent binds; a preload waits for it, and the estimate travels
-## with the built world.
+## with the built world. The budget the kept worlds share, and whether anything
+## is built ahead of the player at all, are the machine's memory class's
+## (`configure`, memory_budgets.gd; 2026-11): 384 MiB and no preloading - near a
+## door or before anticipated travel - on a small machine, 1,792 MiB with
+## preloading otherwise. A world is parked only when its estimate fits what the
+## other kept worlds leave of the budget (`leave`).
 ##
 ## Policy, limits and eviction rules: world_park_policy.gd. Every park,
 ## re-attach, preload start/ready/hit/miss/drop and eviction prints one
@@ -66,6 +71,7 @@ const RetirementBudget := preload("res://src/world/resource_retirement_budget.gd
 const MaterialWarmup := preload("res://src/world/interior_material_warmup.gd")
 const TextureFootprint := preload("res://src/world/texture_footprint.gd")
 const VramTextures := preload("res://src/world/vram_textures.gd")
+const MemoryBudgets := preload("res://src/runtime/memory_budgets.gd")
 
 ## Main-thread microseconds a preload may spend publishing in one frame.
 const PUBLISH_SLICE_USEC := 4000
@@ -82,7 +88,14 @@ var registry: Dictionary = {}
 var enabled := true
 ## Interiors whose parking is held (WorldParkPolicy.HELD_INTERIORS).
 var held_interiors: Dictionary = Policy.HELD_INTERIORS.duplicate()
+## The bytes parked and preloaded worlds may hold together: the memory class's
+## (`configure`; Main lowers it further in the browser).
 var budget_bytes := Policy.BUDGET_BYTES
+## Whether interiors are built ahead of the player, near a door or before
+## anticipated (scripted) travel: off on small machines (`configure`).
+var preload_enabled := true
+## This session's memory class (memory_budgets.gd) once `configure` has run.
+var memory_class := ""
 var preload_slice_usec := PUBLISH_SLICE_USEC
 ## Build a flagged interior's shader keys when its parent binds
 ## (ELORIA_INTERIOR_WARMUP=0 turns it off, for measuring).
@@ -153,11 +166,24 @@ var _last_taken := ""
 ## loaded: a spread warm-up waits for it, so its frames never stack on the
 ## arrival's own chunk loads.
 var _settled_map := ""
+## The bound map's one `preload_disabled` record has been made (preloading
+## off for the memory class; reset by every bind).
+var _preload_disabled_noted := false
 
+## Reads the registry and this machine's memory class (on the main thread, as
+## Main does at startup: the class's first question probes the adapter), which
+## sets `budget_bytes`, `preload_enabled` and `memory_class` and is recorded
+## once as a `budget` event.
 func configure(maps: Dictionary) -> void:
 	registry = maps
 	enabled = OS.get_environment(SWITCH_ENVIRONMENT) != "0"
 	warm_materials = OS.get_environment(WARMUP_ENVIRONMENT) != "0"
+	var machine := MemoryBudgets.current()
+	memory_class = str(machine.get("class", MemoryBudgets.MEDIUM))
+	budget_bytes = Policy.budget_for(memory_class)
+	preload_enabled = Policy.preload_allowed(memory_class)
+	_record("budget", "", {"memory_class": memory_class, "class_source": str(machine.get("source", "")),
+		"budget_mib": _mib(budget_bytes), "preload": preload_enabled})
 	_parents.clear()
 	_portal_index.clear()
 	_scenery_configs.clear()
@@ -235,6 +261,7 @@ func bind_map(map_id: String, curtained := true) -> int:
 		_settled_map = ""
 	_doors.clear()
 	_door_tiles.clear()
+	_preload_disabled_noted = false
 	if not enabled or _bound_map.is_empty():
 		return 0
 	for key: Variant in registry:
@@ -495,13 +522,19 @@ func doors() -> Dictionary:
 ## `settled` is false while the player's arrival on the map is still loading
 ## (Main: the curtain is up, or the streamed cells around them are not all
 ## resident): nothing new starts then, so a preload never competes with the
-## arrival's own chunks.
+## arrival's own chunks. With preloading off for the memory class
+## (`preload_enabled`) nothing is started - near a door or for `anticipated`
+## travel - and the first time on the bound map that one would have been
+## (within PRELOAD_RADIUS_TILES, or anticipated) is recorded once as
+## `preload_disabled`; parked interiors' clocks are kept as always.
 func observe(map_id: String, tile: Vector2i, map_objects: Dictionary = {}, settled := true,
 		anticipated := PackedStringArray()) -> void:
 	if not enabled or MapRegistry.normalize_server_map_id(map_id) != _bound_map:
 		return
 	if settled:
 		_settled_map = _bound_map
+	if not preload_enabled and not _preload.is_empty():
+		_drop_preload("class") # Turned off while one was building.
 	var now := _now()
 	var nearest: Dictionary = {}
 	var nearest_door: Dictionary = {}
@@ -543,6 +576,9 @@ func observe(map_id: String, tile: Vector2i, map_objects: Dictionary = {}, settl
 				row["at_msec"] = now
 				counters.refresh += 1
 			continue
+		if not preload_enabled:
+			_note_preload_disabled(interior, float(nearest[interior]), int(nearest_door[interior]))
+			continue
 		if not _preload.is_empty() and str(_preload.map) != interior:
 			continue # One preload at a time; the other is judged below.
 		_judge_preload(interior, float(nearest[interior]), int(nearest_door[interior]), now, settled)
@@ -550,6 +586,17 @@ func observe(map_id: String, tile: Vector2i, map_objects: Dictionary = {}, settl
 			break # At most the nearest eligible door's bytes, never every room.
 	if not _preload.is_empty() and not nearest.has(str(_preload.map)):
 		_judge_preload(str(_preload.map), INF, -1, now, settled)
+
+## One `preload_disabled` record per bind: the first time a preload of
+## `interior` would have been judged near a door (`door`, an object id) or
+## for anticipated travel (`door` -1) while preloading is off.
+func _note_preload_disabled(interior: String, distance: float, door: int) -> void:
+	if _preload_disabled_noted or distance > Policy.PRELOAD_RADIUS_TILES:
+		return
+	_preload_disabled_noted = true
+	_record("preload_disabled", interior, {"reason": "class", "memory_class": memory_class,
+		"trigger": "approach" if door >= 0 else "anticipated", "door": door,
+		"distance_tiles": snappedf(distance, 0.1), "budget_mib": _mib(budget_bytes)})
 
 static func _prioritize(distances: Dictionary, interior: String) -> Dictionary:
 	var ordered := {interior: distances[interior]}
@@ -584,9 +631,13 @@ func _judge_preload(interior: String, distance: float, door: int, now: int, sett
 # --------------------------------------------------------------------------
 
 ## Starts building `interior` on a worker. Returns false when it cannot start
-## (no package, a thread error, a preload already running).
+## (preloading off for the memory class: a `preload_skip` with reason
+## "class"; no package, a thread error, a preload already running).
 func start_preload(interior: String, door := -1, distance := INF) -> bool:
 	interior = MapRegistry.normalize_server_map_id(interior)
+	if not preload_enabled:
+		_record("preload_skip", interior, {"reason": "class", "memory_class": memory_class})
+		return false
 	if _browser_background:
 		_browser_prefetched = true
 		if not WebPrototype.map_ready(interior): WebPrototype.ensure_map(interior)
@@ -842,7 +893,10 @@ func leave(loader: WorldLoader, from: String, to: String) -> bool:
 			_drop_preload("superseded")
 		else:
 			_drop_preload("travel")
-	elif enabled and not kept_destination and _flagged(to) and parent_of(to) == from and not from.is_empty():
+	elif enabled and preload_enabled and not kept_destination and _flagged(to) and parent_of(to) == from \
+			and not from.is_empty():
+		# With preloading off for the memory class an entry is cold by design,
+		# not a miss (the bind's `preload_disabled` record says so).
 		counters.preload_miss += 1
 		_record("preload_miss", to, {"reason": "not_started"})
 	if not enabled or loader == null or not is_instance_valid(loader.world_root) \
@@ -855,9 +909,15 @@ func leave(loader: WorldLoader, from: String, to: String) -> bool:
 		return false
 	var detach_usec := Time.get_ticks_usec() - began
 	var bytes := _estimate_resident(resident)
-	if bytes > budget_bytes:
+	# Only what the other kept worlds leave of the budget (a world of this map
+	# already parked is replaced below, so it does not count); nothing is
+	# evicted to make room. Travel has evicted every other parked world but the
+	# destination by now, so this is the whole budget unless one is still kept.
+	var room := Policy.remaining(_kept_rows(from), budget_bytes)
+	if bytes > room:
 		_retire_tree(root, from, "budget")
-		_record("park_refused", from, {"into": to, "estimated_mib": _mib(bytes)})
+		_record("park_refused", from, {"into": to, "estimated_mib": _mib(bytes),
+			"remaining_mib": _mib(room), "budget_mib": _mib(budget_bytes), "memory_class": memory_class})
 		return false
 	if _parked.has(from):
 		# A world of this map already parked (one loaded again without being
@@ -1010,12 +1070,7 @@ func tick() -> void:
 ## the oldest parked world; an interior let go while its doors are indexed is
 ## not built again until the player comes back to a door.
 func _relieve_pressure() -> void:
-	var kept := {}
-	for map_id: String in _parked:
-		kept[map_id] = {"bytes": int(_parked[map_id].bytes)}
-	if not _preload.is_empty():
-		kept["preload"] = {"bytes": int(_preload.get("bytes", 0))}
-	if not Policy.under_pressure(kept, budget_bytes):
+	if not Policy.under_pressure(_kept_rows(), budget_bytes):
 		return
 	if not _preload.is_empty():
 		var interior := str(_preload.map)
@@ -1027,6 +1082,26 @@ func _relieve_pressure() -> void:
 	for map_id: String in Policy.over_budget(parked_rows, 0, budget_bytes):
 		_evict(map_id, "budget")
 		_mark_stale(map_id)
+
+## The kept worlds' estimates, for the budget rules: id -> {"bytes": int} for
+## every parked world but `except`, and "preload" for an interior building or
+## built in the background.
+func _kept_rows(except := "") -> Dictionary:
+	var kept := {}
+	for map_id: String in _parked:
+		if map_id != except:
+			kept[map_id] = {"bytes": int(_parked[map_id].bytes)}
+	if not _preload.is_empty():
+		kept["preload"] = {"bytes": int(_preload.get("bytes", 0))}
+	return kept
+
+## The estimated bytes the kept worlds (parked and preloaded) hold together,
+## against `budget_bytes` (diagnostics, the memory census).
+func kept_bytes() -> int:
+	var total := 0
+	for row: Dictionary in _kept_rows().values():
+		total += int(row.bytes)
+	return total
 
 ## A kept build of `interior` let go while the player may still stand by one
 ## of its doors on the bound map: it is not built again until they come back
@@ -1095,6 +1170,8 @@ func diagnostic_snapshot() -> Dictionary:
 	for interior: String in _interior_bytes:
 		estimates[interior] = _mib(int(_interior_bytes[interior]))
 	return {"enabled": enabled, "bound_map": _bound_map, "doors": _doors.size(),
+		"memory_class": memory_class, "budget_mib": _mib(budget_bytes), "kept_mib": _mib(kept_bytes()),
+		"preload_enabled": preload_enabled,
 		"parked": parked, "preload": building, "orphans": _orphans.size(),
 		"retiring": _retiring.size(), "counters": counters.duplicate(),
 		"estimated_mib": estimates, "stale": _stale.keys(), "warming": _warming.keys(),

@@ -38,8 +38,20 @@ extends SceneTree
 ## --keep-vsync (rendered runs turn V-Sync off, so a frame's time is the main
 ## thread's own work rather than the display's refresh).
 ## Exit status 0 when every check passed; the report is JSON.
+##
+## Memory class (2026-11, owner decision 10): WorldPark takes its budget and
+## its preload switch from the machine's class (memory_budgets.gd), so
+## RABBITLANDS_MEMORY_CLASS=small|medium|large or `-- --memory-class=<name>`
+## runs this as that class; the report's `memory_class` says which, and from
+## where. As small (384 MiB, no preloading) the walk-up checks that nothing is
+## built and that one `preload_disabled` is recorded, the first entry is
+## `interior_cold_entry` (the interior from its package, Landfall parked) in
+## place of `interior_preloaded`, and an interior whose estimate is over the
+## class budget (the underground) is refused parking on the way out
+## (`park_refused`), so its re-entry is `interior_cold_again`.
 const WorldParkScript := preload("res://src/world/world_park.gd")
 const Policy := preload("res://src/world/world_park_policy.gd")
+const MemoryBudgets := preload("res://src/runtime/memory_budgets.gd")
 const Rig := preload("res://tests/integration/interior_load_benchmark_rig.tscn")
 const EXTERIOR := "landfall"
 const HITCH_MSEC := 50.0
@@ -199,6 +211,10 @@ func _run() -> void:
 	park.enabled = true
 	if OS.get_cmdline_user_args().has("--park-held"):
 		park.held_interiors = {}
+	# Small machines build nothing ahead of the player (WorldPark.configure).
+	var preloading: bool = park.preload_enabled
+	print("LANDFALL_TOWN_PARK memory class ", JSON.stringify(MemoryBudgets.current()),
+		" budget_mib=", park.budget_bytes / 1048576, " preload=", preloading)
 	_check(park.parent_of(interior) == EXTERIOR, "the interior's parent is Landfall", park.parent_of(interior))
 	# The door: its exterior return tile and the interior's exit tile, from the
 	# interior's own portal rows (one object id serves both ends); the arrival
@@ -265,7 +281,10 @@ func _run() -> void:
 	var flagged := bool(interior_entry.get("preloadOnApproach", false))
 	_check(park.doors().size() >= 1 or not flagged,
 		"binding Landfall indexed its doors into the interior", park.doors())
-	var warmed: Array = park.events.filter(func(e: Dictionary) -> bool: return str(e.event) == "warm")
+	# Landfall's binding warms each of its flagged interiors (the Town and the
+	# underground): this interior's own record is the one checked.
+	var warmed: Array = park.events.filter(func(e: Dictionary) -> bool:
+		return str(e.event) == "warm" and str(e.map) == interior)
 	_check(not flagged or (warmed.size() == 1 and int(warmed[0].keys) > 0),
 		"binding Landfall built the interior shell's shader keys behind its arrival", warmed)
 	var start_tile := door_tile + Vector2i(0, WALK_FROM_TILES)
@@ -280,7 +299,9 @@ func _run() -> void:
 		var travelled := minf(seconds * WALK_TILES_PER_SECOND, span.length() - WALK_STOP_TILES)
 		walked = start_tile + Vector2i((span.normalized() * travelled).round())
 		park.observe(EXTERIOR, walked, map_objects, true)
-		if preload_began < 0 and not flagged and Policy.tile_distance(walked, door_tile) <= Policy.PRELOAD_RADIUS_TILES:
+		if not preloading and seconds * WALK_TILES_PER_SECOND >= span.length() - WALK_STOP_TILES + WALK_TILES_PER_SECOND:
+			break # At the door, and a second standing there: nothing was built.
+		if preloading and preload_began < 0 and not flagged and Policy.tile_distance(walked, door_tile) <= Policy.PRELOAD_RADIUS_TILES:
 			# An interior not flagged (the underground) is preloaded on request.
 			park.start_preload(interior, door, Policy.tile_distance(walked, door_tile))
 		if preload_began < 0 and not park.preload_state(interior).is_empty():
@@ -297,10 +318,7 @@ func _run() -> void:
 	for event: Dictionary in park.events:
 		if str(event.event) == "preload_start":
 			start_event = event
-	_check(preload_began >= 0 and float(start_event.get("distance_tiles", 99.0)) <= Policy.PRELOAD_RADIUS_TILES + 0.5,
-		"walking up to the door starts the preload within 24 tiles of it", start_event)
 	var preload_ms := float(Time.get_ticks_usec() - preload_began) / 1000.0 if preload_began >= 0 else -1.0
-	_check(park.preload_state(interior) == "ready", "the preload is ready", preload_ms)
 	var ready_event: Dictionary = {}
 	for event: Dictionary in park.events:
 		if str(event.event) == "preload_ready":
@@ -310,32 +328,68 @@ func _run() -> void:
 	for value: float in frame_ms:
 		worst = maxf(worst, value)
 		hitches += 1 if value > HITCH_MSEC else 0
-	_check(float(ready_event.get("max_slice_ms", 999.0)) < HITCH_MSEC,
-		"no preload slice holds the main thread for 50 ms", ready_event)
-	_check(not rendered or hitches == 0, "no frame over 50 ms while the preload ran",
-		{"worst_ms": worst, "frames": frame_ms.size(), "over_50ms": hitches})
-	_memory("interior_preloaded_ready")
+	if preloading:
+		_check(preload_began >= 0 and float(start_event.get("distance_tiles", 99.0)) <= Policy.PRELOAD_RADIUS_TILES + 0.5,
+			"walking up to the door starts the preload within 24 tiles of it", start_event)
+		_check(park.preload_state(interior) == "ready", "the preload is ready", preload_ms)
+		_check(float(ready_event.get("max_slice_ms", 999.0)) < HITCH_MSEC,
+			"no preload slice holds the main thread for 50 ms", ready_event)
+		_check(not rendered or hitches == 0, "no frame over 50 ms while the preload ran",
+			{"worst_ms": worst, "frames": frame_ms.size(), "over_50ms": hitches})
+		_memory("interior_preloaded_ready")
+	else:
+		var disabled: Array = park.events.filter(func(e: Dictionary) -> bool: return str(e.event) == "preload_disabled")
+		_check(preload_began < 0 and park.preload_state() == "" and int(park.counters.preload_start) == 0,
+			"%s class: walking up to the door builds nothing" % park.memory_class, park.counters)
+		_check(not flagged or (disabled.size() == 1 and str(disabled[0].map) == interior
+			and float(disabled[0].distance_tiles) <= Policy.PRELOAD_RADIUS_TILES + 0.5),
+			"%s class: one preload_disabled record where the preload would have started" % park.memory_class, disabled)
+		_memory("at_door_no_preload")
 
-	# 3. Through the door: the preloaded Town, Landfall parked.
-	var entered: Dictionary = await _change("interior_preloaded", EXTERIOR, interior, interior_path, inside)
-	_check(bool(entered.kept) and park.has_parked(EXTERIOR), "the preload is taken and Landfall is parked")
-	_check(int(park.counters.preload_hit) == 1, "one preload hit", park.counters)
+	# 3. Through the door: the preloaded Town (cold on a small machine), Landfall parked.
+	var entered: Dictionary = await _change("interior_preloaded" if preloading else "interior_cold_entry",
+		EXTERIOR, interior, interior_path, inside)
+	if preloading:
+		_check(bool(entered.kept) and park.has_parked(EXTERIOR), "the preload is taken and Landfall is parked")
+		_check(int(park.counters.preload_hit) == 1, "one preload hit", park.counters)
+	else:
+		_check(not bool(entered.kept) and park.has_parked(EXTERIOR),
+			"%s class: the interior loads from its package and Landfall is parked" % park.memory_class,
+			park.diagnostic_snapshot().parked)
+		_check(int(park.counters.preload_hit) == 0 and int(park.counters.preload_miss) == 0,
+			"%s class: a cold entry by design is neither a preload hit nor a miss" % park.memory_class, park.counters)
+	# Whether the interior can be parked on the way out: its estimate as `leave`
+	# reads it (the texture estimate made when Landfall bound, else - an
+	# unflagged interior - its GLB-size guess) within the class budget (Landfall
+	# is taken back first, so nothing else is kept).
+	var interior_estimate := int(park._interior_bytes.get(interior, WorldParkScript._estimate_package(interior_path)))
+	var interior_fits := interior_estimate <= int(park.budget_bytes)
 	var scenery := loader.world_root.get_node_or_null(preload("res://src/world/underground_scenery.gd").NODE_NAME)
 	var config := preload("res://src/world/underground_scenery.gd").config_for(interior)
 	_check(config.is_empty() or (scenery != null and scenery.get_child_count() == (config.get("placements", []) as Array).size()),
-		"every scenery placement stands in the preloaded interior",
+		"every scenery placement stands in the %s interior" % ("preloaded" if preloading else "cold-loaded"),
 		{"placed": scenery.get_child_count() if scenery != null else 0,
 			"listed": (config.get("placements", []) as Array).size()})
 
 	# 4. Back out: Landfall re-attached, the Town parked.
 	var returned: Dictionary = await _change("exterior_parked", interior, EXTERIOR, exterior_path, outside)
-	_check(bool(returned.kept) and park.has_parked(interior), "Landfall comes back parked and the Town is kept")
+	var refused: Array = park.events.filter(func(e: Dictionary) -> bool:
+		return str(e.event) == "park_refused" and str(e.map) == interior)
+	_check(bool(returned.kept) and park.has_parked(interior) == interior_fits
+		and (interior_fits or not refused.is_empty()),
+		"Landfall comes back parked and the interior is kept" if interior_fits \
+			else "Landfall comes back parked and the interior, over the class budget, is refused parking",
+		{"estimated_mib": interior_estimate / 1048576, "budget_mib": int(park.budget_bytes) / 1048576, "refused": refused})
 
-	# 5. In again: the parked Town.
-	var again: Dictionary = await _change("interior_parked", EXTERIOR, interior, interior_path, inside)
-	_check(bool(again.kept), "the Town comes back parked")
-	_check(float(again.first_ready_ms) < float(entered.first_ready_ms) * 1.5 + 50.0,
-		"a parked re-entry is no slower than the preloaded entry", [again.first_ready_ms, entered.first_ready_ms])
+	# 5. In again: the parked Town (cold again when it could not be parked).
+	var again: Dictionary = await _change("interior_parked" if interior_fits else "interior_cold_again",
+		EXTERIOR, interior, interior_path, inside)
+	_check(bool(again.kept) == interior_fits,
+		"the interior comes back parked" if interior_fits else "the interior refused parking is loaded again")
+	if interior_fits:
+		_check(float(again.first_ready_ms) < float(entered.first_ready_ms) * 1.5 + 50.0,
+			"a parked re-entry is no slower than the %s entry" % ("preloaded" if preloading else "cold"),
+			[again.first_ready_ms, entered.first_ready_ms])
 
 	# 6. Landfall, parked while the player is inside, evicted (as travel on or
 	# the budget would) and freed a slice at a time: no frame over 50 ms.
@@ -372,8 +426,9 @@ func _run() -> void:
 	_memory("before_interior_cold")
 	var cold: Dictionary = await _change("interior_cold", EXTERIOR, interior, interior_path, inside)
 	_check(not bool(cold.kept), "the cold load reads the package")
-	_check(float(entered.first_ready_ms) < float(cold.first_ready_ms),
-		"the preloaded entry is ready sooner than the cold load", [entered.first_ready_ms, cold.first_ready_ms])
+	if preloading:
+		_check(float(entered.first_ready_ms) < float(cold.first_ready_ms),
+			"the preloaded entry is ready sooner than the cold load", [entered.first_ready_ms, cold.first_ready_ms])
 	_check(float(returned.first_ready_ms) < float(transitions[0].first_ready_ms),
 		"the parked return to Landfall is ready sooner than its cold load",
 		[returned.first_ready_ms, transitions[0].first_ready_ms])
@@ -387,6 +442,8 @@ func _run() -> void:
 func _finish(report_path: String, interior: String, extra := {}) -> void:
 	var park_events: Array = park.events.duplicate() if is_instance_valid(park) else []
 	var park_counters: Dictionary = park.counters.duplicate() if is_instance_valid(park) else {}
+	var park_budget_mib: int = int(park.budget_bytes) / 1048576 if is_instance_valid(park) else -1
+	var park_preload: bool = bool(park.preload_enabled) if is_instance_valid(park) else false
 	if is_instance_valid(park):
 		park.enabled = true
 		park.clear()
@@ -413,7 +470,9 @@ func _finish(report_path: String, interior: String, extra := {}) -> void:
 	var report := {"ok": ok, "interior": interior, "rendered": rendered,
 		"vsync": DisplayServer.window_get_vsync_mode() if rendered else -1,
 		"scope": "WorldLoader + WorldPark + environment/camera/section/cutaway controllers; no Main, network, avatar, occluder fade or curtain. Time to ready = change call + framing + binding + first draw + three grounded physics frames. The cold interior runs last with GlbSceneCache emptied but OS/driver caches warm.",
-		"engine": Engine.get_version_info(), "checks": checks, "transitions": transitions,
+		"engine": Engine.get_version_info(), "memory_class": MemoryBudgets.current(),
+		"world_park_budget_mib": park_budget_mib, "preload_enabled": park_preload,
+		"checks": checks, "transitions": transitions,
 		"memory": memory, "park_events": park_events, "park_counters": park_counters}
 	report.merge(extra)
 	var file := FileAccess.open(report_path, FileAccess.WRITE)

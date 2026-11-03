@@ -147,8 +147,20 @@ The registry flags the map `preloadOnApproach` with `interiorOf: landfall`
 - Inside, Landfall is kept detached (parked) and re-attached on the way out; the
   Town is then parked in turn. A built Town stays while the player is within 48
   tiles of its doors. It is let go after a minute farther away, on travel to any
-  other map, or when the kept worlds' estimates pass the 1.5 GiB budget; one let
-  go for the budget is built again within 8 tiles of a door.
+  other map, or when the kept worlds' estimates pass the machine's budget; one
+  let go for the budget is built again within 8 tiles of a door.
+- The budget is the machine's memory class's (2026-11, `src/runtime/memory_budgets.gd`):
+  1,792 MiB on medium and large machines, 384 MiB on small ones (an integrated,
+  software or virtual GPU, or about 8 GB of memory). A small machine builds
+  nothing ahead of the player: no Town near its doors and no destination before
+  scripted travel, so a first entry loads the Town behind the arrival curtain
+  (`preload_disabled` in the log). Landfall is still parked while the player is
+  inside, and the Town is parked after a visit and kept as above. A world is
+  parked only when its estimate fits what the other kept worlds leave of the
+  budget: on a small machine the underground (~1.58 GiB on source fallback) is
+  never parked (`park_refused`), so going back in is a cold load.
+  `RABBITLANDS_MEMORY_CLASS=small` (or `--memory-class=small`) runs the client
+  or `landfall_town_park.gd` as a small machine.
 - `godot-client/tests/integration/landfall_town_park.gd` (rendered) measures it.
   Five runs on 2026-10-27, the first two on new Godot profiles (an empty shader
   cache): the preload's worst frames were 5.4, 22.9, 16.7, 19.9 and 5.1 ms (the

@@ -21,8 +21,16 @@ extends SceneTree
 ## 8 tiles of a door; no preload starts while its shell's shader keys are
 ## still being warmed over frames (a walk-over bind); exit labels stand at
 ## their door at lintel height and are lifted on screen only when they would
-## fall under the bottom HUD bar.
+## fall under the bottom HUD bar. Memory classes (2026-11, owner decision 10):
+## a small machine's 384 MiB budget and no preloading (approach or
+## anticipated travel), a world parked only within what the other kept worlds
+## leave of the budget, medium and large exactly as before. Every other case
+## runs as a forced memory class, never the test machine's own: medium, or
+## large when the launch names it (`-- --memory-class=large`).
 const Policy := preload("res://src/world/world_park_policy.gd")
+const MemoryBudgets := preload("res://src/runtime/memory_budgets.gd")
+const HardwareTier := preload("res://src/runtime/hardware_tier.gd")
+const MIB := 1048576
 const WorldParkScript := preload("res://src/world/world_park.gd")
 const SceneryStepper := preload("res://src/world/interior_scenery_stepper.gd")
 const UndergroundScenery := preload("res://src/world/underground_scenery.gd")
@@ -35,6 +43,8 @@ const DOOR := 59201
 var failures := 0
 var stage: Node3D
 var registry: Dictionary = {}
+## The memory class every case outside the memory-class block runs as.
+var suite_class := MemoryBudgets.MEDIUM
 
 func _init() -> void:
 	call_deferred("_run")
@@ -47,10 +57,16 @@ func _expect(ok: bool, message: String) -> void:
 		print("PASS: ", message)
 
 func _run() -> void:
+	var forced := str(HardwareTier.memory_class_override().memory_class)
+	suite_class = forced if forced == MemoryBudgets.LARGE else MemoryBudgets.MEDIUM
+	MemoryBudgets.override_for_tests(suite_class)
+	print("World park: the cases run as memory class ", suite_class,
+		" (the machine probes as ", MemoryBudgets.classify(HardwareTier.probe())["class"], ")")
 	stage = Node3D.new()
 	root.add_child(stage)
 	_write_fixtures()
 	_test_policy()
+	_test_memory_class_policy()
 	_test_relations()
 	_test_production_relations()
 	await _test_parking()
@@ -63,11 +79,14 @@ func _run() -> void:
 	await _test_replaced_park()
 	await _test_settled_and_stale()
 	await _test_spread_warmup()
+	await _test_memory_classes()
+	MemoryBudgets.override_for_tests(suite_class)
 	_test_texture_footprint()
 	_test_scenery_table()
 	_test_camera_restore()
 	await _test_building_doors()
 	stage.queue_free()
+	MemoryBudgets.reset()
 	for frame: int in 4:
 		await process_frame
 	print("World park: ", "PASS" if failures == 0 else "FAIL", " (", failures, " failures)")
@@ -817,6 +836,236 @@ func _test_spread_warmup() -> void:
 	loader.unload_world()
 	loader.queue_free()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(SCRATCH.path_join("interior/world.glb")))
+	await _frames(2)
+
+# --------------------------------------------------------------------------
+# Memory classes (2026-11, owner decision 10; memory-classes plan M2)
+# --------------------------------------------------------------------------
+
+func _test_memory_class_policy() -> void:
+	_expect(Policy.budget_for("small") == 384 * MIB and Policy.budget_for("medium") == Policy.BUDGET_BYTES
+		and Policy.budget_for("large") == Policy.BUDGET_BYTES and Policy.BUDGET_BYTES == 1792 * MIB
+		and Policy.budget_for("no-such-class") == Policy.BUDGET_BYTES,
+		"WorldPark's budget is 384 MiB on small machines and today's 1,792 MiB on medium and large")
+	_expect(not Policy.preload_allowed("small") and Policy.preload_allowed("medium")
+		and Policy.preload_allowed("large") and Policy.preload_allowed("no-such-class"),
+		"interiors are built ahead of the player everywhere but on small machines")
+	_expect(Policy.remaining({}, 600) == 600
+		and Policy.remaining({"a": {"bytes": 200}, "preload": {"bytes": 100}}, 600) == 300
+		and Policy.remaining({"a": {"bytes": 600}}, 600) == 0
+		and Policy.remaining({"a": {"bytes": 700}}, 600) == 0
+		and Policy.remaining({"a": {}, "b": {"bytes": -50}}, 600) == 600
+		and Policy.remaining({}) == Policy.BUDGET_BYTES,
+		"what a budget leaves beside the kept worlds, never below nothing")
+	var underground := Policy.interior_estimate(1565 * MIB, 22 * MIB)
+	_expect(underground > Policy.budget_for("small") and underground <= Policy.budget_for("medium"),
+		"the underground's source-fallback estimate (%d MiB) fits medium and large, never small" % [underground / MIB])
+	_expect(256 * MIB <= Policy.budget_for("small") and Policy.interior_estimate(88 * MIB, MIB) <= Policy.budget_for("small"),
+		"a territory within its 256 MiB stream budget and a ~120 MiB town fit a small machine's budget")
+
+## A parked chunk stream standing in for a territory whose resident estimate is
+## `bytes` (no cells: only its estimate matters here).
+func _stream_loader(map_id: String, bytes: int) -> WorldLoader:
+	var loader := WorldLoader.new()
+	stage.add_child(loader)
+	var stream := ContinentChunkStream.new()
+	stream.territory = _manifest(map_id)
+	stream.resident_bytes = bytes
+	loader.world_root = stream
+	loader.manifest = stream.territory
+	loader.add_child(stream)
+	return loader
+
+static func _near(value: Variant, expected: float) -> bool:
+	return absf(float(value) - expected) < 0.05
+
+func _events(park: Node, kind: String) -> Array:
+	return park.events.filter(func(e: Dictionary) -> bool: return str(e.event) == kind)
+
+func _test_memory_classes() -> void:
+	var objects := {DOOR: {"object_id": DOOR, "x": 12, "y": 18, "label": "Portal"}}
+	# Medium and large: today's budget and preloading (the cases above ran as one of them).
+	for label: String in [MemoryBudgets.MEDIUM, MemoryBudgets.LARGE]:
+		MemoryBudgets.override_for_tests(label)
+		var normal := _park()
+		var noted: Array = _events(normal, "budget")
+		_expect(normal.memory_class == label and normal.budget_bytes == Policy.BUDGET_BYTES and normal.preload_enabled
+			and noted.size() == 1 and _near(noted[0].budget_mib, 1792.0) and bool(noted[0].preload),
+			"a %s machine keeps today's 1,792 MiB budget and preloading" % label)
+		normal.bind_map("exterior")
+		normal.finish_estimates(true)
+		normal.observe("exterior", Vector2i(12, 18 + 24), objects, true)
+		_expect(normal.preload_state("interior") == "running" and _events(normal, "preload_disabled").is_empty(),
+			"a %s machine still builds an interior 24 tiles from its door" % label)
+		if label == MemoryBudgets.LARGE:
+			# Configured again as small while that preload builds: it is dropped.
+			MemoryBudgets.override_for_tests(MemoryBudgets.SMALL)
+			normal.configure(registry)
+			normal.observe("exterior", Vector2i(12, 18 + 10), objects, true)
+			var drops: Array = _events(normal, "preload_drop")
+			_expect(normal.preload_state() == "" and drops.size() == 1 and str(drops[0].reason) == "class",
+				"a preload building when preloading is turned off is dropped (%s)" % [drops])
+		normal.clear()
+		await _until(func() -> bool: return normal.is_idle() and normal.retiring_count() == 0)
+		normal.release_now()
+		normal.queue_free()
+
+	# Small: the class's budget, preloading off.
+	MemoryBudgets.override_for_tests(MemoryBudgets.SMALL)
+	var park := _park()
+	var budget: Array = _events(park, "budget")
+	_expect(park.memory_class == "small" and park.budget_bytes == 384 * MIB and not park.preload_enabled,
+		"a small machine's WorldPark has a 384 MiB budget and builds nothing ahead")
+	_expect(budget.size() == 1 and str(budget[0].memory_class) == "small" and str(budget[0].class_source) == "test"
+		and _near(budget[0].budget_mib, 384.0) and not bool(budget[0].preload),
+		"configure records the class, where it came from, its budget and the preload switch (%s)" % [budget])
+	var snapshot: Dictionary = park.diagnostic_snapshot()
+	_expect(str(snapshot.memory_class) == "small" and _near(snapshot.budget_mib, 384.0)
+		and not bool(snapshot.preload_enabled) and _near(snapshot.kept_mib, 0.0),
+		"the diagnostics snapshot carries the class, the budget and what is kept")
+	# Approach: from 40 tiles out to the door, settled, nothing starts.
+	_expect(park.bind_map("exterior") == 1, "(fixture) the door is indexed on a small machine too")
+	park.finish_estimates(true)
+	_expect(park._interior_bytes.has("interior"), "the interior is still estimated, for parking it after a visit")
+	for distance: int in [40, 30, 24, 16, 8, 2, 0]:
+		park.observe("exterior", Vector2i(12, 18 + distance), objects, true)
+		park.tick()
+	var disabled: Array = _events(park, "preload_disabled")
+	_expect(park.preload_state() == "" and int(park.counters.preload_start) == 0,
+		"no preload starts 0-24 tiles from a door on a small machine")
+	_expect(disabled.size() == 1 and str(disabled[0].map) == "interior" and str(disabled[0].trigger) == "approach"
+		and str(disabled[0].reason) == "class" and float(disabled[0].distance_tiles) <= Policy.PRELOAD_RADIUS_TILES
+		and int(disabled[0].door) == DOOR,
+		"one preload_disabled record where the preload would have started (%s)" % [disabled])
+	# Anticipated (scripted) travel, on the same bind and on a new one.
+	park.observe("exterior", Vector2i(200, 200), {}, true, PackedStringArray(["interior"]))
+	_expect(park.preload_state() == "" and int(park.counters.preload_start) == 0
+		and _events(park, "preload_disabled").size() == 1,
+		"anticipated travel builds nothing either, and the bind's one record stands")
+	park.bind_map("exterior")
+	for step: int in 3:
+		park.observe("exterior", Vector2i(200, 200), {}, true, PackedStringArray(["interior"]))
+	disabled = _events(park, "preload_disabled")
+	_expect(park.preload_state() == "" and int(park.counters.preload_start) == 0 and disabled.size() == 2
+		and str(disabled[1].trigger) == "anticipated" and _near(disabled[1].distance_tiles, 0.0),
+		"a scripted departure's destination is not built ahead; one record for the new bind")
+	_expect(not park.start_preload("interior", DOOR, 3.0) and park.preload_state() == ""
+		and str(park.events.back().event) == "preload_skip" and str(park.events.back().reason) == "class",
+		"asking for a preload directly is refused with reason class")
+	var idle: bool = await _until(func() -> bool: return park.is_idle())
+	_expect(idle and int(park.counters.preload_start) == 0, "no worker was started")
+
+	# Entering cold: the territory (within its stream budget) is parked, and a
+	# cold entry by design is no preload miss.
+	var outside := _stream_loader("exterior", 256 * MIB)
+	var territory: Node3D = outside.world_root
+	_expect(park.leave(outside, "exterior", "interior") and park.has_parked("exterior")
+		and int(park.counters.preload_miss) == 0 and _events(park, "preload_miss").is_empty(),
+		"entering cold parks the 256 MiB territory, and is no preload miss on a small machine")
+	park.bind_map("interior")
+	park.now_override = 1000
+	for minute: int in range(1, 21):
+		park.now_override = 1000 + minute * 60000
+		park.tick()
+	_expect(park.has_parked("exterior"), "the territory stays parked while the player is inside")
+	# Back out: the territory comes back, the Town-sized interior is parked.
+	var kept: Dictionary = park.take("exterior")
+	_expect(kept.get("root") == territory, "the parked territory is handed back")
+	_give_world(outside, "interior")
+	park._interior_bytes["interior"] = 120 * MIB
+	_expect(park.leave(outside, "interior", "exterior") and park.has_parked("interior"),
+		"a ~120 MiB interior is parked after a visit on a small machine")
+	outside.adopt_world(kept)
+	park.bind_map("exterior")
+	var refreshes := int(park.counters.refresh)
+	var parked_at: int = park.now_override
+	for step: int in 30:
+		park.now_override = parked_at + step * 60000
+		park.observe("exterior", Vector2i(12, 20 + step), objects, true)
+		park.tick()
+	_expect(park.has_parked("interior") and int(park.counters.refresh) > refreshes
+		and int(park.counters.preload_start) == 0,
+		"a parked interior's clock is still held while the player stays in its area (half an hour)")
+	park.now_override = parked_at + 30 * 60000 + Policy.PARK_TTL_MSEC + 1
+	park.observe("exterior", Vector2i(12, 90), objects, true)
+	park.tick()
+	park.now_override += 60000 + Policy.PARK_TTL_MSEC + 1
+	park.observe("exterior", Vector2i(12, 90), objects, true)
+	park.tick()
+	_expect(not park.has_parked("interior"), "and it still expires once the player has been away ten minutes")
+	park.now_override = -1
+
+	# The underground: ~1.58 GiB on source fallback is never parked on a small machine.
+	var underground := Policy.interior_estimate(1565 * MIB, 22 * MIB)
+	park._interior_bytes["interior"] = underground
+	var inside := _loader_with("interior")
+	var cave: Node3D = inside.world_root
+	_expect(not park.leave(inside, "interior", "exterior") and not park.has_parked("interior"),
+		"leaving a ~1.58 GiB underground does not park it on a small machine")
+	var refused: Array = _events(park, "park_refused")
+	_expect(refused.size() == 1 and str(refused[0].map) == "interior"
+		and _near(refused[0].estimated_mib, float(underground) / MIB)
+		and _near(refused[0].remaining_mib, 384.0) and _near(refused[0].budget_mib, 384.0)
+		and str(refused[0].memory_class) == "small",
+		"park_refused records the estimate, what the budget left and the class (%s)" % [refused])
+	_expect(inside.world_root == null and is_instance_valid(cave) and park.retiring_count() >= 1,
+		"the refused world is let go, freed over frames")
+	var freed: bool = await _until(func() -> bool: return park.retiring_count() == 0)
+	_expect(freed and not is_instance_valid(cave), "and freed")
+	# Medium parks the same world: today's rule.
+	MemoryBudgets.override_for_tests(MemoryBudgets.MEDIUM)
+	var medium := _park()
+	medium._interior_bytes["interior"] = underground
+	var medium_inside := _loader_with("interior")
+	_expect(medium.leave(medium_inside, "interior", "exterior") and medium.has_parked("interior"),
+		"a medium machine still parks the underground when leaving it")
+
+	# Only what the other kept worlds leave: a kept destination (not yet taken
+	# back) leaves 384 - 120 = 264 MiB on a small machine; nothing is evicted.
+	MemoryBudgets.override_for_tests(MemoryBudgets.SMALL)
+	var tight := _park()
+	tight._interior_bytes["interior"] = 120 * MIB
+	var room := _loader_with("interior")
+	_expect(tight.leave(room, "interior", "exterior") and tight.has_parked("interior"),
+		"(fixture) the 120 MiB interior is kept")
+	var too_big := _stream_loader("exterior", 300 * MIB)
+	_expect(not tight.leave(too_big, "exterior", "interior") and not tight.has_parked("exterior")
+		and tight.has_parked("interior"),
+		"a 300 MiB territory beside a kept 120 MiB interior is refused, and the interior is not evicted for it")
+	refused = _events(tight, "park_refused")
+	_expect(refused.size() == 1 and _near(refused[0].remaining_mib, 264.0) and _near(refused[0].estimated_mib, 300.0),
+		"the refusal is against what is left (%s)" % [refused])
+	var fits := _stream_loader("exterior", 256 * MIB)
+	_expect(tight.leave(fits, "exterior", "interior") and tight.has_parked("exterior") and tight.has_parked("interior"),
+		"a 256 MiB territory fits beside it")
+	_expect(tight.kept_bytes() == 376 * MIB and _near(tight.diagnostic_snapshot().kept_mib, 376.0),
+		"kept bytes are the parked worlds' estimates together")
+	# A world of the map already parked does not count against its own replacement.
+	var again := _stream_loader("exterior", 260 * MIB)
+	_expect(tight.leave(again, "exterior", "interior") and tight.has_parked("exterior")
+		and tight.kept_bytes() == 380 * MIB,
+		"re-parking a map replaces its older world instead of counting it")
+	MemoryBudgets.override_for_tests(MemoryBudgets.MEDIUM)
+	var roomy := _park()
+	roomy._interior_bytes["interior"] = 120 * MIB
+	var roomy_inside := _loader_with("interior")
+	roomy.leave(roomy_inside, "interior", "exterior")
+	var roomy_outside := _stream_loader("exterior", 300 * MIB)
+	_expect(roomy.leave(roomy_outside, "exterior", "interior") and roomy.has_parked("exterior")
+		and roomy.has_parked("interior"),
+		"a medium machine parks both, as before")
+
+	for one: Node in [park, medium, tight, roomy]:
+		one.clear()
+	await _until(func() -> bool:
+		return [park, medium, tight, roomy].all(func(one: Node) -> bool: return one.is_idle() and one.retiring_count() == 0))
+	for one: Node in [park, medium, tight, roomy]:
+		one.release_now()
+		one.queue_free()
+	for loader: WorldLoader in [outside, inside, medium_inside, room, too_big, fits, again, roomy_inside, roomy_outside]:
+		if is_instance_valid(loader):
+			loader.unload_world()
+			loader.queue_free()
 	await _frames(2)
 
 func _test_texture_footprint() -> void:
