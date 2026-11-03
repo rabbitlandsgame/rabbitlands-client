@@ -10,15 +10,22 @@ const PROFILES := {
 	"transmute": [19, -0.24, 0.24], "recall": [18, 0.26, 0.26],
 	"ward": [75, 0.12, 0.12]}
 
-static func install(player: AnimationPlayer, resolver: RefCounted) -> Dictionary:
+## `source_library` is the actor's full-hands library (LAT-L1,
+## CrowdAnimationLibrary.full_library): a body that currently plays the
+## fingerless crowd variant still sculpts from the full clip, so its variants
+## keep their finger tracks for when it comes close. Without it, or for a clip
+## it does not hold, the player's own clip is read, exactly as before.
+static func install(player: AnimationPlayer, resolver: RefCounted,
+		source_library: AnimationLibrary = null) -> Dictionary:
 	var result: Dictionary = {}
 	var library := AnimationLibrary.new()
 	for profile: String in PROFILES:
 		var values: Array = PROFILES[profile]
 		var action := SpellPresentation.action_for_effect(int(values[0]))
 		var base_name: String = resolver.clip_for_action(action)
-		if base_name.is_empty() or not player.has_animation(base_name): continue
-		var clip := player.get_animation(base_name).duplicate(true) as Animation
+		var base := _base_clip(player, base_name, source_library)
+		if base == null: continue
+		var clip := base.duplicate(true) as Animation
 		for track: int in clip.get_track_count():
 			if clip.track_get_type(track) != Animation.TYPE_ROTATION_3D: continue
 			var bone := str(clip.track_get_path(track)).to_lower()
@@ -36,3 +43,11 @@ static func install(player: AnimationPlayer, resolver: RefCounted) -> Dictionary
 	if not player.has_animation_library("spell_variants"):
 		player.add_animation_library("spell_variants", library)
 	return result
+
+static func _base_clip(player: AnimationPlayer, base_name: String,
+		source_library: AnimationLibrary) -> Animation:
+	if base_name.is_empty():
+		return null
+	if source_library != null and source_library.has_animation(base_name):
+		return source_library.get_animation(base_name)
+	return player.get_animation(base_name) if player.has_animation(base_name) else null
