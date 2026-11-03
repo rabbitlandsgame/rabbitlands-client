@@ -77,8 +77,9 @@ const TIER_SETTINGS := {
 ## ELORIA_WORLD_DISTANCE  off: no world distance pass, for A/B captures
 ##     (world_distance_mode, world_distance_enabled).
 ## ELORIA_ACTOR_IMAGES  legacy: actor images parsed as before the actor image
-##     extension; nomips: decoded actor images get no generated mips
-##     (actor_images_mode).
+##     extension; nomips: reserved for the actor texture stages (AT-C2: decoded
+##     actor images without the mips that owner decision AT-C6 may add); in
+##     stage A no actor image gets mips in any mode (actor_images_mode).
 ## ELORIA_ACTOR_VRAM_SELF_TEST  a directory such as assets/actors/native/races
 ##     whose actor sidecar index the package smoke launch decodes
 ##     (actor_vram_self_test_dir).
@@ -376,8 +377,9 @@ static func world_distance_mode() -> String:
 static func world_distance_enabled() -> bool:
 	return world_distance_mode() != "off"
 
-## "auto" (sidecars where staged, otherwise decoded with mips), "legacy" or
-## "nomips".
+## "auto" (the actor image extension: URI textures from their imports,
+## embedded images decoded without mips; AT-C2 adds staged sidecars),
+## "legacy" or "nomips" (reserved; read as "auto" until AT-C2).
 static func actor_images_mode() -> String:
 	return str(resolve_switch(OS.get_environment(ACTOR_IMAGES_VARIABLE),
 		ACTOR_IMAGES_MODES, "legacy").mode)

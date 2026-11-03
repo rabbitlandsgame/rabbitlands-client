@@ -120,24 +120,27 @@ Low actor tier, memory budgets per machine class, and the foundations later stag
 one renderer-family switch, a worker-safe actor glTF parse, offline actor geometry and texture
 preparation, content digests, one verified native loader, and per-file updates. Medium and High
 draw exactly as before. Every visible change applies only at Low (and with the Performance
-preset) or on small-class machines, and is listed for the owner's sign-off after wave A.
+preset) or on small-class machines, apart from the new "Follow graphics quality" box under the
+crowd count in Settings → Graphics (shown at every quality; while it is checked the count's
+slider is greyed out), and is listed for the owner's sign-off after wave A.
 Figures are from the development laptop (Core Ultra 9 275HX) unless marked as estimates. The
 wave-A measurement on the iGPU proxy has not been run yet.
 
-Switches that restore earlier behaviour for A/B runs. Each blocks the first-run tier seeding,
-and they are parsed in one place, `hardware_tier.gd`:
+Switches that restore earlier behaviour for A/B runs. The first four rows block the first-run
+tier seeding and are parsed in one place, `hardware_tier.gd`:
 
 | Switch | Effect |
 | --- | --- |
 | `RABBITLANDS_MEMORY_CLASS=small\|medium\|large` or `--memory-class=` (the argument wins) | forces the memory class |
 | `ELORIA_ACTOR_IMAGES=legacy` | the plain actor glTF parse, without the actor image extension (`nomips` is reserved for the actor texture stages) |
-| `RABBITLANDS_ACTOR_GEOMETRY=sidecar\|off\|generate` | actor geometry sidecars (`generate` only in development builds); `RABBITLANDS_ACTOR_GEOMETRY_ROOT` names a sidecar root |
+| `RABBITLANDS_ACTOR_GEOMETRY=sidecar\|off\|generate` | actor geometry sidecars (`generate` only in development builds); `RABBITLANDS_ACTOR_GEOMETRY_ROOT` names a sidecar root. Only the applier reads them, and the actor parse does not call it until a later stage |
 | `ELORIA_WORLD_DISTANCE=off`, `ELORIA_ACTOR_VRAM_SELF_TEST=<dir>` | reserved for world distance management and the actor VRAM self-test; nothing reads them in stage A |
-| `--content-digest=sequential` / `RABBITLANDS_CONTENT_DIGEST=sequential` | the pre-wave-2 single-threaded digest (kill switch) |
+| `--content-digest=sequential` / `RABBITLANDS_CONTENT_DIGEST=sequential` | the pre-wave-2 single-threaded digest (kill switch). It changes no graphics, so it does not block seeding; `content_digest.gd` parses it and logs `content_digest stage=backend` |
 
-Each also accepts `off/0/false/no` for its off mode and `on/1/true/yes` for its default. Any
-other value is ignored. A launch that sets one logs the resolved modes, and any ignored value,
-as `switches` in its `hardware_tier` diagnostic.
+`ELORIA_WORLD_DISTANCE` and `ELORIA_ACTOR_IMAGES` also accept `off/0/false/no` for their off
+mode and `on/1/true/yes` for their default; the memory class and actor geometry take only their
+own names. Any other value is ignored. A launch that sets one of the first four rows logs the
+resolved modes, and any ignored value, as `switches` in its `hardware_tier` diagnostic.
 
 ### Low actor tier (Low and the Performance preset)
 
@@ -153,7 +156,9 @@ step and live effects at 0.75 and 1.0. At Low:
 - **Remote Humans are not finished.** Humans other than the player are built without the
   per-vertex body refinement and face sculpt, so other players show the neutral face, with
   hair and beards groomed to it. The player's own actor, the creation preview, the appearance
-  editor and portraits stay finished. Measured with 20 distinct remote Humans (debug build):
+  editor, leaderboard cards and the campaign replay figure stay finished. A dialogue close-up
+  shows the world actor as it is drawn, so at Low the speaker is unfinished too (an owner
+  question). Measured with 20 distinct remote Humans (debug build):
   - the finish phase fell from a median 111-139 ms (mean 195-217 ms, up to 0.9 s) to about 1 ms
     (mean 11-12 ms);
   - a whole remote Human build fell from a median 143-183 ms to 37-49 ms;
