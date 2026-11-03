@@ -1,6 +1,12 @@
 extends RefCounted
 ## Optional arithmetic only. This does not select a rider, animation or service
 ## mode; absent/incompatible payloads retain the complete script implementation.
+## The payload is verified and loaded by the shared `NativeLibrary.ensure()`.
+const NativeLibrary := preload("res://src/runtime/native_library.gd")
+## NativeLibrary refusal codes -> this file's reasons (unchanged strings).
+const LOADER_REASONS := {"absent": "payload_absent", "manifest_invalid": "manifest_invalid",
+	"api_mismatch": "incompatible_payload", "unsupported_platform": "incompatible_payload",
+	"incomplete": "checksum_mismatch", "checksum_mismatch": "checksum_mismatch"}
 static var _checked := false
 static var _ready := false
 static var _reason := "not_checked"
@@ -21,37 +27,18 @@ static func ready() -> bool:
 		# threads exist. A late dlopen can wait on those threads indefinitely.
 		_reason = "browser_payload_absent"
 		return false
-	var directory := ProjectSettings.globalize_path("res://bin/client_runtime") if OS.has_feature("editor") else \
-		OS.get_executable_path().get_base_dir().path_join("bin/client_runtime")
-	var path := directory.path_join("runtime-manifest.json")
-	if not FileAccess.file_exists(path):
-		_reason = "payload_absent"
+	var refusal := reason_for(NativeLibrary.ensure())
+	if not refusal.is_empty():
+		_reason = refusal
 		return false
-	var value: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-	if not value is Dictionary:
-		_reason = "manifest_invalid"
-		return false
-	var platform := str({"Windows": "windows", "Linux": "linux", "macOS": "macos"}.get(OS.get_name(), ""))
-	var library := str({"windows": "client_runtime.dll", "linux": "client_runtime.so", "macos": "client_runtime.dylib"}.get(platform, ""))
-	var version := Engine.get_version_info()
-	if library.is_empty() or not OS.has_feature("x86_64") \
-			or int(value.get("abi", 0)) != 1 or str(value.get("platform", "")) != platform \
-			or str(value.get("architecture", "")) != "x86_64" or str(value.get("library", "")) != library \
-			or int(value.get("engine_major", 0)) != int(version.major) \
-			or int(value.get("engine_minor", 0)) != int(version.minor):
-		_reason = "incompatible_payload"
-		return false
-	var binary := directory.path_join(library)
-	var descriptor := directory.path_join("client_runtime.gdextension")
-	if not FileAccess.file_exists(binary) or not FileAccess.file_exists(descriptor) \
-			or FileAccess.get_sha256(binary) != str(value.get("library_sha256", "")) \
-			or FileAccess.get_sha256(descriptor) != str(value.get("descriptor_sha256", "")):
-		_reason = "checksum_mismatch"
-		return false
-	GDExtensionManager.load_extension(descriptor)
 	_ready = _classes_ready()
 	_reason = "native_arithmetic" if _ready else "arithmetic_api_unavailable"
 	return _ready
+
+## This file's reason when `NativeLibrary` refused the payload before loading
+## it, or "" when the payload passed and the cape classes decide.
+static func reason_for(loaded: Dictionary) -> String:
+	return str(LOADER_REASONS.get(str(loaded.get("code", "")), ""))
 
 static func _classes_ready() -> bool:
 	var available := ClassDB.class_exists(&"RabbitLandsCapeBodySurface") \

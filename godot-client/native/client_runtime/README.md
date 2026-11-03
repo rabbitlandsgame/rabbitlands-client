@@ -35,7 +35,10 @@ pilot, comparison and legacy launchers. Omitting this option produces a native-a
 package. Windows x86_64 is the initial validation host; other package targets
 retain legacy support until their native payloads qualify.
 
-The manifest checks API, architecture and file checksums before loading. These
+The manifest checks API, architecture and file checksums before loading. One
+GDScript loader, `src/runtime/native_library.gd`, owns these checks and the
+`load_extension` call for every caller (the client runtime controller and the
+mounted cape arithmetic); each caller keeps its own fallback reasons. These
 are compatibility and integrity checks, not a signature or a sandbox for
 untrusted libraries. No optional missing library is registered automatically.
 An invalid result causes a whole-batch fallback, with no partial application.

@@ -1,10 +1,17 @@
 class_name ClientRuntimeController
 extends RefCounted
 const OptimizationProfile := preload("res://src/runtime/optimization_profile.gd")
+const NativeLibrary := preload("res://src/runtime/native_library.gd")
+## NativeLibrary result codes -> this controller's reasons (unchanged strings).
+const LOADER_REASONS := {"absent": "optional_runtime_absent", "manifest_invalid": "manifest_invalid",
+	"api_mismatch": "api_mismatch", "unsupported_platform": "unsupported_platform",
+	"incomplete": "optional_runtime_incomplete", "checksum_mismatch": "runtime_checksum_mismatch",
+	"late_load_refused": "late_load_refused", "extension_unavailable": "extension_unavailable"}
 const MOUNTED_PROFILE_IDS := ["moor_pony", "golden_plains_horse", "crystalback_tortoise", "rabbit", "jadefeather_raptor"]
 ## Human-testing defaults request the optional runtime. Comparison observes
 ## legacy presentation; Rust mode owns supported mounted work when available.
-const ABI := 1
+## One ABI for the manifest (checked by NativeLibrary) and `runtime_info()`.
+const ABI := NativeLibrary.ABI
 const COMPARE_INTERVAL := 60
 const COMPARE_LIMIT := 256
 static var _current_ref: WeakRef
@@ -55,46 +62,15 @@ func initialize(directory := "") -> void:
 	if _requested not in ["compare", "rust", "services"]:
 		_reason = "unsupported_mode"
 		return
-	if directory.is_empty():
-		directory = (ProjectSettings.globalize_path("res://bin/client_runtime") if OS.has_feature("editor")
-			else OS.get_executable_path().get_base_dir().path_join("bin/client_runtime"))
-	var manifest_path := directory.path_join("runtime-manifest.json")
-	if not FileAccess.file_exists(manifest_path):
-		_reason = "optional_runtime_absent"
+	# Every check runs again on each initialize (no NativeLibrary.ensure() cache).
+	var loaded := NativeLibrary.load_verified(directory)
+	if str(loaded.code) not in ["absent", "manifest_invalid"]:
+		_manifest = loaded.manifest
+	if not bool(loaded.ok):
+		_reason = str(LOADER_REASONS.get(loaded.code, loaded.code))
 		return
-	var parser := JSON.new()
-	if parser.parse(FileAccess.get_file_as_string(manifest_path)) != OK or not parser.data is Dictionary:
-		_reason = "manifest_invalid"
-		return
-	_manifest = parser.data
 	var version: Dictionary = Engine.get_version_info()
-	if int(_manifest.get("abi", -1)) != ABI or int(_manifest.get("engine_major", -1)) != int(version.major) \
-			or int(_manifest.get("engine_minor", -1)) != int(version.minor):
-		_reason = "api_mismatch"
-		return
-	var platform := {"Windows": "windows", "Linux": "linux", "macOS": "macos"}.get(OS.get_name(), "unsupported") as String
-	var library: String = str(_manifest.get("library", ""))
-	var expected_library: String = {"windows": "client_runtime.dll", "linux": "client_runtime.so", "macos": "client_runtime.dylib"}.get(platform, "")
-	if str(_manifest.get("platform", "")) != platform or str(_manifest.get("architecture", "")) != "x86_64" \
-			or not OS.has_feature("x86_64") \
-			or library.is_empty() or library != expected_library:
-		_reason = "unsupported_platform"
-		return
-	var library_path := directory.path_join(library)
-	var descriptor := directory.path_join("client_runtime.gdextension")
-	if not FileAccess.file_exists(library_path) or not FileAccess.file_exists(descriptor):
-		_reason = "optional_runtime_incomplete"
-		return
-	if FileAccess.get_sha256(library_path) != str(_manifest.get("library_sha256", "")) \
-			or FileAccess.get_sha256(descriptor) != str(_manifest.get("descriptor_sha256", "")):
-		_reason = "runtime_checksum_mismatch"
-		return
-	if not ClassDB.class_exists("RabbitLandsClientRuntime"):
-		GDExtensionManager.load_extension(descriptor)
-	if not ClassDB.class_exists("RabbitLandsClientRuntime"):
-		_reason = "extension_unavailable"
-		return
-	_native = ClassDB.instantiate("RabbitLandsClientRuntime") as RefCounted
+	_native = ClassDB.instantiate(NativeLibrary.RUNTIME_CLASS) as RefCounted
 	var info: Dictionary = _native.call("runtime_info") if _native != null else {}
 	if int(info.get("abi", -1)) != ABI or not bool(info.get("ready", false)) \
 			or int(info.get("engine_major", -1)) != int(version.major) or int(info.get("engine_minor", -1)) != int(version.minor):
