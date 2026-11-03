@@ -6,6 +6,7 @@ const MapCache := preload("res://src/world/map_scene_cache.gd")
 const Archived := preload("res://src/actors/archived_model_policy.gd")
 const GeometryPolicy := preload("res://src/world/map_geometry_policy.gd")
 const Installed := preload("res://src/world/installed_world_cache.gd")
+const RendererFamily := preload("res://src/runtime/renderer_family.gd")
 const POLICY := "map-collision-faces-v1"
 const VERSION := 1
 const DIRECTORY := "user://map-collision-cache"
@@ -29,10 +30,13 @@ static func _digest(value: Variant) -> String:
 static func _logical(path: String) -> String:
 	return path if not Sources.source_path(path).is_empty() else Sources.logical_source(path)
 
+## Keyed by the renderer's cache family (RendererFamily.cache_renderer), as the
+## geometry cache is: Mobile reads Forward+'s collision and, through this
+## policy, its paving.
 static func policy() -> String:
 	var engine := Engine.get_version_info()
 	return _digest([POLICY,VERSION,GeometryPolicy.VERSION,MapCache.CACHE_FORMAT_VERSION,engine.get("hash",""),
-		engine.get("string",""),RenderingServer.get_current_rendering_method(),Archived.cache_token()])
+		engine.get("string",""),RendererFamily.cache_renderer(),Archived.cache_token()])
 
 static func _root() -> String:
 	return DIRECTORY.path_join(policy())

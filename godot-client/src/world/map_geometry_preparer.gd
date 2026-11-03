@@ -14,6 +14,7 @@ const Quantization := preload("res://src/world/gltf_quantization.gd")
 const MapMesh := preload("res://src/world/map_mesh_extension.gd")
 const MapCache := preload("res://src/world/map_scene_cache.gd")
 const GroundProfile := preload("res://src/world/look/look_profile.gd")
+const RendererFamily := preload("res://src/runtime/renderer_family.gd")
 signal progress(completed: int,total: int,label: String)
 var _cancelled := false
 
@@ -328,7 +329,8 @@ func run(job: Dictionary = {}) -> Dictionary:
 		paving_keys.sort()
 		var engine := Engine.get_version_info()
 		report.release_metadata = {"scope_complete":complete,"platform":OS.get_name(),
-			"renderer":RenderingServer.get_current_rendering_method(),
+			# The cache family the catalog serves (forward_plus for Forward+ and Mobile).
+			"renderer":RendererFamily.cache_renderer(),
 			"engine":{"hash":str(engine.get("hash","")),"string":str(engine.get("string",""))},
 			"engine_executable_sha256":FileAccess.get_sha256(OS.get_executable_path()),
 			"user_data_path":ProjectSettings.globalize_path("user://"),

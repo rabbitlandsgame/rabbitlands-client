@@ -2,6 +2,7 @@ extends RefCounted
 ## SHA-bound, read-only release preparation. Loose metadata never establishes
 ## source/payload acceptance: existing family readers still verify those bytes.
 const Vram := preload("res://src/world/vram_textures.gd")
+const RendererFamily := preload("res://src/runtime/renderer_family.gd")
 const POLICY := "rabbitlands-installed-world-v1"
 const DESCRIPTOR := "res://data/maps/prepared-world.json"
 const ROOT := "res://prepared-world"
@@ -66,10 +67,13 @@ static func _file_path(relative: String, family: String, policy: String, folder:
 	if not _hash(parts[3].get_basename()): return false
 	return parts[3].get_extension() in (["json"] if folder == "entries" else (["rlc"] if family == "collision" else (["res"] if family == "paving" else ["res", "scn"])))
 
+## A catalog's `renderer` is the cache family it was prepared for
+## (RendererFamily.cache_renderer): a `forward_plus` catalog serves Forward+ and
+## Mobile, never the compatibility renderer.
 static func _validate_catalog(value: Dictionary, identity: String) -> bool:
 	if value.get("schema") != 1 or value.get("policy") != POLICY \
 			or value.get("compatibility") != identity or value.get("platform") != OS.get_name() \
-			or value.get("renderer") != RenderingServer.get_current_rendering_method() \
+			or value.get("renderer") != RendererFamily.cache_renderer() \
 			or value.get("engine") != _engine(): return false
 	for family: String in FAMILIES:
 		if not _hash(value.get(family + "_policy")): return false

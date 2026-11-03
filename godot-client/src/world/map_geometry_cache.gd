@@ -12,6 +12,7 @@ const GeometryPolicy := preload("res://src/world/map_geometry_policy.gd")
 const PavingCache := preload("res://src/world/map_paving_cache.gd")
 const GroundProfile := preload("res://src/world/look/look_profile.gd")
 const Installed := preload("res://src/world/installed_world_cache.gd")
+const RendererFamily := preload("res://src/runtime/renderer_family.gd")
 const SCOPE := "res://data/maps/geometry-cache-scope.json"
 const REGISTRY := "res://data/maps/registry.json"
 const DIRECTORY := "user://map-geometry-cache"
@@ -53,10 +54,14 @@ static func logical(path: String) -> String:
 static func _digest(value: Variant) -> String:
 	return Sources.digest_bytes(JSON.stringify(value,"",true,true).to_utf8_buffer())
 
+## The renderer part is its cache family (RendererFamily.cache_renderer): Mobile
+## shares Forward+'s mesh, texture and material storage, so it keys as
+## `forward_plus` and reads the same user caches and shipped prepared world;
+## the compatibility renderer keeps its own key.
 static func _policy_digest() -> String:
 	var engine := Engine.get_version_info()
 	return _digest([VERSION,Writer.POLICY,Sources.POLICY,Bindings.POLICY,MapCache.CACHE_FORMAT_VERSION,engine.get("hash",""),
-		engine.get("string",""),RenderingServer.get_current_rendering_method(),Archived.cache_token()])
+		engine.get("string",""),RendererFamily.cache_renderer(),Archived.cache_token()])
 
 static func initialize() -> void:
 	_mutex.lock()

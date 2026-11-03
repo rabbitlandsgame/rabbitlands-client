@@ -5,6 +5,10 @@ const Writer := preload("res://src/world/map_geometry_writer.gd")
 const Geometry := preload("res://src/world/map_geometry_cache.gd")
 const Collision := preload("res://src/world/map_collision_cache.gd")
 const Paving := preload("res://src/world/map_paving_cache.gd")
+const RendererFamily := preload("res://src/runtime/renderer_family.gd")
+## The files that key a prepared-world or content cache by renderer.
+const CACHE_KEY_SOURCES := ["res://src/world/map_geometry_cache.gd", "res://src/world/map_collision_cache.gd",
+	"res://src/world/installed_world_cache.gd", "res://src/world/map_geometry_preparer.gd"]
 var failures := 0
 var checks := 0
 var folder := ""
@@ -72,6 +76,56 @@ func portable_writer() -> void:
 			"absolute primary plus stable res:// child load in relocated project after source originals are removed")
 	root.free()
 
+## Caches are keyed by the renderer's cache family. Mobile shares Forward+'s
+## mesh, texture and material storage, so it computes Forward+'s keys and
+## accepts a catalog prepared under Forward+ (the shipped prepared world); the
+## compatibility renderer keeps its own keys. A catalog stamped `mobile` serves
+## no renderer: Mobile adds no cache family.
+func renderer_family(catalog: Dictionary, identity: String) -> void:
+	var methods: Array[String] = [RendererFamily.FORWARD_PLUS, RendererFamily.MOBILE, RendererFamily.COMPATIBILITY]
+	var keys := {}
+	for method: String in methods:
+		RendererFamily.override_for_tests(method)
+		var geometry: String = Geometry._policy_digest()
+		var collision: String = Collision.policy()
+		var paving: String = Paving.policy()
+		keys[method] = [geometry, collision, paving, Installed.compatibility(geometry, collision, paving)]
+	var forward: Array = keys[RendererFamily.FORWARD_PLUS]
+	var compat: Array = keys[RendererFamily.COMPATIBILITY]
+	check(keys[RendererFamily.MOBILE] == forward,
+		"Mobile keys the geometry, collision and paving caches and the installed identity as Forward+")
+	var distinct := true
+	for index: int in forward.size():
+		distinct = distinct and forward[index] != compat[index]
+	check(distinct, "the compatibility renderer keeps its own geometry, collision, paving and installed keys")
+	for stamped: String in methods:
+		var copy := catalog.duplicate(true)
+		copy.renderer = stamped
+		for method: String in methods:
+			RendererFamily.override_for_tests(method)
+			var expected := stamped == RendererFamily.cache_renderer(method)
+			check(Installed._validate_catalog(copy, identity) == expected, "a catalog stamped %s is %s under %s"
+				% [stamped, "accepted" if expected else "rejected", method])
+	# Bound through a descriptor, as a release ships it.
+	var forward_catalog := catalog.duplicate(true)
+	forward_catalog.renderer = RendererFamily.FORWARD_PLUS
+	var root := folder.path_join("installed-forward")
+	var descriptor := folder.path_join("descriptor-forward.json")
+	bind_catalog(root, forward_catalog, descriptor)
+	RendererFamily.override_for_tests(RendererFamily.MOBILE)
+	check(Installed._bound_catalogs(descriptor, root).size() == 1, "a catalog prepared under Forward+ binds under Mobile")
+	RendererFamily.override_for_tests(RendererFamily.COMPATIBILITY)
+	check(Installed._bound_catalogs(descriptor, root).is_empty(),
+		"a catalog prepared under Forward+ does not bind under the compatibility renderer")
+	RendererFamily.override_for_tests("")
+	var offenders := PackedStringArray()
+	for path: String in CACHE_KEY_SOURCES:
+		var source := FileAccess.get_file_as_string(path)
+		if source.contains("get_current_rendering_method") or not source.contains("RendererFamily.cache_renderer()"):
+			offenders.append(path.get_file())
+	check(offenders.is_empty(), "the cache key sites ask RendererFamily.cache_renderer(), never the engine's method (%s)"
+		% ", ".join(offenders))
+
 func run() -> void:
 	folder = "user://installed-world-contract-%d" % OS.get_process_id()
 	var root := folder.path_join("installed")
@@ -100,12 +154,13 @@ func run() -> void:
 		targets[family] = entry_path
 		metadata[family] = entry
 	var catalog := {"schema": 1, "policy": Installed.POLICY, "compatibility": identity, "platform": OS.get_name(),
-		"renderer": RenderingServer.get_current_rendering_method(), "engine": Installed._engine(),
+		"renderer": RendererFamily.cache_renderer(), "engine": Installed._engine(),
 		"geometry_policy": policies.geometry, "collision_policy": policies.collision, "paving_policy": policies.paving,
 		"scope_sha256": hex("scope"), "registry_sha256": hex("registry"), "target_keys": [key], "targets": {key: targets}, "files": files}
 	bind_catalog(root, catalog, descriptor)
 	var accepted := Installed._bound_catalogs(descriptor, root)
 	check(accepted.size() == 1, "PCK-style descriptor SHA binds a compatible complete catalog")
+	renderer_family(catalog, identity)
 	if not accepted.is_empty():
 		var resolved := accepted[0]
 		for family: String in Installed.FAMILIES:

@@ -7,6 +7,7 @@ const Cache := preload("res://src/world/map_geometry_cache.gd")
 const Installed := preload("res://src/world/installed_world_cache.gd")
 const Collision := preload("res://src/world/map_collision_cache.gd")
 const Paving := preload("res://src/world/map_paving_cache.gd")
+const RendererFamily := preload("res://src/runtime/renderer_family.gd")
 var failures := 0
 
 func _init() -> void:
@@ -30,6 +31,28 @@ func catalog(keys: Array, scope_sha: String) -> Dictionary:
 	return {"scope_sha256": scope_sha, "registry_sha256": FileAccess.get_sha256(Cache.REGISTRY),
 		"geometry_policy": Cache._policy_digest(), "collision_policy": Collision.policy(),
 		"paving_policy": Paving.policy(), "target_keys": keys}
+
+## A catalog prepared under Forward+ (the shipped prepared world) supplies the
+## targets under Mobile, which keys its caches as Forward+ (installed coverage
+## "complete"), and not under the compatibility renderer, which keeps its own
+## keys and scans the manifests (installed coverage "raw_fallback").
+func renderer_family(keys: Array) -> void:
+	RendererFamily.override_for_tests(RendererFamily.FORWARD_PLUS)
+	var forward := catalog(keys, FileAccess.get_sha256(Cache.SCOPE))
+	Installed._catalogs.assign([forward])
+	reset_cache()
+	var forward_policy := Cache.policy()
+	expect(Cache._catalog_targets, "Forward+ takes its targets from a catalog prepared under Forward+")
+	for method: String in [RendererFamily.MOBILE, RendererFamily.COMPATIBILITY]:
+		RendererFamily.override_for_tests(method)
+		reset_cache()
+		var policy := Cache.policy()
+		var shared := method == RendererFamily.MOBILE
+		var covered := Cache._catalog_targets or not Cache._installed_target_keys(policy).is_empty()
+		expect((policy == forward_policy) == shared and covered == shared and Cache._scope_error.is_empty(),
+			"%s %s Forward+'s geometry policy and %s the installed catalog's targets" % [method,
+				"shares" if shared else "does not share", "takes" if shared else "scans the manifests instead of"])
+	RendererFamily.override_for_tests("")
 
 func run() -> void:
 	var saved_loaded := Installed._loaded
@@ -80,6 +103,7 @@ func run() -> void:
 	Cache.cooking = true
 	expect(Cache._installed_target_keys(Cache._policy_digest()).is_empty(), "a producer always scans the manifests")
 	Cache.cooking = false
+	renderer_family(keys)
 
 	Installed._loaded = saved_loaded
 	Installed._catalogs.assign(saved_catalogs)
