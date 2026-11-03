@@ -51,6 +51,20 @@ extends SceneTree
 ##   interest does. Default 0: none.
 ## - RABBITLANDS_CROWD_BENCH_SERVER_TIME=1: open every tick with an
 ##   ELORIA_SERVER_TIME stamp, so remote steps are paced by server time.
+## - RABBITLANDS_CROWD_BENCH_LONG_FRAME_MSEC: frames at least this long
+##   (default 1000) are logged as they end with the harness stage, the engine
+##   phase split and Main's arrival/streaming state (`longFrames`, and a
+##   flushed `<report>.long-frames.log` that survives a later hang).
+##
+## Per-actor census hook (wave 2 AW-00): later chunks add census fields without
+## editing this harness. An actor node may implement
+## `presentation_census() -> Dictionary` of int/float/bool counters; they are
+## summed into `census.actorFields` (all actors, built bodies and built bodies
+## in the camera frustum). Harness-side analyses live in
+## res://tests/integration/census/*.gd, each a RefCounted with
+## `begin(boundary, context) -> bool`, `actor(node, facts)` and
+## `finish() -> Dictionary`, merged under `census.contributors.<file stem>`.
+## See census_begin for the facts and context they receive.
 
 const BENCHMARK_MAIN_PATH := "res://tests/integration/crowd_benchmark_main.tscn"
 const TIERS := AnimationGate.Tier
@@ -163,6 +177,28 @@ var _route_wall_series: Array[float] = []
 var _route_last_frame_usec := 0
 var _route_primed := false
 var _route_peak_static_bytes := 0
+## The harness stage a long frame is attributed to (`_set_stage`).
+var _stage := "startup"
+## Frames at least `_long_frame_msec` long (wall time between drawn frames),
+## logged as they end; capped at LONG_FRAME_RECORDS.
+const LONG_FRAME_RECORDS := 200
+var _long_frame_msec := 1000
+var _long_frames: Array = []
+var _long_frame_total := 0
+var _long_frame_last_usec := 0
+## A traversal leg's transition, watched each drawn frame (arrival curtain).
+var _leg_probe: Dictionary = {}
+## Census contributor scripts (census_contributor_directory), loaded once.
+var _census_scripts: Array = []
+## Readiness of a route arrival also waits for the arrival curtain and Main's
+## arrival to finish (Compatibility holds the curtain for its camera warm-up,
+## and neighbours are not requested while it is up).
+const ROUTE_READINESS_REQUIRES_ARRIVAL := true
+## How long a walk's last step may take to reach the camera focus.
+const APPROACH_SETTLE_MSEC := 3000
+const APPROACH_SETTLE_METRES := 2.0
+## What teardown found of the RL head prewarm (cancel_rl_head_warm).
+var _rl_head_teardown: Dictionary = {}
 
 func _init() -> void:
 	call_deferred("_run")
@@ -206,6 +242,14 @@ static func cells_for(profile: String) -> Array:
 			"shape": "traversal", "activity": "route", "visit": visit})
 	if profile == "all":
 		return cells
+	# Explicit wave-2 selectors (existing profile memberships stay unchanged):
+	# one real walking seam crossing (Workloads.seam_route), its own cell so the
+	# six-leg southern route and its soak keep their leg contract, and the
+	# `traversal` profile of the three route cells.
+	cells.append({"id": "traversal-seam-walk", "count": 1, "shape": "traversal",
+		"activity": "route", "visit": "cold", "routeId": "seam"})
+	if profile == "traversal":
+		return cells.filter(func(cell: Dictionary) -> bool: return str(cell.shape) == "traversal")
 	# Explicit Phase7 selector; existing profile memberships stay unchanged.
 	cells.append({"id":"combat-heat-bolt-160","count":160,"shape":"heat_bolt","activity":"heat_bolt_combat"})
 	if profile == "phase7":
@@ -289,6 +333,7 @@ func _run() -> void:
 		"videoVendor": RenderingServer.get_video_adapter_vendor(),
 		"processor": OS.get_processor_name(),
 		"processorCount": OS.get_processor_count(),
+		"workerPool": worker_pool_snapshot(),
 		"memoryInfo": OS.get_memory_info(),
 		"godot": Engine.get_version_info(),
 		"runtimeBuild": {"standalone": OS.has_feature("standalone"), "editor": OS.has_feature("editor"),
@@ -372,6 +417,15 @@ func _run() -> void:
 			or not _expect(replay or not _creatures.is_empty(), "creature models resolve"):
 		_finish()
 		return
+	_long_frame_msec = _env_int("RABBITLANDS_CROWD_BENCH_LONG_FRAME_MSEC", 1000, 100)
+	_census_scripts = census_contributor_scripts(census_contributor_directory())
+	_report.measurement["census"] = {"contributorDirectory": census_contributor_directory(),
+		"contributors": census_contributor_names(_census_scripts),
+		"actorMethod": "presentation_census"}
+	# The frame instrumentation is connected before Main exists, so a long frame
+	# during its first arrival (the 4-core proxy's >= 9.97 s stall) is attributed.
+	_connect_frame_instrumentation()
+	_set_stage("setup")
 	await _set_up_main()
 	if _main == null:
 		_finish()
@@ -409,6 +463,43 @@ func _run() -> void:
 		_report.measurement["requestedDisplayWindowMode"] = null
 		_report.measurement["actualWindowMode"] = null
 		_report.measurement["actualVsyncMode"] = null
+	_report["crowdPolicy"] = (_main.get("crowd") as RefCounted).call("describe") \
+		if _main.get("crowd") != null else {"available": false}
+	_record_effective_runtime()
+	if OS.get_environment("RABBITLANDS_PREPARED_PLACEMENT_PROBE").strip_edges() == "1":
+		# Explicit functional run: no prewarm, sampled frames or timing cells.
+		_report["functionalOnly"] = true
+		_report["benchmarkPurpose"] = "prepared_placement_restore_probe"
+		var probe := _main.call("benchmark_restore_prepared_placement",
+			_env("RABBITLANDS_PREPARED_PLACEMENT_PROBE_MAP", "four_gates"),
+			_env("RABBITLANDS_PREPARED_PLACEMENT_PROBE_CHUNK", "02_07")) as Dictionary
+		_report["preparedPlacementProbe"] = probe
+		_expect(str(probe.get("status", "")) == "restored", "explicit prepared placement restores")
+		await _tear_down_main()
+		_finish()
+		return
+	# A replay warms nothing: what the recording shows is built in its prologue,
+	# and a model first seen during the sample costs what it costs in play.
+	if not replay:
+		_set_stage("prewarm")
+		await _prewarm()
+	for cell: Dictionary in cells:
+		if _failures > 0:
+			break # An invalid setup must not spend time sampling later cells.
+		_set_stage("cell:" + str(cell.id))
+		if str(cell.shape) == "traversal":
+			await _run_traversal_cell(cell)
+		else:
+			await _run_cell(cell)
+	_set_stage("teardown")
+	await _tear_down_main()
+	_finish()
+
+
+## Engine-iteration phase hooks: physics, node processing, the deferred flush
+## and the draw of every frame (`_on_iteration_drawn`). Disconnected by
+## `_stop_benchmark_instrumentation` before teardown.
+func _connect_frame_instrumentation() -> void:
 	physics_frame.connect(_on_iteration_started)
 	process_frame.connect(_on_process_started)
 	# The last node to process marks where node processing ends and the
@@ -432,34 +523,25 @@ func _run() -> void:
 	else:
 		RenderingServer.frame_pre_draw.connect(_on_draw_started)
 		RenderingServer.frame_post_draw.connect(_on_iteration_drawn)
-	_report["crowdPolicy"] = (_main.get("crowd") as RefCounted).call("describe") \
-		if _main.get("crowd") != null else {"available": false}
-	_record_effective_runtime()
-	if OS.get_environment("RABBITLANDS_PREPARED_PLACEMENT_PROBE").strip_edges() == "1":
-		# Explicit functional run: no prewarm, sampled frames or timing cells.
-		_report["functionalOnly"] = true
-		_report["benchmarkPurpose"] = "prepared_placement_restore_probe"
-		var probe := _main.call("benchmark_restore_prepared_placement",
-			_env("RABBITLANDS_PREPARED_PLACEMENT_PROBE_MAP", "four_gates"),
-			_env("RABBITLANDS_PREPARED_PLACEMENT_PROBE_CHUNK", "02_07")) as Dictionary
-		_report["preparedPlacementProbe"] = probe
-		_expect(str(probe.get("status", "")) == "restored", "explicit prepared placement restores")
-		await _tear_down_main()
-		_finish()
-		return
-	# A replay warms nothing: what the recording shows is built in its prologue,
-	# and a model first seen during the sample costs what it costs in play.
-	if not replay:
-		await _prewarm()
-	for cell: Dictionary in cells:
-		if _failures > 0:
-			break # An invalid setup must not spend time sampling later cells.
-		if str(cell.shape) == "traversal":
-			await _run_traversal_cell(cell)
-		else:
-			await _run_cell(cell)
-	await _tear_down_main()
-	_finish()
+	_long_frame_last_usec = Time.get_ticks_usec()
+
+
+## Names what the harness is doing, for long-frame attribution.
+func _set_stage(stage: String) -> void:
+	_stage = stage
+
+
+## The worker pool the engine was started with. Godot sizes it from
+## `threading/worker_pool/max_threads` (-1: the logical CPU count, which on
+## Windows ignores the process affinity mask), read once at startup; a run
+## that matches it to an affinity mask sets it in a configuration overlay's
+## override.cfg (run_crowd_presentation_benchmark.py --worker-threads).
+static func worker_pool_snapshot() -> Dictionary:
+	return {"maxThreadsSetting": int(ProjectSettings.get_setting("threading/worker_pool/max_threads", -1)),
+		"lowPriorityThreadRatio": float(ProjectSettings.get_setting(
+			"threading/worker_pool/low_priority_thread_ratio", 0.3)),
+		"processorCount": OS.get_processor_count(),
+		"projectPath": ProjectSettings.globalize_path("res://")}
 
 
 ## A release template ignores --script. Prove that the intended workload loop
@@ -691,7 +773,9 @@ func _run_cell(spec: Dictionary) -> void:
 		_app_state.set("local_actor_id", FIRST_ACTOR_ID)
 		_app_state.set("actors", records)
 		_app_state.call("mark_all_actors_changed")
+		_set_stage("cell:%s:spawn" % str(spec.id))
 		spawn = await _spawn_and_build(count)
+	_set_stage("cell:%s:readiness" % str(spec.id))
 	var readiness := await _wait_for_world_readiness(str(spec["id"]), 300)
 	var census_before := _census("afterSpawn")
 	if not _accept_explicit_census(spec, census_before, "afterSpawn"):
@@ -740,6 +824,7 @@ func _run_cell(spec: Dictionary) -> void:
 		_replay_begin()
 	else:
 		await _prime(plan)
+	_set_stage("cell:%s:warmup" % str(spec.id))
 	await _drive_for(plan, int((_report["measurement"] as Dictionary)["warmupMilliseconds"]), null)
 	var census_ready := {}
 	if _production_undead or _authored_gauntlet:
@@ -773,7 +858,9 @@ func _run_cell(spec: Dictionary) -> void:
 			row[3] = 0
 			commands[command] = row
 	var profile_frames: Array = []
+	_set_stage("cell:%s:sample" % str(spec.id))
 	await _drive_for(plan, int((_report["measurement"] as Dictionary)["sampleMilliseconds"]), raw, profile_frames)
+	_set_stage("cell:%s:after-sample" % str(spec.id))
 	var elapsed := Time.get_ticks_msec() - sample_started
 	var census_after := _census("afterSample")
 	var pacing_after := _steady_pacing_snapshot()
@@ -1295,10 +1382,91 @@ func _on_iteration_drawn() -> void:
 			_route_wall_series.append(_round(float(now - _route_last_frame_usec) / 1000.0))
 		_route_last_frame_usec = now
 		_route_peak_static_bytes = maxi(_route_peak_static_bytes, OS.get_static_memory_usage())
+	if not _leg_probe.is_empty():
+		_observe_leg_probe(now)
+	if _long_frame_last_usec > 0 and now - _long_frame_last_usec >= _long_frame_msec * 1000:
+		_note_long_frame(now - _long_frame_last_usec)
+	_long_frame_last_usec = now
 	_iteration_started_usec = -1
 	_process_started_usec = -1
 	_process_ended_usec = -1
 	_draw_started_usec = -1
+
+
+## A frame at least `_long_frame_msec` long, logged as it ends: the harness
+## stage, the engine phase split of the iteration that ended it (physics, node
+## processing, the deferred flush and the draw; draw is null headless), the
+## engine's own process/physics timers and Main's arrival and streaming state.
+## The wall time runs from the previous drawn frame, so it includes a frame-cap
+## sleep and whatever ran between the iteration hooks.
+func _note_long_frame(wall_usec: int) -> void:
+	_long_frame_total += 1
+	var row := {"atMsec": Time.get_ticks_msec(), "wallMilliseconds": _round(float(wall_usec) / 1000.0),
+		"iterationMilliseconds": _round(_last_iteration_usec / 1000.0) if _last_iteration_usec >= 0.0 else null,
+		"stage": _stage, "phases": _last_phases.duplicate(),
+		"engineProcessMilliseconds": _round(Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0),
+		"enginePhysicsMilliseconds": _round(Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0),
+		"main": _long_frame_context()}
+	if _long_frames.size() < LONG_FRAME_RECORDS:
+		_long_frames.append(row)
+	var line := JSON.stringify(row)
+	print("crowd-presentation long-frame ", line)
+	_append_side_log(".long-frames.log", line)
+
+
+## Main's arrival and streaming state for a long frame (cheap reads only).
+func _long_frame_context() -> Dictionary:
+	var out := {"rlHeadWarming": RLHeadLibrary.warming(), "cachedModels": GlbSceneCache.cached_scene_count(),
+		"orphanImports": ContinentChunkStream.orphans_pending()}
+	if not is_instance_valid(_main):
+		return out
+	if is_instance_valid(_app_state):
+		out["map"] = str(_app_state.get("current_map"))
+	out["loadedMap"] = str(_main.get("loaded_server_map"))
+	out["deferredMapLoad"] = bool(_main.get("_deferred_map_load"))
+	out["arrivalPending"] = bool(_main.call("_arrival_pending"))
+	var curtain := _main.get("arrival_curtain") as Node
+	out["curtainShowing"] = curtain != null and bool(curtain.call("is_showing"))
+	var warmup: Variant = _main.get("camera_shader_warmup")
+	if warmup is RefCounted and (warmup as RefCounted).has_method("snapshot"):
+		out["cameraWarmupActive"] = bool(((warmup as RefCounted).call("snapshot") as Dictionary).get("active", false))
+	out["rlHeadRenderWarm"] = RLHeadLibrary.render_warm_snapshot()
+	var loader := _main.get("world_loader") as WorldLoader
+	if loader != null and is_instance_valid(loader.world_root):
+		var chunk := loader.world_root as ContinentChunkStream
+		if chunk != null:
+			out["chunkCells"] = chunk.cells.size()
+			out["chunkWorkerPending"] = chunk.get("_thread") != null
+	out.merge(exterior_snapshot(_main.get("exterior_stream") as ExteriorRegionStream))
+	out["actorNodes"] = (_main.get("actor_nodes") as Dictionary).size()
+	return out
+
+
+## Main's exterior stream for a long-frame record, read without side effects.
+## ExteriorRegionStream.is_idle() is not used: it reaps finished orphan imports
+## (joins their threads, releases and frees their worlds), and a measurement
+## must not do that work from inside a frame hook.
+static func exterior_snapshot(exterior: ExteriorRegionStream) -> Dictionary:
+	if exterior == null:
+		return {}
+	return {"exteriorPreloadPending": bool(exterior.call("_has_pending_preload")),
+		"exteriorRetiring": (exterior.get("_retiring") as Array).size(),
+		"exteriorResidents": exterior.residents.keys()}
+
+
+## Each drawn frame while a traversal leg's transition runs: when the arrival
+## curtain first showed and when it last went away.
+func _observe_leg_probe(now_usec: int) -> void:
+	_leg_probe["frames"] = int(_leg_probe.get("frames", 0)) + 1
+	if not is_instance_valid(_main):
+		return
+	var curtain := _main.get("arrival_curtain") as Node
+	if curtain != null and bool(curtain.call("is_showing")):
+		if int(_leg_probe.get("curtainShownUsec", -1)) < 0:
+			_leg_probe["curtainShownUsec"] = now_usec
+		_leg_probe["curtainHiddenUsec"] = -1
+	elif int(_leg_probe.get("curtainShownUsec", -1)) >= 0 and int(_leg_probe.get("curtainHiddenUsec", -1)) < 0:
+		_leg_probe["curtainHiddenUsec"] = now_usec
 
 
 ## Waits for the end of this frame and returns its work in milliseconds.
@@ -1729,6 +1897,10 @@ func _census(boundary := "unspecified") -> Dictionary:
 			"aliveRemoteCreatures": 0, "invalidHealth": 0}
 	var mounted_presentation := MountedCensus.begin(boundary)
 	out["mountedPresentation"] = mounted_presentation
+	var hook := census_begin(_census_scripts, boundary, {"boundary": boundary, "main": _main,
+		"camera": camera, "localId": _local_id, "headless": _headless,
+		"quality": LookProfile.quality_name(LookProfile.quality()),
+		"renderingMethod": RenderingServer.get_current_rendering_method()})
 	var planes: Array[Plane] = camera.get_frustum() if camera != null else []
 	# The quarter tier by name, so the census also runs against a client
 	# without it.
@@ -1780,7 +1952,9 @@ func _census(boundary := "unspecified") -> Dictionary:
 		var hidden: bool = actor.has_method("crowd_hidden") and bool(actor.call("crowd_hidden"))
 		if hidden:
 			out["crowdHidden"] += 1
-		if actor.is_drawn():
+		var drawn := actor.is_drawn()
+		var in_frustum := false
+		if drawn:
 			out["drawn"] += 1
 			if not deferred and not hidden:
 				out["visibleBuiltBodies"] += 1
@@ -1789,6 +1963,7 @@ func _census(boundary := "unspecified") -> Dictionary:
 				if plane.distance_to(actor.global_position + Vector3.UP) > actor.view_radius():
 					inside = false
 					break
+			in_frustum = inside
 			out["inFrustumAndDrawn"] += int(inside)
 			if not deferred and not hidden:
 				out["inFrustumBuiltBodies"] += int(inside)
@@ -1826,6 +2001,13 @@ func _census(boundary := "unspecified") -> Dictionary:
 			# A paused body's model subtree is disabled (feature clients only).
 			if not actor.has_method("model_processing") or bool(actor.call("model_processing")):
 				out["skeletonsProcessing"] += 1
+		census_include(hook, actor, {"id": actor.actor_id, "local": actor.actor_id == _local_id,
+			"built": not deferred, "deferred": deferred, "hidden": hidden, "drawn": drawn,
+			"inFrustum": in_frustum, "tier": tier,
+			"cameraDistance": camera.global_position.distance_to(actor.global_position) if camera != null else -1.0,
+			"groundDistance": Vector2(actor.global_position.x - local.global_position.x,
+				actor.global_position.z - local.global_position.z).length() if local != null else -1.0})
+	out.merge(census_finish(hook), true)
 	var gate := _main.get("animation_gate") as AnimationGate
 	if gate != null and gate.has_method("group_sizes"):
 		out["halfGroups"] = gate.call("group_sizes", AnimationGate.Tier.HALF)
@@ -1849,6 +2031,111 @@ func _census(boundary := "unspecified") -> Dictionary:
 	return out
 
 
+## Where census contributor scripts live: census/ beside the benchmark Main
+## scene (res://tests/integration/census/). The directory is optional, not a
+## file this workload needs: a benchmark export keeps only its allowlisted
+## workload files (tools/benchmark_package.py) and then has none. It is
+## derived from BENCHMARK_MAIN_PATH instead of being spelled as a quoted
+## res://tests path, because the export's dependency check
+## (tests/test_benchmark_package.py) treats every such path in a workload file
+## as a file the export must keep.
+static func census_contributor_directory() -> String:
+	return BENCHMARK_MAIN_PATH.get_base_dir().path_join("census") + "/"
+
+
+## The census contributor scripts in `directory`, sorted by file name; none
+## when the directory is absent (a benchmark export packages only its
+## allowlisted workload files).
+static func census_contributor_scripts(directory: String) -> Array:
+	var scripts: Array = []
+	if not DirAccess.dir_exists_absolute(directory):
+		return scripts
+	var names: Array[String] = []
+	for listed: String in DirAccess.get_files_at(directory):
+		# Exported scripts list as .gdc or .gd.remap; both load by their .gd path.
+		var file := listed.trim_suffix(".remap")
+		var source := file.get_basename() + ".gd"
+		if file.get_extension() in ["gd", "gdc"] and not names.has(source):
+			names.append(source)
+	names.sort()
+	for file: String in names:
+		var script := load(directory.path_join(file)) as GDScript
+		if script != null and script.can_instantiate():
+			scripts.append(script)
+	return scripts
+
+
+static func census_contributor_names(scripts: Array) -> Array[String]:
+	var names: Array[String] = []
+	for script: Script in scripts:
+		names.append(script.resource_path.get_file().get_basename())
+	return names
+
+
+## Starts one census pass of the per-actor hook (see the header): field sums
+## for `presentation_census()` and a fresh instance of every contributor whose
+## `begin(boundary, context)` returns true. `context` holds "boundary", "main",
+## "camera", "localId", "headless", "quality" and "renderingMethod".
+static func census_begin(scripts: Array, boundary: String, context: Dictionary) -> Dictionary:
+	var state := {"fields": {"all": {}, "builtBodies": {}, "inFrustumBuiltBodies": {}},
+		"reporting": 0, "ignored": {}, "contributors": []}
+	for script: GDScript in scripts:
+		var contributor: Object = script.new()
+		if contributor.has_method("begin") and bool(contributor.call("begin", boundary, context)):
+			(state.contributors as Array).append([script.resource_path.get_file().get_basename(), contributor])
+	return state
+
+
+## Adds one actor node to a census pass. `facts` are what the harness found:
+## "id", "local", "built" (not deferred), "deferred", "hidden" (crowd-hidden),
+## "drawn", "inFrustum" (drawn and inside the camera frustum), "tier"
+## (AnimationGate.Tier), "cameraDistance" and "groundDistance" (metres from the
+## local player on the ground plane; -1 when there is no camera or player).
+## Numeric and bool values of `presentation_census()` are summed per scope;
+## other values are listed under actorFields.ignoredFields.
+static func census_include(state: Dictionary, node: Object, facts: Dictionary) -> void:
+	if node.has_method("presentation_census"):
+		var fields: Variant = node.call("presentation_census")
+		if fields is Dictionary:
+			state["reporting"] = int(state.reporting) + 1
+			var scopes: Array[String] = ["all"]
+			if bool(facts.get("built", false)):
+				scopes.append("builtBodies")
+				if bool(facts.get("inFrustum", false)) and not bool(facts.get("hidden", false)):
+					scopes.append("inFrustumBuiltBodies")
+			for key: Variant in fields:
+				var value: Variant = (fields as Dictionary)[key]
+				if value is bool:
+					value = int(value)
+				if not (value is int or value is float):
+					(state.ignored as Dictionary)[str(key)] = true
+					continue
+				for scope: String in scopes:
+					var sums: Dictionary = (state.fields as Dictionary)[scope]
+					sums[str(key)] = sums.get(str(key), 0) + value
+	for pair: Array in state.contributors as Array:
+		var contributor := pair[1] as Object
+		if contributor.has_method("actor"):
+			contributor.call("actor", node, facts)
+
+
+## The census fields one pass adds: actorFields (sums per scope and how many
+## actors reported) and contributors (each contributor's `finish()`).
+static func census_finish(state: Dictionary) -> Dictionary:
+	var fields := (state.fields as Dictionary).duplicate(true)
+	fields["actorsReporting"] = int(state.reporting)
+	if not (state.ignored as Dictionary).is_empty():
+		var ignored: Array = (state.ignored as Dictionary).keys()
+		ignored.sort()
+		fields["ignoredFields"] = ignored
+	var contributions := {}
+	for pair: Array in state.contributors as Array:
+		var contributor := pair[1] as Object
+		var result: Variant = contributor.call("finish") if contributor.has_method("finish") else {}
+		contributions[str(pair[0])] = result if result is Dictionary else {"invalidResult": true}
+	return {"actorFields": fields, "contributors": contributions}
+
+
 func _live_effects() -> int:
 	var count := 0
 	for value: Variant in _main.get("world_effects") as Array:
@@ -1856,7 +2143,10 @@ func _live_effects() -> int:
 	return count
 
 
-func _wait_for_world_readiness(label: String, minimum_msec: int) -> Dictionary:
+## `require_arrival`: also wait until Main's arrival is complete and its
+## curtain gone (route arrivals: Compatibility holds the curtain through its
+## camera warm-up, and Main requests no neighbour while it is up).
+func _wait_for_world_readiness(label: String, minimum_msec: int, require_arrival := false) -> Dictionary:
 	if str(_report.get("map", "")) == "none" and str(_app_state.get("current_map")) in ["", "none"]:
 		await _settle_frames(4)
 		return {"label": label, "ready": true, "reason": "no map"}
@@ -1872,6 +2162,11 @@ func _wait_for_world_readiness(label: String, minimum_msec: int) -> Dictionary:
 		var chunk := loader.world_root as ContinentChunkStream if loader != null else null
 		last_state = _main.call("benchmark_readiness_snapshot") as Dictionary
 		var idle := _streaming_idle(loader, chunk) and bool(last_state.get("ready", false))
+		if require_arrival:
+			var curtain := _main.get("arrival_curtain") as Node
+			last_state["arrivalPending"] = bool(_main.call("_arrival_pending"))
+			last_state["curtainShowing"] = curtain != null and bool(curtain.call("is_showing"))
+			idle = idle and not bool(last_state.arrivalPending) and not bool(last_state.curtainShowing)
 		if _production_undead or _authored_gauntlet:
 			var presentation := _steady_pacing_snapshot()
 			last_state["steadyPresentation"] = presentation
@@ -1983,11 +2278,14 @@ func _prepare_authored_herd(spec: Dictionary) -> void:
 ## A client-only route, using the real Main/AppState loader and packet handlers.
 ## It intentionally does not claim server navigation or cold OS/storage caches.
 func _run_traversal_cell(spec: Dictionary) -> void:
+	var route_id := str(spec.get("routeId", "southern"))
+	var planned := Workloads.route(route_id)
 	var iteration_begin := RouteContent.clock()
 	var primer: Array[Dictionary] = []
 	if str(spec.visit) == "warm" and not _route_primed:
-		primer = await _traverse_southern_route()
-		_route_primed = primer.size() == Workloads.southern_route().size() and primer.all(
+		_set_stage("cell:%s:primer" % str(spec.id))
+		primer = await _traverse_route(route_id)
+		_route_primed = primer.size() == planned.size() and primer.all(
 			func(leg: Dictionary) -> bool: return bool(leg.get("success", false)))
 	_route_frame_series.clear()
 	_route_wall_series.clear()
@@ -1995,16 +2293,20 @@ func _run_traversal_cell(spec: Dictionary) -> void:
 	_route_peak_static_bytes = OS.get_static_memory_usage()
 	var before := _memory_sample()
 	var started := Time.get_ticks_msec()
+	var long_frames_before := _long_frame_total
 	_route_capture = true
-	var legs: Array[Dictionary] = await _traverse_southern_route()
+	var legs: Array[Dictionary] = await _traverse_route(route_id)
+	_set_stage("cell:%s:tail" % str(spec.id))
 	var wanted_duration := int((_report.measurement as Dictionary).sampleMilliseconds)
 	while Time.get_ticks_msec() - started < wanted_duration or _route_frame_series.size() < MIN_SAMPLE_FRAMES:
 		await _next_drawn_frame()
 	_route_capture = false
 	var elapsed := Time.get_ticks_msec() - started
-	var success := legs.size() == Workloads.southern_route().size() and legs.all(
+	var success := legs.size() == planned.size() and legs.all(
 		func(leg: Dictionary) -> bool: return bool(leg.get("success", false)))
-	_route_primed = success
+	if route_id == "southern":
+		_route_primed = success
+	_set_stage("cell:%s:final-readiness" % str(spec.id))
 	var readiness := await _wait_for_world_readiness(str(spec.id) + " final", 300)
 	var census := _census("afterRouteFinalReadiness")
 	var result := spec.duplicate(true)
@@ -2014,10 +2316,16 @@ func _run_traversal_cell(spec: Dictionary) -> void:
 		"wallFrameTime": _distribution(_route_wall_series), "readiness": readiness,
 		"plan": {"active": 1, "moving": 1, "fighting": 0},
 		"census": {"afterSpawn": census.duplicate(true), "afterSample": census},
-		"route": {"kind": "synthetic_client_streaming", "legs": legs,
-			"sources": ["southern-streaming-walk.json", "southern-region-routes.json"],
+		"longFrames": _long_frame_total - long_frames_before,
+		"route": {"kind": "synthetic_client_streaming", "routeId": route_id, "legs": legs,
+			"routeVersion": Workloads.ROUTE_VERSION,
+			"sources": ["exterior_connections.json seams", "streamingChunks coverage",
+				"southern-streaming-walk.json", "southern-region-routes.json"],
 			"boundaryContentSchema": 1,
+			"legSchema": 2,
 			"boundaryCaptureTiming": "synchronous capture cost is reported; remains in route frame/wall samples; transition milliseconds ends before arrival capture",
+			"visibleMetric": "transitionStart to Main's first arrival report (arrival_ready_v1: drawn, grounded, no curtain); null when none (a continuous handoff keeps the traveller)",
+			"settleMetric": "transitionStart to readiness: streaming idle, stable resources, arrival complete and curtain gone",
 			"serverNavigationCertified": false, "unmeasuredPrimer": primer,
 			"iterationClock": {"index": int(spec.get("soakIndex", 0)),
 				"plannedIterations": int(spec.get("soakIterations", 1)), "visit": str(spec.visit),
@@ -2031,50 +2339,131 @@ func _run_traversal_cell(spec: Dictionary) -> void:
 	_expect(success, "%s completes every deterministic route leg" % str(spec.id))
 
 
-func _traverse_southern_route() -> Array[Dictionary]:
+## Drives one route (Workloads.route). Per leg: place the player at its start
+## (a no-op when the previous leg arrived there), walk to its approach, let the
+## camera settle there, then change map the way the server would and wait for
+## readiness. Reports the transition's settle and player-visible times, the
+## arrival curtain, the handoff and where its frames sit in the route series.
+func _traverse_route(route_id: String) -> Array[Dictionary]:
 	var results: Array[Dictionary] = []
 	_app_state.set("actor_mounts", {})
 	_app_state.set("selected_actor_id", -1)
-	for leg: Dictionary in Workloads.southern_route():
+	for leg: Dictionary in Workloads.route(route_id):
 		var leg_start := RouteContent.clock()
-		var start_readiness: Dictionary = await _route_place(str(leg.map), Workloads.tile(leg.start), true)
+		var frames_at_start := _route_frame_series.size()
+		_set_stage("route:%s:start" % str(leg.id))
+		var start_readiness: Dictionary = await _route_place(str(leg.map), Workloads.tile(leg.start), true,
+			ROUTE_READINESS_REQUIRES_ARRIVAL)
 		if not bool(start_readiness.get("ready", false)):
 			results.append({"id": leg.id, "success": false, "startReadiness": start_readiness})
 			break
 		var start_content := RouteContent.capture(_main)
-		await _route_walk_to(Workloads.tile(leg.approach))
+		var frames_at_walk := _route_frame_series.size()
+		_set_stage("route:%s:walk" % str(leg.id))
+		var walk_started := Time.get_ticks_msec()
+		await _route_walk_to(Workloads.tile(leg.approach), Workloads.step_msec(leg))
+		var walk_msec := Time.get_ticks_msec() - walk_started
+		var approach_settle := await _route_settle_at(Workloads.tile(leg.approach))
 		var actor := (_main.get("actor_nodes") as Dictionary).get(FIRST_ACTOR_ID) as Node3D
 		var old_identity := actor.get_instance_id() if is_instance_valid(actor) else -1
 		var began := Time.get_ticks_msec()
 		var frames_before := _route_frame_series.size()
+		_set_stage("route:%s:transition" % str(leg.id))
 		var transition_start := RouteContent.clock()
+		_leg_probe = {"startUsec": int(transition_start.ticksUsec)}
+		# Border and seam crossings keep the roster, as the server does; other
+		# map changes empty it first (KILL_ALL_ACTORS).
 		var arrival: Dictionary = await _route_place(str(leg.destination), Workloads.tile(leg.arrival),
-			str(leg.kind) != "border")
+			str(leg.kind) not in ["border", "seam"], ROUTE_READINESS_REQUIRES_ARRIVAL)
 		# Preserve transition duration before the new boundary capture work.
 		var transition_msec := Time.get_ticks_msec() - began
 		var transition_end := RouteContent.clock()
+		var probe := _leg_probe.duplicate()
+		_leg_probe = {}
+		var frames_after_transition := _route_frame_series.size()
+		_set_stage("route:%s:capture" % str(leg.id))
 		var arrival_content := RouteContent.capture(_main)
 		var leg_end := RouteContent.clock()
 		var arrived_actor := (_main.get("actor_nodes") as Dictionary).get(FIRST_ACTOR_ID) as Node3D
 		var handoff := (_main.get("exterior_stream") as ExteriorRegionStream).last_handoff
+		var continuous := str(handoff.get("from", "")) == str(leg.map) \
+			and str(handoff.get("to", "")) == str(leg.destination) and bool(handoff.get("continuous", false))
 		var success := bool(arrival.get("ready", false)) \
 			and str(_app_state.get("current_map")) == str(leg.destination) and is_instance_valid(arrived_actor)
+		var visible := leg_visible_times(_arrival_reports(), int(transition_start.ticksUsec), probe)
 		results.append({"id": leg.id, "kind": leg.kind, "from": leg.map, "to": leg.destination,
-			"success": success, "milliseconds": transition_msec,
+			"success": success, "milliseconds": transition_msec, "settleMs": transition_msec,
+			"visibleMs": visible.visibleMs, "visibleBasis": visible.visibleBasis,
+			"curtain": visible.curtain, "arrivalReports": visible.arrivalReports,
 			"startReadiness": start_readiness,
+			"walk": {"tiles": _chebyshev(Workloads.tile(leg.start), Workloads.tile(leg.approach)),
+				"stepMilliseconds": Workloads.step_msec(leg), "milliseconds": walk_msec,
+				"approachSettle": approach_settle},
 			"clock": {"legStart": leg_start, "transitionStart": transition_start,
 				"transitionEnd": transition_end, "legEnd": leg_end},
 			"content": {"start": start_content, "arrival": arrival_content},
 			"sampledFrames": _route_frame_series.size() - frames_before, "readiness": arrival,
+			# Indices into the cell's frameSeries/wallFrameSeries, [first, end).
+			"frameRanges": {"start": [frames_at_start, frames_at_walk],
+				"walk": [frames_at_walk, frames_before],
+				"transition": [frames_before, frames_after_transition],
+				"capture": [frames_after_transition, _route_frame_series.size()]},
 			"travellerRetained": is_instance_valid(arrived_actor) and arrived_actor.get_instance_id() == old_identity,
-			"continuousHandoff": str(handoff.get("from", "")) == str(leg.map) \
-				and str(handoff.get("to", "")) == str(leg.destination) and bool(handoff.get("continuous", false))})
+			"expectContinuous": bool(leg.get("expectContinuous", false)),
+			"continuousHandoff": continuous,
+			"handoff": {"from": str(handoff.get("from", "")), "to": str(handoff.get("to", "")),
+				"continuous": bool(handoff.get("continuous", false)),
+				"sourceDistanceMetres": _finite_or_null(handoff.get("source_distance", INF)),
+				"anchorDistanceMetres": _finite_or_null(handoff.get("anchor_distance", INF))}})
 		if not success:
 			break
 	return results
 
 
-func _route_place(map_id: String, tile: Vector2i, clear_roster: bool) -> Dictionary:
+## A leg's player-visible times from Main's arrival reports and the curtain
+## probe: visibleMs runs from the transition start to the first report at or
+## after it; curtain shownMs/hiddenMs are frame-granular. Reports are selected
+## by their clock alone, never by a list index taken before the transition:
+## the recorder keeps only its newest reports (crowd_benchmark_main.gd), so
+## once full, the index of a new report is not the list's earlier size.
+static func leg_visible_times(reports: Array, start_usec: int, probe: Dictionary) -> Dictionary:
+	var count := 0
+	var first_usec := -1
+	for report: Variant in reports:
+		var at := int((report as Dictionary).get("ticksUsec", -1)) if report is Dictionary else -1
+		if at < start_usec:
+			continue
+		count += 1
+		first_usec = at if first_usec < 0 else mini(first_usec, at)
+	var shown := int(probe.get("curtainShownUsec", -1))
+	var hidden := int(probe.get("curtainHiddenUsec", -1))
+	return {"visibleMs": snappedf(float(first_usec - start_usec) / 1000.0, 0.001) if first_usec >= 0 else null,
+		"visibleBasis": "arrival_reported" if first_usec >= 0 else "no arrival report (traveller kept or never grounded)",
+		"arrivalReports": count,
+		"curtain": {"shown": shown >= 0,
+			"shownMs": snappedf(float(shown - start_usec) / 1000.0, 0.001) if shown >= 0 else null,
+			"hiddenMs": snappedf(float(hidden - start_usec) / 1000.0, 0.001) if hidden >= 0 else null,
+			"probeFrames": int(probe.get("frames", 0))}}
+
+
+## Main's arrival reports so far (crowd_benchmark_main.gd); empty for a Main
+## without the recorder.
+func _arrival_reports() -> Array:
+	var reports: Variant = _main.get("benchmark_arrival_reports") if is_instance_valid(_main) else null
+	return reports as Array if reports is Array else []
+
+
+static func _chebyshev(a: Vector2i, b: Vector2i) -> int:
+	return maxi(absi(a.x - b.x), absi(a.y - b.y))
+
+
+static func _finite_or_null(value: Variant) -> Variant:
+	return snappedf(float(value), 0.001) if (value is float or value is int) and is_finite(float(value)) else null
+
+
+## `require_arrival`: route placements also wait for Main's arrival and curtain
+## (see _wait_for_world_readiness).
+func _route_place(map_id: String, tile: Vector2i, clear_roster: bool, require_arrival := false) -> Dictionary:
 	_local_id = FIRST_ACTOR_ID
 	_app_state.set("local_actor_id", FIRST_ACTOR_ID)
 	if map_id != str(_app_state.get("current_map")):
@@ -2088,11 +2477,15 @@ func _route_place(map_id: String, tile: Vector2i, clear_roster: bool) -> Diction
 	_main.call("_sync_world", _app_state.call("take_changed_actors"))
 	await _spawn_and_build(1)
 	_adapter = _main.get("adapter") as CoordinateAdapter
-	return await _wait_for_world_readiness("route " + map_id, 300)
+	return await _wait_for_world_readiness("route " + map_id, 300, require_arrival)
 
 
-func _route_walk_to(destination: Vector2i) -> void:
-	var deadline := Time.get_ticks_msec() + 30000
+## Steps the synthetic local player to `destination`, one step command every
+## `step_msec` (at most one per frame), as the server would send them.
+func _route_walk_to(destination: Vector2i, step_msec: int) -> void:
+	var dto0 := (_app_state.get("actors") as Dictionary).get(FIRST_ACTOR_ID, {}) as Dictionary
+	var tiles := _chebyshev(Vector2i(int(dto0.get("x", destination.x)), int(dto0.get("y", destination.y))), destination)
+	var deadline := Time.get_ticks_msec() + maxi(30000, tiles * step_msec * 3 + 10000)
 	var next_step := 0
 	while Time.get_ticks_msec() < deadline:
 		var dto := (_app_state.get("actors") as Dictionary).get(FIRST_ACTOR_ID, {}) as Dictionary
@@ -2108,15 +2501,38 @@ func _route_walk_to(destination: Vector2i) -> void:
 				if EloriaProtocol.actor_command_step(command) == step:
 					_send_actor_commands([FIRST_ACTOR_ID], command)
 					break
-			next_step = Time.get_ticks_msec() + 600
+			next_step = Time.get_ticks_msec() + step_msec
 		await _next_drawn_frame()
 	_expect(false, "route movement reaches its authored approach")
+
+
+## Waits (bounded) until the camera focus, which follows the drawn player and
+## is what Main judges a crossing by, is over the approach tile: a drawn step
+## trails its command. Returns the remaining ground distance and the wait.
+func _route_settle_at(tile: Vector2i) -> Dictionary:
+	var started := Time.get_ticks_msec()
+	var distance := INF
+	while true:
+		var rig := _main.get("camera_rig") as Node3D
+		var adapter := _main.get("adapter") as CoordinateAdapter
+		if rig == null or adapter == null:
+			break
+		var target := adapter.tile_center(tile.x, tile.y)
+		var focus: Vector3 = rig.get("focus")
+		distance = Vector2(focus.x - target.x, focus.z - target.z).length()
+		if distance <= APPROACH_SETTLE_METRES or Time.get_ticks_msec() - started >= APPROACH_SETTLE_MSEC:
+			break
+		await _next_drawn_frame()
+	return {"focusMetres": _finite_or_null(distance), "waitMilliseconds": Time.get_ticks_msec() - started,
+		"settled": distance <= APPROACH_SETTLE_METRES}
 
 
 ## Measurement instrumentation belongs to this benchmark, not to Main or other
 ## listeners. Disconnect exact callables; leave unrelated subscribers intact.
 func _stop_benchmark_instrumentation() -> void:
 	_route_capture = false
+	_leg_probe = {}
+	_long_frame_last_usec = 0
 	if is_instance_valid(_main):
 		_main.call("benchmark_detach_attribution")
 	_attributed.clear()
@@ -2181,14 +2597,36 @@ func _teardown_pending(owner: Variant, loader: Variant,
 	var orphans := ContinentChunkStream.reap_orphans()
 	var cache_pending := is_instance_valid(loader) and int(loader.get("_cache_write_countdown")) > 0
 	var owner_freed := not is_instance_valid(owner)
+	var rl_head_warming := rl_head_warm_pending()
 	return {"ready": workers == 0 and retiring_cells == 0 and queued_streams == 0
 		and surface_callbacks == 0 and not actor_snap and exterior_idle and orphans == 0 and animation_workers == 0
-		and not cache_pending and (not require_owner_freed or owner_freed),
+		and not rl_head_warming and not cache_pending and (not require_owner_freed or owner_freed),
 		"streams": streams, "workers": workers, "retiringCells": retiring_cells,
 		"queuedStreams": queued_streams, "surfaceCallbacks": surface_callbacks,
 		"actorSnapPending": actor_snap, "exteriorIdle": exterior_idle,
 		"animationWorkers": animation_workers, "animationPrewarmEntries": NativeAnimationImporter._prewarming.size(),
+		"rlHeadWarming": rl_head_warming,
 		"orphans": orphans, "cacheWritePending": cache_pending, "ownerFreed": owner_freed}
+
+
+## RL head prewarm work still in flight (RLHeadLibrary.prewarm): a GLB parse
+## on the WorkerThreadPool, the pipeline survey, queued maps or the pipeline
+## warm-up. A process that quits while such a parse runs can hang (the parse
+## packs its scene, which waits for a main thread that is shutting down;
+## rl_head_library.gd prewarm), so teardown counts it as pending work.
+static func rl_head_warm_pending() -> bool:
+	return RLHeadLibrary.warming()
+
+
+## Stops queued RL head prewarm work, as Main's own close path does
+## (_close_client): the parse already running finishes on its worker and is
+## published by the library's poll; `rl_head_warm_pending` stays true until
+## then. Never waits here. Returns what was in flight.
+static func cancel_rl_head_warm() -> Dictionary:
+	var before := {"warming": RLHeadLibrary.warming(), "snapshot": RLHeadLibrary.render_warm_snapshot()}
+	RLHeadLibrary.cancel_warm()
+	before["pendingAfterCancel"] = RLHeadLibrary.warming()
+	return before
 
 
 func _wait_for_teardown_idle(owner: Variant, loader: Variant,
@@ -2226,10 +2664,15 @@ func _wait_for_teardown_idle(owner: Variant, loader: Variant,
 func _log_teardown_stage(stage: String) -> void:
 	var line := "%d pid=%d %s" % [Time.get_ticks_msec(), OS.get_process_id(), stage]
 	print("crowd-presentation teardown ", line)
+	_append_side_log(".teardown.log", line)
+
+
+## Appends one flushed line to `<report><suffix>` beside the report.
+func _append_side_log(suffix: String, line: String) -> void:
 	var output := OS.get_environment("RABBITLANDS_CROWD_BENCH_OUT")
 	if output.is_empty():
 		return
-	var path := ProjectSettings.globalize_path(output + ".teardown.log")
+	var path := ProjectSettings.globalize_path(output + suffix)
 	var mode := FileAccess.READ_WRITE if FileAccess.file_exists(path) else FileAccess.WRITE
 	var log_file := FileAccess.open(path, mode)
 	if log_file == null:
@@ -2275,6 +2718,10 @@ func _tear_down_main() -> void:
 		prewarm.call("discard")
 	if is_instance_valid(exterior):
 		exterior.clear()
+	# The RL head prewarm's queued work stops; a parse already on a worker is
+	# waited for (bounded) by the drain below, never abandoned at quit.
+	_rl_head_teardown = cancel_rl_head_warm()
+	_log_teardown_stage("rl-head-warm:cancelled pending=" + str(bool(_rl_head_teardown.pendingAfterCancel)))
 	var before_unload := await _wait_for_teardown_idle(owner, loader, exterior, "before unload", deadline)
 	if not bool(before_unload.ready):
 		_record_teardown_timeout(started, "beforeUnload", before_unload)
@@ -2319,6 +2766,7 @@ func _tear_down_main() -> void:
 		and bool(after_main_free.ready), "timeoutMilliseconds": MAX_READINESS_MSEC,
 		"milliseconds": Time.get_ticks_msec() - started,
 		"beforeUnload": before_unload, "afterUnload": after_unload, "afterMainFree": after_main_free,
+		"rlHeadWarm": _rl_head_teardown,
 		"ownedSubtreeDisabledAfterDrain": true,
 		"ownedInstrumentationDisconnected": true}
 
@@ -2330,7 +2778,8 @@ func _record_teardown_timeout(started: int, stage: String, state: Dictionary) ->
 	# this exact process; normal quit is intentionally skipped by _finish.
 	_report["teardown"] = {"ready": false, "requiresRunnerTermination": true,
 		"timeoutMilliseconds": MAX_READINESS_MSEC, "milliseconds": Time.get_ticks_msec() - started,
-		"failedStage": stage, stage: state, "ownedInstrumentationDisconnected": true}
+		"failedStage": stage, stage: state, "rlHeadWarm": _rl_head_teardown,
+		"ownedInstrumentationDisconnected": true}
 
 
 func _publish_teardown_failure_marker(out: String) -> void:
@@ -2504,6 +2953,10 @@ func _expect(value: bool, label: String) -> bool:
 
 
 func _finish() -> void:
+	_report["longFrames"] = {"thresholdMilliseconds": _long_frame_msec, "count": _long_frame_total,
+		"recorded": _long_frames.size(), "limit": LONG_FRAME_RECORDS,
+		"scope": "wall time between drawn frames from before Main's setup until teardown begins",
+		"frames": _long_frames}
 	_report["failureCount"] = _failures
 	var out := _env("RABBITLANDS_CROWD_BENCH_OUT", "user://crowd_presentation_benchmark.json")
 	var file := FileAccess.open(out, FileAccess.WRITE)

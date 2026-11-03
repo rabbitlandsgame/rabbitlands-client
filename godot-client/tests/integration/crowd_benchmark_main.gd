@@ -203,6 +203,24 @@ func _process(delta: float) -> void:
 		_benchmark_values[&"process_delta_milliseconds"] = delta * 1000.0
 
 
+## Arrival reports (wave 2 AW-00): the moments Main said the local character is
+## drawn on loaded ground with no loading screen in front of it
+## (`_report_arrival`, the server's arrival_ready_v1), on the engine microsecond
+## clock. A traversal leg's player-visible time ends at the first one after its
+## transition starts. Recording only; the report itself is Main's own.
+var benchmark_arrival_reports: Array[Dictionary] = []
+const BENCHMARK_ARRIVAL_REPORT_LIMIT := 256
+
+func _report_arrival() -> void:
+	var unreported := _arrival_unreported
+	super._report_arrival()
+	if unreported and not _arrival_unreported:
+		benchmark_arrival_reports.append({"ticksUsec": Time.get_ticks_usec(),
+			"map": str(AppState.current_map)})
+		if benchmark_arrival_reports.size() > BENCHMARK_ARRIVAL_REPORT_LIMIT:
+			benchmark_arrival_reports.pop_front()
+
+
 ## Installs diagnostic observers only after a benchmark fixture is complete.
 ## Every existing connection is snapshotted before mutation. The production
 ## combat callback is replaced in place by rebuilding the complete ordered

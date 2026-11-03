@@ -41,6 +41,17 @@ UNDEAD_SPECIES = {"zombie": {"actorType": 746, "footprint": [1, 1]},
                   "drowned_lich_king": {"actorType": 671, "footprint": [2, 2]}}
 ALL_CELLS = OLD_CELLS + ["mixed-mounted-160", "authored-herd",
                          "traversal-southern-cold", "traversal-southern-warm"]
+# Explicit wave-2 selectors outside the historical `all` membership.
+SEAM_CELLS = ["traversal-seam-walk"]
+TRAVERSAL_CELLS = ["traversal-southern-cold", "traversal-southern-warm"] + SEAM_CELLS
+# performance_workloads.gd: the six-leg southern route and the walking seam route.
+ROUTE_LEGS = {"southern": ["first-southern-border", "consecutive-southern-border", "interior-entry",
+                           "interior-return", "teleport", "return"],
+              "seam": ["walking-seam"]}
+# Route fixture version 2 (wave 2 AW-00) adds per-leg settle/visible times.
+ROUTE_VERSION = 2
+# The configuration-overlay worker pools tools/continent_stream_benchmark_project.py supports.
+WORKER_POOL_THREADS = (4, 8)
 ERROR_PATTERN = re.compile(r"SCRIPT ERROR|Parse Error|Failed to load|Error loading|ERROR:", re.I)
 OVERRIDE_PREFIXES = ("ELORIA_LOOK", "ELORIA_CROWD_", "ELORIA_NATIVE_", "RABBITLANDS_CROWD_")
 OVERRIDE_NAMES = {"ELORIA_VRAM_TEXTURES", "ELORIA_NO_MAP_CACHE", "ELORIA_SAFE_MODE", "RABBITLANDS_CLIENT_RUNTIME", "RABBITLANDS_RUST_EFFECTS"}
@@ -200,9 +211,10 @@ def selected_cells(profile: str, replay: bool = False) -> list[str]:
         return []  # The recording determines its map; validate exactly one replay cell later.
     profiles = {"phase4": OLD_CELLS, "quick": ["s3-market-160", "s2-invasion-160"],
                 "phase1": PHASE1_CELLS, "phase7": PHASE7_CELLS, "all": ALL_CELLS,
-                "production-undead": UNDEAD_CELLS}
+                "production-undead": UNDEAD_CELLS, "traversal": TRAVERSAL_CELLS}
     names = list(profiles[profile]) if profile in profiles else profile.split(",")
-    if not names or any(not item or item not in ALL_CELLS + PHASE7_CELLS + UNDEAD_CELLS + [GAUNTLET_CELL] for item in names):
+    if not names or any(not item or item not in ALL_CELLS + PHASE7_CELLS + SEAM_CELLS + UNDEAD_CELLS + [GAUNTLET_CELL]
+                        for item in names):
         raise EvidenceError("unknown or empty benchmark cell selector")
     if len(set(names)) != len(names):
         raise EvidenceError("duplicate benchmark cell selector")
@@ -280,6 +292,115 @@ def validate_gauntlet_cell(cell: dict) -> None:
         if observed != {"remoteCreatures": remote, "localPlayers": 1, "species": species, "invalidProfiles": 0,
                         "aliveRemoteCreatures": remote, "invalidHealth": 0}:
             raise EvidenceError(f"authored gauntlet census/profile/tile/alive mismatch at {boundary}")
+
+
+def route_legs_for(cell_name: str) -> list[str]:
+    """The leg ids a traversal cell must report, in order."""
+    return ROUTE_LEGS["seam" if cell_name.startswith("traversal-seam") else "southern"]
+
+
+def validate_route_v2(route: dict, frames: int, name: str) -> None:
+    """Route fixture version 2: settle/visible times, curtain and frame ranges per leg.
+
+    Whether a seam crossing was continuous is a measurement (the neighbour may not
+    be resident in time), so it is reported, never required.
+    """
+    if route.get("routeVersion") != ROUTE_VERSION or route.get("legSchema") != 2 \
+            or route.get("routeId") != ("seam" if name.startswith("traversal-seam") else "southern"):
+        raise EvidenceError(f"{name}: unexpected route fixture version/schema")
+    previous_end = None
+    for leg in route["legs"]:
+        label = f"{name}.{leg.get('id')}"
+        settle = _number(leg.get("settleMs"), label + ".settleMs")
+        if abs(settle - _number(leg.get("milliseconds"), label + ".milliseconds")) > .001:
+            raise EvidenceError(f"{label}: settle time differs from the transition time")
+        visible = leg.get("visibleMs")
+        # settleMs is the historical transition time, a difference of two whole-millisecond
+        # clock readings; visibleMs is measured in microseconds from a later start. A report
+        # inside the settle window can therefore exceed it by under one truncated millisecond.
+        if visible is not None and _number(visible, label + ".visibleMs") >= settle + 1.0:
+            raise EvidenceError(f"{label}: player-visible time exceeds the settle time")
+        if not isinstance(leg.get("visibleBasis"), str) or (visible is None) != (leg.get("arrivalReports") == 0):
+            raise EvidenceError(f"{label}: visible time disagrees with its arrival reports")
+        curtain = _object(leg.get("curtain"), label + ".curtain")
+        if not isinstance(curtain.get("shown"), bool) \
+                or (curtain["shown"] is False and curtain.get("shownMs") is not None):
+            raise EvidenceError(f"{label}: inconsistent arrival curtain evidence")
+        if not isinstance(leg.get("continuousHandoff"), bool) or not isinstance(leg.get("expectContinuous"), bool):
+            raise EvidenceError(f"{label}: handoff classification missing")
+        ranges = _object(leg.get("frameRanges"), label + ".frameRanges")
+        bounds = []
+        for phase in ("start", "walk", "transition", "capture"):
+            pair = ranges.get(phase)
+            if not isinstance(pair, list) or len(pair) != 2:
+                raise EvidenceError(f"{label}: frame range {phase} missing")
+            bounds.append((_integer(pair[0], label + "." + phase), _integer(pair[1], label + "." + phase)))
+        flat = [value for pair in bounds for value in pair]
+        if flat != sorted(flat) or any(bounds[i][1] != bounds[i + 1][0] for i in range(3)) \
+                or flat[-1] > frames or (previous_end is not None and flat[0] != previous_end):
+            raise EvidenceError(f"{label}: frame ranges are not contiguous within the route series")
+        if _integer(leg.get("sampledFrames"), label + ".sampledFrames") != flat[-1] - bounds[2][0]:
+            raise EvidenceError(f"{label}: sampled frame count differs from its frame ranges")
+        previous_end = flat[-1]
+
+
+def validate_worker_pool(data: dict, request: dict) -> None:
+    """A requested worker pool must be the one the engine reports it started with."""
+    requested = request.get("worker_threads", 0) or 0
+    if not requested:
+        return
+    pool = _object(data.get("workerPool"), "workerPool")
+    if pool.get("maxThreadsSetting") != requested:
+        raise EvidenceError("actual worker pool size differs from the requested overlay")
+
+
+def resolve_worker_threads(value: str, affinity: str) -> int:
+    """--worker-threads: 0 (engine default), 4, 8 or `affinity` (the mask's CPU count)."""
+    if value in ("", "0"):
+        return 0
+    if value == "affinity":
+        if not affinity:
+            raise EvidenceError("--worker-threads affinity requires --affinity")
+        count = bin(int(affinity, 16)).count("1")
+    else:
+        try:
+            count = int(value)
+        except ValueError as exc:
+            raise EvidenceError("--worker-threads must be 0, 4, 8 or affinity") from exc
+    if count not in WORKER_POOL_THREADS:
+        raise EvidenceError(f"worker pool overlays support {WORKER_POOL_THREADS} threads, not {count}")
+    return count
+
+
+def prepare_worker_overlay(project: Path, threads: int) -> dict:
+    """A private configuration overlay of `project` whose override.cfg sets the pool size.
+
+    Godot reads threading/worker_pool/max_threads once at startup, from project.godot
+    and the override.cfg beside it; a source project has no other per-run source, and
+    the checkout's own override.cfg is shared. The overlay (the project's own
+    tools/continent_stream_benchmark_project.py) links the source/data/import
+    directories, copies project.godot and the class/UID caches, and lives in the
+    checkout's ignored .local directory. The original configuration is never edited.
+    """
+    tool = project / "tools" / "continent_stream_benchmark_project.py"
+    if not tool.is_file():
+        raise EvidenceError("worker pool overlay tool is missing from the project")
+    spec = importlib.util.spec_from_file_location("rl_worker_pool_overlay_" + hashlib.sha256(
+        str(tool.resolve()).encode()).hexdigest()[:12], tool)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    if Path(module.SOURCE).resolve() != project.resolve():
+        raise EvidenceError("worker pool overlay tool belongs to another checkout")
+    folder = project.parent / ".local" / "crowd-benchmark-overlay" / f"threads-{threads}"
+    try:
+        manifest = module.prepare(folder, threads)
+    except (ValueError, RuntimeError, OSError) as exc:
+        raise EvidenceError(f"worker pool overlay could not be prepared: {exc}") from exc
+    overlay = Path(manifest["project"])
+    if manifest.get("worker_threads") != threads or not (overlay / "project.godot").is_file() \
+            or f"worker_pool/max_threads={threads}" not in (overlay / "override.cfg").read_text(encoding="utf-8"):
+        raise EvidenceError("worker pool overlay does not set the requested pool size")
+    return manifest
 
 
 def validate_steady_pacing(cell: dict, request: dict) -> None:
@@ -622,6 +743,7 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
     if data.get("presenceDots") != request.get("presence", 0) \
             or data.get("serverTime") is not request.get("server_time", False):
         raise EvidenceError("actual presence/server-time workload differs from request")
+    validate_worker_pool(data, request)
     # New phase-one reports attest effective settings/backends; an old report cannot
     # establish a new reference merely by containing valid historical timing fields.
     validate_runtime(data, request, data.get("renderingMethod"), data["graphicsQuality"],
@@ -731,14 +853,15 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
                     or route.get("serverNavigationCertified") is not False:
                 raise EvidenceError(f"{name}: invalid traversal classification")
             legs = route.get("legs")
-            expected_legs = ["first-southern-border", "consecutive-southern-border", "interior-entry",
-                             "interior-return", "teleport", "return"]
+            expected_legs = route_legs_for(name)
             if not isinstance(legs, list) or [leg.get("id") for leg in legs if isinstance(leg, dict)] != expected_legs:
                 raise EvidenceError(f"{name}: incomplete deterministic route")
             for leg in legs:
                 if leg.get("success") is not True or _object(leg.get("readiness"), name + ".leg.readiness").get("ready") is not True:
                     raise EvidenceError(f"{name}: failed/unready route leg")
                 _number(leg.get("milliseconds"), name + ".leg.milliseconds")
+            if "routeVersion" in route or name == "traversal-seam-walk":
+                validate_route_v2(route, frames, name)
             validate_distribution(cell.get("wallFrameTime"), name + ".wallFrameTime", frames)
             if not isinstance(cell.get("wallFrameSeries"), list) or len(cell["wallFrameSeries"]) != frames:
                 raise EvidenceError(f"{name}: incomplete delivered-frame series")

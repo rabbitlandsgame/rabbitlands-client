@@ -30,7 +30,7 @@ from process_memory_sampler import ProcessMemorySampler
 
 from crowd_benchmark_support import (
     BenchmarkLock, EvidenceError, asset_files, clean_environment, configure_prepared_profile, configure_settings_profile, default_lock_path,
-    hash_files, manifest_identity, read_json, require_private_replay_output,
+    hash_files, manifest_identity, prepare_worker_overlay, read_json, require_private_replay_output, resolve_worker_threads,
     seed_settings_profile, selected_cells, sha256_file, source_files, validate_report, validate_startup_ack,
 )
 
@@ -125,13 +125,19 @@ def request_for(args) -> dict:
             "attribution_scope": "source-project-only" if args.attribution else "disabled",
             "executable": str(args.godot),
             "presence": args.presence, "server_time": args.server_time,
-            "settings_profile": args.settings_profile}
+            "settings_profile": args.settings_profile,
+            "worker_threads": getattr(args, "worker_threads_count", 0)}
+
+
+def launch_path(args) -> Path:
+    """The project Godot opens: the source project, or its worker-pool overlay."""
+    return getattr(args, "worker_overlay_project", None) or args.project_path
 
 
 def command_for(args, log: Path) -> list[str]:
     command = [str(args.godot)]
     if args.executable_mode == "project":
-        command += ["--path", str(args.project_path)]
+        command += ["--path", str(launch_path(args))]
     elif args.main_pack:
         command += ["--main-pack", str(args.main_pack)]
     command += ["--audio-driver", "Dummy", "--log-file", str(log)]
@@ -285,6 +291,11 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
         overrides["DISABLE_VULKAN_OBS_CAPTURE"] = "1"
     env.update(overrides)
     settings_seed = seed_settings_profile(args.settings_profile, args.project_path, user_root, env)
+    worker_pool = None
+    if getattr(args, "worker_threads_count", 0):
+        # Refreshed per run: the overlay copies project.godot and the class/UID caches.
+        worker_pool = prepare_worker_overlay(args.project_path, args.worker_threads_count)
+        args.worker_overlay_project = Path(worker_pool["project"])
     before = identity(args)
     command = command_for(args, log)
     started = time.monotonic()
@@ -300,7 +311,7 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
         startup_request["settings_seed_user_dir"] = settings_seed["userDataDir"]
     with launch_log.open("w", encoding="utf-8") as stream:
         process = subprocess.Popen(command, env=env, stdout=stream, stderr=subprocess.STDOUT,
-                                   cwd=args.project_path if args.executable_mode == "project" else args.godot.parent)
+                                   cwd=launch_path(args) if args.executable_mode == "project" else args.godot.parent)
         observed = set_affinity(process.pid, int(args.affinity, 16)) if args.affinity else None
         startup_request["pid"] = process.pid
         try:
@@ -354,6 +365,7 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
     run["workloadError"] = workload_error
     run["settingsProfile"] = args.settings_profile
     run["settingsSeed"] = settings_seed
+    run["workerPool"] = {"requestedThreads": getattr(args, "worker_threads_count", 0), "overlay": worker_pool}
     if settings_seed:
         run["settingsSeedFinalSha256"] = sha256_file(Path(settings_seed["path"])) \
             if Path(settings_seed["path"]).is_file() else None
@@ -442,6 +454,11 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--sample-ms", type=int, default=6000)
     p.add_argument("--warmup-ms", type=int, default=2000)
     p.add_argument("--affinity", default="")
+    p.add_argument("--worker-threads", default="0", choices=["0", "4", "8", "affinity"],
+                   help="source-project runs only: launch through a private configuration overlay "
+                        "(<checkout>/.local/crowd-benchmark-overlay) whose override.cfg sets "
+                        "threading/worker_pool/max_threads; 'affinity' uses the --affinity mask's CPU "
+                        "count. Godot sizes its pool from the logical CPU count, ignoring the mask")
     p.add_argument("--timeout", type=float, default=3600)
     p.add_argument("--startup-timeout", type=float, default=60,
                    help="seconds allowed for the benchmark startup acknowledgement before the full workload timeout")
@@ -503,6 +520,10 @@ def main(argv: list[str] | None = None) -> int:
             raise EvidenceError("invalid negative/zero workload or timing option")
         if args.affinity and int(args.affinity, 16) <= 0:
             raise EvidenceError("affinity mask must be positive")
+        args.worker_threads_count = resolve_worker_threads(args.worker_threads, args.affinity)
+        if args.worker_threads_count and args.executable_mode != "project":
+            raise EvidenceError("--worker-threads needs --executable-mode project; an export reads "
+                                "override.cfg beside its pack and is not overlaid")
         if args.replay:
             args.driver = "replay"
         selected_cells(args.cells, bool(args.replay))
