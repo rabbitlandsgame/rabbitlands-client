@@ -113,14 +113,16 @@ def _mib(value) -> str:
 
 def markdown(title: str, rows: list[dict], label_key: str) -> str:
     lines = [title, "", "| Phase | Map | Private MiB (at) | Working set MiB (at) | Private MiB min-max until next "
-             "| Static MiB | Video MiB | WorldPark kept MiB | Parked |", "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |"]
+             "| Static MiB | Video MiB | Actor scenes MiB | WorldPark kept MiB | Parked |",
+             "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |"]
     for row in rows:
         at = row.get("at") or {}
         window = (row.get("window") or {}).get("privateBytes") or {}
         lines.append(f"| {row.get(label_key)} | {row.get('map', '')} | {_mib(at.get('privateBytes'))} | "
                      f"{_mib(at.get('workingSetBytes'))} | {_mib(window.get('min'))}-{_mib(window.get('max'))} | "
                      f"{_mib(row.get('staticBytes'))} | {_mib(row.get('videoBytes'))} | "
-                     f"{_mib(row.get('worldParkKeptBytes'))} | {row.get('parked', '')} |")
+                     f"{_mib(row.get('actorSceneBytes'))} | {_mib(row.get('worldParkKeptBytes'))} | "
+                     f"{row.get('parked', '')} |")
     return "\n".join(lines) + "\n"
 
 
@@ -266,7 +268,9 @@ def crowd_points(report: dict) -> list[dict]:
                                "videoBytes": row.get("videoBytes"),
                                "actorSceneBytes": (row.get("actorScenes") or {}).get("bytes"),
                                "worldParkKeptBytes": park.get("keptBytes"), "parked": park.get("parked")})
-    return points
+    # The report's JSON sorts keys (Godot's JSON.stringify), so order by the clock.
+    return sorted(points, key=lambda point: point["unixTime"] if isinstance(point["unixTime"], (int, float))
+                  else float("inf"))
 
 
 def crowd_from_process(path: Path) -> dict:

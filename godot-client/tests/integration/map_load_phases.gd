@@ -71,6 +71,7 @@ const PHASES: Array[StringName] = [
 ]
 
 const SETTLE_FRAMES := 12
+const DRAIN_BEFORE_QUIT_MSEC := 5000
 ## Loaded by path so this script also runs on a client without it.
 const CONTENT_DIGEST_PATH := "res://src/runtime/content_digest.gd"
 
@@ -86,6 +87,13 @@ func _run() -> void:
 	OS.low_processor_usage_mode_sleep_usec = 1
 	Engine.max_fps = 0
 	root.size = Vector2i(1280, 720)
+	# The main-thread glTF extensions, registered as Main and the park benchmark
+	# do; without them the parse probes cannot read quantized GLBs (2026-11).
+	for extension: String in ["res://src/world/gltf_quantization.gd", "res://src/world/vram_textures.gd",
+			"res://src/world/map_mesh_extension.gd"]:
+		var registrar := load(extension) as Script
+		if registrar != null:
+			registrar.call("ensure_registered")
 
 	_artifacts = OS.get_environment("ELORIA_ARTIFACT_DIR")
 	if _artifacts.is_empty():
@@ -153,6 +161,11 @@ func _run() -> void:
 		file.close()
 		print("wrote ", _artifacts.path_join(name))
 	print("map load phases: ", "PASS" if _failures == 0 else "FAIL (%d)" % _failures)
+	# Background verification from the last load finishes before the engine
+	# quits: a quit under it printed SCRIPT ERRORs and crashed at exit (2026-11).
+	var drain_until := Time.get_ticks_msec() + DRAIN_BEFORE_QUIT_MSEC
+	while Time.get_ticks_msec() < drain_until:
+		await process_frame
 	quit(_failures)
 
 ## The content-digest backend in force and its counters (ContentDigest.snapshot()),

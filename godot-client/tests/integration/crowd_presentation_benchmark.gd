@@ -924,6 +924,9 @@ func _run_cell(spec: Dictionary) -> void:
 	var overhead_at_start: Dictionary = _main.call("benchmark_overhead_census")
 	_set_stage("cell:%s:sample" % str(spec.id))
 	await _drive_for(plan, int((_report["measurement"] as Dictionary)["sampleMilliseconds"]), raw, profile_frames)
+	# A host monitor cuts each cell's sample window back from this line (the cell's
+	# summary line comes only after the despawn wait, MEM-M7b).
+	print("crowd-presentation sample-end %s" % str(spec.id))
 	_set_stage("cell:%s:after-sample" % str(spec.id))
 	var elapsed := Time.get_ticks_msec() - sample_started
 	# Video memory with this cell's crowd and diagnostics in effect (OV-0): the
