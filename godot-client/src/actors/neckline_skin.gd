@@ -7,6 +7,7 @@ extends RefCounted
 
 const STEPS := 4
 const NECK_AXIS_Z := -.038
+const MESH_LODS := preload("res://src/actors/mesh_lods.gd")
 
 static var _cache := {}
 
@@ -114,6 +115,7 @@ static func build(original: Mesh, skin: Skin, skeleton: Skeleton3D) -> Dictionar
 		var joints := PackedInt32Array()
 		var weights := PackedFloat32Array()
 		var indices := PackedInt32Array()
+		var coarse := PackedInt32Array()
 		for pair: Array in strips[surface]:
 			var start := p.size()
 			for row: int in range(STEPS + 1):
@@ -155,6 +157,8 @@ static func build(original: Mesh, skin: Skin, skeleton: Skeleton3D) -> Dictionar
 			for row: int in range(STEPS):
 				var first := start + row * 2
 				indices.append_array(PackedInt32Array([first,first + 2,first + 1,first + 1,first + 2,first + 3]))
+			var last := start + STEPS * 2
+			coarse.append_array(PackedInt32Array([start,last,start + 1,start + 1,last,last + 1]))
 		var a := []
 		a.resize(Mesh.ARRAY_MAX)
 		a[Mesh.ARRAY_VERTEX]=p
@@ -167,11 +171,25 @@ static func build(original: Mesh, skin: Skin, skeleton: Skeleton3D) -> Dictionar
 		a[Mesh.ARRAY_BONES]=joints
 		a[Mesh.ARRAY_WEIGHTS]=weights
 		a[Mesh.ARRAY_INDEX]=indices
-		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,a,[],{},
+		MESH_LODS.add_surface(mesh,Mesh.PRIMITIVE_TRIANGLES,a,[],_coarse_lods(original,surface,coarse),
 			original.surface_get_format(surface) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
 		mesh.surface_set_material(mesh.get_surface_count() - 1,original.surface_get_material(surface))
 		surfaces.append(surface)
 	return {} if surfaces.is_empty() else {"mesh":mesh,"surfaces":surfaces}
+
+## Each strip's rows are straight blends of its top and bottom positions, UVs
+## and normals, so its top and bottom rows alone span the same strip in a
+## quarter of the triangles (at rest it differs only by the strip's slight
+## twist between two rim vertices). That level switches in with the body's
+## first LOD level (actor LODs C6), and exists only when the body has one.
+static func _coarse_lods(original: Mesh, surface: int, coarse: PackedInt32Array) -> Dictionary:
+	var parent := MESH_LODS.read(original, surface)
+	if parent.is_empty() or coarse.is_empty():
+		return {}
+	var first := INF
+	for edge: Variant in parent:
+		first = minf(first, float(edge))
+	return {first: coarse}
 
 static func is_neck_rim(p: Vector3) -> bool:
 	return p.y>1.365 and p.y<1.54 and absf(p.x)<.135 and p.z>-.18 and p.z<.12

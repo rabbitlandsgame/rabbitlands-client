@@ -6,6 +6,7 @@ extends RefCounted
 ## and the lower panel; its target error is reported separately.
 ## The source mesh, source skin and all body poses remain unchanged.
 const Data := preload("res://src/actors/cape_approved_data.gd")
+const MESH_LODS := preload("res://src/actors/mesh_lods.gd")
 const HEAD := 16
 const NECK := 15
 const SPINE := 12
@@ -240,8 +241,10 @@ static func build(profile: String, source_mesh: Mesh, skeleton: Skeleton3D,
 		# Repacking readback UNORM16 values would quantize them a second time.
 		# Original authoring float32 values produce the same native GPU weights.
 		arrays[Mesh.ARRAY_WEIGHTS] = raw_weights
-		mesh.add_surface_from_arrays(source_mesh.surface_get_primitive_type(surface),
-			arrays, [], {}, Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
+		# Vertices move and weights are restored; the topology, and with it the
+		# source's LOD chains, stays exactly as it was.
+		MESH_LODS.add_surface(mesh, source_mesh.surface_get_primitive_type(surface),
+			arrays, [], MESH_LODS.read(source_mesh, surface), Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
 		mesh.surface_set_material(surface, source_mesh.surface_get_material(surface))
 		mesh.surface_set_name(surface, source_mesh.surface_get_name(surface))
 	var maximum_error := 0.0

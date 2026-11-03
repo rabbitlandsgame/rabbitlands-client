@@ -149,6 +149,9 @@ const SHOULDER_EASE := 0.055
 ## it cleared.
 const SECTION_BINS := 9
 const FOLD_WINDOW := 0.04
+## The fold and the fit move vertices only, so each rebuilt surface keeps the
+## source's LOD chains (actor LODs C6).
+const MESH_LODS := preload("res://src/actors/mesh_lods.gd")
 
 
 static func columns() -> int:
@@ -310,8 +313,8 @@ static func drape(mesh: Mesh, bones: PackedStringArray,
 			vertices[index] = Vector3(point.x + point.x * scale, point.y,
 				point.z + point.z * scale)
 		arrays[Mesh.ARRAY_VERTEX] = vertices
-		built.add_surface_from_arrays(mesh.surface_get_primitive_type(surface),
-			arrays, [], {},
+		MESH_LODS.add_surface(built, mesh.surface_get_primitive_type(surface),
+			arrays, [], MESH_LODS.read(mesh, surface),
 			mesh.surface_get_format(surface) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
 		built.surface_set_material(surface, mesh.surface_get_material(surface))
 		built.surface_set_name(surface, mesh.surface_get_name(surface))
@@ -374,8 +377,9 @@ static func _hang_yoke(mesh: Mesh) -> Mesh:
 		arrays[Mesh.ARRAY_VERTEX] = vertices
 		arrays[Mesh.ARRAY_NORMAL] = normals
 		arrays[Mesh.ARRAY_TANGENT] = tangents
-		built.add_surface_from_arrays(mesh.surface_get_primitive_type(surface),
-			arrays, [], {}, mesh.surface_get_format(surface) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
+		MESH_LODS.add_surface(built, mesh.surface_get_primitive_type(surface),
+			arrays, [], MESH_LODS.read(mesh, surface),
+			mesh.surface_get_format(surface) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
 		built.surface_set_material(surface, mesh.surface_get_material(surface))
 		built.surface_set_name(surface, mesh.surface_get_name(surface))
 	return built

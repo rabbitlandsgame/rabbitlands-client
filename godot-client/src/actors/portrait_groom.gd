@@ -17,6 +17,9 @@ const BEARD_SHADER := preload("res://src/actors/portrait_beard.gdshader")
 const HAIR_FINISH := preload("res://src/actors/hair_finish.gd")
 const COLOURS := preload("res://src/actors/appearance_colours.gd")
 const AGE := preload("res://src/actors/character_age.gd")
+const MESH_LODS := preload("res://src/actors/mesh_lods.gd")
+## A face triangle is beard when any corner's coverage exceeds this.
+const BEARD_TRIANGLE_COVERAGE := 0.15
 ## Tousled / Swept's portrait_hair.gdshader shading (the uniforms' defaults).
 const FINISH_ROUGHNESS := 0.76
 const FINISH_SPECULAR := 0.24
@@ -36,6 +39,9 @@ static func clear() -> void:
 	_hair_materials.clear()
 	_beard_materials.clear()
 	_beard_base_material = null
+	# Session teardown also forgets the LOD chains the beard, neck skin and
+	# capes were derived through.
+	MESH_LODS.clear()
 
 static func cache_metrics() -> Dictionary:
 	var bytes := 0
@@ -419,7 +425,7 @@ static func _build_beard(source: Mesh, mesh_to_skeleton: Transform3D,
 		for index: int in points.size():
 			coverage[index] = _canonical_beard_coverage(to_head*points[index],eye_height,style,face_frame,face_shape)
 		for triangle: int in range(0, indices.size() - 2, 3):
-			if maxf(coverage[indices[triangle]], maxf(coverage[indices[triangle + 1]], coverage[indices[triangle + 2]])) > 0.15:
+			if maxf(coverage[indices[triangle]], maxf(coverage[indices[triangle + 1]], coverage[indices[triangle + 2]])) > BEARD_TRIANGLE_COVERAGE:
 				selected.append_array(indices.slice(triangle, triangle + 3))
 		if selected.is_empty():
 			continue
@@ -485,13 +491,47 @@ static func _build_beard(source: Mesh, mesh_to_skeleton: Transform3D,
 		if influences > 0:
 			arrays[Mesh.ARRAY_BONES] = bones
 			arrays[Mesh.ARRAY_WEIGHTS] = weights
-		result.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], {},
+		MESH_LODS.add_surface(result, Mesh.PRIMITIVE_TRIANGLES, arrays, [],
+			_beard_lods(source, surface, coverage, remap),
 			Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS if influences == 8 else 0)
 		if _beard_base_material == null:
 			_beard_base_material = ShaderMaterial.new()
 			_beard_base_material.shader = BEARD_SHADER
 		result.surface_set_material(result.get_surface_count() - 1, _beard_base_material)
 	return result
+
+## The face's LOD levels cut to the beard (actor LODs C6): a level triangle is
+## beard by the base rule (any corner's coverage above the threshold) and only
+## when the beard holds all three corners, renumbered onto the beard's
+## vertices. The beard then steps down with the face it sits on, and stays on
+## it; a face without chains gives a beard without chains, as before.
+static func _beard_lods(source: Mesh, surface: int, coverage: PackedFloat32Array,
+		remap: Dictionary) -> Dictionary:
+	var parent := MESH_LODS.read(source, surface)
+	if parent.is_empty():
+		return {}
+	var map := PackedInt32Array()
+	map.resize(coverage.size())
+	map.fill(-1)
+	for index: int in remap:
+		map[index] = int(remap[index])
+	var size := coverage.size()
+	var selected := {}
+	for edge: Variant in parent:
+		var chain: PackedInt32Array = parent[edge]
+		var kept := PackedInt32Array()
+		for triangle: int in range(0, chain.size() - 2, 3):
+			var a := chain[triangle]
+			var b := chain[triangle + 1]
+			var c := chain[triangle + 2]
+			if a < 0 or b < 0 or c < 0 or a >= size or b >= size or c >= size:
+				continue
+			if maxf(coverage[a], maxf(coverage[b], coverage[c])) > BEARD_TRIANGLE_COVERAGE:
+				kept.append(a)
+				kept.append(b)
+				kept.append(c)
+		selected[edge] = kept
+	return MESH_LODS.remap(selected, map)
 
 static func _canonical_beard_coverage(point: Vector3, eye_height: float, style: int, face_frame: Dictionary, face_shape: Variant) -> float:
 	var canonical:=PROPORTIONS.inverse_face_point(point,face_frame,face_shape) if not face_frame.is_empty() else point

@@ -3,6 +3,9 @@ extends RefCounted
 ## its rest mesh, so the emblem follows the same skin, drape and cloth bones.
 ## Detail albedo keeps the original weave, normal map and three cloth colours.
 
+## The projection adds UV2 only, so the surface keeps its LOD chains.
+const MESH_LODS := preload("res://src/actors/mesh_lods.gd")
+
 static var enabled := true
 static var _materials: Array[WeakRef] = []
 static var _meshes: Dictionary = {}
@@ -56,8 +59,9 @@ static func _projected_mesh(source: Mesh) -> Mesh:
 			# outside the design and clamp sampling leave the rest plain cloth.
 			uv.append(Vector2(0.5 - point.x / 0.52, (1.45 - point.y) / 0.52))
 		arrays[Mesh.ARRAY_TEX_UV2] = uv
-		mesh.add_surface_from_arrays(source.surface_get_primitive_type(surface),
-			arrays, [], {}, source.surface_get_format(surface) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
+		MESH_LODS.add_surface(mesh, source.surface_get_primitive_type(surface),
+			arrays, [], MESH_LODS.read(source, surface),
+			source.surface_get_format(surface) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
 		mesh.surface_set_material(surface, source.surface_get_material(surface))
 	if _meshes.size() >= CACHE_LIMIT:
 		_meshes.clear()
