@@ -34,7 +34,9 @@ const NAME_DISTANCE_DEFAULT := 30.0
 ## How many other players and creatures are drawn with a body at once
 ## (crowd_presentation.gd `body_cap`), and how many of the nearest other capes
 ## sway at High quality (`cloth_bodies`). The defaults are the crowd
-## presentation's own: the Phase 4 server cap and its cloth budget.
+## presentation's own: the Phase 4 server cap and its cloth budget. Until the
+## player picks a number the count follows the graphics quality
+## ("Follow graphics quality": ActorRenderQuality.body_cap_default).
 const CROWD_BODIES_MIN := 40
 const CROWD_BODIES_MAX := 300
 const CROWD_BODIES_DEFAULT := 160
@@ -54,6 +56,8 @@ const CacheDiskUsage := preload("res://src/ui/cache_disk_usage.gd")
 const LookProfileScript := preload("res://src/world/look/look_profile.gd")
 ## The tier a fresh profile's graphics defaults were chosen for.
 const HardwareTier := preload("res://src/runtime/hardware_tier.gd")
+## Each quality's crowd count, for the crowd row's wording.
+const RenderQuality := preload("res://src/actors/actor_render_quality.gd")
 ## keys.ini, Eternal Lands-style: the file every key binding is kept in.
 const KeyBindings := preload("res://src/ui/key_bindings.gd")
 const TargetMarkerStyle := preload("res://src/actors/target_marker_style.gd")
@@ -103,6 +107,11 @@ var quality_option: OptionButton
 var graphics_restart_notice: Label
 var name_distance_slider: HSlider
 var name_distance_value: Label
+## The crowd rows: each slider and its count by setting key, and the box that
+## makes the body count follow the graphics quality.
+var crowd_sliders: Dictionary = {}
+var crowd_readings: Dictionary = {}
+var crowd_bodies_auto_toggle: CheckBox
 var text_color_rows: Dictionary = {}
 var text_color_group: OptionButton
 var text_color_search: LineEdit
@@ -800,9 +809,11 @@ func _build_graphics() -> void:
 	_add_count_row(page, "crowd_bodies", tr("ELORIA_SETTINGS_CROWD_BODIES"),
 		tr("ELORIA_SETTINGS_CROWD_BODIES_HINT"), CROWD_BODIES_MIN, CROWD_BODIES_MAX, 10,
 		CROWD_BODIES_DEFAULT)
+	_add_crowd_follow_row(page)
 	_add_count_row(page, "swaying_capes", tr("ELORIA_SETTINGS_SWAYING_CAPES"),
 		tr("ELORIA_SETTINGS_SWAYING_CAPES_HINT"), SWAYING_CAPES_MIN, SWAYING_CAPES_MAX, 1,
 		SWAYING_CAPES_DEFAULT)
+	_show_crowd_follow(crowd_bodies_auto_toggle.button_pressed)
 	# The combat box can also be dismissed from its own right-click menu, so
 	# this is the way back once a player has done that.
 	_add_map_cache_row(page)
@@ -999,16 +1010,73 @@ func _add_count_row(page: VBoxContainer, key: String, label: String, hint: Strin
 		setting_changed.emit(page.name, key, roundi(moved)))
 	row.add_child(slider)
 	row.add_child(reading)
+	crowd_sliders[key] = slider
+	crowd_readings[key] = reading
 
-## Shows the player's crowd settings without re-emitting them.
-func restore_crowd_settings(bodies: int, capes: int) -> void:
+## "Follow graphics quality" under the crowd count: on, the count is the
+## quality's own (60 at Low, 160 at Medium and High) and the slider is greyed
+## out showing it; off, the slider keeps that count until it is moved. A
+## benchmark's RABBITLANDS_CROWD_BODY_CAP still decides over either.
+func _add_crowd_follow_row(page: VBoxContainer) -> void:
+	var row := HBoxContainer.new()
+	row.name = "CrowdBodiesAutoRow"
+	page.add_child(row)
+	var indent := Control.new()
+	indent.custom_minimum_size = Vector2(200.0, 0.0)
+	row.add_child(indent)
+	crowd_bodies_auto_toggle = CheckBox.new()
+	crowd_bodies_auto_toggle.name = "crowd_bodies_auto"
+	crowd_bodies_auto_toggle.text = "Follow graphics quality"
+	crowd_bodies_auto_toggle.tooltip_text = crowd_follow_hint()
+	crowd_bodies_auto_toggle.button_pressed = true
+	crowd_bodies_auto_toggle.toggled.connect(func(pressed: bool) -> void:
+		_show_crowd_follow(pressed)
+		setting_changed.emit(page.name, "crowd_bodies_auto", pressed))
+	row.add_child(crowd_bodies_auto_toggle)
+
+static func crowd_follow_hint() -> String:
+	return "Draw as many characters as the graphics quality suits: %d at Low, %d at Medium and High. Clear it to choose your own number." % [
+		RenderQuality.body_cap_default(RenderQuality.Quality.LOW),
+		RenderQuality.body_cap_default(RenderQuality.Quality.HIGH)]
+
+## The crowd count's slider is greyed out while it follows the quality.
+func _show_crowd_follow(following: bool) -> void:
+	var slider := crowd_sliders.get("crowd_bodies") as HSlider
+	if slider == null:
+		return
+	slider.editable = not following
+	slider.tooltip_text = "Follows the graphics quality. Clear Follow graphics quality to choose a number." \
+		if following else tr("ELORIA_SETTINGS_CROWD_BODIES_HINT")
+
+## Low simulates no other player's cape (ActorRenderQuality non_local_cape),
+## so its swaying-capes count is greyed out there; the value is kept. Only
+## Low, as the Low actor tier asks (Medium swings none either, and its row is
+## left as it was).
+func _show_swaying_capes(level: int) -> void:
+	var slider := crowd_sliders.get("swaying_capes") as HSlider
+	if slider == null:
+		return
+	var low := level == RenderQuality.Quality.LOW
+	slider.editable = not low
+	slider.tooltip_text = "Low quality keeps other players' capes still." if low \
+		else tr("ELORIA_SETTINGS_SWAYING_CAPES_HINT")
+
+## Shows the player's crowd settings without re-emitting them: the body count
+## (the quality's own while `follow_quality`), the swaying capes, and the
+## graphics `quality` they are shown for (-1: the one in use).
+func restore_crowd_settings(bodies: int, capes: int, follow_quality := false,
+		quality := -1) -> void:
 	for pair: Array in [["crowd_bodies", bodies], ["swaying_capes", capes]]:
-		var slider := panel.find_child(str(pair[0]), true, false) as HSlider
-		var reading := panel.find_child(str(pair[0]) + "_count", true, false) as Label
+		var slider := crowd_sliders.get(str(pair[0])) as HSlider
+		var reading := crowd_readings.get(str(pair[0])) as Label
 		if slider != null:
 			slider.set_value_no_signal(int(pair[1]))
 		if reading != null:
 			reading.text = str(int(pair[1]))
+	if crowd_bodies_auto_toggle != null:
+		crowd_bodies_auto_toggle.set_pressed_no_signal(follow_quality)
+	_show_crowd_follow(follow_quality)
+	_show_swaying_capes(quality if quality >= 0 else int(LookProfileScript.quality()))
 
 ## The map cache: a switch, what it is costing, and a way to be rid of it.
 ##

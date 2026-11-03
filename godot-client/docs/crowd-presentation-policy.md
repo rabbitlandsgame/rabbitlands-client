@@ -57,11 +57,24 @@ A parked body's animation is paused, so the gate does not go on stepping it
 while it waits; a revived one animates at half rate until the gate's next
 sweep gives it its tier.
 
-**Body cap (a player setting, 160 by default).** Graphics > "Characters drawn in
-a crowd" (40-300) sets `body_cap`: only the nearest `body_cap` actors in range
-have bodies, not counting the player, their target and their selection. The
-default is the Phase 4 server cap, so once that cap is live the client draws
-everything the server sends. The cap's distance is that of the cap-th nearest
+**Body cap (a player setting that follows the graphics quality by default).**
+Graphics > "Characters drawn in a crowd" (40-300) sets `body_cap`: only the
+nearest `body_cap` actors in range have bodies, not counting the player, their
+target and their selection. Under it, "Follow graphics quality" (on for every
+profile until the player picks a number; `[graphics] crowd_bodies_auto`) makes
+the cap the quality's own, `ActorRenderQuality.body_cap_default`: 60 at Low
+(the Low actor tier, owner decision 2026-11-02) and 160 at Medium and High,
+the Phase 4 server cap, so there the client draws everything the server sends.
+While the box is on the slider is greyed out and shows that count; clearing it
+keeps the count, and moving the slider makes it the player's own number at
+every quality. The Performance preset and the first-run low tier turn the box
+on instead of saving 60. A settings file from before the box follows the
+quality if it held 160 or no count, or the first-run low tier's 60 (with
+`hardware_tier="low"`); any other number stays a number
+(`CrowdPresentation.follows_quality`). The actor cap declared to the server
+(`actor_cap:<N>`, [player interest](player-interest-client.md)) is the cap in
+force, so a Low client following the quality asks for 60 and is re-declared
+when the quality changes. The cap's distance is that of the cap-th nearest
 actor in range; deferred actors inside it are built, and a body is given up
 only once it is `BODY_CAP_HYSTERESIS_METRES` (8 m) farther out than that, so an
 actor on the boundary does not flip as the crowd mills. Past the cap an actor
@@ -115,6 +128,19 @@ the gate part on:
   declutter, which walks the crowd again, on the frame after. A fixture that sets `_animation_gate_refresh_msec` to 0 still gets one
   whole sweep at once.
 
+**Overhead banner cap (Low).** At Low the declutter pass shows at most
+`overhead_cap` (`ActorRenderQuality.overhead_cap`, 24) overhead banners. It
+takes candidates in its usual order (the target, then players and NPCs, then
+creatures, each nearest the camera focus first) and, once 24 are shown, hides
+the rest as crowded (`set_overhead_crowded`: names, health and status quads).
+The target, the selection, the party's other members and a running campaign
+scene's actors are never hidden by the cap and do not count; quest markers and
+speech bubbles are separate nodes and stay. A banner shown on the previous pass
+sorts `OVERHEAD_CAP_HYSTERESIS_METRES` (2 m) nearer, so the 24th and 25th do
+not trade places as a crowd mills. Medium and High have no cap and the pass is
+unchanged there. Each hidden banner saves up to six transparent draws and its
+share of the overhead text pass.
+
 **Live effects.** `live_effect_budget.gd` bounds the short-lived combat visuals
 alive at once: spells, impacts, bursts and portal flashes (`spell`, 48), arrows
 and bolts (`missile`, 48), melee technique visuals (`technique`, 32) and floating
@@ -156,12 +182,17 @@ against the client without it:
 `stagger` and `quarter` refine the gate and are off without it.
 
 `RABBITLANDS_CROWD_BODY_CAP` forces the body cap for a session (0 turns it off)
-and `RABBITLANDS_CROWD_TUNING` the full-rate, half-rate and cloth budgets
-(`full=24,half=8,cloth=4`); either takes precedence over the player's settings,
-which are kept but not applied. The benchmark launcher's `--body-cap` and
-`--tuning` set them; left unset, a run uses the player defaults (160
-characters, 8 capes). The per-frame loop changes are not
-switchable: they change no behaviour.
+and `RABBITLANDS_CROWD_TUNING` the full-rate, half-rate and cloth budgets and
+the overhead banner cap (`full=24,half=8,cloth=4,banners=0`; `banners=0` is no
+banner cap at Low; the benchmark launcher refuses `--tuning` with a Performance
+settings profile, so measure the banner cap with `--settings-profile default
+--quality low`); either takes precedence over the player's settings and the
+quality, which are kept but not applied. The benchmark launcher's `--body-cap`
+and `--tuning` set them; left unset, a run uses the player defaults (the
+quality's count, 160 characters at Medium and High and 60 at Low, 8 capes).
+Since the Low actor tier, `--settings-profile default --quality low` draws 60
+bodies: pass `--body-cap 160` to compare with runs from before it. The
+per-frame loop changes are not switchable: they change no behaviour.
 
 ## Benchmark
 
@@ -276,5 +307,8 @@ band layouts describe the client before this policy.
 `tests/test_crowd_presentation.gd` covers the policy switches, the effect
 budget, deferred and built arrivals, nearest-first builds, building on
 approach, parking and revival, giving a far body up, the body cap, the two
-player settings and their ranges, the paused and half-rate tiers and bulk
-removal.
+player settings and their ranges, the body cap following the quality (and the
+declared actor cap with it), the saved-settings migration, the overhead banner
+cap with its exemptions and hysteresis, the paused and half-rate tiers and bulk
+removal. `tests/test_hardware_tier.gd` loads settings files from before the
+"Follow graphics quality" box through the client.

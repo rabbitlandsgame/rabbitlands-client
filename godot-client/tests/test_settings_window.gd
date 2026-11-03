@@ -69,6 +69,7 @@ func _run() -> void:
 			"the saved emblem preference restores")
 		cape_toggle.button_pressed = true
 	await _test_look_and_quality(main, window, panel, resource_rail)
+	_test_crowd_rows(main, window)
 	await _test_unified_settings(main, window, panel)
 
 	# The map cache row. It is the only setting in this window that spends the
@@ -311,6 +312,37 @@ func _test_look_and_quality(main: Control, window: Control, panel: PanelContaine
 	main.call("_on_client_setting_changed", "Graphics", "quality", original_quality)
 	main.call("_load_hud_settings")
 	tabs.current_tab = 0
+
+## The crowd count's "Follow graphics quality" box (LAT-L5): on Graphics under
+## the count, saved, greying the count while on; Low greys the swaying capes.
+func _test_crowd_rows(main: Control, window: Control) -> void:
+	var page := window.get("panel") as Node
+	var follow := page.find_child("crowd_bodies_auto", true, false) as CheckBox
+	var bodies := page.find_child("crowd_bodies", true, false) as HSlider
+	var capes := page.find_child("swaying_capes", true, false) as HSlider
+	if not _expect(follow != null and bodies != null and capes != null
+			and int(window.call("tab_index_for", follow)) == int(window.call("tab_index_for", bodies)),
+			"the Follow graphics quality box sits on the Graphics tab with the crowd count"):
+		return
+	var original_quality := LookProfile.player_quality()
+	var stored := ConfigFile.new()
+	follow.button_pressed = false
+	stored.load(SETTINGS_PATH)
+	_expect(not bool(main.get("_crowd_bodies_auto")) and bodies.editable
+		and stored.get_value("graphics", "crowd_bodies_auto") == false,
+		"clearing the box saves it and the count can be moved")
+	follow.button_pressed = true
+	stored.load(SETTINGS_PATH)
+	_expect(bool(main.get("_crowd_bodies_auto")) and not bodies.editable
+		and stored.get_value("graphics", "crowd_bodies_auto") == true
+		and follow.tooltip_text.contains("60 at Low"),
+		"ticking it saves it, greys out the count and says what each quality draws")
+	main.call("_on_client_setting_changed", "Graphics", "quality", LookProfile.Quality.LOW)
+	_expect(not capes.editable and capes.tooltip_text.contains("Low quality")
+		and int(bodies.value) == 60, "at Low the swaying capes are greyed out and the count shows 60")
+	main.call("_on_client_setting_changed", "Graphics", "quality", LookProfile.Quality.HIGH)
+	_expect(capes.editable and int(bodies.value) == 160, "at High both are back: the capes and 160")
+	main.call("_on_client_setting_changed", "Graphics", "quality", original_quality)
 
 func _test_fps_limit(main: Control, window: Control) -> void:
 	var option: OptionButton = (window.get("panel") as Node).find_child("fps_limit", true, false) as OptionButton

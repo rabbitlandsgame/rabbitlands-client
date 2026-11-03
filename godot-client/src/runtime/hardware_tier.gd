@@ -53,10 +53,14 @@ const MEDIUM_CPU_THREADS := 8
 ## these defaults are for, and Medium there would trade RL heads and SSIL for
 ## time that machine has. Medium as its default waits for the owner's call on
 ## the per-class budgets; the tier is recorded meanwhile.
+## LOW's crowd setting follows the graphics quality (`crowd_bodies_auto`,
+## 60 bodies at Low) rather than saving 60, as the Performance preset does
+## (Low actor tier, 2026-11-02); a profile this tier seeded with 60 before
+## that reads as following the quality (CrowdPresentation.follows_quality).
 const TIER_SETTINGS := {
 	Tier.LOW: {"quality": "low", "appearance": "painted_ground", "fps_limit": 30,
 		"vsync_mode": "off", "render_scale": 0.75, "map_texture_quality": "half",
-		"crowd_bodies": 60, "swaying_capes": 0, "shadows": false, "particles": true,
+		"crowd_bodies_auto": true, "swaying_capes": 0, "shadows": false, "particles": true,
 		"decorative_grass": false, "name_distance": 20.0},
 	Tier.MEDIUM: {"quality": "high"},
 	Tier.HIGH: {"quality": "high"},

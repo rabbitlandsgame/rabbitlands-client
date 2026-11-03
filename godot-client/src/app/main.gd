@@ -511,7 +511,10 @@ var _trailer_capture_layer: CanvasLayer
 var _name_distance_metres := NAME_DISTANCE_DEFAULT_METRES
 ## The player's crowd settings (Graphics): how many other actors are drawn with
 ## a body at once, and how many of the nearest other capes sway at High.
+## `_crowd_bodies` is what the slider shows: while `_crowd_bodies_auto` (the
+## "Follow graphics quality" box) is on, the quality's own count.
 var _crowd_bodies := SettingsWindowScript.CROWD_BODIES_DEFAULT
+var _crowd_bodies_auto := true
 var _swaying_capes := SettingsWindowScript.SWAYING_CAPES_DEFAULT
 ## "+N nearby" in the lower corner of the minimap (nearby_indicator.gd).
 var nearby_indicator: Label
@@ -3783,7 +3786,8 @@ func _refresh_unified_settings() -> void:
 	equipment_side.select(1 if _equipment_side == "right" else 0)
 	settings_window.restore_fps_limit(_fps_limit)
 	settings_window.restore_name_distance(_name_distance_metres)
-	settings_window.restore_crowd_settings(_crowd_bodies, _swaying_capes)
+	settings_window.restore_crowd_settings(_crowd_bodies, _swaying_capes,
+		_crowd_bodies_auto, LookProfile.quality())
 	settings_window.restore_look(LookProfile.player_mode(), LookProfile.look_forced())
 	settings_window.restore_quality(LookProfile.player_quality(), LookProfile.quality_forced())
 	_refresh_graphics_restart_notice()
@@ -10158,7 +10162,19 @@ func _release_bodies(releases: Array) -> void:
 ## Bodies and interaction targets remain independent of overhead visibility.
 const OVERHEAD_REVEAL_GAP_PIXELS := 6.0
 
+## At Low (crowd.overhead_cap, 24) the pass also stops showing banners once
+## that many are shown, in the same order: the target, the selection, the
+## party and a running campaign scene's actors are always considered and not
+## counted; quest markers and speech bubbles are separate nodes and stay. A
+## banner shown on the last pass sorts a little nearer (crowd hysteresis), so
+## the last one in and the first one out do not swap as a crowd mills.
 func _declutter_actor_overheads(target_id: int) -> void:
+	var capped: bool = int(crowd.overhead_cap) > 0
+	var exempt_ids: Dictionary = {}
+	var party_names: Dictionary = {}
+	if capped:
+		exempt_ids = _overhead_cap_exempt_ids(target_id)
+		party_names = _overhead_cap_party_names()
 	var candidates: Array[Dictionary] = []
 	for raw_id: Variant in actor_nodes:
 		var actor := actor_nodes[raw_id] as ReplicatedActor3D
@@ -10184,11 +10200,16 @@ func _declutter_actor_overheads(target_id: int) -> void:
 				actor.global_position + Vector3.UP * actor.head_height()):
 			actor.set_overhead_crowded(true)
 			continue
-		candidates.append({"actor": actor, "id": int(raw_id), "priority": priority,
+		var candidate := {"actor": actor, "id": int(raw_id), "priority": priority,
 			"type": actor_type,
 			"distance": actor.global_position.distance_squared_to(camera_rig.focus),
 			"rect": overhead_block_rect(screen, str(dto.get("name", "")),
-				actor.occupation(), actor.status_effect_count())})
+				actor.occupation(), actor.status_effect_count())}
+		if capped:
+			candidate["exempt"] = exempt_ids.has(int(raw_id)) or (not party_names.is_empty()
+				and party_names.has(str(dto.get("name", "")).to_lower()))
+			candidate["distance"] = crowd.overhead_sort_distance(int(raw_id), float(candidate.distance))
+		candidates.append(candidate)
 	candidates.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		if a.priority != b.priority: return a.priority < b.priority
 		if a.distance != b.distance: return a.distance < b.distance
@@ -10202,8 +10223,13 @@ func _declutter_actor_overheads(target_id: int) -> void:
 			own.size * scale_to_view)
 		occupied.append(own_rect)
 		player_occupied.append(own_rect)
+	if capped:
+		crowd.begin_overhead_pass()
 	for candidate: Dictionary in candidates:
 		var candidate_actor := candidate.actor as ReplicatedActor3D
+		if capped and crowd.overhead_capped(bool(candidate.exempt)):
+			candidate_actor.set_overhead_crowded(true)
+			continue
 		var crowded := false
 		var creature: bool = candidate.type in [&"creature", &"invasion"]
 		var obstacles: Array[Rect2] = player_occupied if creature else occupied
@@ -10217,12 +10243,41 @@ func _declutter_actor_overheads(target_id: int) -> void:
 					crowded = true
 					break
 		candidate_actor.set_overhead_crowded(crowded)
+		if capped and not crowded and not bool(candidate.exempt) \
+				and candidate_actor._overhead_shown():
+			crowd.count_overhead(int(candidate.id))
 		# Hidden banners do not claim screen space. In particular a disabled
 		# NPC/player name must not hide the next visible player's health.
 		if not crowded and not creature and candidate_actor._overhead_shown():
 			occupied.append(candidate.rect)
 			if candidate.type == &"player":
 				player_occupied.append(candidate.rect)
+	if capped:
+		crowd.end_overhead_pass()
+
+## Who the overhead banner cap never hides or counts: the combat target, the
+## selection and the actors of a running campaign scene (as for the body cap,
+## `_crowd_priority_actor`)...
+func _overhead_cap_exempt_ids(target_id: int) -> Dictionary:
+	var ids := {target_id: true, AppState.selected_actor_id: true,
+		_combat_target_actor_id(): true}
+	for id: int in campaign_scene.live_actor_ids(AppState.campaign, AppState.current_map):
+		ids[id] = true
+	ids.erase(-1)
+	return ids
+
+## ... and the party's other members, by name as the party packet states them
+## (it carries no actor ids), compared without case.
+func _overhead_cap_party_names() -> Dictionary:
+	var names := {}
+	if not bool(AppState.party.get("in_party", false)):
+		return names
+	for raw: Variant in AppState.party.get("members", []) as Array:
+		if raw is Dictionary and not bool((raw as Dictionary).get("is_self", false)):
+			var member_name := str((raw as Dictionary).get("name", "")).to_lower()
+			if not member_name.is_empty():
+				names[member_name] = true
+	return names
 
 ## The screen space an actor's overhead block claims when names are
 ## decluttered: the name, and the health row under it, round `screen`. An
@@ -10961,9 +11016,16 @@ func _load_hud_settings() -> void:
 			config.get_value("graphics", "nameplates", true))
 		_set_name_distance(config.get_value(
 			"graphics", "name_distance", NAME_DISTANCE_DEFAULT_METRES))
-		_set_crowd_settings(config.get_value("graphics", "crowd_bodies",
-			SettingsWindowScript.CROWD_BODIES_DEFAULT), config.get_value(
-			"graphics", "swaying_capes", SettingsWindowScript.SWAYING_CAPES_DEFAULT))
+		# A file from before the "Follow graphics quality" switch has no
+		# crowd_bodies_auto; follows_quality decides from its count and tier.
+		var saved_bodies: Variant = config.get_value("graphics", "crowd_bodies",
+			SettingsWindowScript.CROWD_BODIES_DEFAULT)
+		var saved_follow: Variant = config.get_value("graphics", "crowd_bodies_auto") \
+			if config.has_section_key("graphics", "crowd_bodies_auto") else null
+		_set_crowd_settings(saved_bodies, config.get_value(
+			"graphics", "swaying_capes", SettingsWindowScript.SWAYING_CAPES_DEFAULT),
+			CrowdPresentationScript.follows_quality(saved_follow, saved_bodies,
+				HardwareTier.seeded_tier(config)))
 		camera_rig.rotation_sensitivity = float(config.get_value(
 			"camera", "rotation_sensitivity", camera_rig.rotation_sensitivity))
 		camera_rig.keyboard_speed = float(config.get_value(
@@ -11029,7 +11091,8 @@ func _load_hud_settings() -> void:
 	settings_window.call("restore_toggle", "combat_hud",
 		bool(extension_windows.get("combat_hud_enabled")))
 	settings_window.call("restore_name_distance", _name_distance_metres)
-	settings_window.call("restore_crowd_settings", _crowd_bodies, _swaying_capes)
+	settings_window.call("restore_crowd_settings", _crowd_bodies, _swaying_capes,
+		_crowd_bodies_auto, LookProfile.quality())
 	settings_window.call("restore_toggle", "cape_emblems", CapeEmblems.enabled)
 	for option_key: String in _hud_element_options:
 		settings_window.call("restore_toggle", option_key,
@@ -11138,6 +11201,7 @@ func _save_hud_settings() -> void:
 	config.set_value("graphics", "nameplates", _nameplates_enabled)
 	config.set_value("graphics", "name_distance", _name_distance_metres)
 	config.set_value("graphics", "crowd_bodies", _crowd_bodies)
+	config.set_value("graphics", "crowd_bodies_auto", _crowd_bodies_auto)
 	config.set_value("graphics", "swaying_capes", _swaying_capes)
 	config.set_value("graphics", "fps_limit", _fps_limit)
 	config.set_value("graphics", "vsync_mode", _vsync_preference)
@@ -15160,10 +15224,13 @@ func _apply_look_switch() -> void:
 ## The graphics quality changed: the shadows at once (LookSwitch), the actor
 ## meshes and cape solvers, and the grade's screen-space effects, glow and the
 ## sky's clouds by grading the environment again. The grass beds rebuild at the
-## new reach and density by themselves (LookGrassBeds.tend).
+## new reach and density by themselves (LookGrassBeds.tend). A crowd setting
+## that follows the quality takes the new count (the next gate sweep applies
+## it) and the server is told the new cap.
 func _apply_graphics_quality() -> void:
 	LookSwitch.apply_shadow_quality(world_sun)
 	crowd.set_quality(LookProfile.quality())
+	_follow_quality_crowd_setting()
 	effect_budget.quality = LookProfile.quality()
 	if weather_layer != null:
 		weather_layer.set_effects_enabled(_effects_enabled)
@@ -15194,7 +15261,7 @@ func _apply_performance_preset() -> void:
 	_applying_graphics_preset = true
 	var values := {"quality": LookProfile.Quality.LOW,
 		"appearance": LookProfile.Mode.PAINTED_GROUND, "fps_limit": 30, "vsync_mode": "off",
-		"render_scale": 0.75, "map_texture_quality": "half", "crowd_bodies": 60,
+		"render_scale": 0.75, "map_texture_quality": "half", "crowd_bodies_auto": true,
 		"swaying_capes": 0, "shadows": false, "particles": true,
 		"decorative_grass": false, "name_distance": 20.0}
 	values["renderer"] = GraphicsLaunchOptions.performance_renderer(_renderer_preference)
@@ -15351,26 +15418,60 @@ func _set_name_distance(value: Variant) -> void:
 
 ## The player's crowd settings, clamped to the sliders' ranges and handed to
 ## the crowd presentation, which keeps any value the environment forces for a
-## benchmark. The next gate sweep applies them.
-func _set_crowd_settings(bodies: Variant, capes: Variant) -> void:
+## benchmark. With `follow_quality` (the "Follow graphics quality" box) the
+## count is the graphics quality's own (ActorRenderQuality.body_cap_default:
+## 60 at Low, 160 otherwise) and `bodies` is not used; turning the box off
+## keeps the count it showed. The next gate sweep applies them.
+func _set_crowd_settings(bodies: Variant, capes: Variant, follow_quality := false) -> void:
+	var was_following := _crowd_bodies_auto
+	_crowd_bodies_auto = follow_quality
 	_crowd_bodies = clampi(int(bodies) if bodies is int or bodies is float
 		else SettingsWindowScript.CROWD_BODIES_DEFAULT,
 		SettingsWindowScript.CROWD_BODIES_MIN, SettingsWindowScript.CROWD_BODIES_MAX)
 	_swaying_capes = clampi(int(capes) if capes is int or capes is float
 		else SettingsWindowScript.SWAYING_CAPES_DEFAULT,
 		SettingsWindowScript.SWAYING_CAPES_MIN, SettingsWindowScript.SWAYING_CAPES_MAX)
-	crowd.set_player_budgets(_crowd_bodies, _swaying_capes)
+	if _crowd_bodies_auto:
+		_crowd_bodies = _quality_crowd_bodies()
+	crowd.set_player_budgets(_crowd_bodies, _swaying_capes, _crowd_bodies_auto)
 	_animation_gate_refresh_msec = 0
 	_sync_declared_actor_cap()
+	# A slider being dragged shows its own value; the box changes what the
+	# slider shows and whether it can be moved.
+	if _crowd_bodies_auto or was_following:
+		_restore_crowd_settings_window()
+
+## The crowd count the graphics quality gives, as the slider shows it.
+func _quality_crowd_bodies() -> int:
+	return clampi(int(crowd.quality_body_cap()), SettingsWindowScript.CROWD_BODIES_MIN,
+		SettingsWindowScript.CROWD_BODIES_MAX)
+
+## After a quality change: a crowd setting that follows the quality shows the
+## new count and the server is told the cap it now gives; the window also
+## greys out the swaying capes at Low, where no other cape sways.
+func _follow_quality_crowd_setting() -> void:
+	if _crowd_bodies_auto:
+		_crowd_bodies = _quality_crowd_bodies()
+	_sync_declared_actor_cap()
+	_restore_crowd_settings_window()
+
+func _restore_crowd_settings_window() -> void:
+	if is_instance_valid(settings_window):
+		settings_window.call("restore_crowd_settings", _crowd_bodies, _swaying_capes,
+			_crowd_bodies_auto, LookProfile.quality())
 
 ## The actor cap this client declares to the server (`actor_cap:<N>` in
-## `#clientcaps`) follows the crowd setting: the server is asked for no more
-## players and creatures than are drawn with a body, and never more than the
-## protocol's 160 (interest_protocol.gd `declared_actor_cap`). At the
-## setting's default of 160 the declaration is 160, which is what a client
-## that declares nothing gets.
+## `#clientcaps`) follows the bodies it draws (`crowd.body_cap`): the crowd
+## setting, the graphics quality's count while the setting follows it (60 at
+## Low), or a cap the environment forces for a benchmark. The server is asked
+## for no more players and creatures than are drawn with a body, and never
+## more than the protocol's 160 (interest_protocol.gd `declared_actor_cap`);
+## no cap at all declares 160. At 160 the declaration is 160, which is what a
+## client that declares nothing gets.
 func _sync_declared_actor_cap() -> void:
-	var cap: int = InterestProtocol.declared_actor_cap(_crowd_bodies)
+	var drawn: int = int(crowd.body_cap)
+	var cap: int = InterestProtocol.declared_actor_cap(
+		drawn if drawn > 0 else InterestProtocol.ACTOR_CAP_MAXIMUM)
 	if cap == int(Network.declared_actor_cap):
 		return
 	Network.declared_actor_cap = cap
@@ -15612,9 +15713,12 @@ func _on_client_setting_changed(section: String, key: String,
 		"name_distance":
 			_set_name_distance(value)
 		"crowd_bodies":
-			_set_crowd_settings(value, _swaying_capes)
+			# A number is the player's own choice: it stops following the quality.
+			_set_crowd_settings(value, _swaying_capes, false)
+		"crowd_bodies_auto":
+			_set_crowd_settings(_crowd_bodies, _swaying_capes, bool(value))
 		"swaying_capes":
-			_set_crowd_settings(_crowd_bodies, value)
+			_set_crowd_settings(_crowd_bodies, value, _crowd_bodies_auto)
 		"combat_hud":
 			extension_windows.call("set_combat_hud_enabled", bool(value))
 		"rotation_sensitivity":

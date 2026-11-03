@@ -403,6 +403,9 @@ func _check_client() -> void:
 		and main.get("_effects_enabled") and not Options.decorative_grass
 		and is_equal_approx(float(main.get("_name_distance_metres")), 20.0),
 		"a seeded profile loads half textures, 60 bodies and the preset's toggles")
+	expect(bool(main.get("_crowd_bodies_auto")) and int(main.get("_crowd_bodies")) == 60
+		and int(root.get_node("Network").get("declared_actor_cap")) == 60,
+		"its crowd count follows the quality: 60 at Low, declared to the server as 60")
 	expect(main.get("_renderer_preference") == "auto", "a seeded profile keeps the Automatic renderer")
 	var backdrop: Control = main.get("start_screen_backdrop")
 	expect(not backdrop.get("animation_enabled"), "the client's entry screen starts on the still")
@@ -425,9 +428,49 @@ func _check_client() -> void:
 			drift.append("%s=%s" % [key, stored.get_value("graphics", key)])
 	expect(drift.is_empty(), "the low tier matches the in-game Performance preset: %s" % ", ".join(drift))
 	expect(stored.get_value("graphics", "hardware_tier") == "low", "the client's own saves keep the recorded tier")
+	_check_crowd_migration(main)
 	main.queue_free()
 	await process_frame
 	Engine.max_fps = 0
 	Options.decorative_grass = true
 	LookProfile.set_player_quality(saved_player_quality)
 	LookProfile.set_player_mode(saved_player_mode)
+
+## LAT-L5's settings migration through the client's own load: profiles saved
+## before the crowd count could follow the quality. 160 (or nothing) and the
+## first-run low tier's 60 follow it; any other number, or 60 the player set
+## with the old Performance preset, stays a number; a saved switch decides.
+func _check_crowd_migration(main: Control) -> void:
+	var crowd: RefCounted = main.get("crowd")
+	var cases := [
+		["quality=\"low\"\ncrowd_bodies=60\nhardware_tier=\"low\"\n", true, 60, 160,
+			"a wave-1 low-tier profile (60) follows the quality: 60 at Low, 160 at High"],
+		["quality=\"low\"\ncrowd_bodies=60\n", false, 60, 60,
+			"60 saved by the old Performance preset stays 60 at every quality"],
+		["quality=\"low\"\ncrowd_bodies=160\n", true, 60, 160,
+			"the old default 160 follows the quality"],
+		["quality=\"low\"\n", true, 60, 160, "a profile without a crowd count follows the quality"],
+		["quality=\"high\"\ncrowd_bodies=90\nhardware_tier=\"low\"\n", false, 90, 90,
+			"a player's own 90 stays 90"],
+		["quality=\"low\"\ncrowd_bodies=160\ncrowd_bodies_auto=false\n", false, 160, 160,
+			"a saved switch off keeps the number"],
+	]
+	for case: Array in cases:
+		var file := FileAccess.open(Options.SETTINGS_PATH, FileAccess.WRITE)
+		file.store_string("[graphics]\n\n" + str(case[0]))
+		file.close()
+		main.call("_load_hud_settings")
+		var level := LookProfile.player_quality()
+		var at_saved := int(crowd.get("body_cap"))
+		var low_cap := at_saved if level == LookProfile.Quality.LOW else -1
+		main.call("_on_client_setting_changed", "Graphics", "quality", LookProfile.Quality.HIGH)
+		var high_cap := int(crowd.get("body_cap"))
+		if low_cap < 0:
+			main.call("_on_client_setting_changed", "Graphics", "quality", LookProfile.Quality.LOW)
+			low_cap = int(crowd.get("body_cap"))
+		var stored := ConfigFile.new()
+		stored.load(Options.SETTINGS_PATH)
+		expect(bool(main.get("_crowd_bodies_auto")) == bool(case[1]) and low_cap == int(case[2])
+			and high_cap == int(case[3]) and stored.get_value("graphics", "crowd_bodies_auto") == bool(case[1]),
+			"%s (follows %s, Low %d, High %d, saved %s)" % [case[4], main.get("_crowd_bodies_auto"),
+				low_cap, high_cap, stored.get_value("graphics", "crowd_bodies_auto")])

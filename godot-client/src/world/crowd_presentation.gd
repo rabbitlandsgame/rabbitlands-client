@@ -12,8 +12,12 @@ extends RefCounted
 ## - **Parking.** A body the server removes is kept hidden for a few seconds,
 ##   so an actor that steps out of view and back - a creature on the edge of the
 ##   view radius, an actor on the server's cap boundary - is not rebuilt.
-## - **An optional body cap**, for machines that cannot draw every actor the
-##   server sends (`body_cap`, off unless asked for).
+## - **A body cap**, for machines that cannot draw every actor the server
+##   sends (`body_cap`). It follows the graphics quality unless the player
+##   chose a number (`body_cap_auto`): 60 at Low, the server's 160 otherwise.
+## - **An overhead banner cap** at Low (`overhead_cap`): main.gd's declutter
+##   pass shows at most that many banners besides the target, the selection
+##   and the party.
 ##
 ## The constants are chosen against the 80 m draw distance: bodies are built a
 ## little before they can be seen and kept well after, so walking along the
@@ -62,7 +66,19 @@ const CLOTH_HYSTERESIS := 4
 const HALF_RATE_BODIES := 16
 ## The body cap a player has not changed: the Phase 4 server cap, so the
 ## client draws no fewer than the server will send once that cap is live.
+## While the crowd setting follows the graphics quality the cap is
+## ActorRenderQuality.body_cap_default instead: this at Medium and High, 60
+## at Low (the Low actor tier, owner decision 2026-11-02).
 const BODY_CAP_DEFAULT := 160
+## What the 2026-11 first-run low tier (HardwareTier.TIER_SETTINGS[LOW])
+## saved as the crowd setting before the setting could follow the quality.
+const FIRST_RUN_LOW_BODIES := 60
+## Overhead banner cap hysteresis: a banner shown on the previous declutter
+## pass sorts as if this much nearer the camera focus, so the banners on the
+## cap's boundary do not trade places as a crowd mills.
+const OVERHEAD_CAP_HYSTERESIS_METRES := 2.0
+
+const RenderQuality := preload("res://src/actors/actor_render_quality.gd")
 
 var lazy := true
 var gate := true
@@ -81,17 +97,35 @@ var full_rate_bodies := FULL_RATE_BODIES
 var half_rate_bodies := HALF_RATE_BODIES
 var cloth_bodies := CLOTH_BODIES
 ## The most bodies built at once, not counting the player, their target or
-## selection; 0 is no cap. The player's "Characters drawn in a crowd" setting,
-## 160 until they change it, unless RABBITLANDS_CROWD_BODY_CAP decides (0 there
-## turns the cap off). The server's Phase 3C/4 caps decide what is sent; this
-## decides what is drawn of it.
+## selection; 0 is no cap. The player's "Characters drawn in a crowd" setting:
+## the graphics quality's value while it follows the quality (`body_cap_auto`,
+## every profile until the player picks a number), else the number, unless
+## RABBITLANDS_CROWD_BODY_CAP decides (0 there turns the cap off). The
+## server's Phase 3C/4 caps decide what is sent; this decides what is drawn
+## of it.
 var body_cap := BODY_CAP_DEFAULT
+## Whether the cap follows the graphics quality rather than a number.
+var body_cap_auto := true
+## The most overhead banners shown at once besides the target, the selection
+## and the party (main.gd `_declutter_actor_overheads`); 0 is no cap. The
+## quality's ActorRenderQuality.overhead_cap (24 at Low), unless
+## RABBITLANDS_CROWD_TUNING's `banners=N` sets it for a measurement.
+var overhead_cap := 0
 ## Whether the environment set the cap or the cloth budget for this session,
 ## in which case the player's settings are kept but not applied.
 var body_cap_forced := false
 var cloth_forced := false
 var _full_rate_forced := false
 var _half_rate_forced := false
+var _overhead_cap_forced := false
+## The graphics quality last applied (set_quality), and the player's own
+## number for the body cap.
+var _quality: int = RenderQuality.Quality.HIGH
+var _player_body_cap := BODY_CAP_DEFAULT
+## The banners counted against `overhead_cap` on the last declutter pass, and
+## on the pass under way.
+var _overheads_shown: Dictionary = {}
+var _overheads_counted: Dictionary = {}
 
 var _candidates: Array[int] = []
 var _cursor := 0
@@ -109,7 +143,9 @@ func parked_actor_ids() -> Array:
 ## is empty or `all` for everything, `legacy` (or `0`/`off`) for none, or a
 ## comma list naming the features to keep (`lazy,gate`); `-name` drops one from
 ## the full set. The second sets `body_cap`. Benchmarks use both to compare a
-## feature against the client without it.
+## feature against the client without it. The third,
+## RABBITLANDS_CROWD_TUNING, sets budgets: `full=24,half=16,cloth=8` and
+## `banners=N` for the overhead banner cap (0 = none) at every quality.
 func configure(features: String, cap: String = "", tuning: String = "") -> void:
 	var raw := features.strip_edges().to_lower()
 	var names := ["lazy", "gate", "effects", "park", "stagger", "quarter"]
@@ -140,13 +176,20 @@ func configure(features: String, cap: String = "", tuning: String = "") -> void:
 	stagger = gate and bool(enabled.get("stagger", false))
 	quarter = gate and bool(enabled.get("quarter", false))
 	body_cap_forced = cap.strip_edges().is_valid_int()
-	body_cap = maxi(0, int(cap)) if body_cap_forced else BODY_CAP_DEFAULT
+	body_cap_auto = true
+	_player_body_cap = BODY_CAP_DEFAULT
+	if body_cap_forced:
+		body_cap = maxi(0, int(cap))
+	else:
+		_apply_body_cap()
 	full_rate_bodies = FULL_RATE_BODIES
 	half_rate_bodies = HALF_RATE_BODIES
 	cloth_bodies = CLOTH_BODIES
 	cloth_forced = false
 	_full_rate_forced = false
 	_half_rate_forced = false
+	_overhead_cap_forced = false
+	overhead_cap = RenderQuality.overhead_cap(_quality)
 	for part: String in tuning.split(",", false):
 		var pair := part.split("=")
 		if pair.size() != 2 or not pair[1].strip_edges().is_valid_int():
@@ -161,26 +204,97 @@ func configure(features: String, cap: String = "", tuning: String = "") -> void:
 			"cloth":
 				cloth_bodies = maxi(0, int(pair[1]))
 				cloth_forced = true
+			"banners":
+				overhead_cap = maxi(0, int(pair[1]))
+				_overhead_cap_forced = true
+	_overheads_shown.clear()
 
+## The graphics quality's budgets: the full- and half-rate bodies, the
+## overhead banner cap and, while the crowd setting follows the quality, the
+## body cap (so switching between Low and High in a session restores 160).
 func set_quality(level: int) -> void:
+	_quality = clampi(level, 0, 2)
 	if not _full_rate_forced:
-		full_rate_bodies = [8, 12, FULL_RATE_BODIES][clampi(level, 0, 2)]
+		full_rate_bodies = [8, 12, FULL_RATE_BODIES][_quality]
 	if not _half_rate_forced:
-		half_rate_bodies = [8, 12, HALF_RATE_BODIES][clampi(level, 0, 2)]
+		half_rate_bodies = [8, 12, HALF_RATE_BODIES][_quality]
+	if not _overhead_cap_forced:
+		overhead_cap = RenderQuality.overhead_cap(_quality)
+	if overhead_cap <= 0:
+		_overheads_shown.clear()
+	_apply_body_cap()
 
-## The player's two crowd settings (settings_window.gd, Graphics). Either is
-## ignored while the environment sets it for the session.
-func set_player_budgets(bodies: int, capes: int) -> void:
-	if not body_cap_forced:
-		body_cap = maxi(0, bodies)
+## The player's two crowd settings (settings_window.gd, Graphics): the body
+## count, or `follow_quality` for the quality's own, and the swaying capes.
+## Either is ignored while the environment sets it for the session.
+func set_player_budgets(bodies: int, capes: int, follow_quality := false) -> void:
+	body_cap_auto = follow_quality
+	_player_body_cap = maxi(0, bodies)
+	_apply_body_cap()
 	if not cloth_forced:
 		cloth_bodies = maxi(0, capes)
+
+## The body cap the graphics quality gives while the setting follows it.
+func quality_body_cap() -> int:
+	return RenderQuality.body_cap_default(_quality)
+
+func _apply_body_cap() -> void:
+	if not body_cap_forced:
+		body_cap = quality_body_cap() if body_cap_auto else _player_body_cap
+
+## Whether a saved profile's crowd setting follows the graphics quality.
+## `saved_auto` is [graphics] crowd_bodies_auto, `saved_bodies` crowd_bodies
+## and `tier` the first-run tier the file records (HardwareTier.seeded_tier).
+## A saved switch decides. A profile from before the switch follows the
+## quality when it kept the old default (160, nothing, or something that is
+## not a number, which read as 160) or when the first-run low tier wrote its
+## 60; any other number was the player's own choice and stays a number.
+static func follows_quality(saved_auto: Variant, saved_bodies: Variant, tier: String) -> bool:
+	if saved_auto is bool:
+		return saved_auto
+	if not (saved_bodies is int or saved_bodies is float):
+		return true
+	var bodies := int(saved_bodies)
+	return bodies == BODY_CAP_DEFAULT or (bodies == FIRST_RUN_LOW_BODIES and tier == "low")
+
+## The overhead banner cap, for main.gd's declutter pass. Without a cap none
+## of this is called and the pass is as it always was.
+##
+## The pass's sort distance (squared, to the camera focus) for actor `id`: a
+## banner shown on the previous pass sorts as if
+## OVERHEAD_CAP_HYSTERESIS_METRES nearer.
+func overhead_sort_distance(id: int, distance_squared: float) -> float:
+	if overhead_cap <= 0 or not _overheads_shown.has(id):
+		return distance_squared
+	var nearer := maxf(0.0, sqrt(distance_squared) - OVERHEAD_CAP_HYSTERESIS_METRES)
+	return nearer * nearer
+
+func begin_overhead_pass() -> void:
+	_overheads_counted = {}
+
+## Whether the next candidate's banner is past the cap. An exempt one (the
+## target, the selection, the party) never is and is never counted.
+func overhead_capped(exempt: bool) -> bool:
+	return overhead_cap > 0 and not exempt and _overheads_counted.size() >= overhead_cap
+
+## A banner the pass showed, counted against the cap.
+func count_overhead(id: int) -> void:
+	_overheads_counted[id] = true
+
+func end_overhead_pass() -> void:
+	_overheads_shown = _overheads_counted
+	_overheads_counted = {}
+
+## How many banners the last pass counted against the cap.
+func overheads_shown() -> int:
+	return _overheads_shown.size()
 
 func describe() -> Dictionary:
 	return {"lazy": lazy, "gate": gate, "effects": effects, "park": park,
 		"stagger": stagger, "quarter": quarter,
-		"bodyCap": body_cap, "fullRateBodies": full_rate_bodies,
+		"bodyCap": body_cap, "bodyCapAuto": body_cap_auto, "fullRateBodies": full_rate_bodies,
 		"halfRateBodies": half_rate_bodies, "clothBodies": cloth_bodies,
+		"overheadCap": overhead_cap, "overheadsShown": _overheads_shown.size(),
 		"builds": builds, "releases": releases,
 		"revivals": revivals, "parked": _parked.size()}
 
@@ -284,3 +398,4 @@ func clear() -> void:
 	_candidates.clear()
 	_cursor = 0
 	_far_since.clear()
+	_overheads_shown.clear()

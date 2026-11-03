@@ -93,8 +93,11 @@ func _run() -> void:
 	expect(main.get("_vsync_preference") == "off"
 		and stored.get_value("graphics", "vsync_mode", "") == "off",
 		"performance preset applies and saves vertical sync Off")
+	# The preset's crowd setting follows the quality (Low actor tier): it saves
+	# the switch, and the count Low gives, rather than a fixed 60.
 	expect(stored.get_value("graphics", "map_texture_quality") == "half"
 		and stored.get_value("graphics", "render_scale") == 0.75
+		and stored.get_value("graphics", "crowd_bodies_auto") == true
 		and stored.get_value("graphics", "crowd_bodies") == 60, "preset persists device preferences")
 	var performance_renderer := Launch.performance_renderer("auto")
 	expect(main.get("_renderer_preference") == performance_renderer
