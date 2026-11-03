@@ -62,16 +62,54 @@ const TIER_SETTINGS := {
 	Tier.HIGH: {"quality": "high"},
 }
 
+## Measurement switches of the 2026-11 performance work (wave 2). Each one is
+## in OVERRIDE_VARIABLES, and `--memory-class=` blocks seeding like the
+## optimisation-profile arguments, so a launch that sets one never seeds a
+## first run. The getters further down are the one place their values are
+## parsed, so every consumer agrees on spelling and defaults.
+##
+## RABBITLANDS_MEMORY_CLASS / --memory-class=  small, medium or large: the
+##     memory budget class instead of the probed one (memory_class_override).
+## ELORIA_WORLD_DISTANCE  off: no world distance pass, for A/B captures
+##     (world_distance_mode, world_distance_enabled).
+## ELORIA_ACTOR_IMAGES  legacy: actor images parsed as before the actor image
+##     extension; nomips: decoded actor images get no generated mips
+##     (actor_images_mode).
+## ELORIA_ACTOR_VRAM_SELF_TEST  a directory such as assets/actors/native/races
+##     whose actor sidecar index the package smoke launch decodes
+##     (actor_vram_self_test_dir).
+## RABBITLANDS_ACTOR_GEOMETRY  off: actor meshes as parsed, no cooked LODs;
+##     generate: cook them at runtime, development builds only
+##     (actor_geometry_mode). It takes only its three mode names, as the
+##     applier does: no off/on spellings.
+const MEMORY_CLASS_VARIABLE := "RABBITLANDS_MEMORY_CLASS"
+const MEMORY_CLASS_ARGUMENT := "--memory-class="
+const MEMORY_CLASSES: Array[String] = ["small", "medium", "large"]
+const WORLD_DISTANCE_VARIABLE := "ELORIA_WORLD_DISTANCE"
+const WORLD_DISTANCE_MODES: Array[String] = ["auto", "off"]
+const ACTOR_IMAGES_VARIABLE := "ELORIA_ACTOR_IMAGES"
+const ACTOR_IMAGES_MODES: Array[String] = ["auto", "legacy", "nomips"]
+const ACTOR_VRAM_SELF_TEST_VARIABLE := "ELORIA_ACTOR_VRAM_SELF_TEST"
+const ACTOR_GEOMETRY_VARIABLE := "RABBITLANDS_ACTOR_GEOMETRY"
+const ACTOR_GEOMETRY_MODES: Array[String] = ["sidecar", "off", "generate"]
+## Spellings the world-distance and actor-image switches also accept for their
+## off mode, and for their default (resolve_switch); the self-test directory
+## reads an off spelling as no self-test. Actor geometry takes neither.
+const OFF_SPELLINGS: Array[String] = ["off", "0", "false", "no", "legacy"]
+const ON_SPELLINGS: Array[String] = ["on", "1", "true", "yes"]
+
 ## Environment variables that override graphics, crowd or runtime choices for a
 ## developer, a test or a measurement. Any of them set means the launch is not
 ## a player's first run. The optimisation profile's own variables are added
 ## from its table. RABBITLANDS_LAUNCH_CONTEXT is deliberately absent: the
-## updater sets it on every ordinary launch.
+## updater sets it on every ordinary launch. The content-digest switches
+## (RABBITLANDS_CONTENT_DIGEST*) change no graphics and are left out.
 const OVERRIDE_VARIABLES: Array[String] = ["ELORIA_LOOK", "ELORIA_LOOK_QUALITY",
 	"ELORIA_LOOK_QUALITY_TRIM", "ELORIA_VRAM_TEXTURES", "RABBITLANDS_CROWD_BODY_CAP",
 	"RABBITLANDS_CROWD_PRESENTATION", "RABBITLANDS_CROWD_TUNING",
 	"RABBITLANDS_CROWD_BENCH_START_TOKEN", "RABBITLANDS_RESOURCE_BUDGET_MIB",
-	"RABBITLANDS_CAPE_MATH"]
+	"RABBITLANDS_CAPE_MATH", MEMORY_CLASS_VARIABLE, WORLD_DISTANCE_VARIABLE,
+	ACTOR_IMAGES_VARIABLE, ACTOR_VRAM_SELF_TEST_VARIABLE, ACTOR_GEOMETRY_VARIABLE]
 ## Engine switches that start a tool, test or benchmark main loop.
 const TOOL_ARGUMENTS: Array[String] = ["--script", "-s", "--editor", "-e"]
 
@@ -196,7 +234,7 @@ static func blocker(launch: Dictionary) -> String:
 	for argument: String in launch.get("engine_args", PackedStringArray()):
 		if argument in TOOL_ARGUMENTS or argument.begins_with("--script="):
 			return "tool_launch"
-	var prefixes: Array[String] = [OptimizationProfile.ARGUMENT]
+	var prefixes: Array[String] = [OptimizationProfile.ARGUMENT, MEMORY_CLASS_ARGUMENT]
 	for definition: Dictionary in OptimizationProfile.FEATURES.values():
 		prefixes.append(str(definition.argument))
 	for argument: String in launch.get("user_args", PackedStringArray()):
@@ -209,9 +247,14 @@ static func blocker(launch: Dictionary) -> String:
 
 ## Seeds this machine's tier into a fresh profile. Call once at startup, before
 ## GraphicsOptions.active_texture_skip(); returns what `seed_profile` returns,
-## for the startup log.
+## for the startup log, plus the measurement `switches` a launch sets (none on
+## a player's launch, whose log line is unchanged).
 static func seed_first_run(path := SETTINGS_PATH) -> Dictionary:
-	return seed_profile(path, probe(), launch_context())
+	var result := seed_profile(path, probe(), launch_context())
+	var set_switches := switches()
+	if not set_switches.is_empty():
+		result["switches"] = set_switches
+	return result
 
 ## Classifies `inputs` and, when `launch` allows it and the file at `path` has
 ## no [graphics] section, writes the tier's values there. A file that exists
@@ -282,3 +325,129 @@ static func recorded_tier(path: String) -> String:
 ## the main thread while login work runs (UI-13).
 static func animated_backdrop_default(config: ConfigFile) -> bool:
 	return seeded_tier(config) != TIER_NAMES[Tier.LOW]
+
+# Measurement switches (see MEMORY_CLASS_VARIABLE above). The getters read the
+# environment and the user arguments on every call: that is cheap, safe on a
+# worker thread, and lets a test change them. A caller that needs one answer
+# per session keeps the first. They print nothing; `switches()` (logged at
+# startup by seed_first_run) reports every value that was ignored.
+
+## The memory class this launch forces, or "" to use the probed class:
+## {"memory_class", "source": "argument"|"environment"|"", "rejected"}.
+static func memory_class_override() -> Dictionary:
+	return resolve_memory_class(OS.get_environment(MEMORY_CLASS_VARIABLE),
+		OS.get_cmdline_user_args())
+
+## Pure form of `memory_class_override`. A valid `--memory-class=` argument
+## wins over the environment, the last one when repeated, as for the
+## optimisation-profile arguments; a value that is not a class is skipped and
+## listed in "rejected" (the next valid source, or the probe, decides).
+static func resolve_memory_class(environment_value: String,
+		arguments: PackedStringArray) -> Dictionary:
+	var memory_class := ""
+	var source := ""
+	var rejected := PackedStringArray()
+	var candidates: Array[Array] = [[environment_value, "environment"]]
+	for argument: String in arguments:
+		if argument.begins_with(MEMORY_CLASS_ARGUMENT):
+			candidates.append([argument.trim_prefix(MEMORY_CLASS_ARGUMENT), "argument"])
+	for candidate: Array in candidates:
+		var value := str(candidate[0]).strip_edges().to_lower()
+		if value in MEMORY_CLASSES:
+			memory_class = value
+			source = str(candidate[1])
+		elif not value.is_empty():
+			rejected.append(value)
+	return {"memory_class": memory_class, "source": source, "rejected": rejected}
+
+## "auto" (the world distance pass runs) or "off".
+static func world_distance_mode() -> String:
+	return str(resolve_switch(OS.get_environment(WORLD_DISTANCE_VARIABLE),
+		WORLD_DISTANCE_MODES, "off").mode)
+
+static func world_distance_enabled() -> bool:
+	return world_distance_mode() != "off"
+
+## "auto" (sidecars where staged, otherwise decoded with mips), "legacy" or
+## "nomips".
+static func actor_images_mode() -> String:
+	return str(resolve_switch(OS.get_environment(ACTOR_IMAGES_VARIABLE),
+		ACTOR_IMAGES_MODES, "legacy").mode)
+
+## The directory to self-test actor sidecars in, with forward slashes and no
+## trailing slash, or "" for no self-test.
+static func actor_vram_self_test_dir() -> String:
+	var value := OS.get_environment(ACTOR_VRAM_SELF_TEST_VARIABLE).strip_edges()
+	if value.to_lower() in OFF_SPELLINGS:
+		return ""
+	return value.replace("\\", "/").trim_suffix("/")
+
+## "sidecar" (cooked actor LODs where the catalogue has them), "off" or
+## "generate". An exported build never generates: it reads "sidecar".
+static func actor_geometry_mode() -> String:
+	return str(resolve_actor_geometry(OS.get_environment(ACTOR_GEOMETRY_VARIABLE),
+		OS.has_feature("template")).mode)
+
+## Only the three mode names count here, as in ActorGeometry's own reading of
+## the variable (src/actors/actor_geometry.gd): any other non-empty value,
+## 0/false/no/on included, is the default and reported, so the startup record
+## never names a mode the applier is not in.
+static func resolve_actor_geometry(value: String, exported: bool) -> Dictionary:
+	var text := value.strip_edges().to_lower()
+	if text.is_empty():
+		return {"mode": ACTOR_GEOMETRY_MODES[0], "rejected": ""}
+	if not text in ACTOR_GEOMETRY_MODES:
+		return {"mode": ACTOR_GEOMETRY_MODES[0], "rejected": text}
+	if exported and text == "generate":
+		return {"mode": ACTOR_GEOMETRY_MODES[0], "rejected": "generate"}
+	return {"mode": text, "rejected": ""}
+
+## `value` as one of `modes`, trimmed and lower-cased: empty or an ON spelling
+## is the default `modes[0]`, an OFF spelling is `off_mode`, anything else
+## that is not a mode is the default too and is returned in "rejected".
+static func resolve_switch(value: String, modes: Array[String], off_mode := "") -> Dictionary:
+	var text := value.strip_edges().to_lower()
+	if text in modes:
+		return {"mode": text, "rejected": ""}
+	if not off_mode.is_empty() and text in OFF_SPELLINGS:
+		return {"mode": off_mode, "rejected": ""}
+	if text.is_empty() or text in ON_SPELLINGS:
+		return {"mode": modes[0], "rejected": ""}
+	return {"mode": modes[0], "rejected": text}
+
+## The switches this launch sets, with what each resolved to, for the startup
+## log; {} on an ordinary launch. Values that were ignored are listed under
+## "rejected" by the same keys.
+static func switches() -> Dictionary:
+	var result := {}
+	var rejected := {}
+	var memory := memory_class_override()
+	if not str(memory.memory_class).is_empty():
+		result["memory_class"] = memory.memory_class
+		result["memory_class_source"] = memory.source
+	var memory_rejected: PackedStringArray = memory.rejected
+	if not memory_rejected.is_empty():
+		rejected["memory_class"] = ",".join(memory_rejected)
+	var exported := OS.has_feature("template")
+	var parsed := {
+		"world_distance": [WORLD_DISTANCE_VARIABLE,
+			resolve_switch(OS.get_environment(WORLD_DISTANCE_VARIABLE), WORLD_DISTANCE_MODES, "off")],
+		"actor_images": [ACTOR_IMAGES_VARIABLE,
+			resolve_switch(OS.get_environment(ACTOR_IMAGES_VARIABLE), ACTOR_IMAGES_MODES, "legacy")],
+		"actor_geometry": [ACTOR_GEOMETRY_VARIABLE,
+			resolve_actor_geometry(OS.get_environment(ACTOR_GEOMETRY_VARIABLE), exported)],
+	}
+	for key: String in parsed:
+		var variable := str(parsed[key][0])
+		if OS.get_environment(variable).strip_edges().is_empty():
+			continue
+		var choice: Dictionary = parsed[key][1]
+		result[key] = choice.mode
+		if not str(choice.rejected).is_empty():
+			rejected[key] = choice.rejected
+	var self_test := actor_vram_self_test_dir()
+	if not self_test.is_empty():
+		result["actor_vram_self_test"] = self_test
+	if not rejected.is_empty():
+		result["rejected"] = rejected
+	return result

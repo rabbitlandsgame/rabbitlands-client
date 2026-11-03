@@ -24,21 +24,79 @@ const MIN_LOD_BIAS := 0.001
 ## shadows.  MEDIUM moves them 1.54 times closer but keeps authored shadows.
 ## Cape cloth is per-actor CPU work, so only HIGH simulates it on non-local
 ## actors; the local player's cape remains available at every quality.
+##
+## The rest of each row is the Low actor tier (owner decision 2026-11-02:
+## Low and the Performance preset only; Medium and High unchanged).  Each
+## value is read through its accessor below by the code that owns the
+## behaviour; MEDIUM and HIGH carry the value that code used before the tier,
+## so they behave exactly as they did.
+##   body_cap_default       crowd bodies drawn while the player's crowd setting
+##                          follows the quality (CrowdPresentation.BODY_CAP_DEFAULT
+##                          is 160).
+##   full_rate_metres       camera distance beyond which a body is never on the
+##                          full animation rate (AnimationGate.HALF_RATE_METRES
+##                          is 45 m).
+##   hand_detail_metres     a remote humanoid nearer the camera than this gets
+##                          finger animation ...
+##   hand_detail_release_metres  ... and keeps it until it is farther than
+##                          this (hysteresis).  INF: fingers at any distance.
+##   combat_cues_full_rate_only  per-body hand cues (arcs, sparks, trails) only
+##                          for full-rate and priority bodies.
+##   effect_scale           share of LiveEffectBudget.LIMITS drawn at once
+##                          (0.5 / 0.75 / 1.0 before the tier).
+##   overhead_cap           shown non-priority overhead banners; 0 = no cap.
+##   local_cape_step_hz     the local player's cape solver rate
+##                          (CapeCloth.FIXED_STEP is 1/60 s).
+##   remote_body_finish     per-vertex body refinement and face sculpt for
+##                          remote actors.
+##   frame_driven_motion    remote actors step once per drawn frame instead of
+##                          on the physics tick.
+## Key order is the same in every row (tests compare the rows' keys).
 const QUALITY_PRESETS := {
 	Quality.LOW: {
 		"lod_bias_scale": 0.35,
 		"cast_shadows": false,
 		"non_local_cape": false,
+		"body_cap_default": 60,
+		"full_rate_metres": 35.0,
+		"hand_detail_metres": 12.0,
+		"hand_detail_release_metres": 15.0,
+		"combat_cues_full_rate_only": true,
+		"effect_scale": 0.25,
+		"overhead_cap": 24,
+		"local_cape_step_hz": 30,
+		"remote_body_finish": false,
+		"frame_driven_motion": true,
 	},
 	Quality.MEDIUM: {
 		"lod_bias_scale": 0.65,
 		"cast_shadows": true,
 		"non_local_cape": false,
+		"body_cap_default": 160,
+		"full_rate_metres": 45.0,
+		"hand_detail_metres": INF,
+		"hand_detail_release_metres": INF,
+		"combat_cues_full_rate_only": false,
+		"effect_scale": 0.75,
+		"overhead_cap": 0,
+		"local_cape_step_hz": 60,
+		"remote_body_finish": true,
+		"frame_driven_motion": false,
 	},
 	Quality.HIGH: {
 		"lod_bias_scale": 1.0,
 		"cast_shadows": true,
 		"non_local_cape": true,
+		"body_cap_default": 160,
+		"full_rate_metres": 45.0,
+		"hand_detail_metres": INF,
+		"hand_detail_release_metres": INF,
+		"combat_cues_full_rate_only": false,
+		"effect_scale": 1.0,
+		"overhead_cap": 0,
+		"local_cape_step_hz": 60,
+		"remote_body_finish": true,
+		"frame_driven_motion": false,
 	},
 }
 
@@ -72,6 +130,49 @@ static func non_local_cape_enabled(level: int) -> bool:
 ## still combines it with "a cape is worn" and its animation/distance tier.
 static func cape_enabled(level: int, is_local_actor: bool) -> bool:
 	return is_local_actor or non_local_cape_enabled(level)
+
+
+## Low actor tier accessors (see QUALITY_PRESETS).  Each answers only the
+## graphics-quality part; the caller still applies its own exemptions (the
+## local player, the target, previews, an explicit player setting).
+static func body_cap_default(level: int) -> int:
+	return int(QUALITY_PRESETS[normalized_quality(level)].body_cap_default)
+
+
+static func full_rate_metres(level: int) -> float:
+	return float(QUALITY_PRESETS[normalized_quality(level)].full_rate_metres)
+
+
+static func hand_detail_metres(level: int) -> float:
+	return float(QUALITY_PRESETS[normalized_quality(level)].hand_detail_metres)
+
+
+static func hand_detail_release_metres(level: int) -> float:
+	return float(QUALITY_PRESETS[normalized_quality(level)].hand_detail_release_metres)
+
+
+static func combat_cues_full_rate_only(level: int) -> bool:
+	return bool(QUALITY_PRESETS[normalized_quality(level)].combat_cues_full_rate_only)
+
+
+static func effect_scale(level: int) -> float:
+	return float(QUALITY_PRESETS[normalized_quality(level)].effect_scale)
+
+
+static func overhead_cap(level: int) -> int:
+	return int(QUALITY_PRESETS[normalized_quality(level)].overhead_cap)
+
+
+static func local_cape_step_hz(level: int) -> int:
+	return int(QUALITY_PRESETS[normalized_quality(level)].local_cape_step_hz)
+
+
+static func remote_body_finish(level: int) -> bool:
+	return bool(QUALITY_PRESETS[normalized_quality(level)].remote_body_finish)
+
+
+static func frame_driven_motion(level: int) -> bool:
+	return bool(QUALITY_PRESETS[normalized_quality(level)].frame_driven_motion)
 
 
 ## Apply one quality without replacing resources or losing the authored

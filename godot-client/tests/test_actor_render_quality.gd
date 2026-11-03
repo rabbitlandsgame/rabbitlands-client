@@ -14,6 +14,7 @@ func _init() -> void:
 
 func _run() -> void:
 	_check_presets()
+	_check_low_actor_tier()
 	_check_mesh_application()
 	_check_actor_tree()
 	_check_capes()
@@ -52,6 +53,122 @@ func _check_presets() -> void:
 		and Policy.normalized_quality(99) == Policy.Quality.HIGH
 		and Policy.quality_name(99) == "high",
 		"an unknown quality safely uses HIGH")
+
+
+## The Low actor tier's table (wave 2 LAT-L0). MEDIUM and HIGH must stay what
+## every consumer used before the tier: their rows are compared as text, so a
+## changed value, type or key order fails, and each neutral value is checked
+## against the constant its consumer still owns. LOW carries the approved
+## values. The LOD biases stay 0.35 / 0.65 / 1.0 (schedule 1.1 #5).
+func _check_low_actor_tier() -> void:
+	var golden := {
+		Policy.Quality.LOW: {
+			"lod_bias_scale": 0.35, "cast_shadows": false, "non_local_cape": false,
+			"body_cap_default": 60, "full_rate_metres": 35.0,
+			"hand_detail_metres": 12.0, "hand_detail_release_metres": 15.0,
+			"combat_cues_full_rate_only": true, "effect_scale": 0.25,
+			"overhead_cap": 24, "local_cape_step_hz": 30,
+			"remote_body_finish": false, "frame_driven_motion": true,
+		},
+		Policy.Quality.MEDIUM: {
+			"lod_bias_scale": 0.65, "cast_shadows": true, "non_local_cape": false,
+			"body_cap_default": 160, "full_rate_metres": 45.0,
+			"hand_detail_metres": INF, "hand_detail_release_metres": INF,
+			"combat_cues_full_rate_only": false, "effect_scale": 0.75,
+			"overhead_cap": 0, "local_cape_step_hz": 60,
+			"remote_body_finish": true, "frame_driven_motion": false,
+		},
+		Policy.Quality.HIGH: {
+			"lod_bias_scale": 1.0, "cast_shadows": true, "non_local_cape": true,
+			"body_cap_default": 160, "full_rate_metres": 45.0,
+			"hand_detail_metres": INF, "hand_detail_release_metres": INF,
+			"combat_cues_full_rate_only": false, "effect_scale": 1.0,
+			"overhead_cap": 0, "local_cape_step_hz": 60,
+			"remote_body_finish": true, "frame_driven_motion": false,
+		},
+	}
+	for level: int in golden:
+		_expect(var_to_str(Policy.QUALITY_PRESETS[level]) == var_to_str(golden[level]),
+			"the %s row is exactly the approved table: %s" % [Policy.quality_name(level),
+				var_to_str(Policy.QUALITY_PRESETS[level]).replace("\n", " ")])
+	_expect(Policy.lod_bias_scale(Policy.Quality.LOW) == 0.35
+		and Policy.lod_bias_scale(Policy.Quality.MEDIUM) == 0.65
+		and Policy.lod_bias_scale(Policy.Quality.HIGH) == 1.0,
+		"the actor LOD biases stay 0.35 / 0.65 / 1.0")
+
+	# Every accessor reads its own column, for every level.
+	for level: int in golden:
+		var row: Dictionary = golden[level]
+		var name := Policy.quality_name(level)
+		_expect(Policy.body_cap_default(level) == row.body_cap_default
+			and Policy.full_rate_metres(level) == row.full_rate_metres
+			and Policy.hand_detail_metres(level) == row.hand_detail_metres
+			and Policy.hand_detail_release_metres(level) == row.hand_detail_release_metres
+			and Policy.combat_cues_full_rate_only(level) == row.combat_cues_full_rate_only
+			and Policy.effect_scale(level) == row.effect_scale
+			and Policy.overhead_cap(level) == row.overhead_cap
+			and Policy.local_cape_step_hz(level) == row.local_cape_step_hz
+			and Policy.remote_body_finish(level) == row.remote_body_finish
+			and Policy.frame_driven_motion(level) == row.frame_driven_motion,
+			"the %s accessors return the %s row" % [name, name])
+		_expect(Policy.hand_detail_release_metres(level) >= Policy.hand_detail_metres(level),
+			"%s releases finger detail no nearer than it grants it" % name)
+	_expect(Policy.body_cap_default(99) == 160 and Policy.effect_scale(-1) == 1.0
+		and not Policy.frame_driven_motion(99),
+		"an unknown quality reads HIGH's tier values")
+
+	# MEDIUM and HIGH equal what the consuming code does today, read from that
+	# code where it still owns a constant (a literal stands in once a later
+	# chunk moves the constant into this table).
+	var body_cap := int(_constant("res://src/world/crowd_presentation.gd", "BODY_CAP_DEFAULT", 160))
+	var half_rate := float(_constant("res://src/world/animation_gate.gd", "HALF_RATE_METRES", 45.0))
+	var cape_step := float(_constant("res://src/actors/cape_cloth.gd", "FIXED_STEP", 1.0 / 60.0))
+	for level: int in [Policy.Quality.MEDIUM, Policy.Quality.HIGH]:
+		var name := Policy.quality_name(level)
+		_expect(body_cap == 160 and Policy.body_cap_default(level) == body_cap,
+			"%s keeps the crowd's 160-body default" % name)
+		_expect(half_rate == 45.0 and Policy.full_rate_metres(level) == half_rate,
+			"%s keeps the 45 m full-rate distance" % name)
+		_expect(Policy.local_cape_step_hz(level) == 60
+			and Policy.local_cape_step_hz(level) == roundi(1.0 / cape_step),
+			"%s keeps the local cape on its 60 Hz step" % name)
+		_expect(is_inf(Policy.hand_detail_metres(level))
+			and not Policy.combat_cues_full_rate_only(level)
+			and Policy.overhead_cap(level) == 0
+			and Policy.remote_body_finish(level)
+			and not Policy.frame_driven_motion(level),
+			"%s keeps fingers, cues, banners, remote finishing and physics-tick motion" % name)
+	var budget_script := load("res://src/world/live_effect_budget.gd") as Script
+	_expect(budget_script != null, "the live-effect budget loads")
+	if budget_script != null:
+		var budget: RefCounted = budget_script.new()
+		var limits: Dictionary = budget_script.get_script_constant_map().get("LIMITS", {})
+		var same := not limits.is_empty()
+		for level: int in [Policy.Quality.MEDIUM, Policy.Quality.HIGH]:
+			budget.set("quality", level)
+			for kind: StringName in limits:
+				same = same and int(budget.call("limit", kind)) \
+					== maxi(1, int(int(limits[kind]) * Policy.effect_scale(level)))
+		_expect(same, "MEDIUM and HIGH effect scales give today's live-effect limits")
+
+	# LOW is the approved tier.
+	var low := Policy.Quality.LOW
+	_expect(Policy.body_cap_default(low) == 60 and Policy.full_rate_metres(low) == 35.0
+		and Policy.hand_detail_metres(low) == 12.0 and Policy.hand_detail_release_metres(low) == 15.0
+		and Policy.combat_cues_full_rate_only(low) and Policy.effect_scale(low) == 0.25
+		and Policy.overhead_cap(low) == 24 and Policy.local_cape_step_hz(low) == 30
+		and not Policy.remote_body_finish(low) and Policy.frame_driven_motion(low),
+		"LOW returns the Low actor tier: 60 bodies, 35 m, fingers within 12-15 m, cues at full rate, "
+		+ "0.25 effects, 24 banners, 30 Hz local cape, no remote finishing, frame-driven motion")
+
+
+## `name` in the script at `path`, or `fallback` when the script no longer has it.
+func _constant(path: String, name: String, fallback: Variant) -> Variant:
+	var script := load(path) as Script
+	if script == null:
+		_expect(false, "%s loads" % path)
+		return fallback
+	return script.get_script_constant_map().get(name, fallback)
 
 
 func _check_mesh_application() -> void:

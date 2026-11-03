@@ -33,6 +33,7 @@ func _run() -> void:
 	OS.unset_environment(LookProfile.ENABLE_VARIABLE)
 	_check_classifier()
 	_check_blockers()
+	_check_switches()
 	_check_seeding()
 	_check_scaling_mode()
 	await _check_backdrop()
@@ -153,6 +154,134 @@ func _check_blockers() -> void:
 	expect(HardwareTier.blocker(HardwareTier.launch_context()) == "headless", "this headless run seeds nothing")
 	expect(HardwareTier.blocker(HardwareTier.launch_context().merged({"headless": false}, true)) == "tool_launch",
 		"a windowed --script run (tests, benchmarks in project mode) would seed nothing either")
+
+## The wave-2 measurement switches (schedule 1.1 #16): each blocks seeding,
+## and the getters other groups call parse one spelling everywhere.
+func _check_switches() -> void:
+	var variables: Array[String] = [HardwareTier.MEMORY_CLASS_VARIABLE,
+		HardwareTier.WORLD_DISTANCE_VARIABLE, HardwareTier.ACTOR_IMAGES_VARIABLE,
+		HardwareTier.ACTOR_VRAM_SELF_TEST_VARIABLE, HardwareTier.ACTOR_GEOMETRY_VARIABLE]
+	expect(PackedStringArray(variables) == PackedStringArray(["RABBITLANDS_MEMORY_CLASS", "ELORIA_WORLD_DISTANCE",
+		"ELORIA_ACTOR_IMAGES", "ELORIA_ACTOR_VRAM_SELF_TEST", "RABBITLANDS_ACTOR_GEOMETRY"]),
+		"the five wave-2 variables are spelled as planned")
+	var previous := {}
+	for variable: String in variables:
+		previous[variable] = OS.get_environment(variable)
+		OS.unset_environment(variable)
+
+	# Unset: every getter is the default and the startup log gains nothing.
+	expect(HardwareTier.switches().is_empty(), "an ordinary launch sets no switches")
+	var unforced := HardwareTier.memory_class_override()
+	expect(unforced.memory_class == "" and unforced.source == "" and (unforced.rejected as PackedStringArray).is_empty(),
+		"no memory class is forced by default")
+	expect(HardwareTier.world_distance_mode() == "auto" and HardwareTier.world_distance_enabled()
+		and HardwareTier.actor_images_mode() == "auto" and HardwareTier.actor_vram_self_test_dir() == ""
+		and HardwareTier.actor_geometry_mode() == "sidecar", "the defaults: distance pass on, actor images auto, "
+		+ "no self-test, actor geometry from sidecars")
+	var headless := HardwareTier.seed_first_run(TEMP_SETTINGS)
+	expect(not headless.has("switches") and headless.reason == "headless" and not headless.applied,
+		"the startup record is unchanged without switches")
+
+	# Each variable is an override, and the argument is one too.
+	for variable: String in variables:
+		OS.set_environment(variable, "x")
+		expect(variable in HardwareTier.OVERRIDE_VARIABLES and variable in HardwareTier.launch_context().overrides
+			and HardwareTier.blocker(HardwareTier.launch_context().merged({"headless": false,
+				"engine_args": PackedStringArray()}, true)) == "environment_override",
+			"%s keeps a first run from being seeded" % variable)
+		OS.unset_environment(variable)
+	expect(HardwareTier.blocker(_launch({"user_args": PackedStringArray(["--memory-class=small"])}))
+		== "argument_override", "--memory-class= keeps a first run from being seeded")
+	expect(HardwareTier.blocker(_launch({"user_args": PackedStringArray(["--memory-classes"])})) == "",
+		"an unrelated argument does not")
+
+	# The memory class: argument over environment, the last argument counts,
+	# anything that is not a class is skipped and reported.
+	var cases := [
+		["small", [], "small", "environment", []],
+		[" Medium ", [], "medium", "environment", []],
+		["", ["--memory-class=large"], "large", "argument", []],
+		["small", ["--memory-class=LARGE"], "large", "argument", []],
+		["small", ["--memory-class=huge"], "small", "environment", ["huge"]],
+		["tiny", [], "", "", ["tiny"]],
+		["", ["--memory-class=small", "--memory-class=medium"], "medium", "argument", []],
+		["", ["--optimization-profile=human-testing", "--memory-class="], "", "", []],
+	]
+	for case: Array in cases:
+		var resolved := HardwareTier.resolve_memory_class(str(case[0]), PackedStringArray(case[1]))
+		expect(resolved.memory_class == case[2] and resolved.source == case[3]
+			and resolved.rejected == PackedStringArray(case[4]),
+			"memory class %s %s -> %s" % [case[0], case[1], resolved])
+	OS.set_environment(HardwareTier.MEMORY_CLASS_VARIABLE, "SMALL")
+	var forced := HardwareTier.memory_class_override()
+	expect(forced.memory_class == "small" and forced.source == "environment",
+		"the environment forces the memory class: %s" % forced)
+	OS.unset_environment(HardwareTier.MEMORY_CLASS_VARIABLE)
+
+	# Mode switches: canonical names, off/on spellings, and unknown values.
+	var modes := [
+		[HardwareTier.WORLD_DISTANCE_VARIABLE, func() -> String: return HardwareTier.world_distance_mode(),
+			{"off": "off", " OFF ": "off", "0": "off", "false": "off", "auto": "auto", "1": "auto",
+				"on": "auto", "bogus": "auto"}],
+		[HardwareTier.ACTOR_IMAGES_VARIABLE, func() -> String: return HardwareTier.actor_images_mode(),
+			{"legacy": "legacy", "off": "legacy", "nomips": "nomips", "NoMips": "nomips", "auto": "auto",
+				"sidecar": "auto"}],
+		[HardwareTier.ACTOR_GEOMETRY_VARIABLE, func() -> String: return HardwareTier.actor_geometry_mode(),
+			{"off": "off", " OFF ": "off", "0": "sidecar", "false": "sidecar", "sidecar": "sidecar",
+				"generate": "generate", "on": "sidecar", "lods": "sidecar"}],
+	]
+	for row: Array in modes:
+		var table: Dictionary = row[2]
+		for value: String in table:
+			OS.set_environment(str(row[0]), value)
+			var mode := str((row[1] as Callable).call())
+			expect(mode == table[value], "%s=%s reads as %s (got %s)" % [row[0], value, table[value], mode])
+		OS.unset_environment(str(row[0]))
+	OS.set_environment(HardwareTier.WORLD_DISTANCE_VARIABLE, "off")
+	expect(not HardwareTier.world_distance_enabled(), "off disables the world distance pass")
+	OS.unset_environment(HardwareTier.WORLD_DISTANCE_VARIABLE)
+	expect(HardwareTier.resolve_actor_geometry("generate", true) == {"mode": "sidecar", "rejected": "generate"}
+		and HardwareTier.resolve_actor_geometry("off", true) == {"mode": "off", "rejected": ""}
+		and HardwareTier.resolve_actor_geometry("generate", false) == {"mode": "generate", "rejected": ""},
+		"an exported build never generates actor geometry")
+	# ActorGeometry reads the variable itself and knows only its three names, so
+	# the logged mode must not turn 0/false/no/legacy/on into anything else.
+	var geometry_ok := HardwareTier.resolve_actor_geometry("", false) == {"mode": "sidecar", "rejected": ""}
+	for value: String in ["0", "false", "no", "legacy", "on", "1"]:
+		geometry_ok = geometry_ok and HardwareTier.resolve_actor_geometry(value, false) \
+			== {"mode": "sidecar", "rejected": value}
+	expect(geometry_ok, "actor geometry takes only sidecar/off/generate, as its applier does")
+	for value: String in ["assets/actors/native/races", " assets\\actors\\native\\races\\ "]:
+		OS.set_environment(HardwareTier.ACTOR_VRAM_SELF_TEST_VARIABLE, value)
+		expect(HardwareTier.actor_vram_self_test_dir() == "assets/actors/native/races",
+			"the actor self-test directory %s is normalised" % value)
+	OS.set_environment(HardwareTier.ACTOR_VRAM_SELF_TEST_VARIABLE, "off")
+	expect(HardwareTier.actor_vram_self_test_dir() == "", "off names no self-test directory")
+
+	# What the startup log records for a measurement launch.
+	OS.set_environment(HardwareTier.MEMORY_CLASS_VARIABLE, "small")
+	OS.set_environment(HardwareTier.WORLD_DISTANCE_VARIABLE, "off")
+	OS.set_environment(HardwareTier.ACTOR_IMAGES_VARIABLE, "nomips")
+	OS.set_environment(HardwareTier.ACTOR_VRAM_SELF_TEST_VARIABLE, "assets/actors/native/races/")
+	OS.set_environment(HardwareTier.ACTOR_GEOMETRY_VARIABLE, "bogus")
+	var expected := {"memory_class": "small", "memory_class_source": "environment", "world_distance": "off",
+		"actor_images": "nomips", "actor_geometry": "sidecar",
+		"actor_vram_self_test": "assets/actors/native/races", "rejected": {"actor_geometry": "bogus"}}
+	var logged := HardwareTier.switches()
+	expect(logged == expected, "switches() records each switch and the ignored value: %s" % logged)
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEMP_SETTINGS))
+	var record := HardwareTier.seed_first_run(TEMP_SETTINGS)
+	expect(record.get("switches", {}) == expected and not record.applied
+		and not FileAccess.file_exists(TEMP_SETTINGS), "the startup hardware_tier record carries them")
+	OS.set_environment(HardwareTier.MEMORY_CLASS_VARIABLE, "tiny")
+	expect(HardwareTier.switches().get("rejected", {}).get("memory_class", "") == "tiny"
+		and not HardwareTier.switches().has("memory_class"), "an ignored memory class is reported")
+
+	for variable: String in variables:
+		if str(previous[variable]).is_empty():
+			OS.unset_environment(variable)
+		else:
+			OS.set_environment(variable, str(previous[variable]))
 
 func _write(text: String) -> void:
 	var file := FileAccess.open(TEMP_SETTINGS, FileAccess.WRITE)
