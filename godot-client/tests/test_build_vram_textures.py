@@ -345,23 +345,31 @@ class NoRuntimeCompression(unittest.TestCase):
     ERR_UNAVAILABLE there, so a runtime call would pass every editor-binary
     test and do nothing in the game. Compression belongs to the package tool."""
 
-    @staticmethod
-    def _offenders(relative: str, source: str) -> list[str]:
+    # (file, producer function, its typed-bytes statement, its compress statement). var_to_bytes infers
+    # PackedByteArray, so each exact statement compresses serialized data with ZSTD (map collision vectors, the
+    # actor geometry sidecars of actor_geometry_format.gd). It is unrelated to the Image BC encoder unavailable in
+    # export builds, and allowed only there.
+    BYTE_COMPRESSORS = (
+        ("src/world/map_collision_cache.gd", "static func write_packed(", "var raw := var_to_bytes(ordered)",
+         "bytes.append_array(raw.compress(FileAccess.COMPRESSION_ZSTD))"),
+        ("src/actors/actor_geometry_format.gd", "static func encode(", "var raw := var_to_bytes(sidecar)",
+         "out.append_array(raw.compress(FileAccess.COMPRESSION_ZSTD))"),
+    )
+
+    @classmethod
+    def _offenders(cls, relative: str, source: str) -> list[str]:
         pattern = re.compile(r"\.compress\(|compress_from_channels\(")
         offenders = []
-        producer, typed_bytes = False, False
+        producer, typed_bytes = None, False
         for number, line in enumerate(source.splitlines(), 1):
             code = line.split("#", 1)[0]
             if code.startswith(("func ", "static func ")):
-                producer = code.startswith("static func write_packed(")
+                producer = next((entry for entry in cls.BYTE_COMPRESSORS
+                                 if entry[0] == relative and code.startswith(entry[1])), None)
                 typed_bytes = False
-            if producer and code.strip() == "var raw := var_to_bytes(ordered)":
+            if producer and code.strip() == producer[2]:
                 typed_bytes = True
-            # var_to_bytes infers PackedByteArray, so this exact maintenance
-            # statement compresses serialized CPU vectors with ZSTD. It is
-            # unrelated to the Image BC encoder unavailable in export builds.
-            allowed = (relative == "src/world/map_collision_cache.gd" and producer and typed_bytes
-                       and code.strip() == "bytes.append_array(raw.compress(FileAccess.COMPRESSION_ZSTD))")
+            allowed = producer is not None and typed_bytes and code.strip() == producer[3]
             if pattern.search(code) and not allowed:
                 offenders.append(f"{relative}:{number}")
         return offenders
@@ -387,6 +395,15 @@ class NoRuntimeCompression(unittest.TestCase):
         self.assertTrue(self._offenders("src/world/another_file.gd", prefix + allowed))
         self.assertTrue(self._offenders(relative, "static func write_packed():\n" + allowed))
         self.assertTrue(self._offenders(relative, prefix + "static func another_function():\n" + allowed))
+        # The actor geometry sidecar encoder: its own statement, in its own function and file only.
+        geometry = "src/actors/actor_geometry_format.gd"
+        encoder = ("static func encode(sidecar: Dictionary) -> PackedByteArray:\n\tvar raw := var_to_bytes(sidecar)\n"
+                   "\tout.append_array(raw.compress(FileAccess.COMPRESSION_ZSTD))\n")
+        self.assertEqual(self._offenders(geometry, encoder), [])
+        self.assertTrue(self._offenders(relative, encoder), "not in another file")
+        self.assertTrue(self._offenders(geometry, encoder.replace("static func encode(", "static func other(")))
+        self.assertTrue(self._offenders(geometry, encoder.replace("COMPRESSION_ZSTD", "COMPRESS_BPTC")))
+        self.assertTrue(self._offenders(geometry, prefix + allowed), "nor the collision cache's statement")
 
 
 class Recipes(unittest.TestCase):
