@@ -34,6 +34,11 @@ const HALF_RATE_METRES := 45.0
 ## How many frames apart a body in each stepped tier is stepped.
 const STRIDES := {Tier.HALF: 2, Tier.QUARTER: 4}
 
+## The distance `classify` uses: HALF_RATE_METRES unless the graphics quality
+## asks for less. Main sets it from ActorRenderQuality.full_rate_metres in its
+## quality pass (the Low actor tier, owner decision 2026-11-02: 35 m at Low,
+## 45 m at Medium and High).
+var half_rate_metres := HALF_RATE_METRES
 var _planes: Array[Plane] = []
 var _camera_position := Vector3.ZERO
 ## Whether a body's skeleton follows its tier too: modifiers stepped with a
@@ -83,9 +88,20 @@ func classify(anchor: Vector3, radius: float) -> Tier:
 	for plane: Plane in _planes:
 		if plane.distance_to(anchor) > radius:
 			return Tier.PAUSED
-	if anchor.distance_to(_camera_position) > HALF_RATE_METRES:
+	if anchor.distance_to(_camera_position) > half_rate_metres:
 		return Tier.HALF
 	return Tier.FULL
+
+## A tier another classifier gave against HALF_RATE_METRES (the native remote
+## presentation's batch, which keeps the 45 m constant) brought to this gate's
+## `half_rate_metres`: a FULL body between the two distances is HALF. With
+## the default distance, or no camera captured, the tier is returned as it is.
+func within_half_rate(tier: Tier, anchor: Vector3) -> Tier:
+	if tier != Tier.FULL or half_rate_metres >= HALF_RATE_METRES or _planes.is_empty():
+		return tier
+	if anchor.distance_to(_camera_position) > half_rate_metres:
+		return Tier.HALF
+	return tier
 
 ## Puts `player` in `tier`. Safe to repeat with the tier it is already in.
 ## FULL hands the player back to the engine's idle processing, which is what an

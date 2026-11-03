@@ -8,6 +8,7 @@ const RustSpellFlights = preload("res://src/world/rust_spell_flights.gd")
 const RustRiderPose = preload("res://src/mounts/rust_rider_pose.gd")
 var client_runtime := ClientRuntime.new()
 const RemotePresentationService = preload("res://src/runtime/remote_presentation.gd")
+const CrowdAnimationLibrary = preload("res://src/actors/crowd_animation_library.gd")
 @onready var remote_presentation := RemotePresentationService.new()
 var _gate_slice_tiers: Dictionary = {}
 const ExperienceCurve = preload("res://src/state/experience_curve.gd")
@@ -1030,6 +1031,23 @@ var _gate_ranked: Array = []
 var _gate_built_ranked: Array = []
 var _gate_full_rate: Array = []
 var _gate_capes: Array = []
+## The Low actor tier's per-body rules the sweep applies (LAT-L6; owner
+## decision 2026-11-02, Low and the Performance preset only), read from
+## ActorRenderQuality when the graphics quality is applied
+## (`_capture_gate_quality`): the hand-detail distances (INF at Medium and
+## High: no body is ever asked) and whether hand cues are kept for full-rate
+## and priority bodies only.
+var _gate_quality: int = ActorRenderQuality.QUALITY_DEFAULT
+var _gate_hand_metres := INF
+var _gate_hand_release_metres := INF
+var _gate_cues_full_only := false
+## Hand-detail swaps this sweep has found ({actor, full, d2}), and the ones the
+## last sweep left to `_drain_hand_swaps`, to-full and nearest first. A swap
+## rebuilds the player's track caches (0.2-1 ms on an actor library), so at
+## most CrowdAnimationLibrary.SWAPS_PER_FRAME are made a frame; the rest wait
+## for the next sweep, which finds again whatever still needs one.
+var _gate_hand_swaps: Array = []
+var _hand_swap_queue: Array = []
 ## Which actors get a body, and which removed ones are kept for a return; see
 ## crowd_presentation.gd. `effect_budget` bounds the combat visuals alive at
 ## once. Both read RABBITLANDS_CROWD_PRESENTATION, which benchmarks use to turn
@@ -1358,6 +1376,10 @@ const ANIMATION_GATE_REFRESH_MSEC := 100
 ## At 60 FPS that is the refresh period; at a lower frame rate a sweep takes
 ## longer, which still never leaves an actor unclassified for long.
 const GATE_SWEEP_SLICES := 6
+## How many queued hand-detail swaps (Low) `_drain_hand_swaps` looks at a
+## frame, made or not: a refused or deferred one costs a check, a made one
+## CrowdAnimationLibrary.SWAPS_PER_FRAME's budget.
+const HAND_SWAP_TRIES_PER_FRAME := 4
 ## How far from the player another actor is still drawn in the world. Past
 ## this its body and its name come off the viewport and only its map dot is
 ## left, so it still marks the minimap and the full map. The isometric rig
@@ -4897,6 +4919,8 @@ func _clear_world_presentation(retain_map_resources := false) -> void:
 	# No actor survives this clear. Forget stepped members before queueing
 	# any body, without reactivating its animation or skeleton callbacks.
 	animation_gate.reset(false)
+	_gate_hand_swaps = []
+	_hand_swap_queue = []
 	RustSpellFlights.clear_for(world_root)
 	if is_instance_valid(remote_presentation): remote_presentation.reset_world(client_runtime.current_epoch() + 1, true)
 	client_runtime.reset_session()
@@ -7970,6 +7994,10 @@ func _spawn_actor(id: Variant, build := true,
 		# RL head is built at once, not a classic head while a worker parses.
 		node.apply_render_quality(LookProfile.quality(), true)
 		_local_rl_prewarm_key = 0
+	else:
+		# At Low a remote humanoid starts on the crowd hand variant before its
+		# first clip; the gate gives near ones full hands (LAT-L6).
+		node.crowd_hands_at_build = true
 	var errors := node.configure(dto, actor_adapter, model_config,
 		_animation_for_model(model_config), equipment_config,
 		build or int(id) == AppState.local_actor_id or not crowd.lazy)
@@ -9945,6 +9973,8 @@ func _update_animation_gate(delta: float) -> void:
 	if _declutter_due:
 		_declutter_due = false
 		_declutter_actor_overheads(_declutter_due_target)
+	if not _hand_swap_queue.is_empty():
+		_drain_hand_swaps()
 	var now: int = Time.get_ticks_msec()
 	# Parked bodies are freed on time (every 500 ms at most), not only when
 	# the actor list next changes (`_remove_stale_actor_nodes`): a crowd that
@@ -9999,9 +10029,17 @@ func _begin_gate_sweep(now: int, whole: bool) -> void:
 	_gate_built_ranked = []
 	_gate_full_rate = []
 	_gate_capes = []
+	_gate_hand_swaps = []
 
 ## One actor's part of the sweep: its tier, whether it is drawn, its name's
-## fade, and - for the crowd presentation - its build rank or release.
+## fade, and - for the crowd presentation - its build rank or release. At Low
+## (the Low actor tier) also its hand detail and hand cues: a remote humanoid
+## nearer the camera than 12 m, or still nearer than 15 m with full hands, gets
+## finger animation back; a priority actor (the player's target, selection,
+## a campaign scene's actors) always has it and a pinned body (mounted,
+## cinematic, charge-leaping) keeps full hands it has; the rest take the crowd
+## variant (`_drain_hand_swaps`). Hand cues stay with full-rate and priority
+## bodies.
 func _gate_classify(raw_id: Variant) -> void:
 	var actor_value: Variant = actor_nodes.get(raw_id)
 	if not is_instance_valid(actor_value):
@@ -10009,17 +10047,27 @@ func _gate_classify(raw_id: Variant) -> void:
 	var actor: ReplicatedActor3D = actor_value as ReplicatedActor3D
 	if actor == null or not actor.is_inside_tree():
 		return
+	var low_rules: bool = _gate_cues_full_only or not is_inf(_gate_hand_metres)
 	if int(raw_id) == AppState.local_actor_id:
 		actor.set_drawn(true)
 		_gate_built += 1
 		actor.set_animation_tier(AnimationGate.Tier.FULL, animation_gate)
+		if low_rules:
+			# The player's own keeps every cue and full hands, a body that has
+			# just become theirs too.
+			actor.set_combat_cues_allowed(true)
+			if not actor.hand_detail_full():
+				actor.set_hand_detail(true)
 		return
 	var captured: Dictionary = _gate_slice_tiers.get(raw_id, {})
 	var anchor: Vector3 = actor.global_position + Vector3.UP
 	var radius: float = actor.view_radius()
 	# A preceding visibility callback can move/rebind another actor. Recheck
-	# the captured geometry before using this same-slice batch result.
-	var tier: AnimationGate.Tier = (int(captured.tier) as AnimationGate.Tier
+	# the captured geometry before using this same-slice batch result. The
+	# native batch measures the half-rate distance against the 45 m constant;
+	# the quality's own (35 m at Low) is applied over it.
+	var tier: AnimationGate.Tier = (animation_gate.within_half_rate(
+			int(captured.tier) as AnimationGate.Tier, anchor)
 		if not captured.is_empty() and captured.anchor == anchor and captured.radius == radius
 		else animation_gate.classify(anchor, radius))
 	var distance: float = (0.0 if _gate_local == null
@@ -10034,10 +10082,13 @@ func _gate_classify(raw_id: Variant) -> void:
 	# shot lined up from across a field still needs both.
 	actor.set_overhead_fade(1.0 if int(raw_id) == _gate_fighting
 		else nameplate_fade(distance, _name_distance_metres))
+	# Who is exempt from the crowd's limits: asked when the crowd presentation
+	# ranks bodies or the Low actor tier's per-body rules are on.
+	var priority: bool = _crowd_priority_actor(int(raw_id)) if crowd.lazy or low_rules else false
+	var camera_d2: float = _gate_camera_at.distance_squared_to(actor.global_position)
 	if crowd.lazy:
 		var ground: float = Vector2(actor.global_position.x - _gate_reference.x,
 			actor.global_position.z - _gate_reference.z).length()
-		var priority: bool = _crowd_priority_actor(int(raw_id))
 		if actor.is_model_deferred():
 			# Past the body cap only the map dot is left (crowd_presentation.gd).
 			actor.set_crowd_hidden(not priority and ground > _body_cap_distance)
@@ -10055,23 +10106,40 @@ func _gate_classify(raw_id: Variant) -> void:
 				_gate_releases.append([ground, int(raw_id)])
 	else:
 		_gate_built += 1
+	# Fingers (Low): a swap rebuilds the player's track caches, so it is queued
+	# for `_drain_hand_swaps` rather than made here. Medium and High have no
+	# hand-detail distance and never ask.
+	if low_rules and not is_inf(_gate_hand_metres) and actor.hand_detail_managed():
+		# A pinned body keeps the full hands it has (mounting, a cinematic and
+		# becoming the player's own restore them at once); one that starts a
+		# charge leap on crowd hands keeps those rather than swap twice.
+		var full_now: bool = actor.hand_detail_full()
+		var want_full: bool = priority or CrowdAnimationLibrary.want_full(camera_d2, full_now,
+				_gate_hand_metres, _gate_hand_release_metres) \
+			or (full_now and actor.hand_detail_pinned())
+		if want_full != full_now:
+			_gate_hand_swaps.append({"actor": actor, "full": want_full, "d2": camera_d2})
 	# Paused bodies rank behind every other: a strike can still wake one for its
 	# clip (`set_animation_tier`), and its cape with it.
 	if crowd.gate and actor.wears_cape_cloth():
-		_gate_capes.append([_gate_camera_at.distance_squared_to(actor.global_position)
+		_gate_capes.append([camera_d2
 			+ (1.0e9 if tier == AnimationGate.Tier.PAUSED else 0.0), actor])
 	if crowd.gate and (tier == AnimationGate.Tier.FULL
 			or (tier == AnimationGate.Tier.HALF and crowd.quarter)):
 		# Settled when the sweep ends (`_apply_crowd_full_rate`); a body that
-		# has just come into view animates meanwhile. Past 45 m a body is never
-		# stepped more often than every other frame.
-		_gate_full_rate.append([_gate_camera_at.distance_squared_to(actor.global_position),
-			actor, tier])
+		# has just come into view animates meanwhile. Past the half-rate
+		# distance (45 m, 35 m at Low) a body is never stepped more often than
+		# every other frame.
+		_gate_full_rate.append([camera_d2, actor, tier, priority])
 		if actor.animation_tier() == AnimationGate.Tier.PAUSED \
 				or (tier == AnimationGate.Tier.HALF and actor.animation_tier() == AnimationGate.Tier.FULL):
 			actor.set_animation_tier(AnimationGate.Tier.HALF, animation_gate)
 		return
 	actor.set_animation_tier(tier, animation_gate)
+	# Hand cues (Low): only a body with a combat presentation has any.
+	if _gate_cues_full_only and actor.combat_presentation != null:
+		actor.set_combat_cues_allowed(CombatPresentation3D.cues_wanted(_gate_quality,
+			tier == AnimationGate.Tier.FULL, priority))
 
 ## What needs the whole crowd: full-rate ranks, the cloth budget, the body
 ## count and cap, the build ranks, releases, and the overhead declutter.
@@ -10080,6 +10148,13 @@ func _finish_gate_sweep() -> void:
 	_gate_sweep_ids = []
 	_apply_crowd_full_rate(_gate_full_rate)
 	_apply_cloth_budget(_gate_capes)
+	# The swaps this sweep found replace what the last one left undone: the
+	# sweep has asked every body again.
+	if not _gate_hand_swaps.is_empty() or not _hand_swap_queue.is_empty():
+		_gate_hand_swaps.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+			return CrowdAnimationLibrary.swap_before(a, b))
+		_hand_swap_queue = _gate_hand_swaps
+		_gate_hand_swaps = []
 	_built_bodies = _gate_built
 	if crowd.lazy:
 		_body_cap_distance = INF
@@ -10106,10 +10181,13 @@ func _finish_gate_sweep() -> void:
 ## Full-rate animation for the bodies nearest the camera only. In a crowd of
 ## more than `FULL_RATE_BODIES` animated bodies in view, the farther ones are
 ## stepped at half rate - every other frame, by the time both frames covered,
-## so they move at the same speed - as bodies beyond 45 m always were. A clip
-## that does not loop plays out at half rate there too (`set_animation_tier`).
-## With the quarter tier, bodies beyond 45 m are ranked too, and every body
-## after the next `HALF_RATE_BODIES` is stepped every fourth frame.
+## so they move at the same speed - as bodies beyond 45 m (35 m at Low) always
+## were. A clip that does not loop plays out at half rate there too
+## (`set_animation_tier`). With the quarter tier, bodies beyond that distance
+## are ranked too, and every body after the next `HALF_RATE_BODIES` is stepped
+## every fourth frame. Entries are `[camera distance squared, actor, tier]`,
+## plus whether the actor is a priority one when the sweep made them: at Low
+## a body keeps its hand cues on the full rate or as a priority actor only.
 func _apply_crowd_full_rate(full_rate: Array) -> void:
 	if full_rate.size() > crowd.full_rate_bodies:
 		full_rate.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
@@ -10123,8 +10201,49 @@ func _apply_crowd_full_rate(full_rate: Array) -> void:
 			tier = AnimationGate.Tier.FULL
 		elif crowd.quarter and rank >= crowd.full_rate_bodies + crowd.half_rate_bodies:
 			tier = AnimationGate.Tier.QUARTER
-		(entry[1] as ReplicatedActor3D).set_animation_tier(tier, animation_gate)
+		var body := entry[1] as ReplicatedActor3D
+		body.set_animation_tier(tier, animation_gate)
+		if _gate_cues_full_only and body.combat_presentation != null:
+			body.set_combat_cues_allowed(CombatPresentation3D.cues_wanted(_gate_quality,
+				tier == AnimationGate.Tier.FULL, entry.size() > 3 and bool(entry[3])))
 		rank += 1
+
+## Makes the hand-detail swaps the last gate sweep found (Low only), at most
+## CrowdAnimationLibrary.SWAPS_PER_FRAME a frame, to-full and nearest first. A
+## body freed, parked or replaced since is skipped. One that refuses (it has
+## become the player's own, mounted or cinematic, or its quality is no longer
+## Low) or defers (inside its action crossfade) costs a check, and the next
+## sweep asks it again; at most HAND_SWAP_TRIES_PER_FRAME are looked at a frame.
+func _drain_hand_swaps() -> void:
+	var swapped := 0
+	var tried := 0
+	while not _hand_swap_queue.is_empty() and swapped < CrowdAnimationLibrary.SWAPS_PER_FRAME \
+			and tried < HAND_SWAP_TRIES_PER_FRAME:
+		var entry: Dictionary = _hand_swap_queue.pop_front()
+		tried += 1
+		var value: Variant = entry.get("actor")
+		if not is_instance_valid(value):
+			continue
+		var body := value as ReplicatedActor3D
+		if body == null or body.is_queued_for_deletion() or not body.is_inside_tree() \
+				or actor_nodes.get(body.actor_id) != body:
+			continue
+		if body.set_hand_detail(bool(entry.get("full", true))):
+			swapped += 1
+
+## The Low actor tier's per-body rules for the gate, from the graphics quality
+## (`_apply_graphics_quality`): the half-rate distance, the hand-detail
+## distances and the hand-cue rule. A sweep under way uses them from its next
+## slice. Swaps queued under the previous quality are dropped; the actors' own
+## quality pass has already given full hands back where they are due.
+func _capture_gate_quality(level: int) -> void:
+	_gate_quality = ActorRenderQuality.normalized_quality(level)
+	_gate_hand_metres = ActorRenderQuality.hand_detail_metres(_gate_quality)
+	_gate_hand_release_metres = ActorRenderQuality.hand_detail_release_metres(_gate_quality)
+	_gate_cues_full_only = ActorRenderQuality.combat_cues_full_rate_only(_gate_quality)
+	animation_gate.half_rate_metres = ActorRenderQuality.full_rate_metres(_gate_quality)
+	_gate_hand_swaps = []
+	_hand_swap_queue = []
 
 ## Cape cloth for the caped bodies nearest the camera only. The solver is the
 ## largest per-body cost of an equipped crowd (about 0.2 ms a cape a frame
@@ -15262,6 +15381,9 @@ func _apply_graphics_quality() -> void:
 	ReplicatedActor3D.prewarm_rl_heads(LookProfile.quality())
 	# Before the actors' pass below, which puts each awake one on its clock.
 	ReplicatedActor3D.set_frame_driven(ActorRenderQuality.frame_driven_motion(LookProfile.quality()))
+	# The gate's Low-tier rules; the actors' pass then restores full hands and
+	# hand cues wherever the new quality has no use for the crowd variants.
+	_capture_gate_quality(LookProfile.quality())
 	_apply_actor_render_quality()
 	_apply_ambient_render_quality()
 	_apply_day_night()

@@ -175,10 +175,52 @@ func _run() -> void:
 	actor.queue_free()
 
 	await _check_reset_lifecycle()
+	_check_half_rate_distance(camera)
 
 	print("animation gate tests: ", "PASS" if failures == 0 else "FAIL (%d)" % failures)
 	await process_frame
 	quit(failures)
+
+## The half-rate distance follows the graphics quality (LAT-L6): 45 m by
+## default and at Medium and High, 35 m at Low. A tier the native batch gave
+## against the 45 m constant is brought to the gate's own distance.
+func _check_half_rate_distance(camera: Camera3D) -> void:
+	var gate := AnimationGate.new()
+	gate.begin(camera)
+	var near := Vector3(0.0, 1.0, 0.0) # about 32 m from the camera
+	var middle := Vector3(0.0, 1.0, -10.0) # about 41 m
+	var far := Vector3(0.0, 1.0, -40.0) # about 69 m
+	var behind := Vector3(0.0, 1.0, 60.0)
+	_expect(gate.half_rate_metres == AnimationGate.HALF_RATE_METRES and AnimationGate.HALF_RATE_METRES == 45.0,
+		"the gate starts at the 45 m half-rate distance")
+	_expect(gate.classify(middle, 2.0) == AnimationGate.Tier.FULL
+		and gate.classify(far, 2.0) == AnimationGate.Tier.HALF,
+		"at 45 m a body 41 m away is on the full rate, one 69 m away on half")
+	for tier: AnimationGate.Tier in [AnimationGate.Tier.FULL, AnimationGate.Tier.HALF,
+			AnimationGate.Tier.PAUSED, AnimationGate.Tier.QUARTER]:
+		_expect(gate.within_half_rate(tier, middle) == tier,
+			"at the default distance a native tier %d is kept as it is" % tier)
+	_expect(gate.half_rate_metres == ActorRenderQuality.full_rate_metres(ActorRenderQuality.Quality.HIGH)
+		and gate.half_rate_metres == ActorRenderQuality.full_rate_metres(ActorRenderQuality.Quality.MEDIUM),
+		"Medium and High keep the 45 m distance")
+	gate.half_rate_metres = ActorRenderQuality.full_rate_metres(ActorRenderQuality.Quality.LOW)
+	_expect(gate.half_rate_metres == 35.0, "Low's half-rate distance is 35 m")
+	_expect(gate.classify(near, 2.0) == AnimationGate.Tier.FULL
+		and gate.classify(middle, 2.0) == AnimationGate.Tier.HALF
+		and gate.classify(far, 2.0) == AnimationGate.Tier.HALF
+		and gate.classify(behind, 2.0) == AnimationGate.Tier.PAUSED,
+		"at 35 m a body 41 m away is on half rate; nearer is full, behind is paused")
+	_expect(gate.within_half_rate(AnimationGate.Tier.FULL, middle) == AnimationGate.Tier.HALF
+		and gate.within_half_rate(AnimationGate.Tier.FULL, near) == AnimationGate.Tier.FULL
+		and gate.within_half_rate(AnimationGate.Tier.PAUSED, middle) == AnimationGate.Tier.PAUSED
+		and gate.within_half_rate(AnimationGate.Tier.HALF, near) == AnimationGate.Tier.HALF,
+		"a native FULL between 35 and 45 m becomes HALF; other tiers are kept")
+	var blind := AnimationGate.new()
+	blind.half_rate_metres = 35.0
+	blind.begin(null)
+	_expect(blind.classify(middle, 2.0) == AnimationGate.Tier.FULL
+		and blind.within_half_rate(AnimationGate.Tier.FULL, middle) == AnimationGate.Tier.FULL,
+		"without a camera nothing is gated at any distance")
 
 func _check_reset_lifecycle() -> void:
 	var owner := Node3D.new()

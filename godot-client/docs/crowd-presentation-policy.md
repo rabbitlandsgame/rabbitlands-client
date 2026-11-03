@@ -89,8 +89,11 @@ keeps only its map dot: no stand-in, overhead block or picking shape - what the
 server's own interest cap does to an actor it stops sending.
 
 **Animation and skeleton gating.** The animation gate already paused bodies
-outside the camera frustum and stepped those beyond 45 m at half rate. With
-the gate part on:
+outside the camera frustum and stepped those beyond 45 m at half rate (35 m at
+Low: `ActorRenderQuality.full_rate_metres`, set on `AnimationGate.half_rate_metres`
+by Main's quality pass; the native remote presentation's batch classifier keeps
+45 m and Main brings its answer to the quality's distance). With the gate part
+on:
 
 - A body beyond the draw distance is paused even when the frustum would have
   kept it animating. Nothing of it is drawn.
@@ -203,7 +206,11 @@ the physics-driven one at a steady 30 FPS and at an irregular 25-45 ms frame
 stream (`tests/test_frame_driven_motion.gd`), and positions follow the real
 frame time instead of 16.7 ms quanta, so walking reads smoother below the cap.
 Medium and High are unchanged. The crowd benchmark's per-actor census counts
-`framePresenting` and `physicsPresenting` bodies (`presentation_census`).
+`framePresenting` and `physicsPresenting` bodies (`presentation_census`), and
+with them the Low tier's `handDetailFull` / `handDetailCrowd` (animated
+humanoids on the full library or the crowd variant) and `cuesAllowed` /
+`cuesOff` (bodies with a combat presentation, cues on or off), summed per scope
+in `census.actorFields`.
 
 **Local cape at Low.** At Low the player's own cape solver runs at 30 Hz
 instead of 60 Hz (`ActorRenderQuality.local_cape_step_hz`, set in
@@ -217,6 +224,46 @@ without approved cape motion; the approved motion is unchanged. Without the
 cap, the solver updates the cape every other frame at Low. Mounted cloth keeps
 its own clock, and Medium and High are unchanged (60 Hz, bit-identical).
 Remote capes do not simulate at Low.
+
+**Hand detail (Low).** At Low (`ActorRenderQuality.hand_detail_metres` 12 m,
+`hand_detail_release_metres` 15 m; INF at Medium and High) remote humanoids
+play a "crowd" copy of their animation library without finger tracks
+(`src/actors/crowd_animation_library.gd`): 75 instead of 195 tracks per
+Universal clip, about 60 % less mixer work per update (20 -> 8 us per advance
+on configured luminous actors, development laptop). A remote humanoid Main
+builds at Low takes the variant before its first clip
+(`ReplicatedActor3D.crowd_hands_at_build`), with its fingers set to the idle
+grip; deriving the variant costs 20-35 ms once per actor library and session.
+The gate sweep then gives finger animation back to a body nearer the camera
+than 12 m and lets it keep it until it is farther than 15 m; a priority actor
+(target, selection, a campaign scene's actors) always has it. The player's own,
+a mounted rider and a cinematic body get full hands back at once (they read or
+write finger poses) and refuse the variant. A charge-leaping body refuses the
+variant too, but is not restored when the leap starts: one already on crowd
+hands keeps them unless it comes within 12 m or becomes a priority actor, so a
+leap in a crowd costs no swaps. A swap rebuilds the
+player's track caches (0.2-1 ms on an actor library), so the sweep only queues
+it and Main makes at most `CrowdAnimationLibrary.SWAPS_PER_FRAME` (1) a frame,
+to-full and nearest first (`_drain_hand_swaps`); the next sweep finds again
+whatever is still due. At the default 26 m zoom no remote body is within 12 m
+of the camera, so swaps happen only when the player zooms in. Fingers hold
+their last pose and body motion is identical. Previews, portraits, leaderboard
+cards and showcases are never given the variant. Switching to Medium or High
+gives every body full hands at once in the quality pass; a body built at
+Medium or High finds its variant in the pass that switches to Low and is
+swapped by the gate.
+
+**Hand cues (Low).** Each humanoid's `CombatPresentation3D` draws per-body hand
+cues on every skeleton update: spell arcs and sparks round the hands, the melee
+weapon trail and the bow's release flash. At Medium and High every body draws
+them. At Low (`ActorRenderQuality.combat_cues_full_rate_only`) only bodies the
+gate puts on the full animation rate, priority actors and the player's own do
+(`CombatPresentation3D.cues_wanted`, set from the final tier in
+`_apply_crowd_full_rate` and `_gate_classify`). A body without cues keeps its
+bow carry, draw and release pose and its hand props, and reads its hands only
+to aim a bow. In a debug build an update costs about 114-135 us with a cast cue
+and about 4 us without. Switching to Medium or High turns every body's cues
+back on in the quality pass.
 
 **Live effects.** `live_effect_budget.gd` bounds the short-lived combat visuals
 alive at once: spells, impacts, bursts and portal flashes (`spell`, 48), arrows
@@ -404,8 +451,15 @@ charge leap, cinematic, parking, deletion and reparenting, the switch both
 ways and the delta cap; `tests/test_low_end_graphics.gd` checks that Main's
 quality switch turns it on at Low and off at High, that `_process` steps a
 frame-clock actor once, and that Main leaving the tree turns it off.
+`tests/test_low_tier_gate.gd` covers Main's gate at Low and the switch back:
+remote Humans built on the crowd variant with held fingers, the 12/15 m
+hysteresis, priority bodies, one swap a frame to-full and nearest first,
+refused and stale swaps, hand cues by tier and priority, the census fields,
+previews kept on full hands, the half-rate distance, and Medium and High
+asking nothing of the actors. `tests/test_animation_gate.gd` covers the gate's
+half-rate distance and the native tier adjustment.
 `tests/test_stage_a_actor_hooks.gd` covers the actor's Low-tier entry points
-that Main's gate will drive: crowd hands through the actor, given back on a
+that Main's gate drives: crowd hands through the actor, given back on a
 switch to Medium, High or local, on a cinematic and on mounting; spell
 variants and the weapon fist read from the full clips; the session cache
 clear; the combat hand-cue switch; and the remote snapshot's paused flag on

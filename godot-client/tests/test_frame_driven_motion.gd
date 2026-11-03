@@ -51,6 +51,12 @@ func _expect(ok: bool, message: String) -> void:
 		failures += 1
 		push_error("FAIL: " + message)
 
+## The census's clock fields; LAT-L6 adds hand and cue counts beside them.
+func _clocks(actor: ReplicatedActor3D) -> Dictionary:
+	var census := actor.presentation_census()
+	return {"framePresenting": census.get("framePresenting"),
+		"physicsPresenting": census.get("physicsPresenting")}
+
 func _run() -> void:
 	if "--bench" in OS.get_cmdline_user_args():
 		_bench()
@@ -127,8 +133,7 @@ func _check_defaults() -> void:
 	var before := actor.steps
 	_expect(ReplicatedActor3D.advance_frame_driven(1.0 / 30.0) == 0 and actor.steps == before,
 		"with the clock off the frame step steps nothing")
-	var census := actor.presentation_census()
-	_expect(census == {"framePresenting": false, "physicsPresenting": true},
+	_expect(_clocks(actor) == {"framePresenting": false, "physicsPresenting": true},
 		"the census reports a physics-clock body")
 	_settle(actor)
 	_expect(not actor.is_presenting() and actor._settled
@@ -329,7 +334,7 @@ func _check_registry() -> void:
 	_expect(not actor.is_presenting() and actor._settled and ReplicatedActor3D.frame_driven_count() == 0
 		and actor.global_position.is_equal_approx(actor.server_target) and frames < 400,
 		"a settled body leaves the frame clock on its target (%d frames)" % frames)
-	_expect(actor.presentation_census() == {"framePresenting": false, "physicsPresenting": false},
+	_expect(_clocks(actor) == {"framePresenting": false, "physicsPresenting": false},
 		"the census reports a settled body on neither clock")
 	# Death pauses, revival wakes.
 	var dto := _state(2, 0, 22)
@@ -457,7 +462,7 @@ func _check_delta_cap_and_census() -> void:
 	ReplicatedActor3D.set_frame_driven(true)
 	var actor := _spawn("remote")
 	actor.apply_server_state(_state(1, 0, 22), adapter)
-	_expect(actor.presentation_census() == {"framePresenting": true, "physicsPresenting": false},
+	_expect(_clocks(actor) == {"framePresenting": true, "physicsPresenting": false},
 		"the census reports a frame-clock body")
 	ReplicatedActor3D.advance_frame_driven(1.0)
 	_expect(is_equal_approx(actor.last_delta, 0.25), "a one-second hitch is stepped as 0.25 s")

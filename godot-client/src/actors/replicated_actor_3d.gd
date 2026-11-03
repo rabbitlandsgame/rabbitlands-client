@@ -480,6 +480,17 @@ var _cape_cloth_allowed := true
 var _render_quality: int = ACTOR_RENDER_QUALITY.QUALITY_DEFAULT
 var _render_quality_selected := false
 var _render_quality_local_actor := false
+## Low actor tier, hand detail (LAT-L6). Main sets `crowd_hands_at_build` on a
+## world actor that is not the player's own before `configure`: at a quality
+## with a hand-detail distance (Low) such a humanoid starts on the crowd hand
+## variant before its first clip, so it needs no swap and builds the smaller
+## track caches first; Main's gate gives near ones full hands. Previews,
+## portraits and showcases are never set, so they keep full hands at every
+## quality. `_hand_variant`: this body's rig has a crowd variant, found at
+## build or by the first Low quality pass, which is what makes Main's gate
+## manage its hands (`hand_detail_managed`).
+var crowd_hands_at_build := false
+var _hand_variant := false
 ## Configured without its body: identity, picking, the overhead block, the map
 ## dot and every protocol state are here, but no model, skeleton, animation or
 ## equipment. Main builds a full actor in this one's place once it comes near
@@ -808,6 +819,18 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 			HUMAN_LOCOMOTION.install(animation_player, model_config)
 			_configure_human_animation_mapping()
 			errors.append_array(Array(imported.errors))
+			# LAT-L1 H8 / LAT-L6: a remote humanoid built at Low takes the crowd
+			# hand variant before its first clip. Deriving it is a one-off per
+			# actor library and rig (20-35 ms on the development laptop), paid
+			# here rather than inside Main's per-frame swap budget; the hold is
+			# written, since nothing has posed the fingers yet.
+			_hand_variant = false
+			if crowd_hands_at_build and animation_player != null and not _is_creature \
+					and not _render_quality_local_actor \
+					and not is_inf(ACTOR_RENDER_QUALITY.hand_detail_metres(_render_quality)):
+				_hand_variant = CROWD_ANIMATION.prepare(animation_player, _native_skeleton)
+				if _hand_variant:
+					set_hand_detail(false)
 			if animation_player != null:
 				if not animation_player.animation_finished.is_connected(
 						_on_animation_finished):
@@ -2044,6 +2067,15 @@ func apply_render_quality(level: int, is_local_actor: bool = false) -> void:
 	_render_quality_local_actor = is_local_actor
 	if is_local_actor or is_inf(ACTOR_RENDER_QUALITY.hand_detail_metres(_render_quality)):
 		_restore_full_hands()
+	elif not _hand_variant and animation_player != null and not _is_creature:
+		# A body built at Medium or High that is now a remote Low one: its
+		# variant is found in this pass (a one-off per actor library, which the
+		# quality switch carries), so Main's gate can manage its hands (LAT-L6).
+		_hand_variant = CROWD_ANIMATION.prepare(animation_player, _native_skeleton)
+	if is_local_actor or not ACTOR_RENDER_QUALITY.combat_cues_full_rate_only(_render_quality):
+		# Every hand cue for the player's own and at Medium and High; at Low
+		# Main's gate decides per body (LAT-L2/L6).
+		set_combat_cues_allowed(true)
 	var rl_now := _rl_head_ready and _native_skeleton != null and _rl_head_wanted()
 	# A head that stopped waiting for its RL files without drawing them (a
 	# switch down from High) takes the hair it would have had at once.
@@ -2067,16 +2099,30 @@ func render_quality_is_local() -> bool:
 	return _render_quality_local_actor
 
 ## LAT-L1: Low-tier hand detail for a remote humanoid. Main's gate (L6) asks;
-## true when the library actually changed (its per-frame budget). Local,
-## preview, mounted, cinematic and charge-leaping bodies keep or get back full
-## hands; a body inside its action crossfade is left for a later sweep.
+## true when the library actually changed (its per-frame budget). A pinned
+## body (`hand_detail_pinned`), or any body at a quality without a hand-detail
+## distance (Medium and High), keeps or gets back full hands; a body inside
+## its action crossfade is left for a later sweep.
 func set_hand_detail(full: bool) -> bool:
 	return CROWD_ANIMATION.set_hand_detail(animation_player, _native_skeleton, full,
-		_render_quality_local_actor or _cinematic_active or _charge_leap != null
-		or is_instance_valid(_mount_visual), action_crossfade_seconds)
+		hand_detail_pinned() or is_inf(ACTOR_RENDER_QUALITY.hand_detail_metres(_render_quality)),
+		action_crossfade_seconds)
 
 func hand_detail_full() -> bool:
 	return CROWD_ANIMATION.hand_detail_full(animation_player)
+
+## Whether this body refuses crowd hands whatever the gate would give it: the
+## player's own and every actor marked local, a mounted rider (the reins and
+## the seat read finger poses), a cinematic or charge-leaping body.
+func hand_detail_pinned() -> bool:
+	return _render_quality_local_actor or _cinematic_active or _charge_leap != null \
+		or is_instance_valid(_mount_visual)
+
+## Whether Main's gate decides this body's hand detail (LAT-L6): a remote
+## humanoid whose rig has a crowd variant, found when it was built at Low or
+## by its first Low quality pass. Medium and High never find one.
+func hand_detail_managed() -> bool:
+	return _hand_variant and animation_player != null and not _render_quality_local_actor
 
 func _restore_full_hands() -> void:
 	CROWD_ANIMATION.restore_full(animation_player)
@@ -6298,10 +6344,19 @@ static func advance_frame_driven(delta: float) -> int:
 	return stepped
 
 ## Counters for the crowd benchmark's per-actor census (summed per scope):
-## which clock steps this actor's presentation.
+## which clock steps this actor's presentation (LAT-L7), and the Low actor
+## tier's hand detail and hand cues (LAT-L6): an animated humanoid on its full
+## library or on the crowd variant, and a body with hand cues allowed or off.
+## Counts, never the distances (INF at Medium and High is not valid JSON).
 func presentation_census() -> Dictionary:
+	var humanoid := animation_player != null and not _is_creature
+	var full_hands := humanoid and hand_detail_full()
+	var cues := combat_presentation != null
 	return {"framePresenting": _frame_presenting,
-		"physicsPresenting": is_physics_processing()}
+		"physicsPresenting": is_physics_processing(),
+		"handDetailFull": full_hands, "handDetailCrowd": humanoid and not full_hands,
+		"cuesAllowed": cues and combat_presentation.cues_allowed,
+		"cuesOff": cues and not combat_presentation.cues_allowed}
 
 ## How far this actor reaches from its foot point, for the gate's frustum
 ## test: the body as drawn plus the banner over it, on the widest side of
