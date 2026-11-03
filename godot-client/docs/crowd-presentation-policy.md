@@ -141,6 +141,28 @@ not trade places as a crowd mills. Medium and High have no cap and the pass is
 unchanged there. Each hidden banner saves up to six transparent draws and its
 share of the overhead text pass.
 
+**Remote Humans unfinished (Low).** At Low (`ActorRenderQuality.remote_body_finish`
+false) a Human built for anyone but the player skips the two per-vertex
+GDScript fits of its finishing pass, the body refinement and the face sculpt
+(`CharacterProportions.apply_body_refinement` and `apply`): it draws the source
+body, garments and face, so other players and NPC Humans show the neutral face
+at Low. Hair and beard are still groomed, to that neutral face. The actors
+marked local are finished at every quality: the player's own, the creation
+preview, the appearance editor, leaderboard cards and the campaign replay
+figure. A dialogue close-up leases the world actor, so at Low it shows the
+speaker unfinished. A body finished earlier (at Medium or High, or while it was
+the player's) gives its derived meshes back when it becomes a remote Low body.
+One raised to Medium or High, or made local, is finished then: a quality switch
+up finishes every built remote Human in that one pass (about 4 s for 21
+distinct Humans on the development laptop), and a parked body revived after
+such a switch is finished as it returns. Medium and High are unchanged. The
+saving is per build: on the development laptop (headless debug build, not
+core-pinned, 20 distinct Humans) the finish took a median 0.11-0.14 s (mean
+about 0.2 s, up to 0.9 s) of main thread per remote Human, and afterwards a
+median of about 1 ms (mean 11-12 ms). Each finished actor references up to
+about 5 MB of derived mesh arrays; refinement results are shared through
+bounded caches, so the memory saved is smaller.
+
 **Live effects.** `live_effect_budget.gd` bounds the short-lived combat visuals
 alive at once: spells, impacts, bursts and portal flashes (`spell`, 48), arrows
 and bolts (`missile`, 48), melee technique visuals (`technique`, 32) and floating
@@ -311,4 +333,8 @@ player settings and their ranges, the body cap following the quality (and the
 declared actor cap with it), the saved-settings migration, the overhead banner
 cap with its exemptions and hysteresis, the paused and half-rate tiers and bulk
 removal. `tests/test_hardware_tier.gd` loads settings files from before the
-"Follow graphics quality" box through the client.
+"Follow graphics quality" box through the client. `tests/test_low_remote_finish.gd`
+covers the unfinished remote Human at Low: no refinement or sculpt result on
+any mesh, the neutral face's beard, finishing on a switch up or to local,
+giving the derived meshes back on the way down, wardrobe and appearance changes
+at Low, and Medium and High builds finished as before.

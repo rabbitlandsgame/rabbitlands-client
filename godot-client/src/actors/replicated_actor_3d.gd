@@ -342,6 +342,13 @@ var _model_config: Dictionary = {}
 var _appearance: Dictionary = {}
 var _portrait_scale := Vector3.ONE
 var _human_shape_needs_finish := false
+## Which Human shape finish the body carries (`_apply_render_quality_to_visuals`):
+## none yet, the full one (body refinement and face sculpt, groomed to that
+## face), or the Low actor tier's unfinished one for a remote Human (source body
+## and face, groomed to the neutral face). A change of quality or of local role
+## that wants the other finish redoes it without a wardrobe change.
+enum HumanShapeFinish { NONE, FULL, UNFINISHED }
+var _human_shape_finish: HumanShapeFinish = HumanShapeFinish.NONE
 var _face_material: ShaderMaterial
 var _face_group_materials: Dictionary = {}
 var _skin_materials: Dictionary = {}
@@ -1760,6 +1767,15 @@ func _rl_groom_appearance() -> Dictionary:
 	groomed["facial_hair"] = 0
 	return groomed
 
+## The appearance the groom sees on an unfinished Human (Low actor tier): the
+## player's own hair, beard and colours on the neutral face actually drawn.
+## CharacterProportions reads a missing face field as its neutral middle.
+func _neutral_face_appearance() -> Dictionary:
+	var groomed := _appearance.duplicate()
+	for key: String in CHARACTER_PROPORTIONS.FACE_FIELDS:
+		groomed.erase(key)
+	return groomed
+
 ## The game hairstyle drawn now (its AppearanceHair_<style> holder), or 0.
 func _legacy_hair_style_drawn() -> int:
 	if _native_skeleton == null:
@@ -2025,27 +2041,63 @@ func _apply_render_quality_to_visuals() -> void:
 		# no stubble on it, and no classic High portrait. Its legacy hairstyle,
 		# when one is drawn, keeps the High hair finish.
 		var rl := _rl_head != null or _rl_head_pending != null
-		if _human_shape_needs_finish:
-			# Body refinement is identical on the head. Doing it before the
-			# individual face lets all face choices reuse the same outfit fit.
-			# This field ends below its authored head/upper-neck replacement.
-			CHARACTER_PROPORTIONS.apply_body_refinement(_native_model, _native_skeleton, _model_config)
-			profile_started = _configuration_profile_step("finish.body_refinement", profile_started)
-			if rl:
-				CHARACTER_PROPORTIONS.restore(_native_model)
-				profile_started = _configuration_profile_step("finish.face_proportions", profile_started)
-				if not _rl_switching:
-					PORTRAIT_GROOM.apply(_native_model, _native_skeleton, _rl_groom_appearance(), _model_config)
-					profile_started = _configuration_profile_step("finish.groom", profile_started)
+		# Low actor tier (LAT-L4): a remote Human skips the per-vertex body
+		# refinement and face sculpt, the two per-actor GDScript fits, and keeps
+		# its source body and face. The actors marked local are always finished:
+		# the player's own, the creation preview, the appearance editor,
+		# leaderboard cards and the campaign replay figure. A dialogue close-up
+		# leases the world actor and shows it as it is drawn.
+		var finish := HumanShapeFinish.FULL if _render_quality_local_actor \
+			or ACTOR_RENDER_QUALITY.remote_body_finish(_render_quality) \
+			else HumanShapeFinish.UNFINISHED
+		if _human_shape_needs_finish or (_human_shape_finish != HumanShapeFinish.NONE
+				and _human_shape_finish != finish):
+			if not _human_shape_needs_finish:
+				# A change of quality or role regrooms a body still wearing the
+				# previous quality's shadow mode, which the groom copies onto the
+				# beard shell it builds. Give the body its authored values first;
+				# the quality pass below puts the current ones back on both.
+				ACTOR_RENDER_QUALITY.restore_mesh(_native_model.find_child("body", true, false) as MeshInstance3D)
+			if finish == HumanShapeFinish.FULL:
+				# Body refinement is identical on the head. Doing it before the
+				# individual face lets all face choices reuse the same outfit fit.
+				# This field ends below its authored head/upper-neck replacement.
+				CHARACTER_PROPORTIONS.apply_body_refinement(_native_model, _native_skeleton, _model_config)
+				profile_started = _configuration_profile_step("finish.body_refinement", profile_started)
+				if rl:
+					CHARACTER_PROPORTIONS.restore(_native_model)
+					profile_started = _configuration_profile_step("finish.face_proportions", profile_started)
+					if not _rl_switching:
+						PORTRAIT_GROOM.apply(_native_model, _native_skeleton, _rl_groom_appearance(), _model_config)
+						profile_started = _configuration_profile_step("finish.groom", profile_started)
+				else:
+					CHARACTER_PROPORTIONS.apply(_native_model, _native_skeleton, _appearance)
+					profile_started = _configuration_profile_step("finish.face_proportions", profile_started)
+					# A switch down from the RL head grooms again only to build a
+					# beard shell the RL head went without; otherwise the hair keeps
+					# the grooming and finish it had, as in develop's own switch.
+					if not _rl_switching or _beard_shell_missing():
+						PORTRAIT_GROOM.apply(_native_model, _native_skeleton, _appearance, _model_config)
+						profile_started = _configuration_profile_step("finish.groom", profile_started)
 			else:
-				CHARACTER_PROPORTIONS.apply(_native_model, _native_skeleton, _appearance)
-				profile_started = _configuration_profile_step("finish.face_proportions", profile_started)
-				# A switch down from the RL head grooms again only to build a
-				# beard shell the RL head went without; otherwise the hair keeps
-				# the grooming and finish it had, as in develop's own switch.
-				if not _rl_switching or _beard_shell_missing():
-					PORTRAIT_GROOM.apply(_native_model, _native_skeleton, _appearance, _model_config)
+				# A body finished earlier (at a higher quality, or as the local
+				# player) gives its derived meshes back; one never finished has
+				# nothing to restore and these are walks over its meshes only.
+				CHARACTER_PROPORTIONS.restore(_native_model)
+				CHARACTER_PROPORTIONS.restore_body_refinement(_native_model)
+				profile_started = _configuration_profile_step("finish.unfinished_restore", profile_started)
+				# The groom fits hair and beard to the face drawn, which is the
+				# neutral one here. Grooming with the player's face choices would
+				# shape the beard for a face that is not drawn, and cache that
+				# shape under the shared source body for every other face.
+				if rl:
+					if not _rl_switching:
+						PORTRAIT_GROOM.apply(_native_model, _native_skeleton, _rl_groom_appearance(), _model_config)
+						profile_started = _configuration_profile_step("finish.groom", profile_started)
+				elif not _rl_switching or _beard_shell_missing():
+					PORTRAIT_GROOM.apply(_native_model, _native_skeleton, _neutral_face_appearance(), _model_config)
 					profile_started = _configuration_profile_step("finish.groom", profile_started)
+			_human_shape_finish = finish
 			_human_shape_needs_finish = false
 		if rl:
 			if _native_model.has_meta(HIGH_PORTRAIT.USER_META):
