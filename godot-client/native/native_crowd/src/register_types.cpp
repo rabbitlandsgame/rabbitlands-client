@@ -17,13 +17,25 @@ void initialize_native_crowd_module(
     if (initialization_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
         return;
     }
-    ClassDB::register_class<NativeCrowdReducer>();
-    ClassDB::register_class<NativeCrowdStore>();
-    if (!ClassDBSingleton::get_singleton()->class_exists("NativeSpellFlightGeometry")) {
+    // The verified client_runtime payload compiles the same classes in. Whichever
+    // library loads first registers a class; the other skips it, so the
+    // benchmark extension and client_runtime load in either order.
+    ClassDBSingleton *classes = ClassDBSingleton::get_singleton();
+    if (!classes->class_exists("NativeCrowdReducer")) {
+        ClassDB::register_class<NativeCrowdReducer>();
+    }
+    if (!classes->class_exists("NativeCrowdStore")) {
+        ClassDB::register_class<NativeCrowdStore>();
+    }
+    if (!classes->class_exists("NativeSpellFlightGeometry")) {
         ClassDB::register_class<NativeSpellFlightGeometry>();
     }
-    ClassDB::register_class<NativeCapeConstraintKernel>();
-    ClassDB::register_class<NativeWorldEffectGeometry>();
+    if (!classes->class_exists("NativeCapeConstraintKernel")) {
+        ClassDB::register_class<NativeCapeConstraintKernel>();
+    }
+    if (!classes->class_exists("NativeWorldEffectGeometry")) {
+        ClassDB::register_class<NativeWorldEffectGeometry>();
+    }
 }
 
 void uninitialize_native_crowd_module(

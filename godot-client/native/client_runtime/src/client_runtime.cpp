@@ -6,6 +6,9 @@
 #include "mounted_cape_body_surface.h"
 #include "mounted_cape_projector.h"
 #include "../../native_crowd/src/native_spell_flight_geometry.h"
+#include "../../native_crowd/src/native_cape_constraint_kernel.h"
+#include "../../native_crowd/src/native_crowd_reducer.h"
+#include "../../native_crowd/src/native_world_effect_geometry.h"
 #include <godot_cpp/classes/class_db_singleton.hpp>
 #include "../../shared/cape_constraint_math.h"
 #include <godot_cpp/classes/os.hpp>
@@ -36,6 +39,28 @@ struct PoseTimeScope {
     explicit PoseTimeScope(uint64_t &value) : counter(value) {}
     ~PoseTimeScope() { counter += pose_elapsed_us(began); }
 };
+
+// The native_crowd kernels and reducer compiled into this library (rust-batch
+// C1). Each class is registered only when no other extension registered it
+// first, so a development checkout can still load the benchmark
+// native_crowd.gdextension in either order. Registering changes nothing by
+// itself: every caller keeps its own opt-in (ELORIA_NATIVE_PRESENTATION,
+// ELORIA_NATIVE_CROWD). runtime_info() reports which library provides each.
+struct CrowdKernel { const char *name; uint32_t bit; };
+constexpr CrowdKernel CROWD_KERNELS[] = {
+    {"NativeCrowdReducer", 1u}, {"NativeCrowdStore", 2u},
+    {"NativeCapeConstraintKernel", 4u}, {"NativeWorldEffectGeometry", 8u}};
+uint32_t crowd_kernels_owned = 0;
+template <typename T>
+void register_crowd_kernel(const CrowdKernel &kernel) {
+    if (ClassDBSingleton::get_singleton()->class_exists(kernel.name)) return;
+    ClassDB::register_class<T>();
+    crowd_kernels_owned |= kernel.bit;
+}
+String crowd_kernel_provider(const char *name, bool owned) {
+    if (owned) return "client_runtime";
+    return ClassDBSingleton::get_singleton()->class_exists(name) ? "external" : "absent";
+}
 }
 
 RabbitLandsClientRuntime::RabbitLandsClientRuntime() {
@@ -96,6 +121,11 @@ Dictionary RabbitLandsClientRuntime::runtime_info() const {
     info["language"] = "rust";
     info["cpp_spell_flight_provider"] = client_runtime_owns_cpp_flight() ? "client_runtime" :
         (ClassDBSingleton::get_singleton()->class_exists("NativeSpellFlightGeometry") ? "external" : "absent");
+    Dictionary crowd_providers;
+    crowd_providers["NativeSpellFlightGeometry"] = crowd_kernel_provider("NativeSpellFlightGeometry", client_runtime_owns_cpp_flight());
+    for (const CrowdKernel &kernel : CROWD_KERNELS)
+        crowd_providers[kernel.name] = crowd_kernel_provider(kernel.name, (crowd_kernels_owned & kernel.bit) != 0);
+    info["native_crowd_providers"] = crowd_providers;
     info["ready"] = core != nullptr;
     info["plan_calls"] = static_cast<int64_t>(calls);
     info["records_planned"] = static_cast<int64_t>(records_planned);
@@ -487,6 +517,10 @@ static void initialize_runtime(ModuleInitializationLevel level) {
             ClassDB::register_class<NativeSpellFlightGeometry>();
             client_runtime_mark_cpp_flight_owned();
         }
+        register_crowd_kernel<NativeCrowdReducer>(CROWD_KERNELS[0]);
+        register_crowd_kernel<NativeCrowdStore>(CROWD_KERNELS[1]);
+        register_crowd_kernel<NativeCapeConstraintKernel>(CROWD_KERNELS[2]);
+        register_crowd_kernel<NativeWorldEffectGeometry>(CROWD_KERNELS[3]);
     }
 }
 extern void rl_cape_shutdown_contact_workers();

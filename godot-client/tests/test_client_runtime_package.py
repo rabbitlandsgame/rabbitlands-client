@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import re
 import sys
 import tempfile
 import unittest
@@ -175,6 +176,58 @@ class ClientRuntimePackageTests(unittest.TestCase):
                     text = (stage / f"RabbitLands ({label}).{extension}").read_text(encoding="utf-8")
                     self.assertIn("RABBITLANDS_RUST_EFFECTS=", text)
                     self.assertNotIn("RABBITLANDS_RUST_EFFECTS=heat_bolt", text)
+
+    def test_native_crowd_kernels_and_reducer_are_bound_source_inputs(self):
+        # rust-batch C1: the kernels and the reducer are compiled into the payload
+        # from native_crowd/src, so their exact bytes are part of source_digest.
+        for name in ("native_cape_constraint_kernel", "native_world_effect_geometry", "native_crowd_reducer"):
+            for suffix in (".cpp", ".h"):
+                relative = Path("godot-client/native/native_crowd/src/" + name + suffix)
+                with self.subTest(input=relative.as_posix()):
+                    self.assertIn(relative, runtime_package.EXTERNAL_SOURCE_INPUTS)
+        # The benchmark extension's own registration and build files are not
+        # compiled into the payload and stay out of its provenance.
+        for name in ("register_types.cpp", "register_types.h"):
+            self.assertNotIn(Path("godot-client/native/native_crowd/src/" + name),
+                             runtime_package.EXTERNAL_SOURCE_INPUTS)
+        self.assertEqual(len(set(runtime_package.EXTERNAL_SOURCE_INPUTS)),
+                         len(runtime_package.EXTERNAL_SOURCE_INPUTS))
+
+    @staticmethod
+    def actual_external_build_inputs(repository: Path) -> set:
+        """Every file outside NATIVE_PATH that the real CMakeLists.txt compiles or
+        that a compiled file #includes (transitively), as repository paths."""
+        native = (repository / runtime_package.NATIVE_PATH).resolve()
+        pending = [path.resolve() for path in (native / "src").rglob("*") if path.suffix in {".cpp", ".h"}]
+        cmake = (native / "CMakeLists.txt").read_text(encoding="utf-8")
+        for reference in re.findall(r"\$\{CMAKE_CURRENT_SOURCE_DIR\}/([^\s)\"]+)", cmake):
+            target = (native / reference).resolve()
+            # Inside references that are not C++ (build_profile.json, the
+            # .deps binding checkout) are covered by source_digest's own walk
+            # or are the pinned dependency; anything outside must be source.
+            if not target.is_relative_to(native) or target.suffix in {".cpp", ".h", ".hpp", ".c", ".cc", ".inl"}:
+                pending.append(target)
+        seen = set()
+        while pending:
+            path = pending.pop()
+            if path in seen:
+                continue
+            if not path.is_file():
+                raise AssertionError("native build reference does not resolve to a file: " + str(path))
+            seen.add(path)
+            for include in re.findall(r'^\s*#\s*include\s+"([^"]+)"', path.read_text(encoding="utf-8"), re.MULTILINE):
+                pending.append((path.parent / include).resolve())
+        return {path.relative_to(repository.resolve()).as_posix() for path in seen if not path.is_relative_to(native)}
+
+    def test_external_inputs_equal_what_the_real_build_compiles_and_includes(self):
+        # Provenance follows the build: a source added to CMakeLists.txt from
+        # outside native/client_runtime, or a new cross-directory #include, must
+        # be listed, and nothing unused is listed.
+        actual = self.actual_external_build_inputs(REPOSITORY)
+        listed = {path.as_posix() for path in runtime_package.EXTERNAL_SOURCE_INPUTS}
+        self.assertEqual(actual, listed)
+        self.assertIn("godot-client/native/native_crowd/src/native_crowd_reducer.cpp", actual)
+        self.assertIn("godot-client/native/shared/mounted_cape_surface_math.h", actual)
 
     def test_human_and_legacy_launchers_isolate_all_optional_families(self):
         legacy = {

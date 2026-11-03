@@ -27,6 +27,17 @@ add_library(client_runtime SHARED src/client_remote.cpp src/client_remote.h src/
 target_sources(client_runtime PRIVATE src/client_flights.cpp src/client_flights.h
     ${CMAKE_CURRENT_SOURCE_DIR}/../native_crowd/src/native_spell_flight_geometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../native_crowd/src/native_spell_flight_geometry.h)
+# The native_crowd kernels and reducer ship here; their source stays in
+# native_crowd/ (also the benchmark extension). Every file outside this
+# directory must be listed in tools/client_runtime_package.py
+# EXTERNAL_SOURCE_INPUTS, so the payload's source_digest follows it.
+target_sources(client_runtime PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/../native_crowd/src/native_cape_constraint_kernel.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../native_crowd/src/native_cape_constraint_kernel.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../native_crowd/src/native_world_effect_geometry.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../native_crowd/src/native_world_effect_geometry.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../native_crowd/src/native_crowd_reducer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../native_crowd/src/native_crowd_reducer.h)
 target_sources(client_runtime PRIVATE src/client_residency.cpp src/client_residency.h)
 target_sources(client_runtime PRIVATE src/client_digest.cpp src/client_digest.h)
 target_sources(client_runtime PRIVATE

@@ -144,6 +144,40 @@ native arithmetic alone does not establish a performance benefit. The family
 remains experimental despite activation in the human-testing profile;
 complete-scene performance qualification remains pending.
 
+## native_crowd kernels and reducer
+
+The payload also compiles the `native_crowd` presentation kernels and the
+actor-command reducer from `../native_crowd/src`: `NativeCapeConstraintKernel`,
+`NativeWorldEffectGeometry`, `NativeCrowdReducer` and `NativeCrowdStore`, next
+to the existing `NativeSpellFlightGeometry`. Their source stays in
+`native_crowd/`, which also builds the benchmark extension. Every file compiled
+or included from outside this directory is listed in
+`tools/client_runtime_package.py` `EXTERNAL_SOURCE_INPUTS`, so the payload's
+`source_digest` follows them; `tests/test_client_runtime_package.py` checks that
+list against `CMakeLists.txt` and the `#include` lines.
+
+* Registration is guarded per class. This library registers a class only when
+  no other extension registered it first, and the benchmark
+  `native_crowd.gdextension` does the same, so either library can load first.
+  `RabbitLandsClientRuntime.runtime_info().native_crowd_providers` maps each of
+  the five classes to `client_runtime`, `external` or `absent`;
+  `cpp_spell_flight_provider` is unchanged.
+* Registering changes no default. Each caller keeps its own opt-in:
+  `ELORIA_NATIVE_PRESENTATION` (`cape`, `flight`, `world`, `both`/`1`, `all`)
+  for the kernels and `ELORIA_NATIVE_CROWD=1` for AppState's reducer. When the
+  payload is loaded anyway (the human-testing profile, mounted cape arithmetic),
+  an opt-in now finds the classes without the benchmark extension. Making them a
+  player default is a separate, owner-gated step.
+* The runtime ABI stays 1; added classes are backward compatible.
+
+Checks: `tests/test_client_runtime_crowd_kernels.gd` covers registration,
+providers, unchanged defaults, the opt-ins, one call per class and the reducer
+against `ActorReducer` for every command byte; `--external-crowd=` also loads
+the benchmark extension, before or after the payload. The
+`tests/test_client_runtime_kernels_*.gd` wrappers run the existing kernel and
+reducer suites unchanged against the payload (`--runtime-dir=`,
+`--expect-native=present`).
+
 ## Content digest (SHA-256)
 
 `RabbitLandsContentDigest` (`src/client_digest.{h,cpp}` over

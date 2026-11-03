@@ -9,11 +9,20 @@ import shutil
 ABI = 1
 LIBRARIES = {"windows": "client_runtime.dll", "linux": "client_runtime.so", "macos": "client_runtime.dylib"}
 NATIVE_PATH = Path("godot-client/native/client_runtime")
+# Every source compiled or included into the payload from outside NATIVE_PATH.
+# tests/test_client_runtime_package.py checks this list against the real
+# CMakeLists.txt and #include lines, so a new external input cannot be missed.
 EXTERNAL_SOURCE_INPUTS = (
     Path("godot-client/native/shared/cape_constraint_math.h"),
     Path("godot-client/native/shared/mounted_cape_surface_math.h"),
     Path("godot-client/native/native_crowd/src/native_spell_flight_geometry.cpp"),
     Path("godot-client/native/native_crowd/src/native_spell_flight_geometry.h"),
+    Path("godot-client/native/native_crowd/src/native_cape_constraint_kernel.cpp"),
+    Path("godot-client/native/native_crowd/src/native_cape_constraint_kernel.h"),
+    Path("godot-client/native/native_crowd/src/native_world_effect_geometry.cpp"),
+    Path("godot-client/native/native_crowd/src/native_world_effect_geometry.h"),
+    Path("godot-client/native/native_crowd/src/native_crowd_reducer.cpp"),
+    Path("godot-client/native/native_crowd/src/native_crowd_reducer.h"),
 )
 
 

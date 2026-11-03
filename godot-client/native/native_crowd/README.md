@@ -18,6 +18,12 @@ client path:
   parity-preserving production path, because GDScript observers currently run
   after every packet.
 
+The verified `client_runtime` payload compiles the same reducer and kernel
+sources (see `../client_runtime/README.md`). Each library registers a class
+only when it is not registered yet, so this extension and `client_runtime` load
+in either order. A build of this extension from before those guards logs
+"already registered" errors when it loads after `client_runtime`; rebuild it.
+
 The compact store owns only `x`, `y`, command, sequence, facing, health, and the
 sit/combat/alive flags. The caller still owns names, map placement, appearance,
 equipment, buffs, aim state, and all other cold fields. External changes to hot
