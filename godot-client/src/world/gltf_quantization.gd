@@ -17,10 +17,15 @@ extends GLTFDocumentExtension
 ## Registration is a no-op after the first and must happen before any package
 ## is parsed, so every site that builds a GLTFDocument calls it:
 ## world_loader.gd, external_mesh_pool.gd, glb_scene_cache.gd and
-## native_animation_importer.gd.
+## native_animation_importer.gd. The same call registers the world-object
+## image extension and the actor image extension (src/actors/actor_images.gd),
+## which act only on documents whose GLTFState asks for them.
+
+const ActorImages := preload("res://src/actors/actor_images.gd")
 
 static var _registered: GLTFDocumentExtension = null
 static var _world_images: GLTFDocumentExtension = null
+static var _actor_images: GLTFDocumentExtension = null
 static var _registration_mutex := Mutex.new()
 static var _registration_ready := false
 
@@ -37,11 +42,16 @@ static func ensure_registered() -> bool:
 	_registration_mutex.lock()
 	var quantization: GLTFDocumentExtension = new()
 	var world_images: GLTFDocumentExtension = preload("res://src/world/world_object_images.gd").new()
+	# Its switch is read here, on main, before any worker parse reads it.
+	ActorImages.configure()
+	var actor_images: GLTFDocumentExtension = ActorImages.new()
 	GLTFDocument.register_gltf_document_extension(quantization)
 	GLTFDocument.register_gltf_document_extension(world_images)
+	GLTFDocument.register_gltf_document_extension(actor_images)
 	_registered = quantization
 	_world_images = world_images
-	# Publish completion only after BOTH global registrations. The mutex
+	_actor_images = actor_images
+	# Publish completion only after ALL global registrations. The mutex
 	# protects a defensive worker-first observation, never a parse or mesh.
 	_registration_ready = true
 	_registration_mutex.unlock()

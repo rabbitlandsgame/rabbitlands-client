@@ -14,17 +14,28 @@ extends RefCounted
 ## goes through `material_override`, so sharing the source materials cannot leak
 ## one actor's appearance into another.
 ##
-## Threads: parse an equipment glTF on the main thread only, or on a worker the
-## main thread never waits on. A packaged client imports the textures the
-## equipment glTFs name by URI (tools/package_client.py), and GLTFDocument
-## takes such a texture through ResourceLoader and then reads it back with
-## get_image(). Outside the editor that is a RenderingServer texture read: on
-## the main thread it stalls the GPU once per image, and on a worker it waits
-## for the main thread to serve it, so a main thread that joins the worker
-## (wait_to_finish) never returns. Today only the main thread parses equipment:
-## `prepare` runs on a map preloader's worker for the exterior links'
-## visualScenes, which name no actor file, and the packaging tests hold them
-## and the prewarmed animation libraries to that.
+## Threads: every actor glTF (race, hair, equipment, held prop, mount,
+## creature, RL head) is parsed by `_parse_generate`, which enables the actor
+## image extension (actor_images.gd) on its GLTFState. A packaged client
+## imports the textures the equipment glTFs name by URI
+## (tools/package_client.py), and plain GLTFDocument takes such a texture
+## through ResourceLoader and then reads it back with get_image(). Outside the
+## editor that is a RenderingServer texture read: on the main thread it stalls
+## the GPU once per image, and on a worker it waits for the main thread to
+## serve it, so a main thread that joins the worker (wait_to_finish) never
+## returns. The extension takes the same texture without the read, so an actor
+## parse and generate_scene() wait for nothing.
+##
+## PackedScene.pack() still waits: it asks each MeshInstance3D for its property
+## list, a synchronous RenderingServer call (on a worker, about one main frame
+## per mesh). So actor files reach a worker only through `prepare_actor`, which
+## parses and generates and returns the scene unpacked, and main publishes it
+## with `install_actor_prepared`, which packs. `prepare` packs on its worker; it
+## serves the map preloaders' visualScenes (no actor file), creature warmup and
+## the RL head library, and tests/test_package_actor_worker_contract.py and the
+## packaging tests hold every caller to that. With ELORIA_ACTOR_IMAGES=legacy
+## the extension is off and an equipment parse belongs on the main thread again
+## (`prepare_actor` records "actor_images": false).
 
 ## World objects (harvest nodes, interactives) also come through here, and
 ## GLTFDocument builds their textures at runtime with no mip chain. Seen from the
@@ -34,6 +45,7 @@ extends RefCounted
 ## get the same chains and the same anisotropic filter as the map around them.
 ## Actors are left as they were: their load time is why this cache exists.
 const GltfQuantization := preload("res://src/world/gltf_quantization.gd")
+const ActorImages := preload("res://src/actors/actor_images.gd")
 const GltfAnimationFidelity := preload("res://src/actors/gltf_animation_fidelity.gd")
 const CreaturePayload := preload("res://src/actors/creature_payload.gd")
 const WorldObjectImages := preload("res://src/world/world_object_images.gd")
@@ -47,6 +59,8 @@ const GeometrySources := preload("res://src/world/map_geometry_texture_sources.g
 const MapSceneCache := preload("res://src/world/map_scene_cache.gd")
 const MapMaterialPreparation := preload("res://src/world/map_material_preparation.gd")
 const WORLD_ASSET_ROOT := "res://assets/world/"
+## glTF files under this root are actor documents (see "Threads").
+const ACTOR_ASSET_ROOT := "res://assets/actors/"
 const BOUND_MAIN_ENVIRONMENT := "ELORIA_UNDERGROUND_BOUND_PREPARE"
 const EARLY_WORLD_FILTER_ENVIRONMENT := "ELORIA_EARLY_WORLD_OBJECT_FILTER"
 
@@ -70,7 +84,8 @@ static func missing(paths: PackedStringArray) -> PackedStringArray:
 
 static func prepare(paths: PackedStringArray) -> Dictionary:
 	# Worker-owned resources. The main thread publishes them only on arrival.
-	# Never an equipment glTF: see "Threads" above.
+	# It packs on the worker: never an equipment glTF (prepare_actor is the
+	# actor worker path), see "Threads" above.
 	var result: Dictionary = {}
 	for path: String in paths:
 		path = _canonical_path(path)
@@ -137,6 +152,118 @@ static func install_prepared(scenes: Dictionary) -> void:
 						_scenes[path] = raw
 			else:
 				_scenes[path] = prepared
+
+## Prepares one actor glTF for `install_actor_prepared`, on any thread once
+## GltfQuantization.ensure_registered() has run on the main thread. It parses
+## and generates and never packs, so it waits for nothing on the main thread
+## (see "Threads"). Returns {"path", "actor_images"} plus one of:
+##   "root"      the generated scene, unowned and unpacked, with "stamp" (the
+##               file's modification time and length when it was read);
+##   "packed"    the editor's imported PackedScene (checkouts only);
+##   "prepared"  the result of `prepare`, when prepared content or the geometry
+##               cache serve this file (immutable resources, as today);
+##   "error"     why nothing was prepared ("unregistered", "not_actor_document",
+##               "retired", "parse_failed"); the main thread builds as today.
+## "actor_images" is false under ELORIA_ACTOR_IMAGES=legacy, when an equipment
+## parse waits for the main thread again. A record holding a root owns a Node:
+## hand it to install_actor_prepared or discard_actor_prepared, exactly once.
+## Several actor parses never run at once (one preparer thread).
+static func prepare_actor(path: String) -> Dictionary:
+	var canonical := _canonical_path(path)
+	var record := {"path": canonical, "actor_images": false}
+	# Main's registration also publishes the actor image switch: a worker reads
+	# it only after that, never while main writes it.
+	if not GltfQuantization.ensure_registered():
+		record["error"] = "unregistered"
+		return record
+	record["actor_images"] = ActorImages.active()
+	if not is_actor_document(canonical):
+		record["error"] = "not_actor_document"
+		return record
+	if ArchivedModelPolicy.is_retired_path(canonical):
+		record["error"] = "retired"
+		return record
+	if PreparedContent.selected_mode() != "raw" \
+			or (not GeometryCache.cooking and GeometryCache.eligible("asset", canonical)):
+		record["prepared"] = prepare(PackedStringArray([canonical]))
+		return record
+	if not GeometryCache.cooking:
+		var imported := _imported_actor_scene(canonical)
+		if imported != null:
+			record["packed"] = imported
+			return record
+	record["stamp"] = _source_stamp(canonical)
+	var root := _parse_generate(canonical, {}, true)
+	if root == null:
+		record["error"] = "parse_failed"
+		return record
+	record["root"] = root
+	return record
+
+## Main thread: publishes a `prepare_actor` record into the session cache and
+## returns whether its path is cached afterwards. A raw root is packed here
+## (a race scene packs in 1-2 ms on main, against about one main frame per
+## mesh on a worker) and freed. A root whose file changed since it was read,
+## whose browser file was retired, or whose path is already cached is freed
+## unpublished; the cache keeps, or later builds, the current scene as today.
+static func install_actor_prepared(record: Dictionary) -> bool:
+	if OS.get_thread_caller_id() != OS.get_main_thread_id():
+		push_error("glb cache: install_actor_prepared is main-thread only")
+		return false
+	var path := str(record.get("path", ""))
+	if record.get("prepared") is Dictionary:
+		install_prepared(record.prepared)
+		return _scenes.has(path)
+	var root := _take_root(record)
+	var publish := not path.is_empty() and not _scenes.has(path) \
+		and not (OS.has_feature("web") and not FileAccess.file_exists(path))
+	if record.get("packed") is PackedScene:
+		if publish:
+			_scenes[path] = record.packed
+			_failed.erase(path)
+		return _scenes.has(path)
+	if root == null:
+		return _scenes.has(path)
+	if not publish or record.get("stamp") != _source_stamp(path):
+		root.free()
+		return _scenes.has(path)
+	var began := Time.get_ticks_usec()
+	var packed := _pack_generated(path, root)
+	_record_operation(&"actor_prepared_install", began)
+	if packed == null:
+		return false
+	_scenes[path] = packed
+	_failed.erase(path)
+	return true
+
+## Frees a record's unpublished root (a cancelled or stale job). Any thread;
+## a second call does nothing.
+static func discard_actor_prepared(record: Dictionary) -> void:
+	var root := _take_root(record)
+	if root != null:
+		root.free()
+
+static func _take_root(record: Dictionary) -> Node3D:
+	var value: Variant = record.get("root")
+	record.erase("root")
+	if typeof(value) != TYPE_OBJECT or not is_instance_valid(value):
+		return null
+	return value as Node3D
+
+## Whether `path` is an actor glTF: under ACTOR_ASSET_ROOT, in the same
+## globalized form the cache keys use.
+static func is_actor_document(path: String) -> bool:
+	var canonical := _canonical_path(path)
+	return not canonical.is_empty() and canonical.begins_with(_canonical_path(ACTOR_ASSET_ROOT)) \
+		and not is_world_asset(canonical)
+
+static func _source_stamp(path: String) -> Array:
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		return []
+	var length := file.get_length()
+	file.close()
+	return [FileAccess.get_modified_time(path), length]
 
 ## Underground's synchronous Main arrival can bind each asset before opening
 ## the next, instead of retaining every asset's decoded Images simultaneously.
@@ -313,7 +440,8 @@ static func retention_snapshot() -> Dictionary:
 	return {"strong_scene_entries": _scenes.size() + _direct_raw_scenes.size(),
 		"direct_raw_scene_entries": _direct_raw_scenes.size(), "failed_paths": _failed.size(),
 		"lookup_hits": _lookup_hits, "lookup_misses": _lookup_misses,
-		"bytes_estimate_available": false, "timings": timings}
+		"bytes_estimate_available": false, "timings": timings,
+		"actor_images": ActorImages.totals()}
 
 static func _record_operation(operation: StringName, started: int, atomic := true) -> void:
 	var elapsed := Time.get_ticks_usec() - started
@@ -395,6 +523,16 @@ static func _editor_import_path(resource_path: String) -> String:
 	return imported_path if not imported_path.is_empty() and FileAccess.file_exists(imported_path) else ""
 
 static func _build_raw(path: String, scenery: Dictionary = {}) -> PackedScene:
+	var generated := _parse_generate(path, scenery, is_actor_document(path))
+	return _pack_generated(path, generated) if generated != null else null
+
+## The one runtime glTF parse, shared by `_build_raw` (main) and
+## `prepare_actor` (any thread): the file's generated scene, unowned and
+## unpacked, or null. An actor document gets the actor image extension, a
+## world asset its image pass. Steps that change the parsed state for both
+## paths (AT-C2's sidecars, ALOD-C1h's cooked geometry) go here, after the
+## parse and before generate_scene().
+static func _parse_generate(path: String, scenery: Dictionary, actor_document: bool) -> Node3D:
 	if not GltfQuantization.ensure_registered():
 		push_error("raw glTF parse requires main-thread extension initialization")
 		return null
@@ -406,6 +544,8 @@ static func _build_raw(path: String, scenery: Dictionary = {}) -> PackedScene:
 		if not bool(scenery.get("ok", false)): return null
 		state.set_additional_data(WorldObjectImages.ENABLED, true)
 		state.set_additional_data(SceneryImages.VERIFIED_KEY, scenery)
+	elif actor_document:
+		ActorImages.enable(state, path)
 	var operation_began := Time.get_ticks_usec()
 	var parse_error: Error
 	if world_asset and scenery.get("bytes") is PackedByteArray:
@@ -434,9 +574,15 @@ static func _build_raw(path: String, scenery: Dictionary = {}) -> PackedScene:
 		return null
 	if world_asset:
 		_filter_anisotropic(generated,early_filter)
+	return generated as Node3D
+
+## Packs a `_parse_generate` root and frees it. On a worker pack() waits for
+## the main thread about once per mesh (see "Threads"): `prepare` accepts
+## that, `install_actor_prepared` packs on main instead.
+static func _pack_generated(path: String, generated: Node3D) -> PackedScene:
 	_claim(generated, generated)
 	var packed: PackedScene = PackedScene.new()
-	operation_began = Time.get_ticks_usec()
+	var operation_began := Time.get_ticks_usec()
 	var packed_error: Error = packed.pack(generated)
 	_record_operation(&"scene_pack", operation_began)
 	operation_began = Time.get_ticks_usec()
