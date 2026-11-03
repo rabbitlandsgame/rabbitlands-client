@@ -10,11 +10,194 @@ func check(condition: bool, message: String) -> void:
 		failures += 1
 		push_error(message)
 
+## The action of the last animation request, or "" when none came: a packet
+## that requested nothing fails its check instead of stopping the script (and,
+## with it, the run) on a null access.
+func _last_requested_action(requests: Array[Dictionary]) -> String:
+	return str(requests.back().get("action", "")) if not requests.is_empty() else ""
+
+## Hand-cue switch (Low actor tier, LAT-L2). Main turns cues off for crowd
+## bodies off the full animation rate at Low; with them off a body draws no cue
+## geometry and reads its hands only to aim a bow, while every carried-prop
+## decision is the same as with them on.
+func _check_cue_gate(models: Dictionary, config: Dictionary, equipment: Dictionary,
+		adapter: CoordinateAdapter) -> void:
+	var cue_checks_before := failures
+	var low := ActorRenderQuality.Quality.LOW
+	for level: int in [ActorRenderQuality.Quality.MEDIUM, ActorRenderQuality.Quality.HIGH]:
+		check(CombatPresentation3D.cues_wanted(level, false, false)
+			and CombatPresentation3D.cues_wanted(level, true, false),
+			"quality %d draws every body's cues, as before the Low tier" % level)
+	check(not CombatPresentation3D.cues_wanted(low, false, false),
+		"Low leaves a crowd body off the full rate without cues")
+	check(CombatPresentation3D.cues_wanted(low, true, false)
+		and CombatPresentation3D.cues_wanted(low, false, true),
+		"Low still draws cues for full-rate bodies and priority actors")
+	var option: Dictionary = models.creationOptions[0]
+	var actor := ReplicatedActor3D.new()
+	root.add_child(actor)
+	# A main-hand sword, so the melee swing has a trail tip.
+	var dto := {"actor_id": 902, "x": 0, "y": 0, "rotation": 0, "appearance": {},
+		"equipment_visuals": {0: 114}, "in_combat": false}
+	var errors := actor.configure(dto, adapter, models.models[option.model], config, equipment)
+	check(errors.is_empty(), "cue fixture builds: %s" % [errors])
+	actor.set_physics_process(false)
+	var cues := actor.combat_presentation
+	check(cues != null and cues.cues_allowed, "a new body draws its cues")
+	if cues == null:
+		actor.queue_free()
+		await process_frame
+		return
+	var mesh := (cues.get_node("ActionEffects") as MeshInstance3D).mesh as ImmediateMesh
+	# A cast: drawn with cues, nothing without, and its palette survives.
+	actor.play_action(&"cast_aggressive", true)
+	cues.set_spell_palette(Color(0.2, 0.9, 0.3))
+	actor.animation_player.advance(0.3)
+	cues.update_pose()
+	check(mesh.get_surface_count() == 1, "with cues a cast draws its hand arcs (control)")
+	cues.set_cues_allowed(false)
+	check(not cues.cues_allowed and mesh.get_surface_count() == 0,
+		"turning cues off removes the arc drawn now")
+	for step: int in 5:
+		actor.animation_player.advance(1.0 / 30.0)
+		cues.update_pose()
+		check(mesh.get_surface_count() == 0, "without cues a cast draws nothing (step %d)" % step)
+	check(cues.get("_spell_color") == Color(0.2, 0.9, 0.3),
+		"a cast without cues keeps its spell colour for when cues return")
+	cues.set_cues_allowed(true)
+	actor.animation_player.advance(1.0 / 30.0)
+	cues.update_pose()
+	check(mesh.get_surface_count() == 1, "cues back on draw the cast again mid-clip")
+	# A melee swing: no trail is gathered without cues.
+	var tip: Variant = actor.weapon_trail_tip()
+	check(tip is Vector3, "the sword gives the swing a trail tip")
+	for allowed: bool in [false, true]:
+		cues.set_cues_allowed(allowed)
+		actor.play_action(&"attack_primary", true)
+		var drawn_steps := 0
+		var longest_trail := 0
+		for step: int in 18:
+			actor.animation_player.advance(1.0 / 30.0)
+			cues.update_pose()
+			drawn_steps += int(mesh.get_surface_count() > 0)
+			longest_trail = maxi(longest_trail, (cues.get("_trail") as Array).size())
+		if allowed:
+			check(drawn_steps > 0 and longest_trail >= 2,
+				"with cues a swing draws its trail (control: %d steps, %d points)" % [drawn_steps, longest_trail])
+		else:
+			check(drawn_steps == 0 and longest_trail == 0,
+				"without cues a swing gathers and draws no trail (%d steps, %d points)" % [drawn_steps, longest_trail])
+	cues.set_cues_allowed(true)
+	actor.play_action(&"attack_secondary", true)
+	for step: int in 10:
+		actor.animation_player.advance(1.0 / 30.0)
+		cues.update_pose()
+	var trail_before := (cues.get("_trail") as Array).size()
+	cues.set_cues_allowed(false)
+	check(trail_before > 0 and (cues.get("_trail") as Array).is_empty()
+		and mesh.get_surface_count() == 0,
+		"turning cues off mid-swing forgets the trail (%d points) and its geometry" % trail_before)
+	actor.animation_player.advance(1.0)
+	# The Ranger bow: carry, draw and release poses are the same either way.
+	actor.apply_equipment_visuals({0: 164})
+	var bow_path := str((equipment.models["0:164"] as Dictionary).scene)
+	for action: StringName in [&"idle", &"ranged_draw", &"ranged_attack", &"idle"]:
+		actor.play_action(action, true)
+		actor.animation_player.advance(0.7 if action == &"ranged_draw" else 0.05)
+		var poses := {}
+		for allowed: bool in [false, true]:
+			cues.set_cues_allowed(allowed)
+			cues.update_pose()
+			var props := []
+			for part: int in [0, 1]:
+				for prop: Node in actor._equipment_nodes.get(part, []):
+					props.append(is_instance_valid(prop) and prop is Node3D and (prop as Node3D).visible)
+			poses[allowed] = [cues.bow != null and cues.bow.visible,
+				cues.bow.global_transform if cues.bow != null else Transform3D(),
+				cues.bow.nock_position() if cues.bow != null else Vector3.ZERO, props,
+				mesh.get_surface_count()]
+		var state := str(actor.current_action)
+		check(bool(poses[false][0]) and bool(poses[true][0]),
+			"the bow shows in %s with and without cues" % state)
+		check(poses[false][1] == poses[true][1] and poses[false][2] == poses[true][2],
+			"the bow's pose and nock in %s do not depend on cues" % state)
+		check(poses[false][3] == poses[true][3], "hand props in %s do not depend on cues" % state)
+		check(int(poses[false][4]) == 0, "without cues %s draws no cue geometry" % state)
+		if state == "ranged_attack":
+			check(int(poses[true][4]) == 1, "with cues the release draws its flash (control)")
+	cues.set_cues_allowed(false)
+	actor.play_action(&"ranged_draw", true)
+	actor.animation_player.advance(0.7)
+	cues.update_pose()
+	check(cues.bow.nock_position().distance_to(cues.hand_position(
+		actor.get_skeleton().find_bone("hand_r"))) < 0.09,
+		"without cues the drawn string still follows the draw hand")
+	actor.apply_equipment_visuals({})
+	cues.update_pose()
+	check(not cues.bow.visible, "unequipping the bow without cues still hides it")
+	cues.set_cues_allowed(true)
+	# Hand reads, counted on a probe presentation of the same body (which
+	# keeps the Ranger bow, so it can draw; the probe's own bow is set per row).
+	actor.apply_equipment_visuals({0: 164})
+	var probe_script := GDScript.new()
+	probe_script.source_code = "extends \"res://src/actors/combat_presentation_3d.gd\"\n" \
+		+ "var hand_reads := 0\n" \
+		+ "func hand_position(index: int) -> Vector3:\n" \
+		+ "\thand_reads += 1\n" \
+		+ "\treturn super(index)\n"
+	check(probe_script.reload() == OK, "the hand-read probe compiles")
+	var probe := probe_script.new() as CombatPresentation3D
+	probe.configure(actor)
+	actor.add_child(probe)
+	var reads := {}
+	for row: Array in [[&"cast_aggressive", true, ""], [&"cast_aggressive", false, ""],
+			[&"ranged_draw", false, bow_path], [&"ranged_draw", false, ""],
+			[&"ranged_draw", true, ""], [&"idle", false, bow_path]]:
+		probe.set_equipped_bow(str(row[2]))
+		probe.set_cues_allowed(bool(row[1]))
+		actor.play_action(row[0], true)
+		actor.animation_player.advance(0.05)
+		probe.set("hand_reads", 0)
+		probe.update_pose()
+		reads["%s/%s/%s" % [row[0], "cues" if row[1] else "none", "bow" if row[2] != "" else "bare"]] \
+			= int(probe.get("hand_reads"))
+	check(reads == {"cast_aggressive/cues/bare": 2, "cast_aggressive/none/bare": 0,
+		"ranged_draw/none/bow": 2, "ranged_draw/none/bare": 0, "ranged_draw/cues/bare": 2,
+		"idle/none/bow": 0}, "hands are read for cues and to aim a bow only: %s" % reads)
+	probe.free()
+	# Cost per update, bare-handed (informational; this machine, not core-pinned).
+	actor.apply_equipment_visuals({})
+	cues.set_cues_allowed(true)
+	actor.play_action(&"cast_aggressive", true)
+	actor.animation_player.advance(0.3)
+	check(actor.current_action == &"cast_aggressive", "the timed body is casting")
+	var timings := {}
+	for allowed: bool in [true, false, true, false]:
+		cues.set_cues_allowed(allowed)
+		var began := Time.get_ticks_usec()
+		for repeat: int in 2000:
+			cues.update_pose()
+		var per_call := float(Time.get_ticks_usec() - began) / 2000.0
+		var key := "cast_cues_on" if allowed else "cast_cues_off"
+		timings[key] = minf(float(timings.get(key, INF)), per_call)
+	actor.play_action(&"idle", true)
+	actor.animation_player.advance(0.05)
+	var idle_began := Time.get_ticks_usec()
+	for repeat: int in 2000:
+		cues.update_pose()
+	timings["idle_fast_path"] = float(Time.get_ticks_usec() - idle_began) / 2000.0
+	print("combat cues update_pose us per call (best of 2 x 2000): ", timings)
+	actor.queue_free()
+	await process_frame
+	print("combat cues: ", "PASS" if failures == cue_checks_before else
+		str(failures - cue_checks_before) + " FAILURES")
+
 func run() -> void:
 	var models: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/models.json"))
 	var config: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/animations/luminous.json"))
 	var equipment: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/actors/equipment.json"))
 	var adapter := CoordinateAdapter.new({"walkingHeight": 0.0})
+	await _check_cue_gate(models, config, equipment, adapter)
 	for option: Dictionary in models.creationOptions:
 		var actor := ReplicatedActor3D.new()
 		root.add_child(actor)
@@ -157,15 +340,15 @@ func run() -> void:
 	state.actor_animation_requested.connect(func(request: Dictionary) -> void: requests.append(request))
 	state.set("local_actor_id", 901)
 	state.call("_on_packet", 70, PackedByteArray([4, 1]))
-	check(requests.back().action == &"cast_channel_enter", "target selection channels after server confirmation")
+	check(_last_requested_action(requests) == "cast_channel_enter", "target selection channels after server confirmation")
 	state.call("_on_packet", 70, PackedByteArray([1, 1]))
-	check(requests.back().action == &"heal", "successful healing result releases healing animation")
+	check(_last_requested_action(requests) == "heal", "successful healing result releases healing animation")
 	state.call("_on_packet", 70, PackedByteArray([1, 3]))
-	check(requests.back().action == &"cast_defensive", "shield result releases defensive animation")
+	check(_last_requested_action(requests) == "cast_defensive", "shield result releases defensive animation")
 	state.call("_on_packet", 70, PackedByteArray([1, 6]))
-	check(requests.back().action == &"cast_aggressive", "harm result releases aggressive animation")
+	check(_last_requested_action(requests) == "cast_aggressive", "harm result releases aggressive animation")
 	state.call("_on_packet", 84, PackedByteArray([0x85, 3, 2, 0]))
-	check(requests.back().action == "ranged_draw", "actor aim packet drives draw animation")
+	check(_last_requested_action(requests) == "ranged_draw", "actor aim packet drives draw animation")
 	for effect_id: int in [1, 2, 3, 10, 12, 72, 73, 74]:
 		var effect := WorldEffect3D.new()
 		root.add_child(effect)

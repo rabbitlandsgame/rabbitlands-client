@@ -1,11 +1,19 @@
 class_name CombatPresentation3D
 extends Node3D
 const SPELL_MATERIALS = preload("res://src/world/spell_visual_material.gd")
+const ACTOR_RENDER_QUALITY := preload("res://src/actors/actor_render_quality.gd")
 ## Visual cues use the AnimationPlayer clock, including speed changes and LOD.
 ## Skeletal attachments update after the skeleton evaluates, avoiding hand lag.
 var actor: ReplicatedActor3D
 var bow: RangerBow3D
 var effects_enabled := true
+## Whether this body draws its hand cues: the spell arcs and sparks round the
+## hands, the melee trail and the bow's release flash. The crowd gate turns
+## them off for bodies off the full animation rate at Low (`cues_wanted`).
+## Off keeps every carried-prop decision (the bow's carry, draw and release
+## pose, which hand props show) and skips only the cue geometry and the hand
+## reads that nothing else needs. On, the update is exactly as before.
+var cues_allowed := true
 var _mesh := ImmediateMesh.new()
 var _material := CombatEffectMesh.material()
 var _trail: Array[Vector3] = []
@@ -28,6 +36,27 @@ func set_spell_power(power: int) -> void:
 	spell_power = clampi(power, 1, 10)
 	_power_action = actor.current_action
 	update_pose()
+
+## Whether a body's hand cues are drawn at graphics `quality`
+## (ActorRenderQuality.Quality, which LookProfile.Quality shares). Where the
+## quality keeps cues to the full rate (Low), only a body on the full animation
+## rate or a priority actor (Main's `_crowd_priority_actor`: the player, their
+## target or selection, a campaign actor) draws them; at Medium and High every
+## body does, as before the Low actor tier.
+static func cues_wanted(quality: int, full_rate: bool, priority: bool) -> bool:
+	return priority or full_rate or not ACTOR_RENDER_QUALITY.combat_cues_full_rate_only(quality)
+
+## Turning cues off removes the cue drawn now, so a body the gate then pauses
+## (no skeleton update, so no update_pose) is not left with a frozen arc, and
+## forgets the melee trail, so a trail resumed mid-swing does not join the
+## points from before. Turning them on draws from the next skeleton update.
+func set_cues_allowed(on: bool) -> void:
+	if cues_allowed == on:
+		return
+	cues_allowed = on
+	if not on:
+		_trail.clear()
+		_clear_effects()
 
 func configure(owner_actor: ReplicatedActor3D) -> void:
 	actor = owner_actor
@@ -123,12 +152,13 @@ func update_pose() -> void:
 		_trail.clear()
 	_last_action = action
 	_last_time = time
-	# The hands are read only for a cue: a bow carried at ease follows the
-	# fist's grip frame alone.
-	var left := hand_position(_hand_l) if has_cue else Vector3.ZERO
-	var right := hand_position(_hand_r) if has_cue else Vector3.ZERO
 	var drawing := action in [&"ranged_draw", &"ranged_hold"]
 	var ranging := drawing or action == &"ranged_attack"
+	# The hands are read only for a cue: a bow carried at ease follows the
+	# fist's grip frame alone. With cues off they are read only to aim a bow.
+	var read_hands := has_cue and (cues_allowed or (ranging and _equipped_bow))
+	var left := hand_position(_hand_l) if read_hands else Vector3.ZERO
+	var right := hand_position(_hand_r) if read_hands else Vector3.ZERO
 	if ranging and _equipped_bow:
 		_ensure_bow()
 	if bow != null:
@@ -147,7 +177,7 @@ func update_pose() -> void:
 			bow.carry(carried_bow_grip(), size, skeleton_size)
 	actor.set_hand_props_visible(not mounted and (not ranging or not _equipped_bow))
 	_clear_effects()
-	if not effects_enabled or not actor.is_visible_in_tree():
+	if not cues_allowed or not effects_enabled or not actor.is_visible_in_tree():
 		return
 	var casting := action in [&"cast", &"cast_channel_enter", &"cast_channel", &"cast_aggressive", &"cast_defensive", &"heal"]
 	var melee := action in [&"attack_primary", &"attack_secondary"]

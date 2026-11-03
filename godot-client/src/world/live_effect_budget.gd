@@ -11,12 +11,20 @@ extends RefCounted
 ## the limit if it has to be; the rest is drawn while there is room and simply
 ## skipped while there is not. Nothing already drawn is cut short.
 
+const ACTOR_RENDER_QUALITY := preload("res://src/actors/actor_render_quality.gd")
+
 ## Live visuals of each kind before the rest are skipped. `spell` is spells,
 ## impacts, bursts and portal flashes (WorldEffect3D), `missile` arrows and
 ## bolts, `technique` melee technique visuals, `number` floating health changes.
+## These are the High limits; `limit()` scales them by the graphics quality.
 const LIMITS := {&"spell": 48, &"missile": 48, &"technique": 32, &"number": 24}
 
 var enabled := true
+## The graphics quality (LookProfile.Quality, in ActorRenderQuality's order).
+## Each limit is LIMITS times ActorRenderQuality.effect_scale: all of it at
+## High, three quarters at Medium and a quarter at Low (the Low actor tier:
+## 12 spells, 12 missiles, 8 techniques, 6 numbers). A value outside the
+## range is clamped, as before the tier.
 var quality := 2
 var _live: Dictionary = {}
 var _skipped: Dictionary = {}
@@ -31,7 +39,7 @@ func admit(kind: StringName, priority: bool) -> bool:
 	return false
 
 func limit(kind: StringName) -> int:
-	var scale: float = [0.5, 0.75, 1.0][clampi(quality, 0, 2)]
+	var scale := ACTOR_RENDER_QUALITY.effect_scale(clampi(quality, 0, 2))
 	return maxi(1, int(int(LIMITS.get(kind, 1 << 30)) * scale))
 
 ## Counts `node` as live until it leaves the tree.
