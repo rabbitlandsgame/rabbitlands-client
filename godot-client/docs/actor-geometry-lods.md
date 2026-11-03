@@ -8,9 +8,11 @@ and the RL head body cut keep reading the arrays they read today.
 
 Status: the shared format (`src/actors/actor_geometry_format.gd`) and the runtime
 applier (`src/actors/actor_geometry.gd`) exist and are tested
-(`tests/test_actor_geometry.gd`). Nothing calls the applier yet: the call in the
-actor parse (`GlbSceneCache._build_raw`) and the cook arrive in later steps, so
-the game draws exactly what it drew before.
+(`tests/test_actor_geometry.gd`), and so does the offline tool that decides which
+lining triangles are hidden (`eloria-assets/tools/lining_visibility.py`, below).
+Nothing calls the applier yet: the call in the actor parse
+(`GlbSceneCache._build_raw`) and the cook arrive in later steps, so the game
+draws exactly what it drew before.
 
 ## Sidecar
 
@@ -111,6 +113,108 @@ Every process on the editor binary reads the dev root, headless tests
 included. Once the actor parse calls the applier, a worktree with a cooked dev
 root draws (and tests) actors with sidecars; set
 `RABBITLANDS_ACTOR_GEOMETRY=off` to compare against the plain parse.
+
+## Lining visibility masks
+
+`eloria-assets/tools/lining_visibility.py` decides which triangles of each
+`Generated*` lining (`GeneratedArmorBacking`, `GeneratedLegBacking[WithBoots]`,
+`GeneratedBootBacking[WithLegs]`) no camera can see; the cook's lining stage
+turns a mask's `keep` into that surface's `base`. It is an offline tool: it
+reads the garment GLBs and writes mask files, and changes no asset.
+
+```
+python eloria-assets/tools/lining_visibility.py masks --all            # or GLBs, or --sample review
+python eloria-assets/tools/lining_visibility.py finalise --all --margin 0.02 --margin-rule surface
+python eloria-assets/tools/lining_visibility.py review --sample review --sheets
+python eloria-assets/tools/lining_visibility.py check <mask.json> [<garment.glb>] [--rewritten]
+```
+
+Method (`lining_visibility_blender.py` runs in background Blender, at most four
+processes at a time):
+
+- Poses: the bind pose, then 43 more (pose set v1 in the tool): idle, walk and
+  run at quarter cycles, the three sword swings and their ends, casts, channel,
+  defend, arms raised, bow hold, shield, chop, jump, meditate (the client's sit),
+  chair sit, stand, death, eight emotes, and four mounted straddles rebuilt from
+  `data/mounts/*.json` with the rider seat solver's two-bone IK (narrow horse to
+  wide tortoise). Library clips are retargeted with the shared posekit, as the
+  design fit does. Posed vertices come from linear blend skinning of the glTF
+  data itself (checked against Blender's own deformation to 1e-6 m), so triangle
+  `i` of a mask is glTF triangle `i`, which the raw parse keeps (it may drop
+  unreferenced vertices and swaps the winding inside a triangle, but keeps the
+  triangle order; the design experiment's masks applied with zero centroid
+  deviation).
+- Occluders: only the piece's own non-lining surfaces (shell, inseams, forearm
+  skin) and the lining itself. The body, the twin lining and every other worn
+  item are left out, so a triangle hidden from this set is hidden whatever else
+  is worn. Back faces of single-sided materials are passed through (the GPU
+  culls them); `EquipmentForearmSkin` counts as single-sided because it draws
+  with the body's material; a lining whose mesh extras ask for the quilt or
+  antler-palette shader (`repairQuiltPaint`, `matchAntlerPalette`; drawn
+  `cull_disabled`) counts as double-sided; alpha materials never occlude.
+- Visibility: a triangle is visible when a ray from one of its sample points
+  (the centroid, or a k x k subdivision every 3 cm, up to 16) to the camera
+  escapes, for one of 128 directions over the whole sphere (directions a
+  single-sided lining would cull are skipped). `visible_upper` uses camera
+  elevations of -10 degrees and above only.
+- Margin: `keep` adds every triangle that comes within the margin (default 2 cm,
+  rest pose) of a visible one, measured between points sampled every 5 mm
+  (`surface`), or between centroids as the design experiment did (`centroid`).
+
+Mask file `<out>/<variant>/<stem>.lining.json` (default out:
+`<client repo>/.local/actor-geometry/lining-masks/`), byte deterministic:
+
+```
+{schema: 1, policy: "rl-lining-visibility-v1", source: {path, sha256, bytes},
+ inputs: {tool_sha256, blender_tool_sha256, posekit_sha256, library_sha256},
+ settings, settings_sha256, poses: [...], margin_m, margin_rule, occluders: [...],
+ linings: {<mesh>: {mesh, primitive, triangles, vertices, double_sided, material,
+   gltf_index_sha256, check: [[triangle, x, y, z] x 8], samples, rays,
+   new_visible_by_pose, counts, runs,
+   visible, visible_upper, visible_bind, keep, keep_upper, keep_bind}}}
+```
+
+The six masks are base64 bitsets, little-endian bit order, bit `i` = triangle
+`i`; `*_bind` uses the bind pose alone. A consumer checks the source SHA-256
+against the file it cooks, or, for a build tree whose bytes were rewritten
+(quantisation), the triangle count, the glTF index digest and the eight check
+centroids (within 0.1 mm). `check` compares the SHA-256 and the geometry;
+`check --rewritten` binds build-tree bytes by the geometry alone. It also
+refuses a garment whose skin bind pose is not its node rest pose, which the
+posing assumes (all 400 lining garments match to 2e-7). The raw ray-cast
+result is cached beside it as `<stem>.visibility.json` and reused while the
+garment, tool, library, posekit, mount data and settings digests match;
+`finalise` applies a new margin to cached records without Blender.
+
+`review` renders, for 15 poses that are not in the set (in-between frames,
+other clips, two more mounts) and 16 random camera directions each,
+orthographic first-hit images at 3 mm and counts the pixels whose first drawn
+surface is a removed triangle, for the mask and for comparison masks (other
+margins, the bind pose alone, the design experiment's masks). `--sheets` adds a
+contact sheet per lining for six garments in four poses: as worn (kept lining
+blue, removed lining red; red must never show) and the lining alone.
+
+Measured on the review sample (2026-11-02; 20 garments, 30 linings, 313,301
+lining triangles; dev laptop, four Blender 5.2 workers): the cast took 43 min
+(9,193 worker-seconds, 29 ms per lining triangle, about 3.8 us per ray). All
+400 garments with linings (6.74 M lining triangles) would take about 55
+worker-hours, 14 hours on four workers, once per garment change. Review over
+7,200 unsampled views (14.2 M lining pixels at 3 mm):
+
+| Keep rule | Lining triangles removed | Changed pixels |
+| --- | ---: | ---: |
+| visible only | 58% | 91,878 |
+| visible + 1 cm surface margin | 16% | 232 |
+| **visible + 2 cm surface margin (default)** | **12%** | **43** (at most 4 in one view) |
+| visible + 2 cm centroid margin | 19% | 6,273 |
+| bind pose alone, 2 cm surface margin | 25% | 199,875 |
+| design experiment E4 masks (rest pose, splats, 2 cm centroid) | 45% | 947,796 |
+| cheaper cast (64 directions, centroids, 27 poses; 1/5.6 of the cost), 2 cm surface | 16% | 910 |
+
+By class at the default: torsos 0-11% (most of the interior is seen through the
+collar, hem and cuffs once the body is not an occluder), legs 14-60%, boots
+0-6%. A rest-pose mask and a mask without a margin both open visible holes in
+poses and views they did not sample.
 
 ## Measured cost
 
