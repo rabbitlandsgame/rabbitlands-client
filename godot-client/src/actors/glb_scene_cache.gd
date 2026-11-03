@@ -37,6 +37,37 @@ extends RefCounted
 ## the extension is off and an equipment parse belongs on the main thread again
 ## (`prepare_actor` records "actor_images": false).
 
+## Memory (memory classes M5, owner decision 10): every published entry gets a
+## ledger row ({bytes, mesh_bytes, texture_bytes, domain, origin, ...}) with
+## ResourceBytes estimates and a domain taken from its path (creature, race,
+## hair, equipment, rl_head, world, other). Creature rows are measured when
+## published; the others are measured later by the budget pass, a little at a
+## time, so a map's world objects add no work to their publication.
+## `retention_snapshot()` reports the bytes by domain.
+##
+## Only creatures are evicted, and only entries the creature warm-up prepared
+## on its worker (built raw: never imported, prepared or geometry records,
+## whose instances take other paths). Races, legacy hair and equipment are
+## parsed on the main thread, so evicting them would bring back the re-parse
+## hitch this cache exists to prevent; RL head files are the RL library's;
+## world assets belong to map lifecycles (`release_sources`). The pass runs on
+## the main thread every BUDGET_PASS_SECONDS (a SceneTree timer, armed while
+## there are rows) and after a creature publication that leaves the domain over
+## MemoryBudgets' `creature_scene_bytes`. It evicts idle entries, least recently
+## used first, down to EVICT_TO_FRACTION of the budget; an entry is idle once
+## it has been unused for the class's `creature_scene_idle_msec`. Idle means
+## that every probe mesh's reference count is back at the count it had when
+## the entry was published, before any instance: an instance, a Node
+## duplicate() of one or any other holder keeps it in use, so an entry in use
+## is never evicted (an unexpected holder only keeps memory alive). Eviction
+## drops the entry (its key, as `forget`) and calls
+## NativeAnimationImporter.release_sources() for the file (every creature names
+## its own GLB as its animation library); an importer still prewarming the
+## file skips the entry until a later pass. The warm-up
+## (actor_resource_warmup.gd) asks `evicted()` and prepares such a creature
+## again on its worker, as at first sight, so it is never parsed on the main
+## thread because of an eviction (`evicted_main_rebuilds` counts any that are).
+
 ## World objects (harvest nodes, interactives) also come through here, and
 ## GLTFDocument builds their textures at runtime with no mip chain. Seen from the
 ## gameplay camera a node's 256-512 px texture is minified several times over, so
@@ -58,11 +89,44 @@ const GeometryCache := preload("res://src/world/map_geometry_cache.gd")
 const GeometrySources := preload("res://src/world/map_geometry_texture_sources.gd")
 const MapSceneCache := preload("res://src/world/map_scene_cache.gd")
 const MapMaterialPreparation := preload("res://src/world/map_material_preparation.gd")
+const MemoryBudgets := preload("res://src/runtime/memory_budgets.gd")
+const ResourceBytes := preload("res://src/runtime/resource_bytes.gd")
 const WORLD_ASSET_ROOT := "res://assets/world/"
 ## glTF files under this root are actor documents (see "Threads").
 const ACTOR_ASSET_ROOT := "res://assets/actors/"
 const BOUND_MAIN_ENVIRONMENT := "ELORIA_UNDERGROUND_BOUND_PREPARE"
 const EARLY_WORLD_FILTER_ENVIRONMENT := "ELORIA_EARLY_WORLD_OBJECT_FILTER"
+
+## Ledger domains (see "Memory"). World assets are DOMAIN_WORLD; a path under
+## none of DOMAIN_ROOTS is DOMAIN_OTHER (mounts, shared files, tests).
+const DOMAIN_CREATURE := "creature"
+const DOMAIN_RACE := "race"
+const DOMAIN_HAIR := "hair"
+const DOMAIN_EQUIPMENT := "equipment"
+const DOMAIN_RL_HEAD := "rl_head"
+const DOMAIN_WORLD := "world"
+const DOMAIN_OTHER := "other"
+const DOMAIN_ROOTS := {
+	"res://assets/actors/native/creatures/": DOMAIN_CREATURE,
+	"res://assets/actors/native/races/": DOMAIN_RACE,
+	"res://assets/actors/native/hair/": DOMAIN_HAIR,
+	"res://assets/actors/native/equipment/": DOMAIN_EQUIPMENT,
+	"res://assets/actors/native/rl_heads/": DOMAIN_RL_HEAD,
+}
+## Who published an entry. Only ORIGIN_WORKER creature entries built raw are
+## evictable.
+const ORIGIN_WORKER := "worker" # install_prepared / install_actor_prepared of a worker's build
+const ORIGIN_MAIN := "main" # built on the main thread (a cache miss or a fallback)
+const ORIGIN_IMPORTED := "imported" # the editor's imported PackedScene, via prepare_actor
+const ORIGIN_PREPARED := "prepared" # a prepared-content record
+const ORIGIN_GEOMETRY := "geometry" # a geometry-cache record
+const ORIGIN_UNKNOWN := "unknown" # found in the cache without a publication (pruning)
+## Seconds between budget passes (main thread, SceneTree timer).
+const BUDGET_PASS_SECONDS := 5.0
+## An over-budget pass evicts down to this fraction of the creature budget.
+const EVICT_TO_FRACTION := 0.85
+## Main-thread time a pass may spend measuring pending (non-creature) rows.
+const LEDGER_FILL_SLICE_USEC := 1000
 
 static var _scenes: Dictionary = {}
 static var _failed: Dictionary = {}
@@ -73,6 +137,30 @@ static var _diagnostics_mutex := Mutex.new()
 static var _resource_timings: Dictionary = {}
 static var _lookup_hits := 0
 static var _lookup_misses := 0
+## Memory ledger (see "Memory"), main thread only: canonical path -> row
+## {bytes (-1 until measured), mesh_bytes, texture_bytes, domain, origin,
+## evictable, scene_id, probes (WeakRefs to the scene's meshes), baseline
+## (their reference counts at publication), published_msec, last_used_msec,
+## idle_since_msec (0 while in use or not yet seen idle)}.
+static var _ledger: Dictionary = {}
+## Measured bytes of the ledger's rows by domain.
+static var _domain_bytes: Dictionary = {}
+static var _pending_rows := 0
+static var _evictable_rows := 0
+## Canonical paths evicted and not published since (`evicted`).
+static var _evicted: Dictionary = {}
+## Process totals (not reset by clear()).
+static var _evictions := 0
+static var _evicted_bytes := 0
+static var _eviction_skips := 0
+static var _evicted_main_rebuilds := 0
+static var _budget_passes := 0
+static var _budget_timer_armed := false
+## [canonical root, domain] pairs of DOMAIN_ROOTS, built on first use.
+static var _domain_prefixes: Array = []
+## Test overrides of the creature budget and idle age (< 0: MemoryBudgets').
+static var _test_budget_bytes := -1
+static var _test_idle_msec := -1
 
 static func missing(paths: PackedStringArray) -> PackedStringArray:
 	var out := PackedStringArray()
@@ -124,19 +212,19 @@ static func install_prepared(scenes: Dictionary) -> void:
 				if prepared.has("raw_scene"):
 					if str(prepared.get("source_sha256", "")) == _source_sha(path, scenery) \
 							and str(prepared.get("closure_token", "")) == str(scenery.get("closure_token", "")):
-						_scenes[path] = prepared.raw_scene
+						_put(path, prepared.raw_scene, ORIGIN_WORKER)
 					else:
 						var current := _build(path, scenery)
-						if current != null: _scenes[path] = current
+						if current != null: _put(path, current, ORIGIN_MAIN)
 					continue
 				if prepared.has("geometry_record"):
 					var geometry: Dictionary = prepared.geometry_record
 					if GeometryCache.revalidate(geometry):
-						_scenes[path] = geometry.resource
+						_put(path, geometry.resource, ORIGIN_GEOMETRY)
 						_geometry_entries[path] = geometry
 					else:
 						var raw := _build(path, scenery)
-						if raw != null: _scenes[path] = raw
+						if raw != null: _put(path, raw, ORIGIN_MAIN)
 					continue
 				# Revalidate the current bytes/policy before publishing a worker record.
 				var began := Time.get_ticks_usec()
@@ -144,14 +232,14 @@ static func install_prepared(scenes: Dictionary) -> void:
 					PreparedContent.scene_texture_token(path, scenery))
 				_record_operation(&"prepared_completion_verify", began)
 				if str(verified.status) == "hit":
-					_scenes[path] = verified.resource
+					_put(path, verified.resource, ORIGIN_PREPARED)
 					_prepared_entries[path] = verified.entry
 				elif str(verified.status) == "miss":
 					var raw := _build(path, scenery)
 					if raw != null:
-						_scenes[path] = raw
+						_put(path, raw, ORIGIN_MAIN)
 			else:
-				_scenes[path] = prepared
+				_put(path, prepared, ORIGIN_WORKER)
 
 ## Prepares one actor glTF for `install_actor_prepared`, on any thread once
 ## GltfQuantization.ensure_registered() has run on the main thread. It parses
@@ -219,7 +307,7 @@ static func install_actor_prepared(record: Dictionary) -> bool:
 		and not (OS.has_feature("web") and not FileAccess.file_exists(path))
 	if record.get("packed") is PackedScene:
 		if publish:
-			_scenes[path] = record.packed
+			_put(path, record.packed, ORIGIN_IMPORTED)
 			_failed.erase(path)
 		return _scenes.has(path)
 	if root == null:
@@ -232,7 +320,7 @@ static func install_actor_prepared(record: Dictionary) -> bool:
 	_record_operation(&"actor_prepared_install", began)
 	if packed == null:
 		return false
-	_scenes[path] = packed
+	_put(path, packed, ORIGIN_WORKER)
 	_failed.erase(path)
 	return true
 
@@ -289,9 +377,9 @@ static func prepare_bound_main(paths: PackedStringArray) -> bool:
 		var verify_again := not bool(geometry.get("bound",false)) and not bool(geometry.get("prepared_on_main",false))
 		if GeometryCache.bind(geometry,verify_again): continue
 		_geometry_entries.erase(path)
-		_scenes.erase(path)
+		_erase_scene(path)
 		var raw := _build(path)
-		if raw != null: _scenes[path] = raw
+		if raw != null: _put(path, raw, ORIGIN_MAIN)
 	return true
 
 ## Returns the shared scene for `path`, or null when unavailable. Treat this
@@ -326,7 +414,7 @@ static func _packed_scene(path: String, allow_prepared: bool) -> PackedScene:
 			and PreparedContent.selected_mode() != "require-pilot" and GeometryCache.eligible("asset",path):
 		var geometry := GeometryCache.acquire("asset",path,_source_sha(path, scenery),{},MapSceneCache.is_enabled())
 		if str(geometry.status) == "hit":
-			_scenes[path] = geometry.resource
+			_put(path, geometry.resource, ORIGIN_GEOMETRY)
 			_geometry_entries[path] = geometry
 			return geometry.resource as PackedScene
 	if allow_prepared and (PreparedContent.selected_mode() != "raw" or _prepared_entries.has(path)):
@@ -335,14 +423,15 @@ static func _packed_scene(path: String, allow_prepared: bool) -> PackedScene:
 			PreparedContent.scene_texture_token(path, scenery))
 		_record_operation(&"prepared_publication_verify", verification_began)
 		if str(verified.status) == "hit":
-			_scenes[path] = verified.resource
+			_put(path, verified.resource, ORIGIN_PREPARED)
 			_prepared_entries[path] = verified.entry
 		elif str(verified.status) == "reject":
 			return null
 		elif _prepared_entries.has(path):
 			_prepared_entries.erase(path)
-			_scenes.erase(path)
+			_erase_scene(path)
 	var packed: PackedScene = _scenes.get(path) as PackedScene
+	_touch(path)
 	if not allow_prepared and _prepared_entries.has(path):
 		var raw := _direct_raw_scenes.get(path) as PackedScene
 		if raw == null:
@@ -352,13 +441,15 @@ static func _packed_scene(path: String, allow_prepared: bool) -> PackedScene:
 		return raw
 	if packed == null:
 		_lookup_misses += 1
+		if _evicted.has(path):
+			_evicted_main_rebuilds += 1
 		var miss_began := Time.get_ticks_usec()
 		packed = _build(path, scenery)
 		_record_operation(&"cache_miss_build", miss_began, false)
 		if packed == null:
 			_failed[path] = true
 			return null
-		_scenes[path] = packed
+		_put(path, packed, ORIGIN_MAIN)
 	else:
 		_lookup_hits += 1
 	return packed
@@ -371,6 +462,8 @@ static func runtime_parse(path: String) -> PackedScene:
 	if is_world_asset(path) or _prepared_entries.has(path) or _geometry_entries.has(path):
 		return null
 	var packed := _scenes.get(path) as PackedScene
+	if packed != null:
+		_touch(path)
 	return packed if packed != null and packed.resource_path.is_empty() else null
 
 ## Returns a fresh instance of `path`, or null when the file cannot be imported.
@@ -386,10 +479,10 @@ static func instantiate(path: String) -> Node3D:
 		instance = GeometryCache.instantiate(geometry,not bool(geometry.get("bound",false)) and not bool(geometry.get("prepared_on_main",false)))
 		if instance == null:
 			_geometry_entries.erase(_canonical_path(path))
-			_scenes.erase(_canonical_path(path))
+			_erase_scene(_canonical_path(path))
 			packed = _build(_canonical_path(path))
 			if packed != null:
-				_scenes[_canonical_path(path)] = packed
+				_put(_canonical_path(path), packed, ORIGIN_MAIN)
 				instance = packed.instantiate() as Node3D
 	elif entry.is_empty():
 		instance = packed.instantiate() as Node3D
@@ -399,7 +492,7 @@ static func instantiate(path: String) -> Node3D:
 			_prepared_entries.erase(_canonical_path(path))
 			packed = _build(_canonical_path(path))
 			if packed != null:
-				_scenes[_canonical_path(path)] = packed
+				_put(_canonical_path(path), packed, ORIGIN_MAIN)
 				instance = packed.instantiate() as Node3D
 	_record_operation(&"scene_instantiate", instantiate_began)
 	return instance
@@ -412,6 +505,326 @@ static func clear() -> void:
 	_prepared_entries.clear()
 	_geometry_entries.clear()
 	_direct_raw_scenes.clear()
+	_ledger.clear()
+	_domain_bytes.clear()
+	_pending_rows = 0
+	_evictable_rows = 0
+	_evicted.clear()
+
+## Drops `path` (exactly this key, in any spelling the cache accepts) from
+## every table, as the RL head library does by erasing the dictionaries itself
+## (rl_head_library.gd _forget_scene). Live instances keep their resources.
+## Main thread. Not an eviction: `evicted(path)` stays false.
+static func forget(path: String) -> void:
+	var key := _canonical_path(path)
+	_forget_key(key)
+	_evicted.erase(key)
+
+## Erases the cache key `key` (already canonical) from every table and the
+## ledger: one lookup each, never a walk over the other entries.
+static func _forget_key(key: String) -> void:
+	for cache: Dictionary in [_scenes, _direct_raw_scenes, _failed, _prepared_entries, _geometry_entries]:
+		cache.erase(key)
+	_drop_row(key)
+
+## Whether the budget evicted `path`'s scene (enforce_budget) and nothing has
+## published it since. The creature warm-up asks this of a creature it once
+## prepared, to prepare it again on its worker. Main thread.
+static func evicted(path: String) -> bool:
+	if _evicted.is_empty():
+		return false
+	var key := _canonical_path(path)
+	return _evicted.has(key) and not _scenes.has(key)
+
+## Forgets that `path` was evicted (a preparation that failed after one, so it
+## is not asked for again on every request). Main thread.
+static func clear_eviction(path: String) -> void:
+	if not _evicted.is_empty():
+		_evicted.erase(_canonical_path(path))
+
+## The ledger domain of `path` (DOMAIN_*), from where it lives.
+static func domain_of(path: String) -> String:
+	var canonical := _canonical_path(path)
+	if is_world_asset(canonical):
+		return DOMAIN_WORLD
+	if _domain_prefixes.is_empty():
+		var built: Array = []
+		for root: String in DOMAIN_ROOTS:
+			built.append([_canonical_path(root), DOMAIN_ROOTS[root]])
+		_domain_prefixes = built
+	for prefix: Array in _domain_prefixes:
+		if canonical.begins_with(str(prefix[0])):
+			return str(prefix[1])
+	return DOMAIN_OTHER
+
+## This session's creature budget: MemoryBudgets' `creature_scene_bytes` for
+## the machine's memory class.
+static func creature_budget_bytes() -> int:
+	return _test_budget_bytes if _test_budget_bytes >= 0 \
+		else int(MemoryBudgets.value(MemoryBudgets.CREATURE_SCENE_BYTES))
+
+## How long a creature entry must be idle before it may be evicted.
+static func creature_idle_msec() -> int:
+	return _test_idle_msec if _test_idle_msec >= 0 \
+		else int(MemoryBudgets.value(MemoryBudgets.CREATURE_SCENE_IDLE_MSEC))
+
+## Tests: replaces the creature budget and idle age (-1 restores the class's).
+static func set_budget_for_tests(budget_bytes := -1, idle_msec := -1) -> void:
+	_test_budget_bytes = budget_bytes
+	_test_idle_msec = idle_msec
+
+## Measured bytes of the ledger's `domain` rows (pending rows not included).
+static func domain_bytes(domain: String) -> int:
+	return int(_domain_bytes.get(domain, 0))
+
+## One budget pass, on the main thread (anywhere else it does nothing): prunes
+## ledger rows whose scene left the cache, measures pending rows for at most
+## `fill_slice_usec`, notes which creature entries are idle, and when the
+## creature domain is over its budget evicts idle entries unused for the idle
+## age, least recently used first, down to EVICT_TO_FRACTION of the budget.
+## `now_msec` (ticks; < 0: now) is for tests. Returns {"evicted",
+## "evicted_bytes", "skipped", "creature_bytes" (after), "budget",
+## "idle_candidates"}.
+static func enforce_budget(now_msec := -1, fill_slice_usec := LEDGER_FILL_SLICE_USEC) -> Dictionary:
+	var report := {"evicted": 0, "evicted_bytes": 0, "skipped": 0,
+		"creature_bytes": domain_bytes(DOMAIN_CREATURE), "budget": -1, "idle_candidates": 0}
+	if OS.get_thread_caller_id() != OS.get_main_thread_id():
+		return report
+	var began := Time.get_ticks_usec()
+	_budget_passes += 1
+	var now := Time.get_ticks_msec() if now_msec < 0 else now_msec
+	_prune_ledger()
+	if fill_slice_usec > 0 and _pending_rows > 0:
+		_fill_pending(fill_slice_usec)
+	var budget := creature_budget_bytes()
+	var idle_age := creature_idle_msec()
+	report.budget = budget
+	var candidates: Array = []
+	if _evictable_rows > 0:
+		for path: String in _ledger:
+			var row: Dictionary = _ledger[path]
+			if not bool(row.evictable):
+				continue
+			if _is_busy(row):
+				# Held by a live instance is a use: least recently used means
+				# the entry whose last holder went first, not the one first
+				# instantiated longest ago.
+				row.last_used_msec = maxi(int(row.last_used_msec), now)
+				row.idle_since_msec = 0
+				continue
+			# Seen idle for the first time: it counts from now (a conservative
+			# start, at most one pass late), never from its last use.
+			if int(row.idle_since_msec) <= 0:
+				row.idle_since_msec = now
+			if now - int(row.idle_since_msec) >= idle_age:
+				candidates.append([int(row.last_used_msec), path])
+	report.idle_candidates = candidates.size()
+	var total := domain_bytes(DOMAIN_CREATURE)
+	if total > budget and not candidates.is_empty():
+		candidates.sort_custom(func(a: Array, b: Array) -> bool:
+			return int(a[0]) < int(b[0]) if int(a[0]) != int(b[0]) else str(a[1]) < str(b[1]))
+		var target := int(budget * EVICT_TO_FRACTION)
+		for candidate: Array in candidates:
+			if total <= target:
+				break
+			var path: String = candidate[1]
+			# Its library goes with it; an importer still prewarming the file
+			# is never joined: the entry waits for a later pass. Asked first,
+			# because release_sources() drops the file's libraries even when
+			# it then reports the live prewarm, and a skipped entry must keep
+			# its libraries with its scene.
+			if _library_prewarm_alive(path) \
+					or not NativeAnimationImporter.release_sources(PackedStringArray([path])):
+				report.skipped += 1
+				_eviction_skips += 1
+				continue
+			var row_bytes := maxi(0, int((_ledger.get(path, {}) as Dictionary).get("bytes", 0)))
+			# The row's key is the entry's own key (a worker publication).
+			_forget_key(path)
+			_evicted[path] = true
+			_evictions += 1
+			_evicted_bytes += row_bytes
+			total -= row_bytes
+			report.evicted += 1
+			report.evicted_bytes += row_bytes
+	report.creature_bytes = domain_bytes(DOMAIN_CREATURE)
+	_record_operation(&"budget_pass", began)
+	return report
+
+## Whether NativeAnimationImporter is still parsing `path` as an animation
+## library on a prewarm thread (any spelling of the file). Read only, main
+## thread, where the importer keeps its prewarm threads.
+static func _library_prewarm_alive(path: String) -> bool:
+	var prewarming: Dictionary = NativeAnimationImporter._prewarming
+	if prewarming.is_empty():
+		return false
+	var key := _file_key(path)
+	for source: String in prewarming:
+		if _file_key(source) == key and (prewarming[source] as Thread).is_alive():
+			return true
+	return false
+
+## Publishes `scene` for `path` (canonical) with its ledger row.
+static func _put(path: String, scene: Variant, origin: String) -> void:
+	_scenes[path] = scene
+	_note_published(path, scene, origin)
+
+## Removes `path` (canonical) from the scenes and the ledger.
+static func _erase_scene(path: String) -> void:
+	_scenes.erase(path)
+	_drop_row(path)
+
+## A publication's ledger row. Off the main thread (no caller today) the row
+## is left to the next pass's pruning, as ORIGIN_UNKNOWN.
+static func _note_published(path: String, scene: Variant, origin: String) -> void:
+	if OS.get_thread_caller_id() != OS.get_main_thread_id():
+		return
+	_evicted.erase(path)
+	var row := _add_row(path, scene, origin)
+	if row.is_empty():
+		return
+	if str(row.domain) == DOMAIN_CREATURE:
+		# Measured now: the budget reads it. Probes and their baseline are
+		# taken with no instance alive (callers publish before instantiating).
+		_fill_row(path, row)
+		if bool(row.evictable):
+			row.baseline = _probe_counts(row.probes)
+			if domain_bytes(DOMAIN_CREATURE) > creature_budget_bytes():
+				enforce_budget(-1, 0)
+	_arm_budget_timer()
+
+static func _add_row(path: String, scene: Variant, origin: String) -> Dictionary:
+	_drop_row(path)
+	var packed := scene as PackedScene
+	if packed == null:
+		return {}
+	var now := Time.get_ticks_msec()
+	var domain := domain_of(path)
+	var row := {"bytes": -1, "mesh_bytes": 0, "texture_bytes": 0, "domain": domain, "origin": origin,
+		"evictable": domain == DOMAIN_CREATURE and origin == ORIGIN_WORKER and packed.resource_path.is_empty(),
+		"scene_id": packed.get_instance_id(), "probes": [], "baseline": PackedInt32Array(),
+		"published_msec": now, "last_used_msec": now, "idle_since_msec": 0}
+	_ledger[path] = row
+	_pending_rows += 1
+	if bool(row.evictable):
+		_evictable_rows += 1
+	return row
+
+static func _drop_row(path: String) -> void:
+	var row: Dictionary = _ledger.get(path, {})
+	if row.is_empty():
+		return
+	if int(row.bytes) < 0:
+		_pending_rows -= 1
+	else:
+		var domain := str(row.domain)
+		_domain_bytes[domain] = int(_domain_bytes.get(domain, 0)) - int(row.bytes)
+		if int(_domain_bytes[domain]) <= 0:
+			_domain_bytes.erase(domain)
+	if bool(row.evictable):
+		_evictable_rows -= 1
+	_ledger.erase(path)
+
+## Measures `row` (ResourceBytes, no read-back) and, for an evictable row,
+## keeps WeakRefs to the scene's meshes as its probes.
+static func _fill_row(path: String, row: Dictionary) -> void:
+	var scene := _scenes.get(path) as PackedScene
+	if scene == null or scene.get_instance_id() != int(row.scene_id) or int(row.bytes) >= 0:
+		return
+	var walked := ResourceBytes.scene_resources(scene, _texture_mipmaps(path, scene))
+	row.mesh_bytes = int(walked.mesh_bytes)
+	row.texture_bytes = int(walked.texture_bytes)
+	row.bytes = int(walked.bytes)
+	_pending_rows -= 1
+	var domain := str(row.domain)
+	_domain_bytes[domain] = int(_domain_bytes.get(domain, 0)) + int(row.bytes)
+	if bool(row.evictable):
+		var probes: Array[WeakRef] = []
+		for mesh: Mesh in walked.meshes:
+			probes.append(weakref(mesh))
+		row.probes = probes
+
+## Mip chains the ledger counts for a scene's ImageTextures: none for an actor
+## document's runtime parse (actor_images.gd, like GLTFDocument, decodes
+## embedded images without mips; imported URI textures read their own
+## header), the full chain otherwise (erring high). AT-C2's sidecars bring
+## mipmapped actor images: change this with them.
+static func _texture_mipmaps(path: String, scene: PackedScene) -> int:
+	return ResourceBytes.MIPMAPS_NONE if scene.resource_path.is_empty() and is_actor_document(path) \
+		else ResourceBytes.MIPMAPS_UNKNOWN
+
+## Measures pending rows for about `slice_usec` (a row is never split).
+static func _fill_pending(slice_usec: int) -> void:
+	var began := Time.get_ticks_usec()
+	for path: String in _ledger.keys():
+		if Time.get_ticks_usec() - began >= slice_usec:
+			return
+		var row: Dictionary = _ledger[path]
+		if int(row.bytes) < 0:
+			_fill_row(path, row)
+
+## Drops rows whose scene left the cache or was replaced without a
+## publication, and adds rows (ORIGIN_UNKNOWN, never evictable) for scenes the
+## cache holds without one.
+static func _prune_ledger() -> void:
+	for path: String in _ledger.keys():
+		var scene: Variant = _scenes.get(path)
+		if typeof(scene) != TYPE_OBJECT or not is_instance_valid(scene) \
+				or (scene as Object).get_instance_id() != int(_ledger[path].scene_id):
+			_drop_row(path)
+	if _ledger.size() < _scenes.size():
+		for path: String in _scenes:
+			if not _ledger.has(path):
+				_add_row(path, _scenes[path], ORIGIN_UNKNOWN)
+
+## Whether anything beyond the cache holds `row`'s scene: a probe mesh whose
+## reference count is above its count at publication. A row without probes
+## is never idle.
+static func _is_busy(row: Dictionary) -> bool:
+	var probes: Array = row.probes
+	var baseline: PackedInt32Array = row.baseline
+	if probes.is_empty() or baseline.size() != probes.size():
+		return true
+	var counts := _probe_counts(probes)
+	for index: int in counts.size():
+		if counts[index] > baseline[index]:
+			return true
+	return false
+
+## Reference counts of `probes`' meshes (-1 for one already freed), each read
+## the same way at publication and at every pass, so the reader's own
+## reference cancels out.
+static func _probe_counts(probes: Array) -> PackedInt32Array:
+	var counts := PackedInt32Array()
+	counts.resize(probes.size())
+	for index: int in probes.size():
+		counts[index] = _probe_count(probes[index] as WeakRef)
+	return counts
+
+static func _probe_count(probe: WeakRef) -> int:
+	var held: Variant = probe.get_ref() if probe != null else null
+	return (held as RefCounted).get_reference_count() if held is RefCounted else -1
+
+## An instance or a direct use of `path`'s entry: it is in use now.
+static func _touch(path: String) -> void:
+	var row: Variant = _ledger.get(path)
+	if row != null and bool(row.evictable):
+		row.last_used_msec = Time.get_ticks_msec()
+		row.idle_since_msec = 0
+
+static func _arm_budget_timer() -> void:
+	if _budget_timer_armed or _ledger.is_empty() or OS.get_thread_caller_id() != OS.get_main_thread_id():
+		return
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree == null:
+		return
+	_budget_timer_armed = true
+	tree.create_timer(BUDGET_PASS_SECONDS, true, false, true).timeout.connect(_budget_tick)
+
+static func _budget_tick() -> void:
+	_budget_timer_armed = false
+	enforce_budget()
+	_arm_budget_timer()
 
 static func cached_scene_count() -> int:
 	return _scenes.size() + _direct_raw_scenes.size()
@@ -429,19 +842,34 @@ static func release_sources(paths: PackedStringArray) -> void:
 	for cache: Dictionary in [_scenes, _direct_raw_scenes, _failed, _prepared_entries, _geometry_entries]:
 		for source: String in cache.keys():
 			if wanted.has(_file_key(source)): cache.erase(source)
+	for source: String in _ledger.keys():
+		if not _scenes.has(source): _drop_row(source)
 
 ## Read on the main thread, where cache publication/clearing already lives.
 ## Worker builds only update timing data behind the separate mutex. Counts do
-## not attempt expensive resource walks or imply measured CPU/GPU allocation.
+## not attempt expensive resource walks: the byte figures are the ledger's
+## running totals (ResourceBytes estimates, not measured allocations; rows
+## still waiting to be measured are counted in "pending_rows", not in bytes).
+## "budget", "idle_msec" and "evictions" concern the creature domain, the one
+## that is evicted.
 static func retention_snapshot() -> Dictionary:
 	_diagnostics_mutex.lock()
 	var timings := ResourceDiagnostics.snapshot(_resource_timings)
 	_diagnostics_mutex.unlock()
+	var total := 0
+	for domain: String in _domain_bytes:
+		total += int(_domain_bytes[domain])
 	return {"strong_scene_entries": _scenes.size() + _direct_raw_scenes.size(),
 		"direct_raw_scene_entries": _direct_raw_scenes.size(), "failed_paths": _failed.size(),
 		"lookup_hits": _lookup_hits, "lookup_misses": _lookup_misses,
-		"bytes_estimate_available": false, "timings": timings,
-		"actor_images": ActorImages.totals()}
+		"bytes_estimate_available": true, "timings": timings,
+		"actor_images": ActorImages.totals(),
+		"entries": _scenes.size(), "bytes": total, "bytes_by_domain": _domain_bytes.duplicate(),
+		"pending_rows": _pending_rows, "budget_domain": DOMAIN_CREATURE,
+		"budget": creature_budget_bytes(), "idle_msec": creature_idle_msec(),
+		"evictable_entries": _evictable_rows, "evictions": _evictions, "evicted_bytes": _evicted_bytes,
+		"eviction_skips": _eviction_skips, "evicted_awaiting": _evicted.size(),
+		"evicted_main_rebuilds": _evicted_main_rebuilds, "budget_passes": _budget_passes}
 
 static func _record_operation(operation: StringName, started: int, atomic := true) -> void:
 	var elapsed := Time.get_ticks_usec() - started

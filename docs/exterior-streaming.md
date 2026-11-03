@@ -64,7 +64,11 @@ the current live proof uses one QA traveller, not a multiplayer border crowd.
   are not yet part of the proximity manifest.
 - Generation tokens discard work superseded by disconnect, teleport or another
   transition. Closing the client lets its worker finish before renderer teardown.
-  Distant resident roots are freed. Shared actor model caches last until logout.
+  Distant resident roots are freed. Shared actor model caches last until logout,
+  except creatures: `GlbSceneCache` keeps them within the memory class's creature
+  budget (256 MiB on small machines, 512 MiB medium, 1 GiB large) by evicting
+  idle species, least recently used first, and the creature warm-up prepares an
+  evicted species again on its worker the next time one is in range.
 - Active ground keeps navigation layer 8. A visible neighbor exposes its actual
   ground only on picking layer 16, with no active structural collision. Clicking into
   it routes through the existing road graph, then continues to the clicked tile

@@ -2,18 +2,32 @@ extends RefCounted
 ## One worker prepares cold creature geometry and immutable retargeted clips.
 ## Actors remain ordinary deferred nodes until publication on main. Workers
 ## never inspect live nodes, mutate session caches, or attach anything to a tree.
+##
+## GlbSceneCache may evict an idle creature to stay inside the memory class's
+## creature budget (memory classes M5). A creature prepared before and evicted
+## since is cold again: `request` queues it on the worker as at first sight,
+## so the actor stays deferred until the scene is back and is never parsed on
+## the main thread because of the eviction.
 var _queue: Array[Dictionary] = []
 var _known: Dictionary = {}
 var _known_sources: Dictionary = {}
 var _thread: Thread
 var _active := ""
+var _active_scene := ""
 var _discard_active := false
+## Ready creatures queued again because GlbSceneCache evicted their scene.
+var requeued_after_eviction := 0
 
 func request(config: Dictionary, animation: Dictionary) -> bool:
 	poll()
 	var key := JSON.stringify([config, animation])
 	if _known.has(key):
-		return bool(_known[key])
+		if not bool(_known[key]) or not GlbSceneCache.evicted(str(config.get("scene", ""))):
+			return bool(_known[key])
+		# Evicted since it was prepared: cold again (see the header).
+		_known.erase(key)
+		_known_sources.erase(key)
+		requeued_after_eviction += 1
 	# Equipment libraries have external textures with main-thread readback
 	# semantics. Their existing path is deliberately outside this creature job.
 	var path := str(config.get("scene", ""))
@@ -41,16 +55,23 @@ func poll() -> void:
 			GlbSceneCache.install_prepared(result.get("scenes", {}))
 			NativeAnimationImporter.install_prepared(result.get("library", {}))
 			_known[_active] = true # Failed preparation uses the normal fallback.
+			# A preparation after an eviction that failed is not asked for
+			# again on every request (a published scene cleared the mark).
+			GlbSceneCache.clear_eviction(_active_scene)
 		_discard_active = false
 		_active = ""
+		_active_scene = ""
 	if _thread == null and not _queue.is_empty():
 		var job: Dictionary = _queue.pop_front()
 		_active = str(job.key)
+		_active_scene = str((job.config as Dictionary).get("scene", ""))
 		_thread = Thread.new()
 		if _thread.start(_prepare.bind(job.config, job.animation)) != OK:
 			_thread = null
 			_known[_active] = true
+			GlbSceneCache.clear_eviction(_active_scene)
 			_active = ""
+			_active_scene = ""
 
 func clear() -> void:
 	_queue.clear()
