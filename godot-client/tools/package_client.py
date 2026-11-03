@@ -4573,6 +4573,27 @@ Filename: "{{app}}\\{launch_binary}"; Parameters: "{launch_parameters}"; Working
     return stage.parent / f"{stage.name}-setup.exe"
 
 
+def online_installer_space(payload: dict) -> int:
+    """Extra free space (bytes) the online setup asks for: its peak disk use plus 512 MiB.
+
+    Setup keeps its verified downloads in {tmp} until it exits, and its helper
+    copies each part into the update cache, so the download is on disk twice.
+    A schema-2 release then joins each multi-part package beside its parts (one
+    package at a time, parts deleted afterwards) and only then unpacks into
+    `.eloria-update-stage/`, which is renamed into place. The join and the
+    unpacked files never coexist, so the peak adds the larger of the unpacked
+    files and the largest joined package, not both (measured for UD-04i).
+    Over an existing installation the per-file update (W2-UD-04) stages only
+    changed members and moves the originals, so a fresh install is the worst
+    case. Schema 1 keeps its original formula.
+    """
+    size, unpacked = int(payload["size"]), int(payload["unpacked_size"])
+    if payload.get("schema") != 2:
+        return unpacked + 2 * size + 512 * 1024**2
+    joined = max((int(p["size"]) for p in payload["packages"] if len(p["parts"]) > 1), default=0)
+    return 2 * size + max(unpacked, joined) + 512 * 1024**2
+
+
 def online_installer_script(stage: Path, helper: Path, version: str,
                             launch_args: list[str], payload: dict) -> str:
     root_files = "\n".join(
@@ -4609,7 +4630,7 @@ end;
             f"  DownloadPage.Add('{part['url']}', '{part['url'].rsplit('/', 1)[1]}', '{part['sha256']}');"
             for part in payload["parts"])
     parameters = ("-- --launch-only " + " ".join(launch_args)).strip().replace('"', '""')
-    space = int(payload["unpacked_size"]) + 2 * int(payload["size"]) + 512 * 1024**2
+    space = online_installer_space(payload)
     return f'''[Setup]
 AppId={INSTALLER_APP_ID.replace('{', '{{')}
 AppName=Rabbit Lands
@@ -4647,9 +4668,12 @@ Type: filesandordirs; Name: "{{app}}\\app"
 Type: filesandordirs; Name: "{{app}}\\eloria-assets"
 Type: filesandordirs; Name: "{{app}}\\.eloria-previous"
 Type: filesandordirs; Name: "{{app}}\\.eloria-update-stage"
+Type: filesandordirs; Name: "{{app}}\\.eloria-update-backup"
 Type: filesandordirs; Name: "{{app}}\\.rabbitlands-bootstrap-previous"
 Type: files; Name: "{{app}}\\.rabbitlands-install.json"
 Type: files; Name: "{{app}}\\.eloria-update-journal.json"
+Type: files; Name: "{{app}}\\.eloria-update-journal-v2.json"
+Type: files; Name: "{{app}}\\.eloria-update-journal*.tmp"
 
 [Run]
 Filename: "{{app}}\\RabbitLands-updater.exe"; Parameters: "{parameters}"; WorkingDir: "{{app}}\\app"; Description: "Start Rabbit Lands"; Flags: nowait postinstall skipifsilent
