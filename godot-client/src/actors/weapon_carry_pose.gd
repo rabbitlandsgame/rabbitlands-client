@@ -162,7 +162,7 @@ func _fist(skeleton: Skeleton3D, side: String) -> Array:
 	var clip := actor.resolver.clip_for_action(FIST_ACTION)
 	if clip == &"" or not actor.animation_player.has_animation(clip):
 		return fist
-	var animation := actor.animation_player.get_animation(clip)
+	var animation := preload("res://src/actors/crowd_animation_library.gd").full_animation(actor.animation_player, clip)
 	var tracks := {}
 	for track: int in animation.get_track_count():
 		if animation.track_get_type(track) == Animation.TYPE_ROTATION_3D:

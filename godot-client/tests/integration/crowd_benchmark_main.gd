@@ -690,6 +690,15 @@ func _update_animation_gate(delta: float) -> void:
 	_benchmark_add(&"animation_gate", started)
 
 
+## LAT-L7: the frame-clock presentation step Main takes first in `_process` at
+## Low (`frameMotionMilliseconds`); with it the physics-phase saving can be
+## followed into the process phase.
+func _advance_remote_motion(delta: float) -> void:
+	var started := Time.get_ticks_usec()
+	super._advance_remote_motion(delta)
+	_benchmark_add(&"frame_motion", started)
+
+
 ## The crowd-wide work at the end of a gate sweep, and the overhead declutter
 ## inside it, timed apart from the sweep's per-actor slices.
 func _finish_gate_sweep() -> void:

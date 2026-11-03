@@ -190,6 +190,22 @@ func _check_switches() -> void:
 				"engine_args": PackedStringArray()}, true)) == "environment_override",
 			"%s keeps a first run from being seeded" % variable)
 		OS.unset_environment(variable)
+	# ALOD-C1: the cooked catalogue folder picks which actor geometry draws, so
+	# it blocks seeding too; it is a path, not a mode, and adds no switch entry.
+	var root_variable := HardwareTier.ACTOR_GEOMETRY_ROOT_VARIABLE
+	var root_before := OS.get_environment(root_variable)
+	OS.set_environment(root_variable, "C:/cook/actor-geometry")
+	expect(root_variable == "RABBITLANDS_ACTOR_GEOMETRY_ROOT"
+		and root_variable == preload("res://src/actors/actor_geometry.gd").ROOT_ENVIRONMENT
+		and root_variable in HardwareTier.launch_context().overrides
+		and HardwareTier.blocker(HardwareTier.launch_context().merged({"headless": false,
+			"engine_args": PackedStringArray()}, true)) == "environment_override"
+		and HardwareTier.switches().is_empty(),
+		"RABBITLANDS_ACTOR_GEOMETRY_ROOT (the applier's own variable) keeps a first run from being seeded")
+	if root_before.is_empty():
+		OS.unset_environment(root_variable)
+	else:
+		OS.set_environment(root_variable, root_before)
 	expect(HardwareTier.blocker(_launch({"user_args": PackedStringArray(["--memory-class=small"])}))
 		== "argument_override", "--memory-class= keeps a first run from being seeded")
 	expect(HardwareTier.blocker(_launch({"user_args": PackedStringArray(["--memory-classes"])})) == "",

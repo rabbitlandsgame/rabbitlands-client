@@ -255,8 +255,8 @@ func _check_renderer() -> void:
 func _check_budget() -> void:
 	var budget := Budget.new()
 	budget.quality = 0
-	expect(budget.limit(&"spell") == 24 and budget.limit(&"number") == 12,
-		"low quality halves other fights' visual limits")
+	expect(budget.limit(&"spell") == 12 and budget.limit(&"number") == 6,
+		"low quality draws a quarter of other fights' visual limits")
 	for index: int in 24:
 		budget._live[&"spell"] = index + 1
 	expect(not budget.admit(&"spell", false) and budget.admit(&"spell", true),

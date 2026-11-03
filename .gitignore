@@ -72,6 +72,10 @@ eloria-assets/maps/**/shared-assets/vram/
 # the embedded images of scenery GLBs (--scenery-config; world_object_images.gd).
 eloria-assets/maps/_shared/images/vram/
 godot-client/assets/world/**/vram/
+# Actor-image sidecars (build_vram_textures.py --actor-dir): local trials beside the actor GLBs, and the offline
+# encode kept in .local/texture-preparation/.
+godot-client/assets/actors/native/**/vram/
+/.local/texture-preparation/
 /.vram-encode-cache/
 # The tool's per-image quality numbers (also beside the committed test sidecars).
 **/shared-assets/vram/report.json

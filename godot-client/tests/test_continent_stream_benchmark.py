@@ -33,6 +33,10 @@ class ContinentStreamEvidenceTests(unittest.TestCase):
         errors = bench.qualification_errors(self.report(), {"run_id": "new"}, "digest", {"class.ctex": "old"}, {"class.ctex": "new"})
         self.assertIn("runtime_or_import_inputs_changed", errors)
 
+    def test_input_identity_covers_the_package_digest_facade(self):
+        # Every chunk and map load digests its packages through ContentDigest (NH-A0).
+        self.assertIn("godot-client/src/runtime/content_digest.gd", bench.input_identity())
+
     def test_arrival_only_is_not_moving_route_evidence(self):
         report = self.report()
         report["frames"][0]["phase"] = "arrival"

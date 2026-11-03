@@ -179,6 +179,29 @@ class BenchmarkPackageTests(unittest.TestCase):
             self.assertTrue((project / helper).is_file())
             self.assertFalse((project / fixture).exists())
 
+    def test_census_contributors_survive_export(self):
+        # The crowd harness loads every script in tests/integration/census/
+        # (AW-00); a contributor (ALOD-C8's triangle census) must be exported
+        # whole, while a look-alike outside that directory is still pruned.
+        census = benchmark_package.WORKLOAD_DIRECTORIES[0]
+        self.assertEqual(census, "tests/integration/census/")
+        kept = [census + "triangle_census.gd", census + "triangle_census.gd.uid", census + "nested/helper.gd"]
+        pruned = ["tests/integration/census_extra.gd", "tests/integration/census.gd",
+                  "tests/test_triangle_census.gd"]
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory)
+            (project / "data").mkdir()
+            for name in benchmark_package.WORKLOAD_FILES | set(kept) | set(pruned):
+                path = project / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("fixture", encoding="utf-8")
+            (project / "export_presets.cfg").write_text(package_client.EXPORT_PRESETS, encoding="utf-8")
+            (project / "project.godot").write_text('[application]\nrun/main_scene="res://src/app/main.tscn"\n', encoding="utf-8")
+            benchmark_package.prepare_export(project)
+            self.assertTrue(all((project / name).is_file() for name in kept))
+            self.assertFalse(any((project / name).exists() for name in pruned))
+            self.assertTrue(all((project / name).is_file() for name in benchmark_package.WORKLOAD_FILES))
+
     def test_loop_settings_preserve_unrelated_sections_and_are_idempotent(self):
         original = ('[application]\nconfig/name="Fixture"\n'
                     'run/main_scene="res://src/app/main.tscn"\n\n'

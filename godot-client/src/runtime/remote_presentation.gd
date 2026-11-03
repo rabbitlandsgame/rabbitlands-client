@@ -534,7 +534,7 @@ static func snapshot_actor(n) -> PackedFloat64Array:
 	var remote := current()
 	if remote != null and remote.owns(n):
 		flags |= int(remote._rows[int(n.actor_id)].state[29]) & 512
-	elif n.current_action == &"death" and not n.is_physics_processing():
+	elif n.current_action == &"death" and not n.is_presenting():
 		flags |= 512
 	var walk := 0.0
 	var run := 0.0

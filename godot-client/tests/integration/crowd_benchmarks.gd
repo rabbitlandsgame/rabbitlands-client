@@ -1957,6 +1957,9 @@ func _census(nodes: Dictionary) -> Dictionary:
 
 func _activity_census(nodes: Dictionary) -> Dictionary:
 	var physics := 0
+	# LAT-L7: at Low a presenting remote body steps on the frame clock, so it
+	# is counted here instead of in physicsProcessing.
+	var frame_clock := 0
 	var active_animation_players := 0
 	var actions: Dictionary = {}
 	for value: Variant in nodes.values():
@@ -1964,10 +1967,11 @@ func _activity_census(nodes: Dictionary) -> Dictionary:
 			continue
 		var actor := value as ReplicatedActor3D
 		physics += int(actor.is_physics_processing())
+		frame_clock += int(actor.presents_on_frame_clock())
 		active_animation_players += int(actor.animation_player != null
 			and actor.animation_player.active)
 		actions[str(actor.current_action)] = int(actions.get(str(actor.current_action), 0)) + 1
-	return {"physicsProcessing": physics,
+	return {"physicsProcessing": physics, "framePresenting": frame_clock,
 		"activeAnimationPlayers": active_animation_players, "actions": actions}
 
 

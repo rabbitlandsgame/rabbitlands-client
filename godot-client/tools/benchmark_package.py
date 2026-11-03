@@ -30,6 +30,10 @@ WORKLOAD_FILES = frozenset({
     "tests/test_native_streaming_lifetime.gd",
     "tests/test_prepared_content_pilot.gd",
 })
+# Workload directories exported whole: the crowd harness's per-actor census
+# contributors (crowd_presentation_benchmark.gd reads every script there when
+# the directory exists; AW-00, ALOD-C8).
+WORKLOAD_DIRECTORIES = ("tests/integration/census/",)
 
 
 def _benchmark_loop_settings(settings: str) -> str:
@@ -79,7 +83,8 @@ def prepare_export(project: Path) -> None:
     settings = re.sub(r'(\[editor_plugins\]\s*)enabled\s*=\s*[^\n]*',
                       r'\1enabled=PackedStringArray()', settings)
     for path in files:
-        if path.relative_to(root).as_posix() not in WORKLOAD_FILES:
+        relative = path.relative_to(root).as_posix()
+        if relative not in WORKLOAD_FILES and not relative.startswith(WORKLOAD_DIRECTORIES):
             path.unlink()
     presets.write_text(text.replace("tests/*,", ""), encoding="utf-8", newline="\n")
     # Editor authoring tools do not run in a standalone client. Avoid importing

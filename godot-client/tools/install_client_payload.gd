@@ -106,6 +106,10 @@ func _install_packages(release: Dictionary, identity: Dictionary) -> String:
 		for name: String in existing.get_files():
 			if name.begins_with("running-") and name.ends_with(".json") and Release.lease_process_running(int(Release.read_json(cache.path_join(name)).get("pid", 0))):
 				return "Close Rabbit Lands before installing."
+	# Undo an interrupted update before planning against the installed files.
+	error = Release.recover(root)
+	if error != "":
+		return error
 	var transport := Transport.new()
 	add_child(transport)
 	var parts := args[3].simplify_path()

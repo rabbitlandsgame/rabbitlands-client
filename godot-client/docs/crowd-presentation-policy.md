@@ -205,10 +205,26 @@ frame time instead of 16.7 ms quanta, so walking reads smoother below the cap.
 Medium and High are unchanged. The crowd benchmark's per-actor census counts
 `framePresenting` and `physicsPresenting` bodies (`presentation_census`).
 
+**Local cape at Low.** At Low the player's own cape solver runs at 30 Hz
+instead of 60 Hz (`ActorRenderQuality.local_cape_step_hz`, set in
+`ReplicatedActor3D._refresh_cape_cloth_activity` through
+`CapeCloth.set_step_rate`), so under the 30 FPS cap it steps once per drawn
+frame instead of twice. A 30 Hz step damps by `d^2` and scales gravity by
+`(1 + d) / 2`, which keeps the 60 Hz terminal velocity: the cape hangs where
+the 60 Hz cape hangs and settles as fast, and swings and trails somewhat less
+in a walk or run (`tests/test_cape_step_rate.gd`). It applies only in clips
+without approved cape motion; the approved motion is unchanged. Without the
+cap, the solver updates the cape every other frame at Low. Mounted cloth keeps
+its own clock, and Medium and High are unchanged (60 Hz, bit-identical).
+Remote capes do not simulate at Low.
+
 **Live effects.** `live_effect_budget.gd` bounds the short-lived combat visuals
 alive at once: spells, impacts, bursts and portal flashes (`spell`, 48), arrows
 and bolts (`missile`, 48), melee technique visuals (`technique`, 32) and floating
-health numbers (`number`, 24). A visual that involves the player, their target
+health numbers (`number`, 24). Those are the High limits. Medium draws three
+quarters of each (36/36/24/18) and Low a quarter (12/12/8/6, 38 ordinary
+visuals; a half before the Low actor tier), from `ActorRenderQuality.effect_scale`.
+A visual that involves the player, their target
 or their selection is always drawn, over the limit if need be; the rest are
 drawn while there is room and skipped while there is not. Nothing already drawn
 is cut short, and the fight itself is unchanged: every packet is still applied.
@@ -388,3 +404,9 @@ charge leap, cinematic, parking, deletion and reparenting, the switch both
 ways and the delta cap; `tests/test_low_end_graphics.gd` checks that Main's
 quality switch turns it on at Low and off at High, that `_process` steps a
 frame-clock actor once, and that Main leaving the tree turns it off.
+`tests/test_stage_a_actor_hooks.gd` covers the actor's Low-tier entry points
+that Main's gate will drive: crowd hands through the actor, given back on a
+switch to Medium, High or local, on a cinematic and on mounting; spell
+variants and the weapon fist read from the full clips; the session cache
+clear; the combat hand-cue switch; and the remote snapshot's paused flag on
+the frame clock. `tests/test_cape_step_rate.gd` covers the Low cape rate.

@@ -65,7 +65,10 @@ def test_code_only_release_reuses_identical_world_package_records(tmp_path):
             assert row is previous[row["id"]]
             assert row["sha256"] == previous[row["id"]]["sha256"]
         else:
-            assert row["id"] == "client" and row["sha256"] != previous["client"]["sha256"]
+            # W2-UD-01: the pack and the release descriptor change, each in its own package.
+            assert row["id"] in ("client", "release-descriptor")
+            assert row["sha256"] != previous[row["id"]]["sha256"]
+    assert {row["id"] for row in second} - world_ids == {"client", "release-descriptor"}
 
 
 def test_changed_blob_updates_only_its_buckets_and_drops_obsolete_inventory(tmp_path):

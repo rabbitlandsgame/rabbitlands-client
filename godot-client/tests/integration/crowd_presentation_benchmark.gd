@@ -887,7 +887,7 @@ func _run_cell(spec: Dictionary) -> void:
 		"processPhaseMilliseconds": [], "flushPhaseMilliseconds": [], "drawPhaseMilliseconds": [],
 		"physicsPhaseMilliseconds": [], "mainProcessMilliseconds": [],
 		"gateSweepEndMilliseconds": [], "declutterMilliseconds": [],
-		"halfRateStepMilliseconds": [], "combatPoseMilliseconds": [], "skeletonUpdates": [],
+		"halfRateStepMilliseconds": [], "frameMotionMilliseconds": [], "combatPoseMilliseconds": [], "skeletonUpdates": [],
 		"actorRecords": [], "actorNodes": [],
 		"textPassDrawn": [], "textPassRenderCpuMilliseconds": [], "textPassRenderGpuMilliseconds": [],
 		"textPassDrawCalls": [], "renderGpuSumMilliseconds": [], "totalDrawCalls": [],
@@ -1375,6 +1375,7 @@ func _drive_for(plan: Dictionary, duration: int, raw: Variant, profile_frames: A
 		(raw["gateSweepEndMilliseconds"] as Array).append(float(usec.get("gate_sweep_end", 0)) / 1000.0)
 		(raw["declutterMilliseconds"] as Array).append(float(usec.get("declutter", 0)) / 1000.0)
 		(raw["halfRateStepMilliseconds"] as Array).append(float(usec.get("half_rate_step", 0)) / 1000.0)
+		(raw["frameMotionMilliseconds"] as Array).append(float(usec.get("frame_motion", 0)) / 1000.0)
 		var calls: Dictionary = measured.get("calls", {}) as Dictionary
 		if _attribution:
 			(raw["combatPoseMilliseconds"] as Array).append(float(usec.get("combat_pose_from_skeleton", 0)) / 1000.0)

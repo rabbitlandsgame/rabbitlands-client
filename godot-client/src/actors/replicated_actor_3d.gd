@@ -40,6 +40,7 @@ const CHARACTER_PROPORTIONS := preload("res://src/actors/character_proportions.g
 const PORTRAIT_GROOM := preload("res://src/actors/portrait_groom.gd")
 const STUBBLE_APPEARANCE := preload("res://src/actors/stubble_appearance.gd")
 const HUMAN_LOCOMOTION := preload("res://src/actors/human_locomotion_polish.gd")
+const CROWD_ANIMATION := preload("res://src/actors/crowd_animation_library.gd")
 const HIGH_PORTRAIT := preload("res://src/actors/high_portrait_appearance.gd")
 const HIGH_HAIR := preload("res://src/actors/high_hair_appearance.gd")
 const APPEARANCE_COLOURS := preload("res://src/actors/appearance_colours.gd")
@@ -608,12 +609,27 @@ static func clear_wardrobe_texture_cache() -> void:
 	PORTRAIT_GROOM.clear()
 	STUBBLE_APPEARANCE.clear()
 	HUMAN_LOCOMOTION.clear()
+	CROWD_ANIMATION.clear()
 	HIGH_PORTRAIT.clear()
 	HIGH_HAIR.clear()
 	RLHeadLibrary.clear()
 	RLHeadBodyCut.clear()
 	RLHeadwearFit.clear_caches()
 	RLHeadRig.clear_caches()
+
+## Drops the session's derived equipment and cape caches: parsed equipment
+## pieces and rebound skins, drape envelopes and draped capes, and the torso,
+## fabric-line and shin measures. Main thread, at session end with
+## GlbSceneCache.clear() (main.gd _clear_world_presentation); live actors keep
+## what they already hold. (Memory classes M5.)
+static func clear_static_caches() -> void:
+	_equipment_pieces_cache.clear()
+	_rebound_skins.clear()
+	_drape_envelopes.clear()
+	_draped_capes.clear()
+	_torso_reaches.clear()
+	_fabric_lines.clear()
+	_shin_reaches.clear()
 ## The speech bubble sits above the name instead, and wraps well short of the
 ## screen it is now measured against.
 const SPEECH_BUBBLE_RISE := 28.0
@@ -2026,6 +2042,8 @@ func apply_render_quality(level: int, is_local_actor: bool = false) -> void:
 	_render_quality_selected = true
 	_render_quality = ACTOR_RENDER_QUALITY.normalized_quality(level)
 	_render_quality_local_actor = is_local_actor
+	if is_local_actor or is_inf(ACTOR_RENDER_QUALITY.hand_detail_metres(_render_quality)):
+		_restore_full_hands()
 	var rl_now := _rl_head_ready and _native_skeleton != null and _rl_head_wanted()
 	# A head that stopped waiting for its RL files without drawing them (a
 	# switch down from High) takes the hair it would have had at once.
@@ -2047,6 +2065,21 @@ func render_quality() -> int:
 
 func render_quality_is_local() -> bool:
 	return _render_quality_local_actor
+
+## LAT-L1: Low-tier hand detail for a remote humanoid. Main's gate (L6) asks;
+## true when the library actually changed (its per-frame budget). Local,
+## preview, mounted, cinematic and charge-leaping bodies keep or get back full
+## hands; a body inside its action crossfade is left for a later sweep.
+func set_hand_detail(full: bool) -> bool:
+	return CROWD_ANIMATION.set_hand_detail(animation_player, _native_skeleton, full,
+		_render_quality_local_actor or _cinematic_active or _charge_leap != null
+		or is_instance_valid(_mount_visual), action_crossfade_seconds)
+
+func hand_detail_full() -> bool:
+	return CROWD_ANIMATION.hand_detail_full(animation_player)
+
+func _restore_full_hands() -> void:
+	CROWD_ANIMATION.restore_full(animation_player)
 
 func mounted_presentation_priority() -> bool:
 	return _render_quality_local_actor or _selected or _combat_target
@@ -4223,6 +4256,9 @@ func cape_cloth_should_simulate() -> bool:
 func _refresh_cape_cloth_activity(reset_when_enabled: bool = false) -> void:
 	if _cape_cloth == null:
 		return
+	# LAT-L3: the Low actor tier solves the cape at 30 Hz; Medium and High keep
+	# 60 Hz (remote capes simulate only at High). Mounted cloth keeps its clock.
+	_cape_cloth.call("set_step_rate", ACTOR_RENDER_QUALITY.local_cape_step_hz(_render_quality))
 	var enabled := cape_cloth_should_simulate() and not is_instance_valid(_mount_visual)
 	if enabled and reset_when_enabled and not _cape_cloth.active:
 		_cape_cloth.call("reset")
@@ -4626,6 +4662,7 @@ func _set_mount_state_legacy(state: Dictionary, models: Dictionary) -> void:
 		if animation_player != null:
 			animation_player.active = true
 			animation_player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+		_restore_full_hands()
 		var visual := (load("res://src/mounts/mounted_player_visual.gd") as Script).new() as Node3D
 		add_child(visual)
 		# Configure before marking mounted: reference poses must play normally.
@@ -5616,6 +5653,17 @@ func set_combat_effects_enabled(enabled: bool) -> void:
 		combat_presentation.effects_enabled = enabled
 		combat_presentation.update_pose()
 
+## LAT-L2: this body's hand cues (CombatPresentation3D.cues_allowed: spell arcs
+## and sparks, the melee trail, the bow's release flash). Main's gate (L6) sets
+## them from the tier it gives a remote body at Low; a body without a combat
+## presentation (creatures, mounts) has none to switch.
+func set_combat_cues_allowed(on: bool) -> void:
+	if combat_presentation != null:
+		combat_presentation.set_cues_allowed(on)
+
+func combat_cues_allowed() -> bool:
+	return combat_presentation != null and combat_presentation.cues_allowed
+
 func weapon_trail_tip() -> Variant:
 	if is_instance_valid(_trail_weapon_mesh):
 		return _trail_weapon_mesh.global_transform * _trail_weapon_tip
@@ -6079,6 +6127,7 @@ func set_cinematic_presentation(point: Vector3, yaw: float, action: StringName, 
 	var remote = RemotePresentationService.current()
 	if remote != null: remote.detach(self, "cinematic")
 	end_charge_leap()
+	_restore_full_hands()
 	_cinematic_active = true
 	_cinematic_position = point
 	_cinematic_yaw = yaw
@@ -6733,7 +6782,8 @@ func set_spell_variant(effect: int) -> void:
 	if _spell_variants.is_empty():
 		for action: String in ["cast_aggressive", "cast_defensive", "heal"]:
 			_spell_base_clips[action] = resolver.clip_for_action(action)
-		_spell_variants = SpellAnimationLibrary.install(animation_player, resolver)
+		_spell_variants = SpellAnimationLibrary.install(animation_player, resolver,
+			CROWD_ANIMATION.full_library(animation_player))
 	var action := str(SpellPresentation.action_for_effect(effect))
 	if effect in [3, 6, 72, 74, 76, 77, 78, 80, 81, 82, 92]: effect = 75
 	if _spell_base_clips.has(action):

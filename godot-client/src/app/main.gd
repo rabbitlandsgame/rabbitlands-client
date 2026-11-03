@@ -18,6 +18,7 @@ const SeasonSurfaces = preload("res://src/world/season_surfaces.gd")
 const SurfaceRefreshQueue = preload("res://src/world/chunk_surface_refresh.gd")
 const ExternalMeshPool = preload("res://src/world/external_mesh_pool.gd")
 const ExternalTexturePool = preload("res://src/world/external_texture_pool.gd")
+const MemoryCensus = preload("res://src/runtime/memory_census.gd")
 const LanternGuideScript = preload("res://src/ui/lantern_guide.gd")
 const WindowStackScript = preload("res://src/ui/window_stack.gd")
 const LanternSceneScript = preload("res://src/world/lantern_scene.gd")
@@ -2056,6 +2057,7 @@ func _record_login_first_frame() -> void:
 
 func _start_client_diagnostics() -> void:
 	Diagnostics.record("main_scene_ready")
+	Diagnostics.record("memory_class", MemoryCensus.class_record())
 	var timer := Timer.new()
 	timer.wait_time = 30.0
 	timer.timeout.connect(_record_client_snapshot)
@@ -2136,6 +2138,8 @@ func client_diagnostic_snapshot() -> Dictionary:
 		"video_memory_bytes": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_VIDEO_MEM_USED),
 		"static_memory_bytes": OS.get_static_memory_usage()
 	}
+	row["memory"] = MemoryCensus.snapshot({"world_park": world_park, "crowd": crowd,
+		"retention": row["resource_retention"]})
 	if active_camera != null:
 		row["camera_position"] = str(active_camera.global_position)
 		row["camera_rotation"] = str(active_camera.global_rotation_degrees)
@@ -4953,6 +4957,7 @@ func _clear_world_presentation(retain_map_resources := false) -> void:
 		WardrobeShirtFitScript.clear()
 		actor_resource_warmup.clear()
 		GlbSceneCache.clear()
+		ReplicatedActor3D.clear_static_caches()
 		NativeAnimationImporter.clear()
 		exterior_stream.clear()
 		world_park.clear()

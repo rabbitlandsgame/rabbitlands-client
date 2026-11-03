@@ -392,6 +392,7 @@ func _test_town_spread(registry: Dictionary, manifest: WorldManifest, signatures
 	var park: Node = WorldParkScript.new()
 	get_root().add_child(park)
 	park.configure(registry)
+	park.preload_enabled = true  # preloading is under test whatever the host's memory class
 	park.enabled = true
 	park.warm_materials = true
 	park.prepare_function = _no_prepare

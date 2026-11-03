@@ -86,6 +86,8 @@ const TIER_SETTINGS := {
 ##     generate: cook them at runtime, development builds only
 ##     (actor_geometry_mode). It takes only its three mode names, as the
 ##     applier does: no off/on spellings.
+## RABBITLANDS_ACTOR_GEOMETRY_ROOT  a cooked actor geometry catalogue folder
+##     (tests, measuring a cook); read by src/actors/actor_geometry.gd.
 const MEMORY_CLASS_VARIABLE := "RABBITLANDS_MEMORY_CLASS"
 const MEMORY_CLASS_ARGUMENT := "--memory-class="
 const MEMORY_CLASSES: Array[String] = ["small", "medium", "large"]
@@ -96,6 +98,7 @@ const ACTOR_IMAGES_MODES: Array[String] = ["auto", "legacy", "nomips"]
 const ACTOR_VRAM_SELF_TEST_VARIABLE := "ELORIA_ACTOR_VRAM_SELF_TEST"
 const ACTOR_GEOMETRY_VARIABLE := "RABBITLANDS_ACTOR_GEOMETRY"
 const ACTOR_GEOMETRY_MODES: Array[String] = ["sidecar", "off", "generate"]
+const ACTOR_GEOMETRY_ROOT_VARIABLE := "RABBITLANDS_ACTOR_GEOMETRY_ROOT"
 ## Spellings the world-distance and actor-image switches also accept for their
 ## off mode, and for their default (resolve_switch); the self-test directory
 ## reads an off spelling as no self-test. Actor geometry takes neither.
@@ -113,7 +116,8 @@ const OVERRIDE_VARIABLES: Array[String] = ["ELORIA_LOOK", "ELORIA_LOOK_QUALITY",
 	"RABBITLANDS_CROWD_PRESENTATION", "RABBITLANDS_CROWD_TUNING",
 	"RABBITLANDS_CROWD_BENCH_START_TOKEN", "RABBITLANDS_RESOURCE_BUDGET_MIB",
 	"RABBITLANDS_CAPE_MATH", MEMORY_CLASS_VARIABLE, WORLD_DISTANCE_VARIABLE,
-	ACTOR_IMAGES_VARIABLE, ACTOR_VRAM_SELF_TEST_VARIABLE, ACTOR_GEOMETRY_VARIABLE]
+	ACTOR_IMAGES_VARIABLE, ACTOR_VRAM_SELF_TEST_VARIABLE, ACTOR_GEOMETRY_VARIABLE,
+	ACTOR_GEOMETRY_ROOT_VARIABLE]
 ## Engine switches that start a tool, test or benchmark main loop.
 const TOOL_ARGUMENTS: Array[String] = ["--script", "-s", "--editor", "-e"]
 
