@@ -7,6 +7,12 @@ the additional mounted, combat and traversal reference cells. A source project
 is not an exported package: --executable-mode exported requires an explicit
 benchmark PCK or package artifact manifest and standalone runtime attestation.
 
+Renderer comparisons (wave-2 MOB-C6a): --engine-arg adds allowlisted engine
+options (--gpu-index, --rendering-driver, --gpu-profile) before the runner's own,
+and --seed-profile copies only Godot's shader/pipeline caches into every fresh
+run root so repeats start warm (without it every run is cold). Comparisons at
+plain Low pin --body-cap, since LAT-L5 made Low follow the quality to 60 bodies.
+
 Replay recordings and their raw reports contain player data. Replay output must
 remain outside the repository; summaries omit the recording path and contents.
 The advisory lock coordinates participating launchers, not unrelated programs.
@@ -30,8 +36,8 @@ from process_memory_sampler import ProcessMemorySampler
 
 from crowd_benchmark_support import (
     BenchmarkLock, EvidenceError, asset_files, clean_environment, configure_prepared_profile, configure_settings_profile, default_lock_path,
-    hash_files, manifest_identity, parse_diagnostics, prepare_worker_overlay, read_json, require_private_replay_output,
-    resolve_worker_threads,
+    hash_files, manifest_identity, parse_diagnostics, parse_engine_args, prepare_worker_overlay, profile_seed_source, read_json,
+    require_pinned_body_cap, require_private_replay_output, resolve_worker_threads, seed_profile_caches,
     seed_settings_profile, selected_cells, sha256_file, source_files, validate_report, validate_startup_ack,
 )
 
@@ -127,7 +133,9 @@ def request_for(args) -> dict:
             "executable": str(args.godot),
             "presence": args.presence, "server_time": args.server_time,
             "settings_profile": args.settings_profile,
-            "worker_threads": getattr(args, "worker_threads_count", 0)}
+            "worker_threads": getattr(args, "worker_threads_count", 0),
+            "engine_args": list(getattr(args, "engine_args", None) or []),
+            "seed_profile": str(args.seed_profile) if getattr(args, "seed_profile", None) else None}
 
 
 def launch_path(args) -> Path:
@@ -136,7 +144,9 @@ def launch_path(args) -> Path:
 
 
 def command_for(args, log: Path) -> list[str]:
-    command = [str(args.godot)]
+    # Allowlisted engine options (--engine-arg: GPU index, driver, GPU profile)
+    # come first, as the perf-audit wrapper placed them.
+    command = [str(args.godot), *(getattr(args, "engine_args", None) or [])]
     if args.executable_mode == "project":
         command += ["--path", str(launch_path(args))]
     elif args.main_pack:
@@ -292,6 +302,9 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
         overrides["DISABLE_VULKAN_OBS_CAPTURE"] = "1"
     env.update(overrides)
     settings_seed = seed_settings_profile(args.settings_profile, args.project_path, user_root, env)
+    # A warm repeat: only Godot's shader/pipeline caches from --seed-profile.
+    profile_seed = seed_profile_caches(args.seed_profile, args.project_path, user_root, env) \
+        if getattr(args, "seed_profile", None) else None
     worker_pool = None
     if getattr(args, "worker_threads_count", 0):
         # Refreshed per run: the overlay copies project.godot and the class/UID caches.
@@ -310,6 +323,8 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
                        "start_token": start_token, "user_root": str(user_root)}
     if settings_seed:
         startup_request["settings_seed_user_dir"] = settings_seed["userDataDir"]
+    if profile_seed:
+        startup_request["profile_seed_user_dir"] = profile_seed["userDataDir"]
     with launch_log.open("w", encoding="utf-8") as stream:
         process = subprocess.Popen(command, env=env, stdout=stream, stderr=subprocess.STDOUT,
                                    cwd=launch_path(args) if args.executable_mode == "project" else args.godot.parent)
@@ -366,6 +381,8 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
     run["workloadError"] = workload_error
     run["settingsProfile"] = args.settings_profile
     run["settingsSeed"] = settings_seed
+    run["engineArgs"] = list(getattr(args, "engine_args", None) or [])
+    run["profileSeed"] = profile_seed
     run["workerPool"] = {"requestedThreads": getattr(args, "worker_threads_count", 0), "overlay": worker_pool}
     if settings_seed:
         run["settingsSeedFinalSha256"] = sha256_file(Path(settings_seed["path"])) \
@@ -390,6 +407,8 @@ def run_one(args, variant: str, repeat: int, out_dir: Path) -> dict:
         request = request_for(args) | {"user_root": str(user_root)}
         if settings_seed:
             request["settings_seed_user_dir"] = settings_seed["userDataDir"]
+        if profile_seed:
+            request["profile_seed_user_dir"] = profile_seed["userDataDir"]
         run["validation"] = validate_report(data, request, text)
         actual_user_dir = data["runtimeBuild"]["userDataDir"]
         acknowledged_user_dir = startup["acknowledgement"]["userDataDir"]
@@ -421,14 +440,17 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--settings-profile", choices=["default", "performance", "performance-60", "performance-60-scale50"], default="default",
                    help="Performance presets seed fresh Windows/Linux settings; performance-60 changes only the cap to 60; performance-60-scale50 also uses render scale .5")
     p.add_argument("--fps-cap", type=int, default=None,
-                   help="default 60; performance requires 30 and performance-60 requires 60")
+                   help="default 60; performance requires 30 and performance-60 requires 60; 0 (uncapped) is "
+                        "also accepted with a Performance profile, for GPU-time comparisons")
     p.add_argument("--map", default="")
     p.add_argument("--centre", default="")
     p.add_argument("--quality", default="", choices=["", "low", "medium", "high"])
     p.add_argument("--cells", default="phase4",
                    help="Historical selectors, production-undead (160/300/500 remote creatures plus one player), or authored-gauntlet-resinroad-combat-21")
     p.add_argument("--variants", default="all,legacy")
-    p.add_argument("--body-cap", type=int)
+    p.add_argument("--body-cap", type=int,
+                   help="force the crowd body cap; plain Low draws 60 by default since LAT-L5, so comparisons at "
+                        "--quality low pin it (--body-cap 160 reproduces earlier runs; required for quiet-comparison)")
     p.add_argument("--driver", default="live", choices=["live", "stress"])
     p.add_argument("--replay", type=Path)
     p.add_argument("--replay-start-ms", type=int, default=30000)
@@ -458,6 +480,16 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--sample-ms", type=int, default=6000)
     p.add_argument("--warmup-ms", type=int, default=2000)
     p.add_argument("--affinity", default="")
+    p.add_argument("--engine-arg", action="append", default=[], metavar="OPTION",
+                   help="rendered runs only, repeatable: an engine option placed before the runner's own, one of "
+                        "--gpu-index N (the laptop's iGPU proxy is 1), --rendering-driver NAME (vulkan|d3d12 for "
+                        "forward_plus/mobile, opengl3|opengl3_angle|opengl3_es for gl_compatibility) or "
+                        "--gpu-profile. Write --engine-arg=--gpu-profile, --engine-arg=--gpu-index=1 or "
+                        "--engine-arg \"--gpu-index 1\"")
+    p.add_argument("--seed-profile", type=Path,
+                   help="copy only Godot's shader_cache/, vulkan/ and d3d12/ from this user data directory (or a "
+                        "run's userdata/<run> root) into every run's fresh user root, so repeats start warm; "
+                        "without it every run starts cold. Driver caches are not controlled")
     p.add_argument("--worker-threads", default="0", choices=["0", "4", "8", "affinity"],
                    help="source-project runs only: launch through a private configuration overlay "
                         "(<checkout>/.local/crowd-benchmark-overlay) whose override.cfg sets "
@@ -484,6 +516,16 @@ def main(argv: list[str] | None = None) -> int:
     try:
         configure_settings_profile(args)
         parse_diagnostics(args.diagnostics)
+        args.engine_args = parse_engine_args(args.engine_arg, args.renderer, args.mode)
+        body_cap_note = require_pinned_body_cap(args)
+        if body_cap_note:
+            print("note: " + body_cap_note, file=sys.stderr)
+        if args.seed_profile:
+            if args.mode != "windowed":
+                # Headless runs compile no shaders: a seed would only mislabel them warm.
+                raise EvidenceError("--seed-profile warms shader and pipeline caches: it needs a rendered "
+                                    "(windowed) run")
+            args.seed_profile = profile_seed_source(args.seed_profile)
         if args.attribution and args.executable_mode != "project":
             raise EvidenceError("--attribution is source-project-only; exported/compiled scripts are unsupported")
         if args.window_mode == "fullscreen" and args.mode != "windowed":
@@ -551,6 +593,12 @@ def main(argv: list[str] | None = None) -> int:
                     validation = run["validation"]
                     print(f"[{variant} r{repeat}] {validation['qualification']} exit={run['exit']} -> {run['report']}")
                     if validation["valid"]:
+                        data = run["data"]
+                        memory_class = data.get("memoryClass") if isinstance(data.get("memoryClass"), dict) else {}
+                        print(f"  {data.get('videoAdapter') or data.get('display')} | {data.get('renderingMethod')} | "
+                              f"{data.get('renderingDriver')} | engine args {run['engineArgs'] or 'none'} | "
+                              f"seed {'%d files' % run['profileSeed']['files'] if run['profileSeed'] else 'cold'} | "
+                              f"memory class {memory_class.get('class')} ({memory_class.get('source')})")
                         for cell in run["data"]["cells"]:
                             if cell.get("status") == "unavailable_content":
                                 print(f"  {cell['id']}: pending authored content; no accepted timing")

@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 import platform
 import re
+import shutil
 import socket
 import tempfile
 import time
@@ -55,6 +56,21 @@ WORKER_POOL_THREADS = (4, 8)
 # Attribution switches (RABBITLANDS_CROWD_BENCH_DIAG). no_text_pass and
 # text_pass_always are the wave-2 OV-0 world-text pass modes.
 DIAGNOSTICS = ("no_animation", "no_overhead", "no_ground", "no_text_pass", "text_pass_always")
+# Engine options a rendered run may add to the runner's own (wave-2 MOB-C6a,
+# --engine-arg): the GPU a multi-GPU machine renders on (the laptop's iGPU proxy
+# is --gpu-index 1), the rendering driver and Godot's GPU profile. Nothing else:
+# the renderer, resolution, paths, log and script stay the runner's.
+ENGINE_ARGS = {"--gpu-index": "index", "--rendering-driver": "driver", "--gpu-profile": None}
+RENDERING_DRIVERS = {"forward_plus": ("vulkan", "d3d12", "metal"), "mobile": ("vulkan", "d3d12", "metal"),
+                     "gl_compatibility": ("opengl3", "opengl3_angle", "opengl3_es")}
+# Per-frame viewport GPU times (rendered runs). A reading above the bound is a
+# wrapped timestamp, not a frame (validate_gpu_timestamps).
+GPU_TIME_METRICS = ("worldRenderGpuMilliseconds", "rootRenderGpuMilliseconds", "renderGpuSumMilliseconds",
+                    "textPassRenderGpuMilliseconds")
+MAX_PLAUSIBLE_GPU_MILLISECONDS = 60000.0
+# Godot's shader and pipeline caches in the user data directory, the only things
+# --seed-profile copies into a run's fresh user root (MOB-C6a: warm repeats).
+PROFILE_SEED_DIRECTORIES = ("shader_cache", "vulkan", "d3d12")
 ERROR_PATTERN = re.compile(r"SCRIPT ERROR|Parse Error|Failed to load|Error loading|ERROR:", re.I)
 OVERRIDE_PREFIXES = ("ELORIA_LOOK", "ELORIA_CROWD_", "ELORIA_NATIVE_", "RABBITLANDS_CROWD_")
 OVERRIDE_NAMES = {"ELORIA_VRAM_TEXTURES", "ELORIA_NO_MAP_CACHE", "ELORIA_SAFE_MODE", "RABBITLANDS_CLIENT_RUNTIME", "RABBITLANDS_RUST_EFFECTS"}
@@ -95,6 +111,11 @@ def configure_settings_profile(args, system: str | None = None) -> None:
         for field, absent, expected in (("quality", "", "low"), ("fps_cap", None, profile_fps),
                                         ("body_cap", None, 60)):
             value = getattr(args, field)
+            if field == "fps_cap" and value == 0:
+                # Uncapped: the preset's settings without its frame cap, for GPU-time
+                # comparisons (MOB-C6 protocol, gate G1). The seeded file keeps the
+                # preset's own cap; the requested 0 is recorded and validated.
+                continue
             if value != absent and value != expected:
                 raise EvidenceError(f"Performance profile conflicts with --{field.replace('_', '-')}; requires {expected}")
             setattr(args, field, expected)
@@ -127,6 +148,79 @@ def configure_settings_profile(args, system: str | None = None) -> None:
         raise EvidenceError("mixed-mounted-160 requires 80 mounted bodies; the requested body cap is below 80")
 
 
+def require_pinned_body_cap(args) -> str | None:
+    """Comparison runs at plain Low state their body cap (wave-2 schedule, wave A).
+
+    Since LAT-L5 the crowd count follows the quality: `--quality low` without
+    `--body-cap` draws 60 bodies, where earlier runs drew 160. A quiet-comparison
+    run is refused unless it pins the cap (`--body-cap 160` reproduces earlier
+    runs); a screening run gets a note instead. Performance profiles pin 60.
+    """
+    if getattr(args, "settings_profile", "default") != "default" or args.quality != "low" \
+            or args.body_cap is not None:
+        return None
+    message = ("plain Low follows the quality to 60 bodies since LAT-L5; pass --body-cap 160 to compare "
+               "with earlier runs (or --body-cap 60 to state the new default)")
+    if getattr(args, "measurement_status", "screening") == "quiet-comparison":
+        raise EvidenceError("quiet-comparison runs at --quality low must pin the body cap: " + message)
+    return message
+
+
+def parse_engine_args(values: list[str] | None, renderer: str, mode: str) -> list[str]:
+    """--engine-arg values as the exact engine tokens, refused unless allowlisted.
+
+    Each value is one option with its value: "--gpu-index 1", "--gpu-index=1",
+    "--rendering-driver=d3d12" or "--gpu-profile" (argparse needs
+    `--engine-arg=--gpu-profile` or a quoted value with a space). An option
+    given twice, a malformed index, a driver of the other renderer family, or
+    any option outside ENGINE_ARGS (the renderer, resolution, paths, log and
+    script are the runner's) is refused before anything launches. Headless runs
+    render nothing, so they take none.
+    """
+    tokens: list[str] = []
+    for value in values or []:
+        for part in str(value).split():
+            name, separator, rest = part.partition("=")
+            tokens += [name, rest] if separator and name.startswith("--") else [part]
+    result: list[str] = []
+    seen: set[str] = set()
+    index = 0
+    while index < len(tokens):
+        name = tokens[index]
+        if name not in ENGINE_ARGS:
+            raise EvidenceError(f"unsupported --engine-arg {name!r}; allowed: {', '.join(ENGINE_ARGS)}")
+        if name in seen:
+            raise EvidenceError(f"--engine-arg {name} given twice")
+        seen.add(name)
+        kind = ENGINE_ARGS[name]
+        if kind is None:
+            result.append(name)
+            index += 1
+            continue
+        if index + 1 >= len(tokens) or not tokens[index + 1]:
+            raise EvidenceError(f"--engine-arg {name} needs a value")
+        value = tokens[index + 1]
+        if kind == "index" and re.fullmatch(r"[0-9]{1,2}", value) is None:
+            raise EvidenceError("--engine-arg --gpu-index takes a device index 0-99")
+        if kind == "driver" and value not in RENDERING_DRIVERS.get(renderer, ()):
+            raise EvidenceError(f"--engine-arg --rendering-driver {value!r} does not run the {renderer} renderer; "
+                                f"choose one of {', '.join(RENDERING_DRIVERS.get(renderer, ()))}")
+        result += [name, value]
+        index += 2
+    if result and mode != "windowed":
+        raise EvidenceError("--engine-arg selects a GPU, driver or GPU profile: it needs a rendered (windowed) run")
+    return result
+
+
+def engine_arg_value(engine_args: list[str] | None, name: str) -> str | None:
+    """The value an allowlisted engine option was given, or None."""
+    tokens = list(engine_args or [])
+    if name not in tokens:
+        return None
+    index = tokens.index(name)
+    return "" if ENGINE_ARGS.get(name) is None else tokens[index + 1]
+
+
 def seed_settings_profile(profile: str, client: Path, user_root: Path,
                           environment: dict[str, str], system: str | None = None) -> dict | None:
     """Write only fresh, generated preferences before Godot caches texture quality.
@@ -140,30 +234,7 @@ def seed_settings_profile(profile: str, client: Path, user_root: Path,
     system = platform.system() if system is None else system
     if profile not in PERFORMANCE_PROFILES or system not in ("Windows", "Linux"):
         raise EvidenceError("Performance settings seeding supports Windows and Linux only")
-    root = user_root.resolve()
-    variable = "APPDATA" if system == "Windows" else "XDG_DATA_HOME"
-    data_home = environment.get(variable)
-    if not data_home or not Path(data_home).is_absolute() or Path(data_home).resolve() != root:
-        raise EvidenceError(f"Performance profile requires the fresh isolated {variable} directory")
-    # Verify the repository's declared custom path instead of assuming the
-    # engine's default application-name directory or copying a user's config.
-    application, section = {}, ""
-    for line in (client / "project.godot").read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if line.startswith("[") and line.endswith("]"):
-            section = line[1:-1]
-        elif section == "application" and "=" in line and not line.startswith(";"):
-            key, value = line.split("=", 1)
-            application[key.strip()] = value.strip()
-    custom = "config/custom_user_dir_name"
-    if application.get("config/use_custom_user_dir") != "true" \
-            or application.get(custom) != '"Godot/app_userdata/Eloria"' \
-            or (system == "Linux" and application.get(custom + ".linuxbsd") != '"godot/app_userdata/Eloria"') \
-            or any(key.startswith(custom + ".") and key != custom + ".linuxbsd" for key in application):
-        raise EvidenceError("Performance profile does not support this project's custom user directory settings")
-    user_dir = root / ("Godot/app_userdata/Eloria" if system == "Windows" else "godot/app_userdata/Eloria")
-    if not user_dir.resolve().is_relative_to(root):
-        raise EvidenceError("Performance settings path escaped the isolated run directory")
+    user_dir = isolated_user_data_dir(client, user_root, environment, system, "Performance profile")
     path = user_dir / "eloria_hud.cfg"
     graphics = PERFORMANCE_GRAPHICS | {"fps_limit": PERFORMANCE_PROFILES[profile],
                                        "render_scale": PERFORMANCE_RENDER_SCALES[profile]}
@@ -179,6 +250,129 @@ def seed_settings_profile(profile: str, client: Path, user_root: Path,
     return {"profile": profile, "path": str(path), "userDataDir": str(user_dir),
             "content": content, "sha256": sha256_file(path), "bytes": path.stat().st_size,
             "scope": "generated initial settings before startup; no inherited user config"}
+
+
+def isolated_user_data_dir(client: Path, user_root: Path, environment: dict[str, str],
+                           system: str, purpose: str) -> Path:
+    """The project's custom user:// directory inside a run's fresh isolated root.
+
+    Windows custom user:// uses APPDATA; Linux uses XDG_DATA_HOME and the
+    project's explicit linuxbsd custom-directory override. `purpose` names the
+    seed in refusals.
+    """
+    root = user_root.resolve()
+    variable = "APPDATA" if system == "Windows" else "XDG_DATA_HOME"
+    data_home = environment.get(variable)
+    if not data_home or not Path(data_home).is_absolute() or Path(data_home).resolve() != root:
+        raise EvidenceError(f"{purpose} requires the fresh isolated {variable} directory")
+    # Verify the repository's declared custom path instead of assuming the
+    # engine's default application-name directory or copying a user's config.
+    application, section = {}, ""
+    for line in (client / "project.godot").read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if line.startswith("[") and line.endswith("]"):
+            section = line[1:-1]
+        elif section == "application" and "=" in line and not line.startswith(";"):
+            key, value = line.split("=", 1)
+            application[key.strip()] = value.strip()
+    custom = "config/custom_user_dir_name"
+    if application.get("config/use_custom_user_dir") != "true" \
+            or application.get(custom) != '"Godot/app_userdata/Eloria"' \
+            or (system == "Linux" and application.get(custom + ".linuxbsd") != '"godot/app_userdata/Eloria"') \
+            or any(key.startswith(custom + ".") and key != custom + ".linuxbsd" for key in application):
+        raise EvidenceError(f"{purpose} does not support this project's custom user directory settings")
+    user_dir = root / ("Godot/app_userdata/Eloria" if system == "Windows" else "godot/app_userdata/Eloria")
+    if not user_dir.resolve().is_relative_to(root):
+        raise EvidenceError(f"{purpose} path escaped the isolated run directory")
+    return user_dir
+
+
+def _is_link(path: Path) -> bool:
+    return path.is_symlink() or (hasattr(path, "is_junction") and path.is_junction())
+
+
+def profile_seed_source(path: Path) -> Path:
+    """The user data directory a --seed-profile DIR names.
+
+    DIR is a user data directory (it holds shader_cache/, vulkan/ or d3d12/) or a
+    run's isolated user root (`<out-dir>/userdata/<run>`), whose
+    Godot/app_userdata/Eloria (godot/... on Linux) is used.
+    """
+    root = Path(path).resolve()
+    if not root.is_dir():
+        raise EvidenceError("--seed-profile directory does not exist")
+    for candidate in (root, root / "Godot/app_userdata/Eloria", root / "godot/app_userdata/Eloria"):
+        if any((candidate / name).is_dir() for name in PROFILE_SEED_DIRECTORIES):
+            if _is_link(candidate) or not candidate.resolve().is_relative_to(root):
+                raise EvidenceError("--seed-profile user data directory is a link")
+            return candidate
+    raise EvidenceError("--seed-profile holds no shader_cache/, vulkan/ or d3d12/ directory")
+
+
+def seed_profile_caches(source: Path, client: Path, user_root: Path, environment: dict[str, str],
+                        system: str | None = None) -> dict:
+    """Copy only Godot's shader and pipeline caches into a run's fresh user directory.
+
+    Without a seed every repeat starts cold (MOB-C6a). PROFILE_SEED_DIRECTORIES
+    are copied file by file and verified; settings, prepared-world caches and
+    everything else in the source stay out, and links are refused. The engine
+    must open exactly this directory (startup acknowledgement and report check).
+    Driver caches (LOCALAPPDATA, the GPU vendor's own) are not controlled here.
+    """
+    system = platform.system() if system is None else system
+    if system not in ("Windows", "Linux"):
+        raise EvidenceError("--seed-profile supports Windows and Linux only")
+    source = profile_seed_source(source)
+    user_dir = isolated_user_data_dir(client, user_root, environment, system, "--seed-profile")
+    if source.resolve().is_relative_to(user_root.resolve()) or user_root.resolve().is_relative_to(source.resolve()):
+        raise EvidenceError("--seed-profile overlaps the run's own user root")
+    # Check everything first, so a refused seed leaves nothing in the run's root.
+    planned: dict[str, list[Path]] = {}
+    for name in PROFILE_SEED_DIRECTORIES:
+        top = source / name
+        if not top.exists() and not _is_link(top):
+            continue
+        if _is_link(top) or not top.is_dir():
+            raise EvidenceError(f"--seed-profile {name} is a link or not a directory")
+        if (user_dir / name).exists():
+            raise EvidenceError(f"--seed-profile would overwrite the run's {name}")
+        planned[name] = []
+        for directory, subdirectories, names in os.walk(top, followlinks=False):
+            current = Path(directory)
+            for child in [*subdirectories, *names]:
+                if _is_link(current / child):
+                    raise EvidenceError(f"--seed-profile {name} contains a link")
+            for file_name in sorted(names):
+                if not (current / file_name).is_file():
+                    raise EvidenceError(f"--seed-profile {name} contains a special file")
+                planned[name].append(current / file_name)
+    if not any(planned.values()):
+        raise EvidenceError("--seed-profile caches are empty")
+    digest = hashlib.sha256()
+    directories: dict[str, dict] = {}
+    pipeline_caches: list[str] = []
+    for name, paths in planned.items():
+        files = size = 0
+        for path in sorted(paths):
+            relative = path.relative_to(source).as_posix()
+            destination = user_dir / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(path, destination)
+            file_digest = sha256_file(path)
+            if sha256_file(destination) != file_digest:
+                raise EvidenceError("--seed-profile copy differs from its source")
+            digest.update(f"{relative}\0{file_digest}\n".encode("utf-8"))
+            files += 1
+            size += path.stat().st_size
+            if name != "shader_cache" and path.parent == source / name:
+                pipeline_caches.append(relative)
+        directories[name] = {"files": files, "bytes": size}
+    return {"source": str(source), "userDataDir": str(user_dir), "directories": directories,
+            "files": sum(entry["files"] for entry in directories.values()),
+            "bytes": sum(entry["bytes"] for entry in directories.values()),
+            "sha256": digest.hexdigest(), "pipelineCaches": sorted(pipeline_caches),
+            "scope": "Godot shader_cache/, vulkan/ and d3d12/ only; settings, prepared-world caches and "
+                     "GPU driver caches (LOCALAPPDATA) are not copied"}
 
 
 def finite_tree(value: Any, label: str = "report") -> None:
@@ -540,7 +734,26 @@ def validate_startup_ack(data: dict, request: dict) -> dict:
     if request.get("settings_seed_user_dir") and os.path.normcase(str(Path(user_dir).resolve())) \
             != os.path.normcase(str(Path(request["settings_seed_user_dir"]).resolve())):
         raise EvidenceError("startup acknowledgement did not use the exact seeded user directory")
+    if request.get("profile_seed_user_dir") and os.path.normcase(str(Path(user_dir).resolve())) \
+            != os.path.normcase(str(Path(request["profile_seed_user_dir"]).resolve())):
+        raise EvidenceError("startup acknowledgement did not use the directory --seed-profile filled")
     return data
+
+
+def validate_gpu_timestamps(summary: dict, name: str) -> None:
+    """Refuse a viewport GPU time no frame can take (MOB-C6a, measured on the iGPU proxy).
+
+    viewport_get_measured_render_time_gpu occasionally returns a wrapped
+    timestamp difference (about 1.8e13 ms: 2^64 ns) on the Intel iGPU. One such
+    frame turns the cell's mean world GPU time into nonsense, so the run is
+    rejected for a rerun instead of feeding a renderer comparison.
+    """
+    for metric in GPU_TIME_METRICS:
+        value = summary.get(metric)
+        maximum = value.get("max") if isinstance(value, dict) else None
+        if isinstance(maximum, (int, float)) and maximum > MAX_PLAUSIBLE_GPU_MILLISECONDS:
+            raise EvidenceError(f"{name}: {metric} max {maximum:.3g} ms is a wrapped GPU timestamp "
+                                "(engine/driver timer), not a frame; rerun")
 
 
 def validate_distribution(value: Any, label: str, count: int | None = None) -> dict:
@@ -595,7 +808,8 @@ def validate_runtime(runtime: dict, request: dict, renderer: str, quality: str,
     expected = {"quality": quality, "bodyCap": body_cap, "frameCap": request["fps_cap"],
                 "renderer": renderer, "rootSize": list(request["resolution"])}
     if request.get("settings_profile") in PERFORMANCE_PROFILES:
-        if request["fps_cap"] != PERFORMANCE_PROFILES[request["settings_profile"]]:
+        # 0: the preset uncapped for GPU-time comparisons (configure_settings_profile).
+        if request["fps_cap"] not in (PERFORMANCE_PROFILES[request["settings_profile"]], 0):
             raise EvidenceError(f"{label}: frame cap differs from named Performance profile")
         expected.update(quality="low", bodyCap=60, renderScale=PERFORMANCE_RENDER_SCALES[request["settings_profile"]],
                         textureQuality="half", textureSkip=1, appearance="painted_ground")
@@ -778,6 +992,10 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
         raise EvidenceError("actual display mode differs from requested mode")
     if request["mode"] == "windowed" and data.get("renderingMethod") != request["renderer"]:
         raise EvidenceError("actual renderer differs from requested renderer")
+    driver = engine_arg_value(request.get("engine_args"), "--rendering-driver")
+    if driver and data.get("renderingDriver") != driver:
+        # Godot falls back to another driver when the requested one fails to start.
+        raise EvidenceError("actual rendering driver differs from the requested --rendering-driver")
     if data.get("graphicsQuality") not in ("low", "medium", "high"):
         raise EvidenceError("actual graphics quality is missing")
     if data.get("diagnostics", "") != request.get("diagnostics", ""):
@@ -849,6 +1067,11 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
         if not isinstance(seed_dir, str) or not isinstance(actual, str) \
                 or os.path.normcase(str(Path(actual).resolve())) != os.path.normcase(str(Path(seed_dir).resolve())):
             raise EvidenceError("Performance runtime did not use the exact seeded user directory")
+    if request.get("profile_seed_user_dir"):
+        actual = _object(data.get("runtimeBuild"), "runtimeBuild").get("userDataDir")
+        if not isinstance(actual, str) or os.path.normcase(str(Path(actual).resolve())) \
+                != os.path.normcase(str(Path(request["profile_seed_user_dir"]).resolve())):
+            raise EvidenceError("runtime did not use the directory --seed-profile filled")
     if request.get("replay"):
         replay = _object(data.get("replay"), "replay")
         if replay.get("ok") is not True:
@@ -964,6 +1187,7 @@ def validate_report(data: dict, request: dict, log: str) -> dict:
             if request["mode"] == "windowed":
                 for metric in ("drawPhaseMilliseconds", "worldRenderCpuMilliseconds", "worldRenderGpuMilliseconds", "drawCalls"):
                     validate_distribution(summary.get(metric), name + "." + metric, frames)
+                validate_gpu_timestamps(summary, name)
             for metric in ("actorRecords", "actorNodes"):
                 records = validate_distribution(summary.get(metric), name + "." + metric, frames)
                 if not request.get("replay") and (records["p5"] != count or records["max"] != count):

@@ -81,6 +81,21 @@ var _heat_bolt_benchmark: Node
 const MAX_SPAWN_MSEC := 240000
 const MAX_READINESS_MSEC := 60000
 const MIN_SAMPLE_FRAMES := 60
+## Wave-2 MEM-M7b (perf audit GAP-06): a crowd's removed bodies are parked for
+## CrowdPresentation.PARK_MSEC and freed by the gate pass at most every
+## PARK_EXPIRY_PERIOD_MSEC (main.gd _update_animation_gate). `afterDespawn` is
+## sampled this margin past the park time, so it shows what the crowd left
+## behind instead of the park pool; `afterRemoval` keeps the earlier sample,
+## DESPAWN_SETTLE_FRAMES after the removal.
+const CrowdPolicy := preload("res://src/world/crowd_presentation.gd")
+## The session's memory class sets the park limit (16 or 48) and the world and
+## creature budgets; an inherited RABBITLANDS_MEMORY_CLASS changes it, so every
+## report records it (`memoryClass`).
+const MemoryBudgets := preload("res://src/runtime/memory_budgets.gd")
+const DESPAWN_SAMPLE_MARGIN_MSEC := 1000
+const DESPAWN_SETTLE_FRAMES := 12
+## Longest wait before a cell for RL head prewarm work in flight (MEM-M7b).
+const RL_HEAD_WARM_WAIT_MSEC := 60000
 ## Where each hot spot is when the benchmark stands on its map: the Landfall
 ## market (the mean of the isle's NPC posts, as the server's S3 preset takes it)
 ## and a Twinbrook invasion wave's authored centre (S2).
@@ -329,6 +344,10 @@ func _run() -> void:
 		"headless": _headless,
 		"display": DisplayServer.get_name(),
 		"renderingMethod": RenderingServer.get_current_rendering_method(),
+		# The driver actually running (MOB-C6a: --engine-arg --rendering-driver, which
+		# the engine can fall back from).
+		"renderingDriver": str(RenderingServer.call("get_current_rendering_driver_name")) \
+			if RenderingServer.has_method("get_current_rendering_driver_name") else "",
 		"videoAdapter": RenderingServer.get_video_adapter_name(),
 		"videoVendor": RenderingServer.get_video_adapter_vendor(),
 		"processor": OS.get_processor_name(),
@@ -483,9 +502,15 @@ func _run() -> void:
 	if not replay:
 		_set_stage("prewarm")
 		await _prewarm()
+	# What Main and the crowd were configured with (MEM-M7b), once both asked.
+	_report["memoryClass"] = memory_class_record()
 	for cell: Dictionary in cells:
 		if _failures > 0:
 			break # An invalid setup must not spend time sampling later cells.
+		_set_stage("cell:%s:rl-head-warm" % str(cell.id))
+		# MEM-M7b: an RL head parse still in flight would land in the cell's
+		# memory and frames. Recorded in the cell (`rlHeadWarm`).
+		cell["rlHeadWarm"] = await _wait_for_rl_head_warm(str(cell.id))
 		_set_stage("cell:" + str(cell.id))
 		if str(cell.shape) == "traversal":
 			await _run_traversal_cell(cell)
@@ -744,7 +769,14 @@ func _prewarm() -> void:
 		_report.prewarmed["creatureModels"] = ["mire_goblin", "giant_amber_moth"]
 	_app_state.set("actors", {FIRST_ACTOR_ID: _record(0, true, _centre, FULL_KIT_A)})
 	_main.call("_sync_world")
+	var removed_at := Time.get_ticks_msec()
 	await _settle_frames(20)
+	# MEM-M7b: the prewarm's removed bodies are parked too; the first cell's
+	# `before` sample (and its spawn) must not include or revive them.
+	var parked_at_removal: Variant = _crowd_park_state().get("parked")
+	var despawn := await _wait_after_despawn(removed_at, 20)
+	despawn["parkedAtRemoval"] = parked_at_removal
+	_report.prewarmed["despawn"] = despawn
 
 
 func _run_cell(spec: Dictionary) -> void:
@@ -916,7 +948,13 @@ func _run_cell(spec: Dictionary) -> void:
 	_main.call("benchmark_set_text_pass", "auto")
 	_app_state.set("actors", remaining)
 	_main.call("_sync_world")
-	await _settle_frames(12)
+	var removed_at := Time.get_ticks_msec()
+	await _settle_frames(DESPAWN_SETTLE_FRAMES)
+	var after_removal := _memory_sample()
+	var parked_at_removal: Variant = _crowd_park_state().get("parked")
+	# MEM-M7b: past the park time, so the gate pass has freed the parked bodies.
+	var despawn := await _wait_after_despawn(removed_at)
+	despawn["parkedAtRemoval"] = parked_at_removal
 	var after := _memory_sample()
 	var frames := (raw["frameMilliseconds"] as Array).size()
 	_expect(frames >= MIN_SAMPLE_FRAMES, "%s samples at least %d frames (got %d)" % [
@@ -962,10 +1000,12 @@ func _run_cell(spec: Dictionary) -> void:
 	if not heat_report.is_empty():
 		result["spellWorkload"] = heat_report
 	result["memory"] = {"before": before, "withCrowd": spawned_memory, "afterDespawn": after,
-		"afterSample": sampled_memory,
+		"afterSample": sampled_memory, "afterRemoval": after_removal,
 		"crowdDelta": _memory_delta(before, spawned_memory),
+		"despawnResidue": _memory_delta(before, after),
 		"perActorStaticBytes": int((int(spawned_memory.staticBytes) - int(before.staticBytes))
 			/ maxi(1, count - 1))}
+	result["despawn"] = despawn
 	var drawn_frames := 0
 	for drawn: Variant in raw["textPassDrawn"] as Array:
 		drawn_frames += int(drawn)
@@ -2701,6 +2741,94 @@ static func cancel_rl_head_warm() -> Dictionary:
 	RLHeadLibrary.cancel_warm()
 	before["pendingAfterCancel"] = RLHeadLibrary.warming()
 	return before
+
+
+## RL head prewarm work before a cell (MEM-M7b, perf audit GAP-06): what is in
+## flight (`parsing` worker parses, `queued` parses, the pipeline `surveying`
+## task, the pipeline holder's frames) and what only publishes behind login or
+## a drawn loading screen (`texturesPending`, `pipelinePending`, gated by
+## `allowed`: RLHeadLibrary.render_warm_allowed). Cheap reads; never starts work.
+static func rl_head_warm_state() -> Dictionary:
+	var snapshot := RLHeadLibrary.render_warm_snapshot()
+	var state := {"warming": RLHeadLibrary.warming(), "parsing": RLHeadLibrary._warming.size(),
+		"queued": RLHeadLibrary._warm_queue.size(), "surveying": not RLHeadLibrary._surveying.is_empty(),
+		"pipelineActive": bool(snapshot.get("pipeline_active", false)),
+		"pipelinePending": bool(snapshot.get("pipeline_pending", false)),
+		"texturesPending": int(snapshot.get("textures_pending", 0)),
+		"allowed": bool(snapshot.get("allowed", false))}
+	state["settled"] = rl_head_warm_settled(state)
+	return state
+
+
+## Whether a cell may start: nothing warming, or only publication the live
+## gate holds back. While the game view is shown Main's gate stays closed
+## (main.gd _rl_head_render_warm_allowed), so that work cannot start in the
+## cell, and waiting for it would wait for ever at High.
+static func rl_head_warm_settled(state: Dictionary) -> bool:
+	if not bool(state.get("warming", true)):
+		return true
+	if int(state.get("parsing", 1)) > 0 or int(state.get("queued", 1)) > 0 \
+			or bool(state.get("surveying", true)) or bool(state.get("pipelineActive", true)):
+		return false
+	return not bool(state.get("allowed", true))
+
+
+## Waits (bounded by RL_HEAD_WARM_WAIT_MSEC) until rl_head_warm_settled, and
+## reports the state before and after. A timeout is recorded, not a failure.
+func _wait_for_rl_head_warm(label: String) -> Dictionary:
+	var started := Time.get_ticks_msec()
+	var at_start := rl_head_warm_state()
+	var state := at_start
+	var frames := 0
+	while not bool(state.settled) and Time.get_ticks_msec() - started < RL_HEAD_WARM_WAIT_MSEC:
+		await process_frame
+		frames += 1
+		state = rl_head_warm_state()
+	var out := {"settled": bool(state.settled), "timedOut": not bool(state.settled),
+		"waitMilliseconds": Time.get_ticks_msec() - started, "frames": frames,
+		"atStart": at_start, "atCellStart": state}
+	if not bool(state.settled):
+		print("crowd-presentation rl-head-warm: %s still warming after %d ms: %s" % [
+			label, int(out.waitMilliseconds), JSON.stringify(state)])
+	return out
+
+
+## This session's memory class and why: MemoryBudgets.current() ("class",
+## "source" = probe, environment or argument, "probed_class", "basis", ...).
+## The runner neither sets nor clears RABBITLANDS_MEMORY_CLASS, so a run that
+## inherited one says so here (MEM-M7b review).
+static func memory_class_record() -> Dictionary:
+	return MemoryBudgets.current()
+
+
+## When `afterDespawn` is sampled, in milliseconds after the crowd's removal.
+static func despawn_sample_msec() -> int:
+	return CrowdPolicy.PARK_MSEC + DESPAWN_SAMPLE_MARGIN_MSEC
+
+
+## The crowd's park pool: `parked` bodies and the class's `parkLimit`.
+func _crowd_park_state() -> Dictionary:
+	var crowd: Variant = _main.get("crowd") if is_instance_valid(_main) else null
+	if not (crowd is RefCounted):
+		return {}
+	var described: Dictionary = (crowd as RefCounted).call("describe")
+	return {"parked": described.get("parked"), "parkLimit": described.get("parkLimit")}
+
+
+## Runs frames until despawn_sample_msec() has passed since `removed_at`, so
+## the gate pass has freed the parked bodies, and reports the wait and the
+## pool. `settled_frames`: the frames the caller already ran after the removal.
+func _wait_after_despawn(removed_at: int, settled_frames := DESPAWN_SETTLE_FRAMES) -> Dictionary:
+	var target := despawn_sample_msec()
+	var frames := settled_frames
+	while Time.get_ticks_msec() - removed_at < target:
+		await process_frame
+		frames += 1
+	var park := _crowd_park_state()
+	return {"sampleAfterMilliseconds": target, "waitedMilliseconds": Time.get_ticks_msec() - removed_at,
+		"frames": frames, "removalSettleFrames": settled_frames,
+		"parkMilliseconds": CrowdPolicy.PARK_MSEC, "parkedAtSample": park.get("parked"),
+		"parkLimit": park.get("parkLimit")}
 
 
 func _wait_for_teardown_idle(owner: Variant, loader: Variant,

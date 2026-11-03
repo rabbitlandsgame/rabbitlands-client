@@ -22,7 +22,7 @@ import uuid
 PROJECT = Path(__file__).resolve().parents[1]
 ROOT = PROJECT.parent
 sys.path.insert(0, str(PROJECT / "tests/integration"))
-from crowd_benchmark_support import BenchmarkLock
+from crowd_benchmark_support import BenchmarkLock, EvidenceError, engine_arg_value, parse_engine_args
 
 POINTS = [[-205, 115, 14], [-149, 121, -17], [-115, 122, 6], [50.5, 106.15, 161.5]]
 
@@ -96,6 +96,12 @@ def qualification_errors(report: dict | None, configuration: dict, configuration
         errors.append("runtime_or_import_inputs_changed")
     if not report.get("ok"):
         errors.append("engine_checks_failed")
+    # --renderer / --engine-arg (MOB-C6a): the run must have drawn with what was requested.
+    if configuration.get("renderer") and report.get("renderer") != configuration["renderer"]:
+        errors.append("renderer_mismatch")
+    driver = engine_arg_value(configuration.get("engine_args"), "--rendering-driver")
+    if driver and ((report.get("window_context") or {}).get("start") or {}).get("render_driver") != driver:
+        errors.append("rendering_driver_mismatch")
     movement = [x for x in report.get("frames", []) if x.get("phase") not in ["arrival", "post_route_settle"]]
     if not movement:
         errors.append("measured_movement_missing")
@@ -230,6 +236,19 @@ def seed_paving_cache(user_root: Path | None, profile: Path) -> dict:
     return seed_cache(user_root,profile,"map-paving-cache",[".json",".res"])
 
 
+def engine_command(godot: Path, project: Path, log: Path, renderer: str = "forward_plus",
+                   engine_args: list[str] | None = None, parse_only: bool = False) -> list[str]:
+    """The engine command: allowlisted --engine-arg options first, then the benchmark's own."""
+    command = [str(godot), *(engine_args or []), "--path", str(project), "--script",
+               "res://tests/integration/continent_stream_benchmark.gd", "--audio-driver", "Dummy"]
+    if parse_only:
+        command.extend(["--headless", "--check-only"])
+    else:
+        command.extend(["--rendering-method", renderer, "--resolution", "1280x720", "--position", "-16000,-16000"])
+    command.extend(["--log-file", str(log)])
+    return command
+
+
 class ProcessSampler:
     """Own-child RSS and logical I/O counters; no system-wide disk attribution."""
     def __init__(self, pid: int):
@@ -297,9 +316,18 @@ def main() -> int:
     parser.add_argument("--collision-user-root", type=Path, help="Copy faces-only cache products into isolated profile; never copy full geometry/player data")
     parser.add_argument("--paving-user-root",type=Path,help="Copy paving-only cache products into isolated profile")
     parser.add_argument("--env", action="append", default=[])
+    parser.add_argument("--renderer", choices=["forward_plus", "mobile", "gl_compatibility"], default="forward_plus",
+                        help="rendering method of the rendered run (MOB-C6 traversal: --renderer mobile)")
+    parser.add_argument("--engine-arg", action="append", default=[], metavar="OPTION",
+                        help="repeatable allowlisted engine option placed before the benchmark's own: --gpu-index N, "
+                             "--rendering-driver NAME or --gpu-profile (write --engine-arg=--gpu-index=1)")
     parser.add_argument("--timeout", type=float, default=900)
     parser.add_argument("--parse-only", action="store_true")
     args = parser.parse_args()
+    try:
+        engine_args = parse_engine_args(args.engine_arg, args.renderer, "headless" if args.parse_only else "windowed")
+    except EvidenceError as exc:
+        parser.error(str(exc))
     selected_project = args.project.resolve()
     if selected_project != PROJECT.resolve() and not selected_project.is_relative_to((ROOT/".local").resolve()):
         parser.error("Project must be this task's project or an ignored task overlay")
@@ -327,6 +355,7 @@ def main() -> int:
               "main_listeners":args.main_listeners,
               "arrival_radius":args.arrival_radius,
               "environment_overrides": args.env,
+              "renderer": args.renderer, "engine_args": engine_args,
               "process_cache_state": "fresh process; OS/driver cache state uncontrolled"}
     config_path.write_text(json.dumps(config, indent=2), encoding="utf-8")
     configuration_sha = hashlib.sha256(config_path.read_bytes()).hexdigest()
@@ -348,13 +377,8 @@ def main() -> int:
         if not separator or not key.startswith(("ELORIA_", "RABBITLANDS_")):
             parser.error("--env requires an explicit ELORIA_ or RABBITLANDS_ key=value")
         env[key] = value
-    command = [str(args.godot.resolve()), "--path", str(PROJECT), "--script",
-               "res://tests/integration/continent_stream_benchmark.gd", "--audio-driver", "Dummy"]
-    if args.parse_only:
-        command.extend(["--headless", "--check-only"])
-    else:
-        command.extend(["--rendering-method", "forward_plus", "--resolution", "1280x720", "--position", "-16000,-16000"])
-    command.extend(["--log-file", str(output / "engine.log")])
+    command = engine_command(args.godot.resolve(), PROJECT, output / "engine.log", args.renderer,
+                             engine_args, args.parse_only)
     samples, failure = [], ""
     started = time.perf_counter()
     with BenchmarkLock(Path("C:/rabbitlands/.benchmark-locks/client-performance.lock"), label="continent-stream-benchmark"):
