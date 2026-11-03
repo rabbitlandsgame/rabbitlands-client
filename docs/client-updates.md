@@ -67,7 +67,11 @@ package count. Existing `client-assets` URLs remain valid; older builds also use
 `.pkg.<id>.zip.###` names.
 Each package has a full ZIP SHA-256, bounded download-part hashes, and a signed
 inventory of its files, sizes and hashes. Fixed groups cover the engine,
-client pack, actors, maps, audio, shared assets and records. Path-based buckets
+client pack, release descriptor, actors, maps, audio, shared assets and records.
+The release descriptor (`app/client-release.json` and its loose copy
+`app/data/client_release.json`) is its own `release-descriptor` package, so its
+per-commit change no longer rewrites the client pack's package or a records
+bucket. Path-based buckets
 keep membership stable when another file is added. ZIP timestamps, entry order
 and permissions are fixed, so an unchanged package keeps its checksum across
 builds, independent of the release date, filename and source-file timestamps.
@@ -80,8 +84,8 @@ invalidates a large package of unrelated meshes and textures. The package format
 and signed-file checks remain compatible with earlier package updaters.
 
 Prepared world data is shipped loose under `app/prepared-world/`, outside the
-client PCK. Each engine/renderer compatibility variant has a small catalog
-package, eight stable metadata buckets and 128 stable native-payload buckets.
+client PCK. Each engine/renderer-family compatibility variant (Forward+ and
+Mobile share one variant) has a small catalog package, eight stable metadata buckets and 128 stable native-payload buckets.
 The geometry, collision and paving files use the same signed file inventories,
 part checksums, repair checks and transactional installation as other assets.
 Changing client code alone does not change these package identities. A changed
@@ -192,6 +196,9 @@ installation and its download cache. It asks for confirmation and refuses a
 running or Steam-managed installation. On Windows it uses the registered Inno
 uninstaller when available, preserving Windows' shortcut/app-entry cleanup;
 otherwise a hidden native helper removes the files after the executable exits.
+The Inno uninstaller also removes what an interrupted update can leave:
+`.eloria-update-stage/`, `.eloria-update-backup/`, older updaters'
+`.eloria-previous/`, and the update journals with their temporary `.tmp` files.
 Linux removes the recognized game folder directly. Player settings outside the
 installation are retained. Windows **Installed apps** can also uninstall an
 Inno installation.
@@ -289,6 +296,11 @@ The output is `../dist/releases/client-<full-client-commit>/`:
   unpacked file count. Keep setup open until these steps finish. A second setup
   is blocked, and a helper still working in the background keeps the installation
   locked until it finishes. Locks left by a crashed helper can be recovered on retry.
+  Online setup undoes an interrupted per-file update before it plans, as the
+  launcher does. It asks for free space of two copies of its download (setup keeps
+  its downloads until it exits; its helper copies them into the update cache) plus
+  the larger of the unpacked game and its largest multi-part package, plus 512 MiB.
+  Multi-part packages are joined before unpacking starts, so the two never add up.
   Setup can repair the same build. Players need an internet connection, and
   do not manually download the update parts. Shortcuts start the restart updater.
 - **Linux:** one `*-download.sh` helper. It verifies and starts the native

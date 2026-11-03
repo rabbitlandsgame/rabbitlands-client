@@ -146,7 +146,10 @@ collision, batching, scene structure or material interpretation, even when map
 source bytes are unchanged. `MapGeometryCache.VERSION` aliases this shared version;
 the collision and paving policies include it too. Update the writer, texture-source or binding policy
 identifiers as well when their contracts change. The policy key also includes
-the engine build, renderer, archived-model policy and older map-cache format.
+the engine build, the renderer family (`RendererFamily.cache_renderer()`: Forward+
+and Mobile both key as `forward_plus` because they share Godot's RenderingDevice
+mesh, texture and material storage; the compatibility renderer keys
+`gl_compatibility`), archived-model policy and older map-cache format.
 
 Canonical map and scenery image sharing uses central geometry policy 4, map scene
 format 11, and texture-source/binding policy v3. Existing prepared entries are
@@ -175,7 +178,8 @@ python godot-client/tools/map_geometry_cache.py build --project godot-client --g
 ```
 
 The tool uses Forward+ by default; `--rendering-method gl_compatibility` selects
-OpenGL explicitly. It renders in an offscreen window with dummy audio, and keeps
+OpenGL explicitly. A Mobile run would produce the same Forward+ keys; release
+preparation still runs and requires Forward+. It renders in an offscreen window with dummy audio, and keeps
 its profile, jobs, reports and logs under the ignored
 `godot-client/test-artifacts/map-geometry-prepare/` directory. `--user-root`
 selects another isolated output/profile directory; it does not copy player
@@ -191,7 +195,8 @@ for diagnosis and resumption.
 
 Release packages supply the complete scoped preparation as read-only loose
 assets. A checksum-bound catalog provides geometry, collision and paving entries
-for a compatible engine/renderer. Ordinary launches consume these in place and
+for a compatible engine and renderer family (a Forward+ catalog also serves
+Mobile). Ordinary launches consume these in place and
 skip the whole-world preparation screen. When that catalog is bound to the
 current scope, registry and policies, its own keys are the preparation targets,
 so startup parses none of the scope's manifests; a locally changed manifest

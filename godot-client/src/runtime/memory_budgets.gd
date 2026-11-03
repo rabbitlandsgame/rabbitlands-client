@@ -74,11 +74,11 @@ const CROWD_PARK_LIMIT := "crowd_park_limit"
 ## keep today's WorldPark (world_park_policy.gd BUDGET_BYTES), bake
 ## (rl_head_identity_bake.gd BUDGET_BYTES, IDLE_BYTES) and park pool
 ## (crowd_presentation.gd PARK_LIMIT) values: the approval reduces them on
-## small machines only. The creature and RL head file caches have no budget
-## today (held until logout; all-or-nothing). The territory stream budget
-## (256 MiB) is not a class budget. Nothing reads this table until the chunks
-## that consume it (WorldPark, the creature cache, the RL head cache, the crowd
-## park pool) land.
+## small machines only. The RL head file cache has no budget yet (held until
+## logout; all-or-nothing). The territory stream budget
+## (256 MiB) is not a class budget. WorldPark (M2), the creature scene cache
+## (M5) and the crowd park pool (M7a) read this table; the RL head file and
+## identity bake rows have no reader until M4.
 const BUDGETS := {
 	SMALL: {
 		WORLD_PARK_BYTES: 384 * MIB,

@@ -318,7 +318,9 @@ quality, which are kept but not applied. The benchmark launcher's `--body-cap`
 and `--tuning` set them; left unset, a run uses the player defaults (the
 quality's count, 160 characters at Medium and High and 60 at Low, 8 capes).
 Since the Low actor tier, `--settings-profile default --quality low` draws 60
-bodies: pass `--body-cap 160` to compare with runs from before it. The
+bodies: pass `--body-cap 160` to compare with runs from before it. The runner
+refuses a `--measurement-status quiet-comparison` run at `--quality low` without
+`--body-cap` (MOB-C6a); screening runs print a note. The
 per-frame loop changes are not switchable: they change no behaviour.
 
 ## Benchmark
@@ -365,8 +367,10 @@ about six times the steps and five times the combat of live play. `--map` (defau
 on `landfall` and `twinbrook` the player stands on the S3 market and S2 wave
 centres, and `--centre x,y` names any other tile. `--quality low|medium|high`
 sets the graphics quality through `ELORIA_LOOK_QUALITY`. `--diagnostics
-no_animation,no_overhead,no_ground` freezes every AnimationPlayer, hides the
-overhead blocks or skips the ground rays, for attribution only.
+no_animation,no_overhead,no_ground,no_text_pass,text_pass_always` freezes every
+AnimationPlayer, hides the overhead blocks, skips the ground rays, stops the
+separate world-text pass while its labels remain, or renders that pass every
+frame, for attribution only.
 
 `--replay <recording>.rlrec` (driver `replay`) measures a real session instead
 of a synthetic crowd. The game server can record every connection's frames

@@ -65,12 +65,14 @@ The server may cap how many players and creatures a client is shown at once,
 nearest first, always keeping the player's target, attackers, party and
 trade partner, and ranking players who can attack the player above
 creatures. The client declares its own cap as `actor_cap:<N>` after the
-capability names. It follows the graphics setting **Characters drawn in a
-crowd** (`docs/crowd-presentation-policy.md`): the server is asked for no
-more actors than the client draws with a body, and never more than 160, the
-most the protocol takes. At the setting's default of 160 the declaration is
-160, the same as declaring nothing. The rule is one function,
-`InterestProtocol.declared_actor_cap`.
+capability names. It follows the bodies the client draws (`crowd.body_cap`):
+the graphics setting **Characters drawn in a crowd**, which by default follows
+the graphics quality (60 at Low, 160 at Medium and High;
+`docs/crowd-presentation-policy.md`), or a cap a benchmark forces. The server
+is asked for no more actors than the client draws with a body, and never more
+than 160, the most the protocol takes; at 160 the declaration is the same as
+declaring nothing. A quality change re-declares the cap like a slider change.
+The rule is one function, `InterestProtocol.declared_actor_cap`.
 
 The cap is declared at login. When the player changes the setting during a
 session, the client sends `#actorcap <N>` once the slider has rested for half
