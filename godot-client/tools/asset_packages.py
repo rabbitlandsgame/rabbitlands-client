@@ -19,13 +19,22 @@ PREPARED_WORLD_BLOB_BUCKETS = 128
 PREPARED_WORLD_METADATA_BUCKETS = 8
 MAP_TEXTURE_BUCKETS = 128
 MAP_METADATA_BUCKETS = 8
+# The release descriptor names the commit, so its bytes change in every
+# release. The packager writes it twice: app/client-release.json for the
+# updater and launcher, and the loose app/data/client_release.json copy (the
+# PCK carries a third). A package of its own keeps that change out of the
+# PCK's package and out of a records bucket of unrelated loose files.
+RELEASE_DESCRIPTOR_PACKAGE = "release-descriptor"
+RELEASE_DESCRIPTOR_PATHS = frozenset({"app/client-release.json", "app/data/client_release.json"})
 
 
 def package_id(relative: str) -> str:
     parts = relative.split("/")
     if relative in ("app/RabbitLands.exe", "app/RabbitLands.x86_64"):
         return "engine"
-    if relative in ("app/RabbitLands.pck", "app/client-release.json"):
+    if relative in RELEASE_DESCRIPTOR_PATHS:
+        return RELEASE_DESCRIPTOR_PACKAGE
+    if relative == "app/RabbitLands.pck":
         return "client"
     if relative.startswith("app/prepared-world/") and len(parts) >= 4:
         # Compatibility describes native format/renderer policy, never the
