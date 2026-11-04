@@ -6324,9 +6324,8 @@ static func advance_frame_driven(delta: float) -> int:
 	var step := clampf(delta, 0.0, FRAME_DRIVEN_MAX_DELTA)
 	var stepped := 0
 	for id: int in _frame_awake.keys():
-		if not _frame_awake.has(id):
-			continue
-		var value: Variant = _frame_awake[id]
+		# One lookup: an entry another actor's step erased reads null here.
+		var value: Variant = _frame_awake.get(id)
 		if not is_instance_valid(value):
 			_frame_awake.erase(id)
 			continue

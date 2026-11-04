@@ -97,6 +97,18 @@ var lazy := true
 var gate := true
 var effects := true
 var park := true
+## The Low actor tier's per-body parts (LAT; Low and the Performance preset
+## only, owner decision 2026-11-02), on under every policy above, `legacy`
+## included: each is the tier's, not the crowd presentation's. A measurement
+## drops one with `-hands` (the fingerless crowd hand variant, LAT-L1/L6),
+## `-frameclock` (frame-driven remote motion, LAT-L7) or `-cues` (hand cues
+## kept to full-rate bodies, LAT-L2/L6), to compare the tier with and without
+## it in one tree. Medium and High use none of them, so these change nothing
+## there.
+const TIER_PARTS := ["hands", "frameclock", "cues"]
+var tier_hands := true
+var tier_frame_clock := true
+var tier_cues := true
 ## The gate's stepped bodies take turns over the frames (AnimationGate.stagger)
 ## rather than all being stepped on the same one.
 var stagger := true
@@ -160,10 +172,11 @@ func parked_actor_ids() -> Array:
 ## `RABBITLANDS_CROWD_PRESENTATION` and `RABBITLANDS_CROWD_BODY_CAP`. The first
 ## is empty or `all` for everything, `legacy` (or `0`/`off`) for none, or a
 ## comma list naming the features to keep (`lazy,gate`); `-name` drops one from
-## the full set. The second sets `body_cap`. Benchmarks use both to compare a
-## feature against the client without it. The third,
-## RABBITLANDS_CROWD_TUNING, sets budgets: `full=24,half=16,cloth=8` and
-## `banners=N` for the overhead banner cap (0 = none) at every quality.
+## the full set (`-hands`, `-frameclock` and `-cues` drop a part of the Low
+## actor tier, TIER_PARTS, under any policy). The second sets `body_cap`.
+## Benchmarks use both to compare a feature against the client without it.
+## The third, RABBITLANDS_CROWD_TUNING, sets budgets: `full=24,half=16,cloth=8`
+## and `banners=N` for the overhead banner cap (0 = none) at every quality.
 ## The park pool's size is the memory class's (RABBITLANDS_MEMORY_CLASS or
 ## `--memory-class=` force one for a measurement).
 func configure(features: String, cap: String = "", tuning: String = "") -> void:
@@ -178,7 +191,8 @@ func configure(features: String, cap: String = "", tuning: String = "") -> void:
 	else:
 		var only := false
 		for part: String in raw.split(",", false):
-			if not part.strip_edges().begins_with("-"):
+			var item := part.strip_edges()
+			if not item.begins_with("-") and not item in TIER_PARTS:
 				only = true
 		for name: String in names:
 			enabled[name] = not only
@@ -188,6 +202,14 @@ func configure(features: String, cap: String = "", tuning: String = "") -> void:
 				enabled.erase(item.substr(1))
 			elif item in names:
 				enabled[item] = true
+	var dropped := {}
+	for part: String in raw.split(",", false):
+		var item := part.strip_edges()
+		if item.begins_with("-") and item.substr(1) in TIER_PARTS:
+			dropped[item.substr(1)] = true
+	tier_hands = not dropped.has("hands")
+	tier_frame_clock = not dropped.has("frameclock")
+	tier_cues = not dropped.has("cues")
 	lazy = bool(enabled.get("lazy", false))
 	gate = bool(enabled.get("gate", false))
 	effects = bool(enabled.get("effects", false))
@@ -317,7 +339,8 @@ func describe() -> Dictionary:
 		"halfRateBodies": half_rate_bodies, "clothBodies": cloth_bodies,
 		"overheadCap": overhead_cap, "overheadsShown": _overheads_shown.size(),
 		"builds": builds, "releases": releases,
-		"revivals": revivals, "parked": _parked.size(), "parkLimit": park_limit}
+		"revivals": revivals, "parked": _parked.size(), "parkLimit": park_limit,
+		"tierHands": tier_hands, "tierFrameClock": tier_frame_clock, "tierCues": tier_cues}
 
 ## Hands the gate pass's build candidates over, nearest first. `pairs` holds
 ## `[distance, id]` arrays.
