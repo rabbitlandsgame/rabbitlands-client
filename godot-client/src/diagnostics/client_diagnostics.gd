@@ -6,9 +6,9 @@ extends Node
 var _driver_thread: Thread
 static var _startup_stage := ""
 static var _startup_stage_started := 0
-const LaunchOptions := preload("res://src/updates/launch_options.gd")
 const GraphicsOptions := preload("res://src/world/graphics_options.gd")
 const HardwareTier := preload("res://src/runtime/hardware_tier.gd")
+const RendererPolicy := preload("res://src/runtime/renderer_policy.gd")
 
 static func record(event: String, details: Dictionary = {}) -> void:
 	var row := details.duplicate()
@@ -26,26 +26,61 @@ static func startup_stage(next_stage: String) -> void:
 	_startup_stage = next_stage
 	_startup_stage_started = now
 
+## True while this process is quitting to restart into another renderer
+## (RendererPolicy.restart): Main skips its setup then, which the new process
+## repeats.
+static func restart_pending() -> bool:
+	return RendererPolicy.restarting
+
+## The startup record's renderer-policy fields, from RendererPolicy.reconcile's
+## result (`policy`) and HardwareTier.seed_first_run's (`tier`).
+static func renderer_policy_fields(policy: Dictionary, tier: Dictionary) -> Dictionary:
+	var values: Dictionary = policy.get("values", {})
+	var setting: Dictionary = policy.get("policy", {})
+	var fields := {
+		"renderer_effective": policy.get("effective", "auto"),
+		"renderer_requested": policy.get("requested", ""),
+		"renderer_fallback": bool(policy.get("fallback", false)),
+		"auto_renderer": values.get("auto_renderer", ""),
+		"auto_renderer_state": values.get("auto_renderer_state", ""),
+		"auto_renderer_attempts": int(values.get("auto_renderer_attempts", 0)),
+		"adapter_class": tier.get("adapter_class", ""),
+		"renderer_policy": {"integrated_renderer": setting.get("renderer", ""),
+			"source": setting.get("source", ""), "action": policy.get("action", "none"),
+			"reason": policy.get("reason", "")},
+	}
+	if not str(setting.get("rejected", "")).is_empty():
+		fields.renderer_policy["rejected"] = setting.rejected
+	return fields
+
 func _ready() -> void:
 	if OS.has_feature("web"): WebPrototype.prepare_preferences()
 	# A fresh profile's graphics defaults follow the hardware; before the map
 	# texture tier below is read and cached for the session, and before Main
 	# builds the login backdrop.
-	record("hardware_tier", HardwareTier.seed_first_run())
+	var tier := HardwareTier.seed_first_run()
+	record("hardware_tier", tier)
+	# Which renderer Automatic starts here: a first run's recommendation and the
+	# trial's outcome, recorded before the restart check reads them.
+	var policy := RendererPolicy.reconcile(tier)
 	GraphicsOptions.active_texture_skip()
-	var renderer := LaunchOptions.saved_renderer()
-	if LaunchOptions.needs_renderer_restart(renderer, RenderingServer.get_current_rendering_method(),
-			OS.get_cmdline_args(), OS.get_cmdline_user_args(), DisplayServer.get_name() == "headless"):
-		OS.set_restart_on_exit(true, LaunchOptions.restart_arguments(renderer,
-			OS.get_cmdline_args(), OS.get_cmdline_user_args()))
-		get_tree().quit()
+	var renderer := str(policy.effective)
+	var current := RenderingServer.get_current_rendering_method()
+	if RendererPolicy.needs_restart(renderer, current, OS.get_cmdline_args(), OS.get_cmdline_user_args(),
+			DisplayServer.get_name() == "headless"):
+		var plan := RendererPolicy.restart(get_tree(), renderer)
+		record("renderer_restart", {"renderer": renderer, "from": current, "mode": plan.mode,
+			"attempts": plan.get("attempts", -1), "renderer_policy": renderer_policy_fields(policy, tier).renderer_policy})
 		return
+	if float(policy.confirm_after) > 0.0:
+		get_tree().create_timer(float(policy.confirm_after), true, false, true).timeout.connect(
+			func() -> void: record("renderer_confirmed", RendererPolicy.confirm()))
 	var identity: Dictionary = {}
 	if FileAccess.file_exists("res://data/client_release.json"):
 		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/client_release.json"))
 		if parsed is Dictionary:
 			identity = parsed
-	record("startup", {
+	record("startup", renderer_policy_fields(policy, tier).merged({
 		"build_commit": identity.get("commit", "") if not str(identity.get("commit", "")).is_empty() else "source",
 		"build_platform": identity.get("platform", "source"),
 		"engine": Engine.get_version_info().get("string", ""),
@@ -69,7 +104,7 @@ func _ready() -> void:
 		"quality_override": OS.get_environment("ELORIA_LOOK_QUALITY"),
 		"vram_override": OS.get_environment("ELORIA_VRAM_TEXTURES"),
 		"no_map_cache": OS.get_environment("ELORIA_NO_MAP_CACHE") == "1"
-	})
+	}))
 	# Driver discovery can take seconds on Windows. Query once off the main
 	# thread, without stalling login or touching rendering objects there.
 	if DisplayServer.get_name() != "headless" and OS.get_name() in ["Windows", "Linux", "FreeBSD"]:

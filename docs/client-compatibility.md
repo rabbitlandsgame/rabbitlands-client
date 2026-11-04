@@ -22,7 +22,11 @@ mode).bat**. Linux equivalents are `RabbitLands-debug.sh`,
 Both compatibility launchers still use the restart updater when it is installed.
 Settings → Graphics also offers Automatic, Forward+ and OpenGL Compatibility
 as a saved renderer preference. Close and reopen the game after changing it.
-Explicit launcher/engine renderer flags take precedence over this preference.
+The compatibility and safe-mode launchers take precedence over this preference.
+A renderer passed directly as an engine flag (`--rendering-method`) is honoured
+while the preference is Automatic and Automatic starts the project default; the
+game cannot see engine flags, so with an explicit preference (or an active
+recommendation, below) a direct launch restarts into that renderer.
 The updater selects the saved renderer before starting the child game; a direct
 game launch relaunches once when needed, with a guard against fallback loops.
 Renderer flags reach the child game as engine arguments, before `--`. Safe-mode
@@ -39,6 +43,39 @@ screen shows its still image. Other computers keep the High defaults.
 Settings → Graphics notes a Performance preset start, and every setting can
 still be changed. Existing settings and the renderer choice are never changed,
 and launches with graphics overrides choose nothing.
+
+### Automatic renderer on integrated graphics
+
+Automatic can also record which renderer it starts on a computer
+(`src/runtime/renderer_policy.gd`). On a first run the game classifies the
+graphics adapter it actually renders on; for an integrated GPU on Windows,
+while Forward+ or Mobile works there, it can record the Mobile renderer and
+restart into it once. **This recommendation is switched off**
+(`RendererPolicy.INTEGRATED_RENDERER` is empty) until Mobile passes a
+performance and visual re-qualification, so Automatic starts Forward+ as
+before. Developers can turn it on for a launch with
+`RABBITLANDS_INTEGRATED_RENDERER=mobile` (`off` turns it off); that variable
+does not stop a first run from choosing its starting graphics.
+
+When it is on, the recommendation is a record beside the first-run choice in
+`[graphics]` of `eloria_hud.cfg` (`auto_renderer`, `auto_renderer_basis`,
+`auto_renderer_adapter`, `auto_renderer_state`, `auto_renderer_attempts`),
+never the player's choice:
+
+- an explicit renderer choice always wins, and only fresh profiles get one;
+- the compatibility and safe-mode launchers always keep OpenGL;
+- a process that runs the recommendation for 30 seconds marks it `ok`;
+- if it falls back to OpenGL (`failed_fallback`) or two starts end before `ok`
+  (`failed_start`), Automatic returns to Forward+ for good on that profile;
+- with the policy off again, the next ordinary launch withdraws a recorded
+  recommendation (`withdrawn`), so the switch also works as a kill switch;
+- launches that pin graphics or measure (overrides, tools, tests, benchmarks,
+  headless, the browser) record and change nothing.
+
+A restart into another renderer (the recommendation or an explicit choice)
+exits with code 75 when the updater announced in
+`RABBITLANDS_LAUNCHER_FEATURES` that it relaunches the game and keeps its
+installation lock; otherwise the game restarts itself.
 
 Send the three logs and identify which modes worked, whether the login panel or
 the world after login went blue, and whether the HUD or minimap remained visible.
@@ -129,8 +166,14 @@ retain precedence through their existing controls.
 
 `client_diagnostic` JSON lines survive release exports. Startup records the build,
 engine, OS, CPU/memory, GPU vendor/name, graphics API, active renderer/driver,
-texture format support and graphics overrides. Driver version discovery runs once
-on a worker so it cannot block login. The diagnostics autoload runs before the
+texture format support and graphics overrides. It also records the adapter class
+and the renderer decision: what the settings resolve to (`renderer_effective`),
+what the launch asked for (`renderer_requested`), whether a RenderingDevice
+request fell back to OpenGL (`renderer_fallback`), the `auto_renderer` record and
+the policy's action. A `renderer_restart` event precedes a restart into another
+renderer, and `renderer_confirmed` marks a recommendation confirmed. Driver
+version discovery runs once on a worker so it cannot block login. The diagnostics
+autoload runs before the
 application state and network, so its startup line survives a main-scene failure.
 
 Connection and login events contain state and error codes, with no credentials or
@@ -152,8 +195,13 @@ reviewing them. No logs are uploaded automatically.
 python -m pytest godot-client/tests/test_package_compatibility.py godot-client/tests/test_client_release.py
 godot --headless --path godot-client --script res://tests/test_compatibility_launch.gd
 godot --path godot-client --audio-driver Dummy --rendering-method gl_compatibility --rendering-driver opengl3 --script res://tests/test_compatibility_launch.gd
+godot --headless --path godot-client --script res://tests/test_renderer_policy.gd
 ```
 
 The runtime check exercises child-game argument separation, temporary safe-mode
 overrides and the production viewport snapshot. Its output must not contain the
-`DIAGNOSTIC_PRIVATE_` credential/reply sentinels used by the test.
+`DIAGNOSTIC_PRIVATE_` credential/reply sentinels used by the test. The renderer
+policy check covers the recommendation, its trial states and the restart plan;
+its two `ConfigFile parse error` lines are its unreadable-file case. With
+`RABBITLANDS_LAUNCHER_FEATURES=renderer-relaunch` and `-- --relaunch-child` it
+instead performs a real relaunch restart and must exit with code 75.

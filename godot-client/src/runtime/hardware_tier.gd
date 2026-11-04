@@ -21,7 +21,10 @@ extends RefCounted
 ## section exists and the choice is stable. A launch that pins graphics or
 ## measures (the environment overrides, a `--script` main loop, the crowd
 ## benchmark, headless, the browser build) is left alone and seeds nothing.
-## The renderer is not part of this: Automatic stays Automatic.
+## The renderer is not part of this: the saved choice stays Automatic. Which
+## renderer Automatic starts is RendererPolicy's (src/runtime/renderer_policy.gd),
+## which reads this classification (`adapter_class`) right after the seeding,
+## under the same `blocker`, and records its own keys beside the tier.
 ##
 ## The script declares no `class_name` (callers preload it): it runs from an
 ## autoload, before anything has forced the global class cache up to date.
@@ -109,8 +112,10 @@ const ON_SPELLINGS: Array[String] = ["on", "1", "true", "yes"]
 ## Environment variables that override graphics, crowd or runtime choices for a
 ## developer, a test or a measurement. Any of them set means the launch is not
 ## a player's first run. The optimisation profile's own variables are added
-## from its table. RABBITLANDS_LAUNCH_CONTEXT is deliberately absent: the
-## updater sets it on every ordinary launch. The content-digest switches
+## from its table. RABBITLANDS_LAUNCH_CONTEXT and RABBITLANDS_LAUNCHER_FEATURES
+## are deliberately absent: the updater sets them on every ordinary launch. So
+## is RendererPolicy's RABBITLANDS_INTEGRATED_RENDERER, which exists to test a
+## real first run with the iGPU renderer policy on. The content-digest switches
 ## (RABBITLANDS_CONTENT_DIGEST*) change no graphics and are left out.
 const OVERRIDE_VARIABLES: Array[String] = ["ELORIA_LOOK", "ELORIA_LOOK_QUALITY",
 	"ELORIA_LOOK_QUALITY_TRIM", "ELORIA_VRAM_TEXTURES", "RABBITLANDS_CROWD_BODY_CAP",
