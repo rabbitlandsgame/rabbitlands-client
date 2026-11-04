@@ -13,6 +13,7 @@ const TextureSizes := preload("res://src/world/prepared_texture_sizes.gd")
 const AnimationKeys := preload("res://src/world/prepared_animation_keys.gd")
 const CreaturePayload := preload("res://src/actors/creature_payload.gd")
 const SceneryImages := preload("res://src/world/scenery_image_sources.gd")
+const ActorImages := preload("res://src/actors/actor_images.gd")
 static func node_policy() -> String:
 	var policy := OptimizationProfile.selected("prepared_node_policy")
 	return "lazy-source-v1" if policy == "lazy-source-v1" else "retain"
@@ -93,9 +94,21 @@ static func scene_texture_token(source: String, verified_scenery: Dictionary = {
 				var info := Vram.index_for_directory(directory)
 				parts.append("%s:%s:%s" % [logical_source(directory), str(info.status), str(info.sha256)])
 		return "|".join(parts)
-	return "scene-images-v1|%s|skip=%d|formats=%d|mode=%s" % [
-		"world-preupload-mips" if world else "actor-runtime-import",
-		Graphics.active_texture_skip(), Vram.usable_formats(), Vram.mode_name()]
+	# Actor documents (AT-C2): a prepared scene keeps the textures it was
+	# cooked with, so one built from decoded images must not be reused once
+	# the actor image extension uploads sidecars, nor the reverse. The token
+	# carries both switches, the formats, the map texture quality (kept from
+	# v1), the actor mip skip and fallback chain, and the sidecar index beside
+	# the source (its status and the sha256 of its bytes).
+	var parts := PackedStringArray(["scene-images-v2", "actor-images",
+		"skip=%d" % Graphics.active_texture_skip(), "actor-skip=%d" % ActorImages.texture_skip(),
+		"formats=%d" % Vram.usable_formats(), "mode=" + Vram.mode_name(), "actor-mode=" + ActorImages.mode(),
+		"cpu-mips=%d" % int(ActorImages.fallback_mips())])
+	if ActorImages.active() and Vram.mode() != Vram.Mode.OFF:
+		var directory := source.get_base_dir()
+		var info := Vram.index_for_directory(directory)
+		parts.append("%s:%s:%s" % [logical_source(directory), str(info.status), str(info.sha256)])
+	return "|".join(parts)
 
 static func _resource_root(globalized: String, executable: String) -> String:
 	# A template mounted from its PCK can have an empty resource_path. Godot

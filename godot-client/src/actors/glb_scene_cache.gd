@@ -74,7 +74,13 @@ extends RefCounted
 ## without mips it aliases and swims as the camera moves - the reason
 ## world_loader rebuilds the chains of every map chunk. Models under this root
 ## get the same chains and the same anisotropic filter as the map around them.
-## Actors are left as they were: their load time is why this cache exists.
+## Actors get neither here (build_texture_mipmaps stays world-only): their
+## images are produced inside the parse by the actor image extension
+## (actor_images.gd), which uploads a GLB directory's offline VRAM sidecars
+## (BC7/BC5/BC1 with their whole mip chain, AT-C2) where an index lists them
+## and decodes the rest as before, without mips, sharing one texture per image
+## across GLBs. That costs the parse no readback, so worker and main parses
+## get the same result.
 const GltfQuantization := preload("res://src/world/gltf_quantization.gd")
 const ActorImages := preload("res://src/actors/actor_images.gd")
 const GltfAnimationFidelity := preload("res://src/actors/gltf_animation_fidelity.gd")
@@ -745,13 +751,14 @@ static func _fill_row(path: String, row: Dictionary) -> void:
 		row.probes = probes
 
 ## Mip chains the ledger counts for a scene's ImageTextures: none for an actor
-## document's runtime parse (actor_images.gd, like GLTFDocument, decodes
-## embedded images without mips; imported URI textures read their own
-## header), the full chain otherwise (erring high). AT-C2's sidecars bring
-## mipmapped actor images: change this with them.
+## document's runtime parse from a directory without sidecars (actor_images.gd,
+## like GLTFDocument, decodes embedded images without mips; imported URI
+## textures read their own header), the full chain otherwise (erring high: a
+## directory with a sidecar index mixes BC sidecars, which have their chain,
+## with decoded images, which do not; ActorImages.may_have_mipmaps).
 static func _texture_mipmaps(path: String, scene: PackedScene) -> int:
 	return ResourceBytes.MIPMAPS_NONE if scene.resource_path.is_empty() and is_actor_document(path) \
-		else ResourceBytes.MIPMAPS_UNKNOWN
+		and not ActorImages.may_have_mipmaps(path.get_base_dir()) else ResourceBytes.MIPMAPS_UNKNOWN
 
 ## Measures pending rows for about `slice_usec` (a row is never split).
 static func _fill_pending(slice_usec: int) -> void:
@@ -863,7 +870,7 @@ static func retention_snapshot() -> Dictionary:
 		"direct_raw_scene_entries": _direct_raw_scenes.size(), "failed_paths": _failed.size(),
 		"lookup_hits": _lookup_hits, "lookup_misses": _lookup_misses,
 		"bytes_estimate_available": true, "timings": timings,
-		"actor_images": ActorImages.totals(),
+		"actor_images": ActorImages.retention_snapshot(),
 		"entries": _scenes.size(), "bytes": total, "bytes_by_domain": _domain_bytes.duplicate(),
 		"pending_rows": _pending_rows, "budget_domain": DOMAIN_CREATURE,
 		"budget": creature_budget_bytes(), "idle_msec": creature_idle_msec(),
@@ -956,10 +963,11 @@ static func _build_raw(path: String, scenery: Dictionary = {}) -> PackedScene:
 
 ## The one runtime glTF parse, shared by `_build_raw` (main) and
 ## `prepare_actor` (any thread): the file's generated scene, unowned and
-## unpacked, or null. An actor document gets the actor image extension, a
-## world asset its image pass. Steps that change the parsed state for both
-## paths (AT-C2's sidecars, ALOD-C1h's cooked geometry) go here, after the
-## parse and before generate_scene().
+## unpacked, or null. An actor document gets the actor image extension, whose
+## sidecars and shared textures (AT-C2) are in place when the parse returns,
+## on either path; a world asset its image pass. Steps that change the parsed
+## state for both paths after the parse (ALOD-C1h's cooked geometry) go here,
+## before generate_scene().
 static func _parse_generate(path: String, scenery: Dictionary, actor_document: bool) -> Node3D:
 	if not GltfQuantization.ensure_registered():
 		push_error("raw glTF parse requires main-thread extension initialization")
