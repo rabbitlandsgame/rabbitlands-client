@@ -3,6 +3,8 @@ const TextColors := preload("res://src/ui/text_colors.gd")
 const Release = preload("res://src/updates/release.gd")
 const PackageDownload = preload("res://src/updates/package_download.gd")
 const StartupUpdate = preload("res://src/updates/startup_update.gd")
+const CACHE_JANITOR := "res://src/runtime/cache_janitor.gd"
+const CACHE_JANITOR_SWITCH := "RABBITLANDS_CACHE_JANITOR"
 var _startup: Node
 var identity: Dictionary = {}
 var _target := ""
@@ -30,6 +32,7 @@ func _ready() -> void:
 		set_process(false)
 		return
 	identity = Release.read_json("res://data/client_release.json")
+	_schedule_cache_janitor()
 	if identity.get("platform", "source") != "source" and Release.update_owner(identity) == "github":
 		var cache := Release.cache_for(Release.install_root())
 		if DirAccess.make_dir_recursive_absolute(cache) == OK:
@@ -69,6 +72,20 @@ func _ready() -> void:
 	# Cached updates from older clients still require explicit consent. The
 	# startup checker owns discovery; there is no background install decision.
 	set_process(false)
+
+## This node owns user-data housekeeping: the stale cache janitor (UD-03) runs
+## on a low-priority worker CacheJanitor.DELAY_SECONDS later, in release builds
+## (or with RABBITLANDS_CACHE_JANITOR=on), as a child that stops when the client
+## closes. Loaded by path, never preloaded: the updater tests' own project
+## copies this file without the game's caches.
+func _schedule_cache_janitor() -> void:
+	if identity.get("release_build", false) != true and OS.get_environment(CACHE_JANITOR_SWITCH).strip_edges().to_lower() not in ["1", "on", "true", "yes"]:
+		return
+	if not ResourceLoader.exists(CACHE_JANITOR):
+		return
+	var janitor: Script = load(CACHE_JANITOR)
+	if janitor != null:
+		janitor.call("schedule", self, identity)
 
 func _process(_delta: float) -> void:
 	if not _busy and not _latest_notice.is_empty() and _retry_at_msec > 0 and Time.get_ticks_msec() >= _retry_at_msec:

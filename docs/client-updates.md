@@ -522,6 +522,27 @@ process is still running. Downloads and readiness records are scoped to each
 installation under the player's game user directory; account preferences stay
 in the existing user directory.
 
+The game also removes cache generations it can never read again from the
+player's user directory (`src/runtime/cache_janitor.gd`). In release builds,
+30 seconds after the update checker starts, a low-priority worker removes:
+- map geometry, collision-face and paving policy folders whose own entry header
+  shows an older cache version, or the same version under another engine,
+  format or Mobile's former own renderer key;
+- the legacy scene-cache entries (`map-cache`) of geometry-scoped whole maps
+  such as the gauntlets, which load prepared geometry instead.
+
+The newest policy of each renderer family is always kept (Forward+ and Mobile
+share one; OpenGL Compatibility has its own), so switching renderers rebuilds
+nothing. Folders it cannot prove stale are kept. It does nothing to the policy
+folders while a world preparation runs or is pending, stops at the next file
+when the game closes, and prints one `RABBITLANDS_CACHE_JANITOR` line with the
+bytes it freed. Godot's shader caches are left alone unless
+`RABBITLANDS_CACHE_JANITOR_SHADERS=on`; that rule (non-newest generations idle
+for 14 days, GLES3 shaders capped at 128 MiB) waits for an owner decision.
+`RABBITLANDS_CACHE_JANITOR=off` disables the janitor; `on` also runs it in a
+source build. Like the pre-login world preparation, it stays off in timed
+benchmark runs (`RABBITLANDS_CROWD_BENCH_START_TOKEN` set) unless switched `on`.
+
 Only changed or damaged asset packages are downloaded, and only their changed
 members are unpacked. Keep enough free space for the changed downloads and the
 changed files. ZIP entries use 8 MiB chunks and 64-bit archive offsets, so even

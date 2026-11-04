@@ -605,6 +605,65 @@ static func prune_unreferenced() -> int:
 		if _owned_blob(path) and not retained.has(path) and DirAccess.remove_absolute(path) == OK: removed += 1
 	return removed
 
+# --------------------------------------------------------------------------
+# Helpers for the cache janitor (UD-03, src/runtime/cache_janitor.gd). They
+# read and decide; the janitor deletes. The policy rule is shared with the
+# collision and paving caches (CollisionCache.classify_policy_dirs).
+# --------------------------------------------------------------------------
+
+## _policy_digest() as a run would compute it whose renderer part is
+## `renderer`, taken literally (a family, or `mobile`, the key Mobile runs
+## used before MOB-C2).
+static func policy_for(renderer: String) -> String:
+	var engine := Engine.get_version_info()
+	return _digest([VERSION,Writer.POLICY,Sources.POLICY,Bindings.POLICY,MapCache.CACHE_FORMAT_VERSION,engine.get("hash",""),
+		engine.get("string",""),renderer,Archived.cache_token()])
+
+## The geometry cache's janitor table (main thread). The policy this process
+## already reads (`policy()`, once initialized) is current too.
+static func janitor_policies() -> Dictionary:
+	var per_renderer := {}
+	for key: String in CollisionCache.janitor_keys(): per_renderer[key] = policy_for(key)
+	var table := CollisionCache.janitor_table(_policy_digest(),VERSION,per_renderer)
+	_mutex.lock()
+	var running := _policy
+	_mutex.unlock()
+	if not running.is_empty():
+		if running != _policy_digest():
+			table.ok = false
+			table.reason = "policy_drift"
+		(table.current as Dictionary)[running] = "current"
+	return table
+
+## The stale policy folders of this cache under `directory` (read only).
+static func stale_policy_dirs(directory := DIRECTORY) -> Dictionary:
+	return CollisionCache.classify_policy_dirs(directory,janitor_policies(),MAX_METADATA_BYTES)
+
+## The asset ids among `names` (map names as the scene cache files them,
+## MapSceneCache._safe_name) of geometry-scoped whole maps: maps whose
+## `world` target the scope declares and whose manifest has no streaming
+## chunks. WorldLoader never reads or writes the legacy scene cache for such a
+## map (it loads prepared geometry or the raw package), so its scene-cache
+## entries are only disk (`_retire_scene_cache_entries` removes them when the
+## map loads). Reads only the manifests of scope maps named in `names`.
+static func scoped_whole_map_ids(names: PackedStringArray) -> PackedStringArray:
+	var ids := PackedStringArray()
+	if names.is_empty(): return ids
+	var scope := _read(SCOPE)
+	if int(scope.get("schema",0)) != 1 or not scope.get("maps") is Array: return ids
+	var registry: Variant = null
+	for id: Variant in scope.maps:
+		if not id is String or not MapCache._safe_name(id) in names: continue
+		if registry == null: registry = _read(REGISTRY).get("maps",{})
+		var path := str(MapRegistry.resolve(registry,id).get("manifest",""))
+		if path.is_empty() or not eligible("world",path): continue
+		var document := _read(path)
+		if document.is_empty() or document.has("streamingChunks"): continue
+		var asset := str(document.get("asset",{}).get("id",id))
+		if asset.is_empty() or asset.contains("__chunk_") or not MapCache._safe_name(asset) in names: continue
+		if not asset in ids: ids.append(asset)
+	return ids
+
 static func snapshot() -> Dictionary:
 	initialize()
 	_mutex.lock()

@@ -387,3 +387,158 @@ static func prune_unreferenced() -> int:
 		var path := _root().path_join("blobs").path_join(name)
 		if _owned(path,"rlc") and not retained.has(path) and DirAccess.remove_absolute(path) == OK: removed += 1
 	return removed
+
+# --------------------------------------------------------------------------
+# Stale policy folders: helpers for the cache janitor (UD-03,
+# src/runtime/cache_janitor.gd). They only read and decide; the janitor
+# deletes. The geometry and paving caches use the shared ones below.
+# --------------------------------------------------------------------------
+
+## The renderer families caches are keyed by: RendererFamily.cache_renderer()
+## over the three rendering methods. Mobile keys as `forward_plus`, so this is
+## `forward_plus` and `gl_compatibility`.
+static func renderer_families() -> PackedStringArray:
+	var families := PackedStringArray()
+	for method: String in [RendererFamily.FORWARD_PLUS,RendererFamily.MOBILE,RendererFamily.COMPATIBILITY]:
+		var family := RendererFamily.cache_renderer(method)
+		if not family in families: families.append(family)
+	return families
+
+## policy() as a run would compute it whose renderer part is `renderer`, taken
+## literally (a family, or `mobile`, the key Mobile runs used before MOB-C2).
+static func policy_for(renderer: String) -> String:
+	var engine := Engine.get_version_info()
+	return _digest([POLICY,VERSION,GeometryPolicy.VERSION,MapCache.CACHE_FORMAT_VERSION,engine.get("hash",""),
+		engine.get("string",""),renderer,Archived.cache_token()])
+
+## The renderer keys a janitor table needs a policy for: every family, plus
+## `mobile` (the retired key).
+static func janitor_keys() -> PackedStringArray:
+	var keys := renderer_families()
+	if not RendererFamily.MOBILE in keys: keys.append(RendererFamily.MOBILE)
+	return keys
+
+## Builds the janitor's policy table for a cache. `running` is its policy()
+## now; `per_renderer` maps each janitor_keys() key to that cache's policy
+## under it. `ok` is false (and the cache must be left alone) when the policy
+## under the running family is not `running`: the helper would then disagree
+## with the code that reads the cache.
+static func janitor_table(running: String, version: int, per_renderer: Dictionary) -> Dictionary:
+	var current := {running:"current"}
+	for family: String in renderer_families():
+		var key := str(per_renderer.get(family,""))
+		if not key.is_empty() and not current.has(key): current[key] = "current_"+family
+	var retired := {}
+	var mobile := str(per_renderer.get(RendererFamily.MOBILE,""))
+	if not mobile.is_empty() and not current.has(mobile): retired[mobile] = "renderer_key"
+	var ok: bool = not running.is_empty() and str(per_renderer.get(RendererFamily.cache_renderer(),"")) == running
+	return {"ok":ok,"reason":"" if ok else "policy_drift","version":version,"current":current,"retired":retired}
+
+## The collision cache's janitor table (main thread: it reads the engine and
+## the archived-model token).
+static func janitor_policies() -> Dictionary:
+	var per_renderer := {}
+	for key: String in janitor_keys(): per_renderer[key] = policy_for(key)
+	return janitor_table(policy(),VERSION,per_renderer)
+
+## The stale policy folders of this cache under `directory` (read only).
+static func stale_policy_dirs(directory := DIRECTORY) -> Dictionary:
+	return classify_policy_dirs(directory,janitor_policies())
+
+## The entry header of the policy folder `folder` for `policy`: the first of at
+## most four entries/*.json (or .json.previous) whose own `policy` names the
+## folder, as {"schema":int,"policy":String}; {} when none reads.
+static func policy_header(folder: String, policy: String, max_bytes := MAX_METADATA_BYTES) -> Dictionary:
+	var entries := DirAccess.open(folder.path_join("entries"))
+	if entries == null: return {}
+	var tried := 0
+	for name: String in entries.get_files():
+		var finished := name.trim_suffix(".previous")
+		if finished.get_extension() != "json" or not _hash(finished.get_basename()): continue
+		tried += 1
+		if tried > 4: break
+		var file := FileAccess.open(folder.path_join("entries").path_join(name),FileAccess.READ)
+		if file == null or file.get_length() > max_bytes: continue
+		var value: Variant = JSON.parse_string(file.get_as_text())
+		if value is Dictionary and str(value.get("policy","")) == policy \
+				and typeof(value.get("schema")) in [TYPE_INT,TYPE_FLOAT]:
+			return {"schema":int(value.schema),"policy":policy}
+	return {}
+
+## True when `folder/preparing.lock/owner.json` names a running process.
+static func lock_alive(folder: String) -> bool:
+	var file := FileAccess.open(folder.path_join("preparing.lock/owner.json"),FileAccess.READ)
+	if file == null or file.get_length() > 8192: return false
+	var owner: Variant = JSON.parse_string(file.get_as_text())
+	var pid := int(owner.get("pid",0)) if owner is Dictionary else 0
+	return pid > 0 and OS.is_process_running(pid)
+
+## True while any policy folder under the geometry cache `directory` is held by
+## a live preparation lock (busy(), for any directory).
+static func preparation_locked(directory := "user://map-geometry-cache") -> bool:
+	var root := DirAccess.open(directory)
+	if root == null: return false
+	for name: String in root.get_directories():
+		if _hash(name) and lock_alive(directory.path_join(name)): return true
+	return false
+
+static func _holds_files(folder: String, depth := 0) -> bool:
+	var directory := DirAccess.open(folder)
+	if directory == null: return false
+	if not directory.get_files().is_empty(): return true
+	if depth >= 4: return true
+	for name: String in directory.get_directories():
+		if _holds_files(folder.path_join(name),depth+1): return true
+	return false
+
+## Sorts the policy folders under `directory` for the janitor, keeping the
+## newest policy of every renderer family. `table` is a janitor_table(). The
+## folder name is a one-way digest, so the decision comes from the folder's own
+## entry header (`schema` = the cache VERSION, `policy` = the folder name):
+## - kept: every current policy (the running one and each family's under this
+##   engine, VERSION and format), a newer schema (a newer client wrote it), a
+##   folder whose header cannot be read, a live preparation lock, and any name
+##   that is not a 64-hex digest (not ours);
+## - stale `version`: the header's schema is older than this VERSION;
+## - stale `renderer_key`: same schema, the digest of a retired renderer key
+##   (Mobile's own key before MOB-C2; Mobile now reads `forward_plus`);
+## - stale `engine_or_format`: same schema, a digest no current family has, so
+##   the engine hash/string or a format input (writer, sources, bindings,
+##   map-cache format, archived models) differs;
+## - stale `empty`: a folder that is not current and holds no file.
+## Returns {"ok","reason","stale":[{path,policy,reason,schema}],"kept":[{policy,reason}]}.
+static func classify_policy_dirs(directory: String, table: Dictionary, max_header_bytes := MAX_METADATA_BYTES) -> Dictionary:
+	var result := {"ok":bool(table.get("ok",false)),"reason":str(table.get("reason","")),"stale":[],"kept":[]}
+	if not result.ok: return result
+	var current: Dictionary = table.get("current",{})
+	var retired: Dictionary = table.get("retired",{})
+	var version := int(table.get("version",0))
+	var root := DirAccess.open(directory)
+	if root == null: return result
+	for name: String in root.get_directories():
+		if not _hash(name): continue
+		var folder := directory.path_join(name)
+		if current.has(name):
+			result.kept.append({"policy":name,"reason":str(current[name])})
+			continue
+		if root.is_link(folder):
+			result.kept.append({"policy":name,"reason":"link"})
+			continue
+		if lock_alive(folder):
+			result.kept.append({"policy":name,"reason":"locked"})
+			continue
+		var header := policy_header(folder,name,max_header_bytes)
+		var reason := ""
+		if header.is_empty():
+			if not _holds_files(folder): reason = "empty"
+			else:
+				result.kept.append({"policy":name,"reason":"unverified"})
+				continue
+		elif int(header.schema) > version:
+			result.kept.append({"policy":name,"reason":"newer_version"})
+			continue
+		elif int(header.schema) < version: reason = "version"
+		elif retired.has(name): reason = str(retired[name])
+		else: reason = "engine_or_format"
+		result.stale.append({"path":folder,"policy":name,"reason":reason,"schema":int(header.get("schema",-1))})
+	return result

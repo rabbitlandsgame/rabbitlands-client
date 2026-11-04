@@ -354,6 +354,58 @@ static func prune(map_id: String, keep: String) -> int:
 			removed += 1
 	return removed
 
+## Helpers for the cache janitor (UD-03, src/runtime/cache_janitor.gd).
+##
+## An entry carries no format header: its name folds CACHE_FORMAT_VERSION into
+## a one-way key, so a stale format is found by what the current loader can
+## read, not by reading the version back. These read only; the janitor deletes.
+
+## The map name a finished entry is filed under (`<name>-<16 hex>.scn`), or ""
+## for anything else (a write in flight, a foreign file).
+static func entry_map_name(path: String) -> String:
+	var name := path.get_file()
+	if name.begins_with(STAGING_PREFIX) or not name.ends_with(CACHE_EXTENSION): return ""
+	var stem := name.trim_suffix(CACHE_EXTENSION)
+	var cut := stem.length() - KEY_CHARACTERS - 1
+	if cut <= 0 or stem[cut] != "-": return ""
+	var key := stem.substr(cut + 1)
+	for character: String in key:
+		if not character in "0123456789abcdef": return ""
+	return stem.substr(0, cut)
+
+## The distinct map names entries are filed under in `directory`.
+static func entry_map_names(directory := CACHE_DIRECTORY) -> PackedStringArray:
+	var names := PackedStringArray()
+	for path: String in _entries_in(directory):
+		var name := entry_map_name(path)
+		if not name.is_empty() and not name in names: names.append(name)
+	return names
+
+## The finished entries in `directory` of the maps `retired_ids` (asset ids
+## whose legacy scene-cache format the current loader never reads, such as
+## geometry-scoped whole maps), by the exact-name rule of
+## WorldLoader._retire_scene_cache_entries: `<safe id>-<16 hex>.scn`. Writes
+## in flight and every other map's entries are not listed.
+static func stale_format_entries(retired_ids: PackedStringArray, directory := CACHE_DIRECTORY) -> PackedStringArray:
+	var retired := PackedStringArray()
+	for id: String in retired_ids:
+		retired.append(_safe_name(id))
+	var out := PackedStringArray()
+	for path: String in _entries_in(directory):
+		var name := entry_map_name(path)
+		if not name.is_empty() and name in retired: out.append(path)
+	return out
+
+static func _entries_in(directory: String) -> PackedStringArray:
+	var out := PackedStringArray()
+	var folder := DirAccess.open(directory)
+	if folder == null:
+		return out
+	for name: String in folder.get_files():
+		if name.ends_with(CACHE_EXTENSION) and not name.begins_with(STAGING_PREFIX):
+			out.append(directory.path_join(name))
+	return out
+
 ## A size for the settings row: "48.2 MB", "312 KB", "empty".
 static func describe_size(bytes: int) -> String:
 	if bytes <= 0:
