@@ -583,9 +583,12 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 	var prototypes: int = _resolve_shared_meshes(manifest, generated)
 	if prototypes > 0:
 		print_debug("world_load stage=shared_meshes placements=", prototypes,
-			" parsed=", ExternalMeshPool.last_parsed, " shared=", ExternalMeshPool.last_shared)
+			" parsed=", ExternalMeshPool.last_parsed, " shared=", ExternalMeshPool.last_shared,
+			" lods=", ExternalMeshPool.last_lods)
 	load_phases[&"sharedMeshPlacements"] = prototypes
 	load_phases[&"sharedMeshParsed"] = ExternalMeshPool.last_parsed
+	# Prototypes this load gave generated LODs (WD-C5, ExternalMeshPool).
+	load_phases[&"sharedMeshLods"] = ExternalMeshPool.last_lods
 	mark = _phase(&"sharedMeshes", mark)
 	world_root.name = "ImportedWorld_" + manifest.asset_id()
 	operation_began = Time.get_ticks_usec()

@@ -9,8 +9,9 @@ extends RefCounted
 ## 180 m cell drew a whole grove whenever one tree in it was in view, so small
 ## props now share 32 m cells and only the largest pieces 96 m ones. The
 ## runtime distance pass (WD-C3, `world_distance.gd`) reads the same classes
-## for its reach, shadow and LOD rules, so every number the owner tunes is in
-## this table.
+## for its reach, shadow and LOD rules, and the shared prototype pool (WD-C5,
+## `external_mesh_pool.gd`) its rule for which prototypes get generated LODs,
+## so every number the owner tunes is in this table.
 ##
 ## Membership does not move: which instances batch at all is still decided by
 ## the loader's legacy grouping (at least `WorldLoader.BATCH_MINIMUM_INSTANCES`
@@ -82,6 +83,29 @@ const EXTENT_STEP_METRES := 4.0
 ## Extents beyond this many steps are not ranged (none is expected: a class
 ## cell's own diagonal is under 75 m).
 const EXTENT_STEPS := 32
+
+# --- Generated prototype LODs (WD-C5, external_mesh_pool.gd) ----------------
+
+## A shared prototype (ExternalMeshPool) gets meshoptimizer LODs
+## (ImporterMesh.generate_lods) when the mesh it publishes has at least
+## LOD_MIN_TRIANGLES triangles and its mesh box's half-diagonal is at least
+## LOD_MIN_RADIUS metres, the S limit: small props stay whole and are culled
+## by their reach instead. The generated levels leave the vertices and the
+## full index list as they were; LOD_BIAS above decides how early a level is
+## drawn (at bias 1.0 only where Godot's 1 px screen-error threshold allows).
+## Baked like CELL_METRES: the geometry cook saves the levels with each
+## prototype, so changing these needs a MapGeometryPolicy.VERSION bump and a
+## re-cook of the prepared world.
+const LOD_MIN_TRIANGLES := 600
+const LOD_MIN_RADIUS := 1.5
+## ImporterMesh.generate_lods' normal_merge_angle and normal_split_angle
+## (degrees), the plan's pair: a 25 degree merge keeps the hard edges of cut
+## stone and crystal shards apart. The editor's import default merges at 60;
+## 13 of the 273 shipped prototypes that qualify come out differently. Godot
+## 4.7 no longer reads normal_split_angle (kept for the API: the tree, wall,
+## rock and undergrowth give identical levels at 0, 60 and 179).
+const LOD_NORMAL_MERGE_ANGLE := 25.0
+const LOD_NORMAL_SPLIT_ANGLE := 60.0
 
 ## Ground and water by node name, as the continent exporter names them
 ## (LookGround.kind_of reads the same prefixes): never ranged.
@@ -158,6 +182,11 @@ static func reach_metres(distance_class: String, quality_name: String) -> float:
 ## The mesh LOD bias at `quality_name`.
 static func lod_bias(quality_name: String) -> float:
 	return float(LOD_BIAS.get(quality_name.to_upper(), 1.0))
+
+## Whether a prototype mesh of `triangles` triangles whose mesh box has
+## half-diagonal `radius` (metres, its own space) gets generated LODs.
+static func generates_lods(triangles: int, radius: float) -> bool:
+	return triangles >= LOD_MIN_TRIANGLES and radius >= LOD_MIN_RADIUS
 
 ## The camera's orbit distance rounded up to CAMERA_BUCKET_METRES (at least
 ## one step).
