@@ -41,7 +41,6 @@ class Anchor extends RefCounted:
 	# Layer-owned.
 	var _layer: Object = null
 	var _slot := -1
-	var _callables: Array[Callable] = []
 
 	func _init(anchor_node: Node3D = null, local_point := Vector3.ZERO) -> void:
 		node = anchor_node

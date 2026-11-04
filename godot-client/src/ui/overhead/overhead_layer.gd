@@ -39,7 +39,8 @@ extends Control
 ##    from the camera, planar depth for orthographic) with a native sort, and
 ##    sends only what changed: visibility, draw index, transform, modulate.
 ## Glyphs are rasterised at their final size: text is drawn with an explicit
-## oversampling of the native pixels per design pixel (quantised to 1/16).
+## oversampling of the native pixels per design pixel (quantised to 1/16),
+## times the item's own scale for a scaled item such as the combat pointer.
 ## While that scale changes (resize, UI scale, a FOV lerp) the transform
 ## follows at once and the text is re-rasterised once the scale has held for
 ## SCALE_SETTLE_USEC, so a camera move does not re-record every item.
@@ -228,6 +229,10 @@ var _anchor_distance := PackedFloat64Array()
 var _anchor_sort := PackedFloat64Array()
 var _anchor_users := PackedInt32Array()
 var _anchor_free := PackedInt32Array()
+## The instance id of each anchor slot's node (0: none), and per watched node
+## {node, slots, callables} (_watch_node).
+var _anchor_node_ids := PackedInt64Array()
+var _watched_nodes: Dictionary = {}
 
 # --- Switch ------------------------------------------------------------------------
 
@@ -549,6 +554,10 @@ func _item_offset(slot: int, value: Vector2) -> void:
 
 func _item_scale(slot: int, value: float) -> void:
 	_scales[slot] = value
+	if _flags[slot] & F_HAS_TEXT:
+		# Its text is rasterised at the scale it is drawn at (_record).
+		_flags[slot] = _flags[slot] | F_DIRTY
+		_dirty_pending = true
 
 func _item_range(slot: int, end: float, margin: float) -> void:
 	_range[slot] = end
@@ -624,6 +633,7 @@ func _acquire_anchor(item: Item) -> int:
 		_anchor_distance.append(0.0)
 		_anchor_sort.append(0.0)
 		_anchor_users.append(0)
+		_anchor_node_ids.append(0)
 	anchor._layer = self
 	anchor._slot = slot
 	_anchor_objects[slot] = anchor
@@ -634,13 +644,7 @@ func _acquire_anchor(item: Item) -> int:
 	_anchor_nodes[slot] = node
 	_anchor_state[slot] = 0
 	if node != null:
-		var entered := _on_anchor_entered.bind(anchor)
-		var exiting := _on_anchor_exiting.bind(anchor)
-		var shown := _on_anchor_visibility.bind(anchor)
-		node.tree_entered.connect(entered)
-		node.tree_exiting.connect(exiting)
-		node.visibility_changed.connect(shown)
-		anchor._callables = [entered, exiting, shown]
+		_watch_node(node, slot)
 		_refresh_anchor(slot)
 	return slot
 
@@ -651,15 +655,8 @@ func _release_anchor(anchor: Item.Anchor) -> void:
 	_anchor_users[slot] -= 1
 	if _anchor_users[slot] > 0:
 		return
-	if is_instance_valid(anchor.node) and anchor._callables.size() == 3:
-		var node := anchor.node
-		if node.tree_entered.is_connected(anchor._callables[0]):
-			node.tree_entered.disconnect(anchor._callables[0])
-		if node.tree_exiting.is_connected(anchor._callables[1]):
-			node.tree_exiting.disconnect(anchor._callables[1])
-		if node.visibility_changed.is_connected(anchor._callables[2]):
-			node.visibility_changed.disconnect(anchor._callables[2])
-	anchor._callables = []
+	_unwatch_node(_anchor_node_ids[slot], slot)
+	_anchor_node_ids[slot] = 0
 	anchor._layer = null
 	anchor._slot = -1
 	_anchor_objects[slot] = null
@@ -679,18 +676,71 @@ func _refresh_anchor(slot: int) -> void:
 			state |= A_TREE_VISIBLE
 	_anchor_state[slot] = state
 
-func _on_anchor_entered(anchor: Item.Anchor) -> void:
-	if anchor._layer == self and anchor._slot >= 0:
-		_refresh_anchor(anchor._slot)
+## Follows a node's tree membership and visibility for one more anchor slot.
+## Godot counts one method bound to different arguments as one connection, so
+## each node is connected once, bound to its instance id, and its handlers
+## refresh every anchor slot it carries (a banner hangs its block, boss tag and
+## pointer from the same actor at three heights).
+func _watch_node(node: Node3D, slot: int) -> void:
+	var id := node.get_instance_id()
+	_anchor_node_ids[slot] = id
+	var entry: Dictionary = _watched_nodes.get(id, {})
+	if entry.is_empty():
+		var callables: Array[Callable] = [_on_node_entered.bind(id), _on_node_exiting.bind(id),
+			_on_node_visibility.bind(id)]
+		node.tree_entered.connect(callables[0])
+		node.tree_exiting.connect(callables[1])
+		node.visibility_changed.connect(callables[2])
+		entry = {"node": node, "slots": PackedInt32Array(), "callables": callables}
+		_watched_nodes[id] = entry
+	var slots: PackedInt32Array = entry.slots
+	slots.append(slot)
+	entry.slots = slots
 
-func _on_anchor_exiting(anchor: Item.Anchor) -> void:
-	if anchor._layer == self and anchor._slot >= 0:
-		_anchor_state[anchor._slot] = 0
+func _unwatch_node(id: int, slot: int) -> void:
+	var entry: Dictionary = _watched_nodes.get(id, {})
+	if entry.is_empty():
+		return
+	var slots: PackedInt32Array = entry.slots
+	var at := slots.find(slot)
+	if at >= 0:
+		slots.remove_at(at)
+	entry.slots = slots
+	if not slots.is_empty():
+		return
+	_watched_nodes.erase(id)
+	var node: Variant = entry.node
+	if not is_instance_valid(node):
+		return
+	var callables: Array[Callable] = entry.callables
+	var watched := node as Node3D
+	if watched.tree_entered.is_connected(callables[0]):
+		watched.tree_entered.disconnect(callables[0])
+	if watched.tree_exiting.is_connected(callables[1]):
+		watched.tree_exiting.disconnect(callables[1])
+	if watched.visibility_changed.is_connected(callables[2]):
+		watched.visibility_changed.disconnect(callables[2])
 
-func _on_anchor_visibility(anchor: Item.Anchor) -> void:
-	if anchor._layer == self and anchor._slot >= 0 \
-			and (_anchor_state[anchor._slot] & A_IN_WORLD) != 0:
-		_refresh_anchor(anchor._slot)
+func _node_slots(id: int) -> PackedInt32Array:
+	var entry: Dictionary = _watched_nodes.get(id, {})
+	return entry.slots if not entry.is_empty() else PackedInt32Array()
+
+func _on_node_entered(id: int) -> void:
+	for slot: int in _node_slots(id):
+		_refresh_anchor(slot)
+
+func _on_node_exiting(id: int) -> void:
+	for slot: int in _node_slots(id):
+		_anchor_state[slot] = 0
+
+func _on_node_visibility(id: int) -> void:
+	for slot: int in _node_slots(id):
+		if (_anchor_state[slot] & A_IN_WORLD) != 0:
+			_refresh_anchor(slot)
+
+## Nodes the layer follows (tests): one per node, however many anchors it carries.
+func watched_node_count() -> int:
+	return _watched_nodes.size()
 
 func _anchor_moved(slot: int, point: Vector3) -> void:
 	_anchor_points[slot] = point
@@ -1018,7 +1068,13 @@ func _record(item: Item, slot: int) -> bool:
 	var extent := Rect2()
 	var bounded := false
 	var entry_index := 0
+	# A scaled item (the pointer) is drawn at its scale times the layer's, so its
+	# glyphs are rasterised at that size too, not minified from the layer's.
 	var raster := _oversampling
+	var item_scale := _scales[slot]
+	if item_scale != 1.0 and item_scale > 0.0:
+		raster = maxf(Style.OVERSAMPLING_STEP, snappedf(_oversampling * item_scale,
+			Style.OVERSAMPLING_STEP))
 	# Canvas items this recording draws into; the others are freed below.
 	var used: Dictionary = {}
 	for op: Array in ops:
