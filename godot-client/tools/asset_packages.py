@@ -19,6 +19,13 @@ PREPARED_WORLD_BLOB_BUCKETS = 128
 PREPARED_WORLD_METADATA_BUCKETS = 8
 MAP_TEXTURE_BUCKETS = 128
 MAP_METADATA_BUCKETS = 8
+# Actor VRAM sidecars (AT-C3: app/assets/actors/<a>/<b>/.../vram/*, the .evt
+# files and their index.json) are a group of their own per actor folder,
+# actors-<a>-<b>-textures. Existing actor files keep their packages, so a
+# code-only or GLB-only release downloads no sidecars and a sidecar change
+# re-downloads no GLB package.
+ACTOR_TEXTURE_BUCKETS = 32
+SIDECAR_DIRECTORY = "vram"
 # The release descriptor names the commit, so its bytes change in every
 # release. The packager writes it twice: app/client-release.json for the
 # updater and launcher, and the loose app/data/client_release.json copy (the
@@ -52,6 +59,8 @@ def package_id(relative: str) -> str:
             group, slots = prefix + "-metadata", PREPARED_WORLD_METADATA_BUCKETS
     elif relative.startswith("app/assets/actors/"):
         group, slots = "actors-" + "-".join(parts[3:5]), 16
+        if SIDECAR_DIRECTORY in parts[5:-1]:
+            group, slots = group + "-textures", ACTOR_TEXTURE_BUCKETS
     elif relative.startswith("eloria-assets/maps/"):
         group = "map-" + parts[2]
         if "/vram/" in relative and relative.endswith(".evt"):
