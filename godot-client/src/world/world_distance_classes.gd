@@ -53,10 +53,15 @@ const TIER_REACH_SCALE := {"HIGH": 1.0, "MEDIUM": 0.8, "LOW": 0.6}
 const LOD_BIAS := {"HIGH": 1.0, "MEDIUM": 0.4, "LOW": 0.15}
 ## Whether a class casts the sun's shadow. A flat piece never does.
 const CASTS_SHADOW := {"S": false, "M": true, "L": true, "XL": true}
-## Flat: a piece lower than this (metres), or lower than FLAT_HEIGHT_RATIO of
-## the narrower width of its footprint (`is_flat`).
+## Flat: a piece lower than this (metres), or lower than both
+## FLAT_RATIO_MAX_METRES and FLAT_HEIGHT_RATIO of the narrower width of its
+## footprint (`is_flat`).
 const FLAT_HEIGHT_METRES := 0.35
 const FLAT_HEIGHT_RATIO := 0.15
+## The ratio rule only judges pieces lower than this. A wide enclosure's box
+## (a palisade ring, 49 x 4.9 x 49 m; a sheepfold, 9 x 1.2 x 9 m) is low against
+## its footprint, but its walls are not a slab and keep their shadow.
+const FLAT_RATIO_MAX_METRES := 1.0
 ## Bridge and pier structure (by node name, case-insensitive words, or name
 ## prefixes): never ranged, because the walk decks it holds up are ground and
 ## always drawn; a ranged support would leave a floating deck at distance.
@@ -139,10 +144,12 @@ static func _is_base_name(node_name: String) -> bool:
 ## whose footprint is `footprint` metres across at its narrowest
 ## (`footprint_width`) is flat: a slab, a deck, a pad. Measured on the
 ## footprint's narrower width, a turned copy is exactly as flat as the
-## original, and a long low wall or fence (thin across) is not flat.
+## original, and a long low wall or fence (thin across) is not flat. A piece
+## 1 m tall or more is never flat (FLAT_RATIO_MAX_METRES).
 static func is_flat(height: float, footprint: float) -> bool:
 	var tall := absf(height)
-	return tall < FLAT_HEIGHT_METRES or tall < FLAT_HEIGHT_RATIO * absf(footprint)
+	return tall < FLAT_HEIGHT_METRES \
+		or (tall < FLAT_RATIO_MAX_METRES and tall < FLAT_HEIGHT_RATIO * absf(footprint))
 
 ## The narrowest width (metres) of a box of `mesh_size` placed by `basis`, seen
 ## from above: its outline on the ground plane is the sum of its three placed

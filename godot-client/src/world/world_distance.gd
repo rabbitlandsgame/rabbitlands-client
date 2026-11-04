@@ -14,7 +14,8 @@ extends Node
 ##   placement) is one prop:
 ##   its parts share the class, range and shadow rule of their union box;
 ## - small (S) and flat pieces (a slab or deck: low against the narrower
-##   width of its footprint, so never a long low wall) stop casting the sun's
+##   width of its footprint and under 1 m, so never a long low wall or an
+##   enclosure's ring of walls) stop casting the sun's
 ##   shadow, and so do ground patches, flat walk decks, and a chunk's
 ##   `Terrain_` wherever an opaque, shadow-casting
 ##   `AuthoredGround_<region>Base` in the same root already casts the ground's

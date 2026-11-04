@@ -114,6 +114,16 @@ func _check_table() -> void:
 		and flat_of.call(Vector3(3.2, 0.35, 3.26), Basis(Vector3.UP, 2.8))
 		and not flat_of.call(Vector3(3, 0.1, 3), Basis(Vector3.RIGHT, PI / 2.0)),
 		"sea walls, fences and canopies keep their shadow at any heading; floors and pads are flat")
+	# Wide enclosures (integrator fix, WD-C5 observation): a palisade ring, a
+	# sheepfold and a Sunmane landmark ring are low against their footprint but
+	# keep their walls' shadow; the palisade's 0.75 m floor and scree stay flat.
+	_expect(not flat_of.call(Vector3(49.4, 4.86, 48.9), Basis())
+		and not flat_of.call(Vector3(9.0, 1.2, 9.0), Basis(Vector3.UP, 0.7))
+		and not flat_of.call(Vector3(18.2, 1.28, 20.2), Basis())
+		and flat_of.call(Vector3(49.9, 0.75, 49.4), Basis())
+		and flat_of.call(Vector3(5.2, 0.5, 3.9), Basis(Vector3.UP, 1.1))
+		and Classes.is_flat(0.99, 10.0) and not Classes.is_flat(1.0, 10.0),
+		"pieces 1 m tall or more are never flat; lower wide floors and scree still are")
 	_expect(Classes.is_structure("AuthoredBridgeSupport_ravenhead__b25-11_01_ravenhead")
 		and Classes.is_structure("AuthoredBridgeEdge_landfall__r29-gully-1-01_landfall")
 		and Classes.is_structure("kit-sw-causeway-support-b22l-34") and Classes.is_structure("Deck_sw-causeway-arch-tier-floor")
