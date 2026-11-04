@@ -287,6 +287,40 @@ fallbacks and `compare`), `tests/integration/content_digest_compare_tour.gd`
 (every file of an install against Python's hashlib). `cargo run --release --offline --locked --example digest_bench` is a
 micro-benchmark over a list of files.
 
+## Exit watchdog
+
+`RabbitLandsExitWatchdog` (`src/client_exit_watchdog.{h,cpp}`, platform layer
+`src/client_exit_watchdog_os.{h,cpp}`, plain C++ with no Godot header) ends a
+process whose exit hangs (avatar-worker AW-01). `src/runtime/exit_drain.gd`
+arms it right before `SceneTree.quit()`, after Main's bounded close drains,
+through `ClientRuntimeController.arm_exit_watchdog()`. Those bindings never load
+the payload: the watchdog exists only when the startup load registered
+`client_runtime`, and the runtime kill switch disables it with everything else.
+
+* `arm(timeout_msec, exit_code, log_path, reason)` starts (once) two detached
+  native threads and sets the deadline; a later call replaces deadline, code,
+  path and reason. If the deadline passes without `disarm()`, the watcher
+  appends one line to `log_path` (UTF-8 path, opened share-all on Windows), lets
+  the second thread copy it to stderr for at most 200 ms (a stderr pipe nobody
+  reads cannot keep the process alive), then ends the process with
+  `exit_code`: `TerminateProcess` on Windows, `_exit` elsewhere. Firing takes no
+  lock it does not own: no heap allocation and no C stdio streams, only a line
+  formatted into a stack buffer and direct OS writes. The intended exit code
+  survives (for example the maintenance quit's 1); the renderer relaunch
+  (`RendererPolicy.restart`, exit code 75) quits before the startup load and is
+  not covered. Limits: 100-600000 ms, codes 0-255; `api_info()` states them.
+  Returns 0 armed, 1 invalid argument, 2 thread failed, 3 pin failed, 4 firing.
+* The state is process-wide (instances are handles), guarded by one mutex,
+  allocated once and never freed, so no static destructor runs while the
+  threads wait. The first `arm()` pins the library (`GetModuleHandleExW(... PIN)`,
+  `dlopen(RTLD_NODELETE)`), so Godot's teardown cannot unmap the waiting
+  thread's code when it unloads extensions. After `arm()` returns, nothing here
+  calls into the engine.
+* `tests/test_exit_drain.gd` covers the API (limits, refusals, arm, re-arm,
+  disarm, state) and the drains; its `--mode=fire` (a teardown that never ends)
+  and `--mode=undrained` (AW-00's RL-head exit hang) are run by a harness that
+  checks the exit code and the `exit_watchdog fired` line.
+
 ## Optional remote derived-state pilot
 
 `RABBITLANDS_REMOTE_PRESENTATION=rust` together with

@@ -208,6 +208,20 @@ switch (`native_runtime`) and each kernel's selection, status and provider
 (`native_kernels`). A status such as `runtime_switched_off`, `runtime_absent`
 or `provider_untrusted` names why a requested kernel stayed on GDScript.
 
+Closing the window waits for the client's background work (the actor warm-up,
+the RL head parse, the neighbouring-region preload and the parked-world
+preload) for at most 8 s each, then quits. The log line
+`exit_drain result=clean|timeout ... stages=... watchdog=...` records it; a
+stage marked `!` timed out. With the payload loaded, an exit watchdog then ends
+the process, with the same exit code, if it is still running 10 s after the
+quit. It appends one `exit_watchdog fired` line to `logs/exit_watchdog.log` in
+the user data folder (and to stderr); report that line with the log if it
+appears. Without the payload, with the runtime switched off or with an older
+payload, `watchdog=` names the reason and the client quits as before.
+`--exit-watchdog=off` or `RABBITLANDS_EXIT_WATCHDOG=off` leaves the watchdog
+unarmed, for example to attach a debugger to a hung exit; a number of
+milliseconds from 100 to 600000 replaces the 10 s.
+
 ## Prepared-content coverage and fallback
 
 The catalog is a small exact-content pilot, not a prepared copy of the whole
