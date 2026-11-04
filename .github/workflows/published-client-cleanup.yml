@@ -1,28 +1,22 @@
-name: Retire previous published client
+# No-op since R2 delivery (R2-A7). Pruning moved into the promote job of
+# desktop-release-r2.yml, which keeps whole releases for rollback
+# (prune_published_release.RETENTION_SCHEMA 2). This file no longer reacts to
+# release events and prunes nothing. Release events run the workflow file of
+# the released tag, so older tags still carry the old pruner: keep this
+# workflow disabled in the Actions UI, and never recreate or re-publish an old
+# client-<sha> release.
+name: Retire previous published client (no-op)
 on:
-  release:
-    types: [published]
-permissions:
-  contents: write
+  workflow_dispatch:
+permissions: {}
 concurrency:
   group: rabbitlands-desktop-release
   cancel-in-progress: false
 jobs:
-  cleanup:
-    if: github.repository == 'rabbitlandsgame/rabbitlands-client' && startsWith(github.event.release.tag_name, 'client-') && github.event.release.tag_name != 'client-assets'
+  noop:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 5
+    permissions: {}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: refs/tags/${{ github.event.release.tag_name }}
-          fetch-depth: 1
-          sparse-checkout: godot-client/tools
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-        with:
-          python-version: '3.13'
-      - name: Verify the public replacement before retiring older downloads
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
-        run: python godot-client/tools/prune_published_release.py --tag "$RELEASE_TAG"
+      - name: Prune nothing
+        run: echo "::notice::Pruning runs only in the promote job of desktop-release-r2.yml; this workflow prunes nothing."

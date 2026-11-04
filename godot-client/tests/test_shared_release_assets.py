@@ -346,3 +346,62 @@ def test_publication_cleanup_verifies_reused_files_before_deleting_any_build(tmp
         assert not any(c[:2] == ("release", "delete") or c[:3] == ("api", "--method", "DELETE") for c in calls)
     else:
         assert prune.prune(current["tag_name"]) == [old["tag_name"]]
+
+
+# --- retention schema 2 (R2-A7) ---------------------------------------------------------------------
+
+def test_shared_cleanup_keeps_every_download_a_retained_release_lists_helpers_included(monkeypatch):
+    content, helper, rolled_back, unused = (shared.name("a" * 64), shared.name("b" * 64, "updater", "exe"),
+                                            shared.name("c" * 64, "uninstall", "x86_64"), shared.name("d" * 64))
+    assets = [{"id": index, "name": name} for index, name in enumerate((content, helper, rolled_back, unused), 1)]
+    latest = {"id": 22, "tag_name": "client-" + "c" * 40, "draft": False}
+    newer = {"id": 23, "tag_name": "client-" + "e" * 40, "draft": False}  # published not latest, or rolled back from
+    calls = []
+    monkeypatch.setattr(release, "github_assets", lambda id: assets)
+    monkeypatch.setattr(release, "gh", lambda *args: calls.append(args))
+    expected = {content: "a" * 64, helper: "b" * 64, rolled_back: "c" * 64}
+    assert shared.collect_unused([latest, newer, POOL], {22, 23}, expected) == [unused]
+    assert calls == [("api", "--method", "DELETE", f"repos/{release.REPOSITORY}/releases/assets/4")]
+    calls.clear()
+    # a client release outside the retained set still references its own files: keep everything
+    assert shared.collect_unused([latest, newer, POOL], {22}, expected) == [] and not calls
+    for retained in (set(), {True}, {"22"}):
+        with pytest.raises(ValueError):
+            shared.collect_unused([latest, POOL], retained, expected)
+
+
+def test_published_inventory_allows_only_the_signed_pointers_beyond_its_sums():
+    sums = {"RabbitLands-Windows-20261104-012345678-windows.json": "1" * 64, shared.R2_SUMS: "2" * 64}
+
+    def asset(name, sha="0" * 64, state="uploaded"):
+        return {"name": name, "state": state, "digest": "sha256:" + sha}
+    assets = [asset(name, sha) for name, sha in sums.items()] + [asset("SHA256SUMS")]
+    pointers = [asset("RabbitLands-windows-pointer.json"), asset("RabbitLands-linux-pointer.json")]
+    shared.verify_inventory(sums, assets, [])
+    shared.verify_inventory(sums, assets + pointers, [])
+    for extra in (asset("RabbitLands-macos-pointer.json"), asset("RabbitLands-windows.json"),
+                  asset("RabbitLands-windows-pointer.json", state="starter")):
+        with pytest.raises(ValueError):
+            shared.verify_inventory(sums, assets + [extra], [])
+    with pytest.raises(ValueError):
+        shared.verify_inventory(sums, assets[1:], [])  # a listed file is missing
+    assert shared.is_pointer_name("RabbitLands-linux-pointer.json")
+    import desktop_r2
+    assert {desktop_r2.pointer_asset_name(p) for p in desktop_r2.PLATFORMS} == {
+        "RabbitLands-windows-pointer.json", "RabbitLands-linux-pointer.json"}
+
+
+def test_r2_checksum_inventory_lists_content_addressed_desktop_keys_only():
+    part, manifest = "a" * 64, "b" * 64
+    text = f"{part}  desktop/v1/parts/{part}.bin\n{manifest}  desktop/v1/manifests/linux/{manifest}.json\n"
+    assert shared.r2_checksum_inventory(text) == {f"desktop/v1/parts/{part}.bin": part,
+                                                  f"desktop/v1/manifests/linux/{manifest}.json": manifest}
+    for line in (f"{part}  desktop/v1/parts/{manifest}.bin",           # name and hash disagree
+                 f"{part}  desktop/v1/channels/live/windows.json",     # pointers are mutable: never listed
+                 f"{part}  browser/assets/{part}.bin",                 # another agent's prefix
+                 f"{part} desktop/v1/parts/{part}.bin",                # one space
+                 f"{part}  desktop/v1/sets/macos/{part}.json"):
+        with pytest.raises(ValueError):
+            shared.r2_checksum_inventory(line + "\n")
+    with pytest.raises(ValueError):
+        shared.r2_checksum_inventory(text + text.splitlines()[0] + "\n")  # duplicate key

@@ -6,8 +6,25 @@ import time
 
 TAG = "client-assets"
 STORAGE_TAG = re.compile(r"client-assets(?:-[0-9a-f])?")
+CLIENT_TAG = re.compile(r"client-[0-9a-f]{40}")
 ASSET_LIMIT = 1000
 NAME = re.compile(r"RabbitLands-(pkg|updater|uninstall)-([0-9a-f]{64})\.(zip\.part|exe|x86_64)")
+# Release manifest schemas with package rows (2) and with codec rows (3, UD-05/R2):
+# one rule for every finalizer and publisher, like Release.package_schema in the reader.
+PACKAGE_SCHEMAS = (2, 3)
+# An R2-era release also holds R2-SHA256SUMS (listed in SHA256SUMS) and, after its
+# publish job, one signed pointer per platform (signed after SHA256SUMS was written).
+R2_SUMS = "R2-SHA256SUMS"
+POINTER_ASSET = re.compile(r"RabbitLands-(windows|linux)-pointer\.json")
+
+
+def packaged(schema) -> bool:
+    """True for a release manifest schema that installs packages (2, or 3 with codecs)."""
+    return type(schema) is int and schema in PACKAGE_SCHEMAS
+
+
+def is_pointer_name(value: str) -> bool:
+    return type(value) is str and POINTER_ASSET.fullmatch(value) is not None
 
 
 def name(sha256: str, kind="pkg", extension="zip.part") -> str:
@@ -123,6 +140,21 @@ def checksum_inventory(text: str) -> dict[str, str]:
     return expected
 
 
+_R2_SUMS_LINE = re.compile(r"([0-9a-f]{64})  (desktop/v1/(?:parts/([0-9a-f]{64})\.bin"
+                           r"|(?:sets|manifests)/(?:windows|linux)/([0-9a-f]{64})\.json))")
+
+
+def r2_checksum_inventory(text: str) -> dict[str, str]:
+    """{R2 key: sha256} of an R2-SHA256SUMS: content-addressed desktop/v1 keys only, never a pointer."""
+    expected = {}
+    for line in text.splitlines():
+        match = _R2_SUMS_LINE.fullmatch(line)
+        if not match or match[2] in expected or (match[3] or match[4]) != match[1]:
+            raise ValueError("Invalid R2 checksum inventory.")
+        expected[match[2]] = match[1]
+    return expected
+
+
 class Storage:
     """Lazily load each pool once; never scan all assets per upload."""
     def __init__(self, sha: str):
@@ -185,25 +217,42 @@ def receipt_assets(item: dict) -> dict:
 
 
 def verify_inventory(expected: dict, assets: list[dict], shared: list[dict]) -> None:
+    """A published release holds exactly its SHA256SUMS rows (pool rows in the pools).
+
+    The only other assets allowed are the signed R2 pointers, which the publish
+    job adds after SHA256SUMS was written; they are verified where they are used.
+    """
     normal = {a["name"]: a for a in assets}
     pooled = {a["name"]: a for a in shared}
-    if set(normal) != {n for n in expected if not is_name(n)} | {"SHA256SUMS"}:
+    pointers = {n for n in normal if is_pointer_name(n) and n not in expected}
+    if set(normal) - pointers != {n for n in expected if not is_name(n)} | {"SHA256SUMS"}:
         raise ValueError("Published assets do not match the checksum inventory.")
+    if any(normal[n].get("state") != "uploaded" for n in pointers):
+        raise ValueError("A release pointer upload is incomplete.")
     for filename, digest in expected.items():
         asset = (pooled if is_name(filename) else normal).get(filename, {})
         if asset.get("state") != "uploaded" or asset.get("digest") != "sha256:" + digest:
             raise ValueError("A release download failed checksum verification.")
 
 
-def collect_unused(entries: list[dict], current_id: int, expected: dict) -> list[str]:
-    """Called only after public verification and retirement of older game releases.
+def collect_unused(entries: list[dict], retained, expected: dict) -> list[str]:
+    """Delete pool downloads that no retained release references (RETENTION_SCHEMA 2).
 
-    An existing draft may be actively uploading files before its inventory is
-    finalized. Keep everything in that case; never race its uploads.
+    `retained` is the set of release IDs prune keeps (one ID is accepted for
+    older callers). `expected` must be the union of every retained release's
+    SHA256SUMS: packages, parts and the updater/uninstall helpers of each.
+    Called only after public verification and retirement of the releases
+    outside the retained set. An existing draft may be actively uploading files
+    before its inventory is finalized, and a client release outside the retained
+    set still references its own files: keep everything in either case. R2 is
+    never touched (no credential, no R2 deletes).
     """
     import build_release as release
-    clients = [i for i in entries if re.fullmatch(r"client-[0-9a-f]{40}", i["tag_name"])]
-    if any(i.get("draft") or i["id"] != current_id for i in clients):
+    retained = {retained} if type(retained) is int else set(retained)
+    if not retained or any(type(value) is not int for value in retained):
+        raise ValueError("Invalid retained release identities.")
+    clients = [i for i in entries if CLIENT_TAG.fullmatch(i["tag_name"])]
+    if any(i.get("draft") or i["id"] not in retained for i in clients):
         return []
     removed = []
     for pool in entries:
