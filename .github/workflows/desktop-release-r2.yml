@@ -162,8 +162,11 @@ jobs:
           retention-days: 7
 
   # The ci content leg: today's hosted content build, for the helper-train
-  # release, a Linux fallback or an R2 outage. Its steps arrive with R2-A6b;
-  # r2-prepare refuses a ci source until desktop_release_ci.py has build-content.
+  # release, a Linux fallback or an R2 outage. package_client runs with
+  # --no-client-updates (no key on this leg), desktop_content.py packs the
+  # stage with GitHub pool URLs and the parts go to the pools (the only write;
+  # none in a dry run). The content caches are restored and saved by exact
+  # key only, at today's trust level; no shipped binary comes from this job.
   content-ci:
     name: Content ${{ matrix.platform }} (ci)
     needs: prepare
@@ -198,15 +201,66 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.13'
-      - name: Install the hash-locked Python dependencies
+      - name: Install the hash-locked Python dependencies of the content build
         run: |
-          python -m pip install --require-hashes --no-deps --only-binary=:all: --requirement godot-client/tools/desktop-release-requirements.txt
+          python -m pip install --require-hashes --no-deps --only-binary=:all: --requirement godot-client/tools/desktop-content-requirements.txt
+      - name: Install native Linux build, editor and software graphics libraries
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libfontconfig1 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 libasound2t64 libgl1 libgl1-mesa-dri libglx-mesa0 mesa-vulkan-drivers xvfb xauth cmake ninja-build g++
+      - name: Install the pinned native runtime toolchain
+        run: |
+          export RUSTUP_HOME="$RUNNER_TEMP/rabbitlands-native-toolchain/rustup"
+          export CARGO_HOME="$RUNNER_TEMP/rabbitlands-native-toolchain/cargo"
+          mkdir -p "$RUSTUP_HOME" "$CARGO_HOME"
+          printf 'RUSTUP_HOME=%s\nCARGO_HOME=%s\n' "$RUSTUP_HOME" "$CARGO_HOME" >> "$GITHUB_ENV"
+          rustup toolchain install 1.99.1 --profile minimal --no-self-update
+      - name: Compute the exact content cache keys
+        id: cache-key
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: python godot-client/tools/desktop_release_ci.py content-cache-key --platform "$PLATFORM" --commit "$GITHUB_SHA"
+      - name: Restore the import and graphics cache (exact key)
+        id: asset-cache
+        continue-on-error: true
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/rabbitlands-content-cache/assets-${{ matrix.platform }}
+          key: ${{ steps.cache-key.outputs.asset_key }}
+      - name: Restore the world preparation cache (exact key)
+        id: world-cache
+        continue-on-error: true
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/rabbitlands-content-cache/world
+          key: ${{ steps.cache-key.outputs.world_key }}
       - name: Build the content on this runner and upload its parts to the GitHub pools
         env:
           GH_TOKEN: ${{ github.token }}
           PLATFORM: ${{ matrix.platform }}
           RELEASE_ID: ${{ needs.prepare.outputs.release_id }}
-        run: python godot-client/tools/desktop_release_ci.py build-content --platform "$PLATFORM" --commit "$GITHUB_SHA" --release-id "$RELEASE_ID" --work "$RUNNER_TEMP/content-work" --out "$RUNNER_TEMP/content-$PLATFORM"
+          DRY_RUN: ${{ needs.prepare.outputs.dry_run }}
+        run: python godot-client/tools/desktop_release_ci.py build-content --platform "$PLATFORM" --commit "$GITHUB_SHA" --release-id "$RELEASE_ID" --dry-run "$DRY_RUN" --cache "$RUNNER_TEMP/rabbitlands-content-cache" --work "$RUNNER_TEMP/content-work" --out "$RUNNER_TEMP/content-$PLATFORM"
+      - name: Measure the runner's disk
+        if: always()
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: python godot-client/tools/actions_release.py disk-probe --label "content-ci-$PLATFORM"
+      - name: Retain the import and graphics cache for later ci builds
+        if: steps.asset-cache.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/rabbitlands-content-cache/assets-${{ matrix.platform }}
+          key: ${{ steps.cache-key.outputs.asset_key }}
+      - name: Retain the world preparation cache for later ci builds
+        if: steps.world-cache.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/rabbitlands-content-cache/world
+          key: ${{ steps.cache-key.outputs.world_key }}
       - name: Record the content artifact digest
         id: digest
         env:
@@ -217,6 +271,29 @@ jobs:
           name: content-${{ matrix.platform }}
           path: ${{ runner.temp }}/content-${{ matrix.platform }}
           if-no-files-found: error
+          include-hidden-files: true
+          overwrite: true
+          retention-days: 7
+      - name: Retain the content build's disk measurements and qualification logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: content-ci-logs-${{ matrix.platform }}
+          path: |
+            ${{ runner.temp }}/content-work/content-*/disk-usage.json
+            ${{ runner.temp }}/content-work/content-*/graphics-configuration-failure.json
+            ${{ runner.temp }}/content-work/content-*/graphics-preflight/*.json
+            ${{ runner.temp }}/content-work/content-*/graphics-preflight/*.log
+            ${{ runner.temp }}/content-work/content-*/content-pack/pack-receipt.json
+            ${{ runner.temp }}/content-work/content-*/downloads/.build/logs/*/smoke.log
+            ${{ runner.temp }}/content-work/content-*/downloads/.build/logs/*/smoke-human-testing.log
+            ${{ runner.temp }}/content-work/content-*/downloads/.build/logs/*/vram-textures.log
+            ${{ runner.temp }}/content-work/content-*/downloads/.build/logs/*/optimization-proof.json
+            ${{ runner.temp }}/content-work/content-*/downloads/.build/logs/*/optimizations/**/*.json
+            ${{ runner.temp }}/content-work/content-*/downloads/.build/logs/*/optimizations/**/*.log
+            ${{ runner.temp }}/content-work/content-*/downloads/.build/logs/*/world-preparation/**/*.json
+            ${{ runner.temp }}/content-work/content-*/downloads/.build/logs/*/world-preparation/**/*.log
+          if-no-files-found: ignore
           include-hidden-files: true
           overwrite: true
           retention-days: 7

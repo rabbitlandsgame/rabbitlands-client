@@ -10,6 +10,14 @@ Subcommands (one per workflow job; every input is an argument or an artifact):
                   a HEAD of every part, and a full GET + SHA-256 + member
                   decode and native-magic sniff of every package the published
                   signed release does not already hold; writes artifact content-P
+  build-content   the ci content leg (helper-train release, Linux fallback, R2
+                  outage): today's hosted content build (the committed source
+                  streamed and checked blob by blob, package_client with
+                  --no-client-updates and full qualification, exact-key content
+                  caches), then desktop_content.py pack --source ci (GitHub pool
+                  URLs) and the parts to the GitHub pools through GitHubSink;
+                  writes artifact content-P. No signing key, no R2.
+  content-cache-key  the exact keys of the ci leg's content caches
   executables     the CI-owned binaries: the native client_runtime (rebuilt, no
                   cache), the engine executable, the updater helper (reused from
                   the previous signed release when its fingerprint is equal),
@@ -38,11 +46,13 @@ from __future__ import annotations
 
 import argparse
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import contextmanager
 import hashlib
 import io
 import json
 import os
 from pathlib import Path
+import re
 import secrets
 import shutil
 import struct
@@ -571,6 +581,390 @@ def head_ok_any(http, url: str) -> bool:
     return http.request("HEAD", url, limit=0).status == 200
 
 
+# --- build-content: the ci content leg ------------------------------------------------------------
+#
+# The same workflow with GitHub-hosted content (design 4.5): the helper-train
+# release T, a Linux fallback and the R2-down emergency. The content job of a
+# `ci` platform builds on the runner the way desktop-release.yml's build job
+# does (runner_release.build), minus everything that signs, publishes or
+# builds an installer: the commit's source is streamed and checked blob by
+# blob (package_client's runner mode), package_client runs with
+# --no-client-updates and full qualification, desktop_content.py packs the
+# stage with --source ci (GitHub pool URLs, no reuse), and the parts go to the
+# GitHub pools through runner_release.GitHubSink. Trust is today's: the
+# content caches are restored by exact key only. The set then reaches `sign`
+# exactly like an R2 set (artifact content-P, digest-checked).
+
+CONTENT_CACHE_PREFIX = "rl-desktop-ci-"
+WORLD_CACHE_SCHEMA = 1
+# release_world_preparation.producer_inputs starts in src/world and follows
+# preloads, mostly into src/actors and src/runtime. Other game scripts leave
+# the world key alone: a missed dependency only costs a re-cook, because the
+# cook keeps its own producer namespace and per-target source keys.
+WORLD_KEY_SCRIPTS = ("godot-client/src/world/", "godot-client/src/actors/", "godot-client/src/runtime/")
+POOL_CONFIRM_DELAYS = (0, 5, 15, 30)
+_CACHE_KEY = re.compile(r"[A-Za-z0-9._-]{1,400}")
+_RELEASE_ID = re.compile(r"0|[1-9][0-9]{0,15}")
+
+
+def git_runner(repo: Path):
+    """git in `repo` (or `cwd`) without the caller's GIT_* environment, as runner_source expects."""
+    environment = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
+
+    def run(*args, cwd=None) -> str:
+        result = subprocess.run(["git", "-c", "core.longpaths=true", *map(str, args)], cwd=str(cwd or repo),
+                                capture_output=True, env=environment, timeout=1800)
+        if result.returncode:
+            raise CiError("git", f"git {args[0]} failed")
+        return result.stdout.decode("utf-8")
+    return run
+
+
+def content_cache_keys(git, commit: str, platform: str) -> dict:
+    """The exact GitHub cache keys of the ci leg's content caches (no restore-keys anywhere).
+
+    asset_key: release_asset_cache.input_key, the committed asset and tool inputs
+    as the hosted build keys them, in a namespace of its own: the ci leg never
+    restores or feeds an entry of desktop-release.yml. world_key: the same rows
+    plus the world producer scripts.
+    """
+    import release_asset_cache
+    import runner_source
+    if platform not in r2.PLATFORMS or not r2.valid_commit(commit):
+        raise CiError("arguments", "content-cache-key needs a platform and a full commit")
+    asset = release_asset_cache.input_key(git, commit, platform)
+    rows = []
+    for row in git("ls-tree", "-r", "-z", commit).split("\0"):
+        if not row:
+            continue
+        path = row.split("\t", 1)[1]
+        if not runner_source.selected(path) or path.startswith(("godot-client/tests/", "godot-client/docs/")):
+            continue
+        if (path.startswith("godot-client/src/") and path.endswith((".gd", ".gd.uid"))
+                and not path.startswith(("godot-client/src/updates/", *WORLD_KEY_SCRIPTS))):
+            continue
+        rows.append(row)
+    if not rows:
+        raise CiError("cache-key", "the commit has no content inputs")
+    digest = hashlib.sha256("\0".join(sorted(rows)).encode("utf-8")).hexdigest()
+    keys = {"asset_key": CONTENT_CACHE_PREFIX + asset,
+            "world_key": f"{CONTENT_CACHE_PREFIX}world-v{WORLD_CACHE_SCHEMA}-{platform}-{digest}"}
+    if not all(_CACHE_KEY.fullmatch(value) for value in keys.values()):
+        raise CiError("cache-key", "a cache key holds unexpected characters")
+    return keys
+
+
+def content_cache_dirs(cache: Path, platform: str) -> dict:
+    """The folders the content-ci job's cache steps restore and save, exactly."""
+    return {"assets": Path(cache) / f"assets-{platform}", "world": Path(cache) / "world"}
+
+
+@contextmanager
+def _environment(values: dict):
+    previous = {name: os.environ.get(name) for name in values}
+    os.environ.update({name: str(value) for name, value in values.items()})
+    try:
+        yield
+    finally:
+        for name, value in previous.items():
+            if value is None:
+                os.environ.pop(name, None)
+            else:
+                os.environ[name] = value
+
+
+class _NoPackageUploads:
+    """package_client's runner sink in the ci leg. With --no-client-updates it
+    publishes nothing; parts reach the pools only after desktop_content packs them."""
+    uploaded_bytes = reused_bytes = 0
+
+    def accept(self, path, row):
+        raise CiError("package-upload", "package_client tried to upload during the ci content build")
+
+    def reuse(self, rows) -> bool:
+        return False
+
+
+def _check_ci_content(directory: Path, *, platform: str, commit: str, set_sha256: str) -> dict:
+    """A ci set is signed only as build-content left it: this commit's, every part in the pools."""
+    path = Path(directory) / "verified.json"
+    record = _read_json(path) if path.is_file() else None
+    if (not isinstance(record, dict) or record.get("kind") != CONTENT_KIND or record.get("source") != "ci"
+            or record.get("platform") != platform or record.get("commit") != commit
+            or record.get("set_sha256") != set_sha256 or record.get("uploaded") is not True):
+        raise CiError("ci-content", f"{platform}: the ci content artifact is not a finished build-content "
+                                    "upload of this set (a dry run uploads nothing)")
+    return record
+
+
+class ContentLeg:
+    """build-content for one platform. Methods named as seams reach outside
+    systems (tools, graphics, the native toolchain, package_client, GitHub);
+    tests replace those and run the rest, desktop_content.pack included."""
+
+    PREFLIGHT_BYTES = 7_000_000_000   # runner_release.build's reservation before any source exists
+    CACHE_SAVE_SCRATCH = 64 * 1024 ** 2
+
+    def __init__(self, *, platform: str, commit: str, release_id, dry_run: bool, repo: Path, work: Path, out: Path,
+                 cache: Path, http=None, published="auto", runner_temp: Path | None = None, sleep=time.sleep):
+        self.platform, self.commit, self.dry_run = platform, commit, dry_run
+        self.release_id = release_id
+        self.repo, self.work, self.out, self.cache = (Path(value).resolve() for value in (repo, work, out, cache))
+        self.http = http if http is not None else Fetcher()
+        self.published = published
+        self.runner_temp = Path(runner_temp or os.environ.get("RUNNER_TEMP") or self.work).resolve()
+        self.native_tool_root = self.runner_temp / "rabbitlands-native-toolchain"
+        self.sleep = sleep
+        self.git = git_runner(self.repo)
+
+    # --- seams ---------------------------------------------------------------------------------
+
+    def install_tools(self, root: Path) -> dict:
+        """The pinned editor and export template (no Inno: this leg builds no installer)."""
+        import setup_runner_tools
+        return setup_runner_tools.install(self.platform, root, installers=False)
+
+    def prepare_graphics(self, godot: Path, check, root: Path) -> None:
+        """Software rendering for the headless imports, cooks and smokes, proved by a tiny probe first."""
+        import release_graphics_preflight
+        import release_software_graphics
+        folder = Path(godot).resolve().parent
+        try:
+            config = release_software_graphics.prepare_graphics(self.platform, folder, folder, check)
+        except ValueError as error:
+            _write(root / "graphics-configuration-failure.json",
+                   _json_bytes({"status": "failed", "error": str(error)[:500]}))
+            raise
+        release_graphics_preflight.run_preflight(config, Path(godot), root / "graphics-preflight", check)
+
+    def prepare_native(self, native_cache: Path, check, root: Path) -> dict:
+        """The native runtime package_client qualifies with, compiled from the commit's
+        exact blobs into a cache that starts empty; then the job's Rust homes retire."""
+        import release_native_runtime
+        import runner_retirement
+        if not self.native_tool_root.is_dir():
+            raise CiError("native-toolchain", "install the pinned Rust toolchain in RUNNER_TEMP first")
+        runner_retirement.claim_native_sdk(self.native_tool_root, self.runner_temp, self.commit, self.platform)
+        bootstrap = release_native_runtime.prewarm_cache(self.repo, self.commit, self.platform, native_cache,
+                                                         native_cache.parent / f"bootstrap-{self.platform}", check)
+        _write(root / "native-bootstrap.json", _json_bytes(bootstrap))
+        runner_retirement.retire_native_sdk(self.native_tool_root, self.runner_temp, self.commit, self.platform,
+                                            bootstrap, check, root / "native-toolchain-retirement.json")
+        return bootstrap
+
+    def package(self, argv: list, storage) -> int:
+        """package_client in runner mode: a --no-checkout build worktree whose committed
+        files runner_source streams from the commit's archive and checks blob by blob."""
+        import package_client
+        return package_client.main(argv, storage)
+
+    def sink(self):
+        import runner_release
+        return runner_release.GitHubSink(self.release_id)
+
+    def previous(self, public_pem: bytes):
+        return helpers.previous_release(self.http, self.platform, public_pem)
+
+    # --- the leg -------------------------------------------------------------------------------
+
+    def _check_arguments(self) -> None:
+        if self.platform not in r2.PLATFORMS or not r2.valid_commit(self.commit) or type(self.dry_run) is not bool:
+            raise CiError("arguments", "platform, commit or dry run")
+        if not _RELEASE_ID.fullmatch(str(self.release_id)) or (str(self.release_id) == "0") != self.dry_run:
+            raise CiError("arguments", "a dry run has release id 0; any other run names its draft")
+        self.release_id = int(self.release_id)
+        if SIGNING_SECRET in os.environ:
+            raise CiError("signing-key-present", "the ci content leg never sees the release key")
+        for label, path in (("work", self.work), ("out", self.out), ("cache", self.cache)):
+            if path.is_relative_to(self.repo) or self.repo.is_relative_to(path):
+                raise CiError("location", f"--{label} must be outside the checkout")
+        if self.out.exists() and (not self.out.is_dir() or any(self.out.iterdir())):
+            raise CiError("out-not-empty", "the content artifact folder must start empty")
+
+    def package_arguments(self, *, godot: Path, source: Path, output: Path, vram: Path, pem: Path,
+                          native_cache: Path, world_cache: Path) -> list:
+        """runner_release.build's package_client call without the signing key, the
+        shared-release upload, the installer or the archive: content only."""
+        return ["--platform", self.platform, "--ref", self.commit, "--distribution", "github", "--release-build",
+                "--no-client-updates", "--no-zip", "--no-fetch", "--godot", str(godot), "--build-dir", str(source),
+                "--out", str(output), "--vram-cache", str(vram), "--update-public-key", str(pem),
+                "--server", SERVER, "--full-optimizations", "--native-runtime-cache", str(native_cache),
+                "--prepared-world", "--world-preparation-cache", str(world_cache)]
+
+    def _stage(self, output: Path, identity: dict) -> Path:
+        import package_client
+        stages = [path for path in output.iterdir() if path.is_dir() and (path / package_client.MARKER).is_file()]
+        if len(stages) != 1:
+            raise CiError("stage", "package_client left no single stage")
+        stage = stages[0]
+        descriptor = stage / DESCRIPTOR
+        if not descriptor.is_file() or r2._parse_json(descriptor.read_bytes()) != identity:
+            raise CiError("descriptor", "the stage's app/client-release.json is not the commit's identity")
+        return stage
+
+    def _pool_rows(self, content_set: dict, parts: Path) -> list:
+        """Every distinct part, named and placed exactly as GitHubSink stores it."""
+        import shared_release_assets
+        rows = {}
+        for package in content_set["packages"]:
+            for part in package["parts"]:
+                name = shared_release_assets.name(part["sha256"])
+                if part["url"] != r2.github_pool_url(part["sha256"]) \
+                        or part["url"] != shared_release_assets.download_url(r2.REPOSITORY, name):
+                    raise CiError("pool-url", part["url"])
+                row = {"name": name, "size": part["size"], "sha256": part["sha256"], "url": part["url"]}
+                if rows.setdefault(part["sha256"], row) != row:
+                    raise CiError("pool-url", f"{name} is named with two sizes")
+        for row in rows.values():
+            path = parts / row["name"]
+            if path.is_symlink() or not path.is_file() or path.stat().st_size != row["size"]:
+                raise CiError("local-part", row["name"])
+        return sorted(rows.values(), key=lambda row: row["name"])
+
+    def _confirm_pool(self, rows: list) -> None:
+        """Anonymous HEADs (200, exact length): what players and the e2e will download."""
+        def present(row) -> bool:
+            try:
+                return head_ok(self.http, row["url"], row["size"])
+            except r2.DesktopR2Error:
+                return False
+        pending = list(rows)
+        for delay in POOL_CONFIRM_DELAYS:
+            if delay:
+                self.sleep(delay)
+            with ThreadPoolExecutor(WORKERS) as pool:
+                found = list(pool.map(present, pending))
+            pending = [row for row, ok in zip(pending, found) if not ok]
+            if not pending:
+                return
+        raise CiError("pool-missing", f"{len(pending)} uploaded parts are not downloadable, "
+                                      f"first {pending[0]['url']}")
+
+    def _upload(self, rows: list, parts: Path) -> dict:
+        record = {"uploaded": False, "parts": len(rows), "bytes": sum(row["size"] for row in rows),
+                  "uploaded_bytes": 0, "reused_bytes": 0,
+                  "rows": [{key: row[key] for key in ("name", "size", "sha256")} for row in rows]}
+        if self.dry_run:
+            for row in rows:  # a dry run sends nothing: release the disk
+                (parts / row["name"]).unlink()
+            return record
+        sink = self.sink()
+        for row in rows:
+            path = parts / row["name"]
+            # GitHubSink re-hashes the file and returns only once GitHub records this exact size and SHA-256.
+            sink.accept(path, {"name": row["name"], "size": row["size"], "sha256": row["sha256"]})
+            path.unlink()
+        self._confirm_pool(rows)
+        record.update(uploaded=True, uploaded_bytes=getattr(sink, "uploaded_bytes", None),
+                      reused_bytes=getattr(sink, "reused_bytes", None))
+        return record
+
+    def _cleanup(self, root: Path, stage: Path) -> None:
+        """This build's worktree and stage only (runner_release.RunnerStorage.cleanup's rule)."""
+        import package_client
+        source = root / "source"
+        marker = (stage / package_client.MARKER).read_text(encoding="utf-8").strip()
+        owner = r2._parse_json((root / ".runner-release.json").read_bytes())
+        if (stage.resolve().parent != (root / "downloads").resolve() or marker != self.commit
+                or owner != {"repository": r2.REPOSITORY, "commit": self.commit}):
+            raise CiError("cleanup", "the cleanup targets do not belong to this build")
+        if source.exists():
+            self.git("worktree", "remove", "--force", str(source))
+        shutil.rmtree(stage)
+
+    def run(self) -> dict:
+        import release_asset_cache
+        import runner_release
+        from release_storage import DiskBudget, unique_bytes
+        self._check_arguments()
+        public_pem = rm.commit_public_key(self.repo, self.commit)
+        capabilities = rm.commit_capabilities(self.repo, self.commit)
+        root = self.work / f"content-{self.platform}-{self.commit}"
+        root.mkdir(parents=True, exist_ok=False)
+        _write(root / ".runner-release.json", _json_bytes({"repository": r2.REPOSITORY, "commit": self.commit}))
+        identity = release_identity(self.repo, self.commit, self.platform, public_pem, root / "identity")
+        keys = content_cache_keys(self.git, self.commit, self.platform)
+        dirs = content_cache_dirs(self.cache, self.platform)
+        for folder in dirs.values():
+            folder.mkdir(parents=True, exist_ok=True)
+        asset_cache = release_asset_cache.AssetCache(dirs["assets"], keys["asset_key"])
+        native_cache = self.work / "native-cache" / self.platform
+        if native_cache.exists():
+            raise CiError("native-cache", "the native cache must start empty: no cached native build")
+        native_cache.parent.mkdir(parents=True, exist_ok=True)
+        tool_root = self.work / "toolchain"
+        config = self.install_tools(tool_root)
+        godot = Path(config["godot"]).resolve()
+        git_dir = Path(self.git("rev-parse", "--path-format=absolute", "--git-common-dir").strip())
+        roots = [self.repo, git_dir, root, godot, tool_root, native_cache.parent, self.cache]
+        budget = DiskBudget([*roots, *([self.native_tool_root] if self.native_tool_root.is_dir() else [])])
+        budget.check("preflight", self.PREFLIGHT_BYTES)
+        storage = runner_release.RunnerStorage(root, budget, _NoPackageUploads(), asset_cache)
+        source, output = root / "source", root / "downloads"
+        storage.source = source / "godot-client"
+        storage.previous_packages = {}
+        pem = root / "update_public.pem"
+        pem.write_bytes(public_pem)
+        argv = self.package_arguments(godot=godot, source=source, output=output, vram=asset_cache.vram, pem=pem,
+                                      native_cache=native_cache, world_cache=dirs["world"])
+        with _environment(config.get("env") or {}):
+            self.prepare_graphics(godot, storage.check, root)
+            storage.native_bootstrap = self.prepare_native(native_cache, storage.check, root)
+            storage.check("native cache verified before runtime source materialization")
+            try:
+                code = self.package(argv, storage)
+            except RuntimeError as error:  # package_client.PackageError
+                raise CiError("package", str(error)[:300]) from None
+        if code:
+            raise CiError("package", "package_client failed; see the content build logs")
+        stage = self._stage(output, identity)
+        pck = check_core_pck(stage / CORE_PCK, identity)
+        asset_cache.built_packages = 0
+        asset_cache.finish(b"{}\n")  # the ci leg reuses no package through the cache: pack rebuilds in full
+        storage.check("content stage qualified")
+
+        import desktop_content
+        free = shutil.disk_usage(root).free
+        result = desktop_content.pack(stage, platform=self.platform, out=root / "content-pack", source="ci",
+                                      build_dir=source, godot=godot, tools_repo=self.repo, workers=WORKERS)
+        set_bytes = result.set_path.read_bytes()
+        content_set = r2.parse_set_bytes(set_bytes)
+        summary = r2.validate_set(content_set, public_key_sha256=r2.public_key_sha256(public_pem),
+                                  commit=self.commit, platform=self.platform, source="ci",
+                                  reader_cap=capabilities.reader_cap)
+        _check_builder(content_set)
+        rows = self._pool_rows(content_set, result.set_path.parent / "parts")
+        pool = self._upload(rows, result.set_path.parent / "parts")
+        published = self.previous(public_pem) if self.published == "auto" else self.published
+        diff = content_diff(content_set, published)
+        set_sha256 = r2.sha256_hex(set_bytes)
+        record = {"kind": CONTENT_KIND, "schema": 1, "platform": self.platform, "commit": self.commit,
+                  "source": "ci", "set_sha256": set_sha256, "set_bytes": len(set_bytes), "summary": summary,
+                  "reader": {"schema": capabilities.schema, "reader_cap": capabilities.reader_cap},
+                  "dry_run": self.dry_run, "uploaded": pool["uploaded"], "pool": pool,
+                  "caches": {"asset_key": keys["asset_key"], "asset_hit": asset_cache.hit,
+                             "world_key": keys["world_key"]},
+                  "published": {"commit": diff["previous_commit"], "version": diff["previous_version"]},
+                  "core_pck": pck, "diff": diff,
+                  "disk": {"free_before_pack": free, "budget_peak": budget.peak}}
+        hosting = ("dry run: built and packed, nothing uploaded" if self.dry_run else
+                   f"{pool['parts']} parts in the GitHub pools ({pool['uploaded_bytes'] or 0:,} bytes uploaded, "
+                   f"{pool['reused_bytes'] or 0:,} bytes already there)")
+        self.out.mkdir(parents=True, exist_ok=True)
+        _write(self.out / "set.json", set_bytes)
+        _write(self.out / "verified.json", _json_bytes(record))
+        _write(self.out / "summary.md", (summary_markdown(self.platform, set_sha256, self.commit, diff)
+                                         + f"- source: ci, built on this runner; {hosting}\n"
+                                         ).encode("ascii", "replace"))
+        self._cleanup(root, stage)
+        try:
+            storage.check("before cache save",
+                          unique_bytes([dirs["assets"], dirs["world"]]) + self.CACHE_SAVE_SCRATCH)
+        except ValueError as error:
+            _emit(f"warning: {error} The content cache save may fail; it is optional.", error=True)
+        return record
+
+
 # --- executables -----------------------------------------------------------------------------
 
 def default_template(godot: Path, platform: str) -> Path:
@@ -777,6 +1171,8 @@ def sign(*, commit: str, repo: Path, inputs: dict, key_pem: bytes, out: Path, se
             raise CiError("set-hash", f"{platform}: an r2 source needs the dispatched set SHA-256")
         if expected is not None and digest != expected:
             raise CiError("set-hash", f"{platform}: the content artifact is not the dispatched set")
+        if source == "ci":
+            _check_ci_content(item["content"], platform=platform, commit=commit, set_sha256=digest)
         content_set = r2.parse_set_bytes(set_bytes)
         r2.validate_set(content_set, public_key_sha256=r2.public_key_sha256(public_pem), commit=commit,
                         platform=platform, source=source, reader_cap=capabilities.reader_cap)
@@ -1282,6 +1678,17 @@ def build_parser() -> argparse.ArgumentParser:
     content.add_argument("--commit", required=True)
     content.add_argument("--work", type=Path, required=True)
     content.add_argument("--out", type=Path, required=True)
+    leg = commands.add_parser("build-content")
+    leg.add_argument("--platform", choices=r2.PLATFORMS, required=True)
+    leg.add_argument("--commit", required=True)
+    leg.add_argument("--release-id", required=True)
+    leg.add_argument("--dry-run", choices=("true", "false"), required=True)
+    leg.add_argument("--cache", type=Path, required=True)
+    leg.add_argument("--work", type=Path, required=True)
+    leg.add_argument("--out", type=Path, required=True)
+    keys = commands.add_parser("content-cache-key")
+    keys.add_argument("--platform", choices=r2.PLATFORMS, required=True)
+    keys.add_argument("--commit", required=True)
     build = commands.add_parser("executables")
     build.add_argument("--platform", choices=r2.PLATFORMS, required=True)
     build.add_argument("--commit", required=True)
@@ -1343,6 +1750,22 @@ def _dispatch(args) -> dict | str:
                                 http=Fetcher(), work=args.work, out=args.out)
         _summary((args.out / "summary.md").read_text(encoding="ascii"))
         return record
+    if args.command == "content-cache-key":
+        keys = content_cache_keys(git_runner(REPO), args.commit, args.platform)
+        for name, value in keys.items():
+            _output(name, value)
+        return keys
+    if args.command == "build-content":
+        import actions_release
+        dispatched = actions_release.dispatch_commit(actions_release.R2_WORKFLOW)
+        actions_release.no_signing_key()
+        if args.commit != dispatched:
+            raise CiError("commit", "build-content builds the dispatched commit only")
+        record = ContentLeg(platform=args.platform, commit=args.commit, release_id=args.release_id,
+                            dry_run=args.dry_run == "true", repo=REPO, work=args.work, out=args.out,
+                            cache=args.cache).run()
+        _summary((args.out / "summary.md").read_text(encoding="ascii"))
+        return {key: record[key] for key in ("platform", "commit", "source", "set_sha256", "uploaded")}
     if args.command == "executables":
         return executables(platform=args.platform, commit=args.commit, repo=REPO, godot=args.godot,
                            template=args.template, content_dir=args.content, out=args.out, work=args.work,

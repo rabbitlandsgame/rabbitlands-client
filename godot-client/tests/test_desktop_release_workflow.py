@@ -31,8 +31,9 @@ SPARSE_R2 = ["/godot-client/tools/", "/godot-client/src/updates/", "/godot-clien
              "/godot-client/data/update_public.pem", "/godot-client/project.godot"]
 SIGN_REQUIREMENTS = "godot-client/tools/desktop-sign-requirements.txt"
 RELEASE_REQUIREMENTS = "godot-client/tools/desktop-release-requirements.txt"
+CONTENT_REQUIREMENTS = "godot-client/tools/desktop-content-requirements.txt"
 # desktop_release_ci.py subcommands that later chunks add (contract named here, checked by r2-prepare).
-PENDING_CI_COMMANDS = {"build-content": "content-ci"}
+PENDING_CI_COMMANDS = {}
 
 
 # --- loading ----------------------------------------------------------------------------------
@@ -369,9 +370,11 @@ def test_pip_installs_are_hash_locked_and_signing_jobs_install_only_cryptography
             assert words[:5] == ["python", "-m", "pip", "install", "--require-hashes"], job_name
             assert "--no-deps" in words and "--only-binary=:all:" in words, job_name
             assert words[-2] == "--requirement" and words.count("--requirement") == 1, job_name
-            assert words[-1] in (SIGN_REQUIREMENTS, RELEASE_REQUIREMENTS), job_name
+            assert words[-1] in (SIGN_REQUIREMENTS, RELEASE_REQUIREMENTS, CONTENT_REQUIREMENTS), job_name
             if uses_key or job_name in ("promote", "check"):
                 assert words[-1] == SIGN_REQUIREMENTS, job_name
+            # numpy and Pillow (the content build's imports) only where content is built
+            assert (words[-1] == CONTENT_REQUIREMENTS) == (job_name == "content-ci"), job_name
         assert len(installs) == 1 or job_name == "prepare", job_name
     assert count == len(load(name)["jobs"]) - (1 if name == R2_FILE else 0)
 
@@ -410,6 +413,24 @@ def test_requirement_files_are_exact_closed_and_match_the_local_lock():
     pinned = dict(line.split("==") for line in (TOOLS / "runner-requirements.txt").read_text().split())
     assert f"zstandard=={pinned['zstandard']}" in full and f"cryptography=={pinned['cryptography']}" in full
     assert len(full[f"zstandard=={pinned['zstandard']}"]) > 10  # every published file, not one platform's
+    # the ci content leg: the release lock plus the hosted build's numpy and Pillow, nothing else
+    content = requirement_blocks(TOOLS / "desktop-content-requirements.txt")
+    names = {"cryptography", "cffi", "pycparser", "zstandard", "numpy", "pillow"}
+    assert {name.split("==")[0] for name in content} == names
+    for name, hashes in full.items():
+        assert content[name] == hashes, name
+    for project in ("numpy", "Pillow"):
+        name = f"{project.lower()}=={pinned[project]}"
+        assert name in content and len(content[name]) > 10, name  # runner-requirements' version, every file
+
+
+def test_content_lock_starts_with_the_release_lock_byte_for_byte():
+    content = (TOOLS / "desktop-content-requirements.txt").read_text(encoding="ascii")
+    release = (TOOLS / "desktop-release-requirements.txt").read_text(encoding="ascii")
+
+    def body(text):
+        return [line for line in text.splitlines() if line and not line.startswith("#")]
+    assert body(content)[:len(body(release))] == body(release)
 
 
 # --- artifacts and digests ------------------------------------------------------------------
@@ -580,9 +601,125 @@ def test_every_tool_command_exists_with_its_flags(name):
                         r"(?:[A-Za-z0-9_./=-]*\$\{?[A-Z_]+\}?[A-Za-z0-9_./-]*)+", word)), word
 
 
-def test_ci_leg_command_is_pending_until_r2_a6b_and_prepare_refuses_it():
-    assert "build-content" not in subcommands(desktop_release_ci.build_parser())
+def test_ci_leg_command_exists_so_prepare_accepts_ci_sources():
     assert actions_release.CI_CONTENT_COMMAND == "build-content"
+    assert {"build-content", "content-cache-key"} <= set(subcommands(desktop_release_ci.build_parser()))
+    assert actions_release.CI_CONTENT_COMMAND in actions_release.ci_tool_commands()
+    assert not PENDING_CI_COMMANDS
+
+
+# --- the ci content leg (R2-A6b) ------------------------------------------------------------
+
+def _build_content_step(job: dict) -> dict:
+    (step,) = [step for step in runs(job) for command in commands(step) if command[2] == "build-content"]
+    return step
+
+
+def test_ci_leg_writes_only_through_build_content_and_never_sees_the_key():
+    workflow = jobs(R2_FILE)
+    job = workflow["content-ci"]
+    tokened = [step for step in steps(job)
+               if any("github.token" in value or "GH_TOKEN" in value for value in every_string(step))]
+    step = _build_content_step(job)
+    assert tokened == [step]  # pip, apt, rustup, the cache keys, caches, digests and logs hold no token
+    assert step["env"] == {"GH_TOKEN": "${{ github.token }}", "PLATFORM": "${{ matrix.platform }}",
+                           "RELEASE_ID": "${{ needs.prepare.outputs.release_id }}",
+                           "DRY_RUN": "${{ needs.prepare.outputs.dry_run }}"}
+    assert [command[1:3] for command in commands(step)] == [["godot-client/tools/desktop_release_ci.py",
+                                                            "build-content"]]
+    (command,) = commands(step)
+    assert command[command.index("--dry-run") + 1] == "$DRY_RUN"
+    assert command[command.index("--commit") + 1] == "$GITHUB_SHA"
+    assert not any("secrets." in value or KEY in value for value in every_string(job))
+    assert job["permissions"] == {"contents": "write"} and "environment" not in job
+    # the r2 content leg verifies anonymously: no token at all
+    assert workflow["content"]["permissions"] == {"contents": "read"}
+    assert not any("GH_TOKEN" in value for value in every_string(workflow["content"]))
+
+
+def test_ci_leg_caches_use_exact_keys_and_the_tools_layout():
+    job = jobs(R2_FILE)["content-ci"]
+    items = steps(job)
+    index = {id(step): position for position, step in enumerate(items)}
+    caches = [step for step in items if uses(step).startswith("actions/cache")]
+    assert {uses(step) for step in caches} == {"actions/cache/restore", "actions/cache/save"}
+    (key_step,) = [step for step in items if step.get("id") == "cache-key"]
+    (command,) = commands(key_step)
+    assert command[1:3] == ["godot-client/tools/desktop_release_ci.py", "content-cache-key"]
+    assert "GH_TOKEN" not in key_step.get("env", {})
+    restores = {step["id"]: step for step in caches if uses(step) == "actions/cache/restore"}
+    saves = [step for step in caches if uses(step) == "actions/cache/save"]
+    assert set(restores) == {"asset-cache", "world-cache"} and len(saves) == 2
+    names = set()
+    for step in caches:
+        # exactly a path and a key: no restore-keys, lookup-only, fail-on-cache-miss or cross-OS archive
+        assert set(step["with"]) == {"path", "key"}, step.get("name")
+        assert step["continue-on-error"] is True  # a cache outage is a cold build, never a failure
+        match = re.fullmatch(r"\$\{\{ steps\.cache-key\.outputs\.([a-z_]+) \}\}", step["with"]["key"])
+        assert match, step["with"]["key"]
+        names.add(match[1])
+    # the keys are the tool's outputs, computed for real on this checkout's commit
+    head = desktop_release_ci.git_runner(REPO)("rev-parse", "HEAD").strip()
+    keys = desktop_release_ci.content_cache_keys(desktop_release_ci.git_runner(REPO), head, "linux")
+    assert names == set(keys) == {"asset_key", "world_key"}
+    for value in keys.values():
+        assert value.startswith(desktop_release_ci.CONTENT_CACHE_PREFIX) and "*" not in value
+    # each save writes exactly what its restore read, and only after a miss
+    pairs = {(step["with"]["path"], step["with"]["key"]) for step in restores.values()}
+    assert {(step["with"]["path"], step["with"]["key"]) for step in saves} == pairs
+    for step in saves:
+        (restore,) = [item for item in restores.values() if item["with"]["key"] == step["with"]["key"]]
+        assert step["if"] == f"steps.{restore['id']}.outputs.cache-hit != 'true'"
+    # the folders are the ones build-content uses under its --cache root
+    build = _build_content_step(job)
+    (command,) = commands(build)
+    root = Path(command[command.index("--cache") + 1])
+    for name, step_id in (("assets", "asset-cache"), ("world", "world-cache")):
+        assert expand(restores[step_id]["with"]["path"]) == {
+            desktop_release_ci.content_cache_dirs(root, platform)[name].as_posix() for platform in PLATFORMS}
+    # order: keys, restores, the build, then the saves
+    assert index[id(key_step)] < min(index[id(step)] for step in restores.values())
+    assert max(index[id(step)] for step in restores.values()) < index[id(build)]
+    assert index[id(build)] < min(index[id(step)] for step in saves)
+
+
+@pytest.mark.parametrize("windows, linux, error", [
+    (("r2", "a" * 64), ("ci", ""), None),
+    (("ci", ""), ("r2", "b" * 64), None),
+    (("ci", ""), ("ci", ""), None),
+    (("r2", "a" * 64), ("r2", "b" * 64), None),
+    (("ci", "a" * 64), ("r2", "b" * 64), "windows_set_sha256 must be empty"),
+    (("r2", "a" * 64), ("ci", "b" * 64), "linux_set_sha256 must be empty"),
+    (("r2", ""), ("ci", ""), "windows_set_sha256 must be the 64"),
+    (("ci", ""), ("r2", "B" * 64), "linux_set_sha256 must be the 64"),
+    (("r2", "a" * 64), ("r2", "a" * 64), "cannot be the same object"),
+    (("R2", "a" * 64), ("ci", ""), "windows_source must be r2 or ci"),
+])
+def test_mixed_sources_are_validated_per_platform(windows, linux, error):
+    env = {"WINDOWS_SOURCE": windows[0], "WINDOWS_SET_SHA256": windows[1], "LINUX_SOURCE": linux[0],
+           "LINUX_SET_SHA256": linux[1], "DRY_RUN": "false"}
+    if error:
+        with pytest.raises(ValueError, match=error):
+            actions_release.r2_inputs(env)
+        return
+    value = actions_release.r2_inputs(env)["platforms"]
+    assert value == {"windows": {"source": windows[0], "set_sha256": windows[1]},
+                     "linux": {"source": linux[0], "set_sha256": linux[1]}}
+
+
+def test_each_platforms_source_and_set_reach_sign_from_prepare_and_content_from_either_leg():
+    workflow = jobs(R2_FILE)
+    step = next(step for step in runs(workflow["sign"]) if KEY in step.get("env", {}))
+    for platform in PLATFORMS:
+        for name in ("source", "set_sha256"):
+            assert step["env"][f"{platform.upper()}_{name.upper()}"] == (
+                f"${{{{ needs.prepare.outputs.{platform}_{name} }}}}")
+        (command,) = commands(step)
+        assert command[command.index(f"--{platform}-set-sha256") + 1] == f"${platform.upper()}_SET_SHA256"
+    # a platform's content artifact comes from whichever leg ran for it (the other leg skipped)
+    for job_name in ("build", "sign", "finalize"):
+        values = [value for value in every_string(workflow[job_name]) if "content.outputs" in value]
+        assert values and all("content-ci.outputs" in value for value in values), job_name
 
 
 # --- the old workflow ---------------------------------------------------------------------
@@ -613,7 +750,7 @@ def test_old_workflow_has_no_push_trigger_and_a_first_live_pointer_guard():
 def test_committed_files_hold_no_machine_or_scratch_paths():
     files = [WORKFLOWS / name for name in (R2_FILE, REPOINT_FILE, OLD_FILE)] + [
         TOOLS / "actions_release.py", TOOLS / "desktop-release-requirements.txt",
-        TOOLS / "desktop-sign-requirements.txt"]
+        TOOLS / "desktop-sign-requirements.txt", TOOLS / "desktop-content-requirements.txt"]
     for path in files:
         data = path.read_bytes()
         assert data.isascii() and b"\r" not in data, path.name

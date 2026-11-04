@@ -379,8 +379,10 @@ def test_r2_prepare_refuses_before_any_release_write(tmp_path, monkeypatch, cond
     elif condition == "signing-key":
         monkeypatch.setenv(actions.SECRET, "not for this job")
     elif condition == "ci-leg-missing":
+        # a commit from before R2-A6b: its desktop_release_ci.py has no build-content
         monkeypatch.setenv("LINUX_SOURCE", "ci")
         monkeypatch.setenv("LINUX_SET_SHA256", "")
+        monkeypatch.setattr(actions, "ci_tool_commands", lambda: {"verify-content", "executables", "sign"})
     elif condition == "reader-lacks-r2":
         monkeypatch.setattr(rm, "commit_capabilities", lambda repo, commit: CAPS_B8)
     elif condition == "inputs":
@@ -438,9 +440,9 @@ def test_r2_prepare_reuses_only_this_commits_draft(tmp_path, monkeypatch):
 
 
 def test_ci_leg_needs_the_build_content_subcommand():
-    assert actions.CI_CONTENT_COMMAND not in actions.ci_tool_commands()
-    assert {"verify-content", "executables", "sign", "pointer", "installers", "stage", "e2e",
-            "artifact-digest"} <= actions.ci_tool_commands()
+    assert actions.CI_CONTENT_COMMAND in actions.ci_tool_commands()  # R2-A6b
+    assert {"verify-content", "build-content", "content-cache-key", "executables", "sign", "pointer",
+            "installers", "stage", "e2e", "artifact-digest"} <= actions.ci_tool_commands()
 
 
 @pytest.mark.parametrize("statuses, ok", [((404, 404), True), ((200, 404), False), ((404, 200), False),

@@ -5,6 +5,8 @@ the native build and the shipped binaries are fake runs, the commit is a
 throwaway Git repository and the release key is a throwaway RSA key.
 """
 import hashlib
+import inspect
+import io
 import json
 import os
 from pathlib import Path
@@ -12,6 +14,7 @@ import shutil
 import struct
 import subprocess
 import sys
+import time
 import zipfile
 
 import pytest
@@ -1073,6 +1076,473 @@ def test_e2e_refuses_a_shipped_updater_that_is_not_the_signed_row(repo, checkout
     with pytest.raises(ci.CiError) as error:
         runner.run_all()
     assert error.value.code == "e2e-updater-row"
+
+
+# --- build-content: the ci content leg ------------------------------------------------------------
+
+CODELOAD = "https://codeload.github.com/rabbitlandsgame/rabbitlands-client/tar.gz/"
+
+
+@pytest.fixture(autouse=True)
+def no_source_download(monkeypatch):
+    """No test streams a real source archive; the codeload fixture serves a local one."""
+    import runner_source
+
+    def refuse(url, timeout):
+        raise AssertionError("tests never download: " + url)
+    monkeypatch.setattr(runner_source, "urlopen", refuse)
+
+
+@pytest.fixture
+def ci_checkout(repo, tmp_path):
+    """The content-ci job's checkout: the dispatched commit, on an origin branch of the client repository."""
+    remote = tmp_path / "remote" / "rabbitlandsgame" / "rabbitlands-client.git"
+    remote.parent.mkdir(parents=True)
+    git(tmp_path, "clone", "-q", "--bare", str(repo.path), remote.as_posix())
+    path = tmp_path / "ci-checkout"
+    git(tmp_path, "clone", "-q", remote.as_posix(), str(path))
+    git(path, "checkout", "-q", "--detach", repo.commit)
+    return path
+
+
+@pytest.fixture
+def codeload(repo, monkeypatch):
+    """GitHub's source archive of the commit, served to runner_source (git archive, no line-ending change)."""
+    import runner_source
+    archive = subprocess.run(["git", "-C", str(repo.path), "-c", "core.autocrlf=false", "archive", "--format=tar.gz",
+                              f"--prefix=rabbitlands-client-{repo.commit}/", repo.commit],
+                             capture_output=True, check=True).stdout
+    requested = []
+
+    def urlopen(url, timeout):
+        requested.append(url)
+        return io.BytesIO(archive)
+    monkeypatch.setattr(runner_source, "urlopen", urlopen)
+    return requested
+
+
+class PoolSink:
+    """GitHubSink as the pools see it: an accepted part is downloadable at its pool URL."""
+
+    def __init__(self, http, publish=True):
+        self.http, self.publish, self.accepted = http, publish, []
+        self.uploaded_bytes = self.reused_bytes = 0
+
+    def accept(self, path, row):
+        import shared_release_assets
+        data = Path(path).read_bytes()
+        assert len(data) == row["size"] and sha(data) == row["sha256"] and Path(path).name == row["name"]
+        self.accepted.append(dict(row))
+        if self.publish:
+            self.http.objects[shared_release_assets.download_url(r2.REPOSITORY, row["name"])] = data
+        self.uploaded_bytes += row["size"]
+
+
+class FakeContentLeg(ci.ContentLeg):
+    """The ci leg with fake tools, graphics, native toolchain and GitHub. package() does what
+    package_client does in runner mode: a --no-checkout worktree whose files runner_source
+    streams from the commit's archive and checks blob by blob, then a qualified stage."""
+    PREFLIGHT_BYTES = 0
+
+    def __init__(self, *, identity, sink=None, package_code=0, pck=None, **options):
+        super().__init__(**options)
+        self.identity, self.package_code, self.pck = identity, package_code, pck
+        self.calls, self.argv, self.storage, self.environment = [], None, None, None
+        self.pool_sink = sink if sink is not None else PoolSink(self.http)
+        self.materialized = {}
+
+    def install_tools(self, root):
+        self.calls.append("tools")
+        root.mkdir(parents=True)
+        godot = root / "Godot_v4.7.2-stable"
+        godot.write_bytes(b"editor")
+        return {"godot": godot, "env": {"RL_TEST_TOOL_DATA": str(root / "data")}}
+
+    def prepare_graphics(self, godot, check, root):
+        self.calls.append("graphics")
+        assert os.environ.get("RL_TEST_TOOL_DATA")  # Godot work runs inside the tool environment
+
+    def prepare_native(self, native_cache, check, root):
+        self.calls.append("native")
+        assert not native_cache.exists()  # no native build from a cache
+        return {"selected_commit": self.commit, "platform": self.platform}
+
+    def package(self, argv, storage):
+        import runner_source
+        self.calls.append("package")
+        self.argv, self.storage = list(argv), storage
+        self.environment = {name: os.environ.get(name) for name in (ci.SIGNING_SECRET, "RL_TEST_TOOL_DATA")}
+        build, output = (Path(argv[argv.index(flag) + 1]) for flag in ("--build-dir", "--out"))
+        self.git("worktree", "add", "--detach", "--no-checkout", str(build), self.commit)
+        runner_source.materialize(build, self.commit, self.git, storage)
+        self.materialized = {path.relative_to(build).as_posix(): path.read_bytes()
+                             for path in build.rglob("*") if path.is_file() and ".git" not in path.parts
+                             and path.name != ".git"}
+        if self.package_code:
+            return self.package_code
+        stage = make_stage(output, self.platform, self.identity, pck=self.pck)
+        earlier = time.time_ns() - 60 * 10 ** 9
+        os.utime(stage / ".eloria-package", ns=(earlier, earlier))
+        logs = output / ".build" / "logs" / f"{self.platform}-{stage.name.split('-', 2)[2]}"
+        logs.mkdir(parents=True)
+        (logs / "optimization-proof.json").write_text(json.dumps({
+            "status": "verified_before_signing", "commit": self.commit, "platform": self.platform}))
+        for name in ("smoke.log", "smoke-human-testing.log"):
+            (logs / name).write_text("RABBITLANDS_OPTIMIZATION_STARTUP {}\n")
+        return 0
+
+    def sink(self):
+        self.calls.append("sink")
+        return self.pool_sink
+
+
+def content_leg(repo, ci_checkout, key, tmp_path, platform="windows", *, dry_run=False, release_id=None,
+                cls=None, **extra):
+    if release_id is None:
+        release_id = "0" if dry_run else "77"
+    options = dict(platform=platform, commit=repo.commit, release_id=release_id,
+                   dry_run=dry_run, repo=ci_checkout, work=tmp_path / "content-work",
+                   out=tmp_path / f"content-{platform}", cache=tmp_path / "content-cache", http=FakeHttp(),
+                   published=None, runner_temp=tmp_path, sleep=lambda seconds: None)
+    options.update(extra)
+    return (cls or FakeContentLeg)(identity=identity_of(repo, platform, key, tmp_path / "identity"), **options)
+
+
+def flag(argv, name):
+    return argv[argv.index(name) + 1]
+
+
+def test_build_content_materializes_packages_packs_with_pool_urls_and_uploads_through_the_sink(
+        repo, ci_checkout, key, tmp_path, codeload):
+    import runner_release
+    import shared_release_assets
+    leg = content_leg(repo, ci_checkout, key, tmp_path)
+    record = leg.run()
+    assert leg.calls == ["tools", "graphics", "native", "package", "sink"]
+    # the source came from the commit's archive, checked against its blobs
+    assert codeload == [CODELOAD + repo.commit]
+    assert leg.materialized["godot-client/data/notes.txt"] == b"release\n"
+    assert leg.materialized["godot-client/data/update_public.pem"] == key.public
+    # package_client: content only, with full qualification and no key anywhere
+    argv = leg.argv
+    for name in ("--no-client-updates", "--release-build", "--full-optimizations", "--prepared-world", "--no-zip",
+                 "--no-fetch"):
+        assert name in argv, name
+    for name in ("--update-signing-key", "--installer", "--online-installer", "--shared-release-assets"):
+        assert name not in argv, name
+    assert flag(argv, "--distribution") == "github" and flag(argv, "--server") == ci.SERVER
+    assert flag(argv, "--ref") == repo.commit and flag(argv, "--platform") == "windows"
+    root = leg.work / f"content-windows-{repo.commit}"
+    assert Path(flag(argv, "--build-dir")) == root / "source" and Path(flag(argv, "--out")) == root / "downloads"
+    assert Path(flag(argv, "--update-public-key")).read_bytes() == key.public
+    cache = ci.content_cache_dirs(leg.cache, "windows")
+    assert Path(flag(argv, "--vram-cache")) == cache["assets"] / "vram"
+    assert Path(flag(argv, "--world-preparation-cache")) == cache["world"]
+    assert leg.environment == {ci.SIGNING_SECRET: None, "RL_TEST_TOOL_DATA": str(leg.work / "toolchain/data")}
+    assert "RL_TEST_TOOL_DATA" not in os.environ  # restored afterwards
+    # runner mode with an upload sink that refuses: package_client publishes nothing in this leg
+    assert isinstance(leg.storage, runner_release.RunnerStorage)
+    assert leg.storage.source == root / "source/godot-client" and leg.storage.previous_packages == {}
+    keys = ci.content_cache_keys(ci.git_runner(ci_checkout), repo.commit, "windows")
+    assert leg.storage.asset_cache.key == keys["asset_key"]
+    with pytest.raises(ci.CiError) as error:
+        leg.storage.sink.accept(tmp_path / "x", {})
+    assert error.value.code == "package-upload"
+    # content-P: the set (GitHub pool URLs), the record and the owner's summary, nothing else
+    out = tmp_path / "content-windows"
+    assert sorted(path.name for path in out.iterdir()) == ["set.json", "summary.md", "verified.json"]
+    set_bytes = (out / "set.json").read_bytes()
+    content_set = r2.parse_set_bytes(set_bytes)
+    assert content_set["source"] == "ci" and content_set["commit"] == repo.commit
+    assert content_set["builder"]["mode"] == "release" and content_set["builder"]["tools_dirty"] is False
+    parts = {part["sha256"]: part for package in content_set["packages"] for part in package["parts"]}
+    assert parts and all(part["url"] == r2.github_pool_url(digest) for digest, part in parts.items())
+    assert not any(r2.is_ci_path(entry["path"]) for package in content_set["packages"] for entry in package["files"])
+    # every distinct part went once through the sink, by its pool name, and is downloadable there
+    accepted = leg.pool_sink.accepted
+    assert sorted(row["sha256"] for row in accepted) == sorted(parts)
+    for row in accepted:
+        assert row == {"name": shared_release_assets.name(row["sha256"]), "size": parts[row["sha256"]]["size"],
+                       "sha256": row["sha256"]}
+    heads = [url for method, url in leg.http.calls if method == "HEAD"]
+    assert sorted(heads) == sorted(part["url"] for part in parts.values())
+    assert record == json.loads((out / "verified.json").read_text())
+    assert record["kind"] == ci.CONTENT_KIND and record["source"] == "ci" and record["uploaded"] is True
+    assert record["set_sha256"] == sha(set_bytes) and record["dry_run"] is False
+    assert record["pool"]["parts"] == len(parts) and record["pool"]["uploaded_bytes"] == sum(
+        part["size"] for part in parts.values())
+    assert record["caches"]["asset_key"] == keys["asset_key"] and record["caches"]["world_key"] == keys["world_key"]
+    assert "source: ci" in (out / "summary.md").read_text(encoding="ascii")
+    for path in out.iterdir():
+        data = path.read_bytes()
+        assert b"PRIVATE KEY" not in data and ci.SIGNING_SECRET.encode() not in data, path.name
+        assert str(tmp_path).encode() not in data and tmp_path.as_posix().encode() not in data, path.name
+    # the local parts, the build worktree and the stage are released; the caches stay for the save steps
+    assert not list((root / "content-pack/parts").glob("*.zip.part"))
+    assert not (root / "source").exists() and not (root / "downloads" / content_set["version"]).exists()
+    listing = git(ci_checkout, "worktree", "list", "--porcelain").splitlines()
+    assert sum(line.startswith("worktree ") for line in listing) == 1  # the build worktree is unregistered
+    assert (cache["assets"] / "state.json").is_file()
+
+
+def test_a_ci_set_from_build_content_signs_with_github_pool_rows(repo, ci_checkout, key, tmp_path, codeload):
+    content_leg(repo, ci_checkout, key, tmp_path).run()
+    content = tmp_path / "content-windows"
+    godot, template = tmp_path / "godot", tmp_path / "template"
+    godot.write_bytes(b"editor")
+    template.write_bytes(b"template")
+    ci.executables(platform="windows", commit=repo.commit, repo=ci_checkout, godot=godot, template=template,
+                   content_dir=content, out=tmp_path / "exec-windows", work=tmp_path / "exec-work",
+                   run_godot=fake_godot([]), native_builder=fake_native(ci_checkout, "windows"),
+                   engine_exporter=fake_engine, http=None, previous=None)
+    inputs = {"windows": {"source": "ci", "set_sha256": "", "content": content, "exec": tmp_path / "exec-windows"}}
+    result = ci.sign(commit=repo.commit, repo=ci_checkout, inputs=inputs, key_pem=key.private,
+                     out=tmp_path / "envelopes", sequence=SEQUENCE)
+    _, payload = rm.verify((tmp_path / "envelopes" / result["windows"]["manifest"]).read_bytes(), key.public)
+    digest = sha((content / "set.json").read_bytes())
+    assert payload["content"] == {"source": "ci", "set": {"sha256": digest}}  # a ci set is a CI artifact, not on R2
+    assert payload["schema"] == 3 and result["windows"]["source"] == "ci"
+    for package in payload["packages"]:
+        for part in package["parts"]:
+            assert part["url"] == r2.github_pool_url(part["sha256"]), package["id"]
+
+
+def test_a_dry_run_builds_and_packs_but_sends_nothing_and_cannot_be_signed(repo, ci_checkout, key, tmp_path,
+                                                                           codeload):
+    class NoSink:
+        def accept(self, path, row):
+            pytest.fail("a dry run uploads nothing")
+    leg = content_leg(repo, ci_checkout, key, tmp_path, dry_run=True, sink=NoSink())
+    leg.sink = lambda: pytest.fail("a dry run opens no GitHub sink")
+    record = leg.run()
+    assert record["dry_run"] is True and record["uploaded"] is False and record["pool"]["uploaded_bytes"] == 0
+    assert not [url for method, url in leg.http.calls if method == "HEAD"]
+    root = tmp_path / "content-work" / f"content-windows-{repo.commit}"
+    assert not list((root / "content-pack/parts").glob("*.zip.part"))  # released anyway
+    assert "dry run" in (tmp_path / "content-windows/summary.md").read_text(encoding="ascii")
+    content = tmp_path / "content-windows"
+    digest = sha((content / "set.json").read_bytes())
+    with pytest.raises(ci.CiError) as error:
+        ci._check_ci_content(content, platform="windows", commit=repo.commit, set_sha256=digest)
+    assert error.value.code == "ci-content"
+
+
+def test_sign_takes_a_ci_set_only_as_build_content_left_it(repo, checkout, key, tmp_path):
+    identity = identity_of(repo, "windows", key, tmp_path)
+    stage = make_stage(tmp_path / "local-ci", "windows", identity)
+    ci_set, _ = make_set(stage, "windows", identity, key.public, tmp_path / "pack-ci", source="ci")
+    record, _, _, content = run_executables(repo, checkout, key, tmp_path, set_override=ci_set)
+    digest = sha((content / "set.json").read_bytes())
+    good = {"kind": ci.CONTENT_KIND, "source": "ci", "platform": "windows", "commit": repo.commit,
+            "set_sha256": digest, "uploaded": True}
+    inputs = {"windows": {"source": "ci", "set_sha256": "", "content": content, "exec": tmp_path / "exec-windows"}}
+    for index, verified in enumerate((None, dict(good, uploaded=False), dict(good, set_sha256="0" * 64),
+                                      dict(good, source="r2"), dict(good, commit=repo.reader),
+                                      dict(good, platform="linux"), dict(good, kind="other"))):
+        (content / "verified.json").unlink(missing_ok=True)
+        if verified is not None:
+            (content / "verified.json").write_text(json.dumps(verified))
+        with pytest.raises(ci.CiError) as error:
+            ci.sign(commit=repo.commit, repo=checkout, inputs=inputs, key_pem=key.private,
+                    out=tmp_path / f"o{index}", sequence=SEQUENCE)
+        assert error.value.code == "ci-content" and not (tmp_path / f"o{index}").exists()
+    (content / "verified.json").write_text(json.dumps(good))
+    result = ci.sign(commit=repo.commit, repo=checkout, inputs=inputs, key_pem=key.private, out=tmp_path / "ok",
+                     sequence=SEQUENCE)
+    assert result["windows"]["source"] == "ci" and result["windows"]["set_sha256"] == digest
+
+
+def test_build_content_refuses_before_any_work(repo, ci_checkout, key, tmp_path, monkeypatch):
+    def refused(code, **changes):
+        leg = content_leg(repo, ci_checkout, key, tmp_path, **changes)
+        with pytest.raises(ci.CiError) as error:
+            leg.run()
+        assert error.value.code == code
+        assert leg.calls == [] and not (tmp_path / "content-work").exists()
+    refused("arguments", release_id="0")                      # a real run names its draft
+    refused("arguments", dry_run=True, release_id="5")        # a dry run has none
+    refused("arguments", release_id="-1")
+    refused("arguments", commit="ABC")
+    refused("location", work=ci_checkout / "work")
+    refused("location", cache=ci_checkout / "cache")
+    refused("location", work=tmp_path)                        # a folder that holds the checkout
+    (tmp_path / "busy").mkdir()
+    (tmp_path / "busy/old.json").write_text("{}")
+    refused("out-not-empty", out=tmp_path / "busy")
+    # a native build that came from anywhere but this run (a cache) is refused before any tool runs
+    stale = content_leg(repo, ci_checkout, key, tmp_path / "native")
+    (stale.work / "native-cache" / "windows").mkdir(parents=True)
+    with pytest.raises(ci.CiError) as error:
+        stale.run()
+    assert error.value.code == "native-cache" and stale.calls == []
+    monkeypatch.setenv(ci.SIGNING_SECRET, key.private.decode())
+    refused("signing-key-present")
+    assert os.environ[ci.SIGNING_SECRET]  # refused, not consumed: this leg never touches the key
+
+
+def test_build_content_fails_on_a_failed_package_and_on_parts_the_pools_do_not_serve(
+        repo, ci_checkout, key, tmp_path, codeload):
+    leg = content_leg(repo, ci_checkout, key, tmp_path / "a", package_code=1)
+    with pytest.raises(ci.CiError) as error:
+        leg.run()
+    assert error.value.code == "package" and "sink" not in leg.calls
+
+    class Broken(FakeContentLeg):
+        def package(self, argv, storage):
+            raise RuntimeError("FAILED: export")  # package_client.PackageError is a RuntimeError
+    broken = content_leg(repo, ci_checkout, key, tmp_path / "b", cls=Broken)
+    with pytest.raises(ci.CiError) as error:
+        broken.run()
+    assert error.value.code == "package"
+    delays = []
+    silent = content_leg(repo, ci_checkout, key, tmp_path / "c", sleep=delays.append)
+    silent.pool_sink.publish = False
+    with pytest.raises(ci.CiError) as error:
+        silent.run()
+    assert error.value.code == "pool-missing" and delays == list(ci.POOL_CONFIRM_DELAYS[1:])
+    assert not (tmp_path / "c/content-windows/verified.json").exists()
+
+    class ShortPool(PoolSink):  # the pool answers 200, but not with the part's exact length
+        def accept(self, path, row):
+            super().accept(path, row)
+            url = r2.github_pool_url(row["sha256"])
+            self.http.objects[url] = self.http.objects[url][:-1]
+    short = content_leg(repo, ci_checkout, key, tmp_path / "d")
+    short.pool_sink = ShortPool(short.http)
+    with pytest.raises(ci.CiError) as error:
+        short.run()
+    assert error.value.code == "pool-missing"
+    assert not (tmp_path / "d/content-windows/verified.json").exists()
+
+
+def test_build_content_cleans_up_only_its_own_build(repo, ci_checkout, key, tmp_path, codeload):
+    class Moved(FakeContentLeg):  # the build root's owner record names another build by cleanup time
+        def package(self, argv, storage):
+            code = super().package(argv, storage)
+            (storage.root / ".runner-release.json").write_text(json.dumps(
+                {"repository": r2.REPOSITORY, "commit": repo.reader}))
+            return code
+    leg = content_leg(repo, ci_checkout, key, tmp_path, cls=Moved)
+    with pytest.raises(ci.CiError) as error:
+        leg.run()
+    assert error.value.code == "cleanup"
+    root = leg.work / f"content-windows-{repo.commit}"
+    assert (root / "source").is_dir()  # nothing was removed
+    assert [path for path in (root / "downloads").iterdir() if (path / ".eloria-package").is_file()]
+
+
+def test_build_content_refuses_a_stage_that_is_not_the_commits_build(repo, ci_checkout, key, tmp_path, codeload):
+    leg = content_leg(repo, ci_checkout, key, tmp_path / "descriptor")
+    leg.identity = dict(leg.identity, release_build=False)  # the stage package_client left names another build
+    with pytest.raises(ci.CiError) as error:
+        leg.run()
+    assert error.value.code == "descriptor" and "sink" not in leg.calls
+    identity = identity_of(repo, "windows", key, tmp_path / "pck-identity")
+    other = content_leg(repo, ci_checkout, key, tmp_path / "pck", pck=core_pck(dict(identity, commit=fx.PARENT)))
+    with pytest.raises(ci.CiError) as error:
+        other.run()
+    assert error.value.code == "pck-identity" and "sink" not in other.calls
+    evil = content_leg(repo, ci_checkout, key, tmp_path / "ext", pck=core_pck(
+        identity, [ci.RUNTIME_DESCRIPTOR, "res://addons/evil/evil.gdextension"]))
+    with pytest.raises(ci.CiError) as error:
+        evil.run()
+    assert error.value.code == "pck-extension-list"
+
+
+@pytest.mark.parametrize("url_for", [
+    lambda digest: r2.part_url(digest),                                # an R2 row in a ci set
+    lambda digest: r2.github_pool_url(digest, partitioned=False),      # the legacy pool: not where GitHubSink puts it
+    lambda digest: r2.github_pool_url("0" * 64),                       # another part's name
+])
+def test_pool_rows_are_exactly_where_github_sink_stores_them(tmp_path, url_for):
+    import shared_release_assets
+    digest = sha(b"part")
+    parts = tmp_path / "parts"
+    parts.mkdir()
+    (parts / shared_release_assets.name(digest)).write_bytes(b"part")
+    row = {"url": r2.github_pool_url(digest), "size": 4, "sha256": digest}
+    leg = ci.ContentLeg(platform="linux", commit=fx.COMMIT, release_id=1, dry_run=False, repo=tmp_path / "r",
+                        work=tmp_path / "w", out=tmp_path / "o", cache=tmp_path / "c", http=FakeHttp())
+    assert leg._pool_rows({"packages": [{"parts": [row]}, {"parts": [dict(row)]}]}, parts) == [
+        {"name": shared_release_assets.name(digest), "size": 4, "sha256": digest, "url": row["url"]}]
+    with pytest.raises(ci.CiError) as error:
+        leg._pool_rows({"packages": [{"parts": [dict(row, url=url_for(digest))]}]}, parts)
+    assert error.value.code == "pool-url"
+    with pytest.raises(ci.CiError) as error:  # one pool name, two sizes
+        leg._pool_rows({"packages": [{"parts": [row]}, {"parts": [dict(row, size=5)]}]}, parts)
+    assert error.value.code == "pool-url"
+    with pytest.raises(ci.CiError) as error:
+        leg._pool_rows({"packages": [{"parts": [dict(row, size=5)]}]}, parts)
+    assert error.value.code == "local-part"
+
+
+def test_default_seams_are_the_hosted_builds_tools(monkeypatch, tmp_path):
+    import package_client
+    import runner_release
+    import setup_runner_tools
+    seen = {}
+    monkeypatch.setattr(runner_release, "GitHubSink", lambda release_id: seen.setdefault("sink", release_id))
+    monkeypatch.setattr(package_client, "main", lambda argv, storage: seen.setdefault("main", (argv, storage)) and 0)
+    monkeypatch.setattr(setup_runner_tools, "install",
+                        lambda platform, root, installers=True: seen.setdefault("tools", (platform, root, installers)))
+    leg = ci.ContentLeg(platform="linux", commit=fx.COMMIT, release_id=12, dry_run=False, repo=tmp_path / "repo",
+                        work=tmp_path / "w", out=tmp_path / "o", cache=tmp_path / "c", http=FakeHttp())
+    leg.sink()
+    leg.package(["--platform", "linux"], "storage")
+    leg.install_tools(tmp_path / "t")
+    assert seen == {"sink": 12, "main": (["--platform", "linux"], "storage"),
+                    "tools": ("linux", tmp_path / "t", False)}  # no Inno: this leg builds no installer
+    source = inspect.getsource(ci.ContentLeg)
+    assert "update-signing-key" not in source and "SIGNING_SECRET in os.environ" in source
+
+
+def test_content_cache_keys_are_exact_and_follow_their_inputs(tmp_path):
+    repository = tmp_path / "keys"
+    git(tmp_path, "init", "-q", "-b", "develop", str(repository))
+    base = fx.commit_tree(repository, {"godot-client/assets/ui/icon.png": b"png",
+                                       "godot-client/src/world/terrain.gd": b"extends Node\n",
+                                       "godot-client/src/ui/hud.gd": b"extends Node\n",
+                                       "godot-client/tools/package_client.py": b"# tools\n",
+                                       "godot-client/tests/test_x.py": b"# test\n"}, "base")
+    run = ci.git_runner(repository)
+    keys = ci.content_cache_keys(run, base, "windows")
+    assert keys == ci.content_cache_keys(run, base, "windows")  # deterministic
+    assert keys["asset_key"].startswith("rl-desktop-ci-rl-assets-v1-windows-")  # never desktop-release.yml's keys
+    assert keys["world_key"].startswith("rl-desktop-ci-world-v1-windows-")
+    assert ci.content_cache_keys(run, base, "linux") != keys
+    changes = {"ui": ({"godot-client/src/ui/hud.gd": b"extends Control\n"}, False, False),
+               "test": ({"godot-client/tests/test_x.py": b"# other\n"}, False, False),
+               "world": ({"godot-client/src/world/terrain.gd": b"extends Node3D\n"}, False, True),
+               "asset": ({"godot-client/assets/ui/icon.png": b"png2"}, True, True),
+               "tool": ({"godot-client/tools/package_client.py": b"# tools 2\n"}, True, True)}
+    previous = keys
+    for name, (files, asset_changes, world_changes) in changes.items():
+        commit = fx.commit_tree(repository, files, name)
+        current = ci.content_cache_keys(run, commit, "windows")
+        assert (current["asset_key"] != previous["asset_key"]) == asset_changes, name
+        assert (current["world_key"] != previous["world_key"]) == world_changes, name
+        previous = current
+    with pytest.raises(ci.CiError):
+        ci.content_cache_keys(run, "HEAD", "windows")
+    expected = {"assets": Path("cache/assets-linux"), "world": Path("cache/world")}
+    assert ci.content_cache_dirs(Path("cache"), "linux") == expected
+
+
+def test_cli_build_content_needs_the_dispatched_workflow_and_cache_keys_go_to_outputs(tmp_path, monkeypatch,
+                                                                                      capsys):
+    for name in ("GITHUB_ACTIONS", "GITHUB_REPOSITORY", "GITHUB_REF", "GITHUB_EVENT_NAME", "GITHUB_WORKFLOW_REF"):
+        monkeypatch.delenv(name, raising=False)
+    code = ci.main(["build-content", "--platform", "linux", "--commit", "a" * 40, "--release-id", "0",
+                    "--dry-run", "true", "--cache", str(tmp_path / "c"), "--work", str(tmp_path / "w"),
+                    "--out", str(tmp_path / "o")])
+    assert code == 1 and "master or develop" in capsys.readouterr().err
+    assert not (tmp_path / "w").exists() and not (tmp_path / "o").exists()
+    outputs = tmp_path / "outputs"
+    monkeypatch.setenv("GITHUB_OUTPUT", str(outputs))
+    head = ci.git_runner(ci.REPO)("rev-parse", "HEAD").strip()
+    assert ci.main(["content-cache-key", "--platform", "linux", "--commit", head]) == 0
+    values = dict(line.split("=", 1) for line in outputs.read_text().splitlines())
+    assert values == ci.content_cache_keys(ci.git_runner(ci.REPO), head, "linux")
 
 
 # --- Artifacts and the CLI -------------------------------------------------------------------------
