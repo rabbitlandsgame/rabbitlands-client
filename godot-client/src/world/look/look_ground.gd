@@ -52,6 +52,14 @@ const SHADER_TWO_SIDED := preload("res://src/world/look/painted_ground_two_sided
 const SHADER_OVERLAY := preload("res://src/world/look/painted_ground_overlay.gdshader")
 const SHADER_BLEND := preload("res://src/world/look/painted_ground_blend.gdshader")
 const SHADER_DECK := preload("res://src/world/look/painted_ground_deck.gdshader")
+## The depth pre-passes of SHADER_DECK and SHADER_OVERLAY for the Mobile
+## renderer (`mobile_prepass`, `prepass_shader`). Loaded the first time Mobile
+## asks for one, never preloaded: the renderer translates a shader as soon as
+## it is loaded (and the RenderingDevice renderers start compiling it), and
+## Forward+ and Compatibility never draw these.
+const DECK_PREPASS_PATH := "res://src/world/look/painted_ground_deck_prepass.gdshader"
+const OVERLAY_PREPASS_PATH := "res://src/world/look/painted_ground_overlay_prepass.gdshader"
+const RendererFamily := preload("res://src/runtime/renderer_family.gd")
 
 const BIOME_SHADER_PATH := "res://src/world/biome_blend.gdshader"
 const CONTINENT_WATER_PATH := "res://src/world/continent_water.gdshader"
@@ -110,6 +118,8 @@ vec3 look_biome_reference(vec4 weights, vec4 secondary) {
 const PAINTED_META := &"look_painted_ground"
 ## Marks the copy of a kit paving deck's mesh that carries a coverage.
 const KIT_MESH_META := &"look_kit_paving_mesh"
+## Marks a painted material's Mobile depth pre-pass (`mobile_prepass`).
+const PREPASS_META := &"look_mobile_prepass"
 ## WorldLoader.BATCH_META: the node is hidden and a MultiMesh draws it.
 const BATCH_META := &"static_batch"
 
@@ -122,6 +132,10 @@ static var _biome_mutex := Mutex.new()
 static var _biome_tried := false
 static var _biome_shader: Shader
 static var _biome_uniforms := PackedStringArray()
+## `prepass_shader`'s loaded shaders, by path. Paint runs on the loader's
+## worker threads too.
+static var _prepass_mutex := Mutex.new()
+static var _prepass_shaders: Dictionary = {}
 
 ## Paints a continent map's root as the loader finishes it. Maps outside the
 ## continent wait for `paint_bound`. Returns the surfaces painted.
@@ -348,6 +362,7 @@ static func paint(root: Node, region := "", sun_heading := Vector2.ZERO) -> int:
 				if made[key] is ShaderMaterial:
 					(made[key] as ShaderMaterial).set_shader_parameter(&"look_sun_heading",
 						sun_heading)
+					mobile_prepass(made[key])
 			var painted: Material = made[key]
 			if painted == null:
 				continue
@@ -361,6 +376,88 @@ static func paint(root: Node, region := "", sun_heading := Vector2.ZERO) -> int:
 		print("look_ground stage=painted root=%s surfaces=%d materials=%d"
 			% [root.name, surfaces, materials])
 	return surfaces
+
+## Under the Mobile renderer, gives a painted deck or patch (SHADER_DECK,
+## SHADER_OVERLAY) the depth pre-pass Forward+ runs for it and Mobile does
+## not, as its next pass: a copy of it, uniforms and all, drawn with its
+## `prepass_shader` in the opaque pass. Forward+ draws every blended ground
+## surface's fully covered fragments into depth before anything blends, so on
+## the Four Gates plaza the decks hid the
+## cobble patches below them and each deck's edging band, drawn behind its
+## plane, failed against the other decks' roads. Mobile draws these surfaces
+## in its transparent pass alone, nearest last and writing no depth: a patch
+## nearer the camera than a deck's middle painted over the deck, and every
+## band that crosses another deck drew a black seam along the junction (stage
+## A sign-off, section 8). With the pre-pass the blended pass is the one
+## Forward+ draws, against the same depth.
+##
+## Returns the pre-pass, or null for any other renderer or material. Forward+
+## and Compatibility get nothing, so they draw exactly as before. Call it once
+## the material's uniforms are final: the copy takes them as they are then
+## (only look_sun_heading follows, and the pre-pass draws no paint). Calling it
+## again returns the pre-pass already chained. The pre-pass never opens the
+## occluder fade's hole: OccluderFade keeps every surface this paints solid
+## (LookFade.keeps_solid), so no faded copy of a deck or patch is ever drawn.
+static func mobile_prepass(material: Material, rendering_method := "") -> ShaderMaterial:
+	var painted := material as ShaderMaterial
+	if painted == null:
+		return null
+	var method := RendererFamily.method() if rendering_method.is_empty() else rendering_method
+	if method != RendererFamily.MOBILE:
+		return null
+	if painted.shader != SHADER_DECK and painted.shader != SHADER_OVERLAY:
+		return null
+	if painted.next_pass != null and painted.next_pass.has_meta(PREPASS_META):
+		return painted.next_pass as ShaderMaterial
+	# A glaze (a yard at PATCH_OPACITY, a tinted-down albedo) never reaches
+	# the pre-pass threshold anywhere, so Forward+ writes none of its depth:
+	# no pre-pass to draw.
+	if not reaches_prepass(painted):
+		return null
+	var shader := prepass_shader(painted.shader)
+	if shader == null:
+		return null
+	var prepass := painted.duplicate() as ShaderMaterial
+	for meta: StringName in prepass.get_meta_list():
+		prepass.remove_meta(meta)
+	prepass.shader = shader
+	prepass.next_pass = painted.next_pass
+	prepass.set_meta(PREPASS_META, true)
+	painted.next_pass = prepass
+	return prepass
+
+## The Mobile depth pre-pass shader of a painted ground `shader`
+## (painted_ground_deck_prepass for SHADER_DECK, painted_ground_overlay_prepass
+## for SHADER_OVERLAY), or null for any other. Loaded on first use, once. On a
+## loader worker that first load can wait a frame for the main thread to serve
+## a RenderingServer call, as the loader's other shader work can; nothing joins
+## a live loader worker (ContinentChunkStream polls), so it never blocks.
+static func prepass_shader(shader: Shader) -> Shader:
+	var path := DECK_PREPASS_PATH if shader == SHADER_DECK \
+		else OVERLAY_PREPASS_PATH if shader == SHADER_OVERLAY else ""
+	if path.is_empty():
+		return null
+	_prepass_mutex.lock()
+	var found := _prepass_shaders.get(path) as Shader
+	if found == null:
+		found = load(path) as Shader
+		_prepass_shaders[path] = found
+	_prepass_mutex.unlock()
+	return found
+
+## Forward+'s depth pre-pass keeps a blended fragment whose alpha reaches
+## this (opaque_prepass_threshold); painted_ground_surface's pre-pass uses it.
+const PREPASS_THRESHOLD := 0.99
+
+## True when some fragment of `painted` can reach PREPASS_THRESHOLD: its
+## opacity and its tint's alpha, which every fragment's alpha is scaled by,
+## reach it together.
+static func reaches_prepass(painted: ShaderMaterial) -> bool:
+	var opacity: Variant = painted.get_shader_parameter(&"look_opacity")
+	var tint: Variant = painted.get_shader_parameter(&"albedo_color")
+	var scale := (1.0 if opacity == null else float(opacity)) \
+		* (1.0 if not tint is Color else (tint as Color).a)
+	return scale >= PREPASS_THRESHOLD
 
 ## True when a walk deck is one of `region`'s opaque kit paving pieces
 ## (`ground.kit_paving`, LookProfile.KIT_PAVING_CHUNK_METRES).
