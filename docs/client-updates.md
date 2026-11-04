@@ -128,7 +128,17 @@ missing, damaged or differently spelled member downloads again, but only those
 members are unpacked; matching files stay where they are and are never copied.
 This also works with an older installation that has no package receipt.
 Downloads resume from checksum-verified cached parts. A corrupt or interrupted
-download never replaces the live game.
+download never replaces the live game. Package and updater-helper downloads read
+1 MiB per pass of Godot's download thread, which sleeps until the next timer tick
+after each read (15.6 ms at Windows' default timer resolution, about 2 ms when a
+finer one is in effect). The engine's 64 KiB default capped downloads at about
+4.2 MB/s (or about 30 MB/s); 1 MiB raises that ceiling to about 66 MB/s (or about
+250 MB/s). On a connection slower than the ceiling the download thread keeps one
+processor core busy, as it already did on connections slower than the old
+ceiling, and closing the updater mid-download waits for the current 1 MiB read to
+finish: up to about one second at 8 Mbit/s, about four seconds at 2 Mbit/s and
+about eight seconds at 1 Mbit/s (64 KiB waited at most about half a second there).
+Manifest and API requests keep the default.
 
 Changed files are unpacked into `.eloria-update-stage/` and hashed again from
 disk. Before any live file moves, the updater writes a per-update journal,
@@ -156,8 +166,13 @@ folder inside those roots, keeps the earlier two-root behavior: both roots are
 staged in full and promoted together with the two-root journal.
 
 The installer and updater keep the checked package plan in memory for their one
-locked transaction, avoiding a second scan after downloading. Folder checks are
-shared within each scan. Every file still receives its signed SHA-256 check,
+locked transaction, avoiding a second scan after downloading. The scan lists the
+installed folders once, noting which files and folders are links, then hashes the
+installed files on up to four threads (one fewer than the processor count; files
+of 8 MiB and more first, largest first). The plan is the same as a one-thread
+scan's. Setting `RABBITLANDS_UPDATE_SCAN_THREADS=1` restores the
+one-thread scan (values above one choose the thread count, at most 16). Every
+file still receives its signed SHA-256 check,
 staged files are hashed again before anything live changes, and untouched files
 are checked at the commit point as described above. The plan is never loaded
 from disk or reused by a later updater run, and a plan made before an
