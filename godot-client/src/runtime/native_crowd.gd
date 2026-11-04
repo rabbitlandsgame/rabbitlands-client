@@ -10,7 +10,7 @@ extends RefCounted
 ## | `cape` | NativeCapeConstraintKernel | cape_cloth.gd | ELORIA_NATIVE_PRESENTATION `cape`, `both`/`1`, `all` |
 ## | `flight` | NativeSpellFlightGeometry | spell_flight_3d.gd | `flight`, `both`/`1`, `all` |
 ## | `world` | NativeWorldEffectGeometry | world_effect_3d.gd | `world`, `all` |
-## | `reducer` | NativeCrowdReducer | app_state.gd | ELORIA_NATIVE_CROWD `1` |
+## | `reducer` | NativeCrowdReducer | app_state.gd | ELORIA_NATIVE_CROWD `1`, RABBITLANDS_NATIVE_REDUCER `packet`/`run` |
 ##
 ## No `class_name`: callers preload this file, like `native_library.gd`.
 ##
@@ -22,6 +22,18 @@ extends RefCounted
 ## own release-build A/B. Turning one on is one value here; the tests cover both.
 ## `0`, `off`, `script`, `gdscript` and `legacy` select GDScript, and so does any
 ## value the table does not know (as before).
+##
+## ## Reducer modes (rust-batch R1/R2, RB-C7)
+##
+## AppState reduces ADD_ACTOR_COMMAND packets in one of three modes
+## (`reducer_mode()`): `gdscript`, the original per-command loop; `packet`, the
+## native reducer once per packet (R1, what `ELORIA_NATIVE_CROWD=1` has always
+## selected); `run`, consecutive command packets buffered and reduced in one
+## native call at the next flush point (R2). RABBITLANDS_NATIVE_REDUCER names the
+## mode (`packet`, `run`) or turns the reducer off (`legacy`, the OFF_VALUES).
+## Either variable's off value wins over the other's on value, so the packaged
+## "legacy runtime" launchers (ELORIA_NATIVE_CROWD=0) stay on GDScript. A
+## reducer selected only by DEFAULTS uses DEFAULT_REDUCER_MODE.
 ##
 ## ## Providers
 ##
@@ -59,6 +71,11 @@ const NativeLibrary := preload("res://src/runtime/native_library.gd")
 
 const PRESENTATION_ENVIRONMENT := "ELORIA_NATIVE_PRESENTATION"
 const REDUCER_ENVIRONMENT := "ELORIA_NATIVE_CROWD"
+## The reducer's mode and kill switch (see Reducer modes).
+const REDUCER_MODE_ENVIRONMENT := "RABBITLANDS_NATIVE_REDUCER"
+const REDUCER_MODES: Array[String] = ["gdscript", "packet", "run"]
+## The mode of a reducer selected by DEFAULTS alone (R1 + R2).
+const DEFAULT_REDUCER_MODE := "run"
 const PROVIDER_ENVIRONMENT := "ELORIA_NATIVE_PROVIDER"
 const BENCHMARK_PROVIDER := "benchmark"
 const BENCHMARK_EXTENSION := "res://bin/native_crowd.gdextension"
@@ -80,23 +97,54 @@ static var _stats: Dictionary = {}
 
 ## Makes the native object for `feature` when it is selected and allowed, else
 ## {object: null} with the reason. Returns {object, status, provider, reason}.
-static func kernel(feature: String) -> Dictionary:
-	var made := _make(feature)
+## `wanted` true or false replaces the environment's selection (reason
+## `requested`), for a caller that already decided, such as AppState's reducer
+## mode or a benchmark; the kill switch and the provider rule still apply.
+static func kernel(feature: String, wanted: Variant = null) -> Dictionary:
+	var made := _make(feature, wanted)
 	_record(feature, made)
 	return made
+
+## Pure reducer-mode resolution (see Reducer modes), for AppState, fixtures and
+## reporting: {mode ("gdscript", "packet" or "run"), wanted, reason} from
+## `environment` (ELORIA_NATIVE_CROWD, RABBITLANDS_NATIVE_REDUCER) and
+## `defaults`. Reasons: `script_selected` (an off value), `unknown_value`,
+## `selected`, `default_on`, `default_off`.
+static func reducer_mode(environment: Dictionary, defaults := DEFAULTS) -> Dictionary:
+	var named := str(environment.get(REDUCER_MODE_ENVIRONMENT, "")).strip_edges().to_lower()
+	var crowd := str(environment.get(REDUCER_ENVIRONMENT, "")).strip_edges().to_lower()
+	if named in OFF_VALUES or crowd in OFF_VALUES:
+		return {"mode": "gdscript", "wanted": false, "reason": "script_selected"}
+	if not named.is_empty():
+		if named == "packet" or named == "run":
+			return {"mode": named, "wanted": true, "reason": "selected"}
+		return {"mode": "gdscript", "wanted": false, "reason": "unknown_value"}
+	if crowd.is_empty():
+		var by_default := bool(defaults.get("reducer", false))
+		return {"mode": DEFAULT_REDUCER_MODE if by_default else "gdscript", "wanted": by_default,
+			"reason": "default_on" if by_default else "default_off"}
+	if crowd == "1":
+		return {"mode": "packet", "wanted": true, "reason": "selected"}
+	return {"mode": "gdscript", "wanted": false, "reason": "unknown_value"}
+
+## This process's reducer variables, for `reducer_mode()`.
+static func reducer_environment() -> Dictionary:
+	return {REDUCER_ENVIRONMENT: OS.get_environment(REDUCER_ENVIRONMENT),
+		REDUCER_MODE_ENVIRONMENT: OS.get_environment(REDUCER_MODE_ENVIRONMENT)}
 
 ## Pure selection, for fixtures and reporting: whether `feature` is selected by
 ## `environment` (the variables above) with `defaults`. Returns {wanted, reason}.
 static func selection(feature: String, environment: Dictionary, defaults := DEFAULTS) -> Dictionary:
-	var variable := REDUCER_ENVIRONMENT if feature == "reducer" else PRESENTATION_ENVIRONMENT
+	if feature == "reducer":
+		var resolved := reducer_mode(environment, defaults)
+		return {"wanted": resolved.wanted, "reason": resolved.reason}
+	var variable := PRESENTATION_ENVIRONMENT
 	var value := str(environment.get(variable, "")).strip_edges().to_lower()
 	if value.is_empty():
 		var by_default := bool(defaults.get(feature, false))
 		return {"wanted": by_default, "reason": "default_on" if by_default else "default_off"}
 	if value in OFF_VALUES:
 		return {"wanted": false, "reason": "script_selected"}
-	if feature == "reducer":
-		return {"wanted": value == "1", "reason": "selected" if value == "1" else "unknown_value"}
 	if not PRESENTATION_MODES.has(value):
 		return {"wanted": false, "reason": "unknown_value"}
 	var named: bool = feature in PRESENTATION_MODES[value]
@@ -131,7 +179,8 @@ static func providers() -> Dictionary:
 
 ## {defaults, benchmark_provider, providers, features: {feature: {selected,
 ## reason, attempts, active, last_status, provider}}} for diagnostics and the
-## startup receipt.
+## startup receipt; the reducer's entry also names the `mode` the environment
+## selects (AppState.actor_reducer_stats() has the mode in use).
 static func snapshot() -> Dictionary:
 	var environment := _environment()
 	var features := {}
@@ -141,6 +190,7 @@ static func snapshot() -> Dictionary:
 		var selected := selection(feature, environment)
 		features[feature] = entry.duplicate()
 		features[feature].merge({"selected": selected.wanted, "reason": selected.reason})
+	features.reducer["mode"] = reducer_mode(environment).mode
 	_lock.unlock()
 	return {"defaults": DEFAULTS.duplicate(), "benchmark_provider": benchmark_allowed(),
 		"providers": providers(), "features": features}
@@ -154,20 +204,26 @@ static func reset_for_tests() -> void:
 	_lock.unlock()
 
 static func _environment() -> Dictionary:
-	return {PRESENTATION_ENVIRONMENT: OS.get_environment(PRESENTATION_ENVIRONMENT),
-		REDUCER_ENVIRONMENT: OS.get_environment(REDUCER_ENVIRONMENT)}
+	var environment := reducer_environment()
+	environment[PRESENTATION_ENVIRONMENT] = OS.get_environment(PRESENTATION_ENVIRONMENT)
+	return environment
 
 static func _on_main_thread() -> bool:
 	return OS.get_thread_caller_id() == OS.get_main_thread_id()
 
-static func _make(feature: String) -> Dictionary:
+static func _make(feature: String, wanted: Variant = null) -> Dictionary:
 	var made := {"object": null, "status": "disabled", "provider": "", "reason": ""}
 	if not CLASSES.has(feature):
 		made.status = "unknown_feature"
 		return made
-	# One variable read per call: flights and impacts are made per cast.
-	var variable := REDUCER_ENVIRONMENT if feature == "reducer" else PRESENTATION_ENVIRONMENT
-	var selected := selection(feature, {variable: OS.get_environment(variable)})
+	var selected: Dictionary
+	if wanted != null:
+		selected = {"wanted": bool(wanted), "reason": "requested"}
+	elif feature == "reducer":
+		selected = selection(feature, reducer_environment())
+	else:
+		# One variable read per call: flights and impacts are made per cast.
+		selected = selection(feature, {PRESENTATION_ENVIRONMENT: OS.get_environment(PRESENTATION_ENVIRONMENT)})
 	made.reason = selected.reason
 	if not bool(selected.wanted):
 		return made

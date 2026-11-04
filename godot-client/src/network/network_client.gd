@@ -6,6 +6,10 @@ const PLAYER_CREATION := preload("res://src/actors/player_creation_policy.gd")
 
 signal connection_state_changed(state: String)
 signal packet_received(command: int, payload: PackedByteArray)
+## Once at the end of each dispatch pass (`_drain_packets`), after the last
+## `packet_received` it emitted, inside the pass's dispatch budget. AppState
+## reduces a pending run of actor-command packets here (rust-batch R2).
+signal dispatch_drained
 signal protocol_error(message: String)
 signal magic_selection_completed
 signal coordinate_intents_invalidated
@@ -968,6 +972,7 @@ func _drain_packets() -> void:
 		return
 	var started := Time.get_ticks_usec()
 	_drain_packet_buffer(started)
+	dispatch_drained.emit()
 	_dispatch_spent_usec += Time.get_ticks_usec() - started
 	_dispatch_max_usec = maxi(_dispatch_max_usec, _dispatch_spent_usec)
 

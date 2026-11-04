@@ -26,6 +26,32 @@ struct NativeCrowdActorKeys {
     StringName sitting{"sitting"};
     StringName in_combat{"in_combat"};
     StringName alive{"alive"};
+    // The written fields' names as Strings: a field a record lacks is inserted
+    // under its String name, as ActorReducer (GDScript) inserts it.
+    String x_text{"x"};
+    String y_text{"y"};
+    String command_text{"command"};
+    String command_sequence_text{"command_sequence"};
+    String facing_command_text{"facing_command"};
+    String health_text{"health"};
+    String sitting_text{"sitting"};
+    String in_combat_text{"in_combat"};
+    String alive_text{"alive"};
+    // reduce_run results and its step-stamp argument.
+    StringName consumed{"consumed"};
+    StringName reason{"reason"};
+    StringName facets{"facets"};
+    StringName commands{"commands"};
+    StringName applied{"applied"};
+    StringName stamped{"stamped"};
+    StringName unstamped{"unstamped"};
+    StringName stamp_mode{"mode"};
+    StringName step_key{"step_key"};
+    StringName playout_key{"playout_key"};
+    StringName pass_key{"pass_key"};
+    StringName local_msec{"local_msec"};
+    StringName playout_seconds{"playout_seconds"};
+    StringName pass_id{"pass_id"};
 };
 
 class NativeCrowdReducer : public RefCounted {
@@ -39,6 +65,11 @@ protected:
 public:
     Dictionary reduce_packet(Dictionary actors, const PackedByteArray &payload,
             int64_t local_actor_id) const;
+    // A run of consecutive command-2 payloads, reduced in arrival order as
+    // AppState's GDScript loop reduces them one packet after another, with
+    // each touched actor published once (rust-batch R2). See the .cpp.
+    Dictionary reduce_run(Dictionary actors, const Array &payloads,
+            int64_t local_actor_id, const Dictionary &stamp) const;
 };
 
 class NativeCrowdStore : public RefCounted {

@@ -180,6 +180,22 @@ list against `CMakeLists.txt` and the `#include` lines.
   only when `native_crowd_providers` names `client_runtime`. The benchmark
   extension is loaded and trusted only with `ELORIA_NATIVE_PROVIDER=benchmark`.
 * The runtime ABI stays 1; added classes are backward compatible.
+* Actor-command reduction (RB-C7, rust-batch R1/R2). AppState reduces
+  ADD_ACTOR_COMMAND packets in one of three modes: `gdscript` (the original
+  loop, the default), `packet` (`NativeCrowdReducer.reduce_packet` per packet,
+  R1: what `ELORIA_NATIVE_CROWD=1` selects) and `run` (consecutive command
+  packets buffered and reduced in one `reduce_run` call at the next flush
+  point, R2: `RABBITLANDS_NATIVE_REDUCER=run`). `RABBITLANDS_NATIVE_REDUCER=legacy`
+  or `ELORIA_NATIVE_CROWD=0` keeps GDScript whatever else is set. The run is
+  flushed before any other packet, at `Network.dispatch_drained` (the end of
+  every dispatch pass), at 512 records, before `take_changed_actors`, on a
+  connection change and at the end of the frame; packets the native reducer
+  hands back (the local actor's command 19, a corrupt record) are reduced by
+  the GDScript loop in their place, and any other native answer fails closed
+  to GDScript for the session. `reduce_run` arrived with this payload; an older
+  payload makes `run` fall back to `packet`. `NativeCrowd.DEFAULTS.reducer`
+  stays false until the reducer's own release-build A/B; once on, its mode is
+  `NativeCrowd.DEFAULT_REDUCER_MODE` (`run`).
 
 Checks: `tests/test_client_runtime_crowd_kernels.gd` covers registration,
 providers, unchanged defaults, the opt-ins, one call per class and the reducer
@@ -192,6 +208,10 @@ themselves; `tests/test_native_presentation_modes.gd` encodes the selection
 table and `tests/test_native_runtime_switches.gd` the kill switches, the
 startup load and the provider rule. Run both once more with
 `RABBITLANDS_NATIVE_RUNTIME=off` for the fallback path.
+`tests/test_native_crowd_run_parity.gd` compares `reduce_run` and AppState's
+`run` mode with the GDScript loop byte for byte (`var_to_bytes`) after every
+flush point, on synthetic streams and on RLREC1 session recordings
+(`--recording=`).
 
 ## Content digest (SHA-256)
 

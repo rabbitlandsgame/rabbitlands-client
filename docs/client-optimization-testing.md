@@ -181,6 +181,21 @@ values are unchanged. `ELORIA_NATIVE_PRESENTATION` takes `cape`, `flight`,
 `world`, `both`/`1` or `all`. `0`, `off`, `script`, `gdscript`, `legacy` or any
 other value keeps GDScript. `ELORIA_NATIVE_CROWD=1` turns on the reducer.
 
+The reducer has three modes. `gdscript` is the original loop and stays the
+default until the reducer's own release-build A/B. `packet` reduces each
+actor-command packet natively; `ELORIA_NATIVE_CROWD=1` selects it, as before.
+`run` gathers the actor-command packets of a dispatch pass and reduces them in
+one native call before anything else reads the actors (the next other packet,
+the end of the pass, 512 commands, the next presentation pass, a connection
+change); `RABBITLANDS_NATIVE_REDUCER=run` selects it (`packet` also works).
+`RABBITLANDS_NATIVE_REDUCER=legacy` or `ELORIA_NATIVE_CROWD=0` keeps the
+GDScript loop whatever else is set, and the runtime switch above turns every
+native mode off. The actor table is the same in every mode; in `run` mode the
+`actors` change is announced once per flush instead of once per packet. A
+native failure prints "Native reducer run failed (...)" and the session
+continues on GDScript. `AppState.actor_reducer_stats()` reports the mode in
+use and the run counters.
+
 The kernels and the reducer come from the verified payload, and an opt-in loads
 it if startup has not. Developer builds of the benchmark extension
 `bin/native_crowd.gdextension` are used only with
