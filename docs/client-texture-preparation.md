@@ -258,6 +258,26 @@ originals. Retirement `mapMeshCopies` file SHA bindings are refreshed without
 changing their mesh lists. The plan and recovery receipt are local evidence;
 source asset changes still require the normal integration and qualification.
 
+## Actor sidecars (wave 2, not release-enabled)
+
+`build_vram_textures.py --actor-dir` encodes the embedded images of actor GLBs
+into a `vram/` folder beside them, with the map run's encode cache. The client
+reads them in the actor image extension (`src/actors/actor_images.gd`, AT-C2):
+
+- A sidecar is selected only by the SHA-256 of the bytes this parse read from
+  the GLB. It must be listed in that GLB's own directory index and fit every
+  role this GLB samples it in; anything else is decoded as before.
+- Each `.evt` is hashed in full at its first use in a process. After that, a
+  live pooled texture with the same
+  `sha|evt:<file sha256>:<recipe>:<format>|mip-skip` key is reused.
+- `rl_heads` and data: or loose images never take sidecars.
+
+Packages stage them only with `package_client.py --actor-vram-textures`, which
+release and runner builds refuse until `ACTOR_SIDECARS_RELEASE_ENABLED` is set
+together with AT-C4 (`godot-client/docs/runtime-performance.md`, wave 2 stage
+B). Do not stage race sidecars for windowed play before AT-C4: the wardrobe dye
+readback would receive BC7.
+
 ## Measured map storage reduction, 2026-10-29
 
 The release selector's loose `eloria-assets` payload decreased from

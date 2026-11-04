@@ -87,6 +87,14 @@ exits with code 75 when the updater announced in
 `RABBITLANDS_LAUNCHER_FEATURES` that it relaunches the game and keeps its
 installation lock; otherwise the game restarts itself.
 
+The installed updater starts the recorded renderer while it is active (state
+`trial` or `ok`, with fewer than two trial starts that did not reach `ok`) and
+announces `renderer-relaunch`. When the game exits with 75, the updater starts
+it once more with the renderer the settings now ask for and
+`--graphics-renderer-restarted`, keeping the installation lock. If a trial start
+exits with an error within 60 seconds, the updater sets
+`auto_renderer_state="failed_start"`; nothing else in the file changes.
+
 ### Lights in Mobile and OpenGL Compatibility
 
 Mobile and OpenGL Compatibility light each mesh with at most 8 point lights and
