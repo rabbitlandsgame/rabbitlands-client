@@ -1,5 +1,10 @@
 extends SceneTree
 ## AppState integration parity for the opt-in native actor-command path.
+## AppState takes the reducer from the verified client_runtime payload through
+## src/runtime/native_crowd.gd (or, with ELORIA_NATIVE_PROVIDER=benchmark, from
+## the benchmark extension). Run with ELORIA_NATIVE_CROWD=1.
+
+const NativeCrowd := preload("res://src/runtime/native_crowd.gd")
 
 var failures := 0
 
@@ -42,6 +47,17 @@ func _expected_after(actor: Dictionary, commands: Array) -> Dictionary:
 
 func _run() -> void:
 	var state: Node = root.get_node("AppState")
+	# RB-C1g: the reducer is selected by ELORIA_NATIVE_CROWD=1 or its default
+	# (off until its own A/B, src/runtime/native_crowd.gd). Unselected, AppState
+	# must keep the GDScript reducer and the parity part below is skipped.
+	if not bool(NativeCrowd.selection("reducer",
+			{"ELORIA_NATIVE_CROWD": OS.get_environment("ELORIA_NATIVE_CROWD")}).wanted):
+		_expect(not bool(state.call("native_crowd_reducer_active")),
+			"unselected, AppState keeps the GDScript reducer")
+		print("Native crowd AppState: SKIP parity (set ELORIA_NATIVE_CROWD=1 to opt in); ",
+			"PASS" if failures == 0 else "FAIL (%d)" % failures)
+		quit(failures)
+		return
 	_expect(bool(state.call("native_crowd_reducer_active")),
 		"ELORIA_NATIVE_CROWD activates AppState's native reducer")
 

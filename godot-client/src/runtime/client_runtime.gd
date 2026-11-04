@@ -6,7 +6,8 @@ const NativeLibrary := preload("res://src/runtime/native_library.gd")
 const LOADER_REASONS := {"absent": "optional_runtime_absent", "manifest_invalid": "manifest_invalid",
 	"api_mismatch": "api_mismatch", "unsupported_platform": "unsupported_platform",
 	"incomplete": "optional_runtime_incomplete", "checksum_mismatch": "runtime_checksum_mismatch",
-	"late_load_refused": "late_load_refused", "extension_unavailable": "extension_unavailable"}
+	"late_load_refused": "late_load_refused", "extension_unavailable": "extension_unavailable",
+	"switched_off": "native_runtime_switched_off"}
 const MOUNTED_PROFILE_IDS := ["moor_pony", "golden_plains_horse", "crystalback_tortoise", "rabbit", "jadefeather_raptor"]
 ## Human-testing defaults request the optional runtime. Comparison observes
 ## legacy presentation; Rust mode owns supported mounted work when available.
@@ -64,7 +65,7 @@ func initialize(directory := "") -> void:
 		return
 	# Every check runs again on each initialize (no NativeLibrary.ensure() cache).
 	var loaded := NativeLibrary.load_verified(directory)
-	if str(loaded.code) not in ["absent", "manifest_invalid"]:
+	if str(loaded.code) not in ["absent", "manifest_invalid", NativeLibrary.SWITCHED_OFF]:
 		_manifest = loaded.manifest
 	if not bool(loaded.ok):
 		_reason = str(LOADER_REASONS.get(loaded.code, loaded.code))

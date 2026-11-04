@@ -2,6 +2,7 @@ extends SceneTree
 ## Exercise the actual Main scene hooks, without authentication or a map load.
 const Controller := preload("res://src/runtime/client_runtime.gd")
 const Digest := preload("res://src/runtime/content_digest.gd")
+const NativeLibrary := preload("res://src/runtime/native_library.gd")
 var failures := 0
 
 func _init() -> void:
@@ -39,6 +40,30 @@ func _check_content_digest() -> void:
 		expected = "compare"
 	_expect(str(digest.backend) == expected, "the digest backend follows its own mode and default (%s)" % digest.backend)
 
+## RB-C1g: once Main calls `NativeLibrary.startup()` (B5 hook), Main._ready
+## loads the verified payload for every profile (owner D-NATIVE), or records
+## why not (absent, refused, switched off), before any consumer asks.
+func _check_native_startup() -> void:
+	var snapshot: Dictionary = NativeLibrary.snapshot()
+	var startup: Dictionary = snapshot.get("startup", {})
+	if startup.is_empty():
+		print("NOTE: Main does not call NativeLibrary.startup() yet (RB-C1g hook pending)")
+		return
+	_expect(bool(snapshot.ensured) and str(startup.code) == str(snapshot.code),
+		"Main's startup load is this process's ensure() result (%s)" % startup.code)
+	if OS.get_environment("ELORIA_NATIVE_CROWD").strip_edges() != "1":
+		# No autoload opt-in ran ensure() first, so the timing is the load's own
+		# (and the hook sits before ContentDigest.initialize(), as H1 asks).
+		_expect(not bool(startup.get("prior", true)),
+			"Main's startup() is the process's first ensure() (us=%s)" % startup.get("us"))
+	var args := OS.get_cmdline_user_args()
+	if str(snapshot.switch) == "off":
+		_expect(str(startup.code) == NativeLibrary.SWITCHED_OFF, "a kill switch keeps Main from loading the payload")
+	elif args.has("--expect-native") or args.has("--expect-native=present"):
+		_expect(str(startup.code) == "loaded" and bool(snapshot.registered), "Main loaded the verified payload at startup")
+	elif args.has("--expect-native=absent"):
+		_expect(str(startup.code) != "loaded", "Main starts without a payload")
+
 func _run() -> void:
 	var previous := OS.get_environment("RABBITLANDS_CLIENT_RUNTIME")
 	var selected := "rust" if OS.get_cmdline_user_args().has("--runtime=rust") else "compare"
@@ -63,6 +88,7 @@ func _run() -> void:
 	_expect(controller != null and Controller.current() == controller,
 		"Main ready initializes and publishes its controller")
 	_check_content_digest()
+	_check_native_startup()
 	if controller != null:
 		var before := controller.snapshot()
 		var args := OS.get_cmdline_user_args()

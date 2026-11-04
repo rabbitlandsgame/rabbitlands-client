@@ -37,8 +37,15 @@ retain legacy support until their native payloads qualify.
 
 The manifest checks API, architecture and file checksums before loading. One
 GDScript loader, `src/runtime/native_library.gd`, owns these checks and the
-`load_extension` call for every caller (the client runtime controller and the
-mounted cape arithmetic); each caller keeps its own fallback reasons. These
+`load_extension` call for every caller (the client runtime controller, the
+mounted cape arithmetic, the content digest and the `native_crowd` kernels);
+each caller keeps its own fallback reasons. `Main._ready` loads the payload at
+startup for every profile (`NativeLibrary.startup()`, owner decision D-NATIVE,
+2026-11-04), so no consumer verifies and loads it mid-game; loading registers
+classes and turns no feature on. One kill switch keeps it unloaded and every
+caller on GDScript: `--native-runtime=off`, `RABBITLANDS_NATIVE_RUNTIME=off`,
+`--client-safe-mode`, or the support setting `[runtime] native_runtime = "off"`
+in `user://eloria_hud.cfg`. These
 are compatibility and integrity checks, not a signature or a sandbox for
 untrusted libraries. No optional missing library is registered automatically.
 An invalid result causes a whole-batch fallback, with no partial application.
@@ -162,12 +169,16 @@ list against `CMakeLists.txt` and the `#include` lines.
   `RabbitLandsClientRuntime.runtime_info().native_crowd_providers` maps each of
   the five classes to `client_runtime`, `external` or `absent`;
   `cpp_spell_flight_provider` is unchanged.
-* Registering changes no default. Each caller keeps its own opt-in:
+* Registering changes no default. The callers (cape cloth, spell flights,
+  world impacts, AppState) get their objects from one loader,
+  `src/runtime/native_crowd.gd`, which keeps the opt-ins:
   `ELORIA_NATIVE_PRESENTATION` (`cape`, `flight`, `world`, `both`/`1`, `all`)
-  for the kernels and `ELORIA_NATIVE_CROWD=1` for AppState's reducer. When the
-  payload is loaded anyway (the human-testing profile, mounted cape arithmetic),
-  an opt-in now finds the classes without the benchmark extension. Making them a
-  player default is a separate, owner-gated step.
+  for the kernels and `ELORIA_NATIVE_CROWD=1` for AppState's reducer. Every
+  default is off until that feature's own release-build A/B (owner decision
+  D-NATIVE, 2026-11-04); turning one on is one entry in `NativeCrowd.DEFAULTS`.
+  An opt-in loads this payload through `NativeLibrary.ensure()` and uses a class
+  only when `native_crowd_providers` names `client_runtime`. The benchmark
+  extension is loaded and trusted only with `ELORIA_NATIVE_PROVIDER=benchmark`.
 * The runtime ABI stays 1; added classes are backward compatible.
 
 Checks: `tests/test_client_runtime_crowd_kernels.gd` covers registration,
@@ -176,7 +187,11 @@ against `ActorReducer` for every command byte; `--external-crowd=` also loads
 the benchmark extension, before or after the payload. The
 `tests/test_client_runtime_kernels_*.gd` wrappers run the existing kernel and
 reducer suites unchanged against the payload (`--runtime-dir=`,
-`--expect-native=present`).
+`--expect-native=present`). Since RB-C1g the plain suites load the payload
+themselves; `tests/test_native_presentation_modes.gd` encodes the selection
+table and `tests/test_native_runtime_switches.gd` the kill switches, the
+startup load and the provider rule. Run both once more with
+`RABBITLANDS_NATIVE_RUNTIME=off` for the fallback path.
 
 ## Content digest (SHA-256)
 

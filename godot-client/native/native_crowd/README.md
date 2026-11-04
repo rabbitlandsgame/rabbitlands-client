@@ -24,6 +24,22 @@ only when it is not registered yet, so this extension and `client_runtime` load
 in either order. A build of this extension from before those guards logs
 "already registered" errors when it loads after `client_runtime`; rebuild it.
 
+The game takes these classes from one loader, `src/runtime/native_crowd.gd`
+(RB-C1g). It uses the verified `client_runtime` payload and loads this
+extension (`res://bin/native_crowd.gdextension`) only when
+`ELORIA_NATIVE_PROVIDER=benchmark` names it; without that variable a class this
+extension registered is refused (`provider_untrusted`) and the caller stays on
+GDScript. To measure or parity-test this build rather than the payload, set
+`ELORIA_NATIVE_PROVIDER=benchmark` beside `ELORIA_NATIVE_CROWD=1` or
+`ELORIA_NATIVE_PRESENTATION` in the commands below. The native runtime kill
+switch (`RABBITLANDS_NATIVE_RUNTIME=off`) turns this provider off too.
+Whichever library registers a class first provides it. In the game, `Main._ready`
+loads the payload at startup, so there the payload's kernels win even with
+`ELORIA_NATIVE_PROVIDER=benchmark`, unless no verified payload is installed or
+this build registered first (AppState, an autoload that starts before Main,
+loads it for `ELORIA_NATIVE_CROWD=1`). `NativeCrowd.snapshot()` names the
+provider of each kernel.
+
 The compact store owns only `x`, `y`, command, sequence, facing, health, and the
 sit/combat/alive flags. The caller still owns names, map placement, appearance,
 equipment, buffs, aim state, and all other cold fields. External changes to hot
@@ -88,6 +104,7 @@ $env:TEMP = "$isolated/temp"
 $env:TMP = $env:TEMP
 $env:ELORIA_CROWD_EXPECT_USER_ROOT = $isolated
 $env:ELORIA_NATIVE_CROWD = "1"
+$env:ELORIA_NATIVE_PROVIDER = "benchmark"
 New-Item -ItemType Directory -Force -Path `
   $env:APPDATA,$env:LOCALAPPDATA,$env:USERPROFILE,$env:TEMP,$results | Out-Null
 foreach ($test in @(
@@ -114,6 +131,7 @@ export XDG_CACHE_HOME="$isolated/xdg-cache"
 export TMPDIR="$isolated/tmp"
 export ELORIA_CROWD_EXPECT_USER_ROOT="$isolated"
 export ELORIA_NATIVE_CROWD=1
+export ELORIA_NATIVE_PROVIDER=benchmark
 for test in test_native_crowd test_native_crowd_app_state \
   test_native_crowd_edges; do
   taskset -c 0-3 godot --headless --path godot-client \
@@ -171,6 +189,10 @@ experiments. They do not require the native actor reducer. Leave
 | `both` or `1` | Native | Native | GDScript |
 | `world` | GDScript | GDScript | Native |
 | `all` | Native | Native | Native |
+
+`script`, `gdscript` and `legacy` also select GDScript. Unset means each
+kernel's default in `src/runtime/native_crowd.gd`, which is off until the
+kernel's own release-build A/B.
 
 The source checkout remains usable without a built extension. A requested
 kernel that is unavailable falls back to the existing GDScript implementation.

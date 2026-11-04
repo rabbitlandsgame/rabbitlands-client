@@ -4,6 +4,7 @@ const MountedFit := preload("res://src/actors/cape_mounted_fit.gd")
 const MountedAttachment := preload("res://src/actors/cape_mounted_attachment.gd")
 const MountedBodySurface := preload("res://src/actors/cape_mounted_body_surface.gd")
 const MountedStatic := preload("res://src/actors/cape_mounted_static.gd")
+const NativeCrowd := preload("res://src/runtime/native_crowd.gd")
 var _approved_player: RefCounted
 var _mounted_fit: RefCounted
 var _mounted_body_surface: RefCounted
@@ -740,24 +741,12 @@ func _initialize_native_constraint_kernel() -> void:
 	if _native_constraint_kernel_initialized:
 		return
 	_native_constraint_kernel_initialized = true
-	var requested := OS.get_environment("ELORIA_NATIVE_PRESENTATION").strip_edges().to_lower()
-	if requested not in ["cape", "both", "all", "1"]:
-		return
-	_native_constraint_status = "requested"
-	if not ClassDB.class_exists(&"NativeCapeConstraintKernel"):
-		var extension_path := "res://bin/native_crowd.gdextension"
-		if not FileAccess.file_exists(extension_path):
-			_native_constraint_status = "extension_missing"
-			return
-		GDExtensionManager.load_extension(extension_path)
-	if not ClassDB.class_exists(&"NativeCapeConstraintKernel"):
-		_native_constraint_status = "class_unavailable"
-		return
-	_native_constraint_kernel = ClassDB.instantiate(&"NativeCapeConstraintKernel")
-	if _native_constraint_kernel == null:
-		_native_constraint_status = "instantiate_failed"
-		return
-	_native_constraint_status = "active"
+	# ELORIA_NATIVE_PRESENTATION (cape, both/1, all) or the feature's default;
+	# the kernel comes from the verified client_runtime payload (native_crowd.gd).
+	# The status is "disabled" when the cape kernel is not selected.
+	var made := NativeCrowd.kernel("cape")
+	_native_constraint_status = str(made.status)
+	_native_constraint_kernel = made.object as RefCounted
 
 
 func native_constraint_kernel_active() -> bool:

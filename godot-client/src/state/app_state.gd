@@ -4,6 +4,7 @@ const ServerClockScript := preload("res://src/network/server_clock.gd")
 const ServerTimePacing := preload("res://src/actors/server_time_pacing.gd")
 const PresenceStateScript := preload("res://src/state/presence_state.gd")
 const MountDeltaStateScript := preload("res://src/mounts/mount_delta_state.gd")
+const NativeCrowd := preload("res://src/runtime/native_crowd.gd")
 ## A stamp times the steps read within this long of it. Every write a
 ## stamping server makes opens with a stamp, so a step read later than a few
 ## frames after the last one came from a send that carried none.
@@ -88,9 +89,10 @@ var lantern_tutorial: Dictionary = {}
 ## Authoritative field objectives and optional per-view story presentation.
 var campaign: Dictionary = {}
 var actors: Dictionary = {}
-## Optional coarse actor-command reducer. The descriptor is generated only by
-## the native benchmark build, and this instance exists only for an explicit
-## opt-in, so an ordinary source checkout keeps the GDScript path unchanged.
+## Optional coarse actor-command reducer from the verified client_runtime
+## payload (src/runtime/native_crowd.gd). It exists only for the explicit
+## ELORIA_NATIVE_CROWD=1 opt-in until its own A/B makes it a default, so an
+## ordinary run keeps the GDScript path unchanged.
 var _native_crowd_reducer: Object
 ## The ids of actors written since the presentation last read them. Every
 ## site that writes `actors` records the id here and `take_changed_actors`
@@ -586,20 +588,15 @@ func _ready() -> void:
 	MapSceneCache.set_mismatch_sink(_on_map_digest_mismatch)
 
 func _initialize_native_crowd_reducer() -> void:
-	if OS.get_environment("ELORIA_NATIVE_CROWD") != "1":
-		return
-	if not ClassDB.class_exists(&"NativeCrowdReducer"):
-		var extension_path := "res://bin/native_crowd.gdextension"
-		if not FileAccess.file_exists(extension_path):
-			push_error("ELORIA_NATIVE_CROWD requested but its extension is not built")
-			return
-		GDExtensionManager.load_extension(extension_path)
-	if not ClassDB.class_exists(&"NativeCrowdReducer"):
-		push_error("ELORIA_NATIVE_CROWD requested but its extension did not load")
-		return
-	_native_crowd_reducer = ClassDB.instantiate(&"NativeCrowdReducer")
-	if _native_crowd_reducer == null:
-		push_error("ELORIA_NATIVE_CROWD could not instantiate its reducer")
+	var made: Dictionary = NativeCrowd.kernel("reducer")
+	_native_crowd_reducer = made.object
+	match str(made.status):
+		"active", "disabled":
+			pass
+		"runtime_switched_off":
+			print("ELORIA_NATIVE_CROWD requested, but the native runtime is switched off; GDScript reducer kept")
+		_:
+			push_error("ELORIA_NATIVE_CROWD requested but the native reducer is unavailable (%s)" % made.status)
 
 func native_crowd_reducer_active() -> bool:
 	return _native_crowd_reducer != null

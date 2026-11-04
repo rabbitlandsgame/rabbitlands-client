@@ -156,6 +156,43 @@ continent chunks. It prints one `CONTENT_DIGEST_TOUR {...}` line and exits
 non-zero on any mismatch or failed digest. Run it once more with
 `RABBITLANDS_CONTENT_DIGEST_SHA=portable`.
 
+## Native runtime and kernels
+
+A package with the verified `client_runtime` payload loads it at startup in
+every profile, the legacy profile included. The log line
+`native_runtime stage=startup code=... switch=... source=... us=... prior=...`
+shows the result: `loaded`, a refusal such as `absent` or `checksum_mismatch`,
+or `switched_off`. `prior=yes` means an earlier caller (AppState with
+`ELORIA_NATIVE_CROWD=1`) had already loaded it, so `us` leaves that cost out. Loading only registers the native classes. Each native feature
+keeps its own switch and stays off by default until its own release-build A/B.
+
+To keep the payload unloaded, so that every native path uses its GDScript
+code, use one of these. They are listed in order of precedence:
+
+- the user argument `--native-runtime=off` (`auto` turns it back on);
+- `RABBITLANDS_NATIVE_RUNTIME=off`;
+- safe mode (`--client-safe-mode`, which the safe-mode launchers pass), unless
+  one of the two above names a valid value;
+- the support setting `native_runtime = "off"` in the `[runtime]` section of
+  `eloria_hud.cfg` in the user data folder. Remove the line to undo it.
+
+The presentation kernels and the actor-command reducer are opt-in, and their
+values are unchanged. `ELORIA_NATIVE_PRESENTATION` takes `cape`, `flight`,
+`world`, `both`/`1` or `all`. `0`, `off`, `script`, `gdscript`, `legacy` or any
+other value keeps GDScript. `ELORIA_NATIVE_CROWD=1` turns on the reducer.
+
+The kernels and the reducer come from the verified payload, and an opt-in loads
+it if startup has not. Developer builds of the benchmark extension
+`bin/native_crowd.gdextension` are used only with
+`ELORIA_NATIVE_PROVIDER=benchmark`, and only where they register before the
+payload: with a payload installed, the game's startup load provides the
+kernels.
+
+`RABBITLANDS_OPTIMIZATION_STARTUP` and the diagnostics snapshot report the
+switch (`native_runtime`) and each kernel's selection, status and provider
+(`native_kernels`). A status such as `runtime_switched_off`, `runtime_absent`
+or `provider_untrusted` names why a requested kernel stayed on GDScript.
+
 ## Prepared-content coverage and fallback
 
 The catalog is a small exact-content pilot, not a prepared copy of the whole

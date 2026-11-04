@@ -15,7 +15,9 @@ extends SceneTree
 ##   unknown value and ELORIA_NATIVE_CROWD unset or 0, cape cloth, spell flight,
 ##   world effects and AppState stay on GDScript although the classes exist;
 ## - the existing opt-ins activate the classes from the payload without the
-##   benchmark extension (`res://bin/native_crowd.gdextension`);
+##   benchmark extension (`res://bin/native_crowd.gdextension`); since RB-C1g
+##   (src/runtime/native_crowd.gd) classes the benchmark extension registered
+##   first are used only with ELORIA_NATIVE_PROVIDER=benchmark;
 ## - one smoke call per class, and the reducer against ActorReducer for every
 ##   command byte.
 ## The complete kernel and reducer parity suites run unchanged against the
@@ -34,6 +36,7 @@ extends SceneTree
 ##   runner greps the log for `ERROR:`.
 
 const NativeLibrary := preload("res://src/runtime/native_library.gd")
+const NativeCrowd := preload("res://src/runtime/native_crowd.gd")
 const Cape := preload("res://src/actors/cape_cloth.gd")
 const Flight := preload("res://src/world/spell_flight_3d.gd")
 const WorldEffect := preload("res://src/world/world_effect_3d.gd")
@@ -142,7 +145,7 @@ func _run() -> void:
 		_load_external(external)
 	_registration(external, external_first)
 	_no_default_change()
-	_opt_ins(external)
+	_opt_ins(external, external_first)
 	_smoke()
 	_reducer_parity()
 	print("client runtime crowd kernels: ", "PASS" if failures == 0 else "FAIL")
@@ -222,13 +225,25 @@ func _no_default_change() -> void:
 	OS.set_environment("ELORIA_NATIVE_PRESENTATION", presentation)
 	OS.set_environment("ELORIA_NATIVE_CROWD", crowd)
 
-func _opt_ins(external: String) -> void:
+func _opt_ins(external: String, external_first: bool) -> void:
 	var presentation := OS.get_environment("ELORIA_NATIVE_PRESENTATION")
 	var crowd := OS.get_environment("ELORIA_NATIVE_CROWD")
+	var provider := OS.get_environment(NativeCrowd.PROVIDER_ENVIRONMENT)
 	if external.is_empty() and FileAccess.file_exists(BENCHMARK_EXTENSION):
-		print("NOTE: %s exists; the opt-in checks below may also be satisfied by it" % BENCHMARK_EXTENSION)
+		print("NOTE: %s exists; RB-C1g loads it only with ELORIA_NATIVE_PROVIDER=benchmark" % BENCHMARK_EXTENSION)
 	var cases := {"cape": [true, false, false], "flight": [false, true, false], "both": [true, true, false],
 		"1": [true, true, false], "world": [false, false, true], "all": [true, true, true], " ALL ": [true, true, true]}
+	if external_first:
+		# RB-C1g: classes another extension registered are refused unless the
+		# run names the benchmark provider.
+		OS.set_environment(NativeCrowd.PROVIDER_ENVIRONMENT, "")
+		_expect(_active("all") == [false, false, false],
+			"the benchmark extension's classes are refused without ELORIA_NATIVE_PROVIDER=benchmark")
+		OS.set_environment("ELORIA_NATIVE_CROWD", "1")
+		var reducer: Dictionary = NativeCrowd.kernel("reducer")
+		_expect(reducer.object == null and str(reducer.status) == "provider_untrusted",
+			"the benchmark reducer is refused too (%s)" % reducer.status)
+		OS.set_environment(NativeCrowd.PROVIDER_ENVIRONMENT, NativeCrowd.BENCHMARK_PROVIDER)
 	for mode: String in cases:
 		_expect(_active(mode) == cases[mode], "ELORIA_NATIVE_PRESENTATION='%s' activates exactly %s" % [mode, cases[mode]])
 	_expect(_reducer_active("1"), "ELORIA_NATIVE_CROWD=1 activates AppState's native reducer from the loaded classes")
@@ -238,6 +253,7 @@ func _opt_ins(external: String) -> void:
 			"no opt-in loaded the benchmark extension (%s)" % [loaded_paths])
 	OS.set_environment("ELORIA_NATIVE_PRESENTATION", presentation)
 	OS.set_environment("ELORIA_NATIVE_CROWD", crowd)
+	OS.set_environment(NativeCrowd.PROVIDER_ENVIRONMENT, provider)
 
 func _smoke() -> void:
 	var rest := PackedVector3Array([Vector3.ZERO, Vector3.DOWN, Vector3.DOWN * 2.0, Vector3.DOWN * 3.0, Vector3.DOWN * 4.0])
