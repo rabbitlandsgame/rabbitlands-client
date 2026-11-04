@@ -410,8 +410,8 @@ func _check_clear() -> void:
 		"clear() discards the running job's result and the queue: nothing is published afterwards")
 
 
-## The player's own body is built at once on main (until AW-04d) and can parse
-## a file the worker is parsing for a remote closure. The cache keeps main's
+## The player's own body built at once on main (with no curtain up; AW-04d)
+## can parse a file the worker is parsing for a remote closure. The cache keeps main's
 ## scene; the worker's root is freed unpublished, counted as already cached
 ## (not published), and no pieces are installed from it (they would hold
 ## another parse's meshes).
@@ -604,7 +604,8 @@ func _check_main_gate() -> void:
 	app.actors = {LOCAL: me, 2: remote}
 	var misses := _misses()
 	main.set("_actor_creation_frame", -1)
-	expect(bool(main.call("_remote_model_ready", LOCAL)), "the player's own body is built at once (AW-04d gates it)")
+	expect(bool(main.call("_remote_model_ready", LOCAL)),
+		"with no curtain up the player's own body is built at once (AW-04d gates it behind the curtain)")
 	expect(not bool(main.call("_remote_model_ready", 2)), "a first-seen remote Human waits for its closure")
 	main.call("_spawn_arrivals", [2])
 	var waiting := _node(2)

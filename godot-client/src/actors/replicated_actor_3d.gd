@@ -2991,6 +2991,22 @@ static func rl_hair_only_files_for(model_config: Dictionary, appearance: Diction
 		return PackedStringArray()
 	return RLHeadLibrary.face_paths(face, true)
 
+## The RL files of the RL head `_apply_rl_head_and_hair` draws for a body built
+## from `model_config` wearing `appearance` at `quality`: a portrait Human at
+## High where the renderer draws RL heads (head, hairstyle and beard modules on
+## disk, RLHeadLibrary.face_paths; the same face prewarm_rl_head_files warms).
+## Empty below High, for the lab's explicit face and with RL heads classic.
+## Static for the actor asset closure of the player's own body (AW-04d), which
+## draws its RL head at once (`_rl_head_files_ready`) and so has them parsed on
+## RLHeadLibrary's worker behind the arrival curtain before it is built.
+static func rl_head_files_for(model_config: Dictionary, appearance: Dictionary,
+		quality: int) -> PackedStringArray:
+	if not uses_portrait_customization_for(model_config) or rl_heads_classic() or appearance.has("rl_head") \
+			or ActorRenderQuality.normalized_quality(quality) != ActorRenderQuality.Quality.HIGH \
+			or not rl_heads_renderer_supported():
+		return PackedStringArray()
+	return RLHeadLibrary.face_paths(RLHeadPortraitMap.face(appearance, str(model_config.get("gender", "female"))))
+
 func _apply_character_proportions() -> void:
 	var next := CHARACTER_PROPORTIONS.visual_scale(_appearance) if _uses_portrait_customization() else Vector3.ONE
 	if next.is_equal_approx(_portrait_scale):

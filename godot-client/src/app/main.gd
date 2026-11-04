@@ -155,6 +155,7 @@ const OccluderFadeScript := preload("res://src/world/occluder_fade_manager.gd")
 const CameraShaderWarmup := preload("res://src/world/camera_shader_warmup.gd")
 const CrowdPresentationScript := preload("res://src/world/crowd_presentation.gd")
 const LocalAvatarHoldScript := preload("res://src/actors/local_avatar_hold.gd")
+const LocalAvatarPrepScript := preload("res://src/actors/local_avatar_prep.gd")
 const ActorAssetClosureScript := preload("res://src/actors/actor_asset_closure.gd")
 const ActorResourceWarmupScript := preload("res://src/actors/actor_resource_warmup.gd")
 const MapChangeCurtainScript := preload("res://src/world/map_change_curtain.gd")
@@ -1070,6 +1071,9 @@ var crowd = CrowdPresentationScript.new()
 ## The player's own body kept across a map change that is not a seamless
 ## crossing, for the ADD that follows (AW-02; `_hold_local_avatar`).
 var _local_avatar_hold = LocalAvatarHoldScript.new()
+## The player's own body waiting behind the arrival curtain for its asset
+## closure, its 6 s deadline and its counters (AW-04d; `_local_body_ready`).
+var _local_avatar_prep = LocalAvatarPrepScript.new()
 ## A change of map waiting for the arrival curtain to be drawn, and its
 ## counters (TR-01; `_load_server_map`, `_defer_map_change`).
 var _map_change_curtain = MapChangeCurtainScript.new()
@@ -2145,6 +2149,7 @@ func client_diagnostic_snapshot() -> Dictionary:
 		"low_processor_usage_mode_sleep_usec": OS.low_processor_usage_mode_sleep_usec,
 		"actor_creation_budget": actor_creation_budget_snapshot(),
 		"local_avatar_hold": _local_avatar_hold.snapshot(),
+		"local_avatar_prep": _local_avatar_prep.snapshot(),
 		"actor_preparer": actor_resource_warmup.snapshot(),
 		"map_change_curtain": _map_change_curtain.snapshot(Time.get_ticks_msec()),
 		"ambient_creation_pending": ambient_creation_pending_count(),
@@ -4996,6 +5001,7 @@ func _clear_world_presentation(retain_map_resources := false) -> void:
 	actor_nodes.clear()
 	# A session's end lets go of the player's body kept for a map change too.
 	_local_avatar_hold.release("session")
+	_local_avatar_prep.clear()
 	if _browser_actor_assets != null: _browser_actor_assets.call("clear")
 	_map_actor_marker_cache.clear()
 	crowd.clear()
@@ -7123,6 +7129,10 @@ func _clear_actor_nodes_for_map_change() -> void:
 			else:
 				(raw_actor_node as Node).queue_free()
 		actor_nodes.erase(actor_id)
+	# AW-04d: a wait for the player's body that this change overtook (its record
+	# went with KILL_ALL_ACTORS before the body was built) does not hand its
+	# deadline to the next arrival's wait. No wait exists while it has a body.
+	_local_avatar_prep.abandon()
 
 ## AW-02: keeps the player's own body, which a map change that is not a
 ## seamless crossing (a door, a teleport, a gauntlet entry, a same-map
@@ -7173,6 +7183,7 @@ func _adopt_local_avatar(id: Variant, node: ReplicatedActor3D, dto: Dictionary,
 	node.collision_layer = 2
 	node.rebind_map(actor_adapter, dto)
 	_local_rl_prewarm_key = 0
+	_local_avatar_prep.clear()
 	_revive_actor(id, node, dto, actor_adapter)
 	node.settle_after_relocation()
 	_fit_lantern_map_marker(node, "MapDot")
@@ -7814,6 +7825,9 @@ func _sync_world(changed: Variant = null) -> void:
 	# streaming in: nothing is placed on ground that is not there yet.
 	if _deferred_map_load or _hold_for_arrival():
 		_spawn_backlog = true
+		# AW-04d: the player's own files go to the preparer's worker now, while
+		# the world is built; its build waits for them behind the curtain.
+		_prepare_local_closure()
 		# Not for a wait that is only for the curtain to be drawn (TR-01): the
 		# arrival's actors are built on the frame it ends.
 		if _deferred_map_load and not _map_change_curtain.short_wait():
@@ -7828,6 +7842,7 @@ func _sync_world(changed: Variant = null) -> void:
 		if not (world_loader.world_root as ContinentChunkStream).arrival_resident(
 				adapter.tile_center(int(arriving.x), int(arriving.y))):
 			_spawn_backlog = true
+			_prepare_local_closure()
 			_prewarm_local_rl_head()
 			return
 	if adapter != null and AppState.actors.has(AppState.local_actor_id):
@@ -8048,7 +8063,10 @@ func _spawn_arrivals(arriving: Array) -> void:
 		if wants_body and _actor_creation_may_start(id) \
 				and _actor_work_available(true, _crowd_priority_actor(id)) and _remote_model_ready(id):
 			_build_actor_budgeted(id)
-		elif crowd.lazy and deferred < crowd.DEFERRED_SPAWNS_PER_PASS and _actor_work_available(false):
+		elif id != AppState.local_actor_id and crowd.lazy and deferred < crowd.DEFERRED_SPAWNS_PER_PASS \
+				and _actor_work_available(false):
+			# The player's own node always has its body (`_spawn_actor`): while
+			# that waits (AW-04d; the web's files) it is asked again next pass.
 			_build_actor_budgeted(id, false)
 			deferred += 1
 		else:
@@ -8084,17 +8102,18 @@ func _charge_actor_work(usec: int) -> void:
 	_actor_work_usec += usec
 
 ## Whether an actor's body may be built now without parsing on the main
-## thread what the preparer could parse on its worker. The player's own body is
-## built at once (AW-04d moves it behind the curtain); every other one waits for
-## its asset closure (`_actor_assets_ready`), most urgent first: the selection,
-## the combat target and staged actors, then bodies wanted within the build
-## radius (every caller asks for a body it wants now).
+## thread what the preparer could parse on its worker. The player's own body
+## waits for its closure behind the arrival curtain, for at most 6 s
+## (`_local_body_ready`, AW-04d); every other one waits for its asset closure
+## (`_actor_assets_ready`), most urgent first: the selection, the combat target
+## and staged actors, then bodies wanted within the build radius (every caller
+## asks for a body it wants now).
 func _remote_model_ready(id: int) -> bool:
 	if _actor_preparation_closing:
 		return false
 	var dto: Dictionary = _presentation_dto(AppState.actors[id])
 	if id == AppState.local_actor_id:
-		return not OS.has_feature("web") or _browser_actor_ready(id, dto)
+		return _local_body_ready(id, dto)
 	var priority: int = ActorResourceWarmupScript.PRIORITY_TARGET if _crowd_priority_actor(id) \
 		else ActorResourceWarmupScript.PRIORITY_NEAR
 	return _actor_assets_ready(id, dto, _actor_mount_id(id), priority)
@@ -8128,6 +8147,70 @@ func _actor_assets_ready(id: int, dto: Dictionary, mount: String, priority: int)
 func _actor_mount_id(id: int) -> String:
 	var state := AppState.mount_state_for_actor(id)
 	return str(state.get("mount_id", "")) if state.get("mode") == "mounted" else ""
+
+## AW-04d: whether the player's own body (`dto` presented) may be built now.
+## While the arrival curtain is up it waits until the preparer holds its
+## closure (`_local_closure`: race scene, hair, worn pieces, at
+## PRIORITY_LOCAL; RL files through RLHeadLibrary), so its `configure()`
+## parses nothing on the main thread. LocalAvatarPrep bounds the wait at 6 s
+## (TIMEOUT_MSEC) from its first ask, after which it is built as before; a
+## file the worker could not prepare counts as ready (the preparer's
+## fallback). Built at once, as before: with the curtain down, on the web (its
+## own file admission), with closures off, while the client closes, and for
+## the held body the ADD wears again (AW-02).
+func _local_body_ready(id: int, dto: Dictionary) -> bool:
+	if OS.has_feature("web"):
+		return _browser_actor_ready(id, dto)
+	if _actor_preparation_closing or _local_hold_matches(id, dto) \
+			or not actor_resource_warmup.closure_enabled():
+		return true
+	if not arrival_curtain.is_showing():
+		# Nothing queued: the build that follows parses on main as before, and
+		# a worker parse of the same files beside it would be thrown away.
+		return _local_avatar_prep.admit(id, false, false, Time.get_ticks_msec())
+	var ready: bool = actor_resource_warmup.request_closure(_local_closure(id, dto),
+		ActorResourceWarmupScript.PRIORITY_LOCAL)
+	return _local_avatar_prep.admit(id, ready, true, Time.get_ticks_msec())
+
+## The player's own asset closure (ActorAssetClosure.memoized): what a remote
+## body's is, plus the RL head files it draws at once at High where the game
+## defers RL loading (in a window; a headless process builds them at once).
+func _local_closure(id: int, dto: Dictionary) -> Dictionary:
+	var mount := _actor_mount_id(id)
+	return ActorAssetClosureScript.memoized(dto, _model_for_actor(dto), models, equipment_config,
+		LookProfile.quality(), {} if mount.is_empty() else {"mode": "mounted", "mount_id": mount},
+		RLHeadLibrary.defers_loading())
+
+## Whether the player's held body (AW-02) is the one the ADD for `dto` wears.
+func _local_hold_matches(id: int, dto: Dictionary) -> bool:
+	return _local_avatar_hold.holding() and _local_avatar_hold.matches(id,
+		CrowdPresentationScript.identity_key(dto), _model_for_actor(dto))
+
+## AW-04d: asks the preparer, at PRIORITY_LOCAL, for the closure of the player's
+## own body as soon as its record is known while its build is held (a change of
+## map waiting for the curtain, an arrival whose ground streams in, the intro's
+## arrival: `_sync_world`), so its files are parsed on the worker while the
+## world is built. Nothing for a body it has or the held body the ADD wears
+## again, with closures off, on the web, or while the client closes.
+func _prepare_local_closure() -> void:
+	var id: int = AppState.local_actor_id
+	if _actor_preparation_closing or OS.has_feature("web") or not AppState.actors.has(id) \
+			or actor_nodes.has(id):
+		return
+	var dto: Dictionary = _presentation_dto(AppState.actors[id])
+	if _local_hold_matches(id, dto) or not actor_resource_warmup.closure_enabled():
+		return
+	var closure := _local_closure(id, dto)
+	if not actor_resource_warmup.request_closure(closure, ActorResourceWarmupScript.PRIORITY_LOCAL):
+		_local_avatar_prep.note_early(id, str(closure.get("key", "")))
+
+## AW-04d: the player's own body was built; a wait for its closure ends, and one
+## that happened is recorded (outcome and milliseconds, no player data).
+func _note_local_body_built(id: int) -> void:
+	var waited: Dictionary = _local_avatar_prep.built(id, Time.get_ticks_msec())
+	if not waited.is_empty():
+		waited["map"] = AppState.current_map
+		Diagnostics.record("local_avatar_prepared", waited)
 
 func _browser_actor_ready(id: int, dto: Dictionary) -> bool:
 	if not OS.has_feature("web"): return true
@@ -8254,6 +8337,11 @@ func _spawn_actor(id: Variant, build := true,
 	if OS.has_feature("web") and creates_body and not _browser_actor_ready(int(id), dto):
 		_spawn_backlog = true
 		return false
+	if int(id) == AppState.local_actor_id and not OS.has_feature("web") \
+			and not _local_body_ready(int(id), dto):
+		# AW-04d: behind the curtain until its closure is ready (at most 6 s).
+		_spawn_backlog = true
+		return false
 	if creates_body and not _actor_creation_may_start(int(id)):
 		_spawn_backlog = true
 		return false
@@ -8303,6 +8391,7 @@ func _spawn_actor(id: Variant, build := true,
 		node.visible = not _arrival_pending()
 		_arrival_unreported = true
 		_sync_harvest_sparkle()
+		_note_local_body_built(int(id))
 	elif crowd.lazy:
 		# Drawn or not from the start, rather than from the next gate pass: a
 		# deferred actor far off would otherwise show its stand-in and its name

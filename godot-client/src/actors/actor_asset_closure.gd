@@ -22,8 +22,13 @@ extends RefCounted
 ## library and its worker): the RL hairstyle module a portrait Human draws
 ## without an RL head at `quality` (`rl_hair_only_files_for`), which a build
 ## would otherwise parse on the main thread.
-## Not in it: the RL head's own files at High (RLHeadLibrary already parses them
-## on its worker while the classic head is drawn, _rl_head_files_ready), the
+## With `rl_head` (the player's own body in the game, AW-04d: it draws its RL
+## head at once, never the classic head while a worker parses) "rl_files" also
+## names the RL head's own files a portrait Human draws at High
+## (`ReplicatedActor3D.rl_head_files_for`: head, hairstyle and beard modules).
+## Not in it otherwise: the RL head's own files at High (RLHeadLibrary already
+## parses them on its worker while the classic head is drawn,
+## _rl_head_files_ready), the
 ## animation library (reported in "libraries": creatures' are prepared with
 ## their scene by the creature job, a race's is parsed once per session on
 ## main until AW-04c), and the mount's files (the mount id is reported in
@@ -54,7 +59,8 @@ static var _memo_equipment: Dictionary = {}
 
 ## `closure`, remembered for the same inputs. Do not change what it returns.
 static func memoized(dto: Dictionary, model_id: String, models: Dictionary,
-		equipment_config: Dictionary, quality: int, mount_state: Dictionary = {}) -> Dictionary:
+		equipment_config: Dictionary, quality: int, mount_state: Dictionary = {},
+		rl_head := false) -> Dictionary:
 	if not is_same(models, _memo_models) or not is_same(equipment_config, _memo_equipment):
 		_memo.clear()
 		_memo_models = models
@@ -62,16 +68,16 @@ static func memoized(dto: Dictionary, model_id: String, models: Dictionary,
 	var appearance: Dictionary = dto.get("appearance", {}) as Dictionary
 	var visuals: Dictionary = dto.get("equipment_visuals", {}) as Dictionary
 	var mount := str(mount_state.get("mount_id", "")) if str(mount_state.get("mode", "")) == "mounted" else ""
-	var key := [model_id, quality, int(dto.get("actor_type", -1)), mount, appearance, visuals]
+	var key := [model_id, quality, int(dto.get("actor_type", -1)), mount, appearance, visuals, rl_head]
 	var found: Variant = _memo.get(key)
 	if found is Dictionary:
 		return found as Dictionary
-	var result := closure(dto, model_id, models, equipment_config, quality, mount_state)
+	var result := closure(dto, model_id, models, equipment_config, quality, mount_state, rl_head)
 	if _memo.size() >= MEMO_CAPACITY:
 		_memo.clear()
 	# Own copies in the key: the record's dictionaries may change later.
 	_memo[[model_id, quality, int(dto.get("actor_type", -1)), mount, appearance.duplicate(true),
-		visuals.duplicate(true)]] = result
+		visuals.duplicate(true), rl_head]] = result
 	return result
 
 static func clear_memo() -> void:
@@ -85,7 +91,8 @@ static func clear_memo() -> void:
 ## once; "pieces" the subset read as equipment pieces; "key" a stable name of
 ## the set (scenes, pieces and RL files).
 static func closure(dto: Dictionary, model_id: String, models: Dictionary,
-		equipment_config: Dictionary, quality: int, mount_state: Dictionary = {}) -> Dictionary:
+		equipment_config: Dictionary, quality: int, mount_state: Dictionary = {},
+		rl_head := false) -> Dictionary:
 	var scenes := PackedStringArray()
 	var pieces := PackedStringArray()
 	var rl_files := PackedStringArray()
@@ -118,6 +125,11 @@ static func closure(dto: Dictionary, model_id: String, models: Dictionary,
 	if not hair.is_empty() and rl_files.is_empty():
 		_add(scenes, hair)
 		_add(pieces, hair)
+	if rl_head:
+		# The RL head the body draws at once at High (its game hairstyle above
+		# stays listed: drawn where the RL head draws no module hair or fails).
+		for path: String in ReplicatedActor3D.rl_head_files_for(model_config, appearance, quality):
+			_add(rl_files, path)
 	var parts: Dictionary = equipment_config.get("parts", {}) as Dictionary
 	var visuals: Dictionary = dto.get("equipment_visuals", {}) as Dictionary
 	for raw_part: Variant in visuals:

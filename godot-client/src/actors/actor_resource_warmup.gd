@@ -25,6 +25,11 @@ extends RefCounted
 ##     RLHeadLibrary.request, which parses them on its own worker.
 ## The next job is the most urgent queued one (PRIORITY_*), first asked first
 ## within a class; asking again with a more urgent class raises a queued job.
+## The player's own files (PRIORITY_LOCAL, AW-04d: its body waits for them
+## behind the arrival curtain) never wait behind other actors' roots: a local
+## file job may start while PUBLISH_QUEUE_LIMIT roots await publication (one
+## more root at most), and its parsed roots are published before the others
+## (every other class keeps first parsed, first published).
 ## A file GlbSceneCache already holds is never queued (`missing`). A file the
 ## worker could not prepare (an error record, a stale stamp, a failed start)
 ## is left to the main thread, which parses it on first use exactly as before;
@@ -57,7 +62,8 @@ const PRIORITY_OTHER := 4
 ## thread time after which a frame publishes no more.
 const PUBLISH_PER_FRAME := 1
 const PUBLISH_BUDGET_USEC := 4000
-## Parsed roots awaiting publication at which the worker starts no new job.
+## Parsed roots awaiting publication at which the worker starts no new job
+## (a PRIORITY_LOCAL file job may still start: one root more at most).
 const PUBLISH_QUEUE_LIMIT := 2
 ## `off` (or `main`, `0`): every actor file is parsed on main as before.
 const SWITCH_ENVIRONMENT := "ELORIA_ACTOR_PREPARER"
@@ -88,7 +94,7 @@ var _unclaimed_publish_usec := 0
 var _switch := ""
 var _stats := {"closureRequests": 0, "closureWaits": 0, "filesQueued": 0, "filesParsed": 0,
 	"filesPublished": 0, "alreadyCached": 0, "piecesPublished": 0, "fallbacks": 0, "discarded": 0,
-	"priorityRaises": 0, "rlWaits": 0,
+	"priorityRaises": 0, "rlWaits": 0, "localStartsPastLimit": 0, "localPublishedFirst": 0,
 	"workerUsec": 0, "maximumWorkerUsec": 0, "publishUsec": 0, "maximumPublishUsec": 0}
 
 ## A creature's scene and retargeted clips, prepared on the worker at
@@ -265,7 +271,12 @@ func snapshot() -> Dictionary:
 	for job: Dictionary in _queue:
 		queued[str(job.get("kind", "creature"))] = int(queued.get(str(job.get("kind", "creature")), 0)) + 1
 	var row := _stats.duplicate()
+	var local_files := 0
+	for job: Dictionary in _files.values():
+		if int(job.get("priority", PRIORITY_OTHER)) == PRIORITY_LOCAL:
+			local_files += 1
 	row.merge({"closures": _closure_state(false), "queuedCreatures": queued.creature, "queuedFiles": queued.file,
+		"pendingLocalFiles": local_files,
 		"active": str(_active_job.get("kind", "")), "awaitingPublish": _outbox.size(),
 		"fallbackFiles": _fallback.size(), "requeuedAfterEviction": requeued_after_eviction}, true)
 	return row
@@ -335,7 +346,9 @@ func _next_index() -> int:
 	return best
 
 func _start_next() -> void:
-	while _thread == null and not _queue.is_empty() and _outbox.size() < PUBLISH_QUEUE_LIMIT:
+	while _thread == null and not _queue.is_empty() and (_outbox.size() < PUBLISH_QUEUE_LIMIT
+			or (_outbox.size() == PUBLISH_QUEUE_LIMIT and _local_job_next())):
+		var past_limit := _outbox.size() >= PUBLISH_QUEUE_LIMIT
 		var job: Dictionary = _queue.pop_at(_next_index())
 		if str(job.get("kind", "")) == "file":
 			var path := str(job.path)
@@ -353,6 +366,8 @@ func _start_next() -> void:
 				_files.erase(path)
 				_fallback[path] = true
 				_stats.fallbacks += 1
+			elif past_limit:
+				_stats.localStartsPastLimit += 1
 			continue
 		_active_job = job
 		_active = str(job.key)
@@ -365,6 +380,24 @@ func _start_next() -> void:
 			GlbSceneCache.clear_eviction(_active_scene)
 			_active = ""
 			_active_scene = ""
+
+## Whether the most urgent queued job is a file of the player's own body
+## (PRIORITY_LOCAL), which may start past PUBLISH_QUEUE_LIMIT.
+func _local_job_next() -> bool:
+	var index := _next_index()
+	if index < 0:
+		return false
+	var job: Dictionary = _queue[index]
+	return str(job.get("kind", "")) == "file" and int(job.get("priority", PRIORITY_OTHER)) == PRIORITY_LOCAL
+
+## The parsed root to publish next: the first of the player's own
+## (PRIORITY_LOCAL; a job raised to it while its root waited counts), else the
+## first parsed.
+func _next_outbox_index() -> int:
+	for index: int in _outbox.size():
+		if int((_outbox[index].job as Dictionary).get("priority", PRIORITY_OTHER)) == PRIORITY_LOCAL:
+			return index
+	return 0
 
 func _finish_file(job: Dictionary, record: Dictionary) -> void:
 	var path := str(job.path)
@@ -395,7 +428,10 @@ func _publish_ready() -> void:
 		_frame_publish_usec = 0
 	while not _outbox.is_empty() and _published_in_frame < PUBLISH_PER_FRAME \
 			and _frame_publish_usec < PUBLISH_BUDGET_USEC:
-		var item: Dictionary = _outbox.pop_front()
+		var next := _next_outbox_index()
+		if next > 0:
+			_stats.localPublishedFirst += 1
+		var item: Dictionary = _outbox.pop_at(next)
 		var began := Time.get_ticks_usec()
 		_publish(item.job, item.record)
 		var spent := Time.get_ticks_usec() - began
