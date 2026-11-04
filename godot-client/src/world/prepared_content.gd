@@ -14,6 +14,7 @@ const AnimationKeys := preload("res://src/world/prepared_animation_keys.gd")
 const CreaturePayload := preload("res://src/actors/creature_payload.gd")
 const SceneryImages := preload("res://src/world/scenery_image_sources.gd")
 const ActorImages := preload("res://src/actors/actor_images.gd")
+const ActorGeometry := preload("res://src/actors/actor_geometry.gd")
 static func node_policy() -> String:
 	var policy := OptimizationProfile.selected("prepared_node_policy")
 	return "lazy-source-v1" if policy == "lazy-source-v1" else "retain"
@@ -108,7 +109,38 @@ static func scene_texture_token(source: String, verified_scenery: Dictionary = {
 		var directory := source.get_base_dir()
 		var info := Vram.index_for_directory(directory)
 		parts.append("%s:%s:%s" % [logical_source(directory), str(info.status), str(info.sha256)])
+	# Cooked actor geometry (ALOD-C1h): a prepared scene also keeps the meshes
+	# it was cooked with (cook_prepared_assets.gd builds it with the raw actor
+	# parse, which applies the listed sidecar). Only a parse that the geometry
+	# changes adds a part, so the token of a plain parse is the one above.
+	var geometry := actor_geometry_variant(source)
+	if not geometry.is_empty():
+		parts.append("geometry=" + geometry)
 	return "|".join(parts)
+
+## The cooked actor geometry the raw parse of the actor file `source` gets
+## (ActorGeometry.apply, src/actors/actor_geometry.gd): "sidecar:<sha256>" of
+## the sidecar a ready catalogue lists for it, "generate" for the editor-only
+## runtime LODs, or "" when the parse stays as parsed (switch off, out of
+## scope, no catalogue or a rejected one, not listed, an invalid entry). The
+## sidecar is bound to the parse with the source digest, which the prepared
+## entry carries beside this token. Reads the memoized catalogue; any thread.
+static func actor_geometry_variant(source: String) -> String:
+	var key := ActorGeometry.logical_path(source)
+	if key.is_empty():
+		return ""
+	# The applier's own memoized reading, so the token and the parse agree.
+	var config: Dictionary = ActorGeometry._configuration()
+	var mode := str(config.get("mode", ""))
+	if mode == "generate":
+		return "generate"
+	if mode != "sidecar" or str(config.get("status", "")) != "ready" or not config.get("catalog") is Dictionary:
+		return ""
+	var entries: Variant = (config.catalog as Dictionary).get("entries")
+	var entry: Variant = (entries as Dictionary).get(key) if entries is Dictionary else null
+	if not entry is Dictionary or not ActorGeometry.Format.validate_entry(entry).is_empty():
+		return ""
+	return "sidecar:" + str((entry as Dictionary).sidecar_sha256)
 
 static func _resource_root(globalized: String, executable: String) -> String:
 	# A template mounted from its PCK can have an empty resource_path. Godot

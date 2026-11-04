@@ -37,6 +37,18 @@ extends RefCounted
 ## the extension is off and an equipment parse belongs on the main thread again
 ## (`prepare_actor` records "actor_images": false).
 
+## Actor geometry (actor LODs, ALOD-C1h): the same helper hands each actor
+## document's parsed state to ActorGeometry.apply (actor_geometry.gd) after the
+## parse and before generate_scene(), so the main-thread build, the actor
+## worker and the creature warm-up all draw the same cooked geometry: the
+## package-time LOD index chains, masked lining bases and vertex compaction of
+## a sidecar that validates against this exact parse. The applier is CPU only
+## and thread-safe; it leaves the parse exactly as it was when the switch is
+## off, the file is out of its scope (RL heads, world objects), there is no
+## catalogue (an exported build until release packaging installs one, C9) or
+## anything fails to validate. An imported PackedScene (editor checkouts) is
+## never re-parsed and keeps the importer's own LODs.
+
 ## Memory (memory classes M5, owner decision 10): every published entry gets a
 ## ledger row ({bytes, mesh_bytes, texture_bytes, domain, origin, ...}) with
 ## ResourceBytes estimates and a domain taken from its path (creature, race,
@@ -83,6 +95,7 @@ extends RefCounted
 ## get the same result.
 const GltfQuantization := preload("res://src/world/gltf_quantization.gd")
 const ActorImages := preload("res://src/actors/actor_images.gd")
+const ActorGeometry := preload("res://src/actors/actor_geometry.gd")
 const GltfAnimationFidelity := preload("res://src/actors/gltf_animation_fidelity.gd")
 const CreaturePayload := preload("res://src/actors/creature_payload.gd")
 const WorldObjectImages := preload("res://src/world/world_object_images.gd")
@@ -461,8 +474,12 @@ static func _packed_scene(path: String, allow_prepared: bool) -> PackedScene:
 	return packed
 
 ## The cached scene for `path` when it is the plain runtime glTF parse of that
-## file: not imported, prepared, geometry-bound or given the world-object image
-## pass. Null otherwise; never builds. Main thread, like the cache itself.
+## file: not imported, prepared, geometry-bound (map geometry cache) or given
+## the world-object image pass. Null otherwise; never builds. Main thread, like
+## the cache itself. An actor parse that cooked actor geometry changed (see
+## "Actor geometry") still qualifies: the applier rebuilds mesh surfaces only,
+## so nodes, skeletons, mesh and blend shape names and animations are the
+## parse's, which is all NativeAnimationImporter reads from it.
 static func runtime_parse(path: String) -> PackedScene:
 	path = _canonical_path(path)
 	if is_world_asset(path) or _prepared_entries.has(path) or _geometry_entries.has(path):
@@ -871,6 +888,7 @@ static func retention_snapshot() -> Dictionary:
 		"lookup_hits": _lookup_hits, "lookup_misses": _lookup_misses,
 		"bytes_estimate_available": true, "timings": timings,
 		"actor_images": ActorImages.retention_snapshot(),
+		"actor_geometry": ActorGeometry.snapshot(),
 		"entries": _scenes.size(), "bytes": total, "bytes_by_domain": _domain_bytes.duplicate(),
 		"pending_rows": _pending_rows, "budget_domain": DOMAIN_CREATURE,
 		"budget": creature_budget_bytes(), "idle_msec": creature_idle_msec(),
@@ -965,9 +983,9 @@ static func _build_raw(path: String, scenery: Dictionary = {}) -> PackedScene:
 ## `prepare_actor` (any thread): the file's generated scene, unowned and
 ## unpacked, or null. An actor document gets the actor image extension, whose
 ## sidecars and shared textures (AT-C2) are in place when the parse returns,
-## on either path; a world asset its image pass. Steps that change the parsed
-## state for both paths after the parse (ALOD-C1h's cooked geometry) go here,
-## before generate_scene().
+## on either path; a world asset its image pass. An actor document's cooked
+## geometry (ALOD-C1h, see "Actor geometry") applies here too, after the parse
+## and before generate_scene(), so both paths build from the same state.
 static func _parse_generate(path: String, scenery: Dictionary, actor_document: bool) -> Node3D:
 	if not GltfQuantization.ensure_registered():
 		push_error("raw glTF parse requires main-thread extension initialization")
@@ -995,6 +1013,10 @@ static func _parse_generate(path: String, scenery: Dictionary, actor_document: b
 	_record_operation(&"gltf_parse", operation_began)
 	if parse_error != OK or (world_asset and WorldObjectImages.has_source_errors(state)):
 		return null
+	if actor_document and not world_asset:
+		operation_began = Time.get_ticks_usec()
+		ActorGeometry.apply(state, path)
+		_record_operation(&"actor_geometry_apply", operation_began)
 	if world_asset and int(state.get_additional_data(WorldObjectImages.PREPARED)) < state.get_images().size():
 		build_texture_mipmaps(state)
 	var early_filter := world_asset and OS.get_environment(EARLY_WORLD_FILTER_ENVIRONMENT) != "0" and MapMaterialPreparation.enabled()
