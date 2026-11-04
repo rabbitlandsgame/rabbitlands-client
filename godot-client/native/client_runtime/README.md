@@ -185,9 +185,13 @@ reducer suites unchanged against the payload (`--runtime-dir=`,
 manifest, cache key, prepared record and server value already carries:
 lowercase hex, byte-identical to `FileAccess.get_sha256`. It changes no format;
 it only makes the same digest cheaper. The `ContentDigest` facade
-(`src/runtime/content_digest.gd`) is its only intended caller; until NH-A2 wires
-it there, the facade keeps its GDScript backend and nothing on the player path
-calls this class.
+(`src/runtime/content_digest.gd`) is its only caller. `ContentDigest.initialize()`
+loads the payload through `native_library.gd` and self-tests this class (the API
+number, NIST vectors, the payload's own files against the loader's SHA-256, and
+its manifest and descriptor CRLF-folded against the GDScript reader) before any
+load uses it. It is used for hashing with
+`--content-digest=native` or `compare`, and by `auto` once the facade's
+`NATIVE_DEFAULT` is turned on after the native digest's release-build A/B.
 
 * The block function is chosen once per process: the x86 SHA extensions
   (SHA-NI) when the CPU reports `sha`, `sse2`, `ssse3` and `sse4.1`, otherwise a
@@ -242,8 +246,10 @@ against portable on every length to 8 KiB and every split around block
 boundaries, CRLF folding at read sizes 1-4096, empty/missing/directory/
 non-ASCII/over-260-character files, batches on 1-1000 threads, FFI refusals),
 `tests/test_client_runtime_digest.gd` (engine and `ContentDigest` agreement),
-and `tools/native_digest_check.py` (every file of an install against Python's
-hashlib). `cargo run --release --offline --locked --example digest_bench` is a
+`tests/test_content_digest_native.gd` (the facade's native backend, self-test,
+fallbacks and `compare`), `tests/integration/content_digest_compare_tour.gd`
+(`compare` over 10 maps and 200 chunks) and `tools/native_digest_check.py`
+(every file of an install against Python's hashlib). `cargo run --release --offline --locked --example digest_bench` is a
 micro-benchmark over a list of files.
 
 ## Optional remote derived-state pilot

@@ -96,7 +96,8 @@ func _check_resolve() -> void:
 	var none := PackedStringArray()
 	var default := Digest.resolve({}, none, 8)
 	expect(default.mode == "auto" and default.backend == "gdscript" and default.requested == "auto"
-		and default.reason == "native_backend_not_built", "the default is auto, served by the GDScript backend until NH-A2")
+		and default.reason == "native_not_initialized",
+		"the default is auto, served by the GDScript backend while no native payload was probed")
 	expect(int(default.threads) == 4 and int(default.worker_threads) == 1,
 		"main thread uses half the logical processors (8 -> 4); workers hash alone")
 	expect(int(Digest.resolve({}, none, 24).threads) == 4 and int(Digest.resolve({}, none, 2).threads) == 1
@@ -113,7 +114,7 @@ func _check_resolve() -> void:
 	expect(invalid.mode == "auto" and invalid.requested == "fastest" and invalid.reason == "invalid_mode_auto",
 		"an unknown mode falls back to auto and says so")
 	var compare := Digest.resolve({Digest.ENVIRONMENT: "compare"}, none, 8)
-	expect(compare.mode == "compare" and compare.backend == "gdscript" and compare.reason == "compare_needs_native_backend",
+	expect(compare.mode == "compare" and compare.backend == "gdscript" and compare.reason == "compare_native_not_initialized",
 		"compare without a native backend hashes with GDScript and says why")
 	var threads := Digest.resolve({Digest.THREADS_ENVIRONMENT: "3"}, none, 8)
 	var both := Digest.resolve({Digest.THREADS_ENVIRONMENT: "2, 2"}, none, 8)

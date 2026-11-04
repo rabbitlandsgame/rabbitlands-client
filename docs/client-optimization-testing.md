@@ -108,6 +108,54 @@ and the selected content/node policies. Effects can correctly show inactive
 until a supported flight is created. Catalog presence does not establish a
 prepared hit; use later consumption diagnostics when qualifying that path.
 
+## Content digest backend
+
+Every load still reads and SHA-256-hashes the files it uses and compares them
+with the expected values; nothing is remembered between loads. The content
+digest switch only changes which reader does the hashing, never a digest, so
+it is separate from the optimization profile and keeps working under the
+legacy profile.
+
+Select it with `RABBITLANDS_CONTENT_DIGEST` or the user argument
+`--content-digest=`:
+
+- `auto` (default): the backend that is on by default. Native hashing is not
+  yet on by default; it waits for its own release-build A/B. On Windows the
+  client still loads and self-tests the verified `client_runtime` payload at
+  startup, so the log shows whether native hashing would work.
+- `native`: the verified payload's SHA-256 reader (SHA-NI where the CPU has it).
+  It falls back to GDScript if the payload is absent, refused or fails its
+  self-test.
+- `gdscript`: the GDScript reader on several short-lived threads. It does not
+  touch the native payload.
+- `sequential`: the pre-wave-2 reader, one file at a time. Use it as the A/B
+  control and as the kill switch. The safe-mode launcher selects it unless
+  another valid mode is given.
+- `compare`: for qualification only. Every file is hashed natively and with
+  `FileAccess`, and the `FileAccess` value is used. The first disagreement logs
+  `WARNING: content_digest mismatch {...}` and turns native hashing off for the
+  rest of the session. It is slower than any other mode.
+
+Check the log line `content_digest stage=backend mode=... backend=... reason=...
+native=... sha=... self_test=...`. `backend` is `native:sha_ni`,
+`native:portable`, `gdscript`, `sequential` or `compare`. `native=ready` with
+`self_test=passed` means the payload was verified and self-tested. Any other
+`native=` value names why it was not used, for example `absent`,
+`checksum_mismatch`, `class_missing` or `self_test_failed`.
+`RABBITLANDS_CONTENT_DIGEST_SHA=portable` forces the native reader's portable
+path, so a SHA-NI machine can qualify the no-SHA-NI path.
+
+To qualify a payload, run the compare tour headless from `godot-client/`:
+
+```powershell
+Godot_v4.7.2-stable_win64.exe --headless --path . --script res://tests/integration/content_digest_compare_tour.gd -- --maps=10 --chunks=200 --mode=compare --expect-native=present
+```
+
+It digests the packages and verifies the external images of 10 maps and 200
+continent chunks. It prints one `CONTENT_DIGEST_TOUR {...}` line and exits
+non-zero on any mismatch or failed digest. Run it once more with
+`RABBITLANDS_CONTENT_DIGEST_SHA=portable`.
+
 ## Prepared-content coverage and fallback
 
 The catalog is a small exact-content pilot, not a prepared copy of the whole
