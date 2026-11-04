@@ -158,7 +158,10 @@ The registry flags the map `preloadOnApproach` with `interiorOf: landfall`
   inside, and the Town is parked after a visit and kept as above. A world is
   parked only when its estimate fits what the other kept worlds leave of the
   budget: on a small machine the underground (~1.58 GiB on source fallback) is
-  never parked (`park_refused`), so going back in is a cold load.
+  never parked (`park_refused`), so going back in is a cold load. On small
+  machines the underground's scenery models (1.47 GiB) are also released after
+  leaving it (FIX-MEM), so a re-entry parses them again: a full cold load, as at
+  the first entry.
   `RABBITLANDS_MEMORY_CLASS=small` (or `--memory-class=small`) runs the client
   or `landfall_town_park.gd` as a small machine.
 - `godot-client/tests/integration/landfall_town_park.gd` (rendered) measures it.

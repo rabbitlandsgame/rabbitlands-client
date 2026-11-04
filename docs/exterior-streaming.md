@@ -69,6 +69,17 @@ the current live proof uses one QA traveller, not a multiplayer border crowd.
   budget (256 MiB on small machines, 512 MiB medium, 1 GiB large) by evicting
   idle species, least recently used first, and the creature warm-up prepares an
   evicted species again on its worker the next time one is in range.
+  World models placed by a map (interior scenery, harvest nodes, props) are
+  released once every world that used them has been left (WorldPark, FIX-MEM);
+  on medium and large machines only beyond the park budget.
+- Races, legacy hair and equipment are prepared on the actor preparer's worker
+  before a remote body is built (AW-04a), and so are a mount's scene and its
+  borrowed tack (AW-07). They reach `GlbSceneCache` through
+  `install_actor_prepared` (`ORIGIN_WORKER`). Races, hair and equipment are still
+  not evictable (widening the creature eviction to them is a later, optional
+  step). Creature-folder mounts are in the creature domain and evictable when
+  idle, as creature-job installs already were; `mounts/` (Giant Rat) stays
+  `DOMAIN_OTHER`.
 - Active ground keeps navigation layer 8. A visible neighbor exposes its actual
   ground only on picking layer 16, with no active structural collision. Clicking into
   it routes through the existing road graph, then continues to the clicked tile

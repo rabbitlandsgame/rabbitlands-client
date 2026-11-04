@@ -110,6 +110,11 @@ files; a standalone build is installed again from its download), which restores
 it like any other installed file. This is package reuse, not a binary patch
 within a PCK, GLB or ZIP. macOS bundles and `--benchmark-profile` keep one PCK,
 and `--no-split-pck` builds one on purpose.
+Actor VRAM sidecars (W2-AT-C3, `app/assets/actors/<a>/<b>/.../vram/*`; packaged
+only once release-enabled, after W2-AT-C4) form `actors-<a>-<b>-textures-NN`
+packages, 32 buckets per actor folder. Every other file keeps its package, so a
+code-only or GLB-only release downloads no sidecar, and a re-encoded sidecar
+re-downloads only its bucket.
 
 **Manifest schema 3 (zstd payloads).** A schema 3 manifest is a schema 2
 manifest whose inventory rows may carry `"codec": "zstd"`. Each 8 MiB chunk of

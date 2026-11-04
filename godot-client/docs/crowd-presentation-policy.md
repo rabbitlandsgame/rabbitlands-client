@@ -59,7 +59,9 @@ name, name colour and guild tag - comes back under its id in that time, it wears
 the parked body again: an actor stepping out of the view radius and back, or
 crossing an interest-cap boundary, is not rebuilt. A recycled id carrying
 someone else is built afresh. Every other spawn field is reapplied to a revived
-body. Map changes clear the parking.
+body. Map changes clear the parking. The player's own body is never parked; across
+a map change it is held separately for the ADD that follows
+(`src/actors/local_avatar_hold.gd`, AW-02).
 A parked body's animation is paused, so the gate does not go on stepping it
 while it waits; a revived one animates at half rate until the gate's next
 sweep gives it its tier.
@@ -307,6 +309,12 @@ against the client without it:
 | `-park` | every part but the one named |
 
 `stagger` and `quarter` refine the gate and are off without it.
+
+For measurements, `-hands` (no fingerless crowd hand variant), `-frameclock`
+(remote motion on the physics ticks) and `-cues` (hand cues for every body) drop
+one part of the Low actor tier under any policy (FIX-CPU). `describe()` and the
+benchmark's `crowdPolicy` report `tierHands`, `tierFrameClock` and `tierCues`.
+Medium and High use none of these parts.
 
 `RABBITLANDS_CROWD_BODY_CAP` forces the body cap for a session (0 turns it off)
 and `RABBITLANDS_CROWD_TUNING` the full-rate, half-rate and cloth budgets and
