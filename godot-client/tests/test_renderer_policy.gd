@@ -255,6 +255,7 @@ func _check_first_run() -> void:
 		"... beside the seeded tier, without saving a renderer choice")
 	expect(result.effective == "mobile" and result.requested == "mobile" and not result.fallback
 		and result.confirm_after == 0.0, "... so this Forward+ process restarts into it (not confirmed here)")
+	expect(result.asked == "forward_plus", "... while this first run itself asked for Forward+: %s" % result)
 	expect(Policy.needs_restart(result.effective, "forward_plus", PackedStringArray(), PackedStringArray(), false),
 		"... and the restart check agrees")
 	var recorded := _bytes()
@@ -351,6 +352,7 @@ func _check_trial() -> void:
 	expect(result.action == "failed_fallback" and _values().auto_renderer_state == "failed_fallback"
 		and result.effective == "auto" and result.fallback and result.requested == "forward_plus",
 		"an OpenGL fallback gives failed_fallback; this session continues on OpenGL: %s" % result)
+	expect(result.asked == "mobile", "... and this launch asked for Mobile (the settings' fallback note)")
 	_write(_trial("ok", 0))
 	result = Policy.reconcile(_settled_tier(), TEMP, _context({"method": "gl_compatibility"}))
 	expect(result.action == "failed_fallback", "a confirmed recommendation that later falls back is given up too")
@@ -361,7 +363,7 @@ func _check_trial() -> void:
 		result = Policy.reconcile(_settled_tier(), TEMP, _context({"method": "gl_compatibility",
 			"launch": _launch({"user_args": PackedStringArray([argument])})}))
 		expect(result.action == "none" and _bytes() == before and result.requested == "gl_compatibility"
-			and not result.fallback and not Policy.needs_restart(result.effective, "gl_compatibility",
+			and result.asked == "gl_compatibility" and not result.fallback and not Policy.needs_restart(result.effective, "gl_compatibility",
 			PackedStringArray(), PackedStringArray([argument]), false),
 			"%s keeps OpenGL and the trial as it was" % argument)
 	# The restart into Mobile came back on Forward+.

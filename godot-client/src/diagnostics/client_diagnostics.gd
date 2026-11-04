@@ -63,6 +63,8 @@ func _ready() -> void:
 	# Which renderer Automatic starts here: a first run's recommendation and the
 	# trial's outcome, recorded before the restart check reads them.
 	var policy := RendererPolicy.reconcile(tier)
+	# Kept for the settings window (what Automatic starts, the fallback note).
+	RendererPolicy.launch = policy
 	GraphicsOptions.active_texture_skip()
 	var renderer := str(policy.effective)
 	var current := RenderingServer.get_current_rendering_method()

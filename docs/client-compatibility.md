@@ -20,8 +20,18 @@ mode).bat**. Linux equivalents are `RabbitLands-debug.sh`,
 | Safe mode | OpenGL 3.3, low quality, painted look off, map cache bypassed, original map textures | `eloria-safe-mode.log` |
 
 Both compatibility launchers still use the restart updater when it is installed.
-Settings → Graphics also offers Automatic, Forward+ and OpenGL Compatibility
-as a saved renderer preference. Close and reopen the game after changing it.
+Settings → Graphics also offers Automatic, Forward+, Mobile and OpenGL
+Compatibility as a saved renderer preference. Mobile is listed once the
+installed updater can start it. The Automatic item names the renderer it starts
+on this computer, for example "Automatic (Forward+)". The renderer's tooltip
+names the renderer, graphics API and adapter running now, and says what each
+choice is for: Mobile is often faster on integrated graphics, Forward+ adds
+contact shade and bounce light in the Full painted look, and OpenGL
+Compatibility uses the least memory. Close and reopen the game after changing
+it; the page asks for a restart only when the choice starts a different
+renderer. A note under the choice says when a renderer could not start on this
+computer, for example "Mobile could not start on this computer, so Automatic
+uses Forward+."
 The compatibility and safe-mode launchers take precedence over this preference.
 A renderer passed directly as an engine flag (`--rendering-method`) is honoured
 while the preference is Automatic and Automatic starts the project default; the
@@ -183,7 +193,9 @@ retain precedence through their existing controls.
 engine, OS, CPU/memory, GPU vendor/name, graphics API, active renderer/driver,
 texture format support and graphics overrides. It also records the adapter class
 and the renderer decision: what the settings resolve to (`renderer_effective`),
-what the launch asked for (`renderer_requested`), whether a RenderingDevice
+what the settings ask the engine for once that decision is made
+(`renderer_requested`; after a failed Automatic recommendation, the renderer
+Automatic starts next, not the one this launch tried), whether a RenderingDevice
 request fell back to OpenGL (`renderer_fallback`), the `auto_renderer` record and
 the policy's action. A `renderer_restart` event precedes a restart into another
 renderer, and `renderer_confirmed` marks a recommendation confirmed. Driver
@@ -211,6 +223,7 @@ python -m pytest godot-client/tests/test_package_compatibility.py godot-client/t
 godot --headless --path godot-client --script res://tests/test_compatibility_launch.gd
 godot --path godot-client --audio-driver Dummy --rendering-method gl_compatibility --rendering-driver opengl3 --script res://tests/test_compatibility_launch.gd
 godot --headless --path godot-client --script res://tests/test_renderer_policy.gd
+godot --headless --path godot-client --script res://tests/test_settings_renderer.gd
 ```
 
 The runtime check exercises child-game argument separation, temporary safe-mode
@@ -219,4 +232,7 @@ overrides and the production viewport snapshot. Its output must not contain the
 policy check covers the recommendation, its trial states and the restart plan;
 its two `ConfigFile parse error` lines are its unreadable-file case. With
 `RABBITLANDS_LAUNCHER_FEATURES=renderer-relaunch` and `-- --relaunch-child` it
-instead performs a real relaunch restart and must exit with code 75.
+instead performs a real relaunch restart and must exit with code 75. The
+settings check covers the renderer menu, its labels and tooltip, the fallback
+note and the restart-notice rule, with the Mobile cases simulated
+(`renderers_for_tests` in `settings_window.gd`, `RendererFamily.override_for_tests`).

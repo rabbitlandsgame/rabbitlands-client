@@ -56,6 +56,26 @@ const CacheDiskUsage := preload("res://src/ui/cache_disk_usage.gd")
 const LookProfileScript := preload("res://src/world/look/look_profile.gd")
 ## The tier a fresh profile's graphics defaults were chosen for.
 const HardwareTier := preload("res://src/runtime/hardware_tier.gd")
+## What Automatic starts on this computer and which renderers the launch code
+## can start; the running renderer's family.
+const RendererPolicy := preload("res://src/runtime/renderer_policy.gd")
+const RendererFamily := preload("res://src/runtime/renderer_family.gd")
+## The renderer choice's setting values, in menu order. Automatic and the
+## renderers the launch code can start are offered
+## (RendererPolicy.supported_renderers), so Mobile appears once the updater's
+## launch options can start it.
+const RENDERER_CHOICES: Array[String] = ["auto", "forward_plus", "mobile", "gl_compatibility"]
+const RENDERER_NAMES := {"forward_plus": "Forward+", "mobile": "Mobile",
+	"gl_compatibility": "OpenGL Compatibility"}
+## One line each in the renderer's tooltip: what the choice is for.
+const RENDERER_PURPOSES := {
+	"forward_plus": "Forward+ adds contact shade and bounce light in the Full painted look.",
+	"mobile": "Mobile is often faster on integrated graphics.",
+	"gl_compatibility": "OpenGL Compatibility uses the least memory.",
+}
+## Godot's rendering driver names, as the tooltip shows them.
+const RENDERING_DRIVER_NAMES := {"vulkan": "Vulkan", "d3d12": "Direct3D 12", "metal": "Metal",
+	"opengl3": "OpenGL", "opengl3_angle": "OpenGL (ANGLE)", "opengl3_es": "OpenGL ES"}
 ## Each quality's crowd count, for the crowd row's wording.
 const RenderQuality := preload("res://src/actors/actor_render_quality.gd")
 ## keys.ini, Eternal Lands-style: the file every key binding is kept in.
@@ -105,6 +125,12 @@ var fps_limit_option: OptionButton
 var look_option: OptionButton
 var quality_option: OptionButton
 var graphics_restart_notice: Label
+## Says when a renderer could not start here (the engine fell back to OpenGL,
+## or Automatic's recommendation failed); hidden otherwise.
+var renderer_fallback_note: Label
+## Tests only: the renderers offered besides Automatic, in place of what the
+## launch code can start ([] for that).
+static var renderers_for_tests: Array[String] = []
 var name_distance_slider: HSlider
 var name_distance_value: Label
 ## The crowd rows: each slider and its count by setting key, and the box that
@@ -761,20 +787,35 @@ func _build_graphics() -> void:
 	var page := _new_page("Graphics", tr("ELORIA_SETTINGS_GRAPHICS"))
 	_add_button(page, "performance_preset", "Apply Performance preset")
 	(page.find_child("performance_preset", true, false) as Button).tooltip_text = "Reduce graphics and memory use. On Linux, Automatic renderer switches to OpenGL Compatibility. Restart the game to apply texture and renderer changes."
-	_add_hardware_tier_note(page)
+	# What Automatic starts here, from the values this launch started with
+	# (kept by ClientDiagnostics: no second parse of the settings file).
+	var renderers := offered_renderers()
+	var launch_values := RendererPolicy.launch_values()
+	var automatic := RendererPolicy.automatic_renderer(launch_values,
+		str(RendererPolicy.policy().renderer), renderers)
+	_add_hardware_tier_note(page, automatic)
 	add_choice("Graphics", "render_scale", "3D resolution", ["100%", "75%", "50%"], [1.0, 0.75, 0.5])
 	(page.find_child("render_scale", true, false) as OptionButton).tooltip_text = "Lower the world's resolution to improve performance. Text and menus stay sharp."
 	add_choice("Graphics", "map_texture_quality", "Map textures (restart required)",
 		["Full resolution", "Half resolution", "Quarter resolution"], ["full", "half", "quarter"])
 	(page.find_child("map_texture_quality", true, false) as OptionButton).tooltip_text = "Lower map texture memory use. Character textures and menus keep their detail. Close and reopen the game to apply."
+	var choices := renderer_choices(renderers)
 	add_choice("Graphics", "renderer", "Renderer (restart required)",
-		["Automatic", "Forward+", "OpenGL Compatibility"], ["auto", "forward_plus", "gl_compatibility"])
-	(page.find_child("renderer", true, false) as OptionButton).tooltip_text = "Currently running: %s. Close and reopen the game to apply a change. Compatibility launchers take precedence." % (
-		"OpenGL Compatibility" if RenderingServer.get_current_rendering_method() == "gl_compatibility" else "Forward+")
+		renderer_choice_labels(choices, automatic), choices)
+	var renderer := page.find_child("renderer", true, false) as OptionButton
+	var running := RendererFamily.method()
+	renderer.tooltip_text = renderer_tooltip(running, RenderingServer.get_current_rendering_driver_name(),
+		RenderingServer.get_video_adapter_name(), choices)
 	if OS.has_feature("web"):
-		var renderer := page.find_child("renderer", true, false) as OptionButton
 		renderer.disabled = true
 		renderer.tooltip_text = "The browser uses OpenGL Compatibility. Change 3D resolution or graphics quality to adjust performance."
+	renderer_fallback_note = Label.new()
+	renderer_fallback_note.name = "RendererFallbackNote"
+	renderer_fallback_note.text = "" if OS.has_feature("web") else renderer_fallback_text(launch_values,
+		launch_asked(RendererPolicy.launch), running, RendererPolicy.default_renderer())
+	renderer_fallback_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	renderer_fallback_note.visible = not renderer_fallback_note.text.is_empty()
+	page.add_child(renderer_fallback_note)
 	graphics_restart_notice = Label.new()
 	graphics_restart_notice.name = "GraphicsRestartNotice"
 	graphics_restart_notice.text = "Restart the game to apply texture or renderer changes."
@@ -822,9 +863,10 @@ func _build_graphics() -> void:
 ## (HardwareTier), so a fresh install that began low is not a mystery. Read
 ## once while the window is built, from the file's text rather than a second
 ## full parse at startup; nothing is shown for a profile that was never seeded
-## or kept High (the medium and high tiers).
-func _add_hardware_tier_note(page: VBoxContainer) -> void:
-	var text := hardware_tier_note(HardwareTier.recorded_tier(HardwareTier.SETTINGS_PATH))
+## or kept High (the medium and high tiers), unless Automatic starts the Mobile
+## renderer recorded for this computer (`automatic`).
+func _add_hardware_tier_note(page: VBoxContainer, automatic := "") -> void:
+	var text := hardware_tier_note(HardwareTier.recorded_tier(HardwareTier.SETTINGS_PATH), automatic)
 	if text.is_empty():
 		return
 	var note := Label.new()
@@ -833,11 +875,135 @@ func _add_hardware_tier_note(page: VBoxContainer) -> void:
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	page.add_child(note)
 
-static func hardware_tier_note(tier: String) -> String:
+## The note for a first run's `tier`, and for `automatic` (what Automatic
+## starts here, RendererPolicy.automatic_renderer) when that is the Mobile
+## renderer recorded for this computer's integrated graphics.
+static func hardware_tier_note(tier: String, automatic := "") -> String:
+	var mobile := automatic == RendererFamily.MOBILE
 	match tier:
 		"low":
+			if mobile:
+				return "This computer started on the Performance preset, chosen from its graphics, memory and processor at first launch, and Automatic uses the Mobile renderer for its integrated graphics. Your own changes are kept."
 			return "This computer started on the Performance preset, chosen from its graphics, memory and processor at first launch. Your own changes are kept."
+	if mobile:
+		return "Automatic uses the Mobile renderer for this computer's integrated graphics. Your own changes are kept."
 	return ""
+
+## The renderers offered besides Automatic: the ones the launch code can
+## start by name (RendererPolicy.supported_renderers), or a test's.
+static func offered_renderers() -> Array[String]:
+	if renderers_for_tests.is_empty():
+		return RendererPolicy.supported_renderers()
+	var result: Array[String] = []
+	result.assign(renderers_for_tests)
+	return result
+
+## The renderer choice's values in menu order: Automatic, then each of
+## RENDERER_CHOICES in `offered` (offered_renderers).
+static func renderer_choices(offered: Array[String]) -> Array[String]:
+	var result: Array[String] = ["auto"]
+	for renderer: String in RENDERER_CHOICES:
+		if renderer != "auto" and renderer in offered:
+			result.append(renderer)
+	return result
+
+## A renderer's name in the settings ("Mobile", "Forward+", ...); an unknown
+## method as reported.
+static func renderer_name(renderer: String) -> String:
+	return str(RENDERER_NAMES.get(renderer, renderer))
+
+## The renderer choice's labels for `choices` (renderer_choices): Automatic
+## names what it starts here (`automatic`), e.g. "Automatic (Mobile)".
+static func renderer_choice_labels(choices: Array[String], automatic: String) -> Array[String]:
+	var labels: Array[String] = []
+	for renderer: String in choices:
+		labels.append("Automatic (%s)" % renderer_name(automatic) if renderer == "auto" \
+			else renderer_name(renderer))
+	return labels
+
+## A rendering driver's name ("Vulkan", "Direct3D 12", "OpenGL (ANGLE)", ...);
+## an unknown driver as reported, "" for none (headless "dummy").
+static func driver_name(driver: String) -> String:
+	if driver.is_empty() or driver == "dummy":
+		return ""
+	return str(RENDERING_DRIVER_NAMES.get(driver, driver))
+
+## "Running now: Mobile on Vulkan (Intel(R) UHD Graphics 620)." for the running
+## `method`, `driver` and `adapter`; the driver and adapter are left out when
+## unknown.
+static func running_renderer_text(method: String, driver: String, adapter: String) -> String:
+	var text := "Running now: " + renderer_name(method)
+	var named_driver := driver_name(driver)
+	if not named_driver.is_empty():
+		text += " on " + named_driver
+	if not adapter.strip_edges().is_empty():
+		text += " (%s)" % adapter.strip_edges()
+	return text + "."
+
+## The renderer choice's tooltip: what runs now, one line for each offered
+## renderer in `choices` (renderer_choices) saying what it is for, and how a
+## change applies.
+static func renderer_tooltip(method: String, driver: String, adapter: String,
+		choices: Array[String]) -> String:
+	var lines := PackedStringArray([running_renderer_text(method, driver, adapter),
+		"Automatic uses the renderer chosen for this computer."])
+	for renderer: String in choices:
+		if RENDERER_PURPOSES.has(renderer):
+			lines.append(str(RENDERER_PURPOSES[renderer]))
+	lines.append("Close and reopen the game to apply a change. Compatibility launchers take precedence.")
+	return "\n".join(lines)
+
+## What this launch asked the engine for, from its startup decision
+## (`launch`, RendererPolicy.reconcile): `asked`, which names the Mobile trial
+## that fell back, not `requested`, which then names what Automatic starts
+## next; "" when unknown.
+static func launch_asked(launch: Dictionary) -> String:
+	return str(launch.get("asked", launch.get("requested", "")))
+
+## The fallback note's text, "" for none: this launch asked for a
+## RenderingDevice renderer (`requested`, launch_asked) but runs OpenGL
+## (`running`), and/or Automatic's recorded recommendation in `values`
+## failed (failed_fallback, failed_start) so Automatic starts
+## `default_renderer` again. A compatibility launcher's OpenGL is no fallback:
+## its request is OpenGL.
+static func renderer_fallback_text(values: Dictionary, requested: String, running: String,
+		default_renderer := RendererFamily.FORWARD_PLUS) -> String:
+	var lines := PackedStringArray()
+	var fell_back := requested in RendererFamily.RD_METHODS and running == RendererFamily.COMPATIBILITY
+	if fell_back:
+		lines.append("%s could not start on this computer, so the game is using OpenGL Compatibility." \
+			% renderer_name(requested))
+	var recorded := str(values.get("auto_renderer", ""))
+	var state := str(values.get("auto_renderer_state", ""))
+	if not recorded.is_empty() and recorded != default_renderer \
+			and state in [RendererPolicy.STATE_FAILED_FALLBACK, RendererPolicy.STATE_FAILED_START]:
+		if fell_back and recorded == requested:
+			lines.append("Automatic uses %s from the next start." % renderer_name(default_renderer))
+		else:
+			lines.append("%s could not start on this computer, so Automatic uses %s." \
+				% [renderer_name(recorded), renderer_name(default_renderer)])
+	return " ".join(lines)
+
+## The renderer the choice `preference` starts: `automatic` (what Automatic
+## starts here, RendererPolicy.automatic_renderer) for Automatic, else the
+## choice.
+static func started_renderer(preference: String, automatic: String) -> String:
+	return automatic if preference == "auto" or preference.is_empty() else preference
+
+## Whether the renderer choice `preference` needs a restart to apply, for the
+## restart notice: the renderer it starts is neither the one running
+## (`running`) nor the one this launch's choice (`startup_preference`) asked
+## for. So Automatic to Forward+ while Automatic runs Forward+ needs none, and
+## the notice does not stay up when a compatibility launcher or the engine's
+## OpenGL fallback (the fallback note's case) decided the running renderer.
+## `automatic` "" reads what Automatic starts from this launch's values.
+static func renderer_restart_needed(preference: String, startup_preference: String,
+		running := RendererFamily.method(), automatic := "") -> bool:
+	var automatic_here := automatic if not automatic.is_empty() \
+		else RendererPolicy.automatic_renderer(RendererPolicy.launch_values(),
+			str(RendererPolicy.policy().renderer), offered_renderers())
+	var next := started_renderer(preference, automatic_here)
+	return next != running and next != started_renderer(startup_preference, automatic_here)
 
 static func window_preference(value: Variant) -> String:
 	return value if value is String and value in WINDOW_PREFERENCES else WINDOW_DEFAULT

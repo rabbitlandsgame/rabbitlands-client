@@ -116,6 +116,11 @@ const COMPATIBILITY_ARGUMENTS: Array[String] = ["--client-compatibility", "--cli
 
 ## Set by `begin_restart`: this process is about to quit into another renderer.
 static var restarting := false
+## This process's startup `reconcile` result, kept by ClientDiagnostics so the
+## settings window can name what Automatic starts and what this launch asked
+## for without parsing the settings file again (an established profile's file
+## takes 14-20 ms). {} until then; a test may set its own.
+static var launch := {}
 
 ## The policy in force: {"renderer": INTEGRATED_RENDERER or the variable's
 ## choice ("" = off), "source": "default"|"environment", "rejected": a value of
@@ -194,12 +199,41 @@ static func recommendation_active(values: Dictionary,
 	return recommended in supported and str(values.get("auto_renderer_state", "")) in ACTIVE_STATES \
 		and int(values.get("auto_renderer_attempts", 0)) < MAX_TRIAL_ATTEMPTS
 
-## What Automatic starts with the settings file at `path` under the policy in
-## force, for the settings window: a renderer name or "auto".
+## What the settings file at `path` starts under the policy in force: the
+## explicit choice, the active recommendation for Automatic, or "auto".
 static func effective_renderer(path := SETTINGS_PATH) -> String:
 	var config := ConfigFile.new()
 	config.load(path)
 	return resolve(read_values(config), str(policy().renderer))
+
+## The renderer the project starts when no renderer is named: the project
+## setting (Forward+), and OpenGL Compatibility in the browser.
+static func default_renderer() -> String:
+	if OS.has_feature("web"):
+		return RendererFamily.COMPATIBILITY
+	return str(ProjectSettings.get_setting("rendering/renderer/rendering_method",
+		RendererFamily.FORWARD_PLUS))
+
+## The renderer Automatic starts on this computer, by name, for the settings
+## window's "Automatic (…)" item: the recorded recommendation in `values`
+## (read_values) while the policy is on and the recommendation is active
+## (`resolve`), else `default_renderer`. The player's own choice in `values`
+## does not matter here.
+static func automatic_renderer(values: Dictionary, policy_renderer := str(policy().renderer),
+		supported: Array[String] = supported_renderers()) -> String:
+	var as_automatic := values.duplicate()
+	as_automatic["renderer"] = "auto"
+	var resolved := resolve(as_automatic, policy_renderer, supported)
+	return default_renderer() if resolved == "auto" else resolved
+
+## The [graphics] values (read_values) this launch started with: `launch`'s,
+## or, before ClientDiagnostics kept them, the settings file at `path`'s.
+static func launch_values(path := SETTINGS_PATH) -> Dictionary:
+	if launch.get("values") is Dictionary:
+		return launch.values
+	var config := ConfigFile.new()
+	config.load(path)
+	return read_values(config)
 
 ## Whether `user_args` come from a compatibility or safe-mode launcher.
 static func compatibility_launch(user_args: PackedStringArray) -> bool:
@@ -215,8 +249,7 @@ static func requested_renderer(effective: String, user_args: PackedStringArray) 
 	if compatibility_launch(user_args):
 		return RendererFamily.COMPATIBILITY
 	if effective == "auto":
-		return str(ProjectSettings.get_setting("rendering/renderer/rendering_method",
-			RendererFamily.FORWARD_PLUS))
+		return default_renderer()
 	return effective
 
 ## This process's state, for `reconcile`: the method in use, the platform, the
@@ -237,9 +270,16 @@ static func live_context(overrides := {}) -> Dictionary:
 ## above. Returns:
 ##   effective     the renderer the settings resolve to ("auto" or a name);
 ##                 a blocked launch reads only the explicit choice
-##   requested     what this launch asked the engine for (requested_renderer)
-##   fallback      true when it asked for a RenderingDevice method and runs
-##                 OpenGL
+##   requested     what the settings ask the engine for after this call
+##                 (requested_renderer of `effective`): after a failed_fallback
+##                 that is what Automatic starts next, not what this launch
+##                 asked for
+##   asked         what this launch asked the engine for, as far as the game
+##                 can tell (it cannot see engine flags): the recommendation
+##                 when this call found it running or failed it, else the
+##                 settings before this call (requested_renderer)
+##   fallback      true when `requested` is a RenderingDevice method and the
+##                 process runs OpenGL
 ##   action        none | recorded | failed_fallback | failed_start |
 ##                 withdrawn, what was written
 ##   reason        why nothing (else) was done, "" when an action was taken
@@ -252,8 +292,8 @@ static func reconcile(tier_result: Dictionary, path := SETTINGS_PATH, context :=
 	var supported: Array[String] = []
 	supported.assign(live.supported)
 	var method := str(live.method)
-	var launch: Dictionary = live.launch
-	var user_args := PackedStringArray(launch.get("user_args", PackedStringArray()))
+	var launch_info: Dictionary = live.launch
+	var user_args := PackedStringArray(launch_info.get("user_args", PackedStringArray()))
 	var policy_info: Dictionary = live.policy
 	var policy_renderer := str(policy_info.renderer)
 	var config := ConfigFile.new()
@@ -261,9 +301,12 @@ static func reconcile(tier_result: Dictionary, path := SETTINGS_PATH, context :=
 	var readable := not exists or config.load(path) == OK
 	var values := read_values(config)
 	var result := {"action": "none", "reason": "", "confirm_after": 0.0, "policy": policy_info}
-	var blocked := HardwareTier.blocker(launch)
+	var blocked := HardwareTier.blocker(launch_info)
 	var recommended := str(values.auto_renderer)
 	var state := str(values.auto_renderer_state)
+	# Before any write: what these settings asked this launch for.
+	var asked := requested_renderer(resolve(values, policy_renderer if blocked.is_empty() else "", supported),
+		user_args)
 	var write := {}
 	if not blocked.is_empty():
 		result.reason = blocked
@@ -297,14 +340,17 @@ static func reconcile(tier_result: Dictionary, path := SETTINGS_PATH, context :=
 		result.reason = "inactive"
 	elif method == recommended:
 		result.reason = "running"
+		asked = recommended
 	elif method == RendererFamily.COMPATIBILITY and not compatibility_launch(user_args):
 		# Asked for a RenderingDevice method; the engine fell back to OpenGL.
 		write = {KEY_STATE: STATE_FAILED_FALLBACK}
 		result.action = "failed_fallback"
+		asked = recommended
 	elif LaunchOptions.RENDERER_RESTART in user_args and method != RendererFamily.COMPATIBILITY:
 		# This is the restart into the recommendation, and it did not get it.
 		write = {KEY_STATE: STATE_FAILED_FALLBACK}
 		result.action = "failed_fallback"
+		asked = recommended
 	elif state == STATE_TRIAL and int(values.auto_renderer_attempts) >= MAX_TRIAL_ATTEMPTS:
 		write = {KEY_STATE: STATE_FAILED_START}
 		result.action = "failed_start"
@@ -327,6 +373,7 @@ static func reconcile(tier_result: Dictionary, path := SETTINGS_PATH, context :=
 	result["effective"] = effective
 	var requested := requested_renderer(effective, user_args)
 	result["requested"] = requested
+	result["asked"] = asked
 	result["fallback"] = requested in RendererFamily.RD_METHODS and method == RendererFamily.COMPATIBILITY
 	return result
 
