@@ -43,6 +43,9 @@ const MIN_SUN_SHADOW_OPACITY := 0.5
 const MANIFEST_LIGHT_GROUP := "manifest_lights"
 ## Fits the sun's shadow distance to the ground the camera can see.
 const SunShadowFit := preload("res://src/world/sun_shadow_fit.gd")
+## The play camera's far plane and the fog at its cut (view_reach.gd), which
+## apply only on an environment this marks outdoor.
+const ViewReach := preload("res://src/world/view_reach.gd")
 
 static func apply(manifest: WorldManifest, world_environment: WorldEnvironment,
 		sun: DirectionalLight3D, light_parent: Node = null) -> bool:
@@ -57,6 +60,8 @@ static func apply(manifest: WorldManifest, world_environment: WorldEnvironment,
 		return false
 	var declared: Dictionary = raw as Dictionary
 	var environment: Environment = Environment.new()
+	if horizon_map(manifest):
+		environment.set_meta(ViewReach.OUTDOOR_META, true)
 
 	var sky_value: Variant = declared.get("sky")
 	if sky_value is Dictionary:
@@ -160,6 +165,19 @@ static func apply(manifest: WorldManifest, world_environment: WorldEnvironment,
 		print_debug("world_environment stage=lights count=", lamps)
 	return true
 
+
+## True for a map whose far ground a fog may veil at the camera's far plane
+## (view_reach.gd): one that declares a sun (an interior declares none, or a
+## disabled one) and a sky the look may paint (LookProfile.sky_painted: not
+## the "insides" maps whose void is meant dark). Read at bind; the play camera
+## then fits its far plane on LOW only where this marked the environment.
+static func horizon_map(manifest: WorldManifest) -> bool:
+	var raw: Variant = manifest.data.get("environment") if manifest != null else null
+	if raw is not Dictionary:
+		return false
+	var sun: Variant = (raw as Dictionary).get("sun")
+	return sun is Dictionary and bool((sun as Dictionary).get("enabled", true)) \
+		and LookProfile.sky_painted(manifest.asset_id())
 
 ## Spawns the manifest's point lights under `parent`, replacing any left over
 ## from a previously loaded map. An interior has no sky and no sun, so its

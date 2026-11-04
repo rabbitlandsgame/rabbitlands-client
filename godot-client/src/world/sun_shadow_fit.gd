@@ -32,17 +32,17 @@ extends Node
 ## ELORIA_SHADOW_FIT=0 turns this off.
 
 const Warmup := preload("res://src/world/camera_shader_warmup.gd")
+## The ground sampler and its refit thresholds, shared with the play camera's
+## far plane (view_reach.gd): one sampler, and within a frame one cast.
+const ViewReach := preload("res://src/world/view_reach.gd")
 const NODE_NAME := "SunShadowFit"
 const DISABLE_VARIABLE := "ELORIA_SHADOW_FIT"
-## WorldLoader.NAVIGATION_SURFACE_LAYER and
-## ExteriorRegionStream.PREVIEW_SURFACE_LAYER: the ground, not what stands on it.
-const GROUND_MASK := 8 | 16
-## Rays along the top edge, along the bottom edge, and along the ROWS - 2 rows
-## between, spaced an eighth of the frame apart. Those rows alternate between
-## three columns (both edges and the middle) and the two quarters between.
-const TOP_SAMPLES := 7
-const BOTTOM_SAMPLES := 3
-const ROWS := 9
+## ViewReach's: the walk surface's layers, and the rays along the top edge,
+## along the bottom edge and along the ROWS - 2 rows between.
+const GROUND_MASK := ViewReach.GROUND_MASK
+const TOP_SAMPLES := ViewReach.TOP_SAMPLES
+const BOTTOM_SAMPLES := ViewReach.BOTTOM_SAMPLES
+const ROWS := ViewReach.ROWS
 ## The nearest visible ground is taken anew only once it comes nearer than
 ## this fraction of the held value, or goes further than its inverse.
 const NEAREST_HOLD := 0.8
@@ -59,9 +59,9 @@ const STEP_METRES := 2.0
 ## over uneven ground does not keep resizing the cascades.
 const SHRINK_RATIO := 0.9
 ## Refit when the camera moves or turns this much, and at least this often.
-const REFIT_METRES := 1.0
-const REFIT_DOT := 0.9998
-const REFIT_FRAMES := 15
+const REFIT_METRES := ViewReach.REFIT_METRES
+const REFIT_DOT := ViewReach.REFIT_DOT
+const REFIT_FRAMES := ViewReach.REFIT_FRAMES
 const PROPERTIES: Array[StringName] = [&"directional_shadow_max_distance",
 	&"directional_shadow_split_1", &"directional_shadow_split_2",
 	&"directional_shadow_split_3", &"directional_shadow_fade_start"]
@@ -79,11 +79,9 @@ var _frame := -REFIT_FRAMES
 var _origin := Vector3.INF
 var _forward := Vector3.ZERO
 var _lens: Array = []
-var _query := PhysicsRayQueryParameters3D.new()
 
 func _init() -> void:
 	name = NODE_NAME
-	_query.collision_mask = GROUND_MASK
 
 func _enter_tree() -> void:
 	_sun = get_parent() as DirectionalLight3D
@@ -129,7 +127,7 @@ func _fit() -> void:
 	_forward = forward
 	_lens = lens
 	var ceiling := minf(float(_authored[&"directional_shadow_max_distance"]), camera.far)
-	var depths := visible_depths(camera, ceiling)
+	var depths := ViewReach.shared_depths(camera, ceiling)
 	if not is_finite(depths.y):
 		_restore()
 		return
@@ -153,19 +151,9 @@ func _fit() -> void:
 
 ## The view depth of the nearest (x) and of the deepest (y) ground the rays
 ## down the frame meet, each along the camera's view. y is INF when a ray
-## meets no ground within `ceiling`.
+## meets no ground within `ceiling` (ViewReach.visible_depths; it always casts).
 func visible_depths(camera: Camera3D, ceiling: float) -> Vector2:
-	var size := camera.get_viewport().get_visible_rect().size
-	var space := camera.get_world_3d().direct_space_state
-	var deepest := 0.0
-	var nearest := INF
-	for point: Vector2 in sample_points(size):
-		var depth := _depth(camera, space, point, ceiling)
-		if not is_finite(depth):
-			return Vector2(0.0, INF)
-		deepest = maxf(deepest, depth)
-		nearest = minf(nearest, depth)
-	return Vector2(nearest, deepest)
+	return ViewReach.visible_depths(camera, ceiling)
 
 ## The nearest ground to place moved boundaries by: `held` while `measured`
 ## stays within NEAREST_HOLD of it, else `measured`. Never more than
@@ -178,31 +166,11 @@ static func held_nearest(held: float, measured: float) -> float:
 
 ## Where in a frame of `size` the rays are cast, top row first.
 static func sample_points(size: Vector2) -> PackedVector2Array:
-	var points := PackedVector2Array()
-	for index: int in TOP_SAMPLES:
-		points.append(Vector2(size.x * index / float(TOP_SAMPLES - 1), 0.0))
-	for row: int in range(1, ROWS - 1):
-		var v := size.y * row / float(ROWS - 1)
-		var staggered := row % 2 == 0
-		for index: int in (2 if staggered else 3):
-			points.append(Vector2(size.x * (index + (0.5 if staggered else 0.0)) / 2.0, v))
-	for index: int in BOTTOM_SAMPLES:
-		points.append(Vector2(size.x * index / float(BOTTOM_SAMPLES - 1), size.y))
-	return points
+	return ViewReach.sample_points(size)
 
 func _depth(camera: Camera3D, space: PhysicsDirectSpaceState3D, point: Vector2,
 		ceiling: float) -> float:
-	var forward := -camera.global_basis.z
-	var direction := camera.project_ray_normal(point)
-	var along := direction.dot(forward)
-	if along <= 0.05:
-		return INF
-	_query.from = camera.project_ray_origin(point)
-	_query.to = _query.from + direction * (ceiling / along)
-	var hit := space.intersect_ray(_query)
-	if hit.is_empty():
-		return INF
-	return ((hit.position as Vector3) - camera.global_position).dot(forward)
+	return ViewReach.ray_depth(camera, space, point, ceiling)
 
 ## Split ratios for a fitted `distance`. Godot places boundary i at
 ## near + ratio_i * (distance - near). Boundaries the scene's own values put
