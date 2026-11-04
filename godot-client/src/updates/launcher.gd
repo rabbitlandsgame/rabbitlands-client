@@ -8,6 +8,9 @@ const Uninstall = preload("res://src/updates/uninstall.gd")
 const LaunchOptions = preload("res://src/updates/launch_options.gd")
 # Give the updated game time to load before its old copy is removed.
 const BACKUP_CLEANUP_DELAY_MSEC := 60000
+# A game that exits with LaunchOptions.RELAUNCH_EXIT_CODE (to restart into the
+# renderer its settings now ask for) is started again this many times.
+const MAX_RELAUNCHES := 1
 var _root := ""
 var _guard := Bootstrap.new()
 var _transport
@@ -175,7 +178,7 @@ func _launch_game(identity: Dictionary, args: PackedStringArray) -> void:
 	var binary := "RabbitLands.exe" if identity.platform == "windows" else "RabbitLands.x86_64"
 	var defaults := PackedStringArray(Release.read_json(_root.path_join("launcher-defaults.json")).get("args", []))
 	LaunchOptions.apply_environment(args)
-	var game_args := LaunchOptions.game_arguments(args, defaults, _root, DisplayServer.get_name() == "headless")
+	var game_args := LaunchOptions.game_arguments(args, defaults, _root, _game_headless())
 	var resume_index := args.find("--resume-client")
 	if resume_index >= 0:
 		var context: Variant = JSON.parse_string(Marshalls.base64_to_utf8(args[resume_index + 1])) if resume_index + 1 < args.size() else null
@@ -185,23 +188,53 @@ func _launch_game(identity: Dictionary, args: PackedStringArray) -> void:
 			return
 		LaunchOptions.apply_environment(PackedStringArray(context.user))
 	OS.set_environment("ELORIA_INSTALL_ROOT", _root)
-	var split := game_args.find("--")
-	OS.set_environment(LaunchOptions.CONTEXT_ENV, LaunchOptions.encode_context(
-		LaunchOptions.resume_context(game_args, game_args.slice(split + 1))))
-	_game_pid = OS.create_process(_root.path_join("app/" + binary), game_args)
-	if _game_pid <= 0:
-		_fail("Rabbit Lands could not start. Run its installer to repair this installation.")
-		return
-	if DisplayServer.get_name() != "headless":
-		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MINIMIZED)
-	var started := Time.get_ticks_msec()
-	var lease := Release.cache_for(_root).path_join("running-%d.json" % _game_pid)
-	while OS.is_process_running(_game_pid):
-		# The game's running lease shows the installed build started. This
-		# launcher keeps the lock until the game exits, so no update can begin.
-		if not _backup_cleanup_checked and Time.get_ticks_msec() - started >= _backup_cleanup_delay_msec() and FileAccess.file_exists(lease):
-			_start_backup_cleanup()
-		await get_tree().create_timer(1.0).timeout
+	# Announce the relaunch handshake: a game that must restart into another
+	# renderer exits with RELAUNCH_EXIT_CODE instead of restarting itself, so
+	# this launcher keeps the installation lock across the restart.
+	OS.set_environment(LaunchOptions.LAUNCHER_FEATURES_ENV,
+		LaunchOptions.launcher_features(OS.get_environment(LaunchOptions.LAUNCHER_FEATURES_ENV)))
+	var relaunches := 0
+	while true:
+		var split := game_args.find("--")
+		OS.set_environment(LaunchOptions.CONTEXT_ENV, LaunchOptions.encode_context(
+			LaunchOptions.resume_context(game_args, game_args.slice(split + 1))))
+		# A start of the renderer Automatic is trialling (none for a headless or
+		# compatibility launch); an early error exit gives it up (below).
+		var trial := LaunchOptions.trial_renderer(game_args)
+		_game_pid = _start_process(_root.path_join("app/" + binary), game_args)
+		if _game_pid <= 0:
+			# A relaunch can follow a game that started the backup removal. Stop it
+			# before _fail gives the lock up (and waits on its alert), so no other
+			# updater installs while this one still deletes backup files.
+			_finish_backup_cleanup()
+			_fail("Rabbit Lands could not start. Run its installer to repair this installation.")
+			return
+		if DisplayServer.get_name() != "headless":
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MINIMIZED)
+		var started := Time.get_ticks_msec()
+		var lease := Release.cache_for(_root).path_join("running-%d.json" % _game_pid)
+		while OS.is_process_running(_game_pid):
+			# The game's running lease shows the installed build started. This
+			# launcher keeps the lock until the game exits, so no update can begin.
+			if not _backup_cleanup_checked and Time.get_ticks_msec() - started >= _backup_cleanup_delay_msec() and FileAccess.file_exists(lease):
+				_start_backup_cleanup()
+			await get_tree().create_timer(1.0).timeout
+		var exit_code := OS.get_process_exit_code(_game_pid)
+		if LaunchOptions.record_failed_start(trial, exit_code, Time.get_ticks_msec() - started):
+			print("Rabbit Lands stopped with exit code %d while trying the %s renderer; Automatic uses the default renderer from now on." % [exit_code, trial])
+		if exit_code != LaunchOptions.RELAUNCH_EXIT_CODE:
+			break
+		if relaunches >= MAX_RELAUNCHES:
+			print("Rabbit Lands asked to restart again after a renderer restart; it is not started a second time.")
+			break
+		# The game asked to start again with the renderer its settings now ask
+		# for. The lock stays held; a running backup removal carries on, and
+		# one not started yet waits for the new game's own lease.
+		relaunches += 1
+		game_args = LaunchOptions.relaunch_arguments(game_args)
+		var renderer := LaunchOptions.engine_renderer(game_args)
+		print("Rabbit Lands asked to restart with another renderer; starting it again with %s."
+			% (renderer if renderer != "" else "the default renderer"))
 	_finish_backup_cleanup()
 	_game_pid = 0
 	_guard.release_lock()
@@ -272,6 +305,14 @@ func _handoff(root: String, manifest: String) -> void:
 
 func _new_transport() -> Node:
 	return Transport.new()
+
+# Whether the game starts without a display (as this launcher does). Test
+# fixtures override this and `_start_process` to exercise renderer arguments.
+func _game_headless() -> bool:
+	return DisplayServer.get_name() == "headless"
+
+func _start_process(path: String, game_args: PackedStringArray) -> int:
+	return OS.create_process(path, game_args)
 
 func _backup_cleanup_delay_msec() -> int:
 	return BACKUP_CLEANUP_DELAY_MSEC

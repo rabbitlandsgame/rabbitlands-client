@@ -780,7 +780,9 @@ def test_publication_signs_package_inventory_and_collects_all_installer_assets(f
         assert not any(".tar.gz" in p.name for p in assets)
 
 
-def export_test_updater(f, version, platform="windows"):
+def export_test_updater(f, version, platform="windows", launcher_methods=""):
+    """Exports the production launcher with a fixture transport. `launcher_methods`
+    is GDScript appended to the fixture launcher (test seams only)."""
     stage = f["tmp_path"] / ("helper-" + platform + "-" + version)
     logs = stage / "logs"
     logs.mkdir(parents=True)
@@ -806,7 +808,7 @@ def export_test_updater(f, version, platform="windows"):
             '\t\tif file != null:\n'
             '\t\t\tfile.store_string(Release.read_json("res://data/test-version.json").version)\n'
             '\t\t\tfile.close()\n'
-            '\tsuper._ready()\n')
+            '\tsuper._ready()\n' + launcher_methods)
         (project / "data/test-version.json").write_text(json.dumps({"version": version}))
         (project / "data/test-server.json").write_text(json.dumps({"url": f'http://127.0.0.1:{f["server"].server_port}'}))
         scene = project / "main.tscn"

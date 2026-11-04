@@ -31,6 +31,23 @@ To update immediately from the command line, use `-- --install-update` to
 update and play, or `-- --update-only` to update and exit. With no installed
 game, the standalone updater performs the initial installation as before.
 
+The launcher starts the game with the renderer its settings ask for: the
+player's explicit choice (Forward+, Mobile or OpenGL Compatibility), or, for
+Automatic, the renderer the game recorded for this computer while that
+recommendation is active (`auto_renderer_state` trial or ok, with fewer than two
+trial starts that did not reach ok; see `client-compatibility.md`). Without a
+recorded recommendation Automatic is the project default, Forward+. The
+compatibility and safe-mode launchers always force OpenGL. The launcher lists
+`renderer-relaunch` in `RABBITLANDS_LAUNCHER_FEATURES` for the game. A game that
+must restart into another renderer then exits with code 75, and the launcher
+starts it once more with the renderer the settings now ask for, plus
+`--graphics-renderer-restarted`, while it keeps the installation lock. It does
+not relaunch a second time. If a start that tries the recorded renderer (state
+trial) ends with an error exit within 60 seconds, the launcher sets
+`auto_renderer_state` to `failed_start` and leaves every other setting as it
+is. Automatic then starts the project default on that computer. A game started
+by an older launcher sees no feature and restarts itself, as before.
+
 Source checkouts and ordinary custom exports receive selectable manual commands
 instead of an automatic replacement. The commands fetch the published commit's
 release tag, show incoming commits, and request a fast-forward merge before
@@ -519,6 +536,16 @@ Choose the minimum checks for the behavior being changed. For example:
   fixture project alone reads `RL_UPDATE_TEST_STOP_AFTER`, which shipped updaters
   never do. The checks also cover locked files, case-only renames, and journals
   and backups left by older updaters.
+- Renderer launch arguments and the relaunch handshake:
+  `godot --headless --path godot-client --script res://tests/test_launch_renderer.gd`.
+  The runtime runner below also runs it in its updater-only project, which proves
+  that `launch_options.gd` needs no game script. The native check
+  `python -m pytest -q godot-client/tests/test_startup_updates.py -k relaunch`
+  exports the updater and a stand-in game (it needs the installed export
+  templates). It covers the exit-75 relaunch under one lock, the restart marker,
+  `failed_start` after an error exit or an engine crash, no second relaunch,
+  confirmed, explicit and compatibility starts left alone, and a relaunch that
+  cannot start stopping a running backup removal before the lock is released.
 - Login enforcement changes, from the sibling server repository:
   `python -m pytest -q tests/test_client_updates.py::test_login_denied_before_password_or_world_processing`.
 
