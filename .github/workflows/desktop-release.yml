@@ -1,9 +1,11 @@
 name: Build desktop release
 run-name: Desktop release from ${{ github.ref_name }} (${{ github.sha }})
 
+# Dispatch only: desktop releases move to desktop-release-r2.yml (content from
+# R2, executables built in CI). This full-CI workflow stays for the transition
+# and refuses to run once an R2 live pointer exists (r2-guard). It has no push
+# trigger, so promoting a commit to master starts nothing.
 on:
-  push:
-    branches: [master]
   workflow_dispatch:
 
 # Keep complete workflows separate while allowing the platform jobs to overlap.
@@ -20,7 +22,27 @@ env:
   PIP_DISABLE_PIP_VERSION_CHECK: '1'
 
 jobs:
+  r2-guard:
+    if: github.repository == 'rabbitlandsgame/rabbitlands-client'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          sparse-checkout: godot-client/tools
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+      - name: Refuse once an R2 live pointer exists
+        run: python godot-client/tools/actions_release.py live-pointer-guard
+
   prepare:
+    needs: r2-guard
     if: github.repository == 'rabbitlandsgame/rabbitlands-client'
     runs-on: ubuntu-24.04
     timeout-minutes: 10

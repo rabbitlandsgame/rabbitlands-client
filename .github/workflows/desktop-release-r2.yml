@@ -1,0 +1,868 @@
+name: Build desktop release (R2 content)
+run-name: Desktop release (R2 content) from ${{ github.ref_name }} (${{ github.sha }})
+
+# Content (every package except the CI-owned executables) is built, qualified
+# and uploaded to R2 on the owner's machine; this workflow builds only the
+# executables, signs, tests the shipped combination and publishes on GitHub.
+# R2 is untrusted transport: every byte is checked against a signed row.
+#
+# Dispatch only. Inputs are validated by actions_release.py r2-prepare (they
+# reach it through env:) and later jobs read only its outputs. Approvals:
+# desktop-sign (content summary), desktop-publish (after e2e), desktop-promote
+# (after the R2 pointers are live). No job holds an R2 credential.
+on:
+  workflow_dispatch:
+    inputs:
+      windows_source:
+        description: Windows content source (r2 = the set uploaded from the build machine; ci = built on the runner)
+        type: choice
+        options: [r2, ci]
+        default: r2
+      windows_set_sha256:
+        description: SHA-256 of the Windows content set on R2 (64 hex; empty for ci)
+        type: string
+        default: ''
+      linux_source:
+        description: Linux content source (r2 or ci)
+        type: choice
+        options: [r2, ci]
+        default: r2
+      linux_set_sha256:
+        description: SHA-256 of the Linux content set on R2 (64 hex; empty for ci)
+        type: string
+        default: ''
+      dry_run:
+        description: Build and check only (no draft, no signing, no uploads)
+        type: boolean
+        default: false
+
+# One release operation at a time across desktop-release.yml, this workflow,
+# desktop-repoint.yml and published-client-cleanup.yml.
+concurrency:
+  group: rabbitlands-desktop-release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  PYTHONUTF8: '1'
+  PYTHONDONTWRITEBYTECODE: '1'
+  PIP_NO_CACHE_DIR: '1'
+  PIP_DISABLE_PIP_VERSION_CHECK: '1'
+
+jobs:
+  prepare:
+    if: github.repository == 'rabbitlandsgame/rabbitlands-client'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    outputs:
+      commit: ${{ steps.prepare.outputs.commit }}
+      release_id: ${{ steps.prepare.outputs.release_id }}
+      dry_run: ${{ steps.prepare.outputs.dry_run }}
+      windows_source: ${{ steps.prepare.outputs.windows_source }}
+      linux_source: ${{ steps.prepare.outputs.linux_source }}
+      windows_set_sha256: ${{ steps.prepare.outputs.windows_set_sha256 }}
+      linux_set_sha256: ${{ steps.prepare.outputs.linux_set_sha256 }}
+      r2_any: ${{ steps.prepare.outputs.r2_any }}
+      ci_any: ${{ steps.prepare.outputs.ci_any }}
+      r2_matrix: ${{ steps.prepare.outputs.r2_matrix }}
+      ci_matrix: ${{ steps.prepare.outputs.ci_matrix }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          filter: blob:none
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /godot-client/tools/
+            /godot-client/src/updates/
+            /godot-client/src/app/main.tscn
+            /godot-client/assets/branding/
+            /godot-client/assets/audio/CREDITS.txt
+            /godot-client/native/
+            /godot-client/data/update_public.pem
+            /godot-client/project.godot
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+      - name: Validate the dispatch and find or create the draft
+        id: prepare
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WINDOWS_SOURCE: ${{ inputs.windows_source }}
+          WINDOWS_SET_SHA256: ${{ inputs.windows_set_sha256 }}
+          LINUX_SOURCE: ${{ inputs.linux_source }}
+          LINUX_SET_SHA256: ${{ inputs.linux_set_sha256 }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: python godot-client/tools/actions_release.py r2-prepare
+
+  content:
+    name: Content ${{ matrix.platform }} (r2)
+    needs: prepare
+    if: needs.prepare.outputs.r2_any == 'true'
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare.outputs.r2_matrix) }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    permissions:
+      contents: read
+    outputs:
+      windows_digest: ${{ steps.digest.outputs.windows_digest }}
+      linux_digest: ${{ steps.digest.outputs.linux_digest }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          filter: blob:none
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /godot-client/tools/
+            /godot-client/src/updates/
+            /godot-client/src/app/main.tscn
+            /godot-client/assets/branding/
+            /godot-client/assets/audio/CREDITS.txt
+            /godot-client/native/
+            /godot-client/data/update_public.pem
+            /godot-client/project.godot
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+      - name: Install the hash-locked Python dependencies
+        run: |
+          python -m pip install --require-hashes --no-deps --only-binary=:all: --requirement godot-client/tools/desktop-release-requirements.txt
+      - name: Verify the dispatched content set anonymously and summarize it
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          SET_SHA256: ${{ matrix.set_sha256 }}
+        run: python godot-client/tools/desktop_release_ci.py verify-content --platform "$PLATFORM" --sha256 "$SET_SHA256" --commit "$GITHUB_SHA" --work "$RUNNER_TEMP/content-work" --out "$RUNNER_TEMP/content-$PLATFORM"
+      - name: Record the content artifact digest
+        id: digest
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/content-$PLATFORM" --output-name "${PLATFORM}_digest"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: content-${{ matrix.platform }}
+          path: ${{ runner.temp }}/content-${{ matrix.platform }}
+          if-no-files-found: error
+          include-hidden-files: true
+          overwrite: true
+          retention-days: 7
+
+  # The ci content leg: today's hosted content build, for the helper-train
+  # release, a Linux fallback or an R2 outage. Its steps arrive with R2-A6b;
+  # r2-prepare refuses a ci source until desktop_release_ci.py has build-content.
+  content-ci:
+    name: Content ${{ matrix.platform }} (ci)
+    needs: prepare
+    if: needs.prepare.outputs.ci_any == 'true'
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare.outputs.ci_matrix) }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 180
+    permissions:
+      contents: write
+    outputs:
+      windows_digest: ${{ steps.digest.outputs.windows_digest }}
+      linux_digest: ${{ steps.digest.outputs.linux_digest }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          filter: blob:none
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /godot-client/tools/
+            /godot-client/src/updates/
+            /godot-client/src/app/main.tscn
+            /godot-client/assets/branding/
+            /godot-client/assets/audio/CREDITS.txt
+            /godot-client/native/
+            /godot-client/data/update_public.pem
+            /godot-client/project.godot
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+      - name: Install the hash-locked Python dependencies
+        run: |
+          python -m pip install --require-hashes --no-deps --only-binary=:all: --requirement godot-client/tools/desktop-release-requirements.txt
+      - name: Build the content on this runner and upload its parts to the GitHub pools
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PLATFORM: ${{ matrix.platform }}
+          RELEASE_ID: ${{ needs.prepare.outputs.release_id }}
+        run: python godot-client/tools/desktop_release_ci.py build-content --platform "$PLATFORM" --commit "$GITHUB_SHA" --release-id "$RELEASE_ID" --work "$RUNNER_TEMP/content-work" --out "$RUNNER_TEMP/content-$PLATFORM"
+      - name: Record the content artifact digest
+        id: digest
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/content-$PLATFORM" --output-name "${PLATFORM}_digest"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: content-${{ matrix.platform }}
+          path: ${{ runner.temp }}/content-${{ matrix.platform }}
+          if-no-files-found: error
+          include-hidden-files: true
+          overwrite: true
+          retention-days: 7
+
+  build:
+    name: Executables ${{ matrix.platform }}
+    needs: [prepare, content, content-ci]
+    if: >-
+      ${{ !cancelled() && needs.prepare.result == 'success'
+      && (needs.content.result == 'success' || needs.content.result == 'skipped')
+      && (needs.content-ci.result == 'success' || needs.content-ci.result == 'skipped') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows
+            runner: windows-2025
+          - platform: linux
+            runner: ubuntu-24.04
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 150
+    permissions:
+      contents: read
+    outputs:
+      windows_digest: ${{ steps.digest.outputs.windows_digest }}
+      linux_digest: ${{ steps.digest.outputs.linux_digest }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          filter: blob:none
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /godot-client/tools/
+            /godot-client/src/updates/
+            /godot-client/src/app/main.tscn
+            /godot-client/assets/branding/
+            /godot-client/assets/audio/CREDITS.txt
+            /godot-client/native/
+            /godot-client/data/update_public.pem
+            /godot-client/project.godot
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+      - name: Install the hash-locked Python dependencies
+        run: |
+          python -m pip install --require-hashes --no-deps --only-binary=:all: --requirement godot-client/tools/desktop-release-requirements.txt
+      - name: Install native Linux build and editor libraries
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libfontconfig1 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 libasound2t64 libgl1 cmake ninja-build g++
+      - name: Install the pinned native runtime toolchain
+        run: |
+          export RUSTUP_HOME="$RUNNER_TEMP/rabbitlands-native-toolchain/rustup"
+          export CARGO_HOME="$RUNNER_TEMP/rabbitlands-native-toolchain/cargo"
+          mkdir -p "$RUSTUP_HOME" "$CARGO_HOME"
+          printf 'RUSTUP_HOME=%s\nCARGO_HOME=%s\n' "$RUSTUP_HOME" "$CARGO_HOME" >> "$GITHUB_ENV"
+          rustup toolchain install 1.99.1 --profile minimal --no-self-update
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: content-${{ matrix.platform }}
+          path: ${{ runner.temp }}/content-${{ matrix.platform }}
+      - name: Check the content artifact against its producer's digest
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          EXPECTED: ${{ needs.content.outputs[format('{0}_digest', matrix.platform)] }}${{ needs.content-ci.outputs[format('{0}_digest', matrix.platform)] }}
+        run: python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/content-$PLATFORM" --expect "$EXPECTED"
+      - name: Build the engine, native runtime, helpers, root files and CI packages (no cache)
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: python godot-client/tools/actions_release.py r2-build --platform "$PLATFORM" --content "$RUNNER_TEMP/content-$PLATFORM" --out "$RUNNER_TEMP/exec-$PLATFORM"
+      - name: Measure the runner's disk
+        if: always()
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: python godot-client/tools/actions_release.py disk-probe --label "build-$PLATFORM"
+      - name: Record the executables artifact digest
+        id: digest
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/exec-$PLATFORM" --output-name "${PLATFORM}_digest"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: exec-${{ matrix.platform }}
+          path: ${{ runner.temp }}/exec-${{ matrix.platform }}
+          if-no-files-found: error
+          include-hidden-files: true
+          overwrite: true
+          retention-days: 7
+
+  sign:
+    name: Sign the release manifests
+    needs: [prepare, content, content-ci, build]
+    if: >-
+      ${{ !cancelled() && needs.prepare.result == 'success' && needs.prepare.outputs.dry_run == 'false'
+      && needs.build.result == 'success'
+      && (needs.content.result == 'success' || needs.content.result == 'skipped')
+      && (needs.content-ci.result == 'success' || needs.content-ci.result == 'skipped') }}
+    runs-on: ubuntu-24.04
+    environment: desktop-sign
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    outputs:
+      digest: ${{ steps.digest.outputs.digest }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          filter: blob:none
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /godot-client/tools/
+            /godot-client/src/updates/
+            /godot-client/src/app/main.tscn
+            /godot-client/assets/branding/
+            /godot-client/assets/audio/CREDITS.txt
+            /godot-client/native/
+            /godot-client/data/update_public.pem
+            /godot-client/project.godot
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+      - name: Install the hash-locked signing dependencies
+        run: |
+          python -m pip install --require-hashes --no-deps --only-binary=:all: --requirement godot-client/tools/desktop-sign-requirements.txt
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: content-windows
+          path: ${{ runner.temp }}/content-windows
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: content-linux
+          path: ${{ runner.temp }}/content-linux
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: exec-windows
+          path: ${{ runner.temp }}/exec-windows
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: exec-linux
+          path: ${{ runner.temp }}/exec-linux
+      - name: Check the artifacts against their producers' digests
+        env:
+          CONTENT_WINDOWS: ${{ needs.content.outputs.windows_digest }}${{ needs.content-ci.outputs.windows_digest }}
+          CONTENT_LINUX: ${{ needs.content.outputs.linux_digest }}${{ needs.content-ci.outputs.linux_digest }}
+          EXEC_WINDOWS: ${{ needs.build.outputs.windows_digest }}
+          EXEC_LINUX: ${{ needs.build.outputs.linux_digest }}
+        run: |
+          python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/content-windows" --expect "$CONTENT_WINDOWS"
+          python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/content-linux" --expect "$CONTENT_LINUX"
+          python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/exec-windows" --expect "$EXEC_WINDOWS"
+          python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/exec-linux" --expect "$EXEC_LINUX"
+      - name: Sign both platform manifests with the release key
+        env:
+          CLIENT_UPDATE_SIGNING_KEY: ${{ secrets.CLIENT_UPDATE_SIGNING_KEY }}
+          WINDOWS_SOURCE: ${{ needs.prepare.outputs.windows_source }}
+          WINDOWS_SET_SHA256: ${{ needs.prepare.outputs.windows_set_sha256 }}
+          LINUX_SOURCE: ${{ needs.prepare.outputs.linux_source }}
+          LINUX_SET_SHA256: ${{ needs.prepare.outputs.linux_set_sha256 }}
+        run: python godot-client/tools/desktop_release_ci.py sign --commit "$GITHUB_SHA" --windows-source "$WINDOWS_SOURCE" --windows-set-sha256 "$WINDOWS_SET_SHA256" --windows-content "$RUNNER_TEMP/content-windows" --windows-exec "$RUNNER_TEMP/exec-windows" --linux-source "$LINUX_SOURCE" --linux-set-sha256 "$LINUX_SET_SHA256" --linux-content "$RUNNER_TEMP/content-linux" --linux-exec "$RUNNER_TEMP/exec-linux" --out "$RUNNER_TEMP/envelopes"
+      - name: Record the envelopes artifact digest
+        id: digest
+        run: python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/envelopes" --output-name digest
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: envelopes
+          path: ${{ runner.temp }}/envelopes
+          if-no-files-found: error
+          include-hidden-files: true
+          overwrite: true
+          retention-days: 7
+
+  installers:
+    name: Installer ${{ matrix.platform }}
+    needs: [prepare, build, sign]
+    if: >-
+      ${{ !cancelled() && needs.prepare.result == 'success' && needs.build.result == 'success'
+      && (needs.sign.result == 'success'
+      || (needs.prepare.outputs.dry_run == 'true' && needs.sign.result == 'skipped')) }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows
+            runner: windows-2025
+          - platform: linux
+            runner: ubuntu-24.04
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    outputs:
+      windows_digest: ${{ steps.digest.outputs.windows_digest }}
+      linux_digest: ${{ steps.digest.outputs.linux_digest }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          filter: blob:none
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /godot-client/tools/
+            /godot-client/src/updates/
+            /godot-client/src/app/main.tscn
+            /godot-client/assets/branding/
+            /godot-client/assets/audio/CREDITS.txt
+            /godot-client/native/
+            /godot-client/data/update_public.pem
+            /godot-client/project.godot
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+      - name: Install the hash-locked Python dependencies
+        run: |
+          python -m pip install --require-hashes --no-deps --only-binary=:all: --requirement godot-client/tools/desktop-release-requirements.txt
+      - name: Install editor libraries
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libfontconfig1 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 libasound2t64 libgl1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        if: needs.prepare.outputs.dry_run == 'false'
+        with:
+          name: envelopes
+          path: ${{ runner.temp }}/envelopes
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: exec-${{ matrix.platform }}
+          path: ${{ runner.temp }}/exec-${{ matrix.platform }}
+      - name: Check the envelopes artifact against its producer's digest
+        if: needs.prepare.outputs.dry_run == 'false'
+        env:
+          EXPECTED: ${{ needs.sign.outputs.digest }}
+        run: python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/envelopes" --expect "$EXPECTED"
+      - name: Check the executables artifact against its producer's digest
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          EXPECTED: ${{ needs.build.outputs[format('{0}_digest', matrix.platform)] }}
+        run: python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/exec-$PLATFORM" --expect "$EXPECTED"
+      - name: Verify the envelope with Godot and build the installer
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          DRY_RUN: ${{ needs.prepare.outputs.dry_run }}
+        run: python godot-client/tools/actions_release.py r2-installers --platform "$PLATFORM" --envelopes "$RUNNER_TEMP/envelopes" --exec "$RUNNER_TEMP/exec-$PLATFORM" --out "$RUNNER_TEMP/installers-$PLATFORM" --dry-run "$DRY_RUN"
+      - name: Measure the runner's disk
+        if: always()
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: python godot-client/tools/actions_release.py disk-probe --label "installers-$PLATFORM"
+      - name: Record the installers artifact digest
+        id: digest
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/installers-$PLATFORM" --output-name "${PLATFORM}_digest"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: installers-${{ matrix.platform }}
+          path: ${{ runner.temp }}/installers-${{ matrix.platform }}
+          if-no-files-found: error
+          include-hidden-files: true
+          overwrite: true
+          retention-days: 7
+
+  stage:
+    name: Stage the GitHub downloads
+    needs: [prepare, build, sign, installers]
+    if: >-
+      ${{ !cancelled() && needs.prepare.result == 'success' && needs.prepare.outputs.dry_run == 'false'
+      && needs.build.result == 'success' && needs.sign.result == 'success'
+      && needs.installers.result == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          filter: blob:none
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /godot-client/tools/
+            /godot-client/src/updates/
+            /godot-client/src/app/main.tscn
+            /godot-client/assets/branding/
+            /godot-client/assets/audio/CREDITS.txt
+            /godot-client/native/
+            /godot-client/data/update_public.pem
+            /godot-client/project.godot
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+      - name: Install the hash-locked Python dependencies
+        run: |
+          python -m pip install --require-hashes --no-deps --only-binary=:all: --requirement godot-client/tools/desktop-release-requirements.txt
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: envelopes
+          path: ${{ runner.temp }}/envelopes
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: exec-windows
+          path: ${{ runner.temp }}/exec-windows
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: exec-linux
+          path: ${{ runner.temp }}/exec-linux
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: installers-windows
+          path: ${{ runner.temp }}/installers-windows
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: installers-linux
+          path: ${{ runner.temp }}/installers-linux
+      - name: Check the artifacts against their producers' digests
+        env:
+          ENVELOPES: ${{ needs.sign.outputs.digest }}
+          EXEC_WINDOWS: ${{ needs.build.outputs.windows_digest }}
+          EXEC_LINUX: ${{ needs.build.outputs.linux_digest }}
+          INSTALLERS_WINDOWS: ${{ needs.installers.outputs.windows_digest }}
+          INSTALLERS_LINUX: ${{ needs.installers.outputs.linux_digest }}
+        run: |
+          python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/envelopes" --expect "$ENVELOPES"
+          python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/exec-windows" --expect "$EXEC_WINDOWS"
+          python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/exec-linux" --expect "$EXEC_LINUX"
+          python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/installers-windows" --expect "$INSTALLERS_WINDOWS"
+          python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/installers-linux" --expect "$INSTALLERS_LINUX"
+      - name: Upload CI packages and helpers to the pools, and manifests and installers to the draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_ID: ${{ needs.prepare.outputs.release_id }}
+        run: python godot-client/tools/desktop_release_ci.py stage --commit "$GITHUB_SHA" --release-id "$RELEASE_ID" --envelopes "$RUNNER_TEMP/envelopes" --windows-exec "$RUNNER_TEMP/exec-windows" --windows-installer "$RUNNER_TEMP/installers-windows" --linux-exec "$RUNNER_TEMP/exec-linux" --linux-installer "$RUNNER_TEMP/installers-linux" --work "$RUNNER_TEMP/stage-work"
+
+  e2e:
+    name: End-to-end ${{ matrix.platform }}
+    needs: [prepare, build, sign, installers, stage]
+    if: >-
+      ${{ !cancelled() && needs.prepare.result == 'success' && needs.prepare.outputs.dry_run == 'false'
+      && needs.build.result == 'success' && needs.sign.result == 'success'
+      && needs.installers.result == 'success' && needs.stage.result == 'success' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows
+            runner: windows-2025
+          - platform: linux
+            runner: ubuntu-24.04
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 180
+    permissions:
+      contents: read
+    outputs:
+      windows_digest: ${{ steps.digest.outputs.windows_digest }}
+      linux_digest: ${{ steps.digest.outputs.linux_digest }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          filter: blob:none
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /godot-client/tools/
+            /godot-client/src/updates/
+            /godot-client/src/app/main.tscn
+            /godot-client/assets/branding/
+            /godot-client/assets/audio/CREDITS.txt
+            /godot-client/native/
+            /godot-client/data/update_public.pem
+            /godot-client/project.godot
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+      - name: Install the hash-locked Python dependencies
+        run: |
+          python -m pip install --require-hashes --no-deps --only-binary=:all: --requirement godot-client/tools/desktop-release-requirements.txt
+      - name: Install the Linux display and graphics libraries
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libfontconfig1 libx11-6 libxcursor1 libxinerama1 libxi6 libxrandr2 libasound2t64 libgl1 libgl1-mesa-dri libglx-mesa0 mesa-vulkan-drivers xvfb xauth
+      - name: Prepare a work folder the throwaway e2e user can reach
+        if: matrix.platform == 'linux'
+        run: sudo install -d -m 0755 -o "$(id -u)" -g "$(id -g)" /mnt/rl-e2e
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: envelopes
+          path: ${{ runner.temp }}/envelopes
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: exec-${{ matrix.platform }}
+          path: ${{ runner.temp }}/exec-${{ matrix.platform }}
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: installers-${{ matrix.platform }}
+          path: ${{ runner.temp }}/installers-${{ matrix.platform }}
+      - name: Check the artifacts against their producers' digests
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          ENVELOPES: ${{ needs.sign.outputs.digest }}
+          EXEC: ${{ needs.build.outputs[format('{0}_digest', matrix.platform)] }}
+          INSTALLERS: ${{ needs.installers.outputs[format('{0}_digest', matrix.platform)] }}
+        run: |
+          python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/envelopes" --expect "$ENVELOPES"
+          python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/exec-$PLATFORM" --expect "$EXEC"
+          python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/installers-$PLATFORM" --expect "$INSTALLERS"
+      - name: Measure the runner's disk before installing
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: python godot-client/tools/actions_release.py disk-probe --label "e2e-$PLATFORM"
+      - name: Install from R2 and GitHub with the shipped updater, smoke both profiles, re-check
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: python godot-client/tools/actions_release.py r2-e2e --platform "$PLATFORM" --envelopes "$RUNNER_TEMP/envelopes" --exec "$RUNNER_TEMP/exec-$PLATFORM" --installers "$RUNNER_TEMP/installers-$PLATFORM" --receipt "$RUNNER_TEMP/e2e-$PLATFORM/e2e.json" --logs "$RUNNER_TEMP/e2e-logs-$PLATFORM"
+      - name: Record the e2e receipt digest
+        id: digest
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/e2e-$PLATFORM" --output-name "${PLATFORM}_digest"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: e2e-${{ matrix.platform }}
+          path: ${{ runner.temp }}/e2e-${{ matrix.platform }}
+          if-no-files-found: error
+          include-hidden-files: true
+          overwrite: true
+          retention-days: 7
+      - name: Retain the e2e logs and receipt
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: e2e-logs-${{ matrix.platform }}
+          path: |
+            ${{ runner.temp }}/e2e-logs-${{ matrix.platform }}
+            ${{ runner.temp }}/e2e-${{ matrix.platform }}
+          if-no-files-found: ignore
+          include-hidden-files: true
+          overwrite: true
+          retention-days: 7
+
+  finalize:
+    name: Finalize the draft
+    needs: [prepare, content, content-ci, sign, stage, e2e]
+    if: >-
+      ${{ !cancelled() && needs.prepare.result == 'success' && needs.prepare.outputs.dry_run == 'false'
+      && needs.sign.result == 'success' && needs.stage.result == 'success' && needs.e2e.result == 'success'
+      && (needs.content.result == 'success' || needs.content.result == 'skipped')
+      && (needs.content-ci.result == 'success' || needs.content-ci.result == 'skipped') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    outputs:
+      digest: ${{ steps.digest.outputs.digest }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          filter: blob:none
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /godot-client/tools/
+            /godot-client/src/updates/
+            /godot-client/src/app/main.tscn
+            /godot-client/assets/branding/
+            /godot-client/assets/audio/CREDITS.txt
+            /godot-client/native/
+            /godot-client/data/update_public.pem
+            /godot-client/project.godot
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+      - name: Install the hash-locked Python dependencies
+        run: |
+          python -m pip install --require-hashes --no-deps --only-binary=:all: --requirement godot-client/tools/desktop-release-requirements.txt
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: envelopes
+          path: ${{ runner.temp }}/envelopes
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: content-windows
+          path: ${{ runner.temp }}/content-windows
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: content-linux
+          path: ${{ runner.temp }}/content-linux
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: e2e-windows
+          path: ${{ runner.temp }}/e2e-windows
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: e2e-linux
+          path: ${{ runner.temp }}/e2e-linux
+      - name: Check the artifacts against their producers' digests
+        env:
+          ENVELOPES: ${{ needs.sign.outputs.digest }}
+          CONTENT_WINDOWS: ${{ needs.content.outputs.windows_digest }}${{ needs.content-ci.outputs.windows_digest }}
+          CONTENT_LINUX: ${{ needs.content.outputs.linux_digest }}${{ needs.content-ci.outputs.linux_digest }}
+          E2E_WINDOWS: ${{ needs.e2e.outputs.windows_digest }}
+          E2E_LINUX: ${{ needs.e2e.outputs.linux_digest }}
+        run: |
+          python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/envelopes" --expect "$ENVELOPES"
+          python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/content-windows" --expect "$CONTENT_WINDOWS"
+          python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/content-linux" --expect "$CONTENT_LINUX"
+          python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/e2e-windows" --expect "$E2E_WINDOWS"
+          python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/e2e-linux" --expect "$E2E_LINUX"
+      - name: Verify every download and finalize the draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_ID: ${{ needs.prepare.outputs.release_id }}
+        run: python godot-client/tools/actions_release.py r2-finalize --release-id "$RELEASE_ID" --envelopes "$RUNNER_TEMP/envelopes" --windows-content "$RUNNER_TEMP/content-windows" --linux-content "$RUNNER_TEMP/content-linux" --windows-e2e "$RUNNER_TEMP/e2e-windows" --linux-e2e "$RUNNER_TEMP/e2e-linux" --out "$RUNNER_TEMP/release-verification"
+      - name: Record the release verification digest
+        id: digest
+        run: python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/release-verification" --output-name digest
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-verification
+          path: ${{ runner.temp }}/release-verification
+          if-no-files-found: error
+          include-hidden-files: true
+          overwrite: true
+          retention-days: 30
+
+  publish:
+    name: Publish (not latest) with signed pointers
+    needs: [prepare, sign, finalize]
+    if: >-
+      ${{ !cancelled() && needs.prepare.result == 'success' && needs.prepare.outputs.dry_run == 'false'
+      && needs.sign.result == 'success' && needs.finalize.result == 'success' }}
+    runs-on: ubuntu-24.04
+    environment: desktop-publish
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          filter: blob:none
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /godot-client/tools/
+            /godot-client/src/updates/
+            /godot-client/src/app/main.tscn
+            /godot-client/assets/branding/
+            /godot-client/assets/audio/CREDITS.txt
+            /godot-client/native/
+            /godot-client/data/update_public.pem
+            /godot-client/project.godot
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+      - name: Install the hash-locked signing dependencies
+        run: |
+          python -m pip install --require-hashes --no-deps --only-binary=:all: --requirement godot-client/tools/desktop-sign-requirements.txt
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: envelopes
+          path: ${{ runner.temp }}/envelopes
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-verification
+          path: ${{ runner.temp }}/release-verification
+      - name: Check the artifacts against their producers' digests
+        env:
+          ENVELOPES: ${{ needs.sign.outputs.digest }}
+          VERIFICATION: ${{ needs.finalize.outputs.digest }}
+        run: |
+          python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/envelopes" --expect "$ENVELOPES"
+          python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/release-verification" --expect "$VERIFICATION"
+      - name: Sign both release pointers with the release key
+        env:
+          CLIENT_UPDATE_SIGNING_KEY: ${{ secrets.CLIENT_UPDATE_SIGNING_KEY }}
+          RELEASE_ID: ${{ needs.prepare.outputs.release_id }}
+        run: |
+          python godot-client/tools/desktop_release_ci.py pointer --platform windows --commit "$GITHUB_SHA" --manifest "$RUNNER_TEMP/envelopes/RabbitLands-windows.json" --release-id "$RELEASE_ID" --run-id "$GITHUB_RUN_ID" --out "$RUNNER_TEMP/pointers"
+          python godot-client/tools/desktop_release_ci.py pointer --platform linux --commit "$GITHUB_SHA" --manifest "$RUNNER_TEMP/envelopes/RabbitLands-linux.json" --release-id "$RELEASE_ID" --run-id "$GITHUB_RUN_ID" --out "$RUNNER_TEMP/pointers"
+      - name: Publish the verified draft as not latest, with its pointers
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_ID: ${{ needs.prepare.outputs.release_id }}
+        run: python godot-client/tools/actions_release.py r2-publish --release-id "$RELEASE_ID" --envelopes "$RUNNER_TEMP/envelopes" --pointers "$RUNNER_TEMP/pointers" --receipt "$RUNNER_TEMP/release-verification/runner-release.json"
+
+  promote:
+    name: Promote to GitHub latest
+    needs: [prepare, finalize, publish]
+    if: >-
+      ${{ !cancelled() && needs.prepare.result == 'success' && needs.prepare.outputs.dry_run == 'false'
+      && needs.finalize.result == 'success' && needs.publish.result == 'success' }}
+    runs-on: ubuntu-24.04
+    environment: desktop-promote
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          filter: blob:none
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /godot-client/tools/
+            /godot-client/src/updates/
+            /godot-client/src/app/main.tscn
+            /godot-client/assets/branding/
+            /godot-client/assets/audio/CREDITS.txt
+            /godot-client/native/
+            /godot-client/data/update_public.pem
+            /godot-client/project.godot
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+      - name: Install the hash-locked signing dependencies
+        run: |
+          python -m pip install --require-hashes --no-deps --only-binary=:all: --requirement godot-client/tools/desktop-sign-requirements.txt
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-verification
+          path: ${{ runner.temp }}/release-verification
+      - name: Check the artifact against its producer's digest
+        env:
+          VERIFICATION: ${{ needs.finalize.outputs.digest }}
+        run: python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/release-verification" --expect "$VERIFICATION"
+      - name: Confirm both live R2 pointers name this release, then make it latest and prune
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_ID: ${{ needs.prepare.outputs.release_id }}
+        run: python godot-client/tools/actions_release.py r2-promote --release-id "$RELEASE_ID" --receipt "$RUNNER_TEMP/release-verification/runner-release.json"
