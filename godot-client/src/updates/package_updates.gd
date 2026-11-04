@@ -13,6 +13,12 @@ const SCAN_THREADS_LIMIT := 16
 const SCAN_LARGE_BYTES := 8 * 1024 * 1024
 const SCAN_POLL_MSEC := 20
 const SCAN_PROGRESS_MSEC := 100
+# Inventory codecs (manifest schema 3, W2-UD-05). A row without "codec" keeps
+# the schema 2 chunks: ZIP deflate or stored entries of the file's bytes. A
+# "zstd" row's chunk entries are STORED, and each holds one zstd frame that
+# decodes to exactly that 8 MiB chunk (the last one to the remainder). The
+# decoded bytes are SHA-256 checked as before; installed files are unchanged.
+const CODEC_ZSTD := "zstd"
 
 # This receipt stays in memory for one locked download/install transaction.
 # Never persist it or use it to skip hashing a file it has not hashed itself.
@@ -58,6 +64,9 @@ static func validate(release: Dictionary, identity: Dictionary) -> Dictionary:
 	if not release.get("packages") is Array or release.packages.is_empty() or release.packages.size() > 850:
 		return {"error": "The package list is invalid."}
 	var base := "https://github.com/%s/releases/download/client-%s/" % [identity.repository, release.commit]
+	# Codecs only under schema 3: a schema 2 reader would unpack the frames
+	# as the file's bytes.
+	var codecs: bool = release.get("schema") == Release.CODEC_SCHEMA
 	var seen: Dictionary = {}
 	var ids: Dictionary = {}
 	var total := 0
@@ -77,6 +86,8 @@ static func validate(release: Dictionary, identity: Dictionary) -> Dictionary:
 		for entry: Variant in package.files:
 			if not entry is Dictionary or not Release.safe_path(entry.get("path")) or not Release.valid_hash(entry.get("sha256")) or not typeof(entry.get("size")) in [TYPE_INT, TYPE_FLOAT] or not Release.positive_integer(entry.size + 1) or seen.has(str(entry.path).to_lower()):
 				return {"error": "A package contains an invalid or duplicate file."}
+			if entry.has("codec") and (not codecs or not entry.codec is String or entry.codec != CODEC_ZSTD):
+				return {"error": "A package file uses an encoding this updater cannot read."}
 			seen[str(entry.path).to_lower()] = true
 			bytes += int(entry.size)
 		if bytes != package.get("unpacked_size") or package.files.size() != package.get("file_count"):
@@ -344,6 +355,7 @@ static func extract(archive: String, stage: String, package: Dictionary, members
 		return "A package's files do not match the signed inventory."
 	for index: int in (members if not members.is_empty() else range(package.files.size())):
 		var entry: Dictionary = package.files[index]
+		var zstd: bool = str(entry.get("codec", "")) == CODEC_ZSTD
 		var path := stage.path_join(entry.path)
 		if DirAccess.make_dir_recursive_absolute(path.get_base_dir()) != OK:
 			return "The package staging folder cannot be created."
@@ -355,8 +367,16 @@ static func extract(archive: String, stage: String, package: Dictionary, members
 		var hash := HashingContext.new()
 		hash.start(HashingContext.HASH_SHA256)
 		while remaining > 0:
-			var bytes := zip.read_file("files/%06d/%06d" % [index, chunk])
-			if bytes.size() != mini(Release.CHUNK_BYTES, remaining):
+			var name := "files/%06d/%06d" % [index, chunk]
+			var expected := mini(Release.CHUNK_BYTES, remaining)
+			var bytes := zip.read_file(name)
+			if zstd:
+				if not zip.stored(name):
+					return "A compressed package file is not stored in its signed format. The installed game was kept."
+				bytes = decode_chunk(bytes, expected)
+				if bytes.size() != expected:
+					return "A compressed package file is damaged or has the wrong size. The installed game was kept."
+			if bytes.size() != expected:
 				return "An unpacked package file is incomplete."
 			file.store_buffer(bytes)
 			hash.update(bytes)
@@ -370,6 +390,16 @@ static func extract(archive: String, stage: String, package: Dictionary, members
 		if error != OK or hash.finish().hex_encode() != entry.sha256:
 			return "An unpacked package file failed verification."
 	return ""
+
+static func decode_chunk(frame: PackedByteArray, size: int) -> PackedByteArray:
+	# One zstd frame decoded into a buffer of exactly `size` bytes (at most
+	# CHUNK_BYTES, never the size a frame header claims). A damaged frame, a
+	# checksum mismatch or a frame that decodes to more than `size` returns
+	# empty; one that decodes to fewer comes back short. The caller rejects
+	# any size other than `size`, then hashes the file as for every codec.
+	if frame.is_empty() or size <= 0:
+		return PackedByteArray()
+	return frame.decompress(size, FileAccess.COMPRESSION_ZSTD)
 
 static func install(root: String, release: Dictionary, identity: Dictionary, progress := Callable(), checked: CheckedPlan = null) -> String:
 	# All staging is outside the live roots. An existing installation receives

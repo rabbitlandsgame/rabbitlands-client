@@ -348,6 +348,63 @@ func check_parallel_scan() -> void:
 	expect(not Release.check_file(root.path_join("missing.bin"), 0, empty_sha) and not Release.check_file(root, 0, empty_sha), "check_file accepted a missing file or a folder")
 	Release.remove_tree(root)
 
+func codec_release(schema: int, row_extra: Dictionary) -> Dictionary:
+	# The smallest package manifest validate() accepts, with row_extra merged
+	# into its one inventory row.
+	var commit := "b".repeat(40)
+	var version := "RabbitLands-Windows-20261104-bbbbbbbbb"
+	var base := "https://github.com/o/r/releases/download/client-%s/" % commit
+	var digest := "c".repeat(64)
+	var row := {"path": "app/RabbitLands.pck", "size": 10, "sha256": digest}
+	row.merge(row_extra, true)
+	var part := {"url": base + version + ".pkg.client.zip.001", "size": 100, "sha256": digest}
+	var package := {"id": "client", "sha256": digest, "size": 100, "unpacked_size": 10, "file_count": 1,
+		"files": [row], "parts": [part]}
+	return {"schema": schema, "bootstrap_schema": 1, "commit": commit, "platform": "windows", "repository": "o/r",
+		"version": version, "packages": [package], "size": 100, "unpacked_size": 10, "file_count": 1,
+		"parts": [part], "sha256": digest,
+		"updater": {"url": base + version + "-updater.exe", "size": 5, "sha256": digest},
+		"uninstall": {"url": base + version + "-uninstall.exe", "size": 5, "sha256": digest}}
+
+func check_codec_schema() -> void:
+	# Manifest schema 3 (W2-UD-05): the package reader, with zstd inventory rows.
+	for schema: Variant in [2, 2.0, 3, 3.0]:
+		expect(Release.package_manifest({"schema": schema}), "schema %s is not read as packages" % schema)
+	for schema: Variant in [1, 1.0, 4, 3.5, "3", null]:
+		expect(not Release.package_manifest({"schema": schema}), "schema %s was read as packages" % schema)
+	expect(not Release.package_manifest({}), "a manifest without a schema was read as packages")
+	var identity := {"repository": "o/r", "platform": "windows"}
+	expect(not Packages.validate(codec_release(2, {}), identity).has("error"), "the schema 2 fixture is invalid")
+	expect(not Packages.validate(codec_release(3, {}), identity).has("error"), "schema 3 without codecs was rejected")
+	expect(not Packages.validate(codec_release(3, {"codec": "zstd"}), identity).has("error"), "a schema 3 zstd row was rejected")
+	expect(Packages.validate(codec_release(2, {"codec": "zstd"}), identity).has("error"), "a codec was accepted under schema 2")
+	for codec: Variant in ["ZSTD", "gzip", "", 1, null, ["zstd"]]:
+		expect(Packages.validate(codec_release(3, {"codec": codec}), identity).has("error"), "codec %s was accepted" % str(codec))
+	# Signed: JSON turns the schema into a float; verify_manifest dispatches it.
+	var verified := Release.verify_manifest(envelope(codec_release(3, {"codec": "zstd"})), _identity)
+	expect(not verified.has("error") and Release.package_manifest(verified), "a signed schema 3 manifest was rejected: %s" % verified.get("error", ""))
+	expect(Release.verify_manifest(envelope(codec_release(2, {"codec": "zstd"})), _identity).has("error"), "a signed schema 2 codec row was accepted")
+	expect(Release.verify_manifest(envelope(codec_release(4, {})), _identity).get("error", "") == "The update format is unsupported.", "a future schema was not refused")
+	# Chunk frames: exact size or nothing; the caller rejects any other size.
+	var plain := PackedByteArray()
+	plain.resize(300000)
+	for index in plain.size():
+		plain[index] = (index * 7 + (index >> 10)) % 251
+	var frame := plain.compress(FileAccess.COMPRESSION_ZSTD)
+	expect(frame.size() < plain.size() and Packages.decode_chunk(frame, plain.size()) == plain, "a zstd chunk did not round-trip")
+	expect(Packages.decode_chunk(frame, plain.size() - 1).is_empty(), "a frame larger than its chunk was decoded")
+	expect(Packages.decode_chunk(frame, plain.size() + 1).size() == plain.size(), "a short frame did not come back short")
+	var damaged := frame.duplicate()
+	damaged[damaged.size() >> 1] = damaged[damaged.size() >> 1] ^ 0x55
+	expect(Packages.decode_chunk(damaged, plain.size()) != plain, "a damaged frame decoded to the original bytes")
+	expect(Packages.decode_chunk(frame.slice(0, frame.size() >> 1), plain.size()).is_empty(), "a truncated frame was decoded")
+	expect(Packages.decode_chunk(plain, plain.size()).is_empty(), "raw bytes were decoded as a zstd frame")
+	expect(Packages.decode_chunk(PackedByteArray(), 10).is_empty(), "an empty frame was decoded")
+	var full := PackedByteArray()
+	full.resize(Release.CHUNK_BYTES)
+	full.fill(7)
+	expect(Packages.decode_chunk(full.compress(FileAccess.COMPRESSION_ZSTD), Release.CHUNK_BYTES) == full, "a full 8 MiB chunk did not round-trip")
+
 func _initialize() -> void:
 	_key = Crypto.new().generate_rsa(2048)
 	var a := "a".repeat(40)
@@ -418,6 +475,7 @@ func _initialize() -> void:
 	expect(FileAccess.get_file_as_string(_root.path_join("eloria-assets/map.json")) == "old map", "interrupted install changed untouched world")
 	check_per_file_operations()
 	check_parallel_scan()
+	check_codec_schema()
 	Release.remove_tree(_root)
 	print("Client update runtime checks: ", "PASS" if _failures == 0 else "FAIL")
 	quit(0 if _failures == 0 else 1)

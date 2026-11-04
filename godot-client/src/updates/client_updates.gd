@@ -211,7 +211,7 @@ func _download(url: String, commit: String, generation: int) -> void:
 	if DirAccess.make_dir_recursive_absolute(cache) != OK:
 		_failed("The update cache is not writable.")
 		return
-	if release.schema == 2:
+	if Release.package_manifest(release):
 		var error: String = await PackageDownload.prepare(Release.install_root(), release, _fetch, _run_worker,
 			func(phase: String, _done: int, _total: int, detail: String) -> void: _status.text = phase + " " + detail,
 			func() -> bool: return generation != _generation)

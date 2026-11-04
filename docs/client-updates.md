@@ -95,6 +95,26 @@ builds, independent of the release date, filename and source-file timestamps.
 The exported `RabbitLands.pck` remains one client package; this is package reuse,
 not a binary patch within a PCK, GLB or ZIP.
 
+**Manifest schema 3 (zstd payloads).** A schema 3 manifest is a schema 2
+manifest whose inventory rows may carry `"codec": "zstd"`. Each 8 MiB chunk of
+such a file is a STORED ZIP entry holding one zstd frame (level 19, content size
+and checksum on) that decodes to exactly that chunk. The updater decodes each
+frame into a buffer of the chunk's size. It refuses a chunk that is not stored,
+a damaged frame, a failed frame checksum, and a frame that decodes to any other
+size. It still checks every file's SHA-256 before anything live changes. Rows
+without `codec` keep schema 2's deflate or stored chunks, and one package can
+mix both. A codec row is refused under schema 2, and an unknown codec under any
+schema. The codec does not change installed files or their SHA-256, so moving a
+package to zstd downloads nothing extra for an existing installation. Updaters
+before schema 3 refuse the manifest with "The update format is unsupported."
+and delete a stale `pending.json`; they never extract it. They still verify its
+bootstrap rows and replace themselves with the helper it names, and that helper
+reads it. The setup helper (`tools/install_client_payload.gd`) chooses its own
+path by schema, so it must make the same check (`Release.package_manifest`)
+before a schema 3 setup is built, and the Inno script must queue packages for
+schema 3 as it does for schema 2. Releases stay schema 2 until the packaging
+writer emits schema 3.
+
 Loose map textures use 128 stable buckets per map pool, with JSON metadata in
 eight separate buckets. Updating a generated texture or its small index no longer
 invalidates a large package of unrelated meshes and textures. The package format
@@ -536,6 +556,17 @@ Choose the minimum checks for the behavior being changed. For example:
   fixture project alone reads `RL_UPDATE_TEST_STOP_AFTER`, which shipped updaters
   never do. The checks also cover locked files, case-only renames, and journals
   and backups left by older updaters.
+- Schema 3 and zstd packages:
+  `python -m pytest -q godot-client/tests/test_asset_packages.py -k "zstd or codec or schema_3 or older_updater"`.
+  It covers mixed zstd and deflate rows, multi-chunk and empty files, repair, a
+  fresh install, eight kinds of damaged chunk, the schema rules, and a download
+  the game prepared that installs at restart. An older updater, taken from Git
+  (`RL_OLDER_UPDATER_REFS`, default `origin/develop`; add the live release's
+  commit to check it too), must refuse the manifest, delete `pending.json` and
+  still replace its helpers. The exported self-replacement check includes a
+  schema 3 release and the migration from that older updater. The schema 3
+  Inno setup check skips until the setup helper and the packaging writer's
+  setup script both handle schema 3.
 - Renderer launch arguments and the relaunch handshake:
   `godot --headless --path godot-client --script res://tests/test_launch_renderer.gd`.
   The runtime runner below also runs it in its updater-only project, which proves

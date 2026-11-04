@@ -140,7 +140,7 @@ func _ready() -> void:
 			get_tree().quit()
 			return
 		release = Release.verify_manifest(envelope, identity)
-		if release.has("error") or release.get("schema") != 2:
+		if release.has("error") or not Release.package_manifest(release):
 			_fail(str(release.get("error", "The game package format is unsupported.")))
 			return
 		var prepared_plan: Dictionary = {}
