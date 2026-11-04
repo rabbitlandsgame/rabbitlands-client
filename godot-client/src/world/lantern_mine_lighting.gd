@@ -2,6 +2,7 @@ extends RefCounted
 ## Lantern Mine's ordinary atmosphere, independent of campaign progress.
 ## Landfall Underground contains many disjoint interiors; only these named
 ## levels receive the lantern-lit environment. Published map lights are reused.
+const RendererFamily := preload("res://src/runtime/renderer_family.gd")
 const SECTION := "lantern_mine"
 const SECTIONS := ["lantern_upper_galleries", SECTION, "old_seam"]
 const MAP := "landfall_insides"
@@ -10,13 +11,17 @@ const MAP := "landfall_insides"
 const AMBIENT_ENERGY := 0.30
 const LANTERN_ENERGY := 2.4
 const LANTERN_RANGE := 16.0
-const COMPATIBILITY_LIGHT_LIMIT := 8
+# The renderers that light a mesh with at most this many omni lights (Mobile
+# and Compatibility; RendererFamily.per_mesh_light_limit) keep this many lamps
+# lit when no LightMarkerBudget manages the markers (limit_lamps).
+const COMPATIBILITY_LIGHT_LIMIT := RendererFamily.PER_MESH_LIGHT_LIMIT
+# Marks the lamps and daylight whose energy this sets (LightMarkerBinder).
+const LEASE := "lantern_mine"
 # Lighting is re-asserted every frame, so lamps are chosen again only once the
 # focus has moved this far (metres) from where they were last chosen.
 const LIMIT_STEP := 1.0
 var lamps: Array[OmniLight3D] = []
 var _limited_focus := Vector3.INF
-var _compatibility := RenderingServer.get_current_rendering_method() == "gl_compatibility"
 var _owner: WeakRef
 var _original: Environment
 var _dark: Environment
@@ -102,7 +107,7 @@ func apply(manifest: WorldManifest, section: String, owner: WorldEnvironment,
 		markers = _cinematic_markers.get_ref() as Node3D if _cinematic_markers != null else null
 	_apply_markers(markers, section_at(_cinematic_manifest, _cinematic_focus) if _cinematic_manifest != null else section)
 	if _cinematic_manifest != null: focus = _cinematic_focus
-	if _compatibility and focus.is_finite() \
+	if RendererFamily.per_mesh_light_limit() > 0 and focus.is_finite() \
 			and _limited_focus.distance_squared_to(focus) >= LIMIT_STEP * LIMIT_STEP:
 		limit_lamps(focus)
 
@@ -133,9 +138,13 @@ func _apply_markers(root: Node3D, section: String) -> void:
 		if not lamp and not daylight: continue
 		var key := light.get_instance_id()
 		if not _markers.has(key):
-			_markers[key] = {"node":weakref(light), "energy":light.light_energy,
+			# A LightMarkerBudget may be fading it: keep its own energy, not
+			# the fade's.
+			_markers[key] = {"node":weakref(light), "energy":LightMarkerBinder.resting_energy(light),
 				"range":light.omni_range, "color":light.light_color, "mask":light.light_cull_mask}
 		# Do not write visibility: SecretSections owns whether a room is shown.
+		# The lease keeps a LightMarkerBudget from fading the energy set here.
+		light.set_meta(LightMarkerBinder.LEASE_META, LEASE)
 		light.light_energy = LANTERN_ENERGY if lamp else 0.0
 		light.light_cull_mask = int(_markers[key].mask) if lamp else 0
 		if lamp:
@@ -144,11 +153,16 @@ func _apply_markers(root: Node3D, section: String) -> void:
 			lamps.append(light)
 
 func limit_lamps(focus: Vector3) -> void:
-	# Compatibility allows eight lights per mesh. A level's floor is one mesh,
-	# so distant lamps otherwise consume its entire budget and black out the
-	# room being played. A separate parent gate preserves SecretSections' own
-	# light visibility; mask=0 alone still consumes a GLES per-mesh light slot.
+	# Mobile and Compatibility allow eight lights per mesh. A level's floor is
+	# one mesh, so distant lamps otherwise consume its entire budget and black
+	# out the room being played. A separate parent gate preserves
+	# SecretSections' own light visibility; mask=0 alone still consumes a
+	# per-mesh light slot. A LightMarkerBudget on the markers already keeps
+	# the nearest lamps lit, through the same gates, so it is left to it.
 	_limited_focus = focus
+	var root := _marker_root.get_ref() as Node3D if _marker_root != null else null
+	if LightMarkerBinder.budgeted(root):
+		return
 	var nearest := lamps.filter(func(light: Variant) -> bool: return is_instance_valid(light))
 	nearest.sort_custom(func(a: OmniLight3D, b: OmniLight3D) -> bool:
 		return a.global_position.distance_squared_to(focus) < b.global_position.distance_squared_to(focus))
@@ -156,15 +170,12 @@ func limit_lamps(focus: Vector3) -> void:
 		var light: OmniLight3D = nearest[index]
 		var row: Dictionary = _markers[light.get_instance_id()]
 		if not row.has("gate"):
-			var parent := light.get_parent() as Node3D
-			var gate := Node3D.new()
-			gate.name = "MineLightGate_" + str(light.name)
-			parent.add_child(gate)
-			light.reparent(gate)
-			row["parent"] = weakref(parent)
-			row["gate"] = weakref(gate)
-		var gate := (row.gate as WeakRef).get_ref() as Node3D
-		gate.visible = index < COMPATIBILITY_LIGHT_LIMIT
+			# Only a gate made here is taken out again on leaving.
+			var made := LightMarkerBinder.gate_of(light) == null
+			if LightMarkerBinder.gate_for(light) == null: continue
+			row["gate"] = made
+		var gate := LightMarkerBinder.gate_of(light)
+		if gate != null: gate.visible = index < COMPATIBILITY_LIGHT_LIMIT
 
 func is_active() -> bool:
 	var owner := _owner.get_ref() as WorldEnvironment if _owner != null else null
@@ -175,10 +186,10 @@ func _restore_markers() -> void:
 		var light := (row.node as WeakRef).get_ref() as OmniLight3D
 		if is_instance_valid(light):
 			if row.has("gate"):
-				var parent := (row.parent as WeakRef).get_ref() as Node3D
-				var gate := (row.gate as WeakRef).get_ref() as Node3D
-				if is_instance_valid(parent): light.reparent(parent)
-				if is_instance_valid(gate): gate.queue_free()
+				var gate := LightMarkerBinder.gate_of(light)
+				if bool(row.gate): LightMarkerBinder.ungate(light)
+				elif gate != null: gate.visible = true
+			light.remove_meta(LightMarkerBinder.LEASE_META)
 			light.light_energy = float(row.energy)
 			light.omni_range = float(row.range)
 			light.light_color = row.color

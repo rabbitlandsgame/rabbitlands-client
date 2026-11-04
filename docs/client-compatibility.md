@@ -77,6 +77,21 @@ exits with code 75 when the updater announced in
 `RABBITLANDS_LAUNCHER_FEATURES` that it relaunches the game and keeps its
 installation lock; otherwise the game restarts itself.
 
+### Lights in Mobile and OpenGL Compatibility
+
+Mobile and OpenGL Compatibility light each mesh with at most 8 point lights and
+drop the rest in an order that has nothing to do with distance. Interiors such
+as Landfall Town's castle and the Landfall underground reach one floor with up
+to 22 and 78 map lights, so lamps beside the player used to go dark at random.
+The client therefore keeps only the map lights nearest the camera lit
+(`src/world/light_marker_budget.gd`): 6 at Low quality, 12 at Medium and 24 at
+High, and never more than 8 in Mobile or Compatibility. Lights that change
+because the camera moved fade over 0.3 seconds; a room's lights come on with the
+room. Street-lamp lights stay at 6 or fewer and fire lights at 2 or fewer in
+these renderers, so a ground mesh gets at most 8. Distant lamps are dark rather
+than random lamps dropping out. Forward+ keeps its street-lamp and fire lights
+unchanged.
+
 Send the three logs and identify which modes worked, whether the login panel or
 the world after login went blue, and whether the HUD or minimap remained visible.
 Keep earlier logs before retrying the same launcher, which overwrites its named
