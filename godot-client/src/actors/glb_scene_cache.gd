@@ -61,8 +61,10 @@ extends RefCounted
 ## on its worker (built raw: never imported, prepared or geometry records,
 ## whose instances take other paths). Races, legacy hair and equipment are
 ## parsed on the main thread, so evicting them would bring back the re-parse
-## hitch this cache exists to prevent; RL head files are the RL library's;
-## world assets belong to map lifecycles (`release_sources`). The pass runs on
+## hitch this cache exists to prevent (schedule 1.1 #21: their turn comes once
+## AW-04a parses them on a worker); RL head files are the RL library's;
+## world assets belong to the worlds that used them (see "World scenery"
+## below, and `release_sources` in the browser). The pass runs on
 ## the main thread every BUDGET_PASS_SECONDS (a SceneTree timer, armed while
 ## there are rows) and after a creature publication that leaves the domain over
 ## MemoryBudgets' `creature_scene_bytes`. It evicts idle entries, least recently
@@ -79,6 +81,33 @@ extends RefCounted
 ## (actor_resource_warmup.gd) asks `evicted()` and prepares such a creature
 ## again on its worker, as at first sight, so it is never parsed on the main
 ## thread because of an eviction (`evicted_main_rebuilds` counts any that are).
+
+## World scenery (memory classes, stage-B follow-up FIX-MEM, 2026-11): the
+## models a world places - an interior's scenery (the Landfall underground's
+## 177 models hold about 1.4 GiB of textures), harvest nodes, campaign props -
+## are kept here after the world that placed them is gone, and nothing else
+## frees them on desktop: a small machine that refuses to park the
+## underground (WorldPark) used to free only its node tree. So every world row
+## (domain world) remembers which worlds used it: the map WorldPark names as
+## the world being built or shown (`set_world_scope`) when the row is
+## published, and again each time the row is instantiated. WorldPark calls
+## `release_left_worlds` with the worlds the player has left (not shown, not
+## being loaded, not parked, not preloading): a row only such worlds used is
+## dropped once it is idle - every probe mesh (the meshes and multimeshes its
+## nodes name, taken when it is published, before any instance) back at its
+## count at publication, so no instance, parked or retiring, holds it - and
+## has been unused for `grace_msec`. A row any resident world used, a row no
+## world was named for (published before WorldPark named one, or found
+## without a publication) and a row without probes are never dropped. Rows go
+## least recently used first while what the left worlds keep is over
+## `allowance_bytes` (WorldPark: what the class's park budget leaves beside
+## the parked and preloaded worlds); a 0 allowance drops them all. Every pass
+## drops at least one due row, whatever its slice, so a long ledger never
+## stalls it. WorldPark runs it on small machines only by default. A dropped
+## row is `forget` plus a mark (`world_released_main_rebuilds` counts a later
+## main-thread acquisition of it on a gameplay frame: a raw build, a geometry
+## record or prepared content); live instances keep their resources, so a
+## misjudged release costs a parse, never a missing model.
 
 ## World objects (harvest nodes, interactives) also come through here, and
 ## GLTFDocument builds their textures at runtime with no mip chain. Seen from the
@@ -146,6 +175,11 @@ const BUDGET_PASS_SECONDS := 5.0
 const EVICT_TO_FRACTION := 0.85
 ## Main-thread time a pass may spend measuring pending (non-creature) rows.
 const LEDGER_FILL_SLICE_USEC := 1000
+## Main-thread time one `release_left_worlds` pass may spend measuring and
+## dropping rows (dropping a row frees its scene, and with it its textures).
+const WORLD_RELEASE_SLICE_USEC := 2000
+## A left world's row must have been unused this long before it is dropped.
+const WORLD_RELEASE_GRACE_MSEC := 1000
 
 static var _scenes: Dictionary = {}
 static var _failed: Dictionary = {}
@@ -180,6 +214,23 @@ static var _domain_prefixes: Array = []
 ## Test overrides of the creature budget and idle age (< 0: MemoryBudgets').
 static var _test_budget_bytes := -1
 static var _test_idle_msec := -1
+## World scenery (see "World scenery"), main thread only: the map whose world
+## is being built or shown ("" until WorldPark names one), the rows dropped
+## for left worlds and not published since, and process totals.
+static var _world_scope := ""
+static var _world_released: Dictionary = {}
+static var _world_releases := 0
+static var _world_released_bytes := 0
+static var _world_released_unmeasured := 0
+static var _world_released_main_rebuilds := 0
+static var _world_release_passes := 0
+## The last `release_left_worlds` report (diagnostics).
+static var _world_last_release: Dictionary = {}
+## The world rows each world used (map id -> {path: true}), so a release pass
+## visits only the rows of the worlds it is given, never the whole ledger. A
+## superset: an entry whose row is gone or no longer names that world is
+## dropped when a pass visits it.
+static var _world_rows: Dictionary = {}
 
 static func missing(paths: PackedStringArray) -> PackedStringArray:
 	var out := PackedStringArray()
@@ -416,6 +467,9 @@ static func _packed_scene(path: String, allow_prepared: bool) -> PackedScene:
 	if path.is_empty() or _failed.has(path):
 		return null
 	if _geometry_entries.has(path):
+		# A use like any other: the world it is placed in is noted (see "World
+		# scenery"); bookkeeping only.
+		_touch(path)
 		if allow_prepared: return _scenes.get(path) as PackedScene
 		var raw := _direct_raw_scenes.get(path) as PackedScene
 		if raw == null:
@@ -429,6 +483,12 @@ static func _packed_scene(path: String, allow_prepared: bool) -> PackedScene:
 		scenery = _scenery_inputs(path)
 		if not scenery.is_empty() and not bool(scenery.get("ok", false)):
 			return null
+	# A model the world release dropped (see "World scenery"), wanted again on
+	# a gameplay frame: whatever publishes it below - a geometry record,
+	# prepared content or a raw build - is main-thread work. Counted once here,
+	# before any branch publishes it (which clears the mark).
+	if not _world_released.is_empty() and not _scenes.has(path) and _world_released.has(path):
+		_world_released_main_rebuilds += 1
 	if allow_prepared and not _scenes.has(path) and not GeometryCache.cooking \
 			and PreparedContent.selected_mode() != "require-pilot" and GeometryCache.eligible("asset",path):
 		var geometry := GeometryCache.acquire("asset",path,_source_sha(path, scenery),{},MapSceneCache.is_enabled())
@@ -533,6 +593,9 @@ static func clear() -> void:
 	_pending_rows = 0
 	_evictable_rows = 0
 	_evicted.clear()
+	_world_released.clear()
+	_world_last_release = {}
+	_world_rows.clear()
 
 ## Drops `path` (exactly this key, in any spelling the cache accepts) from
 ## every table, as the RL head library does by erasing the dictionaries itself
@@ -542,6 +605,7 @@ static func forget(path: String) -> void:
 	var key := _canonical_path(path)
 	_forget_key(key)
 	_evicted.erase(key)
+	_world_released.erase(key)
 
 ## Erases the cache key `key` (already canonical) from every table and the
 ## ledger: one lookup each, never a walk over the other entries.
@@ -599,6 +663,151 @@ static func set_budget_for_tests(budget_bytes := -1, idle_msec := -1) -> void:
 ## Measured bytes of the ledger's `domain` rows (pending rows not included).
 static func domain_bytes(domain: String) -> int:
 	return int(_domain_bytes.get(domain, 0))
+
+## Names the world (a map id, as WorldPark normalises it) whose models are
+## being published and placed from now on: world rows published or
+## instantiated note it (see "World scenery"). "" names none. Main thread.
+static func set_world_scope(map_id: String) -> void:
+	if OS.get_thread_caller_id() == OS.get_main_thread_id():
+		_world_scope = map_id
+
+## The world `set_world_scope` last named ("" for none).
+static func world_scope() -> String:
+	return _world_scope
+
+## The worlds that used `path`'s world row (see "World scenery"), sorted; empty
+## for a path without one or a row no world was named for.
+static func world_owners(path: String) -> PackedStringArray:
+	var row: Dictionary = _ledger.get(_canonical_path(path), {})
+	var owners := PackedStringArray((row.get("worlds", {}) as Dictionary).keys()) \
+		if bool(row.get("world", false)) else PackedStringArray()
+	owners.sort()
+	return owners
+
+## Whether the world release dropped `path`'s row (`release_left_worlds`) and
+## nothing has published it since. Main thread.
+static func world_released(path: String) -> bool:
+	if _world_released.is_empty():
+		return false
+	var key := _canonical_path(path)
+	return _world_released.has(key) and not _scenes.has(key)
+
+## One world release pass (see "World scenery"), on the main thread (anywhere
+## else, or with nothing `left`, it does nothing). `left` holds the map ids of
+## the worlds the player has left (id -> anything): a world row is a candidate
+## when every world that used it is one of them, it is idle (`_is_busy`) and
+## it has been unused for `grace_msec`. Candidates are measured (pending rows,
+## within the slice) and dropped least recently used first while their bytes
+## are over `allowance_bytes`; with a 0 allowance every candidate goes,
+## measured or not. Work stops after `slice_usec`, once at least one pending
+## candidate has been measured and one due candidate dropped; "more" says
+## candidates were left for the next pass. Only the rows the left worlds used
+## are visited (`_world_rows`). `now_msec` (ticks; < 0: now) is for tests.
+## Returns {"released", "released_bytes", "released_unmeasured", "retained" (idle
+## candidates kept), "retained_bytes" (their measured bytes), "unmeasured"
+## (candidates still pending), "waiting" (rows of left worlds still in use or
+## within the grace), "allowance", "more"}.
+static func release_left_worlds(left: Dictionary, allowance_bytes := 0, now_msec := -1,
+		slice_usec := WORLD_RELEASE_SLICE_USEC, grace_msec := WORLD_RELEASE_GRACE_MSEC) -> Dictionary:
+	var report := {"released": 0, "released_bytes": 0, "released_unmeasured": 0, "retained": 0,
+		"retained_bytes": 0, "unmeasured": 0, "waiting": 0, "allowance": maxi(0, allowance_bytes), "more": false}
+	if OS.get_thread_caller_id() != OS.get_main_thread_id() or left.is_empty() or _world_rows.is_empty():
+		return report
+	var began := Time.get_ticks_usec()
+	_world_release_passes += 1
+	var now := Time.get_ticks_msec() if now_msec < 0 else now_msec
+	var allowance := maxi(0, allowance_bytes)
+	# Only the rows the left worlds used (`_world_rows`), never the whole
+	# ledger: a pass runs every frame while a burst lasts and every few seconds
+	# while any world is left, and a walk of a 1,000-row ledger with its pruning
+	# costs about 2.4 ms on the main thread (review probe, FIX-MEM).
+	var candidates: Array = []
+	var seen := {}
+	for world: String in left:
+		var paths: Dictionary = _world_rows.get(world, {})
+		for path: String in paths.keys():
+			var row: Dictionary = _ledger.get(path, {})
+			if row.is_empty() or not bool(row.world) or not (row.worlds as Dictionary).has(world):
+				paths.erase(path) # Its row is gone, or was published again for other worlds.
+				continue
+			if seen.has(path):
+				continue
+			seen[path] = true
+			if not _left_only(row.worlds as Dictionary, left):
+				continue
+			var scene: Variant = _scenes.get(path)
+			if typeof(scene) != TYPE_OBJECT or not is_instance_valid(scene) \
+					or (scene as Object).get_instance_id() != int(row.scene_id):
+				# Its scene left the cache or was replaced without a publication:
+				# pruned, as the budget pass would, and never dropped here.
+				_drop_row(path)
+				paths.erase(path)
+				continue
+			if _is_busy(row) or now - int(row.last_used_msec) < grace_msec:
+				report.waiting += 1
+				continue
+			candidates.append([int(row.last_used_msec), path])
+		if paths.is_empty():
+			_world_rows.erase(world)
+	candidates.sort_custom(func(a: Array, b: Array) -> bool:
+		return int(a[0]) < int(b[0]) if int(a[0]) != int(b[0]) else str(a[1]) < str(b[1]))
+	# What the left worlds keep, as far as it is measured (pending rows are
+	# measured here first, a row at a time, within the slice; at least one a
+	# pass, so a slice the scan alone uses up still makes progress).
+	var kept := 0
+	var measured := 0
+	for candidate: Array in candidates:
+		var row: Dictionary = _ledger[str(candidate[1])]
+		if int(row.bytes) < 0 and (measured == 0 or Time.get_ticks_usec() - began < slice_usec):
+			_fill_row(str(candidate[1]), row)
+			measured += 1
+		if int(row.bytes) < 0:
+			report.unmeasured += 1
+		else:
+			kept += int(row.bytes)
+	for candidate: Array in candidates:
+		# At least one due row goes each pass, whatever the slice: a pass that
+		# only scanned and measured would leave "more" set for ever.
+		if int(report.released) > 0 and Time.get_ticks_usec() - began >= slice_usec:
+			report.more = true
+			break
+		var path: String = candidate[1]
+		var bytes := int((_ledger[path] as Dictionary).bytes)
+		if allowance > 0:
+			# Within the allowance: the rest stays. An unmeasured row waits to be
+			# measured (counting it could only add to what is kept).
+			if kept <= allowance:
+				break
+			if bytes < 0:
+				continue
+		_forget_key(path)
+		_world_released[path] = true
+		_world_releases += 1
+		report.released += 1
+		if bytes >= 0:
+			kept -= bytes
+			report.released_bytes += bytes
+			_world_released_bytes += bytes
+		else:
+			report.released_unmeasured += 1
+			_world_released_unmeasured += 1
+	report.retained = candidates.size() - int(report.released)
+	report.retained_bytes = maxi(0, kept)
+	# Candidates left to drop, or still to measure against the allowance.
+	if (allowance == 0 and int(report.retained) > 0) or (allowance > 0 and int(report.unmeasured) > 0):
+		report.more = true
+	_world_last_release = report.duplicate()
+	_record_operation(&"world_release_pass", began)
+	return report
+
+## Whether every world in `worlds` (and at least one) is in `left`.
+static func _left_only(worlds: Dictionary, left: Dictionary) -> bool:
+	if worlds.is_empty():
+		return false
+	for world: String in worlds:
+		if not left.has(world):
+			return false
+	return true
 
 ## One budget pass, on the main thread (anywhere else it does nothing): prunes
 ## ledger rows whose scene left the cache, measures pending rows for at most
@@ -703,9 +912,18 @@ static func _note_published(path: String, scene: Variant, origin: String) -> voi
 	if OS.get_thread_caller_id() != OS.get_main_thread_id():
 		return
 	_evicted.erase(path)
+	if not _world_released.is_empty():
+		_world_released.erase(path)
 	var row := _add_row(path, scene, origin)
 	if row.is_empty():
 		return
+	if bool(row.world):
+		# Its probes and their baseline, taken now with no instance alive
+		# (callers publish before instantiating); a light walk of the nodes'
+		# own properties (see "World scenery").
+		var probes := _scene_probes(scene as PackedScene)
+		row.probes = probes
+		row.baseline = _probe_counts(probes)
 	if str(row.domain) == DOMAIN_CREATURE:
 		# Measured now: the budget reads it. Probes and their baseline are
 		# taken with no instance alive (callers publish before instantiating).
@@ -723,10 +941,18 @@ static func _add_row(path: String, scene: Variant, origin: String) -> Dictionary
 		return {}
 	var now := Time.get_ticks_msec()
 	var domain := domain_of(path)
+	# A world row notes the world named when it is published (none for a row
+	# found without a publication: it is never released, see "World scenery").
+	var world := domain == DOMAIN_WORLD
+	var worlds := {}
+	if world and origin != ORIGIN_UNKNOWN and not _world_scope.is_empty():
+		worlds[_world_scope] = true
+		_note_world_row(_world_scope, path)
 	var row := {"bytes": -1, "mesh_bytes": 0, "texture_bytes": 0, "domain": domain, "origin": origin,
 		"evictable": domain == DOMAIN_CREATURE and origin == ORIGIN_WORKER and packed.resource_path.is_empty(),
 		"scene_id": packed.get_instance_id(), "probes": [], "baseline": PackedInt32Array(),
-		"published_msec": now, "last_used_msec": now, "idle_since_msec": 0}
+		"published_msec": now, "last_used_msec": now, "idle_since_msec": 0,
+		"world": world, "worlds": worlds}
 	_ledger[path] = row
 	_pending_rows += 1
 	if bool(row.evictable):
@@ -829,12 +1055,46 @@ static func _probe_count(probe: WeakRef) -> int:
 	var held: Variant = probe.get_ref() if probe != null else null
 	return (held as RefCounted).get_reference_count() if held is RefCounted else -1
 
-## An instance or a direct use of `path`'s entry: it is in use now.
+## An instance or a direct use of `path`'s entry: it is in use now. A world
+## row also notes the world named now (see "World scenery").
 static func _touch(path: String) -> void:
 	var row: Variant = _ledger.get(path)
-	if row != null and bool(row.evictable):
+	if row == null:
+		return
+	if bool(row.evictable):
 		row.last_used_msec = Time.get_ticks_msec()
 		row.idle_since_msec = 0
+	elif bool(row.world):
+		row.last_used_msec = Time.get_ticks_msec()
+		if not _world_scope.is_empty() and not (row.worlds as Dictionary).has(_world_scope):
+			(row.worlds as Dictionary)[_world_scope] = true
+			_note_world_row(_world_scope, path)
+
+## `world` used the world row at `path` (the `_world_rows` index).
+static func _note_world_row(world: String, path: String) -> void:
+	var paths: Variant = _world_rows.get(world)
+	if paths == null:
+		_world_rows[world] = {path: true}
+	else:
+		(paths as Dictionary)[path] = true
+
+## WeakRefs to the meshes and multimeshes `scene`'s nodes name in their own
+## properties (no materials, textures or nested scenes are walked): a world
+## row's probes. A scene whose nodes name none has no probes, and such a row is
+## never idle.
+static func _scene_probes(scene: PackedScene) -> Array[WeakRef]:
+	var probes: Array[WeakRef] = []
+	var state := scene.get_state() if scene != null else null
+	if state == null:
+		return probes
+	var seen := {}
+	for node: int in state.get_node_count():
+		for property: int in state.get_node_property_count(node):
+			var value: Variant = state.get_node_property_value(node, property)
+			if (value is Mesh or value is MultiMesh) and not seen.has((value as Object).get_instance_id()):
+				seen[(value as Object).get_instance_id()] = true
+				probes.append(weakref(value))
+	return probes
 
 static func _arm_budget_timer() -> void:
 	if _budget_timer_armed or _ledger.is_empty() or OS.get_thread_caller_id() != OS.get_main_thread_id():
@@ -894,7 +1154,15 @@ static func retention_snapshot() -> Dictionary:
 		"budget": creature_budget_bytes(), "idle_msec": creature_idle_msec(),
 		"evictable_entries": _evictable_rows, "evictions": _evictions, "evicted_bytes": _evicted_bytes,
 		"eviction_skips": _eviction_skips, "evicted_awaiting": _evicted.size(),
-		"evicted_main_rebuilds": _evicted_main_rebuilds, "budget_passes": _budget_passes}
+		"evicted_main_rebuilds": _evicted_main_rebuilds, "budget_passes": _budget_passes,
+		"world_scope": _world_scope, "world_releases": _world_releases,
+		"world_released_bytes": _world_released_bytes, "world_released_unmeasured": _world_released_unmeasured,
+		"world_released_awaiting": _world_released.size(),
+		"world_released_main_rebuilds": _world_released_main_rebuilds,
+		"world_release_passes": _world_release_passes,
+		"world_retained_entries": int(_world_last_release.get("retained", 0)),
+		"world_retained_bytes": int(_world_last_release.get("retained_bytes", 0)),
+		"world_release_waiting": int(_world_last_release.get("waiting", 0))}
 
 static func _record_operation(operation: StringName, started: int, atomic := true) -> void:
 	var elapsed := Time.get_ticks_usec() - started

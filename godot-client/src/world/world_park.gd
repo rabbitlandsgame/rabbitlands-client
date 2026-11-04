@@ -59,6 +59,32 @@ extends Node
 ## preloading otherwise. A world is parked only when its estimate fits what the
 ## other kept worlds leave of the budget (`leave`).
 ##
+## Scenery of worlds left behind (FIX-MEM, 2026-11). Most of what a world
+## costs is not its tree but the models its scenery places, which GlbSceneCache
+## keeps for the session (the Landfall underground: about 1.4 GiB of textures
+## in 177 models), so refusing to park a world used to free only its nodes.
+## The park names the world being built or shown to GlbSceneCache
+## (`set_world_scope`: the destination from `leave`, the bound map, a preload
+## while it publishes), and keeps the worlds the player has left: a world freed
+## here (refused, evicted, a dropped preload) or let go by a map change that is
+## not a seamless crossing - and, at the next such change, the worlds a
+## seamless crossing walked out of. A world is resident again once it is the
+## destination, bound, parked or preloading. A few times a second while there
+## is work (`_step_scenery_release`), GlbSceneCache drops the rows only left
+## worlds used, once nothing holds them (a parked world's or a retiring tree's
+## instances do). On a small machine all of them go (`scenery_release` "all":
+## models kept from a left world pin the driver memory blocks its freed ones
+## shared, so the process kept its private bytes; measured, FIX-MEM). Medium
+## and large keep every model until logout, as before ("off"): the memory-class
+## approval covers small machines only (memory-classes plan, budget table).
+## ELORIA_WORLD_SCENERY_RELEASE=budget applies the budget rule on any class
+## (left worlds' models go least recently used first only while what they keep
+## is over what the class's park budget leaves beside the parked and preloaded
+## worlds), =all the small rule, =0 keeps every model until logout. The
+## browser build is off: it retires sources by its own file pins
+## (browser_source_retirement.gd). Each burst of releases prints one
+## `scenery_released` line.
+##
 ## Policy, limits and eviction rules: world_park_policy.gd. Every park,
 ## re-attach, preload start/ready/hit/miss/drop and eviction prints one
 ## `world_park {...}` line with its timings and is kept in `events`.
@@ -82,6 +108,15 @@ const RETIRE_BUDGET_USEC := 2000
 const SWITCH_ENVIRONMENT := "ELORIA_WORLD_PARK"
 const WARMUP_ENVIRONMENT := "ELORIA_INTERIOR_WARMUP"
 const EVENT_LIMIT := 100
+## Scenery of left worlds (see "Scenery of worlds left behind"): the switch,
+## its modes, and how often a pass runs while there is work and while there
+## is none (but left worlds still keep rows).
+const SCENERY_RELEASE_ENVIRONMENT := "ELORIA_WORLD_SCENERY_RELEASE"
+const SCENERY_RELEASE_BUDGET := "budget"
+const SCENERY_RELEASE_ALL := "all"
+const SCENERY_RELEASE_OFF := "off"
+const SCENERY_RELEASE_PASS_MSEC := 500
+const SCENERY_RELEASE_IDLE_PASS_MSEC := 5000
 
 ## The map registry (data/maps/registry.json `maps`).
 var registry: Dictionary = {}
@@ -169,6 +204,25 @@ var _settled_map := ""
 ## The bound map's one `preload_disabled` record has been made (preloading
 ## off for the memory class; reset by every bind).
 var _preload_disabled_noted := false
+## How the scenery of left worlds is released (`configure`: the class's rule
+## or the ELORIA_WORLD_SCENERY_RELEASE switch, `scenery_release_mode`):
+## SCENERY_RELEASE_BUDGET, _ALL or _OFF (a park never configured keeps every
+## model, as before).
+var scenery_release := SCENERY_RELEASE_OFF
+## How long a left world's model must be unused before it goes (tests set 0).
+var scenery_release_grace_msec := GlbSceneCache.WORLD_RELEASE_GRACE_MSEC
+## The worlds the player has left (map id -> true; see "Scenery of worlds left
+## behind"); the worlds a seamless crossing walked out of, left at the next
+## change of map that is not one; the destination of the map change under way
+## (from `leave` until its bind).
+var _left: Dictionary = {}
+var _crossed: Dictionary = {}
+var _arriving := ""
+## When the next scenery pass may run (engine ticks, msec), and the burst of
+## releases under way: {"began_msec", "released", "released_bytes",
+## "released_unmeasured", "passes", "left" (the worlds released for)}.
+var _release_due_msec := 0
+var _release_burst: Dictionary = {}
 
 ## Reads the registry and this machine's memory class (on the main thread, as
 ## Main does at startup: the class's first question probes the adapter), which
@@ -182,8 +236,9 @@ func configure(maps: Dictionary) -> void:
 	memory_class = str(machine.get("class", MemoryBudgets.MEDIUM))
 	budget_bytes = Policy.budget_for(memory_class)
 	preload_enabled = Policy.preload_allowed(memory_class)
+	scenery_release = scenery_release_mode(memory_class)
 	_record("budget", "", {"memory_class": memory_class, "class_source": str(machine.get("source", "")),
-		"budget_mib": _mib(budget_bytes), "preload": preload_enabled})
+		"budget_mib": _mib(budget_bytes), "preload": preload_enabled, "scenery_release": scenery_release})
 	_parents.clear()
 	_portal_index.clear()
 	_scenery_configs.clear()
@@ -193,6 +248,26 @@ func configure(maps: Dictionary) -> void:
 
 func _now() -> int:
 	return now_override if now_override >= 0 else Time.get_ticks_msec()
+
+## The scenery release for a machine of `memory_class` (see "Scenery of worlds
+## left behind"): by default SCENERY_RELEASE_ALL on a small machine (a left
+## world keeps no model: models kept from a left world sit among its freed
+## ones in the driver's memory blocks, and on the iGPU proxy keeping 370 MiB
+## of the underground's left the process's private bytes where they were,
+## FIX-MEM report), SCENERY_RELEASE_OFF otherwise: medium and large keep every
+## model until logout, as before 2026-11 (the memory-class approval covers small
+## machines only). ELORIA_WORLD_SCENERY_RELEASE=all or =budget forces a rule on
+## every class, =0/off keeps every model until logout on every class. Always
+## off in the browser (its sources are retired by file pins).
+static func scenery_release_mode(memory_class_name := "") -> String:
+	if OS.has_feature("web"):
+		return SCENERY_RELEASE_OFF
+	var value := OS.get_environment(SCENERY_RELEASE_ENVIRONMENT).strip_edges().to_lower()
+	if value in ["0", "off", "false", "no"]:
+		return SCENERY_RELEASE_OFF
+	if value in [SCENERY_RELEASE_ALL, SCENERY_RELEASE_BUDGET]:
+		return value
+	return SCENERY_RELEASE_ALL if memory_class_name == MemoryBudgets.SMALL else SCENERY_RELEASE_OFF
 
 # --------------------------------------------------------------------------
 # Relations
@@ -257,6 +332,10 @@ func preload_state(map_id := "") -> String:
 ## else spread over the frames that follow (a walk over the map's border).
 func bind_map(map_id: String, curtained := true) -> int:
 	_bound_map = MapRegistry.normalize_server_map_id(map_id)
+	# The world shown from now on (see "Scenery of worlds left behind").
+	_arriving = ""
+	_note_resident(_bound_map)
+	GlbSceneCache.set_world_scope(_bound_map)
 	if _settled_map != _bound_map:
 		_settled_map = ""
 	_doors.clear()
@@ -681,6 +760,7 @@ func start_preload(interior: String, door := -1, distance := INF) -> bool:
 		"started_usec": Time.get_ticks_usec(), "worker_usec": 0, "publish_usec": 0,
 		"max_slice_usec": 0, "slices": 0, "far_since_msec": -1, "ready_msec": -1,
 		"bytes": bytes, "door": door}
+	_note_resident(interior)
 	counters.preload_start += 1
 	_record("preload_start", interior, {"door": door, "distance_tiles": snappedf(distance, 0.1),
 		"models_to_prepare": visuals.size(), "estimated_mib": _mib(bytes)})
@@ -705,7 +785,10 @@ func _poll_preload(force := false) -> void:
 	if builder == null:
 		_fail_preload("builder_missing")
 		return
+	var scope := GlbSceneCache.world_scope()
+	GlbSceneCache.set_world_scope(interior)
 	var resident := builder.release_world(true, true)
+	GlbSceneCache.set_world_scope(scope)
 	builder.free()
 	var root := resident.get("root") as Node3D
 	if root == null:
@@ -736,7 +819,12 @@ func _publish_slice(budget_usec: int) -> void:
 		return
 	var stepper: SceneryStepper = _preload.stepper
 	var began := Time.get_ticks_usec()
+	# The models it installs and places are the interior's (see "Scenery of
+	# worlds left behind"), whatever map the player stands on.
+	var scope := GlbSceneCache.world_scope()
+	GlbSceneCache.set_world_scope(str(_preload.map))
 	var done: bool = stepper.step(budget_usec)
+	GlbSceneCache.set_world_scope(scope)
 	var spent := Time.get_ticks_usec() - began
 	_preload.publish_usec = int(_preload.publish_usec) + spent
 	_preload.max_slice_usec = maxi(int(_preload.max_slice_usec), spent)
@@ -784,6 +872,7 @@ func _drop_preload(reason: String) -> void:
 	_record("preload_drop", interior, {"reason": reason, "state": str(_preload.state)})
 	_preload = {}
 	_waiting_since = -1
+	_mark_left(interior)
 
 func _discard_builder(builder: WorldLoader, map_id: String) -> void:
 	if builder == null:
@@ -821,6 +910,7 @@ func take(map_id: String) -> Dictionary:
 		_parked.erase(map_id)
 		counters.unpark += 1
 		_last_taken = map_id
+		_arriving = map_id # Resident while the map change adopts it.
 		_record("unpark", map_id, {"parked_s": float(_now() - int(row.at_msec)) / 1000.0})
 		return row.resident
 	if _preload.is_empty() or str(_preload.map) != map_id:
@@ -837,6 +927,7 @@ func take(map_id: String) -> Dictionary:
 	var resident: Dictionary = _preload.resident
 	counters.preload_hit += 1
 	_last_taken = map_id
+	_arriving = map_id # Resident while the map change adopts it.
 	_record("preload_hit", map_id, {"state": state_at_take,
 		"finish_ms": float(Time.get_ticks_usec() - began) / 1000.0,
 		"waited_ms": float(_now() - _waiting_since) if _waiting_since >= 0 else 0.0})
@@ -869,10 +960,20 @@ func should_wait(map_id: String) -> bool:
 ## is adopted or loaded: evicts what this travel ends, and parks the world
 ## `loader` holds when the policy keeps it (WorldParkPolicy.should_park).
 ## `loader` is null when the world was already handed elsewhere (a seamless
-## crossing). Returns true when the world was parked.
+## crossing). Returns true when the world was parked. Names `to` as the world
+## being built to GlbSceneCache, and notes `from` as left unless it was parked
+## or the crossing was seamless (see "Scenery of worlds left behind").
 func leave(loader: WorldLoader, from: String, to: String) -> bool:
 	from = MapRegistry.normalize_server_map_id(from)
 	to = MapRegistry.normalize_server_map_id(to)
+	_arriving = to
+	_note_resident(to)
+	GlbSceneCache.set_world_scope(to)
+	var parked := _leave(loader, from, to)
+	_depart(from, to, loader == null)
+	return parked
+
+func _leave(loader: WorldLoader, from: String, to: String) -> bool:
 	var kept_destination := _last_taken == to
 	_last_taken = ""
 	_bound_map = ""
@@ -935,7 +1036,8 @@ func leave(loader: WorldLoader, from: String, to: String) -> bool:
 func note_adopted(map_id: String, usec: int) -> void:
 	_record("adopted", MapRegistry.normalize_server_map_id(map_id), {"adopt_ms": float(usec) / 1000.0})
 
-## Drops everything kept and building (logout, a closed client).
+## Drops everything kept and building (logout, a closed client). What it
+## drops counts as left (its scenery goes once nothing holds it).
 func clear() -> void:
 	for map_id: String in _parked.keys():
 		_evict(map_id, "clear")
@@ -946,6 +1048,8 @@ func clear() -> void:
 	_doors.clear()
 	_door_tiles.clear()
 	_last_taken = ""
+	_arriving = ""
+	_crossed.clear()
 
 ## Frees every evicted tree at once (closing the client: no frame budget then).
 func release_now() -> void:
@@ -985,6 +1089,8 @@ func _evict(map_id: String, reason: String) -> void:
 func _retire_tree(root: Node3D, map_id: String, reason: String) -> void:
 	if not is_instance_valid(root):
 		return
+	# Nobody shows it again: its scenery may go once its nodes are freed.
+	_mark_left(map_id)
 	ResourceAdmission.retiring(root)
 	if root is ContinentChunkStream:
 		(root as ContinentChunkStream).pause_streaming()
@@ -1031,6 +1137,125 @@ func retiring_count() -> int:
 	return _retiring.size()
 
 # --------------------------------------------------------------------------
+# Scenery of worlds left behind
+# --------------------------------------------------------------------------
+
+## Whether `map_id`'s world is shown, being loaded, parked or preloading.
+func _resident(map_id: String) -> bool:
+	return not map_id.is_empty() and (map_id == _bound_map or map_id == _arriving or _parked.has(map_id)
+		or (not _preload.is_empty() and str(_preload.map) == map_id))
+
+## `map_id` is resident again: its scenery is its own once more.
+func _note_resident(map_id: String) -> void:
+	if map_id.is_empty():
+		return
+	_left.erase(map_id)
+	_crossed.erase(map_id)
+
+## `map_id`'s world is gone (freed here, or let go by a map change) unless it
+## is resident; the next scenery pass runs soon.
+func _mark_left(map_id: String) -> void:
+	if map_id.is_empty() or _resident(map_id):
+		return
+	_left[map_id] = true
+	_crossed.erase(map_id)
+	_release_due_msec = 0
+
+## The map change from `from` to `to` is done with `from`: kept (parked),
+## handed on by a seamless crossing (left at the next change that is not one,
+## with the worlds such crossings walked out of before), or left.
+func _depart(from: String, to: String, seamless: bool) -> void:
+	if from.is_empty() or from == to or _resident(from):
+		return
+	if seamless:
+		_crossed[from] = true
+		return
+	_mark_left(from)
+	for map_id: String in _crossed.keys():
+		_mark_left(map_id)
+	_crossed.clear()
+
+## The worlds the player has left (map ids), for diagnostics and tests.
+func left_worlds() -> Array:
+	return _left.keys()
+
+## Runs one scenery pass now (tests, diagnostics), whatever the clock says.
+func release_scenery_now() -> Dictionary:
+	return _step_scenery_release(true)
+
+## One scenery pass when one is due: the next frame while the last pass left
+## work (out of time, or rows still to measure) and no tree is being freed;
+## every SCENERY_RELEASE_PASS_MSEC while a tree is being freed, left worlds'
+## models are still held or the last pass released; every
+## SCENERY_RELEASE_IDLE_PASS_MSEC otherwise, while any world is left. A pass
+## spends at most GlbSceneCache.WORLD_RELEASE_SLICE_USEC (2 ms, the same as a
+## frame's tree retirement, which it does not share: a tree being freed would
+## halve both). GlbSceneCache drops what only left
+## worlds used, down to what the class budget leaves beside the kept worlds
+## (none with SCENERY_RELEASE_ALL). A burst of releases ends with one
+## `scenery_released` record once a pass releases nothing more and no tree is
+## being freed, or once no world is left any more (the player went back in).
+## Returns the pass's report, {} when none ran.
+func _step_scenery_release(force := false) -> Dictionary:
+	if scenery_release == SCENERY_RELEASE_OFF:
+		return {}
+	if _left.is_empty():
+		_close_release_burst({}, 0)
+		return {}
+	var now := Time.get_ticks_msec()
+	if not force and now < _release_due_msec:
+		return {}
+	var left := {}
+	for map_id: String in _left.keys():
+		if _resident(map_id):
+			_left.erase(map_id)
+		else:
+			left[map_id] = true
+	if left.is_empty():
+		_close_release_burst({}, 0)
+		return {}
+	var allowance := 0 if scenery_release == SCENERY_RELEASE_ALL else maxi(0, budget_bytes - kept_bytes())
+	var report := GlbSceneCache.release_left_worlds(left, allowance, -1,
+		GlbSceneCache.WORLD_RELEASE_SLICE_USEC, scenery_release_grace_msec)
+	var released := int(report.get("released", 0))
+	if released > 0:
+		if _release_burst.is_empty():
+			_release_burst = {"began_msec": now, "released": 0, "released_bytes": 0,
+				"released_unmeasured": 0, "passes": 0, "left": {}}
+		(_release_burst.left as Dictionary).merge(left)
+		_release_burst["released"] = int(_release_burst.released) + released
+		_release_burst["released_bytes"] = int(_release_burst.released_bytes) + int(report.released_bytes)
+		_release_burst["released_unmeasured"] = int(_release_burst.released_unmeasured) \
+			+ int(report.released_unmeasured)
+	if not _release_burst.is_empty():
+		_release_burst["passes"] = int(_release_burst.passes) + 1
+	var busy := int(report.get("waiting", 0)) > 0 or bool(report.get("more", false)) or not _retiring.is_empty()
+	if released == 0 and not bool(report.get("more", false)) and _retiring.is_empty():
+		_close_release_burst(report, allowance)
+	# Work left once no tree is being freed: the next frame (a slice a frame);
+	# while one is (its models come free as its last nodes go), or while left
+	# worlds' models are still held: a few times a second.
+	if bool(report.get("more", false)) and _retiring.is_empty():
+		_release_due_msec = now
+	else:
+		_release_due_msec = now + (SCENERY_RELEASE_PASS_MSEC if busy or released > 0 else SCENERY_RELEASE_IDLE_PASS_MSEC)
+	return report
+
+## Records the burst of releases under way, if any, as one `scenery_released`
+## line: its totals, and what the last pass (`report`, {} for none) kept.
+func _close_release_burst(report: Dictionary, allowance: int) -> void:
+	if _release_burst.is_empty():
+		return
+	_record("scenery_released", "", {"mode": scenery_release, "left": (_release_burst.left as Dictionary).keys(),
+		"released": int(_release_burst.released), "released_mib": _mib(int(_release_burst.released_bytes)),
+		"released_unmeasured": int(_release_burst.released_unmeasured),
+		"retained": int(report.get("retained", 0)), "retained_mib": _mib(int(report.get("retained_bytes", 0))),
+		"waiting": int(report.get("waiting", 0)), "allowance_mib": _mib(allowance),
+		"passes": int(_release_burst.passes),
+		"seconds": float(Time.get_ticks_msec() - int(_release_burst.began_msec)) / 1000.0})
+	_release_burst = {}
+
+# --------------------------------------------------------------------------
 # Frames
 # --------------------------------------------------------------------------
 
@@ -1064,6 +1289,7 @@ func tick() -> void:
 	_step_warmups()
 	_reap_warm_orphans()
 	_drain_retiring()
+	_step_scenery_release()
 
 ## Memory-budget pressure: while the kept worlds' estimates (parked worlds and
 ## a preload) are over `budget_bytes` together, the preload goes first, then
@@ -1175,7 +1401,8 @@ func diagnostic_snapshot() -> Dictionary:
 		"parked": parked, "preload": building, "orphans": _orphans.size(),
 		"retiring": _retiring.size(), "counters": counters.duplicate(),
 		"estimated_mib": estimates, "stale": _stale.keys(), "warming": _warming.keys(),
-		"warmed": _warmed.keys()}
+		"warmed": _warmed.keys(), "scenery_release": scenery_release, "left": _left.keys(),
+		"crossed": _crossed.keys(), "arriving": _arriving}
 
 func _record(kind: String, map_id: String, details: Dictionary) -> void:
 	var event := {"event": kind, "map": map_id, "at_ms": Time.get_ticks_msec()}
