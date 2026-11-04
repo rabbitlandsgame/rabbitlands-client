@@ -17,6 +17,8 @@ func _run() -> void:
 	_check_low_actor_tier()
 	_check_mesh_application()
 	_check_actor_tree()
+	_check_far_presentation()
+	_check_far_ranks()
 	_check_capes()
 	_check_runtime_actor()
 	_check_main_wiring()
@@ -246,6 +248,125 @@ func _check_actor_tree() -> void:
 	actor.free()
 
 
+## The far overlay (actor LODs C5): the coarsest chain level and no shadow at
+## every quality, without touching resources, and the quality's own values
+## back as soon as the body is no longer far - from the authored baseline, so
+## toggling never compounds and the default (far false) path is today's.
+func _check_far_presentation() -> void:
+	_expect(Policy.FAR_LOD_BIAS == Policy.MIN_LOD_BIAS,
+		"far presentation selects the coarsest level any bias can")
+	var double := GeometryInstance3D.SHADOW_CASTING_SETTING_DOUBLE_SIDED
+	var off := GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	for level: int in Policy.QUALITY_NAMES.size():
+		var name := Policy.quality_name(level)
+		var mesh := MeshInstance3D.new()
+		var geometry := BoxMesh.new()
+		var override := StandardMaterial3D.new()
+		mesh.mesh = geometry
+		mesh.material_override = override
+		mesh.lod_bias = 2.0
+		mesh.cast_shadow = double
+		# Today's path, then the explicit far = false path: the same values.
+		Policy.apply_mesh(mesh, level)
+		var plain_bias := mesh.lod_bias
+		var plain_shadow := mesh.cast_shadow
+		Policy.apply_mesh(mesh, level, false)
+		_expect(mesh.lod_bias == plain_bias and mesh.cast_shadow == plain_shadow
+			and is_equal_approx(plain_bias, 2.0 * Policy.lod_bias_scale(level)),
+			"%s without far draws exactly what the quality draws" % name)
+		for pass_index: int in 3:
+			Policy.apply_mesh(mesh, level, true)
+			_expect(is_equal_approx(mesh.lod_bias, Policy.FAR_LOD_BIAS) and mesh.cast_shadow == off,
+				"%s far draws the coarsest level without a shadow (pass %d)" % [name, pass_index])
+			Policy.apply_mesh(mesh, level)
+			_expect(mesh.lod_bias == plain_bias and mesh.cast_shadow == plain_shadow,
+				"%s leaving far restores the quality's bias and shadow (pass %d)" % [name, pass_index])
+		_expect(mesh.mesh == geometry and mesh.material_override == override,
+			"%s far keeps mesh and material identity" % name)
+		# Far first, before any quality: the authored values are still the
+		# baseline the quality and restore_mesh() return to.
+		var fresh := MeshInstance3D.new()
+		fresh.lod_bias = 1.5
+		fresh.cast_shadow = double
+		Policy.apply_mesh(fresh, level, true)
+		Policy.apply_mesh(fresh, level)
+		_expect(is_equal_approx(fresh.lod_bias, 1.5 * Policy.lod_bias_scale(level))
+			and fresh.cast_shadow == (double if Policy.casts_shadows(level) else off),
+			"%s far applied first keeps the authored baseline" % name)
+		Policy.apply_mesh(fresh, level, true)
+		Policy.restore_mesh(fresh)
+		_expect(is_equal_approx(fresh.lod_bias, 1.5) and fresh.cast_shadow == double,
+			"%s restore_mesh after far returns the authored values" % name)
+		mesh.free()
+		fresh.free()
+
+	# Intentionally shadowless geometry stays shadowless after far.
+	var shadowless := MeshInstance3D.new()
+	shadowless.cast_shadow = off
+	Policy.apply_mesh(shadowless, Policy.Quality.HIGH, true)
+	Policy.apply_mesh(shadowless, Policy.Quality.HIGH)
+	_expect(shadowless.cast_shadow == off, "far then HIGH keeps shadowless geometry shadowless")
+	shadowless.free()
+
+	# The tree walk passes far to every descendant, and back.
+	var actor := Node3D.new()
+	var body := MeshInstance3D.new()
+	var holder := Node3D.new()
+	var equipment := MeshInstance3D.new()
+	body.lod_bias = 1.0
+	equipment.lod_bias = 1.5
+	actor.add_child(body)
+	actor.add_child(holder)
+	holder.add_child(equipment)
+	Policy.apply_actor(actor, Policy.Quality.MEDIUM, true)
+	_expect(is_equal_approx(body.lod_bias, Policy.FAR_LOD_BIAS)
+		and is_equal_approx(equipment.lod_bias, Policy.FAR_LOD_BIAS)
+		and body.cast_shadow == off and equipment.cast_shadow == off,
+		"apply_actor far reaches body and runtime equipment descendants")
+	Policy.apply_actor(actor, Policy.Quality.MEDIUM)
+	_expect(is_equal_approx(body.lod_bias, 0.65) and is_equal_approx(equipment.lod_bias, 0.975)
+		and body.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_ON,
+		"apply_actor without far gives every descendant MEDIUM back")
+	actor.free()
+
+
+## The far tier's size per quality (actor-lod.md 3(e): 24 / 20 / 16 detail
+## bodies, 4 of hysteresis) and the rank rule C7 applies.
+func _check_far_ranks() -> void:
+	_expect(Policy.FAR_DETAIL_BODIES.size() == Policy.QUALITY_NAMES.size(),
+		"every named quality has a far tier size")
+	_expect(Policy.far_detail_bodies(Policy.Quality.LOW) == 16
+		and Policy.far_detail_bodies(Policy.Quality.MEDIUM) == 20
+		and Policy.far_detail_bodies(Policy.Quality.HIGH) == 24
+		and Policy.FAR_HYSTERESIS_BODIES == 4,
+		"the far tier keeps 16 / 20 / 24 bodies in full, with 4 of hysteresis")
+	_expect(Policy.far_detail_bodies(-1) == 24 and Policy.far_detail_bodies(99) == 24,
+		"an unknown quality uses HIGH's far tier size")
+	for level: int in Policy.QUALITY_NAMES.size():
+		var name := Policy.quality_name(level)
+		var detail := Policy.far_detail_bodies(level)
+		var enter := detail + Policy.FAR_HYSTERESIS_BODIES
+		_expect(not Policy.far_by_rank(-1, level, false) and not Policy.far_by_rank(-1, level, true),
+			"%s never draws an unranked (priority or out-of-view) body far" % name)
+		_expect(not Policy.far_by_rank(0, level, true) and not Policy.far_by_rank(detail - 1, level, true),
+			"%s brings a far body back inside the nearest %d" % [name, detail])
+		_expect(Policy.far_by_rank(detail, level, true) and Policy.far_by_rank(enter, level, true),
+			"%s keeps a far body far from rank %d" % [name, detail])
+		_expect(not Policy.far_by_rank(detail, level, false)
+			and not Policy.far_by_rank(enter - 1, level, false)
+			and Policy.far_by_rank(enter, level, false),
+			"%s sends a full body far only from rank %d" % [name, enter])
+		# A crowd that walks out and back in flips each body at most once per
+		# crossing: no rank changes the answer of both states.
+		var flips := 0
+		var far := false
+		for rank: int in [detail - 2, detail, detail + 2, enter, detail + 2, detail, detail - 2]:
+			var next := Policy.far_by_rank(rank, level, far)
+			flips += int(next != far)
+			far = next
+		_expect(flips == 2, "%s flips a body twice over one walk out and back (%d)" % [name, flips])
+
+
 func _check_capes() -> void:
 	for level: int in Policy.QUALITY_NAMES.size():
 		_expect(Policy.cape_enabled(level, true),
@@ -310,14 +431,22 @@ func _check_runtime_actor() -> void:
 		and selection.cast_shadow == selection_shadow,
 		"actor quality leaves its selection UI outside the mesh walk")
 
-	# Appearance replaces the old hair holder after LOW is already active.
+	# Appearance replaces the old hair holder after LOW is already active. A
+	# Human's hairstyle is drawn by the RL hair-only rig (RLHeadRig.HAIR_NODE_NAME)
+	# where its style has RL hair, otherwise by an AppearanceHair_<style>
+	# holder; either way the meshes are new nodes and must take LOW.
+	var hair_before := {}
+	for mesh: MeshInstance3D in _hair_meshes(actor):
+		hair_before[mesh.get_instance_id()] = true
 	actor.apply_appearance_variants({
 		"hair": AppearanceVariants.pack_hair(2, 0),
 	})
-	var hair_holder := actor.find_child("AppearanceHair_2", true, false)
-	var hair_meshes := _meshes_below(hair_holder)
-	_expect(not hair_meshes.is_empty() and _all_low(hair_meshes),
-		"hair created after the quality change inherits LOW")
+	var hair_meshes := _hair_meshes(actor)
+	var hair_new := not hair_meshes.is_empty()
+	for mesh: MeshInstance3D in hair_meshes:
+		hair_new = hair_new and not hair_before.has(mesh.get_instance_id())
+	_expect(hair_new and _all_low(hair_meshes),
+		"hair created after the quality change inherits LOW (%d new meshes)" % hair_meshes.size())
 
 	# A missing registry model exercises the actor's normal fallback-equipment
 	# path without adding a test asset.
@@ -350,6 +479,15 @@ func _check_runtime_actor() -> void:
 
 	actor.free()
 	NativeAnimationImporter.clear()
+
+
+## The meshes of the hairstyle the actor draws now: its legacy
+## AppearanceHair_<style> holder and the RL hair-only rig alike.
+func _hair_meshes(actor: Node) -> Array[MeshInstance3D]:
+	var meshes: Array[MeshInstance3D] = []
+	for holder: Node in actor.find_children("AppearanceHair_*", "", true, false):
+		meshes.append_array(_meshes_below(holder))
+	return meshes
 
 
 func _meshes_below(parent: Node) -> Array[MeshInstance3D]:
