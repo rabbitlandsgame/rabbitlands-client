@@ -1580,11 +1580,17 @@ def run_selftest(tmp_path, credentials, fake, http, *, created=None, **options):
                            sizes=options.pop("sizes", SELFTEST_SIZES), **options)
 
 
-def test_selftest_end_to_end_against_fakes(tmp_path, credentials):
+def test_selftest_end_to_end_against_fakes(tmp_path, credentials, capsys):
     fake, created = FakeS3(), []
     result = run_selftest(tmp_path, credentials, fake, FakeHttp(fake), created=created)
     failed = [row for row in result["checks"] if not row["ok"]]
     assert result["ok"] and not failed, failed
+    # A skipped check proved nothing, so the console must not print it as a pass.
+    lines = capsys.readouterr().out.splitlines()
+    skipped = {row["name"] for row in result["checks"] if row.get("skipped")}
+    assert skipped == {"lock-rule"}
+    assert "[skip] lock-rule" in lines and "[ok] lock-rule" not in lines
+    assert "[ok] checksum-sha256" in lines
     prefix = result["prefix"]
     assert re.fullmatch(r"desktop/selftest/[0-9]{8}-[0-9a-f]{8}/", prefix)
     assert [(guard.selftest, guard.prefix) for guard in created] == [(True, prefix)]
@@ -1635,6 +1641,9 @@ def test_selftest_canary_keeps_a_refused_put_within_budget(tmp_path, credentials
     fake.inject.clear()
     result = run_selftest(tmp_path, credentials, fake, FakeHttp(fake), checksum_header=False)
     assert result["ok"] and result["ledger_bytes"] <= up.SELFTEST_BUDGET_BYTES
+    # Without the header nothing was checked: the row says so instead of passing silently.
+    checksum = next(row for row in result["checks"] if row["name"] == "checksum-sha256")
+    assert checksum["skipped"] and checksum["ok"]
 
 
 def test_selftest_budget_is_enforced(tmp_path, credentials):

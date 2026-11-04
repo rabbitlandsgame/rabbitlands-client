@@ -1695,9 +1695,11 @@ class _Checks:
         self.rows = []
 
     def add(self, name: str, ok: bool, **observed) -> bool:
+        """Record one check. A row with `skipped` proved nothing: it prints
+        `[skip]`, not `[ok]`, so the console never presents it as a pass."""
         self.rows.append({"name": name, "ok": bool(ok), **observed})
         self.receipt.set(checks=self.rows)
-        emit(f"[{'ok' if ok else 'FAIL'}] {name}")
+        emit(f"[{'FAIL' if not ok else 'skip' if observed.get('skipped') else 'ok'}] {name}")
         return ok
 
 
@@ -1790,7 +1792,8 @@ def run_selftest(work, credentials, receipt_path, *, ledger=None, budget_bytes: 
         head = bucket.head(small.key, checksum=True)
         expected_checksum = _b64(bytes.fromhex(small.sha256))
         checks.add("checksum-sha256", not checksum_header or (head or {}).get("ChecksumSHA256") == expected_checksum,
-                   reported=(head or {}).get("ChecksumSHA256") is not None)
+                   reported=(head or {}).get("ChecksumSHA256") is not None,
+                   **({} if checksum_header else {"skipped": "--no-checksum-header: no ChecksumSHA256 was sent"}))
 
         # 6. Pointers: first with IfNoneMatch, then IfMatch with the live ETag, then a stale ETag -> 412.
         pointer_key = r2.pointer_key(SELFTEST_PLATFORM, prefix=prefix)
