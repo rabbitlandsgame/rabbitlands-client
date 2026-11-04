@@ -27,6 +27,8 @@ const CAMERA_POSITION := Vector3(0.0, 10.0, 10.0)
 ## On the segment from the camera to the player's chest, roughly half way.
 const ON_THE_LINE := Vector3(0.0, 5.5, 5.0)
 const OFF_TO_THE_SIDE := Vector3(20.0, 5.5, 5.0)
+## Where the batch drawing the batched prop stands: its members' centre.
+const BATCH_FRAME := ON_THE_LINE + Vector3(3.0, 0.0, 0.0)
 ## Long enough that a fade of FADE_SECONDS finishes inside one step.
 const SETTLE := 0.5
 
@@ -136,7 +138,7 @@ func _run_pass() -> void:
 			and batched.get_surface_override_material(0) == null,
 		"the lifted prop is handed back to the batch")
 	if _multimesh_stores_transforms():
-		_expect(batch.multimesh.get_instance_transform(0).origin.is_equal_approx(
+		_expect((batch.transform * batch.multimesh.get_instance_transform(0)).origin.is_equal_approx(
 				ON_THE_LINE),
 			"the batch draws the returned instance where it always stood")
 
@@ -199,9 +201,13 @@ func _build_world() -> void:
 	multimesh.transform_format = MultiMesh.TRANSFORM_3D
 	multimesh.mesh = batched.mesh
 	multimesh.instance_count = 1
-	multimesh.set_instance_transform(0, batched.transform)
+	# A continent batch stands at its members' centre (WD-C2), here as if a
+	# second member stood 6 m along x, and holds the transform relative to it.
 	batch = MultiMeshInstance3D.new()
 	batch.name = "StaticBatch_0_BatchedProp"
+	batch.position = BATCH_FRAME
+	multimesh.set_instance_transform(0,
+		Transform3D(batched.transform.basis, batched.transform.origin - BATCH_FRAME))
 	batch.multimesh = multimesh
 	world.add_child(batch)
 	batched.visible = false

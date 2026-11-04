@@ -35,8 +35,19 @@ const MapImageExtension := preload("res://src/world/map_image_extension.gd")
 # culling meaningful while cutting draw calls by more than an order of
 # magnitude. The rendered result is the same geometry with the same materials
 # at the same transforms.
+#
+# Which instances batch at all is decided per BATCH_CELL_METRES cell: at least
+# BATCH_MINIMUM_INSTANCES of one mesh in one cell. On the continent and in
+# gauntlets each such batch is then split by size class into smaller cells
+# (WorldDistanceClasses: 32/48/64/96 m), each drawn by its own MultiMesh whose
+# node stands at its members' centre, so a 180 m cell no longer draws a whole
+# grove for one tree in view. The split never moves an instance in or out of
+# batching, so the look passes and caches see the same members.
 const BATCH_MINIMUM_INSTANCES := 4
+# The legacy membership cell, and the cap on a class cell (a manifest's
+# `rendering.batchCellMetres` replaces it in both roles).
 const BATCH_CELL_METRES := 180.0
+const WorldDistanceClasses := preload("res://src/world/world_distance_classes.gd")
 # Stamped on every source node a batch swallowed, naming the MultiMeshInstance3D
 # that now draws it and its slot in that multimesh. A batched prop is otherwise
 # untraceable from the node the rest of the client still holds, and OccluderFade
@@ -1743,11 +1754,17 @@ func _batch_static_instances(mesh_instances: Array) -> void:
 	var cell_size: float = maxf(1.0, float(rendering.get("batchCellMetres",
 		BATCH_CELL_METRES)))
 	var groups: Dictionary = {}
+	var classed: bool = manifest != null and WorldDistanceClasses.applies_to(manifest.data)
+	# Each candidate's imported-root placement, walked once (class split only).
+	var placements: Dictionary = {}
 	for node_value: Variant in mesh_instances:
 		var mesh_instance: MeshInstance3D = node_value as MeshInstance3D
 		if not _is_batchable(mesh_instance):
 			continue
-		var origin: Vector3 = _import_transform(mesh_instance).origin
+		var placement: Transform3D = _import_transform(mesh_instance)
+		if classed:
+			placements[mesh_instance.get_instance_id()] = placement
+		var origin: Vector3 = placement.origin
 		var key: String = "%d|%d|%d|%d|%d|%d|%d" % [
 			mesh_instance.mesh.get_instance_id(), mesh_instance.layers,
 			mesh_instance.cast_shadow, mesh_instance.gi_mode,
@@ -1762,12 +1779,38 @@ func _batch_static_instances(mesh_instances: Array) -> void:
 		var members: Array = groups[key_value] as Array
 		if members.size() < minimum:
 			continue
-		_create_batch(members, batches)
-		batches += 1
 		collapsed += members.size()
+		if not classed:
+			_create_batch(members, batches)
+			batches += 1
+			continue
+		for part: Dictionary in _class_cells(members, cell_size, placements):
+			_create_batch(part["members"] as Array, batches, str(part["class"]), placements)
+			batches += 1
+	load_phases[&"staticBatches"] = batches
+	load_phases[&"staticBatchInstances"] = collapsed
 	if batches > 0:
 		print_debug("world_load stage=static_batching batches=", batches,
-			" instances=", collapsed)
+			" instances=", collapsed, " class_cells=", classed)
+
+## One legacy batch's members split into size-class cells
+## (WorldDistanceClasses.partition), each {"class", "members": Array}.
+## `placements` maps a member's instance id to its imported-root transform.
+func _class_cells(members: Array, cap: float, placements: Dictionary) -> Array[Dictionary]:
+	var origins := PackedVector3Array()
+	var radii := PackedFloat32Array()
+	var mesh_box: AABB = (members[0] as MeshInstance3D).mesh.get_aabb()
+	for value: Variant in members:
+		var placement: Transform3D = placements[(value as Object).get_instance_id()]
+		origins.append(placement.origin)
+		radii.append(WorldDistanceClasses.placement_radius(mesh_box, placement.basis))
+	var cells: Array[Dictionary] = []
+	for part: Dictionary in WorldDistanceClasses.partition(origins, radii, cap):
+		var chosen: Array = []
+		for index: int in part["members"] as PackedInt32Array:
+			chosen.append(members[index])
+		cells.append({"class": part["class"], "members": chosen})
+	return cells
 
 func _is_batchable(mesh_instance: MeshInstance3D) -> bool:
 	var ancestor: Node = mesh_instance
@@ -1806,8 +1849,30 @@ func _is_batchable(mesh_instance: MeshInstance3D) -> bool:
 			return false
 	return true
 
-func _create_batch(members: Array, index: int) -> void:
+## Draws `members` (MeshInstance3D sharing one mesh) from one MultiMesh.
+##
+## A legacy batch (`distance_class` empty) stands at the identity and holds its
+## members' imported-root transforms. A class-split batch stands at its
+## members' centre (WorldDistanceClasses.frame_origin), holds their transforms
+## relative to that, and carries WorldDistanceClasses.CLASS_META: its node
+## origin is its AABB centre, so a visibility range reads the same either way.
+## `known` (instance id -> imported-root transform) spares walking a member's
+## parents a second time.
+func _create_batch(members: Array, index: int, distance_class := "", known: Dictionary = {}) -> void:
 	var reference: MeshInstance3D = members[0] as MeshInstance3D
+	var placements: Array[Transform3D] = []
+	for value: Variant in members:
+		var id := (value as Object).get_instance_id()
+		placements.append(known[id] if known.has(id) else _import_transform(value as MeshInstance3D))
+	var frame := Transform3D.IDENTITY
+	if not distance_class.is_empty():
+		var boxes: Array[AABB] = []
+		var origins := PackedVector3Array()
+		var mesh_box: AABB = reference.mesh.get_aabb()
+		for placement: Transform3D in placements:
+			boxes.append(placement * mesh_box)
+			origins.append(placement.origin)
+		frame.origin = WorldDistanceClasses.frame_origin(boxes, origins)
 	var multimesh: MultiMesh = MultiMesh.new()
 	multimesh.transform_format = MultiMesh.TRANSFORM_3D
 	multimesh.mesh = reference.mesh
@@ -1818,16 +1883,21 @@ func _create_batch(members: Array, index: int) -> void:
 	batch.layers = reference.layers
 	batch.cast_shadow = reference.cast_shadow
 	batch.gi_mode = reference.gi_mode
+	if not distance_class.is_empty():
+		batch.set_meta(WorldDistanceClasses.CLASS_META, distance_class)
 	var parent := world_root.get_node_or_null("StreamActive")
 	(parent if parent != null else world_root).add_child(batch)
-	batch.transform = Transform3D.IDENTITY
+	batch.transform = frame
 	# Taken after add_child, which is what settles the name: a package that
 	# already carries a node called StaticBatch_0_Rock would have had this one
 	# renamed, and a path written before that would point at the wrong node.
 	var batch_path: NodePath = world_root.get_path_to(batch)
 	for member_index: int in members.size():
 		var member: MeshInstance3D = members[member_index] as MeshInstance3D
-		multimesh.set_instance_transform(member_index, _import_transform(member))
+		var placement: Transform3D = placements[member_index]
+		# Relative to the batch's own frame; the identity for a legacy batch.
+		multimesh.set_instance_transform(member_index,
+			Transform3D(placement.basis, placement.origin - frame.origin))
 		# The source node stays in the tree so name lookups, manifest
 		# declarations and tooling keep resolving; it simply stops drawing.
 		member.visible = false

@@ -23,6 +23,8 @@ const OccluderFadeScript := preload("res://src/world/occluder_fade.gd")
 const REGISTRY := "res://data/maps/registry.json"
 const FIXTURE_REGION := "four-gates-deposit-four-keys"
 const SCRATCH := "user://map-cache-test"
+## Where the hand-built batch stands (`_build_batched_world`): its members' centre.
+const BATCH_FRAME := Vector3(3.0, 5.5, 5.0)
 
 var failures := 0
 var _loader: WorldLoader
@@ -441,6 +443,10 @@ func _check_occluder_fade_after_a_round_trip() -> void:
 	_expect(batched.get_meta(WorldLoader.BATCH_META)
 			== world.get_node("StaticBatch_0_BatchedProp"),
 		"and it names the MultiMeshInstance3D that is actually drawing the prop")
+	var restored_batch := world.get_node("StaticBatch_0_BatchedProp") as MultiMeshInstance3D
+	_expect(restored_batch.position.is_equal_approx(BATCH_FRAME)
+			and restored_batch.get_meta(WorldLoader.WorldDistanceClasses.CLASS_META, "") == "M",
+		"a batch keeps its centred frame and its size class through the round trip")
 
 	# And now the behaviour that link exists for.
 	var camera: Camera3D = world.get_node("Camera") as Camera3D
@@ -490,9 +496,14 @@ func _build_batched_world() -> Node3D:
 	multimesh.transform_format = MultiMesh.TRANSFORM_3D
 	multimesh.mesh = mesh
 	multimesh.instance_count = 1
-	multimesh.set_instance_transform(0, prop.transform)
+	# As the loader builds a continent batch (WD-C2): standing at its members'
+	# centre (here as if a second member stood 6 m along x), holding their
+	# transforms relative to it and stamped with its size class.
 	var batch := MultiMeshInstance3D.new()
 	batch.name = "StaticBatch_0_BatchedProp"
+	batch.position = BATCH_FRAME
+	batch.set_meta(WorldLoader.WorldDistanceClasses.CLASS_META, "M")
+	multimesh.set_instance_transform(0, Transform3D(prop.transform.basis, prop.transform.origin - BATCH_FRAME))
 	batch.multimesh = multimesh
 	world.add_child(batch)
 
