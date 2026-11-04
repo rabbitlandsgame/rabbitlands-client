@@ -270,3 +270,87 @@ def test_a_sidecar_change_moves_only_texture_packages_and_a_code_change_none(tmp
     glb_changes = changed(first, build(actor_stage(tmp_path / "fourth", glb=b"cooked")))
     assert glb_changes and all("-textures-" not in name for name in glb_changes), \
         "a GLB-only release re-downloads no sidecar"
+
+
+# --- W2-UD-06: split PCK content packs ---------------------------------------------------------------------------
+
+import pck_split  # noqa: E402
+
+CONTENT_PACK_NAMES = ("audio", "video", *(f"equipment-textures-{i}" for i in range(4)),
+                      *(f"textures-{i}" for i in range(2)))
+
+
+def test_each_content_pack_is_a_package_of_its_own():
+    for name in CONTENT_PACK_NAMES:
+        assert P.package_id(f"app/packs/{name}.pck") == f"pck-{name}"
+        # The installed updater accepts ids of [a-z0-9-], at most 96 characters.
+        assert re.fullmatch(r"[a-z0-9-]{1,96}", P.package_id(f"app/packs/{name}.pck"))
+    assert P.package_id("app/packs/" + "a" * 63 + ".pck") == "pck-" + "a" * 63
+    assert P.package_id("app/RabbitLands.pck") == "client"
+    # Only exact app/packs/<lowercase id>.pck files; neighbours keep their packages.
+    for neighbour in ("app/packs/audio.json", "app/packs/sub/audio.pck", "app/packs/Audio.pck",
+                      "app/packs/audio.pck.part", "app/packs/-audio.pck", "app/packs/" + "a" * 64 + ".pck",
+                      "eloria-assets/packs/audio.pck", "app/assets/packs/audio.pck", "app/data/packs/audio.pck"):
+        assert P.package_id(neighbour) == reference_package_id(neighbour), neighbour
+
+
+def _fixture_monolith(path, code=b"GDSC v1", texture=b"GST2 world"):
+    files = {"project.godot": b'config_version=5\n[application]\nconfig/name="Fixture"\n',
+             "src/main.gdc": code, "src/main.gd.remap": b'[remap]\n\npath="res://src/main.gdc"\n',
+             "data/table.json": b'{"rows": 1}',
+             "assets/world.png.import": b'[remap]\n\npath="res://.godot/imported/world.png-1.ctex"\n',
+             ".godot/imported/world.png-1.ctex": texture,
+             "assets/audio/hit.wav.import": b'[remap]\n\npath="res://.godot/imported/hit.wav-2.sample"\n',
+             ".godot/imported/hit.wav-2.sample": b"RIFF hit",
+             "assets/ui/start_screen/01-a.ogv": b"OggS video"}
+    for index in range(8):
+        files[f"assets/equipment/canonical_{index}.jpg.import"] = (
+            b'[remap]\n\npath.s3tc="res://.godot/imported/canonical_%d.jpg-3.s3tc.ctex"\n' % index)
+        files[f".godot/imported/canonical_{index}.jpg-3.s3tc.ctex"] = b"GST2 gear %d" % index
+    pck_split.write_pack(path, {name: pck_split.Source(data=data) for name, data in files.items()},
+                         fmt=4, version=(4, 7, 2))
+    return path
+
+
+def split_stage(stage, commit="a", **monolith):
+    """release_stage with the exported pack split as package_client splits it."""
+    release_stage(stage, commit=commit)
+    (stage / "app/RabbitLands.pck").unlink()
+    exported = _fixture_monolith(stage.parent / f"{stage.name}.monolith.pck", **monolith)
+    pck_split.split(exported, stage / "app", stage / "app/RabbitLands.pck")
+    exported.unlink()
+    return stage
+
+
+def test_a_split_stage_packages_each_pack_once(tmp_path):
+    stage = split_stage(tmp_path / "RabbitLands-Windows-20261104-aaaaaaaaa")
+    packages = {row["id"]: row for row in build(stage)}
+    packs = sorted(path.name for path in (stage / "app/packs").iterdir())
+    assert {"audio.pck", "video.pck"} <= set(packs)
+    for name in packs:
+        row = packages["pck-" + name.removesuffix(".pck")]
+        assert [entry["path"] for entry in row["files"]] == [f"app/packs/{name}"] and row["file_count"] == 1
+    assert [entry["path"] for entry in packages["client"]["files"]] == ["app/RabbitLands.pck"]
+    listed = [entry["path"] for row in packages.values() for entry in row["files"]]
+    staged = sorted(p.relative_to(stage).as_posix() for p in stage.rglob("*") if p.is_file())
+    assert sorted(listed) == staged and len(listed) == len(set(listed))
+
+
+def test_after_the_split_a_code_only_release_downloads_no_content_pack(tmp_path):
+    first = build(split_stage(tmp_path / "first"), shared=True)
+    previous = {row["id"]: row for row in first}
+    reused = []
+    second = build(split_stage(tmp_path / "second", commit="b", code=b"GDSC v2 with one changed script"),
+                   shared=True, previous_packages=previous,
+                   reuse_package=lambda row: reused.append(row["id"]) or True)
+    assert changed(first, second) == ["client", "release-descriptor"]
+    assert {name for name in previous if name.startswith("pck-")} <= set(reused)
+
+
+def test_a_texture_change_moves_its_own_content_pack_and_the_core(tmp_path):
+    first = build(split_stage(tmp_path / "first"))
+    second = build(split_stage(tmp_path / "second", texture=b"GST2 world, repainted"))
+    texture_pack = pck_split.classify(".godot/imported/world.png-1.ctex")[0]
+    # The core lists each pack's size and sha256 in data/content_packs.json, and
+    # it changes in every release anyway (it embeds the commit).
+    assert changed(first, second) == sorted(["client", "pck-" + texture_pack])

@@ -33,6 +33,11 @@ SIDECAR_DIRECTORY = "vram"
 # PCK's package and out of a records bucket of unrelated loose files.
 RELEASE_DESCRIPTOR_PACKAGE = "release-descriptor"
 RELEASE_DESCRIPTOR_PATHS = frozenset({"app/client-release.json", "app/data/client_release.json"})
+# A split PCK (W2-UD-06, tools/pck_split.py): app/RabbitLands.pck is the core
+# pack and stays "client"; each content pack beside it, app/packs/<name>.pck, is
+# a package of its own, pck-<name>, so a release re-downloads exactly the packs
+# whose bytes changed (a code-only release: none of them).
+CONTENT_PACK = re.compile(r"^app/packs/([a-z0-9][a-z0-9-]{0,62})\.pck$")
 
 
 def package_id(relative: str) -> str:
@@ -43,6 +48,9 @@ def package_id(relative: str) -> str:
         return RELEASE_DESCRIPTOR_PACKAGE
     if relative == "app/RabbitLands.pck":
         return "client"
+    content_pack = CONTENT_PACK.match(relative)
+    if content_pack:
+        return "pck-" + content_pack.group(1)
     if relative.startswith("app/prepared-world/") and len(parts) >= 4:
         # Compatibility describes native format/renderer policy, never the
         # game release. Code-only releases can reuse every world package.

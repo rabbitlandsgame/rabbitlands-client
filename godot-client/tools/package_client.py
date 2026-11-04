@@ -18,6 +18,19 @@ What goes in, and why it is more than an export:
   app/RabbitLands.exe (Windows) or app/RabbitLands.x86_64 (Linux), app/RabbitLands.pck
       The Godot export. Scripts, scenes, UI art and data. Linux needs the
       official 4.7.2 export templates installed beside the Windows ones.
+      On Windows and Linux the exported pack is split after the static PCK
+      checks (W2-UD-06, split_client_pack and tools/pck_split.py): the
+      imported textures, audio and login videos move into app/packs/*.pck,
+      which keep their bytes from release to release, and RabbitLands.pck
+      becomes a small core pack that lists them in data/content_packs.json.
+      Its first autoload (src/boot/content_packs.gd) mounts them at start.
+      A code-only release then changes the core pack only. The split is
+      proved entry by entry, every imported resource is loaded from the split
+      layout and compared with the monolith (check_split_pack_resources.gd),
+      and the monolith is deleted; export_launcher, the smoke launch and the
+      full-optimization checks all run on the shipped layout. --no-split-pck,
+      --benchmark-profile (benchmark_asset_closure reads one PCK), macOS and a
+      commit without ContentPacks keep the single PCK.
       The textures the world's 3D scenes sample (see scene_textures) are
       imported VRAM-compressed with mipmaps, normal maps red-green. The
       editor gives a texture those settings only once it has drawn a
@@ -175,6 +188,7 @@ import creature_compression
 import full_optimization_package
 import release_world_preparation
 import map_background_package
+import pck_split
 import strip_rl_head_images
 import build_vram_textures as vram_tool
 from road_ground_dependencies import dependencies as road_dependencies, RoadGroundDependencyError
@@ -3050,6 +3064,191 @@ def check_editor_sources_unpacked(app_dir: Path) -> None:
     log(f"checked the PCK: nothing under {', '.join(EDITOR_ONLY_PCK_DIRS)}")
 
 
+# --- split PCK: a core pack and stable content packs (W2-UD-06) -------------
+#
+# pck_split.py moves the imported textures, audio and login videos into
+# app/packs/*.pck (its RULES) and writes the rest, with data/content_packs.json,
+# into a core pack; the commit's first autoload, ContentPacks, mounts the packs
+# before anything can name what they hold. Only a commit whose project.godot
+# loads ContentPacks first, with the manifest schema this packager writes, is
+# split: an older commit (a rebuilt rollback) keeps its single PCK.
+SPLIT_PCK_PLATFORMS = ("windows", "linux")
+CONTENT_PACKS_SCRIPT = "godot-client/src/boot/content_packs.gd"
+CONTENT_PACKS_AUTOLOAD = 'ContentPacks="*res://src/boot/content_packs.gd"'
+CONTENT_PACKS_FEATURE = f"const MANIFEST_SCHEMA := {pck_split.MANIFEST_SCHEMA}"
+SPLIT_CHECK_TOOL = "godot-client/tools/check_split_pack_resources.gd"
+SPLIT_CORE_TEMPORARY = "RabbitLands.core.pck"
+CONTENT_PACKS_VARIABLE = "RABBITLANDS_CONTENT_PACKS"  # honoured by editor binaries only
+SPLIT_CHECK_FILES = (".ogv",)  # raw entries loaded by path, compared besides the .import resources
+SPLIT_CHECK_TIMEOUT = 1800
+CONTENT_PACKS_DIAGNOSTIC = re.compile(r'client_diagnostic (\{.*"event":"content_packs".*\})\s*$')
+
+
+def split_pack_support(build_dir: Path) -> str:
+    """"" when the build tree's commit mounts content packs, else why it cannot."""
+    settings = build_dir / "godot-client/project.godot"
+    script = build_dir / CONTENT_PACKS_SCRIPT
+    if not script.is_file() or not (build_dir / SPLIT_CHECK_TOOL).is_file() or not settings.is_file():
+        return "the commit predates ContentPacks (src/boot/content_packs.gd)"
+    if CONTENT_PACKS_FEATURE not in script.read_text(encoding="utf-8", errors="replace"):
+        return f"the commit's ContentPacks does not read manifest schema {pck_split.MANIFEST_SCHEMA}"
+    section = re.search(r"(?ms)^\[autoload\]\s*\n(.*?)(?=^\[|\Z)", settings.read_text(encoding="utf-8"))
+    rows = [line.strip() for line in (section.group(1) if section else "").splitlines()
+            if line.strip() and not line.strip().startswith(";")]
+    if not rows or rows[0] != CONTENT_PACKS_AUTOLOAD:
+        return "ContentPacks is not the commit's first autoload"
+    return ""
+
+
+def split_pack_reason(build_dir: Path, platform: str, *, disabled: bool, benchmark: bool) -> str:
+    """"" to split this package's PCK, else why it keeps a single PCK."""
+    if disabled:
+        return "--no-split-pck"
+    if platform not in SPLIT_PCK_PLATFORMS:
+        return f"{platform} keeps a single PCK"
+    if benchmark:
+        return "--benchmark-profile (benchmark_asset_closure reads one PCK)"
+    return split_pack_support(build_dir)
+
+
+def _split_check_job(monolith: pck_split.Pack, mode: str, report: Path) -> dict:
+    return {"schema": 1, "mode": mode, "report": str(report),
+            "resources": sorted(name[:-len(".import")] for name in monolith.entries if name.endswith(".import")),
+            "files": sorted(name for name in monolith.entries if name.endswith(SPLIT_CHECK_FILES)),
+            "mount_script": "res://src/boot/content_packs.gd"}
+
+
+def compare_split_reports(monolith: pck_split.Pack, record: dict, verify: dict,
+                          record_log: str = "", verify_log: str = "") -> dict:
+    """What check_split_pack_resources.gd found from the monolith (record) and from the
+    split layout (verify) must agree: each resource's class, size details and product byte
+    counts, each file's class and bytes; every md5 verify read is the monolith's; the
+    packs mounted; and the split layout logs no load failure the monolith does not."""
+    problems: list[str] = []
+    mount = verify.get("mount", {})
+    if mount.get("state") != "mounted":
+        problems.append(f"content packs not mounted: {json.dumps(mount)[:400]}")
+    for kind in ("resources", "files"):
+        before, after = record.get(kind, {}), verify.get(kind, {})
+        if set(before) != set(after):
+            problems.append(f"{kind}: the two runs checked different paths")
+        for path in sorted(set(before) & set(after)):
+            a, b = before[path], after[path]
+            keys = ("class", "detail", "error") if kind == "resources" else ("class", "bytes", "error")
+            for key in keys:
+                if a.get(key) != b.get(key):
+                    problems.append(f"{path}: {key} {a.get(key)!r} from the monolith, {b.get(key)!r} split")
+            if kind == "resources":
+                sizes_a = {p: row.get("bytes") for p, row in a.get("products", {}).items()}
+                sizes_b = {p: row.get("bytes") for p, row in b.get("products", {}).items()}
+                if sizes_a != sizes_b:
+                    problems.append(f"{path}: import products {sizes_a} from the monolith, {sizes_b} split")
+                hashed = b.get("products", {}).items()
+            else:
+                hashed = [(path, b)]
+            for name, row in hashed:
+                entry = monolith.entries.get(name)
+                if entry is None or row.get("md5") != entry.md5.hex():
+                    problems.append(f"{name}: the split layout read bytes that are not the monolith's")
+    failures = lambda text: {line.strip() for line in text.splitlines() if any(f in line for f in SMOKE_FAILURES)}
+    problems.extend(f"logged only on the split layout: {line}"
+                    for line in sorted(failures(verify_log) - failures(record_log))[:20])
+    if problems:
+        raise PackageError(f"{len(problems)} resources differ between the split layout and the monolith:\n  "
+                           + "\n  ".join(problems[:40]))
+    broken = sorted(path for kind in ("resources", "files") for path, row in record.get(kind, {}).items()
+                    if row.get("error"))
+    return {"resources": len(record.get("resources", {})), "files": len(record.get("files", {})),
+            "broken_in_both": broken, "mount": mount,
+            "seconds": {"record": record.get("usec", 0) / 1e6, "verify": verify.get("usec", 0) / 1e6}}
+
+
+def check_split_pack_resources(godot: Path, project: Path, monolith: Path, core: Path, packs_dir: Path,
+                               logs: Path) -> dict:
+    """Loads every resource the monolith's .import files name, and its videos, once from the
+    monolith and once from the split layout (an editor binary, nothing loose beside it, a
+    throwaway user directory), and compares the two (compare_split_reports)."""
+    pack = pck_split.read_pack(monolith)
+    tool = project / "tools/check_split_pack_resources.gd"
+    reports: dict[str, tuple[dict, str]] = {}
+    with tempfile.TemporaryDirectory(prefix="rl-split-check-") as scratch:
+        for mode, main_pack in (("record", monolith), ("verify", core)):
+            root = Path(scratch) / mode
+            user, cwd = root / "user", root / "cwd"
+            user.mkdir(parents=True)
+            cwd.mkdir()
+            report = root / "report.json"
+            job = root / "job.json"
+            job.write_text(json.dumps(_split_check_job(pack, mode, report)), encoding="utf-8")
+            env = dict(os.environ, APPDATA=str(user), LOCALAPPDATA=str(user), HOME=str(user),
+                       XDG_DATA_HOME=str(user), XDG_CONFIG_HOME=str(user))
+            env.pop(CONTENT_PACKS_VARIABLE, None)
+            if mode == "verify":
+                env[CONTENT_PACKS_VARIABLE] = str(packs_dir)
+            text = run_godot(godot, ["--headless", "--main-pack", str(main_pack), "--script", str(tool),
+                                     "--", str(job)], logs / f"split-check-{mode}.log",
+                             timeout=SPLIT_CHECK_TIMEOUT, env=env, cwd=cwd)
+            if not report.is_file():
+                raise PackageError(f"check_split_pack_resources wrote no {mode} report; "
+                                   f"log: {logs / f'split-check-{mode}.log'}")
+            reports[mode] = (json.loads(report.read_text(encoding="utf-8")), text)
+            if any(cwd.iterdir()):
+                raise PackageError(f"the {mode} resource check wrote into its working directory")
+    (record, record_log), (verify, verify_log) = reports["record"], reports["verify"]
+    return compare_split_reports(pack, record, verify, record_log, verify_log)
+
+
+def split_client_pack(godot: Path, project: Path, app_dir: Path, logs: Path, storage=None) -> dict:
+    """Split app/RabbitLands.pck (pck_split.split), prove the partition and the resources,
+    then replace the monolith by the core pack. Returns the receipt (logs/pck-split.json)."""
+    monolith = app_dir / "RabbitLands.pck"
+    core = app_dir / SPLIT_CORE_TEMPORARY
+    if storage:
+        storage.check("before PCK split", monolith.stat().st_size)
+    log("splitting the PCK into a core pack and content packs")
+    try:
+        receipt = pck_split.split(monolith, app_dir, core)
+        receipt["proof"] = pck_split.prove(monolith, core, app_dir / pck_split.PACKS_DIRECTORY)
+    except pck_split.SplitError as error:
+        raise PackageError(f"PCK split: {error}") from error
+    receipt["proof"].pop("manifest", None)
+    receipt["resources"] = check_split_pack_resources(godot, project, monolith, core,
+                                                      app_dir / pck_split.PACKS_DIRECTORY, logs)
+    monolith.unlink()
+    core.rename(monolith)
+    receipt["core"]["file"] = monolith.name
+    (logs / "pck-split.json").write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
+    moved = sum(row["bytes"] for row in receipt["packs"])
+    log(f"split the PCK: core {receipt['core']['bytes'] / 1e6:.1f} MB, {len(receipt['packs'])} content packs "
+        f"{moved / 1e6:.1f} MB; {receipt['resources']['resources']} resources and "
+        f"{receipt['resources']['files']} files load alike from both layouts")
+    if receipt["resources"]["broken_in_both"]:
+        log(f"warning: {len(receipt['resources']['broken_in_both'])} resources fail to load from the monolith "
+            f"too: {', '.join(receipt['resources']['broken_in_both'][:5])}")
+    return receipt
+
+
+def check_content_packs_mounted(text: str, manifest: dict, log_name: str) -> dict:
+    """The smoke log's content_packs diagnostic: every pack the manifest lists mounted."""
+    rows = []
+    for line in text.splitlines():
+        match = CONTENT_PACKS_DIAGNOSTIC.search(line)
+        if match:
+            try:
+                rows.append(json.loads(match.group(1)))
+            except ValueError:
+                continue
+    if not rows:
+        raise PackageError(f"the exported client logged no content_packs diagnostic ({log_name})")
+    row = rows[-1]
+    mounted = {pack.get("file") for pack in row.get("packs", []) if pack.get("state") in ("mounted", "already")}
+    wanted = {pack["file"] for pack in manifest.get("packs", []) if not pack.get("feature")}
+    if row.get("state") != "mounted" or not wanted <= mounted:
+        raise PackageError(f"the exported client did not mount its content packs ({log_name}): "
+                           + json.dumps(row)[:600])
+    return row
+
+
 def stage_audio_credits(app_dir: Path, stage: Path) -> None:
     """Fail the build if licensed audio would ship without its notices."""
     audio = app_dir / "assets/audio"
@@ -4479,7 +4678,13 @@ def wsl_path(path: Path) -> str:
 def smoke_launch(app_dir: Path, logs: Path, platform: dict, vram_textures: bool = False,
                  pool_test: str | None = None, *, actor_test: str | None = None,
                  clean_feature_environment: bool = False,
-                 optimization_profile: str | None = None, log_name: str = "smoke.log") -> None:
+                 optimization_profile: str | None = None, log_name: str = "smoke.log",
+                 content_packs: dict | None = None) -> None:
+    # With a split PCK (content_packs: the core's data/content_packs.json) the
+    # client must log that it mounted every required pack (W2-UD-06), and the
+    # SMOKE_FAILURES scan covers "Failed loading resource" before and after
+    # the mount.
+    #
     # The launch must leave the package exactly as it was: a user:// that
     # falls back to a relative path writes settings and caches into app/,
     # and they would ship in the archive.
@@ -4511,6 +4716,8 @@ def smoke_launch(app_dir: Path, logs: Path, platform: dict, vram_textures: bool 
             raise PackageError(f"the exported client did not decode and decompress an actor sidecar of {actor_test}:"
                                "\n  " + "\n  ".join(lines[:10] or ["(no actor_images line)"])
                                + f"\nfull log: {logs / log_name}")
+        if content_packs is not None and text is not None:
+            check_content_packs_mounted(text, content_packs, log_name)
     finally:
         added = sorted(p for p in app_dir.parent.rglob("*") if p not in before)
         if added:
@@ -5242,6 +5449,9 @@ def _main(argv=None, storage=None) -> int:
                             help="ship no actor VRAM sidecars")
     parser.add_argument("--vram-cache", type=Path, default=DIST / ".build" / "vram-cache",
                         help="encode cache for the sidecars (default dist/.build/vram-cache)")
+    parser.add_argument("--no-split-pck", action="store_true",
+                        help="ship the export's single RabbitLands.pck instead of a core pack and app/packs/*.pck "
+                             "(W2-UD-06; the split is the Windows/Linux default)")
     parser.add_argument("--no-zip", action="store_true", help="leave the folder unarchived")
     parser.add_argument("--benchmark-profile", action="store_true",
                         help="standalone local test export with allowlisted performance workloads")
@@ -5354,6 +5564,11 @@ def _main(argv=None, storage=None) -> int:
         actor_dirs = actor_sidecar_dirs(build_dir, options.actor_vram_textures, no_vram=options.no_vram_textures,
                                         release_build=options.release_build, runner=bool(storage))
         actor_receipt = None
+        split_reason = split_pack_reason(build_dir, options.platform, disabled=options.no_split_pck,
+                                         benchmark=options.benchmark_profile)
+        log("PCK: split into a core pack and content packs" if not split_reason
+            else f"PCK: single pack ({split_reason})")
+        content_packs = None
         check_map_backgrounds(build_dir)
         optimization = None
         if options.full_optimizations:
@@ -5532,6 +5747,11 @@ def _main(argv=None, storage=None) -> int:
         check_map_background_export(build_dir, app_dir)
         check_glb_textures(app_dir)
         check_shared_meshes(build_dir, stage)
+        if not split_reason:
+            # After every static PCK check and before anything runs the game:
+            # the launcher export, the smoke launches and the full-optimization
+            # checks all see the shipped layout.
+            content_packs = split_client_pack(godot, project, app_dir, logs, storage)["manifest"]
         if updating:
             client_release.export_launcher(stage, metadata, godot, project, EXPORT_PRESETS,
                                            platform["preset"], run_godot, logs,
@@ -5556,12 +5776,14 @@ def _main(argv=None, storage=None) -> int:
         if not options.no_smoke and options.platform != "macos":
             smoke_launch(app_dir, logs, platform, vram_textures=not options.no_vram_textures,
                          pool_test=pooled_sidecar_directory(stage), actor_test=actor_test,
+                         content_packs=content_packs,
                          **({"clean_feature_environment": True} if optimization else {}))
         if optimization:
             optimization.record_startup(logs / "smoke.log")
             smoke_launch(app_dir, logs, platform, vram_textures=not options.no_vram_textures,
                 pool_test=pooled_sidecar_directory(stage), actor_test=actor_test, clean_feature_environment=True,
-                optimization_profile="human-testing", log_name="smoke-human-testing.log")
+                optimization_profile="human-testing", log_name="smoke-human-testing.log",
+                content_packs=content_packs)
             optimization.record_startup(logs / "smoke-human-testing.log", profile="human-testing")
             optimization.check_final_package()
             write_json = full_optimization_package.write_json
