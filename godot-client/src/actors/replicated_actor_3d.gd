@@ -6494,6 +6494,111 @@ func pause_for_parking(gate: AnimationGate) -> void:
 		_weapon_carry.call("update_activity")
 	_refresh_cape_cloth_activity()
 
+## Why the player's own body may not be kept across a map change for the ADD
+## that follows (main.gd `_hold_local_avatar`, AW-02), or "" when it may. A
+## deferred node has nothing worth keeping; a death, a staged scene and a held
+## dialogue portrait own the pose, and those are rebuilt as they always were.
+func relocation_hold_refusal() -> String:
+	if _model_deferred:
+		return "deferred"
+	if current_action == &"death":
+		return "dead"
+	if _cinematic_active:
+		return "cinematic"
+	if portrait_pose_held():
+		return "portrait"
+	return ""
+
+## AW-02: drops what this body carries from the map it is leaving, before Main
+## keeps it hidden for the next ADD (`relocation_hold_refusal` said it may).
+## Main then wears it again the way a parked crowd body comes back
+## (`rebind_map`, `_revive_actor`, `settle_after_relocation`), so it starts the
+## new map as a freshly built body would: no presentation service binding,
+## leap, turn prediction or remembered command; no step being walked, learned
+## pace or network buffer; no lean from the old ground and no ground marker
+## draped over it; nothing selected or targeted; no speech bubble; resting in
+## its first clip, as `configure` leaves a new body. Equipment, appearance,
+## render quality, the RL head and the mount are kept: the ADD restates them
+## and only what changed is applied again.
+func prepare_for_relocation() -> void:
+	var remote = RemotePresentationService.current()
+	if remote != null: remote.detach(self, "relocation")
+	end_charge_leap()
+	# The remembered command, as a new node has it: the ADD's command plays.
+	_last_command_sequence = -1
+	_in_combat = false
+	_ranged_aiming = false
+	_swing_index = 0
+	clear_turn_prediction()
+	# The movement stream. The ADD's teleport snaps to the arrival tile.
+	_segment_elapsed = 0.0
+	_segment_duration = 0.0
+	_schedule_due = -1.0
+	_last_movement_update_msec = -1
+	_smoothed_server_interval = initial_server_interval
+	_pace_histories = {}
+	_unconfirmed_paces = PackedFloat32Array()
+	_unconfirmed_gait = -1
+	_previous_step_gait = 0
+	_previous_step_tiles = 1.0
+	_jitter_allowance = 0.0
+	_travel_yaw_active = false
+	_movement_coast_remaining = 0.0
+	_presentation_speed = walk_presentation_speed
+	_snap_pending = true
+	_settled = false
+	# The ground it stood on is not there any more.
+	_surface_up = Vector3.UP
+	_surface_target_up = Vector3.UP
+	_clear_native_surface_tilt()
+	_apply_surface_orientation()
+	_selection_ring_draped_at = Vector3(NAN, NAN, NAN)
+	if _combat_target_marker != null:
+		_combat_target_marker.call("invalidate_ground")
+	set_selected(false)
+	set_combat_target(false)
+	clear_speech_bubble()
+	# From rest, without a blend from the old map's clip.
+	play_action(&"idle", true)
+
+## AW-02: what a new body takes from its map in `configure`, read the same way
+## for a kept one: metres per tile (the selection ring, click capsule and
+## stand-in follow it), the footprint, the server scale (1 when the record
+## does not say), and its place and facing on the arrival tile at the map's
+## own height - not the old map's ground, which the ADD's teleport would
+## otherwise keep until the new ground is sampled. The map dot goes back to
+## the size it is built at; Main shrinks it again on the small lesson maps
+## (main.gd `_fit_lantern_map_marker`).
+func rebind_map(adapter: CoordinateAdapter, dto: Dictionary) -> void:
+	var dot := get_node_or_null(String(MAP_DOT_NODE)) as Node3D
+	if dot != null:
+		dot.scale = Vector3.ONE
+	_metres_per_tile = maxf(0.01, adapter.metres_per_tile)
+	var next := dto.get("footprint", Vector2i.ONE) as Vector2i
+	footprint = Vector2i(maxi(1, next.x), maxi(1, next.y))
+	set_server_scale(float(dto.get("scale", 1.0)))
+	server_target = adapter.footprint_center(int(dto.get("x", 0)), int(dto.get("y", 0)), footprint)
+	position = server_target
+	_segment_start = position
+	rotation.y = adapter.rotation_to_godot(int(dto.get("rotation", 0)))
+	_target_yaw = rotation.y
+	_resize_selection()
+
+## AW-02: a kept body's cape drops back onto its rest hang at the place Main
+## has just put it, as a new body's solver starts; otherwise it would swing in
+## from where the body stood on the old map. The RL hair springs at High
+## (RLHairMotion's SpringBoneSimulator3D, in the tree only while it runs) work
+## in world space too: reset here, they start from the locks' pose at the new
+## place. Left alone, the first step after the adoption pointed the locks back
+## at the old map (tips 62 mm off rest, headless; 4-5 mm once reset, 9-11 mm on
+## a new body's first step).
+func settle_after_relocation() -> void:
+	if _cape_cloth != null:
+		_cape_cloth.call("reset")
+	_refresh_cape_cloth_activity(true)
+	for simulator: Node in find_children("*", "SpringBoneSimulator3D", true, false):
+		(simulator as SpringBoneSimulator3D).reset()
+
 ## A paused body has nothing to pose: its player is stopped and its cloth is
 ## asleep. Its skeleton still processed its modifiers and updated every frame,
 ## though, so a crowd paid skeleton work for every body off screen (the engine

@@ -154,6 +154,7 @@ const SecretSectionsScript := preload("res://src/world/secret_sections.gd")
 const OccluderFadeScript := preload("res://src/world/occluder_fade_manager.gd")
 const CameraShaderWarmup := preload("res://src/world/camera_shader_warmup.gd")
 const CrowdPresentationScript := preload("res://src/world/crowd_presentation.gd")
+const LocalAvatarHoldScript := preload("res://src/actors/local_avatar_hold.gd")
 const LiveEffectBudgetScript := preload("res://src/world/live_effect_budget.gd")
 const UndergroundSceneryScript := preload("res://src/world/underground_scenery.gd")
 const InvasionAssistantScript := preload("res://src/ui/invasion_assistant.gd")
@@ -1061,6 +1062,9 @@ var _hand_swap_queue: Array = []
 ## once. Both read RABBITLANDS_CROWD_PRESENTATION, which benchmarks use to turn
 ## each part off.
 var crowd = CrowdPresentationScript.new()
+## The player's own body kept across a map change that is not a seamless
+## crossing, for the ADD that follows (AW-02; `_hold_local_avatar`).
+var _local_avatar_hold = LocalAvatarHoldScript.new()
 var effect_budget = LiveEffectBudgetScript.new()
 ## Which actor the selection ring and the overhead target were last given to,
 ## so a pass only touches the actors whose answer changed.
@@ -2132,6 +2136,7 @@ func client_diagnostic_snapshot() -> Dictionary:
 		"low_processor_usage_mode": OS.low_processor_usage_mode,
 		"low_processor_usage_mode_sleep_usec": OS.low_processor_usage_mode_sleep_usec,
 		"actor_creation_budget": actor_creation_budget_snapshot(),
+		"local_avatar_hold": _local_avatar_hold.snapshot(),
 		"ambient_creation_pending": ambient_creation_pending_count(),
 		"map_texture_mip_skip": GraphicsOptions.active_texture_skip(),
 		"map_texture_preference": _map_texture_quality,
@@ -4703,6 +4708,7 @@ func _close_client() -> void:
 	# Keep serving rendering/physics commands until a private loader completes;
 	# joining a live import while the rendering server shuts down can deadlock.
 	_actor_preparation_closing = true
+	_local_avatar_hold.release("close")
 	character_intro.cancel()
 	actor_resource_warmup.clear()
 	while not actor_resource_warmup.is_idle():
@@ -4948,6 +4954,8 @@ func _clear_world_presentation(retain_map_resources := false) -> void:
 		if is_instance_valid(raw_node):
 			(raw_node as Node).queue_free()
 	actor_nodes.clear()
+	# A session's end lets go of the player's body kept for a map change too.
+	_local_avatar_hold.release("session")
 	if _browser_actor_assets != null: _browser_actor_assets.call("clear")
 	_map_actor_marker_cache.clear()
 	crowd.clear()
@@ -6958,13 +6966,7 @@ func _load_server_map() -> void:
 	# empties the table, as the server's KILL_ALL_ACTORS empties AppState's.
 	# Bodies parked for a return belong to the map being left either way.
 	crowd.clear()
-	for actor_id: Variant in actor_nodes.keys():
-		if _continuous_map_handoff or int(actor_id) == _retained_traveller:
-			continue
-		var raw_actor_node: Variant = actor_nodes[actor_id]
-		if is_instance_valid(raw_actor_node):
-			(raw_actor_node as Node).queue_free()
-		actor_nodes.erase(actor_id)
+	_clear_actor_nodes_for_map_change()
 	for bag_node_value: Variant in ground_bag_nodes.values():
 		if is_instance_valid(bag_node_value):
 			(bag_node_value as Node).queue_free()
@@ -7006,6 +7008,91 @@ func _load_server_map() -> void:
 		# CHANGE_MAP precedes the destination actor packet. Delay chunk disk
 		# reads until that packet supplies the actual login/teleport arrival.
 		world_loader.load_world(manifest_path, Vector3.INF, true)
+
+## The actor nodes a change of map that is not a seamless crossing lets go
+## (`_load_server_map`): every one but the traveller a crossing carries. The
+## player's own body is kept for the ADD that follows when it can be
+## (`_hold_local_avatar`) and freed with the rest otherwise.
+func _clear_actor_nodes_for_map_change() -> void:
+	for actor_id: Variant in actor_nodes.keys():
+		if _continuous_map_handoff or int(actor_id) == _retained_traveller:
+			continue
+		var raw_actor_node: Variant = actor_nodes[actor_id]
+		if is_instance_valid(raw_actor_node):
+			if int(actor_id) == AppState.local_actor_id \
+					and _hold_local_avatar(raw_actor_node as ReplicatedActor3D):
+				_built_bodies = maxi(0, _built_bodies - 1)
+			else:
+				(raw_actor_node as Node).queue_free()
+		actor_nodes.erase(actor_id)
+
+## AW-02: keeps the player's own body, which a map change that is not a
+## seamless crossing (a door, a teleport, a gauntlet entry, a same-map
+## relocation) takes off the table, for the ADD the server sends after
+## YOU_ARE. It is parked as a crowd body is - hidden, paused, not pickable -
+## after `prepare_for_relocation` has dropped what belongs to the old map, and
+## stays under world_root out of `actor_nodes`, so the arrival hold, the gate
+## and stale removal never see it. `_spawn_actor` wears it again
+## (`_adopt_local_avatar`). False, and the caller frees it, when the body or
+## the moment is one a rebuild has always handled: no body yet, a death, a
+## staged scene, the character intro, a held dialogue portrait, the client
+## closing. The caller keeps `_built_bodies`.
+func _hold_local_avatar(node: ReplicatedActor3D) -> bool:
+	if node == null or not is_instance_valid(node) or node.is_queued_for_deletion():
+		return false
+	var refusal: String = node.relocation_hold_refusal()
+	if refusal.is_empty():
+		if _actor_preparation_closing:
+			refusal = "closing"
+		elif bool(AppState.death.get("dead", false)):
+			refusal = "dead"
+		elif character_intro.is_active():
+			refusal = "intro"
+		elif campaign_scene.is_active():
+			refusal = "campaign"
+	if not refusal.is_empty():
+		_local_avatar_hold.refuse(refusal)
+		return false
+	node.prepare_for_relocation()
+	node.pause_for_parking(animation_gate)
+	# What follows the body goes with it, as when it was freed: the harvest
+	# glitter stops (`_adopt_local_avatar` asks again for the new map).
+	if is_instance_valid(harvest_sparkle) and harvest_sparkle.is_following(node):
+		harvest_sparkle.stop()
+		harvest_sparkle = null
+	return _local_avatar_hold.hold(node, node.actor_id,
+		str(node.get_meta(&"identity_key", "")), str(node.get_meta(&"model_id", "")),
+		Time.get_ticks_msec())
+
+## AW-02: the held body worn again for the player's ADD, by the steps a parked
+## body takes back (`_revive_actor`), then the player's own: its per-map sizes
+## first (`rebind_map`), its cape settled where it now stands, the lantern
+## map dot, the effect and marker options, and hidden behind the curtain until
+## its ground is there. Equipment and appearance are applied again only where
+## the record differs (apply_server_state reconciles both).
+func _adopt_local_avatar(id: Variant, node: ReplicatedActor3D, dto: Dictionary,
+		actor_adapter: CoordinateAdapter) -> void:
+	node.collision_layer = 2
+	node.rebind_map(actor_adapter, dto)
+	_local_rl_prewarm_key = 0
+	_revive_actor(id, node, dto, actor_adapter)
+	node.settle_after_relocation()
+	_fit_lantern_map_marker(node, "MapDot")
+	node.set_combat_effects_enabled(_effects_enabled)
+	node.set_target_marker_style(_target_marker_style)
+	# Built behind the curtain, shown once its ground is resident.
+	node.visible = not _arrival_pending()
+	_arrival_unreported = true
+	_sync_harvest_sparkle()
+	Diagnostics.record("local_avatar_adopted", {"map": AppState.current_map,
+		"held_ms": _local_avatar_hold.last_wait_msec})
+
+## Lets the held body go once it has waited too long or the player is someone
+## else now (`LocalAvatarHold.expire`), from the gate pass every frame.
+func _expire_held_local_avatar(now: int) -> void:
+	if _local_avatar_hold.expire(now, AppState.local_actor_id):
+		Diagnostics.record("local_avatar_released", {"map": AppState.current_map,
+			"releases": _local_avatar_hold.releases.duplicate()})
 
 func _rebase_streamed_world(rebase: Transform3D) -> void:
 	if is_instance_valid(remote_presentation): remote_presentation.next_map_frame()
@@ -7730,7 +7817,9 @@ func _remove_stale_actor_nodes(changed: Variant) -> void:
 					str(stale_node.get_meta(&"identity_key", "")), now))
 			if parked:
 				stale_node.pause_for_parking(animation_gate)
-			else:
+			elif not (int(id) == AppState.local_actor_id and _hold_local_avatar(stale_node)):
+				# The player's own, taken away by KILL_ALL_ACTORS ahead of a
+				# map change, is kept for the ADD that follows when it can be.
 				(stale_actor as Node).queue_free()
 		actor_nodes.erase(id)
 		crowd.forget(int(id))
@@ -7741,7 +7830,16 @@ func _remove_stale_actor_nodes(changed: Variant) -> void:
 		_actor_health_seen.erase(id)
 	crowd.expire_parked(now)
 	if _browser_actor_assets != null:
-		_browser_actor_assets.call("prune", AppState.actors, crowd.parked_actor_ids())
+		_browser_actor_assets.call("prune", AppState.actors, _kept_body_ids())
+
+## The actor ids whose bodies are kept off the table - parked crowd bodies and
+## the player's own held across a map change - which the browser build's asset
+## prune must keep.
+func _kept_body_ids() -> Array:
+	var ids: Array = crowd.parked_actor_ids()
+	if _local_avatar_hold.holding():
+		ids.append(_local_avatar_hold.held_id())
+	return ids
 
 ## Gives each arriving actor a node. The player's own is always built at once.
 ## With lazy bodies (crowd_presentation.gd) the nearest arrivals inside the
@@ -7978,6 +8076,18 @@ func _spawn_actor(id: Variant, build := true,
 		_spawn_backlog = true
 		return false
 	var identity: String = CrowdPresentationScript.identity_key(dto)
+	if previous == null and _local_avatar_hold.holding() and int(id) == AppState.local_actor_id:
+		# The player's own body, kept across the map change (AW-02): worn
+		# again when the ADD names the same person and model, else let go.
+		var held_model := _model_for_actor(dto)
+		if _local_avatar_hold.matches(int(id), identity, held_model):
+			if OS.has_feature("web") and not _browser_actor_ready(int(id), dto):
+				_spawn_backlog = true
+				return false
+			_adopt_local_avatar(id, _local_avatar_hold.take(int(id), identity, held_model)
+				as ReplicatedActor3D, dto, actor_adapter)
+			return true
+		_local_avatar_hold.release("mismatch")
 	if previous == null:
 		var parked := crowd.take_parked(int(id), identity) as ReplicatedActor3D
 		if parked != null:
@@ -7997,6 +8107,8 @@ func _spawn_actor(id: Variant, build := true,
 	world_root.add_child(node)
 	actor_nodes[id] = node
 	var model_id := _model_for_actor(dto)
+	# What a held player body is matched against at its next ADD (AW-02).
+	node.set_meta(&"model_id", model_id)
 	var model_config: Dictionary = models.get(model_id, {}) as Dictionary
 	if int(id) == AppState.local_actor_id:
 		# The player's own from its first build, as the creation preview is: its
@@ -8078,8 +8190,9 @@ func _revive_actor(id: Variant, node: ReplicatedActor3D, dto: Dictionary,
 	node.set_drawn(_crowd_reference_point().distance_to(node.global_position)
 		<= ACTOR_DRAW_DISTANCE_METRES)
 	# Paused while parked; it animates meanwhile, as a body coming into view
-	# does, until the gate's next sweep gives it its tier.
-	node.set_animation_tier(AnimationGate.Tier.HALF if crowd.gate
+	# does, until the gate's next sweep gives it its tier. The player's own
+	# (held across a map change, AW-02) is always full rate there.
+	node.set_animation_tier(AnimationGate.Tier.HALF if crowd.gate and int(id) != AppState.local_actor_id
 		else AnimationGate.Tier.FULL, animation_gate)
 	node._remote_enrollment_ready = true
 	if is_instance_valid(remote_presentation): remote_presentation.consider(node)
@@ -9992,7 +10105,8 @@ func _update_animation_gate(delta: float) -> void:
 	# the deferred world sync parks or frees it, and that sync prunes it then.
 	if crowd.expire_parked_due(now) > 0 and _browser_actor_assets != null:
 		_browser_actor_assets.call("prune", AppState.actors,
-			crowd.parked_actor_ids() + actor_nodes.keys())
+			_kept_body_ids() + actor_nodes.keys())
+	_expire_held_local_avatar(now)
 	if not _gate_sweep_active:
 		if now < _animation_gate_refresh_msec:
 			return
