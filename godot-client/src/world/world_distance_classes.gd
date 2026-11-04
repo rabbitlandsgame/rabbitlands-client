@@ -21,8 +21,8 @@ extends RefCounted
 ## keeping membership is what keeps the picture the same.
 ##
 ## The constants are literals with string keys on purpose:
-## `tools/world_draw_budget.py` reads CLASS_RADIUS_LIMITS and CELL_METRES
-## from this file.
+## `tools/world_draw_budget.py` reads CLASS_RADIUS_LIMITS, CELL_METRES,
+## REACH_METRES and TIER_REACH_SCALE from this file.
 ##
 ## Pure static helpers: safe on the worker threads that build detached chunks.
 
@@ -35,6 +35,150 @@ const CELL_METRES := {"S": 32.0, "M": 48.0, "L": 64.0, "XL": 96.0}
 ## Stamped on every class-split batch (a String, one of CLASSES); a batch
 ## without it was built by the legacy rule (identity frame, legacy cell).
 const CLASS_META := &"rl_distance_class"
+
+# --- Runtime distance pass (WD-C3, world_distance.gd) -----------------------
+
+## How far from the camera's focus a class is always drawn at HIGH (metres);
+## 0 = never culled by distance (the far plane only). A node is culled only
+## beyond `camera bucket + reach x tier scale + its own extent + margin`
+## (WorldDistance.range_end), so nothing within the reach of the focus is
+## culled at any zoom.
+const REACH_METRES := {"S": 30.0, "M": 70.0, "L": 160.0, "XL": 0.0}
+## The reach per graphics quality (LookProfile.Quality names, upper case).
+const TIER_REACH_SCALE := {"HIGH": 1.0, "MEDIUM": 0.8, "LOW": 0.6}
+## Mesh LOD bias per graphics quality on every classed node. Meshes without
+## LODs ignore it, so it changes nothing until generated prototype LODs
+## (WD-C5) exist.
+const LOD_BIAS := {"HIGH": 1.0, "MEDIUM": 0.4, "LOW": 0.15}
+## Whether a class casts the sun's shadow. A flat piece never does.
+const CASTS_SHADOW := {"S": false, "M": true, "L": true, "XL": true}
+## Flat: a piece lower than this (metres), or lower than FLAT_HEIGHT_RATIO of
+## the narrower width of its footprint (`is_flat`).
+const FLAT_HEIGHT_METRES := 0.35
+const FLAT_HEIGHT_RATIO := 0.15
+## Bridge and pier structure (by node name, case-insensitive words, or name
+## prefixes): never ranged, because the walk decks it holds up are ground and
+## always drawn; a ranged support would leave a floating deck at distance.
+const STRUCTURE_PREFIXES: Array[String] = ["AuthoredBridge", "Deck_"]
+const STRUCTURE_WORDS: Array[String] = ["bridge", "causeway", "trestle"]
+## An object the exporter split by material (its meshes share one parent and
+## one placement) is classed, ranged and shadowed as one, by its parts' union
+## box, so it never loses a part at distance. Such meshes whose union box is
+## wider than this many times the largest part's are not one object, and are
+## classed one by one.
+const ASSEMBLY_SPREAD := 2.0
+## The camera's orbit distance is rounded up to this step (metres), so a zoom
+## re-applies the ranges once per step, not every frame.
+const CAMERA_BUCKET_METRES := 8.0
+## Hysteresis on every range end (metres; VISIBILITY_RANGE_FADE_DISABLED).
+## Godot hides a drawn node beyond end + margin and shows a hidden one inside
+## end - margin, so the margin is added to the end: the hysteresis band lies
+## wholly beyond the reach.
+const RANGE_MARGIN_METRES := 4.0
+## A node's own extent (its drawn box's half-diagonal: a batch's members
+## spread over its cell) is rounded up to this step (metres); nodes of one
+## class and step share one SceneTree group and so one range end.
+const EXTENT_STEP_METRES := 4.0
+## Extents beyond this many steps are not ranged (none is expected: a class
+## cell's own diagonal is under 75 m).
+const EXTENT_STEPS := 32
+
+## Ground and water by node name, as the continent exporter names them
+## (LookGround.kind_of reads the same prefixes): never ranged.
+enum Ground { NONE, WATER, TERRAIN, BASE, PATCH, DECK }
+
+## The ground kind `node_name` names. A base is `AuthoredGround_<region>Base`
+## (WorldLoader._is_authored_base_terrain); any other authored ground is a
+## patch; `Walk_` meshes are walk decks (bridge and pier decks, kit paving).
+static func ground_kind(node_name: String) -> Ground:
+	if node_name.begins_with("Water_") or node_name.begins_with("Scenery_Water"):
+		return Ground.WATER
+	if node_name.begins_with("Terrain_") or node_name.begins_with("Walk_Terrain"):
+		return Ground.TERRAIN
+	if node_name.begins_with("AuthoredGround_"):
+		return Ground.BASE if _is_base_name(node_name) else Ground.PATCH
+	if node_name.begins_with("Walk_"):
+		return Ground.DECK
+	return Ground.NONE
+
+## `AuthoredGround_<region>Base` or `AuthoredGround_<region>Base_<...>`, where
+## the region part holds no `-` (patch names such as `castle-town-lawn` do).
+static func _is_base_name(node_name: String) -> bool:
+	var rest := node_name.trim_prefix("AuthoredGround_")
+	var at := rest.find("Base")
+	if at <= 0 or rest.left(at).contains("-"):
+		return false
+	var after := rest.substr(at + 4)
+	return after.is_empty() or after.begins_with("_")
+
+## Whether a piece `height` metres tall (its placed box's vertical extent)
+## whose footprint is `footprint` metres across at its narrowest
+## (`footprint_width`) is flat: a slab, a deck, a pad. Measured on the
+## footprint's narrower width, a turned copy is exactly as flat as the
+## original, and a long low wall or fence (thin across) is not flat.
+static func is_flat(height: float, footprint: float) -> bool:
+	var tall := absf(height)
+	return tall < FLAT_HEIGHT_METRES or tall < FLAT_HEIGHT_RATIO * absf(footprint)
+
+## The narrowest width (metres) of a box of `mesh_size` placed by `basis`, seen
+## from above: its outline on the ground plane is the sum of its three placed
+## edges, and the narrowest width of that outline lies across one of them.
+static func footprint_width(mesh_size: Vector3, basis: Basis) -> float:
+	var a := Vector2(basis.x.x, basis.x.z) * mesh_size.x
+	var b := Vector2(basis.y.x, basis.y.z) * mesh_size.y
+	var c := Vector2(basis.z.x, basis.z.z) * mesh_size.z
+	var narrowest := minf(_width_across(a, a, b, c), minf(_width_across(b, a, b, c), _width_across(c, a, b, c)))
+	return narrowest if narrowest < INF else 0.0
+
+## The outline's width across `edge` (one of its edges `a`, `b`, `c`); INF for
+## an edge seen end-on.
+static func _width_across(edge: Vector2, a: Vector2, b: Vector2, c: Vector2) -> float:
+	if edge.length_squared() <= 1e-12:
+		return INF
+	var across := Vector2(-edge.y, edge.x).normalized()
+	return absf(a.dot(across)) + absf(b.dot(across)) + absf(c.dot(across))
+
+## Whether `node_name` names bridge or pier structure (STRUCTURE_PREFIXES,
+## STRUCTURE_WORDS).
+static func is_structure(node_name: String) -> bool:
+	for prefix: String in STRUCTURE_PREFIXES:
+		if node_name.begins_with(prefix):
+			return true
+	for word: String in STRUCTURE_WORDS:
+		if node_name.containsn(word):
+			return true
+	return false
+
+## The reach of `distance_class` at `quality_name` (metres from the focus);
+## 0 when the class is not ranged.
+static func reach_metres(distance_class: String, quality_name: String) -> float:
+	var reach := float(REACH_METRES.get(distance_class, 0.0))
+	return reach * float(TIER_REACH_SCALE.get(quality_name.to_upper(), 1.0)) if reach > 0.0 else 0.0
+
+## The mesh LOD bias at `quality_name`.
+static func lod_bias(quality_name: String) -> float:
+	return float(LOD_BIAS.get(quality_name.to_upper(), 1.0))
+
+## The camera's orbit distance rounded up to CAMERA_BUCKET_METRES (at least
+## one step).
+static func camera_bucket(distance: float) -> float:
+	var step := CAMERA_BUCKET_METRES
+	return maxf(step, ceilf(maxf(distance, 0.0) / step) * step)
+
+## The extent step of a node whose drawn box has half-diagonal `extent`, or -1
+## when it is too large to range.
+static func extent_step(extent: float) -> int:
+	var step := ceili(maxf(extent, 0.0) / EXTENT_STEP_METRES)
+	return step if step <= EXTENT_STEPS else -1
+
+## The visibility_range_end of a node of `distance_class` and extent step
+## `step` at camera bucket `bucket` and `quality_name`; 0 (not culled) when
+## the class has no reach.
+static func range_end(distance_class: String, step: int, bucket: float, quality_name: String) -> float:
+	var reach := reach_metres(distance_class, quality_name)
+	if reach <= 0.0 or step < 0:
+		return 0.0
+	return bucket + reach + float(step) * EXTENT_STEP_METRES + RANGE_MARGIN_METRES
 
 ## The class of an instance of radius `radius` (metres; `placement_radius`).
 static func size_class(radius: float) -> String:

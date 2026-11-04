@@ -48,6 +48,10 @@ const BATCH_MINIMUM_INSTANCES := 4
 # `rendering.batchCellMetres` replaces it in both roles).
 const BATCH_CELL_METRES := 180.0
 const WorldDistanceClasses := preload("res://src/world/world_distance_classes.gd")
+# The runtime distance pass (WD-C3): ranges, shadow rules and LOD bias by size
+# class, applied after the cache snapshot and before the look pass on every
+# load path (`_apply_world_distance`), so caches stay tier-neutral.
+const WorldDistance := preload("res://src/world/world_distance.gd")
 # Stamped on every source node a batch swallowed, naming the MultiMeshInstance3D
 # that now draws it and its slot in that multimesh. A batched prop is otherwise
 # untraceable from the node the rest of the client still holds, and OccluderFade
@@ -642,6 +646,7 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 		load_phases[&"total"] = mark-began
 		load_completed.emit(manifest)
 		return
+	_apply_world_distance()
 	# Look pass (a no-op with ELORIA_LOOK=0): paint the ground and
 	# the crowns. After the cache snapshot, so the cache keeps the loader's own
 	# materials.
@@ -759,6 +764,9 @@ var _cache_overrides: Dictionary = {}
 ## The loader's own `material_override` by node index, for the nodes that had
 ## one (see `_snapshot_for_cache`).
 var _cache_material_overrides: Dictionary = {}
+## What the distance pass changed after the snapshot ([[node, {property:
+## value before}]], WorldDistance.apply_root), put back for the pack.
+var _cache_distance: Array = []
 
 ## Reads the region back from the cache, if there is an entry for exactly this
 ## package and this format version. Returns true when the world is in the tree
@@ -806,6 +814,22 @@ func _apply_underground_scenery() -> void:
 	load_phases[&"undergroundPlacements"] = count
 	load_phases.merge(diagnostics,true)
 
+## The runtime distance pass (WorldDistance.apply_loaded) on the loaded tree:
+## after `_resolve_batch_links` and, on the raw path, after the cache snapshot,
+## before the look pass. A pending cache write keeps what the pass changed so
+## `_restore_pristine` packs the loader's own values.
+func _apply_world_distance() -> void:
+	var record := not _cache_nodes.is_empty()
+	var result := WorldDistance.apply_loaded(world_root, manifest, record)
+	if result.is_empty():
+		return
+	load_phases[&"worldDistance"] = int(result.usec)
+	load_phases[&"worldDistanceRanged"] = int(result.ranged)
+	load_phases[&"worldDistanceLodOnly"] = int(result.lod_only)
+	load_phases[&"worldDistanceShadowsOff"] = int(result.shadows_off) + int(result.ground_shadows_off)
+	if record:
+		_cache_distance = result.get("undo", [])
+
 func _materialize_geometry_world() -> bool:
 	if OS.get_thread_caller_id() != OS.get_main_thread_id() or _geometry_native.is_empty(): return false
 	var began := Time.get_ticks_usec()
@@ -822,6 +846,7 @@ func _materialize_geometry_world() -> bool:
 	world_root.name = "ImportedWorld_"+manifest.asset_id()
 	add_child(world_root)
 	_resolve_batch_links()
+	_apply_world_distance()
 	var look_began := Time.get_ticks_usec()
 	LookGround.paint_loaded(world_root,manifest)
 	LookFoliage.paint_loaded(world_root,manifest)
@@ -896,6 +921,7 @@ func _materialize_prepared_world() -> bool:
 	ResourceDiagnostics.record(_resource_timings, &"scene_attach", attach_began, true)
 	_resolve_batch_links()
 	PreparedPlacements.install(world_root, manifest, prepared_entry)
+	_apply_world_distance()
 	LookGround.paint_loaded(world_root, manifest)
 	LookFoliage.paint_loaded(world_root, manifest)
 	GauntletSurfaceContrast.apply(manifest, world_root)
@@ -983,6 +1009,7 @@ func _load_from_cache(mark: int, began: int) -> bool:
 	cache_status = &"hit"
 	print_debug("world_load stage=cache_hit file=", cache_file,
 		" batches_relinked=", relinked)
+	_apply_world_distance()
 	# Look pass (not with ELORIA_LOOK=0): paint the ground and the crowns, as a
 	# fresh load does.
 	LookGround.paint_loaded(world_root, manifest)
@@ -1160,6 +1187,7 @@ func _snapshot_for_cache() -> void:
 
 func _release_snapshot() -> void:
 	_cache_nodes.clear()
+	_cache_distance.clear()
 	_cache_material_overrides.clear()
 	_cache_visible.resize(0)
 	_cache_overrides.clear()
@@ -1253,6 +1281,10 @@ func _save_entry(packed: PackedScene, path: String, map_id: String) -> void:
 ## Puts back what the loader left, and returns what to undo afterwards.
 func _restore_pristine() -> Array:
 	var undo: Array = []
+	if not _cache_distance.is_empty():
+		# The distance pass's ranges, shadows and LOD bias (WD-C3), so an entry
+		# never bakes one quality's or one zoom's values in.
+		undo.append([self, "world_distance", WorldDistance.restore(_cache_distance)])
 	for index: int in _cache_nodes.size():
 		var node: Node = _cache_nodes[index]
 		if not is_instance_valid(node):
@@ -1290,7 +1322,9 @@ func _undo_pristine(undo: Array) -> void:
 		var node: Node = entry[0] as Node
 		if not is_instance_valid(node):
 			continue
-		if entry[1] is String and str(entry[1]) == "material_override":
+		if entry[1] is String and str(entry[1]) == "world_distance":
+			WorldDistance.restore(entry[2] as Array)
+		elif entry[1] is String and str(entry[1]) == "material_override":
 			(node as GeometryInstance3D).material_override = entry[2] as Material
 		elif entry[1] is String:
 			(node as Node3D).visible = bool(entry[2])
