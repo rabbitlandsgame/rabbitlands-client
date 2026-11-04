@@ -190,6 +190,17 @@ old-male base scenes or the `variants/luminous_female` scenes any more.
 `eloria-assets/qa/class-equipment-fit-baseline.json` stays as the record of
 that pass, and the tools remain in git history (last present at a35ff1c43).
 
+A race headwear refit can carry many times the triangles of the Human fit it
+was made from (the Votary Sun Headband: 38,558 against 1,285). The actor
+geometry cook's budget stage (`tools/actor_geometry/budget_policy.gd`, see
+`actor-geometry-lods.md`) gives such a refit a simplified base that it draws at
+every distance: the largest simplified level within twice its Human fit's
+triangles whose error meets the LOD policy's 3 px clamp from 8 m, or, when no
+level within twice does, the smallest level that does (removing at least a
+quarter); a refit with no such level keeps its full mesh. The refit's own
+vertices, UVs and materials are kept. It takes effect only where the game
+applies cooked actor geometry.
+
 ## Asset-generation decision
 
 No new generated mesh was required for this pass. The existing canonical
