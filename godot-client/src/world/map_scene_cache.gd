@@ -64,7 +64,10 @@ extends RefCounted
 ## entry. (Live continent chunks are detached builds, which read the cache but
 ## never write it, so this reaches whole-map loads today.)
 ## 8 - archived procedural model copies are omitted before scene batching.
-const CACHE_FORMAT_VERSION := 11 # External scenery pixels retain their original texture policy.
+## 11 - external scenery pixels retain their original texture policy.
+## 12 - continent and gauntlet static batches are split into size-class cells with centred frames (WD-C2), and
+##      shared prototypes carry generated LODs (WD-C5).
+const CACHE_FORMAT_VERSION := 12 # Size-class batch cells (WD-C2) and generated prototype LODs (WD-C5).
 
 ## The package's two files are hashed through the content-digest facade: the
 ## same sha256, with the glb and the manifest read side by side on the main

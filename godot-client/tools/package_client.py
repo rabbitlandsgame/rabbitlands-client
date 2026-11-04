@@ -4811,8 +4811,13 @@ def write_compatibility_launchers(stage: Path, args: list[str], platform: dict,
     # no baked server. Keep their separator before forwarding them on both OSes.
     extra = " --" + (" " + " ".join(args) if args else "")
     renderer = "--rendering-method gl_compatibility --rendering-driver opengl3"
+    # Packages without the updater start the game from these launchers without
+    # --client-safe-mode, so safe mode reaches the game only through this
+    # environment: the pre-wave-2 sequential digest reader (NH-A2) and the
+    # client_runtime payload left unloaded (RB-C1g's kill switch).
     safe_environment = {"ELORIA_LOOK": "0", "ELORIA_LOOK_QUALITY": "low",
-                        "ELORIA_VRAM_TEXTURES": "0", "ELORIA_NO_MAP_CACHE": "1"}
+                        "ELORIA_VRAM_TEXTURES": "0", "ELORIA_NO_MAP_CACHE": "1",
+                        "RABBITLANDS_CONTENT_DIGEST": "sequential", "RABBITLANDS_NATIVE_RUNTIME": "off"}
     for safe in (False, True):
         label = "safe mode" if safe else "compatibility"
         slug = "safe-mode" if safe else "compatibility"

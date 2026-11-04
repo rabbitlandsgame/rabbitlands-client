@@ -4,6 +4,12 @@ const Diagnostics = preload("res://src/diagnostics/client_diagnostics.gd")
 const BrowserCapture = preload("res://src/platform/browser_capture.gd")
 const BrowserStorageControls = preload("res://src/platform/browser_storage_controls.gd")
 const ClientRuntime = preload("res://src/runtime/client_runtime.gd")
+## The bounded close and the native exit watchdog (AW-01).
+const ExitDrain := preload("res://src/runtime/exit_drain.gd")
+## The verified client_runtime payload, loaded once at startup (RB-C1g, D-NATIVE).
+const NativeLibrary := preload("res://src/runtime/native_library.gd")
+## The one loader of the native kernels and the reducer, for its snapshot (RB-C1g).
+const NativeCrowd := preload("res://src/runtime/native_crowd.gd")
 const RustSpellFlights = preload("res://src/world/rust_spell_flights.gd")
 const RustRiderPose = preload("res://src/mounts/rust_rider_pose.gd")
 var client_runtime := ClientRuntime.new()
@@ -150,8 +156,10 @@ var _dev_plain_tcp := false
 # stale in a working copy until the editor next scans the project.
 const InteriorCutawayScript := preload("res://src/world/interior_cutaway.gd")
 const LanternMineLightingScript := preload("res://src/world/lantern_mine_lighting.gd")
+const LightMarkerBudgetScript := preload("res://src/world/light_marker_budget.gd")
 const SecretSectionsScript := preload("res://src/world/secret_sections.gd")
 const OccluderFadeScript := preload("res://src/world/occluder_fade_manager.gd")
+const WorldDistanceScript := preload("res://src/world/world_distance.gd")
 const CameraShaderWarmup := preload("res://src/world/camera_shader_warmup.gd")
 const CrowdPresentationScript := preload("res://src/world/crowd_presentation.gd")
 const LocalAvatarHoldScript := preload("res://src/actors/local_avatar_hold.gd")
@@ -230,6 +238,9 @@ var _stream_lighting_at := 0
 
 var ambient_population: AmbientPopulation
 var map_light_root: Node3D
+## Keeps the nearest marker lights under map_light_root lit (LIGHT): N by
+## quality, at most 8 in Mobile and Compatibility.
+var light_marker_budget := LightMarkerBudgetScript.new()
 @onready var main_viewport: SubViewport = $GameView/ViewportContainer/Viewport
 @onready var viewport_container: TextureRect = $GameView/ViewportContainer
 @onready var map_viewport: SubViewport = %MapViewport
@@ -484,6 +495,10 @@ var _weather_applied_version := -1
 var _weather_applied_active := false
 ## The streamed maps' own lamps, lit at dusk and through the night.
 var night_lamps: NightLamps
+## World distance management (WD-C3): size-class visibility ranges, shadow
+## rules and LOD bias on the loaded world, following the camera. The camera
+## probe records its snapshot() as `world_distance`.
+var world_distance: WorldDistanceScript
 ## The map's declared mist and gulls (environment.presentation).
 var presentation_effects: PresentationEffects
 ## Objects the server placed into this map after it loaded, by object id.
@@ -1494,6 +1509,10 @@ func _log_optimization_startup() -> void:
 		"prepared": {"mode": prepared.selected_mode(), "node_policy": prepared.node_policy(),
 			"catalog_present": FileAccess.file_exists(prepared.CATALOG)},
 		"effects": RustSpellFlights.snapshot_for(world_root),
+		"content_digest": ContentDigest.snapshot(),
+		"native_runtime": NativeLibrary.snapshot(),
+		"native_kernels": NativeCrowd.snapshot(),
+		"exit_watchdog": ClientRuntime.exit_watchdog_state(),
 	}))
 
 ## Entry maintenance runs before preference changes, login setup or actor warmup.
@@ -1532,7 +1551,7 @@ func _prepare_geometry_before_login() -> bool:
 	await get_tree().process_frame
 	if explicit:
 		print("MAP_GEOMETRY_PREPARE ", JSON.stringify(report))
-		get_tree().quit(0 if bool(report.get("ok", false)) else 1)
+		ExitDrain.quit(get_tree(), 0 if bool(report.get("ok", false)) else 1, "prepare_map_geometry")
 		return true
 	if not bool(report.get("ok", false)):
 		push_warning("World data preparation did not finish; source loading remains available: %s" %
@@ -1547,6 +1566,15 @@ func _prepare_geometry_before_login() -> bool:
 	return false
 
 func _ready() -> void:
+	if Diagnostics.restart_pending():
+		# ClientDiagnostics is restarting this process into the renderer the
+		# settings ask for (RendererPolicy.restart). The new process sets up;
+		# skip it here, as the geometry maintenance exit does: with Main's
+		# startup work running, the quitting process never exits.
+		_geometry_maintenance_active = true
+		process_mode = Node.PROCESS_MODE_DISABLED
+		hide()
+		return
 	if OS.has_feature("web"):
 		_browser_loading_lease = preload("res://src/platform/browser_loading_lease.gd").new()
 		var browser_assets := get_tree().root.get_node_or_null("BrowserAssetService")
@@ -1555,6 +1583,13 @@ func _ready() -> void:
 			browser_assets.connect("files_evicted", Callable(_browser_source_retirement, "enqueue"))
 	RLHeadLibrary.set_render_warm_context(self, &"_rl_head_render_warm_allowed")
 	Diagnostics.startup_stage("geometry_preparation")
+	# Owner D-NATIVE: the verified client_runtime payload loads once here, for
+	# every profile, before any consumer (kill switches and safe mode apply;
+	# no native feature turns on). The digest probe below reuses this load.
+	NativeLibrary.startup()
+	# The content digest's mode, resolved once on the main thread before the
+	# first hash (the geometry preparation check below hashes packages).
+	ContentDigest.initialize()
 	if await _prepare_geometry_before_login():
 		Diagnostics.startup_stage("")
 		return
@@ -1896,6 +1931,8 @@ func _ready() -> void:
 	world_root.add_child(weather_layer)
 	night_lamps = NightLamps.new()
 	world_root.add_child(night_lamps)
+	world_distance = WorldDistanceScript.new()
+	world_root.add_child(world_distance)
 	presentation_effects = PresentationEffects.new()
 	world_root.add_child(presentation_effects)
 	world_loader.load_completed.connect(_on_world_loaded)
@@ -2182,6 +2219,10 @@ func client_diagnostic_snapshot() -> Dictionary:
 		"loader_work": world_loader.diagnostic_snapshot(),
 		"streaming_work": exterior_stream.diagnostic_snapshot(),
 		"client_runtime": client_runtime.snapshot(),
+		"native_runtime": NativeLibrary.snapshot(),
+		"native_kernels": NativeCrowd.snapshot(),
+		"actor_reducer": AppState.actor_reducer_stats(),
+		"content_digest": ContentDigest.snapshot(),
 		"remote_presentation": (remote_presentation.snapshot() if is_instance_valid(remote_presentation) else {"backend": "legacy", "reason": "not_initialized"}),
 		"resource_admission": resource_admission_snapshot(),
 		"spell_flights": RustSpellFlights.snapshot_for(world_root),
@@ -2311,6 +2352,10 @@ func _process(delta: float) -> void:
 		if night_lamps != null:
 			night_lamps.update(camera_rig.focus, AppState.continuous_game_minute(),
 				gloom, _day_night_active)
+		light_marker_budget.update(camera_rig.focus)
+		if world_distance != null:
+			world_distance.update(camera_rig.distance, LookProfile.quality(),
+				campaign_scene.playing or campaign_cutaway.presenting)
 		if presentation_effects != null and world_environment.environment != null:
 			presentation_effects.update(camera_rig.focus, AppState.continuous_game_minute(),
 				weather_layer.mistiness() if weather_layer != null else 0.0, gloom,
@@ -4765,6 +4810,11 @@ func _on_disconnect_pressed() -> void:
 	_leaving_session = false
 
 func _close_client() -> void:
+	# AW-01: one close at a time; every wait below is bounded (8 s each) and
+	# the native exit watchdog ends a process still alive 10 s after quit()
+	# (src/runtime/exit_drain.gd).
+	if not ExitDrain.begin("close"):
+		return
 	_flush_hud_settings_save(true)
 	# Keep serving rendering/physics commands until a private loader completes;
 	# joining a live import while the rendering server shuts down can deadlock.
@@ -4772,26 +4822,22 @@ func _close_client() -> void:
 	_local_avatar_hold.release("close")
 	character_intro.cancel()
 	actor_resource_warmup.clear()
-	while not actor_resource_warmup.is_idle():
-		await get_tree().process_frame
+	await ExitDrain.wait_until(get_tree(), "actor_warmup", actor_resource_warmup.is_idle)
 	# The RL head prewarm's running parse likewise (RLHeadLibrary.prewarm).
 	RLHeadLibrary.cancel_warm()
-	while RLHeadLibrary.warming():
-		await get_tree().process_frame
+	await ExitDrain.wait_until(get_tree(), "rl_head_warm", func() -> bool: return not RLHeadLibrary.warming())
 	campaign_scene.cancel("client_closed")
 	_clear_campaign_cutaway()
 	gauntlet_prewarm.discard()
 	await get_tree().process_frame
 	exterior_stream.clear()
-	while not exterior_stream.is_idle():
-		await get_tree().process_frame
+	await ExitDrain.wait_until(get_tree(), "exterior_stream", exterior_stream.is_idle)
 	# A parked world and a preload worker go the same way: the worker is let
 	# finish (never joined while running), then everything kept is freed.
 	world_park.clear()
-	while not world_park.is_idle():
-		await get_tree().process_frame
+	await ExitDrain.wait_until(get_tree(), "world_park", world_park.is_idle)
 	world_park.release_now()
-	get_tree().quit()
+	ExitDrain.quit(get_tree(), 0, "close")
 
 func _exit_tree() -> void:
 	if OS.has_feature("web") and _browser_fullscreen_callback != null:
@@ -5053,6 +5099,7 @@ func _clear_world_presentation(retain_map_resources := false) -> void:
 		if is_instance_valid(map_light_root):
 			map_light_root.queue_free()
 		map_light_root = null
+		light_marker_budget.bind(null)
 	_actor_surface_samples.clear()
 	_grounded_actors.clear()
 	occluder_fade.reset()
@@ -7359,9 +7406,13 @@ func _bind_light_markers(manifest: WorldManifest) -> void:
 	world_root.add_child(root_node)
 	var bound: int = LightMarkerBinder.apply(manifest, root_node)
 	if bound == 0:
+		light_marker_budget.bind(null)
 		root_node.queue_free()
 		return
 	map_light_root = root_node
+	# LIGHT: the nearest N marker lights burn (6/12/24 by quality, at most 8
+	# where the renderer limits lights per mesh), chosen before the first frame.
+	light_marker_budget.bind(root_node)
 	print_debug("light_markers map=", AppState.current_map, " bound=", bound)
 
 ## Moves the environment to the hour the server is keeping. The manifest is
@@ -15973,6 +16024,8 @@ func _apply_look_switch() -> void:
 ## it) and the server is told the new cap.
 func _apply_graphics_quality() -> void:
 	LookSwitch.apply_shadow_quality(world_sun)
+	if world_distance != null:
+		world_distance.set_quality(LookProfile.quality())
 	crowd.set_quality(LookProfile.quality())
 	_follow_quality_crowd_setting()
 	effect_budget.quality = LookProfile.quality()
@@ -16002,7 +16055,7 @@ func _apply_render_scale() -> void:
 func _refresh_graphics_restart_notice() -> void:
 	settings_window.graphics_restart_notice.visible = (
 		GraphicsOptions.TEXTURE_QUALITIES.find(_map_texture_quality) != GraphicsOptions.active_texture_skip()
-		or _renderer_preference != _startup_renderer_preference)
+		or SettingsWindowScript.renderer_restart_needed(_renderer_preference, _startup_renderer_preference))
 
 ## A one-shot preset. Individual controls remain editable afterward, and the
 ## explicit renderer choices are retained. Linux Automatic uses OpenGL for this
@@ -19300,6 +19353,8 @@ func _watch_surface_stream(surface_root: Node3D) -> void:
 	# The lamps the territory places, the neighbours' included.
 	if chunk_stream != null and night_lamps != null:
 		night_lamps.watch(chunk_stream)
+	if chunk_stream != null and world_distance != null:
+		world_distance.watch(chunk_stream)
 
 func _on_resident_surfaces_changed() -> void:
 	_watch_chunk_surfaces()

@@ -33,6 +33,12 @@ def test_compatibility_modes_keep_updates_and_engine_argument_order(tmp_path, pl
             if safe:
                 for key in ("ELORIA_LOOK", "ELORIA_LOOK_QUALITY", "ELORIA_VRAM_TEXTURES", "ELORIA_NO_MAP_CACHE"):
                     assert key in text
+                # Without --client-safe-mode only the environment selects the
+                # sequential digest reader and keeps the native payload unloaded.
+                for pair in ("RABBITLANDS_CONTENT_DIGEST=sequential", "RABBITLANDS_NATIVE_RUNTIME=off"):
+                    assert pair in text
+            else:
+                assert "RABBITLANDS_CONTENT_DIGEST" not in text and "RABBITLANDS_NATIVE_RUNTIME" not in text
         if platform == "windows":
             assert "setlocal" in text  # Environment overrides cannot affect later launches.
     readme = (tmp_path / "README.txt").read_text()

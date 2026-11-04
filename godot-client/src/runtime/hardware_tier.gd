@@ -79,10 +79,15 @@ const TIER_SETTINGS := {
 ##     memory budget class instead of the probed one (memory_class_override).
 ## ELORIA_WORLD_DISTANCE  off: no world distance pass, for A/B captures
 ##     (world_distance_mode, world_distance_enabled).
+## ELORIA_VIEW_REACH  auto (default), ground or off: the LOW far plane and its
+##     fog (src/world/view_reach.gd); ground adds the ground-fit A/B; off leaves
+##     the far plane and fog to the scene (view_reach in switches()).
 ## ELORIA_ACTOR_IMAGES  legacy: actor images parsed as before the actor image
-##     extension; nomips: reserved for the actor texture stages (AT-C2: decoded
-##     actor images without the mips that owner decision AT-C6 may add); in
-##     stage A no actor image gets mips in any mode (actor_images_mode).
+##     extension (no VRAM sidecars, no shared textures); nomips: decoded
+##     actor images never get the fallback CPU mip chain (ActorImages.
+##     FALLBACK_MIPS, off until owner decision AT-C6). In auto and nomips
+##     staged actor VRAM sidecars (AT-C2) bring their own chain
+##     (actor_images_mode).
 ## ELORIA_ACTOR_VRAM_SELF_TEST  a directory such as assets/actors/native/races
 ##     whose actor sidecar index the package smoke launch decodes
 ##     (actor_vram_self_test_dir).
@@ -92,11 +97,20 @@ const TIER_SETTINGS := {
 ##     applier does: no off/on spellings.
 ## RABBITLANDS_ACTOR_GEOMETRY_ROOT  a cooked actor geometry catalogue folder
 ##     (tests, measuring a cook); read by src/actors/actor_geometry.gd.
+## RABBITLANDS_OVERHEAD_2D / --overhead-2d=  the 2D overhead layer on or off
+##     (src/ui/overhead/overhead_layer.gd, which reads it); here it only blocks
+##     seeding and adds no switches() entry.
 const MEMORY_CLASS_VARIABLE := "RABBITLANDS_MEMORY_CLASS"
 const MEMORY_CLASS_ARGUMENT := "--memory-class="
 const MEMORY_CLASSES: Array[String] = ["small", "medium", "large"]
 const WORLD_DISTANCE_VARIABLE := "ELORIA_WORLD_DISTANCE"
 const WORLD_DISTANCE_MODES: Array[String] = ["auto", "off"]
+## view_reach.gd's own names (it preloads this file, so they are literals here).
+const VIEW_REACH_VARIABLE := "ELORIA_VIEW_REACH"
+const VIEW_REACH_MODES: Array[String] = ["auto", "ground", "off"]
+## overhead_layer.gd's switch (it preloads this file, so literals here too).
+const OVERHEAD_2D_VARIABLE := "RABBITLANDS_OVERHEAD_2D"
+const OVERHEAD_2D_ARGUMENT := "--overhead-2d="
 const ACTOR_IMAGES_VARIABLE := "ELORIA_ACTOR_IMAGES"
 const ACTOR_IMAGES_MODES: Array[String] = ["auto", "legacy", "nomips"]
 const ACTOR_VRAM_SELF_TEST_VARIABLE := "ELORIA_ACTOR_VRAM_SELF_TEST"
@@ -123,7 +137,7 @@ const OVERRIDE_VARIABLES: Array[String] = ["ELORIA_LOOK", "ELORIA_LOOK_QUALITY",
 	"RABBITLANDS_CROWD_BENCH_START_TOKEN", "RABBITLANDS_RESOURCE_BUDGET_MIB",
 	"RABBITLANDS_CAPE_MATH", MEMORY_CLASS_VARIABLE, WORLD_DISTANCE_VARIABLE,
 	ACTOR_IMAGES_VARIABLE, ACTOR_VRAM_SELF_TEST_VARIABLE, ACTOR_GEOMETRY_VARIABLE,
-	ACTOR_GEOMETRY_ROOT_VARIABLE]
+	ACTOR_GEOMETRY_ROOT_VARIABLE, OVERHEAD_2D_VARIABLE, VIEW_REACH_VARIABLE]
 ## Engine switches that start a tool, test or benchmark main loop.
 const TOOL_ARGUMENTS: Array[String] = ["--script", "-s", "--editor", "-e"]
 
@@ -248,7 +262,7 @@ static func blocker(launch: Dictionary) -> String:
 	for argument: String in launch.get("engine_args", PackedStringArray()):
 		if argument in TOOL_ARGUMENTS or argument.begins_with("--script="):
 			return "tool_launch"
-	var prefixes: Array[String] = [OptimizationProfile.ARGUMENT, MEMORY_CLASS_ARGUMENT]
+	var prefixes: Array[String] = [OptimizationProfile.ARGUMENT, MEMORY_CLASS_ARGUMENT, OVERHEAD_2D_ARGUMENT]
 	for definition: Dictionary in OptimizationProfile.FEATURES.values():
 		prefixes.append(str(definition.argument))
 	for argument: String in launch.get("user_args", PackedStringArray()):
@@ -383,8 +397,10 @@ static func world_distance_enabled() -> bool:
 	return world_distance_mode() != "off"
 
 ## "auto" (the actor image extension: URI textures from their imports,
-## embedded images decoded without mips; AT-C2 adds staged sidecars),
-## "legacy" or "nomips" (reserved; read as "auto" until AT-C2).
+## embedded images from a staged VRAM sidecar where the GLB directory's
+## index lists one, otherwise decoded without mips, one texture per image
+## across GLBs; AT-C2), "legacy" (plain GLTFDocument) or "nomips" (as
+## auto, and decoded images never get the fallback CPU mip chain).
 static func actor_images_mode() -> String:
 	return str(resolve_switch(OS.get_environment(ACTOR_IMAGES_VARIABLE),
 		ACTOR_IMAGES_MODES, "legacy").mode)
@@ -447,6 +463,8 @@ static func switches() -> Dictionary:
 	var parsed := {
 		"world_distance": [WORLD_DISTANCE_VARIABLE,
 			resolve_switch(OS.get_environment(WORLD_DISTANCE_VARIABLE), WORLD_DISTANCE_MODES, "off")],
+		"view_reach": [VIEW_REACH_VARIABLE,
+			resolve_switch(OS.get_environment(VIEW_REACH_VARIABLE), VIEW_REACH_MODES, "off")],
 		"actor_images": [ACTOR_IMAGES_VARIABLE,
 			resolve_switch(OS.get_environment(ACTOR_IMAGES_VARIABLE), ACTOR_IMAGES_MODES, "legacy")],
 		"actor_geometry": [ACTOR_GEOMETRY_VARIABLE,

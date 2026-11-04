@@ -6,7 +6,8 @@ const NativeLibrary := preload("res://src/runtime/native_library.gd")
 ## NativeLibrary refusal codes -> this file's reasons (unchanged strings).
 const LOADER_REASONS := {"absent": "payload_absent", "manifest_invalid": "manifest_invalid",
 	"api_mismatch": "incompatible_payload", "unsupported_platform": "incompatible_payload",
-	"incomplete": "checksum_mismatch", "checksum_mismatch": "checksum_mismatch"}
+	"incomplete": "checksum_mismatch", "checksum_mismatch": "checksum_mismatch",
+	"switched_off": "native_runtime_switched_off"}
 static var _checked := false
 static var _ready := false
 static var _reason := "not_checked"

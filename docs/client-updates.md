@@ -84,7 +84,8 @@ package count. Existing `client-assets` URLs remain valid; older builds also use
 `.pkg.<id>.zip.###` names.
 Each package has a full ZIP SHA-256, bounded download-part hashes, and a signed
 inventory of its files, sizes and hashes. Fixed groups cover the engine,
-client pack, release descriptor, actors, maps, audio, shared assets and records.
+client pack, content packs, release descriptor, actors, maps, audio, shared
+assets and records.
 The release descriptor (`app/client-release.json` and its loose copy
 `app/data/client_release.json`) is its own `release-descriptor` package, so its
 per-commit change no longer rewrites the client pack's package or a records
@@ -92,8 +93,23 @@ bucket. Path-based buckets
 keep membership stable when another file is added. ZIP timestamps, entry order
 and permissions are fixed, so an unchanged package keeps its checksum across
 builds, independent of the release date, filename and source-file timestamps.
-The exported `RabbitLands.pck` remains one client package; this is package reuse,
-not a binary patch within a PCK, GLB or ZIP.
+Windows and Linux builds split the exported PCK (W2-UD-06, `tools/pck_split.py`).
+`app/RabbitLands.pck` is a small core pack in the `client` package. It holds
+scripts, scenes, data, every `.import`/`.remap`, the UID and class caches, the
+resources the engine reads before the first autoload, and
+`data/content_packs.json`. Prepared content stays in it until W2-UD-07a. The
+imported textures, audio and login videos are content packs in `app/packs/`
+(`equipment-textures-0..3`, `textures-0..1`, `audio`, `video`), each its own
+`pck-<name>` package. The packs keep their bytes from release to release, so a
+code-only release downloads only `client` and `release-descriptor`, and a content
+release also downloads the packs whose files changed. The first autoload,
+`ContentPacks` (`src/boot/content_packs.gd`), checks each pack's size and mounts
+it at start. If a pack is missing or the wrong size, the game asks the player to
+repair the installation (run the updater; on Steam, Verify integrity of game
+files; a standalone build is installed again from its download), which restores
+it like any other installed file. This is package reuse, not a binary patch
+within a PCK, GLB or ZIP. macOS bundles and `--benchmark-profile` keep one PCK,
+and `--no-split-pck` builds one on purpose.
 
 **Manifest schema 3 (zstd payloads).** A schema 3 manifest is a schema 2
 manifest whose inventory rows may carry `"codec": "zstd"`. Each 8 MiB chunk of
