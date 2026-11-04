@@ -155,6 +155,7 @@ const OccluderFadeScript := preload("res://src/world/occluder_fade_manager.gd")
 const CameraShaderWarmup := preload("res://src/world/camera_shader_warmup.gd")
 const CrowdPresentationScript := preload("res://src/world/crowd_presentation.gd")
 const LocalAvatarHoldScript := preload("res://src/actors/local_avatar_hold.gd")
+const MapChangeCurtainScript := preload("res://src/world/map_change_curtain.gd")
 const LiveEffectBudgetScript := preload("res://src/world/live_effect_budget.gd")
 const UndergroundSceneryScript := preload("res://src/world/underground_scenery.gd")
 const InvasionAssistantScript := preload("res://src/ui/invasion_assistant.gd")
@@ -1065,6 +1066,9 @@ var crowd = CrowdPresentationScript.new()
 ## The player's own body kept across a map change that is not a seamless
 ## crossing, for the ADD that follows (AW-02; `_hold_local_avatar`).
 var _local_avatar_hold = LocalAvatarHoldScript.new()
+## A change of map waiting for the arrival curtain to be drawn, and its
+## counters (TR-01; `_load_server_map`, `_defer_map_change`).
+var _map_change_curtain = MapChangeCurtainScript.new()
 var effect_budget = LiveEffectBudgetScript.new()
 ## Which actor the selection ring and the overhead target were last given to,
 ## so a pass only touches the actors whose answer changed.
@@ -2137,6 +2141,7 @@ func client_diagnostic_snapshot() -> Dictionary:
 		"low_processor_usage_mode_sleep_usec": OS.low_processor_usage_mode_sleep_usec,
 		"actor_creation_budget": actor_creation_budget_snapshot(),
 		"local_avatar_hold": _local_avatar_hold.snapshot(),
+		"map_change_curtain": _map_change_curtain.snapshot(Time.get_ticks_msec()),
 		"ambient_creation_pending": ambient_creation_pending_count(),
 		"map_texture_mip_skip": GraphicsOptions.active_texture_skip(),
 		"map_texture_preference": _map_texture_quality,
@@ -2252,13 +2257,7 @@ func _process(delta: float) -> void:
 			quest_trail.update_trail(delta, (trail_actor as Node3D).global_position)
 		_update_map_walk_target()
 		if AppState.actors.has(AppState.local_actor_id):
-			var film_focus: Node3D = campaign_scene.occlusion_focus()
-			if is_instance_valid(film_focus) and not campaign_cutaway.presenting:
-				# Films move the rendered camera without changing the saved play
-				# rig. Keep their ground resident, including a parked map's return.
-				exterior_stream.update_position(film_focus.global_position)
-			elif not _world_input_blocked():
-				exterior_stream.update_position(camera_rig.focus)
+			_update_exterior_focus()
 			# Background travel preparation continues through reading/choices.
 			_observe_world_park()
 		_update_door_labels()
@@ -2443,13 +2442,49 @@ func _text_entry_active() -> bool:
 
 ## The new-character intro and the loading curtain both own the screen while
 ## they are up: the world takes no input and the exterior preloads wait.
-func _world_input_blocked() -> bool:
+## `count_curtain` false asks whether anything but the loading curtain does
+## (`_curtained_arrival_ungrounded`).
+func _world_input_blocked(count_curtain := true) -> bool:
 	if is_instance_valid(appearance_editor) and appearance_editor.is_visible_in_tree():
 		return true
-	return _disconnect_console_active or character_intro.blocks_input() or campaign_scene.blocks_input() or arrival_curtain.blocks_input() \
+	return _disconnect_console_active or character_intro.blocks_input() or campaign_scene.blocks_input() \
+		or (count_curtain and arrival_curtain.blocks_input()) \
 		or (hud_workspace != null and hud_workspace.is_open()) \
 		or (inventory_workspace != null and inventory_workspace.is_editing()) \
 		or (mixing_workspace != null and mixing_workspace.is_editing())
+
+## Where the exterior stream chooses its neighbours from this frame: the
+## camera's focus, or a film's while one plays; nowhere while the world takes
+## no input (the loading curtain, the intro, a staged scene, an editor). One
+## exception (TR-01): behind the loading curtain, a character built on its
+## arrival that has found no ground for MapChangeCurtain.GROUNDING_GRACE_MSEC -
+## its own cells are in, and the only ground there is a neighbour's preview
+## layer beside a seam - has its neighbours updated from where it stands,
+## rather than waiting out ARRIVAL_CURTAIN_LIMIT_MSEC (AW-00 finding 2).
+func _update_exterior_focus() -> void:
+	var film_focus: Node3D = campaign_scene.occlusion_focus()
+	if is_instance_valid(film_focus) and not campaign_cutaway.presenting:
+		# Films move the rendered camera without changing the saved play
+		# rig. Keep their ground resident, including a parked map's return.
+		exterior_stream.update_position(film_focus.global_position)
+	elif not _world_input_blocked():
+		_map_change_curtain.grounding_due(false, 0)
+		exterior_stream.update_position(camera_rig.focus)
+	elif _map_change_curtain.grounding_due(_curtained_arrival_ungrounded(), Time.get_ticks_msec()):
+		if _map_change_curtain.grounding_first:
+			Diagnostics.record("arrival_grounding_neighbours", {"map": AppState.current_map,
+				"focus": [camera_rig.focus.x, camera_rig.focus.y, camera_rig.focus.z]})
+		exterior_stream.update_position(camera_rig.focus)
+
+## TR-01: only the loading curtain keeps the world's input, the map and the
+## arrival's own cells are in, and the player's character stands built there
+## with no ground found under it.
+func _curtained_arrival_ungrounded() -> bool:
+	if not arrival_curtain.blocks_input() or _world_input_blocked(false) or _deferred_map_load \
+			or _arrival_pending() or adapter == null or loaded_server_map != AppState.current_map:
+		return false
+	var local_id: int = AppState.local_actor_id
+	return is_instance_valid(actor_nodes.get(local_id)) and not _grounded_actors.has(local_id)
 
 const CAMERA_ACTIONS := ["camera_rotate_left", "camera_rotate_right", "camera_tilt_up", "camera_tilt_down"]
 
@@ -6875,6 +6910,7 @@ func _load_server_map() -> void:
 			if not arrival_curtain.retry_requested.is_connected(_retry_browser_area_files):
 				arrival_curtain.retry_requested.connect(_retry_browser_area_files)
 		_deferred_map_load = true
+		_map_change_curtain.clear()
 		return
 	if OS.has_feature("web"): arrival_curtain.clear_retry()
 	Diagnostics.record("map_requested", {"server_map": AppState.current_map, "map": normalized_map})
@@ -6889,7 +6925,23 @@ func _load_server_map() -> void:
 		push_error("map_registry_miss server_id=%s normalized=%s keys=%s" % [
 			AppState.current_map, normalized_map, map_registry.keys()])
 		return
-	var handoff := exterior_stream.take_ready(normalized_map, world_loader, camera_rig.focus)
+	# TR-01: a change onto ground already prepared - a resident neighbour reached
+	# without a seamless crossing, a respawn's or gauntlet exit's prewarmed
+	# ground - binds that world and builds its actors on the frame it lands, as
+	# a fresh load does (below). That frame is shown behind the curtain too: the
+	# change waits until the curtain is drawn. Judged before anything is taken,
+	# because taking hands the world over.
+	var handoff_focus: Vector3 = _map_change_curtain.handoff_focus(normalized_map, camera_rig.focus)
+	var curtained := _map_change_curtain_kind(normalized_map, handoff_focus)
+	var raised := false
+	if not curtained.is_empty():
+		raised = not arrival_curtain.is_showing()
+		if raised:
+			arrival_curtain.begin("Entering %s…" % _friendly_map_name(AppState.current_map))
+		if not arrival_curtain.has_drawn():
+			_defer_map_change(normalized_map, curtained, handoff_focus, raised)
+			return
+	var handoff := exterior_stream.take_ready(normalized_map, world_loader, handoff_focus)
 	if character_intro.is_active():
 		if normalized_map == NewCharacterIntroScript.MAP and character_intro.pending:
 			var preloaded: Dictionary = character_intro.take_preload(normalized_map)
@@ -6907,6 +6959,7 @@ func _load_server_map() -> void:
 			if not arrival_curtain.is_showing():
 				arrival_curtain.begin("Entering %s…" % _friendly_map_name(AppState.current_map))
 			_deferred_map_load = true
+			_map_change_curtain.clear()
 			return
 		# A respawn onto another map adopts the ground loaded while dead.
 		var prewarmed: Dictionary = {} if not kept.is_empty() else gauntlet_prewarm.take(normalized_map)
@@ -6920,14 +6973,20 @@ func _load_server_map() -> void:
 			handoff = {"resident": prewarmed, "continuous": false}
 		else:
 			# A fresh load: the arrival is built behind the curtain. A whole map is
-			# built on the frame it loads, so it waits for the curtain to be drawn.
+			# built on the frame it loads, so it waits for the curtain to be drawn;
+			# so does a streamed territory (TR-01): its manifest, the map's binding
+			# and the actors already received are that frame's work.
 			if not arrival_curtain.is_showing():
 				arrival_curtain.begin("Entering %s…" % _friendly_map_name(AppState.current_map))
-			if not respawn_prewarm.streams(ProjectSettings.globalize_path(str(entry.get("manifest", "")))) \
-					and not arrival_curtain.has_drawn():
-				_deferred_map_load = true
+			if not arrival_curtain.has_drawn():
+				var streamed: bool = respawn_prewarm.streams(
+					ProjectSettings.globalize_path(str(entry.get("manifest", ""))))
+				_defer_map_change(normalized_map, MapChangeCurtainScript.STREAMED if streamed
+					else MapChangeCurtainScript.WHOLE_MAP, Vector3.INF)
 				return
 	_deferred_map_load = false
+	_map_change_curtain.resumed(Time.get_ticks_msec(), normalized_map,
+		not curtained.is_empty() and not handoff.is_empty() and not bool(handoff.get("kept", false)), raised)
 	_arrival = {}
 	if arrival_curtain.is_showing():
 		arrival_curtain.set_text("Entering %s…" % _friendly_map_name(AppState.current_map))
@@ -7008,6 +7067,40 @@ func _load_server_map() -> void:
 		# CHANGE_MAP precedes the destination actor packet. Delay chunk disk
 		# reads until that packet supplies the actual login/teleport arrival.
 		world_loader.load_world(manifest_path, Vector3.INF, true)
+
+## TR-01: what the change to `normalized_map` waits for the drawn curtain to
+## take (MapChangeCurtain.EXTERIOR or PREWARM), or &"" when it takes nothing
+## prepared or goes ahead uncurtained: the character intro (its own curtain); a
+## seamless crossing (`focus` within the seam's slack: never curtained); a door
+## into a world WorldPark kept or is building (no curtain, by design; AW-02
+## keeps the player's body for it); and a fresh load, which the load's own
+## branch holds. Mirrors the order `_load_server_map` takes things in.
+func _map_change_curtain_kind(normalized_map: String, focus: Vector3) -> StringName:
+	if character_intro.is_active() or character_intro.blocks_input():
+		return &""
+	if exterior_stream.residents.has(normalized_map):
+		return &"" if MapChangeCurtainScript.handoff_continuous(exterior_stream, normalized_map, focus) \
+			else MapChangeCurtainScript.EXTERIOR
+	if world_park.has_parked(normalized_map) or not world_park.preload_state(normalized_map).is_empty():
+		return &""
+	if (gauntlet_prewarm.pending() and gauntlet_prewarm.map_id == normalized_map) \
+			or (respawn_prewarm.pending() and respawn_prewarm.map_id == normalized_map):
+		return MapChangeCurtainScript.PREWARM
+	return &""
+
+## TR-01: the change to `normalized_map` waits behind the curtain (`_update_arrival`
+## loads it once the curtain is drawn); `focus` is what an exterior handoff is
+## judged from then; `raised`, that this wait began the curtain itself.
+func _defer_map_change(normalized_map: String, kind: StringName, focus: Vector3, raised := false) -> void:
+	_deferred_map_load = true
+	if _map_change_curtain.defer(normalized_map, kind, focus, Time.get_ticks_msec(), raised):
+		Diagnostics.record("map_change_curtained", {"map": normalized_map, "kind": String(kind)})
+
+## TR-01: whether a change of map waiting for its curtain is about to adopt the
+## prewarm made for `prewarm_map` (it is kept until then: the respawn's death
+## state, cleared right after its CHANGE_MAP, would otherwise discard it).
+func _map_change_adopts_prewarm(prewarm_map: String) -> bool:
+	return _deferred_map_load and _map_change_curtain.waiting_for(MapChangeCurtainScript.PREWARM, prewarm_map)
 
 ## The actor nodes a change of map that is not a seamless crossing lets go
 ## (`_load_server_map`): every one but the traveller a crossing carries. The
@@ -7440,6 +7533,8 @@ func _hold_for_arrival() -> bool:
 		return false
 	stream.begin_arrival(position)
 	_arrival = {"position": position, "started": Time.get_ticks_msec(), "ready": false}
+	# Loading its cells, this arrival was curtained (and warmed) before TR-01.
+	_map_change_curtain.end_warmup_exemption()
 	if not arrival_curtain.is_showing():
 		arrival_curtain.begin("Entering %s…" % _friendly_map_name(AppState.current_map))
 	arrival_curtain.set_progress(0.15)
@@ -7463,9 +7558,16 @@ func _update_arrival() -> void:
 	if _deferred_map_load:
 		if not AppState.authenticated:
 			_deferred_map_load = false
+			_map_change_curtain.clear()
 		elif arrival_curtain.has_drawn():
 			_deferred_map_load = false
 			_load_server_map()
+			if not _deferred_map_load:
+				# TR-01: went ahead, or loads nothing (the server sent the player
+				# back to the map still loaded before the curtain was drawn). A
+				# wait left behind would hand a later change to that map its
+				# stale camera focus.
+				_map_change_curtain.abandon()
 			_sync_world()
 		return
 	if not _arrival.is_empty() and not bool(_arrival.ready):
@@ -7502,6 +7604,7 @@ func _update_arrival() -> void:
 		return
 	if not arrival_curtain.is_showing():
 		camera_shader_warmup.cancel()
+		_map_change_curtain.end_warmup_exemption()
 		return
 	if not AppState.authenticated and AppState.connection_state != "connected":
 		_end_arrival()
@@ -7532,10 +7635,13 @@ func _update_arrival() -> void:
 			Diagnostics.record("camera_shader_warmup_finished", camera_shader_warmup.snapshot())
 		_arrival_settle_frames = 0
 		return
+	# TR-01: not behind a curtain raised only so that ground already prepared is
+	# adopted out of sight; that arrival had neither curtain nor warm-up before.
 	if standing and not character_intro.pending and not campaign_scene.playing \
 			and RenderingServer.get_current_rendering_method() == "gl_compatibility" \
 			and DisplayServer.get_name() != "headless" \
-			and OS.get_environment("ELORIA_CAMERA_SHADER_WARMUP") != "0":
+			and OS.get_environment("ELORIA_CAMERA_SHADER_WARMUP") != "0" \
+			and not _map_change_curtain.skips_warmup():
 		_update_local_actor_follow()
 		if camera_shader_warmup.begin(world_loader.world_root, gameplay_camera,
 				(actor_nodes[local_id] as Node3D).global_position):
@@ -7563,6 +7669,7 @@ func _end_arrival() -> void:
 	camera_shader_warmup.cancel()
 	_arrival = {}
 	_deferred_map_load = false
+	_map_change_curtain.clear()
 	_arrival_settle_frames = 0
 	_arrival_unreported = false
 	arrival_curtain.cancel()
@@ -7589,6 +7696,8 @@ func _report_arrival() -> void:
 ## Prepare the server's beam destination while the completed loot is reviewed.
 ## The hidden stream is adopted by _load_server_map when the party exits.
 func _prefetch_gauntlet_exit() -> void:
+	if _map_change_adopts_prewarm(gauntlet_prewarm.map_id):
+		return # TR-01: the map change waiting for its curtain adopts it next.
 	var loot: Dictionary = AppState.gauntlet_loot
 	var destination: Variant = loot.get("exit_destination")
 	if loot.get("phase", "") not in ["complete", "ended", "sent"] or bool(loot.get("exited", false)) or not destination is Dictionary:
@@ -7608,6 +7717,11 @@ func _prefetch_gauntlet_exit() -> void:
 ## (the death state's `destination`): kept resident on this map, or prewarmed
 ## in a hidden stream on another, so clicking respawn needs no loading.
 func _prefetch_respawn() -> void:
+	# TR-01: the respawn's CHANGE_MAP is waiting for its curtain to adopt this
+	# prewarm; the death state the server sends right after it ("not dead")
+	# must not discard it first.
+	if _map_change_adopts_prewarm(respawn_prewarm.map_id):
+		return
 	var stream := world_loader.world_root as ContinentChunkStream
 	var destination: Variant = AppState.death.get("destination")
 	if not bool(AppState.death.get("dead", false)) or not destination is Dictionary:
@@ -7695,7 +7809,9 @@ func _sync_world(changed: Variant = null) -> void:
 	# streaming in: nothing is placed on ground that is not there yet.
 	if _deferred_map_load or _hold_for_arrival():
 		_spawn_backlog = true
-		if _deferred_map_load:
+		# Not for a wait that is only for the curtain to be drawn (TR-01): the
+		# arrival's actors are built on the frame it ends.
+		if _deferred_map_load and not _map_change_curtain.short_wait():
 			_prewarm_local_rl_head()
 		return
 	# The background worker owns arrival imports during creation. Let it finish

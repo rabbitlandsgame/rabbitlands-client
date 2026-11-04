@@ -102,6 +102,9 @@ var _preload_views: Array[Dictionary] = []
 ## ground around the focus, and neither the retain distance nor the selection
 ## retires them until clear_prefetch().
 var _prefetch: Array[Dictionary] = []
+## Whether `ensure_position` has already logged the position it was given as
+## off this territory's cells (once per stretch off them; TR-01).
+var _off_map_noted := false
 ## Import workers whose owner left the tree or re-primed before they finished.
 ## A worker may be waiting on rendering-server commands that only the main
 ## thread services, so joining it synchronously deadlocks the client; the
@@ -473,6 +476,16 @@ func arrival_resident(position: Vector3) -> bool:
 				return false
 	return covering > 0
 
+## True when the bounds of any of this territory's cells hold the position. A
+## position none holds is off this map's cells - beside a seam, on ground only
+## a neighbour's preview layer draws, past the territory's edge - and nothing
+## of this territory would ground it (TR-01; `ensure_position`).
+func covers(position: Vector3) -> bool:
+	for entry: Dictionary in entries:
+		if bounds_distance(position, entry.bounds) <= .01:
+			return true
+	return false
+
 ## The asynchronous arrival: the focus moves to `position` and the worker
 ## imports the nearest cells first, one at a time, while the client keeps
 ## drawing (a loading curtain covers the wait; see arrival_progress). Unlike
@@ -545,7 +558,19 @@ func ensure_position(position: Vector3) -> bool:
 		prime(position)
 		return true
 	if arrival_resident(position):
+		_off_map_noted = false
 		return false
+	# Off this territory's cells (TR-01): no cell would ground the position, so
+	# a re-prime would only retire the ground around the focus, orphan the
+	# worker importing for it and load the same cells again - on every actor
+	# update while the player stands there (the whitehorn re-prime storm). The
+	# focus's own streaming keeps loading the cells near it.
+	if not covers(position):
+		if not _off_map_noted:
+			_off_map_noted = true
+			_record("arrival_off_map", "", {"position": [position.x, position.y, position.z]})
+		return false
+	_off_map_noted = false
 	var wanted := selection(position)
 	if wanted.is_empty():
 		return false
