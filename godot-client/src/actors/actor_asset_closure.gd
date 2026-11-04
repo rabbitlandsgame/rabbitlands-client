@@ -32,17 +32,21 @@ extends RefCounted
 ## animation library (reported in "libraries": creatures' are prepared with
 ## their scene by the creature job, a race's is parsed once per session on
 ## main until AW-04c), and the mount's files (the mount id is reported in
-## "mount"; AW-07 prepares and binds mounts outside the body build). A model
+## "mount"; `mount_closure` names them, AW-07: Main asks for them beside a
+## rider's body and binds mounts outside the packet handler). A model
 ## under the creatures folder is a creature: "creature" is true, its scene is
 ## left to the creature job (scene + retargeted clips) and "scenes" holds only
 ## what it wears. Only "rl_files" depends on the graphics quality.
 ##
 ## Static: it reads the dictionaries it is given and the actor's static
-## lookups, never a node or a cache (RL file names are checked on disk);
-## `memoized` keeps the closures it computed for Main's repeated asks.
+## lookups, never a node or a cache (RL file names are checked on disk; a
+## mount's profile is read through MountProfiles, data only);
+## `memoized` and `mount_closure` keep what they computed for Main's
+## repeated asks.
 ## Main thread.
 const ArchivedModelPolicy := preload("res://src/actors/archived_model_policy.gd")
 const FemaleShirtNeckline := preload("res://src/actors/female_shirt_neckline.gd")
+const MountProfiles := preload("res://src/mounts/mount_profiles.gd")
 const CREATURE_ROOT := "res://assets/actors/native/creatures/"
 ## Closures `memoized` keeps (it starts again when full).
 const MEMO_CAPACITY := 256
@@ -84,6 +88,43 @@ static func clear_memo() -> void:
 	_memo.clear()
 	_memo_models = {}
 	_memo_equipment = {}
+	_mount_memo.clear()
+	_mount_memo_models = {}
+
+## Mount closures by mount id, for the `models` they were computed from.
+static var _mount_memo: Dictionary = {}
+static var _mount_memo_models: Dictionary = {}
+
+## AW-07: the actor glTF files a mount bind reads
+## (MountedPlayerVisual.configure, through GlbSceneCache), in the closure's
+## shape for ActorResourceWarmup.request_closure: the mount's own scene and
+## the borrowed tack's source scene (BorrowedMountTack; the Moor Pony's saddle
+## for most species). Both are read as whole scenes, never as pieces. A
+## mount's animation library is its own scene file ("libraries" reports it):
+## its clips are retargeted on main from that cached parse (about 1-3 ms
+## headless), as for any creature. Empty (nothing to wait for) for a mount
+## with no profile or no model, as the bind then draws no mount. Memoized per
+## mount id for the same `models`. Main thread.
+static func mount_closure(mount_id: String, models: Dictionary) -> Dictionary:
+	if not is_same(models, _mount_memo_models):
+		_mount_memo.clear()
+		_mount_memo_models = models
+	var found: Variant = _mount_memo.get(mount_id)
+	if found is Dictionary:
+		return found as Dictionary
+	var scenes := PackedStringArray()
+	var libraries := PackedStringArray()
+	var result := {"model": mount_id, "creature": true, "scenes": scenes, "pieces": PackedStringArray(),
+		"rl_files": PackedStringArray(), "libraries": libraries, "mount": mount_id, "key": ""}
+	var config: Dictionary = models.get(mount_id, {}) as Dictionary
+	if MountProfiles.supports(mount_id) and not config.is_empty():
+		_add(scenes, str(config.get("scene", "")))
+		_add(libraries, str(config.get("animationLibrary", "")))
+		var tack: Dictionary = MountProfiles.read(mount_id).get("borrowedTack", {}) as Dictionary
+		_add(scenes, str(tack.get("source", "")))
+		result["key"] = "mount:%s#%s" % [mount_id, "|".join(scenes)]
+	_mount_memo[mount_id] = result
+	return result
 
 ## {model, creature, scenes, pieces, rl_files, libraries, mount, key} for
 ## `dto` at graphics `quality`, built from `models[model_id]`. "scenes" are the

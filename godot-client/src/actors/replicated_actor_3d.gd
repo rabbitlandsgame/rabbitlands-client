@@ -4738,6 +4738,20 @@ func set_mount_state(state: Dictionary, models: Dictionary) -> void:
 	var remote = RemotePresentationService.current() if _remote_generation > 0 else null
 	if remote != null: remote.sync_transfer(self)
 
+## Whether `set_mount_state(state, ...)` would build a mount visual now
+## (avatar-worker AW-07): a built body riding a supported mount it does not
+## show yet, a first mount-up or another species. That reads the mount's
+## glTF files and binds the rider (`_set_mount_state_legacy`); everything else
+## it does (a deferred body keeping the record, the mount shown taking a new
+## gait or coat, a dismount) is cheap.
+func mount_bind_needed(state: Dictionary) -> bool:
+	if _model_deferred or state.get("mode") != "mounted":
+		return false
+	var mount_id := str(state.get("mount_id", ""))
+	if not preload("res://src/mounts/mount_profiles.gd").supports(mount_id):
+		return false
+	return not is_instance_valid(_mount_visual) or mount_state.get("mount_id") != mount_id
+
 func _set_mount_state_legacy(state: Dictionary, models: Dictionary) -> void:
 	if _model_deferred:
 		# Kept for the record only; the built actor seats its own rider.

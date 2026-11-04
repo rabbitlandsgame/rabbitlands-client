@@ -158,6 +158,7 @@ const LocalAvatarHoldScript := preload("res://src/actors/local_avatar_hold.gd")
 const LocalAvatarPrepScript := preload("res://src/actors/local_avatar_prep.gd")
 const ActorAssetClosureScript := preload("res://src/actors/actor_asset_closure.gd")
 const ActorResourceWarmupScript := preload("res://src/actors/actor_resource_warmup.gd")
+const MountBindQueueScript := preload("res://src/mounts/mount_bind_queue.gd")
 const MapChangeCurtainScript := preload("res://src/world/map_change_curtain.gd")
 const LiveEffectBudgetScript := preload("res://src/world/live_effect_budget.gd")
 const UndergroundSceneryScript := preload("res://src/world/underground_scenery.gd")
@@ -1074,6 +1075,18 @@ var _local_avatar_hold = LocalAvatarHoldScript.new()
 ## The player's own body waiting behind the arrival curtain for its asset
 ## closure, its 6 s deadline and its counters (AW-04d; `_local_body_ready`).
 var _local_avatar_prep = LocalAvatarPrepScript.new()
+## Riders whose mount bind waits for its files on the actor preparer, or for
+## Main's per-frame actor work, and its counters (AW-07; `_apply_actor_mount`).
+var _mount_binds = MountBindQueueScript.new()
+## The mount visual's script once loaded on a ResourceLoader thread, held so it
+## stays cached (AW-07; `_mount_visual_script_ready`). `_threaded` is true only
+## when that thread delivered it (not when a bind made at once loaded it first).
+var _mount_visual_script: Script
+var _mount_visual_script_requested := false
+var _mount_visual_script_threaded := false
+## The selected mount a mount table change last asked the preparer for
+## (AW-07; `_prepare_selected_mount`), "" at a session's start.
+var _selected_mount_asked := ""
 ## A change of map waiting for the arrival curtain to be drawn, and its
 ## counters (TR-01; `_load_server_map`, `_defer_map_change`).
 var _map_change_curtain = MapChangeCurtainScript.new()
@@ -2151,6 +2164,9 @@ func client_diagnostic_snapshot() -> Dictionary:
 		"local_avatar_hold": _local_avatar_hold.snapshot(),
 		"local_avatar_prep": _local_avatar_prep.snapshot(),
 		"actor_preparer": actor_resource_warmup.snapshot(),
+		"mount_binds": _mount_binds.snapshot(Time.get_ticks_msec()).merged(
+			{"visualScriptHeld": _mount_visual_script != null,
+			"visualScriptThreaded": _mount_visual_script_threaded}),
 		"map_change_curtain": _map_change_curtain.snapshot(Time.get_ticks_msec()),
 		"ambient_creation_pending": ambient_creation_pending_count(),
 		"map_texture_mip_skip": GraphicsOptions.active_texture_skip(),
@@ -5002,6 +5018,8 @@ func _clear_world_presentation(retain_map_resources := false) -> void:
 	# A session's end lets go of the player's body kept for a map change too.
 	_local_avatar_hold.release("session")
 	_local_avatar_prep.clear()
+	_mount_binds.clear()
+	_selected_mount_asked = ""
 	if _browser_actor_assets != null: _browser_actor_assets.call("clear")
 	_map_actor_marker_cache.clear()
 	crowd.clear()
@@ -6745,9 +6763,11 @@ func _on_state_changed(path: StringName) -> void:
 		&"mount_states":
 			for mount_actor_id: Variant in actor_nodes:
 				_apply_actor_mount(mount_actor_id)
+			_prepare_selected_mount()
 		&"mount_deltas":
 			for mount_actor_id: Variant in AppState.mount_deltas.presentation_ids(actor_nodes):
 				_apply_actor_mount(mount_actor_id)
+			_prepare_selected_mount()
 		&"presence":
 			nearby_indicator.show_count(AppState.presence.nearby_hidden)
 		&"experience_state":
@@ -7129,6 +7149,9 @@ func _clear_actor_nodes_for_map_change() -> void:
 			else:
 				(raw_actor_node as Node).queue_free()
 		actor_nodes.erase(actor_id)
+		# AW-07: a mount bind kept for this node goes with it; a node built
+		# for the same id after the change starts its own wait.
+		_mount_binds.drop(int(actor_id))
 	# AW-04d: a wait for the player's body that this change overtook (its record
 	# went with KILL_ALL_ACTORS before the body was built) does not hand its
 	# deadline to the next arrival's wait. No wait exists while it has a body.
@@ -7958,6 +7981,9 @@ func _remove_stale_actor_nodes(changed: Variant) -> void:
 				# map change, is kept for the ADD that follows when it can be.
 				(stale_actor as Node).queue_free()
 		actor_nodes.erase(id)
+		# AW-07: as its node, a mount bind kept for it (a parked body that
+		# returns binds again in its revival).
+		_mount_binds.drop(int(id))
 		crowd.forget(int(id))
 		_actor_surface_samples.erase(id)
 		_grounded_actors.erase(id)
@@ -8123,8 +8149,9 @@ func _remote_model_ready(id: int) -> bool:
 ## job, as before; elsewhere the preparer parses the actor's closure
 ## (actor_asset_closure.gd: race scene, hair, equipment; its RL hairstyle
 ## module through RLHeadLibrary) on its worker, and a creature's scene and
-## clips through the creature job. `mount` is the mount worn ("" for none),
-## which the closure reports for AW-07.
+## clips through the creature job. `mount` is the mount worn ("" for none):
+## a rider also waits for its mount's files (AW-07, ActorAssetClosure
+## .mount_closure), so its body is built on its mount.
 func _actor_assets_ready(id: int, dto: Dictionary, mount: String, priority: int) -> bool:
 	var model_id := _model_for_actor(dto)
 	var config: Dictionary = models.get(model_id, {}) as Dictionary
@@ -8141,6 +8168,11 @@ func _actor_assets_ready(id: int, dto: Dictionary, mount: String, priority: int)
 	var ready: bool = actor_resource_warmup.request_closure(closure, priority)
 	if bool(closure.get("creature", false)):
 		ready = actor_resource_warmup.request(config, _animation_for_model(config), priority) and ready
+	if not mount.is_empty():
+		# AW-07: a rider's body also waits for its mount's files, at its own
+		# priority, so its build binds the mount at once: it is never shown
+		# on foot first, and the bind parses nothing on main.
+		ready = _mount_files_ready(mount, priority) and ready
 	return ready
 
 ## The mount an actor rides now, or "".
@@ -8157,7 +8189,9 @@ func _actor_mount_id(id: int) -> String:
 ## file the worker could not prepare counts as ready (the preparer's
 ## fallback). Built at once, as before: with the curtain down, on the web (its
 ## own file admission), with closures off, while the client closes, and for
-## the held body the ADD wears again (AW-02).
+## the held body the ADD wears again (AW-02). AW-07: behind the curtain it also
+## waits for the files of the mount it rides (`_prepare_local_mounts`, which
+## also asks for the selected mount without waiting for it).
 func _local_body_ready(id: int, dto: Dictionary) -> bool:
 	if OS.has_feature("web"):
 		return _browser_actor_ready(id, dto)
@@ -8170,6 +8204,8 @@ func _local_body_ready(id: int, dto: Dictionary) -> bool:
 		return _local_avatar_prep.admit(id, false, false, Time.get_ticks_msec())
 	var ready: bool = actor_resource_warmup.request_closure(_local_closure(id, dto),
 		ActorResourceWarmupScript.PRIORITY_LOCAL)
+	# AW-07: and for the files of the mount it rides, so it arrives on it.
+	ready = _prepare_local_mounts(id) and ready
 	return _local_avatar_prep.admit(id, ready, true, Time.get_ticks_msec())
 
 ## The player's own asset closure (ActorAssetClosure.memoized): what a remote
@@ -8191,7 +8227,8 @@ func _local_hold_matches(id: int, dto: Dictionary) -> bool:
 ## map waiting for the curtain, an arrival whose ground streams in, the intro's
 ## arrival: `_sync_world`), so its files are parsed on the worker while the
 ## world is built. Nothing for a body it has or the held body the ADD wears
-## again, with closures off, on the web, or while the client closes.
+## again, with closures off, on the web, or while the client closes. AW-07:
+## its mount files with it (`_prepare_local_mounts`).
 func _prepare_local_closure() -> void:
 	var id: int = AppState.local_actor_id
 	if _actor_preparation_closing or OS.has_feature("web") or not AppState.actors.has(id) \
@@ -8203,6 +8240,7 @@ func _prepare_local_closure() -> void:
 	var closure := _local_closure(id, dto)
 	if not actor_resource_warmup.request_closure(closure, ActorResourceWarmupScript.PRIORITY_LOCAL):
 		_local_avatar_prep.note_early(id, str(closure.get("key", "")))
+	_prepare_local_mounts(id)
 
 ## AW-04d: the player's own body was built; a wait for its closure ends, and one
 ## that happened is recorded (outcome and milliseconds, no player data).
@@ -8381,7 +8419,7 @@ func _spawn_actor(id: Variant, build := true,
 	node.set_title(str(AppState.actor_titles.get(int(id), "")))
 	node.set_occupation(str(AppState.actor_occupations.get(int(id), "")))
 	node.set_quest_available(AppState.quest_offer_actors.has(int(id)))
-	_apply_actor_mount(id)
+	_apply_actor_mount(id, true)
 	_place_actor_on_surface(node, true, actor_adapter.fallback_height())
 	node.adopt_presentation_from(previous)
 	node.set_selected(int(id) == AppState.selected_actor_id)
@@ -8429,7 +8467,7 @@ func _revive_actor(id: Variant, node: ReplicatedActor3D, dto: Dictionary,
 	# Parked bodies were absent from live quality changes. Reconcile before
 	# mount/tack attachment so every returned visual inherits current policy.
 	node.apply_render_quality(LookProfile.quality(), int(id) == AppState.local_actor_id)
-	_apply_actor_mount(id)
+	_apply_actor_mount(id, true)
 	_place_actor_on_surface(node, true, actor_adapter.fallback_height())
 	node.set_selected(int(id) == AppState.selected_actor_id)
 	campaign_scene.prepare_actor_visibility(AppState.campaign, node, int(id), AppState.current_map)
@@ -8452,6 +8490,8 @@ func _update_model_builds() -> void:
 	# The preparer's main-thread publication (one parsed file a frame, packed
 	# here) is this frame's actor work too.
 	_charge_actor_work(actor_resource_warmup.take_publish_usec())
+	# AW-07: mount binds kept out of the packet handler, at most one a frame.
+	_bind_pending_mounts()
 	if not crowd.lazy:
 		return
 	# Critical bodies must not wait behind a stale distance-ranked candidate queue.
@@ -8519,7 +8559,14 @@ func _replace_actor_node(id: int, build: bool) -> bool:
 
 ## Bind mount presentation to the current player identity and map, including
 ## state received before a visible actor's model finished loading.
-func _apply_actor_mount(id: Variant) -> void:
+## AW-07: a bind that builds a mount visual (ReplicatedActor3D.mount_bind_needed)
+## is made outside the packet handler: it waits in `_mount_binds` for its
+## mount's files on the actor preparer (`_mount_bind_wait`; the rider is drawn
+## as it is meanwhile), and a remote rider's ready bind waits for
+## `_bind_pending_mounts` (at most one a frame). `in_build` is a body's own
+## build or revival, whose actor work is already budgeted: a ready bind is made
+## there at once, so a body built on a ready mount never shows on foot.
+func _apply_actor_mount(id: Variant, in_build := false) -> void:
 	var node := actor_nodes.get(id) as ReplicatedActor3D
 	if node == null:
 		return
@@ -8527,7 +8574,175 @@ func _apply_actor_mount(id: Variant) -> void:
 	if OS.has_feature("web") and state.get("mode") == "mounted" and not _browser_actor_ready(int(id),
 			_presentation_dto(AppState.actors.get(id, {}))):
 		return
+	var wait := _mount_bind_wait(int(id), node, state, in_build)
+	if not wait.is_empty():
+		_mount_binds.keep(int(id), wait, Time.get_ticks_msec())
+		return
+	var binding := node.mount_bind_needed(state)
+	if _mount_binds.has(int(id)):
+		if binding:
+			_mount_binds.release(int(id))
+		else:
+			_mount_binds.drop(int(id))
+	if binding:
+		_mount_binds.note_at_once()
 	node.set_mount_state(state, models)
+
+## AW-07: why a mount bind for `id` (its `node`, its mount `state`) waits, or
+## "" to make it now. Only a bind that builds a mount visual can wait:
+##   * "files": its mount's files (ActorAssetClosure.mount_closure) are not in
+##     GlbSceneCache yet, or the mount visual's script is still loading
+##     (`_mount_files_ready`). The files are asked of the preparer: the player's own at
+##     PRIORITY_LOCAL, the selection and combat target at PRIORITY_TARGET,
+##     every other rider at PRIORITY_MOUNT. A file the worker cannot prepare
+##     counts as ready (main parses it in the bind, as before);
+##   * "turn": a remote rider's files are ready and this is not its body's
+##     build (`in_build`): the bind waits for `_bind_pending_mounts`.
+## Made now, as before: the player's own behind the arrival curtain (its files
+## were part of its body's wait, `_prepare_local_mounts`; a bind after that
+## wait's deadline parses on main, hidden by the curtain) and in its own body's
+## build (built at once with the curtain down, AW-04d: its mount with it, as
+## before), and every bind while the game view is hidden (no frame drains
+## `_mount_binds` then), while the client closes, on the web (its own file
+## admission) and with closures off (ELORIA_ACTOR_PREPARER=off, prepared
+## content, legacy actor images).
+func _mount_bind_wait(id: int, node: ReplicatedActor3D, state: Dictionary, in_build: bool) -> String:
+	if not node.mount_bind_needed(state) or not game_view.visible or _actor_preparation_closing \
+			or OS.has_feature("web") or not actor_resource_warmup.closure_enabled():
+		return ""
+	var local := id == AppState.local_actor_id
+	if local and (in_build or arrival_curtain.is_showing()):
+		return ""
+	var priority := ActorResourceWarmupScript.PRIORITY_LOCAL if local \
+		else ActorResourceWarmupScript.PRIORITY_TARGET if _crowd_priority_actor(id) \
+		else ActorResourceWarmupScript.PRIORITY_MOUNT
+	if not _mount_files_ready(str(state.get("mount_id", "")), priority):
+		return "files"
+	return "" if local or in_build else "turn"
+
+## AW-07: whether a bind of `mount_id` finds everything it loads ready: the
+## mount closure's files in GlbSceneCache (asked of the preparer at
+## `priority`) and the mount visual's script (`_mount_visual_script_ready`).
+## True for a mount with nothing to prepare (no profile or no model).
+func _mount_files_ready(mount_id: String, priority: int) -> bool:
+	var closure := ActorAssetClosureScript.mount_closure(mount_id, models)
+	if (closure.scenes as PackedStringArray).is_empty():
+		return true
+	var ready: bool = actor_resource_warmup.request_closure(closure, priority)
+	return _mount_visual_script_ready() and ready
+
+## AW-07: whether the mount visual's script is loaded. Its first load compiles
+## it and the mount scripts it preloads (seat and Rust rider pose, reins, cape
+## surface, upper body, tack, hind legs, coat): 177-192 ms on main headless,
+## the largest part of a session's first bind once its files are prepared. It
+## is loaded on a ResourceLoader thread instead, asked with the first mount
+## files, and held (`_mount_visual_script`) so it stays cached. Main only
+## polls; it takes the result once the load has finished. A load that cannot
+## start or fails is left to the bind, which loads it as before.
+func _mount_visual_script_ready() -> bool:
+	if _mount_visual_script != null:
+		return true
+	var path := MountBindQueueScript.VISUAL_SCRIPT
+	match ResourceLoader.load_threaded_get_status(path):
+		ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+			return false
+		ResourceLoader.THREAD_LOAD_LOADED:
+			_mount_visual_script = ResourceLoader.load_threaded_get(path) as Script
+			_mount_visual_script_threaded = _mount_visual_script != null
+			return true
+		ResourceLoader.THREAD_LOAD_FAILED:
+			ResourceLoader.load_threaded_get(path)
+			return true
+	if ResourceLoader.has_cached(path):
+		# Loaded already (a bind made at once): held from now on.
+		_mount_visual_script = ResourceLoader.load(path) as Script
+		return true
+	if _mount_visual_script_requested:
+		return true
+	_mount_visual_script_requested = true
+	return ResourceLoader.load_threaded_request(path, "Script") != OK
+
+## AW-07: makes the mount binds `_apply_actor_mount` kept, at most
+## MountBindQueue.BINDS_PER_FRAME a process frame, the player's own first, then
+## the longest waiting. A bind is made once its files are ready and the
+## frame's actor work allows it; the player's own, the selection, the combat
+## target and a bind kept for MountBindQueue.OVERDUE_MSEC go regardless. Its
+## time is charged to the frame's actor work. A kept rider that needs no bind
+## any more (dismounted, its mount shown, its node or record gone) is dropped,
+## its state applied.
+func _bind_pending_mounts() -> void:
+	if _mount_binds.is_empty():
+		return
+	var frame := Engine.get_process_frames()
+	var now := Time.get_ticks_msec()
+	var local: int = AppState.local_actor_id
+	var order: Array = _mount_binds.ids()
+	if order.has(local):
+		order.erase(local)
+		order.push_front(local)
+	for raw_id: Variant in order:
+		var id := int(raw_id)
+		var value: Variant = actor_nodes.get(id)
+		var node: ReplicatedActor3D = value as ReplicatedActor3D if is_instance_valid(value) else null
+		if node == null or not AppState.actors.has(id):
+			_mount_binds.drop(id)
+			continue
+		var state := AppState.mount_state_for_actor(id)
+		if not node.mount_bind_needed(state):
+			_mount_binds.drop(id)
+			node.set_mount_state(state, models)
+			continue
+		if _mount_bind_wait(id, node, state, false) == "files":
+			continue
+		if not _mount_binds.may_bind(frame):
+			break
+		var overdue: bool = _mount_binds.overdue(id, now)
+		if not _actor_work_available(true, id == local or overdue or _crowd_priority_actor(id)):
+			continue
+		var began := Time.get_ticks_usec()
+		node.set_mount_state(state, models)
+		var spent := Time.get_ticks_usec() - began
+		_charge_actor_work(spent)
+		_mount_binds.note_bound(id, spent, frame, now, overdue)
+
+## AW-07: asks the preparer for the player's own mount files: the mount ridden
+## now at PRIORITY_LOCAL (true once its files are ready; behind the arrival
+## curtain its body waits for them too, `_local_body_ready`, so it arrives on
+## its mount) and the mount selected for riding at PRIORITY_MOUNT, not waited
+## for, so a later mount-up finds its files ready.
+func _prepare_local_mounts(id: int) -> bool:
+	var riding := _actor_mount_id(id)
+	var ready := riding.is_empty() or _mount_files_ready(riding, ActorResourceWarmupScript.PRIORITY_LOCAL)
+	var selected := str(AppState.mount_state_for_actor(id).get("selected_mount_id", ""))
+	if not selected.is_empty() and selected != riding:
+		_mount_files_ready(selected, ActorResourceWarmupScript.PRIORITY_MOUNT)
+	return ready
+
+## AW-07: when the mount table changes, the player's own mount files are asked
+## of the preparer ahead of a mount-up:
+##   * a mount being summoned, at PRIORITY_LOCAL on every change, so the call's
+##     countdown covers its parse (also after the creature memory budget
+##     evicted an idle prefetch, MEM-M5);
+##   * the mount selected for riding, at PRIORITY_MOUNT once per selection
+##     (`_selected_mount_asked`, cleared at a session's end): an idle prefetch
+##     the budget evicted is not parsed again on every later change of a
+##     market's mount table.
+## The mount ridden is asked for by its bind (`_apply_actor_mount`) and, behind
+## the arrival curtain, by the body's wait (`_prepare_local_mounts`). Nothing
+## before login, while the client closes, on the web or with closures off.
+func _prepare_selected_mount() -> void:
+	var id: int = AppState.local_actor_id
+	if id < 0 or not AppState.authenticated or _actor_preparation_closing or OS.has_feature("web") \
+			or not actor_resource_warmup.closure_enabled():
+		return
+	var state := AppState.mount_state_for_actor(id)
+	if state.get("mode") == "summoning":
+		_mount_files_ready(str(state.get("mount_id", "")), ActorResourceWarmupScript.PRIORITY_LOCAL)
+	var selected := str(state.get("selected_mount_id", ""))
+	if selected.is_empty() or selected == _selected_mount_asked:
+		return
+	_selected_mount_asked = selected
+	_mount_files_ready(selected, ActorResourceWarmupScript.PRIORITY_MOUNT)
 
 func _gauntlet_creature_deaths_pending() -> bool:
 	for value: Variant in actor_nodes.values():

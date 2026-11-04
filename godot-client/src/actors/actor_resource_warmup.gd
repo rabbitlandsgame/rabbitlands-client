@@ -22,7 +22,10 @@ extends RefCounted
 ##     all (`alreadyCached`). The worker starts no parse while
 ##     PUBLISH_QUEUE_LIMIT parsed roots await publication. A closure's RL files
 ##     (a portrait Human's RL hairstyle module) are asked of
-##     RLHeadLibrary.request, which parses them on its own worker.
+##     RLHeadLibrary.request, which parses them on its own worker. A mount's
+##     files (ActorAssetClosure.mount_closure, AW-07: its creature scene and
+##     the borrowed tack's source) are file jobs too, whatever folder they
+##     live in; Main retargets the mount's clips from that cached parse.
 ## The next job is the most urgent queued one (PRIORITY_*), first asked first
 ## within a class; asking again with a more urgent class raises a queued job.
 ## The player's own files (PRIORITY_LOCAL, AW-04d: its body waits for them

@@ -15,6 +15,13 @@ const NAMES := {"moor_pony": "Moor Pony", "golden_plains_horse": "Golden Plains 
 	"jadefeather_raptor":"Jadefeather Raptor", "giant_rat":"Giant Rat",
 	"cave_salamander":"Cave Salamander", "lantern_stag":"Lantern Stag", "cheetah":"Cheetah"}
 
+## Each profile as parsed, once per process (avatar-worker AW-07): a mount bind
+## read and parsed its profile file every time (NET-STATE-05). `read` hands
+## out deep copies, so a caller may change what it gets. Main thread.
+static var _parsed: Dictionary = {}
+## Profile files read from disk this process (one per species).
+static var file_reads := 0
+
 static func display_name(id: String) -> String:
 	return str(NAMES.get(id, "Mount"))
 
@@ -24,4 +31,15 @@ static func supports(id: String) -> bool:
 static func read(id: String) -> Dictionary:
 	if not supports(id):
 		return {}
-	return JSON.parse_string(FileAccess.get_file_as_string(PATHS[id]))
+	var parsed: Variant = _parsed.get(id)
+	if not parsed is Dictionary:
+		file_reads += 1
+		parsed = JSON.parse_string(FileAccess.get_file_as_string(PATHS[id]))
+		if not parsed is Dictionary:
+			return {}
+		_parsed[id] = parsed
+	return (parsed as Dictionary).duplicate(true)
+
+## Forgets the parsed profiles (tests and tools that rewrite a profile file).
+static func clear_cache() -> void:
+	_parsed.clear()
