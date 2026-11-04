@@ -155,6 +155,8 @@ const OccluderFadeScript := preload("res://src/world/occluder_fade_manager.gd")
 const CameraShaderWarmup := preload("res://src/world/camera_shader_warmup.gd")
 const CrowdPresentationScript := preload("res://src/world/crowd_presentation.gd")
 const LocalAvatarHoldScript := preload("res://src/actors/local_avatar_hold.gd")
+const ActorAssetClosureScript := preload("res://src/actors/actor_asset_closure.gd")
+const ActorResourceWarmupScript := preload("res://src/actors/actor_resource_warmup.gd")
 const MapChangeCurtainScript := preload("res://src/world/map_change_curtain.gd")
 const LiveEffectBudgetScript := preload("res://src/world/live_effect_budget.gd")
 const UndergroundSceneryScript := preload("res://src/world/underground_scenery.gd")
@@ -955,7 +957,9 @@ var _actor_work_usec := 0
 var _actor_work_nodes := 0
 var _actor_work_bodies := 0
 var _actor_preparation_closing := false
-var actor_resource_warmup := preload("res://src/actors/actor_resource_warmup.gd").new()
+## The actor preparer (actor_resource_warmup.gd): creature jobs and, for every
+## other remote body, its asset closure parsed on a worker (AW-04a).
+var actor_resource_warmup := ActorResourceWarmupScript.new()
 ## Full body creation has one count/time allowance per rendered process frame,
 ## shared by initial arrivals and later deferred-body promotion. Placeholder
 ## creation and parked-body reuse retain their own existing behavior.
@@ -2141,6 +2145,7 @@ func client_diagnostic_snapshot() -> Dictionary:
 		"low_processor_usage_mode_sleep_usec": OS.low_processor_usage_mode_sleep_usec,
 		"actor_creation_budget": actor_creation_budget_snapshot(),
 		"local_avatar_hold": _local_avatar_hold.snapshot(),
+		"actor_preparer": actor_resource_warmup.snapshot(),
 		"map_change_curtain": _map_change_curtain.snapshot(Time.get_ticks_msec()),
 		"ambient_creation_pending": ambient_creation_pending_count(),
 		"map_texture_mip_skip": GraphicsOptions.active_texture_skip(),
@@ -8078,15 +8083,51 @@ func _charge_actor_work(usec: int) -> void:
 	_actor_work_available(false) # Establish this frame's accounting first.
 	_actor_work_usec += usec
 
+## Whether an actor's body may be built now without parsing on the main
+## thread what the preparer could parse on its worker. The player's own body is
+## built at once (AW-04d moves it behind the curtain); every other one waits for
+## its asset closure (`_actor_assets_ready`), most urgent first: the selection,
+## the combat target and staged actors, then bodies wanted within the build
+## radius (every caller asks for a body it wants now).
 func _remote_model_ready(id: int) -> bool:
 	if _actor_preparation_closing:
 		return false
-	if OS.has_feature("web") and not _browser_actor_ready(id, _presentation_dto(AppState.actors[id])):
-		return false
+	var dto: Dictionary = _presentation_dto(AppState.actors[id])
 	if id == AppState.local_actor_id:
-		return true
-	var config: Dictionary = models.get(_model_for_actor(AppState.actors[id]), {})
-	return actor_resource_warmup.request(config, _animation_for_model(config))
+		return not OS.has_feature("web") or _browser_actor_ready(id, dto)
+	var priority: int = ActorResourceWarmupScript.PRIORITY_TARGET if _crowd_priority_actor(id) \
+		else ActorResourceWarmupScript.PRIORITY_NEAR
+	return _actor_assets_ready(id, dto, _actor_mount_id(id), priority)
+
+## Whether the files a body for `dto` reads are ready (AW-04a), by platform:
+## the browser admits it once its files are downloaded and keeps its creature
+## job, as before; elsewhere the preparer parses the actor's closure
+## (actor_asset_closure.gd: race scene, hair, equipment; its RL hairstyle
+## module through RLHeadLibrary) on its worker, and a creature's scene and
+## clips through the creature job. `mount` is the mount worn ("" for none),
+## which the closure reports for AW-07.
+func _actor_assets_ready(id: int, dto: Dictionary, mount: String, priority: int) -> bool:
+	var model_id := _model_for_actor(dto)
+	var config: Dictionary = models.get(model_id, {}) as Dictionary
+	if OS.has_feature("web"):
+		return _browser_actor_ready(id, dto) \
+			and actor_resource_warmup.request(config, _animation_for_model(config), priority)
+	if not actor_resource_warmup.closure_enabled():
+		# Closures are off (ELORIA_ACTOR_PREPARER=off, prepared content, legacy
+		# actor images): no closure is computed, only the creature job is
+		# asked, as before AW-04a.
+		return actor_resource_warmup.request(config, _animation_for_model(config), priority)
+	var closure := ActorAssetClosureScript.memoized(dto, model_id, models, equipment_config,
+		LookProfile.quality(), {} if mount.is_empty() else {"mode": "mounted", "mount_id": mount})
+	var ready: bool = actor_resource_warmup.request_closure(closure, priority)
+	if bool(closure.get("creature", false)):
+		ready = actor_resource_warmup.request(config, _animation_for_model(config), priority) and ready
+	return ready
+
+## The mount an actor rides now, or "".
+func _actor_mount_id(id: int) -> String:
+	var state := AppState.mount_state_for_actor(id)
+	return str(state.get("mount_id", "")) if state.get("mode") == "mounted" else ""
 
 func _browser_actor_ready(id: int, dto: Dictionary) -> bool:
 	if not OS.has_feature("web"): return true
@@ -8319,6 +8360,9 @@ func _revive_actor(id: Variant, node: ReplicatedActor3D, dto: Dictionary,
 ## Each is a new node in the deferred one's place, carrying on its motion.
 func _update_model_builds() -> void:
 	actor_resource_warmup.poll()
+	# The preparer's main-thread publication (one parsed file a frame, packed
+	# here) is this frame's actor work too.
+	_charge_actor_work(actor_resource_warmup.take_publish_usec())
 	if not crowd.lazy:
 		return
 	# Critical bodies must not wait behind a stale distance-ranked candidate queue.

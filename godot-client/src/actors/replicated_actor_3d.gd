@@ -1446,11 +1446,8 @@ func _add_hair_variant(style: int, color: Color, rebuild := true) -> void:
 	var styles_value: Variant = _model_config.get("hairStyles", [])
 	if styles_value is not Array or (styles_value as Array).is_empty():
 		return
-	var styles: Array = styles_value as Array
-	var path: String = str(styles[posmod(style, styles.size())])
+	var path := hair_scene_for(_model_config, style)
 	var style_override: Dictionary = (_model_config.get("hairStyleOverrides", {}) as Dictionary).get(str(style), {})
-	if not style_override.is_empty():
-		path = str(style_override.get("scene", path))
 	if bool(style_override.get("skinned", _model_config.get("hairSkinned", false))):
 		var holder := Node3D.new()
 		holder.name = "AppearanceHair_%d" % style
@@ -1499,6 +1496,23 @@ func _add_hair_variant(style: int, color: Color, rebuild := true) -> void:
 			(node_value as MeshInstance3D).extra_cull_margin = 0.04
 		else:
 			_tint_mesh(node_value as MeshInstance3D, color)
+
+## The game hairstyle file `_add_hair_variant` draws for `style` on a body
+## built from `model_config` (its `hairStyles`, or a style override's scene),
+## or "" when it draws none (style 0, or a body without hairstyles). Static
+## for the actor asset closure; the file is read as equipment pieces.
+static func hair_scene_for(model_config: Dictionary, style: int) -> String:
+	if style == 0:
+		return ""
+	var styles_value: Variant = model_config.get("hairStyles", [])
+	if styles_value is not Array or (styles_value as Array).is_empty():
+		return ""
+	var styles: Array = styles_value as Array
+	var path: String = str(styles[posmod(style, styles.size())])
+	var style_override: Dictionary = (model_config.get("hairStyleOverrides", {}) as Dictionary).get(str(style), {})
+	if not style_override.is_empty():
+		path = str(style_override.get("scene", path))
+	return path
 
 # ---------------------------------------------------------------- RL head
 # The RL head (src/actors/rl_head/) is a Human's head, upper neck and hair at
@@ -2952,7 +2966,30 @@ func set_boss_rank(value: int) -> void:
 ## Mounted seating records that hierarchy's neutral transform, so update its
 ## reference too when an existing player changes proportions while riding.
 func _uses_portrait_customization() -> bool:
-	return str(_model_config.get("culture", "")) == "luminous" and str(_model_config.get("bodyTemplate", "")) in ["luminous_male", "luminous_female"]
+	return uses_portrait_customization_for(_model_config)
+
+## `_uses_portrait_customization` for a body built from `model_config`.
+static func uses_portrait_customization_for(model_config: Dictionary) -> bool:
+	return str(model_config.get("culture", "")) == "luminous" and str(model_config.get("bodyTemplate", "")) in ["luminous_male", "luminous_female"]
+
+## The RL hairstyle module files `_apply_rl_head_and_hair` draws without an RL
+## head (`_set_rl_hair`, hair only, built at once on the main thread) for a
+## body built from `model_config` wearing `appearance` at `quality`: a portrait
+## Human below High, or at High where the renderer draws no RL head. Empty when
+## it draws the game hairstyle or the RL head (whose files RLHeadLibrary
+## already parses on its worker, _rl_head_files_ready). Static for the actor
+## asset closure, which asks RLHeadLibrary for them before a body is built.
+static func rl_hair_only_files_for(model_config: Dictionary, appearance: Dictionary,
+		quality: int) -> PackedStringArray:
+	if not uses_portrait_customization_for(model_config) or rl_heads_classic() or appearance.has("rl_head"):
+		return PackedStringArray()
+	if ActorRenderQuality.normalized_quality(quality) == ActorRenderQuality.Quality.HIGH \
+			and rl_heads_renderer_supported():
+		return PackedStringArray()
+	var face := RLHeadPortraitMap.face(appearance, str(model_config.get("gender", "female")), true)
+	if face == null or face.hair == RLHeadAppearance.NONE or face.hair.begins_with(RLHeadLibrary.LEGACY_PREFIX):
+		return PackedStringArray()
+	return RLHeadLibrary.face_paths(face, true)
 
 func _apply_character_proportions() -> void:
 	var next := CHARACTER_PROPORTIONS.visual_scale(_appearance) if _uses_portrait_customization() else Vector3.ONE
@@ -4750,17 +4787,30 @@ func _set_mount_state_legacy(state: Dictionary, models: Dictionary) -> void:
 		_apply_surface_orientation()
 
 func _equipment_model_config(part: int, visual_id: int) -> Dictionary:
-	var aliases: Dictionary = _equipment_config.get("aliases", {}) as Dictionary
+	return equipment_model_config_for(_equipment_config, _model_config, part, visual_id)
+
+## The registry model `equipment_config` wears on `part` for `visual_id` on a
+## body built from `model_config`: its alias resolved and its fit variant for
+## that body's race applied (`fit_variant_for`). Static so the actor asset
+## closure (actor_asset_closure.gd) names the very files `configure` will load
+## before any node exists; `_equipment_model_config` is this for the actor.
+static func equipment_model_config_for(equipment_config: Dictionary, model_config: Dictionary,
+		part: int, visual_id: int) -> Dictionary:
+	var aliases: Dictionary = equipment_config.get("aliases", {}) as Dictionary
 	var model_key: String = "%d:%d" % [part, visual_id]
 	model_key = str(aliases.get(model_key, model_key))
-	var models: Dictionary = _equipment_config.get("models", {}) as Dictionary
+	var models: Dictionary = equipment_config.get("models", {}) as Dictionary
 	var model: Dictionary = models.get(model_key, {}) as Dictionary
-	return _fit_variant(model)
+	return fit_variant_for(equipment_config, model_config, model)
 
 ## The race this actor's body was built as, which is what the registry keys its
 ## fit groups and its body measurements on.
 func rig_name() -> String:
-	return str(_model_config.get("scene", "")).get_file().get_basename()
+	return rig_name_for(_model_config)
+
+## `rig_name` for a body built from `model_config`.
+static func rig_name_for(model_config: Dictionary) -> String:
+	return str(model_config.get("scene", "")).get_file().get_basename()
 
 ## The fit groups this actor's race belongs to, in precedence order.
 ##
@@ -4768,8 +4818,12 @@ func rig_name() -> String:
 ## each retained head. Registries list these fit groups in priority
 ## order; the parser also retains compatibility with a single group string.
 func fit_groups() -> PackedStringArray:
-	var groups: Dictionary = _equipment_config.get("fitGroups", {}) as Dictionary
-	var mine: Variant = groups.get(rig_name(), "")
+	return fit_groups_for(_equipment_config, _model_config)
+
+## `fit_groups` for a body built from `model_config`, in `equipment_config`.
+static func fit_groups_for(equipment_config: Dictionary, model_config: Dictionary) -> PackedStringArray:
+	var groups: Dictionary = equipment_config.get("fitGroups", {}) as Dictionary
+	var mine: Variant = groups.get(rig_name_for(model_config), "")
 	if mine is Array:
 		var names := PackedStringArray()
 		for value: Variant in mine as Array:
@@ -4779,6 +4833,11 @@ func fit_groups() -> PackedStringArray:
 	return PackedStringArray() if single.is_empty() else PackedStringArray([single])
 
 func _fit_variant(model: Dictionary) -> Dictionary:
+	return fit_variant_for(_equipment_config, _model_config, model)
+
+## `model` as a body built from `model_config` wears it (see the comment).
+static func fit_variant_for(equipment_config: Dictionary, model_config: Dictionary,
+		model: Dictionary) -> Dictionary:
 	# Modified 2026-08-28 for Eloria Client: some builds cannot be reached by
 	# resizing a garment, only by authoring one.  A race in a fit group wears
 	# the copy of the piece built on its own rig where one exists, and the
@@ -4787,7 +4846,7 @@ func _fit_variant(model: Dictionary) -> Dictionary:
 	if model.is_empty():
 		return model
 	var variants: Dictionary = model.get("variants", {}) as Dictionary
-	for group: String in fit_groups():
+	for group: String in fit_groups_for(equipment_config, model_config):
 		var variant: Dictionary = variants.get(group, {}) as Dictionary
 		if variant.is_empty():
 			continue
@@ -5655,6 +5714,11 @@ func _invalidate_hand_prop_ranged_cache() -> void:
 	_hand_prop_weapon_has_ranged_animation = false
 
 func _ranged_bow_path(weapon: Dictionary) -> String:
+	return ranged_bow_path_for(weapon)
+
+## The bow scene the ranged presentation (RangerBow3D) draws for `weapon`, a
+## resolved registry model, or "" when it draws none.
+static func ranged_bow_path_for(weapon: Dictionary) -> String:
 	var path := str(weapon.get("rangedAnimationScene", ""))
 	var scene := str(weapon.get("scene", ""))
 	if str(weapon.get("attach", "")) == "ranged_bow" or RangerBow3D.supports_asset(scene): path = scene
@@ -6787,10 +6851,37 @@ static func _equipment_pieces(path: String) -> Array:
 	# external test candidates and lean checkouts use GlbSceneCache's raw fallback.
 	if _equipment_pieces_cache.has(path):
 		return _equipment_pieces_cache[path] as Array
-	var pieces: Array = []
 	var imported := GlbSceneCache.instantiate(path)
 	if imported == null:
-		return pieces
+		return []
+	var pieces := equipment_pieces_from(imported, path)
+	imported.free()
+	if not pieces.is_empty():
+		_equipment_pieces_cache[path] = pieces
+	return pieces
+
+## Publishes pieces the actor preparer read on its worker from the very scene
+## root GlbSceneCache just packed for `path` (actor_resource_warmup.gd), so a
+## first build finds them as `_equipment_pieces` would have made them from an
+## instance: the same meshes, skins' names and binds, materials and extras.
+## Main thread; a path already present keeps its pieces. True if stored.
+static func install_equipment_pieces(path: String, pieces: Array) -> bool:
+	if pieces.is_empty() or _equipment_pieces_cache.has(path):
+		return false
+	_equipment_pieces_cache[path] = pieces
+	return true
+
+## Whether `_equipment_pieces(path)` would answer from its session cache.
+static func has_equipment_pieces(path: String) -> bool:
+	return _equipment_pieces_cache.has(path)
+
+## The pieces `_equipment_pieces` caches for `path`, read from `imported`, an
+## instance of the file's scene or its unpacked generated root. Reads only
+## CPU-side node, mesh, skin and material state and the file's JSON chunk
+## (GlbMeshExtras), so the actor preparer calls it on its worker; it never
+## frees, packs or parents `imported`.
+static func equipment_pieces_from(imported: Node3D, path: String) -> Array:
+	var pieces: Array = []
 	var mesh_nodes: Array[MeshInstance3D] = []
 	var embedded_extras := false
 	for node_value: Node in imported.find_children("*", "MeshInstance3D", true, false):
@@ -6833,9 +6924,6 @@ static func _equipment_pieces(path: String) -> Array:
 			"lod_bias": mesh_node.lod_bias,
 			"cast_shadow": mesh_node.cast_shadow,
 		})
-	imported.free()
-	if not pieces.is_empty():
-		_equipment_pieces_cache[path] = pieces
 	return pieces
 
 static func _relative_transform(node: Node3D, root: Node3D) -> Transform3D:
