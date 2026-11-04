@@ -1,0 +1,759 @@
+# Desktop releases with content on R2
+
+Windows and Linux releases keep their game content on Cloudflare R2. The owner's
+build machine builds, qualifies and uploads the content. GitHub Actions builds only
+the executables, signs the release, builds the installers, tests the shipped
+combination and publishes it. From the helper-train release T on, installed games
+and updaters find a release through a small signed pointer on R2. They fall back to
+the GitHub release when R2 cannot be used.
+
+R2 is untrusted transport. Every byte a player installs is checked against a row of
+a manifest signed with the release key, as before. R2, Cloudflare and every R2
+credential can delay or deny an update, but cannot change what a player runs.
+
+Related pages:
+
+- [Runner builds](runner-builds.md): the workflows, their jobs and the `ci` content
+  build.
+- [Automatic client updates](client-updates.md): the updater, packages and staging.
+- [Store builds](store-builds.md): Steam and macOS, which this page does not change.
+- [Browser hosting](browser-hosting.md): the browser prototype. It uses the same
+  bucket under its own `browser/` prefix, which desktop tools never read or write.
+
+## Status
+
+As of 2026-11-04 the tools, the workflows and whole-release retention are in this
+repository, but no release has used them. The uploader's self-test passed against
+the bucket and the custom domain. It proved conditional create, conditional pointer
+replacement, SHA-256 upload checksums, anonymous HTTPS reads, Range requests, and
+downloads by Godot's `HTTPRequest` on Windows and by Inno Setup's download page. The
+same Godot check on Linux, and any IPv6 check, are still open.
+
+These steps remain, in this order:
+
+1. **The updater's R2 reader** (in `src/updates/`):
+   - `release.gd` declares
+     `const DESKTOP_ASSETS := "https://assets.rabbitlandsgame.com/desktop/v1/"`, and
+     `package_updates.gd` raises the package limit from 850 to 2000;
+   - pointer discovery, the installed-release record, the downgrade guard and
+     server-target rediscovery.
+
+   The workflow refuses an `r2` content source until the packaged commit declares
+   `DESKTOP_ASSETS`, next to stage B's schema-3 reader (`CODEC_SCHEMA := 3`).
+2. **The Windows online setup for schema 3 and R2 rows.** This covers the setup
+   helper's schema check and the Inno script. The installer job refuses to build a
+   setup that could not install the release.
+3. **The owner's one-time setup** (below), then a dry run.
+4. **The helper-train release T.** Both platforms use the `ci` source. T ships the
+   R2-aware updater with the content still on GitHub.
+5. **The first full content upload**, after the package format settles. The zstd
+   re-encode changes every part hash, so upload once, with or after it.
+6. **The first R2 content release, R1.**
+7. **Retire `desktop-release.yml`**, one release after R1.
+
+Until the owner moves the signing key into the new environments,
+`desktop-release.yml` can still be dispatched, as described in
+[runner builds](runner-builds.md#the-transitional-full-ci-workflow). It refuses to
+run once a live R2 pointer exists.
+
+## Who builds what
+
+| Files | Built by | Delivered from |
+| --- | --- | --- |
+| Content packages: the core pack `app/RabbitLands.pck` (`client`), the content packs `app/packs/*.pck` (`pck-*`), the release descriptor, prepared world, actors, maps, audio, shared assets and records | the build machine (`r2` source), or a runner (`ci` source) | R2 `desktop/v1/parts/` (`r2`), or the GitHub `client-assets-<h>` pools (`ci`) |
+| Content set: the unsigned list of content packages | the build machine, or the `ci` job | R2 `desktop/v1/sets/` (`r2`), or a workflow artifact (`ci`). Players never read it |
+| Engine `app/RabbitLands.exe` / `app/RabbitLands.x86_64` (`engine` package) | Actions, every run, no cache | GitHub `client-assets-<h>` pools |
+| Native runtime `app/bin/client_runtime/` (`native-runtime` package) | Actions, rebuilt every run, no cache | GitHub `client-assets-<h>` pools |
+| Updater and uninstaller | Actions. While their inputs are unchanged, they are reused byte for byte from the previous signed release | GitHub legacy `client-assets` pool |
+| Root files beside `app/` (launchers, `AUDIO-CREDITS.txt`) | Actions, after the helpers exist | listed in the signed manifest (`root_files`) |
+| `<version>-setup.exe`, `<version>-download.sh` | Actions | the GitHub release `client-<commit>` |
+| Signed manifests, alias, pointers | signed by Actions in owner-approved jobs | the GitHub release, plus immutable manifest copies and the live pointers on R2 |
+
+Content sets never contain the CI-owned paths (`app/RabbitLands.exe`,
+`app/RabbitLands.x86_64`, `app/bin/client_runtime/`), in any spelling, or any file
+at the stage root. The core pack and the content packs come from one local export,
+so the split-pack checks of that export stay valid.
+
+## R2 layout
+
+Everything for the desktop lives under `desktop/` in the project's bucket.
+
+| Key | Mutability | Written by | Content |
+| --- | --- | --- | --- |
+| `desktop/v1/parts/<sha256>.bin` | immutable, content-addressed | `upload_desktop_assets.py content` | one package part (for a one-part package, the whole package ZIP) |
+| `desktop/v1/sets/<platform>/<sha256>.json` | immutable | `content`, **last** in an upload | the unsigned content set; `<sha256>` is the hash of its exact bytes |
+| `desktop/v1/manifests/<platform>/<sha256>.json` | immutable | `upload_desktop_assets.py publish` | the signed release manifest, byte-identical to `<version>-<platform>.json` on GitHub |
+| `desktop/v1/channels/live/<platform>.json` | **mutable** (the only mutable production keys) | `publish`, after the manifest | the signed pointer to the live release |
+| `desktop/selftest/<YYYYMMDD>-<8 hex>/...` | immutable, except its test pointer | `selftest` only | test objects that no client reads |
+
+| Object | Content-Type | Cache-Control | Metadata |
+| --- | --- | --- | --- |
+| part | `application/octet-stream` | `public, max-age=31536000, immutable` | `sha256` |
+| set, manifest | `application/json` | `public, max-age=31536000, immutable` | `sha256` |
+| pointer | `application/json` | `no-store` | `sha256`, `sequence` |
+
+- **Public URLs.** Players and CI read through
+  `https://assets.rabbitlandsgame.com/desktop/v1/`.
+- **Edge caching.** `.bin` keys are cached at the Cloudflare edge. The first read
+  in a location is a MISS and later reads are HITs, per location. `.json` keys always
+  come from the origin, so a new pointer is visible at once. HEAD requests are never
+  cached.
+- **404s are cached.** A 404 for a cacheable key can stay cached for up to 4 hours.
+  That is why nothing reads a part before it exists (rules below).
+- **Metadata is bookkeeping.** The metadata and ETags help the uploader resume.
+  No client or CI job treats them as integrity.
+- **Parts are shared.** Parts are not split by platform: a package that is
+  byte-identical on both platforms is stored once. Local part files keep their
+  `RabbitLands-pkg-<sha256>.zip.part` names. The R2 key is derived only from the
+  hash.
+- **Spare levels.** `v1` lets a later, incompatible layout coexist. Only the `live`
+  channel exists. The `channels/<name>/` level keeps room for a test channel later.
+- **Desktop-only tools.** The desktop tools never touch `browser/`. The browser
+  objects are not reused: they are packed differently and share no hashes with
+  desktop packages.
+
+### Uploader guard
+
+`upload_desktop_assets.py` is the only desktop tool that writes to R2. It enforces
+the following:
+
+- **Key guard.** It refuses, before any request, every key that does not exactly
+  match one of the forms above.
+- **Operation allowlist.** An SDK-level handler allows only `HeadObject`,
+  `GetObject`, `PutObject` and `ListObjectsV2` (under `desktop/` only). There is no
+  delete call of any kind.
+- **Conditional writes.** Every immutable PUT is a conditional create
+  (`If-None-Match: *`). A pointer PUT replaces only the exact live version
+  (`If-Match`), or creates the first pointer.
+- **No overwrite.** An existing object that differs is a conflict and is never
+  overwritten.
+- **Sanitized output.** Errors and receipts carry only error codes. They never
+  contain the endpoint, account id, key id or secret.
+
+These controls limit the tool, not the credential. The credential itself is
+narrowed by the owner (see [one-time setup](#one-time-setup)).
+
+## Trust
+
+```
+godot-client/data/update_public.pem (in Git, RSA-4096)
+  pinned in: the core pack (res://data/client_release.json), app/client-release.json,
+             the updater's trust file and the setup helper
+      |
+release signing key: a GitHub environment secret of desktop-sign and desktop-publish only
+      |
+      +-- sign job (after the owner approves desktop-sign)
+      |     release manifest, schema 3: commit, ancestors, platform, version, launch
+      |     arguments, sequence, every package {files: path, size, SHA-256, codec;
+      |     parts: URL, size, SHA-256}, both helpers, root files, helpers fingerprint,
+      |     content source and set hash
+      |
+      +-- publish job (after the end-to-end tests and the owner's desktop-publish approval)
+            pointer: platform, channel, sequence, rollback flag, release id, run id,
+            target {commit, version, manifest_sequence, manifest {url, sha256, size}}
+
+R2, Cloudflare, every R2 credential: transport only
+```
+
+Signatures are RSA PKCS#1 v1.5 over the SHA-256 of the payload bytes, in the usual
+`{"payload": ..., "signature": ...}` envelope.
+
+### Signing
+
+- Signing runs in two small Linux jobs. Each needs an owner-approved environment,
+  restores no cache and runs no built code. The private key never reaches the build
+  machine.
+- The Python signature is byte-identical to the one `sign_client_release.gd` would
+  write. Each envelope is verified again by Godot's `verify_client_release.gd`
+  before an installer is built.
+- **What the executables pin.** They pin the public key, and the R2 base
+  `https://assets.rabbitlandsgame.com/desktop/v1/` as a compiled constant. The base
+  never comes from a manifest, a set, the server or the environment.
+- **Accepted R2 URLs.** Only these derived forms are accepted:
+  - `<base>parts/<row sha256>.bin` for parts;
+  - `<base>manifests/<platform>/<sha256>.json` for a pointer's manifest;
+  - `<base>channels/live/<platform>.json` for discovery.
+
+### Domain separation
+
+- The pointer payload has `kind: "rabbitlands-release-pointer"` and no top-level
+  `commit`, `schema`, `bootstrap_schema` or `packages`, so every manifest verifier
+  refuses it.
+- The pointer's release asset is named `RabbitLands-<platform>-pointer.json`. It
+  never matches the name patterns older games search for.
+- The content set is never signed and never read by players.
+
+### Checks at install and at load
+
+The install-time checks are unchanged:
+
+1. each part's size and SHA-256;
+2. each package's SHA-256;
+3. each package's `inventory.json`, which must equal the signed file list;
+4. every member, hashed while it is decoded;
+5. staged files, hashed again;
+6. the identity of the required files (commit, key, distribution);
+7. a final re-check at the commit point.
+
+After installation, per-load verification is anchored only in installed files. It
+never depends on where the bytes were downloaded from. Moving delivery to R2
+weakens neither.
+
+### Content attestation
+
+Content is built on the build machine, so the release needs a way to bind CI to it.
+
+1. **The dispatch names the content.** It names each platform's content set by
+   SHA-256.
+2. **The `content` job verifies it.** It downloads the set anonymously and
+   validates it:
+   - the header, the commit, the public key, the paths and the CI-owned paths;
+   - no native-code files and no PE, ELF or Mach-O magic bytes;
+   - the rules for `.gdextension` and `.godot/extension_list.cfg`.
+3. **It cross-checks the identity.** It recomputes the release identity and reads
+   the identity embedded in the core pack.
+4. **It checks every new byte.** It downloads and fully decodes every package the
+   published release does not already have.
+5. **It summarizes the difference.** The job summary lists the differences from the
+   live release.
+6. **The owner attests.** Approving `desktop-sign` is the owner's statement that
+   this content is what they built for that commit.
+
+**Integrity is cryptographic; provenance is the owner's.**
+
+- The core pack's GDScript is code. A compromised build machine could ship
+  malicious scripts in a signed release, as the older local release path always
+  could. The hygiene checks above are not containment.
+- The packer refuses a dirty or unpublished tools checkout. The set records the
+  tools commit, the dirty flag, the editor hash and a digest of the reused import
+  cache.
+- The `builder` and `qualification` blocks are informational. CI gates on its own
+  end-to-end test receipts.
+
+### Freshness, rollback and downgrade
+
+The client rules below ship with the R2-aware updater in release T. The publication
+rule is already in the tools.
+
+- **Sequence.** Every new manifest and pointer carries a signed `sequence`, in UTC
+  Unix seconds at signing. A pointer's sequence is always higher than its
+  manifest's.
+- **Pointer acceptance.** A client accepts a pointer only when its sequence is at
+  least the higher of two marks:
+  - the last pointer sequence the client stored;
+  - the sequence of the installed release.
+
+  An older pointer counts as stale, and the client uses the GitHub alias instead.
+- **Installed-release record.** The setup helper and the updater write a small
+  record after every install: commit, platform, sequence and manifest hash.
+- **Downgrade guard.** The updater refuses a manifest older than the installed
+  record, unless a pointer marked `rollback: true` names exactly that manifest.
+  Manifests without a sequence (before T) count as 0. So the GitHub alias alone can
+  never roll an R2-aware installation back.
+- **Server-target rediscovery.** When the server requires a commit that the
+  installed game does not contain, rediscovery skips the pointer and looks for that
+  exact signed release. A frozen or forgotten pointer therefore never locks players
+  out.
+- **Publication.** It refuses a pointer whose sequence is not above the live one.
+  It also stops when the live pointer's sequence is below the last value in the
+  local publish receipt, because R2 was rolled back.
+
+Games and updaters before T are unchanged. They read the GitHub `latest` alias and
+compare commit ancestry, and the server enforces its required commit at login.
+
+### Who can do what
+
+| Party | Can | Cannot |
+| --- | --- | --- |
+| A holder of an R2 credential | upload objects; replay or freeze a pointer; delete or overwrite objects outside the bucket's lock rules (the tools never do): denial of service, or delayed optional updates | forge a manifest or pointer; make a player run bytes that are not in a signed row; make an unapproved release live (pointers are signed only after approval) |
+| Cloudflare zone, account or DNS administrators | the same as an R2 credential | the same |
+| The Cloudflare edge or the network | serve wrong bytes, 404s or challenge pages, all rejected by hash or status | substitute content |
+| GitHub accounts with write or Actions access | dispatch the workflows; add assets to pools and drafts; edit or delete releases and assets, including which release is GitHub `latest`: denial of service, or an older signed release for updaters without the downgrade guard | sign anything without the owner approving `desktop-sign` or `desktop-publish`; read the key from another branch |
+| The owner, approving environments | sign and publish | - |
+| The build machine | choose the content bytes, attested by the owner at `desktop-sign` | change the CI-built executables or helpers |
+
+One residual stays with the owner. An approval signs whatever workflow file the
+approved run uses, so approve only runs you dispatched yourself, on commits you
+authorized, from a protected branch.
+
+## Publication order
+
+1. **No GET before a key exists.** A part is never read publicly before a HEAD has
+   returned 200 with the right length.
+2. **The set goes last.** A set is uploaded only after all its parts are verified.
+3. **CI only after the set.** The workflow is dispatched only after the set exists.
+4. **Manifest before pointer.** The R2 manifest copy is written before the pointer
+   that names it.
+5. **Forward releases: R2 first, then GitHub.** The R2 manifest and pointer go live
+   before GitHub `latest` flips. **Rollbacks: GitHub first, then R2.** The rule is
+   that the side the destination release's updater reads is updated first.
+6. **The server policy last.** The server's `required_commit` changes last, after
+   `check-policy` confirms that both live pointers and GitHub `latest` name that
+   commit.
+7. **Fresh self-test prefixes.** The self-test always uses a new prefix.
+
+**Two go-live moments.** The local R2 publish is the moment R2-aware installations
+are offered a release. The `desktop-promote` approval (GitHub `latest`) is the
+moment older installations and new downloads from the latest-release page are.
+
+## One-time setup
+
+The owner does all of these; agents do none of them.
+
+### GitHub
+
+1. Create the environments `desktop-sign`, `desktop-publish` and `desktop-promote`.
+   - Required reviewer: the owner's account.
+   - Deployment branches: `master` and `develop`.
+   - Leave "prevent self-review" off while the owner is the only reviewer;
+     otherwise the owner could not approve their own dispatch.
+2. Store `CLIENT_UPDATE_SIGNING_KEY` as an environment secret of `desktop-sign`
+   and `desktop-publish`. Then **delete the repository secret**. This also stops
+   `desktop-release.yml` from signing, which is intended.
+3. Protect `master` and `develop`: no force pushes, and restricted pushers.
+4. **Disable "Retire previous published client"**
+   (`published-client-cleanup.yml`) in the Actions UI, and confirm that it shows as
+   disabled.
+   - It is a no-op on current branches. However, a release event runs the workflow
+     file of the released tag, and older tags carry the old pruner.
+5. Promote the commit that adds `desktop-release-r2.yml` to `master`. GitHub
+   dispatches only workflows on the default branch. That push starts nothing,
+   because every workflow in the repository is dispatch-only.
+6. Run a **dry run** (see [runner builds](runner-builds.md#dry-run)). It checks
+   the toolchains, runner disk and permissions before any signing. Before the R2
+   reader exists, the dry run can only use `ci` sources.
+
+### Cloudflare and R2
+
+1. **No challenges for `/desktop/*`.** Bot Fight Mode, Browser Integrity Check and
+   WAF or managed challenges must not challenge `/desktop/*` for non-browser
+   clients: the game's `RabbitLands-Client` agent, Inno Setup, curl and GitHub
+   runner addresses.
+2. **Optional cache rule.** A Bypass cache rule for `/desktop/v1/channels/*`.
+3. **A separate desktop R2 API token.** Scope it to this bucket and keep it
+   separately revocable from the browser upload key. Store its private
+   configuration file outside every repository and worktree.
+4. **Bucket lock rules, where available.** Add them for `desktop/v1/parts/`,
+   `desktop/v1/sets/` and `desktop/v1/manifests/`, **never** for `channels/`.
+
+### The build machine
+
+1. Install the hash-locked upload dependencies into a stable folder outside every
+   repository and worktree:
+
+   ```
+   python -m pip install --require-hashes --no-deps --target <dependency folder> -r godot-client/tools/desktop-r2-requirements.txt
+   ```
+
+   Put that folder on `PYTHONPATH` when you run `upload_desktop_assets.py`.
+2. Prepare a native Linux build environment for Linux content. The prepared-world
+   cook needs the native platform and Mesa lavapipe.
+   - This can be WSL, with the checkout on the Linux file system rather than a
+     Windows drive.
+   - Use a Linux Godot 4.7.2 editor taken from the download whose hash
+     `setup_runner_tools.py` pins. An editor whose download was not kept cannot be
+     verified, so fetch the pinned download again first.
+   - Plan about 40-50 GB, because of the import cache, the stage, the parts and the
+     caches.
+   - Without it, Linux uses the `ci` source.
+
+## Release build window
+
+In `r2` mode every release needs one full Windows build and one full Linux build on
+the build machine, including a one-line fix. Plan a **release build window** for
+them:
+
+- **Prerequisites.** Commit X is approved and already on `origin`. The branch you
+  will dispatch on (`master` or `develop`) has X as its head.
+- **Freeze that branch** until the dispatch. The workflow runs at the branch head,
+  and the `content` job refuses a set built for any other commit.
+- **No other heavy work.** Run no other Godot, GPU or long CPU jobs. The packager
+  starts Godot directly and does not coordinate with other jobs.
+- **Keep the machine awake.** It must not sleep for the whole window.
+- **A clean checkout.** Build from a checkout or worktree that is clean, whose HEAD
+  is on `origin` and contains X, and that nothing else writes to during the window.
+  The packer refuses a dirty or unpublished tools tree.
+- **Outputs outside every checkout.** Pass explicit `--build-dir` and `--out`
+  folders outside every checkout. Keep upload plans and receipts outside every
+  worktree too, or in ignored folders; the tools refuse other locations.
+- **Disk.** Parts take about 4-4.6 GB per platform. They can be released after a
+  verified upload.
+
+The window ends when both content uploads are verified. The rest runs in Actions,
+apart from the short local R2 publish.
+
+Timings are still unmeasured. They will come from the first real local builds,
+along with the installed-file drift between local and CI builds. Upload speed in
+the self-test was about 11 MB/s, so a first full upload of about 6 GB takes roughly
+10 minutes.
+
+## Releasing: the forward runbook
+
+All commands run from the repository root of the clean checkout. Every
+`<placeholder>` is a folder or file outside every checkout.
+`<private R2 credential file>` is the owner's private configuration; pass it only
+as a path, and never print, copy or commit it.
+
+1. **Build the Windows stage** (natively, on Windows):
+
+   ```
+   python godot-client/tools/package_client.py --platform windows --ref <X> --no-fetch --distribution github --no-client-updates --release-build --full-optimizations --prepared-world --no-zip --build-dir <build-dir> --out <out>
+   ```
+
+   - This runs the full qualification: imports, VRAM, the prepared-world cook, the
+     split-pack proof, the static and native checks, both startup smokes, and the
+     final package check.
+   - `--no-client-updates` builds no updater and signs nothing, so no key is
+     needed.
+2. **Build the Linux stage** the same way, with `--platform linux`, in the native
+   Linux environment. If Linux is not built locally, use `linux_source: ci` in step 6.
+3. **Pack and upload Windows.** Pack the stage into a content set and an upload
+   plan, then upload it:
+
+   ```
+   python godot-client/tools/desktop_content.py pack --stage <stage> --platform windows --out <pack-windows> --previous live --probe s3 --credentials <private R2 credential file> --build-dir <build-dir> --godot <editor>
+   python godot-client/tools/upload_desktop_assets.py content --plan <pack-windows>/upload-plan.json --credentials <private R2 credential file> --receipt <receipts>/content-windows.json
+   ```
+
+   - **`--previous`.** `live` takes the previous release from the live signed
+     pointer and its verified manifest. Use `none` when no pointer exists yet.
+     Packages whose files are unchanged are reused without re-zipping, once their
+     parts answer a HEAD on R2.
+   - **The output folder** must be on the stage's volume.
+   - **Output.** Pack prints the set SHA-256 and the exact dispatch inputs. A rerun
+     on the same inputs gives byte-identical set bytes.
+   - **Reruns resume.** An upload rerun skips objects that are already complete. A
+     differing existing object is refused and listed in the receipt.
+   - **`--release-local-parts`.** After a verified upload, this deletes the local
+     part files. It deletes local files only.
+4. **Pack and upload Linux**, after the Windows upload is complete.
+   - **Pack** in the Linux environment with the same `pack` command, using
+     `--platform linux`, `--probe public` instead of `--probe s3 --credentials`, and
+     `--reuse-set <pack-windows>/set.json`. The public probe needs no credential, so
+     the credential never enters WSL. Packages identical on both platforms are
+     reused, because their parts are already on R2.
+   - **Upload** from Windows with the same `content` command, passing the Linux plan
+     through the WSL network share (`\\wsl.localhost\<distro>\...`) and a receipt
+     of its own, such as `<receipts>/content-linux.json`.
+   - **Drift check (optional).** `desktop_content.py compare` reports installed-file
+     differences against a release (`--manifest live`, `github-latest` or a file).
+   - **Independent check (optional, anonymous):**
+     `upload_desktop_assets.py verify-public --platform <p> --set-sha256 <S> --sample 50`.
+5. **Release the build window.**
+6. **Dispatch** Actions -> **Build desktop release (R2 content)** on the branch whose
+   head is X.
+   - `windows_source` and `linux_source`: `r2` or `ci`.
+   - `windows_set_sha256` and `linux_set_sha256`: the printed hashes for `r2`;
+     empty for `ci`.
+   - `dry_run`: off.
+7. **Approval 1: `desktop-sign`.**
+   - Before approving, read each `Content <platform>` job summary: added, changed
+     and removed packages; whether the core `client` package changed; new file
+     extensions; new bytes; and the builder block.
+   - Check that each set hash is the one pack printed.
+   - Approve only if this is the content you built for X.
+8. **Approval 2: `desktop-publish`.**
+   - Wait for both `End-to-end` jobs and `Finalize the draft` to pass.
+   - Approving signs both pointers and publishes the release as **not latest**.
+     `/releases/latest` keeps naming the previous release, so older games and
+     updaters see nothing yet.
+   - The job summary prints the next command.
+9. **Local R2 publish:**
+
+   ```
+   python godot-client/tools/upload_desktop_assets.py publish --release client-<X> --platform windows --platform linux --credentials <private R2 credential file> --receipt <receipts>/publish.json
+   ```
+
+   - **Always pass the same `--receipt` path.** It keeps the last pointer sequence
+     per platform, which is how the tool notices that R2 was rolled back.
+   - **What it checks.** It reads the release anonymously and verifies both
+     signatures with the committed public key. It checks that the release is not
+     yet `latest`, and that the current `latest` is an ancestor. It HEADs every row
+     the manifest names. Then it writes the manifest copy, and the pointer through a
+     conditional write.
+   - **Read-back.** It reads both back anonymously through the custom domain.
+   - **Failure.** Every platform is checked before anything is written, and a
+     failure before a platform's pointer write leaves that platform's previous
+     pointer live. Once a pointer is written it stays live: a later failure (its
+     read-back, or the other platform) can leave one platform on X and the other
+     on the previous release. Run the same command again; it treats a pointer
+     that is already live as done.
+10. **Local pre-promote setup check, only when required.** The `Finalize the draft`
+    summary asks for it when the Windows runner had too little disk for the
+    setup.exe test. Install `<version>-setup.exe` from the release into a new
+    temporary folder. It must finish, and the game must start.
+11. **Post-publish check** (see [below](#post-publish-check)). At this point only
+    the R2 pointer names X, so the check proves pointer discovery.
+12. **Approval 3: `desktop-promote`.**
+    - CI reads both live pointers anonymously through the custom domain. They must
+      be byte-equal to the release's pointer assets and verify, and the manifest
+      copies they name must be live.
+    - CI then flips GitHub `latest`, confirms it, and prunes outside the retained
+      set (see [rollback](#rollback-runbook)).
+    - The job summary prints the next command.
+13. **Server policy:**
+
+    ```
+    python godot-client/tools/upload_desktop_assets.py check-policy --policy <client_updates.json>
+    ```
+
+    - Take `client_updates.json` from the run's `release-verification` artifact,
+      which is kept for 30 days. Keep a private copy for every release, because a
+      rollback needs the target's.
+    - The command passes only when both live pointers and GitHub `latest` name the
+      policy's `required_commit`.
+    - Then copy the policy to the served server profile. That is a separate, manual
+      server deployment.
+
+### Approvals and owner decisions per release
+
+The workflow asks for exactly three environment approvals, each guarding its own
+step:
+
+| Approval | After | Means |
+| --- | --- | --- |
+| `desktop-sign` | the content summaries | "This is the content I built for X." Both manifests are signed |
+| `desktop-publish` | e2e and finalize | the tested release is published as not latest, with signed pointers |
+| `desktop-promote` | the local R2 publish and the post-publish check (and the local setup check, when required) | GitHub `latest` moves, then pruning |
+
+The owner also decides each of these, every release:
+
+- the content uploads;
+- the dispatch, with its set hashes;
+- the local R2 publish;
+- the server policy, after `check-policy`.
+
+Each approval covers one run. Saved notes and earlier approvals authorize nothing
+new.
+
+### Reruns and refusals
+
+| Message or state | Meaning | Action |
+| --- | --- | --- |
+| `content`: incomplete, with failures in the receipt | some objects did not finish | run the same command again; it resumes |
+| `content`: `conflict` | a different object already holds that key | stop and investigate; never overwrite or delete it |
+| `content` job refuses the set | wrong commit (the branch moved), platform, key, URL form, CI path, or native code | fix the cause; if the branch moved, build and upload content for its new head, then dispatch again |
+| `publish` (local): `pointer-stale` | the signed pointer is not newer than the live one, for example after a repoint | re-run the workflow's publish job, which signs fresh pointers, then run the local publish again |
+| `publish` (local): `live-pointer-unverifiable` or `live-pointer-rolled-back` | the live pointer is not ours, or is older than the receipt | stop and report. R2-aware clients that refuse the live pointer use the GitHub alias meanwhile. Recovery is an owner decision; the tool has no override |
+| `publish` (local): `release-already-latest` | GitHub `latest` already names the release | a forward pointer cannot follow GitHub. Realign through the repoint workflow (see the [emergency path](#when-r2-is-down-the-ci-emergency-path)) |
+| promote: "Run the local publish for client-<X> first; GitHub latest is unchanged." | the live pointers are not this release's | run the local publish, then re-run the promote job |
+| promote: "is GitHub latest; retiring releases outside the retained set failed" | the flip succeeded and pruning did not | re-run the promote job: it skips the flip and prunes again |
+| publish job: "GitHub latest changed during publication" | GitHub moved `latest` despite `--latest=false` | mark the previous release latest again with `gh release edit <tag> --latest` before anything else |
+
+## Post-publish check
+
+Use a test installation of the previous release, never your normal game folder.
+From release T on, that installation's updater is R2-aware.
+
+1. Run the installed updater once with `-- --update-only` (from its folder, or with
+   `-- --root <folder>`). It must install release X: `app/client-release.json` must
+   name X afterwards.
+2. Run it again. It must download nothing; the log says
+   `0 of N packages needed downloads`.
+3. Start the game once. It must reach the login screen without an update prompt.
+
+Run the check after the local R2 publish and before approving `desktop-promote`. At
+that point GitHub `latest` still names the previous release, so success can only
+come through the pointer.
+
+For T itself, the previous release's updater reads only the GitHub alias. Run the
+check after `desktop-promote` instead: it then proves the handover to the new
+updater. Keep that installation as the test installation for R1. If T's check
+fails, fix forward with a new release: installations that took T cannot be rolled
+back to an earlier release (see [rollback](#rollback-runbook)).
+
+**If the check fails, do not approve `desktop-promote`.** R2-aware installations are
+already being offered X. If X itself is at fault:
+
+1. Reject the pending promote. A run waiting for approval holds the release
+   concurrency group, so a repoint would queue behind it.
+2. Repoint the channel to the previous release, which is still GitHub `latest`
+   (see [rollback](#rollback-runbook)).
+
+Ship the fix as a new commit. A published commit is never released twice.
+
+## Rollback runbook
+
+**Rules:**
+
+- **Only one GitHub move.** A rollback only makes a **retained, still-published**
+  release GitHub `latest` again, with `gh release edit client-<target> --latest`.
+  The repoint workflow does this for you. It is an `edited` event, which starts no
+  workflow.
+- **Never touch old tags.** Never recreate, re-publish, re-tag or return to draft
+  an old `client-<sha>` release. Publishing an old tag runs that tag's own copy of
+  the cleanup workflow, with the old pruner. The old pruner deletes every newer
+  release and every pool asset outside its own inventory.
+- **Never delete by hand.** Never delete releases, release assets or pool assets by
+  hand, and never write or delete R2 objects outside the tools.
+
+### What is retained
+
+Pruning runs only in `desktop-promote`. It keeps whole releases, with every pool
+asset their manifests reference, helpers included:
+
+- GitHub `latest`;
+- every published release newer than `latest` (for example, one waiting for promote,
+  or one rolled back from);
+- the two most recently published releases before `latest`;
+- the pinned last GitHub-hosted release, normally T. The pin is set in the R1
+  commit.
+
+A release whose publication time cannot be read is also kept. Nothing on R2 is ever
+deleted. A later, owner-approved cleanup would use the retained releases'
+`R2-SHA256SUMS` files as its reference set.
+
+### Steps
+
+1. **Choose the target.** It must be a retained, published release whose manifests
+   are schema 3, so T or later.
+2. **Reject any waiting run.** If a release run is waiting for an approval, reject
+   or cancel it first.
+3. **Dispatch the repoint workflow.** Run Actions -> **Repoint the desktop live
+   channel (rollback)** from `master` or `develop`, with `target_commit` (40 hex)
+   and `platforms` (`both`, `windows` or `linux`).
+   - Its `check` job needs no approval. It verifies that the target is published by
+     the project account or its workflow, and that its tag points at the commit.
+   - It also checks that each selected platform's manifest verifies with the
+     dispatched commit's key and is schema 3, and that every download the manifest
+     names still answers with its exact length.
+4. **Approve `desktop-publish`** for the `repoint` job. The job does the following:
+   1. It checks again.
+   2. It signs one rollback pointer per platform, with a higher sequence and
+      `rollback: true`. Signing comes before any write, so a missing key stops the
+      job before GitHub changes.
+   3. It makes the target GitHub `latest` (**GitHub first**) and confirms it.
+   4. It uploads the pointers as the target release's pointer assets, replacing
+      the ones there, confirms them, and prints the local command.
+5. **Put the rollback pointers live on R2** with the command the job printed, and
+   the same `--receipt` path as every publish. For both platforms it is:
+
+   ```
+   python godot-client/tools/upload_desktop_assets.py publish --release client-<target> --platform windows --platform linux --rollback --credentials <private R2 credential file> --receipt <receipts>/publish.json
+   ```
+
+   Pass only the platforms you repointed. The tool requires the target to be
+   GitHub `latest` already.
+6. **Run the post-publish check** from an installation of the release you rolled
+   back from. It must land on the target. The downgrade guard admits it only
+   through the rollback pointer.
+7. **Set the server policy.** Write a policy whose `required_commit` is the target,
+   for example that release's own `client_updates.json`. Run `check-policy`, then
+   deploy the policy.
+   - If the server keeps requiring the newer commit, rolled-back players are sent
+     straight back to it.
+
+**Rolling back to a release before T is not supported for R2-aware installations.**
+Pointers name only schema-3 manifests, and the downgrade guard refuses older
+manifests reached through the alias. Roll forward instead: revert the change and
+ship a new release. A rollback from R1 lands on T, which is R2-aware.
+
+## The `ci` content source
+
+The source is chosen per platform. With `ci`, the platform's content is built on a
+GitHub runner from the dispatched commit, the way the earlier full-CI workflow built
+it, and its parts go to the GitHub pools. Everything afterwards is identical:
+signing, installers, e2e, publish and promote. Pointers and R2 manifest copies are
+published either way. A release may mix sources, for example Windows `r2` with
+Linux `ci`.
+
+Uses:
+
+- **the helper-train release T** (both platforms);
+- **a Linux fallback** while Linux content is not built locally;
+- **an R2 outage** (below).
+
+The runner content build restores its import, graphics and world caches by exact key
+only. Its trust level is that of the earlier hosted workflow. A `ci` release
+downloads from GitHub only, so R2 is needed only to make its pointer live. See
+[runner builds](runner-builds.md#the-ci-content-leg).
+
+### When R2 is down: the `ci` emergency path
+
+**What an outage looks like.** Anonymous reads under
+`https://assets.rabbitlandsgame.com/desktop/v1/` fail with 5xx errors, timeouts or
+challenge pages.
+
+**What players see:**
+
+- Installed games keep running.
+- R2-aware updaters fall back to the GitHub alias for discovery. They cannot
+  download the R2 parts of an R2-era release: the install fails cleanly, and
+  nothing is installed.
+- Setup programs of R2-era releases cannot install.
+
+**When a release must ship anyway:**
+
+1. **Dispatch** Build desktop release (R2 content) at the fix commit with
+   `windows_source: ci`, `linux_source: ci` and empty set hashes. Each platform's
+   `Content <platform> (ci)` job builds the content on its runner and uploads the
+   parts to the GitHub pools. No workflow job before promote needs R2.
+2. **Approve `desktop-sign` and `desktop-publish`** as usual. The content summary
+   compares the CI-built content with the live release. The release is published
+   as not latest, with its pointers.
+3. **If R2 is back by now**, continue with the local R2 publish, the post-publish
+   check and `desktop-promote`, as for any release.
+4. **If R2 is still down and the release cannot wait:**
+   - **Promote refuses.** `desktop-promote` refuses while the live pointers are
+     unreadable. Reject the pending promote.
+   - **Flip `latest` yourself.** With GitHub CLI signed in as the project account,
+     run
+     `gh release edit client-<X> --repo rabbitlandsgame/rabbitlands-client --latest`.
+     This is the same single move a rollback makes, on a retained, published
+     release.
+   - **Effect.** Older games and updaters follow the alias. R2-aware ones cannot
+     read the pointer, fall back to the alias, and accept X because its signed
+     sequence is newer than what they have installed. Every download of X is on
+     GitHub, and its setup programs work.
+   - **Nothing is pruned**, because pruning runs only in promote.
+   - **No `check-policy`.** It cannot pass while R2 is down. Leave the server's
+     required commit unchanged unless the owner decides to raise it without that
+     gate.
+5. **When R2 recovers, realign the channel.** The live pointer still names the
+   earlier release. R2-aware installations still on that release see a valid
+   pointer naming their own commit, and are not offered X.
+   1. Dispatch the repoint workflow with `target_commit` set to X. GitHub `latest`
+      already names X, so the job only signs and uploads new pointers.
+   2. Run the local `publish --release client-<X> ... --rollback`.
+   3. Run the post-publish check.
+   4. Run `check-policy`, then deploy the server policy.
+
+   The next normal release would also realign the channel.
+
+**The build machine is also a dependency.** The local R2 publish needs the R2
+credential, which only the build machine holds. Without it, R2-aware installations
+keep following the live pointer. They reach a GitHub-only release only after the
+pointer is realigned, or when the server's required commit sends them to
+rediscovery.
+
+## Limits
+
+| Item | Limit |
+| --- | --- |
+| Signed manifest envelope | at most 15 MiB at signing (released clients accept 16 MiB) |
+| Pointer | at most 64 KiB; R2-aware clients wait at most 15 s for it, then use the alias |
+| Content set | at most 32 MiB |
+| Part | at most 256 MiB, one PUT each (64 MiB from the zstd re-encode release) |
+| Packages plus parts | 850 for today's readers; 2000 with the R2 reader |
+| Files per release | 100,000 |
+| Root files | 64 |
+| Pointer writes | one per second per key (R2) |
+| Costs | egress is free; storage beyond the free 10 GB-month and operations beyond the free allowance are billed (see [browser hosting](browser-hosting.md)) |
+| Public scope | the whole bucket is readable through the custom domain: never upload receipts, plans, logs, keys or server policies |
+
+## Checks when changing this path
+
+These tests use fakes for R2, GitHub and Godot, plus throwaway Git repositories,
+and make no network calls:
+
+```
+python -B -m pytest -q -p no:cacheprovider godot-client/tests/test_desktop_r2.py godot-client/tests/test_desktop_asset_upload.py godot-client/tests/test_desktop_content.py godot-client/tests/test_release_manifest.py godot-client/tests/test_desktop_helpers.py godot-client/tests/test_desktop_release_ci.py
+python -B -m pytest -q -p no:cacheprovider godot-client/tests/test_desktop_release_workflow.py godot-client/tests/test_actions_release.py godot-client/tests/test_release_entrypoint_imports.py godot-client/tests/test_prune_published_release.py godot-client/tests/test_shared_release_assets.py godot-client/tests/test_finalize_runner_release.py godot-client/tests/test_publish_runner_release.py
+```
+
+The SDK-guard tests that need botocore are skipped without it. The live self-test
+writes at most 100 MB under a fresh `desktop/selftest/` prefix and never deletes:
+
+```
+python -B godot-client/tools/upload_desktop_assets.py selftest --work <private folder> --credentials <private R2 credential file> --receipt <receipt> --ledger <one ledger file for every self-test run>
+```
