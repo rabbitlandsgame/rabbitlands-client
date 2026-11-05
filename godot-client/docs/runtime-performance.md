@@ -519,7 +519,10 @@ stage:
   Mobile re-qualification (G4/MOB-C6) passes. An explicit Mobile choice in Settings works now.
 - **Native features.** The verified `client_runtime` payload now loads at startup for every profile (D-NATIVE).
   Native hashing, the cape, flight and impact kernels and the native actor-command reducer still run on GDScript.
-  Each one turns on by default only after its own release-build A/B.
+  Each one turns on by default only after its own release-build A/B. The one piece of native code that acts by
+  default is AW-01's exit watchdog: armed after a drained close, it ends a process still running 10 s after `quit()`.
+  It exists only when the payload loaded, and `--exit-watchdog=off`, the native-runtime switch and safe mode leave it
+  unarmed. It is not a release-build A/B item; the owner is asked to confirm it.
 - **Actor VRAM sidecars** are not built into release packages (`ACTOR_SIDECARS_RELEASE_ENABLED = False`) until AT-C4
   and the G6 smoke self-test.
 - **The actor geometry catalogue** (LOD chains, lining masks, the helmet budget) reaches players only with release
@@ -528,10 +531,11 @@ stage:
 - **Manifest schema 3** is read but not yet written (UD-05p).
 
 Medium and High draw as before, except for the marker-light budget (LIGHT) and the world distance work (WD-C2, WD-C3,
-WD-C5), both described below. At every quality some behaviour changes without changing what is drawn: more map
-changes wait behind the arrival curtain (TR-01), actor bodies and mounts appear once their files are prepared (AW-04a,
-AW-04d, AW-07), the player's body is kept across map changes (AW-02), and Settings names the renderer Automatic starts
-(MOB-C5). Figures are from the development laptop (Core Ultra 9 275HX), mostly headless debug builds, unless marked as
+WD-C5), both described below. At every quality some transitions change timing, while the world and the bodies render
+as before. More map changes show a short arrival curtain where they used to show frozen frames and no curtain
+(TR-01). First-seen bodies and mounts stand as their stand-in a little longer and appear once their files are
+prepared (AW-04a, AW-04d, AW-07). The player's body is kept across map changes (AW-02). Settings names the renderer
+Automatic starts and offers Mobile (MOB-C5). All of these are on the owner's stage-B sign-off list. Figures are from the development laptop (Core Ultra 9 275HX), mostly headless debug builds, unless marked as
 estimates. The stage-B measurement (the MOB-C6 matrix, the WD-C0 matrix and the hitch cells) has not been run yet.
 
 **One release for the world distance work.** WD-C2, WD-C3 and WD-C5 ship together. Geometry policy 5
@@ -664,6 +668,11 @@ graphics and do not block it.
   - S and flat props, ground patches, flat walk decks, and `Terrain_` pieces beside an opaque base stop casting the
     sun's shadow. Flat means under 0.35 m tall, or under 1 m and under 0.15 times the footprint's narrower width (a
     slab, deck or pad); long low walls and wide enclosures such as a palisade ring keep their shadow.
+  - What shows (pass on against `ELORIA_WORLD_DISTANCE=off`, 1280x720, flat test lighting, Landfall, Suncoil and
+    Coilmere spawns): at the default 26 m -60° view MEDIUM and HIGH draw 0-8 % fewer primitives, and up to 0.5 % of
+    pixels change, mostly where small planters, benches and bushes lose their shadows. Shallow and zoomed-out views
+    lose small and mid props towards the horizon: 0.0-1.2 % of pixels at MEDIUM/HIGH and 0.2-4.0 % at LOW, where
+    WD-C5's 0.15 bias also simplifies tree crowns.
   - Every classed node takes the quality's LOD bias (HIGH 1.0 / MEDIUM 0.4 / LOW 0.15).
   - Main's `WorldDistance` node follows the camera's orbit distance, the graphics quality and the film flag. It
     re-applies the ranges with one `set_group` per group when one of them changes (0.35-1.2 ms per 1-2k ranged

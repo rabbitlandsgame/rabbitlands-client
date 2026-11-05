@@ -108,7 +108,9 @@ because the camera moved fade over 0.3 seconds; a room's lights come on with the
 room. Street-lamp lights stay at 6 or fewer and fire lights at 2 or fewer in
 these renderers, so a ground mesh gets at most 8. Distant lamps are dark rather
 than random lamps dropping out. Forward+ keeps its street-lamp and fire lights
-unchanged.
+unchanged, but its map lights follow the same 6 / 12 / 24 limit, so the
+farthest lights of very large rooms are dark there too (for example the Lantern
+Mine at Low).
 
 Send the three logs and identify which modes worked, whether the login panel or
 the world after login went blue, and whether the HUD or minimap remained visible.
