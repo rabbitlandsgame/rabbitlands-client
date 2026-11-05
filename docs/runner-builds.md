@@ -269,10 +269,16 @@ Git, in a throwaway Godot project.
   and installs from the embedded manifest.
 - **Windows.** `<version>-setup.exe` is built from a skeleton stage (root files,
   helpers, the recomputed `app/client-release.json`, branding) and the envelope.
-  - The setup downloads every row and checks its SHA-256.
-  - The job **refuses** a schema-3 manifest, or R2 rows, until the commit's setup
-    helper (`tools/install_client_payload.gd`) and the packager's online-installer
-    script support them. That way it never builds a setup that cannot install.
+  - The setup checks the installed files of each package and downloads only the
+    parts of packages that are not current: an R2 part from its derived
+    `desktop/v1/parts/<sha256>.bin` URL, a CI part from its pool. Inno Setup checks
+    each download's SHA-256, and the embedded setup helper checks it again against
+    the signed manifest. It moves each verified part into its cache, so setup asks
+    for the download's space once.
+  - The job **refuses** a manifest the commit's setup helper
+    (`tools/install_client_payload.gd`) or the packager's online-installer script
+    could not install: an unknown schema, R2 rows the helper cannot read, or more
+    packages than it reads. That way it never builds a setup that cannot install.
 
 ## Staging and the shared download pools
 
@@ -348,8 +354,10 @@ before changing the draft:
 4. **The end-to-end receipts.** Every required step must have passed, and the
    `human-testing` startup must report the native runtime. The sets' qualification
    blocks are informational only.
-5. **`download.sh`.** It is recomputed from the signed data, and must equal the
-   draft's file.
+5. **Installers.** `download.sh` is recomputed from the signed data, and must equal
+   the draft's file. The draft's `setup.exe` must equal, by size and SHA-256, the
+   only file of the `installers-windows` artifact, which the job checks against
+   the installer job's digest first.
 6. **GitHub rows.** GitHub rows are checked by digest in the draft and the pools. R2
    rows are never looked up on GitHub.
 7. **No other draft.** Another client draft is refused, never deleted.

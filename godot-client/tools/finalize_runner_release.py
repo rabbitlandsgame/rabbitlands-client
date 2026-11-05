@@ -483,10 +483,22 @@ See [installation instructions](https://github.com/{release.REPOSITORY}/wiki/Acc
     return text
 
 
+def setup_row(folder: Path, name: str) -> dict:
+    """The asset row of the Windows installers artifact's only file, `name` (setup.exe)."""
+    files = sorted(path.name for path in folder.iterdir()) if folder.is_dir() and not folder.is_symlink() else []
+    setup = folder / name
+    if files != [name] or setup.is_symlink() or not setup.is_file():
+        raise ValueError("The Windows installers artifact must hold exactly this release's setup.exe.")
+    return asset_row(name, setup.stat().st_size, release.client_release.digest(setup))
+
+
 def finalize_r2(*, commit: str, release_id: int, envelopes: Path, content: dict, e2e: dict, out: Path,
-                public_pem: bytes | None = None) -> str:
+                installers: dict, public_pem: bytes | None = None) -> str:
     """Verify the R2 workflow's draft against its signed manifests, then write SHA256SUMS,
-    R2-SHA256SUMS, notes, client_updates.json and runner-release.json (publish/promote input)."""
+    R2-SHA256SUMS, notes, client_updates.json and runner-release.json (publish/promote input).
+
+    installers: {"windows": the digest-checked installers-windows artifact folder}. The
+    draft's setup.exe must equal its bytes (design Q18); download.sh is rebuilt here."""
     import desktop_r2 as r2
     import linux_download_helper
     import release_manifest as rm
@@ -494,13 +506,15 @@ def finalize_r2(*, commit: str, release_id: int, envelopes: Path, content: dict,
         raise ValueError("Finalization needs the dispatched commit and the draft's release ID.")
     if set(content) != set(PLATFORMS) or set(e2e) != set(PLATFORMS):
         raise ValueError("Provide the content artifact and the e2e receipt of each platform.")
+    if not isinstance(installers, dict) or set(installers) != {"windows"}:
+        raise ValueError("Provide the Windows installers artifact.")
     out = Path(out)
     if out.exists():
         raise ValueError("The release verification folder must not exist yet.")
     tag = f"client-{commit}"
     public_pem = rm.commit_public_key(release.REPO, commit) if public_pem is None else public_pem
     signed = signed_manifests(envelopes, commit, public_pem)
-    rows, pool_rows, hosted, platforms, proofs, qualification, helpers, installers = {}, {}, {}, {}, {}, {}, {}, {}
+    rows, pool_rows, hosted, platforms, proofs, qualification, helpers = {}, {}, {}, {}, {}, {}, {}
     for platform, (name, data, value) in signed.items():
         content_set = check_content(content[platform], value)
         proofs[platform] = check_e2e(e2e[platform], value)
@@ -526,7 +540,10 @@ def finalize_r2(*, commit: str, release_id: int, envelopes: Path, content: dict,
             # download.sh is a pure function of the signed updater row and envelope: bind its bytes here
             script = linux_download_helper.bootstrap_script(value["updater"], json.loads(data)).encode("utf-8")
             rows[installer] = asset_row(installer, len(script), r2.sha256_hex(script))
-        installers[platform] = installer
+        else:
+            # setup.exe is not reproducible here: bind the draft's asset to the bytes of the
+            # installers artifact, which the workflow checked against the installers job's digest.
+            rows[installer] = setup_row(Path(installers["windows"]), installer)
         helpers[platform] = {kind: value[kind]["url"].rsplit("/", 1)[1] for kind in rm.HELPER_KINDS}
         platforms[platform] = {"version": value["version"], "manifest": name, "manifest_sha256": digest,
                                "manifest_bytes": len(data), "schema": value["schema"], "sequence": value["sequence"],
@@ -548,13 +565,6 @@ def finalize_r2(*, commit: str, release_id: int, envelopes: Path, content: dict,
         raise ValueError(f"Another client draft exists ({others[0]}); finalization removes no other release.")
     check_tag(tag, commit)
     remote = {asset["name"]: asset for asset in release.github_assets(release_id)}
-    # setup.exe is not reproducible here: its row is the draft's own digest, which the
-    # stage job's upload verified against the digest-checked installers artifact.
-    windows_setup = remote.get(installers["windows"], {})
-    if windows_setup.get("state") != "uploaded" or not str(windows_setup.get("digest", "")).startswith("sha256:"):
-        raise ValueError("The Windows installer is missing from the draft; keeping previous files.")
-    rows[installers["windows"]] = asset_row(installers["windows"], windows_setup.get("size"),
-                                            str(windows_setup["digest"]).removeprefix("sha256:"))
     if any(not release.asset_matches(remote.get(name, {}), row) for name, row in rows.items()):
         raise ValueError("A draft download is missing or failed checksum verification; keeping previous files.")
     pool_ids = pool_release_ids(pool_rows)

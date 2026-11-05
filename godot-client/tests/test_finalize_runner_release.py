@@ -400,6 +400,9 @@ def signed_platform(root, key, platform, source, *, caps=None, set_override=None
                                  envelope=envelope, payload=payload, name=f"{stage.name}-{platform}.json")
 
 
+SETUP_BYTES = b"MZ fake setup " + COMMIT.encode()
+
+
 def r2_inputs(root, key, sources=None, *, caps=None, set_override=None):
     """The envelopes, content-P and e2e-P artifacts of one R2 workflow run of COMMIT."""
     sources = sources or {"windows": "r2", "linux": "r2"}
@@ -429,8 +432,13 @@ def r2_inputs(root, key, sources=None, *, caps=None, set_override=None):
         e2e[platform].mkdir()
         (e2e[platform] / "e2e.json").write_text(json.dumps(e2e_record(platform, item.payload["version"])))
     (envelopes / "sign.json").write_text(json.dumps({"commit": COMMIT, "platforms": records}))
+    # The installers-windows artifact: exactly the setup.exe the stage job uploaded to the draft.
+    installers = {"windows": root / "installers-windows"}
+    installers["windows"].mkdir()
+    (installers["windows"] / f"{signed['windows'].payload['version']}-setup.exe").write_bytes(SETUP_BYTES)
     return types.SimpleNamespace(envelopes=envelopes, content=content, e2e=e2e, signed=signed, root=root,
-                                 out=root / "release-verification", summary=root / "summary.md")
+                                 installers=installers, out=root / "release-verification",
+                                 summary=root / "summary.md")
 
 
 def pool_rows_of(payload) -> list:
@@ -504,7 +512,7 @@ def r2_world(monkeypatch, inputs, *, history=(), stale=True):
         github.add_asset(DRAFT_ID, item.name, item.envelope)
         github.add_asset(DRAFT_ID, f"RabbitLands-{platform}.json", item.envelope)
         if platform == "windows":
-            github.add_asset(DRAFT_ID, f"{item.payload['version']}-setup.exe", b"MZ fake setup " + COMMIT.encode())
+            github.add_asset(DRAFT_ID, f"{item.payload['version']}-setup.exe", SETUP_BYTES)
         else:
             script = linux_download_helper.bootstrap_script(item.payload["updater"], json.loads(item.envelope))
             github.add_asset(DRAFT_ID, f"{item.payload['version']}-download.sh", script.encode("utf-8"))
@@ -518,7 +526,7 @@ def r2_world(monkeypatch, inputs, *, history=(), stale=True):
 
 def finalize_run(inputs, key, **changes):
     options = dict(commit=COMMIT, release_id=DRAFT_ID, envelopes=inputs.envelopes, content=inputs.content,
-                   e2e=inputs.e2e, out=inputs.out, public_pem=key.public)
+                   e2e=inputs.e2e, installers=inputs.installers, out=inputs.out, public_pem=key.public)
     options.update(changes)
     return runner.finalize_r2(**options)
 
@@ -779,8 +787,9 @@ def test_r2_finalize_takes_only_this_runs_signed_manifests(scene, key, other_key
     assert github.calls == []
 
 
-@pytest.mark.parametrize("problem", ["pool-part", "helper", "download-sh", "setup-missing", "manifest-digest",
-                                     "other-draft", "private-commit", "draft-tag", "published", "foreign-author"])
+@pytest.mark.parametrize("problem", ["pool-part", "helper", "download-sh", "setup-missing", "setup-bytes",
+                                     "manifest-digest", "other-draft", "private-commit", "draft-tag", "published",
+                                     "foreign-author"])
 def test_r2_finalize_verifies_every_github_row_before_any_write(scene, key, problem):
     inputs, github = scene
     draft = github.releases[DRAFT_ID]
@@ -796,6 +805,9 @@ def test_r2_finalize_verifies_every_github_row_before_any_write(scene, key, prob
         github.add_asset(DRAFT_ID, f"{inputs.signed['linux'].payload['version']}-download.sh", b"#!/bin/sh\nother\n")
     elif problem == "setup-missing":
         del draft["assets"][f"{windows.payload['version']}-setup.exe"]
+    elif problem == "setup-bytes":
+        # A setup.exe on the draft that is not the installers artifact's (Q18), even if GitHub's digest is its own.
+        github.add_asset(DRAFT_ID, f"{windows.payload['version']}-setup.exe", b"MZ another setup")
     elif problem == "manifest-digest":
         draft["assets"][windows.name]["digest"] = "sha256:" + "f" * 64
     elif problem == "other-draft":
@@ -823,6 +835,35 @@ def test_r2_finalize_needs_a_fresh_output_folder_and_both_platforms(scene, key):
     with pytest.raises(ValueError):
         finalize_run(inputs, key, out=inputs.root / "other", release_id=0)
     assert github.calls == []
+
+
+@pytest.mark.parametrize("problem", ["absent", "no-windows", "empty", "extra-file", "other-name"])
+def test_r2_finalize_needs_exactly_the_windows_installers_artifact(scene, key, problem):
+    inputs, github = scene
+    folder = inputs.installers["windows"]
+    setup = next(folder.iterdir())
+    installers = dict(inputs.installers)
+    if problem == "absent":
+        installers = None
+    elif problem == "no-windows":
+        installers = {"linux": folder}
+    elif problem == "empty":
+        setup.unlink()
+    elif problem == "extra-file":
+        (folder / "notes.txt").write_text("extra")
+    else:
+        setup.rename(folder / "RabbitLands-setup.exe")
+    with pytest.raises(ValueError, match="installers artifact"):
+        finalize_run(inputs, key, installers=installers)
+    assert github.calls == [] and not inputs.out.exists()
+
+
+def test_r2_finalize_binds_setup_exe_to_the_installers_artifact(scene, key):
+    inputs, github = scene
+    finalize_run(inputs, key)
+    name = f"{inputs.signed['windows'].payload['version']}-setup.exe"
+    sums = shared.checksum_inventory((inputs.out / "SHA256SUMS").read_text(encoding="ascii"))
+    assert sums[name] == digest(SETUP_BYTES)
 
 
 def test_r2_receipt_loader_refuses_tampering(scene, key):

@@ -480,7 +480,7 @@ def test_artifacts_are_downloaded_by_exact_name_and_checked_against_their_produc
                     found = True
             assert found, (job_name, options["name"])
             checked += 1
-    assert checked == 23
+    assert checked == 24  # finalize also checks installers-windows (Q18)
 
 
 def test_every_consumed_artifact_exports_its_digest_from_the_producing_job():
@@ -533,7 +533,7 @@ def test_release_job_graph_and_dry_run():
     order = {"build": {"prepare", "content", "content-ci"}, "sign": {"prepare", "content", "content-ci", "build"},
              "installers": {"prepare", "build", "sign"}, "stage": {"prepare", "build", "sign", "installers"},
              "e2e": {"prepare", "build", "sign", "installers", "stage"},
-             "finalize": {"prepare", "content", "content-ci", "sign", "stage", "e2e"},
+             "finalize": {"prepare", "content", "content-ci", "sign", "installers", "stage", "e2e"},
              "publish": {"prepare", "sign", "finalize"}, "promote": {"prepare", "finalize", "publish"}}
     for job_name, required in order.items():
         job = workflow[job_name]
@@ -765,7 +765,7 @@ def test_r2_a7_entry_points_take_the_keywords_the_workflow_passes():
     import prune_published_release
     if getattr(prune_published_release, "RETENTION_SCHEMA", 1) < actions_release.MIN_RETENTION_SCHEMA:
         pytest.skip("R2-A7 (whole-release retention and the R2 publication entry points) is not in this tree yet")
-    keywords = {"finalize": {"commit", "release_id", "envelopes", "content", "e2e", "out"},
+    keywords = {"finalize": {"commit", "release_id", "envelopes", "content", "e2e", "installers", "out"},
                 "publish": {"commit", "release_id", "receipt", "pointers"},
                 "promote": {"commit", "release_id", "receipt"}}
     for step, names in keywords.items():

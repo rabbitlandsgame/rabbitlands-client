@@ -749,10 +749,11 @@ jobs:
 
   finalize:
     name: Finalize the draft
-    needs: [prepare, content, content-ci, sign, stage, e2e]
+    needs: [prepare, content, content-ci, sign, installers, stage, e2e]
     if: >-
       ${{ !cancelled() && needs.prepare.result == 'success' && needs.prepare.outputs.dry_run == 'false'
-      && needs.sign.result == 'success' && needs.stage.result == 'success' && needs.e2e.result == 'success'
+      && needs.sign.result == 'success' && needs.installers.result == 'success'
+      && needs.stage.result == 'success' && needs.e2e.result == 'success'
       && (needs.content.result == 'success' || needs.content.result == 'skipped')
       && (needs.content-ci.result == 'success' || needs.content-ci.result == 'skipped') }}
     runs-on: ubuntu-24.04
@@ -804,6 +805,10 @@ jobs:
         with:
           name: e2e-linux
           path: ${{ runner.temp }}/e2e-linux
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: installers-windows
+          path: ${{ runner.temp }}/installers-windows
       - name: Check the artifacts against their producers' digests
         env:
           ENVELOPES: ${{ needs.sign.outputs.digest }}
@@ -811,17 +816,19 @@ jobs:
           CONTENT_LINUX: ${{ needs.content.outputs.linux_digest }}${{ needs.content-ci.outputs.linux_digest }}
           E2E_WINDOWS: ${{ needs.e2e.outputs.windows_digest }}
           E2E_LINUX: ${{ needs.e2e.outputs.linux_digest }}
+          INSTALLERS_WINDOWS: ${{ needs.installers.outputs.windows_digest }}
         run: |
           python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/envelopes" --expect "$ENVELOPES"
           python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/content-windows" --expect "$CONTENT_WINDOWS"
           python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/content-linux" --expect "$CONTENT_LINUX"
           python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/e2e-windows" --expect "$E2E_WINDOWS"
           python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/e2e-linux" --expect "$E2E_LINUX"
+          python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/installers-windows" --expect "$INSTALLERS_WINDOWS"
       - name: Verify every download and finalize the draft
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_ID: ${{ needs.prepare.outputs.release_id }}
-        run: python godot-client/tools/actions_release.py r2-finalize --release-id "$RELEASE_ID" --envelopes "$RUNNER_TEMP/envelopes" --windows-content "$RUNNER_TEMP/content-windows" --linux-content "$RUNNER_TEMP/content-linux" --windows-e2e "$RUNNER_TEMP/e2e-windows" --linux-e2e "$RUNNER_TEMP/e2e-linux" --out "$RUNNER_TEMP/release-verification"
+        run: python godot-client/tools/actions_release.py r2-finalize --release-id "$RELEASE_ID" --envelopes "$RUNNER_TEMP/envelopes" --windows-content "$RUNNER_TEMP/content-windows" --linux-content "$RUNNER_TEMP/content-linux" --windows-e2e "$RUNNER_TEMP/e2e-windows" --linux-e2e "$RUNNER_TEMP/e2e-linux" --windows-installers "$RUNNER_TEMP/installers-windows" --out "$RUNNER_TEMP/release-verification"
       - name: Record the release verification digest
         id: digest
         run: python godot-client/tools/desktop_release_ci.py artifact-digest --dir "$RUNNER_TEMP/release-verification" --output-name digest

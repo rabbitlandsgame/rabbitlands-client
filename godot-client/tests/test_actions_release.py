@@ -629,10 +629,11 @@ def test_finalize_and_promote_pass_validated_arguments_to_r2_a7(tmp_path, monkey
     monkeypatch.setattr(actions, "r2_a7", lambda step: lambda **kwargs: calls.append((step, kwargs)) or step)
     content = {p: tmp_path / f"content-{p}" for p in r2.PLATFORMS}
     e2e = {p: tmp_path / f"e2e-{p}" for p in r2.PLATFORMS}
-    assert actions.r2_finalize("12", folder, content, e2e, tmp_path / "out") == "finalize"
+    installers = tmp_path / "installers-windows"
+    assert actions.r2_finalize("12", folder, content, e2e, installers, tmp_path / "out") == "finalize"
     assert actions.r2_promote("12", tmp_path / "receipt.json") == "promote"
     assert calls == [("finalize", {"commit": COMMIT, "release_id": 12, "envelopes": folder, "content": content,
-                                   "e2e": e2e, "out": tmp_path / "out"}),
+                                   "e2e": e2e, "installers": {"windows": installers}, "out": tmp_path / "out"}),
                      ("promote", {"commit": COMMIT, "release_id": 12, "receipt": tmp_path / "receipt.json"})]
     assert "check-policy" in (tmp_path / "summary.md").read_text()
     for bad in ("0", "-1", "1e3", "", "12\n"):
@@ -644,7 +645,7 @@ def test_finalize_and_promote_pass_validated_arguments_to_r2_a7(tmp_path, monkey
     monkeypatch.setattr(prune_published_release, "RETENTION_SCHEMA", 2)
     monkeypatch.setenv(actions.SECRET, "never here")
     with pytest.raises(ValueError, match=actions.SECRET):
-        actions.r2_finalize("12", folder, content, e2e, tmp_path / "out")
+        actions.r2_finalize("12", folder, content, e2e, installers, tmp_path / "out")
     assert len(calls) == 2
 
 

@@ -514,7 +514,8 @@ def r2_a7(step: str):
     return target
 
 
-def r2_finalize(release_id, envelopes: Path, content: dict, e2e: dict, out: Path):
+def r2_finalize(release_id, envelopes: Path, content: dict, e2e: dict, windows_installers: Path, out: Path):
+    """Finalize the draft; setup.exe is bound to the bytes of the installers-windows artifact (Q18)."""
     sha = dispatch_commit(R2_WORKFLOW)
     no_signing_key()
     retention_guard()
@@ -522,7 +523,8 @@ def r2_finalize(release_id, envelopes: Path, content: dict, e2e: dict, out: Path
     sign_record(envelopes, sha)
     return r2_a7("finalize")(commit=sha, release_id=release_id, envelopes=Path(envelopes),
                              content={p: Path(content[p]) for p in PLATFORMS},
-                             e2e={p: Path(e2e[p]) for p in PLATFORMS}, out=Path(out))
+                             e2e={p: Path(e2e[p]) for p in PLATFORMS},
+                             installers={"windows": Path(windows_installers)}, out=Path(out))
 
 
 def check_forward_pointers(sha: str, release_id: int, envelopes: Path, pointers: Path) -> dict:
@@ -783,6 +785,7 @@ def build_parser() -> argparse.ArgumentParser:
     for platform in PLATFORMS:
         final.add_argument(f"--{platform}-content", type=Path, required=True)
         final.add_argument(f"--{platform}-e2e", type=Path, required=True)
+    final.add_argument("--windows-installers", type=Path, required=True)
     final.add_argument("--out", type=Path, required=True)
     publish = commands.add_parser("r2-publish")
     publish.add_argument("--release-id", required=True)
@@ -831,7 +834,7 @@ def _run(options) -> int:
     elif command == "r2-finalize":
         r2_finalize(options.release_id, options.envelopes,
                     {p: getattr(options, f"{p}_content") for p in PLATFORMS},
-                    {p: getattr(options, f"{p}_e2e") for p in PLATFORMS}, options.out)
+                    {p: getattr(options, f"{p}_e2e") for p in PLATFORMS}, options.windows_installers, options.out)
     elif command == "r2-publish":
         r2_publish(options.release_id, options.envelopes, options.pointers, options.receipt)
     elif command == "r2-promote":
