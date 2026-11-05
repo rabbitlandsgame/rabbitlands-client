@@ -711,7 +711,8 @@ asset their manifests reference, helpers included:
   or one rolled back from);
 - the two most recently published releases before `latest`;
 - the pinned last GitHub-hosted release, normally T. The pin is set in the R1
-  commit.
+  commit. Until a commit sets it, the R2 workflow refuses a release with `r2`
+  content (a dry run excepted).
 
 A release whose publication time cannot be read is also kept. Nothing on R2 is ever
 deleted. A later, owner-approved cleanup would use the retained releases'

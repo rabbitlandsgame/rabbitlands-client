@@ -307,6 +307,24 @@ def retention_guard() -> int:
     return schema
 
 
+def pinned_release_guard() -> str:
+    """Refuse a release with r2 content unless this commit's prune pins the last GitHub-hosted release.
+
+    Retention (design Q11) keeps latest, KEEP_PREVIOUS earlier releases and
+    PINNED_GITHUB_HOSTED, normally T, set in the commit of the first R2 content
+    release. With no pin the third r2 promote would retire T and every GitHub-hosted
+    file only it references, silently. Prune itself refuses a pin that is not a
+    published release, before it deletes anything.
+    """
+    import prune_published_release
+    pinned = getattr(prune_published_release, "PINNED_GITHUB_HOSTED", None)
+    if type(pinned) is not str or not shared_release_assets.CLIENT_TAG.fullmatch(pinned):
+        raise ValueError("An r2 content source needs prune_published_release.PINNED_GITHUB_HOSTED set to the "
+                         "client-<commit> tag of the last GitHub-hosted release (normally T) in this commit, "
+                         "so retention keeps it; use ci sources or a commit that sets it.")
+    return pinned
+
+
 def _ci():
     import desktop_release_ci
     return desktop_release_ci
@@ -369,6 +387,9 @@ def r2_prepare() -> dict:
         if problem:
             raise ValueError(f"An r2 content source needs this commit's R2-aware updater (W1a), but {problem}; "
                              "use ci sources or a later commit.")
+        # A dry run publishes and prunes nothing, so it may exercise r2 legs before R1's commit.
+        if not inputs["dry_run"]:
+            pinned_release_guard()
     release_id = 0
     if not inputs["dry_run"]:
         runner_release.authorize()

@@ -440,7 +440,8 @@ its manifests reference, helpers included:
 - any release whose publication time cannot be read;
 - the two most recently published releases before `latest`;
 - the pinned last GitHub-hosted release (`PINNED_GITHUB_HOSTED`, set in the first R2
-  content release).
+  content release). The prepare job refuses a release with `r2` content while the
+  dispatched commit has no pin; dry runs and `ci`-only releases need none.
 
 The prune rules:
 

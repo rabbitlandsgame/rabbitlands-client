@@ -288,7 +288,12 @@ def dispatch(tmp_path, monkeypatch, *, workflow=actions.R2_WORKFLOW, sha=SHA, re
     monkeypatch.setattr(actions.runner_release, "authorize", lambda: None)
     monkeypatch.setattr(actions.shared_release_assets, "ensure", lambda value: {"id": 789})
     monkeypatch.setattr(prune_published_release, "RETENTION_SCHEMA", 2, raising=False)
+    # R1's commit pins the last GitHub-hosted release (T); r2 content needs the pin.
+    monkeypatch.setattr(prune_published_release, "PINNED_GITHUB_HOSTED", PIN, raising=False)
     monkeypatch.setattr(rm, "commit_capabilities", lambda repo, commit: CAPS_R2)
+
+
+PIN = "client-" + "c" * 40
 
 
 def outputs(tmp_path) -> dict:
@@ -368,12 +373,22 @@ def test_this_tree_keeps_whole_releases_so_the_r2_workflow_may_run():
 @pytest.mark.parametrize("condition, message", [
     ("retention", "RETENTION_SCHEMA"), ("signing-key", actions.SECRET), ("ci-leg-missing", "build-content"),
     ("reader-lacks-r2", "DESKTOP_ASSETS"), ("reader-keeps-850", "2000"), ("inputs", "windows_set_sha256"),
+    ("no-pin", "PINNED_GITHUB_HOSTED"), ("pin-not-a-tag", "PINNED_GITHUB_HOSTED"),
+    ("pin-uppercase", "PINNED_GITHUB_HOSTED"), ("pin-missing", "PINNED_GITHUB_HOSTED"),
     ("other-draft", "Another client draft"), ("published", "already has a published release")])
 def test_r2_prepare_refuses_before_any_release_write(tmp_path, monkeypatch, condition, message):
     dispatch(tmp_path, monkeypatch, inputs=INPUTS)
     entries = []
     if condition == "retention":
         monkeypatch.setattr(prune_published_release, "RETENTION_SCHEMA", 1)
+    elif condition == "no-pin":
+        monkeypatch.setattr(prune_published_release, "PINNED_GITHUB_HOSTED", None)
+    elif condition == "pin-not-a-tag":
+        monkeypatch.setattr(prune_published_release, "PINNED_GITHUB_HOSTED", "c" * 40)
+    elif condition == "pin-uppercase":
+        monkeypatch.setattr(prune_published_release, "PINNED_GITHUB_HOSTED", "client-" + "C" * 40)
+    elif condition == "pin-missing":
+        monkeypatch.delattr(prune_published_release, "PINNED_GITHUB_HOSTED")
     elif condition == "signing-key":
         monkeypatch.setenv(actions.SECRET, "not for this job")
     elif condition == "ci-leg-missing":
@@ -466,6 +481,25 @@ def test_r2_prepare_creates_this_commits_draft_and_a_ci_leg_when_available(tmp_p
     assert json.loads(values["ci_matrix"]) == {"include": [{"platform": "linux", "runner": "ubuntu-24.04"}]}
     assert json.loads(values["r2_matrix"]) == {"include": [{"platform": "windows", "set_sha256": "1" * 64}]}
     assert (values["linux_source"], values["linux_set_sha256"]) == ("ci", "")
+
+
+@pytest.mark.parametrize("inputs", [
+    {**INPUTS, "DRY_RUN": "true"},  # a dry run publishes and prunes nothing
+    {**INPUTS, "WINDOWS_SOURCE": "ci", "WINDOWS_SET_SHA256": "", "LINUX_SOURCE": "ci", "LINUX_SET_SHA256": ""}])
+def test_r2_prepare_needs_the_pin_only_for_a_real_release_with_r2_content(tmp_path, monkeypatch, inputs):
+    # Release T (ci sources) comes before its own tag can be pinned; R1's commit sets the pin.
+    dispatch(tmp_path, monkeypatch, inputs=inputs)
+    monkeypatch.setattr(prune_published_release, "PINNED_GITHUB_HOSTED", None)
+    monkeypatch.setattr(actions, "ci_tool_commands", lambda: {"verify-content", actions.CI_CONTENT_COMMAND})
+    monkeypatch.setattr(actions.release, "github_releases", lambda: [])
+    monkeypatch.setattr(actions.release, "gh", lambda *args: None)
+    monkeypatch.setattr(actions.release, "github_release", lambda tag: {
+        "id": 456, "tag_name": tag, "draft": True, "author": {"login": "github-actions[bot]"}})
+    assert actions.r2_prepare()["commit"] == SHA
+    with pytest.raises(ValueError, match="PINNED_GITHUB_HOSTED"):
+        actions.pinned_release_guard()
+    monkeypatch.setattr(prune_published_release, "PINNED_GITHUB_HOSTED", PIN)
+    assert actions.pinned_release_guard() == PIN
 
 
 def test_r2_prepare_reuses_only_this_commits_draft(tmp_path, monkeypatch):
