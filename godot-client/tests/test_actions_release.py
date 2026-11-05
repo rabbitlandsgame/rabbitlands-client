@@ -2,6 +2,7 @@
 import hashlib
 import io
 import json
+import subprocess
 import os
 from pathlib import Path
 import sys
@@ -269,6 +270,8 @@ INPUTS = {"WINDOWS_SOURCE": "r2", "WINDOWS_SET_SHA256": "1" * 64, "LINUX_SOURCE"
           "LINUX_SET_SHA256": "2" * 64, "DRY_RUN": "false"}
 CAPS_R2 = rm.ReaderCapabilities(schema3=True, r2_rows=True, package_limit=2000)
 CAPS_B8 = rm.ReaderCapabilities(schema3=True, r2_rows=False, package_limit=850)
+REAL_COMMIT_CAPABILITIES = rm.commit_capabilities
+REAL_RETENTION_SCHEMA = getattr(prune_published_release, "RETENTION_SCHEMA", None)
 
 
 def dispatch(tmp_path, monkeypatch, *, workflow=actions.R2_WORKFLOW, sha=SHA, ref="refs/heads/develop", inputs=None):
@@ -356,20 +359,15 @@ def test_retention_guard_refuses_a_prune_that_deletes_rollback_releases(monkeypa
     assert actions.retention_guard() == 2
 
 
-def test_this_tree_has_no_whole_release_retention_yet_so_the_r2_workflow_refuses(tmp_path, monkeypatch):
-    if getattr(prune_published_release, "RETENTION_SCHEMA", None) is not None:
-        pytest.skip("R2-A7 has landed")
-    dispatch(tmp_path, monkeypatch, inputs=INPUTS)
-    monkeypatch.delattr(prune_published_release, "RETENTION_SCHEMA", raising=False)
-    no_github(monkeypatch)
-    with pytest.raises(ValueError, match="RETENTION_SCHEMA"):
-        actions.r2_prepare()
-    assert not (tmp_path / "outputs").exists()
+def test_this_tree_keeps_whole_releases_so_the_r2_workflow_may_run():
+    # R2-A7 landed: this tree's prune keeps whole releases, so the retention guard passes.
+    assert REAL_RETENTION_SCHEMA == prune_published_release.RETENTION_SCHEMA >= actions.MIN_RETENTION_SCHEMA
+    assert actions.retention_guard() == REAL_RETENTION_SCHEMA
 
 
 @pytest.mark.parametrize("condition, message", [
     ("retention", "RETENTION_SCHEMA"), ("signing-key", actions.SECRET), ("ci-leg-missing", "build-content"),
-    ("reader-lacks-r2", "R2-aware updater"), ("inputs", "windows_set_sha256"),
+    ("reader-lacks-r2", "DESKTOP_ASSETS"), ("reader-keeps-850", "2000"), ("inputs", "windows_set_sha256"),
     ("other-draft", "Another client draft"), ("published", "already has a published release")])
 def test_r2_prepare_refuses_before_any_release_write(tmp_path, monkeypatch, condition, message):
     dispatch(tmp_path, monkeypatch, inputs=INPUTS)
@@ -385,6 +383,10 @@ def test_r2_prepare_refuses_before_any_release_write(tmp_path, monkeypatch, cond
         monkeypatch.setattr(actions, "ci_tool_commands", lambda: {"verify-content", "executables", "sign"})
     elif condition == "reader-lacks-r2":
         monkeypatch.setattr(rm, "commit_capabilities", lambda repo, commit: CAPS_B8)
+    elif condition == "reader-keeps-850":
+        # the R2 base without W1a's raised package limit is not the W1a reader
+        monkeypatch.setattr(rm, "commit_capabilities", lambda repo, commit: rm.ReaderCapabilities(
+            schema3=True, r2_rows=True, package_limit=850))
     elif condition == "inputs":
         monkeypatch.setenv("WINDOWS_SET_SHA256", "")
     elif condition == "other-draft":
@@ -397,6 +399,42 @@ def test_r2_prepare_refuses_before_any_release_write(tmp_path, monkeypatch, cond
     with pytest.raises(ValueError, match=message):
         actions.r2_prepare()
     assert not (tmp_path / "outputs").exists()
+
+
+def _tree_git(*args) -> str:
+    result = subprocess.run(["git", "-C", str(actions.package.REPO), *args], capture_output=True, text=True)
+    if result.returncode:
+        pytest.skip("this checkout's Git history is not available")
+    return result.stdout.strip()
+
+
+def test_this_tree_opens_the_r2_gate_from_the_w1a_commit_on(tmp_path, monkeypatch):
+    """The r2 gate is on: r2-prepare reads this commit's own updater from Git and finds
+    W1a's exact declarations; the commit before W1a keeps it shut."""
+    head = _tree_git("rev-parse", "HEAD^{commit}")
+    if _tree_git("rev-parse", "--is-shallow-repository") != "false":
+        pytest.skip("a shallow checkout lacks the W1a history")
+    line = f'const DESKTOP_ASSETS := "{r2.DESKTOP_ASSETS}"'
+    added = _tree_git("log", "--format=%H", "--reverse", "-S", line, head, "--", rm.RELEASE_GD).splitlines()
+    assert added, "W1a's DESKTOP_ASSETS line is in no commit of this history"
+    first = added[0]
+    before = _tree_git("rev-parse", f"{first}^")
+    assert rm.r2_source_problem(REAL_COMMIT_CAPABILITIES(actions.package.REPO, head)) is None
+    assert rm.r2_source_problem(REAL_COMMIT_CAPABILITIES(actions.package.REPO, first)) is None
+    assert "DESKTOP_ASSETS" in rm.r2_source_problem(REAL_COMMIT_CAPABILITIES(actions.package.REPO, before))
+    # r2-prepare itself, with this tree's retention module and the commit's real reader (dry run)
+    dispatch(tmp_path, monkeypatch, sha=head, inputs={**INPUTS, "DRY_RUN": "true"})
+    monkeypatch.setattr(rm, "commit_capabilities", REAL_COMMIT_CAPABILITIES)
+    monkeypatch.setattr(prune_published_release, "RETENTION_SCHEMA", REAL_RETENTION_SCHEMA)
+    no_github(monkeypatch)
+    values = actions.r2_prepare()
+    assert values["r2_any"] == "true" and values["windows_source"] == values["linux_source"] == "r2"
+    (tmp_path / "before").mkdir()
+    dispatch(tmp_path / "before", monkeypatch, sha=before, inputs={**INPUTS, "DRY_RUN": "true"})
+    monkeypatch.setattr(rm, "commit_capabilities", REAL_COMMIT_CAPABILITIES)
+    no_github(monkeypatch)
+    with pytest.raises(ValueError, match="DESKTOP_ASSETS"):
+        actions.r2_prepare()
 
 
 def test_r2_prepare_dry_run_makes_no_github_call_and_emits_validated_matrices(tmp_path, monkeypatch):

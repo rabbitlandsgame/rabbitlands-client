@@ -3,7 +3,9 @@ and measure installed-file drift against a release.
 
 Modes:
   pack     a hard-link view of a package_client stage without the CI-owned
-           paths and the stage-root files -> asset_packages.build -> derived R2
+           paths and the stage-root files -> asset_packages.build -> the split
+           PCK layout read with pck_split.py (read_pck_layout: the core pack's
+           content pack list equals the built app/packs/ rows) -> derived R2
            part URLs -> desktop_r2.validate_set (with a native-code sniff of
            every file) -> canonical set bytes and upload-plan.json, the input of
            `upload_desktop_assets.py content`
@@ -46,20 +48,23 @@ from pathlib import Path
 import re
 import secrets
 import shutil
+import struct
 import subprocess
 import sys
 import time
 
 import desktop_r2 as r2
+import pck_split
 import upload_desktop_assets as up
 
 TOOLS = Path(__file__).resolve().parent
 TOOLS_REPO = TOOLS.parents[1]
 PEM_PATH = "godot-client/data/update_public.pem"
 # The modules that define package ids, the ZIP layout, part size and part
-# names. Their copies at the tools commit must equal those at the packaged
-# commit, so the set has the formats that commit's updater reads.
-PACKAGING_MODULES = ("asset_packages", "client_release", "release_storage", "shared_release_assets")
+# names, and the split PCK layout (pck_split) the pack checks the stage with.
+# Their copies at the tools commit must equal those at the packaged commit, so
+# the set has the formats that commit's updater and game read.
+PACKAGING_MODULES = ("asset_packages", "client_release", "pck_split", "release_storage", "shared_release_assets")
 STAGE_MARKER = ".eloria-package"            # package_client.MARKER
 STAGE_ROOTS = ("app", "eloria-assets")      # what asset_packages.build walks
 DESCRIPTOR = "app/client-release.json"
@@ -204,8 +209,8 @@ def tools_provenance(repo: Path, commit: str, *, dev: bool = False,
             "tools-dirty": "commit or remove every change in the tools checkout first",
             "tools-not-on-origin": "run from a checkout whose commit is on an origin branch of the client repository",
             "tools-lack-commit": "the tools commit must contain the packaged commit",
-            "tools-packaging-drift": "asset_packages/client_release/release_storage/shared_release_assets differ "
-                                     "from the packaged commit; run from a checkout at that commit",
+            "tools-packaging-drift": "/".join(modules) + " differ from the packaged commit; run from a "
+                                     "checkout at that commit",
         }[problems[0]])
     pem = _git(repo, "show", f"{commit}:{PEM_PATH}").stdout
     r2.public_key_sha256(pem)
@@ -218,7 +223,7 @@ def check_module_locations() -> None:
     import client_release
     import release_storage
     import shared_release_assets
-    for module in (asset_packages, client_release, release_storage, shared_release_assets, r2, up):
+    for module in (asset_packages, client_release, pck_split, release_storage, shared_release_assets, r2, up):
         if Path(module.__file__).resolve().parent != TOOLS:
             raise ContentError("tools-module", f"{module.__name__} was not imported from this checkout")
 
@@ -323,12 +328,136 @@ def read_qualification(stage: Stage, logs=None, *, dev: bool = False) -> tuple[d
             pass
     if len(smoke) != len(SMOKE_LOGS):
         problems.append("qualification-smoke")
-    packs = stage.path / "app" / "packs"
-    split = packs.is_dir() and any(path.is_file() for path in packs.glob("*.pck"))
     if problems and not dev:
         raise ContentError(problems[0], "the stage has no finished package_client --full-optimizations "
                                         "qualification for this run (pass --logs if the logs moved)")
-    return {"optimization_proof_sha256": proof_sha256, "smoke": smoke, "split_pck": split}, problems
+    # split_pck: what the core pack declares (read_pck_layout, set by pack()), never a folder listing.
+    return {"optimization_proof_sha256": proof_sha256, "smoke": smoke, "split_pck": False}, problems
+
+
+# --- The split PCK layout (W2-UD-06, tools/pck_split.py) ---------------------------------
+#
+# A split release ships app/RabbitLands.pck as a core pack whose
+# data/content_packs.json (pck_split.MANIFEST) lists the content packs
+# app/packs/<name>.pck with their bytes, entry count and SHA-256; the game's
+# ContentPacks checks only existence and size, the updater hashes every file.
+# pck_split.py is the one reader of the format, for this local pack and for CI's
+# content checks (desktop_release_ci.py): the declared packs must be exactly
+# the set's app/packs/ files with their signed size and SHA-256, and a content
+# pack may hold only entries pck_split's rules move into that very pack, none
+# of the core's (so no script, identity or extension list can override the
+# core's when the pack mounts).
+
+CORE_PCK = "app/RabbitLands.pck"
+PACKS_PREFIX = "app/" + pck_split.PACKS_DIRECTORY + "/"
+MAX_PCK_ENTRY_BYTES = 16 * 1024 * 1024
+_PACK_FILE = re.compile(re.escape(pck_split.PACKS_DIRECTORY) + r"/([a-z0-9][a-z0-9-]*)\.pck")
+
+
+def read_pck(path: Path) -> pck_split.Pack:
+    """The directory of a Godot 4 PCK, read by pck_split.read_pack (format 3 or 4,
+    relative file base, unencrypted)."""
+    try:
+        return pck_split.read_pack(Path(path))
+    except OSError as error:
+        # An OSError's text quotes the full path (escaped on Windows): name the file only.
+        raise ContentError("pck", f"{Path(path).name}: {error.strerror or type(error).__name__}") from None
+    except (pck_split.SplitError, ValueError, struct.error) as error:
+        raise ContentError("pck", str(error).replace(str(path), Path(path).name)[:200]) from None
+
+
+def pck_entry(pack: pck_split.Pack, name: str, limit: int = MAX_PCK_ENTRY_BYTES) -> bytes | None:
+    """One small entry of `pack`, or None when it has none of that name."""
+    entry = pack.entries.get(name)
+    if entry is None:
+        return None
+    if entry.size > limit:
+        raise ContentError("pck-entry", f"{name} is larger than {limit} bytes")
+    try:
+        return pack.read(name)
+    except (pck_split.SplitError, OSError) as error:
+        raise ContentError("pck-entry", f"{name}: {type(error).__name__}") from None
+
+
+def pack_layout_rows(core: pck_split.Pack) -> list | None:
+    """The content packs the core declares, or None for a single (monolithic) PCK."""
+    data = pck_entry(core, pck_split.MANIFEST)
+    if data is None:
+        return None
+    value = up.strict_json(data[:-1] if data.endswith(b"\n") else data)
+    if (not isinstance(value, dict) or set(value) != {"schema", "packs"}
+            or type(value["schema"]) is not int or value["schema"] != pck_split.MANIFEST_SCHEMA
+            or type(value["packs"]) is not list):
+        raise ContentError("pck-layout", f"{pck_split.MANIFEST} is not a schema-{pck_split.MANIFEST_SCHEMA} "
+                                         "content pack list")
+    rows, seen = [], set()
+    for row in value["packs"]:
+        if (not isinstance(row, dict) or set(row) != {"file", "bytes", "entries", "sha256", "feature"}
+                or type(row["file"]) is not str or not _PACK_FILE.fullmatch(row["file"]) or row["file"] in seen
+                or type(row["bytes"]) is not int or row["bytes"] <= 0
+                or type(row["entries"]) is not int or row["entries"] <= 0
+                or not r2._is_hash(row["sha256"]) or type(row["feature"]) is not str):
+            raise ContentError("pck-layout", f"{pck_split.MANIFEST} has a malformed or repeated pack row")
+        seen.add(row["file"])
+        rows.append(dict(row))
+    return rows
+
+
+def check_split_layout(rows: list | None, files: dict) -> dict:
+    """The declared packs against the release's file rows (`files`: path -> {size,
+    sha256}): exactly the app/packs/ files, each with the declared bytes and SHA-256.
+    A single PCK has no app/packs/ file at all."""
+    present = sorted(path for path in files if path.startswith(PACKS_PREFIX))
+    if rows is None:
+        if present:
+            raise ContentError("pck-layout", f"{present[0]} ships beside a core pack that lists no content packs")
+        return {"split": False, "packs": 0, "bytes": 0, "features": []}
+    listed = {"app/" + row["file"]: row for row in rows}
+    missing = sorted(set(listed) - set(present))
+    if missing:
+        raise ContentError("pck-layout", f"{missing[0]} is declared by the core pack but not shipped")
+    extra = sorted(set(present) - set(listed))
+    if extra:
+        raise ContentError("pck-layout", f"{extra[0]} is shipped but the core pack does not declare it")
+    for path, row in sorted(listed.items()):
+        entry = files[path]
+        if entry.get("size") != row["bytes"] or entry.get("sha256") != row["sha256"]:
+            raise ContentError("pck-layout", f"{path} differs from the size and SHA-256 the core pack declares")
+    return {"split": True, "packs": len(rows), "bytes": sum(row["bytes"] for row in rows),
+            "features": sorted({row["feature"] for row in rows if row["feature"]})}
+
+
+def check_content_pack(path: Path, row: dict, core: pck_split.Pack) -> dict:
+    """One content pack's directory: the core's format and engine version, the
+    declared entry count, and only entries pck_split's rules put in this pack
+    (pck_split.classify), none of which the core holds too."""
+    name = _PACK_FILE.fullmatch(row["file"])[1]
+    pack = read_pck(path)
+    if (pack.format, pack.version) != (core.format, core.version):
+        raise ContentError("pck-content-pack", f"{row['file']} has another PCK format or engine version than the "
+                                               "core pack")
+    if len(pack.entries) != row["entries"]:
+        raise ContentError("pck-content-pack", f"{row['file']} holds {len(pack.entries)} entries, the core pack "
+                                               f"declares {row['entries']}")
+    for entry in sorted(pack.entries):
+        target = pck_split.classify(entry)
+        if target != (name, row["feature"]):
+            raise ContentError("pck-content-pack", f"{row['file']} holds {entry}, which belongs "
+                                                   f"{'in the core pack' if target is None else 'in ' + target[0]}")
+        if entry in core.entries:
+            raise ContentError("pck-content-pack", f"{row['file']} holds {entry}, which the core pack holds too")
+    return {"file": row["file"], "entries": len(pack.entries)}
+
+
+def read_pck_layout(stage_path: Path, files: dict) -> dict:
+    """The split layout of a local stage: the core pack's declaration against the
+    built file rows, and the directory of every content pack."""
+    core = read_pck(Path(stage_path) / CORE_PCK)
+    rows = pack_layout_rows(core)
+    layout = check_split_layout(rows, files)
+    for row in rows or []:
+        check_content_pack(Path(stage_path) / "app" / row["file"], row, core)
+    return layout
 
 
 def import_cache(build_dir, commit: str, *, dev: bool = False) -> tuple[dict, list]:
@@ -834,6 +963,11 @@ def pack(stage, *, platform: str, out, previous: str = "none", previous_set_file
         # would silently leave the set. Every linked file is in exactly one package.
         if sorted(entry["path"] for package in built for entry in package["files"]) != view_info["paths"]:
             raise ContentError("view-changed", "the packages do not hold exactly the view's files; pack again")
+        moment = time.monotonic()
+        layout = read_pck_layout(view, {entry["path"]: entry for package in built for entry in package["files"]})
+        qualification = {**qualification, "split_pck": layout["split"]}
+        receipt["pck_layout"] = layout
+        timings["pck_layout"] = round(time.monotonic() - moment, 3)
 
         plan_rows, counts = {}, {"new": 0, "reused": 0, "new_bytes": 0, "reused_bytes": 0}
         for package in built:

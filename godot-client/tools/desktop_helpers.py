@@ -15,6 +15,13 @@ download it again when it differs, so an unchanged helper must keep its bytes.
                    helper rows are downloaded and accepted only if size and SHA-256
                    equal the signed row (the bytes are reused, not rebuilt)
   export()         otherwise a headless import and export of the project
+  export_into()    the local and full-CI build's export (client_release.export_launcher
+                   delegates here): the same project, preset and fingerprint, with a
+                   local cache of exported helpers keyed by the fingerprint
+
+This is the one helper exporter: the R2 workflow (desktop_release_ci.py
+executables) and package_client build the same project with the same preset,
+so equal inputs give the same fingerprint wherever the helper is built.
 
 Nothing here signs or uploads. The caller verifies the previous manifest's
 signature (previous_release) before its rows are trusted.
@@ -45,7 +52,12 @@ BINARIES = {"windows": "RabbitLands-updater.exe", "linux": "RabbitLands-updater.
 UNINSTALLERS = {"windows": "RabbitLands-uninstall.exe", "linux": "RabbitLands-uninstall.x86_64"}
 MAX_HELPER_BYTES = rm.MAX_HELPER_BYTES
 EXPORT_TIMEOUT = 300
+# The release export templates of the pinned editor (setup_runner_tools installs
+# them under APPDATA / XDG_DATA_HOME on runners, as an editor install does locally).
+TEMPLATE_VERSION = "4.7.2.stable"
+TEMPLATES = {"windows": "windows_release_x86_64.exe", "linux": "linux_release.x86_64"}
 _SCRIPT_REFERENCE = re.compile(r"""["']res://(src/[A-Za-z0-9_./-]+\.gd)["']""")
+_REPOSITORY = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+")
 
 PROJECT_GODOT = (
     'config_version=5\n[application]\nconfig/name="Rabbit Lands"\n'
@@ -141,11 +153,15 @@ def _platform(platform: str) -> str:
 
 
 def trust_file(identity: dict) -> bytes:
-    """The updater's embedded trust: the identity without commit or ancestors."""
+    """The updater's embedded trust: the identity without commit or ancestors.
+
+    The repository is any OWNER/REPO (package_client --github-repository); the R2
+    workflow's identities always name this repository (desktop_release_ci)."""
     if not isinstance(identity, dict) or any(field not in identity for field in TRUST_FIELDS):
         raise HelperError("identity", "the identity lacks a trust field")
-    if identity["repository"] != r2.REPOSITORY or identity["distribution"] != "github":
-        raise HelperError("identity", "helpers serve the GitHub distribution of this repository")
+    if type(identity["repository"]) is not str or not _REPOSITORY.fullmatch(identity["repository"]) \
+            or identity["distribution"] != "github":
+        raise HelperError("identity", "helpers serve the GitHub distribution of an OWNER/REPO repository")
     return json.dumps({field: identity[field] for field in TRUST_FIELDS}, sort_keys=True).encode("utf-8")
 
 
@@ -233,14 +249,25 @@ def write_project(files: dict, project: Path) -> Path:
     return project
 
 
-def _place(binary: Path, out: Path, platform: str) -> dict:
-    """Put the updater and its uninstaller name (the same bytes) in `out`; return the rows."""
+def _place(binary: Path, out: Path, platform: str, *, link: bool = False) -> dict:
+    """Put the updater and its uninstaller name (the same bytes) in `out`; return the rows.
+
+    `link` hard-links `binary` instead of copying it (a local cache or export on
+    the same volume; a copy when linking fails)."""
     out.mkdir(parents=True, exist_ok=True)
     updater, uninstaller = out / BINARIES[platform], out / UNINSTALLERS[platform]
     for path in (updater, uninstaller):
         if path.exists() or path.is_symlink():
             raise HelperError("helper-exists", path.name)
-    shutil.copyfile(binary, updater)
+    linked = False
+    if link:
+        try:
+            os.link(binary, updater)
+            linked = True
+        except OSError:
+            linked = False
+    if not linked:
+        shutil.copyfile(binary, updater)
     os.link(updater, uninstaller)
     if platform == "linux":
         updater.chmod(0o755)
@@ -251,9 +278,13 @@ def _place(binary: Path, out: Path, platform: str) -> dict:
             for kind in rm.HELPER_KINDS}
 
 
-def export(files: dict, *, platform: str, godot: Path, run_godot, work: Path, out: Path) -> dict:
-    """Import and export the helper project headless; return the signed-row shapes."""
-    project = write_project(files, Path(work) / "helper-project")
+def export(files: dict, *, platform: str, godot: Path, run_godot, work: Path, out: Path,
+           project: Path | None = None, link: bool = False) -> dict:
+    """Import and export the helper project headless; return the signed-row shapes.
+
+    The project is written to `project` (default work/helper-project), which must
+    be new or empty; the binary is exported under `work` and placed in `out`."""
+    project = write_project(files, Path(project) if project else Path(work) / "helper-project")
     logs = Path(work) / "logs"
     logs.mkdir(parents=True, exist_ok=True)
     binary = Path(work) / "export" / BINARIES[platform]
@@ -264,7 +295,76 @@ def export(files: dict, *, platform: str, godot: Path, run_godot, work: Path, ou
                       str(binary)], logs / "helper-export.log", timeout=EXPORT_TIMEOUT)
     if not binary.is_file():
         raise HelperError("helper-export", "the helper export is incomplete")
-    return _place(binary, Path(out), platform)
+    return _place(binary, Path(out), platform, link=link)
+
+
+def find_template(godot: Path, platform: str, environ=None) -> Path | None:
+    """The pinned release export template the editor `godot` exports `platform` with:
+    a self-contained editor's editor_data/, else the user data folder (APPDATA on
+    Windows, XDG_DATA_HOME or ~/.local/share elsewhere), as Godot looks them up."""
+    _platform(platform)
+    environ = os.environ if environ is None else environ
+    editor = Path(godot).resolve().parent
+    roots = []
+    if (editor / "._sc_").is_file() or (editor / "_sc_").is_file():
+        roots.append(editor / "editor_data")
+    if os.name == "nt":
+        if environ.get("APPDATA"):
+            roots.append(Path(environ["APPDATA"]) / "Godot")
+    else:
+        roots.append(Path(environ.get("XDG_DATA_HOME") or Path.home() / ".local" / "share") / "godot")
+    for root in roots:
+        candidate = root / "export_templates" / TEMPLATE_VERSION / TEMPLATES[platform]
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+def export_into(stage: Path, source: Path, identity: dict, *, platform: str, godot: Path, run_godot,
+                project: Path, work: Path, cache: Path | None = None, template: Path | None = None) -> HelperResult:
+    """The updater/uninstaller of a local or full-CI build (client_release.export_launcher).
+
+    The project (written to `project`, replaced if it exists) and preset are
+    project_files()'; the export is linked into `stage`. With `cache`, an
+    export is kept as <fingerprint>.bin and a later build with the same
+    fingerprint links it instead of exporting again. The fingerprint needs the
+    export template's SHA-256: without a template (find_template) nothing is
+    cached and the export runs.
+    """
+    files = project_files(source, identity, platform)
+    template = Path(template) if template else find_template(godot, platform)
+    value = None
+    if template is not None and Path(template).is_file():
+        value = fingerprint(files, platform=platform, editor_sha256=_digest(Path(godot)),
+                            template_sha256=_digest(Path(template)))
+    project = Path(project)
+    if project.is_symlink() or project.is_file():
+        raise HelperError("helper-project", "the helper project path is not a folder")
+    if project.exists():
+        shutil.rmtree(project)  # generated by an earlier run of this function
+    cached = Path(cache) / f"{value}.bin" if cache and value else None
+    if cached is not None and cached.is_file():
+        write_project(files, project)
+        rows = _place(cached, Path(stage), platform, link=True)
+        reused = True
+    else:
+        work = Path(work)
+        if work.exists():
+            shutil.rmtree(work)
+        rows = export(files, platform=platform, godot=Path(godot), run_godot=run_godot, work=work, out=Path(stage),
+                      project=project, link=True)
+        reused = False
+        # The stage holds the helper now: the work folder keeps only the logs, so no
+        # second name pins a 100+ MB helper in a build's logs after its stage is gone.
+        (work / "export" / BINARIES[platform]).unlink(missing_ok=True)
+        if cached is not None:
+            cached.parent.mkdir(parents=True, exist_ok=True)
+            try:
+                os.link(Path(stage) / BINARIES[platform], cached)
+            except OSError:
+                shutil.copyfile(Path(stage) / BINARIES[platform], cached)
+    paths = [Path(stage) / BINARIES[platform], Path(stage) / UNINSTALLERS[platform]]
+    return HelperResult(value, rows, reused, paths)
 
 
 def previous_release(http, platform: str, public_pem: bytes) -> dict | None:

@@ -21,6 +21,7 @@ GODOT = Path(__file__).resolve().parents[1]
 TOOLS = GODOT / "tools"
 sys.path.insert(0, str(TOOLS))
 import desktop_r2 as r2  # noqa: E402
+import pck_split  # noqa: E402
 import upload_desktop_assets as up  # noqa: E402
 import desktop_content as dc  # noqa: E402
 
@@ -114,8 +115,46 @@ def build(tmp_path, repo):
     return build_tree(tmp_path, repo, repo.commit)
 
 
+def pck_bytes(entries: dict, *, fmt: int = 4, version=(4, 7, 2)) -> bytes:
+    """A real Godot 4 PCK of `entries` (name -> bytes), written by pck_split.write_pack."""
+    import tempfile
+    with tempfile.TemporaryDirectory() as folder:
+        path = Path(folder) / "pack.pck"
+        pck_split.write_pack(path, {name: pck_split.Source(data=data) for name, data in entries.items()},
+                             fmt=fmt, version=version)
+        return path.read_bytes()
+
+
+CORE_ENTRIES = {"project.binary": b"ECFG" + bytes(4), "src/app/main.tscn": b"[gd_scene]\n",
+                "data/items.json": bytes(range(256)) * 16}
+
+
+def split_pck(packs: dict, *, core_extra=None, rows=None) -> dict:
+    """A split layout: {stage path: bytes} for the core pack and app/packs/<name>.pck.
+    `packs` maps a pack name to its entries; `rows` edits the declared rows."""
+    files, declared = {}, []
+    for name, entries in sorted(packs.items()):
+        data = pck_bytes(entries)
+        files[f"app/packs/{name}.pck"] = data
+        declared.append({"file": f"packs/{name}.pck", "bytes": len(data), "entries": len(entries),
+                         "sha256": sha(data), "feature": ""})
+    if rows:
+        declared = rows(declared)
+    manifest = pck_split.manifest_bytes(declared)
+    files["app/RabbitLands.pck"] = pck_bytes({**CORE_ENTRIES, pck_split.MANIFEST: manifest, **(core_extra or {})})
+    return files
+
+
+TEXTURE = ".godot/imported/ground.png-0123456789abcdef.ctex"
+SOUND = ".godot/imported/howl.ogg-0123456789abcdef.oggvorbisstr"
+
+
+def texture_pack() -> str:
+    return pck_split.classify(TEXTURE)[0]
+
+
 CONTENT = {
-    "app/RabbitLands.pck": b"GDPC" + bytes(range(256)) * 16,
+    "app/RabbitLands.pck": pck_bytes(CORE_ENTRIES),
     "app/assets/actors/wolf/grey/wolf.glb": b"glTF" + b"w" * 3000,
     "app/assets/actors/wolf/grey/vram/wolf.evt": b"EVT1" + b"t" * 500,
     "app/assets/audio/howl.ogg": b"OggS" + b"a" * 1000,
@@ -702,9 +741,97 @@ def test_provenance_block_is_present(tmp_path, repo, key, build):
 
 
 def test_split_pck_is_recorded(tmp_path, repo, key, build):
+    layout = split_pck({texture_pack(): {TEXTURE: b"GST2" + b"t" * 400}, "audio": {SOUND: b"OggS" + b"s" * 300}})
+    stage = make_stage(tmp_path / "dist", repo.commit, "windows", key, extra=layout)
+    result = run_pack(stage, tmp_path / "out", repo, build=build)
+    content_set = set_of(result)
+    assert content_set["qualification"]["split_pck"] is True
+    receipt = json.loads((result.set_path.parent / dc.RECEIPT_NAME).read_text())
+    assert receipt["pck_layout"] == {"split": True, "packs": 2, "features": [],
+                                     "bytes": len(layout["app/packs/audio.pck"])
+                                     + len(layout[f"app/packs/{texture_pack()}.pck"])}
+    # each content pack is a package of its own (asset_packages: pck-<name>)
+    assert package(content_set, "pck-audio")["files"][0]["path"] == "app/packs/audio.pck"
+
+
+def test_a_folder_of_pck_files_is_no_split_layout(tmp_path, repo, key, build):
+    """Only the core pack's declaration makes a split layout: a stray pack is refused."""
     stage = make_stage(tmp_path / "dist", repo.commit, "windows", key,
-                       extra={"app/packs/world-a.pck": b"GDPC" + b"x" * 400})
-    assert set_of(run_pack(stage, tmp_path / "out", repo, build=build))["qualification"]["split_pck"] is True
+                       extra={"app/packs/world-a.pck": pck_bytes({TEXTURE: b"t"})})
+    with pytest.raises(dc.ContentError) as error:
+        run_pack(stage, tmp_path / "out", repo, build=build)
+    assert error.value.code == "pck-layout" and "app/packs/world-a.pck" in str(error.value)
+
+
+def _rows(**change):
+    def edit(rows):
+        return [dict(row, **change) if row["file"] == "packs/audio.pck" else row for row in rows]
+    return edit
+
+
+@pytest.mark.parametrize("name, layout, code, needle", [
+    ("missing", lambda: {path: data for path, data in split_pck({"audio": {SOUND: b"s"}}).items()
+                         if path != "app/packs/audio.pck"}, "pck-layout", "not shipped"),
+    ("extra", lambda: {**split_pck({"audio": {SOUND: b"s"}}), "app/packs/video.pck": pck_bytes({"a.ogv": b"v"})},
+     "pck-layout", "does not declare"),
+    ("other-file", lambda: {**split_pck({"audio": {SOUND: b"s"}}), "app/packs/readme.txt": b"x"},
+     "pck-layout", "does not declare"),
+    ("size", lambda: split_pck({"audio": {SOUND: b"s"}}, rows=_rows(bytes=1)), "pck-layout", "size and SHA-256"),
+    ("sha256", lambda: split_pck({"audio": {SOUND: b"s"}}, rows=_rows(sha256="0" * 64)), "pck-layout",
+     "size and SHA-256"),
+    ("entries", lambda: split_pck({"audio": {SOUND: b"s"}}, rows=_rows(entries=2)), "pck-content-pack",
+     "declares 2"),
+    ("feature", lambda: split_pck({"audio": {SOUND: b"s"}}, rows=_rows(feature="hd")), "pck-content-pack",
+     SOUND),
+    ("script", lambda: split_pck({"audio": {SOUND: b"s", "src/app/main.gd": b"extends Node\n"}}),
+     "pck-content-pack", "src/app/main.gd"),
+    ("identity", lambda: split_pck({"audio": {SOUND: b"s", "data/client_release.json": b"{}"}}),
+     "pck-content-pack", "data/client_release.json"),
+    ("wrong-pack", lambda: split_pck({"audio": {TEXTURE: b"t"}}), "pck-content-pack", TEXTURE),
+    ("override", lambda: split_pck({"audio": {SOUND: b"s"}}, core_extra={SOUND: b"boot"}), "pck-content-pack",
+     "the core pack holds too"),
+    ("not-a-pck", lambda: {**split_pck({"audio": {SOUND: b"s"}}), "app/RabbitLands.pck": b"GDPC" + b"x" * 200},
+     "pck", "not supported"),
+    ("manifest", lambda: {**split_pck({}), "app/RabbitLands.pck": pck_bytes({
+        **CORE_ENTRIES, pck_split.MANIFEST: b'{"schema": 2, "packs": []}\n'})}, "pck-layout", "schema-1"),
+])
+def test_a_broken_split_layout_is_refused(tmp_path, repo, key, build, name, layout, code, needle):
+    stage = make_stage(tmp_path / "dist", repo.commit, "windows", key, extra=layout())
+    with pytest.raises(dc.ContentError) as error:
+        run_pack(stage, tmp_path / "out", repo, build=build)
+    assert error.value.code == code and needle in str(error.value), (name, error.value)
+    assert not (tmp_path / "out" / dc.SET_NAME).exists()
+
+
+def test_a_content_pack_needs_the_cores_format_and_engine_version(tmp_path):
+    core = pck_bytes(CORE_ENTRIES)
+    (tmp_path / "app/packs").mkdir(parents=True)
+    (tmp_path / "app/RabbitLands.pck").write_bytes(core)
+    for label, data in (("format", pck_bytes({SOUND: b"s"}, fmt=3)),
+                        ("version", pck_bytes({SOUND: b"s"}, version=(4, 7, 1)))):
+        (tmp_path / "app/packs/audio.pck").write_bytes(data)
+        row = {"file": "packs/audio.pck", "bytes": len(data), "entries": 1, "sha256": sha(data), "feature": ""}
+        with pytest.raises(dc.ContentError) as error:
+            dc.check_content_pack(tmp_path / "app/packs/audio.pck", row, dc.read_pck(tmp_path / "app/RabbitLands.pck"))
+        assert error.value.code == "pck-content-pack" and "format or engine version" in str(error.value), label
+    good = pck_bytes({SOUND: b"s"})
+    (tmp_path / "app/packs/audio.pck").write_bytes(good)
+    row = {"file": "packs/audio.pck", "bytes": len(good), "entries": 1, "sha256": sha(good), "feature": ""}
+    assert dc.check_content_pack(tmp_path / "app/packs/audio.pck", row,
+                                 dc.read_pck(tmp_path / "app/RabbitLands.pck")) == {"file": "packs/audio.pck",
+                                                                                    "entries": 1}
+
+
+def test_a_pck_refusal_names_the_file_never_its_folder(tmp_path):
+    folder = tmp_path / "builder-home" / "stage" / "app"
+    folder.mkdir(parents=True)
+    (folder / "short.pck").write_bytes(b"GDPC")
+    for name in ("missing.pck", "short.pck"):
+        with pytest.raises(dc.ContentError) as error:
+            dc.read_pck(folder / name)
+        text = str(error.value)
+        assert error.value.code == "pck" and name in text, text
+        assert "builder-home" not in text and str(tmp_path) not in text, text
 
 
 def test_a_dirty_or_non_origin_tools_tree_is_refused(tmp_path, repo, key, build):
@@ -1024,7 +1151,7 @@ def test_r2_parts_use_the_r2_part_size_and_ci_parts_keep_theirs(tmp_path, repo, 
     import client_release
     noise = b"".join(hashlib.sha256(str(i).encode()).digest() for i in range(1000))  # 32,000 bytes, incompressible
     stage = make_stage(tmp_path / "dist", repo.commit, "windows", key,
-                       content={**CONTENT, "app/RabbitLands.pck": b"GDPC" + noise})
+                       content={**CONTENT, "app/RabbitLands.pck": pck_bytes({**CORE_ENTRIES, "data/noise.bin": noise})})
     monkeypatch.setattr(client_release, "R2_PART_BYTES", 4096)
     hosted = set_of(run_pack(stage, tmp_path / "out", repo, build=build))
     ci = set_of(run_pack(stage, tmp_path / "out-ci", repo, build=build, source="ci"))

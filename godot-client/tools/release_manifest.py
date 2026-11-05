@@ -1,14 +1,18 @@
 """Signed desktop release manifests and pointers, built and signed in Python.
 
-One writer for the release payload of the R2 workflow (desktop-release-r2.yml):
+The one writer of release payloads:
 
-  payload()        the schema-2 or schema-3 release payload: the content set's
-                   packages (R2 or GitHub-pool rows), the CI packages (`engine`,
+  release_payload()  the fields every release manifest has (schema, identity,
+                   launch arguments, version, totals, packages, parts, helper
+                   rows), packages sorted by id; client_release.publish_artifacts
+                   (local and full-CI builds) and payload() both write through
+                   it, so equal rows give byte-equal payload_bytes()
+  payload()        the R2 workflow's (desktop-release-r2.yml) schema-2 or
+                   schema-3 release payload: the content set's packages (R2 or
+                   GitHub-pool rows), the CI packages (`engine`,
                    `native-runtime`, GitHub pool) and the updater/uninstaller
-                   rows (legacy `client-assets` pool), with the same fields,
-                   order rules and totals as client_release.publish_artifacts,
-                   plus the signed R2 fields `sequence`, `helpers_fingerprint`,
-                   `root_files` and `content`
+                   rows (legacy `client-assets` pool), plus the signed R2 fields
+                   `sequence`, `helpers_fingerprint`, `root_files` and `content`
   check_payload()  a Python mirror of package_updates.gd validate, plus the R2
                    and schema rules, run before anything is signed
   sign()/verify()  RSA PKCS#1 v1.5 over SHA-256 of the exact payload bytes, the
@@ -19,9 +23,11 @@ One writer for the release payload of the R2 workflow (desktop-release-r2.yml):
 The schema follows the packaged commit's own reader: schema 3 only when that
 commit's src/updates/release.gd declares `const CODEC_SCHEMA := 3` (UD-05u),
 otherwise schema 2. Derived R2 part rows also need the R2-aware reader, which
-declares `const DESKTOP_ASSETS := "<desktop_r2.DESKTOP_ASSETS>"` (W1a); without
-it an `r2` content source is refused, so CI never signs a manifest whose own
-updater would reject it.
+declares `const DESKTOP_ASSETS := "<desktop_r2.DESKTOP_ASSETS>"` and reads 2000
+packages (W1a, r2_source_problem); without it an `r2` content source is
+refused, so CI never signs a manifest whose own updater would reject it.
+publish_artifacts writes the lowest schema its rows need (2, or 3 for zstd rows)
+and refuses rows its packaged reader cannot read.
 
 Trust: the release key signs; R2 and GitHub are transport. Signing is
 deterministic, so a Python signature equals the one sign_client_release.gd makes
@@ -142,6 +148,38 @@ def commit_capabilities(repo: Path, commit: str) -> ReaderCapabilities:
     if release_gd is None:
         raise ManifestError("reader", f"{RELEASE_GD} is missing at {commit}")
     return reader_capabilities(release_gd, _git_show(repo, commit, PACKAGE_UPDATES_GD))
+
+
+def folder_capabilities(client: Path) -> ReaderCapabilities:
+    """The reader of a godot-client folder (a build tree at the packaged commit)."""
+    folder = Path(client) / "src" / "updates"
+    try:
+        release_gd = (folder / "release.gd").read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        raise ManifestError("reader", "src/updates/release.gd is missing or unreadable") from None
+    try:
+        package_updates_gd = (folder / "package_updates.gd").read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        package_updates_gd = None
+    return reader_capabilities(release_gd, package_updates_gd)
+
+
+def r2_source_problem(capabilities: ReaderCapabilities) -> str | None:
+    """Why the R2 workflow must refuse an `r2` content source for a commit with this
+    reader, or None when it may sign one. The W1a text contract, matched exactly:
+    release.gd declares `const CODEC_SCHEMA := 3` and
+    `const DESKTOP_ASSETS := "<desktop_r2.DESKTOP_ASSETS>"`, and package_updates.gd
+    reads `release.packages.size() > 2000`."""
+    if not isinstance(capabilities, ReaderCapabilities):
+        return "the commit's reader is unknown"
+    if not capabilities.schema3:
+        return "its release.gd lacks the schema-3 declaration (const CODEC_SCHEMA := 3)"
+    if not capabilities.r2_rows:
+        return f'its release.gd does not declare const DESKTOP_ASSETS := "{r2.DESKTOP_ASSETS}" (W1a)'
+    if capabilities.reader_cap != r2.READER_CAP_W1A:
+        return (f"its package_updates.gd reads {capabilities.package_limit} packages, not "
+                f"{r2.READER_CAP_W1A} (W1a: release.packages.size() > {r2.READER_CAP_W1A})")
+    return None
 
 
 def commit_public_key(repo: Path, commit: str) -> bytes:
@@ -283,14 +321,65 @@ def _check_launch_args(args) -> list:
 
 # --- The payload -----------------------------------------------------------------
 
+def release_schema(packages: list, capabilities: ReaderCapabilities) -> int:
+    """The lowest schema the rows need that `capabilities` reads: 2, or 3 for zstd rows
+    (publish_artifacts). The R2 workflow signs the reader's own schema instead."""
+    if not isinstance(capabilities, ReaderCapabilities):
+        raise ManifestError("reader")
+    if not _uses_codec(packages):
+        return SCHEMA_PACKAGES
+    if not capabilities.schema3:
+        raise ManifestError("codec-needs-schema-3", "the packaged reader lacks the schema-3 declaration")
+    return SCHEMA_CODEC
+
+
+def release_payload(*, schema: int, repository: str, commit: str, ancestors: list, platform: str, version: str,
+                    packages: list, helpers: dict, launch_args: list,
+                    capabilities: ReaderCapabilities) -> dict:
+    """The fields of every release manifest, written once for every caller.
+
+    client_release.publish_artifacts (local and full-CI builds) and payload()
+    (the R2 workflow) both build their payload here, and payload_bytes() is
+    canonical, so the same rows give byte-equal payloads and, signing being
+    deterministic, byte-equal manifests. Packages are sorted by id; the
+    totals, the package digest and the part list derive from them. Refuses a
+    schema `capabilities` does not read, zstd rows below schema 3, and more
+    packages or parts than the reader takes. Helper rows are taken as given:
+    payload() holds them to the legacy pool form.
+    """
+    if not isinstance(capabilities, ReaderCapabilities):
+        raise ManifestError("reader")
+    if type(schema) is not int or schema not in (SCHEMA_PACKAGES, SCHEMA_CODEC) \
+            or (schema == SCHEMA_CODEC and not capabilities.schema3):
+        raise ManifestError("schema", _quote(schema))
+    if type(packages) is not list or not all(isinstance(package, dict) for package in packages):
+        raise ManifestError("packages")
+    packages = sorted(packages, key=lambda package: package["id"])
+    if schema == SCHEMA_PACKAGES and _uses_codec(packages):
+        raise ManifestError("codec-needs-schema-3")
+    parts = [part for package in packages for part in package["parts"]]
+    if len(packages) > capabilities.package_limit or len(parts) > capabilities.reader_cap:
+        raise ManifestError("reader-cap-exceeded", f"{len(packages)} packages, {len(parts)} parts")
+    if not isinstance(helpers, dict) or set(helpers) != set(HELPER_KINDS):
+        raise ManifestError("helpers")
+    return {"schema": schema, "bootstrap_schema": BOOTSTRAP_SCHEMA, "repository": repository, "commit": commit,
+            "ancestors": list(ancestors), "launch_args": _check_launch_args(launch_args), "platform": platform,
+            "version": version, "size": sum(package["size"] for package in packages),
+            "unpacked_size": sum(package["unpacked_size"] for package in packages),
+            "file_count": sum(package["file_count"] for package in packages),
+            "sha256": packages_sha256(packages), "packages": packages, "parts": parts,
+            **{kind: dict(helpers[kind]) for kind in HELPER_KINDS}}
+
+
 def payload(*, identity: dict, version: str, content_packages: list, ci_packages: list, helpers: dict,
             launch_args: list, capabilities: ReaderCapabilities, source: str, set_sha256: str, sequence: int,
             helpers_fingerprint: str, root_files: list, optional_packages: list | None = None) -> dict:
     """The release payload CI signs for one platform.
 
-    Equal to client_release.publish_artifacts' release-payload.json for the same
-    rows, apart from the schema (that of the commit's reader), the hosting of
-    content parts (derived R2 URLs for `r2`) and the added fields.
+    release_payload() plus the R2 additions: for the same rows and schema its
+    payload_bytes() without `sequence`, `helpers_fingerprint`, `root_files` and
+    `content` are client_release.publish_artifacts' release-payload.json bytes.
+    The schema is the commit's reader's; `r2` content parts carry derived R2 URLs.
     """
     _check_identity(identity)
     platform, commit = identity["platform"], identity["commit"]
@@ -320,26 +409,14 @@ def payload(*, identity: dict, version: str, content_packages: list, ci_packages
         if not any(package["id"] == pid and any(entry["path"] == path for entry in package["files"])
                    for package in content_packages):
             raise ManifestError("required-package", pid)
-    packages = sorted([*content_packages, *ci_packages], key=lambda package: package["id"])
-    if schema == SCHEMA_PACKAGES and _uses_codec(packages):
-        raise ManifestError("codec-needs-schema-3")
-    parts = [part for package in packages for part in package["parts"]]
-    if len(packages) > capabilities.package_limit or len(parts) > capabilities.reader_cap:
-        raise ManifestError("reader-cap-exceeded", f"{len(packages)} packages, {len(parts)} parts")
-    if not isinstance(helpers, dict) or set(helpers) != set(HELPER_KINDS):
-        raise ManifestError("helpers")
+    release = release_payload(schema=schema, repository=identity["repository"], commit=commit,
+                              ancestors=identity["ancestors"], platform=platform, version=version,
+                              packages=[*content_packages, *ci_packages], helpers=helpers,
+                              launch_args=launch_args, capabilities=capabilities)
     for kind in HELPER_KINDS:
-        problem = helper_row_problem(helpers[kind], kind, platform)
+        problem = helper_row_problem(release[kind], kind, platform)
         if problem:
             raise ManifestError(problem, kind)
-    release = {"schema": schema, "bootstrap_schema": BOOTSTRAP_SCHEMA, "repository": identity["repository"],
-               "commit": commit, "ancestors": list(identity["ancestors"]),
-               "launch_args": _check_launch_args(launch_args), "platform": platform, "version": version,
-               "size": sum(package["size"] for package in packages),
-               "unpacked_size": sum(package["unpacked_size"] for package in packages),
-               "file_count": sum(package["file_count"] for package in packages),
-               "sha256": packages_sha256(packages), "packages": packages, "parts": parts,
-               **{kind: dict(helpers[kind]) for kind in HELPER_KINDS}}
     if type(root_files) is not list or len(root_files) > MAX_ROOT_FILES:
         raise ManifestError("root-files", "at most 64 root files")
     release.update(r2.manifest_additions(platform=platform, sequence=sequence,

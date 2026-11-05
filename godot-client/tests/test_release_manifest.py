@@ -178,8 +178,8 @@ def build_payload(stage: Path, platform: str, key, work: Path, *, source="r2", c
     return rm.payload(**options)
 
 
-def published_payload(stage: Path, platform: str, key, logs: Path) -> dict:
-    """client_release.publish_artifacts' release-payload.json (shared pools, fake Godot)."""
+def published_bytes(stage: Path, platform: str, key, logs: Path, *, source: Path = GODOT, **options) -> bytes:
+    """client_release.publish_artifacts' release-payload.json bytes (shared pools, fake Godot)."""
     import client_release
     calls = []
 
@@ -189,9 +189,14 @@ def published_payload(stage: Path, platform: str, key, logs: Path) -> dict:
             Path(args[-1]).write_text("{}", encoding="utf-8")
     logs.mkdir(parents=True, exist_ok=True)
     client_release.publish_artifacts(stage, identity(platform, key), Path("unused-private.pem"), Path("godot"),
-                                     GODOT, run_godot, logs, shared="partitioned")
+                                     source, run_godot, logs, shared="partitioned", **options)
     assert len(calls) == 2
-    return json.loads((logs / "release-payload.json").read_text(encoding="utf-8"))
+    return (logs / "release-payload.json").read_bytes()
+
+
+def published_payload(stage: Path, platform: str, key, logs: Path) -> dict:
+    """client_release.publish_artifacts' release-payload.json (shared pools, fake Godot)."""
+    return json.loads(published_bytes(stage, platform, key, logs))
 
 
 # --- Equality with publish_artifacts ----------------------------------------------------
@@ -207,6 +212,121 @@ def test_payload_equals_publish_artifacts_apart_from_schema_and_new_fields(tmp_p
     assert new["content"] == {"source": "ci", "set": {"sha256": "c" * 64}}
     assert new["sequence"] == SEQUENCE and new["helpers_fingerprint"] == FINGERPRINT
     assert new["root_files"] == ROOT_FILES
+
+
+def without_r2_fields(payload: dict) -> dict:
+    return {name: value for name, value in payload.items() if name not in NEW_FIELDS}
+
+
+@pytest.mark.parametrize("platform", ["windows", "linux"])
+def test_publish_artifacts_and_payload_share_one_writer_byte_for_byte(tmp_path, key, platform):
+    """One manifest writer: equal rows give byte-equal payload bytes on the local/full-CI path
+    (publish_artifacts) and the R2 workflow's (payload, apart from its R2 additions)."""
+    stage = make_stage(tmp_path / "published", platform, key, native=False)
+    old = published_bytes(stage, platform, key, tmp_path / "logs")
+    new = build_payload(stage, platform, key, tmp_path / "new", source="ci", caps=CAPS2)
+    assert old == rm.payload_bytes(without_r2_fields(new)) == r2.canonical_bytes(json.loads(old))
+    # signing is deterministic, so both paths sign the same bytes into the same manifest
+    private = rm.load_signing_key(key.private, key.public)
+    assert rm.sign(old, private) == rm.sign(rm.payload_bytes(without_r2_fields(new)), private)
+    # this tree's reader reads schema 3: the R2 workflow signs 3, the local path the lowest its rows need (2)
+    three = build_payload(stage, platform, key, tmp_path / "three", source="ci", caps=CAPS3)
+    assert three["schema"] == 3 and json.loads(old)["schema"] == 2
+    assert old == rm.payload_bytes({**without_r2_fields(three), "schema": 2})
+
+
+def _codec_rows(monkeypatch):
+    import asset_packages
+    real = asset_packages.build
+
+    def build(*args, **options):
+        packages = real(*args, **options)
+        for package in packages:
+            if package["id"] == "client":
+                package["files"][0]["codec"] = "zstd"
+        return packages
+    monkeypatch.setattr(asset_packages, "build", build)
+
+
+def reader_folder(root: Path, release_gd: str, package_updates_gd: str | None = None) -> Path:
+    folder = Path(root) / "godot-client"
+    (folder / "src/updates").mkdir(parents=True)
+    (folder / "src/updates/release.gd").write_text(release_gd, encoding="utf-8")
+    if package_updates_gd is not None:
+        (folder / "src/updates/package_updates.gd").write_text(package_updates_gd, encoding="utf-8")
+    return folder
+
+
+def test_publish_artifacts_writes_schema_3_only_for_zstd_rows_its_reader_reads(tmp_path, key, monkeypatch):
+    stage = make_stage(tmp_path / "published", "windows", key, native=False)
+    _codec_rows(monkeypatch)
+    assert json.loads(published_bytes(stage, "windows", key, tmp_path / "logs"))["schema"] == 3
+    # a packaged reader without the schema-3 declaration cannot read zstd rows: nothing is signed
+    old_reader = reader_folder(tmp_path / "old", RELEASE_GD, CAP_850)
+    with pytest.raises(rm.ManifestError) as error:
+        published_bytes(stage, "windows", key, tmp_path / "logs-old", source=old_reader)
+    assert error.value.code == "codec-needs-schema-3"
+
+
+def test_publish_artifacts_refuses_more_packages_than_the_packaged_reader_reads(tmp_path, key):
+    stage = make_stage(tmp_path / "published", "windows", key, native=False)
+    small = reader_folder(tmp_path / "small", RELEASE_GD + SCHEMA3_LINE, CAP_850.replace("850", "2"))
+    accepted = []
+    with pytest.raises(rm.ManifestError) as error:
+        published_bytes(stage, "windows", key, tmp_path / "logs", source=small,
+                        accept_part=lambda path, row: accepted.append(Path(path).name))
+    assert error.value.code == "reader-cap-exceeded"
+    # package parts upload as they are built; the helpers are refused before theirs
+    assert accepted and not [name for name in accepted if "updater" in name or "uninstall" in name]
+    with pytest.raises(rm.ManifestError) as error:
+        rm.folder_capabilities(tmp_path / "nowhere")
+    assert error.value.code == "reader"
+
+
+def test_release_payload_refusals(tmp_path, key):
+    stage = make_stage(tmp_path / "stage", "windows", key)
+    rows = dict(schema=2, repository=r2.REPOSITORY, commit=COMMIT, ancestors=[COMMIT, PARENT], platform="windows",
+                version=stage.name, packages=content_packages(stage, tmp_path / "work", "ci"),
+                helpers=helper_rows(stage, "windows"), launch_args=list(LAUNCH_ARGS), capabilities=CAPS2)
+    release = rm.release_payload(**rows)
+    assert [package["id"] for package in release["packages"]] == sorted(p["id"] for p in rows["packages"])
+    assert rm.release_payload(**{**rows, "packages": list(reversed(rows["packages"]))}) == release
+    for change, code in (({"schema": 3}, "schema"), ({"schema": 1}, "schema"), ({"schema": True}, "schema"),
+                         ({"capabilities": None}, "reader"), ({"packages": None}, "packages"),
+                         ({"helpers": {"updater": rows["helpers"]["updater"]}}, "helpers"),
+                         ({"launch_args": "--server"}, "launch-args"),
+                         ({"capabilities": rm.ReaderCapabilities(schema3=False, r2_rows=False, package_limit=2)},
+                          "reader-cap-exceeded")):
+        with pytest.raises(r2.DesktopR2Error) as error:
+            rm.release_payload(**{**rows, **change})
+        assert error.value.code == code, change
+    assert rm.release_payload(**{**rows, "schema": 3, "capabilities": CAPS3})["schema"] == 3
+    assert rm.release_schema(rows["packages"], CAPS2) == 2
+
+
+def test_the_r2_source_needs_the_exact_w1a_reader():
+    assert "CODEC_SCHEMA" in rm.r2_source_problem(CAPS2)
+    assert "DESKTOP_ASSETS" in rm.r2_source_problem(CAPS3)
+    assert "2000" in rm.r2_source_problem(rm.ReaderCapabilities(schema3=True, r2_rows=True, package_limit=850))
+    assert rm.r2_source_problem(CAPS_R2) is None
+    assert rm.r2_source_problem(None)
+    w1a = rm.reader_capabilities(RELEASE_GD + SCHEMA3_LINE + R2_LINE, CAP_2000)
+    assert rm.r2_source_problem(w1a) is None
+    # the line must be exact: another base, a commented line or a lower limit keep the gate shut
+    for release_gd, package_updates_gd in ((RELEASE_GD + SCHEMA3_LINE + R2_LINE.replace("v1/", "v2/"), CAP_2000),
+                                           (RELEASE_GD + SCHEMA3_LINE + "# " + R2_LINE, CAP_2000),
+                                           (RELEASE_GD + SCHEMA3_LINE + R2_LINE.replace(":=", "="), CAP_2000),
+                                           (RELEASE_GD + SCHEMA3_LINE + R2_LINE, CAP_850)):
+        assert rm.r2_source_problem(rm.reader_capabilities(release_gd, package_updates_gd)), release_gd
+
+
+def test_this_trees_updater_opens_the_r2_gate_with_the_w1a_text():
+    release_gd = (GODOT / "src/updates/release.gd").read_text(encoding="utf-8")
+    package_updates_gd = (GODOT / "src/updates/package_updates.gd").read_text(encoding="utf-8")
+    assert release_gd.splitlines().count(R2_LINE.rstrip("\n")) == 1
+    assert "release.packages.size() > 2000" in package_updates_gd and "> 850" not in package_updates_gd
+    assert rm.r2_source_problem(rm.folder_capabilities(GODOT)) is None
+    assert rm.folder_capabilities(GODOT) == rm.reader_capabilities(release_gd, package_updates_gd)
 
 
 def test_r2_payload_differs_only_in_schema_hosting_and_new_fields(tmp_path, key):

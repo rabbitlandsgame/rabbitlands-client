@@ -7,9 +7,12 @@ Subcommands (one per workflow job; every input is an argument or an artifact):
                   the commit's reader cap, the recomputed release identity
                   against the `release-descriptor` package and the core PCK
                   (res://data/client_release.json, .godot/extension_list.cfg),
-                  a HEAD of every part, and a full GET + SHA-256 + member
-                  decode and native-magic sniff of every package the published
-                  signed release does not already hold; writes artifact content-P
+                  its split layout read with pck_split.py (the declared content
+                  packs are exactly the set's app/packs/ rows; each new pack
+                  holds only entries pck_split's rules put there), a HEAD of
+                  every part, and a full GET + SHA-256 + member decode and
+                  native-magic sniff of every package the published signed
+                  release does not already hold; writes artifact content-P
   build-content   the ci content leg (helper-train release, Linux fallback, R2
                   outage): today's hosted content build (the committed source
                   streamed and checked blob by blob, package_client with
@@ -55,7 +58,6 @@ from pathlib import Path
 import re
 import secrets
 import shutil
-import struct
 import subprocess
 import sys
 import tempfile
@@ -65,6 +67,7 @@ import urllib.request
 import zipfile
 import zlib
 
+import desktop_content as dc
 import desktop_r2 as r2
 import desktop_helpers as helpers
 import release_manifest as rm
@@ -84,7 +87,7 @@ CHUNK_BYTES = 8 * 1024 * 1024        # client_release.CHUNK_BYTES: one ZIP entry
 MAX_INVENTORY_BYTES = 64 * 1024 * 1024
 MAX_ENTRY_BYTES = 16 * 1024 * 1024    # Release.PayloadArchive.MAX_ENTRY_BYTES: no chunk member is larger
 _ZIP_FLAGS = 0x080E                     # the general-purpose flags PayloadArchive accepts (never 0x1, encrypted)
-MAX_PCK_ENTRY = 16 * 1024 * 1024
+MAX_PCK_ENTRY = 16 * 1024 * 1024        # the identity and extension list read from the core PCK
 WORKERS = 4
 EXEC_KIND, CONTENT_KIND, E2E_KIND = ("rabbitlands-desktop-exec", "rabbitlands-desktop-content-check",
                                      "rabbitlands-desktop-e2e")
@@ -93,10 +96,6 @@ HELPER_EXTENSIONS = rm.HELPER_EXTENSIONS
 GITHUB_LATEST = f"https://github.com/{r2.REPOSITORY}/releases/latest/download/"
 DOWNLOAD_WAIT_SECONDS = 3600
 SMOKE_TIMEOUT = 300
-PCK_FORMATS = (3, 4)
-_PCK_HEADER = struct.Struct("<4sIIIIIQQ")   # magic, format, major, minor, patch, flags, file base, directory
-_PCK_TAIL = struct.Struct("<QQ16sI")        # offset, size, md5, flags
-_PCK_DIR_ENCRYPTED, _PCK_REL_FILEBASE = 1, 2
 
 
 class CiError(r2.DesktopR2Error):
@@ -352,68 +351,36 @@ def verify_package(package: dict, part_paths: list[Path], *, extract: dict | Non
     return {"id": package["id"], "files": len(files), "bytes": package["size"]}
 
 
-# --- Minimal Godot PCK reader (formats 3 and 4) --------------------------------------
+# --- The core PCK and the split layout (read by tools/pck_split.py) --------------------
+#
+# pck_split.py (W2-UD-06) is the one PCK reader: desktop_content.read_pck wraps
+# pck_split.read_pack, and the layout checks (the core's content pack list
+# against the set's app/packs/ rows, each content pack's directory) are
+# desktop_content's, shared with the local pack.
 
-def read_pck(path: Path) -> dict[str, tuple[int, int]]:
-    """Entry name (without res://) -> (absolute offset, size) of an unencrypted Godot 4 PCK."""
-    path = Path(path)
-    size = path.stat().st_size
-    with path.open("rb") as handle:
-        head = handle.read(_PCK_HEADER.size)
-        if len(head) != _PCK_HEADER.size:
-            raise CiError("pck", "not a Godot PCK")
-        magic, fmt, _major, _minor, _patch, flags, base, directory = _PCK_HEADER.unpack(head)
-        if magic != b"GDPC" or fmt not in PCK_FORMATS:
-            raise CiError("pck", f"not a Godot 4 PCK (format {fmt})")
-        if flags & _PCK_DIR_ENCRYPTED or flags & ~(_PCK_DIR_ENCRYPTED | _PCK_REL_FILEBASE):
-            raise CiError("pck", f"pack flags {flags:#x} are not supported")
-        if not directory or directory > size - 4:
-            raise CiError("pck", "the directory offset is outside the file")
-        offset_base = base if flags & _PCK_REL_FILEBASE else 0
-        handle.seek(directory)
-        count, = struct.unpack("<I", handle.read(4))
-        entries = {}
-        for _ in range(count):
-            raw = handle.read(4)
-            if len(raw) != 4:
-                raise CiError("pck", "the directory is truncated")
-            length, = struct.unpack("<I", raw)
-            name_bytes, tail = handle.read(length), handle.read(_PCK_TAIL.size)
-            if len(name_bytes) != length or len(tail) != _PCK_TAIL.size:
-                raise CiError("pck", "the directory is truncated")
-            name = name_bytes.rstrip(b"\0").decode("utf-8", "replace").removeprefix("res://")
-            offset, entry_size, _md5, entry_flags = _PCK_TAIL.unpack(tail)
-            if entry_flags or not name or name in entries or offset_base + offset + entry_size > size:
-                raise CiError("pck", f"entry {name!r} is encrypted, repeated or outside the file")
-            entries[name] = (offset_base + offset, entry_size)
-    return entries
+def read_pck(path: Path):
+    """The directory (pck_split.Pack) of an unencrypted Godot 4 PCK, format 3 or 4."""
+    return dc.read_pck(path)
 
 
-def pck_entry(path: Path, entries: dict, name: str) -> bytes | None:
-    if name not in entries:
-        return None
-    offset, size = entries[name]
-    if size > MAX_PCK_ENTRY:
-        raise CiError("pck-entry", name)
-    with Path(path).open("rb") as handle:
-        handle.seek(offset)
-        data = handle.read(size)
-    if len(data) != size:
-        raise CiError("pck-entry", name)
-    return data
+def pck_entry(pack, name: str) -> bytes | None:
+    return dc.pck_entry(pack, name, MAX_PCK_ENTRY)
 
 
-def check_core_pck(path: Path, identity: dict) -> dict:
-    """The core PCK's embedded identity equals the commit's; it names only the CI runtime extension."""
-    entries = read_pck(path)
-    embedded = pck_entry(path, entries, PCK_IDENTITY)
+def check_core_pck(path: Path, identity: dict) -> tuple[dict, object, list | None]:
+    """The core PCK's embedded identity equals the commit's; it names only the CI
+    runtime extension. Returns its record, its directory and the content packs it
+    declares (None for a single PCK)."""
+    pack = read_pck(path)
+    embedded = pck_entry(pack, PCK_IDENTITY)
     if embedded is None or r2._parse_json(embedded) != identity:
         raise CiError("pck-identity", "res://data/client_release.json differs from the commit's identity")
-    listed = pck_entry(path, entries, EXTENSION_LIST)
+    listed = pck_entry(pack, EXTENSION_LIST)
     extensions = [line.strip() for line in (listed or b"").decode("utf-8", "replace").splitlines() if line.strip()]
     if any(line != RUNTIME_DESCRIPTOR for line in extensions):
         raise CiError("pck-extension-list", "the core PCK loads an extension other than the CI runtime")
-    return {"entries": len(entries), "extensions": extensions}
+    rows = dc.pack_layout_rows(pack)
+    return {"entries": len(pack.entries), "extensions": extensions}, pack, rows
 
 
 # --- Content summary (what the owner reads before approving desktop-sign) ---------------
@@ -448,7 +415,7 @@ def content_diff(content_set: dict, published: dict | None) -> dict:
             "builder": content_set.get("builder"), "qualification": content_set.get("qualification")}
 
 
-def summary_markdown(platform: str, set_sha256: str, commit: str, diff: dict) -> str:
+def summary_markdown(platform: str, set_sha256: str, commit: str, diff: dict, pck: dict | None = None) -> str:
     lines = [f"### {platform.title()} content `{set_sha256}`", "",
              f"- commit `{commit}`; compared with the published release "
              f"`{diff['previous_version'] or 'none'}`",
@@ -457,6 +424,11 @@ def summary_markdown(platform: str, set_sha256: str, commit: str, diff: dict) ->
              f"- core `client` package changed: {'yes' if diff['client_changed'] else 'no'}",
              f"- new bytes to download: {diff['new_bytes']:,}",
              f"- new file extensions: {', '.join(diff['new_extensions']) or 'none'}"]
+    layout = (pck or {}).get("layout")
+    if layout:
+        lines.append(f"- PCK: split, {layout['packs']} content packs ({layout['bytes']:,} bytes), "
+                     f"{len(pck.get('content_packs_checked') or [])} new or changed packs read entry by entry"
+                     if layout["split"] else "- PCK: a single pack (no content packs)")
     for label in ("added", "changed", "removed"):
         if diff[label]:
             shown = ", ".join(f"`{pid}`" for pid in diff[label][:40])
@@ -482,8 +454,9 @@ def verify_content(*, platform: str, set_sha256: str, commit: str, repo: Path, h
     work, out = Path(work), Path(out)
     public_pem = rm.commit_public_key(repo, commit)
     capabilities = rm.commit_capabilities(repo, commit)
-    if not capabilities.r2_rows:
-        raise CiError("reader-lacks-r2", "the commit's updater does not read R2 rows; use the ci source")
+    problem = rm.r2_source_problem(capabilities)
+    if problem:
+        raise CiError("reader-lacks-r2", f"the commit's updater does not read R2 rows: {problem}; use the ci source")
     url = r2.set_url(platform, set_sha256)
     if not head_ok_any(http, url):
         raise CiError("set-missing", url)
@@ -521,20 +494,24 @@ def verify_content(*, platform: str, set_sha256: str, commit: str, repo: Path, h
     downloads = work / "parts"
     downloads.mkdir(parents=True, exist_ok=True)
     extracted = work / "extracted"
-    extracted.mkdir(parents=True, exist_ok=True)
+    (extracted / "packs").mkdir(parents=True, exist_ok=True)
     targets = {DESCRIPTOR: extracted / "client-release.json", DESCRIPTOR_COPY: extracted / "client_release.json",
                CORE_PCK: extracted / "RabbitLands.pck"}
+    files = {entry["path"]: entry for package in content_set["packages"] for entry in package["files"]}
     # Packages the published signed release already holds (same bytes and files)
     # were verified when that release was made: HEAD only. Every other package is
     # downloaded part by part and checked member by member. The descriptor and
-    # the core pack are always checked: they carry the identity.
-    selected = [package for package in content_set["packages"]
-                if package["id"] in r2.REQUIRED_PACKAGES or not known(package)]
+    # the core pack are always checked, first: they carry the identity, and the
+    # core declares the content packs (pck_split layout) a new pack is held to.
+    selected = sorted((package for package in content_set["packages"]
+                       if package["id"] in r2.REQUIRED_PACKAGES or not known(package)),
+                      key=lambda package: (package["id"] not in r2.REQUIRED_PACKAGES, package["id"]))
     uses = {}
     for package in selected:
         for part in package["parts"]:
             uses[part["sha256"]] = uses.get(part["sha256"], 0) + 1
-    verified, fetched = [], set()
+    verified, fetched, checked_packs = [], set(), []
+    core = pck = layout = declared = None
     for package in selected:
         paths = []
         for part in package["parts"]:
@@ -545,11 +522,22 @@ def verify_content(*, platform: str, set_sha256: str, commit: str, repo: Path, h
             paths.append(path)
         wanted = {path: target for path, target in targets.items()
                   if any(entry["path"] == path for entry in package["files"])}
-        verified.append(verify_package(package, paths, extract=wanted))
+        packs = {entry["path"]: extracted / "packs" / entry["path"].rsplit("/", 1)[1] for entry in package["files"]
+                 if entry["path"].startswith(dc.PACKS_PREFIX)}
+        verified.append(verify_package(package, paths, extract={**wanted, **packs}))
         for part in package["parts"]:
             uses[part["sha256"]] -= 1
             if not uses[part["sha256"]]:
                 (downloads / f"{part['sha256']}.bin").unlink(missing_ok=True)
+        if core is None and targets[CORE_PCK].is_file():
+            pck, core, rows = check_core_pck(targets[CORE_PCK], identity)
+            layout = dc.check_split_layout(rows, files)
+            declared = {"app/" + row["file"]: row for row in rows or []}
+        for path, local in sorted(packs.items()):
+            if core is None:
+                raise CiError("descriptor", f"{CORE_PCK} is not in a checked package")
+            checked_packs.append(dc.check_content_pack(local, declared[path], core))
+            local.unlink()
 
     missing = [path for path, target in targets.items() if not target.is_file()]
     if missing:
@@ -559,8 +547,8 @@ def verify_content(*, platform: str, set_sha256: str, commit: str, repo: Path, h
         raise CiError("descriptor", "app/client-release.json differs from the commit's recomputed identity")
     if targets[DESCRIPTOR_COPY].read_bytes() != descriptor:
         raise CiError("descriptor", "app/data/client_release.json differs from app/client-release.json")
-    pck = check_core_pck(targets[CORE_PCK], identity)
     targets[CORE_PCK].unlink()
+    pck = {**pck, "layout": layout, "content_packs_checked": [row["file"] for row in checked_packs]}
 
     diff = content_diff(content_set, published)
     record = {"kind": CONTENT_KIND, "schema": 1, "platform": platform, "commit": commit, "source": "r2",
@@ -573,7 +561,7 @@ def verify_content(*, platform: str, set_sha256: str, commit: str, repo: Path, h
     out.mkdir(parents=True, exist_ok=True)
     _write(out / "set.json", set_bytes)
     _write(out / "verified.json", _json_bytes(record))
-    _write(out / "summary.md", summary_markdown(platform, set_sha256, commit, diff).encode("ascii", "replace"))
+    _write(out / "summary.md", summary_markdown(platform, set_sha256, commit, diff, pck).encode("ascii", "replace"))
     return record
 
 
@@ -918,7 +906,7 @@ class ContentLeg:
         if code:
             raise CiError("package", "package_client failed; see the content build logs")
         stage = self._stage(output, identity)
-        pck = check_core_pck(stage / CORE_PCK, identity)
+        pck, core, rows = check_core_pck(stage / CORE_PCK, identity)
         asset_cache.built_packages = 0
         asset_cache.finish(b"{}\n")  # the ci leg reuses no package through the cache: pack rebuilds in full
         storage.check("content stage qualified")
@@ -933,8 +921,13 @@ class ContentLeg:
                                   commit=self.commit, platform=self.platform, source="ci",
                                   reader_cap=capabilities.reader_cap)
         _check_builder(content_set)
-        rows = self._pool_rows(content_set, result.set_path.parent / "parts")
-        pool = self._upload(rows, result.set_path.parent / "parts")
+        # The packed rows against the core's content pack list, and every content pack's directory (pck_split).
+        layout = dc.check_split_layout(rows, {entry["path"]: entry for package in content_set["packages"]
+                                              for entry in package["files"]})
+        checked = [dc.check_content_pack(stage / "app" / row["file"], row, core)["file"] for row in rows or []]
+        pck = {**pck, "layout": layout, "content_packs_checked": checked}
+        pool_rows = self._pool_rows(content_set, result.set_path.parent / "parts")
+        pool = self._upload(pool_rows, result.set_path.parent / "parts")
         published = self.previous(public_pem) if self.published == "auto" else self.published
         diff = content_diff(content_set, published)
         set_sha256 = r2.sha256_hex(set_bytes)
@@ -953,7 +946,7 @@ class ContentLeg:
         self.out.mkdir(parents=True, exist_ok=True)
         _write(self.out / "set.json", set_bytes)
         _write(self.out / "verified.json", _json_bytes(record))
-        _write(self.out / "summary.md", (summary_markdown(self.platform, set_sha256, self.commit, diff)
+        _write(self.out / "summary.md", (summary_markdown(self.platform, set_sha256, self.commit, diff, pck)
                                          + f"- source: ci, built on this runner; {hosting}\n"
                                          ).encode("ascii", "replace"))
         self._cleanup(root, stage)

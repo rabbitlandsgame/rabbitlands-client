@@ -25,6 +25,7 @@ sys.path.insert(0, str(TOOLS))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import desktop_r2 as r2  # noqa: E402
 import desktop_release_ci as ci  # noqa: E402
+import pck_split  # noqa: E402
 import release_manifest as rm  # noqa: E402
 import upload_desktop_assets as up  # noqa: E402
 import test_release_manifest as fx  # noqa: E402
@@ -120,6 +121,28 @@ def core_pck(identity: dict, extensions=None, **extra) -> bytes:
     if extensions is not None:
         entries[".godot/extension_list.cfg"] = "".join(line + "\n" for line in extensions).encode()
     return make_pck(entries)
+
+
+TEXTURE = ".godot/imported/ground.png-0123456789abcdef.ctex"
+SOUND = ".godot/imported/howl.ogg-0123456789abcdef.oggvorbisstr"
+
+
+def split_layout(identity: dict, packs: dict, *, rows=None, core_extra=None) -> tuple[bytes, dict]:
+    """A split PCK (pck_split): the core pack declaring app/packs/<name>.pck, and those packs."""
+    files, declared = {}, []
+    for name, entries in sorted(packs.items()):
+        data = make_pck(entries)
+        files[f"app/packs/{name}.pck"] = data
+        declared.append({"file": f"packs/{name}.pck", "bytes": len(data), "entries": len(entries),
+                         "sha256": sha(data), "feature": ""})
+    if rows:
+        declared = rows(declared)
+    core = core_pck(identity, **{pck_split.MANIFEST: pck_split.manifest_bytes(declared)}, **(core_extra or {}))
+    return core, files
+
+
+def texture_pack() -> str:
+    return pck_split.classify(TEXTURE)[0]
 
 
 def make_stage(root: Path, platform: str, identity: dict, *, pck: bytes | None = None, descriptor=None,
@@ -379,6 +402,75 @@ def test_native_magic_in_a_new_package_is_refused(repo, key, tmp_path, data, kin
     assert kind in str(error) and "innocent.dat" in str(error)
 
 
+def _split_scene(repo, key, tmp_path, packs, **options):
+    identity = identity_of(repo, "windows", key, tmp_path)
+    core, files = split_layout(identity, packs, **options)
+    return _scene_with(repo, key, tmp_path, pck=core, extra=files)
+
+
+SPLIT_PACKS = {"audio": {SOUND: b"OggS" + b"s" * 300}, "video": {"assets/video/login.ogv": b"OggS" + b"v" * 200}}
+
+
+def test_verify_content_reads_the_split_layout_and_each_new_content_pack(repo, key, tmp_path, monkeypatch):
+    scene = _split_scene(repo, key, tmp_path, {texture_pack(): {TEXTURE: b"GST2" + b"t" * 400}, **SPLIT_PACKS})
+    read = []
+    real = pck_split.read_pack
+    monkeypatch.setattr(pck_split, "read_pack", lambda path: read.append(Path(path).name) or real(path))
+    record = run_verify(scene, repo, tmp_path)
+    packs = sorted(f"packs/{name}.pck" for name in (texture_pack(), "audio", "video"))
+    assert record["core_pck"]["layout"]["split"] is True and record["core_pck"]["layout"]["packs"] == 3
+    assert sorted(record["core_pck"]["content_packs_checked"]) == packs
+    assert sorted(read) == sorted(["RabbitLands.pck", *(path.split("/")[1] for path in packs)])
+    assert not list((tmp_path / "work/extracted/packs").iterdir())  # each pack is released once read
+    summary = (tmp_path / "content-windows" / "summary.md").read_text(encoding="ascii")
+    assert "PCK: split, 3 content packs" in summary and "3 new or changed packs read entry by entry" in summary
+    # a pack the published release holds is not downloaded; its row is still held to the core's declaration
+    known = [package for package in scene.set["packages"] if package["id"] == "pck-audio"]
+    again = run_verify(scene, repo, tmp_path / "again", published={"packages": known})
+    assert "packs/audio.pck" not in again["core_pck"]["content_packs_checked"]
+    assert again["core_pck"]["layout"]["packs"] == 3
+
+
+def test_a_single_pack_release_has_no_content_packs(scene, repo, tmp_path):
+    record = run_verify(scene, repo, tmp_path)
+    assert record["core_pck"]["layout"] == {"split": False, "packs": 0, "bytes": 0, "features": []}
+    assert "PCK: a single pack" in (tmp_path / "content-windows" / "summary.md").read_text(encoding="ascii")
+
+
+def _declared(**change):
+    def edit(rows):
+        return [dict(row, **change) if row["file"] == "packs/audio.pck" else row for row in rows]
+    return edit
+
+
+@pytest.mark.parametrize("label, packs, options, code, needle", [
+    ("script", {"audio": {SOUND: b"s", "src/app/evil.gd": b"extends Node\n"}}, {}, "pck-content-pack",
+     "src/app/evil.gd"),
+    ("extension-list", {"audio": {SOUND: b"s", ".godot/extension_list.cfg": b"res://evil.gdextension\n"}}, {},
+     "pck-content-pack", "extension_list.cfg"),
+    ("override", {"audio": {SOUND: b"s"}}, {"core_extra": {SOUND: b"boot"}}, "pck-content-pack",
+     "the core pack holds too"),
+    ("other-pack", {"audio": {TEXTURE: b"t"}}, {}, "pck-content-pack", TEXTURE),
+    ("entries", {"audio": {SOUND: b"s"}}, {"rows": _declared(entries=9)}, "pck-content-pack", "declares 9"),
+    ("bytes", {"audio": {SOUND: b"s"}}, {"rows": _declared(bytes=1)}, "pck-layout", "size and SHA-256"),
+    ("undeclared", {"audio": {SOUND: b"s"}}, {"rows": lambda rows: []}, "pck-layout", "does not declare"),
+    ("unshipped", {"audio": {SOUND: b"s"}}, {"rows": lambda rows: [*rows, dict(rows[0], file="packs/gone.pck")]},
+     "pck-layout", "not shipped"),
+])
+def test_a_split_layout_ci_must_not_sign_is_refused(repo, key, tmp_path, label, packs, options, code, needle):
+    with pytest.raises(r2.DesktopR2Error) as error:
+        run_verify(_split_scene(repo, key, tmp_path, packs, **options), repo, tmp_path)
+    assert error.value.code == code and needle in str(error.value), (label, error.value)
+    assert not (tmp_path / "content-windows" / "set.json").exists()
+
+
+def test_a_reader_with_the_r2_base_but_the_850_limit_is_refused(scene, repo, tmp_path, monkeypatch):
+    monkeypatch.setattr(rm, "commit_capabilities", lambda path, commit: rm.ReaderCapabilities(
+        schema3=True, r2_rows=True, package_limit=850))
+    error = _refused("reader-lacks-r2", scene, repo, tmp_path)
+    assert "2000" in str(error)
+
+
 def test_a_dev_mode_set_is_refused(repo, key, tmp_path):
     scene = _scene_with(repo, key, tmp_path, builder={"mode": "dev", "tools_dirty": True, "release_build": True})
     _refused("builder", scene, repo, tmp_path)
@@ -524,19 +616,31 @@ def test_verify_package_reads_members_as_the_updater_does(tmp_path):
     assert error.value.code == "member-size"
 
 
-def test_pck_reader_formats_and_refusals(tmp_path):
+def test_the_pck_reader_is_pck_split(tmp_path, monkeypatch):
     entries = {"data/client_release.json": b'{"commit": "x"}', "a/b.txt": b"hello"}
     for fmt in (3, 4):
         path = tmp_path / f"v{fmt}.pck"
         path.write_bytes(make_pck(entries, fmt=fmt))
         found = ci.read_pck(path)
-        assert set(found) == set(entries) and ci.pck_entry(path, found, "a/b.txt") == b"hello"
+        assert isinstance(found, pck_split.Pack) and set(found.entries) == set(entries)
+        assert ci.pck_entry(found, "a/b.txt") == b"hello" and ci.pck_entry(found, "missing") is None
+    # pck_split's rules: a relative file base only (flags 2), no encryption, formats 3 and 4
     for name, data in (("magic", make_pck(entries, magic=b"XXXX")), ("v2", make_pck(entries, fmt=2)),
-                       ("encrypted", make_pck(entries, flags=3)), ("short", b"GDPC")):
+                       ("encrypted", make_pck(entries, flags=3)), ("absolute", make_pck(entries, flags=0)),
+                       ("short", b"GDPC"), ("trailing", make_pck(entries) + b"x")):
         path = tmp_path / f"{name}.pck"
         path.write_bytes(data)
-        with pytest.raises(ci.CiError):
+        with pytest.raises(r2.DesktopR2Error) as error:
             ci.read_pck(path)
+        assert error.value.code == "pck" and str(tmp_path) not in str(error.value), name
+    calls = []
+    real = pck_split.read_pack
+    monkeypatch.setattr(pck_split, "read_pack", lambda path: calls.append(Path(path).name) or real(path))
+    ci.read_pck(tmp_path / "v4.pck")
+    assert calls == ["v4.pck"]
+    # one reader: the CI tool parses no PCK header or directory of its own
+    source = (TOOLS / "desktop_release_ci.py").read_text(encoding="ascii")
+    assert "GDPC" not in source and "import struct" not in source and "_PCK_HEADER" not in source
 
 
 def test_content_diff_reports_changes_extensions_and_bytes(scene):
@@ -1167,9 +1271,9 @@ class FakeContentLeg(ci.ContentLeg):
     streams from the commit's archive and checks blob by blob, then a qualified stage."""
     PREFLIGHT_BYTES = 0
 
-    def __init__(self, *, identity, sink=None, package_code=0, pck=None, **options):
+    def __init__(self, *, identity, sink=None, package_code=0, pck=None, extra=None, **options):
         super().__init__(**options)
-        self.identity, self.package_code, self.pck = identity, package_code, pck
+        self.identity, self.package_code, self.pck, self.extra = identity, package_code, pck, extra
         self.calls, self.argv, self.storage, self.environment = [], None, None, None
         self.pool_sink = sink if sink is not None else PoolSink(self.http)
         self.materialized = {}
@@ -1203,7 +1307,7 @@ class FakeContentLeg(ci.ContentLeg):
                              and path.name != ".git"}
         if self.package_code:
             return self.package_code
-        stage = make_stage(output, self.platform, self.identity, pck=self.pck)
+        stage = make_stage(output, self.platform, self.identity, pck=self.pck, extra=self.extra)
         earlier = time.time_ns() - 60 * 10 ** 9
         os.utime(stage / ".eloria-package", ns=(earlier, earlier))
         logs = output / ".build" / "logs" / f"{self.platform}-{stage.name.split('-', 2)[2]}"
@@ -1470,6 +1574,28 @@ def test_build_content_refuses_a_stage_that_is_not_the_commits_build(repo, ci_ch
     with pytest.raises(ci.CiError) as error:
         evil.run()
     assert error.value.code == "pck-extension-list"
+
+
+def test_build_content_checks_the_split_layout_of_its_stage(repo, ci_checkout, key, tmp_path, codeload, monkeypatch):
+    import desktop_content
+    identity = identity_of(repo, "windows", key, tmp_path / "identity")
+    core, files = split_layout(identity, SPLIT_PACKS)
+    leg = content_leg(repo, ci_checkout, key, tmp_path / "good", pck=core, extra=files)
+    record = leg.run()
+    assert record["core_pck"]["layout"]["split"] is True
+    assert sorted(record["core_pck"]["content_packs_checked"]) == ["packs/audio.pck", "packs/video.pck"]
+    core, files = split_layout(identity, {"audio": {SOUND: b"s", "src/app/evil.gd": b"extends Node\n"}})
+    evil = content_leg(repo, ci_checkout, key, tmp_path / "evil", pck=core, extra=files)
+    with pytest.raises(r2.DesktopR2Error) as error:
+        evil.run()
+    assert error.value.code == "pck-content-pack" and "sink" not in evil.calls
+    # the leg checks the stage itself, not only through desktop_content.pack's own layout check
+    monkeypatch.setattr(desktop_content, "read_pck_layout", lambda stage, rows: {
+        "split": True, "packs": 1, "bytes": 0, "features": []})
+    again = content_leg(repo, ci_checkout, key, tmp_path / "evil-again", pck=core, extra=files)
+    with pytest.raises(r2.DesktopR2Error) as error:
+        again.run()
+    assert error.value.code == "pck-content-pack" and "sink" not in again.calls
 
 
 @pytest.mark.parametrize("url_for", [

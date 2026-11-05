@@ -60,22 +60,28 @@ def test_a_game_preset_only_change_keeps_the_fingerprint(source, key, monkeypatc
     monkeypatch.setattr(package_client, "EXPORT_PRESETS", changed)
     assert fingerprint_of(files_of(source, key)) == before
     assert b"*.csv" not in files_of(source, key)["export_presets.cfg"]
-    # today's export_launcher cache key follows the game preset, so the same
-    # edit would rebuild the helper and every player would download it again
-    names = []
+    # export_launcher (local and full-CI builds) delegates here: the same edit
+    # keeps its cached helper, so no player downloads the helper again
+    godot, template = tmp_path / "godot.exe", tmp_path / "template.exe"
+    godot.write_bytes(b"editor")
+    template.write_bytes(b"template")
+    names, exports = [], []
     for preset in (package_client.EXPORT_PRESETS.replace(',*.csv', ''), changed):
         stage, cache = tmp_path / f"stage{len(names)}", tmp_path / "cache"
         stage.mkdir()
 
         def run_godot(godot, args, log, timeout):
+            exports.append(args)
             if "--export-release" in args:
                 Path(args[-1]).write_bytes(b"helper")
-        godot = tmp_path / "godot.exe"
-        godot.write_bytes(b"editor")
         client_release.export_launcher(stage, fx.identity("windows", key), godot, source, preset, "Windows Desktop",
-                                       run_godot, tmp_path / f"logs{len(names)}", cache=cache)
+                                       run_godot, tmp_path / f"logs{len(names)}", cache=cache, template=template)
         names.append(sorted(path.name for path in cache.iterdir()))
-    assert names[0] != names[1]
+    value = helpers.fingerprint(files_of(source, key), platform="windows", editor_sha256=sha(b"editor"),
+                                template_sha256=sha(b"template"))
+    assert names[0] == names[1] == [f"{value}.bin"]
+    assert len(exports) == 2  # one import and one export; the second build linked the cached helper
+    assert os.path.samefile(tmp_path / "stage1/RabbitLands-updater.exe", tmp_path / "cache" / f"{value}.bin")
 
 
 def test_a_src_updates_change_alters_the_fingerprint(source, key):
@@ -110,31 +116,116 @@ def test_asset_only_releases_keep_the_trust_file_and_fingerprint(source, key):
     assert set(trust) == set(helpers.TRUST_FIELDS) and "commit" not in trust
 
 
-def test_project_files_equal_export_launchers_apart_from_the_preset(source, key, tmp_path):
+@pytest.mark.parametrize("platform", ["windows", "linux"])
+def test_export_launcher_is_this_exporter(source, key, tmp_path, platform):
+    """One helper exporter: the local/full-CI export_launcher writes exactly project_files() (the
+    fixed preset included, the same bytes on every OS) and exports what the R2 workflow exports."""
     import client_release
     import package_client
     stage = tmp_path / "stage"
     stage.mkdir()
+    (stage / "RabbitLands-updater.pck").write_bytes(b"stale")
+    calls = []
 
     def run_godot(godot, args, log, timeout):
+        calls.append(args)
         if "--export-release" in args:
-            Path(args[-1]).write_bytes(b"helper")
-    client_release.export_launcher(stage, fx.identity("linux", key), tmp_path / "godot", source,
-                                   package_client.EXPORT_PRESETS, "Linux", run_godot, tmp_path / "logs")
+            Path(args[-1]).write_bytes(b"MZ-helper" if platform == "windows" else b"ELF-helper")
+    godot = tmp_path / "godot"
+    godot.write_bytes(b"editor")
+    rows = client_release.export_launcher(stage, fx.identity(platform, key), godot, source,
+                                          package_client.EXPORT_PRESETS, package_client.PLATFORMS[platform]["preset"],
+                                          run_godot, tmp_path / "logs")
     project = tmp_path / "logs" / "updater-project"
     generated = {path.relative_to(project).as_posix(): path.read_bytes() for path in project.rglob("*")
                  if path.is_file()}
-    ours = files_of(source, key, "linux")
-    assert set(generated) == set(ours)
-    for name in ours:
-        if name != "export_presets.cfg":
-            # export_launcher writes text mode (CRLF on Windows); this tool writes the same bytes everywhere
-            text = not name.endswith((".gd", ".png", ".ico"))
-            normal = generated[name].replace(b"\r\n", b"\n") if text else generated[name]
-            assert normal == ours[name], name
-    preset = ours["export_presets.cfg"].decode()
+    assert generated == files_of(source, key, platform)
+    preset = generated["export_presets.cfg"].decode()
     assert "binary_format/embed_pck=true" in preset and "embed_pck=false" not in preset
-    assert 'name="Linux"' in preset and "[preset.1]" not in preset
+    assert f'name="{helpers.PRESET_NAMES[platform]}"' in preset and "[preset.1]" not in preset
+    assert [args[args.index("--path") + 1] for args in calls] == [str(project)] * 2
+    assert calls[1][calls[1].index("--export-release") + 1] == helpers.PRESET_NAMES[platform]
+    updater, uninstall = stage / helpers.BINARIES[platform], stage / helpers.UNINSTALLERS[platform]
+    assert os.path.samefile(updater, uninstall) and not (stage / "RabbitLands-updater.pck").exists()
+    # the export folder keeps its logs but no second name of the helper
+    work = tmp_path / "logs" / "updater-export"
+    assert (work / "logs").is_dir() and not (work / "export" / helpers.BINARIES[platform]).exists()
+    assert rows["updater"] == {"url": rm.helper_url(sha(updater.read_bytes()), "updater", platform),
+                               "size": updater.stat().st_size, "sha256": sha(updater.read_bytes())}
+    if platform == "linux" and os.name != "nt":
+        assert updater.stat().st_mode & 0o111
+    # a rerun into a fresh stage replaces the generated project (no stale fixture files survive)
+    (project / "stale.gd").write_text("extends Node\n")
+    again = tmp_path / "again"
+    again.mkdir()
+    client_release.export_launcher(again, fx.identity(platform, key), godot, source, package_client.EXPORT_PRESETS,
+                                   package_client.PLATFORMS[platform]["preset"], run_godot, tmp_path / "logs")
+    assert not (project / "stale.gd").exists()
+
+
+def test_export_launcher_refuses_another_preset_and_identity(source, key, tmp_path):
+    import client_release
+    import package_client
+
+    def run_godot(godot, args, log, timeout):
+        pytest.fail("nothing is exported")
+    stage = tmp_path / "stage"
+    stage.mkdir()
+    with pytest.raises(ValueError, match="preset"):
+        client_release.export_launcher(stage, fx.identity("windows", key), tmp_path / "godot", source,
+                                       package_client.EXPORT_PRESETS, "Linux", run_godot, tmp_path / "logs")
+    with pytest.raises(helpers.HelperError) as error:
+        client_release.export_launcher(stage, {**fx.identity("windows", key), "distribution": "steam"},
+                                       tmp_path / "godot", source, package_client.EXPORT_PRESETS, "Windows Desktop",
+                                       run_godot, tmp_path / "logs")
+    assert error.value.code == "identity"
+
+
+def test_a_fork_repository_keeps_its_own_trust(source, key):
+    fork = files_of(source, key, repository="someone/rabbitlands-fork")
+    assert json.loads(fork["data/client_release.json"])["repository"] == "someone/rabbitlands-fork"
+    assert fingerprint_of(fork) != fingerprint_of(files_of(source, key))
+    for bad in ("", "no-slash", "a/b/c", "a b/c", None):
+        with pytest.raises(helpers.HelperError):
+            files_of(source, key, repository=bad)
+
+
+def test_export_into_caches_only_with_a_known_template(source, key, tmp_path):
+    godot = tmp_path / "godot.exe"
+    godot.write_bytes(b"editor")
+    calls = []
+    identity = fx.identity("windows", key)
+    for index in range(2):
+        stage = tmp_path / f"plain{index}"
+        stage.mkdir()
+        result = helpers.export_into(stage, source, identity, platform="windows", godot=godot,
+                                     run_godot=_fake_export(calls), project=tmp_path / "p", work=tmp_path / "w",
+                                     cache=tmp_path / "cache", template=tmp_path / "no-such-template")
+        assert result.fingerprint is None and not result.reused
+    assert len(calls) == 4 and not (tmp_path / "cache").exists()
+
+
+def test_find_template_follows_godots_data_folders(tmp_path, monkeypatch):
+    editor = tmp_path / "editor"
+    editor.mkdir()
+    godot = editor / "Godot_v4.7.2-stable_win64.exe"
+    godot.write_bytes(b"editor")
+
+    def place(root, platform):
+        path = root / "export_templates" / helpers.TEMPLATE_VERSION / helpers.TEMPLATES[platform]
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"template")
+        return path
+    environ = {"APPDATA": str(tmp_path / "appdata"), "XDG_DATA_HOME": str(tmp_path / "xdg")}
+    assert helpers.find_template(godot, "windows", environ) is None
+    user = place(tmp_path / ("appdata/Godot" if os.name == "nt" else "xdg/godot"), "linux")
+    assert helpers.find_template(godot, "linux", environ) == user
+    assert helpers.find_template(godot, "windows", environ) is None
+    (editor / "._sc_").write_bytes(b"")
+    portable = place(editor / "editor_data", "linux")
+    assert helpers.find_template(godot, "linux", environ) == portable  # a self-contained editor first
+    with pytest.raises(helpers.HelperError):
+        helpers.find_template(godot, "macos", environ)
 
 
 def test_helper_dependencies_must_be_part_of_the_helper(source, key):

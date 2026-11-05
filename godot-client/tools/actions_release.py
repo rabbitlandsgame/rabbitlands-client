@@ -362,10 +362,13 @@ def r2_prepare() -> dict:
         raise ValueError(f"A ci content source needs desktop_release_ci.py {CI_CONTENT_COMMAND} (R2-A6b), "
                          "which this commit lacks.")
     if "r2" in sources.values():
+        # The r2 gate, open from W1a on: the commit's own updater must read derived
+        # R2 rows (the exact W1a declarations, release_manifest.r2_source_problem).
         import release_manifest
-        if not release_manifest.commit_capabilities(package.REPO, sha).r2_rows:
-            raise ValueError("An r2 content source needs this commit's R2-aware updater (W1a: release.gd "
-                             "declares DESKTOP_ASSETS); use ci sources or a later commit.")
+        problem = release_manifest.r2_source_problem(release_manifest.commit_capabilities(package.REPO, sha))
+        if problem:
+            raise ValueError(f"An r2 content source needs this commit's R2-aware updater (W1a), but {problem}; "
+                             "use ci sources or a later commit.")
     release_id = 0
     if not inputs["dry_run"]:
         runner_release.authorize()

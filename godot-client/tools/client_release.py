@@ -103,89 +103,60 @@ def split_payload(archive: Path, base_url: str, part_bytes: int = PART_BYTES) ->
 
 
 def export_launcher(stage: Path, metadata: dict, godot: Path, source: Path,
-                    preset_text: str, preset_name: str, run_godot, logs: Path, *, cache=None) -> None:
-    project = logs / "updater-project"
-    scripts = project / "src" / "updates"
-    scripts.mkdir(parents=True, exist_ok=True)
-    for name in ("release.gd", "launcher.gd", "launch_options.gd", "package_updates.gd",
-                 "package_download.gd", "update_transport.gd", "bootstrap.gd", "uninstall.gd"):
-        (scripts / name).write_bytes((source / "src" / "updates" / name).read_bytes())
-    (project / "data").mkdir(exist_ok=True)
-    # Bootstrap trust is independent of a game revision. Asset-only releases
-    # must not change the updater just because commit ancestry changed.
-    trust = {key: metadata[key] for key in ("schema", "platform", "public_key", "repository", "distribution")}
-    (project / "data" / "client_release.json").write_text(json.dumps(trust, sort_keys=True), encoding="utf-8")
-    branding = project / "assets" / "branding"
-    branding.mkdir(parents=True, exist_ok=True)
-    for name in ("rabbitlands-icon.png", "rabbitlands-icon.ico", "rabbitlands-mark-64.png"):
-        shutil.copyfile(source / "assets" / "branding" / name, branding / name)
-    (project / "project.godot").write_text(
-        'config_version=5\n[application]\nconfig/name="Rabbit Lands"\nconfig/icon="res://assets/branding/rabbitlands-icon.png"\nboot_splash/image="res://assets/branding/rabbitlands-mark-64.png"\nboot_splash/bg_color=Color(0.035, 0.043, 0.055, 1)\nconfig/use_custom_user_dir=true\nconfig/custom_user_dir_name="Godot/app_userdata/Eloria"\nconfig/custom_user_dir_name.linuxbsd="godot/app_userdata/Eloria"\nrun/main_scene="res://main.tscn"\n'
-        '[display]\nwindow/size/viewport_width=440\nwindow/size/viewport_height=100\n'
-        '[rendering]\nrenderer/rendering_method="gl_compatibility"\n', encoding="utf-8")
-    (project / "main.tscn").write_text(
-        '[gd_scene load_steps=2 format=3]\n[ext_resource type="Script" path="res://src/updates/launcher.gd" id="1"]\n'
-        '[node name="Launcher" type="Node"]\nscript=ExtResource("1")\n'
-        '[node name="Status" type="Label" parent="."]\ntext="Preparing game updates…"\n', encoding="utf-8")
-    # The installed templates disable command-line path overrides. Embedding
-    # the bootstrap's own pack prevents it loading app/RabbitLands.pck when its
-    # working directory is app/, where the child game's loose assets live.
-    preset_text = preset_text.replace('binary_format/embed_pck=false', 'binary_format/embed_pck=true')
-    preset_text = preset_text.replace('[preset.1.options]', '[preset.1.options]\n\nbinary_format/embed_pck=true')
-    (project / "export_presets.cfg").write_text(preset_text, encoding="utf-8")
-    binary = "RabbitLands-updater.exe" if metadata["platform"] == "windows" else "RabbitLands-updater.x86_64"
+                    preset_text: str, preset_name: str, run_godot, logs: Path, *, cache=None,
+                    template: Path | None = None) -> dict:
+    """The updater (and the uninstaller, the same bytes under another name) in `stage`.
+
+    Delegates to desktop_helpers.export_into, the exporter the R2 workflow
+    uses: the project is generated at logs/updater-project from `source`'s
+    updater scripts and branding plus the release trust (no commit, so
+    asset-only releases keep the helper), and exported with the helper's own
+    fixed preset. `preset_text` (the game's presets) no longer shapes the
+    helper, so a game preset change never changes helper bytes; `preset_name`
+    must name the platform's preset. `cache` keeps exports by
+    desktop_helpers.fingerprint (the project, the editor and the export
+    template). Returns the helper rows in the legacy pool form.
+    """
+    import desktop_helpers
+    platform = metadata["platform"]
+    if desktop_helpers.PRESET_NAMES.get(platform) != preset_name:
+        raise ValueError(f"The updater helper exports with the {platform} preset, not {preset_name!r}.")
     (stage / "RabbitLands-updater.pck").unlink(missing_ok=True)
-    # Fingerprint the complete generated project plus the pinned engine. Trust
-    # changes and helper edits must rebuild even when game assets are unchanged.
-    cached = None
-    if cache:
-        fingerprint = hashlib.sha256((str(metadata["platform"]) + preset_name).encode())
-        for path in sorted(project.rglob("*")):
-            if path.is_file() and ".godot" not in path.relative_to(project).parts:
-                fingerprint.update(path.relative_to(project).as_posix().encode() + b"\0" + path.read_bytes())
-        fingerprint.update(digest(godot).encode())
-        cached = cache / (fingerprint.hexdigest() + ".bin")
-    if cached and cached.is_file():
-        (stage / binary).hardlink_to(cached)
-    else:
-        run_godot(godot, ["--headless", "--path", str(project), "--import"], logs / "updater-import.log", timeout=120)
-        run_godot(godot, ["--headless", "--path", str(project), "--export-release", preset_name, str(stage / binary)],
-                  logs / "updater-export.log", timeout=120)
-        if cached:
-            cache.mkdir(parents=True, exist_ok=True)
-            cached.hardlink_to(stage / binary)
-    if not (stage / binary).is_file():
+    # A refusal is a desktop_helpers.HelperError, a ValueError with a stable code.
+    helper = desktop_helpers.export_into(stage, source, metadata, platform=platform, godot=godot,
+                                         run_godot=run_godot, project=logs / "updater-project",
+                                         work=logs / "updater-export", cache=cache, template=template)
+    if not all(path.is_file() for path in helper.paths):
         raise ValueError("updater export is incomplete")
-    # Same trusted binary, different entry point selected by executable name.
-    uninstaller = binary.replace("-updater", "-uninstall")
-    (stage / uninstaller).hardlink_to(stage / binary)
-    if metadata["platform"] == "linux":
-        (stage / binary).chmod(0o755)
-        (stage / uninstaller).chmod(0o755)
+    return helper.rows
 
 
 def publish_artifacts(stage: Path, metadata: dict, private_key: Path,
                       godot: Path, source: Path, run_godot, logs: Path,
                       *, accept_part=None, budget=None, shared=False,
                       previous_packages=None, reuse_package=None) -> list[Path]:
+    """Build, sign and verify the release manifest of `stage`.
+
+    The payload comes from release_manifest.release_payload, the writer the R2
+    workflow signs through as well, as canonical bytes: equal rows give a
+    byte-equal payload (and, signing being deterministic, manifest) on both
+    paths. The schema is the lowest the rows need that the packaged reader
+    (`source`/src/updates) reads: 2, or 3 once packages carry zstd rows.
+    """
+    import release_manifest
     commit = metadata["commit"]
     platform = metadata["platform"]
     tag = f"client-{commit}"
     base = f'https://github.com/{metadata["repository"]}/releases/download/{tag}'
     import asset_packages
     import shared_release_assets as shared_assets
+    capabilities = release_manifest.folder_capabilities(source)
     downloads = shared_assets.base(metadata["repository"]) if shared else base
     packages = asset_packages.build(stage, downloads, accept_part=accept_part, budget=budget, shared=shared,
                                     previous_packages=previous_packages, reuse_package=reuse_package)
-    release = {"schema": 2, "bootstrap_schema": 1, "repository": metadata["repository"], "commit": commit,
-               "ancestors": metadata["ancestors"],
-               "launch_args": json.loads((stage / "launcher-defaults.json").read_text()).get("args", []) if (stage / "launcher-defaults.json").is_file() else [],
-               "platform": platform, "version": stage.name,
-               "size": sum(p["size"] for p in packages),
-               "unpacked_size": sum(p["unpacked_size"] for p in packages),
-               "file_count": sum(p["file_count"] for p in packages),
-               "sha256": hashlib.sha256(json.dumps(packages, sort_keys=True, separators=(",", ":")).encode()).hexdigest(),
-               "packages": packages, "parts": [part for p in packages for part in p["parts"]]}
+    defaults = stage / "launcher-defaults.json"
+    launch_args = json.loads(defaults.read_text()).get("args", []) if defaults.is_file() else []
+    rows = {}
     helpers = []
     extension = "exe" if platform == "windows" else "x86_64"
     for kind in ("updater", "uninstall"):
@@ -198,14 +169,19 @@ def publish_artifacts(stage: Path, metadata: dict, private_key: Path,
                 raise ValueError("A local bootstrap checksum conflicts with its shared filename.")
         else:
             path.hardlink_to(original)
-        row = {"url": f"{downloads}/{path.name}", "size": path.stat().st_size, "sha256": digest(path)}
-        release[kind] = row
-        if accept_part:
-            accept_part(path, row)
-            path.unlink()
+        rows[kind] = {"url": f"{downloads}/{path.name}", "size": path.stat().st_size, "sha256": digest(path)}
         helpers.append(path)
+    # Every row is in hand: refuse what the packaged reader cannot read before any helper upload.
+    release = release_manifest.release_payload(
+        schema=release_manifest.release_schema(packages, capabilities), repository=metadata["repository"],
+        commit=commit, ancestors=metadata["ancestors"], platform=platform, version=stage.name, packages=packages,
+        helpers=rows, launch_args=launch_args, capabilities=capabilities)
+    if accept_part:
+        for kind, path in zip(("updater", "uninstall"), helpers):
+            accept_part(path, rows[kind])
+            path.unlink()
     payload = logs / "release-payload.json"
-    payload.write_text(json.dumps(release, separators=(",", ":")), encoding="utf-8")
+    payload.write_bytes(release_manifest.payload_bytes(release))
     manifest = stage.parent / f"{stage.name}-{platform}.json"
     run_godot(godot, ["--headless", "--path", str(logs / "updater-project"), "--script",
                      str(source / "tools" / "sign_client_release.gd"), "--", "sign",
