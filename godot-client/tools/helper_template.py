@@ -3,13 +3,18 @@
 The helper (desktop_helpers.py) needs a window with a label and a dialog, HTTPS,
 SHA-256/RSA, zstd and GDScript. The official 4.7.2 template carries the whole
 engine (109 MB on Windows); this recipe builds Godot 4.7.2 without 3D, 2D
-physics/navigation, Vulkan/D3D12 and every module the helper does not use.
+physics/navigation, Vulkan/D3D12 and every module the helper does not use. On
+Windows it keeps what the official template links for players: ANGLE (OpenGL ES
+over Direct3D 11, for GPUs and remote displays without OpenGL 3.3, and Windows on
+ARM) and AccessKit (screen readers).
 
   helper_template.json  the committed recipe: the Godot tag and commit, the SCons
-                        arguments, the toolchain pins and, per platform, the
-                        pinned custom template (size, SHA-256; download URL derived
-                        from the hosting tag), the official template's pin, and
-                        `select`: which of the two the helper is exported with.
+                        arguments, the toolchain pins, the pinned dependency
+                        archives (Godot's own ANGLE and AccessKit downloads: URL,
+                        size, SHA-256) and, per platform, the pinned custom
+                        template (size, SHA-256; download URL derived from the
+                        hosting tag), the official template's pin, and `select`:
+                        which of the two the helper is exported with.
                         "official" is the fallback switch.
   selection()           the pinned template a platform's helper uses. Its SHA-256
                         is the helpers_fingerprint input, so a release whose
@@ -19,15 +24,20 @@ physics/navigation, Vulkan/D3D12 and every module the helper does not use.
                         the pinned URL only when a helper must be exported.
 
   python helper_template.py build --platform windows --source <godot clone or URL> --work <new dir>
-         --scons-wheel <scons-4.10.1-py3-none-any.whl> --msys2 <MSYS2 root> [--twice] [--jobs N]
+         --scons-wheel <scons-4.10.1-py3-none-any.whl> --msys2 <MSYS2 root>
+         --dependency angle=<archive> --dependency accesskit=<archive> [--twice] [--jobs N]
   python helper_template.py verify --platform windows --file <template>
   python helper_template.py fetch --platform windows --dir <folder>
 
-`build` clones the tag (core.autocrlf=false) into a new tree, checks the
-toolchain against its pins, runs SCons with the recipe's arguments, and checks
-the result (PE timestamp 0 on Windows, the glibc floor on Linux, no build paths
-in the binary). --twice builds a second fresh tree at another path and requires
-equal bytes. A pin is accepted only from such a reproducible build.
+`build` checks the toolchain and every dependency archive (exact size and
+SHA-256) against their pins before anything else, clones the tag
+(core.autocrlf=false) into a new tree, unpacks each verified archive inside that
+tree's own folder and hands SCons its path (the recipe never names a path), runs
+SCons with the recipe's arguments, and checks the result (PE timestamp 0 and the
+dependencies' imports on Windows, the glibc floor on Linux, no build, archive or
+home paths in the binary). --twice builds a second fresh tree, with its own
+unpacked dependencies, at another path and requires equal bytes. A pin is
+accepted only from such a reproducible build.
 
 Only the standard library is imported at module level, so `build` also runs
 under a plain Linux Python (WSL).
@@ -63,6 +73,16 @@ _SCRUBBED_ENV = ("SCONSFLAGS", "SCONS_CACHE", "SCONS_CACHE_LIMIT", "SCONS_LIB_DI
                  "CC", "CXX", "CFLAGS", "CXXFLAGS", "CCFLAGS", "CPPFLAGS", "LDFLAGS", "LINKFLAGS", "MINGW_PREFIX")
 BELOW_NORMAL_PRIORITY_CLASS = 0x00004000
 _SCONS_BOOT = "import sys; sys.path.insert(0, sys.argv.pop(1)); import SCons.Script; SCons.Script.main()"
+# The SCons option that takes a dependency's unpacked folder, and the switch that
+# must say "yes" for it. Godot drops a switched-on library whose folder is missing,
+# with only a warning, so the recipe pins the archive and the build supplies the folder.
+DEPENDENCY_OPTIONS = {"angle_libs": "angle", "accesskit_sdk_path": "accesskit"}
+# Switches a Windows recipe names explicitly (Godot's defaults would look in a per-user folder).
+WINDOWS_SWITCHES = ("angle", "accesskit")
+_DEPENDENCY_URL = re.compile(r"https://github\.com/godotengine/[A-Za-z0-9_.-]+/releases/download/[A-Za-z0-9_./-]+")
+_DLL = re.compile(r"[a-z0-9_.-]+\.dll")
+# What Godot's SCons prints when it drops a switched-on library for want of its files.
+_MISSING_DEPENDENCY = "requires dependencies to be installed"
 
 
 class TemplateError(ValueError):
@@ -91,6 +111,29 @@ def _pin(value, where: str) -> dict:
         raise TemplateError("recipe", f"{where}.size")
     if type(value.get("sha256")) is not str or not _SHA256.fullmatch(value["sha256"]):
         raise TemplateError("recipe", f"{where}.sha256")
+    return value
+
+
+def _dependency(value, where: str) -> dict:
+    """A pinned dependency archive: Godot's own download URL, its size and SHA-256,
+    the folder inside it SCons is given, that SCons option, and the DLLs it adds."""
+    _pin(value, where)
+    if type(value.get("url")) is not str or not _DEPENDENCY_URL.fullmatch(value["url"]) \
+            or not value["url"].endswith("/" + value["file"]):
+        raise TemplateError("recipe", f"{where}.url must be a godotengine release asset named by file")
+    root = value.get("root")
+    if type(root) is not str or (root and not _FILE.fullmatch(root)):
+        raise TemplateError("recipe", f"{where}.root must be empty or one folder name")
+    if value.get("option") not in DEPENDENCY_OPTIONS:
+        raise TemplateError("recipe", f"{where}.option must be one of {sorted(DEPENDENCY_OPTIONS)}")
+    imports = value.get("imports")
+    if not isinstance(imports, list) or not imports or not all(type(item) is str and _DLL.fullmatch(item)
+                                                               for item in imports):
+        raise TemplateError("recipe", f"{where}.imports must name the lower-case DLLs the library adds")
+    modules = value.get("modules", [])
+    if not isinstance(modules, list) or not all(type(item) is str and re.fullmatch(r"[a-z0-9_]+", item)
+                                                for item in modules):
+        raise TemplateError("recipe", f"{where}.modules must name the Godot modules the library links against")
     return value
 
 
@@ -135,8 +178,25 @@ def validate(recipe) -> dict:
         names = [item.split("=", 1)[0] for item in arguments + spec["arguments"]]
         if len(names) != len(set(names)) or "platform" not in names:
             raise TemplateError("recipe", f"{platform}: every SCons argument once, the platform included")
-        if _module_switches(spec["arguments"]):
-            raise TemplateError("recipe", f"{platform}: modules are switched only by the common arguments")
+        dependencies = spec.get("dependencies")
+        if not isinstance(dependencies, dict) or not all(re.fullmatch(r"[a-z0-9_]+", name) for name in dependencies):
+            raise TemplateError("recipe", f"{platform}.dependencies")
+        options = [_dependency(pin, f"{platform}.dependencies.{name}")["option"] for name, pin in dependencies.items()]
+        # A platform switches on a module only because a pinned library links against it
+        # (ANGLE's static library calls the astcenc module's decoder, as in the official build).
+        needed = {module for pin in dependencies.values() for module in pin.get("modules", [])}
+        own = _module_switches(spec["arguments"])
+        if set(own) != needed or set(own.values()) - {"yes"} or needed & set(modules):
+            raise TemplateError("recipe", f"{platform}: modules are switched by the common arguments, or here "
+                                          f"only for a pinned library that needs them")
+        values = dict(item.split("=", 1) for item in arguments + spec["arguments"])
+        if len(options) != len(set(options)) or set(DEPENDENCY_OPTIONS) & set(values):
+            raise TemplateError("recipe", f"{platform}: a dependency folder comes only from its pinned archive")
+        if platform == "windows" and not all(values.get(switch) in ("yes", "no") for switch in WINDOWS_SWITCHES):
+            raise TemplateError("recipe", f"windows names {', '.join(WINDOWS_SWITCHES)} explicitly")
+        for option, switch in DEPENDENCY_OPTIONS.items():
+            if (values.get(switch) == "yes") != (option in options):
+                raise TemplateError("recipe", f"{platform}: {switch}=yes and a pinned {option} archive go together")
         toolchain = spec.get("toolchain") or {}
         if not isinstance(toolchain.get("packages"), dict) or not isinstance(toolchain.get("files"), dict) \
                 or not all(_SHA256.fullmatch(str(value)) for value in toolchain["files"].values()):
@@ -365,8 +425,54 @@ def clone(source: str, tree: Path, engine: dict) -> str:
     return commit
 
 
-def scons_arguments(recipe: dict, platform: str, jobs: int) -> list[str]:
-    return [f"-j{int(jobs)}", *recipe["arguments"], *recipe["platforms"][platform]["arguments"]]
+def check_dependencies(spec: dict, archives: dict) -> dict:
+    """{name: archive} once every pinned dependency archive is named exactly once and
+    its size and SHA-256 equal the pin; checked before any clone or build."""
+    pins = spec["dependencies"]
+    if set(archives) != set(pins):
+        raise TemplateError("dependency", f"name each pinned archive once: {', '.join(sorted(pins)) or 'none'}"
+                                          f" (given {', '.join(sorted(archives)) or 'none'})")
+    checked = {}
+    for name, pin in pins.items():
+        path = Path(archives[name])
+        if path.is_symlink() or not path.is_file():
+            raise TemplateError("dependency", f"no {name} archive at {path.name}; download {pin['url']}")
+        if path.stat().st_size != pin["size"] or _digest(path) != pin["sha256"]:
+            raise TemplateError("dependency", f"{path.name} is not the pinned {name} archive "
+                                              f"({pin['size']} bytes, {pin['sha256']})")
+        checked[name] = path
+    return checked
+
+
+def unpack_dependency(archive: Path, pin: dict, target: Path) -> Path:
+    """The verified archive unpacked into the new folder `target`; returns the folder
+    SCons is given. The bytes are hashed from the same open file they are read from."""
+    if target.exists():
+        raise TemplateError("dependency", "the dependency folder must be new")
+    with Path(archive).open("rb") as handle:
+        if os.fstat(handle.fileno()).st_size != pin["size"] \
+                or hashlib.file_digest(handle, "sha256").hexdigest() != pin["sha256"]:
+            raise TemplateError("dependency", f"{Path(archive).name} changed after it was checked")
+        handle.seek(0)
+        with zipfile.ZipFile(handle) as bundle:
+            for member in bundle.infolist():
+                parts = member.filename.split("/")
+                if not member.filename or member.filename.startswith("/") or "\\" in member.filename \
+                        or ":" in member.filename or ".." in parts \
+                        or (member.external_attr >> 16) & 0o170000 == 0o120000:  # a symbolic link
+                    raise TemplateError("dependency", f"unexpected member in {Path(archive).name}")
+            target.mkdir(parents=True)
+            bundle.extractall(target)
+    folder = target / pin["root"] if pin["root"] else target
+    if not folder.is_dir():
+        raise TemplateError("dependency", f"{Path(archive).name} has no {pin['root']} folder")
+    return folder
+
+
+def scons_arguments(recipe: dict, platform: str, jobs: int, folders: dict | None = None) -> list[str]:
+    """SCons' arguments: the recipe's, then each dependency option with its unpacked folder."""
+    return [f"-j{int(jobs)}", *recipe["arguments"], *recipe["platforms"][platform]["arguments"],
+            *(f"{option}={folder}" for option, folder in sorted((folders or {}).items()))]
 
 
 def build_environment(recipe: dict, platform: str, *, msys2: Path | None = None, environ=None) -> dict:
@@ -388,6 +494,29 @@ def pe_timestamp(data: bytes) -> int:
     return struct.unpack_from("<I", data, offset + 8)[0]
 
 
+def pe_imports(data: bytes) -> set[str]:
+    """The lower-case names of the DLLs a PE executable imports (its import directory)."""
+    pe_timestamp(data)  # refuses what is not a PE executable
+    header = struct.unpack_from("<I", data, 0x3C)[0] + 4
+    count, optional_size = struct.unpack_from("<H", data, header + 2)[0], struct.unpack_from("<H", data, header + 16)[0]
+    optional = header + 20
+    directories = optional + (112 if struct.unpack_from("<H", data, optional)[0] == 0x20B else 96)
+    sections = [struct.unpack_from("<IIII", data, optional + optional_size + 40 * index + 8) for index in range(count)]
+
+    def offset(rva: int) -> int:
+        for virtual_size, address, raw_size, raw in sections:
+            if address <= rva < address + max(virtual_size, raw_size):
+                return raw + rva - address
+        raise TemplateError("output", "an import outside every section")
+    names, rva = set(), struct.unpack_from("<I", data, directories + 8)[0]
+    position = offset(rva) if rva else None
+    while position is not None and any(data[position:position + 20]):
+        start = offset(struct.unpack_from("<I", data, position + 12)[0])
+        names.add(data[start:data.index(b"\0", start)].decode("ascii").lower())
+        position += 20
+    return names
+
+
 def glibc_floor(data: bytes) -> str | None:
     """The newest GLIBC_2.x symbol version an ELF names (None when it names none)."""
     minors = [int(match.group(1)) for match in _GLIBC.finditer(data)]
@@ -400,6 +529,10 @@ def inspect(path: Path, platform: str, spec: dict, *, private: list[str]) -> dic
     record = {"size": len(data), "sha256": hashlib.sha256(data).hexdigest(), "checks": {}}
     if platform == "windows":
         record["checks"]["pe_timestamp_zero"] = pe_timestamp(data) == 0
+        imports = pe_imports(data)
+        # each linked library leaves its DLL imports (ANGLE: dxgi.dll; AccessKit: uiautomationcore.dll)
+        record["checks"]["dependencies_linked"] = all(
+            set(pin["imports"]) <= imports for pin in spec.get("dependencies", {}).values())
     else:
         floor = glibc_floor(data)
         record["glibc"] = floor
@@ -416,7 +549,11 @@ def inspect(path: Path, platform: str, spec: dict, *, private: list[str]) -> dic
     return record
 
 
-def _scons(tree: Path, scons: Path, arguments: list, env: dict, log: Path, platform: str) -> float:
+def _scons(tree: Path, scons: Path, arguments: list, env: dict, log: Path, platform: str, *,
+           pinned_libraries: bool = True) -> float:
+    """Run SCons; with pinned_libraries, a library it drops for want of its files fails the
+    build. The Linux recipe pins none and leaves AccessKit to Godot's default, which a
+    fresh clone drops with that warning (as its pinned template was built)."""
     kwargs = {}
     if os.name == "nt":
         kwargs["creationflags"] = BELOW_NORMAL_PRIORITY_CLASS
@@ -428,17 +565,22 @@ def _scons(tree: Path, scons: Path, arguments: list, env: dict, log: Path, platf
                                 stdout=output, stderr=subprocess.STDOUT, **kwargs)
     if result.returncode:
         raise TemplateError("scons", f"SCons exited {result.returncode}; see {log.name}")
+    if pinned_libraries and _MISSING_DEPENDENCY in log.read_text(encoding="utf-8", errors="replace"):
+        raise TemplateError("dependency", f"SCons dropped a switched-on library; see {log.name}")
     return round(time.monotonic() - start, 1)
 
 
 def build(platform: str, *, source: str, work: Path, scons_wheel: Path, jobs: int, twice: bool,
-          msys2: Path | None = None, recipe_path: Path | None = None, allow_other_toolchain: bool = False) -> dict:
-    """Build the custom template of `platform` (twice in two fresh trees with --twice)."""
+          msys2: Path | None = None, recipe_path: Path | None = None, allow_other_toolchain: bool = False,
+          dependencies: dict | None = None) -> dict:
+    """Build the custom template of `platform` (twice in two fresh trees with --twice).
+    dependencies: {name: archive} for every dependency the recipe pins."""
     recipe = load(recipe_path)
     spec = recipe["platforms"][platform]
     native = "windows" if os.name == "nt" else "linux"
     if platform != native:
         raise TemplateError("platform", f"build the {platform} template on {platform}")
+    archives = check_dependencies(spec, dict(dependencies or {}))
     work = Path(work).resolve()
     if work.exists() and any(work.iterdir()):
         raise TemplateError("work", "the work folder must be new or empty")
@@ -448,24 +590,31 @@ def build(platform: str, *, source: str, work: Path, scons_wheel: Path, jobs: in
         raise TemplateError("toolchain", "; ".join(toolchain["problems"]))
     scons = install_scons(Path(scons_wheel), work / "scons", recipe["scons"]["wheel_sha256"])
     env = build_environment(recipe, platform, msys2=msys2)
-    arguments = scons_arguments(recipe, platform, jobs)
+    # Neither the archives' folders nor a tree's unpacked copies may reach the binary.
+    private = [str(work), str(Path.home()), *(str(path.resolve().parent) for path in archives.values())]
     runs = []
     for label in ("a", "b") if twice else ("a",):
         tree = work / label / "godot"
         commit = clone(source, tree, recipe["engine"])
-        seconds = _scons(tree, scons, arguments, env, work / label / "scons.log", platform)
+        folders = {dep["option"]: unpack_dependency(archives[name], dep, work / label / "deps" / name)
+                   for name, dep in spec["dependencies"].items()}
+        seconds = _scons(tree, scons, scons_arguments(recipe, platform, jobs, folders), env,
+                         work / label / "scons.log", platform, pinned_libraries=bool(spec["dependencies"]))
         output = tree / spec["output"]
         if not output.is_file():
             raise TemplateError("output", f"SCons left no {spec['output']}")
-        record = inspect(output, platform, spec, private=[str(work), str(Path.home())])
+        record = inspect(output, platform, spec, private=private)
         kept = work / label / spec["custom"]["file"]
         shutil.copyfile(output, kept)
         runs.append({"tree": label, "commit": commit, "seconds": seconds, **record})
     pin = spec["custom"]
     identical = len({run["sha256"] for run in runs}) == 1
+    placeholders = {dep["option"]: f"<{name}>" for name, dep in spec["dependencies"].items()}
     result = {"kind": KIND + "-build", "platform": platform, "recipe_sha256": recipe_sha256(recipe_path),
-              "engine": recipe["engine"], "arguments": arguments[1:], "jobs": jobs, "toolchain": toolchain,
-              "runs": runs, "identical": identical,
+              "engine": recipe["engine"], "arguments": scons_arguments(recipe, platform, jobs, placeholders)[1:],
+              "dependencies": {name: {key: dep[key] for key in ("version", "file", "size", "sha256")}
+                               for name, dep in spec["dependencies"].items()},
+              "jobs": jobs, "toolchain": toolchain, "runs": runs, "identical": identical,
               "checks_pass": all(all(run["checks"].values()) for run in runs),
               "matches_pin": all(run["sha256"] == pin["sha256"] and run["size"] == pin["size"] for run in runs)}
     result["pinnable"] = bool(twice and identical and result["checks_pass"] and not toolchain["problems"])
@@ -487,6 +636,8 @@ def _main(argv=None) -> int:
     build_parser.add_argument("--recipe", type=Path)
     build_parser.add_argument("--allow-other-toolchain", action="store_true",
                               help="experiments only: the result is never pinnable")
+    build_parser.add_argument("--dependency", action="append", default=[], metavar="NAME=ARCHIVE",
+                              help="a pinned dependency archive (the recipe's url), once per dependency")
     for name in ("verify", "fetch"):
         sub = commands.add_parser(name)
         sub.add_argument("--platform", choices=PLATFORMS, required=True)
@@ -498,9 +649,15 @@ def _main(argv=None) -> int:
     args = parser.parse_args(argv)
     try:
         if args.command == "build":
+            dependencies = {}
+            for item in args.dependency:
+                name, _, archive = item.partition("=")
+                if not archive or name in dependencies:
+                    raise TemplateError("dependency", f"--dependency {ascii(item)}: NAME=ARCHIVE, once per name")
+                dependencies[name] = Path(archive)
             result = build(args.platform, source=args.source, work=args.work, scons_wheel=args.scons_wheel,
                            jobs=args.jobs, twice=args.twice, msys2=args.msys2, recipe_path=args.recipe,
-                           allow_other_toolchain=args.allow_other_toolchain)
+                           allow_other_toolchain=args.allow_other_toolchain, dependencies=dependencies)
             print(json.dumps({key: result[key] for key in ("platform", "identical", "checks_pass", "matches_pin",
                                                             "pinnable")}
                              | {"runs": [{key: run[key] for key in ("tree", "seconds", "size", "sha256", "checks")}

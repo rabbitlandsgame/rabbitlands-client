@@ -404,11 +404,11 @@ The owner does all of these; agents do none of them.
    the toolchains, runner disk and permissions before any signing. An `r2` dry run
    needs a content set already uploaded for the commit, so before the first content
    upload the dry run uses `ci` sources.
-7. **Before T's build, decide ANGLE and AccessKit, then publish the helper
-   template** (see [the helper template](#the-helper-template) and its open
-   decisions). Without the published template, the Windows `build` job stops with
-   `helper-template`, because T must export a new helper. A decision made after T
-   costs every player another helper download.
+7. **Before T's build, publish the helper template** (see
+   [the helper template](#the-helper-template)). Without the published template,
+   the Windows `build` job stops with `helper-template`, because T must export a
+   new helper. A template change after T costs every player another helper
+   download.
 
 ### Cloudflare and R2
 
@@ -872,12 +872,25 @@ The updater and uninstaller are one small Godot program. From T on it is exporte
 from its own export template, built from the official Godot 4.7.2 source without
 3D, 2D physics and navigation, Vulkan, D3D12 and every module the helper does not
 use. Only the `gdscript`, `mbedtls`, `freetype`, `text_server_adv` and `svg`
-modules remain. The game keeps the official template.
+modules remain, plus `astcenc` on Windows for ANGLE. The game keeps the official
+template.
+
+On Windows the template links the same two libraries as the official one, from
+Godot's own prebuilt archives:
+
+- **ANGLE** (OpenGL ES over Direct3D 11). The helper opens its window where native
+  OpenGL 3.3 is missing (basic RDP and virtual-machine displays, very old GPUs),
+  on Windows on ARM, and on the drivers Godot always sends to ANGLE.
+  `--rendering-driver opengl3_angle` selects it. ANGLE's static library calls
+  Godot's `astcenc` module, so the Windows build also enables that module (it adds
+  no engine class).
+- **AccessKit** (screen readers through UI Automation). A screen reader can read
+  the helper's progress text and the uninstall dialog.
 
 | Windows helper | Template | Helper |
 | --- | ---: | ---: |
 | Official template (before T, and the fallback) | 109,268,480 B | 111,372,248 B |
-| Helper template | 33,929,728 B | 36,032,920 B |
+| Helper template (with ANGLE and AccessKit) | 41,797,632 B | 43,900,824 B |
 
 `godot-client/tools/helper_template.json` is the recipe. It holds:
 
@@ -885,6 +898,10 @@ modules remain. The game keeps the official template.
 - the SCons arguments;
 - the toolchain pins: MSYS2 MinGW GCC 16.2.0 package versions, compiler file
   hashes, and SCons under the python.org CPython 3.13;
+- the dependency archives for Windows: ANGLE `chromium/7219` (x86_64, MinGW GCC)
+  and AccessKit `0.22.3`, each with the URL that Godot's
+  `misc/scripts/install_angle.py` or `install_accesskit.py` uses at the tag, its
+  size and its SHA-256 (equal to the digest GitHub publishes for the asset);
 - for each platform, the pinned template's file name, size and SHA-256;
 - `select`, which says whether the helper uses that template (`custom`) or the
   official one (`official`).
@@ -913,11 +930,12 @@ was measured by comparing `ClassDB.get_class_list()` in both templates.
 
 ### Publishing the template (owner, once per pin, before T)
 
-Build it twice and check the result. A pin is accepted only when both fresh trees
-give identical bytes:
+Download the two dependency archives from the URLs in the recipe, each into its
+own new folder outside the repositories. Then build twice and check the result. A
+pin is accepted only when both fresh trees give identical bytes:
 
 ```
-python godot-client/tools/helper_template.py build --platform windows --source https://github.com/godotengine/godot.git --work <new folder outside the repositories> --scons-wheel <scons-4.10.1-py3-none-any.whl> --msys2 <MSYS2 root> --twice
+python godot-client/tools/helper_template.py build --platform windows --source https://github.com/godotengine/godot.git --work <new folder outside the repositories> --scons-wheel <scons-4.10.1-py3-none-any.whl> --msys2 <MSYS2 root> --dependency angle=<godot-angle-static-x86_64-gcc-release.zip> --dependency accesskit=<accesskit-c-0.22.3.zip> --twice
 python godot-client/tools/helper_template.py verify --platform windows --file <work>/a/rabbitlands-helper-template-4.7.2-windows-x86_64.exe
 ```
 
@@ -925,6 +943,15 @@ python godot-client/tools/helper_template.py verify --platform windows --file <w
 - The build refuses other MSYS2 package versions, other compiler files, and a
   Python whose path separator is not `\`. MSYS2's own Python writes `/` into
   `__FILE__` and gives other bytes.
+- Before anything else, the build refuses a dependency archive whose size or
+  SHA-256 differs from the recipe. Each tree unpacks the archives into its own
+  work folder and gives SCons those folders, so the recipe never names a path.
+- The build refuses a result in which SCons dropped a library, or whose imports
+  lack `dxgi.dll` (ANGLE) or `uiautomationcore.dll` (AccessKit). It also refuses a
+  result that holds the work folder, an archive folder or the home folder.
+- AccessKit's Rust library carries its publisher's own build paths
+  (`/home/runner/.cargo/registry/...`, `/rustc/<hash>`). The official template
+  carries the same strings.
 
 Then upload the verified file as a **prerelease that is never marked latest**.
 Old games discover updates through `releases/latest`, so a latest template
@@ -948,22 +975,12 @@ gh release create helper-template-4.7.2-rl1 --repo rabbitlandsgame/rabbitlands-c
   2.38, while the official template needs 2.28. It would fail to start on Ubuntu
   22.04 and Debian 12. The custom Linux template is pinned but blocked until it is
   built with a glibc 2.28 toolchain.
-- **ANGLE and AccessKit** are not linked into the Windows template; their static
-  libraries were not downloaded. Decide both before T. Adding either library is a
-  new pin, and after T it is another helper download for every player.
-  - Without ANGLE the helper needs native OpenGL 3.3. It cannot open its window
-    over basic RDP or virtual-machine displays or on very old GPUs, and it never
-    starts on Windows on ARM, where Godot accepts only ANGLE. The engine shows
-    an "Unable to initialize video driver" message and exits.
-  - Every Windows shortcut starts the helper first, including **Safe mode** and
-    **Compatibility**, and so does the field updater's handoff at T. The game
-    itself would still fall back to ANGLE, but those players could neither update
-    nor start it from a shortcut.
-  - The 56 drivers that Godot forces onto ANGLE use native OpenGL in the helper.
-  - Without AccessKit, screen readers cannot read the helper's window or its
-    uninstall dialog.
-  - The alternative to approving the libraries is the fallback above: `select`
-    `official` for Windows, which keeps the 111 MB helper.
+- **ANGLE and AccessKit stay linked.** Every Windows shortcut starts the helper
+  first, including **Safe mode** and **Compatibility**, and so does the field
+  updater's handoff at T. A template without ANGLE could not open its window where
+  native OpenGL 3.3 is missing, so those players could neither update nor start
+  the game from a shortcut. Removing either library is a new pin, and after T it
+  is another helper download for every player.
 - **Before the release exists**, local exports of this tree's helper (for example
   the exported-updater tests) need the verified file in `.local/helper-template/`:
   copy the built file there, or run `helper_template.py fetch` once it is

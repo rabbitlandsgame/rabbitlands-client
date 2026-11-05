@@ -59,11 +59,43 @@
         "platform=windows",
         "use_mingw=yes",
         "d3d12=no",
-        "angle=no",
-        "accesskit=no",
+        "angle=yes",
+        "module_astcenc_enabled=yes",
+        "accesskit=yes",
         "winrt=no",
         "linkflags=-Wl,--no-insert-timestamp"
       ],
+      "dependencies": {
+        "angle": {
+          "about": "ANGLE (OpenGL ES over Direct3D 11): the MinGW GCC static libraries that misc/scripts/install_angle.py installs at the engine tag",
+          "version": "chromium/7219",
+          "url": "https://github.com/godotengine/godot-angle-static/releases/download/chromium/7219/godot-angle-static-x86_64-gcc-release.zip",
+          "file": "godot-angle-static-x86_64-gcc-release.zip",
+          "size": 4739323,
+          "sha256": "ebf94e32334b04fa76b3907727c7a69c35adb713cf0a5d194c83c7ad955217bd",
+          "root": "",
+          "option": "angle_libs",
+          "imports": [
+            "dxgi.dll"
+          ],
+          "modules": [
+            "astcenc"
+          ]
+        },
+        "accesskit": {
+          "about": "AccessKit (screen readers through UI Automation): the C SDK that misc/scripts/install_accesskit.py installs at the engine tag",
+          "version": "0.22.3",
+          "url": "https://github.com/godotengine/godot-accesskit-c-static/releases/download/0.22.3/accesskit-c-0.22.3.zip",
+          "file": "accesskit-c-0.22.3.zip",
+          "size": 101767087,
+          "sha256": "41b30b1382d03b225b6f7e8721269a32557a68065804f3797bdffc34a3273498",
+          "root": "accesskit-c-0.22.3",
+          "option": "accesskit_sdk_path",
+          "imports": [
+            "uiautomationcore.dll"
+          ]
+        }
+      },
       "output": "bin/godot.windows.template_release.x86_64.exe",
       "toolchain": {
         "kind": "msys2-mingw64",
@@ -94,15 +126,16 @@
           "mingw64/bin/as.exe": "85b4d99c741cd2f14c361e9680b66e22a9fd6ffc0e81fc5b2c30e917c4a7cd78",
           "mingw64/bin/ar.exe": "1b2551c5e8b3f61c80f84a6d526c61fe1e5186806a1696e3a546e26784956923",
           "mingw64/bin/ranlib.exe": "cfaf4e7e8de15885a5f7d816ec7b0a6d1071bd1b37d12baf12ddde84f0c7ee61",
-          "mingw64/bin/windres.exe": "0735184706376284f01ae409ada3636616e256c4475b19b609b02114c2430e01"
+          "mingw64/bin/windres.exe": "0735184706376284f01ae409ada3636616e256c4475b19b609b02114c2430e01",
+          "mingw64/bin/dlltool.exe": "373b849afbecb00ba078d8c8e3dace2cec10aaf7cd4bb01fdf532a266530f287"
         },
         "python": "3.13",
         "path_separator": "\\"
       },
       "custom": {
         "file": "rabbitlands-helper-template-4.7.2-windows-x86_64.exe",
-        "size": 33929728,
-        "sha256": "73fab692ded3bab62da88a8a2042c3ab5f90078882308fc6c631efbbc398e68d"
+        "size": 41797632,
+        "sha256": "6c237cd87dea82cf0f090346d6def1894674787658664a1f70776122c7257d8a"
       }
     },
     "linux": {
@@ -116,6 +149,7 @@
         "platform=linuxbsd",
         "speechd=no"
       ],
+      "dependencies": {},
       "output": "bin/godot.linuxbsd.template_release.x86_64",
       "glibc_max": "2.28",
       "toolchain": {
