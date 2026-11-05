@@ -462,10 +462,30 @@ them:
 The window ends when both content uploads are verified. The rest runs in Actions,
 apart from the short local R2 publish.
 
-Timings are still unmeasured. They will come from the first real local builds,
-along with the installed-file drift between local and CI builds. Upload speed in
-the self-test was about 11 MB/s, so a first full upload of about 6 GB takes roughly
-10 minutes.
+**Measured Windows timings** (the first real local build and pack, 2026-11-05; Linux
+is not measured yet):
+
+| Step | Time |
+| --- | --- |
+| Stage build, warm build folder (native cache hit, warm VRAM cache, cold world cook) | about 36 min, of which the world cook is 15.5 min until its cache is warm |
+| First import in a fresh build folder (two passes) | about 17 min, plus about 2 min of checkout and 3 min of native build |
+| Whole cold build in a fresh folder | about 55-70 min (an estimate, not run as one build) |
+| `desktop_content.py pack` (676 packages, 685 parts, 4.23 GB) | about 5 min |
+| First full upload at the self-test's 11 MB/s | about 6.5 min |
+
+- **Disk.** The build root (build folder with its import cache, stage, local parts
+  and caches) peaked at about 24 GB.
+- **One build folder per release.** A second full-optimization build in a
+  `--build-dir` that an earlier one used currently stops on the leftover
+  `bin/client_runtime` payload. Pass a fresh `--build-dir` for each release, or
+  delete that build folder's ignored `godot-client/bin/client_runtime/` first (the
+  native cache supplies it again and keeps the warm import).
+- **Local and CI bytes.** Local deflate archives reproduce CI's bytes for the same
+  files. BC7 VRAM sidecars encoded on the build machine differ slightly from the
+  CI runner's (the other sidecar formats match), so the first R2 release
+  re-downloads about 0.8 GB of texture packages once, unless it rides with a
+  re-encode that changes them anyway. Later local builds stay stable through the
+  persistent VRAM cache.
 
 ## Releasing: the forward runbook
 
