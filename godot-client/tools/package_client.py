@@ -2863,6 +2863,10 @@ def stage_loose_client_files(build_dir: Path, app_dir: Path, platform: str = "")
     # the launcher, the updater and the packager's own steps read them from
     # disk rather than through Godot (AUDIO-CREDITS is built from the staged
     # assets/audio/provenance.json, which the pack also carries).
+    # A file loose_duplicate_plan keeps for a raw read stays loose even when
+    # the export also packed it as itself: Godot packs project.godot's icon
+    # and boot splash raw, and check_loose_duplicates requires every kept
+    # file loose.
     packed = pck_paths(app_dir / "RabbitLands.pck")
     duplicates = loose_duplicate_plan(build_dir, packed, platform)
     total = staged = pck_only = dropped = dropped_bytes = packed_only = packed_bytes = 0
@@ -2882,7 +2886,7 @@ def stage_loose_client_files(build_dir: Path, app_dir: Path, platform: str = "")
         inside = PurePosixPath(relative).relative_to("godot-client")
         local = inside.as_posix()
         if local in duplicates["drop"] or (
-                local in packed and inside.parts[0] not in LOOSE_ALWAYS_ROOTS
+                local in packed and local not in duplicates["keep"] and inside.parts[0] not in LOOSE_ALWAYS_ROOTS
                 and inside.suffix.lower() not in LOOSE_ALWAYS_SUFFIXES
                 and local not in LOOSE_ALWAYS_FILES and local not in LOOSE_STAGE_READERS):
             packed_only += 1

@@ -465,6 +465,29 @@ class Fixture(unittest.TestCase):
         finally:
             packager.actor_shipping, packager.world_import_shipping = actor_shipping, world_import_shipping
 
+    def test_a_kept_file_the_export_also_packs_as_itself_still_stages_loose(self):
+        # Godot packs project.godot's icon and boot splash raw as well as imported. Staging used to
+        # skip such a file as "in the PCK", and the check then refused the build because the plan
+        # keeps it for a raw read (the first real build after W2-UD-02 failed exactly so).
+        icon = "assets/branding/rabbitlands-icon.png"
+        write_pck(self.app / "RabbitLands.pck", sorted(self.packed() | {icon}))
+        (self.root / "godot-client/assets/actors/native/equipment/sword.glb").unlink()
+        actor = {"pck": set(), "loose": set(), "dropped": set()}
+        world = {"dropped_images": set()}
+        actor_shipping, world_import_shipping = packager.actor_shipping, packager.world_import_shipping
+        packager.actor_shipping = lambda build_dir: actor
+        packager.world_import_shipping = lambda build_dir: world
+        try:
+            plan = packager.stage_loose_client_files(self.root, self.app)
+            self.assertIn("project.godot", " ".join(plan["keep"][icon]))
+            self.assertTrue((self.app / icon).is_file())
+            packager.check_loose_duplicates(self.root, self.app)
+            (self.app / icon).unlink()
+            with self.assertRaisesRegex(packager.PackageError, "rabbitlands-icon.png: read raw .*project.godot"):
+                packager.check_loose_duplicates(self.root, self.app)
+        finally:
+            packager.actor_shipping, packager.world_import_shipping = actor_shipping, world_import_shipping
+
 
 class StageReaders(unittest.TestCase):
     def test_every_branding_file_the_installer_takes_from_the_stage_stays_loose(self):
