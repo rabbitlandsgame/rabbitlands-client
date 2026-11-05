@@ -535,8 +535,9 @@ WD-C5), both described below. At every quality some transitions change timing, w
 as before. More map changes show a short arrival curtain where they used to show frozen frames and no curtain
 (TR-01). First-seen bodies and mounts stand as their stand-in a little longer and appear once their files are
 prepared (AW-04a, AW-04d, AW-07). The player's body is kept across map changes (AW-02). Settings names the renderer
-Automatic starts and offers Mobile (MOB-C5). All of these are on the owner's stage-B sign-off list. Figures are from the development laptop (Core Ultra 9 275HX), mostly headless debug builds, unless marked as
-estimates. The stage-B measurement (the MOB-C6 matrix, the WD-C0 matrix and the hitch cells) has not been run yet.
+Automatic starts and offers Mobile (MOB-C5). All of these are on the owner's stage-B sign-off list. Figures are from
+the development laptop (Core Ultra 9 275HX), mostly headless debug builds, unless marked as estimates. The stage-B
+measurement (the MOB-C6 matrix, the WD-C0 matrix and the hitch cells) has not been run yet.
 
 **One release for the world distance work.** WD-C2, WD-C3 and WD-C5 ship together. Geometry policy 5
 (`MapGeometryPolicy.VERSION`) and scene-cache format 12 (`MapSceneCache.CACHE_FORMAT_VERSION`) make every installed
