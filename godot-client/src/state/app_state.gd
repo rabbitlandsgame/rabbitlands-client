@@ -702,11 +702,14 @@ func _set_actor_reducer(reducer: Object, mode: String) -> void:
 	if not _command_runs:
 		changed_facets.clear()
 		taken_changed_facets.clear()
-	var drained: Signal = Network.dispatch_drained
-	if _command_runs and not drained.is_connected(flush_actor_commands):
-		drained.connect(flush_actor_commands)
-	elif not _command_runs and drained.is_connected(flush_actor_commands):
-		drained.disconnect(flush_actor_commands)
+	# A stand-in Network (UI tests replace the autoload's script) may lack the
+	# signal; the run's other flush points still apply there.
+	if Network.has_signal(&"dispatch_drained"):
+		var drained: Signal = Network.dispatch_drained
+		if _command_runs and not drained.is_connected(flush_actor_commands):
+			drained.connect(flush_actor_commands)
+		elif not _command_runs and drained.is_connected(flush_actor_commands):
+			drained.disconnect(flush_actor_commands)
 	# Session totals: kept across mode changes, so a fail-closed stays visible.
 	if _reducer_stats.is_empty():
 		_reducer_stats = {"flushes": 0, "segments": 0, "packets": 0, "commands": 0, "applied": 0,
