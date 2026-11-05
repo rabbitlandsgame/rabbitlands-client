@@ -104,7 +104,7 @@ def split_payload(archive: Path, base_url: str, part_bytes: int = PART_BYTES) ->
 
 def export_launcher(stage: Path, metadata: dict, godot: Path, source: Path,
                     preset_text: str, preset_name: str, run_godot, logs: Path, *, cache=None,
-                    template: Path | None = None) -> dict:
+                    template: Path | None = None, template_choice: str | None = None) -> dict:
     """The updater (and the uninstaller, the same bytes under another name) in `stage`.
 
     Delegates to desktop_helpers.export_into, the exporter the R2 workflow
@@ -114,8 +114,10 @@ def export_launcher(stage: Path, metadata: dict, godot: Path, source: Path,
     fixed preset. `preset_text` (the game's presets) no longer shapes the
     helper, so a game preset change never changes helper bytes; `preset_name`
     must name the platform's preset. `cache` keeps exports by
-    desktop_helpers.fingerprint (the project, the editor and the export
-    template). Returns the helper rows in the legacy pool form.
+    desktop_helpers.fingerprint (the project, the editor and the pinned helper
+    template of helper_template.json; `template_choice` overrides its select,
+    `template` is that template's file, else it is fetched only for an export).
+    Returns the helper rows in the legacy pool form.
     """
     import desktop_helpers
     platform = metadata["platform"]
@@ -125,7 +127,8 @@ def export_launcher(stage: Path, metadata: dict, godot: Path, source: Path,
     # A refusal is a desktop_helpers.HelperError, a ValueError with a stable code.
     helper = desktop_helpers.export_into(stage, source, metadata, platform=platform, godot=godot,
                                          run_godot=run_godot, project=logs / "updater-project",
-                                         work=logs / "updater-export", cache=cache, template=template)
+                                         work=logs / "updater-export", cache=cache, template=template,
+                                         template_choice=template_choice)
     if not all(path.is_file() for path in helper.paths):
         raise ValueError("updater export is incomplete")
     return helper.rows

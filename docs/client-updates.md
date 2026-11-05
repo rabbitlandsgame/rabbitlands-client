@@ -448,7 +448,11 @@ trust key, Godot's `tools/sign_client_release.gd` can generate a pair with
 checks that the pair matches. A newly generated key is not trusted by existing
 installations; changing their trust root requires an initial installer upgrade.
 
-Godot 4.7.2 and its matching Windows/Linux export templates are required. Run
+Godot 4.7.2 and its matching Windows/Linux export templates are required. The
+Windows updater is exported with its own small template, pinned in
+`godot-client/tools/helper_template.json` and fetched into the ignored
+`.local/helper-template/` when an export needs it
+([the helper template](desktop-r2-delivery.md#the-helper-template)). Run
 packaging from the final `rabbitlandsgame/rabbitlands-client` checkout, normally
 `C:\rabbitlands\rabbitlands-client`. Private source archives and retired
 migration or clean-stage checkouts are not release sources: builds record the
@@ -816,7 +820,8 @@ Choose the minimum checks for the behavior being changed. For example:
   downgrade guard, rollback pointers, server targets, the handover limit and flag
   stripping, with a scripted transport).
   `python -m pytest -q godot-client/tests/test_updater_discovery.py godot-client/tests/test_startup_updates.py`
-  exports the updater (it needs the installed export templates) and installs through
+  exports the updater (it needs the installed export templates and, on Windows, the
+  pinned helper template in `.local/helper-template/`) and installs through
   a pointer and R2 parts signed by the release tools with a test key. It also checks
   the record, an older alias refused, a signed rollback, a replayed pointer, a server
   target through the R2 copy, the handover limit, and the setup helper writing the

@@ -1,6 +1,7 @@
 """The updater helper: fixed project, fingerprint, signed-row reuse (tools/desktop_helpers.py).
 
-No network or Godot: exports and downloads are fakes; keys are throwaway.
+No network or Godot: exports and downloads are fakes; keys are throwaway. The
+helper template's pins are fake bytes (test_helper_template.pin_templates).
 """
 import hashlib
 import json
@@ -17,9 +18,11 @@ sys.path.insert(0, str(TOOLS))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import desktop_helpers as helpers  # noqa: E402
 import desktop_r2 as r2  # noqa: E402
+import helper_template as ht  # noqa: E402
 import release_manifest as rm  # noqa: E402
 import upload_desktop_assets as up  # noqa: E402
 import test_release_manifest as fx  # noqa: E402
+from test_helper_template import pin_templates  # noqa: E402
 
 EDITOR, TEMPLATE = "a" * 64, "b" * 64
 key = fx.key
@@ -28,6 +31,12 @@ other_key = fx.other_key
 
 def sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+
+@pytest.fixture(autouse=True)
+def pinned(monkeypatch, tmp_path):
+    """Both platforms' helper templates pinned to b"template", placed in the local folder."""
+    return pin_templates(monkeypatch, tmp_path, b"template")
 
 
 @pytest.fixture
@@ -139,8 +148,13 @@ def test_export_launcher_is_this_exporter(source, key, tmp_path, platform):
     project = tmp_path / "logs" / "updater-project"
     generated = {path.relative_to(project).as_posix(): path.read_bytes() for path in project.rglob("*")
                  if path.is_file()}
-    assert generated == files_of(source, key, platform)
-    preset = generated["export_presets.cfg"].decode()
+    expected = files_of(source, key, platform)
+    # the on-disk preset names the pinned helper template; everything else is project_files()
+    template = tmp_path / "local-template" / ht.selection(platform)["file"]
+    assert generated.pop("export_presets.cfg").decode() == helpers.preset_with_template(
+        expected.pop("export_presets.cfg").decode(), template)
+    assert generated == expected
+    preset = helpers.preset_with_template(files_of(source, key, platform)["export_presets.cfg"].decode(), template)
     assert "binary_format/embed_pck=true" in preset and "embed_pck=false" not in preset
     assert f'name="{helpers.PRESET_NAMES[platform]}"' in preset and "[preset.1]" not in preset
     assert [args[args.index("--path") + 1] for args in calls] == [str(project)] * 2
@@ -190,19 +204,31 @@ def test_a_fork_repository_keeps_its_own_trust(source, key):
             files_of(source, key, repository=bad)
 
 
-def test_export_into_caches_only_with_a_known_template(source, key, tmp_path):
+def test_export_into_fingerprints_the_pin_and_refuses_another_template_file(source, key, tmp_path):
     godot = tmp_path / "godot.exe"
     godot.write_bytes(b"editor")
     calls = []
     identity = fx.identity("windows", key)
-    for index in range(2):
+    wrong = tmp_path / "official.exe"
+    wrong.write_bytes(b"official template bytes")
+    with pytest.raises(helpers.HelperError) as error:
+        helpers.export_into(tmp_path / "s0", source, identity, platform="windows", godot=godot,
+                            run_godot=_fake_export(calls), project=tmp_path / "p", work=tmp_path / "w",
+                            cache=tmp_path / "cache", template=wrong)
+    assert error.value.code == "helper-template" and calls == [] and not (tmp_path / "cache").exists()
+    # no template file is needed to know the fingerprint: the first build exports
+    # (with the pinned local file), the second links the cached helper
+    for index in (1, 2):
         stage = tmp_path / f"plain{index}"
         stage.mkdir()
         result = helpers.export_into(stage, source, identity, platform="windows", godot=godot,
                                      run_godot=_fake_export(calls), project=tmp_path / "p", work=tmp_path / "w",
-                                     cache=tmp_path / "cache", template=tmp_path / "no-such-template")
-        assert result.fingerprint is None and not result.reused
-    assert len(calls) == 4 and not (tmp_path / "cache").exists()
+                                     cache=tmp_path / "cache")
+        assert result.fingerprint == fingerprint_of(files_of(source, key), editor=sha(b"editor"),
+                                                    template=sha(b"template"))
+        assert result.reused is (index == 2)
+    assert len(calls) == 2 and sorted(path.name for path in (tmp_path / "cache").iterdir()) == [
+        f"{result.fingerprint}.bin"]
 
 
 def test_find_template_follows_godots_data_folders(tmp_path, monkeypatch):
@@ -342,7 +368,8 @@ def test_provide_reuses_when_equal_and_exports_otherwise(source, key, tmp_path):
                                         "size": len(b"MZ-new-helper"), "sha256": sha(b"MZ-new-helper")}
     assert exported.rows["uninstall"]["url"].endswith(f"RabbitLands-uninstall-{sha(b'MZ-new-helper')}.exe")
     project = tmp_path / "w2/helper-project"
-    assert (project / "export_presets.cfg").read_bytes() == files["export_presets.cfg"]
+    assert (project / "export_presets.cfg").read_text(encoding="utf-8") == helpers.preset_with_template(
+        files["export_presets.cfg"].decode(), template)
 
 
 def test_previous_release_prefers_r2_then_the_alias_and_verifies(tmp_path, key, other_key):
@@ -362,3 +389,138 @@ def test_source_is_ascii_without_machine_paths():
     text = (TOOLS / "desktop_helpers.py").read_bytes().decode("ascii")
     for needle in ("C:/", "C:\\", "/Users/", "scratchpad", "AppData"):
         assert needle not in text
+
+
+# --- The helper template (UD-09) -------------------------------------------------------------
+
+def official_template(tmp_path, data: bytes) -> Path:
+    """An official 4.7.2 template where find_template looks (APPDATA / XDG_DATA_HOME)."""
+    folder = tmp_path / "appdata" / ("Godot" if os.name == "nt" else "godot") / "export_templates"
+    path = folder / helpers.TEMPLATE_VERSION / helpers.TEMPLATES["windows"]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(data)
+    return path
+
+
+def test_the_fingerprint_follows_the_template_pin_not_the_official_template(source, key, tmp_path, monkeypatch):
+    """TOOL_VERSION 2: the template input is the pinned helper template. Replacing the
+    official template the editor finds changes nothing; a new pin changes the fingerprint."""
+    assert helpers.TOOL_VERSION == 2
+    godot = tmp_path / "editor" / "godot.exe"
+    godot.parent.mkdir()
+    godot.write_bytes(b"editor")
+    monkeypatch.setenv("APPDATA", str(tmp_path / "appdata"))
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "appdata"))
+    files = files_of(source, key)
+    values = []
+    for official in (b"official one", b"official two"):
+        official_template(tmp_path, official)
+        stage = tmp_path / f"stage-{len(values)}"
+        stage.mkdir()
+        values.append(helpers.export_into(stage, source, fx.identity("windows", key), platform="windows",
+                                          godot=godot, run_godot=_fake_export([]), project=tmp_path / "p",
+                                          work=tmp_path / "w").fingerprint)
+    assert values[0] == values[1] == fingerprint_of(files, editor=sha(b"editor"), template=sha(b"template"))
+    pin_templates(monkeypatch, tmp_path / "other", b"another template")
+    assert helpers.export_into(tmp_path / "stage-x", source, fx.identity("windows", key), platform="windows",
+                               godot=godot, run_godot=_fake_export([]), project=tmp_path / "p",
+                               work=tmp_path / "w").fingerprint != values[0]
+
+
+def test_the_template_path_reaches_only_the_project_copy_on_disk(source, key, tmp_path):
+    files = files_of(source, key)
+    template = tmp_path / "local-template" / ht.selection("windows")["file"]
+    calls = []
+    rows = helpers.export(files, platform="windows", godot=tmp_path / "godot", run_godot=_fake_export(calls),
+                          work=tmp_path / "w", out=tmp_path / "out", template=template)
+    on_disk = (tmp_path / "w/helper-project/export_presets.cfg").read_text(encoding="utf-8")
+    assert f'custom_template/release="{template.resolve().as_posix()}"' in on_disk
+    assert on_disk.replace(f'"{template.resolve().as_posix()}"', '""') == files["export_presets.cfg"].decode()
+    assert b'custom_template/release=""' in files["export_presets.cfg"]  # the fingerprinted bytes: no path
+    assert rows["updater"]["sha256"] == sha(b"MZ-new-helper") and len(calls) == 2
+    with pytest.raises(helpers.HelperError) as error:
+        helpers.export(files, platform="windows", godot=tmp_path / "godot", run_godot=_fake_export(calls),
+                       work=tmp_path / "w2", out=tmp_path / "out2", template=None)
+    assert error.value.code == "helper-template" and len(calls) == 2
+
+
+def test_a_reused_helper_needs_no_template_and_an_export_checks_the_pin(source, key, tmp_path):
+    godot = tmp_path / "godot.exe"
+    godot.write_bytes(b"editor")
+    value = fingerprint_of(files_of(source, key), editor=sha(b"editor"), template=sha(b"template"))
+    previous = previous_release(fingerprint=value)
+    http = FakeHttp({previous["updater"]["url"]: HELPER_BYTES})
+    reused = helpers.provide(source, fx.identity("windows", key), platform="windows", godot=godot,
+                             template=lambda: pytest.fail("a reused helper needs no template"),
+                             run_godot=_fake_export([]), work=tmp_path / "w1", out=tmp_path / "r1",
+                             previous=previous, http=http)
+    assert reused.reused and reused.fingerprint == value
+    provided, calls = [], []
+
+    def template():
+        provided.append(1)
+        return tmp_path / "local-template" / ht.selection("windows")["file"]
+    exported = helpers.provide(source, fx.identity("windows", key), platform="windows", godot=godot,
+                               template=template, run_godot=_fake_export(calls), work=tmp_path / "w2",
+                               out=tmp_path / "r2", previous=None, http=http)
+    assert not exported.reused and provided == [1] and len(calls) == 2
+    wrong = tmp_path / "wrong.exe"
+    wrong.write_bytes(b"not the pinned template")
+    with pytest.raises(helpers.HelperError) as error:
+        helpers.provide(source, fx.identity("windows", key), platform="windows", godot=godot, template=wrong,
+                        run_godot=_fake_export(calls), work=tmp_path / "w3", out=tmp_path / "r3", previous=None,
+                        http=http)
+    assert error.value.code == "helper-template" and len(calls) == 2
+
+
+def test_the_official_template_is_the_documented_fallback_switch(source, key, tmp_path, monkeypatch):
+    godot = tmp_path / "editor" / "godot.exe"
+    godot.parent.mkdir()
+    godot.write_bytes(b"editor")
+    monkeypatch.setenv("APPDATA", str(tmp_path / "appdata"))
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "appdata"))
+    official = official_template(tmp_path, b"official")
+    calls = []
+    result = helpers.export_into(tmp_path / "stage", source, fx.identity("windows", key), platform="windows",
+                                 godot=godot, run_godot=_fake_export(calls), project=tmp_path / "p",
+                                 work=tmp_path / "w", template_choice="official")
+    assert result.fingerprint == fingerprint_of(files_of(source, key), editor=sha(b"editor"), template=sha(b"official"))
+    on_disk = (tmp_path / "p/export_presets.cfg").read_text(encoding="utf-8")
+    assert f'custom_template/release="{official.resolve().as_posix()}"' in on_disk
+    # the committed switch: select "official" in helper_template.json
+    pin_templates(monkeypatch, tmp_path, b"template", select="official")
+    assert helpers.template_selection("windows")["sha256"] == sha(b"official")
+    official.write_bytes(b"not the pinned official template")
+    with pytest.raises(helpers.HelperError) as error:
+        helpers.export_into(tmp_path / "stage2", source, fx.identity("windows", key), platform="windows",
+                            godot=godot, run_godot=_fake_export(calls), project=tmp_path / "p", work=tmp_path / "w")
+    assert error.value.code == "helper-template"
+
+
+def test_an_export_with_the_custom_template_refuses_a_class_it_lacks(source, key, tmp_path, monkeypatch):
+    """A helper script that uses a class the custom template lacks would fail to parse on
+    players' machines: both exporters refuse it before fetching the template; the official
+    template (the fallback) has every class."""
+    godot = tmp_path / "editor" / "godot.exe"
+    godot.parent.mkdir()
+    godot.write_bytes(b"editor")
+    script = source / "src/updates/uninstall.gd"
+    script.write_bytes(script.read_bytes() + b"\nstatic func _probe() -> Object:\n\treturn RegEx.new()\n")
+    calls = []
+    with pytest.raises(helpers.HelperError) as error:
+        helpers.export_into(tmp_path / "stage", source, fx.identity("windows", key), platform="windows",
+                            godot=godot, run_godot=_fake_export(calls), project=tmp_path / "p", work=tmp_path / "w",
+                            template=lambda: pytest.fail("no template is fetched for a refused helper"))
+    assert error.value.code == "helper-template-class" and "uninstall.gd: RegEx" in str(error.value)
+    with pytest.raises(helpers.HelperError) as error:
+        helpers.provide(source, fx.identity("windows", key), platform="windows", godot=godot,
+                        template=lambda: pytest.fail("no template is fetched for a refused helper"),
+                        run_godot=_fake_export(calls), work=tmp_path / "w2", out=tmp_path / "r2", previous=None)
+    assert error.value.code == "helper-template-class" and calls == []
+    monkeypatch.setenv("APPDATA", str(tmp_path / "appdata"))
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "appdata"))
+    official_template(tmp_path, b"official")
+    helpers.export_into(tmp_path / "stage3", source, fx.identity("windows", key), platform="windows", godot=godot,
+                        run_godot=_fake_export(calls), project=tmp_path / "p3", work=tmp_path / "w3",
+                        template_choice="official")
+    assert len(calls) == 2

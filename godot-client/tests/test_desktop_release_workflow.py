@@ -771,3 +771,48 @@ def test_r2_a7_entry_points_take_the_keywords_the_workflow_passes():
     for step, names in keywords.items():
         signature = inspect.signature(actions_release.r2_a7(step))
         assert names <= set(signature.parameters), step
+
+
+# --- UD-09: the helper template ---------------------------------------------------------------
+
+HELPER_TEMPLATE_FILES = ("godot-client/tools/helper_template.json", "godot-client/tools/helper_template.py",
+                         "godot-client/tools/helper_template_classes.json")
+
+
+def _covered(relative: str, patterns: list[str] | None) -> bool:
+    """Whether a sparse checkout with `patterns` (folders or files) contains `relative`;
+    a checkout without sparse patterns contains everything."""
+    if patterns is None:
+        return True
+    for pattern in patterns:
+        folder = pattern.strip("/")
+        if pattern.endswith("/") or (REPO / folder).is_dir():
+            if relative.startswith(folder + "/"):
+                return True
+        elif relative == folder:
+            return True
+    return False
+
+
+def test_the_executables_jobs_check_out_the_helper_template_pin_and_no_step_builds_or_caches_it():
+    """The build job's tools read tools/helper_template.json and fetch the pinned template
+    themselves (desktop_release_ci.executables, export_into): the workflows need no step, input,
+    cache or artifact for it, so this chunk changes no workflow line."""
+    for relative in HELPER_TEMPLATE_FILES:
+        assert (REPO / relative).is_file(), relative
+
+    def sparse(step: dict) -> list[str] | None:
+        patterns = step.get("with", {}).get("sparse-checkout")
+        return patterns.split() if patterns else None
+    # Found by `uses`, not by position: Windows-capable jobs may run a line-ending step before the checkout.
+    checkouts = [step for step in steps(jobs(R2_FILE)["build"]) if uses(step) == "actions/checkout"]
+    assert len(checkouts) == 1
+    for relative in HELPER_TEMPLATE_FILES:
+        assert _covered(relative, sparse(checkouts[0])), relative
+    for job in load(OLD_FILE)["jobs"].values():
+        for step in steps(job):
+            if uses(step) == "actions/checkout":
+                assert all(_covered(relative, sparse(step)) for relative in HELPER_TEMPLATE_FILES)
+    for name in DESKTOP_FILES:
+        raw = text(name)
+        assert "helper_template" not in raw and "helper-template" not in raw, name

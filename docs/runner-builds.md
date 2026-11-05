@@ -224,8 +224,10 @@ with no secret and no cache:
    - Linux: a copy of the release template, giving `app/RabbitLands.x86_64`.
 3. **Helpers.**
    - `desktop_helpers.py` computes a fingerprint over the inputs: the updater
-     scripts, branding, trust file, editor and template hashes, a fixed minimal
-     helper preset and the tool version.
+     scripts, branding, trust file, the editor hash, the pinned
+     [helper template](desktop-r2-delivery.md#the-helper-template) hash, a fixed
+     minimal helper preset and the tool version. The template is downloaded from
+     its pin only when the helper must be exported.
    - When the previous signed release has the same fingerprint, its updater and
      uninstaller rows are downloaded and checked against their signed SHA-256, so
      the helper bytes are reused exactly. Otherwise the helper is exported.

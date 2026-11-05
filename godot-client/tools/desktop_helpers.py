@@ -10,18 +10,25 @@ download it again when it differs, so an unchanged helper must keep its bytes.
                    it), branding, project.godot, main.tscn and a FIXED minimal
                    export preset that does not depend on the game's preset
   fingerprint()    SHA-256 over every project file, the platform, the preset name,
-                   the editor and export-template SHA-256s and TOOL_VERSION
+                   the editor SHA-256, the PINNED helper template SHA-256
+                   (helper_template.json: the small custom template, or the
+                   official one where the recipe selects it) and TOOL_VERSION
   reuse()          when the previous signed release has the same fingerprint, its
                    helper rows are downloaded and accepted only if size and SHA-256
                    equal the signed row (the bytes are reused, not rebuilt)
-  export()         otherwise a headless import and export of the project
+  export()         otherwise a headless import and export of the project with
+                   that template (its path goes only into the project copy on
+                   disk, never into the fingerprint)
   export_into()    the local and full-CI build's export (client_release.export_launcher
                    delegates here): the same project, preset and fingerprint, with a
                    local cache of exported helpers keyed by the fingerprint
 
 This is the one helper exporter: the R2 workflow (desktop_release_ci.py
 executables) and package_client build the same project with the same preset,
-so equal inputs give the same fingerprint wherever the helper is built.
+so equal inputs give the same fingerprint wherever the helper is built. The
+fingerprint comes from the template's pin, so a reused helper needs no
+template file: the template is fetched (helper_template.obtain) only when the
+helper must be exported.
 
 Nothing here signs or uploads. The caller verifies the previous manifest's
 signature (previous_release) before its rows are trusted.
@@ -39,9 +46,12 @@ import subprocess
 import sys
 
 import desktop_r2 as r2
+import helper_template
 import release_manifest as rm
 
-TOOL_VERSION = 1
+# 2: the template input is the pinned helper template (UD-09), not the official
+# template the editor would find; no fingerprint of version 1 can match.
+TOOL_VERSION = 2
 KIND = "rabbitlands-helpers-fingerprint"
 HELPER_SCRIPTS = ("release.gd", "launcher.gd", "launch_options.gd", "package_updates.gd",
                   "package_download.gd", "update_transport.gd", "bootstrap.gd", "uninstall.gd")
@@ -52,10 +62,13 @@ BINARIES = {"windows": "RabbitLands-updater.exe", "linux": "RabbitLands-updater.
 UNINSTALLERS = {"windows": "RabbitLands-uninstall.exe", "linux": "RabbitLands-uninstall.x86_64"}
 MAX_HELPER_BYTES = rm.MAX_HELPER_BYTES
 EXPORT_TIMEOUT = 300
-# The release export templates of the pinned editor (setup_runner_tools installs
-# them under APPDATA / XDG_DATA_HOME on runners, as an editor install does locally).
+# The official release export templates of the pinned editor (setup_runner_tools
+# installs them under APPDATA / XDG_DATA_HOME on runners, as an editor install
+# does locally): the helper uses them where helper_template.json selects
+# "official" (the fallback); the game always does.
 TEMPLATE_VERSION = "4.7.2.stable"
 TEMPLATES = {"windows": "windows_release_x86_64.exe", "linux": "linux_release.x86_64"}
+_TEMPLATE_LINE = 'custom_template/release=""'
 _SCRIPT_REFERENCE = re.compile(r"""["']res://(src/[A-Za-z0-9_./-]+\.gd)["']""")
 _REPOSITORY = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+")
 
@@ -278,13 +291,56 @@ def _place(binary: Path, out: Path, platform: str, *, link: bool = False) -> dic
             for kind in rm.HELPER_KINDS}
 
 
-def export(files: dict, *, platform: str, godot: Path, run_godot, work: Path, out: Path,
+def template_selection(platform: str, choice: str | None = None) -> dict:
+    """The pinned template the helper of `platform` exports with (helper_template.json)."""
+    try:
+        return helper_template.selection(_platform(platform), choice=choice)
+    except helper_template.TemplateError as error:
+        raise HelperError("helper-template", str(error)) from None
+
+
+def preset_with_template(text: str, template: Path) -> str:
+    """The fixed preset naming `template` as its release template (the on-disk copy only)."""
+    if text.count(_TEMPLATE_LINE) != 1:
+        raise HelperError("helper-preset", "the helper preset must leave custom_template/release empty")
+    return text.replace(_TEMPLATE_LINE, "custom_template/release="
+                        + json.dumps(Path(template).resolve().as_posix(), ensure_ascii=False))
+
+
+def check_template_classes(files: dict, chosen: dict) -> None:
+    """Refuse to export with the custom template a helper whose scripts or scene use an
+    engine class that template lacks (helper_template_classes.json): GDScript would fail
+    to parse it at runtime on players' machines. The official template has every class."""
+    if chosen["template"] != "custom":
+        return
+    try:
+        found = helper_template.audit(files)
+    except (OSError, ValueError) as error:
+        raise HelperError("helper-template", f"the helper template class list is unreadable: {error}") from None
+    if found:
+        raise HelperError("helper-template-class", "the custom helper template lacks " + "; ".join(found[:5]))
+
+
+def _verified_template(template, sha256: str) -> Path:
+    path = Path(template() if callable(template) else template)
+    if not path.is_file() or path.is_symlink() or _digest(path) != sha256:
+        raise HelperError("helper-template", f"{path.name} is not the pinned helper template {sha256}")
+    return path
+
+
+def export(files: dict, *, platform: str, godot: Path, run_godot, work: Path, out: Path, template: Path,
            project: Path | None = None, link: bool = False) -> dict:
     """Import and export the helper project headless; return the signed-row shapes.
 
     The project is written to `project` (default work/helper-project), which must
-    be new or empty; the binary is exported under `work` and placed in `out`."""
+    be new or empty; the binary is exported under `work` and placed in `out`.
+    `template` is the release template file: only the on-disk export_presets.cfg
+    names it, so `files` (and the fingerprint) never hold a machine path."""
+    if template is None or not Path(template).is_file():
+        raise HelperError("helper-template", "the helper export needs its release template file")
     project = write_project(files, Path(project) if project else Path(work) / "helper-project")
+    presets = project / "export_presets.cfg"
+    presets.write_bytes(preset_with_template(presets.read_text(encoding="ascii"), Path(template)).encode("utf-8"))
     logs = Path(work) / "logs"
     logs.mkdir(parents=True, exist_ok=True)
     binary = Path(work) / "export" / BINARIES[platform]
@@ -320,39 +376,56 @@ def find_template(godot: Path, platform: str, environ=None) -> Path | None:
     return None
 
 
+def local_template(platform: str, *, godot: Path, directory: Path | None = None, choice: str | None = None) -> Path:
+    """The selected helper template as a verified local file: the official template
+    beside the editor (find_template), or the custom one in `directory` (default
+    the ignored .local/helper-template of this checkout), fetched from its pinned
+    URL when it is not there yet."""
+    chosen = template_selection(platform, choice)
+    official = find_template(godot, platform) if chosen["template"] == "official" else None
+    try:
+        return helper_template.obtain(platform, directory=Path(directory or helper_template.LOCAL_DIR),
+                                      official=official, choice=choice)
+    except helper_template.TemplateError as error:
+        raise HelperError("helper-template", str(error)) from None
+
+
 def export_into(stage: Path, source: Path, identity: dict, *, platform: str, godot: Path, run_godot,
-                project: Path, work: Path, cache: Path | None = None, template: Path | None = None) -> HelperResult:
+                project: Path, work: Path, cache: Path | None = None, template: Path | None = None,
+                template_dir: Path | None = None, template_choice: str | None = None) -> HelperResult:
     """The updater/uninstaller of a local or full-CI build (client_release.export_launcher).
 
     The project (written to `project`, replaced if it exists) and preset are
     project_files()'; the export is linked into `stage`. With `cache`, an
     export is kept as <fingerprint>.bin and a later build with the same
-    fingerprint links it instead of exporting again. The fingerprint needs the
-    export template's SHA-256: without a template (find_template) nothing is
-    cached and the export runs.
+    fingerprint links it instead of exporting again. The fingerprint uses the
+    pinned helper template (template_choice overrides the recipe's select);
+    `template` is that template's file, else local_template() provides it, only
+    when an export runs. A file that is not the pinned template is refused.
     """
     files = project_files(source, identity, platform)
-    template = Path(template) if template else find_template(godot, platform)
-    value = None
-    if template is not None and Path(template).is_file():
-        value = fingerprint(files, platform=platform, editor_sha256=_digest(Path(godot)),
-                            template_sha256=_digest(Path(template)))
+    chosen = template_selection(platform, template_choice)
+    value = fingerprint(files, platform=platform, editor_sha256=_digest(Path(godot)), template_sha256=chosen["sha256"])
     project = Path(project)
     if project.is_symlink() or project.is_file():
         raise HelperError("helper-project", "the helper project path is not a folder")
     if project.exists():
         shutil.rmtree(project)  # generated by an earlier run of this function
-    cached = Path(cache) / f"{value}.bin" if cache and value else None
+    cached = Path(cache) / f"{value}.bin" if cache else None
     if cached is not None and cached.is_file():
         write_project(files, project)
         rows = _place(cached, Path(stage), platform, link=True)
         reused = True
     else:
+        check_template_classes(files, chosen)
+        template = _verified_template(
+            template or (lambda: local_template(platform, godot=Path(godot), directory=template_dir,
+                                                choice=template_choice)), chosen["sha256"])
         work = Path(work)
         if work.exists():
             shutil.rmtree(work)
         rows = export(files, platform=platform, godot=Path(godot), run_godot=run_godot, work=work, out=Path(stage),
-                      project=project, link=True)
+                      template=template, project=project, link=True)
         reused = False
         # The stage holds the helper now: the work folder keeps only the logs, so no
         # second name pins a 100+ MB helper in a build's logs after its stage is gone.
@@ -429,16 +502,26 @@ class HelperResult:
         return {"helpers_fingerprint": self.fingerprint, "reused": self.reused, **self.rows}
 
 
-def provide(source: Path | None, identity: dict, *, platform: str, godot: Path, template: Path, run_godot,
-            work: Path, out: Path, previous: dict | None, http=None, read=None) -> HelperResult:
-    """Reuse the previous helper when its fingerprint is equal, else export it."""
+def provide(source: Path | None, identity: dict, *, platform: str, godot: Path, template, run_godot,
+            work: Path, out: Path, previous: dict | None, http=None, read=None,
+            template_sha256: str | None = None) -> HelperResult:
+    """Reuse the previous helper when its fingerprint is equal, else export it.
+
+    The fingerprint takes `template_sha256` (default: the pinned selection of
+    helper_template.json). `template` is the template file, or a callable that
+    provides it: it is called only when the helper must be exported, and its
+    file must hash to `template_sha256`."""
     files = project_files(source, identity, platform, read=read)
-    value = fingerprint(files, platform=platform, editor_sha256=_digest(Path(godot)),
-                        template_sha256=_digest(Path(template)))
+    chosen = template_selection(platform)
+    template_sha256 = template_sha256 or chosen["sha256"]
+    value = fingerprint(files, platform=platform, editor_sha256=_digest(Path(godot)), template_sha256=template_sha256)
     rows = reuse(previous, value, platform=platform, http=http, out=out) if previous and http else None
     reused = rows is not None
     if not reused:
-        rows = export(files, platform=platform, godot=Path(godot), run_godot=run_godot, work=work, out=out)
+        if template_sha256 == chosen["sha256"]:
+            check_template_classes(files, chosen)
+        rows = export(files, platform=platform, godot=Path(godot), run_godot=run_godot, work=work, out=out,
+                      template=_verified_template(template, template_sha256))
     paths = [Path(out) / BINARIES[platform], Path(out) / UNINSTALLERS[platform]]
     return HelperResult(value, rows, reused, paths)
 
@@ -450,13 +533,14 @@ def _main(argv=None) -> int:
     parser.add_argument("--identity", type=Path, required=True, help="the release identity JSON")
     parser.add_argument("--platform", choices=tuple(PRESET_NAMES), required=True)
     parser.add_argument("--godot", type=Path, required=True)
-    parser.add_argument("--template", type=Path, required=True)
+    parser.add_argument("--template-choice", choices=helper_template.CHOICES,
+                        help="override helper_template.json's select (its pin is used; no file is read)")
     args = parser.parse_args(argv)
     try:
         identity = json.loads(args.identity.read_text(encoding="utf-8"))
         files = project_files(args.source, identity, args.platform)
         print(fingerprint(files, platform=args.platform, editor_sha256=_digest(args.godot),
-                          template_sha256=_digest(args.template)))
+                          template_sha256=template_selection(args.platform, args.template_choice)["sha256"]))
     except (OSError, ValueError) as error:
         print(f"Refused: {error}", file=sys.stderr)
         return 2

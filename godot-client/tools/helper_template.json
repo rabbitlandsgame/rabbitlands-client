@@ -1,0 +1,157 @@
+{
+  "schema": 1,
+  "kind": "rabbitlands-helper-template",
+  "about": "The updater/uninstaller helper's own small Godot export template (UD-09). Built by helper_template.py build from this recipe; the helper exports with the template that each platform's select names, and its SHA-256 here is the helpers_fingerprint input. See docs/desktop-r2-delivery.md#the-helper-template.",
+  "engine": {
+    "repository": "https://github.com/godotengine/godot.git",
+    "tag": "4.7.2-stable",
+    "commit": "ed1daf0bf001b61586d9930840f2f1394092c079",
+    "commit_time": 1786929518,
+    "version": "4.7.2.stable"
+  },
+  "build_name": "rl_helper",
+  "scons": {
+    "version": "4.10.1",
+    "wheel": "scons-4.10.1-py3-none-any.whl",
+    "wheel_sha256": "bd9d1c52f908d874eba92a8c0c0a8dcf2ed9f3b88ab956d0fce1da479c4e7126"
+  },
+  "modules": [
+    "gdscript",
+    "mbedtls",
+    "freetype",
+    "text_server_adv",
+    "svg"
+  ],
+  "arguments": [
+    "progress=no",
+    "arch=x86_64",
+    "target=template_release",
+    "production=yes",
+    "optimize=size",
+    "lto=none",
+    "disable_3d=yes",
+    "disable_physics_2d=yes",
+    "disable_navigation_2d=yes",
+    "vulkan=no",
+    "opengl3=yes",
+    "sdl=no",
+    "modules_enabled_by_default=no",
+    "module_gdscript_enabled=yes",
+    "module_mbedtls_enabled=yes",
+    "module_freetype_enabled=yes",
+    "module_text_server_adv_enabled=yes",
+    "module_svg_enabled=yes",
+    "scu_build=yes"
+  ],
+  "hosting": {
+    "tag": "helper-template-4.7.2-rl1",
+    "release": "a GitHub prerelease of this repository that is never marked latest"
+  },
+  "platforms": {
+    "windows": {
+      "select": "custom",
+      "official": {
+        "file": "windows_release_x86_64.exe",
+        "size": 109268480,
+        "sha256": "d34d36f3be1a6c49c56525ae86469b92e4f417ddf0b43cf00dd80c385c4b0562"
+      },
+      "arguments": [
+        "platform=windows",
+        "use_mingw=yes",
+        "d3d12=no",
+        "angle=no",
+        "accesskit=no",
+        "winrt=no",
+        "linkflags=-Wl,--no-insert-timestamp"
+      ],
+      "output": "bin/godot.windows.template_release.x86_64.exe",
+      "toolchain": {
+        "kind": "msys2-mingw64",
+        "compiler": "MSYS2 MinGW-w64 GCC 16.2.0, SCons under the python.org CPython 3.13 (backslash paths)",
+        "packages": {
+          "mingw-w64-x86_64-gcc": "16.2.0-3",
+          "mingw-w64-x86_64-gcc-libs": "16.2.0-3",
+          "mingw-w64-x86_64-binutils": "2.47-3",
+          "mingw-w64-x86_64-crt": "14.0.0.r302.gd7f3c5201-1",
+          "mingw-w64-x86_64-headers": "14.0.0.r302.gd7f3c5201-1",
+          "mingw-w64-x86_64-winpthreads": "14.0.0.r302.gd7f3c5201-1",
+          "mingw-w64-x86_64-libwinpthread": "14.0.0.r302.gd7f3c5201-1",
+          "mingw-w64-x86_64-gmp": "6.3.0-2",
+          "mingw-w64-x86_64-mpfr": "4.2.2-3",
+          "mingw-w64-x86_64-mpc": "1.4.1-1",
+          "mingw-w64-x86_64-isl": "0.28-1",
+          "mingw-w64-x86_64-zstd": "1.5.7-2",
+          "mingw-w64-x86_64-zlib": "1.3.2-2",
+          "mingw-w64-x86_64-windows-default-manifest": "20260815-1"
+        },
+        "files": {
+          "mingw64/bin/gcc.exe": "ab37c11763fdcb3bf6f809b5d033a31ebeb77f10ba5934c72fa37287ee56144f",
+          "mingw64/bin/g++.exe": "fe03455c28ab0c69f1adb0ccde202124091f01d02b0c0ede8578f606063cc894",
+          "mingw64/lib/gcc/x86_64-w64-mingw32/16.2.0/cc1.exe": "7ca0315702e255fca656d72b31965b7d7d4f3ba893f995d6ceacb62ab862fe84",
+          "mingw64/lib/gcc/x86_64-w64-mingw32/16.2.0/cc1plus.exe": "c8136249c20cb5e6ab7f03ac190cda15ea33d2bddbe083c7040bb120e4be978d",
+          "mingw64/lib/gcc/x86_64-w64-mingw32/16.2.0/collect2.exe": "4518b29fd6cba600cdd15e6978a424c5aa0964a924d94d578be9108b4bb3e151",
+          "mingw64/bin/ld.exe": "ceeb5869a347a51c0b201bbb0b232c5b6353f69bc10adec578fe28b3f6c0cfcf",
+          "mingw64/bin/as.exe": "85b4d99c741cd2f14c361e9680b66e22a9fd6ffc0e81fc5b2c30e917c4a7cd78",
+          "mingw64/bin/ar.exe": "1b2551c5e8b3f61c80f84a6d526c61fe1e5186806a1696e3a546e26784956923",
+          "mingw64/bin/ranlib.exe": "cfaf4e7e8de15885a5f7d816ec7b0a6d1071bd1b37d12baf12ddde84f0c7ee61",
+          "mingw64/bin/windres.exe": "0735184706376284f01ae409ada3636616e256c4475b19b609b02114c2430e01"
+        },
+        "python": "3.13",
+        "path_separator": "\\"
+      },
+      "custom": {
+        "file": "rabbitlands-helper-template-4.7.2-windows-x86_64.exe",
+        "size": 33929728,
+        "sha256": "73fab692ded3bab62da88a8a2042c3ab5f90078882308fc6c631efbbc398e68d"
+      }
+    },
+    "linux": {
+      "select": "official",
+      "official": {
+        "file": "linux_release.x86_64",
+        "size": 73519416,
+        "sha256": "d9f79ab89b5ae369aeed11c6052d402e8218cd503bf85b4a235f9c30c46a7c63"
+      },
+      "arguments": [
+        "platform=linuxbsd",
+        "speechd=no"
+      ],
+      "output": "bin/godot.linuxbsd.template_release.x86_64",
+      "glibc_max": "2.28",
+      "toolchain": {
+        "kind": "ubuntu-24.04",
+        "compiler": "Ubuntu 24.04 GCC 13.3.0",
+        "packages": {
+          "gcc-13": "13.3.0-6ubuntu2~24.04.1",
+          "g++-13": "13.3.0-6ubuntu2~24.04.1",
+          "cpp-13": "13.3.0-6ubuntu2~24.04.1",
+          "libstdc++-13-dev": "13.3.0-6ubuntu2~24.04.1",
+          "libgcc-13-dev": "13.3.0-6ubuntu2~24.04.1",
+          "binutils": "2.42-4ubuntu2.8",
+          "binutils-x86-64-linux-gnu": "2.42-4ubuntu2.8",
+          "libc6-dev": "2.39-0ubuntu8.9",
+          "linux-libc-dev": "6.8.0-147.147"
+        },
+        "files": {
+          "/usr/bin/x86_64-linux-gnu-gcc-13": "1b99826121ae6682a634e5efe09bd3e3df58ce58e0b28f849114ab5b89139c26",
+          "/usr/bin/x86_64-linux-gnu-g++-13": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+          "/usr/libexec/gcc/x86_64-linux-gnu/13/cc1": "5d1679131184e2de4435b426eb264bf13472fe026db8e5c6bc97445814e8e2f4",
+          "/usr/libexec/gcc/x86_64-linux-gnu/13/cc1plus": "840b332fb62ec6f694ac77d91fe69ef7f80b0d69512ed89374af0ee7a506255d",
+          "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2": "4d1f341ae5b763b513258ee2812422a45e063c30a2f1924a0cf63d3699f3a158",
+          "/usr/bin/x86_64-linux-gnu-ld.bfd": "e46a122cc3a29feba3b1d0fc2a274b6e46538be016ebe381370c0801bb98b0b8",
+          "/usr/bin/x86_64-linux-gnu-as": "7a2ef948033b05ad0c5dcb0d5be059bc68562b5d45713d91aee21df2b4bf4e92",
+          "/usr/bin/x86_64-linux-gnu-ar": "534681ac11c18868cfc4fdf98770aa0ba8973eedc90c231e94e6ba96e1a04f27",
+          "/usr/bin/x86_64-linux-gnu-ranlib": "3fb728371b8fff3c7cf74c0cf2184293717b8729f591bb2290b540dfd92edef7"
+        },
+        "python": "3.12",
+        "path_separator": "/"
+      },
+      "custom": {
+        "file": "rabbitlands-helper-template-4.7.2-linux-x86_64",
+        "size": 37391144,
+        "sha256": "072d3ba352cd6d4f5776da45ac06e92a38497e3bb85e2213fc69ed40bbed64b1",
+        "blocked": "built with glibc 2.39 it needs GLIBC_2.38; the official template needs 2.28. Needs a glibc 2.28 toolchain (owner decision D3)"
+      }
+    }
+  }
+}

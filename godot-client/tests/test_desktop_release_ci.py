@@ -25,10 +25,12 @@ sys.path.insert(0, str(TOOLS))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import desktop_r2 as r2  # noqa: E402
 import desktop_release_ci as ci  # noqa: E402
+import helper_template as ht  # noqa: E402
 import pck_split  # noqa: E402
 import release_manifest as rm  # noqa: E402
 import upload_desktop_assets as up  # noqa: E402
 import test_release_manifest as fx  # noqa: E402
+from test_helper_template import pin_templates  # noqa: E402
 
 key = fx.key
 other_key = fx.other_key
@@ -682,10 +684,31 @@ def fake_native(repo_path: Path, platform: str):
     return build
 
 
+HELPER_TEMPLATE = b"MZ-pinned-helper-template"
+
+
+@pytest.fixture(autouse=True)
+def helper_template_downloads(monkeypatch, tmp_path):
+    """The helper template pinned to fake bytes; its pinned download is a fake that
+    serves them and records each URL (no test downloads a real template)."""
+    pin_templates(monkeypatch, tmp_path, HELPER_TEMPLATE, place=False)
+    fetched = []
+
+    def download(url, size, sha256, target):
+        fetched.append(url)
+        Path(target).write_bytes(HELPER_TEMPLATE)
+    monkeypatch.setattr(ht, "_download", download)
+    return fetched
+
+
 def fake_engine(repo, platform, godot, template, run_godot, work, target):
+    fake_engine.templates.append(Path(template))
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_bytes((fx.pe_bytes if platform == "windows" else fx.elf_bytes)(b"engine"))
     return target
+
+
+fake_engine.templates = []
 
 
 def fake_godot(calls):
@@ -819,6 +842,58 @@ def test_windows_engine_export_uses_the_game_preset_without_its_pack(checkout, t
     linux = ci.export_engine(checkout, "linux", tmp_path / "godot", template, run_godot, tmp_path / "w2",
                              tmp_path / "stage/app/RabbitLands.x86_64")
     assert linux.read_bytes() == b"\x7fELF-template" and len(calls) == 2
+
+
+# --- the helper template (UD-09) --------------------------------------------------------------
+
+def test_executables_fetch_the_pinned_helper_template_only_to_export_it(repo, checkout, key, tmp_path,
+                                                                          helper_template_downloads):
+    fake_engine.templates.clear()
+    record, calls, _, _ = run_executables(repo, checkout, key, tmp_path)
+    chosen = ht.selection("windows")
+    assert helper_template_downloads == [chosen["url"]]  # fetched once, from the pinned URL
+    fetched = tmp_path / "work/helper-template" / chosen["file"]
+    preset = (tmp_path / "work/helper/helper-project/export_presets.cfg").read_text(encoding="utf-8")
+    assert f'custom_template/release="{fetched.resolve().as_posix()}"' in preset
+    assert record["helper_template"] == {key: chosen[key] for key in ("template", "file", "size", "sha256")}
+    assert record["helper_template"]["sha256"] == sha(HELPER_TEMPLATE)
+    # the game's engine keeps the official template
+    assert fake_engine.templates == [tmp_path / "template"]
+    identity = identity_of(repo, "windows", key, tmp_path)
+    files = ci.helpers.project_files(None, identity, "windows", read=ci.helpers.git_reader(checkout, repo.commit))
+    assert record["helpers_fingerprint"] == ci.helpers.fingerprint(
+        files, platform="windows", editor_sha256=sha(b"editor"), template_sha256=sha(HELPER_TEMPLATE))
+
+
+def test_executables_reuse_the_previous_helper_without_any_template(repo, checkout, key, tmp_path,
+                                                                    helper_template_downloads):
+    from test_desktop_helpers import FakeHttp
+    first, _, _, content = run_executables(repo, checkout, key, tmp_path)
+    helper = (tmp_path / "exec-windows/root/RabbitLands-updater.exe").read_bytes()
+    previous = {"platform": "windows", "helpers_fingerprint": first["helpers_fingerprint"],
+                **{kind: first["helpers"][kind] for kind in rm.HELPER_KINDS}}
+    http = FakeHttp({first["helpers"]["updater"]["url"]: helper})
+    helper_template_downloads.clear()
+    calls = []
+    godot = tmp_path / "godot"
+    record = ci.executables(platform="windows", commit=repo.commit, repo=checkout, godot=godot,
+                            template=tmp_path / "template", content_dir=content, out=tmp_path / "exec-again",
+                            work=tmp_path / "work-again", run_godot=fake_godot(calls),
+                            native_builder=fake_native(checkout, "windows"), engine_exporter=fake_engine, http=http,
+                            previous=previous)
+    assert record["helpers_reused"] is True and record["helpers"] == first["helpers"]
+    assert helper_template_downloads == [] and not (tmp_path / "work-again/helper-template").exists()
+    assert not any("--export-release" in args and "Windows Desktop" in args and "helper" in str(args)
+                   for args in calls)
+    assert record["helper_template"] == first["helper_template"]
+
+
+def test_a_helper_template_that_is_not_the_pin_stops_the_build(repo, checkout, key, tmp_path, monkeypatch):
+    monkeypatch.setattr(ht, "_download", lambda url, size, sha256, target: Path(target).write_bytes(b"MZ-other"))
+    with pytest.raises(ci.CiError) as error:
+        run_executables(repo, checkout, key, tmp_path)
+    assert error.value.code == "helper-template"
+    assert not (tmp_path / "exec-windows/root/RabbitLands-updater.exe").exists()
 
 
 # --- sign ---------------------------------------------------------------------------------------

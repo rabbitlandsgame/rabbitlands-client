@@ -1128,7 +1128,9 @@ def test_publication_signs_package_inventory_and_collects_all_installer_assets(f
 def export_test_updater(f, version, platform="windows", launcher_methods="", source=CLIENT):
     """Exports the production launcher with a fixture transport. `launcher_methods`
     is GDScript appended to the fixture launcher (test seams only); `source` is the
-    client tree whose src/updates/ is exported (older_updater_source for an older one)."""
+    client tree whose src/updates/ is exported (older_updater_source for an older one).
+    This tree's helper uses helper_template.json's template; an older revision is
+    exported with the official template, as the field updaters were."""
     stage = f["tmp_path"] / ("helper-" + platform + "-" + version)
     logs = stage / "logs"
     logs.mkdir(parents=True)
@@ -1164,7 +1166,8 @@ def export_test_updater(f, version, platform="windows", launcher_methods="", sou
         assert completed.returncode == 0 and "SCRIPT ERROR" not in log.read_text(), log.read_text()
 
     client_release.export_launcher(stage, identity, f["godot"], source, package_client.EXPORT_PRESETS,
-        package_client.PLATFORMS[platform]["preset"], run_godot, logs)
+        package_client.PLATFORMS[platform]["preset"], run_godot, logs,
+        template_choice=None if source == CLIENT else "official")
     return stage / ("RabbitLands-updater.exe" if platform == "windows" else "RabbitLands-updater.x86_64")
 
 

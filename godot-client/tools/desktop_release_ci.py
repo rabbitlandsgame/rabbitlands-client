@@ -70,6 +70,7 @@ import zlib
 import desktop_content as dc
 import desktop_r2 as r2
 import desktop_helpers as helpers
+import helper_template
 import release_manifest as rm
 import upload_desktop_assets as up
 
@@ -1068,11 +1069,27 @@ def write_root_files(root: Path, repo: Path, platform: str, version: str, commit
     return launch_args, rows
 
 
+def helper_template_provider(platform: str, official: Path, folder: Path, download=None):
+    """The helper's pinned template, fetched into this run's `folder` (no cache) only
+    when called, i.e. only when the helper is exported rather than reused."""
+    def provide() -> Path:
+        try:
+            return helper_template.obtain(platform, directory=folder, official=official, download=download)
+        except helper_template.TemplateError as error:
+            raise CiError("helper-template", str(error)) from None
+    return provide
+
+
 def executables(*, platform: str, commit: str, repo: Path, godot: Path, content_dir: Path, out: Path, work: Path,
                 template: Path | None = None, run_godot=None, native_builder=build_native,
                 engine_exporter=export_engine,
-                http=None, previous="auto") -> dict:
-    """The build job: every CI-owned binary and root file of one platform -> artifact exec-P."""
+                http=None, previous="auto", helper_template_file=None) -> dict:
+    """The build job: every CI-owned binary and root file of one platform -> artifact exec-P.
+
+    `template` is the official template (the game's engine, always). The helper
+    uses helper_template.json's pinned selection: its SHA-256 is the
+    fingerprint input, and the file (`helper_template_file`, else a download
+    from the pinned URL into work/helper-template) is needed only for an export."""
     import client_runtime_package
     if run_godot is None:
         import package_client
@@ -1098,9 +1115,12 @@ def executables(*, platform: str, commit: str, repo: Path, godot: Path, content_
 
     if previous == "auto":
         previous = helpers.previous_release(http, platform, public_pem) if http else None
-    helper = helpers.provide(None, identity, platform=platform, godot=Path(godot), template=template,
-                             run_godot=run_godot, work=work / "helper", out=root, previous=previous, http=http,
-                             read=helpers.git_reader(repo, commit))
+    chosen = helpers.template_selection(platform)
+    helper = helpers.provide(None, identity, platform=platform, godot=Path(godot),
+                             template=helper_template_file or helper_template_provider(platform, template,
+                                                                                       work / "helper-template"),
+                             template_sha256=chosen["sha256"], run_godot=run_godot, work=work / "helper", out=root,
+                             previous=previous, http=http, read=helpers.git_reader(repo, commit))
     launch_args, root_files = write_root_files(root, repo, platform, version, commit)
 
     native_paths = sorted(path.relative_to(staged).as_posix() for path in (staged / rm.NATIVE_PREFIX).rglob("*")
@@ -1117,6 +1137,7 @@ def executables(*, platform: str, commit: str, repo: Path, godot: Path, content_
     record = {"kind": EXEC_KIND, "schema": 1, "platform": platform, "commit": commit, "version": version,
               "ci_packages": packages, "helpers": {kind: helper.rows[kind] for kind in rm.HELPER_KINDS},
               "helpers_fingerprint": helper.fingerprint, "helpers_reused": helper.reused,
+              "helper_template": {key: chosen[key] for key in ("template", "file", "size", "sha256")},
               "root_files": root_files, "launch_args": launch_args, "comparison": comparison,
               "native": {"source_digest": native.get("source_digest"), "cache_hit": False}}
     for package in packages:

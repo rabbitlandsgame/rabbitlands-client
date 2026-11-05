@@ -77,7 +77,7 @@ run once a live R2 pointer exists.
 | Content set: the unsigned list of content packages | the build machine, or the `ci` job | R2 `desktop/v1/sets/` (`r2`), or a workflow artifact (`ci`). Players never read it |
 | Engine `app/RabbitLands.exe` / `app/RabbitLands.x86_64` (`engine` package) | Actions, every run, no cache | GitHub `client-assets-<h>` pools |
 | Native runtime `app/bin/client_runtime/` (`native-runtime` package) | Actions, rebuilt every run, no cache | GitHub `client-assets-<h>` pools |
-| Updater and uninstaller | Actions. While their inputs are unchanged, they are reused byte for byte from the previous signed release | GitHub legacy `client-assets` pool |
+| Updater and uninstaller | Actions, with the pinned [helper template](#the-helper-template). While their inputs are unchanged, they are reused byte for byte from the previous signed release | GitHub legacy `client-assets` pool |
 | Root files beside `app/` (launchers, `AUDIO-CREDITS.txt`) | Actions, after the helpers exist | listed in the signed manifest (`root_files`) |
 | `<version>-setup.exe`, `<version>-download.sh` | Actions | the GitHub release `client-<commit>` |
 | Signed manifests, alias, pointers | signed by Actions in owner-approved jobs | the GitHub release, plus immutable manifest copies and the live pointers on R2 |
@@ -404,6 +404,11 @@ The owner does all of these; agents do none of them.
    the toolchains, runner disk and permissions before any signing. An `r2` dry run
    needs a content set already uploaded for the commit, so before the first content
    upload the dry run uses `ci` sources.
+7. **Before T's build, decide ANGLE and AccessKit, then publish the helper
+   template** (see [the helper template](#the-helper-template) and its open
+   decisions). Without the published template, the Windows `build` job stops with
+   `helper-template`, because T must export a new helper. A decision made after T
+   costs every player another helper download.
 
 ### Cloudflare and R2
 
@@ -861,6 +866,110 @@ keep following the live pointer. They reach a GitHub-only release only after the
 pointer is realigned, or when the server's required commit sends them to
 rediscovery.
 
+## The helper template
+
+The updater and uninstaller are one small Godot program. From T on it is exported
+from its own export template, built from the official Godot 4.7.2 source without
+3D, 2D physics and navigation, Vulkan, D3D12 and every module the helper does not
+use. Only the `gdscript`, `mbedtls`, `freetype`, `text_server_adv` and `svg`
+modules remain. The game keeps the official template.
+
+| Windows helper | Template | Helper |
+| --- | ---: | ---: |
+| Official template (before T, and the fallback) | 109,268,480 B | 111,372,248 B |
+| Helper template | 33,929,728 B | 36,032,920 B |
+
+`godot-client/tools/helper_template.json` is the recipe. It holds:
+
+- the Godot tag and commit;
+- the SCons arguments;
+- the toolchain pins: MSYS2 MinGW GCC 16.2.0 package versions, compiler file
+  hashes, and SCons under the python.org CPython 3.13;
+- for each platform, the pinned template's file name, size and SHA-256;
+- `select`, which says whether the helper uses that template (`custom`) or the
+  official one (`official`).
+
+`helper_template_classes.json` lists the 491 engine classes the template lacks. It
+was measured by comparing `ClassDB.get_class_list()` in both templates.
+`test_helper_template.py` fails if a helper script or scene uses one of them.
+
+### How releases use it
+
+- The helper fingerprint takes the **pinned** template SHA-256, not a file. When
+  the helper's inputs are unchanged, a release reuses the previous helper without
+  fetching anything. That is how R1 reuses T's helper.
+- When the helper must be exported, `desktop_release_ci.executables` downloads the
+  template from the pinned URL into its work folder. It uses no cache, and it
+  refuses the file unless its size and SHA-256 match the pin. Local and
+  `desktop-release.yml` builds (`export_into`) fetch it into the ignored
+  `.local/helper-template/` folder instead.
+- The pinned URL is an asset of the GitHub release `helper-template-4.7.2-rl1` in
+  this repository. Its tag is never a `client-*` or `client-assets*` tag, so
+  pruning never touches it. No workflow builds or caches the template.
+- **Freeze rule for R1:** R1 reuses T's helper only if these are unchanged since
+  T: the eight `src/updates` helper scripts, the branding, the trust fields,
+  `desktop_helpers.py`'s project, preset and `TOOL_VERSION`, the editor and
+  `helper_template.json`'s selected pin.
+
+### Publishing the template (owner, once per pin, before T)
+
+Build it twice and check the result. A pin is accepted only when both fresh trees
+give identical bytes:
+
+```
+python godot-client/tools/helper_template.py build --platform windows --source https://github.com/godotengine/godot.git --work <new folder outside the repositories> --scons-wheel <scons-4.10.1-py3-none-any.whl> --msys2 <MSYS2 root> --twice
+python godot-client/tools/helper_template.py verify --platform windows --file <work>/a/rabbitlands-helper-template-4.7.2-windows-x86_64.exe
+```
+
+- The SCons wheel is the one whose SHA-256 the recipe pins.
+- The build refuses other MSYS2 package versions, other compiler files, and a
+  Python whose path separator is not `\`. MSYS2's own Python writes `/` into
+  `__FILE__` and gives other bytes.
+
+Then upload the verified file as a **prerelease that is never marked latest**.
+Old games discover updates through `releases/latest`, so a latest template
+release would hide the game:
+
+```
+gh release create helper-template-4.7.2-rl1 --repo rabbitlandsgame/rabbitlands-client --target master --prerelease --latest=false --title "Updater helper template (Godot 4.7.2, rl1)" --notes "Pinned in godot-client/tools/helper_template.json." <file>
+```
+
+- Create it after `master` carries the no-op `published-client-cleanup.yml`
+  (one-time setup step 5).
+- Never delete or replace the asset. A new pin needs a new `rl<n>` tag and a
+  commit that changes the recipe.
+
+### Fallback and open decisions
+
+- **Fallback:** set a platform's `select` to `official` and commit. The fingerprint
+  then takes the official template's pin, and the next release ships an
+  official-template helper, which players download once.
+- **Linux** stays on the official template. A build on Ubuntu 24.04 needs glibc
+  2.38, while the official template needs 2.28. It would fail to start on Ubuntu
+  22.04 and Debian 12. The custom Linux template is pinned but blocked until it is
+  built with a glibc 2.28 toolchain.
+- **ANGLE and AccessKit** are not linked into the Windows template; their static
+  libraries were not downloaded. Decide both before T. Adding either library is a
+  new pin, and after T it is another helper download for every player.
+  - Without ANGLE the helper needs native OpenGL 3.3. It cannot open its window
+    over basic RDP or virtual-machine displays or on very old GPUs, and it never
+    starts on Windows on ARM, where Godot accepts only ANGLE. The engine shows
+    an "Unable to initialize video driver" message and exits.
+  - Every Windows shortcut starts the helper first, including **Safe mode** and
+    **Compatibility**, and so does the field updater's handoff at T. The game
+    itself would still fall back to ANGLE, but those players could neither update
+    nor start it from a shortcut.
+  - The 56 drivers that Godot forces onto ANGLE use native OpenGL in the helper.
+  - Without AccessKit, screen readers cannot read the helper's window or its
+    uninstall dialog.
+  - The alternative to approving the libraries is the fallback above: `select`
+    `official` for Windows, which keeps the 111 MB helper.
+- **Before the release exists**, local exports of this tree's helper (for example
+  the exported-updater tests) need the verified file in `.local/helper-template/`:
+  copy the built file there, or run `helper_template.py fetch` once it is
+  published. Older revisions are exported with the official template, as the
+  field built them.
+
 ## Limits
 
 | Item | Limit |
@@ -884,7 +993,7 @@ These tests use fakes for R2, GitHub and Godot, plus throwaway Git repositories,
 and make no network calls:
 
 ```
-python -B -m pytest -q -p no:cacheprovider godot-client/tests/test_desktop_r2.py godot-client/tests/test_desktop_asset_upload.py godot-client/tests/test_desktop_content.py godot-client/tests/test_release_manifest.py godot-client/tests/test_desktop_helpers.py godot-client/tests/test_desktop_release_ci.py
+python -B -m pytest -q -p no:cacheprovider godot-client/tests/test_helper_template.py godot-client/tests/test_desktop_r2.py godot-client/tests/test_desktop_asset_upload.py godot-client/tests/test_desktop_content.py godot-client/tests/test_release_manifest.py godot-client/tests/test_desktop_helpers.py godot-client/tests/test_desktop_release_ci.py
 python -B -m pytest -q -p no:cacheprovider godot-client/tests/test_desktop_release_workflow.py godot-client/tests/test_actions_release.py godot-client/tests/test_release_entrypoint_imports.py godot-client/tests/test_prune_published_release.py godot-client/tests/test_shared_release_assets.py godot-client/tests/test_finalize_runner_release.py godot-client/tests/test_publish_runner_release.py
 ```
 
