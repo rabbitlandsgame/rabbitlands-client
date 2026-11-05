@@ -271,7 +271,9 @@ PLAIN_EXPORT_SUFFIXES = (".json", ".bin")
 # sources. The export's exclude filter keeps docs, tests and tools out of a
 # package, so nothing a package runs is written there. It keeps the map
 # editor's region sources (world_authoring) out too, but they are still read
-# here and by scene_textures: a name there only keeps a file, never drops one.
+# here, before a runner retires them: a name there only keeps an actor file,
+# never drops one. scene_textures and the loose duplicate plan
+# (packaged_client_files) skip them.
 SOURCE_SUFFIXES = (".gd", ".tscn", ".tres", ".gdshader", ".gdshaderinc", ".godot", ".cfg",
                    ".gdextension", ".cpp", ".h")
 UNSHIPPED_CLIENT_DIRS = ("godot-client/docs/", "godot-client/tests/", "godot-client/tools/",
@@ -580,11 +582,25 @@ def shipped_client_files(build_dir: Path, suffixes: tuple[str, ...]) -> list[str
 
     world_authoring is listed although the export leaves it out (EDITOR_ONLY_PCK_DIRS): what its
     sources name only keeps an actor file loose, never drops one (SOURCE_SUFFIXES); scene_textures
-    skips it.
+    and the loose duplicate plan (packaged_client_files) skip it.
     """
     return [p for p in tracked(build_dir, "godot-client")
             if p.lower().endswith(suffixes) and not p.startswith(UNSHIPPED_CLIENT_DIRS)
             and not p.lower().endswith(".md")]
+
+
+def packaged_client_files(build_dir: Path, suffixes: tuple[str, ...]) -> list[str]:
+    """shipped_client_files without the map editor's sources (EDITOR_ONLY_PCK_DIRS): the tracked
+    client files an exported package can read, and so all the W2-UD-02 readers (the loose
+    duplicate plan) look at.
+
+    The export leaves world_authoring out and nothing stages it, so no read in a package can
+    reach it, and a runner build deletes it once its reference proof is done
+    (runner_release.RunnerStorage.retire_editor_sources), before the export and the plan: a
+    reader run after that must not need it, and a local build, which keeps it, must decide the same.
+    """
+    editor_sources = tuple("godot-client/" + folder for folder in EDITOR_ONLY_PCK_DIRS)
+    return [p for p in shipped_client_files(build_dir, suffixes) if not p.startswith(editor_sources)]
 
 
 def _actor_path(literal: str) -> str | None:
@@ -2020,9 +2036,10 @@ def runtime_client_sources(build_dir: Path) -> list[str]:
     settings, and every other shipped script or scene those name by res:// path, transitively.
 
     The map editor's plugins (addons) and the developer prototypes stay out unless the
-    runtime names them: they run in the editor or from an explicit command line only.
+    runtime names them: they run in the editor or from an explicit command line only. Its
+    region sources (world_authoring) are never in a package (packaged_client_files).
     """
-    sources = shipped_client_files(build_dir, SOURCE_SUFFIXES)
+    sources = packaged_client_files(build_dir, SOURCE_SUFFIXES)
     shipped = {"res://" + relative.removeprefix("godot-client/"): relative for relative in sources}
     included = {relative for relative in sources
                 if relative.startswith("godot-client/src/") or relative == "godot-client/project.godot"}
@@ -2523,11 +2540,12 @@ def loose_read_allowlist(build_dir: Path, candidates: set[str]) -> dict:
     code (W2-UD-02): a generated allowlist.
 
     Every literal in a runtime GDScript (runtime_client_sources) that names a candidate,
-    a folder or prefix holding one, or a data file (LOOSE_DATA_SUFFIXES) under godot-client,
-    is followed by _LiteralUses. One with any use that is not the resource system names its
-    file - joined, its folder - as read raw; if it names a data file, so is everything that
-    file names, and its folder. A data file read by its exact constant path is a "data"
-    read (data_reads). A folder or prefix literal used only by the resource system is
+    a folder or prefix holding one, or a data file (LOOSE_DATA_SUFFIXES) under godot-client
+    that a package carries (packaged_client_files), is followed by _LiteralUses. One with
+    any use that is not the resource system names its file - joined, its folder - as read
+    raw; if it names a data file, so is everything that file names, and its folder. A data
+    file read by its exact constant path is a "data" read (data_reads). A folder or prefix
+    literal used only by the resource system is
     "resource only": composing paths under it never reads raw (resource_prefixes, used by
     loose_data_names). Also read raw: the asset paths project.godot names (the engine reads
     its icon and boot splash as images), any asset path in a scene or resource outside an
@@ -2548,9 +2566,8 @@ def loose_read_allowlist(build_dir: Path, candidates: set[str]) -> dict:
     lowered = sorted(candidate.lower() for candidate in candidates)
     candidate_set = set(lowered)
     data_names: dict[str, tuple[set[str], set[str]]] = {}
-    for relative in tracked(build_dir, "godot-client"):
-        if relative.lower().endswith(LOOSE_DATA_SUFFIXES) and not relative.startswith(UNSHIPPED_CLIENT_DIRS):
-            data_names[relative.lower()] = _data_names(build_dir, relative)
+    for relative in packaged_client_files(build_dir, LOOSE_DATA_SUFFIXES):
+        data_names[relative.lower()] = _data_names(build_dir, relative)
     naming = sorted(data for data, (named, under) in data_names.items()
                     if {n.lower() for n in named} & candidate_set
                     or any(c.startswith(u.lower()) for u in under for c in lowered))
@@ -2628,11 +2645,12 @@ def loose_data_names(build_dir: Path, candidates: set[str], resource_prefixes: s
     Map data and the client's data drive raw reads whose path no code literal holds (a map
     manifest's externalResources are hashed from disk, a registry names manifests), so:
     a candidate any shipped data names by a res://, assets/ or data/ path - a godot-client
-    data file (LOOSE_DATA_SUFFIXES) outside docs/tests/tools, or an eloria-assets JSON that
-    ships - stays loose. A name relative to its data file's folder keeps a candidate too,
-    unless the data file's own folder is one the code uses only through the resource
-    system (loose_read_allowlist "resource_prefixes": the audio catalog names its tracks
-    relative to assets/audio/, and every literal naming that folder ends in a load()); a
+    data file (LOOSE_DATA_SUFFIXES) outside docs/tests/tools and the map editor's sources
+    (packaged_client_files), or an eloria-assets JSON that ships - stays loose. A name
+    relative to its data file's folder keeps a candidate too, unless the data file's own
+    folder is one the code uses only through the resource system (loose_read_allowlist
+    "resource_prefixes": the audio catalog names its tracks relative to assets/audio/,
+    and every literal naming that folder ends in a load()); a
     data file another data file names by path has no such code, so its relative names
     always count.
     """
@@ -2642,8 +2660,7 @@ def loose_data_names(build_dir: Path, candidates: set[str], resource_prefixes: s
     resource_prefixes = {prefix.lower() for prefix in resource_prefixes}
     if served is None:
         served = read_served_v2_packages(build_dir) if (build_dir / REGISTRY_FILE).is_file() else []
-    data_files = [p for p in tracked(build_dir, "godot-client") if p.lower().endswith(LOOSE_DATA_SUFFIXES)
-                  and not p.startswith(UNSHIPPED_CLIENT_DIRS)]
+    data_files = packaged_client_files(build_dir, LOOSE_DATA_SUFFIXES)
     data_files += [p for p in sorted(shipped_eloria_assets(build_dir, served=served)[0])
                    if p.lower().endswith(".json")]
     named: dict[str, set[str]] = {}
@@ -2710,11 +2727,12 @@ def gltf_uri_raw_reads(build_dir: Path, imported: set[str]) -> dict[str, set[str
     `imported` (repository paths whose .import and products the PCK holds) is there to take.
     Every other glTF a package carries - world models through the scenery image pass, the
     editor's imported scenes, anything else - reads the file. In a build tree without the
-    AW-03 path every URI counts as a raw read.
+    AW-03 path every URI counts as a raw read. The map editor's region sources are in no
+    package (packaged_client_files).
     """
     actor_imports = _actor_glb_reads_imports(build_dir)
     reads: dict[str, set[str]] = {}
-    for relative in shipped_client_files(build_dir, GLTF_SUFFIXES):
+    for relative in packaged_client_files(build_dir, GLTF_SUFFIXES):
         # "unchecked" until a URI of an actor document names an imported image; then "imports"
         # or, for a document with a pixel-reading material (actor_images.gd
         # PIXEL_READING_MATERIALS: spec-gloss, left to GLTFDocument's own raw read), "raw".

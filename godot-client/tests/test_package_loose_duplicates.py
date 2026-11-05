@@ -304,7 +304,10 @@ class Fixture(unittest.TestCase):
                 "assets/branding/rabbitlands-icon.png", "assets/ui/unpacked.png"]
 
     def setUp(self):
-        self.root = Path(tempfile.mkdtemp(prefix="loose-duplicates-tree-"))
+        # The build tree sits where a runner build keeps it (<runner root>/source), so a test can
+        # retire its editor sources with the runner's own RunnerStorage.
+        self.root = Path(tempfile.mkdtemp(prefix="loose-duplicates-tree-")) / "source"
+        self.root.mkdir()
         self.app = Path(tempfile.mkdtemp(prefix="loose-duplicates-app-")) / "app"
         root, client = self.root, "godot-client/"
         write(root, client + "project.godot",
@@ -377,7 +380,7 @@ class Fixture(unittest.TestCase):
     def tearDown(self):
         packager.tracked, packager.log = self._tracked, self._log
         packager._LOOSE_READ_CACHE.clear()
-        shutil.rmtree(self.root, ignore_errors=True)
+        shutil.rmtree(self.root.parent, ignore_errors=True)
         shutil.rmtree(self.app.parent, ignore_errors=True)
 
     def packed(self, missing_products=("assets/ui/unpacked.png",)) -> set[str]:
@@ -485,6 +488,64 @@ class Fixture(unittest.TestCase):
             (self.app / icon).unlink()
             with self.assertRaisesRegex(packager.PackageError, "rabbitlands-icon.png: read raw .*project.godot"):
                 packager.check_loose_duplicates(self.root, self.app)
+        finally:
+            packager.actor_shipping, packager.world_import_shipping = actor_shipping, world_import_shipping
+
+    def test_a_runner_build_without_the_editor_sources_stages_what_a_local_build_does(self):
+        # A runner build (desktop_release_ci build-content) deletes world_authoring once its reference
+        # proof is done (RunnerStorage.retire_editor_sources), before the export and the staging, while
+        # Git still lists those files. The plan read them, and the first ci dry run failed so:
+        # FileNotFoundError on world_authoring/continent-v2/shared-kit-catalog.json. No package carries
+        # them, so nothing they name keeps a file loose, with or without them on disk.
+        from runner_release import RunnerStorage
+        from release_storage import DiskBudget
+        client, editor = "godot-client/", "godot-client/world_authoring/continent-v2/"
+        write(self.root, client + "project.godot",
+              '[application]\nconfig/icon="res://assets/branding/rabbitlands-icon.png"\n'
+              '[map_authoring]\nterritory_catalog_path="res://world_authoring/continent-v2/territories.json"\n')
+        write(self.root, editor + "territories.json",
+              {"sharedAssetCatalogPath": "res://world_authoring/continent-v2/shared-kit-catalog.json",
+               "background": "res://assets/ui/old.png"})
+        write(self.root, editor + "shared-kit-catalog.json",
+              {"models": {"crate": "res://assets/ui/icons/sheet.png"}, "sound": "../../assets/audio/hit.wav"})
+        write(self.root, editor + "kit/old_crate.glb", glb(["../../../assets/ui/emblem.png"]))
+        write(self.root, editor + "kit/region.tscn", 'texture = "res://assets/ui/old.png"\n')
+        write(self.root, client + "src/dev/region_snapshot.gd",
+              'const CATALOG := "res://world_authoring/continent-v2/territories.json"\n'
+              "func _ready() -> void:\n"
+              "\tvar text := FileAccess.get_file_as_string(CATALOG)\n"
+              '\tvar scene := load("res://world_authoring/continent-v2/kit/region.tscn")\n')
+        (self.root / "godot-client/assets/actors/native/equipment/sword.glb").unlink()
+        write_pck(self.app / "RabbitLands.pck", sorted(self.packed()))
+        local = packager.loose_duplicate_plan(self.root, self.packed())  # a local build keeps the sources
+        # The runner's retirement, as Git sees it afterwards: the files are gone, still tracked.
+        index = packager.tracked(self.root, "godot-client", "eloria-assets")
+        self.assertIn(editor + "shared-kit-catalog.json", index)
+        packager.tracked = lambda tree, *specs: [p for p in index if any(
+            p == s or p.startswith(s.rstrip("/") + "/") for s in specs)]
+        runner = RunnerStorage(self.root.parent, DiskBudget([self.root.parent]), None)
+        runner.actor_plans[self.root.resolve()] = {}
+        runner.retire_editor_sources(self.root / "godot-client")
+        self.assertFalse((self.root / editor).exists())
+        self.assertEqual([p.name for p in (self.root / "godot-client/world_authoring").iterdir()], [".gdignore"])
+        packager._LOOSE_READ_CACHE.clear()
+        actor = {"pck": set(), "loose": set(), "dropped": set()}
+        world = {"dropped_images": set()}
+        actor_shipping, world_import_shipping = packager.actor_shipping, packager.world_import_shipping
+        packager.actor_shipping = lambda build_dir: actor
+        packager.world_import_shipping = lambda build_dir: world
+        try:
+            staged_plan = packager.stage_loose_client_files(self.root, self.app)
+            self.assertEqual(set(local["drop"]), {"assets/audio/music_a.ogg", "assets/audio/hit.wav",
+                                                  "assets/ui/icons/sheet.png", "assets/ui/old.png",
+                                                  "assets/ui/emblem.png"})
+            self.assertNotIn("world_authoring", json.dumps(local["keep"]))
+            self.assertEqual(staged_plan, local)
+            self.assertEqual(packager.check_loose_duplicates(self.root, self.app), local)
+            staged = {p.relative_to(self.app).as_posix() for p in self.app.rglob("*") if p.is_file()}
+            self.assertFalse([p for p in staged if "world_authoring" in p])
+            for dropped in local["drop"]:
+                self.assertNotIn(dropped, staged)
         finally:
             packager.actor_shipping, packager.world_import_shipping = actor_shipping, world_import_shipping
 
