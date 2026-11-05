@@ -95,7 +95,9 @@ def test_installed_legacy_bootstrap_accepts_new_helpers_before_sharded_packages(
     payload["parts"] = [part for package in payload["packages"] for part in package["parts"]]
     script = f["tmp_path"] / "project/src/updates/release.gd"
     current = script.read_text()
-    legacy = re.sub(r'(?ms)^static func shared_download\(.*?(?=^static func verify_envelope)',
+    # Replace only shared_download; the functions after it (W1a's r2_part and the
+    # derived R2 URLs among them) stay, as package_updates.gd calls them.
+    legacy = re.sub(r'(?ms)^static func shared_download\(.*?(?=^static func )',
         'static func shared_download(row: Dictionary, repository: String, kind := "pkg", extension := "zip.part") -> bool:\n'
         '\treturn valid_hash(row.get("sha256")) and row.get("url") == "https://github.com/%s/releases/download/client-assets/RabbitLands-%s-%s.%s" % [repository, kind, row.sha256, extension]\n\n', current)
     assert legacy != current
