@@ -402,6 +402,36 @@ def upload_asset_api(release_id: int, path: Path, row: dict, old: dict, *, immut
     raise ValueError("GitHub upload did not complete.")
 
 
+def r2_live_pointer_guard(http=None) -> None:
+    """Refuse every upload once an R2 live pointer exists (the full-CI workflow's r2-guard).
+
+    This command predates whole-release retention: it deletes every other client
+    draft (the R2 workflow's included) and, with --publish, every other client
+    release (the retained rollback set), marks its release latest without the
+    pointer, and signs manifests without a sequence, which R2-aware installations
+    refuse through the alias. Once a pointer is live, desktop releases go through
+    desktop-release-r2.yml. Anything but a 404 for both pointers (a 200, a
+    challenge page, an outage) refuses: fail closed. Anonymous reads only.
+    """
+    import desktop_r2 as r2
+    import upload_desktop_assets as up
+    http = http or up.Http()
+    for platform in r2.PLATFORMS:
+        try:
+            status = http.request("GET", r2.pointer_url(platform), limit=r2.MAX_POINTER_BYTES,
+                                  keep_body=False).status
+        except r2.DesktopR2Error as error:
+            raise ValueError(f"Could not confirm that no R2 live pointer exists for {platform} ({error.code}); "
+                             "build_release.py upload refuses (fail closed).") from None
+        if status == 200:
+            raise ValueError(f"The R2 live pointer for {platform} exists, so desktop releases go through "
+                             "desktop-release-r2.yml. build_release.py upload would delete the releases kept "
+                             "for rollback and publish a release R2-aware installations refuse.")
+        if status != 404:
+            raise ValueError(f"Could not confirm that no R2 live pointer exists for {platform} "
+                             f"(HTTP {status}); build_release.py upload refuses (fail closed).")
+
+
 def upload(bundle: Path, publish: bool = False) -> None:
     root = bundle.resolve().parent
     data = json.loads(bundle.read_text(encoding="utf-8"))
@@ -415,6 +445,8 @@ def upload(bundle: Path, publish: bool = False) -> None:
     notes = root / "RELEASE-NOTES.md"
     if not notes.is_file():
         raise ValueError("Release notes are missing.")
+    # Before any GitHub call: drafts and releases are deleted further down.
+    r2_live_pointer_guard()
     if gh("api", "user", "--jq", ".login").lower() != ACCOUNT:
         raise ValueError("Sign gh into rabbitlandsgame before uploading. An unrelated account cannot publish this project.")
     if gh("api", f"repos/{REPOSITORY}", "--jq", ".permissions.push") != "true":

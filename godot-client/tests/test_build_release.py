@@ -200,7 +200,51 @@ def mock_github(monkeypatch, *, account="rabbitlandsgame", public=False, wrong_t
         return ""
 
     monkeypatch.setattr(build_release, "gh", gh)
+    # No R2 live pointer yet (the transition before the first R2-workflow
+    # release); the guard itself is tested below, without network.
+    monkeypatch.setattr(build_release, "r2_live_pointer_guard", lambda http=None: None)
     return calls
+
+
+@pytest.mark.parametrize("statuses, refusal", [
+    ((404, 404), None), ((200, 404), "for windows exists"), ((404, 200), "for linux exists"),
+    ((403, 404), r"for windows \(HTTP 403\)"), ((404, 503), r"for linux \(HTTP 503\)"),
+    (("error", 404), r"for windows \(http-error\)")])
+def test_r2_live_pointer_guard_passes_only_while_both_pointers_are_absent(statuses, refusal):
+    ok = refusal is None
+    import desktop_r2 as r2
+    import upload_desktop_assets as up
+    calls = []
+
+    class Http:
+        def request(self, method, url, *, limit, headers=None, keep_body=True):
+            calls.append((method, url, limit, keep_body))
+            status = statuses[len(calls) - 1]
+            if status == "error":
+                raise up.UploadError("http-error", "URLError")
+            return up.HttpResponse(status, {})
+    if ok:
+        build_release.r2_live_pointer_guard(Http())
+    else:
+        with pytest.raises(ValueError, match=refusal):
+            build_release.r2_live_pointer_guard(Http())
+    expected = [("GET", r2.pointer_url(platform), r2.MAX_POINTER_BYTES, False) for platform in r2.PLATFORMS]
+    assert calls == expected[:len(calls)] and (len(calls) == 2 or not ok)
+
+
+@pytest.mark.parametrize("publish", [False, True])
+def test_upload_refuses_before_any_github_call_once_an_r2_pointer_is_live(tmp_path, monkeypatch, publish):
+    # After the first R2-workflow release this command would delete the R2
+    # workflow's draft and the releases kept for rollback.
+    bundle, _ = upload_fixture(tmp_path)
+    calls = mock_github(monkeypatch, public=False, old_tag="client-" + "b" * 40)
+
+    def live(http=None):
+        raise ValueError("The R2 live pointer for windows exists")
+    monkeypatch.setattr(build_release, "r2_live_pointer_guard", live)
+    with pytest.raises(ValueError, match="R2 live pointer"):
+        build_release.upload(bundle, publish=publish)
+    assert calls == []
 
 
 def test_wrong_github_account_cannot_mutate_a_release(tmp_path, monkeypatch):

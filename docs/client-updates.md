@@ -564,7 +564,9 @@ the R2 workflow.** The command below predates retention:
   which the R2 process keeps in GitHub only.
 
 It remains documented for the transition before the first R2-workflow release, and
-for reference.
+for reference. Like the full-CI workflow, `build_release.py upload` refuses before
+its first GitHub call once either live R2 pointer exists, and also when it cannot
+confirm that both are absent (a challenge page or an outage).
 
 First push the selected client commit through the repository's configured SSH
 identity. Uploads require GitHub CLI authenticated as **rabbitlandsgame** with
