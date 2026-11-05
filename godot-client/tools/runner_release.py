@@ -8,10 +8,12 @@ from __future__ import annotations
 
 import argparse
 import base64
+import hashlib
 import json
 import os
 from pathlib import Path
 import shutil
+import subprocess
 import sys
 
 import build_release as release
@@ -41,6 +43,67 @@ def authorize() -> None:
         raise ValueError("Use the Rabbit Lands account to stage release downloads.")
     if release.gh("api", f"repos/{release.REPOSITORY}", "--jq", ".permissions.push") != "true":
         raise ValueError("The workflow token needs contents: write on the client repository.")
+
+
+# The hosted Windows image sets core.autocrlf=true in Git's system config, so a plain
+# actions/checkout writes every text file with CRLF. Each workflow job that can run on
+# Windows turns conversion off first (the steps below, checked by
+# tests/test_desktop_release_workflow.py); exact_checkout proves it worked.
+EXACT_CHECKOUT_STEPS = ("git config --global core.autocrlf false", "git config --global core.eol lf")
+_CONVERTING = {"true", "yes", "on", "1"}
+
+
+def exact_checkout(repo: Path) -> int:
+    """Refuse a CI checkout whose files are not the commit's exact Git bytes; return the files checked.
+
+    The release tools build, hash, ship and reuse checked-out bytes: the native
+    runtime's inputs are proved against their blobs and hashed into its shipped
+    manifest, its descriptor template is shipped as it is, and the setup helper
+    embeds the updater scripts. A checkout that converts line endings changes all of
+    them, so the job stops here, before any download or build, with the fix, instead
+    of failing (or shipping other bytes) wherever a converted file is read first.
+    Every checked-out regular file is hashed as a raw blob and compared with its
+    index entry; sparse-checkout (skip-worktree) paths are not on disk and are skipped.
+    """
+    repo = Path(repo)
+    fix = " and ".join(f"`{step}`" for step in EXACT_CHECKOUT_STEPS) + " before actions/checkout"
+
+    def git(*args: str) -> subprocess.CompletedProcess:
+        return subprocess.run(["git", "-c", "core.quotepath=false", "-C", str(repo), *args],
+                              capture_output=True, timeout=600)
+
+    setting = git("config", "--get", "core.autocrlf")
+    value = setting.stdout.decode("utf-8", "replace").strip().lower()
+    if setting.returncode == 0 and value in _CONVERTING:
+        raise ValueError(f"The checkout converts line endings (core.autocrlf={value}), so its files are not the "
+                         f"commit's bytes; run {fix}.")
+    listing = git("ls-files", "--stage", "-t", "-z")
+    if listing.returncode:
+        raise ValueError("Could not list the checkout's tracked files.")
+    differ, checked = [], 0
+    for row in listing.stdout.split(b"\0"):
+        if not row:
+            continue
+        meta, name = row.split(b"\t", 1)
+        tag, mode, blob, _ = meta.decode("ascii").split()
+        if tag == "S" or mode not in ("100644", "100755"):
+            continue  # not on disk (sparse), or a link or submodule rather than file bytes
+        relative = name.decode("utf-8")
+        path = repo / relative
+        if path.is_symlink() or not path.is_file():
+            differ.append(relative)
+            continue
+        digest = (hashlib.sha1 if len(blob) == 40 else hashlib.sha256)(b"blob %d\0" % path.stat().st_size)
+        with path.open("rb") as stream:
+            while block := stream.read(1024 ** 2):
+                digest.update(block)
+        checked += 1
+        if digest.hexdigest() != blob:
+            differ.append(relative)
+    if differ:
+        raise ValueError(f"{len(differ)} checked-out files differ from their committed blobs (first: "
+                         f"{', '.join(sorted(differ)[:3])}); the release tools need exact Git bytes: run {fix}.")
+    return checked
 
 
 class GitHubSink:

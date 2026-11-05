@@ -18,7 +18,7 @@ import tarfile
 import client_release
 import package_client as package
 from release_storage import DiskBudget, PartWriter
-from runner_release import RunnerStorage
+from runner_release import RunnerStorage, exact_checkout
 import setup_runner_tools
 
 
@@ -51,6 +51,8 @@ def build(options):
         raise ValueError("Use a native runner for each platform.")
     if options.distribution == "standalone" and options.platform != "macos":
         raise ValueError("Windows/Linux standalone distribution uses the existing GitHub installer workflow.")
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        exact_checkout(package.REPO)  # the runner's tools checkout holds the commit's bytes (no CRLF)
     sha = package.git("rev-parse", "--verify", "--end-of-options", options.ref + "^{commit}").strip()
     root = options.out.resolve()
     if root.is_relative_to(package.REPO) or root.is_relative_to(package.REPO.parent / "rabbitlands-server"):

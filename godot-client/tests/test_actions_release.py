@@ -2,6 +2,7 @@
 import hashlib
 import io
 import json
+import shlex
 import subprocess
 import os
 from pathlib import Path
@@ -30,6 +31,7 @@ def context(tmp_path, monkeypatch):
                         "GITHUB_OUTPUT": str(tmp_path / "outputs"), "RUNNER_TEMP": str(tmp_path)}.items():
         monkeypatch.setenv(name, value)
     monkeypatch.setattr(actions.package, "git", lambda *args: SHA)
+    monkeypatch.setattr(actions.runner_release, "exact_checkout", lambda repo: 1)  # its own tests below
     monkeypatch.setattr(actions.runner_release, "authorize", lambda: None)
     monkeypatch.setattr(actions.shared_release_assets, "ensure", lambda sha: {"id": 789})
 
@@ -285,6 +287,7 @@ def dispatch(tmp_path, monkeypatch, *, workflow=actions.R2_WORKFLOW, sha=SHA, re
     (tmp_path / "runner").mkdir(exist_ok=True)
     monkeypatch.delenv(actions.SECRET, raising=False)
     monkeypatch.setattr(actions.package, "git", lambda *args: sha)
+    monkeypatch.setattr(actions.runner_release, "exact_checkout", lambda repo: 1)  # its own tests below
     monkeypatch.setattr(actions.runner_release, "authorize", lambda: None)
     monkeypatch.setattr(actions.shared_release_assets, "ensure", lambda value: {"id": 789})
     monkeypatch.setattr(prune_published_release, "RETENTION_SCHEMA", 2, raising=False)
@@ -331,6 +334,113 @@ def test_dispatch_commit_refuses_a_checkout_of_another_commit(tmp_path, monkeypa
     monkeypatch.setattr(actions.package, "git", lambda *args: "c" * 40)
     with pytest.raises(ValueError, match="exact source commit"):
         actions.dispatch_commit(actions.R2_WORKFLOW)
+
+
+# --- the exact-bytes checkout guard (second R2 dry run: CRLF native inputs on Windows) ---------
+
+def isolated_git(tmp_path, monkeypatch, system: str = "") -> None:
+    """Only this test's Git config: the machine's own (a Windows system autocrlf=true) must not leak in."""
+    for name, text in (("GIT_CONFIG_SYSTEM", system), ("GIT_CONFIG_GLOBAL", "")):
+        path = tmp_path / f"{name.lower()}.gitconfig"
+        path.write_text(text, encoding="ascii")
+        monkeypatch.setenv(name, str(path))
+    monkeypatch.delenv("GIT_CONFIG_NOSYSTEM", raising=False)
+
+
+def committed_source(tmp_path) -> Path:
+    """A commit shaped like the release checkout: LF native inputs and updater scripts, a CRLF blob kept
+    exact by -text (like the map authoring scripts), an executable and a path outside the sparse set."""
+    source = tmp_path / "source"
+    files = {".gitattributes": b"tools/kept_crlf.gd -text\n",
+             "native/client_runtime/CMakeLists.txt": b"cmake_minimum_required(VERSION 3.20)\nproject(x)\n",
+             "native/client_runtime/client_runtime.gdextension.in": b"[configuration]\nentry_symbol=\"x\"\n",
+             "src/updates/release.gd": b"extends RefCounted\nconst CODEC_SCHEMA := 3\n",
+             "tools/kept_crlf.gd": b"extends Node\r\nfunc _ready():\r\n\tpass\r\n",
+             "tools/run.sh": b"#!/bin/sh\necho ok\n",
+             "world/big_source.txt": b"outside the sparse checkout\n"}
+    for name, data in files.items():
+        (source / name).parent.mkdir(parents=True, exist_ok=True)
+        (source / name).write_bytes(data)
+    git = ["git", "-c", "user.name=t", "-c", "user.email=t@example.invalid", "-C", str(source)]
+    subprocess.run(["git", "init", "-q", str(source)], check=True)
+    subprocess.run([*git, "add", "-A"], check=True)
+    subprocess.run([*git, "update-index", "--chmod=+x", "tools/run.sh"], check=True)
+    subprocess.run([*git, "commit", "-q", "-m", "source"], check=True)
+    return source
+
+
+def ci_checkout(tmp_path, source: Path, name: str, *, config: dict | None = None) -> Path:
+    """actions/checkout's steps: init, fetch, a non-cone sparse file, a forced checkout."""
+    target = tmp_path / name
+    subprocess.run(["git", "init", "-q", str(target)], check=True)
+    for key, value in (config or {}).items():
+        subprocess.run(["git", "-C", str(target), "config", key, value], check=True)
+    subprocess.run(["git", "-C", str(target), "fetch", "-q", str(source), "HEAD"], check=True)
+    subprocess.run(["git", "-C", str(target), "config", "core.sparseCheckout", "true"], check=True)
+    (target / ".git/info").mkdir(parents=True, exist_ok=True)
+    (target / ".git/info/sparse-checkout").write_text("/native/\n/src/updates/\n/tools/\n", encoding="ascii")
+    subprocess.run(["git", "-C", str(target), "checkout", "-q", "--force", "FETCH_HEAD"], check=True)
+    return target
+
+
+def test_exact_checkout_accepts_committed_bytes_crlf_blobs_and_sparse_paths(tmp_path, monkeypatch):
+    isolated_git(tmp_path, monkeypatch)
+    checkout = ci_checkout(tmp_path, committed_source(tmp_path), "checkout")
+    assert not (checkout / "world").exists()
+    assert (checkout / "tools/kept_crlf.gd").read_bytes().count(b"\r\n") == 3
+    assert actions.runner_release.exact_checkout(checkout) == 5  # 2 native, release.gd, 2 tools (not world/)
+
+
+def test_exact_checkout_refuses_the_windows_images_line_ending_conversion(tmp_path, monkeypatch):
+    # The windows-2025 image: core.autocrlf=true in Git's system config, nothing in the global config.
+    isolated_git(tmp_path, monkeypatch, system="[core]\n\tautocrlf = true\n")
+    source = committed_source(tmp_path)
+    converted = ci_checkout(tmp_path, source, "converted")
+    assert (converted / "native/client_runtime/CMakeLists.txt").read_bytes().count(b"\r\n") == 2
+    with pytest.raises(ValueError, match=r"core\.autocrlf=true.*git config --global core\.autocrlf false"):
+        actions.runner_release.exact_checkout(converted)
+    # The bytes alone refuse too, once the setting is gone (or set by something the check does not read).
+    subprocess.run(["git", "-C", str(converted), "config", "core.autocrlf", "false"], check=True)
+    with pytest.raises(ValueError, match=r"^4 checked-out files differ from their committed blobs \(first: "
+                                         r"native/client_runtime/CMakeLists.txt, native/client_runtime/"
+                                         r"client_runtime.gdextension.in, src/updates/release.gd\)"):
+        actions.runner_release.exact_checkout(converted)
+    # The workflows' first step, in the runner's global config, before the checkout: exact bytes.
+    for command in actions.runner_release.EXACT_CHECKOUT_STEPS:
+        subprocess.run(shlex.split(command), check=True)
+    fixed = ci_checkout(tmp_path, source, "fixed")
+    assert actions.runner_release.exact_checkout(fixed) == 5
+
+
+def test_exact_checkout_refuses_changed_and_missing_checked_out_files(tmp_path, monkeypatch):
+    isolated_git(tmp_path, monkeypatch)
+    checkout = ci_checkout(tmp_path, committed_source(tmp_path), "checkout")
+    (checkout / "src/updates/release.gd").write_bytes(b"extends RefCounted\n")
+    (checkout / "tools/run.sh").unlink()
+    with pytest.raises(ValueError, match=r"^2 checked-out files differ .*first: src/updates/release.gd, "
+                                         r"tools/run.sh\)"):
+        actions.runner_release.exact_checkout(checkout)
+
+
+@pytest.mark.parametrize("check", ["dispatch", "workflow"])
+def test_every_release_job_entry_proves_its_checkout_holds_exact_bytes(tmp_path, monkeypatch, check):
+    """dispatch_commit (R2, repoint) and workflow_commit (the old workflow) run the guard on the tools'
+    repository right after the commit check, before any tool download, build or GitHub call."""
+    if check == "dispatch":
+        dispatch(tmp_path, monkeypatch)
+        entry = lambda: actions.dispatch_commit(actions.R2_WORKFLOW)  # noqa: E731
+    else:
+        context(tmp_path, monkeypatch)
+        entry = actions.workflow_commit
+    seen = []
+    monkeypatch.setattr(actions.runner_release, "exact_checkout", lambda repo: seen.append(repo) or 670)
+    assert entry() == SHA and seen == [actions.package.REPO]
+
+    def converted(repo):
+        raise ValueError("210 checked-out files differ from their committed blobs")
+    monkeypatch.setattr(actions.runner_release, "exact_checkout", converted)
+    with pytest.raises(ValueError, match="210 checked-out files differ"):
+        entry()
 
 
 @pytest.mark.parametrize("change", [

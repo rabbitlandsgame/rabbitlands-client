@@ -61,6 +61,7 @@ def workflow_commit() -> str:
     sha = os.environ.get("GITHUB_SHA", "")
     if not re.fullmatch(r"[0-9a-f]{40}", sha) or package.git("rev-parse", "HEAD").strip() != sha:
         raise ValueError("The checkout must match the workflow's exact source commit.")
+    runner_release.exact_checkout(package.REPO)
     return sha
 
 
@@ -257,7 +258,8 @@ def no_signing_key() -> None:
 
 
 def dispatch_commit(workflow: str) -> str:
-    """The dispatched commit of `workflow` (dispatch only, master or develop, exact checkout)."""
+    """The dispatched commit of `workflow` (dispatch only, master or develop, exact checkout: the
+    commit, with every checked-out file its committed bytes, runner_release.exact_checkout)."""
     ref = os.environ.get("GITHUB_REF")
     if (os.environ.get("GITHUB_ACTIONS") != "true"
             or os.environ.get("GITHUB_REPOSITORY") != release.REPOSITORY
@@ -269,6 +271,7 @@ def dispatch_commit(workflow: str) -> str:
     sha = os.environ.get("GITHUB_SHA", "")
     if not _COMMIT.fullmatch(sha) or package.git("rev-parse", "HEAD").strip() != sha:
         raise ValueError("The checkout must match the workflow's exact source commit.")
+    runner_release.exact_checkout(package.REPO)
     return sha
 
 
