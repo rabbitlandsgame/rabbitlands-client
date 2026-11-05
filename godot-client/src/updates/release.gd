@@ -18,6 +18,13 @@ const INSTALL_PHASE := "Installing verified game files"
 # verify_manifest; they still verify its bootstrap rows and replace themselves
 # with the helper it names, which reads it.
 const CODEC_SCHEMA := 3
+# Game content parts may also come from the desktop layout on Cloudflare R2
+# (schema 3 only, package_updates.gd). R2 is transport: every part is checked
+# against the SHA-256 in the signed manifest, as for GitHub. This base is
+# compiled in and never read from a manifest, the server or the environment.
+# The R2 release workflow looks for this exact line (desktop_r2.DESKTOP_ASSETS),
+# and test fixtures replace it only in their own copies.
+const DESKTOP_ASSETS := "https://assets.rabbitlandsgame.com/desktop/v1/"
 
 # Godot's ZIPReader uses 32-bit minizip seek/tell callbacks on Windows,
 # even in a 64-bit export. Read our bounded ZIP entries through FileAccess
@@ -242,6 +249,19 @@ static func shared_download(row: Dictionary, repository: String, kind := "pkg", 
 	var filename := "/RabbitLands-%s-%s.%s" % [kind, row.sha256, extension]
 	return row.get("url") == prefix + filename or (kind == "pkg" and extension == "zip.part" and row.get("url") == prefix + "-" + str(row.sha256).left(1) + filename)
 
+static func r2_part(row: Variant) -> bool:
+	# The one R2 form of a content part: DESKTOP_ASSETS + "parts/<sha256>.bin",
+	# named by its own signed SHA-256. No other host, prefix, query or spelling.
+	return row is Dictionary and valid_hash(row.get("sha256")) and row.get("url") is String and row.url == DESKTOP_ASSETS + "parts/" + str(row.sha256) + ".bin"
+
+static func r2_manifest_url(platform: String, sha256: String) -> String:
+	# An immutable copy of a signed manifest, named by the SHA-256 of its envelope.
+	return DESKTOP_ASSETS + "manifests/%s/%s.json" % [platform, sha256]
+
+static func pointer_url(platform: String) -> String:
+	# The signed live pointer of a platform (read by discovery, W1b).
+	return DESKTOP_ASSETS + "channels/live/%s.json" % platform
+
 static func verify_envelope(envelope: Dictionary, identity: Dictionary) -> Dictionary:
 	if update_owner(identity) != "github":
 		return {"error": "This installation is updated by its distribution service."}
@@ -301,6 +321,24 @@ static func check_file(path: String, size: int, digest: String) -> bool:
 	var length := file.get_length()
 	file.close()
 	return length == size and FileAccess.get_sha256(path) == digest
+
+static func move_file(source: String, target: String) -> Error:
+	# Moves a verified file, such as an online setup download leaving its {tmp}
+	# for the update cache (tools/install_client_payload.gd, HOOK-B8). On one
+	# volume a rename keeps a single copy on disk; across volumes, or when the
+	# rename fails, it copies and then removes the source. A linked source is
+	# copied, never moved, so the cache holds a plain file. The caller checks
+	# the target's size and SHA-256 again before using it. Godot's Windows
+	# rename deletes an existing target first, so a missing source must never
+	# reach it.
+	if not FileAccess.file_exists(source):
+		return ERR_FILE_NOT_FOUND
+	if not is_link(source) and DirAccess.rename_absolute(source, target) == OK:
+		return OK
+	var error := DirAccess.copy_absolute(source, target)
+	if error == OK and not is_link(source):
+		DirAccess.remove_absolute(source)
+	return error
 
 static func remove_tree(path: String, stop := Callable()) -> Error:
 	# Never follow a symlink/junction out of an updater-owned directory.

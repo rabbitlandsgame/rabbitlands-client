@@ -1,6 +1,9 @@
 extends SceneTree
 const Release = preload("res://src/updates/release.gd")
 const Packages = preload("res://src/updates/package_updates.gd")
+const Download = preload("res://src/updates/package_download.gd")
+# The shipped base. Only fixture projects replace it, in their own copies.
+const PRODUCTION_ASSETS := "https://assets.rabbitlandsgame.com/desktop/v1/"
 var _failures := 0
 var _key: CryptoKey
 var _root := ""
@@ -405,6 +408,202 @@ func check_codec_schema() -> void:
 	full.fill(7)
 	expect(Packages.decode_chunk(full.compress(FileAccess.COMPRESSION_ZSTD), Release.CHUNK_BYTES) == full, "a full 8 MiB chunk did not round-trip")
 
+func r2_release(schema: int, packages: int, parts_per_package := 1) -> Dictionary:
+	# A package manifest validate() accepts: `packages` one-file packages whose
+	# parts all use the R2 form under the compiled base.
+	var commit := "b".repeat(40)
+	var version := "RabbitLands-Windows-20261104-bbbbbbbbb"
+	var github := "https://github.com/o/r/releases/download/client-%s/" % commit
+	var rows: Array = []
+	var all_parts: Array = []
+	for index in packages:
+		var parts: Array = []
+		for slice in parts_per_package:
+			var digest := "a%063x" % (index * 16 + slice + 1)
+			parts.append({"url": Release.DESKTOP_ASSETS + "parts/" + digest + ".bin", "size": 10, "sha256": digest})
+		rows.append({"id": "p%05d" % index, "sha256": "c".repeat(64), "size": 10 * parts_per_package, "unpacked_size": 1,
+			"file_count": 1, "files": [{"path": "app/p%05d.bin" % index, "size": 1, "sha256": "d".repeat(64)}], "parts": parts})
+		all_parts.append_array(parts)
+	return {"schema": schema, "bootstrap_schema": 1, "commit": commit, "platform": "windows", "repository": "o/r",
+		"version": version, "packages": rows, "size": 10 * parts_per_package * packages, "unpacked_size": packages,
+		"file_count": packages, "parts": all_parts, "sha256": "c".repeat(64),
+		"updater": {"url": github + version + "-updater.exe", "size": 5, "sha256": "c".repeat(64)},
+		"uninstall": {"url": github + version + "-uninstall.exe", "size": 5, "sha256": "c".repeat(64)}}
+
+func with_part_url(release: Dictionary, url: String) -> Dictionary:
+	# The first part of the first package, and its row in the release's part
+	# list, moved to url.
+	var changed := release.duplicate(true)
+	changed.packages[0].parts[0].url = url
+	changed.parts[0].url = url
+	return changed
+
+func check_r2_rows() -> void:
+	# W1a: content parts may come from R2, only in the derived form under the
+	# compiled base and only in schema 3. Helpers stay on GitHub.
+	expect(Release.DESKTOP_ASSETS == PRODUCTION_ASSETS, "the shipped R2 base changed: " + Release.DESKTOP_ASSETS)
+	var digest := "e".repeat(64)
+	var good := {"url": PRODUCTION_ASSETS + "parts/" + digest + ".bin", "size": 1, "sha256": digest}
+	expect(Release.r2_part(good), "the derived R2 part form was refused")
+	var other := "f".repeat(64)
+	var upper := "E".repeat(64)
+	var refused := [PRODUCTION_ASSETS + "parts/" + other + ".bin", PRODUCTION_ASSETS.replace("https://", "http://") + "parts/" + digest + ".bin",
+		"https://127.0.0.1:8443/desktop/v1/parts/" + digest + ".bin", "https://127.0.0.1/desktop/v1/parts/" + digest + ".bin",
+		"https://localhost/desktop/v1/parts/" + digest + ".bin", PRODUCTION_ASSETS.replace("/v1/", "/v2/") + "parts/" + digest + ".bin",
+		"https://assets.rabbitlandsgame.com/browser/assets/" + digest + ".bin", "https://assets.rabbitlandsgame.com/desktop/selftest/x/parts/" + digest + ".bin",
+		PRODUCTION_ASSETS + "parts/" + digest + ".bin?x=1", PRODUCTION_ASSETS + "parts/" + digest + ".bin#x",
+		PRODUCTION_ASSETS + "parts/" + upper + ".bin", PRODUCTION_ASSETS + "parts//" + digest + ".bin",
+		PRODUCTION_ASSETS + "parts/" + digest + ".zip", PRODUCTION_ASSETS + "parts/../parts/" + digest + ".bin",
+		PRODUCTION_ASSETS + "parts/" + digest + ".bin ", PRODUCTION_ASSETS.to_upper() + "parts/" + digest + ".bin",
+		"https://assets.rabbitlandsgame.com.example/desktop/v1/parts/" + digest + ".bin", "https://x@assets.rabbitlandsgame.com/desktop/v1/parts/" + digest + ".bin",
+		"https://assets.rabbitlandsgame.com:443/desktop/v1/parts/" + digest + ".bin", PRODUCTION_ASSETS + digest + ".bin",
+		"https://github.com/o/r/releases/download/client-assets/RabbitLands-pkg-" + other + ".zip.part"]
+	for url: String in refused:
+		expect(not Release.r2_part({"url": url, "size": 1, "sha256": digest}), "an R2 part form was accepted: " + url)
+	for row: Variant in [{"url": PRODUCTION_ASSETS + "parts/" + upper + ".bin", "sha256": upper}, {"url": 7, "sha256": digest},
+			{"sha256": digest}, {"url": good.url}, [good.url], good.url, null]:
+		expect(not Release.r2_part(row), "an invalid R2 part row was accepted: %s" % [row])
+	expect(Release.r2_manifest_url("windows", digest) == PRODUCTION_ASSETS + "manifests/windows/" + digest + ".json", "the R2 manifest URL changed")
+	expect(Release.pointer_url("linux") == PRODUCTION_ASSETS + "channels/live/linux.json", "the R2 pointer URL changed")
+	# The schema rule: R2 rows in schema 3 only; GitHub rows in both.
+	var identity := {"repository": "o/r", "platform": "windows"}
+	var r2 := r2_release(3, 3, 2)
+	expect(not Packages.validate(r2, identity).has("error"), "schema 3 R2 rows were refused: %s" % Packages.validate(r2, identity).get("error", ""))
+	expect(Packages.validate(r2_release(2, 3, 2), identity).get("error", "") == "A package download is invalid.", "schema 2 accepted R2 rows")
+	var first: String = r2.parts[0].sha256
+	var shared := "https://github.com/o/r/releases/download/client-assets-%s/RabbitLands-pkg-%s.zip.part" % [first.left(1), first]
+	expect(not Packages.validate(with_part_url(r2, shared), identity).has("error"), "schema 3 refused a GitHub row beside R2 rows")
+	var github_only := with_part_url(r2_release(2, 1), shared)
+	expect(not Packages.validate(github_only, identity).has("error"), "schema 2 refused a GitHub row")
+	for url: String in refused:
+		var moved := url.replace(digest, first).replace(upper, first.to_upper())
+		expect(Packages.validate(with_part_url(r2, moved), identity).get("error", "") == "A package download is invalid.", "schema 3 accepted a part at " + moved)
+	for kind: String in ["updater", "uninstall"]:
+		var helper := r2.duplicate(true)
+		helper[kind].url = PRODUCTION_ASSETS + "parts/" + str(helper[kind].sha256) + ".bin"
+		expect(Packages.validate(helper, identity).get("error", "") == "The updater or uninstaller download is invalid.", "an R2 %s row was accepted" % kind)
+	# Limits: 2000 packages and 2000 parts in all (the R2 release tools' cap).
+	expect(not Packages.validate(r2_release(3, 2000), identity).has("error"), "2000 packages were refused")
+	expect(Packages.validate(r2_release(3, 2001), identity).get("error", "") == "The package list is invalid.", "2001 packages were accepted")
+	expect(not Packages.validate(r2_release(3, 1000, 2), identity).has("error"), "2000 parts were refused")
+	expect(Packages.validate(r2_release(3, 667, 3), identity).get("error", "") == "The package list is invalid.", "2001 parts were accepted")
+	# Signed: JSON turns numbers into floats; verify_manifest dispatches schema 3.
+	var verified := Release.verify_manifest(envelope(r2), _identity)
+	expect(not verified.has("error") and Release.package_manifest(verified), "a signed schema 3 manifest with R2 rows was refused: %s" % verified.get("error", ""))
+	expect(Release.verify_manifest(envelope(r2_release(2, 3, 2)), _identity).get("error", "") == "A package download is invalid.", "a signed schema 2 manifest with R2 rows was accepted")
+	expect(Release.verify_manifest(envelope(with_part_url(r2, "https://127.0.0.1:8443/desktop/v1/parts/" + first + ".bin")), _identity).has("error"), "the production rules accepted a local part")
+
+func scripted_fetch(actions: Array, content: String, calls: Array) -> Callable:
+	# A transport stand-in: each call takes the next action. "ok" writes the
+	# part's bytes, "garbage" as many other bytes, "partial" a cut transfer,
+	# "drop" no reply; a number is that HTTP status; "copy" fails without one.
+	return func(url: String, path: String, _limit: int) -> Dictionary:
+		calls.append({"url": url, "stale": FileAccess.file_exists(path)})
+		var action: String = str(actions.pop_front()) if not actions.is_empty() else "ok"
+		if action == "ok":
+			write(path, content)
+			return {}
+		if action == "garbage":
+			write(path, "x".repeat(content.length()))
+			return {}
+		if action == "partial":
+			write(path, content.left(3))
+			return {"error": "The update download failed.", "status": 200, "result": HTTPRequest.RESULT_BODY_SIZE_LIMIT_EXCEEDED}
+		if action == "drop":
+			return {"error": "The update download failed.", "status": 0, "result": HTTPRequest.RESULT_CONNECTION_ERROR}
+		if action == "copy":
+			return {"error": "A verified download could not be copied."}
+		write(path, "<html>status page</html>")
+		return {"error": "The update download failed.", "status": int(action), "result": HTTPRequest.RESULT_SUCCESS}
+
+func check_part_retries() -> void:
+	# The per-part retry rule (design 5.5), with zero waits and no network.
+	var content := "signed part bytes"
+	var part := {"url": PRODUCTION_ASSETS + "parts/" + content.sha256_text() + ".bin", "size": content.length(), "sha256": content.sha256_text()}
+	var folder := _root + "-retries"
+	DirAccess.make_dir_recursive_absolute(folder)
+	var path := folder.path_join(str(part.sha256) + ".part")
+	var worker := func(callable: Callable) -> Variant: return callable.call()
+	var failed := "The update download failed."
+	var cases := [[["ok"], "", 1], [["503", "ok"], "", 2], [["429", "drop", "ok"], "", 3], [["403", "ok"], "", 2],
+		[["408", "500", "ok"], "", 3], [["partial", "ok"], "", 2], [["garbage", "ok"], "", 2], [["garbage", "503", "ok"], "", 3],
+		[["503", "503", "503", "ok"], failed, 3], [["drop", "drop", "drop"], failed, 3],
+		[["404", "ok"], Download.MISSING_ERROR, 1], [["410"], Download.MISSING_ERROR, 1], [["503", "404"], Download.MISSING_ERROR, 2],
+		[["garbage", "garbage"], Download.VERIFICATION_ERROR, 2], [["garbage", "503", "garbage"], Download.VERIFICATION_ERROR, 3],
+		[["400", "ok"], failed, 1], [["copy", "ok"], "A verified download could not be copied.", 1]]
+	for case: Array in cases:
+		DirAccess.remove_absolute(path)
+		var calls: Array = []
+		var waits: Array = []
+		var actions: Array = case[0].duplicate()
+		var error: String = await Download.download_part(part, path, scripted_fetch(actions, content, calls), worker, Callable(), [0.0, 0.0],
+			func(seconds: float) -> void: waits.append(seconds))
+		var label := "%s" % [case[0]]
+		expect(error == case[1], "%s ended with \"%s\", not \"%s\"" % [label, error, case[1]])
+		expect(calls.size() == case[2], "%s made %d attempts, not %d" % [label, calls.size(), case[2]])
+		expect(waits.size() == calls.size() - 1, "%s waited %d times for %d attempts" % [label, waits.size(), calls.size()])
+		expect(calls.all(func(attempt: Dictionary) -> bool: return not attempt.stale and attempt.url == part.url), "%s reused a stale file or changed the URL: %s" % [label, calls])
+		expect(not FileAccess.file_exists(path + ".tmp"), "%s left a temporary file" % label)
+		expect(Release.check_file(path, int(part.size), part.sha256) == (error == ""), "%s kept the wrong file" % label)
+	# The schedule: at once, then after each wait; no waits means one attempt.
+	var calls: Array = []
+	var waits: Array = []
+	DirAccess.remove_absolute(path)
+	var error: String = await Download.download_part(part, path, scripted_fetch(["503", "503", "ok"], content, calls), worker, Callable(), [0.0, 0.0],
+		func(seconds: float) -> void: waits.append(seconds))
+	expect(error == "" and waits == [0.0, 0.0], "the retry waits were not reported in order: %s" % [waits])
+	calls.clear()
+	DirAccess.remove_absolute(path)
+	error = await Download.download_part(part, path, scripted_fetch(["503", "ok"], content, calls), worker, Callable(), [])
+	expect(error == failed and calls.size() == 1, "an empty wait list still retried")
+	# A partial file left by an interrupted run never seeds the first attempt.
+	calls.clear()
+	DirAccess.remove_absolute(path)
+	write(path + ".tmp", "stale partial")
+	error = await Download.download_part(part, path, scripted_fetch(["ok"], content, calls), worker, Callable(), [0.0, 0.0])
+	expect(error == "" and calls.size() == 1 and not calls[0].stale, "a stale partial download seeded the first attempt: %s" % [calls])
+	expect(Download.RETRY_WAITS_SEC == [5.0, 30.0], "the production retry waits are not 5 s then 30 s: %s" % [Download.RETRY_WAITS_SEC])
+	# Cancellation ends the attempts.
+	calls.clear()
+	DirAccess.remove_absolute(path)
+	error = await Download.download_part(part, path, scripted_fetch(["503", "ok"], content, calls), worker, func() -> bool: return calls.size() >= 1, [0.0, 0.0])
+	expect(error == Download.CANCELLED_ERROR and calls.size() == 1 and not FileAccess.file_exists(path + ".tmp"), "a cancelled download went on: %s" % error)
+	expect(not await Download.wait(10.0, func() -> bool: return true), "a cancelled wait did not end")
+	expect(await Download.wait(0.0), "a zero wait was refused")
+	# The classification the transports' statuses feed.
+	var table := [[{"status": 0, "result": HTTPRequest.RESULT_CANT_CONNECT}, true, false], [{"status": 0, "result": HTTPRequest.RESULT_TIMEOUT}, true, false],
+		[{"status": 200, "result": HTTPRequest.RESULT_BODY_SIZE_LIMIT_EXCEEDED}, true, false], [{"status": 200, "result": HTTPRequest.RESULT_DOWNLOAD_FILE_WRITE_ERROR}, false, false],
+		[{"status": 200, "result": HTTPRequest.RESULT_DOWNLOAD_FILE_CANT_OPEN}, false, false],
+		[{"status": 503, "result": HTTPRequest.RESULT_SUCCESS}, true, false], [{"status": 500, "result": HTTPRequest.RESULT_SUCCESS}, true, false],
+		[{"status": 429, "result": HTTPRequest.RESULT_SUCCESS}, true, false], [{"status": 403, "result": HTTPRequest.RESULT_SUCCESS}, true, false],
+		[{"status": 408, "result": HTTPRequest.RESULT_SUCCESS}, true, false], [{"status": 404, "result": HTTPRequest.RESULT_SUCCESS}, false, true],
+		[{"status": 404, "result": HTTPRequest.RESULT_BODY_SIZE_LIMIT_EXCEEDED}, false, true], [{"status": 410, "result": HTTPRequest.RESULT_SUCCESS}, false, true],
+		[{"status": 400, "result": HTTPRequest.RESULT_SUCCESS}, false, false], [{"status": 401, "result": HTTPRequest.RESULT_SUCCESS}, false, false],
+		[{}, false, false]]
+	for row: Array in table:
+		var result: Dictionary = row[0].duplicate()
+		result["error"] = "failed"
+		expect(Download.retryable(result) == row[1] and Download.missing(result) == row[2], "a fetch result was misclassified: %s" % [row])
+	# A request that could not start made no network attempt: final.
+	expect(not Download.retryable({"error": "The update download could not start."}), "a request that never started was retried")
+	Release.remove_tree(folder)
+
+func check_move_file() -> void:
+	# HOOK-B8: the online setup's helper moves a verified download from its
+	# {tmp} into the update cache instead of copying it (one copy on disk).
+	var folder := _root + "-move"
+	Release.remove_tree(folder)
+	var source := folder.path_join("tmp/" + "e".repeat(64) + ".bin")
+	var target := folder.path_join("cache/packages/" + "e".repeat(64) + ".part.tmp")
+	write(source, "verified part bytes")
+	write(target, "stale bytes")
+	expect(Release.move_file(source, target) == OK, "a verified download could not be moved")
+	expect(not FileAccess.file_exists(source), "a moved download stayed in setup's folder")
+	expect(FileAccess.get_file_as_string(target) == "verified part bytes", "a moved download lost its bytes or kept the stale file")
+	expect(Release.move_file(source, target) != OK, "a missing download was reported as moved")
+	expect(FileAccess.get_file_as_string(target) == "verified part bytes", "a failed move changed the cached file")
+	Release.remove_tree(folder)
+
 func _initialize() -> void:
 	_key = Crypto.new().generate_rsa(2048)
 	var a := "a".repeat(40)
@@ -476,6 +675,9 @@ func _initialize() -> void:
 	check_per_file_operations()
 	check_parallel_scan()
 	check_codec_schema()
+	check_r2_rows()
+	await check_part_retries()
+	check_move_file()
 	Release.remove_tree(_root)
 	print("Client update runtime checks: ", "PASS" if _failures == 0 else "FAIL")
 	quit(0 if _failures == 0 else 1)

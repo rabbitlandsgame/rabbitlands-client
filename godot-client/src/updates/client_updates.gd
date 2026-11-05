@@ -191,7 +191,8 @@ func _fetch(url: String, path := "", limit := Release.MAX_MANIFEST_BYTES) -> Dic
 	request.queue_free()
 	_request = null
 	if response[0] != HTTPRequest.RESULT_SUCCESS or response[1] != 200:
-		return {"error": "The update download failed."}
+		# The status and result decide a package part's retry (package_download.gd).
+		return {"error": "The update download failed.", "status": int(response[1]), "result": int(response[0])}
 	return {"body": response[3]}
 
 func _new_http_request() -> HTTPRequest:

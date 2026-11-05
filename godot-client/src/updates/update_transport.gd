@@ -10,8 +10,12 @@ const DOWNLOAD_CHUNK_BYTES := 1024 * 1024
 var _request: HTTPRequest
 var _thread: Thread
 
+# A failed request returns {"error", "status", "result"}: the HTTP status (0
+# without a reply) and the HTTPRequest result, which package downloads read to
+# decide on a retry (package_download.gd). A request that could not start made
+# no network attempt and returns only "error", which is never retried.
 func fetch(url: String, path := "", limit := Release.MAX_MANIFEST_BYTES) -> Dictionary:
-	_request = HTTPRequest.new()
+	_request = _new_http_request()
 	_request.use_threads = true
 	_request.accept_gzip = false
 	_request.timeout = 3600.0 if path != "" else 30.0
@@ -31,8 +35,14 @@ func fetch(url: String, path := "", limit := Release.MAX_MANIFEST_BYTES) -> Dict
 	_request.queue_free()
 	_request = null
 	if response[0] != HTTPRequest.RESULT_SUCCESS or response[1] != 200:
-		return {"error": "The update download failed. Check the internet connection and try again."}
+		return {"error": "The update download failed. Check the internet connection and try again.",
+			"status": int(response[1]), "result": int(response[0])}
 	return {"body": response[3]}
+
+# Every request starts here with the system's certificate checks. Only test
+# fixtures override it, to trust their local server's certificate.
+func _new_http_request() -> HTTPRequest:
+	return HTTPRequest.new()
 
 func worker(callable: Callable) -> Variant:
 	_thread = Thread.new()

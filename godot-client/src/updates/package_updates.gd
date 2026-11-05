@@ -61,12 +61,17 @@ static func validate(release: Dictionary, identity: Dictionary) -> Dictionary:
 				return {"error": "The game launch defaults are invalid."}
 	if release.get("repository") != identity.get("repository") or not release.get("version") is String or "/" in release.version or "\\" in release.version:
 		return {"error": "The package release identity is invalid."}
-	if not release.get("packages") is Array or release.packages.is_empty() or release.packages.size() > 850:
+	# At most 2000 packages, and 2000 parts in all (the R2 release tools refuse
+	# more for this reader). The R2 workflow reads this limit from this line.
+	if not release.get("packages") is Array or release.packages.is_empty() or release.packages.size() > 2000:
 		return {"error": "The package list is invalid."}
 	var base := "https://github.com/%s/releases/download/client-%s/" % [identity.repository, release.commit]
 	# Codecs only under schema 3: a schema 2 reader would unpack the frames
 	# as the file's bytes.
 	var codecs: bool = release.get("schema") == Release.CODEC_SCHEMA
+	# R2 part rows (Release.r2_part) only under schema 3 too: the release tools
+	# write them only there, and readers before this one refuse them.
+	var r2_rows := codecs
 	var seen: Dictionary = {}
 	var ids: Dictionary = {}
 	var total := 0
@@ -96,12 +101,14 @@ static func validate(release: Dictionary, identity: Dictionary) -> Dictionary:
 		for index in package.parts.size():
 			var part: Variant = package.parts[index]
 			var url := base + "%s.pkg.%s.zip.%03d" % [release.version, package.id, index + 1]
-			if not part is Dictionary or (part.get("url") != url and not Release.shared_download(part, identity.repository)) or not Release.valid_hash(part.get("sha256")) or not Release.positive_integer(part.get("size"), 256 * 1024 * 1024):
+			if not part is Dictionary or (part.get("url") != url and not Release.shared_download(part, identity.repository) and not (r2_rows and Release.r2_part(part))) or not Release.valid_hash(part.get("sha256")) or not Release.positive_integer(part.get("size"), 256 * 1024 * 1024):
 				return {"error": "A package download is invalid."}
 			packed += int(part.size)
 			parts.append(part)
 		if packed != int(package.size):
 			return {"error": "A package's download sizes do not agree."}
+		if parts.size() > 2000:
+			return {"error": "The package list is invalid."}
 		total += packed
 		unpacked += bytes
 		count += package.files.size()
