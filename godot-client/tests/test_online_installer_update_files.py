@@ -85,6 +85,10 @@ def test_uninstall_delete_covers_every_per_file_update_leftover(tmp_path):
     # Release.save_json writes <name>.tmp and renames it; a stop in between leaves the .tmp.
     for leftover in (journal, journal + ".tmp", ".eloria-update-journal.json", ".eloria-update-journal.json.tmp"):
         assert any(fnmatch.fnmatchcase(leftover, pattern) for pattern in files), leftover
+    # The install record (W1b) and the .tmp it is written through, named exactly (no wildcard).
+    record = updater_constant("INSTALL_RECORD")
+    for leftover in (record, record + ".tmp"):
+        assert leftover in files, leftover
     # The wildcard is anchored to the journal names: it cannot reach the install marker or game files.
     for kept in (".rabbitlands-install.json", "player-notes.tmp", "eloria-update-journal.tmp"):
         assert not any(fnmatch.fnmatchcase(kept, pattern) for pattern in files if "*" in pattern), kept

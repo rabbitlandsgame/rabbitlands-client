@@ -397,7 +397,8 @@ uninstaller when available, preserving Windows' shortcut/app-entry cleanup;
 otherwise a hidden native helper removes the files after the executable exits.
 The Inno uninstaller also removes what an interrupted update can leave:
 `.eloria-update-stage/`, `.eloria-update-backup/`, older updaters'
-`.eloria-previous/`, and the update journals with their temporary `.tmp` files.
+`.eloria-previous/`, the update journals with their temporary `.tmp` files, and
+the installed-release record `.rabbitlands-release.json` with its `.tmp`.
 Linux removes the recognized game folder directly. Player settings outside the
 installation are retained. Windows **Installed apps** can also uninstall an
 Inno installation.

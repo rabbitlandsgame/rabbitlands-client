@@ -68,10 +68,10 @@ def test_client_pointer_rules_match_the_release_tools():
 
 
 def test_inno_uninstall_removes_the_install_record():
+    # HOOK-W1b-1: an Inno uninstall removes the record and the .tmp it is written through.
     script = (CLIENT / "tools/package_client.py").read_text(encoding="utf-8")
-    if ".rabbitlands-release.json" not in script:
-        pytest.skip("package_client.py [UninstallDelete] does not list the install record yet (W1b hook for W2/C6).")
     assert 'Type: files; Name: "{{app}}\\\\.rabbitlands-release.json"' in script
+    assert 'Type: files; Name: "{{app}}\\\\.rabbitlands-release.json.tmp"' in script
 
 
 def public_pem(f):
