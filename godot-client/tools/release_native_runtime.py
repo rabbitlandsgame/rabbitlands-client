@@ -213,14 +213,20 @@ def remove_owned_work(directory, parent):
 
 
 def workspace_bytes(directory):
+    """Bytes in a native workspace, sampled while the build still writes it: a file the
+    compiler removes between the listing and its stat (cargo's temporary objects) no longer
+    takes space, so it is skipped rather than failing the build."""
     total = 0
     for root, folders, files in os.walk(directory):
         for name in folders:
             require(not (Path(root) / name).is_symlink(), "native workspace contains a linked directory")
         for name in files:
-            path = Path(root) / name
-            require(not path.is_symlink(), "native workspace contains a linked file")
-            total += path.stat().st_size
+            try:
+                info = (Path(root) / name).lstat()
+            except FileNotFoundError:
+                continue
+            require(not stat.S_ISLNK(info.st_mode), "native workspace contains a linked file")
+            total += info.st_size
     return total
 
 

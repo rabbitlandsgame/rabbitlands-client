@@ -312,6 +312,27 @@ class NativeBuilderTests(unittest.TestCase):
             build.run(["fixture"], checkpoint=budget)
         stopped.assert_called_once_with(child)
 
+    def test_workspace_sample_skips_a_file_the_running_build_removes(self):
+        # The budget sample walks the workspace while cargo still writes it. A local replay of the
+        # ci content leg failed on a temporary object cargo deleted between the listing and the stat
+        # (FileNotFoundError on ...\examples\digest_bench.<hash>.rcgu.o during "native Rust tests").
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "debug/examples").mkdir(parents=True)
+            (root / "debug/examples/kept.rlib").write_bytes(b"12345")
+            (root / "debug/examples/temp.rcgu.o").write_bytes(b"x" * 1000)
+            walk = os.walk
+
+            def walk_then_remove(top, *args, **kwargs):
+                for folder, folders, files in walk(top, *args, **kwargs):
+                    if "temp.rcgu.o" in files:
+                        (Path(folder) / "temp.rcgu.o").unlink()  # removed after the listing
+                    yield folder, folders, files
+
+            with mock.patch.object(release.os, "walk", side_effect=walk_then_remove):
+                self.assertEqual(release.workspace_bytes(root), 5)
+            self.assertEqual(release.workspace_bytes(root), 5)
+
     def test_nonzero_child_exit_cannot_be_accepted_by_budget_wrapper(self):
         child = mock.Mock()
         child.wait.return_value = 17
