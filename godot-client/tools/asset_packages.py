@@ -38,6 +38,27 @@ RELEASE_DESCRIPTOR_PATHS = frozenset({"app/client-release.json", "app/data/clien
 # a package of its own, pck-<name>, so a release re-downloads exactly the packs
 # whose bytes changed (a code-only release: none of them).
 CONTENT_PACK = re.compile(r"^app/packs/([a-z0-9][a-z0-9-]{0,62})\.pck$")
+# How many parts one build may write. Partitioned shared parts (the sixteen
+# client-assets-<hex> pools, and the R2 content set, whose URLs are rewritten
+# after the build) may number up to the R2-aware reader's cap,
+# desktop_r2.READER_CAP_W1A (W1a/W2, design Q10): smaller R2 parts and the AT-C3
+# sidecar packages need the room. One GitHub release holds at most 1,000 assets,
+# so a versioned release (shared=False) and the single legacy pool (shared=True)
+# keep the older bound, which leaves room for the installers and manifests.
+MAX_PARTS = 2000
+MAX_RELEASE_PARTS = 850
+CLIENT = Path(__file__).resolve().parents[1]
+
+
+def package_limit(source: Path = CLIENT) -> int:
+    """How many packages the updater in `source` reads: the smallest
+    `release.packages.size() > N` check in its package_updates.gd (850 before the
+    R2-aware reader, 2000 with it), never more than MAX_PARTS. build() writes no
+    more, so the updater and setup helper of this tree can read what it builds."""
+    import release_manifest
+    path = Path(source) / "src/updates/package_updates.gd"
+    text = path.read_text(encoding="utf-8") if path.is_file() else ""
+    return min(MAX_PARTS, release_manifest.reader_capabilities("", text).package_limit)
 
 
 def package_id(relative: str) -> str:
@@ -109,7 +130,16 @@ def write_payload(stage: Path, files: list[dict], output) -> None:
 
 
 def build(stage: Path, base: str, *, accept_part=None, budget=None, shared=False,
-          previous_packages=None, reuse_package=None) -> list[dict]:
+          previous_packages=None, reuse_package=None, part_bytes: int | None = None) -> list[dict]:
+    """Package rows for the stage's app/ and eloria-assets/ files.
+
+    part_bytes: the size of each new part (default client_release.PART_BYTES;
+    client_release.R2_PART_BYTES for content packed for R2). A reused package
+    keeps its earlier parts, whatever their size.
+    """
+    part_bytes = client_release.PART_BYTES if part_bytes is None else part_bytes
+    if type(part_bytes) is not int or not 0 < part_bytes <= client_release.MAX_PART_BYTES:
+        raise ValueError("Invalid package part size.")
     groups = defaultdict(list)
     seen = set()
     for root in ("app", "eloria-assets"):
@@ -132,11 +162,13 @@ def build(stage: Path, base: str, *, accept_part=None, budget=None, shared=False
             packages.append(previous)
             continue
         archive = stage.parent / f"{stage.name}.pkg.{name}.zip"
-        with PartWriter(archive, base, client_release.PART_BYTES, accept_part, budget, shared=shared) as writer:
+        with PartWriter(archive, base, part_bytes, accept_part, budget, shared=shared) as writer:
             write_payload(stage, files, writer)
         packages.append({"id": name, "sha256": writer.sha256, "size": writer.size,
                          "unpacked_size": sum(f["size"] for f in files),
                          "file_count": len(files), "files": files, "parts": writer.parts})
-    if not packages or sum(len(p["parts"]) for p in packages) > 850:
+    parts = sum(len(p["parts"]) for p in packages)
+    if (not packages or len(packages) > package_limit()
+            or parts > (MAX_PARTS if shared == "partitioned" else MAX_RELEASE_PARTS)):
         raise ValueError("Invalid package count; leave room for installers and platform metadata.")
     return packages

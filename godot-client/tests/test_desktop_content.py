@@ -442,7 +442,8 @@ def test_url_rewrite_is_idempotent_and_ci_keeps_pool_urls(tmp_path, repo, key, b
             assert part["url"] == r2.github_pool_url(part["sha256"])
             assert (tmp_path / "out-ci" / "parts" / f"RabbitLands-pkg-{part['sha256']}.zip.part").is_file()
     r2.validate_set(ci_set, public_key_sha256=sha(key.public), source="ci", reader_cap=r2.READER_CAP_W1A)
-    # Same files, same bytes: the ci rows differ from the r2 rows only by URL.
+    # Same files, same bytes: the ci rows differ from the r2 rows only by URL (every fixture
+    # package is one part, below both part sizes).
     assert r2.rewrite_part_urls(ci_set["packages"]) == packages
     with pytest.raises(dc.ContentError):
         run_pack(stage, tmp_path / "out-ci", repo, build=build, source="ci", previous="none", probe=FakeProbe())
@@ -1015,3 +1016,20 @@ def test_tool_source_holds_no_machine_paths_and_no_writes_to_r2():
     # The only bucket call is the uploader's reuse check (S3 HEAD through its guarded client).
     assert source.count("up.verify_reused(") == 1 and "bucket.head" not in source.replace("self.bucket", "")
     assert source.isascii()
+
+
+def test_r2_parts_use_the_r2_part_size_and_ci_parts_keep_theirs(tmp_path, repo, key, build, monkeypatch):
+    """R2 content is cut into client_release.R2_PART_BYTES parts (64 MiB, design Q10);
+    GitHub-hosted (ci) content keeps client_release.PART_BYTES. Same package bytes."""
+    import client_release
+    noise = b"".join(hashlib.sha256(str(i).encode()).digest() for i in range(1000))  # 32,000 bytes, incompressible
+    stage = make_stage(tmp_path / "dist", repo.commit, "windows", key,
+                       content={**CONTENT, "app/RabbitLands.pck": b"GDPC" + noise})
+    monkeypatch.setattr(client_release, "R2_PART_BYTES", 4096)
+    hosted = set_of(run_pack(stage, tmp_path / "out", repo, build=build))
+    ci = set_of(run_pack(stage, tmp_path / "out-ci", repo, build=build, source="ci"))
+    pack = next(row for row in hosted["packages"] if row["id"] == "client")
+    assert len(pack["parts"]) > 1 and max(part["size"] for part in pack["parts"]) == 4096
+    assert all(part["url"] == r2.part_url(part["sha256"]) for part in pack["parts"])
+    ci_pack = next(row for row in ci["packages"] if row["id"] == "client")
+    assert len(ci_pack["parts"]) == 1 and ci_pack["sha256"] == pack["sha256"]

@@ -606,9 +606,11 @@ Choose the minimum checks for the behavior being changed. For example:
   (`RL_OLDER_UPDATER_REFS`, default `origin/develop`; add the live release's
   commit to check it too), must refuse the manifest, delete `pending.json` and
   still replace its helpers. The exported self-replacement check includes a
-  schema 3 release and the migration from that older updater. The schema 3
-  Inno setup check skips until the setup helper and the packaging writer's
-  setup script both handle schema 3.
+  schema 3 release and the migration from that older updater. The Inno setup
+  checks (they need Inno Setup 6) install schema 2, schema 3, and schema 3 with
+  every part at its derived R2 URL through the real setup helper;
+  `test_online_installer_r2.py` covers the setup script, its disk space and a
+  tampered or missing R2 part against a local mirror of `desktop/v1/`.
 - Renderer launch arguments and the relaunch handshake:
   `godot --headless --path godot-client --script res://tests/test_launch_renderer.gd`.
   The runtime runner below also runs it in its updater-only project, which proves

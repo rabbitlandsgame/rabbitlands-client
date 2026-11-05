@@ -1304,15 +1304,36 @@ def test_inno_single_file_setup_installs_schema_3_packages(fixture):
     check_inno_setup(fixture, 3)
 
 
-def check_inno_setup(f, schema):
+def test_inno_single_file_setup_installs_r2_hosted_schema_3_packages(fixture):
+    check_inno_setup(fixture, 3, r2=True)
+
+
+def r2_hosted(release, served):
+    """The release with every package part at its derived R2 URL (desktop/v1/parts/<sha256>.bin),
+    each part's bytes also served under that basename from `served`."""
+    import desktop_r2
+    hosted = json.loads(json.dumps(release))
+    hosted["packages"] = desktop_r2.rewrite_part_urls(hosted["packages"])
+    hosted["parts"] = [part for package in hosted["packages"] for part in package["parts"]]
+    for old, new in zip(release["parts"], hosted["parts"]):
+        shutil.copyfile(served / old["url"].rsplit("/", 1)[1], served / new["url"].rsplit("/", 1)[1])
+    return hosted
+
+
+def check_inno_setup(f, schema, r2=False):
     """Fresh install, a no-op repair and a selective repair through the real Inno setup."""
     iscc = package_client.find_iscc(None)
     if os.name != "nt" or not iscc:
         pytest.skip("Inno Setup 6 is needed for this native integration check.")
     if schema == 3 and not installer_reads_schema_3():
         pytest.skip("tools/install_client_payload.gd still sends schema 3 down the schema 1 path (hook pending).")
+    if r2 and not package_client.setup_helper_reads(CLIENT)["r2_rows"]:
+        pytest.skip("src/updates/release.gd does not read R2 part rows yet (W1a).")
     stage = f["stage"]
     release = f["payload"] if schema == 2 else manifest(stage, f["newer"], schema=3, build=codec_build())
+    if r2:
+        release = r2_hosted(release, f["tmp_path"])
+        assert all(part["url"].endswith(f'/desktop/v1/parts/{part["sha256"]}.bin') for part in release["parts"])
     if not setup_queues_packages(stage, release):
         pytest.skip("package_client.online_installer_script does not queue packages for this schema yet (W2-UD-05p).")
     logs = f["tmp_path"] / "inno-logs"
@@ -1367,6 +1388,52 @@ def check_inno_setup(f, schema):
     install()
     actor = next(p for p in release["packages"] if p["id"].startswith("actors-"))
     assert f["downloads"] == ["/" + actor["parts"][0]["url"].rsplit("/", 1)[1]]
+
+
+def test_setup_helper_moves_verified_downloads_out_of_setup_tmp(fixture):
+    """HOOK-B8: the embedded setup helper moves each verified download from setup's
+    {tmp} into its cache (one copy on disk), which is what lets package_client ask
+    for the lower peak space. It runs as setup runs it, on an R2-hosted schema-3
+    release, with --parts at a folder this test keeps (setup deletes its {tmp})."""
+    f = fixture
+    reads = package_client.setup_helper_reads(CLIENT)
+    if not (reads["schema3"] and reads["r2_rows"]):
+        pytest.skip("This tree's setup helper does not read R2-hosted schema 3 yet.")
+    assert reads["moves_downloads"], "install_client_payload.gd lacks MOVES_VERIFIED_DOWNLOADS (HOOK-B8)"
+    stage = f["stage"]
+    release = r2_hosted(manifest(stage, f["newer"], schema=3, build=codec_build()), f["tmp_path"])
+    branding = stage / "app/assets/branding"
+    branding.mkdir(parents=True)
+    for name in ("rabbitlands-icon.ico", "rabbitlands-mark-64.png"):
+        shutil.copyfile(CLIENT / "assets/branding" / name, branding / name)
+    (stage.parent / f"{stage.name}-windows.json").write_text(json.dumps(signed(release, f["key"])))
+    logs = f["tmp_path"] / "helper-logs"
+    logs.mkdir()
+
+    def run_godot(godot, args, log, timeout):
+        result = subprocess.run([str(godot), "--log-file", str(log.with_suffix(".godot.log")), *args],
+                                capture_output=True, text=True, timeout=timeout)
+        log.write_text(result.stdout + result.stderr)
+        assert result.returncode == 0 and "SCRIPT ERROR" not in log.read_text(), log.read_text()
+
+    client_release.export_installer_helper(stage, f["godot"], CLIENT, package_client.EXPORT_PRESETS, run_godot, logs)
+    parts = f["tmp_path"] / "setup-tmp"
+    parts.mkdir()
+    for part in release["parts"]:
+        name = part["url"].rsplit("/", 1)[1]
+        shutil.copyfile(f["tmp_path"] / name, parts / name)
+    installed = f["tmp_path"] / "helper-installed"
+    log = logs / "helper-run.log"
+    result = subprocess.run([str(f["godot"]), "--headless", "--log-file", str(log), "--path",
+                             str(logs / "installer-project"), "--", "--root", str(installed), "--parts", str(parts)],
+                            env=f["env"], capture_output=True, text=True, timeout=120)
+    output = result.stdout + result.stderr
+    assert result.returncode == 0 and "SCRIPT ERROR" not in output, output
+    assert "Rabbit Lands installation verified." in output, output
+    assert json.loads((installed / "app/client-release.json").read_text())["commit"] == "b" * 40
+    # Every verified part left setup's folder: none was copied, none fetched again.
+    assert sorted(path.name for path in parts.iterdir()) == []
+    assert f["downloads"] == []
 
 
 def test_downloaded_updater_launches_game_with_loose_assets(fixture):

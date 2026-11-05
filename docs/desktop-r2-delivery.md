@@ -733,7 +733,7 @@ rediscovery.
 | Signed manifest envelope | at most 15 MiB at signing (released clients accept 16 MiB) |
 | Pointer | at most 64 KiB; R2-aware clients wait at most 15 s for it, then use the alias |
 | Content set | at most 32 MiB |
-| Part | at most 256 MiB, one PUT each (64 MiB from the zstd re-encode release) |
+| Part | R2 parts are cut at 64 MiB, GitHub-hosted parts at 256 MiB; readers accept up to 256 MiB; one PUT each |
 | Packages plus parts | 850 for today's readers; 2000 with the R2 reader |
 | Files per release | 100,000 |
 | Root files | 64 |

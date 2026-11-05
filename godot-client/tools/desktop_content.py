@@ -765,6 +765,7 @@ def pack(stage, *, platform: str, out, previous: str = "none", previous_set_file
             raise ContentError("godot", "the --godot editor is not a file")
         editor_sha256 = _digest(Path(godot))
     import asset_packages
+    import client_release
     import shared_release_assets
 
     commit = stage_commit(stage)
@@ -820,8 +821,11 @@ def pack(stage, *, platform: str, out, previous: str = "none", previous_set_file
             return False
         moment = time.monotonic()
         try:
+            # R2 parts are 64 MiB (design Q10); GitHub-hosted (ci) parts keep 256 MiB. A reused
+            # package keeps its earlier parts.
             built = asset_packages.build(view, shared_release_assets.base(r2.REPOSITORY), shared="partitioned",
-                                         previous_packages=dict(chosen), reuse_package=reuse_package)
+                                         previous_packages=dict(chosen), reuse_package=reuse_package,
+                                         part_bytes=client_release.R2_PART_BYTES if source == "r2" else None)
         except ValueError as error:
             raise ContentError("package-build", str(error)[:200]) from None
         timings["build"] = round(time.monotonic() - moment, 3)

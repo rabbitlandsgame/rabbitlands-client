@@ -210,6 +210,12 @@ ASSET_REF = re.compile(r"res://\.\./(eloria-assets/[^\"'\s]+)")
 # uninstaller entry on it.
 INSTALLER_APP_ID = "{6B1E9F4C-3A52-4D8E-9C71-5E0B2F8A4D17}"
 INSTALLER_MUTEX = "RabbitLandsSetup-" + INSTALLER_APP_ID.strip("{}")
+# The online setup (make_online_installer) installs these manifest schemas:
+# 1 (one archive), 2 and 3 (packages; 3 may carry zstd chunks, UD-05u). It
+# accepts derived R2 part rows (desktop/v1/parts/<sha256>.bin) in schema 3.
+# desktop_release_ci.installer_preconditions reads both declarations.
+ONLINE_INSTALLER_SCHEMAS = (1, 2, 3)
+ONLINE_INSTALLER_R2_ROWS = True
 
 # Leave local editing snapshots and review art in the repository, not in a
 # release. These are folder defaults: an explicit client/manifest dependency
@@ -5185,13 +5191,35 @@ Filename: "{{app}}\\{launch_binary}"; Parameters: "{launch_parameters}"; Working
     return stage.parent / f"{stage.name}-setup.exe"
 
 
-def online_installer_space(payload: dict) -> int:
-    """Extra free space (bytes) the online setup asks for: its peak disk use plus 512 MiB.
+# The setup helper's own declarations, read from the scripts that
+# client_release.export_installer_helper embeds (make_online_installer):
+# - the HOOK-B8 gate that sends schemas 2 and 3 to the package path;
+# - MOVES_VERIFIED_DOWNLOADS: the helper moves each verified download out of
+#   setup's {tmp} into the update cache (a rename on one volume, a copy across
+#   volumes), so the download is on the installation's volume once.
+SETUP_HELPER_PACKAGE_GATE = "Release.package_manifest(manifest)"
+SETUP_HELPER_MOVES_DOWNLOADS = re.compile(r"^const MOVES_VERIFIED_DOWNLOADS := true[ \t]*(?:#.*)?$", re.M)
 
-    Setup keeps its verified downloads in {tmp} until it exits, and its helper
-    copies each part into the update cache, so the download is on disk twice.
-    A schema-2 release then joins each multi-part package beside its parts (one
-    package at a time, parts deleted afterwards) and only then unpacks into
+
+def online_package_manifest(payload: dict) -> bool:
+    """Release.package_manifest for the setup script: schemas 2 and 3 list packages
+    (by value, as Godot reads JSON numbers as floats)."""
+    schema = payload.get("schema")
+    return type(schema) in (int, float) and schema in (2, 3)
+
+
+def online_installer_space(payload: dict, *, moves_downloads: bool = False) -> int:
+    """Extra free space (bytes) the online setup asks for: its peak disk use on the
+    installation's volume plus 512 MiB.
+
+    Setup keeps its verified downloads in {tmp} until it exits. A helper that
+    copies each part into the update cache holds the download twice. One that
+    moves it (moves_downloads, a package manifest only) holds it once on the
+    installation's volume: a move on one volume empties {tmp}, and across
+    volumes the copy in the cache is the only one there.
+    A package release (schema 2 or 3; zstd chunks change no size here) then
+    joins each multi-part package beside its parts (one package at a time,
+    parts deleted afterwards) and only then unpacks into
     `.eloria-update-stage/`, which is renamed into place. The join and the
     unpacked files never coexist, so the peak adds the larger of the unpacked
     files and the largest joined package, not both (measured for UD-04i).
@@ -5200,19 +5228,32 @@ def online_installer_space(payload: dict) -> int:
     case. Schema 1 keeps its original formula.
     """
     size, unpacked = int(payload["size"]), int(payload["unpacked_size"])
-    if payload.get("schema") != 2:
+    if not online_package_manifest(payload):
         return unpacked + 2 * size + 512 * 1024**2
     joined = max((int(p["size"]) for p in payload["packages"] if len(p["parts"]) > 1), default=0)
-    return 2 * size + max(unpacked, joined) + 512 * 1024**2
+    downloads = size if moves_downloads else 2 * size
+    return downloads + max(unpacked, joined) + 512 * 1024**2
+
+
+def _pascal(text: str) -> str:
+    """An Inno Pascal string literal."""
+    return "'" + str(text).replace("'", "''") + "'"
+
+
+def _download_line(part: dict, indent: str) -> str:
+    # The basename is the URL's last segment: `<sha256>.bin` for an R2 part,
+    # the asset name for a GitHub part. The setup helper looks for exactly
+    # `url.get_file()` in {tmp}.
+    return f"{indent}DownloadPage.Add({_pascal(part['url'])}, {_pascal(part['url'].rsplit('/', 1)[1])}, {_pascal(part['sha256'])});"
 
 
 def online_installer_script(stage: Path, helper: Path, version: str,
-                            launch_args: list[str], payload: dict) -> str:
+                            launch_args: list[str], payload: dict, *, moves_downloads: bool = False) -> str:
     root_files = "\n".join(
         f'Source: "{path}"; DestDir: "{{app}}"; Flags: ignoreversion'
         for path in sorted(stage.iterdir()) if path.is_file() and path.name != MARKER)
     package_checks = ""
-    if payload.get("schema") == 2:
+    if online_package_manifest(payload):
         checks, queues = [], []
         for index, package in enumerate(payload["packages"]):
             lines = [f"function PackageCurrent{index}: Boolean;", "begin", "  Result := False;"]
@@ -5222,7 +5263,7 @@ def online_installer_script(stage: Path, helper: Path, version: str,
             lines.extend(["  Result := True;", "end;"])
             checks.append("\n".join(lines))
             queues.append(f"  if not PackageCurrent{index} then begin")
-            queues.extend(f"    DownloadPage.Add('{part['url']}', '{part['url'].rsplit('/', 1)[1]}', '{part['sha256']}');" for part in package["parts"])
+            queues.extend(_download_line(part, "    ") for part in package["parts"])
             queues.append("  end;")
         package_checks = """function InstalledFileMatches(const Name, Hash: String): Boolean;
 begin
@@ -5238,11 +5279,9 @@ end;
 """ + "\n\n".join(checks)
         downloads = "\n".join(queues)
     else:
-        downloads = "\n".join(
-            f"  DownloadPage.Add('{part['url']}', '{part['url'].rsplit('/', 1)[1]}', '{part['sha256']}');"
-            for part in payload["parts"])
+        downloads = "\n".join(_download_line(part, "  ") for part in payload["parts"])
     parameters = ("-- --launch-only " + " ".join(launch_args)).strip().replace('"', '""')
-    space = online_installer_space(payload)
+    space = online_installer_space(payload, moves_downloads=moves_downloads)
     return f'''[Setup]
 AppId={INSTALLER_APP_ID.replace('{', '{{')}
 AppName=Rabbit Lands
@@ -5387,32 +5426,97 @@ end;
 '''
 
 
+def setup_helper_reads(source: Path) -> dict:
+    """What the setup helper exported from `source` installs, from the exact scripts
+    client_release.export_installer_helper embeds: schema 3 (release.gd declares
+    CODEC_SCHEMA and install_client_payload.gd asks Release.package_manifest),
+    derived R2 rows (release.gd declares DESKTOP_ASSETS, W1a), its package limit
+    (package_updates.gd) and whether it moves verified downloads."""
+    import release_manifest
+
+    def text(relative: str) -> str:
+        path = Path(source) / relative
+        return path.read_text(encoding="utf-8") if path.is_file() else ""
+    helper = text("tools/install_client_payload.gd")
+    reader = release_manifest.reader_capabilities(text("src/updates/release.gd"),
+                                                  text("src/updates/package_updates.gd"))
+    return {"schema3": reader.schema3 and SETUP_HELPER_PACKAGE_GATE in helper,
+            "r2_rows": reader.r2_rows, "package_limit": reader.package_limit,
+            "moves_downloads": SETUP_HELPER_MOVES_DOWNLOADS.search(helper) is not None}
+
+
+def online_installer_problem(payload: dict, reads: dict) -> str | None:
+    """Why the setup helper (setup_helper_reads) could not install this manifest, or None."""
+    schema, parts = payload.get("schema"), payload.get("parts")
+    if type(schema) is not int or schema not in ONLINE_INSTALLER_SCHEMAS:
+        return "The online installer does not support this manifest schema."
+    if not isinstance(parts, list) or not parts or not all(isinstance(part, dict) for part in parts):
+        return "The release download list is invalid."
+    if schema >= 2:
+        packages = payload.get("packages")
+        if not isinstance(packages, list) or not packages or not all(
+                isinstance(package, dict) and isinstance(package.get("parts"), list) for package in packages):
+            return "The release package list is invalid."
+        # Setup queues each package's parts; they must be exactly the checked list.
+        if [part for package in packages for part in package["parts"]] != parts:
+            return "The release download list does not match its packages."
+        if len(packages) > reads["package_limit"]:
+            return "The release has more packages than the setup helper reads."
+    import desktop_r2
+    if any(desktop_r2.part_url_matches(part, "r2") for part in parts):
+        if schema != 3:
+            return "R2 download rows need a schema 3 manifest."
+        if not reads["r2_rows"]:
+            return "The setup helper cannot read R2 download rows yet (W1a)."
+    if schema == 3 and not reads["schema3"]:
+        return "The setup helper cannot install manifest schema 3 yet (UD-05u, HOOK-B8)."
+    return None
+
+
 def make_online_installer(stage: Path, godot: Path, iscc: Path, version: str,
-                           launch_args: list[str], logs: Path) -> Path:
+                           launch_args: list[str], logs: Path, *, verified=None) -> Path:
+    """setup.exe for the signed Windows manifest beside the stage.
+
+    Every download row must be the commit's GitHub release, a client-assets
+    pool or (schema 3) a derived R2 part URL, and its bytes known to equal the
+    signed row: verified(row) when given (for example rows CI checked from R2),
+    then STORAGE.part_matches, else the local file beside the stage.
+    """
     manifest = stage.parent / f"{stage.name}-windows.json"
     payload = json.loads(base64.b64decode(json.loads(manifest.read_text(encoding="utf-8"))["payload"], validate=True))
     metadata = json.loads((stage / "app/client-release.json").read_text(encoding="utf-8"))
     if payload["commit"] != metadata["commit"] or payload["platform"] != "windows":
         raise PackageError("The online installer manifest does not match the staged client.")
+    source = STORAGE.source if STORAGE else CLIENT
+    reads = setup_helper_reads(source)
+    problem = online_installer_problem(payload, reads)
+    if problem:
+        raise PackageError(problem)
     base = f"https://github.com/{metadata['repository']}/releases/download/client-{metadata['commit']}/"
+    import desktop_r2
     import shared_release_assets as shared
     for part in payload["parts"]:
         name = part["url"].rsplit("/", 1)[-1]
-        if (not part["url"].startswith(base) and not shared.matches(part, metadata["repository"])) or Path(name).name != name:
+        hosted = payload["schema"] == 3 and desktop_r2.part_url_matches(part, "r2")
+        if (not part["url"].startswith(base) and not shared.matches(part, metadata["repository"])
+                and not hosted) or Path(name).name != name:
             raise PackageError("Unexpected online installer download URL.")
-        path = stage.parent / name
+        if verified is not None and verified(part):
+            continue
         if STORAGE and STORAGE.part_matches(name, part):
             continue
-        if path.stat().st_size != part["size"] or client_release.digest(path) != part["sha256"]:
+        path = stage.parent / name
+        if (not path.is_file() or path.stat().st_size != part["size"]
+                or client_release.digest(path) != part["sha256"]):
             raise PackageError("An online installer download changed after signing.")
-    helper = client_release.export_installer_helper(stage, godot, STORAGE.source if STORAGE else CLIENT,
-                                                   EXPORT_PRESETS, run_godot, logs)
+    helper = client_release.export_installer_helper(stage, godot, source, EXPORT_PRESETS, run_godot, logs)
     (stage.parent / f"{stage.name}-online-install.txt").write_text(
         "Rabbit Lands will download and verify its game files during setup.\n\n"
         f"Download size: approximately {payload['size'] / 1024**3:.1f} GiB. An internet connection is required.\n"
         "You do not need to download the accompanying update files yourself.\n", encoding="utf-8")
     script = logs / "online-installer.iss"
-    script.write_text(online_installer_script(stage, helper, version, launch_args, payload), encoding="utf-8-sig")
+    script.write_text(online_installer_script(stage, helper, version, launch_args, payload,
+                                              moves_downloads=reads["moves_downloads"]), encoding="utf-8-sig")
     log("compiling small online installer")
     with (logs / "iscc-online.log").open("w", encoding="utf-8", errors="replace") as output:
         result = subprocess.run([str(iscc), str(script)], stdout=output, stderr=subprocess.STDOUT)

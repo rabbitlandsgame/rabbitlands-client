@@ -55,14 +55,23 @@ def native_inputs() -> dict:
 
 
 def helper_sources(*, reader: bool) -> dict:
+    """This checkout's helper inputs, with (reader) or without the R2 reader's
+    declarations (W1a: DESKTOP_ASSETS and the 2000 package limit)."""
     files = {}
     for name in ("release.gd", "launcher.gd", "launch_options.gd", "package_updates.gd", "package_download.gd",
                  "update_transport.gd", "bootstrap.gd", "uninstall.gd", "startup_update.gd"):
         data = (GODOT / "src/updates" / name).read_bytes()
-        if reader and name == "release.gd":
-            data += b"\n" + fx.SCHEMA3_LINE.encode() + fx.R2_LINE.encode()
-        if reader and name == "package_updates.gd":
-            data = data.replace(b"release.packages.size() > 850", b"release.packages.size() > 2000")
+        if name == "release.gd":
+            text = data.decode("utf-8")
+            if not reader:
+                text = text.replace(fx.R2_LINE, "")
+            for line in (fx.SCHEMA3_LINE, fx.R2_LINE) if reader else ():
+                if line not in text:
+                    text += "\n" + line
+            data = text.encode("utf-8")
+        if name == "package_updates.gd":
+            old, new = (b"> 850", b"> 2000") if reader else (b"> 2000", b"> 850")
+            data = data.replace(b"release.packages.size() " + old, b"release.packages.size() " + new)
         files[f"godot-client/src/updates/{name}"] = data
     for name in ("rabbitlands-icon.png", "rabbitlands-icon.ico", "rabbitlands-mark-64.png"):
         files[f"godot-client/assets/branding/{name}"] = (GODOT / "assets/branding" / name).read_bytes()
@@ -836,16 +845,30 @@ def test_linux_installer_is_the_checksum_verifying_download_script(repo, checkou
 def test_windows_setup_waits_for_the_w2_and_b8_hooks(repo, checkout, key, tmp_path, monkeypatch):
     import package_client
     envelope, _, _ = signed(repo, checkout, key, tmp_path, "windows")
+    _, release = rm.verify(envelope.read_bytes(), key.public, limit=r2.MAX_ENVELOPE_BYTES)
+    assert release["schema"] == rm.SCHEMA_CODEC and any(p["url"].startswith(r2.DESKTOP_ASSETS) for p in release["parts"])
+    # W2 (package_client's online setup) and HOOK-B8 (the commit's setup helper) are both present.
+    ci.installer_preconditions(release, checkout, repo.commit)
+    # An online setup script without schema 3 (before W2) is refused.
+    monkeypatch.setattr(package_client, "ONLINE_INSTALLER_SCHEMAS", (1, 2))
     with pytest.raises(ci.CiError) as error:
         ci.installers(platform="windows", commit=repo.commit, repo=checkout, envelope=envelope,
                       exec_dir=tmp_path / "exec-windows", out=tmp_path / "i", work=tmp_path / "iw",
                       verify_with_godot=False)
     assert error.value.code == "installer-schema"
-    monkeypatch.setattr(package_client, "ONLINE_INSTALLER_SCHEMAS", (1, 2, 3), raising=False)
+    monkeypatch.undo()
+    # So is one that does not accept R2 rows.
+    monkeypatch.setattr(package_client, "ONLINE_INSTALLER_R2_ROWS", False)
     with pytest.raises(ci.CiError) as error:
-        ci.installers(platform="windows", commit=repo.commit, repo=checkout, envelope=envelope,
-                      exec_dir=tmp_path / "exec-windows", out=tmp_path / "i", work=tmp_path / "iw2",
-                      verify_with_godot=False)
+        ci.installer_preconditions(release, checkout, repo.commit)
+    assert error.value.code == "installer-r2"
+    monkeypatch.undo()
+    # And a commit whose setup helper lacks the schema-3 gate (before HOOK-B8).
+    real_show = rm._git_show
+    monkeypatch.setattr(rm, "_git_show", lambda repo_, commit, path: (
+        "" if path.endswith("install_client_payload.gd") else real_show(repo_, commit, path)))
+    with pytest.raises(ci.CiError) as error:
+        ci.installer_preconditions(release, checkout, repo.commit)
     assert error.value.code == "installer-helper"
 
 

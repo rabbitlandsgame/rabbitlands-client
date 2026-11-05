@@ -16,7 +16,16 @@ from typing import BinaryIO
 from release_storage import PartWriter
 
 CHUNK_BYTES = 8 * 1024 * 1024
+# GitHub-hosted parts (the versioned release and the client-assets pools), the
+# schema-1 tarball and the offline installer's slices.
 PART_BYTES = 256 * 1024 * 1024
+# Package parts on Cloudflare R2 (desktop/v1/parts/<sha256>.bin, design Q10).
+# A failed part restarts from zero, so the smaller part bounds a retry, and it
+# stays far below the edge's 512 MB cache limit. Content packed for R2 passes
+# it to asset_packages.build(part_bytes=...); GitHub-hosted parts keep PART_BYTES.
+R2_PART_BYTES = 64 * 1024 * 1024
+# The largest part the updater accepts (package_updates.gd validate).
+MAX_PART_BYTES = 256 * 1024 * 1024
 MAX_ANCESTORS = 100000
 
 

@@ -4,6 +4,10 @@ const Release = preload("res://src/updates/release.gd")
 const Packages = preload("res://src/updates/package_updates.gd")
 const Download = preload("res://src/updates/package_download.gd")
 const Transport = preload("res://src/updates/update_transport.gd")
+# HOOK-B8: each verified download leaves setup's {tmp} for the update cache
+# by Release.move_file (a rename on one volume, a copy across volumes), so
+# it is on disk once. package_client.online_installer_space reads this line.
+const MOVES_VERIFIED_DOWNLOADS := true
 var _lock := ""
 var _owns_lock := false
 var _lock_owner: FileAccess
@@ -123,7 +127,8 @@ func _install_packages(release: Dictionary, identity: Dictionary) -> String:
 		var source := parts.path_join(url.get_file())
 		var valid: Variant = await transport.worker(func() -> bool: return Release.check_file(source, int(part.size), part.sha256))
 		if valid == true:
-			return {} if DirAccess.copy_absolute(source, target) == OK else {"error": "A verified download could not be copied."}
+			# Download.prepare checks the target's size and SHA-256 again before using it.
+			return {} if Release.move_file(source, target) == OK else {"error": "A verified download could not be copied."}
 		return await transport.fetch(url, target, limit)
 	var prepared_plan: Dictionary = {}
 	error = await Download.prepare(root, release, fetch, transport.worker, _progress, Callable(), prepared_plan)
