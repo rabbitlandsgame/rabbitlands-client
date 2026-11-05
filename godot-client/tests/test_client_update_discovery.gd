@@ -14,6 +14,9 @@ const PRODUCTION_ASSETS := "https://assets.rabbitlandsgame.com/desktop/v1/"
 const ALIAS := "https://github.com/rabbitlandsgame/rabbitlands-client/releases/latest/download/RabbitLands-windows.json"
 const POINTER := PRODUCTION_ASSETS + "channels/live/windows.json"
 const S := 1762300000
+# A server notice address that would add `--uninstall --confirm` to the
+# updater's Windows command line if it were passed on.
+const INJECTED_URL := "https://github.com/rabbitlandsgame/rabbitlands-client/releases/download/client-x/RabbitLands-windows.json\"\t--uninstall\t--confirm\t\""
 var A := "a".repeat(40)
 var B := "b".repeat(40)
 var C := "c".repeat(40)
@@ -315,6 +318,18 @@ func check_urls_and_arguments() -> void:
 			PRODUCTION_ASSETS + "channels/live/windows.json", "https://assets.example.com/desktop/v1/manifests/windows/%s.json" % digest, 5, null]:
 		expect(not Release.target_manifest_url(url, REPOSITORY, "windows"), "an unknown manifest source was accepted: %s" % [str(url)])
 		expect(Release.r2_manifest_sha256(url, "windows") == "", "a non-derived R2 name was read: %s" % [str(url)])
+	# A server's GitHub address reaches the updater's command line, where
+	# Windows splits a quoted argument at an embedded quote and a tab: only two
+	# plain names (<tag>/<name>.json) are accepted, so no option can be added.
+	var github := "https://github.com/%s/releases/download/" % REPOSITORY
+	expect(Release.target_manifest_url(github + "client-%s/RabbitLands-Windows-20261104-bbbbbbbbb-windows.json" % B, REPOSITORY, "windows"), "a versioned GitHub manifest name was refused")
+	for url: String in [INJECTED_URL, github + "client-%s/a\"b.json" % B, github + "client-%s/a\tb.json" % B, github + "client-%s/a%%22.json" % B,
+			github + "client-%s/a.json?x=1" % B, github + "client-%s/a.json#x" % B, github + "client-%s\\a.json" % B, github + "client-%s/x/a.json" % B,
+			github + "a.json", github + "client-%s//a.json" % B, github + "../a.json", github + "./a.json", github + "client-%s/.json" % B,
+			github + "client-%s/a.bin" % B, github + "client-%s/" % B, github + "-x/a.json", github + "client-%s/a.json\u00a0" % B]:
+		expect(not Release.target_manifest_url(url, REPOSITORY, "windows"), "an address that needs quoting was accepted: %s" % [url.c_escape()])
+		expect(Launcher.update_request(PackedStringArray(["--target-commit=" + B, "--target-manifest-url=" + url])).has("error"), "the updater accepted an address that needs quoting: %s" % [url.c_escape()])
+	expect(not Release.target_manifest_url(github.replace(REPOSITORY, "") + "client-%s/a.json" % B, "", "windows"), "an address was accepted without a repository")
 	# Updater-only requests never reach the game or a saved launch context.
 	var args := PackedStringArray(["--server=game.example", "--target-commit=" + B, "--target-manifest-url=" + r2, "--handoff-hops=2", "--client-debug"])
 	expect(LaunchOptions.without_launcher_flags(args) == PackedStringArray(["--server=game.example", "--client-debug"]), "updater requests leaked to the game")
@@ -590,6 +605,21 @@ func check_game_start() -> void:
 		startup._accept_update()
 		expect(("--target-commit=" + D) in startup.started and ("--target-manifest-url=" + required_copy.url) in startup.started, "the updater was not asked for the required commit: %s" % [startup.started])
 		startup.free()
+	# A notice address that needs quoting never reaches the updater's command
+	# line: the alias still finds the required release, and the updater is
+	# asked only for the commit (no option can be added through the address).
+	installed(A, S)
+	transport = new_transport()
+	transport.responses[ALIAS] = bytes_of(signed(required))
+	startup = probe(transport, A)
+	startup.finished = true
+	startup._transport = transport
+	await startup.server_target(D, INJECTED_URL)
+	expect(transport.urls() == [ALIAS] and is_instance_valid(startup.dialog) and startup.published.commit == D, "the required release was not offered through the alias: %s" % [transport.urls()])
+	startup._accept_update()
+	expect(("--target-commit=" + D) in startup.started and not startup.started.has("--uninstall") and not Array(startup.started).any(func(argument: String) -> bool: return argument.begins_with("--target-manifest-url=") or "\"" in argument or "\t" in argument),
+		"a server address reached the updater's command line: %s" % [startup.started])
+	startup.free()
 	# ... never with a refusal, for a contained commit, a mismatching R2 copy or an older release.
 	installed(A, S)
 	transport = new_transport()

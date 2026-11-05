@@ -329,7 +329,9 @@ release T on. The publication rule is in the tools.
 - **Server-target rediscovery.** When the server requires a commit that the
   installed game does not contain, rediscovery skips the pointer and looks for that
   exact signed release: the GitHub alias, then the policy's `manifest_url` (a GitHub
-  release download, or an R2 manifest copy whose bytes must hash to its name). A
+  release download named `<tag>/<name>.json` with plain names only, because the
+  address is passed on the updater's command line, or an R2 manifest copy whose
+  bytes must hash to its name). A
   frozen or forgotten pointer therefore never locks players out. Rediscovery still
   refuses an older release, respects a player who declined the update, and retries
   at most every five minutes.

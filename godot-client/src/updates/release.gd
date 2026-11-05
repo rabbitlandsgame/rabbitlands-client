@@ -46,6 +46,10 @@ const INSTALL_RECORD := ".rabbitlands-release.json"
 # The highest pointer sequence this installation has accepted (update cache).
 const POINTER_RECORD := "release-pointer.json"
 const OLDER_RELEASE_MESSAGE := "This update is older than the installed game."
+# The characters of a plain URL name (plain_name): a server's manifest address
+# travels on the updater's command line, so it holds nothing that needs quoting.
+const PLAIN_NAME_START := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+const PLAIN_NAME_LETTERS := PLAIN_NAME_START + "._-"
 
 # Godot's ZIPReader uses 32-bit minizip seek/tell callbacks on Windows,
 # even in a 64-bit export. Read our bounded ZIP entries through FileAccess
@@ -293,11 +297,31 @@ static func r2_manifest_sha256(url: Variant, platform: String) -> String:
 
 static func target_manifest_url(url: Variant, repository: String, platform: String) -> bool:
 	# Where a server notice may point for its required commit: a GitHub release
-	# download of this repository, or an immutable R2 manifest copy in its
-	# derived form. The manifest itself is still verified in full.
+	# download of this repository (<tag>/<name>.json, plain names only), or an
+	# immutable R2 manifest copy in its derived form. The manifest itself is
+	# still verified in full. The address also reaches the updater's command
+	# line (--target-manifest-url=), and Windows splits a quoted argument at an
+	# embedded quote followed by a tab, so a server could add updater options:
+	# only letters, digits, ".", "_" and "-" are accepted in the two names.
 	if not https_url(url):
 		return false
-	return url.begins_with("https://github.com/%s/releases/download/" % repository) or r2_manifest_sha256(url, platform) != ""
+	if r2_manifest_sha256(url, platform) != "":
+		return true
+	var prefix := "https://github.com/%s/releases/download/" % repository
+	if repository.is_empty() or not url.begins_with(prefix):
+		return false
+	var names: PackedStringArray = url.trim_prefix(prefix).split("/")
+	return names.size() == 2 and plain_name(names[0]) and plain_name(names[1]) and names[1].ends_with(".json")
+
+static func plain_name(value: String) -> bool:
+	# One URL path segment that needs no quoting or escaping: letters, digits,
+	# ".", "_" and "-", starting with a letter or digit (so never "." or "..").
+	if value.is_empty() or value.length() > 255 or not value[0] in PLAIN_NAME_START:
+		return false
+	for letter in value:
+		if not letter in PLAIN_NAME_LETTERS:
+			return false
+	return true
 
 static func parse_body(bytes: PackedByteArray) -> Variant:
 	# A downloaded JSON body, or null. Quiet: a challenge page is no log error.

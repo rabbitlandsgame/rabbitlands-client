@@ -147,7 +147,11 @@ declined an update in this session, the game looks for exactly that release and
 
 1. the GitHub alias;
 2. the policy's `manifest_url`: a GitHub release download of this repository, or an
-   R2 manifest copy, whose bytes must hash to the SHA-256 in its name.
+   R2 manifest copy, whose bytes must hash to the SHA-256 in its name. A GitHub
+   address must be exactly `<tag>/<name>.json` after `releases/download/`, both
+   names made only of letters, digits, `.`, `_` and `-`. The address is passed
+   on the updater's command line, and on Windows a quote and a tab inside it
+   would add updater options, so any other address is not used.
 
 Only a signed manifest of exactly that commit, not older than the installed
 release, is offered: "The game server requires Rabbit Lands release <commit>."
