@@ -34,6 +34,8 @@ class Probe extends "res://src/updates/startup_update.gd":
         notice_changed.connect(func(message: String) -> void: notice = message)
     func _source_identity() -> Dictionary:
         return identity
+    func _install_root() -> String:
+        return "" # no installed-release record or pointer mark for this probe
     func can_auto_update() -> bool:
         return automatic
     func _new_transport() -> Node:
@@ -120,7 +122,7 @@ def test_startup_consent_and_launch_mode_roundtrip(fixture):
     assert declined["prompted"] and declined["declined"]
     assert "compatibility issues" in declined["notice"] and "as soon as possible" in declined["notice"]
     assert not declined["started"] and not declined["closed"]
-    assert f["downloads"] == ["/RabbitLands-windows.json"]
+    assert f["downloads"] == ["/windows.json", "/RabbitLands-windows.json"]
     accepted = run_probe(f, installed, published, action="accept", automatic=True)
     assert accepted["closed"] and "--wait-for-pid" in accepted["started"]
     assert "--resume-client" in accepted["started"]
@@ -169,7 +171,7 @@ def test_invalid_signed_release_history_does_not_prompt_or_download(fixture):
     published["ancestors"] = ["not-a-commit"]
     result = run_probe(f, installed, published, automatic=True)
     assert not result["prompted"] and not result["started"]
-    assert f["downloads"] == ["/RabbitLands-windows.json"]
+    assert f["downloads"] == ["/windows.json", "/RabbitLands-windows.json"]
 
 
 def test_tampered_signature_does_not_prompt_or_download(fixture):
@@ -177,7 +179,7 @@ def test_tampered_signature_does_not_prompt_or_download(fixture):
     installed, published = history(f)
     result = run_probe(f, installed, published, automatic=True, tamper=True)
     assert not result["prompted"] and not result["started"]
-    assert f["downloads"] == ["/RabbitLands-windows.json"]
+    assert f["downloads"] == ["/windows.json", "/RabbitLands-windows.json"]
 
 
 def test_legacy_published_release_uses_signed_manifest_and_commit_comparison(fixture):
@@ -186,8 +188,8 @@ def test_legacy_published_release_uses_signed_manifest_and_commit_comparison(fix
     published.pop("ancestors")
     result = run_probe(f, installed, published, automatic=True, legacy=True)
     assert result["prompted"] and result["declined"]
-    assert len(f["downloads"]) == 4
-    assert f["downloads"][:3] == ["/RabbitLands-windows.json", "/latest", "/legacy-windows.json"]
+    assert len(f["downloads"]) == 5
+    assert f["downloads"][:4] == ["/windows.json", "/RabbitLands-windows.json", "/latest", "/legacy-windows.json"]
 
 
 @pytest.mark.skipif(os.name != "nt", reason="Native Windows export and process handoff")

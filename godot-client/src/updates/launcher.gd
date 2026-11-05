@@ -11,6 +11,10 @@ const BACKUP_CLEANUP_DELAY_MSEC := 60000
 # A game that exits with LaunchOptions.RELAUNCH_EXIT_CODE (to restart into the
 # renderer its settings now ask for) is started again this many times.
 const MAX_RELAUNCHES := 1
+# Updater handovers in one update before this one stops: two generations that
+# discover different releases (each naming the other's helper) cannot loop.
+const MAX_HANDOFF_HOPS := 3
+const HOPS_MESSAGE := "Updater versions disagree; try again later."
 var _root := ""
 var _guard := Bootstrap.new()
 var _transport
@@ -99,18 +103,27 @@ func _ready() -> void:
 		_fail(error)
 		return
 	_progress("Checking for game and updater updates", 0, 1)
-	var url := "https://github.com/%s/releases/latest/download/RabbitLands-%s.json" % [identity.repository, identity.platform]
+	var request := update_request(args)
+	if request.has("error"):
+		_fail(request.error)
+		return
 	var manifest_index := args.find("--install-manifest")
 	var fetched: Dictionary
 	if manifest_index >= 0:
+		# The installer's own signed manifest: no discovery and no downgrade
+		# guard (the player chose this installer, as with setup).
 		var file := FileAccess.open(args[manifest_index + 1], FileAccess.READ) if manifest_index + 1 < args.size() else null
 		if file == null or file.get_length() > Release.MAX_MANIFEST_BYTES:
 			_fail("The installer's signed release information is missing or too large.")
 			return
-		fetched = {"body": file.get_buffer(file.get_length())}
+		var bytes := file.get_buffer(file.get_length())
 		file.close()
+		fetched = {"body": bytes, "sha256": Release.bytes_sha256(bytes)}
 	else:
-		fetched = await _transport.fetch(url)
+		fetched = await _discover(identity, request.target, request.target_url)
+		if fetched.get("fatal", false):
+			_fail(fetched.error)
+			return
 	if not fetched.has("error"):
 		var parsed: Variant = JSON.parse_string(fetched.body.get_string_from_utf8())
 		var envelope: Dictionary = parsed if parsed is Dictionary else {}
@@ -129,24 +142,29 @@ func _ready() -> void:
 			args[manifest_index + 1] = saved
 		var matched: Variant = await _transport.worker(func() -> bool: return Bootstrap.helpers_match(_root, release, identity))
 		if matched != true:
+			if int(request.hops) >= MAX_HANDOFF_HOPS:
+				_fail(HOPS_MESSAGE)
+				return
 			_progress("Updating the updater", 0, 1)
 			error = await Bootstrap.prepare_helpers(_root, release, _transport.fetch, _transport.worker)
 			if error == "":
-				error = Bootstrap.start_handoff(_root, envelope, args)
+				# The next updater discovers again with the same request.
+				error = Bootstrap.start_handoff(_root, envelope, handoff_arguments(args, int(request.hops) + 1))
 			if error != "":
 				_fail(error)
 				return
 			_guard.release_lock()
 			get_tree().quit()
 			return
-		release = Release.verify_manifest(envelope, identity)
+		release = Release.verify_manifest(envelope, identity, request.target)
 		if release.has("error") or not Release.package_manifest(release):
 			_fail(str(release.get("error", "The game package format is unsupported.")))
 			return
 		var prepared_plan: Dictionary = {}
+		var manifest_sha256: String = fetched.get("sha256", "")
 		error = await Download.prepare(_root, release, _transport.fetch, _transport.worker, _progress, Callable(), prepared_plan)
 		if error == "":
-			error = await _transport.worker(func() -> String: return Packages.install(_root, release, identity, _progress, prepared_plan.get("checked")))
+			error = await _transport.worker(func() -> String: return Packages.install(_root, release, identity, _progress, prepared_plan.get("checked"), manifest_sha256))
 		if error != "":
 			_fail(error)
 			return
@@ -166,6 +184,7 @@ func _ready() -> void:
 	await _launch_game(identity, args)
 
 func _launch_game(identity: Dictionary, args: PackedStringArray) -> void:
+	args = LaunchOptions.without_launcher_flags(args)
 	if "--install-update" in args:
 		args.remove_at(args.find("--install-update"))
 	var manifest_index := args.find("--install-manifest")
@@ -302,6 +321,102 @@ func _handoff(root: String, manifest: String) -> void:
 		_fail(error)
 	else:
 		get_tree().quit()
+
+## The update request in the updater's arguments: a server's required commit
+## (--target-commit=<40 hex>) with an optional manifest URL for it
+## (--target-manifest-url=<url>, a GitHub release download or an R2 manifest
+## copy), and the handovers so far (--handoff-hops=<n>). Returns {target,
+## target_url, hops} or {error}. The arguments stay in place for handovers.
+static func update_request(args: PackedStringArray) -> Dictionary:
+	var request := {"target": "", "target_url": "", "hops": 0}
+	var trust := Bootstrap.trust()
+	for argument: String in args:
+		if argument.begins_with("--target-commit="):
+			request.target = argument.trim_prefix("--target-commit=")
+			if not Release.valid_commit(request.target):
+				return {"error": "The requested game version is invalid."}
+		elif argument.begins_with("--target-manifest-url="):
+			request.target_url = argument.trim_prefix("--target-manifest-url=")
+			if not Release.target_manifest_url(request.target_url, str(trust.get("repository", "")), str(trust.get("platform", ""))):
+				return {"error": "The requested game version's release information is not from a known source."}
+		elif argument.begins_with("--handoff-hops="):
+			var hops := argument.trim_prefix("--handoff-hops=")
+			if not hops.is_valid_int() or hops.length() > 3 or int(hops) < 0:
+				return {"error": HOPS_MESSAGE}
+			request.hops = int(hops)
+	if request.target_url != "" and request.target == "":
+		return {"error": "The requested game version is invalid."}
+	return request
+
+## `args` for the next updater after a handover: the same request, one hop more.
+static func handoff_arguments(args: PackedStringArray, hops: int) -> PackedStringArray:
+	var next := PackedStringArray()
+	for argument: String in args:
+		if not argument.begins_with("--handoff-hops="):
+			next.append(argument)
+	next.append("--handoff-hops=%d" % hops)
+	return next
+
+## Finds the signed release to install: the R2 pointer first (15 s), then the
+## GitHub alias (all that older updaters read), then, for a server's required
+## commit, the notice's manifest URL. The pointer must verify, be no older than
+## this installation has seen, and name a manifest whose SHA-256, commit,
+## version and sequence it states; otherwise the alias is used. A manifest
+## older than the installed release is refused unless a signed rollback pointer
+## named exactly it. Returns {body, sha256, via, rollback} or {error, fatal}.
+func _discover(identity: Dictionary, target: String, target_url: String) -> Dictionary:
+	var installed := Release.read_json(_root.path_join("app/client-release.json"))
+	var installed_sequence := Release.installed_sequence(_root, installed.get("commit"))
+	var pointer: Dictionary = await Release.fetch_pointer(_transport, identity, Release.pointer_high_water(_root, installed.get("commit")))
+	if pointer.has("error"):
+		print("Release discovery: the R2 pointer was not used (%s)" % pointer.error)
+	else:
+		Release.store_pointer_sequence(_root, int(pointer.sequence))
+		if target != "" and not Release.same_text(pointer.target.commit, target):
+			print("Release discovery: the R2 pointer names %s, not the requested %s" % [str(pointer.target.commit).left(9), target.left(9)])
+		else:
+			var pointed: Dictionary = await Release.fetch_pointed_manifest(_transport, pointer)
+			var release: Dictionary = pointed if pointed.has("error") else Bootstrap.verify(pointed.envelope, identity)
+			var problem: String = release.get("error", "")
+			if problem == "" and not Release.matches_pointer(release, pointer):
+				problem = "The pointed release information does not match its pointer."
+			if problem == "":
+				problem = Release.downgrade_error(release, installed_sequence, pointer.rollback)
+			if problem == "":
+				print("Release discovery: R2 pointer %d%s, commit %s" % [int(pointer.sequence), " (rollback)" if pointer.rollback else "", str(release.commit).left(9)])
+				return {"body": pointed.body, "sha256": pointed.sha256, "via": "pointer", "rollback": pointer.rollback}
+			print("Release discovery: the R2 pointer was not used (%s)" % problem)
+	var sources: Array[String] = ["https://github.com/%s/releases/latest/download/RabbitLands-%s.json" % [identity.repository, identity.platform]]
+	if target_url != "":
+		sources.append(target_url)
+	var last: Dictionary = {}
+	for index in sources.size():
+		var url := sources[index]
+		var fetched: Dictionary = await _transport.fetch(url)
+		if fetched.has("error"):
+			last = {"error": fetched.error, "fatal": target != ""}
+			continue
+		var parsed: Variant = JSON.parse_string(fetched.body.get_string_from_utf8())
+		var release := Bootstrap.verify(parsed if parsed is Dictionary else {}, identity)
+		var named := Release.r2_manifest_sha256(url, str(identity.platform))
+		var digest := Release.bytes_sha256(fetched.body)
+		if not release.has("error") and named != "" and digest != named:
+			release = {"error": "The server's release information does not match its address."}
+		if release.has("error"):
+			# A GitHub alias that fails verification stops the update, as before.
+			last = {"error": release.error, "fatal": true}
+			continue
+		if target != "" and not Release.same_text(release.commit, target):
+			last = {"error": "The release does not match the server's client commit.", "fatal": true}
+			continue
+		var older := Release.downgrade_error(release, installed_sequence)
+		if older != "":
+			last = {"error": older, "fatal": target != ""}
+			continue
+		var via := "GitHub alias" if index == 0 else "server target"
+		print("Release discovery: %s, commit %s" % [via, str(release.commit).left(9)])
+		return {"body": fetched.body, "sha256": digest, "via": via, "rollback": false}
+	return last
 
 func _new_transport() -> Node:
 	return Transport.new()

@@ -35,6 +35,10 @@ const FAILED_START_STATE := "failed_start"
 const ACTIVE_AUTO_STATES := ["trial", "ok"]
 ## Trial starts without reaching "ok" after which Automatic gives up.
 const MAX_TRIAL_ATTEMPTS := 2
+## Updater-only requests (launcher.gd): a server's required commit and its
+## manifest URL, and the count of updater handovers so far. They travel through
+## handovers but never reach the game or a saved launch context.
+const LAUNCHER_ONLY_PREFIXES := ["--target-commit=", "--target-manifest-url=", "--handoff-hops="]
 ## A trial start that exits with an error sooner than this after it was
 ## started marks the recommendation failed_start (`record_failed_start`).
 const TRIAL_FAILURE_WINDOW_MSEC := 60000
@@ -71,9 +75,18 @@ static func encode_context(context: Dictionary) -> String:
 	# embedded quotes being stripped by Windows process creation.
 	return Marshalls.utf8_to_base64(JSON.stringify(context))
 
+## `args` without the updater-only requests (LAUNCHER_ONLY_PREFIXES).
+static func without_launcher_flags(args: PackedStringArray) -> PackedStringArray:
+	var kept := PackedStringArray()
+	for argument: String in args:
+		if not LAUNCHER_ONLY_PREFIXES.any(func(prefix: String) -> bool: return argument.begins_with(prefix)):
+			kept.append(argument)
+	return kept
+
 static func resume_context(engine_args: PackedStringArray, user_args: PackedStringArray) -> Dictionary:
 	# Preserve the active renderer and diagnostic log without carrying editor,
 	# script, pack or project-path overrides into the newly installed game.
+	user_args = without_launcher_flags(user_args)
 	var engine := PackedStringArray()
 	var value_options := ["--rendering-method", "--rendering-driver", "--log-file"]
 	var index := 0
@@ -97,7 +110,7 @@ static func resume_arguments(context: Dictionary) -> PackedStringArray:
 			if not value is String:
 				return PackedStringArray()
 	var engine := PackedStringArray(context.engine)
-	var user := PackedStringArray(context.user)
+	var user := without_launcher_flags(PackedStringArray(context.user))
 	# Reuse the allow-list when consuming the handoff, too.
 	if resume_context(engine, user).engine != Array(engine):
 		return PackedStringArray()

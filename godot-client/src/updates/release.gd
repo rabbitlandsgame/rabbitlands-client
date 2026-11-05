@@ -25,6 +25,27 @@ const CODEC_SCHEMA := 3
 # The R2 release workflow looks for this exact line (desktop_r2.DESKTOP_ASSETS),
 # and test fixtures replace it only in their own copies.
 const DESKTOP_ASSETS := "https://assets.rabbitlandsgame.com/desktop/v1/"
+# Release discovery (W1b): the signed per-platform pointer on R2 is read first;
+# any failure (offline, a challenge page, a 404, a bad or stale signature, a
+# manifest that does not match it) falls back to the GitHub alias. The pointer
+# format is tools/desktop_r2.py's pointer v1.
+const POINTER_KIND := "rabbitlands-release-pointer"
+const POINTER_SCHEMA := 1
+const POINTER_CHANNEL := "live"
+const MAX_POINTER_BYTES := 64 * 1024
+const POINTER_TIMEOUT_SEC := 15.0
+const POINTER_FIELDS := ["kind", "pointer_schema", "repository", "platform", "channel", "sequence", "rollback", "release_id", "run_id", "target"]
+const POINTER_TARGET_FIELDS := ["commit", "version", "manifest_sequence", "manifest"]
+const POINTER_MANIFEST_FIELDS := ["url", "sha256", "size"]
+# Signed sequences are UTC Unix seconds at signing (desktop_r2 MIN/MAX_SEQUENCE).
+const MIN_SEQUENCE := 1700000000
+const MAX_SEQUENCE := 4102444800
+# The installed-release record, in the install root, written after the commit
+# point by the updater and the setup helper (package_updates.gd install).
+const INSTALL_RECORD := ".rabbitlands-release.json"
+# The highest pointer sequence this installation has accepted (update cache).
+const POINTER_RECORD := "release-pointer.json"
+const OLDER_RELEASE_MESSAGE := "This update is older than the installed game."
 
 # Godot's ZIPReader uses 32-bit minizip seek/tell callbacks on Windows,
 # even in a 64-bit export. Read our bounded ZIP entries through FileAccess
@@ -261,6 +282,159 @@ static func r2_manifest_url(platform: String, sha256: String) -> String:
 static func pointer_url(platform: String) -> String:
 	# The signed live pointer of a platform (read by discovery, W1b).
 	return DESKTOP_ASSETS + "channels/live/%s.json" % platform
+
+static func r2_manifest_sha256(url: Variant, platform: String) -> String:
+	# The SHA-256 an R2 manifest URL names in its derived form, else "".
+	var prefix := DESKTOP_ASSETS + "manifests/%s/" % platform
+	if not url is String or not url.begins_with(prefix) or not url.ends_with(".json"):
+		return ""
+	var named: String = url.trim_prefix(prefix).trim_suffix(".json")
+	return named if valid_hash(named) and url == r2_manifest_url(platform, named) else ""
+
+static func target_manifest_url(url: Variant, repository: String, platform: String) -> bool:
+	# Where a server notice may point for its required commit: a GitHub release
+	# download of this repository, or an immutable R2 manifest copy in its
+	# derived form. The manifest itself is still verified in full.
+	if not https_url(url):
+		return false
+	return url.begins_with("https://github.com/%s/releases/download/" % repository) or r2_manifest_sha256(url, platform) != ""
+
+static func parse_body(bytes: PackedByteArray) -> Variant:
+	# A downloaded JSON body, or null. Quiet: a challenge page is no log error.
+	var json := JSON.new()
+	return json.data if json.parse(bytes.get_string_from_utf8()) == OK else null
+
+static func bytes_sha256(bytes: PackedByteArray) -> String:
+	var hash := HashingContext.new()
+	hash.start(HashingContext.HASH_SHA256)
+	hash.update(bytes)
+	return hash.finish().hex_encode()
+
+static func sequence_value(value: Variant) -> bool:
+	return positive_integer(value) and float(value) >= MIN_SEQUENCE and float(value) < MAX_SEQUENCE
+
+static func release_sequence(release: Dictionary) -> int:
+	# A signed manifest's sequence. A pre-R2 manifest has none and counts as 0.
+	var value: Variant = release.get("sequence")
+	return int(value) if sequence_value(value) else 0
+
+static func _exact_fields(value: Variant, fields: Array) -> bool:
+	if not value is Dictionary or value.size() != fields.size():
+		return false
+	for field: String in fields:
+		if not value.has(field):
+			return false
+	return true
+
+static func same_text(value: Variant, expected: Variant) -> bool:
+	# Godot refuses to compare a String with a number, so check types first.
+	return value is String and expected is String and value == expected
+
+static func same_number(value: Variant, expected: Variant) -> bool:
+	return typeof(value) in [TYPE_INT, TYPE_FLOAT] and typeof(expected) in [TYPE_INT, TYPE_FLOAT] and value == expected
+
+static func verify_pointer(envelope: Variant, identity: Dictionary, high_water := 0) -> Dictionary:
+	# A signed pointer v1 for this repository and platform whose sequence is at
+	# least `high_water` (the highest pointer or installed sequence seen here).
+	# It has no top-level commit, schema or packages, so no release verifier
+	# accepts it; a release payload has no "kind", so it never passes here.
+	if not envelope is Dictionary:
+		return {"error": "The release pointer is invalid."}
+	var pointer := verify_envelope(envelope, identity)
+	if pointer.has("error"):
+		return pointer
+	var target: Variant = pointer.get("target")
+	var manifest: Variant = target.get("manifest") if target is Dictionary else null
+	if not same_text(pointer.get("kind"), POINTER_KIND) or not _exact_fields(pointer, POINTER_FIELDS) or not _exact_fields(target, POINTER_TARGET_FIELDS) or not _exact_fields(manifest, POINTER_MANIFEST_FIELDS):
+		return {"error": "The release pointer is invalid."}
+	if not same_number(pointer.pointer_schema, POINTER_SCHEMA) or not same_text(pointer.repository, identity.get("repository")) or not same_text(pointer.platform, identity.get("platform")) or not same_text(pointer.channel, POINTER_CHANNEL):
+		return {"error": "The release pointer is for a different client."}
+	if not sequence_value(pointer.sequence) or not pointer.rollback is bool or not positive_integer(pointer.release_id) or not positive_integer(pointer.run_id):
+		return {"error": "The release pointer is invalid."}
+	if not valid_commit(target.commit) or not target.version is String or target.version.is_empty() or "/" in target.version or "\\" in target.version or not sequence_value(target.manifest_sequence) or int(target.manifest_sequence) >= int(pointer.sequence):
+		return {"error": "The release pointer is invalid."}
+	if not valid_hash(manifest.sha256) or not positive_integer(manifest.size, MAX_MANIFEST_BYTES) or not same_text(manifest.url, r2_manifest_url(pointer.platform, manifest.sha256)):
+		return {"error": "The release pointer is invalid."}
+	if int(pointer.sequence) < high_water:
+		return {"error": "The release pointer is older than one this installation has seen."}
+	return pointer
+
+static func matches_pointer(release: Dictionary, pointer: Dictionary) -> bool:
+	# The verified manifest a pointer names (by SHA-256) carries what it says.
+	var target: Dictionary = pointer.target
+	return same_text(release.get("commit"), target.commit) and same_text(release.get("version"), target.version) and same_text(release.get("platform"), pointer.platform) and release_sequence(release) == int(target.manifest_sequence)
+
+static func fetch_pointer(transport: Node, identity: Dictionary, high_water := 0) -> Dictionary:
+	# GET the platform's pointer with a 15 s timeout and a 64 KiB limit, then
+	# verify it. Returns the pointer payload, or {"error"}.
+	var fetched: Dictionary = await transport.fetch_pointer(pointer_url(str(identity.get("platform"))))
+	if fetched.has("error"):
+		return {"error": "The release pointer is unavailable."}
+	var body: PackedByteArray = fetched.get("body", PackedByteArray())
+	if body.is_empty() or body.size() > MAX_POINTER_BYTES:
+		return {"error": "The release pointer is invalid."}
+	return verify_pointer(parse_body(body), identity, high_water)
+
+static func fetch_pointed_manifest(transport: Node, pointer: Dictionary) -> Dictionary:
+	# GET the immutable manifest a verified pointer names, limited to its size,
+	# and require its exact SHA-256. Returns {"body", "envelope", "sha256"} or
+	# {"error"}. The caller verifies the envelope and matches_pointer.
+	var manifest: Dictionary = pointer.target.manifest
+	var fetched: Dictionary = await transport.fetch(manifest.url, "", int(manifest.size))
+	if fetched.has("error"):
+		return {"error": "The pointed release information is unavailable."}
+	var body: PackedByteArray = fetched.get("body", PackedByteArray())
+	if body.size() != int(manifest.size) or bytes_sha256(body) != manifest.sha256:
+		return {"error": "The pointed release information does not match its pointer."}
+	var envelope: Variant = parse_body(body)
+	if not envelope is Dictionary:
+		return {"error": "The pointed release information is invalid."}
+	return {"body": body, "envelope": envelope, "sha256": manifest.sha256}
+
+static func stored_pointer_sequence(root: String) -> int:
+	# A missing or unreadable record counts as no mark.
+	var record := read_json(cache_for(root).path_join(POINTER_RECORD))
+	return int(record.sequence) if same_number(record.get("schema"), 1) and sequence_value(record.get("sequence")) else 0
+
+static func store_pointer_sequence(root: String, sequence: int) -> void:
+	# Only ever raised; written with temp + rename.
+	if not sequence_value(sequence) or sequence <= stored_pointer_sequence(root):
+		return
+	var cache := cache_for(root)
+	if is_link(cache) or DirAccess.make_dir_recursive_absolute(cache) != OK or is_link(cache.path_join(POINTER_RECORD)):
+		return
+	save_json(cache.path_join(POINTER_RECORD), {"schema": 1, "sequence": sequence})
+
+static func installed_sequence(root: String, commit: Variant) -> int:
+	# The signed sequence of the installed release, from its record. A record of
+	# another commit (another installer changed the game since) counts as none,
+	# as does a pre-R2 installation without a record.
+	var record := read_json(root.path_join(INSTALL_RECORD))
+	if not same_number(record.get("schema"), 1) or not valid_commit(commit) or not same_text(record.get("commit"), commit) or not sequence_value(record.get("sequence")):
+		return 0
+	return int(record.sequence)
+
+static func pointer_high_water(root: String, commit: Variant) -> int:
+	return maxi(stored_pointer_sequence(root), installed_sequence(root, commit))
+
+static func save_install_record(root: String, release: Dictionary, manifest_sha256 := "") -> Error:
+	# After the commit point: what is installed now, and its signed sequence.
+	var record := {"schema": 1, "commit": release.get("commit"), "platform": release.get("platform"), "sequence": release_sequence(release)}
+	if valid_hash(manifest_sha256):
+		record["manifest_sha256"] = manifest_sha256
+	var path := root.path_join(INSTALL_RECORD)
+	var error := ERR_FILE_CANT_WRITE if is_link(path) else save_json(path, record)
+	if error != OK:
+		# Never keep a record that describes an earlier release.
+		DirAccess.remove_absolute(path)
+	return error
+
+static func downgrade_error(release: Dictionary, installed: int, admitted := false) -> String:
+	# Refuse a signed manifest older than the installed release, unless a signed
+	# rollback pointer named exactly it (`admitted`). Equal sequences repair.
+	if installed > 0 and release_sequence(release) < installed and not admitted:
+		return OLDER_RELEASE_MESSAGE
+	return ""
 
 static func verify_envelope(envelope: Dictionary, identity: Dictionary) -> Dictionary:
 	if update_owner(identity) != "github":
@@ -851,6 +1025,11 @@ static func install(root: String, identity: Dictionary, repair := false, progres
 	if release.has("error"):
 		DirAccess.remove_absolute(cache.path_join("pending.json"))
 		return release.error
+	# A download prepared earlier never replaces a newer installed release.
+	# Setup (repair) installs exactly the release it carries.
+	if not repair and downgrade_error(release, installed_sequence(root, read_json(root.path_join("app/client-release.json")).get("commit"))) != "":
+		DirAccess.remove_absolute(cache.path_join("pending.json"))
+		return ""
 	if package_manifest(release):
 		return load("res://src/updates/package_updates.gd").install(root, release, identity, progress)
 	var current := read_json(root.path_join("app/client-release.json"))

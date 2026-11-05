@@ -121,8 +121,15 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 	if _startup != null:
 		# Discovery and consent own this launch's update decision. In particular,
 		# a server policy cannot clear a refusal or replace a custom build.
-		if _startup.declined or (Release.valid_commit(notice.get("required_commit")) and not Release.contains_commit(identity, notice.required_commit)):
+		var required: Variant = notice.get("required_commit")
+		var missing: bool = Release.valid_commit(required) and not Release.contains_commit(identity, required)
+		if _startup.declined or missing:
 			_status.text = StartupUpdate.COMPATIBILITY_NOTE
+		if missing and not _startup.declined:
+			# The required commit may be one the R2 pointer does not reach (a
+			# frozen or forgotten pointer): rediscover it, bypassing the pointer.
+			var manifest_url: Variant = notice.get("manifest_url", "")
+			_startup.server_target(required, manifest_url if manifest_url is String else "")
 		return
 	if notice.get("disabled", false) == true:
 		_generation += 1
@@ -147,9 +154,8 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 		DirAccess.remove_absolute(Release.cache_for(Release.install_root()).path_join("pending.json"))
 		_status.text = ""
 		return
-	var prefix := "https://github.com/%s/releases/download/" % str(identity.get("repository", ""))
 	var url: Variant = notice.get("manifest_url", "")
-	if not url is String or not url.begins_with(prefix) or not Release.https_url(url):
+	if not Release.target_manifest_url(url, str(identity.get("repository", "")), str(identity.get("platform", ""))):
 		_status.text = "The server's update source is not configured for this installation."
 		return
 	if _target == commit:

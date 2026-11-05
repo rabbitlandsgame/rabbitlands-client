@@ -9,6 +9,18 @@ const Release = preload("res://src/updates/release.gd")
 const DOWNLOAD_CHUNK_BYTES := 1024 * 1024
 var _request: HTTPRequest
 var _thread: Thread
+# Set only while fetch_pointer runs (fetch keeps its signature: fixtures
+# override it to redirect requests, and fetch_pointer goes through them).
+var _pointer_timeout := 0.0
+
+# The signed R2 pointer (Release.fetch_pointer): small, and read before the
+# GitHub alias, so a slow, blocked or challenged R2 delays discovery by at
+# most Release.POINTER_TIMEOUT_SEC.
+func fetch_pointer(url: String) -> Dictionary:
+	_pointer_timeout = Release.POINTER_TIMEOUT_SEC
+	var fetched: Dictionary = await fetch(url, "", Release.MAX_POINTER_BYTES)
+	_pointer_timeout = 0.0
+	return fetched
 
 # A failed request returns {"error", "status", "result"}: the HTTP status (0
 # without a reply) and the HTTPRequest result, which package downloads read to
@@ -18,7 +30,7 @@ func fetch(url: String, path := "", limit := Release.MAX_MANIFEST_BYTES) -> Dict
 	_request = _new_http_request()
 	_request.use_threads = true
 	_request.accept_gzip = false
-	_request.timeout = 3600.0 if path != "" else 30.0
+	_request.timeout = 3600.0 if path != "" else (_pointer_timeout if _pointer_timeout > 0.0 else 30.0)
 	_request.body_size_limit = limit
 	_request.download_file = path
 	if path != "":

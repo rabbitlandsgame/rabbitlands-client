@@ -1218,9 +1218,12 @@ def test_exported_updater_replaces_itself_then_installs_and_uninstalls(fixture, 
     pinned.unlink() # A shell installer's temporary files disappear at this handoff.
     deadline = time.monotonic() + 40
     while True:
-        descriptor = json.loads((f["installed"] / "app/client-release.json").read_text())
+        try:
+            descriptor = json.loads((f["installed"] / "app/client-release.json").read_text())
+        except (OSError, ValueError):
+            descriptor = {}  # the install moves it (live -> backup, stage -> live) for a moment
         proof = f["installed"] / "updater-test-version.txt"
-        if (descriptor["commit"] == "b" * 40 and proof.is_file() and proof.read_text() == "new"
+        if (descriptor.get("commit") == "b" * 40 and proof.is_file() and proof.read_text() == "new"
                 and not (f["installed"] / ".eloria-launcher-lock").exists()):
             break
         assert time.monotonic() < deadline, log.read_text() + "\n" + str(f["downloads"])
@@ -1236,7 +1239,8 @@ def test_exported_updater_replaces_itself_then_installs_and_uninstalls(fixture, 
     client_download = "/" + client_part["url"].rsplit("/", 1)[1]
     assert f["downloads"].count(updater_download) == 1
     assert f["downloads"].count(client_download) == 1
-    assert set(f["downloads"]) <= {"/RabbitLands-windows.json", updater_download, client_download}
+    # An R2-aware updater reads the signed pointer first (absent here, a 404).
+    assert set(f["downloads"]) <= {"/RabbitLands-windows.json", "/windows.json", updater_download, client_download}
     if shared:
         assert "/RabbitLands-windows.json" not in f["downloads"], "Pinned draft install looked up the public release"
         assert json.loads((f["installed"] / "launcher-defaults.json").read_text())["args"] == payload["launch_args"]

@@ -121,6 +121,22 @@ def main() -> None:
     if not private.exists():
         run("tools/sign_client_release.gd", "generate", private, public)
     run("tests/client_update_test_certificate.gd", private, certificate)
+    # Release discovery (W1b): pointer, install record, downgrade and hop guards,
+    # game start and server-target rediscovery. The shipped scripts unchanged
+    # (production R2 base); requests go to an in-process scripted transport.
+    discovery = root / "discovery-project"
+    shutil.rmtree(discovery, ignore_errors=True)
+    shutil.copytree(SOURCE / "src/updates", discovery / "src/updates",
+                    ignore=shutil.ignore_patterns("*.uid"))
+    (discovery / "src/ui").mkdir(parents=True)
+    shutil.copyfile(SOURCE / "src/ui/text_colors.gd", discovery / "src/ui/text_colors.gd")
+    (discovery / "data").mkdir()
+    (discovery / "data/client_release.json").write_text(json.dumps({
+        "schema": 1, "platform": "windows", "distribution": "github",
+        "repository": "rabbitlandsgame/rabbitlands-client", "public_key": public.read_text()}))
+    shutil.copyfile(SOURCE / "data/update_public.pem", discovery / "data/update_public.pem")
+    (discovery / "project.godot").write_text('config_version=5\n[application]\nconfig/name="Release discovery fixture"\n')
+    run("tests/test_client_update_discovery.gd", root / "discovery-fixture", private, project=discovery)
     stage = root / "payload-fixture"
     (stage / "app").mkdir(parents=True, exist_ok=True)
     (stage / "eloria-assets").mkdir(exist_ok=True)

@@ -408,10 +408,14 @@ static func decode_chunk(frame: PackedByteArray, size: int) -> PackedByteArray:
 		return PackedByteArray()
 	return frame.decompress(size, FileAccess.COMPRESSION_ZSTD)
 
-static func install(root: String, release: Dictionary, identity: Dictionary, progress := Callable(), checked: CheckedPlan = null) -> String:
+static func install(root: String, release: Dictionary, identity: Dictionary, progress := Callable(), checked: CheckedPlan = null, manifest_sha256 := "") -> String:
 	# All staging is outside the live roots. An existing installation receives
 	# only its changed files, each move recorded in a per-file journal first; a
-	# fresh one keeps the two-root promotion and legacy journal.
+	# fresh one keeps the two-root promotion and legacy journal. Afterwards the
+	# installed-release record (Release.INSTALL_RECORD) names this release and
+	# its signed sequence: the updater's downgrade guard and pointer high-water
+	# mark read it. The setup helper installs through here too, so a fresh setup
+	# starts with a record. manifest_sha256: the signed envelope's, when known.
 	var interrupted := FileAccess.file_exists(root.path_join(Release.JOURNAL_V2)) or FileAccess.file_exists(root.path_join(".eloria-update-journal.json"))
 	var recovery := Release.recover(root)
 	if recovery != "":
@@ -421,6 +425,10 @@ static func install(root: String, release: Dictionary, identity: Dictionary, pro
 	if checked == null or not checked.take(root, release) or interrupted:
 		checked = inspect(root, release, progress)
 	if checked.needed.is_empty():
+		# Every signed file is installed already: this is the installed release
+		# (its descriptor names the same commit).
+		if Release.same_text(Release.read_json(root.path_join("app/client-release.json")).get("commit"), release.commit):
+			Release.save_install_record(root, release, manifest_sha256)
 		DirAccess.remove_absolute(cache.path_join("pending.json"))
 		return ""
 	var fresh := true
@@ -431,6 +439,8 @@ static func install(root: String, release: Dictionary, identity: Dictionary, pro
 	var error := _install_roots(root, release, identity, progress, checked) if fresh or checked.linked else _install_files(root, release, identity, progress, checked)
 	if error != "":
 		return error
+	# After the commit point, under the installation lock.
+	Release.save_install_record(root, release, manifest_sha256)
 	Release.save_json(root.path_join(".rabbitlands-install.json"), {"schema": 1, "repository": identity.repository, "platform": identity.platform})
 	DirAccess.remove_absolute(cache.path_join("pending.json"))
 	Release.remove_tree(cache.path_join("packages"))
