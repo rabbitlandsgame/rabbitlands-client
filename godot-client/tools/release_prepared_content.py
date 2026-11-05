@@ -67,12 +67,29 @@ def _check(check_budget, phase: str, additional: int = 0) -> None:
         check_budget("prepared: " + phase, additional)
 
 
+# Backup copies are reserved against the runner's disk budget in batches of at least
+# this many bytes. A runner's check walks every accounted root (tens of thousands of
+# files, seconds each), and the world cook alone backs up about 2,000 small imports and
+# images one at a time. In a local replay of the ci content leg one check per file took
+# about 2.7 s, so that overlay alone would have taken about 1.5 h of the job's 180 minutes.
+BACKUP_BATCH_BYTES = 128 * 1024**2
+
+
 class _Overlay:
     """Restore only our exact changed files; never recursively delete inputs."""
     def __init__(self, root: Path, backups: Path, check_budget):
         self.root, self.backups, self.check_budget = root.resolve(), backups, check_budget
         self.saved: dict[Path, Path | None] = {}
         self.backups.mkdir()
+        self.allowance = 0
+
+    def _reserve(self, phase: str, size: int) -> None:
+        """Account `size` more bytes of copies: a budget check reserves a whole batch when
+        the last one is used up, as runner_source reserves its archive batches."""
+        if size > self.allowance:
+            self.allowance = max(BACKUP_BATCH_BYTES, size)
+            _check(self.check_budget, phase, self.allowance)
+        self.allowance -= size
 
     def remember(self, path: Path) -> None:
         path = path.resolve()
@@ -84,7 +101,7 @@ class _Overlay:
             raise ReleasePreparedError(f"temporary overlay is not a regular file: {path}")
         backup = None
         if path.is_file():
-            _check(self.check_budget, "backup selected input", path.stat().st_size)
+            self._reserve("backup selected input", path.stat().st_size)
             backup = self.backups / str(len(self.saved))
             shutil.copy2(path, backup)  # Snapshot copy must survive an in-place PCK copy.
         self.saved[path] = backup
@@ -107,7 +124,7 @@ class _Overlay:
         backup = self.saved[path.resolve()]
         if backup is None:
             raise ReleasePreparedError("runtime snapshot input must already exist: " + str(path))
-        _check(self.check_budget, "isolate selected import", backup.stat().st_size)
+        self._reserve("isolate selected import", backup.stat().st_size)
         path.unlink()
         shutil.copy2(backup, path)
 

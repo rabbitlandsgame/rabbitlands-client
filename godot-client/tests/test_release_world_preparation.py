@@ -151,6 +151,43 @@ def test_actual_import_overlay_hides_only_unshipped_raw_sources(tmp_path, monkey
     assert (project / remap).read_bytes() == original
 
 
+def test_overlay_reserves_backups_in_batches_not_one_budget_walk_per_file(tmp_path, monkeypatch):
+    # A runner's budget check walks every accounted root. The world cook's overlay backs up about
+    # 2,000 imports one at a time; one check each took about 1.5 h in a local replay of the ci leg.
+    import release_prepared_content as content
+    root = tmp_path / "repo"
+    small = [put(root / f"godot-client/assets/world/t{index}.png.import", b"remap" * 20) for index in range(50)]
+    large = put(root / "godot-client/assets/world/large.png", b"x" * 3000)
+    checks = []
+
+    def budget(phase, additional=0):
+        checks.append((phase, additional))
+
+    monkeypatch.setattr(content, "BACKUP_BATCH_BYTES", 1000, raising=False)
+    overlay = content._Overlay(root, tmp_path / "backups", budget)
+    for path in small:
+        overlay.remember(path)
+        path.write_bytes(b"changed")
+    overlay.isolate(large)
+    total = sum(len(b"remap" * 20) for _ in small)
+    # 50 x 100 bytes in batches of 1000: five checks, each reserving a whole batch before its copies.
+    assert checks[:5] == [("prepared: backup selected input", 1000)] * 5
+    # A file larger than a batch reserves its own size; its isolated copy reserves again.
+    assert checks[5:] == [("prepared: backup selected input", 3000), ("prepared: isolate selected import", 3000)]
+    assert sum(additional for _, additional in checks[:5]) >= total
+    overlay.restore()
+    assert all(path.read_bytes() == b"remap" * 20 for path in small)
+    assert large.read_bytes() == b"x" * 3000
+
+    def refuse(phase, additional=0):
+        raise ValueError("Runner disk budget exceeded during " + phase)
+
+    refused = content._Overlay(root, tmp_path / "refused", refuse)
+    with pytest.raises(ValueError, match="budget exceeded"):
+        refused.remember(small[0])
+    assert not any((tmp_path / "refused").iterdir())  # nothing copied past a refused reservation
+
+
 def test_cache_pruning_preserves_unknown_profiles(tmp_path):
     platform = tmp_path / "windows"
     current, old, unknown = (platform / (letter * 64) for letter in "abc")
