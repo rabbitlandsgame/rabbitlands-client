@@ -8202,17 +8202,20 @@ func _remote_model_ready(id: int) -> bool:
 ## module through RLHeadLibrary) on its worker, and a creature's scene and
 ## clips through the creature job. `mount` is the mount worn ("" for none):
 ## a rider also waits for its mount's files (AW-07, ActorAssetClosure
-## .mount_closure), so its body is built on its mount.
+## .mount_closure), so its body is built on its mount. While the game view is
+## hidden no frame drains the preparer (`_process` polls it in the game view's
+## block), so a body wanted then is built as before AW-04a, as AW-07 binds a
+## mount at once then.
 func _actor_assets_ready(id: int, dto: Dictionary, mount: String, priority: int) -> bool:
 	var model_id := _model_for_actor(dto)
 	var config: Dictionary = models.get(model_id, {}) as Dictionary
 	if OS.has_feature("web"):
 		return _browser_actor_ready(id, dto) \
 			and actor_resource_warmup.request(config, _animation_for_model(config), priority)
-	if not actor_resource_warmup.closure_enabled():
+	if not actor_resource_warmup.closure_enabled() or not game_view.visible:
 		# Closures are off (ELORIA_ACTOR_PREPARER=off, prepared content, legacy
-		# actor images): no closure is computed, only the creature job is
-		# asked, as before AW-04a.
+		# actor images) or the game view is hidden: no closure is computed,
+		# only the creature job is asked, as before AW-04a.
 		return actor_resource_warmup.request(config, _animation_for_model(config), priority)
 	var closure := ActorAssetClosureScript.memoized(dto, model_id, models, equipment_config,
 		LookProfile.quality(), {} if mount.is_empty() else {"mode": "mounted", "mount_id": mount})

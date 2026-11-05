@@ -766,7 +766,8 @@ map WorldPark names when it publishes or instantiates one (`GlbSceneCache.set_wo
     time to the frame's actor work. The worker pauses while 2 parsed roots wait.
   - A file the worker cannot prepare is parsed by Main on first use, as before. So is everything on the web build,
     with prepared content, under `ELORIA_ACTOR_IMAGES=legacy`, or with `ELORIA_ACTOR_PREPARER=off`; the kill switch
-    restores the old behaviour exactly.
+    restores the old behaviour exactly. A body wanted while the game view is hidden (before login) is built as before
+    too, because no frame drains the preparer then (AW-07's rule for mount binds).
   - Diagnostics: the `actor_preparer` row in the client snapshot (`closures`, queued, awaiting, fallbacks,
     `filesPublished`, `piecesPublished`, `priorityRaises`, worker and publish time). `actor_scenes.lookup_misses` and
     the `cache_miss_build` timing show any main-thread parse that remains.

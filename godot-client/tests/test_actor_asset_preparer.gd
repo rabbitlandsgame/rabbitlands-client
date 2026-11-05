@@ -565,6 +565,9 @@ func _setup_main() -> void:
 	main.world_root.add_child(floor)
 	await physics_frame
 	app.authenticated = true
+	# In the world, as after LOG_IN_OK: the body gate runs while the game view
+	# is shown (Main's frames drain the preparer then).
+	main.game_view.show()
 	app.death = {}
 	app.local_actor_id = LOCAL
 	app.selected_actor_id = -1
@@ -604,6 +607,11 @@ func _check_main_gate() -> void:
 	app.actors = {LOCAL: me, 2: remote}
 	var misses := _misses()
 	main.set("_actor_creation_frame", -1)
+	main.game_view.hide()
+	expect(bool(main.call("_remote_model_ready", 2))
+		and (main.actor_resource_warmup.get("_files") as Dictionary).is_empty(),
+		"with the game view hidden (no frame drains the preparer) a remote body is built at once, as before AW-04a")
+	main.game_view.show()
 	expect(bool(main.call("_remote_model_ready", LOCAL)),
 		"with no curtain up the player's own body is built at once (AW-04d gates it behind the curtain)")
 	expect(not bool(main.call("_remote_model_ready", 2)), "a first-seen remote Human waits for its closure")
