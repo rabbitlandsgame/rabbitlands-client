@@ -431,7 +431,10 @@ static func mobile_prepass(material: Material, rendering_method := "") -> Shader
 ## for SHADER_OVERLAY), or null for any other. Loaded on first use, once. On a
 ## loader worker that first load can wait a frame for the main thread to serve
 ## a RenderingServer call, as the loader's other shader work can; nothing joins
-## a live loader worker (ContinentChunkStream polls), so it never blocks.
+## a live loader worker (ContinentChunkStream polls), so it never blocks. The
+## load runs outside `_prepass_mutex`: main paints too (`paint_bound`), and a
+## main thread waiting on that lock for a worker whose load waits on the main
+## thread would never wake. Two first loads at once get the one cached Shader.
 static func prepass_shader(shader: Shader) -> Shader:
 	var path := DECK_PREPASS_PATH if shader == SHADER_DECK \
 		else OVERLAY_PREPASS_PATH if shader == SHADER_OVERLAY else ""
@@ -439,8 +442,14 @@ static func prepass_shader(shader: Shader) -> Shader:
 		return null
 	_prepass_mutex.lock()
 	var found := _prepass_shaders.get(path) as Shader
-	if found == null:
-		found = load(path) as Shader
+	_prepass_mutex.unlock()
+	if found != null:
+		return found
+	var loaded := load(path) as Shader
+	_prepass_mutex.lock()
+	found = _prepass_shaders.get(path) as Shader
+	if found == null and loaded != null:
+		found = loaded
 		_prepass_shaders[path] = found
 	_prepass_mutex.unlock()
 	return found
