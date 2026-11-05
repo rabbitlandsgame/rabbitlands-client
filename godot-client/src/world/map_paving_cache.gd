@@ -437,3 +437,21 @@ static func prune_unreferenced() -> int:
 		var path := _root().path_join("blobs").path_join(name)
 		if _owned(path,"res") and not retained.has(path) and DirAccess.remove_absolute(path) == OK: count += 1
 	return count
+
+# Stale policy folders: helpers for the cache janitor (UD-03); the shared rule
+# is MapCollisionCache.classify_policy_dirs.
+
+## policy() as a run would compute it whose collision policy (and so renderer
+## part) is keyed `renderer`, taken literally.
+static func policy_for(renderer: String) -> String:
+	return Faces._digest([POLICY,VERSION,Faces.policy_for(renderer),Profile.KIT_PAVING_CHUNK_METRES,Profile.KIT_PAVING_JOIN_METRES])
+
+## The paving cache's janitor table (main thread).
+static func janitor_policies() -> Dictionary:
+	var per_renderer := {}
+	for key: String in Faces.janitor_keys(): per_renderer[key] = policy_for(key)
+	return Faces.janitor_table(policy(),VERSION,per_renderer)
+
+## The stale policy folders of this cache under `directory` (read only).
+static func stale_policy_dirs(directory := DIRECTORY) -> Dictionary:
+	return Faces.classify_policy_dirs(directory,janitor_policies(),Faces.MAX_METADATA_BYTES)

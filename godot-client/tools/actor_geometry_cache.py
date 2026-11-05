@@ -11,7 +11,7 @@ the catalogue the applier reads. Docs: godot-client/docs/actor-geometry-lods.md.
   cook     cook what changed and rewrite <out>/<policy>/catalog.json
   verify   apply every catalogued sidecar with the runtime applier to a fresh
            parse (and check the levels the RenderingServer holds)
-  report   coverage, bytes and cook time from the cook summary
+  report   coverage, bytes, cook time and lining masks from the cook summary
   compare  byte-compare two catalogue roots (determinism)
   predict  drawn triangles a crowd triangle census would have with the chains
 
@@ -21,11 +21,29 @@ except rl_heads/ (authored LODs) and retired models. Default output:
 rl-actor-geometry-v1/ (catalog.json, blobs/) and the driver state cook/
 (summary.json, per-run jobs, logs and an isolated Godot profile).
 
+Lining masks (actor LODs C4): a garment whose glTF has Generated* lining
+meshes is cooked with its mask file <masks>/<variant>/<stem>.lining.json
+(eloria-assets/tools/lining_visibility.py; default <out>/lining-masks/) when
+the mask is bound to the garment's exact bytes and meets MASK_GATE; the
+headless lining stage (tools/actor_geometry/lining_policy.gd) then drops the
+lining triangles the mask proves hidden. A garment without a usable mask
+cooks as before and is reported (`mask_status`).
+
+Race-refit budget (actor LODs C11): a race refit of a rigid socket model
+(data/actors/equipment.json: a non-skinned model's canonical_<race>_<sex>
+variant; in practice the helmets) is cooked with its Human source's triangle
+count (the model's canonical_human_<sex> variant, read from the glTF JSON);
+the headless budget stage (tools/actor_geometry/budget_policy.gd) caps a refit
+drawing more than twice that with a simplified base. `--no-budget` cooks
+without it.
+
 A file is reused while its bytes, the external buffers it reads (a .gltf's
-.bin), its model scale and the policy digest (engine build + cook.gd +
-lod_policy.gd + actor_geometry_format.gd) are unchanged and its sidecar is
-intact. This cooks the source checkout (a developer root); cooking a package's
-build tree is release packaging's job. Every Godot process runs headless with
+.bin), its model scale, its lining mask (and MASK_GATE), its budget reference
+(the Human source's bytes and triangles) and the policy digest (engine build +
+cook.gd + lod_policy.gd + lining_policy.gd + budget_policy.gd +
+actor_geometry_format.gd) are unchanged and its sidecar is intact. This
+cooks the source checkout (a developer root); cooking a package's build tree
+is release packaging's job. Every Godot process runs headless with
 an isolated APPDATA/LOCALAPPDATA; --wrapper prefixes each Godot command (for
 example a machine-wide slot lock). cook and verify hold an OS lock on
 <out>/cook/driver.lock, so a second driver on the same output folder stops
@@ -34,6 +52,8 @@ instead of collecting the first one's blobs.
 from __future__ import annotations
 
 import argparse
+import base64
+import binascii
 from concurrent.futures import ThreadPoolExecutor
 import contextlib
 import hashlib
@@ -58,9 +78,11 @@ EXCLUDED_ROOTS = ("assets/actors/native/rl_heads/",)
 GLTF_SUFFIXES = (".glb", ".gltf")
 COOK_SCRIPT = "res://tools/actor_geometry/cook.gd"
 POLICY_FILES = ("tools/actor_geometry/cook.gd", "tools/actor_geometry/lod_policy.gd",
+                "tools/actor_geometry/lining_policy.gd", "tools/actor_geometry/budget_policy.gd",
                 "src/actors/actor_geometry_format.gd")
 RETIRED_INDEX = "data/assets/retired_procedural_models.json"
 MODELS = "data/actors/models.json"
+EQUIPMENT = "data/actors/equipment.json"
 CATALOG_FILE = "catalog.json"
 # "file": the runtime hashes each actor file against its entry at first parse
 # (a developer root; about 4 ms per MB, so 0.2 s for a 57 MB creature);
@@ -89,6 +111,34 @@ ERROR_LINE = re.compile(r"^(SCRIPT ERROR|ERROR):")
 SCRIPT_ERROR_LINE = re.compile(r"^SCRIPT ERROR:|Parse Error")
 # Projection.get_lod_multiplier() of the gameplay camera: 2 tan(hfov / 2).
 DEFAULT_VFOV_DEGREES = 50.0
+# Lining masks (lining_visibility.py output) and the lining stage's input.
+MASK_SCHEMA = 1
+MASK_POLICY = "rl-lining-visibility-v1"
+MASK_FOLDER = "lining-masks"
+MASK_SUFFIX = ".lining.json"
+LINING_PREFIX = "Generated"
+LINING_INPUT_SCHEMA = 1
+LINING_INPUT_KEYS = ("mesh", "primitive", "triangles", "keep", "check")
+# The least a mask must prove before the cook drops lining faces with it: the
+# 2 cm surface margin (the lossless default measured in C3: 43 changed 3 mm
+# pixels over 7,200 unsampled views), the full 128-direction sphere and the
+# 44-pose set v1 (cheaper casts open visible holes).
+MASK_GATE = {"min_margin_m": 0.02, "margin_rule": "surface", "min_directions": 128, "min_poses": 44}
+MASK_STATUSES = ("ok", "partial", "missing", "stale", "gate", "invalid")
+# Summary row fields that describe a file's lining mask.
+MASK_FIELDS = ("mask_status", "mask_reason", "mask_sha256", "lining_key", "mask_removable")
+# Race-refit budget (budget_policy.gd's input): equipment.json variant keys of
+# a race and sex; the Human variant of the same sex is the source.
+BUDGET_INPUT_SCHEMA = 1
+BUDGET_VARIANT = re.compile(r"^canonical_([a-z0-9]+)_(male|female)$")
+HUMAN_RACE = "human"
+# BudgetPolicy.MAX_RATIO (budget_policy.gd decides; `plan` only counts the
+# refits above it).
+BUDGET_RATIO = 2.0
+# Summary row fields that describe a file's budget reference.
+BUDGET_FIELDS = ("budget_key", "budget_reference", "budget_reference_triangles", "budget_status")
+# Statuses of a surface row's `budget` that mean the stage reduced its base.
+BUDGET_REDUCED = ("capped", "partial")
 
 
 class CookError(RuntimeError):
@@ -106,6 +156,12 @@ def project_path(project: Path) -> Path:
 
 def default_out(project: Path) -> Path:
     return project.parent / ".local" / "actor-geometry"
+
+
+def default_masks(out: Path) -> Path:
+    """lining_visibility.py writes <client repo>/.local/actor-geometry/lining-masks/
+    by default, i.e. <default out>/lining-masks."""
+    return Path(out) / MASK_FOLDER
 
 
 def in_scope(relative: str) -> bool:
@@ -183,10 +239,9 @@ def sha256_file(path: Path) -> str:
         return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
-def external_buffers(path: Path) -> list[str]:
-    """URIs of the external (not data:) buffers a .gltf or .glb reads, in
-    document order; [] when it has none or its JSON cannot be read (the
-    cook then reports the parse)."""
+def gltf_document(path: Path) -> dict | None:
+    """The JSON document of a .gltf or .glb (the GLB's JSON chunk only), or
+    None when it cannot be read."""
     try:
         if path.suffix.lower() == ".gltf":
             text = path.read_bytes()
@@ -194,14 +249,22 @@ def external_buffers(path: Path) -> list[str]:
             with path.open("rb") as stream:
                 header = stream.read(20)
                 if len(header) < 20 or header[:4] != GLB_MAGIC:
-                    return []
+                    return None
                 length, kind = struct.unpack_from("<II", header, 12)
                 if kind != GLB_JSON_CHUNK:
-                    return []
+                    return None
                 text = stream.read(length)
         document = json.loads(text.decode("utf-8-sig"))
     except (OSError, ValueError, UnicodeDecodeError, struct.error):
-        return []
+        return None
+    return document if isinstance(document, dict) else None
+
+
+def external_buffers(path: Path) -> list[str]:
+    """URIs of the external (not data:) buffers a .gltf or .glb reads, in
+    document order; [] when it has none or its JSON cannot be read (the
+    cook then reports the parse)."""
+    document = gltf_document(path)
     buffers = document.get("buffers") if isinstance(document, dict) else None
     uris = []
     for buffer in buffers if isinstance(buffers, list) else []:
@@ -225,8 +288,16 @@ def dependencies_sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def file_records(project: Path, relatives: list[str]) -> list[dict]:
+def file_records(project: Path, relatives: list[str], masks: Path | None = None,
+                 budget: bool = True) -> list[dict]:
+    """One job record per file. With `masks` (a lining mask folder), a garment
+    with Generated* linings also gets `mask_status` and, when its mask is
+    usable, the lining stage's input (`lining`, `mask_sha256`, `lining_key`).
+    With `budget`, a race refit of a rigid socket model also gets the budget
+    stage's input (`budget`, `budget_key`, `budget_reference`, ...)."""
     scales = model_scales(project)
+    sources = budget_sources(project) if budget else {}
+    references: dict[str, dict | None] = {}
     records = []
     for relative in relatives:
         path = project / relative
@@ -236,8 +307,296 @@ def file_records(project: Path, relatives: list[str]) -> list[dict]:
         dependencies = dependencies_sha256(path)
         if dependencies:
             record["dependencies_sha256"] = dependencies
+        if masks is not None:
+            record.update(lining_fields(path, relative, record["file_sha256"], masks))
+        if key in sources:
+            record.update(budget_fields(project, sources[key], references))
         records.append(record)
     return records
+
+
+# --- lining masks -------------------------------------------------------------------
+
+def lining_primitives(document: dict | None) -> list[dict]:
+    """[{mesh, primitive, triangles}] of the Generated* lining triangle
+    primitives of a glTF document, in mesh order."""
+    linings = []
+    if not isinstance(document, dict):
+        return linings
+    accessors = document.get("accessors") if isinstance(document.get("accessors"), list) else []
+    for mesh in document.get("meshes") if isinstance(document.get("meshes"), list) else []:
+        name = mesh.get("name", "") if isinstance(mesh, dict) else ""
+        if not isinstance(name, str) or not name.startswith(LINING_PREFIX):
+            continue
+        for index, primitive in enumerate(mesh.get("primitives") or []):
+            if not isinstance(primitive, dict) or primitive.get("mode", 4) != 4:
+                continue
+            linings.append({"mesh": name, "primitive": index, "triangles": _primitive_triangles(accessors, primitive)})
+    return linings
+
+
+def _primitive_triangles(accessors: list, primitive: dict) -> int:
+    """Triangles of one triangle-list primitive: its index count (or, without
+    indices, its POSITION count) / 3."""
+    accessor = primitive.get("indices")
+    if accessor is None:
+        accessor = (primitive.get("attributes") or {}).get("POSITION")
+    count = accessors[accessor].get("count", 0) if isinstance(accessor, int) and 0 <= accessor < len(accessors) \
+        and isinstance(accessors[accessor], dict) else 0
+    return int(count) // 3 if isinstance(count, int) and not isinstance(count, bool) and count > 0 else 0
+
+
+def gltf_triangles(document: dict | None) -> int:
+    """Triangles of every triangle-list primitive of a glTF document (the
+    runtime parse keeps each one), 0 when it has none or cannot be read."""
+    if not isinstance(document, dict):
+        return 0
+    accessors = document.get("accessors") if isinstance(document.get("accessors"), list) else []
+    total = 0
+    for mesh in document.get("meshes") if isinstance(document.get("meshes"), list) else []:
+        for primitive in (mesh.get("primitives") or []) if isinstance(mesh, dict) else []:
+            if isinstance(primitive, dict) and primitive.get("mode", 4) == 4:
+                total += _primitive_triangles(accessors, primitive)
+    return total
+
+
+def mask_path(masks: Path, relative: str) -> Path:
+    """lining_visibility.py's mask file for a garment: <masks>/<variant>/<stem>.lining.json."""
+    item = PurePosixPath(relative)
+    return Path(masks) / item.parent.name / (item.stem + MASK_SUFFIX)
+
+
+def _mask_bits(text, count: int) -> int | None:
+    """A mask's base64 little-endian bitset as an int (bit i = triangle i), or
+    None unless it holds exactly `count` bits."""
+    if not isinstance(text, str) or count <= 0:
+        return None
+    try:
+        raw = base64.b64decode(text.encode("ascii"), validate=True)
+    except (ValueError, binascii.Error, UnicodeEncodeError):
+        return None
+    if len(raw) != (count + 7) // 8:
+        return None
+    value = int.from_bytes(raw, "little")
+    return None if value >> count else value
+
+
+def _check_rows(rows, triangles: int) -> bool:
+    if not isinstance(rows, list) or not rows:
+        return False
+    for row in rows:
+        if not isinstance(row, list) or len(row) != 4 or not isinstance(row[0], int) or isinstance(row[0], bool) \
+                or not 0 <= row[0] < triangles:
+            return False
+        if not all(isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+                   for value in row[1:]):
+            return False
+    return True
+
+
+def read_mask(path: Path, logical_path: str, file_sha256: str, linings: list[dict]) -> dict:
+    """Validates one mask file against its garment. Returns {status, reason?,
+    input?, mask_sha256?, removable?}: status ok / partial (some linings have
+    no mask entry) with the lining stage's input, or missing / stale (cast for
+    other bytes) / gate (below MASK_GATE) / invalid without one."""
+    if not path.is_file():
+        return {"status": "missing"}
+    try:
+        data = path.read_bytes()
+    except OSError as exc:
+        # lining_visibility.py rewrites masks in place; a file it holds open
+        # (or one that just vanished) cooks without a mask this time.
+        return {"status": "invalid", "reason": f"read: {exc.__class__.__name__}"}
+    digest = hashlib.sha256(data).hexdigest()
+    try:
+        mask = json.loads(data.decode("utf-8"))
+    except (ValueError, UnicodeDecodeError):
+        return {"status": "invalid", "reason": "json", "mask_sha256": digest}
+    if not isinstance(mask, dict) or mask.get("schema") != MASK_SCHEMA or mask.get("policy") != MASK_POLICY:
+        return {"status": "invalid", "reason": "schema", "mask_sha256": digest}
+    source = mask.get("source") if isinstance(mask.get("source"), dict) else {}
+    if source.get("path") != logical_path:
+        return {"status": "invalid", "reason": "path", "mask_sha256": digest}
+    if source.get("sha256") != file_sha256:
+        return {"status": "stale", "reason": "source sha256", "mask_sha256": digest}
+    margin = mask.get("margin_m")
+    if mask.get("margin_rule") != MASK_GATE["margin_rule"] or not isinstance(margin, (int, float)) \
+            or isinstance(margin, bool) or not math.isfinite(margin) or margin < MASK_GATE["min_margin_m"] - 1e-9:
+        return {"status": "gate", "reason": f"margin {mask.get('margin_rule')} {margin}", "mask_sha256": digest}
+    directions = (mask.get("settings") or {}).get("directions") if isinstance(mask.get("settings"), dict) else None
+    if not isinstance(directions, int) or directions < MASK_GATE["min_directions"]:
+        return {"status": "gate", "reason": f"directions {directions}", "mask_sha256": digest}
+    poses = mask.get("poses")
+    if not isinstance(poses, list) or len(poses) < MASK_GATE["min_poses"]:
+        return {"status": "gate", "reason": f"poses {len(poses) if isinstance(poses, list) else poses}",
+                "mask_sha256": digest}
+    entries = mask.get("linings") if isinstance(mask.get("linings"), dict) else None
+    if not entries:
+        return {"status": "invalid", "reason": "linings", "mask_sha256": digest}
+    expected = {(item["mesh"], item["primitive"]): item["triangles"] for item in linings}
+    found = []
+    seen = set()
+    for name, entry in sorted(entries.items()):
+        if not isinstance(entry, dict) or not isinstance(entry.get("mesh"), str) \
+                or not isinstance(entry.get("primitive"), int) or isinstance(entry.get("primitive"), bool):
+            return {"status": "invalid", "reason": f"lining {name}", "mask_sha256": digest}
+        key = (entry["mesh"], entry["primitive"])
+        if key not in expected or key in seen:
+            return {"status": "invalid", "reason": f"lining {name} not in the garment", "mask_sha256": digest}
+        seen.add(key)
+        triangles = entry.get("triangles")
+        if not isinstance(triangles, int) or isinstance(triangles, bool) or triangles != expected[key]:
+            return {"status": "invalid", "reason": f"lining {name} triangles", "mask_sha256": digest}
+        keep = _mask_bits(entry.get("keep"), triangles)
+        visible = _mask_bits(entry.get("visible"), triangles)
+        if keep is None or visible is None:
+            return {"status": "invalid", "reason": f"lining {name} bits", "mask_sha256": digest}
+        if visible & ~keep:
+            return {"status": "invalid", "reason": f"lining {name} visible not kept", "mask_sha256": digest}
+        if not _check_rows(entry.get("check"), triangles):
+            return {"status": "invalid", "reason": f"lining {name} check", "mask_sha256": digest}
+        found.append({"mesh": key[0], "primitive": key[1], "triangles": triangles, "keep": entry["keep"],
+                      "check": entry["check"], "removable": triangles - keep.bit_count()})
+    removable = sum(item.pop("removable") for item in found)
+    result = {"status": "ok" if len(found) == len(expected) else "partial", "mask_sha256": digest,
+              "removable": removable,
+              "input": {"schema": LINING_INPUT_SCHEMA, "mask_sha256": digest, "linings": found}}
+    if result["status"] == "partial":
+        result["reason"] = "linings without a mask: " + ", ".join(
+            sorted(f"{mesh}/{primitive}" for mesh, primitive in set(expected) - seen))
+    return result
+
+
+def lining_key(mask_sha256: str) -> str:
+    """Cache key of a file's lining input: the mask bytes and the gate they passed."""
+    return hashlib.sha256(json.dumps({"mask_sha256": mask_sha256, "gate": MASK_GATE, "schema": LINING_INPUT_SCHEMA},
+                                     sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
+def lining_fields(path: Path, relative: str, file_sha256: str, masks: Path) -> dict:
+    """The record fields of a garment's lining mask ({} when it has no lining)."""
+    linings = lining_primitives(gltf_document(path))
+    if not linings:
+        return {}
+    mask = read_mask(mask_path(masks, relative), logical(relative), file_sha256, linings)
+    fields = {"mask_status": mask["status"]}
+    if mask.get("reason"):
+        fields["mask_reason"] = mask["reason"]
+    if "input" in mask:
+        fields.update(lining=mask["input"], mask_sha256=mask["mask_sha256"], lining_key=lining_key(mask["mask_sha256"]),
+                      mask_removable=mask["removable"])
+    return fields
+
+
+def copy_mask_fields(row: dict, record: dict) -> dict:
+    """Puts the record's current mask fields on a summary row (and drops any
+    the record no longer has). Returns the row."""
+    for key in MASK_FIELDS:
+        row.pop(key, None)
+        if key in record:
+            row[key] = record[key]
+    return row
+
+
+def lining_masked(row: dict) -> bool:
+    """True when the cook's lining stage masked at least one surface of the
+    file. A cook.gd that does not run the stage reports no lining rows, and
+    masks that stay below the gain gate leave the sidecar exactly as LOD policy
+    v1 plans it; neither is shaped by the mask."""
+    for mesh in row.get("meshes") or []:
+        for surface in (mesh.get("surfaces") or []) if isinstance(mesh, dict) else []:
+            lining = surface.get("lining") if isinstance(surface, dict) else None
+            if isinstance(lining, dict) and lining.get("status") == "masked":
+                return True
+    return False
+
+
+# --- race-refit budget ----------------------------------------------------------------
+
+def budget_sources(project: Path) -> dict[str, list[str]]:
+    """res:// race refit -> its Human source(s), from equipment.json: for every
+    model that is not skinned (attached to a socket bone; the runtime's
+    default), each canonical_<race>_<sex> variant against the model's
+    canonical_human_<sex> variant (the model's own scene when it has none).
+    A scene that is any model's Human source, or its own source, is never a
+    refit. {} without equipment.json."""
+    path = project / EQUIPMENT
+    if not path.is_file():
+        return {}
+    document = json.loads(path.read_text(encoding="utf-8-sig"))
+    models = document.get("models") if isinstance(document, dict) else None
+    humans: set[str] = set()
+    pairs: dict[str, set[str]] = {}
+    for model in (models or {}).values() if isinstance(models, dict) else []:
+        if not isinstance(model, dict) or model.get("attach", "socket") == "skinned":
+            continue
+        if isinstance(model.get("scene"), str):
+            humans.add(model["scene"])
+        variants = model.get("variants") if isinstance(model.get("variants"), dict) else {}
+        for key, variant in sorted(variants.items()):
+            match = BUDGET_VARIANT.match(key) if isinstance(key, str) else None
+            if not match or not isinstance(variant, dict) or not isinstance(variant.get("scene"), str):
+                continue
+            race, sex = match.groups()
+            human = variants.get(f"canonical_{HUMAN_RACE}_{sex}")
+            reference = human.get("scene") if isinstance(human, dict) and isinstance(human.get("scene"), str) \
+                else model.get("scene")
+            if not isinstance(reference, str):
+                continue
+            humans.add(reference)
+            if race != HUMAN_RACE and variant["scene"] != reference:
+                pairs.setdefault(variant["scene"], set()).add(reference)
+    return {scene: sorted(references) for scene, references in sorted(pairs.items()) if scene not in humans}
+
+
+def budget_fields(project: Path, references: list[str], seen: dict[str, dict | None]) -> dict:
+    """The record fields of a race refit: the budget stage's input against its
+    Human source (of several, the one with the most triangles: the least cut)
+    and its cache key, or budget_status "no_reference" when no source can be
+    read. `seen` memoizes each source's {sha256, triangles}."""
+    best = None
+    for reference in references:
+        if reference not in seen:
+            relative = reference[len("res://"):] if reference.startswith("res://") else ""
+            path = project / relative
+            triangles = gltf_triangles(gltf_document(path)) if relative and in_scope(relative) and path.is_file() else 0
+            seen[reference] = {"sha256": sha256_file(path), "triangles": triangles} if triangles > 0 else None
+        info = seen[reference]
+        if info is not None and (best is None or info["triangles"] > best[1]["triangles"]):
+            best = (reference, info)
+    if best is None:
+        return {"budget_status": "no_reference"}
+    budget = {"schema": BUDGET_INPUT_SCHEMA, "reference": best[0], "reference_sha256": best[1]["sha256"],
+              "reference_triangles": best[1]["triangles"]}
+    return {"budget": budget, "budget_key": budget_key(budget), "budget_reference": best[0],
+            "budget_reference_triangles": best[1]["triangles"], "budget_status": "ok"}
+
+
+def budget_key(budget: dict) -> str:
+    """Cache key of a file's budget input: its Human source's path, bytes and triangles."""
+    return hashlib.sha256(json.dumps(budget, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
+def copy_budget_fields(row: dict, record: dict) -> dict:
+    """Puts the record's current budget fields on a summary row (and drops any
+    the record no longer has). Returns the row."""
+    for key in BUDGET_FIELDS:
+        row.pop(key, None)
+        if key in record:
+            row[key] = record[key]
+    return row
+
+
+def budget_reduced(row: dict) -> bool:
+    """True when the cook's budget stage gave at least one surface of the file
+    a reduced base (a cook.gd that does not run the stage reports no budget
+    rows, and a refit within its budget keeps LOD policy v1's sidecar)."""
+    for mesh in row.get("meshes") or []:
+        for surface in (mesh.get("surfaces") or []) if isinstance(mesh, dict) else []:
+            budget = surface.get("budget") if isinstance(surface, dict) else None
+            if isinstance(budget, dict) and budget.get("status") in BUDGET_REDUCED:
+                return True
+    return False
 
 
 # --- engine and policy -------------------------------------------------------
@@ -371,8 +730,10 @@ def ensure_ignored(out: Path) -> None:
 # --- planning ----------------------------------------------------------------------
 
 def plan(project: Path, out: Path, digest: str, *, paths: list[str] | None = None, force: bool = False,
-         records: list[dict] | None = None) -> dict:
-    """Which in-scope files need cooking. Returns {records, stale, fresh, digest}."""
+         records: list[dict] | None = None, masks: Path | None = None, budget: bool = True) -> dict:
+    """Which in-scope files need cooking. Returns {records, stale, fresh, digest}.
+    `masks` is the lining mask folder (None: cook without masks); `budget`
+    False cooks race refits without the budget stage."""
     if records is None:
         relatives = scope_files(project)
         if paths:
@@ -381,7 +742,7 @@ def plan(project: Path, out: Path, digest: str, *, paths: list[str] | None = Non
             if unknown:
                 raise CookError(f"Not in the cook scope: {', '.join(unknown)}")
             relatives = [item for item in relatives if item in wanted]
-        records = file_records(project, relatives)
+        records = file_records(project, relatives, masks, budget)
     summary = load_summary(out)
     catalog = load_catalog(root_dir(out))
     entries = catalog.get("entries", {}) if catalog.get("engine") else {}
@@ -392,6 +753,8 @@ def plan(project: Path, out: Path, digest: str, *, paths: list[str] | None = Non
                    and row.get("file_sha256") == record["file_sha256"]
                    and row.get("dependencies_sha256", "") == record.get("dependencies_sha256", "")
                    and row.get("model_scale") == record["model_scale"]
+                   and row.get("lining_key", "") == record.get("lining_key", "")
+                   and row.get("budget_key", "") == record.get("budget_key", "")
                    and row.get("status") in ("cooked", "unchanged"))
         if current and row.get("status") == "cooked":
             entry = entries.get(record["path"])
@@ -589,26 +952,39 @@ def collect_garbage(root: Path, entries: dict) -> list[str]:
 def cook(project: Path, godot: Path, *, out: Path | None = None, wrapper: str | None = None,
          paths: list[str] | None = None, force: bool = False, batch_size: int = DEFAULT_BATCH,
          jobs: int = 1, timeout_seconds: float = DEFAULT_TIMEOUT_SECONDS, raw_digests: bool = False,
-         runner=None, engine: str | None = None, source_check: str = DEFAULT_SOURCE_CHECK) -> dict:
+         runner=None, engine: str | None = None, source_check: str = DEFAULT_SOURCE_CHECK,
+         masks: Path | None | bool = True, budget: bool = True) -> dict:
+    """`masks`: the lining mask folder, True for the default (<out>/lining-masks),
+    or None/False to cook without lining masks. `budget` False cooks race
+    refits without the budget stage."""
     project = project_path(project)
     if source_check not in SOURCE_CHECKS:
         raise CookError(f"source_check must be one of {', '.join(SOURCE_CHECKS)}")
     out = Path(out).resolve() if out else default_out(project)
+    masks = resolve_masks(out, masks)
     ensure_ignored(out)
     with driver_lock(out):
         return _cook(project, godot, out, wrapper=wrapper, paths=paths, force=force, batch_size=batch_size,
                      jobs=jobs, timeout_seconds=timeout_seconds, raw_digests=raw_digests, runner=runner,
-                     engine=engine, source_check=source_check)
+                     engine=engine, source_check=source_check, masks=masks, budget=budget)
+
+
+def resolve_masks(out: Path, masks: Path | None | bool) -> Path | None:
+    if masks is True:
+        return default_masks(out)
+    if masks is None or masks is False:
+        return None
+    return Path(masks).resolve()
 
 
 def _cook(project: Path, godot: Path, out: Path, *, wrapper: str | None, paths: list[str] | None, force: bool,
           batch_size: int, jobs: int, timeout_seconds: float, raw_digests: bool, runner, engine: str | None,
-          source_check: str) -> dict:
+          source_check: str, masks: Path | None = None, budget: bool = True) -> dict:
     command = wrapper_command(wrapper)
     began = time.monotonic()
     engine = engine or engine_identity(godot, command)
     digest = policy_digest(project, engine)
-    planned = plan(project, out, digest, paths=paths, force=force)
+    planned = plan(project, out, digest, paths=paths, force=force, masks=masks, budget=budget)
     summary = load_summary(out)
     catalog = load_catalog(root_dir(out))
     old_entries = catalog.get("entries", {}) if catalog.get("engine") == engine else {}
@@ -630,6 +1006,11 @@ def _cook(project: Path, godot: Path, out: Path, *, wrapper: str | None, paths: 
             entries[path] = old_entries[path]
     records = {record["path"]: record for record in planned["records"]}
     files = summary["files"] if paths else {key: value for key, value in summary["files"].items() if key in scope}
+    for path in planned["fresh"]:
+        # A reused row keeps its sidecar (same lining key), but an unusable
+        # mask's status may have moved on (missing -> invalid, no masks now).
+        if isinstance(files.get(path), dict):
+            files[path] = copy_budget_fields(copy_mask_fields(dict(files[path]), records[path]), records[path])
     for path, row in merged["results"].items():
         record = records[path]
         row = dict(row, file_sha256=record["file_sha256"], model_scale=record["model_scale"],
@@ -637,10 +1018,22 @@ def _cook(project: Path, godot: Path, out: Path, *, wrapper: str | None, paths: 
         row.pop("dependencies_sha256", None)
         if record.get("dependencies_sha256"):
             row["dependencies_sha256"] = record["dependencies_sha256"]
+        copy_mask_fields(row, record)
+        copy_budget_fields(row, record)
         if merged["errors"].get(path):
             row["engine_errors"] = merged["errors"][path][:8]
         if row.get("status") == "cooked" and path in merged["entries"]:
-            entries[path] = merged["entries"][path]
+            entry = merged["entries"][path]
+            if record.get("mask_sha256") and lining_masked(row):
+                # Provenance only (the sidecar's own hash binds what is drawn),
+                # and only for a sidecar the mask actually shaped.
+                entry = dict(entry, inputs=dict(entry.get("inputs") or {}, mask_sha256=record["mask_sha256"]))
+            if record.get("budget") and budget_reduced(row):
+                # Provenance only, and only for a sidecar the budget shaped.
+                entry = dict(entry, inputs=dict(entry.get("inputs") or {},
+                                                budget_reference=record["budget"]["reference"],
+                                                budget_reference_sha256=record["budget"]["reference_sha256"]))
+            entries[path] = entry
         else:
             entries.pop(path, None)
             if row.get("status") == "cooked":
@@ -651,13 +1044,21 @@ def _cook(project: Path, godot: Path, out: Path, *, wrapper: str | None, paths: 
     removed = collect_garbage(root_dir(out), entries)
     wall = round(time.monotonic() - began, 1)
     statuses: dict[str, int] = {}
+    mask_statuses: dict[str, int] = {}
+    budget_statuses: dict[str, int] = {}
     for path in planned["records"]:
         status = files.get(path["path"], {}).get("status", "missing")
         statuses[status] = statuses.get(status, 0) + 1
+        if "mask_status" in path:
+            mask_statuses[path["mask_status"]] = mask_statuses.get(path["mask_status"], 0) + 1
+        if "budget_status" in path:
+            budget_statuses[path["budget_status"]] = budget_statuses.get(path["budget_status"], 0) + 1
     run = {"time": time.strftime("%Y-%m-%dT%H:%M:%S"), "engine": engine, "policy_digest": digest,
            "scope": len(planned["records"]), "cooked_now": len(planned["stale"]), "reused": len(planned["fresh"]),
            "partial": bool(paths), "force": force, "wall_seconds": wall, "batches": merged["batches"],
            "statuses": statuses, "catalog_bytes": catalog_bytes, "blobs_removed": len(removed),
+           "masks": str(masks) if masks else "", "mask_statuses": mask_statuses,
+           "budget": budget, "budget_statuses": budget_statuses,
            "unattributed_errors": merged["errors"].get("", [])[:8], "run_dir": merged["run_dir"]}
     summary.update({"schema": SCHEMA, "policy": POLICY, "engine": engine, "policy_digest": digest,
                     "settings": merged["policy_settings"] or summary.get("settings", {}), "files": files})
@@ -665,7 +1066,8 @@ def _cook(project: Path, godot: Path, out: Path, *, wrapper: str | None, paths: 
     write_json_atomic(state_dir(out) / SUMMARY_FILE, summary)
     return {"ok": statuses.get("failed", 0) == 0 and not merged["script_errors"], "root": str(root_dir(out)),
             "entries": len(entries), **{key: run[key] for key in ("scope", "cooked_now", "reused", "wall_seconds",
-                                                                   "statuses", "catalog_bytes", "blobs_removed")},
+                                                                   "statuses", "catalog_bytes", "blobs_removed",
+                                                                   "mask_statuses", "budget_statuses")},
             "failed": sorted(path for path, row in files.items() if row.get("status") == "failed")[:20],
             "script_errors": {key: value[:3] for key, value in merged["script_errors"].items()}}
 
@@ -758,6 +1160,10 @@ def report(out: Path) -> dict:
     methods: dict[str, int] = {}
     reasons: dict[str, dict] = {}
     linings = {"surfaces": 0, "triangles": 0, "triangles_2plus": 0}
+    masking = {"surfaces": {}, "triangles": 0, "kept_triangles": 0, "removed_triangles": 0,
+               "removable_below_gain": 0, "compacted_surfaces": 0, "vertices": 0, "compacted_vertices": 0,
+               "rejected": {}}
+    budgeting = {"surfaces": {}, "reasons": {}, "triangles": 0, "base_triangles": 0, "files": {}}
     levels_hist: dict[int, int] = {}
     uncovered = []
     total = covered2 = covered1 = 0
@@ -784,6 +1190,34 @@ def report(out: Path) -> dict:
             linings["surfaces"] += 1
             linings["triangles"] += triangles
             linings["triangles_2plus"] += triangles if levels >= 2 else 0
+        lining = surface.get("lining")
+        if isinstance(lining, dict):
+            status = str(lining.get("status", "?"))
+            masking["surfaces"][status] = masking["surfaces"].get(status, 0) + 1
+            masking["triangles"] += triangles
+            if status == "masked":
+                masking["kept_triangles"] += int(lining.get("kept_triangles", triangles))
+                masking["removed_triangles"] += int(lining.get("removed_triangles", 0))
+                masking["vertices"] += int(lining.get("vertices", 0))
+                compacted = lining.get("compacted")
+                if isinstance(compacted, dict):
+                    masking["compacted_surfaces"] += 1
+                    masking["compacted_vertices"] += int(lining.get("vertices", 0)) - int(compacted.get("kept_vertices", 0))
+            elif status == "below_gain":
+                masking["removable_below_gain"] += int(lining.get("removable_triangles", 0))
+            elif status == "rejected":
+                reason = str(lining.get("reason", "?"))
+                masking["rejected"][reason] = masking["rejected"].get(reason, 0) + 1
+        budget = surface.get("budget")
+        if isinstance(budget, dict):
+            status = str(budget.get("status", "?"))
+            budgeting["surfaces"][status] = budgeting["surfaces"].get(status, 0) + 1
+            if budget.get("reason"):
+                reason = str(budget["reason"])
+                budgeting["reasons"][reason] = budgeting["reasons"].get(reason, 0) + 1
+            if status in BUDGET_REDUCED:
+                budgeting["triangles"] += triangles
+                budgeting["base_triangles"] += int(budget.get("base_triangles", triangles))
         if levels < 2 and triangles >= 2000:
             uncovered.append((triangles, path, mesh.get("name", ""), surface.get("reason") or f"{levels} level"))
     for bucket in classes.values():
@@ -792,7 +1226,22 @@ def report(out: Path) -> dict:
     blob_bytes = sum(int(row.get("sidecar_bytes", 0)) for row in files.values() if row.get("status") == "cooked")
     catalog_path = root_dir(out) / CATALOG_FILE
     uncovered.sort(reverse=True)
+    mask_files: dict[str, int] = {}
+    for row in files.values():
+        if row.get("mask_status"):
+            mask_files[row["mask_status"]] = mask_files.get(row["mask_status"], 0) + 1
+    masking["files"] = mask_files
+    for row in files.values():
+        statuses_of = {str(surface.get("budget", {}).get("status", "")) for mesh in row.get("meshes") or []
+                       for surface in mesh.get("surfaces", []) if isinstance(surface.get("budget"), dict)}
+        if statuses_of:
+            status = next((name for name in ("capped", "partial", "kept", "rejected", "within") if name in statuses_of), "?")
+            budgeting["files"][status] = budgeting["files"].get(status, 0) + 1
+        elif row.get("budget_status") == "no_reference":
+            budgeting["files"]["no_reference"] = budgeting["files"].get("no_reference", 0) + 1
+    masking["removed_share"] = round(masking["removed_triangles"] / max(masking["triangles"], 1), 4)
     return {"engine": summary.get("engine"), "policy_digest": summary.get("policy_digest"),
+            "lining_masks": masking, "budget": budgeting,
             "files": len(files), "statuses": statuses, "classes": classes,
             "surfaces": sum(methods.values()), "methods": methods, "reasons": reasons,
             "levels_per_surface": {str(key): levels_hist[key] for key in sorted(levels_hist)},
@@ -836,8 +1285,9 @@ def lod_multiplier(vfov_degrees: float, aspect: float) -> float:
 def level_triangles(surface: dict, depth: float, *, model_scale: float, lod_bias: float, multiplier: float,
                     width: float, threshold_px: float = 1.0) -> int:
     """Triangles Godot draws for one surface at this camera depth: the last LOD
-    level whose edge * scale * bias / (depth * multiplier) <= threshold / width."""
-    drawn = int(surface.get("triangles", 0))
+    level whose edge * scale * bias / (depth * multiplier) <= threshold / width
+    (the masked base of a lining when the lining stage changed it)."""
+    drawn = int(surface.get("base_triangles", surface.get("triangles", 0)))
     for triangles, edge, *_ in surface.get("levels", []):
         if depth <= 0 or float(edge) * model_scale * lod_bias / (depth * multiplier) > threshold_px / width:
             break
@@ -985,6 +1435,10 @@ def main(argv: list[str] | None = None) -> int:
     cooker = commands.add_parser("cook", help="cook what changed and rewrite the catalogue")
     common(cooker, True)
     cooker.add_argument("--force", action="store_true", help="recook every file in scope")
+    for sub in (planner, cooker):
+        sub.add_argument("--masks", type=Path, help="lining mask folder (default <out>/lining-masks)")
+        sub.add_argument("--no-masks", action="store_true", help="cook without lining masks")
+        sub.add_argument("--no-budget", action="store_true", help="cook race refits without the budget stage")
     cooker.add_argument("--raw-digests", action="store_true", help="record generate_lods digests (parity checks)")
     cooker.add_argument("--source-check", choices=SOURCE_CHECKS, default=DEFAULT_SOURCE_CHECK,
                         help="how the runtime binds sidecars to actor files (default: file)")
@@ -1010,15 +1464,31 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "plan":
             project = project_path(args.project)
             out = Path(out).resolve() if out else default_out(project)
-            planned = plan(project, out, policy_digest(project, args.engine), force=args.force)
+            masks = resolve_masks(out, None if args.no_masks else (args.masks or True))
+            planned = plan(project, out, policy_digest(project, args.engine), force=args.force, masks=masks,
+                           budget=not args.no_budget)
+            mask_statuses: dict[str, int] = {}
+            budget_statuses: dict[str, int] = {}
+            over_budget = 0
+            for record in planned["records"]:
+                if "mask_status" in record:
+                    mask_statuses[record["mask_status"]] = mask_statuses.get(record["mask_status"], 0) + 1
+                if "budget_status" in record:
+                    budget_statuses[record["budget_status"]] = budget_statuses.get(record["budget_status"], 0) + 1
+                if record.get("budget"):
+                    triangles = gltf_triangles(gltf_document(project / relative_of(record["path"])))
+                    over_budget += int(triangles > BUDGET_RATIO * record["budget"]["reference_triangles"])
             result = {"scope": len(planned["records"]), "stale": len(planned["stale"]),
                       "fresh": len(planned["fresh"]), "policy_digest": planned["digest"],
+                      "masks": str(masks) if masks else "", "mask_statuses": mask_statuses,
+                      "budget_statuses": budget_statuses, "refits_over_budget": over_budget,
                       "stale_paths": [record["path"] for record in planned["stale"]][:50]}
         elif args.command == "cook":
             result = cook(args.project, args.godot, out=out, wrapper=args.wrapper, paths=args.paths,
                           force=args.force, batch_size=args.batch_size, jobs=args.jobs,
                           timeout_seconds=args.timeout_seconds, raw_digests=args.raw_digests,
-                          source_check=args.source_check)
+                          source_check=args.source_check,
+                          masks=None if args.no_masks else (args.masks or True), budget=not args.no_budget)
         elif args.command == "verify":
             result = verify(args.project, args.godot, out=out, wrapper=args.wrapper, paths=args.paths,
                             sample=args.sample, batch_size=args.batch_size, jobs=args.jobs,

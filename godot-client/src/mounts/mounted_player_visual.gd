@@ -47,6 +47,27 @@ var _stepped_seconds := 0.0
 var _presentation_view_radius := 0.0
 var _gait_blend_poses: Array[Transform3D] = []
 var _gait_blend_elapsed := 0.0
+## Each mount's creature animation map as parsed, once per process
+## (avatar-worker AW-07): a bind read and parsed it every time (NET-STATE-05).
+## `animation_map` hands out deep copies (configure adds the gait clips to
+## its copy). Main thread.
+static var _animation_maps: Dictionary = {}
+## Animation map files read from disk this process (one per species).
+static var animation_map_reads := 0
+
+## The animation map at `path` (a creature's "animationMap"), as a copy.
+static func animation_map(path: String) -> Dictionary:
+	var parsed: Variant = _animation_maps.get(path)
+	if not parsed is Dictionary:
+		animation_map_reads += 1
+		parsed = JSON.parse_string(FileAccess.get_file_as_string(path))
+		if not parsed is Dictionary:
+			return {}
+		_animation_maps[path] = parsed
+	return (parsed as Dictionary).duplicate(true)
+
+static func clear_animation_maps() -> void:
+	_animation_maps.clear()
 
 func configure(player: ReplicatedActor3D, models: Dictionary, mount_id := "moor_pony",
 		visual_profile: Dictionary = {}) -> Array[String]:
@@ -59,7 +80,7 @@ func configure(player: ReplicatedActor3D, models: Dictionary, mount_id := "moor_
 	add_child(pony)
 	var config: Dictionary = models[mount_id].duplicate(true)
 	config.import.scale = float(config.import.scale) * float(profile.get("visualScale", 1.0))
-	var mapping: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(config.animationMap))
+	var mapping: Dictionary = animation_map(str(config.animationMap))
 	# Mount gaits can use clips the unmounted creature no longer requests.
 	for gait: String in profile.clips:
 		mapping.actions["mount_" + gait] = profile.clips[gait]

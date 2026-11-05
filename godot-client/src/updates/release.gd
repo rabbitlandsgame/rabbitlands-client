@@ -5,13 +5,19 @@ const CHUNK_BYTES := 8 * 1024 * 1024
 const MAX_MANIFEST_BYTES := 16 * 1024 * 1024
 const ROOTS := ["app", "eloria-assets"]
 const DISTRIBUTION_SCHEMA := 1
-# Per-file package installs (schema 2 manifests with live roots). Old updaters
+# Per-file package installs (schema 2 and 3 manifests with live roots). Old updaters
 # never read these names, so they cannot "recover" a half-applied delta.
 const STAGE := ".eloria-update-stage"
 const JOURNAL_V2 := ".eloria-update-journal-v2.json"
 const BACKUP_V2 := ".eloria-update-backup"
 const OPERATION_KINDS := ["retire", "replace", "add"]
 const INSTALL_PHASE := "Installing verified game files"
+# Signed manifest schemas this updater reads: 1 is one whole-game archive, 2
+# lists independent packages, and 3 is schema 2 whose inventory rows may name a
+# codec (W2-UD-05, package_updates.gd). Updaters before schema 3 reject it in
+# verify_manifest; they still verify its bootstrap rows and replace themselves
+# with the helper it names, which reads it.
+const CODEC_SCHEMA := 3
 
 # Godot's ZIPReader uses 32-bit minizip seek/tell callbacks on Windows,
 # even in a 64-bit export. Read our bounded ZIP entries through FileAccess
@@ -126,6 +132,11 @@ class PayloadArchive extends RefCounted:
 				"method": method, "flags": flags, "crc": header.decode_u32(16)}
 			position = next
 		return position == directory.size()
+
+	func stored(name: String) -> bool:
+		# An entry kept without ZIP compression (method 0). A zstd-coded
+		# package file's chunks must be stored: the frame is the compression.
+		return _entries.has(name) and int(_entries[name].method) == 0
 
 	func read_file(name: String) -> PackedByteArray:
 		if _file == null or not _entries.has(name):
@@ -252,17 +263,23 @@ static func verify_envelope(envelope: Dictionary, identity: Dictionary) -> Dicti
 		return {"error": "The release information is invalid."}
 	return parsed
 
+static func package_manifest(release: Dictionary) -> bool:
+	# Schemas 2 and 3 list packages (installed by package_updates.gd). JSON
+	# numbers are floats, so compare values, never with Array.has.
+	var schema: Variant = release.get("schema")
+	return typeof(schema) in [TYPE_INT, TYPE_FLOAT] and (schema == 2 or schema == CODEC_SCHEMA)
+
 static func verify_manifest(envelope: Dictionary, identity: Dictionary, target := "") -> Dictionary:
 	var release := verify_envelope(envelope, identity)
 	if release.has("error"):
 		return release
-	if release.get("schema") != 1 and release.get("schema") != 2:
+	if release.get("schema") != 1 and not package_manifest(release):
 		return {"error": "The update format is unsupported."}
 	if not valid_commit(release.get("commit")) or release.get("platform") != identity.get("platform"):
 		return {"error": "The release is for a different client."}
 	if target != "" and release.commit != target:
 		return {"error": "The release does not match the server's client commit."}
-	if release.schema == 2:
+	if package_manifest(release):
 		return load("res://src/updates/package_updates.gd").validate(release, identity)
 	if not valid_hash(release.get("sha256")) or not positive_integer(release.get("size")) or not positive_integer(release.get("unpacked_size")):
 		return {"error": "The release size or checksum is invalid."}
@@ -796,7 +813,7 @@ static func install(root: String, identity: Dictionary, repair := false, progres
 	if release.has("error"):
 		DirAccess.remove_absolute(cache.path_join("pending.json"))
 		return release.error
-	if release.schema == 2:
+	if package_manifest(release):
 		return load("res://src/updates/package_updates.gd").install(root, release, identity, progress)
 	var current := read_json(root.path_join("app/client-release.json"))
 	if not repair and contains_commit(current, release.commit):

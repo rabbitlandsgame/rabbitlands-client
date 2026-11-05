@@ -26,6 +26,8 @@ extends Node3D
 ## Everything is built from primitives and generated textures. Nothing is
 ## imported, traced or converted.
 
+const RendererFamily := preload("res://src/runtime/renderer_family.gd")
+
 ## The amounts of a look, in the order the wire sends them after the kind.
 const AMOUNTS: Array[String] = ["precipitation", "clouds", "fog", "darkness", "wind", "lightning"]
 const FALLS: Array[String] = ["none", "rain", "snow", "ash", "sand"]
@@ -41,6 +43,9 @@ const RAIN_HEIGHT := 13.0
 const CAPACITY := {"rain": 2200, "snow": 1600, "ash": 1200, "sand": 1800}
 const LOW_QUALITY_SHARE := 0.5
 const FIRE_LIGHTS_BY_QUALITY := [2, 4, 8]
+## The most fire lights on a renderer that lights a mesh with at most 8 omni
+## lights (Mobile, Compatibility): with NightLamps.LIMITED_LIGHTS, 8 together.
+const LIMITED_FIRE_LIGHTS := 2
 const FIRE_LIGHT_REACH := 64.0
 
 ## How a legacy pair is drawn: the server's own light_rain, heavy_rain and
@@ -309,8 +314,18 @@ func _refresh_fire_lights() -> void:
 			if distance <= FIRE_LIGHT_REACH * FIRE_LIGHT_REACH:
 				ranked.append([distance, fire])
 	ranked.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
-	for index: int in mini(ranked.size(), FIRE_LIGHTS_BY_QUALITY[LookProfile.quality()]):
+	for index: int in mini(ranked.size(), fire_light_limit()):
 		(ranked[index][1].get_node("Glow") as OmniLight3D).visible = true
+
+## How many fires give real light: FIRE_LIGHTS_BY_QUALITY at `quality` (-1 for
+## the one in use), at most LIMITED_FIRE_LIGHTS on a renderer with a per-mesh
+## light limit (`rendering_method`, "" for the one in use).
+static func fire_light_limit(quality := -1, rendering_method := "") -> int:
+	var level: int = LookProfile.quality() if quality < 0 else quality
+	var wanted: int = FIRE_LIGHTS_BY_QUALITY[clampi(level, 0, FIRE_LIGHTS_BY_QUALITY.size() - 1)]
+	if RendererFamily.per_mesh_light_limit(rendering_method) > 0:
+		return mini(wanted, LIMITED_FIRE_LIGHTS)
+	return wanted
 
 ## Rain follows the camera rather than the world, so the box that is drawn is
 ## always the one the player can see. The height is followed too: this map's

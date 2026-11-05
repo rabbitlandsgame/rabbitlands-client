@@ -6,6 +6,8 @@ const Options := preload("res://src/world/graphics_options.gd")
 const Vram := preload("res://src/world/vram_textures.gd")
 const Launch := preload("res://src/updates/launch_options.gd")
 const Budget := preload("res://src/world/live_effect_budget.gd")
+const Settings := preload("res://src/ui/settings_window.gd")
+const RendererPolicy := preload("res://src/runtime/renderer_policy.gd")
 var failures := 0
 
 ## Counts presentation steps (Low actor tier, frame-driven remote motion).
@@ -48,6 +50,7 @@ func _run() -> void:
 	var layer: Weather3D = main.get("weather_layer")
 	var window: Control = main.get("settings_window")
 	_check_frame_clock(main)
+	_check_renderer_settings(main, window)
 	main.call("_on_client_setting_changed", "Graphics", "quality", LookProfile.Quality.HIGH)
 	var rain: Array = [1, 100, 70, 20, 20, 10, 0]
 	layer.set_state(rain, rain, 0.0, true, true)
@@ -177,6 +180,64 @@ func _check_frame_clock(main: Control) -> void:
 		"High puts awake remote actors back on physics")
 	actor.free()
 
+## The renderer choice in the running game (MOB-C5): the menu offers what the
+## launch code can start and names the running renderer; the restart notice
+## follows the renderer a change starts (once main.gd's
+## _refresh_graphics_restart_notice asks the settings window, the B5 hook) and
+## the preference before that; a Mobile choice is saved and launched once
+## LaunchOptions can start Mobile (MOB-C3u).
+func _check_renderer_settings(main: Control, window: Control) -> void:
+	var option := (window.get("panel") as Control).find_child("renderer", true, false) as OptionButton
+	expect(option != null, "Graphics offers the renderer choice")
+	if option == null:
+		return
+	var offered := []
+	for index: int in option.item_count:
+		offered.append(option.get_item_metadata(index))
+	expect(offered == Array(Settings.renderer_choices(RendererPolicy.supported_renderers())),
+		"the renderer menu offers Automatic and what the launch code can start: " + str(offered))
+	expect(option.get_item_text(0) == "Automatic (%s)" % Settings.renderer_name(
+			RendererPolicy.automatic_renderer(RendererPolicy.launch_values())),
+		"the Automatic item names what Automatic starts: " + option.get_item_text(0))
+	expect(option.tooltip_text.begins_with(Settings.running_renderer_text(
+			RenderingServer.get_current_rendering_method(), RenderingServer.get_current_rendering_driver_name(),
+			RenderingServer.get_video_adapter_name())), "the renderer tooltip names the running renderer")
+	var notice: Label = window.get("graphics_restart_notice")
+	var texture: Variant = main.get("_map_texture_quality")
+	main.call("_on_client_setting_changed", "Graphics", "map_texture_quality",
+		Options.TEXTURE_QUALITIES[Options.active_texture_skip()])
+	var startup := str(main.get("_startup_renderer_preference"))
+	var hooked := FileAccess.get_file_as_string("res://src/app/main.gd").contains("renderer_restart_needed")
+	for choice: String in ["auto", "forward_plus", "gl_compatibility", "auto"]:
+		main.call("_on_client_setting_changed", "Graphics", "renderer", choice)
+		var wanted := Settings.renderer_restart_needed(choice, startup) if hooked else choice != startup
+		expect(notice.visible == wanted, "restart notice for %s (launched with %s): %s" % [choice, startup, wanted])
+	if hooked:
+		main.call("_on_client_setting_changed", "Graphics", "renderer", "forward_plus")
+		expect(startup != "auto" or RenderingServer.get_current_rendering_method() != "forward_plus"
+			or not notice.visible, "Automatic to Forward+ while Forward+ runs needs no restart")
+	else:
+		print("SKIP: the restart notice compares renderers once the B5 hook calls Settings.renderer_restart_needed")
+	if "mobile" in Launch.RENDERERS:
+		main.call("_on_client_setting_changed", "Graphics", "renderer", "mobile")
+		main.call("_save_hud_settings")
+		var stored := ConfigFile.new()
+		stored.load(Options.SETTINGS_PATH)
+		expect(main.get("_renderer_preference") == "mobile" and stored.get_value("graphics", "renderer") == "mobile",
+			"choosing Mobile saves renderer=mobile")
+		var launched := Launch.game_arguments([], [], "/Game Folder", false)
+		var method := launched.find("--rendering-method")
+		expect(method >= 0 and launched[method + 1] == "mobile" and method < launched.find("--"),
+			"the updater starts a saved Mobile choice with --rendering-method mobile")
+		expect(not hooked or notice.visible == (RenderingServer.get_current_rendering_method() != "mobile"),
+			"choosing Mobile asks for a restart unless Mobile runs")
+		main.call("_on_client_setting_changed", "Graphics", "renderer", "auto")
+		main.call("_save_hud_settings")
+	else:
+		print("SKIP: choosing Mobile, once LaunchOptions can start it (MOB-C3u)")
+	main.call("_on_client_setting_changed", "Graphics", "renderer", "auto")
+	main.call("_on_client_setting_changed", "Graphics", "map_texture_quality", texture)
+
 func _check_images() -> void:
 	var source := Image.create(64, 64, false, Image.FORMAT_RGBA8)
 	source.fill(Color(0.2, 0.4, 0.6, 1.0))
@@ -222,6 +283,12 @@ func _check_renderer() -> void:
 	for platform: String in ["Windows", "macOS"]:
 		expect(Launch.performance_renderer("auto", platform) == "auto",
 			"Performance preserves Automatic on " + platform)
+	if "mobile" in Launch.RENDERERS:
+		for platform: String in ["Linux", "Windows", "macOS"]:
+			expect(Launch.performance_renderer("mobile", platform) == "mobile",
+				"Performance preserves an explicit Mobile on " + platform)
+	else:
+		print("SKIP: Performance and an explicit Mobile, once LaunchOptions can start Mobile (MOB-C3u)")
 	var config := ConfigFile.new()
 	config.load(Options.SETTINGS_PATH)
 	var had_renderer := config.has_section_key("graphics", "renderer")

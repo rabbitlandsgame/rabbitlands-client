@@ -7,6 +7,8 @@ extends SceneTree
 ## and a small pool of real lights goes to the lamps nearest the camera's
 ## focus. All of it follows the server's clock.
 
+const RendererFamily := preload("res://src/runtime/renderer_family.gd")
+
 var failures := 0
 
 func _init() -> void:
@@ -96,6 +98,24 @@ func _run() -> void:
 	_tick(lamps, focus, 0.0)
 	_expect(lamps.lit_count() == NightLamps.LIGHTS_BY_QUALITY[LookProfile.Quality.LOW],
 		"low quality lights %d lamps" % lamps.lit_count())
+	# Mobile and Compatibility light a mesh with at most 8 omni lights: the
+	# pool keeps 6 there (Weather3D's fires the other 2), at any quality.
+	for method: String in ["mobile", "gl_compatibility"]:
+		RendererFamily.override_for_tests(method)
+		OS.set_environment(LookProfile.QUALITY_VARIABLE, "high")
+		_tick(lamps, focus, 0.0)
+		_expect(lamps.lit_count() == NightLamps.LIMITED_LIGHTS,
+			"%s at high quality lights %d lamps, not %d" % [method, lamps.lit_count(),
+				NightLamps.LIGHTS_BY_QUALITY[LookProfile.Quality.HIGH]])
+		OS.set_environment(LookProfile.QUALITY_VARIABLE, "low")
+		_tick(lamps, focus, 0.0)
+		_expect(lamps.lit_count() == NightLamps.LIGHTS_BY_QUALITY[LookProfile.Quality.LOW],
+			"%s at low quality keeps its %d" % [method, lamps.lit_count()])
+	RendererFamily.override_for_tests("")
+	OS.set_environment(LookProfile.QUALITY_VARIABLE, "high")
+	_tick(lamps, focus, 0.0)
+	_expect(lamps.lit_count() == NightLamps.LIGHTS_BY_QUALITY[LookProfile.Quality.HIGH],
+		"Forward+ again lights the full high-quality pool")
 	if previous.is_empty():
 		OS.unset_environment(LookProfile.QUALITY_VARIABLE)
 	else:

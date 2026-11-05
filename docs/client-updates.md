@@ -31,6 +31,23 @@ To update immediately from the command line, use `-- --install-update` to
 update and play, or `-- --update-only` to update and exit. With no installed
 game, the standalone updater performs the initial installation as before.
 
+The launcher starts the game with the renderer its settings ask for: the
+player's explicit choice (Forward+, Mobile or OpenGL Compatibility), or, for
+Automatic, the renderer the game recorded for this computer while that
+recommendation is active (`auto_renderer_state` trial or ok, with fewer than two
+trial starts that did not reach ok; see `client-compatibility.md`). Without a
+recorded recommendation Automatic is the project default, Forward+. The
+compatibility and safe-mode launchers always force OpenGL. The launcher lists
+`renderer-relaunch` in `RABBITLANDS_LAUNCHER_FEATURES` for the game. A game that
+must restart into another renderer then exits with code 75, and the launcher
+starts it once more with the renderer the settings now ask for, plus
+`--graphics-renderer-restarted`, while it keeps the installation lock. It does
+not relaunch a second time. If a start that tries the recorded renderer (state
+trial) ends with an error exit within 60 seconds, the launcher sets
+`auto_renderer_state` to `failed_start` and leaves every other setting as it
+is. Automatic then starts the project default on that computer. A game started
+by an older launcher sees no feature and restarts itself, as before.
+
 Source checkouts and ordinary custom exports receive selectable manual commands
 instead of an automatic replacement. The commands fetch the published commit's
 release tag, show incoming commits, and request a fast-forward merge before
@@ -67,7 +84,8 @@ package count. Existing `client-assets` URLs remain valid; older builds also use
 `.pkg.<id>.zip.###` names.
 Each package has a full ZIP SHA-256, bounded download-part hashes, and a signed
 inventory of its files, sizes and hashes. Fixed groups cover the engine,
-client pack, release descriptor, actors, maps, audio, shared assets and records.
+client pack, content packs, release descriptor, actors, maps, audio, shared
+assets and records.
 The release descriptor (`app/client-release.json` and its loose copy
 `app/data/client_release.json`) is its own `release-descriptor` package, so its
 per-commit change no longer rewrites the client pack's package or a records
@@ -75,8 +93,48 @@ bucket. Path-based buckets
 keep membership stable when another file is added. ZIP timestamps, entry order
 and permissions are fixed, so an unchanged package keeps its checksum across
 builds, independent of the release date, filename and source-file timestamps.
-The exported `RabbitLands.pck` remains one client package; this is package reuse,
-not a binary patch within a PCK, GLB or ZIP.
+Windows and Linux builds split the exported PCK (W2-UD-06, `tools/pck_split.py`).
+`app/RabbitLands.pck` is a small core pack in the `client` package. It holds
+scripts, scenes, data, every `.import`/`.remap`, the UID and class caches, the
+resources the engine reads before the first autoload, and
+`data/content_packs.json`. Prepared content stays in it until W2-UD-07a. The
+imported textures, audio and login videos are content packs in `app/packs/`
+(`equipment-textures-0..3`, `textures-0..1`, `audio`, `video`), each its own
+`pck-<name>` package. The packs keep their bytes from release to release, so a
+code-only release downloads only `client` and `release-descriptor`, and a content
+release also downloads the packs whose files changed. The first autoload,
+`ContentPacks` (`src/boot/content_packs.gd`), checks each pack's size and mounts
+it at start. If a pack is missing or the wrong size, the game asks the player to
+repair the installation (run the updater; on Steam, Verify integrity of game
+files; a standalone build is installed again from its download), which restores
+it like any other installed file. This is package reuse, not a binary patch
+within a PCK, GLB or ZIP. macOS bundles and `--benchmark-profile` keep one PCK,
+and `--no-split-pck` builds one on purpose.
+Actor VRAM sidecars (W2-AT-C3, `app/assets/actors/<a>/<b>/.../vram/*`; packaged
+only once release-enabled, after W2-AT-C4) form `actors-<a>-<b>-textures-NN`
+packages, 32 buckets per actor folder. Every other file keeps its package, so a
+code-only or GLB-only release downloads no sidecar, and a re-encoded sidecar
+re-downloads only its bucket.
+
+**Manifest schema 3 (zstd payloads).** A schema 3 manifest is a schema 2
+manifest whose inventory rows may carry `"codec": "zstd"`. Each 8 MiB chunk of
+such a file is a STORED ZIP entry holding one zstd frame (level 19, content size
+and checksum on) that decodes to exactly that chunk. The updater decodes each
+frame into a buffer of the chunk's size. It refuses a chunk that is not stored,
+a damaged frame, a failed frame checksum, and a frame that decodes to any other
+size. It still checks every file's SHA-256 before anything live changes. Rows
+without `codec` keep schema 2's deflate or stored chunks, and one package can
+mix both. A codec row is refused under schema 2, and an unknown codec under any
+schema. The codec does not change installed files or their SHA-256, so moving a
+package to zstd downloads nothing extra for an existing installation. Updaters
+before schema 3 refuse the manifest with "The update format is unsupported."
+and delete a stale `pending.json`; they never extract it. They still verify its
+bootstrap rows and replace themselves with the helper it names, and that helper
+reads it. The setup helper (`tools/install_client_payload.gd`) chooses its own
+path by schema, so it must make the same check (`Release.package_manifest`)
+before a schema 3 setup is built, and the Inno script must queue packages for
+schema 3 as it does for schema 2. Releases stay schema 2 until the packaging
+writer emits schema 3.
 
 Loose map textures use 128 stable buckets per map pool, with JSON metadata in
 eight separate buckets. Updating a generated texture or its small index no longer
@@ -128,7 +186,17 @@ missing, damaged or differently spelled member downloads again, but only those
 members are unpacked; matching files stay where they are and are never copied.
 This also works with an older installation that has no package receipt.
 Downloads resume from checksum-verified cached parts. A corrupt or interrupted
-download never replaces the live game.
+download never replaces the live game. Package and updater-helper downloads read
+1 MiB per pass of Godot's download thread, which sleeps until the next timer tick
+after each read (15.6 ms at Windows' default timer resolution, about 2 ms when a
+finer one is in effect). The engine's 64 KiB default capped downloads at about
+4.2 MB/s (or about 30 MB/s); 1 MiB raises that ceiling to about 66 MB/s (or about
+250 MB/s). On a connection slower than the ceiling the download thread keeps one
+processor core busy, as it already did on connections slower than the old
+ceiling, and closing the updater mid-download waits for the current 1 MiB read to
+finish: up to about one second at 8 Mbit/s, about four seconds at 2 Mbit/s and
+about eight seconds at 1 Mbit/s (64 KiB waited at most about half a second there).
+Manifest and API requests keep the default.
 
 Changed files are unpacked into `.eloria-update-stage/` and hashed again from
 disk. Before any live file moves, the updater writes a per-update journal,
@@ -156,8 +224,13 @@ folder inside those roots, keeps the earlier two-root behavior: both roots are
 staged in full and promoted together with the two-root journal.
 
 The installer and updater keep the checked package plan in memory for their one
-locked transaction, avoiding a second scan after downloading. Folder checks are
-shared within each scan. Every file still receives its signed SHA-256 check,
+locked transaction, avoiding a second scan after downloading. The scan lists the
+installed folders once, noting which files and folders are links, then hashes the
+installed files on up to four threads (one fewer than the processor count; files
+of 8 MiB and more first, largest first). The plan is the same as a one-thread
+scan's. Setting `RABBITLANDS_UPDATE_SCAN_THREADS=1` restores the
+one-thread scan (values above one choose the thread count, at most 16). Every
+file still receives its signed SHA-256 check,
 staged files are hashed again before anything live changes, and untouched files
 are checked at the commit point as described above. The plan is never loaded
 from disk or reused by a later updater run, and a plan made before an
@@ -470,6 +543,27 @@ process is still running. Downloads and readiness records are scoped to each
 installation under the player's game user directory; account preferences stay
 in the existing user directory.
 
+The game also removes cache generations it can never read again from the
+player's user directory (`src/runtime/cache_janitor.gd`). In release builds,
+30 seconds after the update checker starts, a low-priority worker removes:
+- map geometry, collision-face and paving policy folders whose own entry header
+  shows an older cache version, or the same version under another engine,
+  format or Mobile's former own renderer key;
+- the legacy scene-cache entries (`map-cache`) of geometry-scoped whole maps
+  such as the gauntlets, which load prepared geometry instead.
+
+The newest policy of each renderer family is always kept (Forward+ and Mobile
+share one; OpenGL Compatibility has its own), so switching renderers rebuilds
+nothing. Folders it cannot prove stale are kept. It does nothing to the policy
+folders while a world preparation runs or is pending, stops at the next file
+when the game closes, and prints one `RABBITLANDS_CACHE_JANITOR` line with the
+bytes it freed. Godot's shader caches are left alone unless
+`RABBITLANDS_CACHE_JANITOR_SHADERS=on`; that rule (non-newest generations idle
+for 14 days, GLES3 shaders capped at 128 MiB) waits for an owner decision.
+`RABBITLANDS_CACHE_JANITOR=off` disables the janitor; `on` also runs it in a
+source build. Like the pre-login world preparation, it stays off in timed
+benchmark runs (`RABBITLANDS_CROWD_BENCH_START_TOKEN` set) unless switched `on`.
+
 Only changed or damaged asset packages are downloaded, and only their changed
 members are unpacked. Keep enough free space for the changed downloads and the
 changed files. ZIP entries use 8 MiB chunks and 64-bit archive offsets, so even
@@ -504,6 +598,27 @@ Choose the minimum checks for the behavior being changed. For example:
   fixture project alone reads `RL_UPDATE_TEST_STOP_AFTER`, which shipped updaters
   never do. The checks also cover locked files, case-only renames, and journals
   and backups left by older updaters.
+- Schema 3 and zstd packages:
+  `python -m pytest -q godot-client/tests/test_asset_packages.py -k "zstd or codec or schema_3 or older_updater"`.
+  It covers mixed zstd and deflate rows, multi-chunk and empty files, repair, a
+  fresh install, eight kinds of damaged chunk, the schema rules, and a download
+  the game prepared that installs at restart. An older updater, taken from Git
+  (`RL_OLDER_UPDATER_REFS`, default `origin/develop`; add the live release's
+  commit to check it too), must refuse the manifest, delete `pending.json` and
+  still replace its helpers. The exported self-replacement check includes a
+  schema 3 release and the migration from that older updater. The schema 3
+  Inno setup check skips until the setup helper and the packaging writer's
+  setup script both handle schema 3.
+- Renderer launch arguments and the relaunch handshake:
+  `godot --headless --path godot-client --script res://tests/test_launch_renderer.gd`.
+  The runtime runner below also runs it in its updater-only project, which proves
+  that `launch_options.gd` needs no game script. The native check
+  `python -m pytest -q godot-client/tests/test_startup_updates.py -k relaunch`
+  exports the updater and a stand-in game (it needs the installed export
+  templates). It covers the exit-75 relaunch under one lock, the restart marker,
+  `failed_start` after an error exit or an engine crash, no second relaunch,
+  confirmed, explicit and compatibility starts left alone, and a relaunch that
+  cannot start stopping a running backup removal before the lock is released.
 - Login enforcement changes, from the sibling server repository:
   `python -m pytest -q tests/test_client_updates.py::test_login_denied_before_password_or_world_processing`.
 

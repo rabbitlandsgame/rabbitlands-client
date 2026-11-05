@@ -635,6 +635,596 @@ class SceneryAndUnskip(unittest.TestCase):
             packager.check_scenery_vram_textures(self.app)
 
 
+# --- actor sidecars (AT-C3) -------------------------------------------------------------------------------------
+
+ACTOR_FIXTURE = TESTS / "fixtures" / "actor_vram"
+REAL_TOOL = CLIENT / "tools" / "build_vram_textures.py"
+
+# Stands in for the commit's tools/build_vram_textures.py --actor-dir (it sits at that path in a scratch build tree):
+# plans the build tree's actor GLBs with the real tool's own readers and writes per-directory indexes of fake .evt
+# files, accepting every image a material samples (with its roles) and excluding the others. The real encode is
+# covered by test_build_vram_textures.py ActorBuild and by ActorStageReal below.
+FAKE_ACTOR_TOOL = r"""
+import hashlib, importlib.util, json, os, sys
+from pathlib import Path
+spec = importlib.util.spec_from_file_location("real_vram_tool", os.environ["REAL_VRAM_TOOL"])
+real = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(real)
+args = sys.argv[1:]
+def values(flag):
+    return [args[i + 1] for i, arg in enumerate(args) if arg == flag]
+cache = Path(values("--cache")[0])
+cache.mkdir(parents=True, exist_ok=True)
+(cache / "argv.json").write_text(json.dumps(args), encoding="utf-8")
+if os.environ.get("FAKE_ACTOR_TOOL_FAIL"):
+    print("[00:00:00] FAILED: the fake encoder broke")
+    sys.exit(1)
+client = Path(__file__).resolve().parents[1]
+actors = client / "assets" / "actors"
+retired_index = client / "data" / "assets" / "retired_procedural_models.json"
+retired = {(client / "assets" / p).resolve() for p in json.loads(retired_index.read_text(encoding="utf-8"))["runtimePaths"]}
+out_root = Path(values("--actor-out-root")[0])
+plans = {}
+glbs = 0
+for name in values("--actor-dir"):
+    for glb in sorted((actors / "native" / name).rglob("*.glb")):
+        if glb.resolve() in retired:
+            continue
+        glbs += 1
+        chunks = real.glb_chunks(glb)
+        roles = real.image_roles(chunks[0])
+        for index, sha, _ in real.embedded_images(glb, cache / "_extract", chunks):
+            plans.setdefault(glb.parent, {}).setdefault(sha, set()).update(real.role_names(roles.get(index, set())))
+summary = {"encoded": 0, "cached": 0, "actorGlbs": glbs, "actorImages": 0, "actorAccepted": 0, "actorExcluded": {},
+           "actorGpuBytes": 0, "actorFileBytes": 0, "directories": {}}
+for directory, images in sorted(plans.items()):
+    target = out_root / directory.relative_to(actors) / "vram"
+    target.mkdir(parents=True, exist_ok=True)
+    index = {"schema": 1, "recipeVersion": 1, "images": {}, "excluded": {}}
+    for sha, roles in sorted(images.items()):
+        summary["actorImages"] += 1
+        if not roles:
+            index["excluded"][sha] = "no_material_role"
+            summary["actorExcluded"]["no_material_role"] = summary["actorExcluded"].get("no_material_role", 0) + 1
+            continue
+        data = b"EVT1 fake sidecar " + sha.encode()
+        (target / f"{sha}.base.evt").write_bytes(data)
+        index["images"][sha] = {"file": f"{sha}.base.evt", "recipe": "base", "format": "bc7", "width": 64,
+                                "height": 64, "mipmaps": 7, "gpuBytes": 5472, "rawBytes": 5620,
+                                "fileBytes": len(data), "sha256": hashlib.sha256(data).hexdigest(),
+                                "roles": sorted(roles)}
+        summary["actorAccepted"] += 1
+        summary["actorGpuBytes"] += 5472
+        summary["actorFileBytes"] += len(data)
+    (target / "index.json").write_text(json.dumps(index, indent=1) + "\n", encoding="utf-8")
+    (target / "report.json").write_text("{}", encoding="utf-8")
+    summary["directories"][str(target)] = {"sidecars": len(index["images"])}
+print("[00:00:00] fake actor encode")
+print(json.dumps(summary, indent=1))
+"""
+
+
+def _actor_build_tree(root: Path, tool_text: str | None = FAKE_ACTOR_TOOL) -> Path:
+    """A scratch build tree shaped like the repository: godot-client/ holding the actor fixture's assets and data,
+    and tools/build_vram_textures.py (the fake above, or the real tool when tool_text is None)."""
+    client = root / "godot-client"
+    shutil.copytree(ACTOR_FIXTURE / "assets", client / "assets")
+    shutil.copytree(ACTOR_FIXTURE / "data", client / "data")
+    (client / "tools").mkdir(parents=True)
+    if tool_text is None:
+        shutil.copyfile(REAL_TOOL, client / "tools" / "build_vram_textures.py")
+        shutil.copyfile(CLIENT / "tools" / "vram_encode.gd", client / "tools" / "vram_encode.gd")
+    else:
+        (client / "tools" / "build_vram_textures.py").write_text(tool_text, encoding="utf-8")
+    return root
+
+
+def _stage_actor_glbs(build: Path, app: Path) -> None:
+    """The actor GLBs as stage_loose_client_files stages them: every tracked file loose, rl_heads and the retired
+    model included (they ship; they only get no sidecars)."""
+    shutil.copytree(build / "godot-client" / "assets" / "actors", app / "assets" / "actors")
+
+
+class ActorSidecarStage(unittest.TestCase):
+    """stage_actor_vram_textures runs the commit's tool once per package, for the actor folders, into app/."""
+
+    def setUp(self):
+        self.scratch = Path(tempfile.mkdtemp(prefix="vram-actor-stage-")).resolve()
+        self.build = _actor_build_tree(self.scratch / "build")
+        self.stage = self.scratch / "stage"
+        self.app = self.stage / "app"
+        self.logs = self.scratch / "logs"
+        self.logs.mkdir()
+        self.cache = self.scratch / "cache"
+        _stage_actor_glbs(self.build, self.app)
+        self.env = mock.patch.dict(packager.os.environ, {"REAL_VRAM_TOOL": str(REAL_TOOL)})
+        self.env.start()
+
+    def tearDown(self):
+        self.env.stop()
+        shutil.rmtree(self.scratch, ignore_errors=True)
+
+    def run_stage(self, **options):
+        with mock.patch.object(packager, "log"):
+            return packager.stage_actor_vram_textures(self.build, self.stage, Path("godot.exe"), self.cache,
+                                                      self.logs, self.app, **options)
+
+    def argv(self):
+        return json.loads((self.cache / "argv.json").read_text(encoding="utf-8"))
+
+    def test_one_run_of_the_commit_s_tool_into_app_assets_actors(self):
+        receipt = self.run_stage()
+        argv = self.argv()
+        self.assertEqual([argv[i + 1] for i, arg in enumerate(argv) if arg == "--actor-dir"],
+                         list(packager.ACTOR_SIDECAR_DIRS))
+        self.assertEqual(argv[argv.index("--actor-out-root") + 1], str(self.app / "assets" / "actors"))
+        self.assertEqual(argv[argv.index("--cache") + 1], str(self.cache), "the map run's cache: actors use _actors/")
+        self.assertEqual(argv[argv.index("--godot") + 1], "godot.exe")
+        for absent in ("--maps", "--out-root", "--link-output", "--cache-budget-bytes", "--floors", "--procs"):
+            self.assertNotIn(absent, argv, "a local package: no runner storage, map floors, the tool's procs")
+        native = self.app / "assets" / "actors" / "native"
+        indexes = sorted(p.parent.parent.relative_to(native).as_posix() for p in native.rglob("vram/index.json"))
+        self.assertEqual(indexes, ["creatures", "creatures/basic_expansion", "equipment", "hair", "hair/fitted",
+                                   "mounts", "races"])
+        self.assertFalse(list(native.rglob("report.json")), "the quality reports go to the logs, not app/")
+        self.assertEqual(sorted(p.name for p in self.logs.glob("vram-report-app__*.json")),
+                         sorted("vram-report-app__assets__actors__native__" + d.replace("/", "__") + ".json"
+                                for d in indexes))
+        self.assertEqual(receipt, json.loads((self.logs / "actor-vram-textures.json").read_text(encoding="utf-8")))
+        self.assertEqual(receipt["dirs"], list(packager.ACTOR_SIDECAR_DIRS))
+        self.assertEqual(receipt["selfTest"], "assets/actors/native/races")
+        self.assertEqual(receipt["summary"]["actorGlbs"], 8, "rl_heads and the retired model are never planned")
+        self.assertEqual(sorted(receipt["families"]), sorted(packager.ACTOR_SIDECAR_DIRS))
+        files = [p for p in native.rglob("vram/*") if p.is_file()]
+        self.assertEqual((receipt["files"], receipt["bytes"]), (len(files), sum(p.stat().st_size for p in files)))
+        self.assertEqual(receipt["families"]["creatures"]["indexes"], 2)
+        self.assertEqual(receipt["sidecars"], 14)
+        self.assertTrue((self.logs / "actor-vram-textures.log").is_file())
+        self.assertFalse(list((self.build / "godot-client" / "assets").rglob("vram")), "the build tree is untouched")
+
+    def test_the_staged_result_passes_both_checks(self):
+        self.run_stage()
+        with mock.patch.object(packager, "log"):
+            packager.check_loose_vram_textures(self.app)
+            coverage = packager.check_actor_vram_coverage(self.build, self.app, packager.ACTOR_SIDECAR_DIRS)
+        self.assertEqual((coverage["glbs"], coverage["directories"], coverage["images"], coverage["sidecars"]),
+                         (8, 7, 15, 14))
+        self.assertEqual(coverage["excluded"], {"no_material_role": 1})
+        self.assertEqual(coverage["families"]["races"], {"glbs": 2, "images": 3, "sidecars": 3, "excluded": {}})
+
+    def test_owner_floors_procs_and_phasing_reach_the_tool(self):
+        floors = {"normal_mean_deg": 1.5, "normal_p99_deg": 8.0}
+        with mock.patch.object(packager, "ACTOR_SIDECAR_FLOORS", floors):
+            receipt = self.run_stage(dirs=("races", "hair", "mounts", "equipment"), procs=1, measure_procs=2)
+        argv = self.argv()
+        self.assertEqual(json.loads(argv[argv.index("--floors") + 1]), floors)
+        self.assertEqual((argv[argv.index("--procs") + 1], argv[argv.index("--measure-procs") + 1]), ("1", "2"))
+        self.assertNotIn("creatures", [argv[i + 1] for i, arg in enumerate(argv) if arg == "--actor-dir"])
+        self.assertEqual(receipt["floors"], floors)
+        self.assertFalse((self.app / "assets/actors/native/creatures/vram").exists(), "phase A ships no creatures")
+        with mock.patch.object(packager, "log"):
+            packager.check_actor_vram_coverage(self.build, self.app, ("races", "hair", "mounts", "equipment"))
+
+    def test_a_folder_the_build_tree_lacks_is_skipped(self):
+        shutil.rmtree(self.build / "godot-client/assets/actors/native/mounts")
+        receipt = self.run_stage()
+        self.assertEqual(receipt["skipped"], ["mounts"])
+        self.assertNotIn("mounts", [a for i, a in enumerate(self.argv()) if i and self.argv()[i - 1] == "--actor-dir"])
+
+    def test_a_runner_build_links_into_the_stage_within_its_budget(self):
+        storage = mock.Mock()
+        storage.budget.capacity, storage.budget.reserve, storage.budget.roots = 10 * 1024**3, 1024**3, [self.scratch]
+        with mock.patch.object(packager, "STORAGE", storage):
+            self.run_stage()
+        argv = self.argv()
+        self.assertIn("--link-output", argv)
+        self.assertGreater(int(argv[argv.index("--cache-budget-bytes") + 1]), 0)
+
+    def test_a_failed_tool_fails_the_package_with_its_log(self):
+        with mock.patch.dict(packager.os.environ, {"FAKE_ACTOR_TOOL_FAIL": "1"}):
+            with self.assertRaisesRegex(packager.PackageError, "(?s)--actor-dir failed.*fake encoder broke"):
+                self.run_stage()
+
+    def test_no_summary_is_a_failure(self):
+        for text in ("[00:00:00] done\n", "", "{\n \"encoded\": \n"):
+            with self.assertRaises(packager.PackageError):
+                packager._tool_summary(text)
+        self.assertEqual(packager._tool_summary('{\n "a": {\n  "b": 1\n }\n}\n'), {"a": {"b": 1}})
+        self.assertEqual(packager._tool_summary('[t] x {\n{\n "a": 2\n}\n'), {"a": 2})
+
+
+class ActorSidecarChecks(unittest.TestCase):
+    """check_loose_vram_textures and check_actor_vram_coverage on a staged actor result."""
+
+    def setUp(self):
+        self.scratch = Path(tempfile.mkdtemp(prefix="vram-actor-check-")).resolve()
+        self.build = _actor_build_tree(self.scratch / "build")
+        self.app = self.scratch / "stage" / "app"
+        _stage_actor_glbs(self.build, self.app)
+        with mock.patch.dict(packager.os.environ, {"REAL_VRAM_TOOL": str(REAL_TOOL)}), \
+                mock.patch.object(packager, "log"):
+            packager.stage_actor_vram_textures(self.build, self.scratch / "stage", Path("godot.exe"),
+                                               self.scratch / "cache", self.scratch, self.app)
+        self.native = self.app / "assets" / "actors" / "native"
+        self.races = self.native / "races" / "vram"
+        self.index = json.loads((self.races / "index.json").read_text(encoding="utf-8"))
+        self.log = mock.patch.object(packager, "log")
+        self.log.start()
+
+    def tearDown(self):
+        self.log.stop()
+        shutil.rmtree(self.scratch, ignore_errors=True)
+
+    def write_index(self):
+        (self.races / "index.json").write_text(json.dumps(self.index), encoding="utf-8")
+
+    def check(self, dirs=packager.ACTOR_SIDECAR_DIRS):
+        packager.check_loose_vram_textures(self.app)
+        return packager.check_actor_vram_coverage(self.build, self.app, dirs)
+
+    def test_a_changed_sidecar_fails(self):
+        entry = next(iter(self.index["images"].values()))
+        (self.races / entry["file"]).write_bytes(b"changed")
+        with self.assertRaisesRegex(packager.PackageError, "sha256 differs from the index"):
+            self.check()
+
+    def test_an_entry_without_its_sha256_is_a_build_problem(self):
+        # Not a KeyError traceback out of the packager: a reported sidecar problem.
+        del next(iter(self.index["images"].values()))["sha256"]
+        self.write_index()
+        with self.assertRaisesRegex(packager.PackageError, "sha256 differs from the index"):
+            packager.check_loose_vram_textures(self.app)
+
+    def test_a_missing_sidecar_fails(self):
+        entry = next(iter(self.index["images"].values()))
+        (self.races / entry["file"]).unlink()
+        with self.assertRaisesRegex(packager.PackageError, "listed in the index but missing"):
+            self.check()
+
+    def test_a_stray_file_fails(self):
+        (self.races / "report.json").write_text("{}", encoding="utf-8")
+        with self.assertRaisesRegex(packager.PackageError, "not named by the index"):
+            self.check()
+
+    def test_a_sidecar_folder_without_its_index_fails(self):
+        (self.races / "index.json").unlink()
+        with self.assertRaisesRegex(packager.PackageError, "sidecar folder without its index.json"):
+            packager.check_loose_vram_textures(self.app)
+        with self.assertRaisesRegex(packager.PackageError, "3 embedded images and no vram/index.json"):
+            packager.check_actor_vram_coverage(self.build, self.app, packager.ACTOR_SIDECAR_DIRS)
+
+    def test_an_index_naming_a_file_outside_its_folder_fails(self):
+        sha, entry = next(iter(self.index["images"].items()))
+        for name in ("../" + entry["file"], "sub/" + entry["file"], "C:" + entry["file"], "index.json"):
+            with self.subTest(name=name):
+                self.index["images"][sha] = dict(entry, file=name)
+                self.write_index()
+                with self.assertRaisesRegex(packager.PackageError, "unsafe sidecar file"):
+                    packager.check_loose_vram_textures(self.app)
+
+    def test_a_coverage_gap_fails(self):
+        sha = next(iter(self.index["images"]))
+        entry = self.index["images"].pop(sha)
+        (self.races / entry["file"]).unlink()
+        self.write_index()
+        with self.assertRaisesRegex(packager.PackageError, f"races: embedded image {sha[:12]} has no sidecar"):
+            self.check()
+
+    def test_an_exclusion_with_a_reason_is_coverage(self):
+        sha = next(iter(self.index["images"]))
+        entry = self.index["images"].pop(sha)
+        (self.races / entry["file"]).unlink()
+        self.index["excluded"][sha] = "quality: psnr 28.6 < 30.0 at mip 3"
+        self.write_index()
+        coverage = self.check()
+        self.assertEqual(coverage["excluded"], {"no_material_role": 1, "quality": 1})
+        self.index["excluded"][sha] = " "
+        self.write_index()
+        with self.assertRaisesRegex(packager.PackageError, "no sidecar and no exclusion reason"):
+            self.check()
+
+    def test_a_sidecar_for_other_roles_fails(self):
+        sha, entry = next((s, e) for s, e in self.index["images"].items() if e["roles"] == ["normal"])
+        entry["roles"] = ["base"]
+        self.write_index()
+        with self.assertRaisesRegex(packager.PackageError, r"is for \['base'\], its GLBs sample it as \['normal'\]"):
+            self.check()
+
+    def test_an_index_entry_no_glb_embeds_fails(self):
+        self.index["excluded"]["f" * 64] = "no_material_role"
+        self.write_index()
+        with self.assertRaisesRegex(packager.PackageError, "names ffffffffffff, which no GLB in that folder embeds"):
+            self.check()
+
+    def test_a_changed_staged_glb_fails(self):
+        # The staged bytes, not the build tree's, are what the client hashes.
+        shutil.copyfile(self.native / "races" / "human_male.glb", self.native / "creatures" / "wolf.glb")
+        with self.assertRaisesRegex(packager.PackageError, "creatures: embedded image .* has no sidecar"):
+            self.check()
+
+    def test_an_index_outside_the_planned_folders_fails(self):
+        shutil.copytree(self.races, self.native / "rl_heads" / "hair" / "vram")
+        with self.assertRaisesRegex(packager.PackageError, "rl_heads/hair: an actor sidecar index outside"):
+            self.check()
+        shutil.rmtree(self.native / "rl_heads" / "hair" / "vram")
+        with self.assertRaisesRegex(packager.PackageError, "native/creatures: an actor sidecar index outside"):
+            self.check(dirs=("races", "hair", "mounts", "equipment"))
+
+    def test_retired_and_rl_head_glbs_need_no_sidecar(self):
+        coverage = self.check()
+        self.assertEqual(coverage["families"]["creatures"]["glbs"], 2, "wolf and fox; not the retired beast")
+        retired = json.loads((self.build / "godot-client/data/assets/retired_procedural_models.json")
+                             .read_text(encoding="utf-8"))
+        retired["runtimePaths"] = []
+        (self.build / "godot-client/data/assets/retired_procedural_models.json").write_text(
+            json.dumps(retired), encoding="utf-8")
+        with self.assertRaisesRegex(packager.PackageError, "creatures: embedded image"):
+            self.check()
+
+    def test_an_unreadable_glb_fails(self):
+        (self.native / "hair" / "short.glb").write_bytes(b"glTF\x02\x00\x00\x00")
+        with self.assertRaisesRegex(packager.PackageError, "hair/short.glb: cannot read its images"):
+            self.check()
+
+    def test_the_self_test_folder_prefers_races_then_the_next_folder_with_a_sidecar(self):
+        dirs = packager.ACTOR_SIDECAR_DIRS
+        self.assertEqual(packager.actor_self_test_directory(self.app, dirs), "assets/actors/native/races")
+        self.index["images"] = {}
+        self.write_index()
+        self.assertEqual(packager.actor_self_test_directory(self.app, dirs), "assets/actors/native/creatures")
+        self.assertEqual(packager.actor_self_test_directory(self.app, ("races",)), None)
+
+
+class ActorGlbReader(unittest.TestCase):
+    """The coverage check's ranged reader finds exactly the images build_vram_textures.py plans."""
+
+    def setUp(self):
+        self.scratch = Path(tempfile.mkdtemp(prefix="vram-actor-reader-")).resolve()
+
+    def tearDown(self):
+        shutil.rmtree(self.scratch, ignore_errors=True)
+
+    def planned(self, glb):
+        return [(index, sha) for index, sha, _ in packager.vram_tool.embedded_images(glb, self.scratch / "x")]
+
+    def test_it_agrees_with_the_tool_on_every_fixture_glb(self):
+        glbs = sorted((ACTOR_FIXTURE / "assets").rglob("*.glb"))
+        self.assertGreaterEqual(len(glbs), 9)
+        for glb in glbs:
+            with self.subTest(glb=glb.name):
+                document, images = packager._glb_embedded_images(glb)
+                self.assertEqual(images, self.planned(glb))
+                self.assertEqual(document, packager.vram_tool.glb_json(glb))
+
+    @unittest.skipUnless((CHECKOUT / ".git").exists(), "needs the client's git checkout")
+    def test_it_agrees_with_the_tool_on_real_actor_glbs(self):
+        native = CLIENT / "assets" / "actors" / "native"
+        sample = [path for name in ("races", "mounts", "hair/fitted") for path in sorted((native / name).glob("*.glb"))[:3]]
+        sample += sorted((native / "creatures").glob("*.glb"))[:3] + sorted((native / "equipment").rglob("*.glb"))[:3]
+        sample = [path for path in sample if path.is_file()]
+        if not sample:
+            self.skipTest("no actor GLBs checked out")
+        for glb in sample:
+            with self.subTest(glb=glb.name):
+                self.assertEqual(packager._glb_embedded_images(glb)[1], self.planned(glb))
+
+    def test_an_rlcz_envelope_reads_as_its_glb(self):
+        source = ACTOR_FIXTURE / "assets/actors/native/creatures/wolf.glb"
+        envelope = self.scratch / "wolf.glb"
+        try:
+            encoded = packager.creature_compression.encode(source.read_bytes())
+        except packager.creature_compression.PayloadError as error:  # no zstandard module
+            self.skipTest(str(error))
+        envelope.write_bytes(encoded)
+        self.assertEqual(envelope.read_bytes()[:4], packager.vram_tool.RLCZ_MAGIC)
+        self.assertEqual(packager._glb_embedded_images(envelope), packager._glb_embedded_images(source))
+
+    def test_malformed_files_raise(self):
+        source = (ACTOR_FIXTURE / "assets/actors/native/races/human_male.glb").read_bytes()
+        length = struct.unpack_from("<I", source, 12)[0]
+        document = json.loads(source[20:20 + length])
+        view = document["bufferViews"][document["images"][-1]["bufferView"]]
+        inside_last_image = 20 + length + 8 + view.get("byteOffset", 0) + view["byteLength"] // 2
+        # The BIN chunk declared shorter than the last image's view, its bytes still in the file.
+        short_bin = bytearray(source)
+        struct.pack_into("<I", short_bin, 20 + length, inside_last_image - (20 + length + 8))
+        cases = {"not a glb": b"PNG not a glb", "truncated json": source[:40],
+                 "truncated image": source[:inside_last_image], "view past the bin chunk": bytes(short_bin)}
+        for label, data in cases.items():
+            with self.subTest(label):
+                path = self.scratch / (label.replace(" ", "_") + ".glb")
+                path.write_bytes(data)
+                with self.assertRaises(ValueError):
+                    packager._glb_embedded_images(path)
+
+
+class ActorSmoke(unittest.TestCase):
+    """The smoke launch asks for and requires the actor self-test line when actor sidecars ship."""
+
+    LINE = "actor_images self_test ok entries=50 format=bc7 mips=10 decompress=ok"
+
+    def setUp(self):
+        self.scratch = Path(tempfile.mkdtemp(prefix="vram-actor-smoke-"))
+        self.app = self.scratch / "pkg" / "app"
+        self.app.mkdir(parents=True)
+        self.lines = packager.VRAM_SELF_TEST_OK + " entries=4 format=bc7 mips=7\n"
+        self.seen = {}
+
+        def fake_godot(binary, args, log_path, timeout=0, env=None, **kwargs):
+            self.seen["env"] = dict(env or {})
+            return self.lines
+        self.patch = mock.patch.object(packager, "run_godot", fake_godot)
+        self.patch.start()
+        self.quiet = mock.patch.object(packager, "log")
+        self.quiet.start()
+
+    def tearDown(self):
+        self.quiet.stop()
+        self.patch.stop()
+        shutil.rmtree(self.scratch, ignore_errors=True)
+
+    def smoke(self, **options):
+        packager.smoke_launch(self.app, self.scratch, {"binary": "RabbitLands.exe"}, vram_textures=True, **options)
+
+    def test_without_actor_sidecars_nothing_is_asked(self):
+        self.smoke()
+        self.assertNotIn(packager.ACTOR_VRAM_SELF_TEST_VARIABLE, self.seen["env"])
+
+    def test_the_line_is_asked_for_and_required(self):
+        with self.assertRaisesRegex(packager.PackageError, "did not decode and decompress an actor sidecar"):
+            self.smoke(actor_test="assets/actors/native/races")
+        self.assertEqual(self.seen["env"]["ELORIA_ACTOR_VRAM_SELF_TEST"], "assets/actors/native/races")
+        for bad in ("actor_images self_test failed index=missing",
+                    "actor_images self_test ok entries=50 format=bc7 mips=10 decompress=failed",
+                    "actor_images self_test ok entries=0 format=bc7 mips=10 decompress=ok",
+                    "actor_images self_test ok entries=50 format=bc7 mips=0 decompress=ok",
+                    "actor_images self_test ok entries=50 format=bc7 mips=10 decompress=okay"):
+            with self.subTest(bad=bad):
+                self.lines = packager.VRAM_SELF_TEST_OK + " entries=4\n" + bad + "\n"
+                with self.assertRaisesRegex(packager.PackageError, "actor sidecar"):
+                    self.smoke(actor_test="assets/actors/native/races")
+        self.lines = packager.VRAM_SELF_TEST_OK + " entries=4\n" + self.LINE + "\n"
+        self.smoke(actor_test="assets/actors/native/races")
+
+    def test_an_unsafe_folder_is_refused_before_launching(self):
+        for bad in ("../assets/actors/native/races", "assets/actors/native/races; rm -rf /", "assets/world/x",
+                    "assets/actors/native/../../../x", "assets/actors/native/races dir"):
+            with self.subTest(bad=bad):
+                self.seen.clear()
+                with self.assertRaisesRegex(packager.PackageError, "not an app-relative actor folder"):
+                    self.smoke(actor_test=bad)
+                self.assertNotIn("env", self.seen)
+
+
+class ActorSidecarDecision(unittest.TestCase):
+    """--actor-vram-textures: off by default and refused for releases until the release switch (schedule 1.1 #20)."""
+
+    def setUp(self):
+        self.build = Path(tempfile.mkdtemp(prefix="vram-actor-decide-")).resolve()
+        self.reader = self.build / packager.ACTOR_VRAM_READER
+        self.reader.parent.mkdir(parents=True)
+        self.reader.write_text('print("actor_images self_test ok entries=%d ...")\n', encoding="utf-8")
+        self.tool = self.build / packager.ACTOR_VRAM_TOOL
+        self.tool.parent.mkdir(parents=True)
+        self.tool.write_text('parser.add_argument("--actor-dir", action="append")\n', encoding="utf-8")
+        self.quiet = mock.patch.object(packager, "log")
+        self.quiet.start()
+
+    def tearDown(self):
+        self.quiet.stop()
+        shutil.rmtree(self.build, ignore_errors=True)
+
+    def decide(self, requested, no_vram=False, release_build=False, runner=False):
+        return packager.actor_sidecar_dirs(self.build, requested, no_vram=no_vram, release_build=release_build,
+                                           runner=runner)
+
+    def test_not_release_enabled_yet(self):
+        self.assertFalse(packager.ACTOR_SIDECARS_RELEASE_ENABLED, "release-enable only with AT-C4 and the smoke line")
+
+    def test_off_unless_asked(self):
+        self.assertEqual(self.decide(None), ())
+        self.assertEqual(self.decide(False), ())
+        self.assertEqual(self.decide(None, release_build=True, runner=True), (), "a runner build is unaffected")
+        self.assertEqual(self.decide(True), packager.ACTOR_SIDECAR_DIRS)
+
+    def test_a_release_or_runner_build_cannot_ask_yet(self):
+        for kind in ({"release_build": True}, {"runner": True}):
+            with self.subTest(**kind):
+                with self.assertRaisesRegex(packager.PackageError, "not release-enabled yet"):
+                    self.decide(True, **kind)
+
+    def test_asking_without_vram_sidecars_fails(self):
+        with self.assertRaisesRegex(packager.PackageError, "needs the VRAM sidecars"):
+            self.decide(True, no_vram=True)
+
+    def test_a_commit_without_the_reader_or_the_actor_mode_cannot_ship_them(self):
+        self.reader.write_text("extends GLTFDocumentExtension\n", encoding="utf-8")
+        self.assertIn("actor_images.gd", packager.actor_sidecar_support(self.build))
+        with self.assertRaisesRegex(packager.PackageError, "has no actor sidecar reader"):
+            self.decide(True)
+        self.reader.write_text('"actor_images self_test ok"', encoding="utf-8")
+        self.tool.write_text("# no actor mode\n", encoding="utf-8")
+        with self.assertRaisesRegex(packager.PackageError, "has no actor mode"):
+            self.decide(True)
+        self.tool.unlink()
+        self.assertIn("AT-C1", packager.actor_sidecar_support(self.build))
+
+    def test_once_release_enabled_they_are_the_default_where_the_commit_has_them(self):
+        with mock.patch.object(packager, "ACTOR_SIDECARS_RELEASE_ENABLED", True):
+            self.assertEqual(self.decide(None, release_build=True, runner=True), packager.ACTOR_SIDECAR_DIRS)
+            self.assertEqual(self.decide(False, release_build=True), ())
+            self.assertEqual(self.decide(None, no_vram=True), (), "macOS and --no-vram-textures ship none")
+            self.reader.unlink()
+            self.assertEqual(self.decide(None), (), "an older commit is packaged without them")
+
+    def test_rl_heads_can_never_be_a_sidecar_folder(self):
+        with mock.patch.object(packager, "ACTOR_SIDECAR_DIRS", ("races", "rl_heads")):
+            with self.assertRaisesRegex(packager.PackageError, "never planned"):
+                self.decide(None)
+
+    def test_the_command_line_offers_both_switches(self):
+        text = (CLIENT / "tools" / "package_client.py").read_text(encoding="utf-8")
+        self.assertIn('"--actor-vram-textures"', text)
+        self.assertIn('"--no-actor-vram-textures"', text)
+
+
+class ActorSelfTestLine(unittest.TestCase):
+    """The packager and the client agree on the actor self-test variable and line (actor_images.gd, AT-C2)."""
+
+    def test_the_variable_is_the_one_hardware_tier_documents(self):
+        tier = (CLIENT / "src" / "runtime" / "hardware_tier.gd").read_text(encoding="utf-8")
+        self.assertIn(f'const ACTOR_VRAM_SELF_TEST_VARIABLE := "{packager.ACTOR_VRAM_SELF_TEST_VARIABLE}"', tier)
+
+    def test_the_client_prints_the_line_the_smoke_launch_requires(self):
+        client = (CLIENT / "src" / "actors" / "actor_images.gd").read_text(encoding="utf-8")
+        if packager.ACTOR_VRAM_SELF_TEST_OK not in client:
+            self.skipTest("the actor sidecar reader (AT-C2) is not in this tree yet")
+        for token in ("entries=", "format=", "mips=", "decompress="):
+            self.assertIn(token, client)
+
+
+@unittest.skipIf(SKIP_ENCODE, SKIP_ENCODE or "")
+class ActorStageReal(unittest.TestCase):
+    """The real tool, one encoder process, on the actor fixture: what a package stages passes every check."""
+
+    def test_stage_check_and_rerun(self):
+        scratch = Path(tempfile.mkdtemp(prefix="vram-actor-real-")).resolve()
+        try:
+            build = _actor_build_tree(scratch / "build", tool_text=None)
+            stage = scratch / "stage"
+            app = stage / "app"
+            logs = scratch / "logs"
+            logs.mkdir()
+            _stage_actor_glbs(build, app)
+            with mock.patch.object(packager, "log"):
+                receipt = packager.stage_actor_vram_textures(build, stage, GODOT, scratch / "cache", logs, app,
+                                                             procs=1, measure_procs=2)
+                packager.check_loose_vram_textures(app)
+                coverage = packager.check_actor_vram_coverage(build, app, packager.ACTOR_SIDECAR_DIRS)
+            self.assertEqual(receipt["summary"]["actorGlbs"], 8)
+            self.assertEqual((coverage["images"], coverage["sidecars"]), (15, 11))
+            self.assertEqual(coverage["excluded"], {"size_not_multiple_of_4": 1, "role_conflict": 1,
+                                                    "no_material_role": 1, "quality": 1})
+            self.assertEqual(receipt["sidecars"], 11)
+            self.assertEqual(receipt["selfTest"], "assets/actors/native/races")
+            self.assertGreater(receipt["summary"]["encoded"], 0)
+            self.assertFalse(list(app.rglob("report.json")))
+            self.assertFalse(list((build / "godot-client" / "assets").rglob("vram")))
+            self.assertTrue(list((scratch / "cache" / "_actors").glob("*.evt")), "actor encodes live in _actors/")
+            # A second package from the same cache encodes nothing and stages the same indexes.
+            first = {p.relative_to(app).as_posix(): p.read_bytes() for p in app.rglob("vram/index.json")}
+            shutil.rmtree(stage)
+            _stage_actor_glbs(build, app)
+            with mock.patch.object(packager, "log"):
+                again = packager.stage_actor_vram_textures(build, stage, GODOT, scratch / "cache", logs, app,
+                                                           procs=1, measure_procs=2)
+            self.assertEqual(again["summary"]["encoded"], 0)
+            self.assertEqual({p.relative_to(app).as_posix(): p.read_bytes() for p in app.rglob("vram/index.json")},
+                             first)
+        finally:
+            shutil.rmtree(scratch, ignore_errors=True)
+
+
 @unittest.skipIf(SKIP_ENCODE, SKIP_ENCODE or "")
 class Stage(unittest.TestCase):
     def test_stage_builds_checks_and_ships_only_index_and_sidecars(self):

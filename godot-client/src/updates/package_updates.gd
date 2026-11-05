@@ -6,6 +6,19 @@ const FREE_SPACE_MARGIN := 64 * 1024 * 1024
 # File times have one-second (FAT: two-second) resolution. A matching file
 # whose time is this close to the scan is hashed again at the commit point.
 const RACY_SECONDS := 3
+# The installed-file scan: hashing threads by default (and at most when set by
+# RABBITLANDS_UPDATE_SCAN_THREADS), files hashed first, and progress pacing.
+const SCAN_THREADS_DEFAULT := 4
+const SCAN_THREADS_LIMIT := 16
+const SCAN_LARGE_BYTES := 8 * 1024 * 1024
+const SCAN_POLL_MSEC := 20
+const SCAN_PROGRESS_MSEC := 100
+# Inventory codecs (manifest schema 3, W2-UD-05). A row without "codec" keeps
+# the schema 2 chunks: ZIP deflate or stored entries of the file's bytes. A
+# "zstd" row's chunk entries are STORED, and each holds one zstd frame that
+# decodes to exactly that 8 MiB chunk (the last one to the remainder). The
+# decoded bytes are SHA-256 checked as before; installed files are unchanged.
+const CODEC_ZSTD := "zstd"
 
 # This receipt stays in memory for one locked download/install transaction.
 # Never persist it or use it to skip hashing a file it has not hashed itself.
@@ -51,6 +64,9 @@ static func validate(release: Dictionary, identity: Dictionary) -> Dictionary:
 	if not release.get("packages") is Array or release.packages.is_empty() or release.packages.size() > 850:
 		return {"error": "The package list is invalid."}
 	var base := "https://github.com/%s/releases/download/client-%s/" % [identity.repository, release.commit]
+	# Codecs only under schema 3: a schema 2 reader would unpack the frames
+	# as the file's bytes.
+	var codecs: bool = release.get("schema") == Release.CODEC_SCHEMA
 	var seen: Dictionary = {}
 	var ids: Dictionary = {}
 	var total := 0
@@ -70,6 +86,8 @@ static func validate(release: Dictionary, identity: Dictionary) -> Dictionary:
 		for entry: Variant in package.files:
 			if not entry is Dictionary or not Release.safe_path(entry.get("path")) or not Release.valid_hash(entry.get("sha256")) or not typeof(entry.get("size")) in [TYPE_INT, TYPE_FLOAT] or not Release.positive_integer(entry.size + 1) or seen.has(str(entry.path).to_lower()):
 				return {"error": "A package contains an invalid or duplicate file."}
+			if entry.has("codec") and (not codecs or not entry.codec is String or entry.codec != CODEC_ZSTD):
+				return {"error": "A package file uses an encoding this updater cannot read."}
 			seen[str(entry.path).to_lower()] = true
 			bytes += int(entry.size)
 		if bytes != package.get("unpacked_size") or package.files.size() != package.get("file_count"):
@@ -112,9 +130,18 @@ static func linked_path(root: String, relative: String, directories: Dictionary 
 static func plan(root: String, release: Dictionary) -> Array:
 	return inspect(root, release).needed
 
-static func inspect(root: String, release: Dictionary, progress := Callable()) -> CheckedPlan:
+static func scan_threads() -> int:
+	# Threads that hash installed files. RABBITLANDS_UPDATE_SCAN_THREADS=1
+	# hashes on the calling thread alone, as before.
+	var requested := OS.get_environment("RABBITLANDS_UPDATE_SCAN_THREADS")
+	if requested.is_valid_int() and int(requested) >= 1:
+		return mini(int(requested), SCAN_THREADS_LIMIT)
+	return clampi(OS.get_processor_count() - 1, 1, SCAN_THREADS_DEFAULT)
+
+static func inspect(root: String, release: Dictionary, progress := Callable(), threads := 0) -> CheckedPlan:
 	# Per file: every installed file is still SHA-256 checked once, and only
-	# members that differ are downloaded, unpacked and replaced.
+	# members that differ are downloaded, unpacked and replaced. The hashing
+	# runs on several threads; the plan is the same as a one-thread scan's.
 	var checked := CheckedPlan.new(root, release)
 	var installed := _installed_files(root, checked)
 	# Windows folds case. A member whose installed name differs only in case
@@ -125,38 +152,141 @@ static func inspect(root: String, release: Dictionary, progress := Callable()) -
 		for path: String in installed:
 			spelled[path.to_lower()] = path
 	var claimed: Dictionary = {}
-	var directories: Dictionary = {}
-	var completed := 0
+	# Per package and member: -1 when it is replaced without reading it
+	# (missing, a link, spelled in another case), otherwise its hash job.
+	var slots: Array = []
+	var jobs: Array = []
+	var total := 0
 	for package: Dictionary in release.packages:
-		Release.report_progress(progress, "Checking installed packages", completed, release.packages.size(), package.id)
-		var members: Array = []
+		var row := PackedInt32Array()
+		row.resize(package.files.size())
 		for index in package.files.size():
 			var entry: Dictionary = package.files[index]
 			var path: String = entry.path
 			var key := path.to_lower() if folded else path
 			var actual: String = spelled.get(key, "") if folded else (path if installed.has(path) else "")
 			claimed[key] = true
+			row[index] = -1
 			if actual != "" and actual.get_file() != path.get_file():
 				checked.renamed[path] = actual
-				members.append(index)
-			elif actual == "" or linked_path(root, path, directories) or not Release.check_file(root.path_join(path), int(entry.size), entry.sha256):
+			elif actual != "" and not installed[actual]:
+				# Listed under unlinked folders and not a link itself.
+				row[index] = jobs.size()
+				jobs.append([root.path_join(path), int(entry.size), str(entry.sha256)])
+				total += int(entry.size)
+		slots.append(row)
+	Release.report_progress(progress, "Checking installed packages", 0, maxi(total, 1))
+	var results := _check_files(jobs, total, threads if threads > 0 else scan_threads(), progress)
+	var matched: PackedByteArray = results[0]
+	var modified: PackedInt64Array = results[1]
+	for package_index in release.packages.size():
+		var package: Dictionary = release.packages[package_index]
+		var row: PackedInt32Array = slots[package_index]
+		var members: Array = []
+		for index in row.size():
+			var job := row[index]
+			if job < 0 or matched[job] == 0:
 				members.append(index)
 			else:
-				checked.snapshot[path] = [int(entry.size), FileAccess.get_modified_time(root.path_join(path)), entry.sha256]
+				var entry: Dictionary = package.files[index]
+				checked.snapshot[entry.path] = [int(entry.size), modified[job], entry.sha256]
 		checked.unchanged[package.id] = members.is_empty()
 		if not members.is_empty():
 			checked.changed[package.id] = members
 			checked.needed.append(package)
-		completed += 1
 	for path: String in installed:
 		if not claimed.has(path.to_lower() if folded else path):
 			checked.retire.append(path)
-	Release.report_progress(progress, "Checking installed packages", completed, release.packages.size())
+	Release.report_progress(progress, "Checking installed packages", maxi(total, 1), maxi(total, 1))
 	return checked
 
+static func _check_files(jobs: Array, total: int, threads: int, progress: Callable) -> Array:
+	# Hashes every job once. Large files go first, largest first, so no thread
+	# is left with one at the end; smaller files keep inventory (folder) order.
+	# Returns [matched (1/0 per job), modification time per job].
+	var large: Array = []
+	var order := PackedInt32Array()
+	for job in jobs.size():
+		if int(jobs[job][1]) >= SCAN_LARGE_BYTES:
+			large.append(job)
+	large.sort_custom(func(a: int, b: int) -> bool: return int(jobs[a][1]) > int(jobs[b][1]) or (int(jobs[a][1]) == int(jobs[b][1]) and a < b))
+	for job: int in large:
+		order.append(job)
+	for job in jobs.size():
+		if int(jobs[job][1]) < SCAN_LARGE_BYTES:
+			order.append(job)
+	var queue := {"next": 0, "bytes": 0}
+	var lock := Mutex.new()
+	var workers: Array[Thread] = []
+	for index in (mini(threads, order.size()) if threads > 1 else 0):
+		var worker := Thread.new()
+		if worker.start(func() -> Dictionary: return _check_queue(jobs, order, queue, lock, total, Callable())) == OK:
+			workers.append(worker)
+	var found: Dictionary = {}
+	if workers.is_empty():
+		# One thread: this one hashes and reports progress itself.
+		found = _check_queue(jobs, order, queue, lock, total, progress)
+	else:
+		var reported := 0
+		var reported_at := Time.get_ticks_msec()
+		while workers.any(func(worker: Thread) -> bool: return worker.is_alive()):
+			OS.delay_msec(SCAN_POLL_MSEC)
+			lock.lock()
+			var done: int = queue.bytes
+			lock.unlock()
+			if done != reported and done > 0 and done < total and Time.get_ticks_msec() - reported_at >= SCAN_PROGRESS_MSEC:
+				reported = done
+				reported_at = Time.get_ticks_msec()
+				Release.report_progress(progress, "Checking installed packages", done, total)
+		for worker: Thread in workers:
+			# A job no thread reported stays unmatched: it is downloaded again.
+			var part: Variant = worker.wait_to_finish()
+			if part is Dictionary:
+				found.merge(part)
+	var matched := PackedByteArray()
+	matched.resize(jobs.size())
+	matched.fill(0)
+	var modified := PackedInt64Array()
+	modified.resize(jobs.size())
+	modified.fill(0)
+	for job: int in found:
+		var stamp: int = found[job]
+		if stamp >= 0:
+			matched[job] = 1
+			modified[job] = stamp
+	return [matched, modified]
+
+static func _check_queue(jobs: Array, order: PackedInt32Array, queue: Dictionary, lock: Mutex, total: int, progress: Callable) -> Dictionary:
+	# Takes the next job until none is left. Returns job -> modification time
+	# for a matching file, -1 for a missing, resized or damaged one.
+	var found: Dictionary = {}
+	var reported_at := Time.get_ticks_msec()
+	while true:
+		lock.lock()
+		var position: int = queue.next
+		queue.next = position + 1
+		lock.unlock()
+		if position >= order.size():
+			break
+		var job := order[position]
+		var record: Array = jobs[job]
+		# The time is read before the bytes, so a change while hashing is
+		# either seen by the hash or by the commit point's time check.
+		var stamp := FileAccess.get_modified_time(record[0])
+		found[job] = stamp if Release.check_file(record[0], record[1], record[2]) else -1
+		lock.lock()
+		queue.bytes = int(queue.bytes) + int(record[1])
+		var done: int = queue.bytes
+		lock.unlock()
+		if progress.is_valid() and done > 0 and done < total and Time.get_ticks_msec() - reported_at >= SCAN_PROGRESS_MSEC:
+			reported_at = Time.get_ticks_msec()
+			Release.report_progress(progress, "Checking installed packages", done, total)
+	return found
+
 static func _installed_files(root: String, checked: CheckedPlan) -> Dictionary:
-	# Installed files under the game roots, spelled as on disk. Folder links
-	# are noted and never followed; a file link moves as the link itself.
+	# Installed files under the game roots, spelled as on disk, each mapped to
+	# whether it is itself a link. Folder links are noted and never followed; a
+	# file link moves as the link itself and is never hashed through.
 	var files: Dictionary = {}
 	for name: String in Release.ROOTS:
 		if Release.is_link(root.path_join(name)):
@@ -171,7 +301,7 @@ static func _list_files(root: String, relative: String, files: Dictionary, check
 		return
 	directory.include_hidden = true
 	for name: String in directory.get_files():
-		files[relative + "/" + name] = true
+		files[relative + "/" + name] = directory.is_link(name)
 	for name: String in directory.get_directories():
 		if directory.is_link(name):
 			checked.linked = true
@@ -225,6 +355,7 @@ static func extract(archive: String, stage: String, package: Dictionary, members
 		return "A package's files do not match the signed inventory."
 	for index: int in (members if not members.is_empty() else range(package.files.size())):
 		var entry: Dictionary = package.files[index]
+		var zstd: bool = str(entry.get("codec", "")) == CODEC_ZSTD
 		var path := stage.path_join(entry.path)
 		if DirAccess.make_dir_recursive_absolute(path.get_base_dir()) != OK:
 			return "The package staging folder cannot be created."
@@ -236,8 +367,16 @@ static func extract(archive: String, stage: String, package: Dictionary, members
 		var hash := HashingContext.new()
 		hash.start(HashingContext.HASH_SHA256)
 		while remaining > 0:
-			var bytes := zip.read_file("files/%06d/%06d" % [index, chunk])
-			if bytes.size() != mini(Release.CHUNK_BYTES, remaining):
+			var name := "files/%06d/%06d" % [index, chunk]
+			var expected := mini(Release.CHUNK_BYTES, remaining)
+			var bytes := zip.read_file(name)
+			if zstd:
+				if not zip.stored(name):
+					return "A compressed package file is not stored in its signed format. The installed game was kept."
+				bytes = decode_chunk(bytes, expected)
+				if bytes.size() != expected:
+					return "A compressed package file is damaged or has the wrong size. The installed game was kept."
+			if bytes.size() != expected:
 				return "An unpacked package file is incomplete."
 			file.store_buffer(bytes)
 			hash.update(bytes)
@@ -251,6 +390,16 @@ static func extract(archive: String, stage: String, package: Dictionary, members
 		if error != OK or hash.finish().hex_encode() != entry.sha256:
 			return "An unpacked package file failed verification."
 	return ""
+
+static func decode_chunk(frame: PackedByteArray, size: int) -> PackedByteArray:
+	# One zstd frame decoded into a buffer of exactly `size` bytes (at most
+	# CHUNK_BYTES, never the size a frame header claims). A damaged frame, a
+	# checksum mismatch or a frame that decodes to more than `size` returns
+	# empty; one that decodes to fewer comes back short. The caller rejects
+	# any size other than `size`, then hashes the file as for every codec.
+	if frame.is_empty() or size <= 0:
+		return PackedByteArray()
+	return frame.decompress(size, FileAccess.COMPRESSION_ZSTD)
 
 static func install(root: String, release: Dictionary, identity: Dictionary, progress := Callable(), checked: CheckedPlan = null) -> String:
 	# All staging is outside the live roots. An existing installation receives

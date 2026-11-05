@@ -108,6 +108,120 @@ and the selected content/node policies. Effects can correctly show inactive
 until a supported flight is created. Catalog presence does not establish a
 prepared hit; use later consumption diagnostics when qualifying that path.
 
+## Content digest backend
+
+Every load still reads and SHA-256-hashes the files it uses and compares them
+with the expected values; nothing is remembered between loads. The content
+digest switch only changes which reader does the hashing, never a digest, so
+it is separate from the optimization profile and keeps working under the
+legacy profile.
+
+Select it with `RABBITLANDS_CONTENT_DIGEST` or the user argument
+`--content-digest=`:
+
+- `auto` (default): the backend that is on by default. Native hashing is not
+  yet on by default; it waits for its own release-build A/B. On Windows the
+  client still loads and self-tests the verified `client_runtime` payload at
+  startup, so the log shows whether native hashing would work.
+- `native`: the verified payload's SHA-256 reader (SHA-NI where the CPU has it).
+  It falls back to GDScript if the payload is absent, refused or fails its
+  self-test.
+- `gdscript`: the GDScript reader on several short-lived threads. It does not
+  touch the native payload.
+- `sequential`: the pre-wave-2 reader, one file at a time. Use it as the A/B
+  control and as the kill switch. The safe-mode launcher selects it unless
+  another valid mode is given.
+- `compare`: for qualification only. Every file is hashed natively and with
+  `FileAccess`, and the `FileAccess` value is used. The first disagreement logs
+  `WARNING: content_digest mismatch {...}` and turns native hashing off for the
+  rest of the session. It is slower than any other mode.
+
+Check the log line `content_digest stage=backend mode=... backend=... reason=...
+native=... sha=... self_test=...`. `backend` is `native:sha_ni`,
+`native:portable`, `gdscript`, `sequential` or `compare`. `native=ready` with
+`self_test=passed` means the payload was verified and self-tested. Any other
+`native=` value names why it was not used, for example `absent`,
+`checksum_mismatch`, `class_missing` or `self_test_failed`.
+`RABBITLANDS_CONTENT_DIGEST_SHA=portable` forces the native reader's portable
+path, so a SHA-NI machine can qualify the no-SHA-NI path.
+
+To qualify a payload, run the compare tour headless from `godot-client/`:
+
+```powershell
+Godot_v4.7.2-stable_win64.exe --headless --path . --script res://tests/integration/content_digest_compare_tour.gd -- --maps=10 --chunks=200 --mode=compare --expect-native=present
+```
+
+It digests the packages and verifies the external images of 10 maps and 200
+continent chunks. It prints one `CONTENT_DIGEST_TOUR {...}` line and exits
+non-zero on any mismatch or failed digest. Run it once more with
+`RABBITLANDS_CONTENT_DIGEST_SHA=portable`.
+
+## Native runtime and kernels
+
+A package with the verified `client_runtime` payload loads it at startup in
+every profile, the legacy profile included. The log line
+`native_runtime stage=startup code=... switch=... source=... us=... prior=...`
+shows the result: `loaded`, a refusal such as `absent` or `checksum_mismatch`,
+or `switched_off`. `prior=yes` means an earlier caller (AppState with
+`ELORIA_NATIVE_CROWD=1`) had already loaded it, so `us` leaves that cost out. Loading only registers the native classes. Each native feature
+keeps its own switch and stays off by default until its own release-build A/B.
+
+To keep the payload unloaded, so that every native path uses its GDScript
+code, use one of these. They are listed in order of precedence:
+
+- the user argument `--native-runtime=off` (`auto` turns it back on);
+- `RABBITLANDS_NATIVE_RUNTIME=off`;
+- safe mode (`--client-safe-mode`, which the safe-mode launchers pass), unless
+  one of the two above names a valid value;
+- the support setting `native_runtime = "off"` in the `[runtime]` section of
+  `eloria_hud.cfg` in the user data folder. Remove the line to undo it.
+
+The presentation kernels and the actor-command reducer are opt-in, and their
+values are unchanged. `ELORIA_NATIVE_PRESENTATION` takes `cape`, `flight`,
+`world`, `both`/`1` or `all`. `0`, `off`, `script`, `gdscript`, `legacy` or any
+other value keeps GDScript. `ELORIA_NATIVE_CROWD=1` turns on the reducer.
+
+The reducer has three modes. `gdscript` is the original loop and stays the
+default until the reducer's own release-build A/B. `packet` reduces each
+actor-command packet natively; `ELORIA_NATIVE_CROWD=1` selects it, as before.
+`run` gathers the actor-command packets of a dispatch pass and reduces them in
+one native call before anything else reads the actors (the next other packet,
+the end of the pass, 512 commands, the next presentation pass, a connection
+change); `RABBITLANDS_NATIVE_REDUCER=run` selects it (`packet` also works).
+`RABBITLANDS_NATIVE_REDUCER=legacy` or `ELORIA_NATIVE_CROWD=0` keeps the
+GDScript loop whatever else is set, and the runtime switch above turns every
+native mode off. The actor table is the same in every mode; in `run` mode the
+`actors` change is announced once per flush instead of once per packet. A
+native failure prints "Native reducer run failed (...)" and the session
+continues on GDScript. `AppState.actor_reducer_stats()` reports the mode in
+use and the run counters.
+
+The kernels and the reducer come from the verified payload, and an opt-in loads
+it if startup has not. Developer builds of the benchmark extension
+`bin/native_crowd.gdextension` are used only with
+`ELORIA_NATIVE_PROVIDER=benchmark`, and only where they register before the
+payload: with a payload installed, the game's startup load provides the
+kernels.
+
+`RABBITLANDS_OPTIMIZATION_STARTUP` and the diagnostics snapshot report the
+switch (`native_runtime`) and each kernel's selection, status and provider
+(`native_kernels`). A status such as `runtime_switched_off`, `runtime_absent`
+or `provider_untrusted` names why a requested kernel stayed on GDScript.
+
+Closing the window waits for the client's background work (the actor warm-up,
+the RL head parse, the neighbouring-region preload and the parked-world
+preload) for at most 8 s each, then quits. The log line
+`exit_drain result=clean|timeout ... stages=... watchdog=...` records it; a
+stage marked `!` timed out. With the payload loaded, an exit watchdog then ends
+the process, with the same exit code, if it is still running 10 s after the
+quit. It appends one `exit_watchdog fired` line to `logs/exit_watchdog.log` in
+the user data folder (and to stderr); report that line with the log if it
+appears. Without the payload, with the runtime switched off or with an older
+payload, `watchdog=` names the reason and the client quits as before.
+`--exit-watchdog=off` or `RABBITLANDS_EXIT_WATCHDOG=off` leaves the watchdog
+unarmed, for example to attach a debugger to a hung exit; a number of
+milliseconds from 100 to 600000 replaces the 10 s.
+
 ## Prepared-content coverage and fallback
 
 The catalog is a small exact-content pilot, not a prepared copy of the whole

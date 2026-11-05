@@ -47,6 +47,8 @@ func benchmark_runtime_snapshot() -> Dictionary:
 			"rootSize": [get_tree().root.size.x, get_tree().root.size.y],
 			"worldViewportSize": [main_viewport.size.x, main_viewport.size.y]},
 		"activeBackends": {"nativeReducer": AppState.native_crowd_reducer_active(),
+			# RB-C7's reducer mode (gdscript, packet or run); null in a tree without modes.
+			"nativeReducerMode": AppState.get("actor_reducer_mode"),
 			"animationTrackCompaction": NativeAnimationImporter.retention_snapshot(),
 			"clientRuntime": client_runtime.snapshot(),
 			"remotePresentation": (remote_presentation.snapshot() if is_instance_valid(remote_presentation) else {"backend": "legacy", "reason": "not_initialized"}),

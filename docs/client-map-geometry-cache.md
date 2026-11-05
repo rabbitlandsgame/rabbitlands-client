@@ -158,6 +158,28 @@ rebuild them with the matching runtime. Shared prototype and road material
 loads retain each original image directory's texture policy even when the
 physical pixel file is shared with another region.
 
+Geometry policy 5 (wave 2 WD-C2) splits continent and gauntlet static batches
+into size-class cells (S 32 / M 48 / L 64 / XL 96 m by the instance's mesh-box
+radius times its scale, `src/world/world_distance_classes.gd`). Which instances
+batch is still decided per 180 m cell (or the manifest's
+`rendering.batchCellMetres`, which also caps every class cell). Each split batch
+stands at its members' centre and carries `rl_distance_class`. Interiors and
+other maps keep their batches unchanged. Policy 5 also covers WD-C5:
+`ExternalMeshPool.acquire` gives every shared prototype with at least 600
+triangles and a mesh-box half-diagonal of at least 1.5 m meshoptimizer LODs
+(`ImporterMesh.generate_lods(25, 60)`) before it becomes an ArrayMesh. The
+vertices and full index list are unchanged. The geometry cook parses prototypes
+through the pool, so cooked prototype blobs carry the levels and their
+index-byte figure (`rl_lod_index_bytes`). Re-cooking Landfall plus Harrowcrag
+grew prototype blobs 12.8 % and the whole cook 3.2 %. The rule lives in
+`world_distance_classes.gd`; changing it needs a policy bump. Map scene format 12
+goes with policy 5. Existing prepared entries are invalidated: re-cook the shipped
+`prepared-world` (one re-download for WD-C2, WD-C3 and WD-C5 together).
+
+The distance pass (WD-C3) runs after every cache snapshot and restores its
+shadows, ranges and LOD bias for a pack, so geometry, prepared and scene-cache
+entries never carry them; it needs no policy bump.
+
 Development checkouts lack a release identity. Selected source-input metadata
 provides a cheap hint that preparation should run again; it is not evidence that
 a cache entry is valid. Runtime source and payload hashes remain authoritative,
@@ -216,8 +238,12 @@ disk usage and Clear action.
 "Skip for now" retains completed entries and continues to login; a later launch
 resumes preparation. Missing entries use source loading in the meantime.
 Clear also removes older geometry-policy files and is disabled during cooking.
-Older policy folders are otherwise retained; a successful cook prunes only
-unreferenced blobs in its current policy. Clearing the completion marker means a
+In release builds the cache janitor (`src/runtime/cache_janitor.gd`, UD-03)
+removes older policy folders that their own entry header proves stale: an older
+VERSION, or the same VERSION under another engine, format or Mobile's former own
+key. It always keeps the newest policy of each renderer family (Forward+/Mobile
+and Compatibility). A successful cook still prunes only unreferenced blobs in its
+current policy. Clearing the completion marker means a
 later normal launch with caching enabled prepares the scoped data again.
 
 The explicit client entry point `--prepare-map-geometry` prepares even when the

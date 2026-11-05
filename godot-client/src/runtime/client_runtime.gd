@@ -6,7 +6,8 @@ const NativeLibrary := preload("res://src/runtime/native_library.gd")
 const LOADER_REASONS := {"absent": "optional_runtime_absent", "manifest_invalid": "manifest_invalid",
 	"api_mismatch": "api_mismatch", "unsupported_platform": "unsupported_platform",
 	"incomplete": "optional_runtime_incomplete", "checksum_mismatch": "runtime_checksum_mismatch",
-	"late_load_refused": "late_load_refused", "extension_unavailable": "extension_unavailable"}
+	"late_load_refused": "late_load_refused", "extension_unavailable": "extension_unavailable",
+	"switched_off": "native_runtime_switched_off"}
 const MOUNTED_PROFILE_IDS := ["moor_pony", "golden_plains_horse", "crystalback_tortoise", "rabbit", "jadefeather_raptor"]
 ## Human-testing defaults request the optional runtime. Comparison observes
 ## legacy presentation; Rust mode owns supported mounted work when available.
@@ -14,6 +15,11 @@ const MOUNTED_PROFILE_IDS := ["moor_pony", "golden_plains_horse", "crystalback_t
 const ABI := NativeLibrary.ABI
 const COMPARE_INTERVAL := 60
 const COMPARE_LIMIT := 256
+## The native exit watchdog (avatar-worker AW-01; `exit_drain.gd` arms it).
+const EXIT_WATCHDOG_CLASS := &"RabbitLandsExitWatchdog"
+## `RabbitLandsExitWatchdog.arm()` return codes -> status strings.
+const EXIT_WATCHDOG_STATUS := {0: "armed", 1: "invalid_argument", 2: "thread_failed", 3: "pin_failed",
+	4: "firing"}
 static var _current_ref: WeakRef
 var _native: RefCounted
 var _requested := "legacy"
@@ -64,7 +70,7 @@ func initialize(directory := "") -> void:
 		return
 	# Every check runs again on each initialize (no NativeLibrary.ensure() cache).
 	var loaded := NativeLibrary.load_verified(directory)
-	if str(loaded.code) not in ["absent", "manifest_invalid"]:
+	if str(loaded.code) not in ["absent", "manifest_invalid", NativeLibrary.SWITCHED_OFF]:
 		_manifest = loaded.manifest
 	if not bool(loaded.ok):
 		_reason = str(LOADER_REASONS.get(loaded.code, loaded.code))
@@ -146,3 +152,60 @@ func close() -> void:
 	_mode = "legacy"
 	if current() == self:
 		_current_ref = null
+
+## ## Exit watchdog (avatar-worker AW-01)
+##
+## `RabbitLandsExitWatchdog` is a process-wide native timer in the payload: once
+## armed, a detached native thread ends the process with the given exit code
+## (TerminateProcess / _exit) if it is still alive `timeout_msec` later, after
+## appending one line to `log_path` and stderr. These bindings work in every
+## optimization profile but never load the library: the watchdog is available
+## only when the payload is already registered (`NativeLibrary.startup()` at
+## `Main._ready`), so the exit path never verifies or loads a DLL. Without it
+## the result's `status` says why and the caller quits as before.
+
+## Arms (or re-arms; the latest call wins) the exit watchdog. Returns {armed,
+## status ("armed", "invalid_argument", "thread_failed", "pin_failed",
+## "firing", or an unavailable reason), timeout_msec, exit_code, log_path}.
+static func arm_exit_watchdog(timeout_msec: int, exit_code: int, log_path := "", reason := "") -> Dictionary:
+	var result := {"armed": false, "status": "", "timeout_msec": timeout_msec, "exit_code": exit_code,
+		"log_path": log_path}
+	var watchdog := _exit_watchdog()
+	if watchdog == null:
+		result.status = exit_watchdog_unavailable_reason()
+		return result
+	var status := int(watchdog.call("arm", timeout_msec, exit_code, log_path, reason))
+	result.status = str(EXIT_WATCHDOG_STATUS.get(status, "status_%d" % status))
+	result.armed = status == 0
+	return result
+
+## Cancels a pending watchdog deadline (tests). Returns whether one was pending.
+static func disarm_exit_watchdog() -> bool:
+	var watchdog := _exit_watchdog()
+	return watchdog != null and bool(watchdog.call("disarm"))
+
+## The native watchdog's state plus `available`; {available: false, reason}
+## when the class is not registered.
+static func exit_watchdog_state() -> Dictionary:
+	var watchdog := _exit_watchdog()
+	if watchdog == null:
+		return {"available": false, "reason": exit_watchdog_unavailable_reason()}
+	var out: Dictionary = watchdog.call("state")
+	out["available"] = true
+	return out
+
+## "" when the watchdog can be armed; otherwise why not: the native runtime is
+## switched off (NativeLibrary's kill switch wins even over a registered
+## class), it was not loaded (no or a refused payload, or no startup load), or
+## the loaded payload predates the watchdog.
+static func exit_watchdog_unavailable_reason() -> String:
+	if str(NativeLibrary.switch_state().mode) == "off":
+		return "native_runtime_switched_off"
+	if not ClassDB.class_exists(NativeLibrary.RUNTIME_CLASS):
+		return "native_runtime_not_loaded"
+	return "" if ClassDB.class_exists(EXIT_WATCHDOG_CLASS) else "watchdog_unavailable"
+
+static func _exit_watchdog() -> RefCounted:
+	if not exit_watchdog_unavailable_reason().is_empty():
+		return null
+	return ClassDB.instantiate(EXIT_WATCHDOG_CLASS) as RefCounted

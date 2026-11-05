@@ -37,8 +37,15 @@ retain legacy support until their native payloads qualify.
 
 The manifest checks API, architecture and file checksums before loading. One
 GDScript loader, `src/runtime/native_library.gd`, owns these checks and the
-`load_extension` call for every caller (the client runtime controller and the
-mounted cape arithmetic); each caller keeps its own fallback reasons. These
+`load_extension` call for every caller (the client runtime controller, the
+mounted cape arithmetic, the content digest and the `native_crowd` kernels);
+each caller keeps its own fallback reasons. `Main._ready` loads the payload at
+startup for every profile (`NativeLibrary.startup()`, owner decision D-NATIVE,
+2026-11-04), so no consumer verifies and loads it mid-game; loading registers
+classes and turns no feature on. One kill switch keeps it unloaded and every
+caller on GDScript: `--native-runtime=off`, `RABBITLANDS_NATIVE_RUNTIME=off`,
+`--client-safe-mode`, or the support setting `[runtime] native_runtime = "off"`
+in `user://eloria_hud.cfg`. These
 are compatibility and integrity checks, not a signature or a sandbox for
 untrusted libraries. No optional missing library is registered automatically.
 An invalid result causes a whole-batch fallback, with no partial application.
@@ -162,13 +169,33 @@ list against `CMakeLists.txt` and the `#include` lines.
   `RabbitLandsClientRuntime.runtime_info().native_crowd_providers` maps each of
   the five classes to `client_runtime`, `external` or `absent`;
   `cpp_spell_flight_provider` is unchanged.
-* Registering changes no default. Each caller keeps its own opt-in:
+* Registering changes no default. The callers (cape cloth, spell flights,
+  world impacts, AppState) get their objects from one loader,
+  `src/runtime/native_crowd.gd`, which keeps the opt-ins:
   `ELORIA_NATIVE_PRESENTATION` (`cape`, `flight`, `world`, `both`/`1`, `all`)
-  for the kernels and `ELORIA_NATIVE_CROWD=1` for AppState's reducer. When the
-  payload is loaded anyway (the human-testing profile, mounted cape arithmetic),
-  an opt-in now finds the classes without the benchmark extension. Making them a
-  player default is a separate, owner-gated step.
+  for the kernels and `ELORIA_NATIVE_CROWD=1` for AppState's reducer. Every
+  default is off until that feature's own release-build A/B (owner decision
+  D-NATIVE, 2026-11-04); turning one on is one entry in `NativeCrowd.DEFAULTS`.
+  An opt-in loads this payload through `NativeLibrary.ensure()` and uses a class
+  only when `native_crowd_providers` names `client_runtime`. The benchmark
+  extension is loaded and trusted only with `ELORIA_NATIVE_PROVIDER=benchmark`.
 * The runtime ABI stays 1; added classes are backward compatible.
+* Actor-command reduction (RB-C7, rust-batch R1/R2). AppState reduces
+  ADD_ACTOR_COMMAND packets in one of three modes: `gdscript` (the original
+  loop, the default), `packet` (`NativeCrowdReducer.reduce_packet` per packet,
+  R1: what `ELORIA_NATIVE_CROWD=1` selects) and `run` (consecutive command
+  packets buffered and reduced in one `reduce_run` call at the next flush
+  point, R2: `RABBITLANDS_NATIVE_REDUCER=run`). `RABBITLANDS_NATIVE_REDUCER=legacy`
+  or `ELORIA_NATIVE_CROWD=0` keeps GDScript whatever else is set. The run is
+  flushed before any other packet, at `Network.dispatch_drained` (the end of
+  every dispatch pass), at 512 records, before `take_changed_actors`, on a
+  connection change and at the end of the frame; packets the native reducer
+  hands back (the local actor's command 19, a corrupt record) are reduced by
+  the GDScript loop in their place, and any other native answer fails closed
+  to GDScript for the session. `reduce_run` arrived with this payload; an older
+  payload makes `run` fall back to `packet`. `NativeCrowd.DEFAULTS.reducer`
+  stays false until the reducer's own release-build A/B; once on, its mode is
+  `NativeCrowd.DEFAULT_REDUCER_MODE` (`run`).
 
 Checks: `tests/test_client_runtime_crowd_kernels.gd` covers registration,
 providers, unchanged defaults, the opt-ins, one call per class and the reducer
@@ -176,7 +203,15 @@ against `ActorReducer` for every command byte; `--external-crowd=` also loads
 the benchmark extension, before or after the payload. The
 `tests/test_client_runtime_kernels_*.gd` wrappers run the existing kernel and
 reducer suites unchanged against the payload (`--runtime-dir=`,
-`--expect-native=present`).
+`--expect-native=present`). Since RB-C1g the plain suites load the payload
+themselves; `tests/test_native_presentation_modes.gd` encodes the selection
+table and `tests/test_native_runtime_switches.gd` the kill switches, the
+startup load and the provider rule. Run both once more with
+`RABBITLANDS_NATIVE_RUNTIME=off` for the fallback path.
+`tests/test_native_crowd_run_parity.gd` compares `reduce_run` and AppState's
+`run` mode with the GDScript loop byte for byte (`var_to_bytes`) after every
+flush point, on synthetic streams and on RLREC1 session recordings
+(`--recording=`).
 
 ## Content digest (SHA-256)
 
@@ -185,9 +220,13 @@ reducer suites unchanged against the payload (`--runtime-dir=`,
 manifest, cache key, prepared record and server value already carries:
 lowercase hex, byte-identical to `FileAccess.get_sha256`. It changes no format;
 it only makes the same digest cheaper. The `ContentDigest` facade
-(`src/runtime/content_digest.gd`) is its only intended caller; until NH-A2 wires
-it there, the facade keeps its GDScript backend and nothing on the player path
-calls this class.
+(`src/runtime/content_digest.gd`) is its only caller. `ContentDigest.initialize()`
+loads the payload through `native_library.gd` and self-tests this class (the API
+number, NIST vectors, the payload's own files against the loader's SHA-256, and
+its manifest and descriptor CRLF-folded against the GDScript reader) before any
+load uses it. It is used for hashing with
+`--content-digest=native` or `compare`, and by `auto` once the facade's
+`NATIVE_DEFAULT` is turned on after the native digest's release-build A/B.
 
 * The block function is chosen once per process: the x86 SHA extensions
   (SHA-NI) when the CPU reports `sha`, `sse2`, `ssse3` and `sse4.1`, otherwise a
@@ -242,9 +281,45 @@ against portable on every length to 8 KiB and every split around block
 boundaries, CRLF folding at read sizes 1-4096, empty/missing/directory/
 non-ASCII/over-260-character files, batches on 1-1000 threads, FFI refusals),
 `tests/test_client_runtime_digest.gd` (engine and `ContentDigest` agreement),
-and `tools/native_digest_check.py` (every file of an install against Python's
-hashlib). `cargo run --release --offline --locked --example digest_bench` is a
+`tests/test_content_digest_native.gd` (the facade's native backend, self-test,
+fallbacks and `compare`), `tests/integration/content_digest_compare_tour.gd`
+(`compare` over 10 maps and 200 chunks) and `tools/native_digest_check.py`
+(every file of an install against Python's hashlib). `cargo run --release --offline --locked --example digest_bench` is a
 micro-benchmark over a list of files.
+
+## Exit watchdog
+
+`RabbitLandsExitWatchdog` (`src/client_exit_watchdog.{h,cpp}`, platform layer
+`src/client_exit_watchdog_os.{h,cpp}`, plain C++ with no Godot header) ends a
+process whose exit hangs (avatar-worker AW-01). `src/runtime/exit_drain.gd`
+arms it right before `SceneTree.quit()`, after Main's bounded close drains,
+through `ClientRuntimeController.arm_exit_watchdog()`. Those bindings never load
+the payload: the watchdog exists only when the startup load registered
+`client_runtime`, and the runtime kill switch disables it with everything else.
+
+* `arm(timeout_msec, exit_code, log_path, reason)` starts (once) two detached
+  native threads and sets the deadline; a later call replaces deadline, code,
+  path and reason. If the deadline passes without `disarm()`, the watcher
+  appends one line to `log_path` (UTF-8 path, opened share-all on Windows), lets
+  the second thread copy it to stderr for at most 200 ms (a stderr pipe nobody
+  reads cannot keep the process alive), then ends the process with
+  `exit_code`: `TerminateProcess` on Windows, `_exit` elsewhere. Firing takes no
+  lock it does not own: no heap allocation and no C stdio streams, only a line
+  formatted into a stack buffer and direct OS writes. The intended exit code
+  survives (for example the maintenance quit's 1); the renderer relaunch
+  (`RendererPolicy.restart`, exit code 75) quits before the startup load and is
+  not covered. Limits: 100-600000 ms, codes 0-255; `api_info()` states them.
+  Returns 0 armed, 1 invalid argument, 2 thread failed, 3 pin failed, 4 firing.
+* The state is process-wide (instances are handles), guarded by one mutex,
+  allocated once and never freed, so no static destructor runs while the
+  threads wait. The first `arm()` pins the library (`GetModuleHandleExW(... PIN)`,
+  `dlopen(RTLD_NODELETE)`), so Godot's teardown cannot unmap the waiting
+  thread's code when it unloads extensions. After `arm()` returns, nothing here
+  calls into the engine.
+* `tests/test_exit_drain.gd` covers the API (limits, refusals, arm, re-arm,
+  disarm, state) and the drains; its `--mode=fire` (a teardown that never ends)
+  and `--mode=undrained` (AW-00's RL-head exit hang) are run by a harness that
+  checks the exit code and the `exit_watchdog fired` line.
 
 ## Optional remote derived-state pilot
 

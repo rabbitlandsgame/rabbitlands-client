@@ -2,10 +2,12 @@ extends SceneTree
 ## Lantern Mine lighting is applied every frame the player is in the mine.
 ## Repeated frames must keep the lit result exactly while doing no repeated
 ## work: the section's lamps are found once per section, the clock's regrading
-## is still undone, and Compatibility's nearest-eight lamp choice is made again
-## only once the focus has moved a metre.
+## is still undone, and the per-mesh-limited renderers' (Compatibility and
+## Mobile: RendererFamily.per_mesh_light_limit) nearest-eight lamp choice is
+## made again only once the focus has moved a metre.
 const Lighting := preload("res://src/world/lantern_mine_lighting.gd")
 const MarkerBinder := preload("res://src/world/light_marker_binder.gd")
+const RendererFamily := preload("res://src/runtime/renderer_family.gd")
 var checks := 0
 var failures := 0
 
@@ -68,11 +70,23 @@ func run() -> void:
 	expect(mine_lamp.light_energy == native_energy and mine_lamp.omni_range == native_range,
 		"the section left behind gets its native lamps back")
 
+	# Forward+ (no per-mesh limit) leaves every lamp lit when no budget runs.
+	var focus := Vector3(605, 0, 121)
+	RendererFamily.override_for_tests("forward_plus")
+	lighting.apply(manifest, "lantern_upper_galleries", owner, sun, moon, markers, focus)
+	expect(_lit_gates(lighting.lamps) == lighting.lamps.size(), "Forward+ keeps every mine lamp lit")
+	# Mobile has the same per-mesh limit, read from RendererFamily.
+	lighting.before_regrade(WorldManifest.new(), "")
+	RendererFamily.override_for_tests("mobile")
+	lighting.apply(manifest, "lantern_upper_galleries", owner, sun, moon, markers, focus)
+	expect(lighting.lamps.size() > Lighting.COMPATIBILITY_LIGHT_LIMIT
+		and _lit_gates(lighting.lamps) == Lighting.COMPATIBILITY_LIGHT_LIMIT,
+		"Mobile lights the nearest eight lamps")
+	lighting.before_regrade(WorldManifest.new(), "")
 	# Compatibility's per-mesh light budget: the nearest eight lamps, chosen
 	# again only after the focus has moved a metre.
 	lighting.apply(manifest, "lantern_upper_galleries", owner, sun, moon, markers)
-	lighting.set("_compatibility", true)
-	var focus := Vector3(605, 0, 121)
+	RendererFamily.override_for_tests("gl_compatibility")
 	lighting.apply(manifest, "lantern_upper_galleries", owner, sun, moon, markers, focus)
 	var lamps: Array = lighting.lamps.duplicate()
 	expect(lamps.size() > Lighting.COMPATIBILITY_LIGHT_LIMIT and _lit_gates(lamps) == Lighting.COMPATIBILITY_LIGHT_LIMIT,
@@ -89,6 +103,7 @@ func run() -> void:
 	lighting.apply(manifest, "lantern_upper_galleries", owner, sun, moon, markers, focus + Vector3(9, 0, 0))
 	expect(_lit_gates(lamps) == Lighting.COMPATIBILITY_LIGHT_LIMIT, "a freed lamp is skipped when choosing again")
 	lighting.before_regrade(WorldManifest.new(), "")
+	RendererFamily.override_for_tests("")
 	expect(not lighting.is_active() and owner.environment == original and is_equal_approx(sun.light_energy, 0.7),
 		"leaving restores the environment and the sun")
 	markers.free(); lighting.clear()

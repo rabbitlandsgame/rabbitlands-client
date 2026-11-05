@@ -18,6 +18,19 @@ What goes in, and why it is more than an export:
   app/RabbitLands.exe (Windows) or app/RabbitLands.x86_64 (Linux), app/RabbitLands.pck
       The Godot export. Scripts, scenes, UI art and data. Linux needs the
       official 4.7.2 export templates installed beside the Windows ones.
+      On Windows and Linux the exported pack is split after the static PCK
+      checks (W2-UD-06, split_client_pack and tools/pck_split.py): the
+      imported textures, audio and login videos move into app/packs/*.pck,
+      which keep their bytes from release to release, and RabbitLands.pck
+      becomes a small core pack that lists them in data/content_packs.json.
+      Its first autoload (src/boot/content_packs.gd) mounts them at start.
+      A code-only release then changes the core pack only. The split is
+      proved entry by entry, every imported resource is loaded from the split
+      layout and compared with the monolith (check_split_pack_resources.gd),
+      and the monolith is deleted; export_launcher, the smoke launch and the
+      full-optimization checks all run on the shipped layout. --no-split-pck,
+      --benchmark-profile (benchmark_asset_closure reads one PCK), macOS and a
+      commit without ContentPacks keep the single PCK.
       The textures the world's 3D scenes sample (see scene_textures) are
       imported VRAM-compressed with mipmaps, normal maps red-green. The
       editor gives a texture those settings only once it has drawn a
@@ -92,6 +105,19 @@ What goes in, and why it is more than an export:
       package time by tools/build_vram_textures.py (they are not tracked), so
       the client uploads them as they are instead of decoding each image to
       RGBA8. Checked against their index; --no-vram-textures leaves them out.
+  app/assets/actors/native/<dir>/.../vram
+      VRAM-compressed sidecars of the actor GLBs' embedded images
+      (creatures, races, legacy hair, mounts, held props: ACTOR_SIDECAR_DIRS),
+      one index per GLB directory, made at package time by the commit's
+      build_vram_textures.py --actor-dir from the build tree's GLBs and
+      staged loose beside the staged GLBs, where src/actors/actor_images.gd
+      looks (AT-C3, stage_actor_vram_textures). Every embedded image of every
+      staged GLB there is indexed for the roles its GLBs sample it in, or
+      excluded with a reason (check_actor_vram_coverage), and the smoke
+      launch decodes and decompresses one (ELORIA_ACTOR_VRAM_SELF_TEST). They
+      update as packages of their own (asset_packages.py actors-*-textures).
+      Not release-enabled yet (ACTOR_SIDECARS_RELEASE_ENABLED): only a local
+      package asked for with --actor-vram-textures builds them.
   eloria-assets/maps/_shared/meshes
       The prototype meshes map packages name instead of carrying
       (eloria-assets/tools/shared_meshes.py publishes each mesh that repeated
@@ -138,6 +164,7 @@ import argparse
 import base64
 import datetime
 import hashlib
+import io
 import json
 import os
 import posixpath
@@ -161,7 +188,9 @@ import creature_compression
 import full_optimization_package
 import release_world_preparation
 import map_background_package
+import pck_split
 import strip_rl_head_images
+import build_vram_textures as vram_tool
 from road_ground_dependencies import dependencies as road_dependencies, RoadGroundDependencyError
 from pathlib import Path, PurePosixPath
 from urllib.parse import unquote
@@ -3035,6 +3064,191 @@ def check_editor_sources_unpacked(app_dir: Path) -> None:
     log(f"checked the PCK: nothing under {', '.join(EDITOR_ONLY_PCK_DIRS)}")
 
 
+# --- split PCK: a core pack and stable content packs (W2-UD-06) -------------
+#
+# pck_split.py moves the imported textures, audio and login videos into
+# app/packs/*.pck (its RULES) and writes the rest, with data/content_packs.json,
+# into a core pack; the commit's first autoload, ContentPacks, mounts the packs
+# before anything can name what they hold. Only a commit whose project.godot
+# loads ContentPacks first, with the manifest schema this packager writes, is
+# split: an older commit (a rebuilt rollback) keeps its single PCK.
+SPLIT_PCK_PLATFORMS = ("windows", "linux")
+CONTENT_PACKS_SCRIPT = "godot-client/src/boot/content_packs.gd"
+CONTENT_PACKS_AUTOLOAD = 'ContentPacks="*res://src/boot/content_packs.gd"'
+CONTENT_PACKS_FEATURE = f"const MANIFEST_SCHEMA := {pck_split.MANIFEST_SCHEMA}"
+SPLIT_CHECK_TOOL = "godot-client/tools/check_split_pack_resources.gd"
+SPLIT_CORE_TEMPORARY = "RabbitLands.core.pck"
+CONTENT_PACKS_VARIABLE = "RABBITLANDS_CONTENT_PACKS"  # honoured by editor binaries only
+SPLIT_CHECK_FILES = (".ogv",)  # raw entries loaded by path, compared besides the .import resources
+SPLIT_CHECK_TIMEOUT = 1800
+CONTENT_PACKS_DIAGNOSTIC = re.compile(r'client_diagnostic (\{.*"event":"content_packs".*\})\s*$')
+
+
+def split_pack_support(build_dir: Path) -> str:
+    """"" when the build tree's commit mounts content packs, else why it cannot."""
+    settings = build_dir / "godot-client/project.godot"
+    script = build_dir / CONTENT_PACKS_SCRIPT
+    if not script.is_file() or not (build_dir / SPLIT_CHECK_TOOL).is_file() or not settings.is_file():
+        return "the commit predates ContentPacks (src/boot/content_packs.gd)"
+    if CONTENT_PACKS_FEATURE not in script.read_text(encoding="utf-8", errors="replace"):
+        return f"the commit's ContentPacks does not read manifest schema {pck_split.MANIFEST_SCHEMA}"
+    section = re.search(r"(?ms)^\[autoload\]\s*\n(.*?)(?=^\[|\Z)", settings.read_text(encoding="utf-8"))
+    rows = [line.strip() for line in (section.group(1) if section else "").splitlines()
+            if line.strip() and not line.strip().startswith(";")]
+    if not rows or rows[0] != CONTENT_PACKS_AUTOLOAD:
+        return "ContentPacks is not the commit's first autoload"
+    return ""
+
+
+def split_pack_reason(build_dir: Path, platform: str, *, disabled: bool, benchmark: bool) -> str:
+    """"" to split this package's PCK, else why it keeps a single PCK."""
+    if disabled:
+        return "--no-split-pck"
+    if platform not in SPLIT_PCK_PLATFORMS:
+        return f"{platform} keeps a single PCK"
+    if benchmark:
+        return "--benchmark-profile (benchmark_asset_closure reads one PCK)"
+    return split_pack_support(build_dir)
+
+
+def _split_check_job(monolith: pck_split.Pack, mode: str, report: Path) -> dict:
+    return {"schema": 1, "mode": mode, "report": str(report),
+            "resources": sorted(name[:-len(".import")] for name in monolith.entries if name.endswith(".import")),
+            "files": sorted(name for name in monolith.entries if name.endswith(SPLIT_CHECK_FILES)),
+            "mount_script": "res://src/boot/content_packs.gd"}
+
+
+def compare_split_reports(monolith: pck_split.Pack, record: dict, verify: dict,
+                          record_log: str = "", verify_log: str = "") -> dict:
+    """What check_split_pack_resources.gd found from the monolith (record) and from the
+    split layout (verify) must agree: each resource's class, size details and product byte
+    counts, each file's class and bytes; every md5 verify read is the monolith's; the
+    packs mounted; and the split layout logs no load failure the monolith does not."""
+    problems: list[str] = []
+    mount = verify.get("mount", {})
+    if mount.get("state") != "mounted":
+        problems.append(f"content packs not mounted: {json.dumps(mount)[:400]}")
+    for kind in ("resources", "files"):
+        before, after = record.get(kind, {}), verify.get(kind, {})
+        if set(before) != set(after):
+            problems.append(f"{kind}: the two runs checked different paths")
+        for path in sorted(set(before) & set(after)):
+            a, b = before[path], after[path]
+            keys = ("class", "detail", "error") if kind == "resources" else ("class", "bytes", "error")
+            for key in keys:
+                if a.get(key) != b.get(key):
+                    problems.append(f"{path}: {key} {a.get(key)!r} from the monolith, {b.get(key)!r} split")
+            if kind == "resources":
+                sizes_a = {p: row.get("bytes") for p, row in a.get("products", {}).items()}
+                sizes_b = {p: row.get("bytes") for p, row in b.get("products", {}).items()}
+                if sizes_a != sizes_b:
+                    problems.append(f"{path}: import products {sizes_a} from the monolith, {sizes_b} split")
+                hashed = b.get("products", {}).items()
+            else:
+                hashed = [(path, b)]
+            for name, row in hashed:
+                entry = monolith.entries.get(name)
+                if entry is None or row.get("md5") != entry.md5.hex():
+                    problems.append(f"{name}: the split layout read bytes that are not the monolith's")
+    failures = lambda text: {line.strip() for line in text.splitlines() if any(f in line for f in SMOKE_FAILURES)}
+    problems.extend(f"logged only on the split layout: {line}"
+                    for line in sorted(failures(verify_log) - failures(record_log))[:20])
+    if problems:
+        raise PackageError(f"{len(problems)} resources differ between the split layout and the monolith:\n  "
+                           + "\n  ".join(problems[:40]))
+    broken = sorted(path for kind in ("resources", "files") for path, row in record.get(kind, {}).items()
+                    if row.get("error"))
+    return {"resources": len(record.get("resources", {})), "files": len(record.get("files", {})),
+            "broken_in_both": broken, "mount": mount,
+            "seconds": {"record": record.get("usec", 0) / 1e6, "verify": verify.get("usec", 0) / 1e6}}
+
+
+def check_split_pack_resources(godot: Path, project: Path, monolith: Path, core: Path, packs_dir: Path,
+                               logs: Path) -> dict:
+    """Loads every resource the monolith's .import files name, and its videos, once from the
+    monolith and once from the split layout (an editor binary, nothing loose beside it, a
+    throwaway user directory), and compares the two (compare_split_reports)."""
+    pack = pck_split.read_pack(monolith)
+    tool = project / "tools/check_split_pack_resources.gd"
+    reports: dict[str, tuple[dict, str]] = {}
+    with tempfile.TemporaryDirectory(prefix="rl-split-check-") as scratch:
+        for mode, main_pack in (("record", monolith), ("verify", core)):
+            root = Path(scratch) / mode
+            user, cwd = root / "user", root / "cwd"
+            user.mkdir(parents=True)
+            cwd.mkdir()
+            report = root / "report.json"
+            job = root / "job.json"
+            job.write_text(json.dumps(_split_check_job(pack, mode, report)), encoding="utf-8")
+            env = dict(os.environ, APPDATA=str(user), LOCALAPPDATA=str(user), HOME=str(user),
+                       XDG_DATA_HOME=str(user), XDG_CONFIG_HOME=str(user))
+            env.pop(CONTENT_PACKS_VARIABLE, None)
+            if mode == "verify":
+                env[CONTENT_PACKS_VARIABLE] = str(packs_dir)
+            text = run_godot(godot, ["--headless", "--main-pack", str(main_pack), "--script", str(tool),
+                                     "--", str(job)], logs / f"split-check-{mode}.log",
+                             timeout=SPLIT_CHECK_TIMEOUT, env=env, cwd=cwd)
+            if not report.is_file():
+                raise PackageError(f"check_split_pack_resources wrote no {mode} report; "
+                                   f"log: {logs / f'split-check-{mode}.log'}")
+            reports[mode] = (json.loads(report.read_text(encoding="utf-8")), text)
+            if any(cwd.iterdir()):
+                raise PackageError(f"the {mode} resource check wrote into its working directory")
+    (record, record_log), (verify, verify_log) = reports["record"], reports["verify"]
+    return compare_split_reports(pack, record, verify, record_log, verify_log)
+
+
+def split_client_pack(godot: Path, project: Path, app_dir: Path, logs: Path, storage=None) -> dict:
+    """Split app/RabbitLands.pck (pck_split.split), prove the partition and the resources,
+    then replace the monolith by the core pack. Returns the receipt (logs/pck-split.json)."""
+    monolith = app_dir / "RabbitLands.pck"
+    core = app_dir / SPLIT_CORE_TEMPORARY
+    if storage:
+        storage.check("before PCK split", monolith.stat().st_size)
+    log("splitting the PCK into a core pack and content packs")
+    try:
+        receipt = pck_split.split(monolith, app_dir, core)
+        receipt["proof"] = pck_split.prove(monolith, core, app_dir / pck_split.PACKS_DIRECTORY)
+    except pck_split.SplitError as error:
+        raise PackageError(f"PCK split: {error}") from error
+    receipt["proof"].pop("manifest", None)
+    receipt["resources"] = check_split_pack_resources(godot, project, monolith, core,
+                                                      app_dir / pck_split.PACKS_DIRECTORY, logs)
+    monolith.unlink()
+    core.rename(monolith)
+    receipt["core"]["file"] = monolith.name
+    (logs / "pck-split.json").write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
+    moved = sum(row["bytes"] for row in receipt["packs"])
+    log(f"split the PCK: core {receipt['core']['bytes'] / 1e6:.1f} MB, {len(receipt['packs'])} content packs "
+        f"{moved / 1e6:.1f} MB; {receipt['resources']['resources']} resources and "
+        f"{receipt['resources']['files']} files load alike from both layouts")
+    if receipt["resources"]["broken_in_both"]:
+        log(f"warning: {len(receipt['resources']['broken_in_both'])} resources fail to load from the monolith "
+            f"too: {', '.join(receipt['resources']['broken_in_both'][:5])}")
+    return receipt
+
+
+def check_content_packs_mounted(text: str, manifest: dict, log_name: str) -> dict:
+    """The smoke log's content_packs diagnostic: every pack the manifest lists mounted."""
+    rows = []
+    for line in text.splitlines():
+        match = CONTENT_PACKS_DIAGNOSTIC.search(line)
+        if match:
+            try:
+                rows.append(json.loads(match.group(1)))
+            except ValueError:
+                continue
+    if not rows:
+        raise PackageError(f"the exported client logged no content_packs diagnostic ({log_name})")
+    row = rows[-1]
+    mounted = {pack.get("file") for pack in row.get("packs", []) if pack.get("state") in ("mounted", "already")}
+    wanted = {pack["file"] for pack in manifest.get("packs", []) if not pack.get("feature")}
+    if row.get("state") != "mounted" or not wanted <= mounted:
+        raise PackageError(f"the exported client did not mount its content packs ({log_name}): "
+                           + json.dumps(row)[:600])
+    return row
+
+
 def stage_audio_credits(app_dir: Path, stage: Path) -> None:
     """Fail the build if licensed audio would ship without its notices."""
     audio = app_dir / "assets/audio"
@@ -3787,21 +4001,38 @@ def stage_vram_textures(build_dir: Path, stage: Path, godot: Path, cache: Path, 
     return {"files": files, "bytes": size, "sceneryFiles": scenery_files, "sceneryBytes": scenery_bytes}
 
 
-def check_scenery_vram_textures(app_dir: Path) -> None:
-    """Every scenery sidecar index in app/assets names files that are staged beside it, byte for byte, and nothing
-    else sits in its vram/ folder (world_object_images.gd reads them; a broken one only costs a decode)."""
+def check_loose_vram_textures(app_dir: Path) -> None:
+    """Every sidecar index in app/assets - the scenery's (world_object_images.gd reads them) and the actors'
+    (actor_images.gd, AT-C3) - names files that are staged beside it, byte for byte, by plain file names, nothing
+    else sits in its vram/ folder, and no vram/ folder lacks its index (a broken one only costs a decode)."""
     import hashlib
     problems: list[str] = []
     sidecars = 0
-    for index_path in sorted((app_dir / "assets").rglob("vram/index.json")) if (app_dir / "assets").is_dir() else []:
-        index = json.loads(index_path.read_text(encoding="utf-8"))
+    assets = app_dir / "assets"
+    for folder in sorted(assets.rglob(vram_tool.SIDECAR_DIR)) if assets.is_dir() else []:
+        if folder.is_dir() and not (folder / "index.json").is_file():
+            problems.append(f"{folder.relative_to(app_dir).as_posix()}: a sidecar folder without its index.json")
+    for index_path in sorted(assets.rglob("vram/index.json")) if assets.is_dir() else []:
+        try:
+            index = json.loads(index_path.read_text(encoding="utf-8"))
+            if not isinstance(index, dict) or not isinstance(index.get("images", {}), dict):
+                raise ValueError("not an index object")
+        except (OSError, ValueError) as error:
+            problems.append(f"{index_path.relative_to(app_dir).as_posix()}: unreadable sidecar index: {error}")
+            continue
         listed = set()
         for entry in index.get("images", {}).values():
-            path = index_path.parent / entry["file"]
-            listed.add(entry["file"])
+            name = entry.get("file") if isinstance(entry, dict) else None
+            if (not isinstance(name, str) or name in ("", ".", "..", "index.json")
+                    or "/" in name or "\\" in name or ":" in name):
+                problems.append(f"{index_path.relative_to(app_dir).as_posix()}: names an unsafe sidecar file {name!r}")
+                continue
+            path = index_path.parent / name
+            listed.add(name)
             if not path.is_file():
                 problems.append(f"{path.relative_to(app_dir)}: listed in the index but missing")
-            elif hashlib.sha256(path.read_bytes()).hexdigest() != entry["sha256"]:
+            elif hashlib.sha256(path.read_bytes()).hexdigest() != entry.get("sha256"):
+                # A missing or wrong sha256 is a build problem, not a KeyError traceback.
                 problems.append(f"{path.relative_to(app_dir)}: sha256 differs from the index")
             else:
                 sidecars += 1
@@ -3834,8 +4065,355 @@ def check_scenery_vram_textures(app_dir: Path) -> None:
         except (OSError, ValueError, TypeError) as error:
             problems.append(f"{config.relative_to(app_dir)}: invalid scenery image sidecar closure: {error}")
     if problems:
-        raise PackageError(f"{len(problems)} scenery sidecar problems:\n  " + "\n  ".join(problems[:40]))
-    log(f"checked {sidecars} scenery sidecars in app/assets")
+        raise PackageError(f"{len(problems)} loose sidecar problems:\n  " + "\n  ".join(problems[:40]))
+    log(f"checked {sidecars} loose sidecars in app/assets")
+
+
+# The name before AT-C3 added the actor sidecars it also checks.
+check_scenery_vram_textures = check_loose_vram_textures
+
+
+# --- actor VRAM sidecars (wave-2 actor textures, AT-C3) ----------------------------------------------------------
+
+# The folders below godot-client/assets/actors/native whose GLBs' embedded images ship VRAM sidecars, loose beside
+# the GLBs in app/assets/actors/native/<folder>/.../vram (build_vram_textures.py --actor-dir; read by
+# src/actors/actor_images.gd). Phasing them is the owner's download decision (actor-textures open question 1).
+# Sidecar bytes measured on the wave-2 tree at the map floors (AT-C1): creatures 455.4 MB, equipment (held props)
+# 134.9 MB, races 40.8 MB, mounts 1.0 MB, hair 0.7 MB; without "creatures" (the plan's phase A) +177.4 MB instead of
+# +632.8 MB. rl_heads is never one of them (strip_rl_head_images.py removes its embedded copies instead).
+ACTOR_SIDECAR_DIRS = ("creatures", "races", "hair", "mounts", "equipment")
+# Quality floors of the actor run only (build_vram_textures.py --floors); None keeps the map floors. The plan's
+# relaxed actor normal floors await the owner (open question 2; AT-C1: 678 of 697 images get sidecars at the map
+# floors, 691 with {"normal_mean_deg": 1.5, "normal_p99_deg": 8.0, "normal_mean_deg_mips": 2.0,
+# "normal_p99_deg_mips": 10.0}, +13.4 MB).
+ACTOR_SIDECAR_FLOORS: dict | None = None
+# The release switch (wave-2 schedule 1.1 #20). The packaging lands before its consumers are ready: with a BC7 race
+# atlas the wardrobe dye readback needs AT-C4's SHA-keyed cache (stage C) or the template's BCn decompressor, which
+# the smoke self-test below proves. While False, actor sidecars are built only for a local package that asks for
+# them (--actor-vram-textures), never for a --release-build or a runner build. True makes them the default of every
+# package that ships VRAM sidecars, and --no-actor-vram-textures opts out.
+ACTOR_SIDECARS_RELEASE_ENABLED = False
+# The client's smoke line (actor_images.gd, AT-C2) when ELORIA_ACTOR_VRAM_SELF_TEST names a folder: it decoded that
+# folder's index and a sidecar, and Image.decompress() of a copy worked in the shipped template.
+ACTOR_VRAM_SELF_TEST_VARIABLE = "ELORIA_ACTOR_VRAM_SELF_TEST"
+ACTOR_VRAM_SELF_TEST_OK = "actor_images self_test ok"
+ACTOR_VRAM_SELF_TEST_LINE = re.compile(r"actor_images self_test ok entries=([1-9][0-9]*) format=(\S+) "
+                                       r"mips=([1-9][0-9]*) decompress=ok(?=\s|$)")
+# The folder the smoke launch self-tests: races first (its BC7 atlases are what the wardrobe reads back).
+ACTOR_VRAM_SELF_TEST_PREFERENCE = ("races",)
+ACTOR_VRAM_SELF_TEST_PATH = re.compile(r"^assets/actors/native/[A-Za-z0-9_][A-Za-z0-9_./-]*$")
+# What the commit being packaged must have: the client reader with its self-test, and the builder's actor mode.
+ACTOR_VRAM_READER = "godot-client/src/actors/actor_images.gd"
+ACTOR_VRAM_TOOL = "godot-client/tools/build_vram_textures.py"
+ACTOR_VRAM_TOOL_FEATURE = '"--actor-dir"'
+# Runner disk allowance before the actor encode (bytes): a cold cache adds about 0.63 GB of encodes (hard-linked into
+# the stage), about 0.13 GB of extracted images and bounded quality scratch; a warm runner cache adds little.
+ACTOR_ENCODE_ALLOWANCE = 1024**3
+ACTOR_ENCODE_ALLOWANCE_WARM = 256 * 1024**2
+PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+
+
+def actor_sidecar_support(build_dir: Path) -> str:
+    """"" when the commit being packaged can build and read actor sidecars, else what it lacks."""
+    reader = build_dir / ACTOR_VRAM_READER
+    if not reader.is_file() or ACTOR_VRAM_SELF_TEST_OK not in reader.read_text(encoding="utf-8", errors="replace"):
+        return "has no actor sidecar reader with its smoke self-test (src/actors/actor_images.gd, AT-C2)"
+    tool = build_dir / ACTOR_VRAM_TOOL
+    if not tool.is_file() or ACTOR_VRAM_TOOL_FEATURE not in tool.read_text(encoding="utf-8", errors="replace"):
+        return "has no actor mode in tools/build_vram_textures.py (AT-C1)"
+    return ""
+
+
+def actor_sidecar_dirs(build_dir: Path, requested: bool | None, *, no_vram: bool, release_build: bool,
+                       runner: bool) -> tuple[str, ...]:
+    """The actor folders this package builds sidecars for; () for none.
+
+    requested is --actor-vram-textures (True), --no-actor-vram-textures (False) or neither (None: the release
+    switch's default). An explicit request that cannot be honoured fails the build before the import."""
+    if any(name in vram_tool.ACTOR_NEVER_PLANNED or not name or "/" in name or "\\" in name
+           for name in ACTOR_SIDECAR_DIRS):
+        raise PackageError(f"ACTOR_SIDECAR_DIRS names a folder that is never planned: {ACTOR_SIDECAR_DIRS}")
+    wanted = ACTOR_SIDECARS_RELEASE_ENABLED if requested is None else requested
+    if not wanted:
+        return ()
+    if no_vram:
+        if requested:
+            raise PackageError("--actor-vram-textures needs the VRAM sidecars, which this package leaves out "
+                               "(--no-vram-textures, or macOS)")
+        return ()
+    if not ACTOR_SIDECARS_RELEASE_ENABLED and (release_build or runner):
+        raise PackageError("actor VRAM sidecars are not release-enabled yet (wave-2 schedule 1.1 #20: AT-C4 and the "
+                           "smoke self-test first); build them in a local package only")
+    missing = actor_sidecar_support(build_dir)
+    if missing:
+        if requested:
+            raise PackageError(f"--actor-vram-textures: the commit being packaged {missing}")
+        log(f"no actor VRAM sidecars: the commit being packaged {missing}")
+        return ()
+    return ACTOR_SIDECAR_DIRS
+
+
+def _tool_summary(text: str) -> dict:
+    """The summary object build_vram_textures.py prints last (json.dumps(..., indent=1) after its log lines)."""
+    start = text.rfind("\n{\n")
+    start = start + 1 if start >= 0 else (0 if text.startswith("{\n") else -1)
+    try:
+        summary = json.loads(text[start:]) if start >= 0 else None
+    except ValueError:
+        summary = None
+    if not isinstance(summary, dict):
+        raise PackageError("build_vram_textures.py printed no summary")
+    return summary
+
+
+def actor_self_test_directory(app_dir: Path, dirs: tuple[str, ...]) -> str | None:
+    """The app-relative folder (assets/actors/native/...) the smoke launch self-tests: the first folder of a preferred
+    family, then of the others in order (in each, the shallowest first), whose staged index lists a sidecar; None
+    when none does."""
+    native = app_dir / "assets" / "actors" / "native"
+    order = [name for name in ACTOR_VRAM_SELF_TEST_PREFERENCE if name in dirs]
+    order += [name for name in dirs if name not in order]
+    for name in order:
+        found = (native / name).rglob("vram/index.json") if (native / name).is_dir() else []
+        for index_path in sorted(found, key=lambda path: (len(path.parts), path.as_posix())):
+            try:
+                images = json.loads(index_path.read_text(encoding="utf-8")).get("images") or {}
+            except (OSError, ValueError, AttributeError):
+                continue
+            if images:
+                return index_path.parent.parent.relative_to(app_dir).as_posix()
+    return None
+
+
+def stage_actor_vram_textures(build_dir: Path, stage: Path, godot: Path, cache: Path, logs: Path, app_dir: Path,
+                              dirs: tuple[str, ...] = ACTOR_SIDECAR_DIRS, tool: Path | None = None,
+                              procs: int | None = None, measure_procs: int | None = None) -> dict:
+    """Build the VRAM sidecars of the actor GLBs' embedded images into app/assets/actors (AT-C3).
+
+    A run of its own of the commit's tools/build_vram_textures.py (--actor-dir per folder of `dirs` the build tree
+    has, --actor-out-root app/assets/actors), after the map run and with the same encode cache (actor encodes live
+    in its _actors/ folder, so neither run prunes the other's). It plans the build tree's tracked GLBs, after the RL
+    strip; the GLBs staged in app/ are those bytes (check_actor_vram_coverage proves it per image). Only index.json
+    and the .evt files ship; each folder's quality report goes to the logs. The log is logs/actor-vram-textures.log
+    and the receipt logs/actor-vram-textures.json (sizes per family, the tool's summary, the self-test folder)."""
+    tool = tool or build_dir / ACTOR_VRAM_TOOL
+    native = build_dir / ACTOR_ROOT
+    present = tuple(name for name in dirs if (native / name).is_dir())
+    skipped = [name for name in dirs if name not in present]
+    if skipped:
+        log(f"actor VRAM sidecars: the build tree has no {', '.join(skipped)} folder")
+    out_root = app_dir / "assets" / "actors"
+    receipt = {"schema": 1, "dirs": list(present), "skipped": skipped,
+               "floors": ACTOR_SIDECAR_FLOORS, "families": {}, "files": 0, "bytes": 0, "sidecars": 0,
+               "gpuBytes": 0, "summary": {}, "selfTest": None}
+    if not present:
+        (logs / "actor-vram-textures.json").write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
+        return receipt
+    log(f"building actor VRAM texture sidecars ({', '.join(present)})")
+    cache.mkdir(parents=True, exist_ok=True)
+    runner_args = []
+    if STORAGE:
+        remaining = (STORAGE.budget.capacity - STORAGE.budget.reserve
+                     - release_storage.unique_bytes(STORAGE.budget.roots) - 64 * 1024**2)
+        # As for the map run: the child measures its whole cache, retained bytes included.
+        runner_args = ["--link-output", "--cache-budget-bytes", str(remaining + release_storage.unique_bytes([cache]))]
+    options = [arg for name in present for arg in ("--actor-dir", name)]
+    if ACTOR_SIDECAR_FLOORS:
+        options += ["--floors", json.dumps(ACTOR_SIDECAR_FLOORS, sort_keys=True)]
+    if procs:
+        options += ["--procs", str(procs)]
+    if measure_procs:
+        options += ["--measure-procs", str(measure_procs)]
+    started = time.time()
+    log_path = logs / "actor-vram-textures.log"
+    with open(log_path, "w", encoding="utf-8", errors="replace") as handle:
+        result = subprocess.run([sys.executable, str(tool), *options, "--actor-out-root", str(out_root),
+                                 "--cache", str(cache), "--godot", str(godot), *runner_args],
+                                stdout=handle, stderr=subprocess.STDOUT, timeout=3600,
+                                env=dict(os.environ, PYTHONIOENCODING="utf-8"))
+    text = log_path.read_text(encoding="utf-8", errors="replace")
+    if result.returncode != 0:
+        raise PackageError(f"build_vram_textures.py --actor-dir failed; log: {log_path}\n{text[-2000:]}")
+    summary = _tool_summary(text)
+    receipt["summary"] = {key: summary[key] for key in (
+        "encoded", "cached", "remeasured", "encodeSeconds", "seconds", "actorGlbs", "actorImages", "actorAccepted",
+        "actorExcluded", "actorGpuBytes", "actorFileBytes", "basePsnrMedian") if key in summary}
+    for report in sorted((out_root / "native").rglob("vram/report.json")):
+        folder = report.parent.parent.relative_to(app_dir)
+        shutil.move(str(report), logs / ("vram-report-app__" + "__".join(folder.parts) + ".json"))
+    for folder in sorted((out_root / "native").rglob(vram_tool.SIDECAR_DIR)):
+        if not folder.is_dir():
+            continue
+        family = folder.relative_to(out_root / "native").parts[0]
+        row = receipt["families"].setdefault(family, {"indexes": 0, "files": 0, "bytes": 0, "sidecars": 0,
+                                                      "excluded": 0, "gpuBytes": 0})
+        for path in folder.iterdir():
+            if path.is_file():
+                row["files"] += 1
+                row["bytes"] += path.stat().st_size
+        index_path = folder / "index.json"
+        if index_path.is_file():
+            index = json.loads(index_path.read_text(encoding="utf-8"))
+            row["indexes"] += 1
+            row["sidecars"] += len(index.get("images", {}))
+            row["excluded"] += len(index.get("excluded", {}))
+            row["gpuBytes"] += sum(int(entry.get("gpuBytes", 0)) for entry in index.get("images", {}).values())
+    for key in ("files", "bytes", "sidecars", "gpuBytes"):
+        receipt[key] = sum(row[key] for row in receipt["families"].values())
+    receipt["selfTest"] = actor_self_test_directory(app_dir, present)
+    receipt["seconds"] = round(time.time() - started, 1)
+    log(f"staged {receipt['files']} actor VRAM sidecar files ({receipt['bytes'] / 1e6:.0f} MB, already zstd: the "
+        f"download grows by about as much; {receipt['sidecars']} sidecars, {receipt['gpuBytes'] / 1048576:.0f} MiB "
+        f"on the GPU) in {receipt['seconds']:.0f} s: "
+        + ", ".join(f"{name} {row['bytes'] / 1e6:.1f} MB" for name, row in sorted(receipt["families"].items())))
+    (logs / "actor-vram-textures.json").write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
+    return receipt
+
+
+def _glb_embedded_images(path: Path) -> tuple[dict, list[tuple[int, str]]]:
+    """A GLB's JSON document and (image index, sha256) for each bufferView image build_vram_textures.py plans (its
+    embedded_images rule: the declared PNG/JPEG/WebP type, else the bytes' signature), reading only the JSON and the
+    image byte ranges. A staged RLCZ creature envelope is decoded first. Raises ValueError on a malformed file."""
+    with open(path, "rb") as raw:
+        if raw.read(4) == vram_tool.RLCZ_MAGIC:
+            return _glb_stream_images(io.BytesIO(creature_compression.decode(path.read_bytes())))
+        raw.seek(0)
+        return _glb_stream_images(raw)
+
+
+def _glb_stream_images(stream) -> tuple[dict, list[tuple[int, str]]]:
+    header = stream.read(20)
+    if len(header) < 20 or header[:4] != b"glTF":
+        raise ValueError("not a GLB")
+    length = struct.unpack_from("<I", header, 12)[0]
+    data = stream.read(length)
+    if len(data) != length:
+        raise ValueError("truncated JSON chunk")
+    document = json.loads(data.decode("utf-8"))
+    chunk = stream.read(8)
+    binary_start = binary_length = None
+    if len(chunk) == 8 and struct.unpack_from("<I", chunk, 4)[0] == 0x004E4942:
+        binary_start, binary_length = 20 + length + 8, struct.unpack_from("<I", chunk)[0]
+    views = document.get("bufferViews", [])
+    found = []
+    for index, image in enumerate(document.get("images", [])):
+        view_index = image.get("bufferView")
+        if not isinstance(view_index, int) or not 0 <= view_index < len(views):
+            continue
+        view = views[view_index]
+        if view.get("buffer", 0) != 0 or binary_start is None:
+            raise ValueError(f"image {index} lives outside the GLB's BIN chunk")
+        start, size = int(view.get("byteOffset", 0)), int(view["byteLength"])
+        if start < 0 or start + size > binary_length:
+            raise ValueError(f"image {index}'s bufferView runs past the BIN chunk")
+        stream.seek(binary_start + start)
+        payload = stream.read(size)
+        if len(payload) != size:
+            raise ValueError(f"image {index}'s bytes are truncated")
+        if (vram_tool.EMBEDDED_TYPES.get(str(image.get("mimeType", "")).lower()) is None
+                and payload[:8] != PNG_SIGNATURE and payload[:3] != b"\xff\xd8\xff" and payload[8:12] != b"WEBP"):
+            continue  # not an image the client decodes either
+        found.append((index, hashlib.sha256(payload).hexdigest()))
+    return document, found
+
+
+def _retired_actor_files(build_dir: Path) -> set[str]:
+    """The paths (relative to res://assets, e.g. actors/native/creatures/x.glb) the retirement index retires."""
+    path = build_dir / "godot-client" / "data" / "assets" / "retired_procedural_models.json"
+    if not path.is_file():
+        return set()
+    try:
+        paths = json.loads(path.read_text(encoding="utf-8-sig")).get("runtimePaths", [])
+        if not isinstance(paths, list):
+            raise ValueError("runtimePaths is not a list")
+    except (OSError, ValueError, AttributeError) as error:
+        raise PackageError(f"cannot read the retirement index {path}: {error}") from error
+    return {PurePosixPath(item).as_posix() for item in paths if isinstance(item, str) and item}
+
+
+def check_actor_vram_coverage(build_dir: Path, app_dir: Path, dirs: tuple[str, ...]) -> dict:
+    """Every embedded image of every staged, non-retired GLB below app/assets/actors/native/<dir> (dirs) has a
+    sidecar in its GLB directory's vram/index.json whose roles cover every role a GLB of that directory samples it
+    in, or an exclusion with a reason (the client decodes those); no index names an image no GLB beside it embeds,
+    and no actor sidecar index sits outside those directories. Run after check_loose_vram_textures (files and
+    hashes). Returns and logs the coverage counts."""
+    assets = app_dir / "assets"
+    native = assets / "actors" / "native"
+    retired = _retired_actor_files(build_dir)
+    problems: list[str] = []
+    needs: dict[Path, dict[str, set[str]]] = {}
+    families: dict[str, dict] = {}
+    glbs = 0
+    for name in dirs:
+        family = native / name
+        row = families.setdefault(name, {"glbs": 0, "images": 0, "sidecars": 0, "excluded": {}})
+        for glb in sorted(family.rglob("*.glb")) if family.is_dir() else []:
+            if vram_tool.SIDECAR_DIR in glb.relative_to(family).parts[:-1]:
+                problems.append(f"{glb.relative_to(app_dir).as_posix()}: a GLB inside a sidecar folder")
+                continue
+            if glb.relative_to(assets).as_posix() in retired:
+                continue
+            glbs += 1
+            row["glbs"] += 1
+            try:
+                document, images = _glb_embedded_images(glb)
+            except (OSError, ValueError, KeyError, TypeError) as error:
+                problems.append(f"{glb.relative_to(app_dir).as_posix()}: cannot read its images: {error}")
+                continue
+            roles = vram_tool.image_roles(document)
+            wanted = needs.setdefault(glb.parent, {})
+            for index, sha in images:
+                wanted.setdefault(sha, set()).update(vram_tool.role_names(roles.get(index, set())))
+    counts = {"glbs": glbs, "directories": 0, "images": 0, "sidecars": 0, "excluded": {}, "families": families}
+    for directory, wanted in sorted(needs.items()):
+        if not wanted:
+            continue
+        label = directory.relative_to(app_dir).as_posix()
+        row = families[directory.relative_to(native).parts[0]]
+        index_path = directory / vram_tool.SIDECAR_DIR / "index.json"
+        if not index_path.is_file():
+            problems.append(f"{label}: {len(wanted)} embedded images and no vram/index.json")
+            continue
+        try:
+            index = json.loads(index_path.read_text(encoding="utf-8"))
+            if not isinstance(index, dict):
+                raise ValueError("not an object")
+        except (OSError, ValueError) as error:
+            problems.append(f"{label}: unreadable vram/index.json: {error}")
+            continue
+        images = index.get("images") if isinstance(index.get("images"), dict) else {}
+        excluded = index.get("excluded") if isinstance(index.get("excluded"), dict) else {}
+        counts["directories"] += 1
+        for sha, roles in sorted(wanted.items()):
+            counts["images"] += 1
+            row["images"] += 1
+            if sha in images:
+                listed = set(images[sha].get("roles") or []) if isinstance(images[sha], dict) else set()
+                if not roles <= listed:
+                    problems.append(f"{label}: the sidecar of {sha[:12]} is for {sorted(listed)}, its GLBs sample "
+                                    f"it as {sorted(roles)}")
+                    continue
+                counts["sidecars"] += 1
+                row["sidecars"] += 1
+            elif sha in excluded and str(excluded[sha]).strip():
+                reason = str(excluded[sha]).split(":")[0]
+                counts["excluded"][reason] = counts["excluded"].get(reason, 0) + 1
+                row["excluded"][reason] = row["excluded"].get(reason, 0) + 1
+            else:
+                problems.append(f"{label}: embedded image {sha[:12]} has no sidecar and no exclusion reason")
+        for sha in sorted((set(images) | set(excluded)) - set(wanted)):
+            problems.append(f"{label}: its index names {sha[:12]}, which no GLB in that folder embeds")
+    for index_path in sorted((assets / "actors").rglob("vram/index.json")) if (assets / "actors").is_dir() else []:
+        directory = index_path.parent.parent
+        if not needs.get(directory):
+            problems.append(f"{directory.relative_to(app_dir).as_posix()}: an actor sidecar index outside the "
+                            f"GLB folders of {', '.join(dirs) or 'no actor folder'}")
+    if problems:
+        raise PackageError(f"{len(problems)} actor sidecar coverage problems:\n  " + "\n  ".join(problems[:40]))
+    reasons = ", ".join(f"{reason} {n}" for reason, n in sorted(counts["excluded"].items())) or "none"
+    log(f"checked actor VRAM coverage: {glbs} GLBs, {counts['images']} embedded images in {counts['directories']} "
+        f"folders: {counts['sidecars']} sidecars, {sum(counts['excluded'].values())} decoded ({reasons})")
+    return counts
 
 
 TEXTURE_POLICY_DIRECTORY_KEY = "rl_texture_policy_directory"
@@ -4098,8 +4676,15 @@ def wsl_path(path: Path) -> str:
 
 
 def smoke_launch(app_dir: Path, logs: Path, platform: dict, vram_textures: bool = False,
-                 pool_test: str | None = None, *, clean_feature_environment: bool = False,
-                 optimization_profile: str | None = None, log_name: str = "smoke.log") -> None:
+                 pool_test: str | None = None, *, actor_test: str | None = None,
+                 clean_feature_environment: bool = False,
+                 optimization_profile: str | None = None, log_name: str = "smoke.log",
+                 content_packs: dict | None = None) -> None:
+    # With a split PCK (content_packs: the core's data/content_packs.json) the
+    # client must log that it mounted every required pack (W2-UD-06), and the
+    # SMOKE_FAILURES scan covers "Failed loading resource" before and after
+    # the mount.
+    #
     # The launch must leave the package exactly as it was: a user:// that
     # falls back to a relative path writes settings and caches into app/,
     # and they would ship in the archive.
@@ -4109,9 +4694,13 @@ def smoke_launch(app_dir: Path, logs: Path, platform: dict, vram_textures: bool 
     # launch is headless, so this covers the decode, not the GPU upload.
     # pool_test (a stage-relative source directory whose index names another
     # pool's sidecars) makes it also decode one of those, from where it ships.
+    # actor_test (an app-relative actor folder, assets/actors/native/races)
+    # sets ELORIA_ACTOR_VRAM_SELF_TEST: the client must read that folder's
+    # actor sidecar index, decode a sidecar and Image.decompress() a copy in
+    # the shipped template (ACTOR_VRAM_SELF_TEST_LINE, AT-C3).
     before = {p for p in app_dir.parent.rglob("*")}
     try:
-        text = _launch(app_dir, logs, platform, vram_textures, pool_test,
+        text = _launch(app_dir, logs, platform, vram_textures, pool_test, actor_test=actor_test,
                        clean_feature_environment=clean_feature_environment,
                        optimization_profile=optimization_profile, log_name=log_name)
         for wanted, what in ((VRAM_SELF_TEST_OK, "a VRAM sidecar"),
@@ -4121,6 +4710,14 @@ def smoke_launch(app_dir: Path, logs: Path, platform: dict, vram_textures: bool 
                 raise PackageError(f"the exported client did not decode {what}:\n  "
                                    + "\n  ".join(lines[:10] or ["(no vram_textures line)"])
                                    + f"\nfull log: {logs / log_name}")
+        if actor_test and text is not None and not any(ACTOR_VRAM_SELF_TEST_LINE.search(line)
+                                                       for line in text.splitlines()):
+            lines = [line for line in text.splitlines() if "actor_images" in line]
+            raise PackageError(f"the exported client did not decode and decompress an actor sidecar of {actor_test}:"
+                               "\n  " + "\n  ".join(lines[:10] or ["(no actor_images line)"])
+                               + f"\nfull log: {logs / log_name}")
+        if content_packs is not None and text is not None:
+            check_content_packs_mounted(text, content_packs, log_name)
     finally:
         added = sorted(p for p in app_dir.parent.rglob("*") if p not in before)
         if added:
@@ -4129,10 +4726,14 @@ def smoke_launch(app_dir: Path, logs: Path, platform: dict, vram_textures: bool 
 
 
 def _launch(app_dir: Path, logs: Path, platform: dict, vram_textures: bool = False,
-            pool_test: str | None = None, *, clean_feature_environment: bool = False,
+            pool_test: str | None = None, *, actor_test: str | None = None,
+            clean_feature_environment: bool = False,
             optimization_profile: str | None = None, log_name: str = "smoke.log") -> str | None:
     if optimization_profile not in (None, "legacy", "human-testing") or Path(log_name).name != log_name:
         raise PackageError("smoke checks require a known profile and a scoped log filename")
+    if actor_test is not None and (not ACTOR_VRAM_SELF_TEST_PATH.match(actor_test)
+                                   or ".." in actor_test.split("/") or "//" in actor_test):
+        raise PackageError(f"the actor sidecar self-test folder is not an app-relative actor folder: {actor_test!r}")
     profile_args = [] if optimization_profile is None else ["--", "--optimization-profile=" + optimization_profile]
     if platform.get("preset") == "macOS":
         return macos_package.smoke(app_dir, logs, run_godot, SMOKE_FAILURES)
@@ -4140,6 +4741,8 @@ def _launch(app_dir: Path, logs: Path, platform: dict, vram_textures: bool = Fal
     pool_dir = f"res://../{pool_test}" if vram_textures and pool_test else ""
     if pool_dir:
         self_test += f"ELORIA_VRAM_SELF_TEST_POOL={pool_dir} "
+    if actor_test:
+        self_test += f"{ACTOR_VRAM_SELF_TEST_VARIABLE}={actor_test} "
     base_env = full_optimization_package.clean_environment() if clean_feature_environment else dict(os.environ)
     if platform["binary"].endswith(".exe"):
         log("smoke launch (headless)")
@@ -4150,6 +4753,8 @@ def _launch(app_dir: Path, logs: Path, platform: dict, vram_textures: bool = Fal
                 env["ELORIA_VRAM_SELF_TEST"] = "1"
             if pool_dir:
                 env["ELORIA_VRAM_SELF_TEST_POOL"] = pool_dir
+            if actor_test:
+                env[ACTOR_VRAM_SELF_TEST_VARIABLE] = actor_test
             text = run_godot(app_dir / platform["binary"], ["--headless", "--quit-after", "600", *profile_args],
                              logs / log_name, timeout=300, env=env)
     elif os.name != "nt":
@@ -4160,6 +4765,8 @@ def _launch(app_dir: Path, logs: Path, platform: dict, vram_textures: bool = Fal
                 env["ELORIA_VRAM_SELF_TEST"] = "1"
             if pool_dir:
                 env["ELORIA_VRAM_SELF_TEST_POOL"] = pool_dir
+            if actor_test:
+                env[ACTOR_VRAM_SELF_TEST_VARIABLE] = actor_test
             binary = app_dir / platform["binary"]
             binary.chmod(binary.stat().st_mode | 0o111)
             text = run_godot(binary, ["--headless", "--quit-after", "600", *profile_args],
@@ -4204,8 +4811,13 @@ def write_compatibility_launchers(stage: Path, args: list[str], platform: dict,
     # no baked server. Keep their separator before forwarding them on both OSes.
     extra = " --" + (" " + " ".join(args) if args else "")
     renderer = "--rendering-method gl_compatibility --rendering-driver opengl3"
+    # Packages without the updater start the game from these launchers without
+    # --client-safe-mode, so safe mode reaches the game only through this
+    # environment: the pre-wave-2 sequential digest reader (NH-A2) and the
+    # client_runtime payload left unloaded (RB-C1g's kill switch).
     safe_environment = {"ELORIA_LOOK": "0", "ELORIA_LOOK_QUALITY": "low",
-                        "ELORIA_VRAM_TEXTURES": "0", "ELORIA_NO_MAP_CACHE": "1"}
+                        "ELORIA_VRAM_TEXTURES": "0", "ELORIA_NO_MAP_CACHE": "1",
+                        "RABBITLANDS_CONTENT_DIGEST": "sequential", "RABBITLANDS_NATIVE_RUNTIME": "off"}
     for safe in (False, True):
         label = "safe mode" if safe else "compatibility"
         slug = "safe-mode" if safe else "compatibility"
@@ -4832,9 +5444,19 @@ def _main(argv=None, storage=None) -> int:
     parser.add_argument("--no-smoke", action="store_true", help="skip the headless launch check")
     parser.add_argument("--online-installer", action="store_true", help="with --installer: small setup downloads signed game files")
     parser.add_argument("--no-vram-textures", action="store_true",
-                        help="ship no VRAM-compressed map texture sidecars (the client decodes every image)")
+                        help="ship no VRAM-compressed texture sidecars, of maps, scenery or actors "
+                             "(the client decodes every image)")
+    actor_vram = parser.add_mutually_exclusive_group()
+    actor_vram.add_argument("--actor-vram-textures", dest="actor_vram_textures", action="store_true", default=None,
+                            help="also ship VRAM sidecars of the actor GLBs' embedded images (ACTOR_SIDECAR_DIRS); "
+                                 "not release-enabled yet: a local package only")
+    actor_vram.add_argument("--no-actor-vram-textures", dest="actor_vram_textures", action="store_false",
+                            help="ship no actor VRAM sidecars")
     parser.add_argument("--vram-cache", type=Path, default=DIST / ".build" / "vram-cache",
                         help="encode cache for the sidecars (default dist/.build/vram-cache)")
+    parser.add_argument("--no-split-pck", action="store_true",
+                        help="ship the export's single RabbitLands.pck instead of a core pack and app/packs/*.pck "
+                             "(W2-UD-06; the split is the Windows/Linux default)")
     parser.add_argument("--no-zip", action="store_true", help="leave the folder unarchived")
     parser.add_argument("--benchmark-profile", action="store_true",
                         help="standalone local test export with allowlisted performance workloads")
@@ -4943,6 +5565,15 @@ def _main(argv=None, storage=None) -> int:
         project = prepare_build_tree(build_dir, sha)
         if (project / "prepared-content").exists():
             raise PackageError("Disposable build has an old prepared-content directory; use a fresh build checkout to avoid unintended export.")
+        # Decided before the import, so a request this commit or build cannot honour fails in seconds.
+        actor_dirs = actor_sidecar_dirs(build_dir, options.actor_vram_textures, no_vram=options.no_vram_textures,
+                                        release_build=options.release_build, runner=bool(storage))
+        actor_receipt = None
+        split_reason = split_pack_reason(build_dir, options.platform, disabled=options.no_split_pck,
+                                         benchmark=options.benchmark_profile)
+        log("PCK: split into a core pack and content packs" if not split_reason
+            else f"PCK: single pack ({split_reason})")
+        content_packs = None
         check_map_backgrounds(build_dir)
         optimization = None
         if options.full_optimizations:
@@ -5032,8 +5663,18 @@ def _main(argv=None, storage=None) -> int:
             if storage:
                 storage.check("before graphics encoding", 512 * 1024**2 if asset_cache and asset_cache.hit else 1024**3)
             stage_vram_textures(build_dir, stage, godot, options.vram_cache.resolve(), logs, app_dir=app_dir)
+            if actor_dirs:
+                if storage:
+                    storage.check("before actor graphics encoding", ACTOR_ENCODE_ALLOWANCE_WARM
+                                  if asset_cache and asset_cache.hit else ACTOR_ENCODE_ALLOWANCE)
+                actor_receipt = stage_actor_vram_textures(build_dir, stage, godot, options.vram_cache.resolve(),
+                                                          logs, app_dir, actor_dirs)
             check_vram_textures(stage)
-            check_scenery_vram_textures(app_dir)
+            check_loose_vram_textures(app_dir)
+            if actor_receipt is not None:
+                actor_receipt["coverage"] = check_actor_vram_coverage(build_dir, app_dir, actor_dirs)
+                (logs / "actor-vram-textures.json").write_text(json.dumps(actor_receipt, indent=2) + "\n",
+                                                               encoding="utf-8")
             if storage:
                 storage.clear_cache(options.vram_cache.resolve())
                 storage.check("graphics prepared")
@@ -5111,6 +5752,11 @@ def _main(argv=None, storage=None) -> int:
         check_map_background_export(build_dir, app_dir)
         check_glb_textures(app_dir)
         check_shared_meshes(build_dir, stage)
+        if not split_reason:
+            # After every static PCK check and before anything runs the game:
+            # the launcher export, the smoke launches and the full-optimization
+            # checks all see the shipped layout.
+            content_packs = split_client_pack(godot, project, app_dir, logs, storage)["manifest"]
         if updating:
             client_release.export_launcher(stage, metadata, godot, project, EXPORT_PRESETS,
                                            platform["preset"], run_godot, logs,
@@ -5129,15 +5775,20 @@ def _main(argv=None, storage=None) -> int:
         if options.platform == "linux" and os.name != "nt":
             for script in stage.glob("RabbitLands*.sh"):
                 script.chmod(0o755)
+        actor_test = actor_receipt["selfTest"] if actor_receipt else None
+        if actor_receipt is not None and actor_test is None:
+            log("warning: no staged actor sidecar index lists a sidecar; the smoke launch self-tests none")
         if not options.no_smoke and options.platform != "macos":
             smoke_launch(app_dir, logs, platform, vram_textures=not options.no_vram_textures,
-                         pool_test=pooled_sidecar_directory(stage),
+                         pool_test=pooled_sidecar_directory(stage), actor_test=actor_test,
+                         content_packs=content_packs,
                          **({"clean_feature_environment": True} if optimization else {}))
         if optimization:
             optimization.record_startup(logs / "smoke.log")
             smoke_launch(app_dir, logs, platform, vram_textures=not options.no_vram_textures,
-                pool_test=pooled_sidecar_directory(stage), clean_feature_environment=True,
-                optimization_profile="human-testing", log_name="smoke-human-testing.log")
+                pool_test=pooled_sidecar_directory(stage), actor_test=actor_test, clean_feature_environment=True,
+                optimization_profile="human-testing", log_name="smoke-human-testing.log",
+                content_packs=content_packs)
             optimization.record_startup(logs / "smoke-human-testing.log", profile="human-testing")
             optimization.check_final_package()
             write_json = full_optimization_package.write_json

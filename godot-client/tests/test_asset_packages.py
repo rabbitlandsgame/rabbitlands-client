@@ -1,18 +1,22 @@
 """Real Godot checks for selective downloads, repair, rollback and uninstall."""
 import base64
+from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 import functools
 import hashlib
 import http.server
+import io
 import json
 import os
 from pathlib import Path
 import shutil
 import subprocess
 import sys
+import tarfile
 import threading
 import time
+import zipfile
 
 import pytest
 from cryptography.hazmat.primitives import hashes, serialization
@@ -23,6 +27,7 @@ sys.path.insert(0, str(CLIENT / "tools"))
 import asset_packages
 import client_release
 import package_client
+from release_storage import PartWriter
 
 
 @contextmanager
@@ -113,9 +118,9 @@ def source(root, identity):
     (root / "eloria-assets/maps/landfall/world.json").write_bytes(b"unchanged world")
 
 
-def manifest(stage, identity, helpers=None):
+def manifest(stage, identity, helpers=None, *, schema=2, build=None):
     base = f'https://github.com/{identity["repository"]}/releases/download/client-{identity["commit"]}'
-    packages = asset_packages.build(stage, base)
+    packages = (build or asset_packages.build)(stage, base)
     helpers = helpers or {kind: b"fixture bootstrap" for kind in ("updater", "uninstall")}
     rows = {}
     for kind, content in helpers.items():
@@ -123,7 +128,7 @@ def manifest(stage, identity, helpers=None):
         path.write_bytes(content)
         rows[kind] = {"url": base + "/" + path.name, "size": path.stat().st_size,
                       "sha256": client_release.digest(path)}
-    return {"schema": 2, "bootstrap_schema": 1, "commit": identity["commit"], "platform": identity["platform"],
+    return {"schema": schema, "bootstrap_schema": 1, "commit": identity["commit"], "platform": identity["platform"],
             "repository": identity["repository"], "version": stage.name,
             "sha256": "a" * 64, "packages": packages,
             "size": sum(p["size"] for p in packages),
@@ -136,6 +141,152 @@ def signed(payload, key):
     raw = json.dumps(payload, separators=(",", ":")).encode()
     return {"payload": base64.b64encode(raw).decode(), "signature": base64.b64encode(
         key.sign(raw, padding.PKCS1v15(), hashes.SHA256())).decode()}
+
+
+ZSTD_MAGIC = b"\x28\xb5\x2f\xfd"
+
+
+def zstd_frame(data):
+    """One chunk as W2-UD-05 encodes it: a level 19 frame with content size and checksum."""
+    zstandard = pytest.importorskip("zstandard")
+    return zstandard.ZstdCompressor(level=19, write_content_size=True, write_checksum=True).compress(data)
+
+
+def codec_build(encode=lambda relative: True, frame=None, stored=lambda relative: True):
+    """A package builder for manifest schema 3, the reader's fixture (the packaging
+    writer is W2-UD-05p). Rows for which encode(path) holds carry "codec": "zstd";
+    each of their 8 MiB chunks is one ZIP entry, STORED unless stored(path) is false,
+    holding frame(chunk, path, index). Other rows keep schema 2's deflate chunks.
+    Names, entry order, timestamps and parts are those of asset_packages.build."""
+    frame = frame or (lambda data, relative, index: zstd_frame(data))
+
+    def write(archive, name, data, deflate):
+        info = zipfile.ZipInfo(name, (1980, 1, 1, 0, 0, 0))
+        info.compress_type = zipfile.ZIP_DEFLATED if deflate else zipfile.ZIP_STORED
+        info.create_system = 3
+        info.external_attr = 0o100644 << 16
+        archive.writestr(info, data, compresslevel=1 if deflate else None)
+
+    def build(stage, base):
+        groups = defaultdict(list)
+        for root in ("app", "eloria-assets"):
+            for path in sorted((stage / root).rglob("*")):
+                if path.is_file():
+                    relative = path.relative_to(stage).as_posix()
+                    row = {"path": relative, "size": path.stat().st_size, "sha256": client_release.digest(path)}
+                    if encode(relative):
+                        row["codec"] = "zstd"
+                    groups[asset_packages.package_id(relative)].append(row)
+        packages = []
+        for name, files in sorted(groups.items()):
+            archive = stage.parent / f"{stage.name}.pkg.{name}.zip"
+            for old in stage.parent.glob(archive.name + ".*"):
+                old.unlink()
+            with PartWriter(archive, base, client_release.PART_BYTES) as writer:
+                with zipfile.ZipFile(writer, "w", allowZip64=True) as output:
+                    for index, entry in enumerate(files):
+                        zstd = entry.get("codec") == "zstd"
+                        with (stage / entry["path"]).open("rb") as source:
+                            chunk = 0
+                            while data := source.read(client_release.CHUNK_BYTES):
+                                write(output, f"files/{index:06d}/{chunk:06d}",
+                                      frame(data, entry["path"], chunk) if zstd else data,
+                                      not zstd or not stored(entry["path"]))
+                                chunk += 1
+                    write(output, "inventory.json", json.dumps(files, separators=(",", ":")).encode(), True)
+            packages.append({"id": name, "sha256": writer.sha256, "size": writer.size,
+                             "unpacked_size": sum(f["size"] for f in files),
+                             "file_count": len(files), "files": files, "parts": writer.parts})
+        return packages
+    return build
+
+
+def compressible(size):
+    """Deterministic bytes that compress like map geometry, not like zeros."""
+    block = b"".join(hashlib.sha256(str(i).encode()).digest()[:8] + bytes(24) for i in range(4096))
+    return (block * (size // len(block) + 1))[:size]
+
+
+def chunk_entries(f, package, path):
+    """(compression, first four bytes, stored size) of each chunk of path in a one-part package."""
+    index = [row["path"] for row in package["files"]].index(path)
+    with zipfile.ZipFile(f["tmp_path"] / package["parts"][0]["url"].rsplit("/", 1)[1]) as archive:
+        return [(info.compress_type, archive.read(info)[:4], info.compress_size) for info in archive.infolist()
+                if info.filename.startswith(f"files/{index:06d}/")]
+
+
+def pending_path(f):
+    """The game's prepared-download record for the fixture installation."""
+    return (f["tmp_path"] / "userdata/RabbitLandsPackageTests/client-updates"
+            / hashlib.sha256(f["installed"].as_posix().encode()).hexdigest()[:24] / "pending.json")
+
+
+# Older updaters that must refuse schema 3 cleanly and still replace themselves:
+# Git revisions whose src/updates/ ran before W2-UD-05 (for example the live
+# release). RL_OLDER_UPDATER_REFS="origin/develop <release commit>" adds more.
+# An empty or blank value means the default; it must never stop collection.
+OLDER_UPDATER_REFS = os.environ.get("RL_OLDER_UPDATER_REFS", "").split() or ["origin/develop"]
+OLDER_UPDATER_RUN = '''extends SceneTree
+# Only calls every reviewed updater revision has, so this compiles against old code.
+const Release = preload("res://src/updates/release.gd")
+const Transport = preload("res://src/updates/update_transport.gd")
+const Bootstrap = preload("res://src/updates/bootstrap.gd")
+func _initialize() -> void:
+    _run.call_deferred()
+func _run() -> void:
+    var request := Release.read_json(OS.get_cmdline_user_args()[0])
+    var transport := Transport.new()
+    root.add_child(transport)
+    var fetch := func(url: String, path: String, limit: int) -> Dictionary:
+        return await transport.fetch(request.server + "/" + url.get_file(), path, limit)
+    var error := ""
+    if request.action == "pending-install":
+        error = await transport.worker(func() -> String: return Release.install(request.root, request.identity))
+    elif request.action == "bootstrap-verify" or request.action == "bootstrap":
+        var release := Bootstrap.verify(request.envelope, request.identity)
+        error = str(release.get("error", ""))
+        if error == "" and request.action == "bootstrap":
+            error = await Bootstrap.prepare_helpers(request.root, release, fetch, transport.worker)
+            if error == "":
+                error = Bootstrap.promote_helpers(request.root, release, request.identity)
+    else:
+        error = str(Release.verify_manifest(request.envelope, request.identity).get("error", ""))
+    Release.save_json(request.result, {"error": error})
+    quit(0 if error == "" else 1)
+'''
+
+
+def older_updater_source(f, ref):
+    """A client tree holding an older revision's src/updates/ (from Git) and this
+    tree's branding, or None when the revision is not available here."""
+    destination = f["tmp_path"] / ("older-" + "".join(c if c.isalnum() else "-" for c in ref))
+    if (destination / "src/updates/release.gd").is_file():
+        return destination
+    try:
+        archive = subprocess.run(["git", "-C", str(CLIENT.parent), "archive", "--format=tar",
+                                  f"{ref}:godot-client", "src/updates"], capture_output=True, timeout=60)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if archive.returncode or not archive.stdout:
+        return None
+    with tarfile.open(fileobj=io.BytesIO(archive.stdout)) as tar:
+        tar.extractall(destination, filter="data")
+    shutil.copytree(CLIENT / "assets/branding", destination / "assets/branding")
+    return destination if (destination / "src/updates/release.gd").is_file() else None
+
+
+def older_updater_project(f, ref):
+    """The fixture's headless project with an older revision's updater scripts."""
+    source = older_updater_source(f, ref)
+    if source is None:
+        return None
+    project = f["tmp_path"] / (source.name + "-project")
+    if not project.is_dir():
+        shutil.copytree(source / "src/updates", project / "src/updates")
+        shutil.copytree(f["project"] / "data", project / "data")
+        shutil.copyfile(f["project"] / "project.godot", project / "project.godot")
+        (project / "run.gd").write_text(OLDER_UPDATER_RUN)
+    return project
 
 
 @pytest.fixture
@@ -166,7 +317,8 @@ func _initialize() -> void:
     _run.call_deferred()
 func _run() -> void:
     var request := Release.read_json(OS.get_cmdline_user_args()[0])
-    var release := Bootstrap.verify(request.envelope, request.identity) if request.action == "bootstrap-verify" else Release.verify_manifest(request.envelope, request.identity)
+    # pending-install reads its manifest from pending.json, as the updater does at restart.
+    var release := {} if request.action == "pending-install" else (Bootstrap.verify(request.envelope, request.identity) if request.action == "bootstrap-verify" else Release.verify_manifest(request.envelope, request.identity))
     var error := str(release.get("error", ""))
     var transport := Transport.new()
     root.add_child(transport)
@@ -174,6 +326,11 @@ func _run() -> void:
         return await transport.fetch(request.server + "/" + url.get_file(), path, limit)
     if error == "" and request.action == "recover":
         error = await transport.worker(func() -> String: return Release.recover(request.root))
+    if error == "" and request.action == "prepare":
+        # The game's own download (client_updates.gd) before it records pending.json.
+        error = await Download.prepare(request.root, release, fetch, transport.worker)
+    if error == "" and request.action == "pending-install":
+        error = await transport.worker(func() -> String: return Release.install(request.root, request.identity))
     if error == "" and request.action == "update":
         var prepared_plan: Dictionary = {}
         var stop_after := OS.get_environment("RL_UPDATE_TEST_STOP_AFTER")
@@ -242,7 +399,8 @@ func _run() -> void:
     source(installed, identity)
     env = {**os.environ, "APPDATA": str(tmp_path / "userdata"), "LOCALAPPDATA": str(tmp_path / "userdata")}
 
-    def run(action="update", payload=payload, stop_after=None, **extra):
+    def run(action="update", payload=payload, stop_after=None, project_dir=None, **extra):
+        # project_dir: another headless project with its own run.gd (an older updater).
         request = tmp_path / "request.json"
         result = tmp_path / "result.json"
         result.unlink(missing_ok=True)
@@ -250,8 +408,9 @@ func _run() -> void:
             "envelope": signed(payload, key), "action": action, "result": str(result),
             "server": f"http://127.0.0.1:{server.server_port}", **extra}))
         run_env = env if stop_after is None else {**env, "RL_UPDATE_TEST_STOP_AFTER": str(stop_after)}
-        completed = subprocess.run([str(godot), "--headless", "--path", str(project),
-            "--script", str(script), "--", str(request)], env=run_env, text=True, capture_output=True, timeout=40)
+        directory = Path(project_dir) if project_dir else project
+        completed = subprocess.run([str(godot), "--headless", "--path", str(directory),
+            "--script", str(directory / "run.gd"), "--", str(request)], env=run_env, text=True, capture_output=True, timeout=40)
         output = completed.stdout + completed.stderr
         assert "SCRIPT ERROR" not in output, output
         if stop_after is not None and not result.is_file():
@@ -507,6 +666,14 @@ def release_stage(f, name, change):
     return stage, manifest(stage, f["newer"])
 
 
+def codec_release_stage(f, name, change, **build):
+    """Sign a schema 3 release of commit b with zstd rows (codec_build options)."""
+    stage = f["tmp_path"] / name
+    shutil.copytree(f["stage"], stage)
+    change(stage)
+    return stage, manifest(stage, f["newer"], schema=3, build=codec_build(**build))
+
+
 def every_operation(f):
     """A release whose install needs every operation kind and both folder swaps."""
     installed = f["installed"]
@@ -683,6 +850,180 @@ def test_an_update_over_an_older_updaters_backup_removes_it(fixture):
     assert_no_transaction(installed)
 
 
+def test_schema_3_zstd_packages_update_repair_and_install_fresh(fixture):
+    # W2-UD-05: zstd rows next to deflate rows in one package, a file of two full
+    # chunks and a remainder, and an empty coded file. Installed bytes are the
+    # signed ones whatever the codec.
+    f = fixture
+    world = "eloria-assets/maps/landfall/world.json"
+    plain = same_package_neighbour(world)
+    terrain = "eloria-assets/maps/landfall/terrain.glb"
+    empty = "app/data/empty.json"
+
+    def change(stage):
+        (stage / world).write_bytes(b"new world " * 100)
+        (stage / plain).write_bytes(b"neighbour kept as deflate " * 50)
+        (stage / terrain).write_bytes(compressible(2 * client_release.CHUNK_BYTES + 4321))
+        (stage / empty).parent.mkdir(parents=True, exist_ok=True)
+        (stage / empty).write_bytes(b"")
+
+    stage, payload = codec_release_stage(f, "RabbitLands-Windows-20261104-fffffffff", change,
+                                         encode=lambda relative: relative != plain)
+    assert payload["schema"] == 3
+    rows = {row["path"]: row for package in payload["packages"] for row in package["files"]}
+    assert "codec" not in rows[plain] and rows[world]["codec"] == rows[terrain]["codec"] == rows[empty]["codec"] == "zstd"
+    # The fixture writes what the reader expects: one STORED zstd frame per chunk.
+    package = next(p for p in payload["packages"] if p["id"] == asset_packages.package_id(terrain))
+    chunks = chunk_entries(f, package, terrain)
+    assert [(kind, magic) for kind, magic, _ in chunks] == [(zipfile.ZIP_STORED, ZSTD_MAGIC)] * 3
+    assert sum(size for _, _, size in chunks) < rows[terrain]["size"] // 8
+    neighbour = next(p for p in payload["packages"] if p["id"] == asset_packages.package_id(plain))
+    assert chunk_entries(f, neighbour, plain)[0][0] == zipfile.ZIP_DEFLATED
+    code, error, output = f["run"](payload=payload)
+    assert code == 0 and not error, output
+    assert tree(f["installed"]) == tree(stage)
+    assert_no_transaction(f["installed"])
+    # Repair: a damaged coded file comes back from its package alone.
+    (f["installed"] / terrain).write_bytes(b"damaged terrain")
+    f["downloads"].clear()
+    code, error, output = f["run"](payload=payload)
+    assert code == 0 and not error, output
+    assert f["downloads"] == [part_name(payload, package["id"])]
+    assert tree(f["installed"]) == tree(stage)
+    # A fresh install promotes both roots from the coded packages.
+    f["installed"].rename(f["tmp_path"] / "previous-codec-install")
+    f["downloads"].clear()
+    code, error, output = f["run"](payload=payload)
+    assert code == 0 and not error, output
+    assert len(f["downloads"]) == len(payload["parts"])
+    assert tree(f["installed"]) == tree(stage)
+    assert_no_transaction(f["installed"])
+
+
+def flipped(data, position):
+    damaged = bytearray(data)
+    damaged[position] ^= 0x55
+    return bytes(damaged)
+
+
+# A coded chunk as a broken publication could sign it. The archive's own SHA-256
+# matches, so only the reader's frame and file checks can refuse it.
+DAMAGED_FRAMES = {
+    "corrupt": lambda data: flipped(zstd_frame(data), len(zstd_frame(data)) // 2),
+    "checksum": lambda data: flipped(zstd_frame(data), -1),
+    "truncated": lambda data: zstd_frame(data)[:-6],
+    "oversize": lambda data: zstd_frame(data + b"!"),
+    "short": lambda data: zstd_frame(data[:-1]),
+    "raw": lambda data: data,
+    "other-bytes": lambda data: zstd_frame(data[::-1]),
+}
+
+
+@pytest.mark.parametrize("damage", [*DAMAGED_FRAMES, "deflated"])
+def test_a_damaged_zstd_chunk_keeps_the_installed_game(fixture, damage):
+    zstandard = pytest.importorskip("zstandard")
+    f = fixture
+    target = "app/RabbitLands.pck"
+    content = b"new fixture pack " * 64
+    bad = DAMAGED_FRAMES.get(damage, zstd_frame)
+    frame = bad(content)
+    decoder = zstandard.ZstdDecompressor()
+    if damage in ("corrupt", "checksum", "truncated", "raw"):
+        with pytest.raises(zstandard.ZstdError):
+            decoder.decompress(frame, max_output_size=len(content) + 1)
+    elif damage != "deflated":
+        assert decoder.decompress(frame) != content
+    stage, payload = codec_release_stage(f, "RabbitLands-Windows-20261104-ggggggggg",
+        lambda stage: (stage / target).write_bytes(content),
+        frame=lambda data, relative, index: bad(data) if relative == target else zstd_frame(data),
+        stored=lambda relative: not (damage == "deflated" and relative == target))
+    before = tree(f["installed"])
+    code, error, output = f["run"](payload=payload)
+    expected = {"other-bytes": "failed verification", "deflated": "not stored in its signed format"}
+    assert code == 1 and expected.get(damage, "damaged or has the wrong size") in error, output
+    assert tree(f["installed"]) == before
+    for name in JOURNALS + (".eloria-update-backup", ".eloria-previous"):
+        assert not (f["installed"] / name).exists(), name
+    # Nothing left behind blocks the next, sound release.
+    good_stage, good = codec_release_stage(f, "RabbitLands-Windows-20261104-hhhhhhhhh",
+                                           lambda stage: (stage / target).write_bytes(content))
+    code, error, output = f["run"](payload=good)
+    assert code == 0 and not error, output
+    assert tree(f["installed"]) == tree(good_stage)
+    assert_no_transaction(f["installed"])
+
+
+def test_codec_rows_need_schema_3_and_a_known_codec(fixture):
+    f = fixture
+    stage, payload = codec_release_stage(f, "RabbitLands-Windows-20261104-iiiiiiiii", lambda stage: None)
+    assert f["run"]("verify", payload)[0] == 0
+    # Schema 2 readers would unpack the frames as file bytes: codecs need schema 3.
+    code, error, output = f["run"]("verify", {**payload, "schema": 2})
+    assert code == 1 and "encoding this updater cannot read" in error, output
+    for codec in ("brotli", "ZSTD", "", 1, None):
+        bad = json.loads(json.dumps(payload))
+        bad["packages"][0]["files"][0]["codec"] = codec
+        code, error, output = f["run"]("verify", bad)
+        assert code == 1 and "encoding this updater cannot read" in error, (codec, output)
+    # Schema 3 without any codec row is still a valid package manifest.
+    _, uncoded = codec_release_stage(f, "RabbitLands-Windows-20261104-jjjjjjjjj", lambda stage: None,
+                                     encode=lambda relative: False)
+    assert uncoded["schema"] == 3 and f["run"]("verify", uncoded)[0] == 0
+    code, error, output = f["run"]("verify", {**payload, "schema": 4})
+    assert code == 1 and error == "The update format is unsupported.", output
+    assert not f["downloads"]
+
+
+def test_a_schema_3_download_prepared_in_game_installs_at_restart(fixture):
+    # The game downloads changed packages (client_updates.gd) and records
+    # pending.json; the updater installs it at restart through Release.install.
+    f = fixture
+    stage, payload = codec_release_stage(f, "RabbitLands-Windows-20261104-kkkkkkkkk", lambda stage: None)
+    code, error, output = f["run"]("prepare", payload)
+    assert code == 0 and not error, output
+    assert f["downloads"] == [part_name(payload, descriptor_package())]
+    pending = pending_path(f)
+    pending.write_text(json.dumps(signed(payload, f["key"])))
+    f["downloads"].clear()
+    code, error, output = f["run"]("pending-install", payload)
+    assert code == 0 and not error, output
+    assert not f["downloads"] and not pending.exists()
+    assert tree(f["installed"]) == tree(stage)
+    assert_no_transaction(f["installed"])
+
+
+@pytest.mark.parametrize("ref", OLDER_UPDATER_REFS)
+def test_an_older_updater_refuses_schema_3_and_still_replaces_itself(fixture, ref):
+    f = fixture
+    older = older_updater_project(f, ref)
+    if older is None:
+        pytest.skip(f"The older updater revision {ref} is not available here.")
+    stage, payload = codec_release_stage(f, "RabbitLands-Windows-20261104-lllllllll", lambda stage: None)
+    code, error, output = f["run"]("verify", payload, project_dir=older)
+    if code == 0:
+        pytest.skip(f"{ref} already reads schema 3.")
+    assert error == "The update format is unsupported.", output
+    # The bootstrap contract is unchanged: it verifies the helper rows and
+    # installs the helper the manifest names, which reads schema 3.
+    assert f["run"]("bootstrap-verify", payload, project_dir=older)[0] == 0
+    for kind in ("updater", "uninstall"):
+        (f["installed"] / f"RabbitLands-{kind}.exe").write_bytes(b"old helper")
+    code, error, output = f["run"]("bootstrap", payload, project_dir=older)
+    assert code == 0 and not error, output
+    assert (f["installed"] / "RabbitLands-updater.exe").read_bytes() == b"fixture bootstrap"
+    # A pending.json from a newer game (the restart path) is deleted, never extracted.
+    pending = pending_path(f)
+    pending.parent.mkdir(parents=True, exist_ok=True)
+    pending.write_text(json.dumps(signed(payload, f["key"])))
+    before = tree(f["installed"])
+    code, error, output = f["run"]("pending-install", payload, project_dir=older)
+    assert code == 1 and error == "The update format is unsupported.", output
+    assert not pending.exists()
+    assert tree(f["installed"]) == before
+    assert_no_transaction(f["installed"])
+    assert set(f["downloads"]) == {"/" + payload["updater"]["url"].rsplit("/", 1)[1]}
+
+
 def test_uninstall_requires_confirmation_and_refuses_steam(fixture):
     f = fixture
     assert f["run"]("uninstall")[0] == 1
@@ -727,6 +1068,10 @@ def test_bootstrap_can_upgrade_before_reading_a_future_game_format(fixture):
     assert f["run"]("verify", payload)[0] == 1
     payload["updater"] = {**payload["updater"], "url": "https://example.invalid/helper.exe"}
     assert f["run"]("bootstrap-verify", payload)[0] == 1
+    # Schema 3 (zstd rows) keeps the bootstrap contract, and this updater reads it.
+    _, current = codec_release_stage(f, "RabbitLands-Windows-20261104-mmmmmmmmm", lambda stage: None)
+    assert f["run"]("bootstrap-verify", current)[0] == 0
+    assert f["run"]("verify", current)[0] == 0
 
 
 @pytest.mark.parametrize("shared", [False, True])
@@ -780,7 +1125,10 @@ def test_publication_signs_package_inventory_and_collects_all_installer_assets(f
         assert not any(".tar.gz" in p.name for p in assets)
 
 
-def export_test_updater(f, version, platform="windows"):
+def export_test_updater(f, version, platform="windows", launcher_methods="", source=CLIENT):
+    """Exports the production launcher with a fixture transport. `launcher_methods`
+    is GDScript appended to the fixture launcher (test seams only); `source` is the
+    client tree whose src/updates/ is exported (older_updater_source for an older one)."""
     stage = f["tmp_path"] / ("helper-" + platform + "-" + version)
     logs = stage / "logs"
     logs.mkdir(parents=True)
@@ -806,7 +1154,7 @@ def export_test_updater(f, version, platform="windows"):
             '\t\tif file != null:\n'
             '\t\t\tfile.store_string(Release.read_json("res://data/test-version.json").version)\n'
             '\t\t\tfile.close()\n'
-            '\tsuper._ready()\n')
+            '\tsuper._ready()\n' + launcher_methods)
         (project / "data/test-version.json").write_text(json.dumps({"version": version}))
         (project / "data/test-server.json").write_text(json.dumps({"url": f'http://127.0.0.1:{f["server"].server_port}'}))
         scene = project / "main.tscn"
@@ -815,19 +1163,29 @@ def export_test_updater(f, version, platform="windows"):
         log.write_text(completed.stdout + completed.stderr)
         assert completed.returncode == 0 and "SCRIPT ERROR" not in log.read_text(), log.read_text()
 
-    client_release.export_launcher(stage, identity, f["godot"], CLIENT, package_client.EXPORT_PRESETS,
+    client_release.export_launcher(stage, identity, f["godot"], source, package_client.EXPORT_PRESETS,
         package_client.PLATFORMS[platform]["preset"], run_godot, logs)
     return stage / ("RabbitLands-updater.exe" if platform == "windows" else "RabbitLands-updater.x86_64")
 
 
-@pytest.mark.parametrize("shared", [False, True])
-def test_exported_updater_replaces_itself_then_installs_and_uninstalls(fixture, shared):
+# (shared URLs, manifest schema, Git revision of the installed "old" updater or None
+# for this tree). The last case is the real migration: an updater from before
+# schema 3 meets a zstd release, replaces itself, and its successor installs it.
+EXPORTED_UPDATER_CASES = [(False, 2, None), (True, 2, None), (True, 3, None), (False, 3, OLDER_UPDATER_REFS[0])]
+
+
+@pytest.mark.parametrize(("shared", "schema", "older_ref"), EXPORTED_UPDATER_CASES)
+def test_exported_updater_replaces_itself_then_installs_and_uninstalls(fixture, shared, schema, older_ref):
     if os.name != "nt":
         pytest.skip("This check exercises Windows executable locking and its native uninstaller.")
     f = fixture
-    old = export_test_updater(f, "old")
+    older = older_updater_source(f, older_ref) if older_ref else CLIENT
+    if older is None:
+        pytest.skip(f"The older updater revision {older_ref} is not available here.")
+    old = export_test_updater(f, "old", source=older)
     new = export_test_updater(f, "new")
-    payload = json.loads(json.dumps(f["payload"]))
+    payload = json.loads(json.dumps(f["payload"] if schema == 2 else
+                                    manifest(f["stage"], f["newer"], schema=3, build=codec_build())))
     for kind in ("updater", "uninstall"):
         row = payload[kind]
         path = f["tmp_path"] / row["url"].rsplit("/", 1)[1]
@@ -925,12 +1283,38 @@ def test_linux_export_runs_native_uninstaller_and_keeps_settings(fixture):
     assert settings.read_text() == "keep Linux settings"
 
 
+def installer_reads_schema_3(source=CLIENT):
+    """Whether the setup helper's script chooses the package path for schema 3
+    (it must ask Release.package_manifest, not compare the schema with 2)."""
+    return "Release.package_manifest(manifest)" in (source / "tools/install_client_payload.gd").read_text(encoding="utf-8")
+
+
+def setup_queues_packages(stage, payload):
+    """Whether package_client's setup script checks and queues each package for this
+    manifest's schema (the packaging writer's side), instead of every part."""
+    return "function PackageCurrent0" in package_client.online_installer_script(
+        stage, stage / "helper.exe", "probe", [], payload)
+
+
 def test_inno_single_file_setup_uses_packages_for_fresh_install_and_repair(fixture):
-    f = fixture
+    check_inno_setup(fixture, 2)
+
+
+def test_inno_single_file_setup_installs_schema_3_packages(fixture):
+    check_inno_setup(fixture, 3)
+
+
+def check_inno_setup(f, schema):
+    """Fresh install, a no-op repair and a selective repair through the real Inno setup."""
     iscc = package_client.find_iscc(None)
     if os.name != "nt" or not iscc:
         pytest.skip("Inno Setup 6 is needed for this native integration check.")
+    if schema == 3 and not installer_reads_schema_3():
+        pytest.skip("tools/install_client_payload.gd still sends schema 3 down the schema 1 path (hook pending).")
     stage = f["stage"]
+    release = f["payload"] if schema == 2 else manifest(stage, f["newer"], schema=3, build=codec_build())
+    if not setup_queues_packages(stage, release):
+        pytest.skip("package_client.online_installer_script does not queue packages for this schema yet (W2-UD-05p).")
     logs = f["tmp_path"] / "inno-logs"
     logs.mkdir()
     branding = stage / "app/assets/branding"
@@ -938,7 +1322,7 @@ def test_inno_single_file_setup_uses_packages_for_fresh_install_and_repair(fixtu
     for name in ("rabbitlands-icon.ico", "rabbitlands-mark-64.png"):
         shutil.copyfile(CLIENT / "assets/branding" / name, branding / name)
     manifest_path = stage.parent / f"{stage.name}-windows.json"
-    manifest_path.write_text(json.dumps(signed(f["payload"], f["key"])))
+    manifest_path.write_text(json.dumps(signed(release, f["key"])))
 
     def run_godot(godot, args, log, timeout):
         result = subprocess.run([str(godot), *args], capture_output=True, text=True, timeout=timeout)
@@ -949,11 +1333,12 @@ def test_inno_single_file_setup_uses_packages_for_fresh_install_and_repair(fixtu
         package_client.EXPORT_PRESETS, run_godot, logs)
     # Only Inno's download URLs are redirected. The embedded helper still
     # verifies the original GitHub-pinned, signed package inventory.
-    payload = json.loads(json.dumps(f["payload"]))
-    for package in payload["packages"]:
-        for part in package["parts"]:
-            part["url"] = f'http://127.0.0.1:{f["server"].server_port}/' + part["url"].rsplit("/", 1)[1]
+    payload = json.loads(json.dumps(release))
+    for part in [part for package in payload["packages"] for part in package["parts"]] + payload["parts"]:
+        part["url"] = f'http://127.0.0.1:{f["server"].server_port}/' + part["url"].rsplit("/", 1)[1]
     script = package_client.online_installer_script(stage, helper, "test", [], payload)
+    # Setup must never reach the real release host from this test.
+    assert "DownloadPage.Add('https://" not in script and "DownloadPage.Add('http://127.0.0.1:" in script
     script = script.replace('AppId=' + package_client.INSTALLER_APP_ID.replace('{', '{{'),
         'AppId=RabbitLandsPackageInstallerTest\nUninstallable=no')
     script = script.split('[Icons]')[0] + '[Code]' + script.split('[Code]', 1)[1]
@@ -973,14 +1358,14 @@ def test_inno_single_file_setup_uses_packages_for_fresh_install_and_repair(fixtu
         assert result.returncode == 0, (logs / "setup.log").read_text(errors="replace")
 
     install()
-    assert len(f["downloads"]) == len(f["payload"]["parts"])
+    assert len(f["downloads"]) == len(release["parts"])
     assert json.loads((installed / "app/client-release.json").read_text())["commit"] == "b" * 40
     f["downloads"].clear()
     install()
     assert not f["downloads"], "Setup repair downloaded unchanged packages."
     (installed / "app/assets/actors/native/creatures/rabbit.glb").write_bytes(b"damage")
     install()
-    actor = next(p for p in f["payload"]["packages"] if p["id"].startswith("actors-"))
+    actor = next(p for p in release["packages"] if p["id"].startswith("actors-"))
     assert f["downloads"] == ["/" + actor["parts"][0]["url"].rsplit("/", 1)[1]]
 
 

@@ -4,6 +4,12 @@ const Diagnostics = preload("res://src/diagnostics/client_diagnostics.gd")
 const BrowserCapture = preload("res://src/platform/browser_capture.gd")
 const BrowserStorageControls = preload("res://src/platform/browser_storage_controls.gd")
 const ClientRuntime = preload("res://src/runtime/client_runtime.gd")
+## The bounded close and the native exit watchdog (AW-01).
+const ExitDrain := preload("res://src/runtime/exit_drain.gd")
+## The verified client_runtime payload, loaded once at startup (RB-C1g, D-NATIVE).
+const NativeLibrary := preload("res://src/runtime/native_library.gd")
+## The one loader of the native kernels and the reducer, for its snapshot (RB-C1g).
+const NativeCrowd := preload("res://src/runtime/native_crowd.gd")
 const RustSpellFlights = preload("res://src/world/rust_spell_flights.gd")
 const RustRiderPose = preload("res://src/mounts/rust_rider_pose.gd")
 var client_runtime := ClientRuntime.new()
@@ -150,10 +156,18 @@ var _dev_plain_tcp := false
 # stale in a working copy until the editor next scans the project.
 const InteriorCutawayScript := preload("res://src/world/interior_cutaway.gd")
 const LanternMineLightingScript := preload("res://src/world/lantern_mine_lighting.gd")
+const LightMarkerBudgetScript := preload("res://src/world/light_marker_budget.gd")
 const SecretSectionsScript := preload("res://src/world/secret_sections.gd")
 const OccluderFadeScript := preload("res://src/world/occluder_fade_manager.gd")
+const WorldDistanceScript := preload("res://src/world/world_distance.gd")
 const CameraShaderWarmup := preload("res://src/world/camera_shader_warmup.gd")
 const CrowdPresentationScript := preload("res://src/world/crowd_presentation.gd")
+const LocalAvatarHoldScript := preload("res://src/actors/local_avatar_hold.gd")
+const LocalAvatarPrepScript := preload("res://src/actors/local_avatar_prep.gd")
+const ActorAssetClosureScript := preload("res://src/actors/actor_asset_closure.gd")
+const ActorResourceWarmupScript := preload("res://src/actors/actor_resource_warmup.gd")
+const MountBindQueueScript := preload("res://src/mounts/mount_bind_queue.gd")
+const MapChangeCurtainScript := preload("res://src/world/map_change_curtain.gd")
 const LiveEffectBudgetScript := preload("res://src/world/live_effect_budget.gd")
 const UndergroundSceneryScript := preload("res://src/world/underground_scenery.gd")
 const InvasionAssistantScript := preload("res://src/ui/invasion_assistant.gd")
@@ -224,6 +238,9 @@ var _stream_lighting_at := 0
 
 var ambient_population: AmbientPopulation
 var map_light_root: Node3D
+## Keeps the nearest marker lights under map_light_root lit (LIGHT): N by
+## quality, at most 8 in Mobile and Compatibility.
+var light_marker_budget := LightMarkerBudgetScript.new()
 @onready var main_viewport: SubViewport = $GameView/ViewportContainer/Viewport
 @onready var viewport_container: TextureRect = $GameView/ViewportContainer
 @onready var map_viewport: SubViewport = %MapViewport
@@ -478,6 +495,10 @@ var _weather_applied_version := -1
 var _weather_applied_active := false
 ## The streamed maps' own lamps, lit at dusk and through the night.
 var night_lamps: NightLamps
+## World distance management (WD-C3): size-class visibility ranges, shadow
+## rules and LOD bias on the loaded world, following the camera. The camera
+## probe records its snapshot() as `world_distance`.
+var world_distance: WorldDistanceScript
 ## The map's declared mist and gulls (environment.presentation).
 var presentation_effects: PresentationEffects
 ## Objects the server placed into this map after it loaded, by object id.
@@ -953,7 +974,9 @@ var _actor_work_usec := 0
 var _actor_work_nodes := 0
 var _actor_work_bodies := 0
 var _actor_preparation_closing := false
-var actor_resource_warmup := preload("res://src/actors/actor_resource_warmup.gd").new()
+## The actor preparer (actor_resource_warmup.gd): creature jobs and, for every
+## other remote body, its asset closure parsed on a worker (AW-04a).
+var actor_resource_warmup := ActorResourceWarmupScript.new()
 ## Full body creation has one count/time allowance per rendered process frame,
 ## shared by initial arrivals and later deferred-body promotion. Placeholder
 ## creation and parked-body reuse retain their own existing behavior.
@@ -1041,6 +1064,14 @@ var _gate_quality: int = ActorRenderQuality.QUALITY_DEFAULT
 var _gate_hand_metres := INF
 var _gate_hand_release_metres := INF
 var _gate_cues_full_only := false
+## The same rules as the sweep reads them for every body (FIX-CPU, wave 2
+## stage B): whether any Low rule is on, whether hands are managed, and the two
+## hand distances squared, so a classify asks no utility or static function
+## for them. Medium and High: false, false, INF, INF.
+var _gate_low_rules := false
+var _gate_hands_on := false
+var _gate_hand_d2 := INF
+var _gate_hand_release_d2 := INF
 ## Hand-detail swaps this sweep has found ({actor, full, d2}), and the ones the
 ## last sweep left to `_drain_hand_swaps`, to-full and nearest first. A swap
 ## rebuilds the player's track caches (0.2-1 ms on an actor library), so at
@@ -1053,6 +1084,27 @@ var _hand_swap_queue: Array = []
 ## once. Both read RABBITLANDS_CROWD_PRESENTATION, which benchmarks use to turn
 ## each part off.
 var crowd = CrowdPresentationScript.new()
+## The player's own body kept across a map change that is not a seamless
+## crossing, for the ADD that follows (AW-02; `_hold_local_avatar`).
+var _local_avatar_hold = LocalAvatarHoldScript.new()
+## The player's own body waiting behind the arrival curtain for its asset
+## closure, its 6 s deadline and its counters (AW-04d; `_local_body_ready`).
+var _local_avatar_prep = LocalAvatarPrepScript.new()
+## Riders whose mount bind waits for its files on the actor preparer, or for
+## Main's per-frame actor work, and its counters (AW-07; `_apply_actor_mount`).
+var _mount_binds = MountBindQueueScript.new()
+## The mount visual's script once loaded on a ResourceLoader thread, held so it
+## stays cached (AW-07; `_mount_visual_script_ready`). `_threaded` is true only
+## when that thread delivered it (not when a bind made at once loaded it first).
+var _mount_visual_script: Script
+var _mount_visual_script_requested := false
+var _mount_visual_script_threaded := false
+## The selected mount a mount table change last asked the preparer for
+## (AW-07; `_prepare_selected_mount`), "" at a session's start.
+var _selected_mount_asked := ""
+## A change of map waiting for the arrival curtain to be drawn, and its
+## counters (TR-01; `_load_server_map`, `_defer_map_change`).
+var _map_change_curtain = MapChangeCurtainScript.new()
 var effect_budget = LiveEffectBudgetScript.new()
 ## Which actor the selection ring and the overhead target were last given to,
 ## so a pass only touches the actors whose answer changed.
@@ -1457,6 +1509,10 @@ func _log_optimization_startup() -> void:
 		"prepared": {"mode": prepared.selected_mode(), "node_policy": prepared.node_policy(),
 			"catalog_present": FileAccess.file_exists(prepared.CATALOG)},
 		"effects": RustSpellFlights.snapshot_for(world_root),
+		"content_digest": ContentDigest.snapshot(),
+		"native_runtime": NativeLibrary.snapshot(),
+		"native_kernels": NativeCrowd.snapshot(),
+		"exit_watchdog": ClientRuntime.exit_watchdog_state(),
 	}))
 
 ## Entry maintenance runs before preference changes, login setup or actor warmup.
@@ -1495,7 +1551,7 @@ func _prepare_geometry_before_login() -> bool:
 	await get_tree().process_frame
 	if explicit:
 		print("MAP_GEOMETRY_PREPARE ", JSON.stringify(report))
-		get_tree().quit(0 if bool(report.get("ok", false)) else 1)
+		ExitDrain.quit(get_tree(), 0 if bool(report.get("ok", false)) else 1, "prepare_map_geometry")
 		return true
 	if not bool(report.get("ok", false)):
 		push_warning("World data preparation did not finish; source loading remains available: %s" %
@@ -1510,6 +1566,15 @@ func _prepare_geometry_before_login() -> bool:
 	return false
 
 func _ready() -> void:
+	if Diagnostics.restart_pending():
+		# ClientDiagnostics is restarting this process into the renderer the
+		# settings ask for (RendererPolicy.restart). The new process sets up;
+		# skip it here, as the geometry maintenance exit does: with Main's
+		# startup work running, the quitting process never exits.
+		_geometry_maintenance_active = true
+		process_mode = Node.PROCESS_MODE_DISABLED
+		hide()
+		return
 	if OS.has_feature("web"):
 		_browser_loading_lease = preload("res://src/platform/browser_loading_lease.gd").new()
 		var browser_assets := get_tree().root.get_node_or_null("BrowserAssetService")
@@ -1518,6 +1583,13 @@ func _ready() -> void:
 			browser_assets.connect("files_evicted", Callable(_browser_source_retirement, "enqueue"))
 	RLHeadLibrary.set_render_warm_context(self, &"_rl_head_render_warm_allowed")
 	Diagnostics.startup_stage("geometry_preparation")
+	# Owner D-NATIVE: the verified client_runtime payload loads once here, for
+	# every profile, before any consumer (kill switches and safe mode apply;
+	# no native feature turns on). The digest probe below reuses this load.
+	NativeLibrary.startup()
+	# The content digest's mode, resolved once on the main thread before the
+	# first hash (the geometry preparation check below hashes packages).
+	ContentDigest.initialize()
 	if await _prepare_geometry_before_login():
 		Diagnostics.startup_stage("")
 		return
@@ -1859,6 +1931,8 @@ func _ready() -> void:
 	world_root.add_child(weather_layer)
 	night_lamps = NightLamps.new()
 	world_root.add_child(night_lamps)
+	world_distance = WorldDistanceScript.new()
+	world_root.add_child(world_distance)
 	presentation_effects = PresentationEffects.new()
 	world_root.add_child(presentation_effects)
 	world_loader.load_completed.connect(_on_world_loaded)
@@ -2124,6 +2198,13 @@ func client_diagnostic_snapshot() -> Dictionary:
 		"low_processor_usage_mode": OS.low_processor_usage_mode,
 		"low_processor_usage_mode_sleep_usec": OS.low_processor_usage_mode_sleep_usec,
 		"actor_creation_budget": actor_creation_budget_snapshot(),
+		"local_avatar_hold": _local_avatar_hold.snapshot(),
+		"local_avatar_prep": _local_avatar_prep.snapshot(),
+		"actor_preparer": actor_resource_warmup.snapshot(),
+		"mount_binds": _mount_binds.snapshot(Time.get_ticks_msec()).merged(
+			{"visualScriptHeld": _mount_visual_script != null,
+			"visualScriptThreaded": _mount_visual_script_threaded}),
+		"map_change_curtain": _map_change_curtain.snapshot(Time.get_ticks_msec()),
 		"ambient_creation_pending": ambient_creation_pending_count(),
 		"map_texture_mip_skip": GraphicsOptions.active_texture_skip(),
 		"map_texture_preference": _map_texture_quality,
@@ -2138,6 +2219,10 @@ func client_diagnostic_snapshot() -> Dictionary:
 		"loader_work": world_loader.diagnostic_snapshot(),
 		"streaming_work": exterior_stream.diagnostic_snapshot(),
 		"client_runtime": client_runtime.snapshot(),
+		"native_runtime": NativeLibrary.snapshot(),
+		"native_kernels": NativeCrowd.snapshot(),
+		"actor_reducer": AppState.actor_reducer_stats(),
+		"content_digest": ContentDigest.snapshot(),
 		"remote_presentation": (remote_presentation.snapshot() if is_instance_valid(remote_presentation) else {"backend": "legacy", "reason": "not_initialized"}),
 		"resource_admission": resource_admission_snapshot(),
 		"spell_flights": RustSpellFlights.snapshot_for(world_root),
@@ -2197,7 +2282,8 @@ func _bind_shared_world() -> void:
 	print_debug("world_binding stage=shared world=", gameplay_world)
 
 func _process(delta: float) -> void:
-	_advance_remote_motion(delta)
+	if ReplicatedActor3D.frame_driven():
+		_advance_remote_motion(delta)
 	if _browser_source_retirement != null: _browser_source_retirement.call("advance")
 	if _browser_actor_assets != null:
 		for actor_id: int in _browser_actor_assets.call("poll"):
@@ -2238,13 +2324,7 @@ func _process(delta: float) -> void:
 			quest_trail.update_trail(delta, (trail_actor as Node3D).global_position)
 		_update_map_walk_target()
 		if AppState.actors.has(AppState.local_actor_id):
-			var film_focus: Node3D = campaign_scene.occlusion_focus()
-			if is_instance_valid(film_focus) and not campaign_cutaway.presenting:
-				# Films move the rendered camera without changing the saved play
-				# rig. Keep their ground resident, including a parked map's return.
-				exterior_stream.update_position(film_focus.global_position)
-			elif not _world_input_blocked():
-				exterior_stream.update_position(camera_rig.focus)
+			_update_exterior_focus()
 			# Background travel preparation continues through reading/choices.
 			_observe_world_park()
 		_update_door_labels()
@@ -2272,6 +2352,10 @@ func _process(delta: float) -> void:
 		if night_lamps != null:
 			night_lamps.update(camera_rig.focus, AppState.continuous_game_minute(),
 				gloom, _day_night_active)
+		light_marker_budget.update(camera_rig.focus)
+		if world_distance != null:
+			world_distance.update(camera_rig.distance, LookProfile.quality(),
+				campaign_scene.playing or campaign_cutaway.presenting)
 		if presentation_effects != null and world_environment.environment != null:
 			presentation_effects.update(camera_rig.focus, AppState.continuous_game_minute(),
 				weather_layer.mistiness() if weather_layer != null else 0.0, gloom,
@@ -2314,8 +2398,8 @@ func _process(delta: float) -> void:
 ## presentation step of the frame here, first, so the local follow, the map
 ## marks, the animation gate's frustum and distance ranks and everything else
 ## this frame reads them where they now stand, as they did after the physics
-## steps. With the frame clock off (Medium, High) nothing is in it and this
-## returns at once; actors step on physics as before.
+## steps. With the frame clock off (Medium, High) nothing is in it, actors step
+## on physics as before and `_process` does not call this at all.
 func _advance_remote_motion(delta: float) -> void:
 	ReplicatedActor3D.advance_frame_driven(delta)
 
@@ -2429,13 +2513,49 @@ func _text_entry_active() -> bool:
 
 ## The new-character intro and the loading curtain both own the screen while
 ## they are up: the world takes no input and the exterior preloads wait.
-func _world_input_blocked() -> bool:
+## `count_curtain` false asks whether anything but the loading curtain does
+## (`_curtained_arrival_ungrounded`).
+func _world_input_blocked(count_curtain := true) -> bool:
 	if is_instance_valid(appearance_editor) and appearance_editor.is_visible_in_tree():
 		return true
-	return _disconnect_console_active or character_intro.blocks_input() or campaign_scene.blocks_input() or arrival_curtain.blocks_input() \
+	return _disconnect_console_active or character_intro.blocks_input() or campaign_scene.blocks_input() \
+		or (count_curtain and arrival_curtain.blocks_input()) \
 		or (hud_workspace != null and hud_workspace.is_open()) \
 		or (inventory_workspace != null and inventory_workspace.is_editing()) \
 		or (mixing_workspace != null and mixing_workspace.is_editing())
+
+## Where the exterior stream chooses its neighbours from this frame: the
+## camera's focus, or a film's while one plays; nowhere while the world takes
+## no input (the loading curtain, the intro, a staged scene, an editor). One
+## exception (TR-01): behind the loading curtain, a character built on its
+## arrival that has found no ground for MapChangeCurtain.GROUNDING_GRACE_MSEC -
+## its own cells are in, and the only ground there is a neighbour's preview
+## layer beside a seam - has its neighbours updated from where it stands,
+## rather than waiting out ARRIVAL_CURTAIN_LIMIT_MSEC (AW-00 finding 2).
+func _update_exterior_focus() -> void:
+	var film_focus: Node3D = campaign_scene.occlusion_focus()
+	if is_instance_valid(film_focus) and not campaign_cutaway.presenting:
+		# Films move the rendered camera without changing the saved play
+		# rig. Keep their ground resident, including a parked map's return.
+		exterior_stream.update_position(film_focus.global_position)
+	elif not _world_input_blocked():
+		_map_change_curtain.grounding_due(false, 0)
+		exterior_stream.update_position(camera_rig.focus)
+	elif _map_change_curtain.grounding_due(_curtained_arrival_ungrounded(), Time.get_ticks_msec()):
+		if _map_change_curtain.grounding_first:
+			Diagnostics.record("arrival_grounding_neighbours", {"map": AppState.current_map,
+				"focus": [camera_rig.focus.x, camera_rig.focus.y, camera_rig.focus.z]})
+		exterior_stream.update_position(camera_rig.focus)
+
+## TR-01: only the loading curtain keeps the world's input, the map and the
+## arrival's own cells are in, and the player's character stands built there
+## with no ground found under it.
+func _curtained_arrival_ungrounded() -> bool:
+	if not arrival_curtain.blocks_input() or _world_input_blocked(false) or _deferred_map_load \
+			or _arrival_pending() or adapter == null or loaded_server_map != AppState.current_map:
+		return false
+	var local_id: int = AppState.local_actor_id
+	return is_instance_valid(actor_nodes.get(local_id)) and not _grounded_actors.has(local_id)
 
 const CAMERA_ACTIONS := ["camera_rotate_left", "camera_rotate_right", "camera_tilt_up", "camera_tilt_down"]
 
@@ -4690,32 +4810,34 @@ func _on_disconnect_pressed() -> void:
 	_leaving_session = false
 
 func _close_client() -> void:
+	# AW-01: one close at a time; every wait below is bounded (8 s each) and
+	# the native exit watchdog ends a process still alive 10 s after quit()
+	# (src/runtime/exit_drain.gd).
+	if not ExitDrain.begin("close"):
+		return
 	_flush_hud_settings_save(true)
 	# Keep serving rendering/physics commands until a private loader completes;
 	# joining a live import while the rendering server shuts down can deadlock.
 	_actor_preparation_closing = true
+	_local_avatar_hold.release("close")
 	character_intro.cancel()
 	actor_resource_warmup.clear()
-	while not actor_resource_warmup.is_idle():
-		await get_tree().process_frame
+	await ExitDrain.wait_until(get_tree(), "actor_warmup", actor_resource_warmup.is_idle)
 	# The RL head prewarm's running parse likewise (RLHeadLibrary.prewarm).
 	RLHeadLibrary.cancel_warm()
-	while RLHeadLibrary.warming():
-		await get_tree().process_frame
+	await ExitDrain.wait_until(get_tree(), "rl_head_warm", func() -> bool: return not RLHeadLibrary.warming())
 	campaign_scene.cancel("client_closed")
 	_clear_campaign_cutaway()
 	gauntlet_prewarm.discard()
 	await get_tree().process_frame
 	exterior_stream.clear()
-	while not exterior_stream.is_idle():
-		await get_tree().process_frame
+	await ExitDrain.wait_until(get_tree(), "exterior_stream", exterior_stream.is_idle)
 	# A parked world and a preload worker go the same way: the worker is let
 	# finish (never joined while running), then everything kept is freed.
 	world_park.clear()
-	while not world_park.is_idle():
-		await get_tree().process_frame
+	await ExitDrain.wait_until(get_tree(), "world_park", world_park.is_idle)
 	world_park.release_now()
-	get_tree().quit()
+	ExitDrain.quit(get_tree(), 0, "close")
 
 func _exit_tree() -> void:
 	if OS.has_feature("web") and _browser_fullscreen_callback != null:
@@ -4939,6 +5061,11 @@ func _clear_world_presentation(retain_map_resources := false) -> void:
 		if is_instance_valid(raw_node):
 			(raw_node as Node).queue_free()
 	actor_nodes.clear()
+	# A session's end lets go of the player's body kept for a map change too.
+	_local_avatar_hold.release("session")
+	_local_avatar_prep.clear()
+	_mount_binds.clear()
+	_selected_mount_asked = ""
 	if _browser_actor_assets != null: _browser_actor_assets.call("clear")
 	_map_actor_marker_cache.clear()
 	crowd.clear()
@@ -4972,6 +5099,7 @@ func _clear_world_presentation(retain_map_resources := false) -> void:
 		if is_instance_valid(map_light_root):
 			map_light_root.queue_free()
 		map_light_root = null
+		light_marker_budget.bind(null)
 	_actor_surface_samples.clear()
 	_grounded_actors.clear()
 	occluder_fade.reset()
@@ -6682,9 +6810,11 @@ func _on_state_changed(path: StringName) -> void:
 		&"mount_states":
 			for mount_actor_id: Variant in actor_nodes:
 				_apply_actor_mount(mount_actor_id)
+			_prepare_selected_mount()
 		&"mount_deltas":
 			for mount_actor_id: Variant in AppState.mount_deltas.presentation_ids(actor_nodes):
 				_apply_actor_mount(mount_actor_id)
+			_prepare_selected_mount()
 		&"presence":
 			nearby_indicator.show_count(AppState.presence.nearby_hidden)
 		&"experience_state":
@@ -6858,6 +6988,7 @@ func _load_server_map() -> void:
 			if not arrival_curtain.retry_requested.is_connected(_retry_browser_area_files):
 				arrival_curtain.retry_requested.connect(_retry_browser_area_files)
 		_deferred_map_load = true
+		_map_change_curtain.clear()
 		return
 	if OS.has_feature("web"): arrival_curtain.clear_retry()
 	Diagnostics.record("map_requested", {"server_map": AppState.current_map, "map": normalized_map})
@@ -6872,7 +7003,23 @@ func _load_server_map() -> void:
 		push_error("map_registry_miss server_id=%s normalized=%s keys=%s" % [
 			AppState.current_map, normalized_map, map_registry.keys()])
 		return
-	var handoff := exterior_stream.take_ready(normalized_map, world_loader, camera_rig.focus)
+	# TR-01: a change onto ground already prepared - a resident neighbour reached
+	# without a seamless crossing, a respawn's or gauntlet exit's prewarmed
+	# ground - binds that world and builds its actors on the frame it lands, as
+	# a fresh load does (below). That frame is shown behind the curtain too: the
+	# change waits until the curtain is drawn. Judged before anything is taken,
+	# because taking hands the world over.
+	var handoff_focus: Vector3 = _map_change_curtain.handoff_focus(normalized_map, camera_rig.focus)
+	var curtained := _map_change_curtain_kind(normalized_map, handoff_focus)
+	var raised := false
+	if not curtained.is_empty():
+		raised = not arrival_curtain.is_showing()
+		if raised:
+			arrival_curtain.begin("Entering %s…" % _friendly_map_name(AppState.current_map))
+		if not arrival_curtain.has_drawn():
+			_defer_map_change(normalized_map, curtained, handoff_focus, raised)
+			return
+	var handoff := exterior_stream.take_ready(normalized_map, world_loader, handoff_focus)
 	if character_intro.is_active():
 		if normalized_map == NewCharacterIntroScript.MAP and character_intro.pending:
 			var preloaded: Dictionary = character_intro.take_preload(normalized_map)
@@ -6890,6 +7037,7 @@ func _load_server_map() -> void:
 			if not arrival_curtain.is_showing():
 				arrival_curtain.begin("Entering %s…" % _friendly_map_name(AppState.current_map))
 			_deferred_map_load = true
+			_map_change_curtain.clear()
 			return
 		# A respawn onto another map adopts the ground loaded while dead.
 		var prewarmed: Dictionary = {} if not kept.is_empty() else gauntlet_prewarm.take(normalized_map)
@@ -6903,14 +7051,20 @@ func _load_server_map() -> void:
 			handoff = {"resident": prewarmed, "continuous": false}
 		else:
 			# A fresh load: the arrival is built behind the curtain. A whole map is
-			# built on the frame it loads, so it waits for the curtain to be drawn.
+			# built on the frame it loads, so it waits for the curtain to be drawn;
+			# so does a streamed territory (TR-01): its manifest, the map's binding
+			# and the actors already received are that frame's work.
 			if not arrival_curtain.is_showing():
 				arrival_curtain.begin("Entering %s…" % _friendly_map_name(AppState.current_map))
-			if not respawn_prewarm.streams(ProjectSettings.globalize_path(str(entry.get("manifest", "")))) \
-					and not arrival_curtain.has_drawn():
-				_deferred_map_load = true
+			if not arrival_curtain.has_drawn():
+				var streamed: bool = respawn_prewarm.streams(
+					ProjectSettings.globalize_path(str(entry.get("manifest", ""))))
+				_defer_map_change(normalized_map, MapChangeCurtainScript.STREAMED if streamed
+					else MapChangeCurtainScript.WHOLE_MAP, Vector3.INF)
 				return
 	_deferred_map_load = false
+	_map_change_curtain.resumed(Time.get_ticks_msec(), normalized_map,
+		not curtained.is_empty() and not handoff.is_empty() and not bool(handoff.get("kept", false)), raised)
 	_arrival = {}
 	if arrival_curtain.is_showing():
 		arrival_curtain.set_text("Entering %s…" % _friendly_map_name(AppState.current_map))
@@ -6949,13 +7103,7 @@ func _load_server_map() -> void:
 	# empties the table, as the server's KILL_ALL_ACTORS empties AppState's.
 	# Bodies parked for a return belong to the map being left either way.
 	crowd.clear()
-	for actor_id: Variant in actor_nodes.keys():
-		if _continuous_map_handoff or int(actor_id) == _retained_traveller:
-			continue
-		var raw_actor_node: Variant = actor_nodes[actor_id]
-		if is_instance_valid(raw_actor_node):
-			(raw_actor_node as Node).queue_free()
-		actor_nodes.erase(actor_id)
+	_clear_actor_nodes_for_map_change()
 	for bag_node_value: Variant in ground_bag_nodes.values():
 		if is_instance_valid(bag_node_value):
 			(bag_node_value as Node).queue_free()
@@ -6997,6 +7145,133 @@ func _load_server_map() -> void:
 		# CHANGE_MAP precedes the destination actor packet. Delay chunk disk
 		# reads until that packet supplies the actual login/teleport arrival.
 		world_loader.load_world(manifest_path, Vector3.INF, true)
+
+## TR-01: what the change to `normalized_map` waits for the drawn curtain to
+## take (MapChangeCurtain.EXTERIOR or PREWARM), or &"" when it takes nothing
+## prepared or goes ahead uncurtained: the character intro (its own curtain); a
+## seamless crossing (`focus` within the seam's slack: never curtained); a door
+## into a world WorldPark kept or is building (no curtain, by design; AW-02
+## keeps the player's body for it); and a fresh load, which the load's own
+## branch holds. Mirrors the order `_load_server_map` takes things in.
+func _map_change_curtain_kind(normalized_map: String, focus: Vector3) -> StringName:
+	if character_intro.is_active() or character_intro.blocks_input():
+		return &""
+	if exterior_stream.residents.has(normalized_map):
+		return &"" if MapChangeCurtainScript.handoff_continuous(exterior_stream, normalized_map, focus) \
+			else MapChangeCurtainScript.EXTERIOR
+	if world_park.has_parked(normalized_map) or not world_park.preload_state(normalized_map).is_empty():
+		return &""
+	if (gauntlet_prewarm.pending() and gauntlet_prewarm.map_id == normalized_map) \
+			or (respawn_prewarm.pending() and respawn_prewarm.map_id == normalized_map):
+		return MapChangeCurtainScript.PREWARM
+	return &""
+
+## TR-01: the change to `normalized_map` waits behind the curtain (`_update_arrival`
+## loads it once the curtain is drawn); `focus` is what an exterior handoff is
+## judged from then; `raised`, that this wait began the curtain itself.
+func _defer_map_change(normalized_map: String, kind: StringName, focus: Vector3, raised := false) -> void:
+	_deferred_map_load = true
+	if _map_change_curtain.defer(normalized_map, kind, focus, Time.get_ticks_msec(), raised):
+		Diagnostics.record("map_change_curtained", {"map": normalized_map, "kind": String(kind)})
+
+## TR-01: whether a change of map waiting for its curtain is about to adopt the
+## prewarm made for `prewarm_map` (it is kept until then: the respawn's death
+## state, cleared right after its CHANGE_MAP, would otherwise discard it).
+func _map_change_adopts_prewarm(prewarm_map: String) -> bool:
+	return _deferred_map_load and _map_change_curtain.waiting_for(MapChangeCurtainScript.PREWARM, prewarm_map)
+
+## The actor nodes a change of map that is not a seamless crossing lets go
+## (`_load_server_map`): every one but the traveller a crossing carries. The
+## player's own body is kept for the ADD that follows when it can be
+## (`_hold_local_avatar`) and freed with the rest otherwise.
+func _clear_actor_nodes_for_map_change() -> void:
+	for actor_id: Variant in actor_nodes.keys():
+		if _continuous_map_handoff or int(actor_id) == _retained_traveller:
+			continue
+		var raw_actor_node: Variant = actor_nodes[actor_id]
+		if is_instance_valid(raw_actor_node):
+			if int(actor_id) == AppState.local_actor_id \
+					and _hold_local_avatar(raw_actor_node as ReplicatedActor3D):
+				_built_bodies = maxi(0, _built_bodies - 1)
+			else:
+				(raw_actor_node as Node).queue_free()
+		actor_nodes.erase(actor_id)
+		# AW-07: a mount bind kept for this node goes with it; a node built
+		# for the same id after the change starts its own wait.
+		_mount_binds.drop(int(actor_id))
+	# AW-04d: a wait for the player's body that this change overtook (its record
+	# went with KILL_ALL_ACTORS before the body was built) does not hand its
+	# deadline to the next arrival's wait. No wait exists while it has a body.
+	_local_avatar_prep.abandon()
+
+## AW-02: keeps the player's own body, which a map change that is not a
+## seamless crossing (a door, a teleport, a gauntlet entry, a same-map
+## relocation) takes off the table, for the ADD the server sends after
+## YOU_ARE. It is parked as a crowd body is - hidden, paused, not pickable -
+## after `prepare_for_relocation` has dropped what belongs to the old map, and
+## stays under world_root out of `actor_nodes`, so the arrival hold, the gate
+## and stale removal never see it. `_spawn_actor` wears it again
+## (`_adopt_local_avatar`). False, and the caller frees it, when the body or
+## the moment is one a rebuild has always handled: no body yet, a death, a
+## staged scene, the character intro, a held dialogue portrait, the client
+## closing. The caller keeps `_built_bodies`.
+func _hold_local_avatar(node: ReplicatedActor3D) -> bool:
+	if node == null or not is_instance_valid(node) or node.is_queued_for_deletion():
+		return false
+	var refusal: String = node.relocation_hold_refusal()
+	if refusal.is_empty():
+		if _actor_preparation_closing:
+			refusal = "closing"
+		elif bool(AppState.death.get("dead", false)):
+			refusal = "dead"
+		elif character_intro.is_active():
+			refusal = "intro"
+		elif campaign_scene.is_active():
+			refusal = "campaign"
+	if not refusal.is_empty():
+		_local_avatar_hold.refuse(refusal)
+		return false
+	node.prepare_for_relocation()
+	node.pause_for_parking(animation_gate)
+	# What follows the body goes with it, as when it was freed: the harvest
+	# glitter stops (`_adopt_local_avatar` asks again for the new map).
+	if is_instance_valid(harvest_sparkle) and harvest_sparkle.is_following(node):
+		harvest_sparkle.stop()
+		harvest_sparkle = null
+	return _local_avatar_hold.hold(node, node.actor_id,
+		str(node.get_meta(&"identity_key", "")), str(node.get_meta(&"model_id", "")),
+		Time.get_ticks_msec())
+
+## AW-02: the held body worn again for the player's ADD, by the steps a parked
+## body takes back (`_revive_actor`), then the player's own: its per-map sizes
+## first (`rebind_map`), its cape settled where it now stands, the lantern
+## map dot, the effect and marker options, and hidden behind the curtain until
+## its ground is there. Equipment and appearance are applied again only where
+## the record differs (apply_server_state reconciles both).
+func _adopt_local_avatar(id: Variant, node: ReplicatedActor3D, dto: Dictionary,
+		actor_adapter: CoordinateAdapter) -> void:
+	node.collision_layer = 2
+	node.rebind_map(actor_adapter, dto)
+	_local_rl_prewarm_key = 0
+	_local_avatar_prep.clear()
+	_revive_actor(id, node, dto, actor_adapter)
+	node.settle_after_relocation()
+	_fit_lantern_map_marker(node, "MapDot")
+	node.set_combat_effects_enabled(_effects_enabled)
+	node.set_target_marker_style(_target_marker_style)
+	# Built behind the curtain, shown once its ground is resident.
+	node.visible = not _arrival_pending()
+	_arrival_unreported = true
+	_sync_harvest_sparkle()
+	Diagnostics.record("local_avatar_adopted", {"map": AppState.current_map,
+		"held_ms": _local_avatar_hold.last_wait_msec})
+
+## Lets the held body go once it has waited too long or the player is someone
+## else now (`LocalAvatarHold.expire`), from the gate pass every frame.
+func _expire_held_local_avatar(now: int) -> void:
+	if _local_avatar_hold.expire(now, AppState.local_actor_id):
+		Diagnostics.record("local_avatar_released", {"map": AppState.current_map,
+			"releases": _local_avatar_hold.releases.duplicate()})
 
 func _rebase_streamed_world(rebase: Transform3D) -> void:
 	if is_instance_valid(remote_presentation): remote_presentation.next_map_frame()
@@ -7131,9 +7406,13 @@ func _bind_light_markers(manifest: WorldManifest) -> void:
 	world_root.add_child(root_node)
 	var bound: int = LightMarkerBinder.apply(manifest, root_node)
 	if bound == 0:
+		light_marker_budget.bind(null)
 		root_node.queue_free()
 		return
 	map_light_root = root_node
+	# LIGHT: the nearest N marker lights burn (6/12/24 by quality, at most 8
+	# where the renderer limits lights per mesh), chosen before the first frame.
+	light_marker_budget.bind(root_node)
 	print_debug("light_markers map=", AppState.current_map, " bound=", bound)
 
 ## Moves the environment to the hour the server is keeping. The manifest is
@@ -7344,6 +7623,8 @@ func _hold_for_arrival() -> bool:
 		return false
 	stream.begin_arrival(position)
 	_arrival = {"position": position, "started": Time.get_ticks_msec(), "ready": false}
+	# Loading its cells, this arrival was curtained (and warmed) before TR-01.
+	_map_change_curtain.end_warmup_exemption()
 	if not arrival_curtain.is_showing():
 		arrival_curtain.begin("Entering %s…" % _friendly_map_name(AppState.current_map))
 	arrival_curtain.set_progress(0.15)
@@ -7367,9 +7648,16 @@ func _update_arrival() -> void:
 	if _deferred_map_load:
 		if not AppState.authenticated:
 			_deferred_map_load = false
+			_map_change_curtain.clear()
 		elif arrival_curtain.has_drawn():
 			_deferred_map_load = false
 			_load_server_map()
+			if not _deferred_map_load:
+				# TR-01: went ahead, or loads nothing (the server sent the player
+				# back to the map still loaded before the curtain was drawn). A
+				# wait left behind would hand a later change to that map its
+				# stale camera focus.
+				_map_change_curtain.abandon()
 			_sync_world()
 		return
 	if not _arrival.is_empty() and not bool(_arrival.ready):
@@ -7406,6 +7694,7 @@ func _update_arrival() -> void:
 		return
 	if not arrival_curtain.is_showing():
 		camera_shader_warmup.cancel()
+		_map_change_curtain.end_warmup_exemption()
 		return
 	if not AppState.authenticated and AppState.connection_state != "connected":
 		_end_arrival()
@@ -7436,10 +7725,13 @@ func _update_arrival() -> void:
 			Diagnostics.record("camera_shader_warmup_finished", camera_shader_warmup.snapshot())
 		_arrival_settle_frames = 0
 		return
+	# TR-01: not behind a curtain raised only so that ground already prepared is
+	# adopted out of sight; that arrival had neither curtain nor warm-up before.
 	if standing and not character_intro.pending and not campaign_scene.playing \
 			and RenderingServer.get_current_rendering_method() == "gl_compatibility" \
 			and DisplayServer.get_name() != "headless" \
-			and OS.get_environment("ELORIA_CAMERA_SHADER_WARMUP") != "0":
+			and OS.get_environment("ELORIA_CAMERA_SHADER_WARMUP") != "0" \
+			and not _map_change_curtain.skips_warmup():
 		_update_local_actor_follow()
 		if camera_shader_warmup.begin(world_loader.world_root, gameplay_camera,
 				(actor_nodes[local_id] as Node3D).global_position):
@@ -7467,6 +7759,7 @@ func _end_arrival() -> void:
 	camera_shader_warmup.cancel()
 	_arrival = {}
 	_deferred_map_load = false
+	_map_change_curtain.clear()
 	_arrival_settle_frames = 0
 	_arrival_unreported = false
 	arrival_curtain.cancel()
@@ -7493,6 +7786,8 @@ func _report_arrival() -> void:
 ## Prepare the server's beam destination while the completed loot is reviewed.
 ## The hidden stream is adopted by _load_server_map when the party exits.
 func _prefetch_gauntlet_exit() -> void:
+	if _map_change_adopts_prewarm(gauntlet_prewarm.map_id):
+		return # TR-01: the map change waiting for its curtain adopts it next.
 	var loot: Dictionary = AppState.gauntlet_loot
 	var destination: Variant = loot.get("exit_destination")
 	if loot.get("phase", "") not in ["complete", "ended", "sent"] or bool(loot.get("exited", false)) or not destination is Dictionary:
@@ -7512,6 +7807,11 @@ func _prefetch_gauntlet_exit() -> void:
 ## (the death state's `destination`): kept resident on this map, or prewarmed
 ## in a hidden stream on another, so clicking respawn needs no loading.
 func _prefetch_respawn() -> void:
+	# TR-01: the respawn's CHANGE_MAP is waiting for its curtain to adopt this
+	# prewarm; the death state the server sends right after it ("not dead")
+	# must not discard it first.
+	if _map_change_adopts_prewarm(respawn_prewarm.map_id):
+		return
 	var stream := world_loader.world_root as ContinentChunkStream
 	var destination: Variant = AppState.death.get("destination")
 	if not bool(AppState.death.get("dead", false)) or not destination is Dictionary:
@@ -7599,7 +7899,12 @@ func _sync_world(changed: Variant = null) -> void:
 	# streaming in: nothing is placed on ground that is not there yet.
 	if _deferred_map_load or _hold_for_arrival():
 		_spawn_backlog = true
-		if _deferred_map_load:
+		# AW-04d: the player's own files go to the preparer's worker now, while
+		# the world is built; its build waits for them behind the curtain.
+		_prepare_local_closure()
+		# Not for a wait that is only for the curtain to be drawn (TR-01): the
+		# arrival's actors are built on the frame it ends.
+		if _deferred_map_load and not _map_change_curtain.short_wait():
 			_prewarm_local_rl_head()
 		return
 	# The background worker owns arrival imports during creation. Let it finish
@@ -7611,6 +7916,7 @@ func _sync_world(changed: Variant = null) -> void:
 		if not (world_loader.world_root as ContinentChunkStream).arrival_resident(
 				adapter.tile_center(int(arriving.x), int(arriving.y))):
 			_spawn_backlog = true
+			_prepare_local_closure()
 			_prewarm_local_rl_head()
 			return
 	if adapter != null and AppState.actors.has(AppState.local_actor_id):
@@ -7721,9 +8027,14 @@ func _remove_stale_actor_nodes(changed: Variant) -> void:
 					str(stale_node.get_meta(&"identity_key", "")), now))
 			if parked:
 				stale_node.pause_for_parking(animation_gate)
-			else:
+			elif not (int(id) == AppState.local_actor_id and _hold_local_avatar(stale_node)):
+				# The player's own, taken away by KILL_ALL_ACTORS ahead of a
+				# map change, is kept for the ADD that follows when it can be.
 				(stale_actor as Node).queue_free()
 		actor_nodes.erase(id)
+		# AW-07: as its node, a mount bind kept for it (a parked body that
+		# returns binds again in its revival).
+		_mount_binds.drop(int(id))
 		crowd.forget(int(id))
 		_actor_surface_samples.erase(id)
 		_grounded_actors.erase(id)
@@ -7732,7 +8043,16 @@ func _remove_stale_actor_nodes(changed: Variant) -> void:
 		_actor_health_seen.erase(id)
 	crowd.expire_parked(now)
 	if _browser_actor_assets != null:
-		_browser_actor_assets.call("prune", AppState.actors, crowd.parked_actor_ids())
+		_browser_actor_assets.call("prune", AppState.actors, _kept_body_ids())
+
+## The actor ids whose bodies are kept off the table - parked crowd bodies and
+## the player's own held across a map change - which the browser build's asset
+## prune must keep.
+func _kept_body_ids() -> Array:
+	var ids: Array = crowd.parked_actor_ids()
+	if _local_avatar_hold.holding():
+		ids.append(_local_avatar_hold.held_id())
+	return ids
 
 ## Gives each arriving actor a node. The player's own is always built at once.
 ## With lazy bodies (crowd_presentation.gd) the nearest arrivals inside the
@@ -7820,7 +8140,10 @@ func _spawn_arrivals(arriving: Array) -> void:
 		if wants_body and _actor_creation_may_start(id) \
 				and _actor_work_available(true, _crowd_priority_actor(id)) and _remote_model_ready(id):
 			_build_actor_budgeted(id)
-		elif crowd.lazy and deferred < crowd.DEFERRED_SPAWNS_PER_PASS and _actor_work_available(false):
+		elif id != AppState.local_actor_id and crowd.lazy and deferred < crowd.DEFERRED_SPAWNS_PER_PASS \
+				and _actor_work_available(false):
+			# The player's own node always has its body (`_spawn_actor`): while
+			# that waits (AW-04d; the web's files) it is asked again next pass.
 			_build_actor_budgeted(id, false)
 			deferred += 1
 		else:
@@ -7855,15 +8178,131 @@ func _charge_actor_work(usec: int) -> void:
 	_actor_work_available(false) # Establish this frame's accounting first.
 	_actor_work_usec += usec
 
+## Whether an actor's body may be built now without parsing on the main
+## thread what the preparer could parse on its worker. The player's own body
+## waits for its closure behind the arrival curtain, for at most 6 s
+## (`_local_body_ready`, AW-04d); every other one waits for its asset closure
+## (`_actor_assets_ready`), most urgent first: the selection, the combat target
+## and staged actors, then bodies wanted within the build radius (every caller
+## asks for a body it wants now).
 func _remote_model_ready(id: int) -> bool:
 	if _actor_preparation_closing:
 		return false
-	if OS.has_feature("web") and not _browser_actor_ready(id, _presentation_dto(AppState.actors[id])):
-		return false
+	var dto: Dictionary = _presentation_dto(AppState.actors[id])
 	if id == AppState.local_actor_id:
+		return _local_body_ready(id, dto)
+	var priority: int = ActorResourceWarmupScript.PRIORITY_TARGET if _crowd_priority_actor(id) \
+		else ActorResourceWarmupScript.PRIORITY_NEAR
+	return _actor_assets_ready(id, dto, _actor_mount_id(id), priority)
+
+## Whether the files a body for `dto` reads are ready (AW-04a), by platform:
+## the browser admits it once its files are downloaded and keeps its creature
+## job, as before; elsewhere the preparer parses the actor's closure
+## (actor_asset_closure.gd: race scene, hair, equipment; its RL hairstyle
+## module through RLHeadLibrary) on its worker, and a creature's scene and
+## clips through the creature job. `mount` is the mount worn ("" for none):
+## a rider also waits for its mount's files (AW-07, ActorAssetClosure
+## .mount_closure), so its body is built on its mount. While the game view is
+## hidden no frame drains the preparer (`_process` polls it in the game view's
+## block), so a body wanted then is built as before AW-04a, as AW-07 binds a
+## mount at once then.
+func _actor_assets_ready(id: int, dto: Dictionary, mount: String, priority: int) -> bool:
+	var model_id := _model_for_actor(dto)
+	var config: Dictionary = models.get(model_id, {}) as Dictionary
+	if OS.has_feature("web"):
+		return _browser_actor_ready(id, dto) \
+			and actor_resource_warmup.request(config, _animation_for_model(config), priority)
+	if not actor_resource_warmup.closure_enabled() or not game_view.visible:
+		# Closures are off (ELORIA_ACTOR_PREPARER=off, prepared content, legacy
+		# actor images) or the game view is hidden: no closure is computed,
+		# only the creature job is asked, as before AW-04a.
+		return actor_resource_warmup.request(config, _animation_for_model(config), priority)
+	var closure := ActorAssetClosureScript.memoized(dto, model_id, models, equipment_config,
+		LookProfile.quality(), {} if mount.is_empty() else {"mode": "mounted", "mount_id": mount})
+	var ready: bool = actor_resource_warmup.request_closure(closure, priority)
+	if bool(closure.get("creature", false)):
+		ready = actor_resource_warmup.request(config, _animation_for_model(config), priority) and ready
+	if not mount.is_empty():
+		# AW-07: a rider's body also waits for its mount's files, at its own
+		# priority, so its build binds the mount at once: it is never shown
+		# on foot first, and the bind parses nothing on main.
+		ready = _mount_files_ready(mount, priority) and ready
+	return ready
+
+## The mount an actor rides now, or "".
+func _actor_mount_id(id: int) -> String:
+	var state := AppState.mount_state_for_actor(id)
+	return str(state.get("mount_id", "")) if state.get("mode") == "mounted" else ""
+
+## AW-04d: whether the player's own body (`dto` presented) may be built now.
+## While the arrival curtain is up it waits until the preparer holds its
+## closure (`_local_closure`: race scene, hair, worn pieces, at
+## PRIORITY_LOCAL; RL files through RLHeadLibrary), so its `configure()`
+## parses nothing on the main thread. LocalAvatarPrep bounds the wait at 6 s
+## (TIMEOUT_MSEC) from its first ask, after which it is built as before; a
+## file the worker could not prepare counts as ready (the preparer's
+## fallback). Built at once, as before: with the curtain down, on the web (its
+## own file admission), with closures off, while the client closes, and for
+## the held body the ADD wears again (AW-02). AW-07: behind the curtain it also
+## waits for the files of the mount it rides (`_prepare_local_mounts`, which
+## also asks for the selected mount without waiting for it).
+func _local_body_ready(id: int, dto: Dictionary) -> bool:
+	if OS.has_feature("web"):
+		return _browser_actor_ready(id, dto)
+	if _actor_preparation_closing or _local_hold_matches(id, dto) \
+			or not actor_resource_warmup.closure_enabled():
 		return true
-	var config: Dictionary = models.get(_model_for_actor(AppState.actors[id]), {})
-	return actor_resource_warmup.request(config, _animation_for_model(config))
+	if not arrival_curtain.is_showing():
+		# Nothing queued: the build that follows parses on main as before, and
+		# a worker parse of the same files beside it would be thrown away.
+		return _local_avatar_prep.admit(id, false, false, Time.get_ticks_msec())
+	var ready: bool = actor_resource_warmup.request_closure(_local_closure(id, dto),
+		ActorResourceWarmupScript.PRIORITY_LOCAL)
+	# AW-07: and for the files of the mount it rides, so it arrives on it.
+	ready = _prepare_local_mounts(id) and ready
+	return _local_avatar_prep.admit(id, ready, true, Time.get_ticks_msec())
+
+## The player's own asset closure (ActorAssetClosure.memoized): what a remote
+## body's is, plus the RL head files it draws at once at High where the game
+## defers RL loading (in a window; a headless process builds them at once).
+func _local_closure(id: int, dto: Dictionary) -> Dictionary:
+	var mount := _actor_mount_id(id)
+	return ActorAssetClosureScript.memoized(dto, _model_for_actor(dto), models, equipment_config,
+		LookProfile.quality(), {} if mount.is_empty() else {"mode": "mounted", "mount_id": mount},
+		RLHeadLibrary.defers_loading())
+
+## Whether the player's held body (AW-02) is the one the ADD for `dto` wears.
+func _local_hold_matches(id: int, dto: Dictionary) -> bool:
+	return _local_avatar_hold.holding() and _local_avatar_hold.matches(id,
+		CrowdPresentationScript.identity_key(dto), _model_for_actor(dto))
+
+## AW-04d: asks the preparer, at PRIORITY_LOCAL, for the closure of the player's
+## own body as soon as its record is known while its build is held (a change of
+## map waiting for the curtain, an arrival whose ground streams in, the intro's
+## arrival: `_sync_world`), so its files are parsed on the worker while the
+## world is built. Nothing for a body it has or the held body the ADD wears
+## again, with closures off, on the web, or while the client closes. AW-07:
+## its mount files with it (`_prepare_local_mounts`).
+func _prepare_local_closure() -> void:
+	var id: int = AppState.local_actor_id
+	if _actor_preparation_closing or OS.has_feature("web") or not AppState.actors.has(id) \
+			or actor_nodes.has(id):
+		return
+	var dto: Dictionary = _presentation_dto(AppState.actors[id])
+	if _local_hold_matches(id, dto) or not actor_resource_warmup.closure_enabled():
+		return
+	var closure := _local_closure(id, dto)
+	if not actor_resource_warmup.request_closure(closure, ActorResourceWarmupScript.PRIORITY_LOCAL):
+		_local_avatar_prep.note_early(id, str(closure.get("key", "")))
+	_prepare_local_mounts(id)
+
+## AW-04d: the player's own body was built; a wait for its closure ends, and one
+## that happened is recorded (outcome and milliseconds, no player data).
+func _note_local_body_built(id: int) -> void:
+	var waited: Dictionary = _local_avatar_prep.built(id, Time.get_ticks_msec())
+	if not waited.is_empty():
+		waited["map"] = AppState.current_map
+		Diagnostics.record("local_avatar_prepared", waited)
 
 func _browser_actor_ready(id: int, dto: Dictionary) -> bool:
 	if not OS.has_feature("web"): return true
@@ -7969,6 +8408,18 @@ func _spawn_actor(id: Variant, build := true,
 		_spawn_backlog = true
 		return false
 	var identity: String = CrowdPresentationScript.identity_key(dto)
+	if previous == null and _local_avatar_hold.holding() and int(id) == AppState.local_actor_id:
+		# The player's own body, kept across the map change (AW-02): worn
+		# again when the ADD names the same person and model, else let go.
+		var held_model := _model_for_actor(dto)
+		if _local_avatar_hold.matches(int(id), identity, held_model):
+			if OS.has_feature("web") and not _browser_actor_ready(int(id), dto):
+				_spawn_backlog = true
+				return false
+			_adopt_local_avatar(id, _local_avatar_hold.take(int(id), identity, held_model)
+				as ReplicatedActor3D, dto, actor_adapter)
+			return true
+		_local_avatar_hold.release("mismatch")
 	if previous == null:
 		var parked := crowd.take_parked(int(id), identity) as ReplicatedActor3D
 		if parked != null:
@@ -7976,6 +8427,11 @@ func _spawn_actor(id: Variant, build := true,
 			return true
 	var creates_body: bool = build or int(id) == AppState.local_actor_id or not crowd.lazy
 	if OS.has_feature("web") and creates_body and not _browser_actor_ready(int(id), dto):
+		_spawn_backlog = true
+		return false
+	if int(id) == AppState.local_actor_id and not OS.has_feature("web") \
+			and not _local_body_ready(int(id), dto):
+		# AW-04d: behind the curtain until its closure is ready (at most 6 s).
 		_spawn_backlog = true
 		return false
 	if creates_body and not _actor_creation_may_start(int(id)):
@@ -7988,6 +8444,8 @@ func _spawn_actor(id: Variant, build := true,
 	world_root.add_child(node)
 	actor_nodes[id] = node
 	var model_id := _model_for_actor(dto)
+	# What a held player body is matched against at its next ADD (AW-02).
+	node.set_meta(&"model_id", model_id)
 	var model_config: Dictionary = models.get(model_id, {}) as Dictionary
 	if int(id) == AppState.local_actor_id:
 		# The player's own from its first build, as the creation preview is: its
@@ -7997,7 +8455,7 @@ func _spawn_actor(id: Variant, build := true,
 	else:
 		# At Low a remote humanoid starts on the crowd hand variant before its
 		# first clip; the gate gives near ones full hands (LAT-L6).
-		node.crowd_hands_at_build = true
+		node.crowd_hands_at_build = crowd.tier_hands
 	var errors := node.configure(dto, actor_adapter, model_config,
 		_animation_for_model(model_config), equipment_config,
 		build or int(id) == AppState.local_actor_id or not crowd.lazy)
@@ -8015,7 +8473,7 @@ func _spawn_actor(id: Variant, build := true,
 	node.set_title(str(AppState.actor_titles.get(int(id), "")))
 	node.set_occupation(str(AppState.actor_occupations.get(int(id), "")))
 	node.set_quest_available(AppState.quest_offer_actors.has(int(id)))
-	_apply_actor_mount(id)
+	_apply_actor_mount(id, true)
 	_place_actor_on_surface(node, true, actor_adapter.fallback_height())
 	node.adopt_presentation_from(previous)
 	node.set_selected(int(id) == AppState.selected_actor_id)
@@ -8025,6 +8483,7 @@ func _spawn_actor(id: Variant, build := true,
 		node.visible = not _arrival_pending()
 		_arrival_unreported = true
 		_sync_harvest_sparkle()
+		_note_local_body_built(int(id))
 	elif crowd.lazy:
 		# Drawn or not from the start, rather than from the next gate pass: a
 		# deferred actor far off would otherwise show its stand-in and its name
@@ -8062,15 +8521,16 @@ func _revive_actor(id: Variant, node: ReplicatedActor3D, dto: Dictionary,
 	# Parked bodies were absent from live quality changes. Reconcile before
 	# mount/tack attachment so every returned visual inherits current policy.
 	node.apply_render_quality(LookProfile.quality(), int(id) == AppState.local_actor_id)
-	_apply_actor_mount(id)
+	_apply_actor_mount(id, true)
 	_place_actor_on_surface(node, true, actor_adapter.fallback_height())
 	node.set_selected(int(id) == AppState.selected_actor_id)
 	campaign_scene.prepare_actor_visibility(AppState.campaign, node, int(id), AppState.current_map)
 	node.set_drawn(_crowd_reference_point().distance_to(node.global_position)
 		<= ACTOR_DRAW_DISTANCE_METRES)
 	# Paused while parked; it animates meanwhile, as a body coming into view
-	# does, until the gate's next sweep gives it its tier.
-	node.set_animation_tier(AnimationGate.Tier.HALF if crowd.gate
+	# does, until the gate's next sweep gives it its tier. The player's own
+	# (held across a map change, AW-02) is always full rate there.
+	node.set_animation_tier(AnimationGate.Tier.HALF if crowd.gate and int(id) != AppState.local_actor_id
 		else AnimationGate.Tier.FULL, animation_gate)
 	node._remote_enrollment_ready = true
 	if is_instance_valid(remote_presentation): remote_presentation.consider(node)
@@ -8081,6 +8541,11 @@ func _revive_actor(id: Variant, node: ReplicatedActor3D, dto: Dictionary,
 ## Each is a new node in the deferred one's place, carrying on its motion.
 func _update_model_builds() -> void:
 	actor_resource_warmup.poll()
+	# The preparer's main-thread publication (one parsed file a frame, packed
+	# here) is this frame's actor work too.
+	_charge_actor_work(actor_resource_warmup.take_publish_usec())
+	# AW-07: mount binds kept out of the packet handler, at most one a frame.
+	_bind_pending_mounts()
 	if not crowd.lazy:
 		return
 	# Critical bodies must not wait behind a stale distance-ranked candidate queue.
@@ -8148,7 +8613,14 @@ func _replace_actor_node(id: int, build: bool) -> bool:
 
 ## Bind mount presentation to the current player identity and map, including
 ## state received before a visible actor's model finished loading.
-func _apply_actor_mount(id: Variant) -> void:
+## AW-07: a bind that builds a mount visual (ReplicatedActor3D.mount_bind_needed)
+## is made outside the packet handler: it waits in `_mount_binds` for its
+## mount's files on the actor preparer (`_mount_bind_wait`; the rider is drawn
+## as it is meanwhile), and a remote rider's ready bind waits for
+## `_bind_pending_mounts` (at most one a frame). `in_build` is a body's own
+## build or revival, whose actor work is already budgeted: a ready bind is made
+## there at once, so a body built on a ready mount never shows on foot.
+func _apply_actor_mount(id: Variant, in_build := false) -> void:
 	var node := actor_nodes.get(id) as ReplicatedActor3D
 	if node == null:
 		return
@@ -8156,7 +8628,175 @@ func _apply_actor_mount(id: Variant) -> void:
 	if OS.has_feature("web") and state.get("mode") == "mounted" and not _browser_actor_ready(int(id),
 			_presentation_dto(AppState.actors.get(id, {}))):
 		return
+	var wait := _mount_bind_wait(int(id), node, state, in_build)
+	if not wait.is_empty():
+		_mount_binds.keep(int(id), wait, Time.get_ticks_msec())
+		return
+	var binding := node.mount_bind_needed(state)
+	if _mount_binds.has(int(id)):
+		if binding:
+			_mount_binds.release(int(id))
+		else:
+			_mount_binds.drop(int(id))
+	if binding:
+		_mount_binds.note_at_once()
 	node.set_mount_state(state, models)
+
+## AW-07: why a mount bind for `id` (its `node`, its mount `state`) waits, or
+## "" to make it now. Only a bind that builds a mount visual can wait:
+##   * "files": its mount's files (ActorAssetClosure.mount_closure) are not in
+##     GlbSceneCache yet, or the mount visual's script is still loading
+##     (`_mount_files_ready`). The files are asked of the preparer: the player's own at
+##     PRIORITY_LOCAL, the selection and combat target at PRIORITY_TARGET,
+##     every other rider at PRIORITY_MOUNT. A file the worker cannot prepare
+##     counts as ready (main parses it in the bind, as before);
+##   * "turn": a remote rider's files are ready and this is not its body's
+##     build (`in_build`): the bind waits for `_bind_pending_mounts`.
+## Made now, as before: the player's own behind the arrival curtain (its files
+## were part of its body's wait, `_prepare_local_mounts`; a bind after that
+## wait's deadline parses on main, hidden by the curtain) and in its own body's
+## build (built at once with the curtain down, AW-04d: its mount with it, as
+## before), and every bind while the game view is hidden (no frame drains
+## `_mount_binds` then), while the client closes, on the web (its own file
+## admission) and with closures off (ELORIA_ACTOR_PREPARER=off, prepared
+## content, legacy actor images).
+func _mount_bind_wait(id: int, node: ReplicatedActor3D, state: Dictionary, in_build: bool) -> String:
+	if not node.mount_bind_needed(state) or not game_view.visible or _actor_preparation_closing \
+			or OS.has_feature("web") or not actor_resource_warmup.closure_enabled():
+		return ""
+	var local := id == AppState.local_actor_id
+	if local and (in_build or arrival_curtain.is_showing()):
+		return ""
+	var priority := ActorResourceWarmupScript.PRIORITY_LOCAL if local \
+		else ActorResourceWarmupScript.PRIORITY_TARGET if _crowd_priority_actor(id) \
+		else ActorResourceWarmupScript.PRIORITY_MOUNT
+	if not _mount_files_ready(str(state.get("mount_id", "")), priority):
+		return "files"
+	return "" if local or in_build else "turn"
+
+## AW-07: whether a bind of `mount_id` finds everything it loads ready: the
+## mount closure's files in GlbSceneCache (asked of the preparer at
+## `priority`) and the mount visual's script (`_mount_visual_script_ready`).
+## True for a mount with nothing to prepare (no profile or no model).
+func _mount_files_ready(mount_id: String, priority: int) -> bool:
+	var closure := ActorAssetClosureScript.mount_closure(mount_id, models)
+	if (closure.scenes as PackedStringArray).is_empty():
+		return true
+	var ready: bool = actor_resource_warmup.request_closure(closure, priority)
+	return _mount_visual_script_ready() and ready
+
+## AW-07: whether the mount visual's script is loaded. Its first load compiles
+## it and the mount scripts it preloads (seat and Rust rider pose, reins, cape
+## surface, upper body, tack, hind legs, coat): 177-192 ms on main headless,
+## the largest part of a session's first bind once its files are prepared. It
+## is loaded on a ResourceLoader thread instead, asked with the first mount
+## files, and held (`_mount_visual_script`) so it stays cached. Main only
+## polls; it takes the result once the load has finished. A load that cannot
+## start or fails is left to the bind, which loads it as before.
+func _mount_visual_script_ready() -> bool:
+	if _mount_visual_script != null:
+		return true
+	var path := MountBindQueueScript.VISUAL_SCRIPT
+	match ResourceLoader.load_threaded_get_status(path):
+		ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+			return false
+		ResourceLoader.THREAD_LOAD_LOADED:
+			_mount_visual_script = ResourceLoader.load_threaded_get(path) as Script
+			_mount_visual_script_threaded = _mount_visual_script != null
+			return true
+		ResourceLoader.THREAD_LOAD_FAILED:
+			ResourceLoader.load_threaded_get(path)
+			return true
+	if ResourceLoader.has_cached(path):
+		# Loaded already (a bind made at once): held from now on.
+		_mount_visual_script = ResourceLoader.load(path) as Script
+		return true
+	if _mount_visual_script_requested:
+		return true
+	_mount_visual_script_requested = true
+	return ResourceLoader.load_threaded_request(path, "Script") != OK
+
+## AW-07: makes the mount binds `_apply_actor_mount` kept, at most
+## MountBindQueue.BINDS_PER_FRAME a process frame, the player's own first, then
+## the longest waiting. A bind is made once its files are ready and the
+## frame's actor work allows it; the player's own, the selection, the combat
+## target and a bind kept for MountBindQueue.OVERDUE_MSEC go regardless. Its
+## time is charged to the frame's actor work. A kept rider that needs no bind
+## any more (dismounted, its mount shown, its node or record gone) is dropped,
+## its state applied.
+func _bind_pending_mounts() -> void:
+	if _mount_binds.is_empty():
+		return
+	var frame := Engine.get_process_frames()
+	var now := Time.get_ticks_msec()
+	var local: int = AppState.local_actor_id
+	var order: Array = _mount_binds.ids()
+	if order.has(local):
+		order.erase(local)
+		order.push_front(local)
+	for raw_id: Variant in order:
+		var id := int(raw_id)
+		var value: Variant = actor_nodes.get(id)
+		var node: ReplicatedActor3D = value as ReplicatedActor3D if is_instance_valid(value) else null
+		if node == null or not AppState.actors.has(id):
+			_mount_binds.drop(id)
+			continue
+		var state := AppState.mount_state_for_actor(id)
+		if not node.mount_bind_needed(state):
+			_mount_binds.drop(id)
+			node.set_mount_state(state, models)
+			continue
+		if _mount_bind_wait(id, node, state, false) == "files":
+			continue
+		if not _mount_binds.may_bind(frame):
+			break
+		var overdue: bool = _mount_binds.overdue(id, now)
+		if not _actor_work_available(true, id == local or overdue or _crowd_priority_actor(id)):
+			continue
+		var began := Time.get_ticks_usec()
+		node.set_mount_state(state, models)
+		var spent := Time.get_ticks_usec() - began
+		_charge_actor_work(spent)
+		_mount_binds.note_bound(id, spent, frame, now, overdue)
+
+## AW-07: asks the preparer for the player's own mount files: the mount ridden
+## now at PRIORITY_LOCAL (true once its files are ready; behind the arrival
+## curtain its body waits for them too, `_local_body_ready`, so it arrives on
+## its mount) and the mount selected for riding at PRIORITY_MOUNT, not waited
+## for, so a later mount-up finds its files ready.
+func _prepare_local_mounts(id: int) -> bool:
+	var riding := _actor_mount_id(id)
+	var ready := riding.is_empty() or _mount_files_ready(riding, ActorResourceWarmupScript.PRIORITY_LOCAL)
+	var selected := str(AppState.mount_state_for_actor(id).get("selected_mount_id", ""))
+	if not selected.is_empty() and selected != riding:
+		_mount_files_ready(selected, ActorResourceWarmupScript.PRIORITY_MOUNT)
+	return ready
+
+## AW-07: when the mount table changes, the player's own mount files are asked
+## of the preparer ahead of a mount-up:
+##   * a mount being summoned, at PRIORITY_LOCAL on every change, so the call's
+##     countdown covers its parse (also after the creature memory budget
+##     evicted an idle prefetch, MEM-M5);
+##   * the mount selected for riding, at PRIORITY_MOUNT once per selection
+##     (`_selected_mount_asked`, cleared at a session's end): an idle prefetch
+##     the budget evicted is not parsed again on every later change of a
+##     market's mount table.
+## The mount ridden is asked for by its bind (`_apply_actor_mount`) and, behind
+## the arrival curtain, by the body's wait (`_prepare_local_mounts`). Nothing
+## before login, while the client closes, on the web or with closures off.
+func _prepare_selected_mount() -> void:
+	var id: int = AppState.local_actor_id
+	if id < 0 or not AppState.authenticated or _actor_preparation_closing or OS.has_feature("web") \
+			or not actor_resource_warmup.closure_enabled():
+		return
+	var state := AppState.mount_state_for_actor(id)
+	if state.get("mode") == "summoning":
+		_mount_files_ready(str(state.get("mount_id", "")), ActorResourceWarmupScript.PRIORITY_LOCAL)
+	var selected := str(state.get("selected_mount_id", ""))
+	if selected.is_empty() or selected == _selected_mount_asked:
+		return
+	_selected_mount_asked = selected
+	_mount_files_ready(selected, ActorResourceWarmupScript.PRIORITY_MOUNT)
 
 func _gauntlet_creature_deaths_pending() -> bool:
 	for value: Variant in actor_nodes.values():
@@ -9983,7 +10623,8 @@ func _update_animation_gate(delta: float) -> void:
 	# the deferred world sync parks or frees it, and that sync prunes it then.
 	if crowd.expire_parked_due(now) > 0 and _browser_actor_assets != null:
 		_browser_actor_assets.call("prune", AppState.actors,
-			crowd.parked_actor_ids() + actor_nodes.keys())
+			_kept_body_ids() + actor_nodes.keys())
+	_expire_held_local_avatar(now)
 	if not _gate_sweep_active:
 		if now < _animation_gate_refresh_msec:
 			return
@@ -10047,12 +10688,11 @@ func _gate_classify(raw_id: Variant) -> void:
 	var actor: ReplicatedActor3D = actor_value as ReplicatedActor3D
 	if actor == null or not actor.is_inside_tree():
 		return
-	var low_rules: bool = _gate_cues_full_only or not is_inf(_gate_hand_metres)
 	if int(raw_id) == AppState.local_actor_id:
 		actor.set_drawn(true)
 		_gate_built += 1
 		actor.set_animation_tier(AnimationGate.Tier.FULL, animation_gate)
-		if low_rules:
+		if _gate_low_rules:
 			# The player's own keeps every cue and full hands, a body that has
 			# just become theirs too.
 			actor.set_combat_cues_allowed(true)
@@ -10084,7 +10724,7 @@ func _gate_classify(raw_id: Variant) -> void:
 		else nameplate_fade(distance, _name_distance_metres))
 	# Who is exempt from the crowd's limits: asked when the crowd presentation
 	# ranks bodies or the Low actor tier's per-body rules are on.
-	var priority: bool = _crowd_priority_actor(int(raw_id)) if crowd.lazy or low_rules else false
+	var priority: bool = _crowd_priority_actor(int(raw_id)) if crowd.lazy or _gate_low_rules else false
 	var camera_d2: float = _gate_camera_at.distance_squared_to(actor.global_position)
 	if crowd.lazy:
 		var ground: float = Vector2(actor.global_position.x - _gate_reference.x,
@@ -10109,14 +10749,14 @@ func _gate_classify(raw_id: Variant) -> void:
 	# Fingers (Low): a swap rebuilds the player's track caches, so it is queued
 	# for `_drain_hand_swaps` rather than made here. Medium and High have no
 	# hand-detail distance and never ask.
-	if low_rules and not is_inf(_gate_hand_metres) and actor.hand_detail_managed():
+	if _gate_hands_on and actor.hand_detail_managed():
 		# A pinned body keeps the full hands it has (mounting, a cinematic and
 		# becoming the player's own restore them at once); one that starts a
-		# charge leap on crowd hands keeps those rather than swap twice.
+		# charge leap on crowd hands keeps those rather than swap twice. The
+		# distances are CrowdAnimationLibrary.want_full's, squared once.
 		var full_now: bool = actor.hand_detail_full()
-		var want_full: bool = priority or CrowdAnimationLibrary.want_full(camera_d2, full_now,
-				_gate_hand_metres, _gate_hand_release_metres) \
-			or (full_now and actor.hand_detail_pinned())
+		var want_full: bool = priority or camera_d2 < _gate_hand_d2 \
+			or (full_now and (camera_d2 < _gate_hand_release_d2 or actor.hand_detail_pinned()))
 		if want_full != full_now:
 			_gate_hand_swaps.append({"actor": actor, "full": want_full, "d2": camera_d2})
 	# Paused bodies rank behind every other: a strike can still wake one for its
@@ -10138,8 +10778,15 @@ func _gate_classify(raw_id: Variant) -> void:
 	actor.set_animation_tier(tier, animation_gate)
 	# Hand cues (Low): only a body with a combat presentation has any.
 	if _gate_cues_full_only and actor.combat_presentation != null:
-		actor.set_combat_cues_allowed(CombatPresentation3D.cues_wanted(_gate_quality,
-			tier == AnimationGate.Tier.FULL, priority))
+		_gate_set_cues(actor, tier == AnimationGate.Tier.FULL, priority)
+
+## Hand cues for a body with a combat presentation while the quality keeps
+## them to full-rate and priority bodies (`_gate_cues_full_only`, Low): what
+## CombatPresentation3D.cues_wanted gives there, set only when it changes.
+func _gate_set_cues(actor: ReplicatedActor3D, full_rate: bool, priority: bool) -> void:
+	var wanted: bool = full_rate or priority
+	if actor.combat_presentation.cues_allowed != wanted:
+		actor.set_combat_cues_allowed(wanted)
 
 ## What needs the whole crowd: full-rate ranks, the cloth budget, the body
 ## count and cap, the build ranks, releases, and the overhead declutter.
@@ -10204,8 +10851,7 @@ func _apply_crowd_full_rate(full_rate: Array) -> void:
 		var body := entry[1] as ReplicatedActor3D
 		body.set_animation_tier(tier, animation_gate)
 		if _gate_cues_full_only and body.combat_presentation != null:
-			body.set_combat_cues_allowed(CombatPresentation3D.cues_wanted(_gate_quality,
-				tier == AnimationGate.Tier.FULL, entry.size() > 3 and bool(entry[3])))
+			_gate_set_cues(body, tier == AnimationGate.Tier.FULL, entry.size() > 3 and bool(entry[3]))
 		rank += 1
 
 ## Makes the hand-detail swaps the last gate sweep found (Low only), at most
@@ -10235,12 +10881,20 @@ func _drain_hand_swaps() -> void:
 ## (`_apply_graphics_quality`): the half-rate distance, the hand-detail
 ## distances and the hand-cue rule. A sweep under way uses them from its next
 ## slice. Swaps queued under the previous quality are dropped; the actors' own
-## quality pass has already given full hands back where they are due.
+## quality pass has already given full hands back where they are due. A
+## measurement that drops the tier's hands or cues (`crowd.tier_hands`,
+## `crowd.tier_cues`: RABBITLANDS_CROWD_PRESENTATION `-hands`, `-cues`) leaves
+## the gate asking nothing of them, as at Medium and High.
 func _capture_gate_quality(level: int) -> void:
 	_gate_quality = ActorRenderQuality.normalized_quality(level)
-	_gate_hand_metres = ActorRenderQuality.hand_detail_metres(_gate_quality)
-	_gate_hand_release_metres = ActorRenderQuality.hand_detail_release_metres(_gate_quality)
-	_gate_cues_full_only = ActorRenderQuality.combat_cues_full_rate_only(_gate_quality)
+	_gate_hand_metres = ActorRenderQuality.hand_detail_metres(_gate_quality) if crowd.tier_hands else INF
+	_gate_hand_release_metres = (ActorRenderQuality.hand_detail_release_metres(_gate_quality)
+		if crowd.tier_hands else INF)
+	_gate_cues_full_only = crowd.tier_cues and ActorRenderQuality.combat_cues_full_rate_only(_gate_quality)
+	_gate_hands_on = not is_inf(_gate_hand_metres)
+	_gate_low_rules = _gate_cues_full_only or _gate_hands_on
+	_gate_hand_d2 = _gate_hand_metres * _gate_hand_metres if _gate_hands_on else INF
+	_gate_hand_release_d2 = _gate_hand_release_metres * _gate_hand_release_metres if _gate_hands_on else INF
 	animation_gate.half_rate_metres = ActorRenderQuality.full_rate_metres(_gate_quality)
 	_gate_hand_swaps = []
 	_hand_swap_queue = []
@@ -15373,6 +16027,8 @@ func _apply_look_switch() -> void:
 ## it) and the server is told the new cap.
 func _apply_graphics_quality() -> void:
 	LookSwitch.apply_shadow_quality(world_sun)
+	if world_distance != null:
+		world_distance.set_quality(LookProfile.quality())
 	crowd.set_quality(LookProfile.quality())
 	_follow_quality_crowd_setting()
 	effect_budget.quality = LookProfile.quality()
@@ -15380,7 +16036,8 @@ func _apply_graphics_quality() -> void:
 		weather_layer.set_effects_enabled(_effects_enabled)
 	ReplicatedActor3D.prewarm_rl_heads(LookProfile.quality())
 	# Before the actors' pass below, which puts each awake one on its clock.
-	ReplicatedActor3D.set_frame_driven(ActorRenderQuality.frame_driven_motion(LookProfile.quality()))
+	ReplicatedActor3D.set_frame_driven(crowd.tier_frame_clock
+		and ActorRenderQuality.frame_driven_motion(LookProfile.quality()))
 	# The gate's Low-tier rules; the actors' pass then restores full hands and
 	# hand cues wherever the new quality has no use for the crowd variants.
 	_capture_gate_quality(LookProfile.quality())
@@ -15401,7 +16058,7 @@ func _apply_render_scale() -> void:
 func _refresh_graphics_restart_notice() -> void:
 	settings_window.graphics_restart_notice.visible = (
 		GraphicsOptions.TEXTURE_QUALITIES.find(_map_texture_quality) != GraphicsOptions.active_texture_skip()
-		or _renderer_preference != _startup_renderer_preference)
+		or SettingsWindowScript.renderer_restart_needed(_renderer_preference, _startup_renderer_preference))
 
 ## A one-shot preset. Individual controls remain editable afterward, and the
 ## explicit renderer choices are retained. Linux Automatic uses OpenGL for this
@@ -18699,6 +19356,8 @@ func _watch_surface_stream(surface_root: Node3D) -> void:
 	# The lamps the territory places, the neighbours' included.
 	if chunk_stream != null and night_lamps != null:
 		night_lamps.watch(chunk_stream)
+	if chunk_stream != null and world_distance != null:
+		world_distance.watch(chunk_stream)
 
 func _on_resident_surfaces_changed() -> void:
 	_watch_chunk_surfaces()

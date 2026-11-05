@@ -1,5 +1,12 @@
 extends Node
 const Release = preload("res://src/updates/release.gd")
+# HTTPRequest's download thread reads one chunk, then sleeps until the next
+# timer tick: 15.6 ms at Windows' default timer resolution, about 2 ms when a
+# finer one is in effect. The 64 KiB default capped package downloads at 4.2
+# (or about 30) MB/s; 1 MiB lifts that to about 66 (or 250) MB/s. Cancelling
+# waits for the chunk being read: up to about 1 s on an 8 Mbit/s connection,
+# about 8 s on a 1 Mbit/s one.
+const DOWNLOAD_CHUNK_BYTES := 1024 * 1024
 var _request: HTTPRequest
 var _thread: Thread
 
@@ -10,6 +17,9 @@ func fetch(url: String, path := "", limit := Release.MAX_MANIFEST_BYTES) -> Dict
 	_request.timeout = 3600.0 if path != "" else 30.0
 	_request.body_size_limit = limit
 	_request.download_file = path
+	if path != "":
+		# File downloads only; manifests and API replies keep the default.
+		_request.download_chunk_size = DOWNLOAD_CHUNK_BYTES
 	add_child(_request)
 	var accept := "application/vnd.github+json" if url.begins_with("https://api.github.com/") else "application/octet-stream"
 	var error := _request.request(url, ["Accept: " + accept, "Cache-Control: no-cache", "User-Agent: RabbitLands-Client"])

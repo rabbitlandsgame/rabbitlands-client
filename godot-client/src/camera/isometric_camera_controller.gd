@@ -33,6 +33,9 @@ const NEAR_PLANE_MIN := 0.2
 # manifests' camera blocks, which override these.
 @export var min_distance := 1.5
 @export var max_distance := 90.0
+## The far plane: fitted to the orbit distance on LOW with fog at the cut
+## (view_reach.gd), just before each draw; MEDIUM and HIGH keep the scene's.
+const ViewReach := preload("res://src/world/view_reach.gd")
 
 @onready var camera: Camera3D = %Camera
 
@@ -44,9 +47,37 @@ var _follow_arrival := Vector3.INF
 var _follow_arrival_until := 0.0
 const FOLLOW_ARRIVAL_SECONDS := 6.0
 var _rotating := false
+var _view_reach: ViewReach
 
 func _ready() -> void:
 	_update_camera()
+	_view_reach = ViewReach.new(camera)
+	_watch_view_reach()
+
+func _enter_tree() -> void:
+	if _view_reach != null:
+		_watch_view_reach()
+
+func _exit_tree() -> void:
+	if RenderingServer.frame_pre_draw.is_connected(_fit_view_reach):
+		RenderingServer.frame_pre_draw.disconnect(_fit_view_reach)
+	if _view_reach != null:
+		_view_reach.release()
+
+func _watch_view_reach() -> void:
+	if not RenderingServer.frame_pre_draw.is_connected(_fit_view_reach):
+		RenderingServer.frame_pre_draw.connect(_fit_view_reach)
+
+## Runs just before every draw, after the frame's scripts have moved the rig
+## and rewritten the fog, so the far plane and its fog fit the frame drawn.
+## The rig reads the graphics quality itself; nothing needs to tell it.
+func _fit_view_reach() -> void:
+	if _view_reach != null:
+		_view_reach.fit(distance, LookProfile.quality())
+
+## The rig's far-plane fit (view_reach.gd), for diagnostics and tests.
+func view_reach() -> ViewReach:
+	return _view_reach
 
 func set_focus(value: Vector3) -> void:
 	_last_follow_position = value
@@ -67,6 +98,9 @@ func set_focus(value: Vector3) -> void:
 
 ## Adopt an authored look-at view as an ordinary, controllable orbit camera.
 ## arrival is a visual destination only; this never moves the followed actor.
+## A `far` the view names other than the scene's or one the rig fitted is
+## kept: the rig fits the far plane again only once it is given back
+## (view_reach.gd).
 func adopt_world_view(view: Dictionary, followed_position: Vector3,
 		arrival := Vector3.INF) -> bool:
 	var pose: Transform3D = view.get("transform", Transform3D.IDENTITY)
@@ -180,6 +214,8 @@ func camera_diagnostics() -> Dictionary:
 		"yaw_degrees": yaw_degrees,
 		"pitch_degrees": pitch_degrees,
 		"distance": distance,
+		"far": camera.far if is_instance_valid(camera) else 0.0,
+		"view_reach": _view_reach.state() if _view_reach != null else {},
 	}
 
 func _update_camera() -> void:

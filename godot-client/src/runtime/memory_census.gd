@@ -50,7 +50,8 @@ const ExternalTexturePool := preload("res://src/world/external_texture_pool.gd")
 ## The figures every cache row carries (-1 when the cache does not report one).
 const CACHE_FIELDS: Array[String] = ["entries", "bytes", "budget", "evictions"]
 ## Breakdowns a cache row keeps when the cache reports them.
-const CACHE_DETAILS: Array[String] = ["bytes_by_domain", "bytes_by_kind", "idle_bytes", "pending_rows"]
+const CACHE_DETAILS: Array[String] = ["bytes_by_domain", "bytes_by_kind", "idle_bytes", "pending_rows",
+	"world_released_bytes", "world_retained_bytes"]
 ## The caches whose retention_snapshot() Main already collects in its
 ## diagnostics row ("resource_retention"), by the same names.
 const RETENTION_CACHES: Array[String] = ["actor_scenes", "animations", "world_meshes", "world_textures"]

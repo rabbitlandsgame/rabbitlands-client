@@ -39,6 +39,20 @@
 // centimetres behind the deck's own plane: road decks overlap and are
 // coplanar, and without that one road's band drew a dark line across the
 // other road's middle wherever two met.
+//
+// A shader that defines LOOK_GROUND_PREPASS as well (painted_ground_*_prepass)
+// is the depth pre-pass Forward+ runs for these blended surfaces, which the
+// Mobile renderer has not got (LookGround.mobile_prepass chains it in as the
+// surface's next pass there). Forward+ writes the depth of a fragment whose
+// alpha reaches its pre-pass threshold (0.99) before anything blends, so a
+// deck hides the patches below it and one deck's band, drawn behind its plane,
+// fails against another deck's road. Mobile draws these surfaces in its
+// transparent pass alone, sorted by distance and writing no depth: a nearer
+// patch below a deck painted over it, and every band crossing another deck
+// drew a black seam. The pre-pass shader is opaque and unshaded: it keeps only
+// what Forward+'s pre-pass keeps, writes that depth (a hair farther than the
+// blended pass computes, so the blended pass always passes over it), and its
+// colour is the plain texture under the blended pass that covers it.
 
 #include "res://src/world/look/painted_ground_paint.gdshaderinc"
 
@@ -168,10 +182,14 @@ void fragment() {
 	float threshold = fract(sin(dot(grain, vec2(12.9898, 78.233))) * 43758.5453);
 	if (covered <= threshold) { discard; }
 #else
+#ifdef LOOK_GROUND_PREPASS
+	float look_prepass_alpha = 1.0 - (1.0 - covered) * (1.0 - band);
+#else
 	// The road over what lies beneath, and beyond it that ground darkened:
 	// covered * road + (1 - covered) * (1 - band) * ground.
 	ALPHA = 1.0 - (1.0 - covered) * (1.0 - band);
 	ALBEDO *= covered / max(ALPHA, 0.0001);
+#endif
 #endif
 #ifdef LOOK_GROUND_EDGE_BAND
 	vec3 pushed = VERTEX + normalize(VERTEX) * (band > 0.0 ? look_edge_band_push : 0.0);
@@ -180,6 +198,28 @@ void fragment() {
 	DEPTH = clip.z / clip.w * 0.5 + 0.5;
 #else
 	DEPTH = clip.z / clip.w;
+#endif
+#endif
+#ifdef LOOK_GROUND_PREPASS
+	// Forward+'s depth pre-pass threshold for depth_prepass_alpha.
+	if (look_prepass_alpha < 0.99) {
+		discard;
+	}
+	ALBEDO = albedo;
+#ifndef LOOK_GROUND_EDGE_BAND
+	vec4 prepass_clip = PROJECTION_MATRIX * vec4(VERTEX, 1.0);
+#if CURRENT_RENDERER == RENDERER_COMPATIBILITY
+	DEPTH = prepass_clip.z / prepass_clip.w * 0.5 + 0.5;
+#else
+	DEPTH = prepass_clip.z / prepass_clip.w;
+#endif
+#endif
+#if CURRENT_RENDERER == RENDERER_COMPATIBILITY
+#else
+	// Reversed depth: smaller is farther. 0.000002 of the depth is about 16
+	// float steps and 0.05 mm at 26 m: far more than the two passes'
+	// rounding, far less than the millimetres between stacked ground layers.
+	DEPTH *= 1.0 - 0.000002;
 #endif
 #endif
 #endif

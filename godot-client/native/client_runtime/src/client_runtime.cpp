@@ -3,6 +3,7 @@
 #include "client_residency.h"
 #include "client_flights.h"
 #include "client_digest.h"
+#include "client_exit_watchdog.h"
 #include "mounted_cape_body_surface.h"
 #include "mounted_cape_projector.h"
 #include "../../native_crowd/src/native_spell_flight_geometry.h"
@@ -513,6 +514,7 @@ static void initialize_runtime(ModuleInitializationLevel level) {
         ClassDB::register_class<RabbitLandsRemotePresentationRuntime>();
         ClassDB::register_class<RabbitLandsSpellFlightRuntime>();
         ClassDB::register_class<RabbitLandsContentDigest>();
+        ClassDB::register_class<RabbitLandsExitWatchdog>();
         if (!ClassDBSingleton::get_singleton()->class_exists("NativeSpellFlightGeometry")) {
             ClassDB::register_class<NativeSpellFlightGeometry>();
             client_runtime_mark_cpp_flight_owned();

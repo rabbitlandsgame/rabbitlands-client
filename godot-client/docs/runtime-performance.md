@@ -87,8 +87,9 @@ The wave-2 measurement switches block seeding too and are parsed in one place,
 argument `--memory-class=` (the argument wins), `ELORIA_WORLD_DISTANCE=off`,
 `ELORIA_ACTOR_IMAGES=legacy|nomips`, `ELORIA_ACTOR_VRAM_SELF_TEST=<dir>` and
 `RABBITLANDS_ACTOR_GEOMETRY=sidecar|off|generate` (`generate` only in
-development builds), plus `RABBITLANDS_ACTOR_GEOMETRY_ROOT`. See the wave 2
-stage A section below.
+development builds), plus `RABBITLANDS_ACTOR_GEOMETRY_ROOT`, and since stage B
+`ELORIA_VIEW_REACH=auto|ground|off` and `RABBITLANDS_OVERHEAD_2D` or the user
+argument `--overhead-2d=`. See the wave 2 stage A and stage B sections below.
 
 Below 100% 3D resolution, Forward+ and Mobile upscale with AMD FSR 1 rather
 than bilinear filtering (`GraphicsOptions.scaling_mode`); Compatibility, which
@@ -132,9 +133,9 @@ tier seeding and are parsed in one place, `hardware_tier.gd`:
 | Switch | Effect |
 | --- | --- |
 | `RABBITLANDS_MEMORY_CLASS=small\|medium\|large` or `--memory-class=` (the argument wins) | forces the memory class |
-| `ELORIA_ACTOR_IMAGES=legacy` | the plain actor glTF parse, without the actor image extension (`nomips` is reserved for the actor texture stages) |
-| `RABBITLANDS_ACTOR_GEOMETRY=sidecar\|off\|generate` | actor geometry sidecars (`generate` only in development builds); `RABBITLANDS_ACTOR_GEOMETRY_ROOT` names a sidecar root. Only the applier reads them, and the actor parse does not call it until a later stage |
-| `ELORIA_WORLD_DISTANCE=off`, `ELORIA_ACTOR_VRAM_SELF_TEST=<dir>` | reserved for world distance management and the actor VRAM self-test; nothing reads them in stage A |
+| `ELORIA_ACTOR_IMAGES=legacy` | the plain actor glTF parse, without the actor image extension. Since stage B, `nomips` keeps decoded actor images without the fallback CPU mip chain (sidecars still bring their own) |
+| `RABBITLANDS_ACTOR_GEOMETRY=sidecar\|off\|generate` | actor geometry sidecars (`generate` only in development builds); `RABBITLANDS_ACTOR_GEOMETRY_ROOT` names a sidecar root. Since stage B every actor parse calls the applier (ALOD-C1h) |
+| `ELORIA_WORLD_DISTANCE=off`, `ELORIA_ACTOR_VRAM_SELF_TEST=<dir>` | nothing read them in stage A. Since stage B the first turns off the world distance pass (WD-C3) and the far plane on LOW (WD-C4), and the second runs the actor VRAM self-test (AT-C2) |
 | `--content-digest=sequential` / `RABBITLANDS_CONTENT_DIGEST=sequential` | the pre-wave-2 single-threaded digest (kill switch). It changes no graphics, so it does not block seeding; `content_digest.gd` parses it and logs `content_digest stage=backend` |
 
 `ELORIA_WORLD_DISTANCE` and `ELORIA_ACTOR_IMAGES` also accept `off/0/false/no` for their off
@@ -250,7 +251,8 @@ machines:
   visit;
 - the Town (about 120 MiB) is parked after a visit;
 - the Landfall underground (about 1.55-1.6 GiB estimated) is never parked (`park_refused`), so
-  re-entering it is a cold load.
+  re-entering it is a cold load. Since stage B its scenery models are released too once the
+  player has left it (FIX-MEM, in the stage B section).
 
 Startup logs `world_park {"event":"budget","memory_class":...,"budget_mib":...,"preload":...}`.
 Measured headless: the first Town entry takes about 1.1 s cold on small, against about 50 ms
@@ -315,8 +317,8 @@ because headless runs report the project's method unless `--rendering-method` na
 The Forward+ and Compatibility look dumps are byte-identical to before
 (`tests/fixtures/renderer_family_look_golden.json`).
 
-An explicit `--rendering-method mobile` launch (the only way to reach Mobile until it becomes
-selectable) now:
+An explicit Mobile launch (`--rendering-method mobile`, or since stage B the Mobile choice in
+Settings → Graphics) now:
 - paints the Forward+ trims instead of the Compatibility ones, matching Godot's shaders, which
   already lit Mobile as linear;
 - reads the shipped `forward_plus` prepared world (geometry, collision and paving; 404 MB in the
@@ -335,12 +337,13 @@ Every actor glTF parses through `GlbSceneCache._parse_generate`, which enables
   readback was a GPU sync per first-seen texture; on a worker it waited for the main thread.
 - Embedded images are decoded by the extension with GLTFDocument's own decoder order and no
   mips.
-- The extension is where actor VRAM sidecars and the wardrobe CPU capture will attach.
+- The extension is where actor VRAM sidecars (stage B, AT-C2) and the wardrobe CPU capture attach.
 
 `PackedScene.pack()` still waits for the main thread from a worker (about one frame per mesh).
 The actor worker path is therefore `GlbSceneCache.prepare_actor` (any thread: parse and generate,
 unpacked root), then `install_actor_prepared` (main thread: pack and publish, about 1 ms per
-file). Nothing calls the worker path yet. Across all 2,118 actor glTFs the parse gives the same
+file). Since stage B the actor preparer uses the worker path for remote bodies, the player's own
+body and mounts (AW-04a, AW-04d, AW-07). Across all 2,118 actor glTFs the parse gives the same
 textures, pixels, materials, nodes and mesh arrays as before. Verification:
 `tests/test_actor_worker_parse.gd` (`RL_AW03_SWEEP=full` sweeps every actor glTF) and
 `tests/test_package_actor_worker_contract.py`. Diagnostics: `actor_scenes.actor_images` in the
@@ -367,8 +370,9 @@ later stages.
   On develop content: 61 images in 42 of 44 files, a 68.7 MB smaller package (84.1 MB of decoded
   PNG). Checkouts keep the original GLBs, and the drawn result is identical.
 - **Actor geometry sidecars.** `src/actors/actor_geometry.gd` attaches package-time LOD chains,
-  masked lining bases and optional run compaction to the raw actor glTF parse. The parse does not
-  call it yet. Apply cost (editor binary):
+  masked lining bases and optional run compaction to the raw actor glTF parse. Since stage B every
+  actor parse calls it (ALOD-C1h); exported builds have no catalogue until release packaging (C9).
+  Apply cost (editor binary):
   - 1.2-1.6 ms for an L1 torso, or 2.3-3.3 ms with compaction, depending on the run count;
   - about 6 ms more when the catalogue asks for the actor file hash;
   - 21 ms once to read a full catalogue.
@@ -415,7 +419,7 @@ later stages.
 (`src/runtime/content_digest.gd`). The digests are byte-identical to `FileAccess.get_sha256`, and
 no manifest, cache key or server value changes. `--content-digest=` or
 `RABBITLANDS_CONTENT_DIGEST` selects the mode:
-- `auto` (default; GDScript until the native backend is wired);
+- `auto` (default; GDScript until the native backend's own release-build A/B, see stage B);
 - `gdscript`: on the main thread a batch is shared by the caller and up to 3 short-lived threads,
   `clamp(cores/2,1,4)` in all; worker-thread callers hash alone;
 - `sequential`: the pre-wave-2 cost profile, for A/B runs and as the kill switch;
@@ -441,8 +445,8 @@ WorkerThreadPool. Measured warm:
 
 `RABBITLANDS_CONTENT_DIGEST_SHA=portable` forces the portable path for qualification.
 `tools/native_digest_check.py` compares every file of an install with Python's hashlib: on
-release 4a57cea4, 51,467 files (12 GB) matched on both paths. The player path does not use the
-class until `ContentDigest` is wired to it.
+release 4a57cea4, 51,467 files (12 GB) matched on both paths. Since stage B `ContentDigest` can
+use the class (`native`, `compare`); `auto` keeps GDScript until its A/B.
 
 **Native loader.** The optional `bin/client_runtime` payload is verified and loaded by one
 script, `src/runtime/native_library.gd`. It checks the manifest ABI, the engine major and minor
@@ -462,8 +466,9 @@ reducer and compact store. Their source stays in `native/native_crowd`, and the 
   reports which library provides each class.
 - Nothing changes by default: the kernels and the reducer stay opt-in
   (`ELORIA_NATIVE_PRESENTATION`, `ELORIA_NATIVE_CROWD=1`). With the payload loaded, an opt-in no
-  longer needs a benchmark build.
-- The DLL grows by about 63 KB, to 1.46 MB.
+  longer needs a benchmark build. Since stage B the payload loads at startup in every profile
+  (RB-C1g).
+- The DLL grows by about 63 KB, to 1.46 MB (1.49 MB with stage B's exit watchdog and reducer runs).
 - `tests/test_client_runtime_crowd_kernels.gd` and the `tests/test_client_runtime_kernels_*.gd`
   wrappers run the registration and parity suites against a payload (`--runtime-dir=`,
   `--expect-native=present`).
@@ -505,6 +510,529 @@ reducer and compact store. Their source stays in `native/native_crowd`, and the 
   the unpacked game plus 512 MiB. Measured, the fresh-install peak equals two downloads plus the
   unpacked game to within 101 bytes; the extra join copy of a multi-part package never coexists
   with the unpacked files.
+
+## Wave 2 stage B: renderer choice, world distance, actor runtime and hitches (2026-11)
+
+Stage B builds on stage A. Several parts are built and tested but stay switched off until their own gate or a later
+stage:
+- **Mobile as Automatic's choice on integrated GPUs** stays off (`RendererPolicy.INTEGRATED_RENDERER = ""`) until the
+  Mobile re-qualification (G4/MOB-C6) passes. An explicit Mobile choice in Settings works now.
+- **Native features.** The verified `client_runtime` payload now loads at startup for every profile (D-NATIVE).
+  Native hashing, the cape, flight and impact kernels and the native actor-command reducer still run on GDScript.
+  Each one turns on by default only after its own release-build A/B. The one piece of native code that acts by
+  default is AW-01's exit watchdog: armed after a drained close, it ends a process still running 10 s after `quit()`.
+  It exists only when the payload loaded, and `--exit-watchdog=off`, the native-runtime switch and safe mode leave it
+  unarmed. It is not a release-build A/B item; the owner is asked to confirm it.
+- **Actor VRAM sidecars** are not built into release packages (`ACTOR_SIDECARS_RELEASE_ENABLED = False`) until AT-C4
+  and the G6 smoke self-test.
+- **The actor geometry catalogue** (LOD chains, lining masks, the helmet budget) reaches players only with release
+  packaging (ALOD-C9). An exported build has no catalogue and draws exactly what it drew before.
+- **The 2D overhead layer** is built but not wired (OV-3).
+- **Manifest schema 3** is read but not yet written (UD-05p).
+
+Medium and High draw as before, except for the marker-light budget (LIGHT) and the world distance work (WD-C2, WD-C3,
+WD-C5), both described below. At every quality some transitions change timing, while the world and the bodies render
+as before. More map changes show a short arrival curtain where they used to show frozen frames and no curtain
+(TR-01). First-seen bodies and mounts stand as their stand-in a little longer and appear once their files are
+prepared (AW-04a, AW-04d, AW-07). The player's body is kept across map changes (AW-02). Settings names the renderer
+Automatic starts and offers Mobile (MOB-C5). All of these are on the owner's stage-B sign-off list. Figures are from
+the development laptop (Core Ultra 9 275HX), mostly headless debug builds, unless marked as estimates. The stage-B
+measurement (the MOB-C6 matrix, the WD-C0 matrix and the hitch cells) has not been run yet.
+
+**One release for the world distance work.** WD-C2, WD-C3 and WD-C5 ship together. Geometry policy 5
+(`MapGeometryPolicy.VERSION`) and scene-cache format 12 (`MapSceneCache.CACHE_FORMAT_VERSION`) make every installed
+geometry, collision, paving, scene-cache and prepared-world entry miss once. Re-cook the shipped `prepared-world` for
+that release; until a re-cooked one is installed, clients load raw. Measurements on this branch must re-cook first,
+otherwise arrivals measure raw loads.
+
+New A/B switches. `ELORIA_VIEW_REACH` and the overhead switch now block first-run seeding, as the stage-A switches,
+`ELORIA_VRAM_TEXTURES` and `RABBITLANDS_CROWD_PRESENTATION` already did. The other new switches change no first-run
+graphics and do not block it.
+
+| Switch | Effect |
+| --- | --- |
+| `RABBITLANDS_INTEGRATED_RENDERER=mobile\|off` | turns the integrated-GPU renderer policy on or off for one launch |
+| `ELORIA_WORLD_DISTANCE=off` | turns off the WD-C3 distance pass (ranges, shadow rules, LOD bias) and the WD-C4 far plane on LOW. WD-C5's generated levels still draw, at Godot's bias 1.0 |
+| `ELORIA_VIEW_REACH=auto\|ground\|off` | the far plane on LOW and its fog. `ground` adds the ground-fit A/B |
+| `ELORIA_WORLD_SCENERY_RELEASE=all\|budget\|0` | the rule for releasing the scenery models of worlds left behind. `0` keeps them until logout |
+| `ELORIA_ACTOR_PREPARER=off` | actor bodies and mounts are parsed on the main thread at first use, as before |
+| `ELORIA_VRAM_TEXTURES=0` | no VRAM sidecars, actor sidecars included (`ELORIA_ACTOR_IMAGES=legacy` also leaves actor sidecars out) |
+| `--native-runtime=off`, `RABBITLANDS_NATIVE_RUNTIME=off`, `[runtime] native_runtime = "off"` in `eloria_hud.cfg`, `--client-safe-mode` | the native payload is neither read nor loaded, and every caller stays on GDScript |
+| `--content-digest=native\|compare` | native hashing, or both backends with a mismatch check (`auto` keeps GDScript) |
+| `RABBITLANDS_NATIVE_REDUCER=run\|legacy`, `ELORIA_NATIVE_CROWD=1\|0` | the actor-command reducer mode: `run` (R2), per packet (R1, `ELORIA_NATIVE_CROWD=1`) or GDScript. Off wins over on |
+| `--exit-watchdog=off\|<ms>`, `RABBITLANDS_EXIT_WATCHDOG` | the exit watchdog |
+| `RABBITLANDS_OVERHEAD_2D=on\|off`, `--overhead-2d=` | the launch state of the 2D overhead layer. Nothing creates a layer yet |
+| `RABBITLANDS_CROWD_PRESENTATION` with `-hands`, `-frameclock` or `-cues` | Low-tier measurement switches (below) |
+| `RABBITLANDS_UPDATE_SCAN_THREADS=1` | the updater's installed-file scan on one thread |
+| `RABBITLANDS_CACHE_JANITOR=off` | no stale-cache janitor |
+| `--no-split-pck` (packager) | one monolithic `RabbitLands.pck` |
+| `--actor-vram-textures` (packager) | stages actor VRAM sidecars. Release and runner builds refuse it while release-enable is off |
+
+### Renderer choice and Mobile
+
+- **Automatic on integrated graphics.** `src/runtime/renderer_policy.gd` decides which renderer Automatic starts.
+  On a fresh first run on an integrated GPU (Windows, RenderingDevice working), it can record Mobile and restart into
+  it once. The restart uses exit code 75 when the updater announces `renderer-relaunch` in
+  `RABBITLANDS_LAUNCHER_FEATURES`, and `set_restart_on_exit` otherwise. **The default is off** until G4/MOB-C6
+  passes. The startup record carries `renderer_effective`, `renderer_requested`, `renderer_fallback`,
+  `auto_renderer*`, `adapter_class` and `renderer_policy`. A restart is logged as `renderer_restart`, and the
+  confirmation after 30 s as `renderer_confirmed`.
+- **Updater side.** `LaunchOptions.effective_renderer` applies the same rule as `RendererPolicy.resolve` with the
+  policy on. The updater has no policy switch of its own, so turning `INTEGRATED_RENDERER` off works through the
+  game's withdrawal on the next ordinary launch. While a recommendation is active, the updater starts it. On exit 75
+  it starts the game once more with the renderer the settings now ask for and `--graphics-renderer-restarted`,
+  keeping the installation lock. A trial start that exits with an error within 60 s sets
+  `auto_renderer_state="failed_start"`. The relaunch costs one extra process start.
+- **Behaviour changes that apply now.** The compatibility and safe-mode launchers keep OpenGL even over a saved
+  explicit Forward+ choice; before, the game tried to restart into Forward+ and hung. A pending renderer restart skips
+  Main's setup (`Diagnostics.restart_pending()`), so a direct launch whose saved explicit renderer differs from the
+  running one now restarts (or exits with 75 under the updater) instead of stopping after one frame.
+- **Settings → Graphics** names the renderer from `RendererFamily.method()`, so Mobile is no longer labelled Forward+.
+  - The menu offers Automatic plus the renderers the launch code can start (`RendererPolicy.supported_renderers()`):
+    Forward+, Mobile and OpenGL Compatibility.
+  - The Automatic item names what Automatic starts on this computer, for example "Automatic (Forward+)", or
+    "Automatic (Mobile)" while a recommendation is active.
+  - The tooltip names the running renderer, graphics API and adapter, with one line per choice.
+  - A note appears when a RenderingDevice renderer was asked for but OpenGL runs, or when Automatic's recommendation
+    failed. A direct developer launch with `--rendering-method gl_compatibility` while the choice is Automatic shows
+    this note too, because Godot consumes the flag before the game sees it.
+  - The restart notice shows only when the choice starts a renderer that is neither running nor this launch's request
+    (`SettingsWindow.renderer_restart_needed`).
+  - The window reads ClientDiagnostics' startup `reconcile` result (`RendererPolicy.launch`) instead of parsing the
+    settings file again.
+  - Testers: `RABBITLANDS_INTEGRATED_RENDERER=mobile` shows "Automatic (Mobile)" for a profile with an active
+    recommendation.
+- **Mobile ground pre-pass (MOB-FIX).** Godot's Mobile renderer has no depth pre-pass for `depth_prepass_alpha`
+  materials: it draws them only in its transparent pass, sorted by distance and writing no depth. The painted walk
+  decks and solid ground patches rely on Forward+'s pre-pass. Without it, a deck's dark edging band drew black seams
+  across crossing decks, and nearer-sorted cobble patches painted over the decks.
+  - Under Mobile only, `LookGround.mobile_prepass` chains an opaque, unshaded copy of each such material as its
+    `next_pass` (`painted_ground_deck_prepass` / `painted_ground_overlay_prepass`). The copy keeps the fragments
+    Forward+ keeps (alpha ≥ 0.99) and writes their depth. Glazes below 0.99 get none, as on Forward+.
+  - Forward+ and Compatibility are unchanged; their preprocessed shaders are identical. The look paints after the
+    cache snapshot, so the shared Forward+/Mobile caches never hold a pre-pass.
+  - Cost on the iGPU proxy: GPU below same-process noise; about +12 MiB working set and about 10 pipelines at Four
+    Gates.
+  - Rendered check: `tests/integration/rendered_mobile_ground_parity.gd`, once per renderer.
+- **Mobile working set.** Mobile's working set above Forward+ is outside Godot's heap: it is driver memory per
+  compiled pipeline. Godot's static memory is equal, and video memory is lower under Mobile. It varies by session (-2 %
+  to +7 % at the plaza in stage A, about +3 % on the stage-B tree), so compare peaks in brackets, not single pairs.
+- **For G4/MOB-C6.** Godot consumes engine flags such as `--gpu-index` and `--rendering-driver`, and neither
+  `set_restart_on_exit` nor the updater's relaunch carries them. A first-run restart started with `--gpu-index 1` on
+  the dual-GPU laptop therefore reopens on the default (discrete) GPU. To measure the restart on the iGPU, use a
+  pre-seeded `trial` profile (through the updater it starts Mobile directly, with no environment variable) or the
+  per-app GPU preference.
+
+### Marker lights (LIGHT)
+
+- `src/world/light_marker_budget.gd` keeps the marker lights nearest the camera focus lit: N = 6 / 12 / 24 at LOW /
+  MEDIUM / HIGH, and never more than `RendererFamily.per_mesh_light_limit()` (8) in Mobile and Compatibility. Main owns
+  one budget, binds it to each map's marker rig and ticks it every frame.
+- The lights are chosen again at 5 Hz, after a 1.5 m focus move, and before the frame whenever SecretSections shows or
+  hides a light. Changes fade over 0.3 s. On the limited renderers a light fading out keeps its slot, so no more than
+  8 are lit on any frame; Forward+ fades across, with at most N + 2 lights.
+- Lights are switched by gates (`LightMarkerBinder.gate_for`), never by `visible`, which SecretSections owns. A gate
+  is added only when its light first goes out.
+- `LanternMineLighting` leases its lamps (`LEASE_META`), so their energy is never faded. Its own nearest-8 fallback
+  runs only where no budget manages the markers (cutaway stage lights).
+- NightLamps keeps at most 6 lights and Weather3D at most 2 fire lights on renderers with a per-mesh limit (6 + 2 = 8
+  per chunk ground mesh). Forward+ is unchanged.
+- **What players see.** On Forward+ LOW, rooms with more than 6 marker lights show 6 (the Lantern Mine 6 of 18); at
+  MEDIUM the town castle and the tavern's upper floor, and at HIGH the largest Insides caves, show fewer lights too.
+  Forward+ HIGH in Landfall Town is unchanged. On Mobile and Compatibility at MEDIUM and HIGH, street lamps and fires
+  go to 6 + 2 lights (from 8 + 4 and 12 + 8).
+- Diagnostics: `main.light_marker_budget.stats()`. Cost (headless indication): 4-59 µs per timed choice, up to about
+  0.6 ms once per room entered in the 78-light serpent undercity.
+- Not budgeted yet: manifest environment lights (`WorldEnvironmentBinder._apply_lights`; up to 61 in gauntlets) and
+  the scripted scene lights.
+
+### World distance (WD-C2, WD-C3, WD-C4, WD-C5)
+
+- **Size-class batch cells (WD-C2).** Continent and gauntlet static batches are split into size-class cells (S 32 /
+  M 48 / L 64 / XL 96 m, by the instance's mesh-box radius times its scale, `src/world/world_distance_classes.gd`).
+  Batch membership is unchanged, so the look passes, the paving cache, gauntlet contrast and the season passes see the
+  same members; each split batch stands at its members' centre. Interiors and other maps keep their batches unchanged.
+  - Landfall (34 chunks) plus Harrowcrag: 271 → 1,182 batches (Landfall 2.6x, the gauntlet 6.8x). The batching phase
+    costs about +0.5 ms per chunk (mostly on workers) and +17 ms on the gauntlet; whole loads are within noise. A
+    cooked Harrowcrag arrival adds about 350-410 ms of main-thread publish (estimate for the low-end reference: about
+    1 s).
+  - Computed main-pass primitives at the default view: -36 % on Landfall, -64 % on Suncoil, -35 % on Coilmere. Draws
+    rise in wide views until WD-C3's ranges.
+  - Full painted only: batched crowns re-shuffle their jitter seeds, and near region borders a crown takes its tint
+    at its smaller batch's centre.
+- **Runtime distance pass (WD-C3).** `src/world/world_distance.gd` classes every loaded continent territory, chunk and
+  gauntlet after the cache snapshot and before the look pass.
+  - Class-split batches, pooled placements and own meshes join one group per size class and extent step. They are
+    culled beyond `camera bucket (8 m) + reach × quality scale + their own extent + 4 m`. Reach from the focus is S 30,
+    M 70 and L 160 m at HIGH (×0.8 at MEDIUM, ×0.6 at LOW); XL is never culled. Nothing within the player's reach is
+    culled at any zoom, and nothing is culled while a film owns the camera.
+  - S and flat props, ground patches, flat walk decks, and `Terrain_` pieces beside an opaque base stop casting the
+    sun's shadow. Flat means under 0.35 m tall, or under 1 m and under 0.15 times the footprint's narrower width (a
+    slab, deck or pad); long low walls and wide enclosures such as a palisade ring keep their shadow.
+  - What shows (pass on against `ELORIA_WORLD_DISTANCE=off`, 1280x720, flat test lighting, Landfall, Suncoil and
+    Coilmere spawns): at the default 26 m -60° view MEDIUM and HIGH draw 0-8 % fewer primitives, and up to 0.5 % of
+    pixels change, mostly where small planters, benches and bushes lose their shadows. Shallow and zoomed-out views
+    lose small and mid props towards the horizon: 0.0-1.2 % of pixels at MEDIUM/HIGH and 0.2-4.0 % at LOW, where
+    WD-C5's 0.15 bias also simplifies tree crowns.
+  - Every classed node takes the quality's LOD bias (HIGH 1.0 / MEDIUM 0.4 / LOW 0.15).
+  - Main's `WorldDistance` node follows the camera's orbit distance, the graphics quality and the film flag. It
+    re-applies the ranges with one `set_group` per group when one of them changes (0.35-1.2 ms per 1-2k ranged
+    nodes). A tree stamped with an older state is re-applied as it enters the scene.
+  - Cost of the pass: about 1-3 ms per chunk (on the worker for background chunks, on Main for geometry-cache
+    arrivals) and about 20 ms for a gauntlet. Caches stay tier-neutral: the loader restores the pass's values for a
+    pack.
+  - Main-pass estimates (world_draw_budget port) at 90 m and -15° on HIGH: Landfall 486 draws / 2.09 M primitives →
+    380 / 1.54 M, Suncoil 611 / 2.28 M → 312 / 1.10 M.
+  - The camera probe records `world_distance` (Main's snapshot).
+- **Far plane on LOW (WD-C4).** On LOW, outdoor maps with fog draw to the orbit distance rounded up to 8 m, plus
+  200 m (232 m at 26 m, 296 m at 90 m). The fog is fitted so that it is whole 10 m before the cut: a depth fog ends
+  there and is opaque, and an exponential map fog becomes a depth fog from 80 m on curve 2 in its own colour.
+  - MEDIUM and HIGH keep the scene's 1800 m and their fog. The plan's 300/400 m would clip ground that stays resident
+    beyond the 320 m retain distance, which is measured to bounds.
+  - `src/world/view_reach.gd` runs from the camera rig in `RenderingServer.frame_pre_draw`, over whatever the binders
+    last wrote. Outdoor means `WorldEnvironmentBinder.horizon_map`.
+  - `ELORIA_VIEW_REACH=ground` also narrows the renderer's camera to the sampled visible ground (+25 % + 16 m) whenever
+    every ray meets ground, as an A/B for content hidden behind the ground.
+  - Probes read `camera_rig.camera_diagnostics().view_reach` (`far`, `horizon_far`, `drawn_far`, `ground_far`,
+    `fog_fitted`). `Camera3D.far` reports the far plane, not the ground fit.
+  - The sun's shadow fit and the far plane share one ground sampler (`ViewReach.shared_depths`): 28 rays, one cast per
+    frame, pose and lens.
+- **Generated prototype LODs (WD-C5).** Shared prototypes carry generated LODs: 273 of the 532 placed prototypes, with
+  79 % of placed triangles. `ExternalMeshPool.acquire` generates them (`ImporterMesh.generate_lods(25, 60)`) for every
+  prototype with at least 600 triangles and a mesh-box half-diagonal of at least 1.5 m. Godot's 1 px rule picks the
+  level, scaled by WD-C3's LOD bias.
+  - At 1280×720 over the Landfall and Suncoil spawns, with C2 and C3 on: main-pass primitives fall 13-42 % at HIGH and
+    22-54 % at LOW, and shadow-pass primitives 36-42 % at HIGH. Draw calls are unchanged.
+  - The pixel difference is at most 0.09 % at HIGH. At LOW it is 3-5 % at 90 m, where foliage and thin trunks thin out.
+  - The levels switch under Forward+, Mobile and Compatibility.
+  - A raw parse spends about 2.6 ms per new prototype generating them (on the worker for background chunks). Cooked
+    arrivals spend nothing: the geometry cook stores the levels.
+  - The census counts the level indices (`world_meshes.prototype_lods`, `rl_lod_index_bytes`).
+
+### Scenery of worlds left behind (FIX-MEM)
+
+Stage A's small memory class refused to park the Landfall underground but released only its nodes: GlbSceneCache kept
+its 155 scenery models (1.47 GiB) until logout. The cache now records which worlds used each world model, from the
+map WorldPark names when it publishes or instantiates one (`GlbSceneCache.set_world_scope`).
+
+- WorldPark tracks the worlds the player has left. A world is left when the park frees it (refused, evicted, a
+  dropped preload) or when a map change that is not seamless lets it go; a seamless crossing counts at the next change
+  that is not one. A world is resident again once it is the destination, bound, parked or preloading.
+- While a world is left, `WorldPark.tick` drops the models that only left worlds used, once nothing holds them (mesh
+  reference-count probes), in at most 2 ms a frame. On **small** machines it drops all of them. On **medium and large**
+  machines it drops least recently used first, and only while what left worlds keep exceeds the 1,792 MiB budget minus
+  the parked and preloaded worlds, so nothing changes unless a session outgrows it.
+- Each burst logs `world_park {"event":"scenery_released",...}`, and `resource_retention.actor_scenes` reports
+  `world_releases`, `world_released_bytes`, `world_retained_bytes`, `world_released_main_rebuilds` and the other
+  `world_*` counters. The memory census row carries `world_released_bytes` and `world_retained_bytes`. The browser
+  build retires sources by file pins and is unaffected.
+- Measured on the iGPU proxy as small: after leaving the underground, video memory returns to its level before entry
+  (785-815 against 765-781 MiB), and the `landfall_town_park.gd` WorldLoader + WorldPark script returns 1.68 GB of
+  private bytes. The live client returns 0.3-0.56 GB within 20 s; the remaining ~1.6 GB is reused by the next load
+  (MEM-M8).
+- The cost: going back into the underground on small is a full cold load (a rendered settle of 11.5-14.3 s, against
+  4.1 s parked on medium).
+
+### Actor runtime: sidecars, worker preparation and the player's body
+
+- **Actor VRAM sidecars at runtime (AT-C2).** The actor image extension (`src/actors/actor_images.gd`) now also reads
+  the offline actor sidecars (stage A's AT-C1) when a GLB directory carries `vram/index.json`. An embedded image whose
+  SHA-256 the index lists, in a format the renderer samples and encoded for every role this GLB samples it in, becomes
+  that sidecar: BC7, BC5 or BC1 with its whole mip chain, checked like the map sidecars (file hash, header, size, DDS
+  dimensions, format and mips). Anything else is decoded as before, without mips (`FALLBACK_MIPS` off).
+  - Every embedded actor image is shared by SHA-256 across GLBs in a weak pool (16 race bodies on two atlases, 162
+    legacy hair GLBs on four images). Even without sidecars, a market of races holds about a third less actor texture
+    memory (headless bench: 916 → 680 MiB for 55 actor GLBs; 222 MiB with sidecars). It costs one SHA-256 per embedded
+    image per parse (about 2.3 ms/MB).
+  - Calls are matched to bufferView images by length and sampled bytes in image order, never to AW-03's URI
+    placeholders, and a post-parse size and format check refuses to publish anything that is not where it was
+    matched. `rl_heads` and data: or loose images never take sidecars.
+  - Switches: `ELORIA_ACTOR_IMAGES=legacy` (plain parse), `nomips`, `ELORIA_VRAM_TEXTURES=0` (no sidecars),
+    `ELORIA_ACTOR_VRAM_SELF_TEST=assets/actors/native/races` (the package smoke line
+    `actor_images self_test ok entries=… format=… mips=… decompress=ok`). Diagnostics: `actor_scenes.actor_images`
+    (counters and `pool`).
+  - Do not stage race sidecars for windowed play before AT-C4: the wardrobe dye readback would receive BC7.
+  - Verification: `tests/test_actor_images.gd`. The AW-03 sweep (`RL_AW03_SWEEP=full tests/test_actor_worker_parse.gd`)
+    still finds all 2,118 actor glTFs equal to the plain parse in a checkout without sidecars.
+- **Actor geometry hook (ALOD-C1h).** Every actor glTF parse hands its state to `ActorGeometry.apply` before
+  `generate_scene()`, on the main thread and on the workers. Without a catalogue (every exported build until C9) this
+  costs 62-72 µs per actor parse (about 0.1 % of a 57 ms parse). With the stage-A cook as a "parsed" root, the median
+  is 1.3 ms and p90 4.8 ms per first-seen file; as a "file" root (the developer default), median 3.1 ms, p90 15.9 ms
+  and up to 213 ms for a 52 MB creature (the file hash). Counters: `resource_retention.actor_scenes.actor_geometry` and
+  the cache timing `actor_geometry_apply`. Kill switch `RABBITLANDS_ACTOR_GEOMETRY=off`. An editor run in a checkout
+  that has the developer root `.local/actor-geometry/rl-actor-geometry-v1/` draws its cooked chains, so pin
+  `RABBITLANDS_ACTOR_GEOMETRY=off` for like-for-like rows.
+- **Remote bodies wait for their files, parsed on a worker (AW-04a).**
+  - A remote actor's body (players, NPCs, every race; creatures as before) is built only once the actor glTFs it reads
+    are in GlbSceneCache. Until then it stands as its deferred node.
+  - `src/actors/actor_asset_closure.gd` names those files from the presented record with the actor's own lookups: the
+    race scene, the game hairstyle, every worn piece with the race's fit variant, and a bow's arrow. A portrait
+    Human's RL hairstyle module below High goes to `RLHeadLibrary.request`.
+  - `ActorResourceWarmup` parses them one at a time on its worker with `GlbSceneCache.prepare_actor` (parse and
+    generate, never pack), and reads the equipment pieces table there from the unpacked root. Jobs go most urgent
+    first: the player's own (AW-04d), then selected, target and staged actors, then those within the build radius,
+    then mounts, then the rest.
+  - Main publishes one file a frame (`install_actor_prepared` packs it, about 1-4 ms) with its pieces, and charges the
+    time to the frame's actor work. The worker pauses while 2 parsed roots wait.
+  - A file the worker cannot prepare is parsed by Main on first use, as before. So is everything on the web build,
+    with prepared content, under `ELORIA_ACTOR_IMAGES=legacy`, or with `ELORIA_ACTOR_PREPARER=off`; the kill switch
+    restores the old behaviour exactly. A body wanted while the game view is hidden (before login) is built as before
+    too, because no frame drains the preparer then (AW-07's rule for mount binds).
+  - Diagnostics: the `actor_preparer` row in the client snapshot (`closures`, queued, awaiting, fallbacks,
+    `filesPublished`, `piecesPublished`, `priorityRaises`, worker and publish time). `actor_scenes.lookup_misses` and
+    the `cache_miss_build` timing show any main-thread parse that remains.
+  - Verification: `tests/test_actor_asset_preparer.gd` and `tests/test_actor_preparer_contract.py`.
+- **The player's own body waits behind the curtain (AW-04d).** While the arrival curtain is up, the player's body is
+  built only once the actor preparer holds the glTFs it reads, at the preparer's most urgent class
+  (`PRIORITY_LOCAL`). Its RL files go through `RLHeadLibrary.request` (the RL hairstyle below High; at High in the
+  game, the RL head's head, hairstyle and beard modules).
+  - The closure is asked for as soon as the player's record is known while its build is held (a map change waiting
+    for its curtain, an arrival whose ground streams in), so the parses overlap the world build.
+  - The wait is bounded (`src/actors/local_avatar_prep.gd`): 6 s from the first ask, then the body is built as before.
+    A file the worker could not prepare counts as ready.
+  - Built at once, as before: with the curtain down, on the web, with the preparer off, and for the body AW-02 held
+    across the map change.
+  - Diagnostics: the client snapshot row `local_avatar_prep` (waits, outcomes `ready`/`timeout`/`uncurtained`, early
+    requests, last and maximum wait), a `local_avatar_prepared` record per waited build, and the preparer counters
+    `localStartsPastLimit`, `localPublishedFirst` and `pendingLocalFiles`. Verification:
+    `tests/test_local_avatar_prep.gd`.
+- **Mount visuals outside the packet handler (AW-07).** A rider's first mount bind of a species used to parse the
+  mount's creature GLB and the borrowed saddle GLB, and read two JSON files, inside the `mount_states` packet handler
+  (0.9-2.9 s on the development laptop).
+  - `MountProfiles.read` and `MountedPlayerVisual.animation_map` now parse each file once per process and hand out
+    deep copies. `ActorAssetClosure.mount_closure` names the mount's scene and the borrowed tack's source, and the
+    actor preparer prepares them on its worker. The mount's clips are retargeted on Main from the cached parse (about
+    1-3 ms headless).
+  - The mount visual's script (`mounted_player_visual.gd` and the mount scripts it preloads) loads on a
+    ResourceLoader thread with the first mount files; compiling it on Main cost 177-192 ms on a session's first bind.
+  - `main._apply_actor_mount` builds a mount visual only when its files are cached. Otherwise the rider is kept in
+    `_mount_binds` (`src/mounts/mount_bind_queue.gd`) and drawn as it is (on foot, or on the mount it shows) until the
+    files are in. A remote rider's ready bind is made by `_bind_pending_mounts` in Main's per-frame actor work, at most
+    one a frame and within the actor work budget (own, selected, target and binds kept for 1 s go regardless).
+  - Bound at once: in a body's own build or revival; the player's own when its files are ready or behind the arrival
+    curtain; and as before with the game view hidden, on the web, and with the preparer off. A remote rider's body
+    waits for its mount's files too (the AW-04a gate), so it is built on its mount. The player's own body behind the
+    curtain waits for the ridden mount's files within AW-04d's 6 s.
+  - Diagnostics: the client snapshot row `mount_binds`. Verification: `tests/test_mount_bind_prep.gd`.
+- **The player's own body across map changes (AW-02).** A map change that is not a seamless crossing (a door, a
+  teleport, a gauntlet entry, a same-map relocation) no longer rebuilds the player's body.
+  - KILL_ALL_ACTORS or CHANGE_MAP's teardown hides it as a parked crowd body (invisible, `PROCESS_MODE_DISABLED`, not
+    pickable, paused) after `ReplicatedActor3D.prepare_for_relocation()` has dropped the old map's motion, lean,
+    markers, command memory and clip. It stays under `world_root` but out of `actor_nodes`.
+  - The ADD the server sends after YOU_ARE wears it again when its actor id, identity key and model id match
+    (`_adopt_local_avatar`: `rebind_map`, the parked-body revival, a cape reset at the new place). Changed equipment
+    or appearance is applied on the kept body. Otherwise, and after 15 s, at session end or at close, it is freed and
+    the ADD builds as before.
+  - A death, a staged scene, the character intro and a held dialogue portrait are never held.
+  - Diagnostics: `local_avatar_hold` in the client snapshot (`holds`, `adoptions`, `lastWaitMsec`, `releases`,
+    `refusals`) and the `local_avatar_adopted` / `local_avatar_released` events. An adoption records no actor build,
+    so `actor_creation_budget.totals.builds` and `slow_actor_creation` drop by the player's rebuild per map change.
+
+### Actor geometry cook (ALOD-C4, ALOD-C11, ALOD-C5)
+
+These change the developer catalogue only; players see them once release packaging ships a catalogue (C9). Details
+are in `actor-geometry-lods.md`.
+
+- **Lining masks (C4).** The cook drops lining triangles that no sampled pose and view can see (C3 masks, 2 cm margin)
+  and keeps LOD chains that never draw more than before. Lossless masks remove about 1-2k triangles per equipped Human
+  at close range (kit B -4 %, kit A -10 % of lining) and almost nothing at the default camera (market census -0.16 %
+  at High, 0 at Low): leg linings already draw their coarse levels there, and torso masks remove 0-2 %. The triangle
+  budget has to come from vertex-colour torso linings (C10) and the far tier (C7).
+- **Race-refit helmet budget (C11).** Race helmet refits that carry more than twice their Human helmet's triangles
+  (Votary refits up to 38.6k against 1.3k) are capped by the cook at a simplified base that meets the 3 px / 8 m clamp:
+  326 of 896 refits, 1.71 M → 0.72 M base triangles. The saving is mostly close up (mean 5.2k → 2.2k per refit at 3 m,
+  2.6k → 2.1k at 8 m). At the default 26 m camera the v1 chains already draw 1.5k (0.1k fewer now), and the benchmark
+  market (Human kits) does not change.
+- **LOD ladder (C5, gate G5: go).** `tests/integration/actor_lod_ladder.gd` (windowed) measures what an actor draws as
+  the gameplay camera (FOV 50, 1920x1080) backs away 4-70 m, per quality and renderer, against the LOD rule's
+  prediction; `actor_lod_ladder.py gate` judges G5. Compatibility selects exactly the levels Forward+ selects (96/96
+  cells, 3 px and 6 px cooks). Mobile draws exactly what Forward+ draws, shadows included. The renderers differ only by
+  the RL head (Forward+ and Mobile only, by design). With the 3 px cook an equipped Human (kit B) draws 38.4k
+  primitives at 26 m on High (plain 52.9k), 29.5k on Medium and 27.4k on Low (plain 47.4k); a Glasswarden 12.5k /
+  10.6k (plain 39.4k). About 21k per equipped Human has no chain (the torso lining soup and the cape), so the ~25k High
+  budget needs C10/L2 and a cape chain. Index LODs cut raster and vertex-shader work, not skinning; frame time is C8's
+  to measure. `ActorRenderQuality` also has the far-overlay API C7 will wire (`apply_actor(model, level, far)`,
+  `far_by_rank`).
+
+### Map changes behind the curtain (TR-01)
+
+- **What now waits.** Every map change that is not a seamless crossing waits for a drawn arrival curtain
+  (`arrival_curtain.has_drawn()`) before Main binds the new world and builds its actors. Before, only a cold whole map
+  waited. Now so do a streamed territory loaded fresh, a resident neighbour reached without a seamless crossing (a
+  non-continuous exterior handoff), and the ground a respawn or gauntlet exit prewarmed.
+- **What does not.** Doors into worlds WorldPark keeps or builds ahead keep their uncurtained transition, and so do
+  seamless crossings, the character intro and same-map relocations.
+- The kind is judged before anything is taken (`_map_change_curtain_kind`), because taking hands the world over. The
+  exterior handoff is judged from the camera focus at CHANGE_MAP time. A waiting prewarm is not discarded by the "not
+  dead" death state that follows a respawn's CHANGE_MAP. The local RL head is prewarmed on a worker only during long
+  waits (whole map, web files, WorldPark worker).
+- **Grounding wait.** Behind the curtain, a built character that has found no ground for 1 s (its own cells are in,
+  and its only ground is a neighbour's preview layer beside a seam) has its exterior neighbours updated from where it
+  stands. Before, the curtain waited out its 60 s limit.
+- **Off-map positions.** `ContinentChunkStream.ensure_position` no longer re-primes for a position no cell covers
+  (`covers()`). That re-prime retired the focus's ground and orphaned its worker on every actor update while the player
+  stood off the territory's cells. It is logged once per stretch as `arrival_off_map`.
+- Diagnostics: `map_change_curtain` in the client snapshot (`deferrals` per kind `whole_map`, `streamed`, `exterior`,
+  `prewarm`; `pending`, `last_wait`, `grounding_waits`, `grounding_updates`), the events `map_change_curtained {map,
+  kind}` and `arrival_grounding_neighbours`, and the chunk event `arrival_off_map`.
+
+### Low tier follow-up (FIX-CPU)
+
+- **Measurement switches.** `RABBITLANDS_CROWD_PRESENTATION` (runner `--variants=`) takes `-hands` (no fingerless crowd
+  variant), `-frameclock` (remote motion on the physics ticks) and `-cues` (hand cues for every body) under any policy.
+  `describe()` / `crowdPolicy` reports `tierHands`, `tierFrameClock` and `tierCues`. Medium and High use none of them.
+- **What the Low tier saves per body in a market** (Performance preset), measured in one process
+  (`tests/integration/benchmark_low_tier_market.gd`, E4 proxy, 48 Humans in the market tier mix, two runs): fingers
+  19-30 µs per stepped animation update and 18-44 µs per full-rate body; frame-driven motion 14-15 µs per walking body
+  per frame (30-45 % of its motion cost, because per-event work and the transform notifications do not halve).
+  Together -0.43..-0.69 ms (22-25 %) for 48 bodies, about -0.6..-1.0 ms for a 69-body market (estimate). Stage A's
+  cross-tree figure (-0.34 ms) under-reads it: its stage-A runs ran in a slower host state (+3-11 % on unchanged
+  components, +1 ms world GPU).
+- **High combat after stage A** is unchanged in code terms: stage A's per-frame work at High is under ~0.05 ms
+  (estimate), and the +0.7 ms in stage A's C5 cell is a host factor shared by unchanged engine phases. Main no longer
+  calls the frame clock's step at Medium and High.
+- For the wave-B C5 repeat: `--memory-class medium` in both trees (medium and large behave the same in the crowd cells
+  today), and the main thread on the favoured cores (`--affinity C00000`) or the hostmon regime classifier.
+
+### Native runtime, digests, the reducer and the exit watchdog
+
+- **Native runtime at startup (RB-C1g, D-NATIVE).** A package with the verified `client_runtime` payload loads it once
+  at `Main._ready`, in every profile, after the `geometry_preparation` stage (`NativeLibrary.startup()`; log line
+  `native_runtime stage=startup code=… switch=… source=… us=…`; 6-11 ms on the dev laptop's debug build). That moves
+  the verify and load that mounted cape arithmetic used to pay in its first frame. Loading registers classes only.
+  One switch keeps the payload unread and unloaded and every caller on GDScript: `--native-runtime=off`,
+  `RABBITLANDS_NATIVE_RUNTIME=off`, safe mode (`--client-safe-mode`, which also hashes `sequential`), or the support
+  setting `[runtime] native_runtime = "off"` in `eloria_hud.cfg`. The safe-mode launchers of packages without the
+  updater set `RABBITLANDS_CONTENT_DIGEST=sequential` and `RABBITLANDS_NATIVE_RUNTIME=off`.
+- **One kernel loader.** `src/runtime/native_crowd.gd` hands the kernels and the reducer to their callers. It loads the
+  payload through `NativeLibrary.ensure()` and uses a class only when `runtime_info().native_crowd_providers` names
+  `client_runtime`. The benchmark extension `bin/native_crowd.gdextension` is used only with
+  `ELORIA_NATIVE_PROVIDER=benchmark`. No other game script calls `load_extension`. The kernels stay opt-in
+  (`ELORIA_NATIVE_PRESENTATION`, `ELORIA_NATIVE_CROWD=1`; `NativeCrowd.DEFAULTS` are all off).
+- **Native content digest (NH-A2).** `ContentDigest` can hash with the payload's `RabbitLandsContentDigest`, which uses
+  SHA-NI where the CPU has it and a portable path otherwise, on its own threads. Digests are byte-identical, and strict
+  per-load verification is unchanged.
+  - At startup, directly after the native load, `ContentDigest.initialize()` self-tests the class: NIST vectors, the
+    payload's own files against the loader's SHA-256, and a CRLF-folded file. Any failure keeps GDScript.
+  - Modes: `auto` (default), `native`, `gdscript`, `sequential`, `compare`. `--client-safe-mode` means `sequential`,
+    and an unknown or empty mode no longer escapes it. `gdscript` and `sequential` never touch the DLL.
+  - `auto` does not hash natively until its release-build A/B (NH-A7, D-NATIVE). It still reports
+    `native=ready self_test=passed` in the `content_digest stage=backend` line.
+  - `compare` hashes every row both ways, returns the FileAccess value, logs and counts any mismatch, and turns native
+    off for the session. Rows native cannot open are read again by GDScript, and a refused call falls back for that
+    call. PCK-resident `res://` paths of an exported build always stay on GDScript.
+  - Measured over a tour of 10 maps and 200 chunks (210 packages, 2.18 GB, debug build, warm cache): sequential
+    10.0 s, gdscript ×4 3.1 s, native SHA-NI 0.77 s, native portable 2.7 s. The `compare` tour gave 0 mismatches over
+    10,862 rows on both SHA paths. After the native load, the probe (1.8-2.7 ms) and the self-test (1.8-2.5 ms) add
+    about 4-5 ms at startup.
+- **Actor-command reduction (RB-C7, rust-batch R1/R2).** AppState reduces ADD_ACTOR_COMMAND packets in one of three
+  modes. `gdscript` (the default) is the original per-command loop. `packet` (R1, `ELORIA_NATIVE_CROWD=1`) runs
+  `NativeCrowdReducer.reduce_packet` once per packet. `run` (R2, `RABBITLANDS_NATIVE_REDUCER=run`) only appends each
+  command packet to a run, then reduces the run in one `reduce_run` call before anything else can read the actors:
+  before the next other packet, at `Network.dispatch_drained` (the end of each dispatch pass, inside its budget), at
+  512 commands, before `take_changed_actors`, on a connection change and at the end of the frame.
+  - The result is the GDScript loop's, byte for byte, including step-stamp keys and their insertion order
+    (`tests/test_native_crowd_run_parity.gd`). The only visible difference is that `actors` is announced once per
+    flush instead of once per packet. The local actor's command 19 and corrupt records are reduced by the GDScript
+    loop in their place, and any other native answer fails closed to GDScript for the session.
+  - A 2,400-command burst costs 13.5 ms in the GDScript mode, 7.8 ms per packet (R1) and 2.0 ms as a run (R2); with
+    server-time stamps 16.7, 10.4 and 2.25 ms (debug build). Steady market dispatch (about 1 packet per frame) is
+    about 0.17 ms in every mode.
+  - `RABBITLANDS_NATIVE_REDUCER=legacy` or `ELORIA_NATIVE_CROWD=0` forces GDScript; off wins over on. The mode stays
+    `gdscript` until the reducer's own release-build A/B. `AppState.actor_reducer_stats()` reports the mode and the run
+    counters. Both native reducers now insert missing fields as String keys, as GDScript does; before, sparse records
+    got StringName keys, which `==` hid.
+- **Bounded close and exit watchdog (AW-01).** `Main._close_client` waits for the actor warm-up, the RL head parse, the
+  exterior preload (and the orphans it reaps) and the WorldPark preload through `ExitDrain.wait_until`, for at most 8 s
+  per stage, and a repeat close is ignored. It then calls `ExitDrain.quit`, which prints `exit_drain
+  result=clean|timeout ... stages=... watchdog=...` and arms `RabbitLandsExitWatchdog` from the `client_runtime`
+  payload. The `--prepare-map-geometry` quit goes the same way.
+  - If the process is still alive 10 s after `quit()`, the watchdog appends one `exit_watchdog fired` line to
+    `user://logs/exit_watchdog.log` and stderr and ends the process with the same exit code (TerminateProcess /
+    `_exit`). It never loads the library: without the payload, with the runtime switched off (safe mode included) or
+    with an older payload, the close quits as before and `watchdog=` names the reason.
+  - On the dev laptop, AW-00's exit-hang control (quit during an RL head parse) hangs indefinitely without the
+    watchdog and ends 10.06 s after quit with it. A drained close exits 0.14-0.28 s after quit (35 of 35 runs).
+  - `ExteriorRegionStream._exit_tree` now orphans its preload worker on the default (legacy) admission too. Before, the
+    worker stayed on the freed node, and the stage-A tree crashed at exit (rc 139) in that case.
+- **Diagnostics.** The `RABBITLANDS_OPTIMIZATION_STARTUP` receipt carries `content_digest`, `native_runtime`,
+  `native_kernels` and `exit_watchdog`. The client diagnostics snapshot carries `native_runtime`, `native_kernels`,
+  `actor_reducer` and `content_digest`.
+
+### 2D overhead layer (OV-1, OV-2; not wired)
+
+- `src/ui/overhead/` holds the layer that will replace the layer-20 Label3D text pass (OV-3 actors, OV-5 world labels,
+  OV-6 removal). Nothing in the game creates a layer yet.
+- **How it draws.** OverheadItems are retained RenderingServer canvas items under one Control above the game view,
+  placed in `frame_pre_draw` from the world camera with the fixed-size scale (`OVERHEAD_PIXEL * P11 * H/2`). Order is
+  far to near within each pass and batch group: font size for text, texture for icons and bars. Text is rasterised at
+  its final size, by explicit oversampling.
+- **Batching.** Godot 4.7.2 batches 2D draws only while they share a texture, and every font size, outline size and
+  icon has its own. Batch groups therefore decide the cost: 300 banners cost 6 canvas draw calls, against 1,190 in
+  strict per-pass order (all three renderers, windowed probe).
+- **Switch.** `RABBITLANDS_OVERHEAD_2D=on|off` or `--overhead-2d=` sets the launch state, and
+  `OverheadLayer.set_enabled()` switches every layer within a run.
+- **Measuring.** Read `last_update_usec`, `items_drawn`, `rerecords_this_frame` and `rs_calls_this_frame` per frame.
+  Headless runs need `update_when_headless`. Placement costs about 0.18 ms per frame for 160 banners (82 on screen),
+  headless.
+- **The banner (OV-2).** `src/ui/overhead/overhead_banner.gd` is the actor's overhead banner as layer content: Block
+  (name, tag, title, occupation, health row, backing, icons), Boss, Quest (pulse by formula, no Tween), Speech and
+  Pointer. Its layout and visibility rules are a port of the 3D banner's, pinned by
+  `tests/test_overhead_banner_parity.gd` (28,021 states against the 3D node path) and the golden
+  `tests/fixtures/overhead_banner_layout_golden.json`, which keeps the pin after OV-3 removes the nodes. Regenerate
+  the golden only in a tree that still has the node path (`-- --write-golden`). A content change rebuilds the block
+  lazily at record time (about 36-43 µs per build, headless); fade, crowding and range toggles rebuild nothing.
+
+### Updates and packaging
+
+- **Installed-file scan and downloads (FIX-UD).** The updater's scan lists the game folders once and hashes on up to
+  four threads (`RABBITLANDS_UPDATE_SCAN_THREADS=1` for one). Every kept file is still SHA-256 checked once, and the
+  plan is byte-identical to the one-thread scan's (checked on the real install: 157 packages, 419 changed members, 20
+  retirements, 25,455 snapshot rows). On a freshly written copy of the real install (5.82 GB hashed) the scan took
+  57.9 s (median of 3), against stage A's 236.9 s and wave 1's 104.4 s; warm, 10.2-12.1 s against 39.4-48.0 s and
+  25.8-27.4 s (busy shared host; wall times). Package downloads now read 1 MiB per pass of HTTPRequest's download
+  thread, which sleeps until the next timer tick after each read: the 64 KiB default capped downloads at 4.2 MB/s at
+  Windows' default 15.6 ms tick (about 30 MB/s with a finer tick); 1 MiB lifts that to about 66 MB/s (about
+  250 MB/s), measured on localhost HTTP and HTTPS. The end-to-end timed update on the real install has not been
+  re-run.
+- **Manifest schema 3 (UD-05u).** The updater reads manifest schema 3: inventory rows may be `"codec": "zstd"`, one
+  STORED zstd frame per 8 MiB chunk, decoded into a buffer of exactly the chunk size and then SHA-256 checked as
+  before. Decoding runs at 706-753 MB/s single-threaded, against 286-302 MB/s for today's deflate inflate (the same
+  77 MB of real map and creature GLB chunks). Rows without a codec take the unchanged path, and the setup helper
+  (`tools/install_client_payload.gd`) picks the package path through the same schema check. The download saving (about
+  -9 %, -360 MB on a full install, design estimate) arrives only when UD-05p publishes schema 3.
+- **Stale cache janitor (UD-03).** A release client removes stale cache generations 30 s after start on a low-priority
+  worker: policy folders with an older version, engine or format (per renderer family, the newest kept), and the
+  legacy scene-cache entries of geometry-scoped whole maps (about 709 MB on existing installs). It prints
+  `RABBITLANDS_CACHE_JANITOR`; `RABBITLANDS_CACHE_JANITOR=off` compares. The shader-cache rule (14 days / 128 MiB) is
+  built but owner-gated and off. To check a packaged build, wait more than 30 s after launch and read the line in
+  `client.log`.
+- **Split PCK (UD-06).** Windows and Linux packages split the exported PCK after the static PCK checks
+  (`tools/pck_split.py`, `package_client.split_client_pack`).
+  - `app/RabbitLands.pck` becomes a core pack: scripts, scenes, data, `.import`/`.remap`, the UID and class caches,
+    the boot closure and `data/content_packs.json`. Prepared content stays in it until UD-07a.
+  - Imported textures, audio and login videos move to `app/packs/{equipment-textures-0..3,textures-0..1,audio,video}.pck`.
+  - The first autoload, `ContentPacks` (`src/boot/content_packs.gd`), checks each pack's size and mounts it before
+    anything else loads. It logs `client_diagnostic {"event":"content_packs",...}` with `usec` (mount) and `check_usec`
+    per pack. A missing or wrong-size pack shows a native message asking the player to repair the installation
+    (the updater; Steam's integrity check; a standalone build is installed again).
+  - Release 4a57cea4: the core is 346.6 MB (27.1 MB without prepared content) and the packs 539.9 MB. A code-only
+    release downloads 322.9 MB instead of 769.3 MB (about 13 MB once UD-07a moves prepared content out); the release
+    that introduces the split downloads the same 769 MB as any code release today. Mount: 22-27 ms warm on the dev
+    laptop, 31-58 ms on the 4-E-core proxy (gate: 50 ms or less on the low-end reference machine). The packager proves
+    the partition entry by entry and loads all 1,435 imported resources and the videos from both layouts.
+  - macOS bundles and `--benchmark-profile` keep one PCK, and `--no-split-pck` builds one on purpose.
+- **Actor sidecars in packages (AT-C3, not release-enabled).** `package_client.py --actor-vram-textures` runs
+  `build_vram_textures.py --actor-dir` for `ACTOR_SIDECAR_DIRS` (creatures, races, hair, mounts, equipment) after the
+  map sidecars, with the same encode cache, and stages one `vram/` index per actor GLB folder loose beside the GLBs in
+  `app/assets/actors/native/` (quality reports in `logs/vram-report-app__*.json`, receipt
+  `logs/actor-vram-textures.json`). `check_loose_vram_textures` (formerly `check_scenery_vram_textures`) checks every
+  staged file against its index, and `check_actor_vram_coverage` requires every embedded image of every staged,
+  non-retired GLB to have a sidecar for the roles its GLBs sample it in, or an exclusion reason. The smoke launch sets
+  `ELORIA_ACTOR_VRAM_SELF_TEST=assets/actors/native/races` and requires `actor_images self_test ok ... decompress=ok`.
+  Release and runner builds refuse the option until `ACTOR_SIDECARS_RELEASE_ENABLED` is set with AT-C4 (schedule 1.1
+  #20). Measured on the wave-2 tree: 680 sidecars (678 unique), 633.2 MB in 98 update packages, 900 MiB on the GPU,
+  21 images decoded at the map floors; 177.5 MB without creatures. Default packages are unchanged.
 
 ## First-use camera rotation on Compatibility
 
@@ -1089,6 +1617,11 @@ as screening. A fast development machine does not qualify low-end hardware.
     world-distance chunks are measured against; `--check-reference` reproduces the plan's tables.
     The plan's "+ranges" columns also hide every `Terrain_`, which is an upper bound; compare
     later results with `ranges_keep_terrain` instead.
+- **Stage-B switches.** `WAVE2_SWITCHES` (`crowd_benchmark_support.py`) also passes
+  `ELORIA_WORLD_SCENERY_RELEASE` and `RABBITLANDS_NATIVE_REDUCER` through to the client and
+  records them. With the run reducer on, the benchmark flushes the run after its tick loop and
+  charges it to `packetDispatch`, and `activeBackends.nativeReducerMode` records the mode. Both
+  are feature-detected, so the harness still runs in the stage-A tree.
 - **Example (gate G1 on the iGPU proxy).** One configuration of an interleaved F+/M/F+/M set:
   `--mode windowed --renderer mobile --settings-profile performance --fps-cap 0 --cells
   s3-market-160,combat-160,empty --affinity 3C0 --engine-arg=--gpu-index=1

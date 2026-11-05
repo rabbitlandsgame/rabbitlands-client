@@ -11,10 +11,22 @@ applier (`src/actors/actor_geometry.gd`) exist and are tested
 (`tests/test_actor_geometry.gd`), and so do the cook that writes a developer
 catalogue (`tools/actor_geometry_cache.py`, below) and the offline tool that
 decides which lining triangles are hidden
-(`eloria-assets/tools/lining_visibility.py`, below). Nothing calls the applier
-yet: the call in the actor parse (`GlbSceneCache._build_raw`), lining masks in
-the cook and release packaging arrive in later steps, so the game draws exactly
-what it drew before.
+(`eloria-assets/tools/lining_visibility.py`, below). The cook applies lining
+masks and the race-refit helmet budget (wave 2 stage B, below); release
+packaging (C9) is still to come.
+
+The actor parse calls the applier (`GlbSceneCache._parse_generate`, after the
+parse and before `generate_scene()`, so the main-thread build, the actor worker
+and the creature warm-up draw the same geometry; ALOD-C1h). An exported build
+has no catalogue until release packaging installs one (C9), so players draw
+exactly what they drew before. An editor-binary run in a checkout that has the
+developer root `.local/actor-geometry/rl-actor-geometry-v1/` draws its cooked
+chains on raw-parsed actors (races, hair, creatures, mounts; editor-imported
+equipment keeps the importer's PackedScene). `RABBITLANDS_ACTOR_GEOMETRY=off`
+compares. A prepared actor scene's texture token ends in
+`|geometry=sidecar:<sha256>` when the parse applies a sidecar
+(`PreparedContent.actor_geometry_variant`), so prepared content cooked with one
+catalogue is never served to a runtime with another.
 
 ## Sidecar
 
@@ -212,6 +224,16 @@ For every triangle surface of at least 64 triangles (`lod_policy.gd`):
   bands hold in world metres; gameplay size scales are not known to the cook
   (larger instances switch later).
 
+The quality biases scale every switch (High 1.0 at the bands, Medium 0.65, Low
+0.35; see `oldcraft-character-presentation.md` "LOD bias and switching
+distances"). The LOD ladder (`tests/integration/actor_lod_ladder.gd`) confirmed
+on 2026-11-04 that Forward+, Mobile and Compatibility draw the levels this
+policy places, as the switch rule predicts from the sidecars' edge lengths (94
+of 96 cells exact; the rest sit at a switch, where the renderer bounds a skinned
+mesh by its posed skeleton). A 6 px error clamp (derived from the same cook)
+saves 1-11 % more per Human at 4-26 m and shows a dark notch at the throat at
+12 m on kit B; 3 px stays the policy until the owner decides.
+
 ### Measured (2026-11-03, dev laptop, editor binary 4.7.2 headless)
 
 | | |
@@ -332,6 +354,79 @@ By class at the default: torsos 0-11% (most of the interior is seen through the
 collar, hem and cuffs once the body is not an occluder), legs 14-60%, boots
 0-6%. A rest-pose mask and a mask without a margin both open visible holes in
 poses and views they did not sample.
+
+### Lining stage (actor LODs C4)
+
+`tools/actor_geometry/lining_policy.gd` runs inside the cook after LOD policy v1
+(`cook.gd` `cook_file`).
+
+- The driver finds each garment's mask (`<masks>/<variant>/<stem>.lining.json`;
+  default `<out>/lining-masks/`, which is where `lining_visibility.py` writes;
+  `--masks DIR`, `--no-masks`). It checks the mask against the garment (schema and
+  policy, `source.path`, `source.sha256` equal to the bytes cooked, each lining's
+  triangle count, bitsets, visible within keep, check rows) and against
+  `MASK_GATE` (a 2 cm `surface` margin or more, 128 directions, the 44-pose set).
+  It passes `{schema, mask_sha256, linings: [{mesh, primitive, triangles, keep,
+  check}]}` in the job.
+- The stage binds each lining to the parse (glTF mesh name, surface = primitive,
+  triangle count, every check centroid within 0.1 mm). It masks a lining only when
+  the mask removes at least 5 % and 64 triangles (`below_gain` otherwise: a base
+  costs about 7 sidecar bytes per kept triangle and an index digest at first
+  parse).
+- A masked lining's `base` is its kept triangles in parse order. Its chain is LOD
+  policy v1 on the masked base merged with v1's chain of the unmasked lining, so no
+  depth draws more than either (a holed lining's own coarse levels switch far
+  later). Torso soups keep none.
+- Compaction needs 25 % and 1,024 unused vertices within at most 400 runs after
+  merging gaps, and every dropped vertex's exact position must still be present in
+  the file's remaining vertex arrays (`positions_kept`), so every reader of a
+  position set (the cape's envelope, shin and axis reach, mesh AABBs) is
+  unchanged. On the review sample no surface compacts.
+- Report rows carry `lining.status` (masked, all_kept, below_gain, all_hidden,
+  rejected with a reason) and `base_triangles`. The summary carries `mask_status`
+  (ok, partial, missing, stale, gate, invalid). A new mask, new mask bytes or a new
+  gate recooks the garment. `report` adds `lining_masks`, and `predict` draws the
+  masked base.
+
+Measured on the 23-mask review sample: 12.8 % of lining triangles removed; per
+Human at LOD0, kit B -1,093 (-4 %) and kit A -2,207 (-10 %); the market census at
+1280 px -0.16 % at High, -0.09 % at 0.65 and 0 at Low; +494 KB of sidecars for the
+9 garments that change; runtime apply +0.6-2 ms per masked garment at first parse
+on the dev laptop. Pose sheet: 0 changed pixels on 5 of 6 masked garments over 30
+views each, and 1-2 pixel specks in 8 of 30 views on the Splinted Chausses. A
+half-faded corpse blends slightly less lining (mean <= 5/255).
+
+### Budget stage (actor LODs C11)
+
+`tools/actor_geometry/budget_policy.gd` runs in the cook after LOD policy v1 and
+the lining stage.
+
+- The driver finds the race refits of rigid socket models in
+  `data/actors/equipment.json` (a non-skinned model's `canonical_<race>_<sex>`
+  variant; in practice the 896 race helmets). It passes each its Human source
+  (`canonical_human_<sex>`, else the model's scene) as `{schema, reference,
+  reference_sha256, reference_triangles}`, the count read from the glTF JSON.
+- A refit drawing more than `MAX_RATIO` (2) times its source gets, per rigid
+  surface, a share of that limit and a base that is a verbatim `generate_lods`
+  level of the parsed surface: the largest within the share whose error meets the
+  3 px clamp from 8 m (`capped`), or, when none does, the smallest level that does
+  (`partial`, at least 25 % removed). Otherwise the surface keeps its v1 plan
+  (`kept`, reason `guard`).
+- Below the capped base come policy v1's selection and edges. The capped base
+  draws at every distance and quality, and vertex buffers are untouched.
+- Report rows carry `budget.status` (within, capped, partial, kept, rejected) and
+  `base_triangles`. A new Human source (bytes or triangles) recooks its refits
+  (`budget_key`). `report` adds `budget`, `plan` counts `refits_over_budget`, and
+  `--no-budget` cooks without the stage.
+
+Measured (2026-11-04): 335 of 896 refits are over 2x (Votary 73 of 128, up to
+30x); 281 capped, 45 partial, 9 kept; 1.71 M -> 0.72 M base triangles over the
+326 reduced refits; 1,735 other sidecars byte-identical; sidecars -1.0 MB. Mean
+drawn per reduced refit at High: 5.2k -> 2.2k at 3 m, 2.6k -> 2.1k at 8 m, 1.5k ->
+1.4k at 26 m (the v1 chains already reduce them at gameplay distance; Low is
+unchanged at 26 m). The unguarded 2x rule would draw visibly broken levels on a
+few Votary refits (errors up to 0.4 m); the guard keeps the 3 m look within
+single-pixel silhouette changes.
 
 ## Measured cost
 

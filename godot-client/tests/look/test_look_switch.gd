@@ -347,9 +347,16 @@ func _continent_world(node_name: String) -> Node3D:
 	batch.multimesh.transform_format = MultiMesh.TRANSFORM_3D
 	batch.multimesh.mesh = fir_a.mesh
 	batch.multimesh.instance_count = 2
+	# As the loader builds a continent batch (WD-C2): standing at its members'
+	# centre, holding their transforms relative to it, stamped with its class.
+	batch.position = (fir_a.transform * fir_a.mesh.get_aabb()).merge(
+		fir_b.transform * fir_b.mesh.get_aabb()).get_center()
+	batch.set_meta(&"rl_distance_class", "L")
 	world.add_child(batch)
 	for index: int in 2:
 		var member: MeshInstance3D = [fir_a, fir_b][index]
+		batch.multimesh.set_instance_transform(index,
+			Transform3D(member.transform.basis, member.transform.origin - batch.position))
 		member.visible = false
 		member.set_meta(LookFoliage.BATCH_META, batch)
 		member.set_meta(LookFoliage.BATCH_INDEX_META, index)

@@ -67,6 +67,10 @@ cache shares those meshes, skins, and materials across actors.
 | Medium | LOD transitions at 0.65× authored bias | Authored setting | Off |
 | High | Authored LOD bias | Authored setting | On |
 
+(Low and the Performance preset also take the Low actor tier: fewer crowd
+bodies, nearer full-rate animation and finger detail, fewer effects and
+banners; see `ActorRenderQuality.QUALITY_PRESETS`.)
+
 The local player's cape remains available at every tier. Existing crowd rules
 remain in force as well: nearby actors animate at full rate, farther visible
 actors update at half rate, off-screen animation pauses, and actors outside the
@@ -77,6 +81,83 @@ When torso coverage rebuilds a body surface, it filters every imported LOD
 index chain through the same face predicate as the full-detail surface. This
 keeps Low/Medium/High selection intact without adding a quality-specific mesh
 cache or any per-frame geometry work.
+
+### LOD bias and switching distances
+
+Besides the importer's chains (imported races, hair and creatures in an editor
+checkout), an actor glTF parsed raw can
+carry the package-time chains of the actor geometry cook
+(`actor-geometry-lods.md`): levels near 50 / 25 / 12 / 5 % of each surface's
+triangles, placed at 8 / 18 / 36 / 70 m for a bias of 1 at 1920 px, and never
+before the level's geometric error covers 3 px. Godot draws a level once
+`edge * lod_bias * model scale / (distance * 2 tan(hfov / 2)) <= 1 px / width`,
+the distance running from the camera to the near side of the mesh's bounds, so
+the quality's bias scales every switch:
+
+| Setting | Bias | Levels from (1920 px; a 1280 px view switches at 2/3 of these) | Error allowed |
+| --- | --- | --- | --- |
+| High | 1.0 | 8 / 18 / 36 / 70 m | 3 px |
+| Medium | 0.65 | 5.2 / 11.7 / 23.4 / 45.5 m | 4.6 px |
+| Low | 0.35 | 2.8 / 6.3 / 12.6 / 24.5 m | 8.6 px |
+
+The biases stay 0.35 / 0.65 / 1.0 (wave-2 schedule 1.1 #5); a retune is an
+owner decision taken on the LOD ladder below. RL heads and RL hair keep their
+authored lod0/1/2 bands (10 / 25 m) and are never cooked.
+
+### Far presentation
+
+`ActorRenderQuality` also carries the far presentation the far-crowd tier
+(actor LODs C7) applies: `apply_mesh(mesh, level, true)` and
+`apply_actor(root, level, true)` draw the coarsest level of every chain
+(`FAR_LOD_BIAS`, the minimum bias) and cast no shadow at every quality, and the
+next call without `far` gives back exactly what that quality draws, from the
+same authored baseline. Which bodies are far is decided by rank:
+in-view bodies ranked by camera distance, nearest first, priority actors not
+ranked, keep full presentation up to `far_detail_bodies(level)` (High 24,
+Medium 20, Low 16); a full body goes far from that rank plus
+`FAR_HYSTERESIS_BODIES` (4), and a far body comes back inside the limit
+(`far_by_rank`). Surfaces without a chain (torso lining soups, the cape) stay
+whole; hiding the cape, quiver and banners, forcing the RL head band and the
+animation rate are the actor's part of the tier. Nothing applies it yet: the
+default path draws what it drew before at every quality.
+
+### LOD ladder
+
+`tests/integration/actor_lod_ladder.gd` (windowed, under the GPU lock) builds
+two Humans in the crowd benchmark's kits A and B, an unequipped Glasswarden and
+a creature as remote actors at each quality, poses them, and backs the camera
+(FOV 50, 1920x1080, pitch -35) away to 4 / 8 / 12 / 18 / 26 / 36 / 50 / 70 m.
+Per step it records the visible and shadow primitives and draw calls of the
+actor alone, the primitives Godot's LOD rule predicts from the meshes' chains
+(per piece: level drawn and triangles), and a crop of the frame at native
+pixels. By default every actor file is parsed raw, as an exported build parses
+it (`RABBITLANDS_LADDER_PARSE=editor` keeps a checkout's imported races, hair
+and creatures; a guarded checkout's equipment is `importer="skip"` and parsed
+raw either way).
+One process draws one renderer and one geometry variant
+(`RABBITLANDS_ACTOR_GEOMETRY=off`, or `RABBITLANDS_ACTOR_GEOMETRY_ROOT` for a
+cook); `RABBITLANDS_LADDER_MODE=clip` writes a zoom clip of one subject at the
+three qualities side by side (3 -> 70 -> 3 m). `actor_lod_ladder.py gate`
+judges gate G5 across runs (Compatibility draws what Forward+ draws and what
+the rule predicts, and fewer primitives than the plain parse from 18 m),
+`compose` writes the owner's strips and `clip` encodes the clip.
+
+Measured 2026-11-04 (dev laptop dGPU, editor binary 4.7.2, a scratch cook with
+lining masks for the review sample and the budget stage): gate G5 is GO.
+Compatibility selects exactly the levels Forward+ selects (its primitives
+differ from the rule's prediction by the same amount in 96 of 96 cells, and
+are identical wherever both draw the same pieces); Mobile draws exactly what
+Forward+ draws, shadows included. The renderers differ only by design: the RL
+head is drawn on Forward+ and Mobile, Compatibility keeps the classic High
+head. Primitives of one equipped Human (kit B, 3 px chains) against the plain
+parse: High 57.0k at 4 m (masked linings only), 38.4k at 26 m and 28.7k at 70 m
+(plain 58.1k / 52.9k / 47.5k, the RL head's own bands); Medium 29.5k and Low
+27.4k at 26 m (plain 47.4k). The Glasswarden falls from 39.4k to 12.5k (High)
+and 10.6k (Low) at 26 m, the boar from 4,130 to 1,031 at 70 m (High). The
+Humans do not reach the ~25k High budget beyond 8 m with these chains: about
+21k of what they draw at any distance has no chain (the torso lining soup,
+15.0k, and the cape, 6.1k), so vertex-colour torso linings (C10) and a cape
+chain are the remaining levers.
 
 The generated LOD chains are reached through `GlbSceneCache`'s imported-scene
 route, which only an editor checkout takes. An exported client has no resource
@@ -101,9 +182,12 @@ RenderingServer call that a worker thread can only make by waiting for the
 main thread, so equipment glTFs are parsed on the main thread only, never in
 `NativeAnimationImporter.prewarm` or a map preloader's `GlbSceneCache.prepare`. A
 packaged actor still carries no LOD chains, so Low and Medium change
-shadows, cape simulation and LOD bias but not mesh detail there. Giving
-packages the LODs needs the runtime to resolve those paths back to `res://`
-(and the packager to ship the imported scenes instead of the loose GLBs).
+shadows, cape simulation and LOD bias but not mesh detail there. The route to
+packaged LODs is the actor geometry cook (`actor-geometry-lods.md`): every raw
+actor parse hands its state to `ActorGeometry.apply`, which attaches the
+package-time chains of a catalogue that validates against that parse; a
+package draws them once release packaging installs a catalogue (actor LODs
+C9). Until then an exported build has none and draws as before.
 
 Anything pinned to a mesh's bytes must therefore pin the parsed mesh too. The
 importer lays out each face's corners differently from `GLTFDocument`, so a
@@ -189,6 +273,17 @@ programme's P7 cleanup (2026-10), together with those outputs: no body wore the
 old-male base scenes or the `variants/luminous_female` scenes any more.
 `eloria-assets/qa/class-equipment-fit-baseline.json` stays as the record of
 that pass, and the tools remain in git history (last present at a35ff1c43).
+
+A race headwear refit can carry many times the triangles of the Human fit it
+was made from (the Votary Sun Headband: 38,558 against 1,285). The actor
+geometry cook's budget stage (`tools/actor_geometry/budget_policy.gd`, see
+`actor-geometry-lods.md`) gives such a refit a simplified base that it draws at
+every distance: the largest simplified level within twice its Human fit's
+triangles whose error meets the LOD policy's 3 px clamp from 8 m, or, when no
+level within twice does, the smallest level that does (removing at least a
+quarter); a refit with no such level keeps its full mesh. The refit's own
+vertices, UVs and materials are kept. It takes effect only where the game
+applies cooked actor geometry.
 
 ## Asset-generation decision
 

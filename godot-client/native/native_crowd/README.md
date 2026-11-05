@@ -8,6 +8,24 @@ client path:
   dictionary object, shallow-copies each touched actor record once, and returns
   the touched ids. A malformed payload and a local actor's command 19 are
   detected before mutation and return `invalid` or `fallback` respectively.
+- `NativeCrowdReducer.reduce_run(actors, payloads, local_actor_id, stamp)`
+  (rust-batch R2, RB-C7) reduces a run of consecutive command-2 payloads that
+  AppState buffered without decoding, in arrival order, with the result of
+  reducing them one after another in GDScript: each touched record is copied
+  and written back once per run, and AppState's step-time stamps
+  (`ServerTimePacing.stamp`/`unstamp`, passed in as `stamp`) are applied right
+  after each step command, as `_stamp_step` applies them. It stops before the
+  first packet that must keep the GDScript path (`local_leave`,
+  `record_not_dictionary`, `invalid_payload`) and returns
+  `{status, reason, consumed, changed_ids, facets, commands, applied, stamped,
+  unstamped}`; `facets` holds a mask per changed id (move, command, facing,
+  sit, combat, life: AppState's `FACET_*`). Only `ok` and `fallback` write;
+  a malformed `stamp` returns `invalid` and writes nothing.
+- Both reducers insert a field a record lacks under its String name, as
+  `ActorReducer` does: Godot 4.7 keeps a StringName key's type on insert, and
+  such keys made `var_to_bytes` (and `keys()`) of sparse records differ from
+  the GDScript result before RB-C7. Present fields are written through cached
+  StringNames.
 - `NativeCrowdStore` keeps command-hot scalar fields in a contiguous
   `vector<ActorState>` and resolves the protocol's 16-bit actor ids through a
   fixed 65,536-entry id-to-slot index. Removal swaps the last record into the
@@ -23,6 +41,22 @@ sources (see `../client_runtime/README.md`). Each library registers a class
 only when it is not registered yet, so this extension and `client_runtime` load
 in either order. A build of this extension from before those guards logs
 "already registered" errors when it loads after `client_runtime`; rebuild it.
+
+The game takes these classes from one loader, `src/runtime/native_crowd.gd`
+(RB-C1g). It uses the verified `client_runtime` payload and loads this
+extension (`res://bin/native_crowd.gdextension`) only when
+`ELORIA_NATIVE_PROVIDER=benchmark` names it; without that variable a class this
+extension registered is refused (`provider_untrusted`) and the caller stays on
+GDScript. To measure or parity-test this build rather than the payload, set
+`ELORIA_NATIVE_PROVIDER=benchmark` beside `ELORIA_NATIVE_CROWD=1` or
+`ELORIA_NATIVE_PRESENTATION` in the commands below. The native runtime kill
+switch (`RABBITLANDS_NATIVE_RUNTIME=off`) turns this provider off too.
+Whichever library registers a class first provides it. In the game, `Main._ready`
+loads the payload at startup, so there the payload's kernels win even with
+`ELORIA_NATIVE_PROVIDER=benchmark`, unless no verified payload is installed or
+this build registered first (AppState, an autoload that starts before Main,
+loads it for `ELORIA_NATIVE_CROWD=1`). `NativeCrowd.snapshot()` names the
+provider of each kernel.
 
 The compact store owns only `x`, `y`, command, sequence, facing, health, and the
 sit/combat/alive flags. The caller still owns names, map placement, appearance,
@@ -88,6 +122,7 @@ $env:TEMP = "$isolated/temp"
 $env:TMP = $env:TEMP
 $env:ELORIA_CROWD_EXPECT_USER_ROOT = $isolated
 $env:ELORIA_NATIVE_CROWD = "1"
+$env:ELORIA_NATIVE_PROVIDER = "benchmark"
 New-Item -ItemType Directory -Force -Path `
   $env:APPDATA,$env:LOCALAPPDATA,$env:USERPROFILE,$env:TEMP,$results | Out-Null
 foreach ($test in @(
@@ -114,6 +149,7 @@ export XDG_CACHE_HOME="$isolated/xdg-cache"
 export TMPDIR="$isolated/tmp"
 export ELORIA_CROWD_EXPECT_USER_ROOT="$isolated"
 export ELORIA_NATIVE_CROWD=1
+export ELORIA_NATIVE_PROVIDER=benchmark
 for test in test_native_crowd test_native_crowd_app_state \
   test_native_crowd_edges; do
   taskset -c 0-3 godot --headless --path godot-client \
@@ -125,7 +161,18 @@ Then run the reducer-only timing comparison. It records GDScript, native
 Dictionary reduction, packed state with per-packet export, and packed state
 with deferred export. The last mode is deliberately labelled non-equivalent.
 Reset, reduction, and materialization components run as a separate timing pass,
-so their clock reads do not inflate the total-mode measurements.
+so their clock reads do not inflate the total-mode measurements. With a
+reducer that has `reduce_run` it also records `nativeRun` (the capture as one
+run) and an `appState` section: AppState end to end (`_on_packet` per packet,
+then `take_changed_actors`) in the `gdscript`, `packet` (R1) and `run` (R2)
+reducer modes, with and without current server-time stamps, every trial's
+final table compared with the GDScript mode. `--runtime-dir=<payload>` (after
+`--`) loads a payload built outside the project.
+
+The coalesced AppState path has its own parity suite,
+`tests/test_native_crowd_run_parity.gd` (run it with `--runtime-dir=` and
+`--expect-native=present`; without a payload that has `reduce_run` its native
+parts SKIP).
 
 Use the same isolated environment initialized above. On Windows, while the
 PowerShell variables from the parity run are still active:
@@ -171,6 +218,10 @@ experiments. They do not require the native actor reducer. Leave
 | `both` or `1` | Native | Native | GDScript |
 | `world` | GDScript | GDScript | Native |
 | `all` | Native | Native | Native |
+
+`script`, `gdscript` and `legacy` also select GDScript. Unset means each
+kernel's default in `src/runtime/native_crowd.gd`, which is off until the
+kernel's own release-build A/B.
 
 The source checkout remains usable without a built extension. A requested
 kernel that is unavailable falls back to the existing GDScript implementation.

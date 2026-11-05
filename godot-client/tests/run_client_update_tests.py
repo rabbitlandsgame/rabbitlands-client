@@ -53,6 +53,8 @@ def main() -> None:
         if result.returncode or "SCRIPT ERROR" in result.stderr:
             raise RuntimeError(result.stderr or f"{script} exited {result.returncode}")
 
+    # Launch options on their own, as the updater project compiles them.
+    run("tests/test_launch_renderer.gd")
     run("tests/test_client_updates.gd", root / "install-fixture")
     run("tests/test_client_update_cleanup.gd", root / "cleanup-fixture")
     run("tests/test_store_updates.gd", root / "store-install-fixture")

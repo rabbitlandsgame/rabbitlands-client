@@ -3,6 +3,14 @@ extends SceneTree
 ## while raw external candidates remain usable in lean and authoring tests.
 
 const Extras := preload("res://src/actors/glb_mesh_extras.gd")
+const ActorGeometry := preload("res://src/actors/actor_geometry.gd")
+## Cooked actor geometry (actor LODs, ALOD-C1h) adds package-time LOD chains to
+## the raw parse of a file its catalogue lists; tests/test_actor_geometry_parse_hook.gd
+## covers that. This test is about the parse paths themselves, so the applier
+## reads a folder with no catalogue: a cooked developer root cannot change what
+## it checks, and the raw fallback is what an exported build without a
+## catalogue draws.
+const NO_GEOMETRY_ROOT := "user://imported-actor-lods-no-geometry"
 const BODY := "res://assets/actors/native/races/luminous_male.glb"
 # The Human male fits (each generated piece's base scene since the P7 cleanup).
 const TORSO := "res://assets/actors/native/equipment/variants/human_male/amberwood_woodland_cuirass_01.glb"
@@ -17,11 +25,23 @@ func _init() -> void:
 
 
 func _run() -> void:
+	var saved := {}
+	for variable: String in [ActorGeometry.MODE_ENVIRONMENT, ActorGeometry.ROOT_ENVIRONMENT]:
+		saved[variable] = OS.get_environment(variable)
+	OS.set_environment(ActorGeometry.MODE_ENVIRONMENT, "sidecar")
+	OS.set_environment(ActorGeometry.ROOT_ENVIRONMENT, ProjectSettings.globalize_path(NO_GEOMETRY_ROOT))
+	ActorGeometry.reset()
 	_check_minimal_extras_reader()
 	_check_cached_actor_body()
 	_check_cached_equipment_resources()
 	_check_external_fallback()
 	GlbSceneCache.clear()
+	for variable: String in saved:
+		if str(saved[variable]).is_empty():
+			OS.unset_environment(variable)
+		else:
+			OS.set_environment(variable, str(saved[variable]))
+	ActorGeometry.reset()
 	print("imported actor LODs: %s (%d checks)" % [
 		"PASS" if _failures == 0 else "FAIL (%d)" % _failures, _checks])
 	quit(1 if _failures > 0 else 0)
@@ -61,6 +81,8 @@ func _check_cached_actor_body() -> void:
 	else:
 		_expect(body_lods == 0,
 			"a lean actor body fallback does not generate LODs at runtime")
+		_expect(int(ActorGeometry.snapshot().reasons.get("no_catalog", 0)) > 0,
+			"the raw fallback hands its parse to the actor geometry applier, which finds no catalogue")
 	body.free()
 
 

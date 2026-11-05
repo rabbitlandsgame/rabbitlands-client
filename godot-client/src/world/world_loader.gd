@@ -35,8 +35,23 @@ const MapImageExtension := preload("res://src/world/map_image_extension.gd")
 # culling meaningful while cutting draw calls by more than an order of
 # magnitude. The rendered result is the same geometry with the same materials
 # at the same transforms.
+#
+# Which instances batch at all is decided per BATCH_CELL_METRES cell: at least
+# BATCH_MINIMUM_INSTANCES of one mesh in one cell. On the continent and in
+# gauntlets each such batch is then split by size class into smaller cells
+# (WorldDistanceClasses: 32/48/64/96 m), each drawn by its own MultiMesh whose
+# node stands at its members' centre, so a 180 m cell no longer draws a whole
+# grove for one tree in view. The split never moves an instance in or out of
+# batching, so the look passes and caches see the same members.
 const BATCH_MINIMUM_INSTANCES := 4
+# The legacy membership cell, and the cap on a class cell (a manifest's
+# `rendering.batchCellMetres` replaces it in both roles).
 const BATCH_CELL_METRES := 180.0
+const WorldDistanceClasses := preload("res://src/world/world_distance_classes.gd")
+# The runtime distance pass (WD-C3): ranges, shadow rules and LOD bias by size
+# class, applied after the cache snapshot and before the look pass on every
+# load path (`_apply_world_distance`), so caches stay tier-neutral.
+const WorldDistance := preload("res://src/world/world_distance.gd")
 # Stamped on every source node a batch swallowed, naming the MultiMeshInstance3D
 # that now draws it and its slot in that multimesh. A batched prop is otherwise
 # untraceable from the node the rest of the client still holds, and OccluderFade
@@ -568,9 +583,12 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 	var prototypes: int = _resolve_shared_meshes(manifest, generated)
 	if prototypes > 0:
 		print_debug("world_load stage=shared_meshes placements=", prototypes,
-			" parsed=", ExternalMeshPool.last_parsed, " shared=", ExternalMeshPool.last_shared)
+			" parsed=", ExternalMeshPool.last_parsed, " shared=", ExternalMeshPool.last_shared,
+			" lods=", ExternalMeshPool.last_lods)
 	load_phases[&"sharedMeshPlacements"] = prototypes
 	load_phases[&"sharedMeshParsed"] = ExternalMeshPool.last_parsed
+	# Prototypes this load gave generated LODs (WD-C5, ExternalMeshPool).
+	load_phases[&"sharedMeshLods"] = ExternalMeshPool.last_lods
 	mark = _phase(&"sharedMeshes", mark)
 	world_root.name = "ImportedWorld_" + manifest.asset_id()
 	operation_began = Time.get_ticks_usec()
@@ -631,6 +649,7 @@ func load_world(manifest_path: String, arrival := Vector3.INF, wait_for_arrival 
 		load_phases[&"total"] = mark-began
 		load_completed.emit(manifest)
 		return
+	_apply_world_distance()
 	# Look pass (a no-op with ELORIA_LOOK=0): paint the ground and
 	# the crowns. After the cache snapshot, so the cache keeps the loader's own
 	# materials.
@@ -748,6 +767,9 @@ var _cache_overrides: Dictionary = {}
 ## The loader's own `material_override` by node index, for the nodes that had
 ## one (see `_snapshot_for_cache`).
 var _cache_material_overrides: Dictionary = {}
+## What the distance pass changed after the snapshot ([[node, {property:
+## value before}]], WorldDistance.apply_root), put back for the pack.
+var _cache_distance: Array = []
 
 ## Reads the region back from the cache, if there is an entry for exactly this
 ## package and this format version. Returns true when the world is in the tree
@@ -795,6 +817,22 @@ func _apply_underground_scenery() -> void:
 	load_phases[&"undergroundPlacements"] = count
 	load_phases.merge(diagnostics,true)
 
+## The runtime distance pass (WorldDistance.apply_loaded) on the loaded tree:
+## after `_resolve_batch_links` and, on the raw path, after the cache snapshot,
+## before the look pass. A pending cache write keeps what the pass changed so
+## `_restore_pristine` packs the loader's own values.
+func _apply_world_distance() -> void:
+	var record := not _cache_nodes.is_empty()
+	var result := WorldDistance.apply_loaded(world_root, manifest, record)
+	if result.is_empty():
+		return
+	load_phases[&"worldDistance"] = int(result.usec)
+	load_phases[&"worldDistanceRanged"] = int(result.ranged)
+	load_phases[&"worldDistanceLodOnly"] = int(result.lod_only)
+	load_phases[&"worldDistanceShadowsOff"] = int(result.shadows_off) + int(result.ground_shadows_off)
+	if record:
+		_cache_distance = result.get("undo", [])
+
 func _materialize_geometry_world() -> bool:
 	if OS.get_thread_caller_id() != OS.get_main_thread_id() or _geometry_native.is_empty(): return false
 	var began := Time.get_ticks_usec()
@@ -811,6 +849,7 @@ func _materialize_geometry_world() -> bool:
 	world_root.name = "ImportedWorld_"+manifest.asset_id()
 	add_child(world_root)
 	_resolve_batch_links()
+	_apply_world_distance()
 	var look_began := Time.get_ticks_usec()
 	LookGround.paint_loaded(world_root,manifest)
 	LookFoliage.paint_loaded(world_root,manifest)
@@ -885,6 +924,7 @@ func _materialize_prepared_world() -> bool:
 	ResourceDiagnostics.record(_resource_timings, &"scene_attach", attach_began, true)
 	_resolve_batch_links()
 	PreparedPlacements.install(world_root, manifest, prepared_entry)
+	_apply_world_distance()
 	LookGround.paint_loaded(world_root, manifest)
 	LookFoliage.paint_loaded(world_root, manifest)
 	GauntletSurfaceContrast.apply(manifest, world_root)
@@ -972,6 +1012,7 @@ func _load_from_cache(mark: int, began: int) -> bool:
 	cache_status = &"hit"
 	print_debug("world_load stage=cache_hit file=", cache_file,
 		" batches_relinked=", relinked)
+	_apply_world_distance()
 	# Look pass (not with ELORIA_LOOK=0): paint the ground and the crowns, as a
 	# fresh load does.
 	LookGround.paint_loaded(world_root, manifest)
@@ -1149,6 +1190,7 @@ func _snapshot_for_cache() -> void:
 
 func _release_snapshot() -> void:
 	_cache_nodes.clear()
+	_cache_distance.clear()
 	_cache_material_overrides.clear()
 	_cache_visible.resize(0)
 	_cache_overrides.clear()
@@ -1242,6 +1284,10 @@ func _save_entry(packed: PackedScene, path: String, map_id: String) -> void:
 ## Puts back what the loader left, and returns what to undo afterwards.
 func _restore_pristine() -> Array:
 	var undo: Array = []
+	if not _cache_distance.is_empty():
+		# The distance pass's ranges, shadows and LOD bias (WD-C3), so an entry
+		# never bakes one quality's or one zoom's values in.
+		undo.append([self, "world_distance", WorldDistance.restore(_cache_distance)])
 	for index: int in _cache_nodes.size():
 		var node: Node = _cache_nodes[index]
 		if not is_instance_valid(node):
@@ -1279,7 +1325,9 @@ func _undo_pristine(undo: Array) -> void:
 		var node: Node = entry[0] as Node
 		if not is_instance_valid(node):
 			continue
-		if entry[1] is String and str(entry[1]) == "material_override":
+		if entry[1] is String and str(entry[1]) == "world_distance":
+			WorldDistance.restore(entry[2] as Array)
+		elif entry[1] is String and str(entry[1]) == "material_override":
 			(node as GeometryInstance3D).material_override = entry[2] as Material
 		elif entry[1] is String:
 			(node as Node3D).visible = bool(entry[2])
@@ -1743,11 +1791,17 @@ func _batch_static_instances(mesh_instances: Array) -> void:
 	var cell_size: float = maxf(1.0, float(rendering.get("batchCellMetres",
 		BATCH_CELL_METRES)))
 	var groups: Dictionary = {}
+	var classed: bool = manifest != null and WorldDistanceClasses.applies_to(manifest.data)
+	# Each candidate's imported-root placement, walked once (class split only).
+	var placements: Dictionary = {}
 	for node_value: Variant in mesh_instances:
 		var mesh_instance: MeshInstance3D = node_value as MeshInstance3D
 		if not _is_batchable(mesh_instance):
 			continue
-		var origin: Vector3 = _import_transform(mesh_instance).origin
+		var placement: Transform3D = _import_transform(mesh_instance)
+		if classed:
+			placements[mesh_instance.get_instance_id()] = placement
+		var origin: Vector3 = placement.origin
 		var key: String = "%d|%d|%d|%d|%d|%d|%d" % [
 			mesh_instance.mesh.get_instance_id(), mesh_instance.layers,
 			mesh_instance.cast_shadow, mesh_instance.gi_mode,
@@ -1762,12 +1816,38 @@ func _batch_static_instances(mesh_instances: Array) -> void:
 		var members: Array = groups[key_value] as Array
 		if members.size() < minimum:
 			continue
-		_create_batch(members, batches)
-		batches += 1
 		collapsed += members.size()
+		if not classed:
+			_create_batch(members, batches)
+			batches += 1
+			continue
+		for part: Dictionary in _class_cells(members, cell_size, placements):
+			_create_batch(part["members"] as Array, batches, str(part["class"]), placements)
+			batches += 1
+	load_phases[&"staticBatches"] = batches
+	load_phases[&"staticBatchInstances"] = collapsed
 	if batches > 0:
 		print_debug("world_load stage=static_batching batches=", batches,
-			" instances=", collapsed)
+			" instances=", collapsed, " class_cells=", classed)
+
+## One legacy batch's members split into size-class cells
+## (WorldDistanceClasses.partition), each {"class", "members": Array}.
+## `placements` maps a member's instance id to its imported-root transform.
+func _class_cells(members: Array, cap: float, placements: Dictionary) -> Array[Dictionary]:
+	var origins := PackedVector3Array()
+	var radii := PackedFloat32Array()
+	var mesh_box: AABB = (members[0] as MeshInstance3D).mesh.get_aabb()
+	for value: Variant in members:
+		var placement: Transform3D = placements[(value as Object).get_instance_id()]
+		origins.append(placement.origin)
+		radii.append(WorldDistanceClasses.placement_radius(mesh_box, placement.basis))
+	var cells: Array[Dictionary] = []
+	for part: Dictionary in WorldDistanceClasses.partition(origins, radii, cap):
+		var chosen: Array = []
+		for index: int in part["members"] as PackedInt32Array:
+			chosen.append(members[index])
+		cells.append({"class": part["class"], "members": chosen})
+	return cells
 
 func _is_batchable(mesh_instance: MeshInstance3D) -> bool:
 	var ancestor: Node = mesh_instance
@@ -1806,8 +1886,30 @@ func _is_batchable(mesh_instance: MeshInstance3D) -> bool:
 			return false
 	return true
 
-func _create_batch(members: Array, index: int) -> void:
+## Draws `members` (MeshInstance3D sharing one mesh) from one MultiMesh.
+##
+## A legacy batch (`distance_class` empty) stands at the identity and holds its
+## members' imported-root transforms. A class-split batch stands at its
+## members' centre (WorldDistanceClasses.frame_origin), holds their transforms
+## relative to that, and carries WorldDistanceClasses.CLASS_META: its node
+## origin is its AABB centre, so a visibility range reads the same either way.
+## `known` (instance id -> imported-root transform) spares walking a member's
+## parents a second time.
+func _create_batch(members: Array, index: int, distance_class := "", known: Dictionary = {}) -> void:
 	var reference: MeshInstance3D = members[0] as MeshInstance3D
+	var placements: Array[Transform3D] = []
+	for value: Variant in members:
+		var id := (value as Object).get_instance_id()
+		placements.append(known[id] if known.has(id) else _import_transform(value as MeshInstance3D))
+	var frame := Transform3D.IDENTITY
+	if not distance_class.is_empty():
+		var boxes: Array[AABB] = []
+		var origins := PackedVector3Array()
+		var mesh_box: AABB = reference.mesh.get_aabb()
+		for placement: Transform3D in placements:
+			boxes.append(placement * mesh_box)
+			origins.append(placement.origin)
+		frame.origin = WorldDistanceClasses.frame_origin(boxes, origins)
 	var multimesh: MultiMesh = MultiMesh.new()
 	multimesh.transform_format = MultiMesh.TRANSFORM_3D
 	multimesh.mesh = reference.mesh
@@ -1818,16 +1920,21 @@ func _create_batch(members: Array, index: int) -> void:
 	batch.layers = reference.layers
 	batch.cast_shadow = reference.cast_shadow
 	batch.gi_mode = reference.gi_mode
+	if not distance_class.is_empty():
+		batch.set_meta(WorldDistanceClasses.CLASS_META, distance_class)
 	var parent := world_root.get_node_or_null("StreamActive")
 	(parent if parent != null else world_root).add_child(batch)
-	batch.transform = Transform3D.IDENTITY
+	batch.transform = frame
 	# Taken after add_child, which is what settles the name: a package that
 	# already carries a node called StaticBatch_0_Rock would have had this one
 	# renamed, and a path written before that would point at the wrong node.
 	var batch_path: NodePath = world_root.get_path_to(batch)
 	for member_index: int in members.size():
 		var member: MeshInstance3D = members[member_index] as MeshInstance3D
-		multimesh.set_instance_transform(member_index, _import_transform(member))
+		var placement: Transform3D = placements[member_index]
+		# Relative to the batch's own frame; the identity for a legacy batch.
+		multimesh.set_instance_transform(member_index,
+			Transform3D(placement.basis, placement.origin - frame.origin))
 		# The source node stays in the tree so name lookups, manifest
 		# declarations and tooling keep resolving; it simply stops drawing.
 		member.visible = false

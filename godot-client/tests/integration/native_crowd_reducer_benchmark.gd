@@ -3,6 +3,15 @@ extends SceneTree
 ## The full 300-actor scene benchmark remains the acceptance instrument; this
 ## script answers only whether the native state boundary itself buys enough to
 ## justify integration.
+##
+## RB-C7 (rust-batch R2) adds, when the reducer has `reduce_run`:
+## - `nativeRun`: the whole capture as one coalesced run (one native call);
+## - `appState`: AppState end to end on the same capture (`_on_packet` for every
+##   packet, then the presentation pass's `take_changed_actors`) in the three
+##   reducer modes (`gdscript`, `packet` = R1, `run` = R2), with and without
+##   current server-time stamps, final tables compared with `var_to_bytes`.
+## `--runtime-dir=<payload>` loads a payload built outside the project before
+## the autoloads (as the test_client_runtime_kernels_* wrappers do).
 
 const ACTOR_COUNT := 300
 const ACTIVE_ACTORS := 100
@@ -14,6 +23,12 @@ const TRIALS := 9
 const FIRST_ACTOR_ID := 4000
 
 var failures := 0
+var _app_script: GDScript
+
+func _initialize() -> void:
+	for argument: String in OS.get_cmdline_user_args():
+		if argument.begins_with("--runtime-dir="):
+			preload("res://src/runtime/native_library.gd").load_verified(argument.trim_prefix("--runtime-dir="))
 
 func _init() -> void:
 	call_deferred("_run")
@@ -113,6 +128,22 @@ func _time_native_dictionary(reducer: Object, seed: Dictionary,
 			break
 		for actor_id: int in result.changed_ids:
 			changed[actor_id] = true
+	return {"microseconds": Time.get_ticks_usec() - started,
+		"actors": actors, "changed": changed}
+
+func _time_native_run(reducer: Object, seed: Dictionary,
+		packets: Array[PackedByteArray]) -> Dictionary:
+	var actors: Dictionary = seed.duplicate(true)
+	var changed: Dictionary = {}
+	var packet_array: Array = []
+	packet_array.assign(packets)
+	var started := Time.get_ticks_usec()
+	var result: Dictionary = reducer.call(
+		"reduce_run", actors, packet_array, -1, {}) as Dictionary
+	if result.status != "ok":
+		failures += 1
+	for actor_id: int in result.changed_ids:
+		changed[actor_id] = true
 	return {"microseconds": Time.get_ticks_usec() - started,
 		"actors": actors, "changed": changed}
 
@@ -221,7 +252,10 @@ func _measure_scenario(reducer: Object, store: Object, seed: Dictionary,
 	# Untimed reference and warmup keep class registration and first-call setup
 	# out of the samples.
 	var expected := _time_gdscript(seed, packets)
+	var run_available := reducer.has_method("reduce_run")
 	_time_native_dictionary(reducer, seed, packets)
+	if run_available:
+		_time_native_run(reducer, seed, packets)
 	_time_compact_per_packet(store, seed, packets)
 	_time_compact_deferred(store, seed, packets)
 
@@ -231,6 +265,8 @@ func _measure_scenario(reducer: Object, store: Object, seed: Dictionary,
 		"nativeCompactPerPacket": [] as Array[float],
 		"nativeCompactDeferred": [] as Array[float],
 	}
+	if run_available:
+		samples["nativeRun"] = [] as Array[float]
 	var component_samples: Dictionary = {
 		"nativeCompactPerPacket": {
 			"reset": [] as Array[float], "reduce": [] as Array[float],
@@ -241,6 +277,8 @@ func _measure_scenario(reducer: Object, store: Object, seed: Dictionary,
 	}
 	var mode_order: Array[String] = ["gdscript", "nativeDictionary",
 		"nativeCompactPerPacket", "nativeCompactDeferred"]
+	if run_available:
+		mode_order.append("nativeRun")
 	for trial: int in range(TRIALS):
 		var measured_by_mode: Dictionary = {}
 		for offset: int in range(mode_order.size()):
@@ -252,6 +290,7 @@ func _measure_scenario(reducer: Object, store: Object, seed: Dictionary,
 					reducer, seed, packets)
 				"nativeCompactPerPacket": measured = _time_compact_per_packet(
 					store, seed, packets)
+				"nativeRun": measured = _time_native_run(reducer, seed, packets)
 				_: measured = _time_compact_deferred(store, seed, packets)
 			measured_by_mode[mode] = measured
 			(samples[mode] as Array[float]).append(float(measured.microseconds))
@@ -280,6 +319,70 @@ func _measure_scenario(reducer: Object, store: Object, seed: Dictionary,
 			modes[mode]["components"] = component_report
 	return modes
 
+## AppState end to end: `_on_packet` for every packet, then the presentation
+## pass's `take_changed_actors` (which reduces a pending run), in `mode`. With
+## `stamped`, a current server time stamps remote steps (the production case
+## on a stamping server).
+func _time_app_state(mode: String, seed: Dictionary, packets: Array[PackedByteArray],
+		stamped: bool) -> Dictionary:
+	var state: Node = _app_script.new()
+	var selected: Dictionary = state.call("select_actor_reducer", mode)
+	if str(selected.mode) != mode:
+		state.free()
+		return {"error": "mode %s unavailable (%s)" % [mode, selected]}
+	state.set("actors", seed.duplicate(true))
+	state.set("local_actor_id", -1)
+	if stamped:
+		state.set("_frame_stamps_seen", true)
+		state.set("_frame_step_local_msec", 1000)
+		state.set("_frame_stamp_read_msec", Time.get_ticks_msec() + 3600000)
+	state.call("take_changed_actors")
+	var command: int = EloriaProtocol.ServerMessage.ADD_ACTOR_COMMAND
+	var started := Time.get_ticks_usec()
+	for payload: PackedByteArray in packets:
+		state.call("_on_packet", command, payload)
+	var changed: Dictionary = state.call("take_changed_actors")
+	var elapsed := Time.get_ticks_usec() - started
+	var out := {"microseconds": elapsed, "actors": var_to_bytes(state.get("actors")),
+		"changed": var_to_bytes(changed), "stats": state.call("actor_reducer_stats")}
+	state.free()
+	return out
+
+func _measure_app_state(seed: Dictionary, packets: Array[PackedByteArray],
+		command_count: int) -> Dictionary:
+	var report := {}
+	var modes: Array[String] = ["gdscript", "packet", "run"]
+	for stamped: bool in [false, true]:
+		var reference := _time_app_state("gdscript", seed, packets, stamped)
+		for mode: String in modes:
+			_time_app_state(mode, seed, packets, stamped)
+		var samples := {}
+		var stats := {}
+		for mode: String in modes:
+			samples[mode] = [] as Array[float]
+		for trial: int in range(TRIALS):
+			for offset: int in range(modes.size()):
+				var mode := modes[(trial + offset) % modes.size()]
+				var measured := _time_app_state(mode, seed, packets, stamped)
+				if measured.has("error"):
+					_expect(false, str(measured.error))
+					return report
+				# R1 appends step stamps after the whole packet, so with stamps
+				# only R2 (run) promises the GDScript key order; compare R1 by ==.
+				var same: bool = measured.actors == reference.actors
+				if not same and mode == "packet":
+					same = bytes_to_var(measured.actors) == bytes_to_var(reference.actors)
+				_expect(same and measured.changed == reference.changed,
+					"AppState %s mode (stamped %s) leaves the same actor table and changed set" % [mode, stamped])
+				(samples[mode] as Array[float]).append(float(measured.microseconds))
+				stats[mode] = measured.stats
+		var section := {}
+		for mode: String in modes:
+			section[mode] = _summarize(samples[mode] as Array[float], packets.size(), command_count)
+			section[mode]["reducerStats"] = stats[mode]
+		report["stamped" if stamped else "unstamped"] = section
+	return report
+
 func _run() -> void:
 	var expected_user_root := OS.get_environment(
 		"ELORIA_CROWD_EXPECT_USER_ROOT").replace("\\", "/")
@@ -303,6 +406,8 @@ func _run() -> void:
 		"ELORIA_NATIVE_CROWD activates the integrated AppState path")
 	var reducer: Object = ClassDB.instantiate(&"NativeCrowdReducer")
 	var store: Object = ClassDB.instantiate(&"NativeCrowdStore")
+	_app_script = app_state.get_script()
+	var run_available := reducer.has_method("reduce_run")
 	var report: Dictionary = {
 		"scope": "protocol decode plus reducer and Dictionary output; no actor presentation",
 		"nativeCompactDeferredEquivalent": false,
@@ -326,6 +431,10 @@ func _run() -> void:
 			_seed_actors(LEGACY_ACTOR_COUNT), legacy_packets,
 			LEGACY_PACKET_COUNT * LEGACY_COMMANDS_PER_PACKET),
 	}
+	if run_available:
+		report.scenarios["legacyActorPackets"]["appState"] = _measure_app_state(
+			_seed_actors(LEGACY_ACTOR_COUNT), legacy_packets,
+			LEGACY_PACKET_COUNT * LEGACY_COMMANDS_PER_PACKET)
 	var crowd_packets := _packets()
 	report.scenarios["crowd100Commands"] = {
 		"actors": ACTOR_COUNT,
@@ -335,6 +444,9 @@ func _run() -> void:
 		"modes": _measure_scenario(reducer, store, _seed_actors(),
 			crowd_packets, CROWD_PACKET_COUNT * ACTIVE_ACTORS),
 	}
+	if run_available:
+		report.scenarios["crowd100Commands"]["appState"] = _measure_app_state(
+			_seed_actors(), crowd_packets, CROWD_PACKET_COUNT * ACTIVE_ACTORS)
 
 	var artifacts := OS.get_environment("ELORIA_ARTIFACT_DIR")
 	if artifacts.is_empty():

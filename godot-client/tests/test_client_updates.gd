@@ -151,6 +151,260 @@ func check_per_file_operations() -> void:
 	var free := Packages.space_left(_root)
 	expect(free > 0 and Packages.space_left(_root.path_join("missing/child")) > 0, "free disk space could not be read")
 
+func reference_inspect(root: String, release: Dictionary) -> Dictionary:
+	# The one-thread scan this updater shipped before FIX-UD, kept as the
+	# oracle: per member, a leaf/ancestor link check, then size + SHA-256.
+	var installed: Dictionary = {}
+	var linked := [false]
+	var walk := func(walk: Callable, relative: String) -> void:
+		var directory := DirAccess.open(root.path_join(relative))
+		if directory == null:
+			return
+		directory.include_hidden = true
+		for name: String in directory.get_files():
+			installed[relative + "/" + name] = true
+		for name: String in directory.get_directories():
+			if directory.is_link(name):
+				linked[0] = true
+			else:
+				walk.call(walk, relative + "/" + name)
+	for name: String in Release.ROOTS:
+		if Release.is_link(root.path_join(name)):
+			linked[0] = true
+		elif DirAccess.dir_exists_absolute(root.path_join(name)):
+			walk.call(walk, name)
+	var folded := OS.get_name() == "Windows"
+	var spelled: Dictionary = {}
+	for path: String in installed:
+		spelled[path.to_lower()] = path
+	var claimed: Dictionary = {}
+	var directories: Dictionary = {}
+	var plan := {"needed": [], "unchanged": {}, "changed": {}, "snapshot": {}, "renamed": {}, "retire": [], "linked": false}
+	for package: Dictionary in release.packages:
+		var members: Array = []
+		for index in package.files.size():
+			var entry: Dictionary = package.files[index]
+			var path: String = entry.path
+			var key := path.to_lower() if folded else path
+			var actual: String = spelled.get(key, "") if folded else (path if installed.has(path) else "")
+			claimed[key] = true
+			if actual != "" and actual.get_file() != path.get_file():
+				plan.renamed[path] = actual
+				members.append(index)
+			elif actual == "" or Release.linked_path(root, path, directories) or FileAccess.get_sha256(root.path_join(path)) != entry.sha256 or FileAccess.get_size(root.path_join(path)) != int(entry.size):
+				members.append(index)
+			else:
+				plan.snapshot[path] = [int(entry.size), FileAccess.get_modified_time(root.path_join(path)), entry.sha256]
+		plan.unchanged[package.id] = members.is_empty()
+		if not members.is_empty():
+			plan.changed[package.id] = members
+			plan.needed.append(package.id)
+	for path: String in installed:
+		if not claimed.has(path.to_lower() if folded else path):
+			plan.retire.append(path)
+	plan.linked = linked[0]
+	return plan
+
+func plan_of(checked: Packages.CheckedPlan) -> Dictionary:
+	var needed: Array = []
+	for package: Dictionary in checked.needed:
+		needed.append(package.id)
+	return {"needed": needed, "unchanged": checked.unchanged, "changed": checked.changed, "snapshot": checked.snapshot,
+		"renamed": checked.renamed, "retire": checked.retire, "linked": checked.linked}
+
+func write_bytes(path: String, bytes: PackedByteArray) -> void:
+	DirAccess.make_dir_recursive_absolute(path.get_base_dir())
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	file.store_buffer(bytes)
+	file.close()
+
+func check_parallel_scan() -> void:
+	# The threaded scan must make exactly the plan of the one-thread scan:
+	# same packages, members, snapshot (size, time, hash), renames, retirements.
+	var root := _root + "-scan"
+	Release.remove_tree(root)
+	var packages: Array = []
+	var inventory: Dictionary = {}
+	var noise := RandomNumberGenerator.new()
+	noise.seed = 42
+	var empty_sha := "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+	for package_index in 24:
+		var files: Array = []
+		for index in 12:
+			var path := "%s/pack-%02d/file-%02d.bin" % [Release.ROOTS[package_index % 2], package_index, index]
+			var bytes := PackedByteArray()
+			bytes.resize(noise.randi_range(1, 3000))
+			for at in bytes.size():
+				bytes[at] = noise.randi() % 256
+			write_bytes(root.path_join(path), bytes)
+			var digest := HashingContext.new()
+			digest.start(HashingContext.HASH_SHA256)
+			digest.update(bytes)
+			files.append({"path": path, "size": bytes.size(), "sha256": digest.finish().hex_encode()})
+			inventory[path] = bytes
+		packages.append({"id": "pack-%02d" % package_index, "files": files})
+	# Two large files, hashed first and largest first.
+	for name: String in ["app/RabbitLands.pck", "eloria-assets/maps/large.glb"]:
+		var large := PackedByteArray()
+		large.resize(Packages.SCAN_LARGE_BYTES + (4096 if name.ends_with(".pck") else 0))
+		large.fill(7 if name.ends_with(".pck") else 9)
+		write_bytes(root.path_join(name), large)
+		var digest := HashingContext.new()
+		digest.start(HashingContext.HASH_SHA256)
+		digest.update(large)
+		packages[0].files.append({"path": name, "size": large.size(), "sha256": digest.finish().hex_encode()})
+	var release := {"packages": packages}
+	# Unchanged files, plus: damaged at the same size, resized, missing, renamed
+	# in case (Windows), not listed, a large file damaged at the same size, an
+	# empty file that matches and an empty file that should have bytes.
+	var damaged: String = packages[3].files[2].path
+	var flipped: PackedByteArray = inventory[damaged].duplicate()
+	flipped[0] = (flipped[0] + 1) % 256
+	write_bytes(root.path_join(damaged), flipped)
+	write_bytes(root.path_join(packages[5].files[0].path), PackedByteArray([1, 2, 3]))
+	DirAccess.remove_absolute(root.path_join(packages[7].files[4].path))
+	var renamed_path: String = packages[9].files[1].path
+	if OS.get_name() == "Windows":
+		DirAccess.rename_absolute(root.path_join(renamed_path), root.path_join(renamed_path.get_base_dir().path_join(renamed_path.get_file().to_upper())))
+	write(root.path_join("app/pack-10/extra-not-listed.txt"), "retire me")
+	var resaved := PackedByteArray()
+	resaved.resize(Packages.SCAN_LARGE_BYTES)
+	resaved.fill(8)
+	write_bytes(root.path_join("eloria-assets/maps/large.glb"), resaved)
+	packages[11].files.append({"path": "app/pack-11/empty.bin", "size": 0, "sha256": empty_sha})
+	write_bytes(root.path_join("app/pack-11/empty.bin"), PackedByteArray())
+	packages[12].files.append({"path": "eloria-assets/pack-12/now-empty.bin", "size": 5, "sha256": "fives".sha256_text()})
+	write_bytes(root.path_join("eloria-assets/pack-12/now-empty.bin"), PackedByteArray())
+	var reference := reference_inspect(root, release)
+	var phases: Array = []
+	var progress := func(phase: String, completed: int, total: int, _detail := "") -> void:
+		phases.append([phase, completed, total])
+	for threads: int in [1, 2, 4, 9]:
+		phases.clear()
+		var checked := Packages.inspect(root, release, progress, threads)
+		var plan := plan_of(checked)
+		expect(JSON.stringify(plan, "", true) == JSON.stringify(reference, "", true), "a %d-thread scan made another plan:\n%s\nreference:\n%s" % [threads, plan, reference])
+		var zeros := 0
+		var last := -1
+		var ordered := true
+		for row: Array in phases:
+			expect(row[0] == "Checking installed packages", "the scan reported another phase: %s" % [row])
+			zeros += 1 if row[1] == 0 else 0
+			ordered = ordered and int(row[1]) >= last and int(row[1]) <= int(row[2])
+			last = row[1]
+		expect(zeros == 1 and ordered and not phases.is_empty() and phases[-1][1] == phases[-1][2], "%d-thread scan progress is not 0 once, rising, then complete: %s" % [threads, phases])
+	var expected_needed := ["pack-00", "pack-03", "pack-05", "pack-07", "pack-12"]
+	if OS.get_name() == "Windows":
+		expected_needed.insert(4, "pack-09")
+	expect(reference.needed == expected_needed and reference.retire == ["app/pack-10/extra-not-listed.txt"] and reference.snapshot.has("app/pack-11/empty.bin") and reference.snapshot.has("app/RabbitLands.pck"), "the scan fixture lost a case: %s" % [reference])
+	# A folder link inside the roots is noted and never followed (Windows junction).
+	if OS.get_name() == "Windows":
+		var target := root + "-outside"
+		write(target.path_join("x.bin"), "outside")
+		var output: Array = []
+		if OS.execute("cmd.exe", ["/c", "mklink", "/J", root.path_join("app/linked").replace("/", "\\"), target.replace("/", "\\")], output) == 0:
+			packages[1].files.append({"path": "app/linked/x.bin", "size": 7, "sha256": "outside".sha256_text()})
+			reference = reference_inspect(root, release)
+			var checked := Packages.inspect(root, release, Callable(), 4)
+			expect(checked.linked and reference.linked and JSON.stringify(plan_of(checked), "", true) == JSON.stringify(reference, "", true), "a linked folder changed the threaded plan")
+			expect(checked.changed.get("pack-01", []).has(packages[1].files.size() - 1), "a file behind a folder link was trusted")
+			DirAccess.remove_absolute(root.path_join("app/linked"))
+		Release.remove_tree(target)
+	# A file link to the right bytes is replaced, never hashed through. Making a
+	# file link needs Developer Mode or elevation on Windows; skip it otherwise.
+	var member: String = packages[2].files[3].path
+	var outside := root + "-outside-file"
+	DirAccess.make_dir_recursive_absolute(outside)
+	DirAccess.rename_absolute(root.path_join(member), outside.path_join("real.bin"))
+	var made := -1
+	if OS.get_name() == "Windows":
+		made = OS.execute("cmd.exe", ["/c", "mklink", root.path_join(member).replace("/", "\\"), outside.path_join("real.bin").replace("/", "\\")], [])
+	else:
+		made = OS.execute("ln", ["-s", outside.path_join("real.bin"), root.path_join(member)], [])
+	if made == 0 and Release.is_link(root.path_join(member)):
+		reference = reference_inspect(root, release)
+		var checked := Packages.inspect(root, release, Callable(), 4)
+		expect(checked.changed.get("pack-02", []).has(3) and reference.changed.get("pack-02", []).has(3) and JSON.stringify(plan_of(checked), "", true) == JSON.stringify(reference, "", true), "a file link was hashed through")
+		DirAccess.remove_absolute(root.path_join(member))
+	else:
+		print("SKIP: file links cannot be created here; the file-link scan case did not run.")
+		DirAccess.rename_absolute(outside.path_join("real.bin"), root.path_join(member))
+	Release.remove_tree(outside)
+	# The thread count: auto by default, one restores the sequential scan.
+	OS.set_environment("RABBITLANDS_UPDATE_SCAN_THREADS", "1")
+	expect(Packages.scan_threads() == 1, "RABBITLANDS_UPDATE_SCAN_THREADS=1 was ignored")
+	OS.set_environment("RABBITLANDS_UPDATE_SCAN_THREADS", "99")
+	expect(Packages.scan_threads() == Packages.SCAN_THREADS_LIMIT, "the scan thread override is not bounded")
+	OS.set_environment("RABBITLANDS_UPDATE_SCAN_THREADS", "many")
+	var automatic := clampi(OS.get_processor_count() - 1, 1, Packages.SCAN_THREADS_DEFAULT)
+	expect(Packages.scan_threads() == automatic, "an invalid scan thread override was used")
+	OS.unset_environment("RABBITLANDS_UPDATE_SCAN_THREADS")
+	expect(Packages.scan_threads() == automatic, "the automatic scan thread count changed")
+	# The scan's file check: size first, then SHA-256 of the whole file.
+	var probe := root.path_join("probe.bin")
+	write(probe, "check me")
+	expect(Release.check_file(probe, 8, "check me".sha256_text()), "check_file refused a matching file")
+	expect(not Release.check_file(probe, 7, "check me".sha256_text()) and not Release.check_file(probe, 8, "check mE".sha256_text()), "check_file accepted a wrong size or hash")
+	expect(not Release.check_file(root.path_join("missing.bin"), 0, empty_sha) and not Release.check_file(root, 0, empty_sha), "check_file accepted a missing file or a folder")
+	Release.remove_tree(root)
+
+func codec_release(schema: int, row_extra: Dictionary) -> Dictionary:
+	# The smallest package manifest validate() accepts, with row_extra merged
+	# into its one inventory row.
+	var commit := "b".repeat(40)
+	var version := "RabbitLands-Windows-20261104-bbbbbbbbb"
+	var base := "https://github.com/o/r/releases/download/client-%s/" % commit
+	var digest := "c".repeat(64)
+	var row := {"path": "app/RabbitLands.pck", "size": 10, "sha256": digest}
+	row.merge(row_extra, true)
+	var part := {"url": base + version + ".pkg.client.zip.001", "size": 100, "sha256": digest}
+	var package := {"id": "client", "sha256": digest, "size": 100, "unpacked_size": 10, "file_count": 1,
+		"files": [row], "parts": [part]}
+	return {"schema": schema, "bootstrap_schema": 1, "commit": commit, "platform": "windows", "repository": "o/r",
+		"version": version, "packages": [package], "size": 100, "unpacked_size": 10, "file_count": 1,
+		"parts": [part], "sha256": digest,
+		"updater": {"url": base + version + "-updater.exe", "size": 5, "sha256": digest},
+		"uninstall": {"url": base + version + "-uninstall.exe", "size": 5, "sha256": digest}}
+
+func check_codec_schema() -> void:
+	# Manifest schema 3 (W2-UD-05): the package reader, with zstd inventory rows.
+	for schema: Variant in [2, 2.0, 3, 3.0]:
+		expect(Release.package_manifest({"schema": schema}), "schema %s is not read as packages" % schema)
+	for schema: Variant in [1, 1.0, 4, 3.5, "3", null]:
+		expect(not Release.package_manifest({"schema": schema}), "schema %s was read as packages" % schema)
+	expect(not Release.package_manifest({}), "a manifest without a schema was read as packages")
+	var identity := {"repository": "o/r", "platform": "windows"}
+	expect(not Packages.validate(codec_release(2, {}), identity).has("error"), "the schema 2 fixture is invalid")
+	expect(not Packages.validate(codec_release(3, {}), identity).has("error"), "schema 3 without codecs was rejected")
+	expect(not Packages.validate(codec_release(3, {"codec": "zstd"}), identity).has("error"), "a schema 3 zstd row was rejected")
+	expect(Packages.validate(codec_release(2, {"codec": "zstd"}), identity).has("error"), "a codec was accepted under schema 2")
+	for codec: Variant in ["ZSTD", "gzip", "", 1, null, ["zstd"]]:
+		expect(Packages.validate(codec_release(3, {"codec": codec}), identity).has("error"), "codec %s was accepted" % str(codec))
+	# Signed: JSON turns the schema into a float; verify_manifest dispatches it.
+	var verified := Release.verify_manifest(envelope(codec_release(3, {"codec": "zstd"})), _identity)
+	expect(not verified.has("error") and Release.package_manifest(verified), "a signed schema 3 manifest was rejected: %s" % verified.get("error", ""))
+	expect(Release.verify_manifest(envelope(codec_release(2, {"codec": "zstd"})), _identity).has("error"), "a signed schema 2 codec row was accepted")
+	expect(Release.verify_manifest(envelope(codec_release(4, {})), _identity).get("error", "") == "The update format is unsupported.", "a future schema was not refused")
+	# Chunk frames: exact size or nothing; the caller rejects any other size.
+	var plain := PackedByteArray()
+	plain.resize(300000)
+	for index in plain.size():
+		plain[index] = (index * 7 + (index >> 10)) % 251
+	var frame := plain.compress(FileAccess.COMPRESSION_ZSTD)
+	expect(frame.size() < plain.size() and Packages.decode_chunk(frame, plain.size()) == plain, "a zstd chunk did not round-trip")
+	expect(Packages.decode_chunk(frame, plain.size() - 1).is_empty(), "a frame larger than its chunk was decoded")
+	expect(Packages.decode_chunk(frame, plain.size() + 1).size() == plain.size(), "a short frame did not come back short")
+	var damaged := frame.duplicate()
+	damaged[damaged.size() >> 1] = damaged[damaged.size() >> 1] ^ 0x55
+	expect(Packages.decode_chunk(damaged, plain.size()) != plain, "a damaged frame decoded to the original bytes")
+	expect(Packages.decode_chunk(frame.slice(0, frame.size() >> 1), plain.size()).is_empty(), "a truncated frame was decoded")
+	expect(Packages.decode_chunk(plain, plain.size()).is_empty(), "raw bytes were decoded as a zstd frame")
+	expect(Packages.decode_chunk(PackedByteArray(), 10).is_empty(), "an empty frame was decoded")
+	var full := PackedByteArray()
+	full.resize(Release.CHUNK_BYTES)
+	full.fill(7)
+	expect(Packages.decode_chunk(full.compress(FileAccess.COMPRESSION_ZSTD), Release.CHUNK_BYTES) == full, "a full 8 MiB chunk did not round-trip")
+
 func _initialize() -> void:
 	_key = Crypto.new().generate_rsa(2048)
 	var a := "a".repeat(40)
@@ -220,6 +474,8 @@ func _initialize() -> void:
 	expect(FileAccess.get_file_as_string(_root.path_join("app/RabbitLands.exe")) == "old exe", "interrupted install did not restore old executable")
 	expect(FileAccess.get_file_as_string(_root.path_join("eloria-assets/map.json")) == "old map", "interrupted install changed untouched world")
 	check_per_file_operations()
+	check_parallel_scan()
+	check_codec_schema()
 	Release.remove_tree(_root)
 	print("Client update runtime checks: ", "PASS" if _failures == 0 else "FAIL")
 	quit(0 if _failures == 0 else 1)

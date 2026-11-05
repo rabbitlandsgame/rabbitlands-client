@@ -276,3 +276,189 @@ func _ready() -> void:
             if original.poll() is None:
                 subprocess.run(["taskkill", "/PID", str(original.pid), "/T", "/F"], capture_output=True)
                 original.wait(timeout=5)
+
+
+# A stand-in game for the renderer relaunch handshake. Each start records what
+# it was given, then follows the next step of relaunch-plan.json in the install
+# root: optionally record settings (as RendererPolicy does before it asks for a
+# restart), write the running lease (as ClientUpdates does) and stay a while,
+# then exit with a code or crash the engine.
+RELAUNCH_GAME = '''extends Node
+const Release = preload("res://src/updates/release.gd")
+func _ready() -> void:
+    var root := OS.get_environment("ELORIA_INSTALL_ROOT")
+    var steps: Array = Release.read_json(root.path_join("relaunch-plan.json")).get("runs", [])
+    var done: Array = Release.read_json(root.path_join("relaunch-runs.json")).get("runs", [])
+    var step: Dictionary = steps[done.size()] if done.size() < steps.size() else {"exit": 0}
+    var encoded := OS.get_environment("RABBITLANDS_LAUNCH_CONTEXT")
+    var context: Variant = JSON.parse_string(Marshalls.base64_to_utf8(encoded)) if encoded != "" else null
+    done.append({"user": Array(OS.get_cmdline_user_args()), "context": context, "pid": OS.get_process_id(),
+        "features": OS.get_environment("RABBITLANDS_LAUNCHER_FEATURES"),
+        "lock_owner": Release.read_json(root.path_join(".eloria-launcher-lock/owner.json")).get("pid", 0)})
+    Release.save_json(root.path_join("relaunch-runs.json"), {"runs": done})
+    if step.has("settings"):
+        var config := ConfigFile.new()
+        config.load("user://eloria_hud.cfg")
+        for key: String in step.settings:
+            var value: Variant = step.settings[key]
+            config.set_value("graphics", key, int(value) if value is float else value)
+        config.save("user://eloria_hud.cfg")
+    if step.get("lease", false):
+        var cache := Release.cache_for(root)
+        DirAccess.make_dir_recursive_absolute(cache)
+        Release.save_json(cache.path_join("running-%d.json" % OS.get_process_id()), {"pid": OS.get_process_id()})
+    if step.has("sleep"):
+        OS.delay_msec(int(step.sleep))
+    if step.get("crash", false):
+        OS.crash("relaunch fixture crash")
+    get_tree().quit(int(step.get("exit", 0)))
+'''
+
+# The updater runs headless here. These test seams make it compute the renderer
+# arguments of a game with a display, while the game itself still starts headless.
+# With relaunch-start-fails in the install root, every start after the first
+# fails, and _fail records whether a backup removal was still running then.
+RELAUNCH_LAUNCHER = ('func _game_headless() -> bool:\n\treturn false\n'
+    'var _test_starts := 0\n'
+    'func _start_process(path: String, game_args: PackedStringArray) -> int:\n'
+    '\t_test_starts += 1\n'
+    '\tif _test_starts > 1 and FileAccess.file_exists(_root.path_join("relaunch-start-fails")):\n'
+    '\t\treturn -1\n'
+    '\treturn super._start_process(path, PackedStringArray(["--headless"]) + game_args)\n'
+    'func _fail(message: String) -> void:\n'
+    '\tRelease.save_json(_root.path_join("relaunch-fail.json"), {"message": message,\n'
+    '\t\t"cleanup_running": _backup_cleanup != null, "lock_held": DirAccess.dir_exists_absolute(_root.path_join(".eloria-launcher-lock"))})\n'
+    '\tsuper._fail(message)\n')
+
+TRIAL = {"auto_renderer": "mobile", "auto_renderer_basis": "integrated_gpu",
+         "auto_renderer_adapter": "Intel(R) UHD Graphics 620", "auto_renderer_state": "trial",
+         "auto_renderer_attempts": 1}
+
+
+def settings_text(values):
+    lines = ["[notes]", "", 'text="keep [graphics] notes"', "", "[graphics]", ""]
+    for key, value in values.items():
+        lines.append(f'{key}="{value}"' if isinstance(value, str) else f"{key}={value}")
+    return "\n".join(lines) + "\n"
+
+
+def settings_values(text):
+    values, section = {}, ""
+    for line in text.splitlines():
+        if line.startswith("["):
+            section = line.strip("[]")
+        elif "=" in line and section == "graphics":
+            key, value = line.split("=", 1)
+            values[key] = value.strip('"') if value.startswith('"') else int(value) if value.lstrip("-").isdigit() else value
+    return values
+
+
+def engine_renderer(record):
+    engine = record["context"]["engine"]
+    return engine[engine.index("--rendering-method") + 1] if "--rendering-method" in engine else ""
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Native Windows export and process exit codes")
+def test_exported_updater_relaunches_a_renderer_restart_once_and_gives_up_failed_trials(fixture):
+    f = fixture
+    updater = export_test_updater(f, "relaunch", launcher_methods=RELAUNCH_LAUNCHER)
+    project = f["tmp_path"] / "relaunch-game"
+    shutil.copytree(CLIENT / "src/updates", project / "src/updates")
+    shutil.copytree(CLIENT / "assets/branding", project / "assets/branding")
+    # The game and its updater share one user directory, as the real ones do.
+    (project / "project.godot").write_text('config_version=5\n[application]\nconfig/name="Relaunch probe"\n'
+        'config/use_custom_user_dir=true\nconfig/custom_user_dir_name="Godot/app_userdata/Eloria"\n'
+        'run/main_scene="res://main.tscn"\n[rendering]\nrenderer/rendering_method="gl_compatibility"\n')
+    (project / "main.gd").write_text(RELAUNCH_GAME)
+    (project / "main.tscn").write_text('[gd_scene load_steps=2 format=3]\n[ext_resource type="Script" path="res://main.gd" id="1"]\n[node name="Probe" type="Node"]\nscript=ExtResource("1")\n')
+    (project / "export_presets.cfg").write_text(package_client.EXPORT_PRESETS)
+    installed = f["installed"]
+    for args in (["--headless", "--path", str(project), "--import"],
+                 ["--headless", "--path", str(project), "--export-release", "Windows Desktop", str(installed / "app/RabbitLands.exe")]):
+        result = subprocess.run([str(f["godot"]), *args], capture_output=True, text=True, timeout=120)
+        assert result.returncode == 0 and "SCRIPT ERROR" not in result.stdout + result.stderr, result.stdout + result.stderr
+    for kind in ("updater", "uninstall"):
+        shutil.copyfile(updater, installed / f"RabbitLands-{kind}.exe")
+    settings = Path(f["env"]["APPDATA"]) / "Godot/app_userdata/Eloria/eloria_hud.cfg"
+    settings.parent.mkdir(parents=True, exist_ok=True)
+
+    def launch(initial, runs, *user, returncode=0):
+        (installed / "relaunch-runs.json").unlink(missing_ok=True)
+        (installed / "relaunch-plan.json").write_text(json.dumps({"runs": runs}))
+        if initial is None:
+            settings.unlink(missing_ok=True)
+        else:
+            settings.write_text(settings_text(initial))
+        completed = subprocess.run([str(installed / "RabbitLands-updater.exe"), "--headless", "--", "--root",
+            str(installed), "--launch-only", *user], cwd=installed / "app", env=f["env"], timeout=90,
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        assert completed.returncode == returncode
+        assert not (installed / ".eloria-launcher-lock").exists(), "the launcher releases the lock when it ends"
+        records = json.loads((installed / "relaunch-runs.json").read_text())["runs"]
+        return records, settings.read_text() if settings.exists() else None
+
+    # A fresh profile: the game records a trial, counts the restart and exits 75.
+    records, text = launch(None, [{"exit": 75, "settings": {"renderer": "auto", **TRIAL}}, {"exit": 0}])
+    assert len(records) == 2, records
+    first, second = records
+    # One launcher holds the installation lock for both starts.
+    assert first["lock_owner"] and first["lock_owner"] == second["lock_owner"], records
+    assert first["lock_owner"] not in (first["pid"], second["pid"])
+    assert all("renderer-relaunch" in record["features"].split(",") for record in records), records
+    assert first["pid"] != second["pid"]
+    assert engine_renderer(first) == "" and engine_renderer(second) == "mobile", records
+    assert "--graphics-renderer-restarted" not in first["user"]
+    assert second["user"] == first["user"] + ["--graphics-renderer-restarted"], records
+    assert second["context"]["user"] == second["user"], "the relaunched game gets its own launch context"
+    assert settings_values(text)["auto_renderer_state"] == "trial"
+
+    # The relaunched trial start fails at once: Automatic gives Mobile up ...
+    records, text = launch({"renderer": "auto"}, [{"exit": 75, "settings": TRIAL}, {"exit": 3}])
+    values = settings_values(text)
+    assert len(records) == 2 and engine_renderer(records[1]) == "mobile", records
+    assert values["auto_renderer_state"] == "failed_start", text
+    assert values["auto_renderer"] == "mobile" and values["auto_renderer_attempts"] == 1, text
+    assert 'text="keep [graphics] notes"' in text
+    # ... and the next launch starts the project default.
+    records, after = launch(values, [{"exit": 0}])
+    assert len(records) == 1 and engine_renderer(records[0]) == "", records
+    assert after == settings_text(values)
+
+    # An engine crash on an ordinary trial start (no relaunch) counts as well.
+    records, text = launch({"renderer": "auto", **TRIAL}, [{"crash": True}])
+    assert len(records) == 1 and engine_renderer(records[0]) == "mobile", records
+    assert settings_values(text)["auto_renderer_state"] == "failed_start", text
+
+    # A second request is not relaunched, and 75 is no failure.
+    records, text = launch(None, [{"exit": 75, "settings": {"renderer": "auto", **TRIAL}}, {"exit": 75}, {"exit": 0}])
+    assert len(records) == 2, records
+    assert settings_values(text)["auto_renderer_state"] == "trial"
+
+    # Errors that are not a failed trial leave the settings alone.
+    confirmed = {"renderer": "auto", **TRIAL, "auto_renderer_state": "ok", "auto_renderer_attempts": 0}
+    for initial, user, renderer in ((confirmed, (), "mobile"),
+                                    ({**TRIAL, "renderer": "forward_plus"}, (), "forward_plus"),
+                                    ({"renderer": "auto", **TRIAL}, ("--client-compatibility",), "gl_compatibility")):
+        records, text = launch(initial, [{"exit": 3}], *user)
+        assert len(records) == 1 and engine_renderer(records[0]) == renderer, (initial, records)
+        assert text == settings_text(initial), (initial, text)
+
+    # The first start ran long enough to begin removing the previous
+    # installation's backup, then asked for a relaunch that cannot start. The
+    # removal is stopped before the lock is given up (no other updater may
+    # install meanwhile).
+    backup = installed / ".eloria-previous"
+    (backup / "app").mkdir(parents=True, exist_ok=True)
+    for index in range(8):
+        (backup / "app" / f"old-{index}.bin").write_bytes(b"previous" * 64)
+    (installed / "relaunch-fail.json").unlink(missing_ok=True)
+    (installed / "relaunch-start-fails").write_text("")
+    try:
+        records, text = launch({"renderer": "auto"}, [{"lease": True, "sleep": 3000, "exit": 75}], returncode=1)
+    finally:
+        (installed / "relaunch-start-fails").unlink(missing_ok=True)
+    assert len(records) == 1, records
+    assert not backup.exists(), "the backup removal began during the first start"
+    failed = json.loads((installed / "relaunch-fail.json").read_text())
+    assert "could not start" in failed["message"] and failed["lock_held"], failed
+    assert failed["cleanup_running"] is False, "the backup removal still ran when the lock was given up"

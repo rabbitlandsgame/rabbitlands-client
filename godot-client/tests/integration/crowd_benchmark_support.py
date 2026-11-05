@@ -106,7 +106,12 @@ WAVE1_SWITCHES = ("ELORIA_FSR", "ELORIA_WORLD_TEXT_IDLE", "ELORIA_SHADOW_FIT", "
                   "ELORIA_WORLD_PARK", "ELORIA_INTERIOR_WARMUP", "RABBITLANDS_OPTIMIZATION_PROFILE")
 WAVE2_SWITCHES = ("RABBITLANDS_MEMORY_CLASS", "ELORIA_WORLD_DISTANCE", "ELORIA_ACTOR_IMAGES",
                   "ELORIA_ACTOR_VRAM_SELF_TEST", "RABBITLANDS_ACTOR_GEOMETRY", "RABBITLANDS_ACTOR_GEOMETRY_ROOT",
-                  "RABBITLANDS_CONTENT_DIGEST", "RABBITLANDS_CONTENT_DIGEST_THREADS", "RABBITLANDS_CAPE_MATH")
+                  "RABBITLANDS_CONTENT_DIGEST", "RABBITLANDS_CONTENT_DIGEST_THREADS", "RABBITLANDS_CAPE_MATH",
+                  "ELORIA_WORLD_SCENERY_RELEASE", "RABBITLANDS_NATIVE_REDUCER",
+                  # Stage-B kill switches, so one tree can A/B its feature: the client_runtime
+                  # load (D-NATIVE), the actor preparer's worker parse (AW-04a) and LOW's far
+                  # plane (WD-C4). A tree without them ignores the variable.
+                  "RABBITLANDS_NATIVE_RUNTIME", "ELORIA_ACTOR_PREPARER", "ELORIA_VIEW_REACH")
 SWITCH_NAMES = WAVE1_SWITCHES + WAVE2_SWITCHES
 # --switch may set these; the others have dedicated options (--memory-class,
 # --diagnostics text_pass_always) or are the runner's own (ELORIA_VRAM_TEXTURES).

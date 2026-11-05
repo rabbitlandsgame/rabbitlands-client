@@ -1120,9 +1120,13 @@ func _exit_tree() -> void:
 	if _web_pending or _web_builder != null:
 		ResourceAdmission.event(_admission_token, ResourceAdmission.CANCEL)
 		_cancel_web_preload()
-	if _thread != null and not _admission_token.is_empty():
-		# Preserve the already-owned worker across an unexpected owner exit.
-		# The existing reaper joins only after completion on a later main frame.
+	if _thread != null:
+		# Preserve the already-owned worker across an unexpected owner exit,
+		# whatever its admission token: the default (legacy) admission has none,
+		# and a Thread freed with this node while it runs can hang or crash the
+		# exit (AW-01). Never joined here: the reaper
+		# (ContinentChunkStream.reap_orphans) joins it after completion on a
+		# later main frame.
 		ResourceAdmission.event(_admission_token, ResourceAdmission.CANCEL)
 		ContinentChunkStream._orphan(_thread, {"id": _pending_map, "estimatedResidentBytes": 0,
 			"_admission_token": _admission_token, "_admission_family": "exterior"})

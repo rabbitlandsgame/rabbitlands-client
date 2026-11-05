@@ -19,6 +19,13 @@ PREPARED_WORLD_BLOB_BUCKETS = 128
 PREPARED_WORLD_METADATA_BUCKETS = 8
 MAP_TEXTURE_BUCKETS = 128
 MAP_METADATA_BUCKETS = 8
+# Actor VRAM sidecars (AT-C3: app/assets/actors/<a>/<b>/.../vram/*, the .evt
+# files and their index.json) are a group of their own per actor folder,
+# actors-<a>-<b>-textures. Existing actor files keep their packages, so a
+# code-only or GLB-only release downloads no sidecars and a sidecar change
+# re-downloads no GLB package.
+ACTOR_TEXTURE_BUCKETS = 32
+SIDECAR_DIRECTORY = "vram"
 # The release descriptor names the commit, so its bytes change in every
 # release. The packager writes it twice: app/client-release.json for the
 # updater and launcher, and the loose app/data/client_release.json copy (the
@@ -26,6 +33,11 @@ MAP_METADATA_BUCKETS = 8
 # PCK's package and out of a records bucket of unrelated loose files.
 RELEASE_DESCRIPTOR_PACKAGE = "release-descriptor"
 RELEASE_DESCRIPTOR_PATHS = frozenset({"app/client-release.json", "app/data/client_release.json"})
+# A split PCK (W2-UD-06, tools/pck_split.py): app/RabbitLands.pck is the core
+# pack and stays "client"; each content pack beside it, app/packs/<name>.pck, is
+# a package of its own, pck-<name>, so a release re-downloads exactly the packs
+# whose bytes changed (a code-only release: none of them).
+CONTENT_PACK = re.compile(r"^app/packs/([a-z0-9][a-z0-9-]{0,62})\.pck$")
 
 
 def package_id(relative: str) -> str:
@@ -36,6 +48,9 @@ def package_id(relative: str) -> str:
         return RELEASE_DESCRIPTOR_PACKAGE
     if relative == "app/RabbitLands.pck":
         return "client"
+    content_pack = CONTENT_PACK.match(relative)
+    if content_pack:
+        return "pck-" + content_pack.group(1)
     if relative.startswith("app/prepared-world/") and len(parts) >= 4:
         # Compatibility describes native format/renderer policy, never the
         # game release. Code-only releases can reuse every world package.
@@ -52,6 +67,8 @@ def package_id(relative: str) -> str:
             group, slots = prefix + "-metadata", PREPARED_WORLD_METADATA_BUCKETS
     elif relative.startswith("app/assets/actors/"):
         group, slots = "actors-" + "-".join(parts[3:5]), 16
+        if SIDECAR_DIRECTORY in parts[5:-1]:
+            group, slots = group + "-textures", ACTOR_TEXTURE_BUCKETS
     elif relative.startswith("eloria-assets/maps/"):
         group = "map-" + parts[2]
         if "/vram/" in relative and relative.endswith(".evt"):

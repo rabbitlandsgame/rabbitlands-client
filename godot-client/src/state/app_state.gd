@@ -4,6 +4,7 @@ const ServerClockScript := preload("res://src/network/server_clock.gd")
 const ServerTimePacing := preload("res://src/actors/server_time_pacing.gd")
 const PresenceStateScript := preload("res://src/state/presence_state.gd")
 const MountDeltaStateScript := preload("res://src/mounts/mount_delta_state.gd")
+const NativeCrowd := preload("res://src/runtime/native_crowd.gd")
 ## A stamp times the steps read within this long of it. Every write a
 ## stamping server makes opens with a stamp, so a step read later than a few
 ## frames after the last one came from a send that carried none.
@@ -11,6 +12,24 @@ const FRAME_STAMP_VALID_MSEC := 250
 ## EL's HUMAN, COMPUTER_CONTROLLED_HUMAN and PKABLE_HUMAN: the actor kinds that
 ## are players (main.gd `_minimap_actor_type`).
 const PLAYER_ACTOR_KINDS: Array[int] = [1, 3, 4]
+## Facets of an actor that a command run touched (`changed_facets`), the bits
+## NativeCrowdReducer.reduce_run reports (native_crowd_reducer.cpp).
+const FACET_MOVE := 1
+const FACET_COMMAND := 2
+const FACET_FACING := 4
+const FACET_SIT := 8
+const FACET_COMBAT := 16
+const FACET_LIFE := 32
+## A command run is flushed inside `_on_packet` once it holds this many
+## records, so one flush stays well inside Network's 3-ms dispatch budget,
+## which is checked between packets (`_drain_packet_buffer`).
+const RUN_FLUSH_RECORDS := 512
+## reduce_run's stamp modes: leave stamps alone, stamp remote steps with the
+## current server time (the local actor's are taken off), take every stepped
+## actor's stamp off.
+const RUN_STAMP_NONE := 0
+const RUN_STAMP_CURRENT := 1
+const RUN_STAMP_CLEAR := 2
 ## How often the player's own calling, combat lock and gallop endurance are
 ## restated between riding deltas: as often as the complete tables sent them.
 const MOUNT_COUNTDOWN_MSEC := 100
@@ -88,10 +107,40 @@ var lantern_tutorial: Dictionary = {}
 ## Authoritative field objectives and optional per-view story presentation.
 var campaign: Dictionary = {}
 var actors: Dictionary = {}
-## Optional coarse actor-command reducer. The descriptor is generated only by
-## the native benchmark build, and this instance exists only for an explicit
-## opt-in, so an ordinary source checkout keeps the GDScript path unchanged.
+## Optional coarse actor-command reducer from the verified client_runtime
+## payload (src/runtime/native_crowd.gd). It exists only for the explicit
+## opt-ins (ELORIA_NATIVE_CROWD=1, RABBITLANDS_NATIVE_REDUCER=packet|run) until
+## its own A/B makes it a default, so an ordinary run keeps the GDScript path
+## unchanged.
 var _native_crowd_reducer: Object
+## How ADD_ACTOR_COMMAND packets are reduced (NativeCrowd "Reducer modes"):
+## "gdscript", "packet" (R1: native, one packet at a time) or "run" (R2).
+##
+## In "run" mode a command packet is only appended to `_command_run`, without
+## decoding. The run is reduced in one native call, with the same result as
+## reducing its packets one after another in GDScript, at the first flush
+## point: before any other packet (`_on_packet`), at the end of each Network
+## dispatch pass (`Network.dispatch_drained`), when the run reaches
+## RUN_FLUSH_RECORDS, before a presentation pass takes the changed actors, on a
+## connection change, on a reducer change, and at the latest at the end of the
+## frame (a deferred call, for callers that feed `_on_packet` directly). So
+## nothing reads `actors` between two packets of a run. The difference a
+## listener can see is the count of `&"actors"` signals: one per flush instead
+## of one per packet. `flush_actor_commands()` is the public flush.
+var actor_reducer_mode := "gdscript"
+var _command_runs := false
+var _command_run: Array[PackedByteArray] = []
+var _command_run_records := 0
+var _command_run_flush_queued := false
+var _reducer_stats: Dictionary = {}
+## Facet masks (FACET_*) of the actors in `changed_actors` whose only changes
+## since the last `take_changed_actors` were command runs; an id in
+## `changed_actors` without an entry changed in some other way (all facets).
+## Kept only in "run" mode, and nothing reads it yet: it is the input for a
+## facet-dirty presentation path (rust-batch R2). `take_changed_actors` moves
+## it to `taken_changed_facets`, the facets of the set it hands over.
+var changed_facets: Dictionary = {}
+var taken_changed_facets: Dictionary = {}
 ## The ids of actors written since the presentation last read them. Every
 ## site that writes `actors` records the id here and `take_changed_actors`
 ## hands the set over, so a frame with one moving creature costs one actor's
@@ -251,16 +300,26 @@ var _unseen_mount_rows: Dictionary = {}
 ## The footprint of an actor type, defaulting to a single tile.
 func mark_actor_changed(actor_id: int) -> void:
 	changed_actors[actor_id] = true
+	if _command_runs:
+		changed_facets.erase(actor_id)
 
 func mark_all_actors_changed() -> void:
 	for actor_id: Variant in actors:
 		changed_actors[actor_id] = true
+	if _command_runs:
+		changed_facets.clear()
 
-## The changed set, emptied for the next frame.
+## The changed set, emptied for the next frame. A pending command run is
+## reduced first, so a pass never presents actors behind their packets.
 func take_changed_actors() -> Dictionary:
+	if not _command_run.is_empty():
+		flush_actor_commands()
 	_presentation_pass += 1
 	var taken: Dictionary = changed_actors
 	changed_actors = {}
+	if _command_runs:
+		taken_changed_facets = changed_facets
+		changed_facets = {}
 	return taken
 
 func mount_state_for_actor(actor_id: int) -> Dictionary:
@@ -373,8 +432,18 @@ func _stamp_step(actor_id: int, actor_command: int) -> void:
 
 ## The same for the native reducer's path. A row can only hold a stamp on a
 ## connection that has had one (a dropped connection clears both), so there is
-## nothing to take off before the first.
+## nothing to take off before the first. `stamp_payload` leaves the player's own
+## actor alone, but `_stamp_step` also takes a stamp that actor still holds off
+## at its next step (one it was given as a remote actor, before YOU_ARE named
+## it), so that is done here: one lookup a packet, a scan only while it holds one.
 func _stamp_native_steps(payload: PackedByteArray) -> void:
+	var own: Variant = actors.get(local_actor_id)
+	if own is Dictionary and (own as Dictionary).has(ServerTimePacing.STEP_KEY):
+		for offset: int in range(0, payload.size() - 2, 3):
+			if (ServerTimePacing.is_step_command(payload[offset + 2])
+					and (payload[offset] | (payload[offset + 1] << 8)) == local_actor_id):
+				ServerTimePacing.unstamp(own as Dictionary)
+				break
 	if not _frame_stamps_seen:
 		return
 	var now: int = Time.get_ticks_msec()
@@ -585,29 +654,209 @@ func _ready() -> void:
 	Network.packet_received.connect(_on_packet)
 	MapSceneCache.set_mismatch_sink(_on_map_digest_mismatch)
 
+## The session's reducer from the environment (NativeCrowd.reducer_mode). The
+## default (no variable set) stays on GDScript without touching the loader.
 func _initialize_native_crowd_reducer() -> void:
-	if OS.get_environment("ELORIA_NATIVE_CROWD") != "1":
+	var chosen: Dictionary = NativeCrowd.reducer_mode(NativeCrowd.reducer_environment())
+	if not bool(chosen.wanted):
+		_set_actor_reducer(null, "gdscript")
 		return
-	if not ClassDB.class_exists(&"NativeCrowdReducer"):
-		var extension_path := "res://bin/native_crowd.gdextension"
-		if not FileAccess.file_exists(extension_path):
-			push_error("ELORIA_NATIVE_CROWD requested but its extension is not built")
-			return
-		GDExtensionManager.load_extension(extension_path)
-	if not ClassDB.class_exists(&"NativeCrowdReducer"):
-		push_error("ELORIA_NATIVE_CROWD requested but its extension did not load")
-		return
-	_native_crowd_reducer = ClassDB.instantiate(&"NativeCrowdReducer")
-	if _native_crowd_reducer == null:
-		push_error("ELORIA_NATIVE_CROWD could not instantiate its reducer")
+	var selected := select_actor_reducer(str(chosen.mode))
+	match str(selected.status):
+		"active":
+			if str(selected.mode) != str(chosen.mode):
+				print("Native reducer mode %s requested, %s used (%s)" % [chosen.mode, selected.mode, selected.reason])
+		"runtime_switched_off":
+			print("Native reducer requested, but the native runtime is switched off; GDScript reducer kept")
+		_:
+			push_error("Native reducer requested but unavailable (%s)" % selected.status)
+
+## Chooses how ADD_ACTOR_COMMAND packets are reduced from now on: "gdscript",
+## "packet" or "run" (anything else means "gdscript"). A pending run is reduced
+## first. The native object comes from NativeCrowd (kill switch and provider
+## rule apply); "run" needs `reduce_run` and falls back to "packet" with an
+## older payload. Returns {mode, status, reason}. AppState calls it once at
+## startup; tests and benchmarks call it to compare modes.
+func select_actor_reducer(requested: String) -> Dictionary:
+	flush_actor_commands()
+	var outcome := {"mode": "gdscript", "status": "disabled", "reason": "script_selected"}
+	var reducer: Object = null
+	if requested == "packet" or requested == "run":
+		var made: Dictionary = NativeCrowd.kernel("reducer", true)
+		outcome.status = str(made.status)
+		outcome.reason = str(made.status)
+		reducer = made.object
+		if reducer != null:
+			outcome.mode = requested
+			outcome.reason = "selected"
+			if requested == "run" and not reducer.has_method(&"reduce_run"):
+				outcome.mode = "packet"
+				outcome.reason = "run_unavailable"
+	_set_actor_reducer(reducer, str(outcome.mode))
+	return outcome
+
+func _set_actor_reducer(reducer: Object, mode: String) -> void:
+	_native_crowd_reducer = reducer
+	actor_reducer_mode = mode
+	_command_runs = mode == "run"
+	if not _command_runs:
+		changed_facets.clear()
+		taken_changed_facets.clear()
+	# A stand-in Network (UI tests replace the autoload's script) may lack the
+	# signal; the run's other flush points still apply there.
+	if Network.has_signal(&"dispatch_drained"):
+		var drained: Signal = Network.dispatch_drained
+		if _command_runs and not drained.is_connected(flush_actor_commands):
+			drained.connect(flush_actor_commands)
+		elif not _command_runs and drained.is_connected(flush_actor_commands):
+			drained.disconnect(flush_actor_commands)
+	# Session totals: kept across mode changes, so a fail-closed stays visible.
+	if _reducer_stats.is_empty():
+		_reducer_stats = {"flushes": 0, "segments": 0, "packets": 0, "commands": 0, "applied": 0,
+			"changed": 0, "stamped": 0, "unstamped": 0, "script_packets": 0, "largest_run": 0,
+			"native_failures": 0, "last_failure": ""}
 
 func native_crowd_reducer_active() -> bool:
 	return _native_crowd_reducer != null
+
+## The reducer mode and, for the session's "run" flushes: flushes, native
+## calls (segments), packets, commands (records), applied (records for known
+## actors), changed (actors published), stamped/unstamped, script_packets
+## (packets reduced in GDScript inside a flush: local command 19, a corrupt
+## record), largest_run (packets), native_failures and last_failure, plus
+## pending_packets (a run not reduced yet).
+func actor_reducer_stats() -> Dictionary:
+	var out: Dictionary = _reducer_stats.duplicate()
+	out["mode"] = actor_reducer_mode
+	out["pending_packets"] = _command_run.size()
+	return out
+
+## Reduces the pending command run (see `actor_reducer_mode`). Packets the
+## native reducer hands back - the local actor's command 19, a record that is
+## not a Dictionary - are reduced by the original GDScript loop in their place,
+## between the native segments around them. A native result that is not "ok"
+## or "fallback" fails closed: the rest of the run is reduced in GDScript and
+## the session stays on the GDScript reducer.
+func flush_actor_commands() -> void:
+	if _command_run.is_empty():
+		return
+	var payloads: Array[PackedByteArray] = _command_run
+	_command_run = []
+	_command_run_records = 0
+	_reducer_stats.flushes = int(_reducer_stats.flushes) + 1
+	_reducer_stats.packets = int(_reducer_stats.packets) + payloads.size()
+	_reducer_stats.largest_run = maxi(int(_reducer_stats.largest_run), payloads.size())
+	var start := 0
+	while start < payloads.size():
+		var batch: Array = payloads if start == 0 else payloads.slice(start)
+		var reply: Variant = null
+		if _native_crowd_reducer != null:
+			reply = _native_crowd_reducer.call(&"reduce_run", actors, batch, local_actor_id, _command_run_stamp())
+		var result: Dictionary = reply if reply is Dictionary else {}
+		var status := str(result.get("status", ""))
+		var consumed := int(result.get("consumed", -1))
+		if not ((status == "ok" and consumed == batch.size())
+				or (status == "fallback" and consumed >= 0 and consumed < batch.size())):
+			_fail_closed_run(batch, "%s:%s" % [status, result.get("reason", "")] if reply is Dictionary
+				else "no_result")
+			return
+		_reducer_stats.segments = int(_reducer_stats.segments) + 1
+		if consumed > 0:
+			_publish_command_run(result)
+		if status == "ok":
+			return
+		_reducer_stats.script_packets = int(_reducer_stats.script_packets) + 1
+		_reduce_actor_commands_script(batch[consumed])
+		start += consumed + 1
+
+## One native segment's changes: the ids in first-touch order (the order the
+## GDScript loop marks them) and their facets, then one `&"actors"` signal.
+func _publish_command_run(result: Dictionary) -> void:
+	var ids: PackedInt32Array = result.get("changed_ids", PackedInt32Array())
+	var masks: PackedInt32Array = result.get("facets", PackedInt32Array())
+	for index: int in ids.size():
+		var actor_id: int = ids[index]
+		if not changed_actors.has(actor_id):
+			changed_actors[actor_id] = true
+			changed_facets[actor_id] = masks[index]
+		elif changed_facets.has(actor_id):
+			changed_facets[actor_id] = int(changed_facets[actor_id]) | masks[index]
+	_reducer_stats.commands = int(_reducer_stats.commands) + int(result.get("commands", 0))
+	_reducer_stats.applied = int(_reducer_stats.applied) + int(result.get("applied", 0))
+	_reducer_stats.changed = int(_reducer_stats.changed) + ids.size()
+	_reducer_stats.stamped = int(_reducer_stats.stamped) + int(result.get("stamped", 0))
+	_reducer_stats.unstamped = int(_reducer_stats.unstamped) + int(result.get("unstamped", 0))
+	state_changed.emit(&"actors")
+
+## `_stamp_step`'s inputs for one flush. Every packet of a run arrived after
+## the last stamped frame (a stamp packet flushes the run first), so they share
+## its time; `now` is read once, at the flush.
+func _command_run_stamp() -> Dictionary:
+	var now: int = Time.get_ticks_msec()
+	var stamp := {"mode": RUN_STAMP_CLEAR, "step_key": ServerTimePacing.STEP_KEY,
+		"playout_key": ServerTimePacing.PLAYOUT_KEY, "pass_key": ServerTimePacing.PASS_KEY}
+	if _frame_stamps_seen and now - _frame_stamp_read_msec <= FRAME_STAMP_VALID_MSEC:
+		stamp["mode"] = RUN_STAMP_CURRENT
+		stamp["local_msec"] = _frame_step_local_msec
+		stamp["playout_seconds"] = server_clock.playout_delay_msec(now) / 1000.0
+		stamp["pass_id"] = _presentation_pass
+	return stamp
+
+## The original `"actor_commands"` loop of `_on_packet` for one payload of a
+## run (keep the two in step). The coordinate checks already ran when the
+## packet was appended; command packets carry no coordinates to convert.
+func _reduce_actor_commands_script(payload: PackedByteArray) -> void:
+	if payload.size() % 3 != 0:
+		# Not reached: only whole 3-byte records join a run. As `"invalid"`.
+		recent_protocol_errors.append({"command": EloriaProtocol.ServerMessage.ADD_ACTOR_COMMAND,
+			"error": "actor_command_length", "size": payload.size(), "msec": Time.get_ticks_msec()})
+		if recent_protocol_errors.size() > 50:
+			recent_protocol_errors.pop_front()
+		state_changed.emit(&"protocol_errors")
+		return
+	for offset: int in range(0, payload.size(), 3):
+		var actor_id: int = payload[offset] | (payload[offset + 1] << 8)
+		if actors.has(actor_id):
+			var actor_command: int = payload[offset + 2]
+			var actor: Dictionary = actors[actor_id]
+			actors[actor_id] = ActorReducer.apply_command(actor, actor_command)
+			_stamp_step(actor_id, actor_command)
+			if actor_id == local_actor_id and actor_command == 19:
+				combat_state = _empty_combat_state()
+				state_changed.emit(&"combat_state")
+			mark_actor_changed(actor_id)
+	state_changed.emit(&"actors")
+
+func _fail_closed_run(payloads: Array, reason: String) -> void:
+	push_error("Native reducer run failed (%s); this session continues on the GDScript reducer" % reason)
+	_set_actor_reducer(null, "gdscript")
+	_reducer_stats.native_failures = int(_reducer_stats.native_failures) + 1
+	_reducer_stats.last_failure = reason
+	for payload: PackedByteArray in payloads:
+		_reduce_actor_commands_script(payload)
+
+func _flush_command_run_deferred() -> void:
+	_command_run_flush_queued = false
+	flush_actor_commands()
 
 func _try_native_actor_commands(command: int,
 		payload: PackedByteArray) -> bool:
 	if _native_crowd_reducer == null or command != EloriaProtocol.ServerMessage.ADD_ACTOR_COMMAND:
 		return false
+	if _command_runs:
+		# A malformed packet takes the original path, which reports it; the
+		# run before it is reduced first.
+		if payload.size() % 3 != 0:
+			flush_actor_commands()
+			return false
+		if not _command_run_flush_queued:
+			_command_run_flush_queued = true
+			_flush_command_run_deferred.call_deferred()
+		_command_run.append(payload)
+		_command_run_records += payload.size() / 3
+		if _command_run_records >= RUN_FLUSH_RECORDS:
+			flush_actor_commands()
+		return true
 	var result: Dictionary = _native_crowd_reducer.call(
 		"reduce_packet", actors, payload, local_actor_id) as Dictionary
 	if str(result.get("status", "fallback")) != "ok":
@@ -635,6 +884,9 @@ func _on_map_digest_mismatch(map_id: String, server: String, local: String) -> v
 		map_id, server.substr(0, 12), local.substr(0, 12)])
 
 func _on_connection_state_changed(value: String) -> void:
+	# The packets of a pending run arrived before this change (a dropped link
+	# clears the actors below): reduce them first, as they were reduced then.
+	flush_actor_commands()
 	connection_state = value
 	# "reconnecting" is a waiting state between a drop and the next attempt.
 	# The world was already cleared by the "disconnected" that preceded it, so
@@ -772,6 +1024,10 @@ func _queue_map_marker_removal(marker_id: int) -> void:
 			state_changed.emit(&"map_markers"), CONNECT_ONE_SHOT)
 
 func _on_packet(command: int, payload: PackedByteArray) -> void:
+	# A pending command run is reduced before anything else is handled, so
+	# every other packet sees the actors as the packets before it left them.
+	if not _command_run.is_empty() and command != EloriaProtocol.ServerMessage.ADD_ACTOR_COMMAND:
+		flush_actor_commands()
 	# A whole riding table spread over frames ends at the first packet that is
 	# not one of them (mount_delta_state.gd).
 	if command != EloriaProtocol.ServerMessage.ELORIA_MOUNT_DELTAS and mount_deltas.full_open():

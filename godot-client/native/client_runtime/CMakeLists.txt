@@ -40,12 +40,17 @@ target_sources(client_runtime PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../native_crowd/src/native_crowd_reducer.h)
 target_sources(client_runtime PRIVATE src/client_residency.cpp src/client_residency.h)
 target_sources(client_runtime PRIVATE src/client_digest.cpp src/client_digest.h)
+target_sources(client_runtime PRIVATE src/client_exit_watchdog.cpp src/client_exit_watchdog.h
+    src/client_exit_watchdog_os.cpp src/client_exit_watchdog_os.h)
 target_sources(client_runtime PRIVATE
     src/mounted_cape_body_surface.cpp src/mounted_cape_body_surface.h
     src/mounted_cape_projector.cpp src/mounted_cape_projector.h)
 target_link_libraries(client_runtime PRIVATE godot-cpp "${RL_RUST_LIBRARY}")
 if(WIN32)
     target_link_libraries(client_runtime PRIVATE ws2_32 userenv advapi32 bcrypt ntdll)
+else()
+    # dladdr/dlopen pin the library for the exit watchdog.
+    target_link_libraries(client_runtime PRIVATE ${CMAKE_DL_LIBS})
 endif()
 target_compile_features(client_runtime PRIVATE cxx_std_17)
 set_target_properties(client_runtime PROPERTIES PREFIX "" OUTPUT_NAME "client_runtime")

@@ -26,6 +26,13 @@ extends Node3D
 ##
 ## How lit they are follows the server's clock (DayNightBinder.daylight) and,
 ## a little, the weather: lamps are lit in a dark storm too.
+##
+## Mobile and Compatibility light one mesh instance with at most 8 omni lights
+## (RendererFamily.per_mesh_light_limit) and drop the rest in cull order. A
+## chunk's ground is one mesh, so there the pool keeps at most LIMITED_LIGHTS
+## and Weather3D's fires LIMITED_FIRE_LIGHTS: 8 together.
+
+const RendererFamily := preload("res://src/runtime/renderer_family.gd")
 
 ## Per kit model: where its flame is in the model's own frame (metres), the
 ## colour it burns, the light it throws (energy, range) and its halo's size.
@@ -43,6 +50,8 @@ const LAMPS := {
 ## Real lights by LookProfile.Quality (LOW, MEDIUM, HIGH). The halos are drawn
 ## at every quality.
 const LIGHTS_BY_QUALITY: Array[int] = [4, 8, 12]
+## The most real lights on a renderer with a per-mesh light limit.
+const LIMITED_LIGHTS := 6
 ## How far from the camera's focus a lamp may hold a real light; the light
 ## fades out over the last third of it.
 const LIGHT_REACH := 64.0
@@ -134,8 +143,18 @@ func update(focus: Vector3, minute: float, gloom: float, active := true) -> void
 	_prune()
 	_hand_out_lights(focus, strength)
 
+## How many real lights the pool hands out: LIGHTS_BY_QUALITY at `quality`
+## (-1 for the one in use), at most LIMITED_LIGHTS on a renderer with a
+## per-mesh light limit (`rendering_method`, "" for the one in use).
+static func light_limit(quality := -1, rendering_method := "") -> int:
+	var level: int = LookProfile.quality() if quality < 0 else quality
+	var wanted: int = LIGHTS_BY_QUALITY[clampi(level, 0, LIGHTS_BY_QUALITY.size() - 1)]
+	if RendererFamily.per_mesh_light_limit(rendering_method) > 0:
+		return mini(wanted, LIMITED_LIGHTS)
+	return wanted
+
 func _hand_out_lights(focus: Vector3, strength: float) -> void:
-	var wanted: int = LIGHTS_BY_QUALITY[clampi(LookProfile.quality(), 0, LIGHTS_BY_QUALITY.size() - 1)]
+	var wanted: int = light_limit()
 	var nearest: Array = []
 	if strength > 0.001:
 		for lamps: Array in _lamps.values():

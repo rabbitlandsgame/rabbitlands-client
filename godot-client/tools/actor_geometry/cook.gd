@@ -15,7 +15,9 @@ extends SceneTree
 ## Job (JSON): {schema: 1, mode: "cook" | "verify", root: <absolute catalogue
 ## root>, report: <absolute report path>, policy_digest, raw_digests?: bool,
 ## scene_check?: bool, files: [{path: "res://...", file_sha256, bytes,
-## model_scale}]}.
+## model_scale, lining?, budget?}]} (`lining`: the lining stage's mask input,
+## see lining_policy.gd; `budget`: the budget stage's Human source, see
+## budget_policy.gd).
 ##   cook    parses each file, plans every surface with lod_policy.gd, and
 ##           writes the sidecar of a file with at least one chain to
 ##           <root>/blobs/<sha256>.rlgeo (content-addressed, written through a
@@ -34,6 +36,8 @@ extends SceneTree
 const Format := preload("res://src/actors/actor_geometry_format.gd")
 const ActorGeometry := preload("res://src/actors/actor_geometry.gd")
 const LodPolicy := preload("res://tools/actor_geometry/lod_policy.gd")
+const LiningPolicy := preload("res://tools/actor_geometry/lining_policy.gd")
+const BudgetPolicy := preload("res://tools/actor_geometry/budget_policy.gd")
 const GltfQuantization := preload("res://src/world/gltf_quantization.gd")
 const ActorImages := preload("res://src/actors/actor_images.gd")
 const CreaturePayload := preload("res://src/actors/creature_payload.gd")
@@ -156,6 +160,10 @@ static func cook_file(item: Dictionary, root: String, policy_digest: String, raw
 		summary.reason = "parse"
 		return {"summary": summary}
 	var plan := plan_state(parsed.state, path, source_sha256, source_bytes, float(item.model_scale), raw_digests)
+	# Lining stage (actor LODs C4): masked lining bases from the job's masks.
+	plan = LiningPolicy.apply(parsed.state, plan, item.get("lining", {}))
+	# Budget stage (actor LODs C11): race refits capped against their Human source.
+	plan = BudgetPolicy.apply(parsed.state, plan, item.get("budget", {}))
 	summary["meshes"] = plan.meshes
 	summary["changed_surfaces"] = plan.changed
 	summary["lod_levels"] = plan.levels

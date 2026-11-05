@@ -86,9 +86,16 @@ func _run() -> void:
 	batch.multimesh.transform_format = MultiMesh.TRANSFORM_3D
 	batch.multimesh.mesh = fir_a.mesh
 	batch.multimesh.instance_count = 2
+	# As the loader builds a continent batch (WD-C2): standing at its members'
+	# centre, holding their transforms relative to it, stamped with its class.
+	var fir_box := (fir_a.transform * fir_a.mesh.get_aabb()).merge(fir_b.transform * fir_b.mesh.get_aabb())
+	batch.position = fir_box.get_center()
+	batch.set_meta(&"rl_distance_class", "L")
 	world.add_child(batch)
 	for index: int in 2:
 		var member: MeshInstance3D = [fir_a, fir_b][index]
+		batch.multimesh.set_instance_transform(index,
+			Transform3D(member.transform.basis, member.transform.origin - batch.position))
 		member.visible = false
 		member.set_meta(LookFoliage.BATCH_META, batch)
 		member.set_meta(LookFoliage.BATCH_INDEX_META, index)
@@ -194,6 +201,10 @@ func _run() -> void:
 	_expect(is_equal_approx(float(member_paint.get_shader_parameter(&"look_seed")),
 			fposmod(batch_seed + LookFoliage.INSTANCE_SEED_STEP, 1.0)),
 		"a member's seed is the one the batch's shader gives its instance")
+	var crown_offset: Vector2 = world.get_meta(LookFoliage.CONTINENT_META, Vector2.ZERO)
+	_expect(LookFoliage._crown_place(fir_b, world, batch).is_equal_approx(
+			Vector2(batch.position.x, batch.position.z) + crown_offset),
+		"a batch member takes its crown tint at its batch's centre")
 
 	# The dithered fade.
 	var fade := _fade_of(world, canopy)

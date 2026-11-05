@@ -19,7 +19,9 @@ extends GLTFDocumentExtension
 ## world_loader.gd, external_mesh_pool.gd, glb_scene_cache.gd and
 ## native_animation_importer.gd. The same call registers the world-object
 ## image extension and the actor image extension (src/actors/actor_images.gd),
-## which act only on documents whose GLTFState asks for them.
+## which act only on documents whose GLTFState asks for them, and primes the
+## VRAM sidecar formats (VramTextures.usable_formats) on the main thread for
+## the actor sidecars, before any worker parse can ask.
 
 const ActorImages := preload("res://src/actors/actor_images.gd")
 
@@ -42,8 +44,11 @@ static func ensure_registered() -> bool:
 	_registration_mutex.lock()
 	var quantization: GLTFDocumentExtension = new()
 	var world_images: GLTFDocumentExtension = preload("res://src/world/world_object_images.gd").new()
-	# Its switch is read here, on main, before any worker parse reads it.
+	# Its switch is read here, on main, before any worker parse reads it, and
+	# so are the sidecar formats the renderer samples (a worker asking first
+	# would get none and decode); prime() also logs the package self-test.
 	ActorImages.configure()
+	ActorImages.prime()
 	var actor_images: GLTFDocumentExtension = ActorImages.new()
 	GLTFDocument.register_gltf_document_extension(quantization)
 	GLTFDocument.register_gltf_document_extension(world_images)

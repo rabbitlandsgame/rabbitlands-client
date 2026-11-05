@@ -68,7 +68,9 @@ func _ready() -> void:
 	var identity := Release.read_json("res://data/client_release.json")
 	var manifest := Release.verify_manifest(Release.read_json("res://data/install_manifest.json"), identity, str(identity.get("commit", "")))
 	var error: String
-	if not manifest.has("error") and manifest.schema == 2:
+	# Schemas 2 and 3 (zstd chunks, UD-05u) list packages; the same check as
+	# the updater's, so a schema 3 setup never takes the whole-archive path.
+	if not manifest.has("error") and Release.package_manifest(manifest):
 		error = await _install_packages(manifest, identity)
 	else:
 		error = _install()

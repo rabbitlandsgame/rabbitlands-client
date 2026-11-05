@@ -1360,6 +1360,13 @@ func _drive_for(plan: Dictionary, duration: int, raw: Variant, profile_frames: A
 			_drive_tick(plan, tick)
 			tick += 1
 			next_tick += cadence
+		# RB-C7: a coalesced actor-command run (RABBITLANDS_NATIVE_REDUCER=run) is reduced where the game's
+		# Network.dispatch_drained reduces it, at the end of the dispatch pass: charge it to packetDispatch.
+		# Feature-detected: a tree without reducer modes answers null, so nothing runs there.
+		if str(_app_state.get("actor_reducer_mode")) == "run":
+			var flush_started := Time.get_ticks_usec()
+			_app_state.call("flush_actor_commands")
+			_driver_usec += Time.get_ticks_usec() - flush_started
 		var work: float = await _next_drawn_frame()
 		await process_frame
 		if raw == null:

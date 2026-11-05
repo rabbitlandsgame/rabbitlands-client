@@ -20,6 +20,7 @@ const RING_RADIUS := 0.72
 const PARTICLE_COUNT := 32
 const SpellFlight = preload("res://src/world/spell_flight_3d.gd")
 const SPELL_MATERIALS = preload("res://src/world/spell_visual_material.gd")
+const NativeCrowd := preload("res://src/runtime/native_crowd.gd")
 
 ## The effect classes the server actually uses, by the palette they draw in.
 ## Everything else is neutral rather than guessed at.
@@ -69,20 +70,10 @@ func _init() -> void:
 		_native_details = ArrayMesh.new()
 
 
+## ELORIA_NATIVE_PRESENTATION (world, all) or the feature's default; the
+## builder comes from the verified client_runtime payload (native_crowd.gd).
 func _initialize_native_presentation() -> void:
-	var mode := OS.get_environment("ELORIA_NATIVE_PRESENTATION").strip_edges().to_lower()
-	if mode not in ["world", "all"]:
-		return
-	if not ClassDB.class_exists(&"NativeWorldEffectGeometry"):
-		var extension_path := "res://bin/native_crowd.gdextension"
-		if not FileAccess.file_exists(extension_path):
-			return
-		GDExtensionManager.load_extension(extension_path)
-	if not ClassDB.class_exists(&"NativeWorldEffectGeometry"):
-		return
-	_native_geometry = ClassDB.instantiate(&"NativeWorldEffectGeometry") as RefCounted
-	if _native_geometry != null and not _native_geometry.has_method(&"build"):
-		_native_geometry = null
+	_native_geometry = NativeCrowd.kernel("world").object as RefCounted
 
 
 func native_presentation_active() -> bool:
