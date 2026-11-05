@@ -136,6 +136,56 @@ Set-Location app
 This direct invocation does not run the older restart updater. Use it only to
 compare rendering, then return to the normal launcher for updates.
 
+## Update downloads
+
+From release T on (the first release of
+[desktop R2 delivery](desktop-r2-delivery.md)), installed games and the updater use
+two download locations (see
+[client updates](client-updates.md#release-discovery-and-freshness)):
+
+- `https://assets.rabbitlandsgame.com/desktop/v1/`: the signed release pointer, the
+  signed manifest copies, and the game content of releases built from the owner's
+  content uploads;
+- `https://github.com/rabbitlandsgame/rabbitlands-client/releases/` and the GitHub
+  download hosts it redirects to: the fallback release information, the updater,
+  the engine and native runtime, and the content of GitHub-hosted releases.
+  `api.github.com` answers an ancestry question for older releases.
+
+A firewall, proxy or filter that blocks the first address delays the update check
+by at most 15 seconds, after which the GitHub release is used. Content stored there
+can come only from there, so such an update stops with an error and installs
+nothing; the installed game keeps working. Every download is checked against the
+signed release wherever it comes from, so a proxy that changes bytes causes a
+verification error, never a different game.
+
+When an update fails, keep the updater's message and its log. Run the updater from
+the game folder with a log file outside the game folder. On Windows, in
+PowerShell:
+
+```powershell
+.\RabbitLands-updater.exe --log-file "$env:TEMP\rabbitlands-updater.log" -- --update-only
+```
+
+On Linux:
+
+```sh
+./RabbitLands-updater.x86_64 --log-file /tmp/rabbitlands-updater.log -- --update-only
+```
+
+Lines starting with `Release discovery:` say whether the R2 pointer, the GitHub
+alias or the server's required release was used, and why the pointer was not.
+Progress lines show `retrying in N s` while a part is retried.
+
+| Message | Meaning |
+| --- | --- |
+| The update files are not available yet. Try again later. | A file the release names is not there yet (404). Nothing changed |
+| The update download failed. Check the internet connection and try again. | No reply, an error reply, or a cut transfer; a download part is tried up to three times first |
+| A downloaded package failed verification. | One part arrived with the wrong bytes twice |
+| This update is older than the installed game. | An older release was offered and refused; the installed game is kept |
+| Updater versions disagree; try again later. | Three updater handovers in a row, usually while a release is being published |
+
+Verified parts stay cached, so running the updater again resumes where it stopped.
+
 ## Disconnects and chat colors
 
 Losing a logged-in connection opens the console and preserves the session's chat

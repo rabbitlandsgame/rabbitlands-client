@@ -9,6 +9,9 @@ commit compatibility checks but never download or apply GitHub update payloads.
 
 The Windows/Linux GitHub client checks the latest **published** release when
 it opens, before a server connection is needed. Draft releases are excluded.
+From release T on, it reads the signed release pointer on Cloudflare R2 first and
+uses the GitHub release only as a fallback (see
+[release discovery](#release-discovery-and-freshness)).
 The check verifies the release signature and compares full Git commit ancestry;
 hashes are never treated as increasing version numbers. Current builds and
 descendants of the published release are left alone. Unrelated branches are
@@ -65,6 +68,111 @@ comparison API. Older releases without a stable manifest alias are discovered
 through GitHub's latest-release metadata; their manifest signature is still
 required. No downloads are applied by the startup check itself.
 
+## Release discovery and freshness
+
+From release T on (the helper-train release, the first release of
+[desktop R2 delivery](desktop-r2-delivery.md)), installed games and updaters find
+releases through a small signed **pointer** on
+Cloudflare R2, and fall back to the GitHub release when it cannot be used. Games and
+updaters before T read only the GitHub alias. They reach T's updater through the
+helper handover described [below](#independent-packages-and-the-updater), before
+they read any R2 address.
+
+**The pointer.** The signed record
+`https://assets.rabbitlandsgame.com/desktop/v1/channels/live/<platform>.json`
+names the live release's commit, version and sequence, and the address, size and
+SHA-256 of an immutable copy of its signed manifest under `desktop/v1/manifests/`.
+The R2 base is compiled into the game and the updater; no manifest, server or
+environment setting can change it. Discovery works like this:
+
+1. Read the pointer, waiting at most 15 seconds and reading at most 64 KiB.
+2. Verify it with the pinned release key. Its kind, repository, platform and
+   channel must match, and its sequence must be at least this installation's
+   high-water mark (below).
+3. Fetch the manifest copy it names, limited to that size. Its SHA-256 must be the
+   pointer's, and its commit, version and sequence must be the ones the pointer
+   states.
+
+Any failure falls back to the GitHub `latest` alias: offline, DNS, a challenge
+page, a 404, a bad, foreign or stale signature, or a manifest that is missing or
+differs. A pointer is never taken for a manifest. It has no top-level commit or
+package list, so every release verifier refuses it, and the game refuses any signed
+record that has a `kind`.
+
+At game start, a pointer naming the installed commit, or one of its ancestors, ends
+the check at once, with no manifest download. Otherwise the game compares the
+pointed release by ancestry, as above, and asks when the installed build is behind.
+
+**High-water mark.** `release-pointer.json` in the installation's update cache
+(`client-updates/<installation id>/` in the game's user data folder) holds the
+highest pointer sequence the installation has accepted. It is written with a
+temporary file and a rename, only ever raised, and a missing or damaged file counts
+as no mark. Source and editor runs keep no mark.
+
+**Installed-release record.** After the commit point, the updater and the setup
+helper write `.rabbitlands-release.json` in the installation folder, with a
+temporary file and a rename: the commit, the platform, the manifest's signed
+sequence (0 for a manifest from before T) and, from the updater, the manifest's
+SHA-256. It is also rewritten when an update finds nothing to install. A record
+whose commit differs from `app/client-release.json` (another installer changed the
+game since) is ignored, so a stale record never locks an installation out. A
+pointer is accepted only when its sequence is at least the higher of the mark and
+the record's sequence; an older one counts as stale.
+
+**Downgrade guard.** The updater refuses a manifest whose signed sequence is lower
+than the installed record's, with "This update is older than the installed game.",
+unless a signed pointer marked `rollback: true` named exactly that manifest.
+
+- A manifest from before T has no sequence and counts as 0. An installation without
+  a record (installed before T) behaves as before.
+- When the alias offers an older release, the updater still starts the installed
+  game; `--update-only` and a fresh installation stop with the message.
+- The game applies the same rule before it offers an update, and a download that an
+  earlier game prepared for an older release is dropped the next time the updater
+  installs, never installed.
+- Only discovery is guarded: the pointer, the alias and the server's required
+  release. An installer's own manifest is not: `*-setup.exe`, `*-download.sh` and
+  `--install-manifest` install the release the player chose, and write the record.
+
+**Rollback pointers.** A pointer marked `rollback: true` only admits the one
+manifest it names, even when that release is older than the installed one. The game
+offers only a release that has the installed commit among its ancestors, so an
+installation that already has the newer release moves back only when the player
+runs the updater explicitly (`-- --update-only` or `-- --install-update`).
+
+**The server's required release.** When the game server requires a client commit
+that the installed build lacks (see the table below), and the player has not
+declined an update in this session, the game looks for exactly that release and
+**bypasses the pointer**, which might be frozen or forgotten:
+
+1. the GitHub alias;
+2. the policy's `manifest_url`: a GitHub release download of this repository, or an
+   R2 manifest copy, whose bytes must hash to the SHA-256 in its name.
+
+Only a signed manifest of exactly that commit, not older than the installed
+release, is offered: "The game server requires Rabbit Lands release <commit>."
+Accepting starts the updater with `--target-commit=<commit>` and, when the
+policy names a usable manifest address, `--target-manifest-url=<address>`. The
+updater then installs only that commit: it skips a pointer that names another
+commit, and uses the address when the alias names another commit. When nothing is
+found, a later server notice may try again after five minutes.
+
+**Handover limit.** When a release names another updater, the updater hands over to
+it, and the new updater discovers again with the same request. Each handover adds
+`--handoff-hops=<n>`; at three handovers the updater stops with "Updater versions
+disagree; try again later." The `--target-commit=`, `--target-manifest-url=` and
+`--handoff-hops=` flags belong to the updater: they are removed before the game
+starts and from saved launch modes.
+
+**What the updater logs.** Each discovery prints the path it used:
+
+- `Release discovery: R2 pointer <sequence>, commit <first 9 hex digits>`, with
+  `(rollback)` after the sequence for a rollback pointer;
+- `Release discovery: the R2 pointer was not used (<reason>)`;
+- `Release discovery: the R2 pointer names <commit>, not the requested <commit>`;
+- `Release discovery: GitHub alias, commit <first 9 hex digits>`;
+- `Release discovery: server target, commit <first 9 hex digits>`.
+
 ## Independent packages and the updater
 
 Fresh installation still starts with **one file**: the Windows `*-setup.exe`,
@@ -82,6 +190,13 @@ through `client-assets-f`, selected by the first digit of each part's SHA-256.
 This keeps GitHub's 1,000-assets-per-release limit independent of the total
 package count. Existing `client-assets` URLs remain valid; older builds also use
 `.pkg.<id>.zip.###` names.
+From release T on, releases come from the
+[R2 release workflow](desktop-r2-delivery.md). Content packages built on the
+owner's build machine are stored on Cloudflare R2 as
+`https://assets.rabbitlandsgame.com/desktop/v1/parts/<SHA256>.bin`, in parts of at
+most 64 MiB. The `engine` and `native-runtime` packages and the updater and
+uninstaller stay in the GitHub pools. A release built with the workflow's `ci`
+source keeps all its parts on GitHub.
 Each package has a full ZIP SHA-256, bounded download-part hashes, and a signed
 inventory of its files, sizes and hashes. Fixed groups cover the engine,
 client pack, content packs, release descriptor, actors, maps, audio, shared
@@ -130,11 +245,13 @@ package to zstd downloads nothing extra for an existing installation. Updaters
 before schema 3 refuse the manifest with "The update format is unsupported."
 and delete a stale `pending.json`; they never extract it. They still verify its
 bootstrap rows and replace themselves with the helper it names, and that helper
-reads it. The setup helper (`tools/install_client_payload.gd`) chooses its own
-path by schema, so it must make the same check (`Release.package_manifest`)
-before a schema 3 setup is built, and the Inno script must queue packages for
-schema 3 as it does for schema 2. Releases stay schema 2 until the packaging
-writer emits schema 3.
+reads it. The setup helper (`tools/install_client_payload.gd`) chooses its path
+with the same check (`Release.package_manifest`), and the Inno script queues
+packages for schema 3 as it does for schema 2. The R2 workflow signs schema 3 from
+release T on; only schema 3 may name R2 parts. The local and full-CI builds write
+their payload with the same writer (`release_manifest.release_payload`), in
+canonical bytes and with the lowest schema their rows need: 2, or 3 once rows carry
+zstd.
 
 Loose map textures use 128 stable buckets per map pool, with JSON metadata in
 eight separate buckets. Updating a generated texture or its small index no longer
@@ -166,10 +283,17 @@ are reused. Their URLs stay under `client-assets`, allowing installed launchers
 to update their helpers before validating packages in partitioned storage.
 Storage partitions affect download placement, not package membership or selective
 updates. Both platforms' receipts identify their storage destinations; finalization
-and publication verify bytes at those exact destinations. Unused parts are removed
-only after publication and only when no competing client draft remains.
+and publication verify bytes at those exact destinations. Unused pool parts are
+removed only after publication and only when no competing client draft remains; the
+R2 workflow keeps every part of the releases it retains for rollback, and nothing
+on R2 is deleted.
 The signature still binds the repository, helper kind, platform,
-exact download URL and expected hashes. Arbitrary external URLs are rejected.
+exact download URL and expected hashes. Arbitrary external URLs are rejected. An R2
+part is accepted only in a schema 3 manifest and only at its one derived address,
+`https://assets.rabbitlandsgame.com/desktop/v1/parts/<its signed SHA-256>.bin`:
+no other host, path, port, query or spelling. Updater and uninstaller rows keep the
+GitHub-only rule. A schema 2 or 3 release may list at most 2000 packages and 2000
+parts in all (updaters before T: 850 packages).
 
 For the first upgrade from a client without shared-download support, run the
 new setup file or the newly downloaded standalone updater once. Keep its
@@ -238,9 +362,11 @@ interrupted update was recovered is discarded. Single-part packages are promoted
 directly from their verified download instead of making another complete archive
 copy.
 
-When explicitly run or accepted from the game, the updater checks the stable `RabbitLands-<platform>.json` alias in
-the latest published release. Its **bootstrap schema 1** contract verifies the
-signature, platform and updater/uninstaller hashes before parsing the game
+When explicitly run or accepted from the game, the updater finds the release as
+described under [release discovery](#release-discovery-and-freshness): the signed R2
+pointer first (from release T on), then the stable `RabbitLands-<platform>.json`
+alias in the latest published release. Its **bootstrap schema 1** contract verifies
+the signature, platform and updater/uninstaller hashes before parsing the game
 package format. If the updater needs replacement, it downloads and verifies
 its successor, hands over to a temporary copy outside the installation, closes
 the original, replaces the executables, and restarts. Windows never overwrites
@@ -295,6 +421,13 @@ The declaration is a compatibility check, like client capabilities; it is not
 an anti-cheat attestation of executable code.
 
 ## Build machine setup
+
+Player releases go through [desktop R2 delivery](desktop-r2-delivery.md). There
+the build machine builds content with `package_client.py --no-client-updates`, which
+needs no key, and GitHub Actions signs in owner-approved jobs. Once the owner moves
+the signing key into those jobs, it is no longer on the build machine. The signed
+local builds below need that key, so they serve only the transition before the key
+moves, and distributions with a key of their own.
 
 Signed release builds require the existing release private key matching
 `godot-client/data/update_public.pem`. The private key is not included in a
@@ -370,10 +503,14 @@ The output is `../dist/releases/client-<full-client-commit>/`:
   is blocked, and a helper still working in the background keeps the installation
   locked until it finishes. Locks left by a crashed helper can be recovered on retry.
   Online setup undoes an interrupted per-file update before it plans, as the
-  launcher does. It asks for free space of two copies of its download (setup keeps
-  its downloads until it exits; its helper copies them into the update cache) plus
-  the larger of the unpacked game and its largest multi-part package, plus 512 MiB.
-  Multi-part packages are joined before unpacking starts, so the two never add up.
+  launcher does. It asks for free space of one copy of its download (its helper
+  moves each verified download from setup's temporary folder into the update cache:
+  a rename on one drive, a copy across drives) plus the larger of the unpacked game
+  and its largest multi-part package, plus 512 MiB. Multi-part packages are joined
+  before unpacking starts, so the two never add up. A setup for an R2 release
+  downloads its content parts from R2 and the rest from GitHub. A failed or
+  tampered download stops setup before its helper runs and installs nothing; run
+  setup again.
   Setup can repair the same build. Players need an internet connection, and
   do not manually download the update parts. Shortcuts start the restart updater.
 - **Linux:** one `*-download.sh` helper. It verifies and starts the native
@@ -405,13 +542,28 @@ reused across builds.
 
 ## Upload a complete desktop release
 
-For bounded-storage hosted builds, see [runner builds](runner-builds.md). That
-path builds one platform per job, streams verified parts into an existing draft,
-and finalizes small receipts without copying full builds between jobs. The
-desktop Actions workflow then publishes automatically after both platforms and
-all required checks pass, and retires older compiled releases after verifying
-the public replacement. The local upload commands below retain their explicit
-`--publish` option.
+Desktop releases go through the R2 release workflow and its owner-approved steps;
+see [desktop R2 delivery](desktop-r2-delivery.md) and
+[runner builds](runner-builds.md). Every desktop workflow is dispatch-only: no push
+or merge starts one. The R2 workflow publishes only after the owner's approvals,
+and prunes only in its promote step, keeping whole releases for rollback. The
+transitional full-CI workflow, once dispatched, still publishes its release as
+latest and prunes with the same retention rule after its checks pass; it refuses
+to run once a live R2 pointer exists.
+
+**Do not publish with `build_release.py upload` once a release has gone out through
+the R2 workflow.** The command below predates retention:
+
+- it deletes every other client draft, and with `--publish` every other client
+  release too, including the releases kept for rollback;
+- it marks its release GitHub `latest` without checking the live R2 pointer;
+- its manifests carry no signed sequence, so R2-aware updaters refuse them through
+  the alias as older than the installed game;
+- its bundle is built with the private signing key (`build_release.py build`),
+  which the R2 process keeps in GitHub only.
+
+It remains documented for the transition before the first R2-workflow release, and
+for reference.
 
 First push the selected client commit through the repository's configured SSH
 identity. Uploads require GitHub CLI authenticated as **rabbitlandsgame** with
@@ -426,10 +578,10 @@ python godot-client/tools/build_release.py upload --bundle $RabbitLandsRelease
 This creates or reuses the **current client draft**, using `RELEASE-NOTES.md` as
 its description. The working published release stays available while its
 replacement is prepared and reviewed. Older files in the draft are removed only
-after all replacement files pass verification. After the replacement is published,
-the **Retire previous published client** workflow verifies its checksum inventory
-and retires older published compiled releases. A published release and replacement
-draft can coexist temporarily; compiled version history is not retained afterwards.
+after all replacement files pass verification. With `--publish`, the script then
+deletes the other client releases itself. The **Retire previous published client**
+workflow no longer prunes anything; keep it disabled (see
+[runner builds](runner-builds.md)).
 
 The commit-specific tag keeps signed update URLs tied to the actual build. The
 script verifies that commit exists in the public client repository and refuses
@@ -475,7 +627,9 @@ The server policy can still select an exact packaged client commit.
    `.pkg.<id>.zip.###` part listed in the instructions. Parts are at most 256 MiB.
    Initial installations use the Windows setup file or Linux download helper.
 3. Verify all replacement assets, publish the release and confirm public downloads.
-   Retire the previous compiled release after the replacement is available.
+   Before the first R2-workflow release, retire the previous compiled release after
+   the replacement is available. After it, never delete releases or assets by
+   hand: the R2 workflow keeps the releases needed for rollback.
 4. Put the generated policy into the **served server profile** as
    `client_updates.json`. If both platforms are published, combine their two
    `manifests` rows and keep the same `required_commit`.
@@ -494,29 +648,58 @@ values; do not paste a truncated commit):
 }
 ```
 
+The release workflow's finalize step writes the `manifests` URLs as GitHub
+commit-tag downloads, which every client reads; keep them. R2-aware games (release
+T on) also accept the release's immutable R2 manifest copy,
+`https://assets.rabbitlandsgame.com/desktop/v1/manifests/<platform>/<sha256>.json`,
+whose bytes must hash to the name; older games accept only GitHub release
+downloads. When `required_commit` names a release that the R2 pointer does not,
+R2-aware games skip the pointer and look for that release (see
+[release discovery](#release-discovery-and-freshness)).
+
 The server defaults to re-reading this file every 30 seconds and notifies
 existing connections when the policy changes. A partial/invalid edit retains
 the last valid policy. Write the policy atomically after all assets have been
-published. `enforce: true` blocks incompatible **new logins/character creation**
-before credentials are processed. Connected players finish their session and
-install at restart. `enforce: false` offers the update without blocking login.
+published and, for an R2-workflow release, after the `check-policy` mode of
+`upload_desktop_assets.py` confirms that both live pointers and GitHub `latest`
+name its commit. `enforce: true` blocks incompatible **new logins/character creation**
+before credentials are processed. Connected players are not disconnected and can
+finish their session. Games from release T on also offer the required release (see
+[release discovery](#release-discovery-and-freshness)); earlier games show a
+compatibility notice. `enforce: false` offers the update without blocking login.
 An empty object disables release checks. The server settings
 `client_updates_file` and `client_update_check_seconds` select the file and
 poll interval.
 
 ## Player behavior and recovery
 
-Start with `RabbitLands.bat`, `RabbitLands.sh`, or the installer shortcut. The game shows
-download progress, verifies the signed manifest, verifies every download part
-and each assembled package, and announces when it is ready for the next launch.
-Hashing and assembly run on a worker thread. Failed downloads retry automatically
-with backoff from 30 seconds to five minutes. Parts interrupted by an exit are
-retried; already complete verified parts are reused. Changing the server's
-chosen commit supersedes an in-flight update. Compatible clients receive only
-the compatibility notice and download nothing.
+Start with `RabbitLands.bat`, `RabbitLands.sh`, or the installer shortcut. The game
+itself downloads no update in the background: it asks when it opens, or when the
+game server requires a release, and an accepted update starts the updater. The
+updater shows download progress, verifies the signed manifest, every download
+part and each assembled package, then installs. Hashing and assembly run on a
+worker thread. Compatible clients receive only the compatibility notice and
+download nothing.
 
-The game never overwrites itself while running. On the next launch, the small
-restart launcher verifies the download again, unpacks the changed files to a
+Each download part gets at most three attempts: at once, after 5 seconds and after
+30 seconds, and the progress line shows `<package> (retrying in N s)` meanwhile.
+
+- **Retried:** no reply, a transfer that was cut short, too slow or longer than
+  signed, the replies 403, 408 and 429 and every 5xx reply (for example a challenge
+  page or a busy edge), and one hash mismatch.
+- **Not retried:** 404 or 410, which ends with "The update files are not available
+  yet. Try again later."; other replies; local file errors; and a request that
+  could not start.
+- **Ends:** a second hash mismatch ends with "A downloaded package failed
+  verification." A verified part that cannot be moved into the cache ends with "The
+  verified package download could not be recorded."
+
+Every attempt starts from an empty file and the same signed row: there is no other
+host, and never unverified bytes. Verified parts stay in the update cache, so the
+next run resumes at part granularity, including after an exit.
+
+The game never overwrites itself while running. The updater, once the game has
+closed, verifies the downloads again, unpacks the changed files to a
 sibling staging folder, validates paths/checksums, and moves them into `app/`
 and `eloria-assets/` under the per-file journal. If the launcher stops part-way,
 for example in a crash or power cut, the next start reads the journal and undoes
@@ -611,6 +794,27 @@ Choose the minimum checks for the behavior being changed. For example:
   every part at its derived R2 URL through the real setup helper;
   `test_online_installer_r2.py` covers the setup script, its disk space and a
   tampered or missing R2 part against a local mirror of `desktop/v1/`.
+- R2 parts and per-part retries:
+  `python godot-client/tests/run_client_update_tests.py --godot <godot-path>` runs
+  `test_client_update_r2.gd` against a local HTTPS server with the `desktop/v1/`
+  layout. Only the fixture's copy of `release.gd` moves the R2 base there. It covers
+  scripted 5xx, 429, 403, dropped and garbage replies, a 404 that fails at once and
+  a rerun that fetches only the missing parts, two hash mismatches, a cancelled
+  wait, and R2 rows refused under schema 2.
+  `python -m pytest -q godot-client/tests/test_updater_r2_reader.py` pins the lines
+  the release tools read (the R2 base and the 2000-package limit) and the retry
+  schedule.
+- Release discovery and freshness: the same runner also runs
+  `test_client_update_discovery.gd` (the pointer rules, the mark and record, the
+  downgrade guard, rollback pointers, server targets, the handover limit and flag
+  stripping, with a scripted transport).
+  `python -m pytest -q godot-client/tests/test_updater_discovery.py godot-client/tests/test_startup_updates.py`
+  exports the updater (it needs the installed export templates) and installs through
+  a pointer and R2 parts signed by the release tools with a test key. It also checks
+  the record, an older alias refused, a signed rollback, a replayed pointer, a server
+  target through the R2 copy, the handover limit, and the setup helper writing the
+  record. When the field release's updater (`945042f0`) is in the local Git
+  history, it checks that updater handing over to the R2-aware one.
 - Renderer launch arguments and the relaunch handshake:
   `godot --headless --path godot-client --script res://tests/test_launch_renderer.gd`.
   The runtime runner below also runs it in its updater-only project, which proves

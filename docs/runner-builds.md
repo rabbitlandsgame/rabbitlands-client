@@ -64,8 +64,11 @@ The **prepare** job refuses, before anything is written:
 - invalid or inconsistent inputs. Each input is regex-validated, and the same set
   hash may not be given for both platforms;
 - a tree without whole-release retention (`RETENTION_SCHEMA` below 2);
-- an `r2` source when the commit's updater cannot read R2 rows (`src/updates/release.gd`
-  lacks the `DESKTOP_ASSETS` declaration or stage B's `CODEC_SCHEMA := 3`);
+- an `r2` source when the commit's updater cannot read R2 rows. Its
+  `src/updates/release.gd` must declare `const CODEC_SCHEMA := 3` and exactly
+  `const DESKTOP_ASSETS := "https://assets.rabbitlandsgame.com/desktop/v1/"`, and its
+  `src/updates/package_updates.gd` must read 2000 packages
+  (`release.packages.size() > 2000`). The refusal names the missing declaration;
 - another client draft;
 - a commit that already has a published release. A published commit is never
   released twice.
@@ -108,7 +111,8 @@ with an `r2` source. With `ci` sources, its R2 reads fall back to GitHub without
 failing, and the first R2 reads in this workflow that must succeed are those of
 T's promote job.
 
-Until the packaged commit's updater can read R2 rows, a dry run can only use `ci`
+An `r2` dry run needs a commit whose updater reads R2 rows and a content set already
+uploaded for that commit, so dry runs before the first content upload use `ci`
 sources. Run one before the first real release, and read the disk probes it records.
 
 ## Runner rules
@@ -186,12 +190,21 @@ checks:
    recomputed identity. The core pack's embedded `res://data/client_release.json`
    must equal it too, and `.godot/extension_list.cfg` may name only the CI runtime
    extension.
-7. **The summary.** It writes the artifact `content-<platform>` (`set.json`,
+7. **The split pack.** PCKs are read with `tools/pck_split.py`, the packager's own
+   reader. The core pack's `data/content_packs.json` must list exactly the set's
+   `app/packs/` files, with their signed size and SHA-256; beside a single PCK there
+   may be no `app/packs/` file at all. Every new or changed content pack must have
+   the core's PCK format, engine version and declared entry count, and may hold only
+   entries that `pck_split` assigns to that pack and that the core does not hold. So
+   no script, identity or extension list can ride in a content pack.
+8. **The summary.** It writes the artifact `content-<platform>` (`set.json`,
    `verified.json`, `summary.md`) and appends the summary to the job page. The
    summary lists:
    - added, changed and removed package ids;
    - whether the core `client` package changed;
    - new file extensions and new bytes;
+   - the PCK layout: split or single, the number and bytes of content packs, and
+     how many were read entry by entry;
    - the builder block.
 
    The owner reads it before approving `desktop-sign`.
@@ -217,6 +230,9 @@ with no secret and no cache:
      uninstaller rows are downloaded and checked against their signed SHA-256, so
      the helper bytes are reused exactly. Otherwise the helper is exported.
    - A change to the game's own export preset does not change the fingerprint.
+   - Local and full-CI builds export their helpers the same way:
+     `client_release.export_launcher` uses the same project files, fixed preset and
+     fingerprint, and keys its local helper cache by that fingerprint.
 4. **Root files.** They are made after the helper exists, so launchers start the
    updater with `--launch-only` and the production server
    `game.rabbitlandsgame.com:2001`. They include the human-testing and pilot
@@ -484,7 +500,9 @@ helper-train release T, as a Linux fallback, and during an R2 outage.
    --full-optimizations --prepared-world` and the production `--server`. The
    packager's own upload sink refuses every upload.
 4. **Stage checks.** It checks the stage: the descriptor equals the recomputed
-   identity, and the core pack's identity and extension list are correct.
+   identity, the core pack's identity and extension list are correct, and the split
+   layout passes the same `pck_split` checks as the
+   [content check](#content-check-r2-sources).
 5. **Packing.** It packs the stage with `desktop_content.py --source ci`. That
    applies the same rules as a local pack, keeps the partitioned GitHub pool URLs,
    and validates the set with the commit's own package limit.
@@ -617,7 +635,10 @@ the whole release on two hosted runners with `runner_release.py`:
 - `publish_runner_release.py`, which publishes the release as latest and prunes.
 
 It keeps a verified import and texture cache. A code-only release normally uploads
-only the client code package, a fresh installer and the signed metadata.
+only the client code package, a fresh installer and the signed metadata. Its
+manifests come from the same writer as the R2 workflow's
+(`release_manifest.release_payload`), with the lowest schema their rows need, and no
+`sequence`: R2-aware updaters treat them as older than any R2-era release.
 
 Its status:
 

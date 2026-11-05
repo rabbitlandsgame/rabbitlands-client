@@ -1033,6 +1033,17 @@ are in `actor-geometry-lods.md`.
   Release and runner builds refuse the option until `ACTOR_SIDECARS_RELEASE_ENABLED` is set with AT-C4 (schedule 1.1
   #20). Measured on the wave-2 tree: 680 sidecars (678 unique), 633.2 MB in 98 update packages, 900 MiB on the GPU,
   21 images decoded at the map floors; 177.5 MB without creatures. Default packages are unchanged.
+- **Content from R2 (desktop R2 delivery; not a stage-B item).** Games and updaters read R2 from release T on, and
+  content comes from R2 from the first R2 content release on. Its parts come from
+  `https://assets.rabbitlandsgame.com/desktop/v1/parts/<sha256>.bin` in parts of at most 64 MiB (GitHub-hosted parts
+  stay at 256 MiB), through the same 1 MiB-read transport. Each part gets at most three attempts (at once, after 5 s,
+  after 30 s), so a failed attempt repeats at most 64 MiB. In the R2 self-test on the dev laptop, Godot's
+  `HTTPRequest` fetched a 64 MiB part through the custom domain at 14-16 MB/s, with 1 MiB and 4 MiB reads; `.bin`
+  parts are edge-cached after the first read in a location. A game start whose build is current now reads only the
+  small signed pointer (at most 64 KiB), where it used to fetch the 8-9 MB alias manifest every time. Online setup's
+  helper now moves each verified download into the update cache, so setup asks for one copy of its download, not the
+  two of the stage-A note above. No timed end-to-end update from R2 has been run. Details in
+  `docs/desktop-r2-delivery.md` and `docs/client-updates.md`.
 
 ## First-use camera rotation on Compatibility
 
