@@ -1,7 +1,9 @@
 """Static checks of the desktop release workflows (.github/workflows). No GitHub call, no run, no network."""
 import inspect
+import os
 import re
 import shlex
+import subprocess
 import sys
 from pathlib import Path
 
@@ -16,10 +18,12 @@ WORKFLOWS = REPO / ".github" / "workflows"
 sys.path.insert(0, str(TOOLS))
 import actions_release  # noqa: E402
 import desktop_release_ci  # noqa: E402
+import runner_release  # noqa: E402
 
 R2_FILE, REPOINT_FILE, OLD_FILE = "desktop-release-r2.yml", "desktop-repoint.yml", "desktop-release.yml"
 NEW_FILES = (R2_FILE, REPOINT_FILE)
 DESKTOP_FILES = (OLD_FILE, R2_FILE, REPOINT_FILE, "published-client-cleanup.yml")
+ALL_FILES = tuple(sorted(path.name for path in WORKFLOWS.glob("*.yml")))  # every workflow, store-build.yml too
 KEY = "CLIENT_UPDATE_SIGNING_KEY"
 KEY_VALUE = "${{ secrets.CLIENT_UPDATE_SIGNING_KEY }}"
 PLATFORMS = ("windows", "linux")
@@ -312,7 +316,9 @@ def test_no_cache_in_shipped_binary_legs_and_no_restore_keys(name):
 def test_checkouts_are_exact_partial_and_hold_no_credentials(name):
     for job_name, job in load(name)["jobs"].items():
         checkouts = [step for step in steps(job) if uses(step) == "actions/checkout"]
-        assert len(checkouts) == 1 and steps(job)[0] is checkouts[0], job_name
+        # first, or second after the line-ending step of a job that can run on Windows
+        first = 1 if windows_capable(job) else 0
+        assert len(checkouts) == 1 and steps(job)[first] is checkouts[0], job_name
         options = checkouts[0]["with"]
         assert options["ref"] == "${{ github.sha }}" and options["fetch-depth"] == 0, job_name
         assert options["filter"] == "blob:none" and options["persist-credentials"] is False, job_name
@@ -320,6 +326,75 @@ def test_checkouts_are_exact_partial_and_hold_no_credentials(name):
         paths = options["sparse-checkout"].split()
         expected = SPARSE_R2 if name == R2_FILE else ["/godot-client/tools/", "/godot-client/data/update_public.pem"]
         assert paths == expected, job_name
+
+
+def windows_capable(job: dict) -> bool:
+    """Whether any leg of `job` runs on a Windows runner (a literal image, a matrix row, or the
+    matrix r2-prepare emits from actions_release.RUNNERS)."""
+    runner = job.get("runs-on", "")
+    if runner != "${{ matrix.runner }}":
+        return "windows" in str(runner)
+    matrix = job["strategy"]["matrix"]
+    if isinstance(matrix, str):
+        assert "needs.prepare.outputs" in matrix, matrix
+        return any(image.startswith("windows") for image in actions_release.RUNNERS.values())
+    return any(str(row.get("runner", "")).startswith("windows") for row in matrix["include"])
+
+
+def shell(workflow: dict, step: dict) -> str:
+    return step.get("shell", workflow.get("defaults", {}).get("run", {}).get("shell", ""))
+
+
+@pytest.mark.parametrize("name", ALL_FILES)
+def test_windows_jobs_turn_off_line_ending_conversion_before_checkout(name):
+    """Windows images default to core.autocrlf=true, and a converted checkout fails the native
+    input proof (the second R2 dry run) or ships other bytes. Every job that can run on Windows
+    sets the runner's global Git config first, unconditionally, before any checkout."""
+    workflow = load(name)
+    for job_name, job in workflow["jobs"].items():
+        items = steps(job)
+        exact = [index for index, step in enumerate(items)
+                 if tuple(line.strip() for line in step.get("run", "").splitlines() if line.strip())
+                 == runner_release.EXACT_CHECKOUT_STEPS]
+        if not windows_capable(job):
+            continue
+        checkouts = [index for index, step in enumerate(items) if uses(step) == "actions/checkout"]
+        assert checkouts and exact == [0], (name, job_name)
+        step = items[0]
+        assert set(step) == {"name", "run"} | ({"shell"} if "shell" in step else set()), (name, job_name)
+        assert shell(workflow, step) == "bash", (name, job_name)  # Git Bash on Windows, as the tools' steps
+
+
+def test_the_windows_job_classifier_finds_exactly_the_known_windows_jobs():
+    found = {(name, job_name) for name in ALL_FILES for job_name, job in jobs(name).items() if windows_capable(job)}
+    assert found == {(R2_FILE, "content-ci"), (R2_FILE, "build"), (R2_FILE, "installers"), (R2_FILE, "e2e"),
+                     (OLD_FILE, "build"), ("store-build.yml", "build")}
+    assert REPOINT_FILE in ALL_FILES  # its jobs run on Linux only
+
+
+def test_the_exact_checkout_steps_disable_every_checkout_conversion(tmp_path):
+    """Run on a CRLF-converting machine config, the steps' global settings give a byte-exact checkout."""
+    source = tmp_path / "source"
+    git = ["git", "-c", "user.name=t", "-c", "user.email=t@example.invalid"]
+    subprocess.run(["git", "init", "-q", str(source)], check=True)
+    (source / "native").mkdir()
+    (source / "native/CMakeLists.txt").write_bytes(b"project(x)\nadd_library(x)\n")
+    subprocess.run([*git, "-C", str(source), "add", "-A"], check=True)
+    subprocess.run([*git, "-C", str(source), "commit", "-q", "-m", "x"], check=True)
+    system, home = tmp_path / "system.gitconfig", tmp_path / "home"
+    system.write_text("[core]\n\tautocrlf = true\n", encoding="ascii")  # the windows-2025 image's system config
+    home.mkdir()
+    env = {**os.environ, "GIT_CONFIG_SYSTEM": str(system), "GIT_CONFIG_GLOBAL": str(home / ".gitconfig"),
+           "HOME": str(home)}
+    env.pop("GIT_CONFIG_NOSYSTEM", None)
+    converted = tmp_path / "converted"
+    subprocess.run(["git", "clone", "-q", str(source), str(converted)], check=True, env=env)
+    assert (converted / "native/CMakeLists.txt").read_bytes() == b"project(x)\r\nadd_library(x)\r\n"
+    for command in runner_release.EXACT_CHECKOUT_STEPS:
+        subprocess.run(shlex.split(command), check=True, env=env)
+    exact = tmp_path / "exact"
+    subprocess.run(["git", "clone", "-q", str(source), str(exact)], check=True, env=env)
+    assert (exact / "native/CMakeLists.txt").read_bytes() == b"project(x)\nadd_library(x)\n"
 
 
 @pytest.mark.parametrize("name", [R2_FILE, REPOINT_FILE, OLD_FILE])

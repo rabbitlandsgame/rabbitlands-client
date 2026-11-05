@@ -146,6 +146,15 @@ These hold in `desktop-release-r2.yml`. The workflow and tool tests check them:
   sparse; under `godot-client/` it holds `tools/`, `src/updates/`,
   `src/app/main.tscn`, `assets/branding/`, `assets/audio/CREDITS.txt`, `native/`,
   `data/update_public.pem` and `project.godot`.
+- **Exact bytes on Windows.** The Windows image sets `core.autocrlf=true`, which
+  checks text files out with CRLF. Every job that can run on Windows therefore
+  starts by setting `core.autocrlf false` and `core.eol lf` in the runner's global
+  Git config, before `actions/checkout`. The native build proves its inputs against
+  their blobs, and the runtime descriptor and the setup helper's scripts ship as
+  they are checked out. Each job entry point (`actions_release.py`,
+  `store_build.py`) runs `runner_release.exact_checkout` first. It refuses a
+  converting checkout, or any checked-out file that differs from its blob, before
+  anything is downloaded or built.
 - **Inputs** reach scripts only through `env:`, never through `${{ }}` inside a
   `run:` script.
 - **Artifacts** are passed by exact name, never by pattern. Each producer exports a

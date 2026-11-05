@@ -160,3 +160,26 @@ def test_mac_cross_export_fails_instead_of_claiming_a_native_test(tmp_path, monk
     monkeypatch.setattr(macos_package.sys, "platform", "win32")
     with pytest.raises(ValueError, match="native macOS"):
         macos_package.native()
+
+
+def test_a_ci_store_build_proves_an_exact_checkout_before_anything_else(tmp_path, monkeypatch):
+    """The Windows store runner converts line endings unless the workflow turns that off first."""
+    from types import SimpleNamespace
+    seen = []
+
+    def converted(repo):
+        seen.append(repo)
+        raise ValueError("210 checked-out files differ from their committed blobs")
+    monkeypatch.setattr(store_build, "exact_checkout", converted)
+    options = SimpleNamespace(platform=store_build.native_platform(), distribution="steam", ref="HEAD",
+                              out=tmp_path / "store-build")
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    with pytest.raises(ValueError, match="differ from their committed blobs"):
+        store_build.build(options)
+    assert seen == [package_client.REPO] and not options.out.exists()
+    # Outside Actions (a local store build) the developer's checkout is not judged.
+    monkeypatch.delenv("GITHUB_ACTIONS")
+    monkeypatch.setattr(store_build.package, "git", lambda *args: (_ for _ in ()).throw(ValueError("next step")))
+    with pytest.raises(ValueError, match="next step"):
+        store_build.build(options)
+    assert seen == [package_client.REPO]

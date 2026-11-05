@@ -182,6 +182,12 @@ jobs:
       windows_digest: ${{ steps.digest.outputs.windows_digest }}
       linux_digest: ${{ steps.digest.outputs.linux_digest }}
     steps:
+      # Windows images set core.autocrlf=true: without this every text file would be
+      # checked out with CRLF, not the commit's bytes (runner_release.exact_checkout).
+      - name: Turn off line-ending conversion before the checkout (exact Git bytes)
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
@@ -321,6 +327,12 @@ jobs:
       windows_digest: ${{ steps.digest.outputs.windows_digest }}
       linux_digest: ${{ steps.digest.outputs.linux_digest }}
     steps:
+      # Windows images set core.autocrlf=true: without this every text file would be
+      # checked out with CRLF, not the commit's bytes (runner_release.exact_checkout).
+      - name: Turn off line-ending conversion before the checkout (exact Git bytes)
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
@@ -495,6 +507,12 @@ jobs:
       windows_digest: ${{ steps.digest.outputs.windows_digest }}
       linux_digest: ${{ steps.digest.outputs.linux_digest }}
     steps:
+      # Windows images set core.autocrlf=true: without this every text file would be
+      # checked out with CRLF, not the commit's bytes (runner_release.exact_checkout).
+      - name: Turn off line-ending conversion before the checkout (exact Git bytes)
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
@@ -661,6 +679,12 @@ jobs:
       windows_digest: ${{ steps.digest.outputs.windows_digest }}
       linux_digest: ${{ steps.digest.outputs.linux_digest }}
     steps:
+      # Windows images set core.autocrlf=true: without this every text file would be
+      # checked out with CRLF, not the commit's bytes (runner_release.exact_checkout).
+      - name: Turn off line-ending conversion before the checkout (exact Git bytes)
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
