@@ -1198,6 +1198,65 @@ class FakeRuns:
         return 0, text
 
 
+class FakeDisplay:
+    """A VirtualDisplay that only records its life."""
+
+    def __init__(self):
+        self.live, self.commands = False, []
+
+    def start(self, command, log):
+        self.commands.append([str(item) for item in command])
+        self.live = True
+        return ":7"
+
+    def stop(self):
+        self.live = False
+
+
+class HandoverRuns(FakeRuns):
+    """A fresh install as it really goes: the process `run` waits for hands over and exits. The installed
+    helper, a windowed process, then needs the display named on its command line, after `run` has returned,
+    and download.sh's goes on to start the game, which never quits by itself."""
+
+    def __init__(self, *args, display, **options):
+        super().__init__(*args, **options)
+        self.display, self.helpers, self.game = display, [], False
+
+    def __call__(self, command, log, *, timeout, env=None, cwd=None):
+        command = [str(item) for item in command]
+        if "--install-update" in command or "sh" in command:
+            self.commands.append(command)
+            self.helpers.append(command)
+            return 0, ""
+        if "pkill" in command:
+            self.game = False
+        return super().__call__(command, log, timeout=timeout, env=env, cwd=cwd)
+
+    def alive(self):
+        """E2E's poll: one helper makes progress per poll."""
+        if self.helpers:
+            command = self.helpers.pop(0)
+            # xvfb-run stops its server when its command returns; the helper then has no display.
+            if "DISPLAY=:7" in command and "xvfb-run" not in command and self.display.live:
+                super().__call__(command, self.stage.parent / "helper.log", timeout=1)
+                self.game = "sh" in command
+            return True
+        return self.game
+
+
+def handover_scene(repo, checkout, key, tmp_path):
+    runner, _, release = e2e_scene(repo, checkout, key, tmp_path, "linux")
+    runs = HandoverRuns(release, tmp_path / "e2e-stage", tmp_path / "exec-linux/root" / ci.helpers.BINARIES["linux"],
+                        display=runner.display_server)
+    runner.run, runner.alive = runs, runs.alive
+    import linux_download_helper
+    script = tmp_path / "download.sh"
+    script.write_text(linux_download_helper.bootstrap_script(
+        release["updater"], json.loads((tmp_path / "envelopes" / f"{release['version']}-linux.json").read_bytes())),
+        encoding="utf-8")
+    return runner, runs, script
+
+
 def e2e_scene(repo, checkout, key, tmp_path, platform, **fake):
     envelope, content_set, record = signed(repo, checkout, key, tmp_path, platform)
     _, release = rm.verify(envelope.read_bytes(), key.public)
@@ -1214,11 +1273,116 @@ def e2e_scene(repo, checkout, key, tmp_path, platform, **fake):
     runs = FakeRuns(release, stage, exec_dir / "root" / ci.helpers.BINARIES[platform], **fake)
     runner = ci.E2E(platform=platform, envelope=envelope, exec_dir=exec_dir, work=tmp_path / "e2e",
                     public_pem=key.public, run=runs, user="rl-e2e-test" if platform == "linux" else None,
-                    alive=lambda: False, sleep=lambda seconds: None)
+                    alive=lambda: False, sleep=lambda seconds: None,
+                    display_server=FakeDisplay() if platform == "linux" else None)
     return runner, runs, release
 
 
-def test_e2e_linux_installs_from_the_envelope_as_an_unprivileged_user_under_xvfb(repo, checkout, key, tmp_path):
+def test_e2e_linux_display_outlives_the_updater_that_hands_over(repo, checkout, key, tmp_path):
+    """T's failure: xvfb-run stopped its server when the updater exited, before the installed helper needed it."""
+    runner, runs, script = handover_scene(repo, checkout, key, tmp_path)
+    receipt = runner.run_all(installer=script)
+    assert all(step["ok"] for step in receipt["steps"])
+    assert not any("xvfb-run" in command for command in runs.commands)
+    assert runner.display_server.live is False
+
+
+def test_e2e_linux_download_script_waits_for_the_helper_and_stops_the_game(repo, checkout, key, tmp_path):
+    """download.sh returns at the handover. The installed helper installs later and starts a game that never quits."""
+    runner, runs, script = handover_scene(repo, checkout, key, tmp_path)
+    receipt = runner.run_all(installer=script)
+    assert [step["ok"] for step in receipt["steps"] if step["step"] == "download-sh-run"] == [True]
+    assert runs.commands[-1] == ["sudo", "-n", "pkill", "-KILL", "-u", "rl-e2e-test"] and runs.game is False
+
+
+def test_e2e_linux_download_script_fails_when_its_helper_dies(repo, checkout, key, tmp_path):
+    runner, runs, script = handover_scene(repo, checkout, key, tmp_path)
+    original = runs.alive
+
+    def dies():
+        if runs.helpers and "sh" in runs.helpers[0]:
+            runs.helpers.clear()
+        return original()
+    runner.alive = dies
+    with pytest.raises(ci.CiError) as error:
+        runner.run_all(installer=script)
+    assert error.value.code == "e2e-download-sh-run"
+    assert runner.receipt["steps"][-1] == {"step": "download-sh-run", "ok": False, "code": 0, "quiet_polls": 3}
+
+
+def test_e2e_linux_stops_the_session_when_a_step_fails(repo, checkout, key, tmp_path):
+    runner, runs, _ = e2e_scene(repo, checkout, key, tmp_path, "linux")
+    runner.check_files = lambda: runner.step("installed-files", False)
+    with pytest.raises(ci.CiError):
+        runner.run_all()
+    assert runs.commands[-1][:4] == ["sudo", "-n", "pkill", "-KILL"] and runner.display_server.live is False
+
+
+def test_e2e_linux_refuses_a_display_that_does_not_start(repo, checkout, key, tmp_path):
+    runner, runs, _ = e2e_scene(repo, checkout, key, tmp_path, "linux")
+
+    def fails(command, log):
+        raise ci.CiError("e2e-display", "the virtual display did not start")
+    runner.display_server.start = fails
+    with pytest.raises(ci.CiError) as error:
+        runner.run_all()
+    assert error.value.code == "e2e-display"
+    assert not any("--install-update" in command for command in runs.commands)
+
+
+def test_e2e_linux_alive_ignores_what_a_windowed_helper_leaves_on_the_display(repo, checkout, key, tmp_path,
+                                                                              monkeypatch):
+    """The display stays up for the whole leg, and so do the session services a windowed Godot autolaunches on it.
+    Counting them as the install would hold every wait until its one-hour deadline."""
+    runner, _, _ = e2e_scene(repo, checkout, key, tmp_path, "linux")
+    table = ["Xvfb -displayfd 1 -screen 0 1280x720x24 -nolisten tcp", "dbus-launch --autolaunch 0123 --binary-syntax",
+             "/usr/bin/dbus-daemon --syslog-only --fork --session", "/usr/libexec/at-spi-bus-launcher"]
+
+    def pgrep(command, **options):
+        assert command[:3] == ["pgrep", "-u", "rl-e2e-test"]
+        pattern = command[command.index("-f") + 1] if "-f" in command else ""
+        return subprocess.CompletedProcess(command, 0 if any(pattern in line for line in table) else 1)
+    monkeypatch.setattr(ci.subprocess, "run", pgrep)
+    assert runner._alive() is False
+    table.append(f"{runner.root}/RabbitLands-updater.x86_64 -- --root {runner.root} --install-update")
+    assert runner._alive() is True
+
+
+def test_virtual_display_reports_its_number_and_stops(tmp_path):
+    server = [sys.executable, "-c", "import time; print(7, flush=True); time.sleep(60)"]
+    display = ci.VirtualDisplay()
+    assert display.start(server, tmp_path / "logs/xvfb.log") == ":7"
+    process = display.process
+    assert process.poll() is None
+    display.stop()
+    assert process.poll() is not None and display.process is None
+    display.stop()
+
+
+def test_virtual_display_stop_tolerates_a_server_it_may_not_signal():
+    """On a runner the direct child is sudo, root's: end_session has stopped its user, and this signal is refused."""
+    class Sudo:
+        def terminate(self):
+            raise PermissionError(1, "Operation not permitted")
+
+        def wait(self, timeout):
+            raise subprocess.TimeoutExpired("sudo", timeout)
+    display = ci.VirtualDisplay()
+    display.process = Sudo()
+    display.stop()
+    assert display.process is None
+
+
+@pytest.mark.parametrize("program", ["import sys; sys.exit(1)", "import time; time.sleep(60)"],
+                         ids=["exits", "hangs"])
+def test_virtual_display_refuses_a_server_without_a_number(tmp_path, program):
+    display = ci.VirtualDisplay(wait_seconds=1)
+    with pytest.raises(ci.CiError) as error:
+        display.start([sys.executable, "-c", program], tmp_path / "xvfb.log")
+    assert error.value.code == "e2e-display" and display.process is None
+
+
+def test_e2e_linux_installs_from_the_envelope_as_an_unprivileged_user_on_one_display(repo, checkout, key, tmp_path):
     runner, runs, release = e2e_scene(repo, checkout, key, tmp_path, "linux")
     import linux_download_helper
     script = tmp_path / "download.sh"
@@ -1228,13 +1392,18 @@ def test_e2e_linux_installs_from_the_envelope_as_an_unprivileged_user_under_xvfb
     receipt = runner.run_all(installer=script)
     install = next(command for command in runs.commands if "--install-update" in command)
     assert install[:5] == ["sudo", "-n", "-u", "rl-e2e-test", "--"] and "env" in install and "-i" in install
-    assert install[install.index("xvfb-run"):install.index("xvfb-run") + 2] == ["xvfb-run", "-a"]
+    assert "DISPLAY=:7" in install and "xvfb-run" not in install
+    server = runner.display_server.commands[0]
+    assert server[:5] == ["sudo", "-n", "-u", "rl-e2e-test", "--"] and "env" in server and "-i" in server
+    assert not any(item.startswith("DISPLAY=") for item in server)
+    assert server[server.index("Xvfb"):] == list(ci.VirtualDisplay.COMMAND)
     assert install[install.index("--install-manifest") + 1].endswith("install-manifest.json")
     assert "--update-only" in install
     assert any(command[:3] == ["sudo", "-n", "useradd"] for command in runs.commands)
     smokes = [command for command in runs.commands if any(item.endswith("RabbitLands.x86_64") for item in command)]
     assert len(smokes) == 2 and all(command[:4] == ["sudo", "-n", "-u", "rl-e2e-test"] for command in smokes)
     assert all("ELORIA_VRAM_SELF_TEST=1" in command for command in smokes)
+    assert not any(item.startswith("DISPLAY=") for command in smokes for item in command)
     assert "--optimization-profile=human-testing" in smokes[1]
     steps = {step["step"]: step for step in receipt["steps"]}
     for name in ("updater-row", "install-started", "installed", "installed-files", "smoke-legacy",
@@ -1244,7 +1413,7 @@ def test_e2e_linux_installs_from_the_envelope_as_an_unprivileged_user_under_xvfb
     assert steps["startup-human-testing"]["runtime"] == {"mode": "rust", "native_available": True}
     recheck = next(command for command in runs.commands
                    if "--update-only" in command and "--install-update" not in command)
-    assert "--install-manifest" in recheck and "xvfb-run" in recheck
+    assert "--install-manifest" in recheck and "DISPLAY=:7" in recheck
 
 
 def test_e2e_windows_runs_the_shipped_binaries_with_throwaway_user_dirs(repo, checkout, key, tmp_path):
@@ -1252,7 +1421,7 @@ def test_e2e_windows_runs_the_shipped_binaries_with_throwaway_user_dirs(repo, ch
     receipt = runner.run_all()
     install = next(command for command in runs.commands if "--install-update" in command)
     assert install[0].endswith("RabbitLands-updater.exe") and "--install-manifest" in install
-    assert not any("sudo" in command or "xvfb-run" in command for command in runs.commands)
+    assert not any("sudo" in command or "DISPLAY" in " ".join(command) for command in runs.commands)
     assert all(step["ok"] for step in receipt["steps"])
 
 

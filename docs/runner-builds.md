@@ -357,16 +357,22 @@ the executables and the installers from the artifacts:
    envelope. It must report `0 of N packages needed downloads`, and leave the tree
    unchanged.
 4. **Linux `download.sh`.** Its content is checked: the updater URL, the
-   `sha256sum` line and the embedded envelope. It is then run under `xvfb-run` with
-   a timeout, and must install the commit.
+   `sha256sum` line and the embedded envelope. It is then run with a timeout. The
+   script ends when its updater hands over, so the job then waits for the installed
+   helper, which must install the commit.
 5. **Windows `setup.exe`.** It runs silently into a temporary folder, but only when
    the runner has at least 1.25 times the setup's declared disk need free. Otherwise
    the step is recorded as skipped for disk. Finalize then asks for the
    [local pre-promote setup check](desktop-r2-delivery.md#releasing-the-forward-runbook)
    before `desktop-promote`.
 
-Linux steps run as a throwaway unprivileged user, under `xvfb-run` except for the
-headless startup smokes, in a work folder that user can reach (`/mnt/rl-e2e`).
+Linux steps run as a throwaway unprivileged user, in a work folder that user can
+reach (`/mnt/rl-e2e`). One Xvfb, started as that user, stays up for the whole leg, as
+a player's desktop does. `xvfb-run` cannot be used: it stops its server when its own
+command exits, and the installed helper, a windowed process, starts after the updater
+that handed over to it has exited. The headless startup smokes do not use the display.
+The job stops what is left at the end, also when a step fails: the game `download.sh`
+started, and the display.
 Windows steps use throwaway user folders. Each step is recorded with its result,
 time and free disk; the receipt is written even on failure. The logs are kept as an
 artifact.

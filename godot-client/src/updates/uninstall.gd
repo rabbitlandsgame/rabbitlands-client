@@ -111,7 +111,10 @@ static func run(host: Node, root: String, confirmed: bool) -> void:
 		# Process exit closes the guard's file handle.
 	else:
 		guard.release_lock()
-		error = "" if Release.remove_tree(root) == OK and Release.remove_tree(Release.cache_for(root)) == OK else "The installation could not be completely removed."
+		# The cache first: this helper's working directory is the installation
+		# folder (Godot starts beside its executable), and no folder can be opened
+		# once that one has gone.
+		error = "" if Release.remove_tree(Release.cache_for(root)) == OK and Release.remove_tree(root) == OK else "The installation could not be completely removed."
 		if error != "":
 			push_error(error)
 	host.get_tree().quit(0 if error == "" else 1)

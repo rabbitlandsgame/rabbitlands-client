@@ -526,7 +526,7 @@ is not measured yet):
 | --- | --- |
 | Stage build, warm build folder (native cache hit, warm VRAM cache, cold world cook) | about 36 min, of which the world cook is 15.5 min until its cache is warm |
 | First import in a fresh build folder (two passes) | about 17 min, plus about 2 min of checkout and 3 min of native build |
-| Whole cold build in a fresh folder | about 55-70 min (an estimate, not run as one build) |
+| Whole cold build in a fresh folder | about 65-80 min |
 | `desktop_content.py pack` (676 packages, 685 parts, 4.23 GB) | about 5 min |
 | First full upload at the self-test's 11 MB/s | about 6.5 min |
 
@@ -581,6 +581,9 @@ as a path, and never print, copy or commit it.
      on the same inputs gives byte-identical set bytes.
    - **Reruns resume.** An upload rerun skips objects that are already complete. A
      differing existing object is refused and listed in the receipt.
+   - **`--workers`.** The default is 4. Add `--workers 1` or `--workers 2` on the
+     build machine's connection: with 4 workers, a full upload failed 34 of its 685
+     parts. A rerun uploads only what failed.
    - **`--release-local-parts`.** After a verified upload, this deletes the local
      part files. It deletes local files only.
 4. **Pack and upload Linux**, after the Windows upload is complete.
@@ -693,6 +696,7 @@ new.
 | --- | --- | --- |
 | `content`: incomplete, with failures in the receipt | some objects did not finish | run the same command again; it resumes |
 | `content`: `conflict` | a different object already holds that key | stop and investigate; never overwrite or delete it |
+| prepare or finalize: "Another client draft exists (client-<Y>)" | an earlier real run stopped after prepare and left its draft, for example after a failed job | delete that draft (`gh release delete client-<Y> --repo rabbitlandsgame/rabbitlands-client --yes`), then dispatch again. Its pool parts stay, and the new run reuses the unchanged ones |
 | `content` job refuses the set | wrong commit (the branch moved), platform, key, URL form, CI path, or native code | fix the cause; if the branch moved, build and upload content for its new head, then dispatch again |
 | `publish` (local): `pointer-stale` | the signed pointer is not newer than the live one, for example after a repoint | re-run the workflow's publish job, which signs fresh pointers, then run the local publish again |
 | `publish` (local): `live-pointer-unverifiable` or `live-pointer-rolled-back` | the live pointer is not ours, or is older than the receipt | stop and report. R2-aware clients that refuse the live pointer use the GitHub alias meanwhile. Recovery is an owner decision; the tool has no override |
@@ -779,7 +783,9 @@ published commit is never released twice.
   the cleanup workflow, with the old pruner. The old pruner deletes every newer
   release and every pool asset outside its own inventory.
 - **Never delete by hand.** Never delete releases, release assets or pool assets by
-  hand, and never write or delete R2 objects outside the tools.
+  hand, and never write or delete R2 objects outside the tools. The one exception is
+  the never-published draft of a stopped run (see
+  [reruns and refusals](#reruns-and-refusals)).
 
 ### What is retained
 

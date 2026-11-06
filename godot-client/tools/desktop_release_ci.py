@@ -61,6 +61,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -1411,11 +1412,54 @@ def run_logged(command: list, log: Path, *, timeout: int, env: dict | None = Non
     return code, log.read_text(encoding="utf-8", errors="replace")
 
 
+class VirtualDisplay:
+    """An X server for a whole Linux e2e leg, as a desktop session has one.
+
+    Not xvfb-run: it stops its server when its own command exits. A fresh install's
+    updater exits as soon as it has handed over, while the installed helper it left
+    behind (a windowed process, as players run it) has not even started.
+    """
+
+    COMMAND = ("Xvfb", "-displayfd", "1", "-screen", "0", "1280x720x24", "-nolisten", "tcp")
+
+    def __init__(self, wait_seconds: float = 30):
+        self.wait_seconds, self.process = wait_seconds, None
+
+    def start(self, command: list, log: Path) -> str:
+        """Run `command`, an X server that reports its display number on stdout; returns ":<number>"."""
+        log.parent.mkdir(parents=True, exist_ok=True)
+        with log.open("wb") as errors:
+            self.process = subprocess.Popen([str(item) for item in command], stdout=subprocess.PIPE, stderr=errors,
+                                            start_new_session=os.name != "nt")
+        line = []
+        reader = threading.Thread(target=lambda: line.append(self.process.stdout.readline()), daemon=True)
+        reader.start()
+        reader.join(self.wait_seconds)
+        number = line[0].decode("ascii", "replace").strip() if line else ""
+        if not number.isdigit():
+            self.stop()
+            raise CiError("e2e-display", "the virtual display did not start")
+        return f":{number}"
+
+    def stop(self) -> None:
+        if self.process is None:
+            return
+        try:
+            self.process.terminate()
+        except PermissionError:
+            pass  # a sudo'd server: E2E.end_session has already stopped everything of its user
+        try:
+            self.process.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            pass
+        self.process = None
+
+
 class E2E:
     """The e2e job for one platform. `run(command, log, timeout=, env=, cwd=) -> (code, text)` is injectable."""
 
     def __init__(self, *, platform: str, envelope: Path, exec_dir: Path, work: Path, public_pem: bytes, run=run_logged,
-                 user: str | None = None, alive=None, clock=time.monotonic, sleep=time.sleep):
+                 user: str | None = None, alive=None, clock=time.monotonic, sleep=time.sleep, display_server=None):
         self.platform, self.envelope, self.exec_dir, self.work = platform, Path(envelope), Path(exec_dir), Path(work)
         _, self.release = rm.verify(self.envelope.read_bytes(), public_pem, limit=r2.MAX_ENVELOPE_BYTES)
         if self.release.get("platform") != platform:
@@ -1425,10 +1469,12 @@ class E2E:
         self.clock, self.sleep = clock, sleep
         self.root = self.work / "install" / "RabbitLands"
         self.logs = self.work / "logs"
+        self.display_server = display_server or (VirtualDisplay() if platform == "linux" else None)
+        self.display = None
         self.receipt = {"kind": E2E_KIND, "schema": 1, "platform": platform, "commit": self.release["commit"],
                         "version": self.release["version"], "steps": []}
 
-    # Linux runs everything as an unprivileged throwaway user under xvfb-run.
+    # Linux runs everything as an unprivileged throwaway user, on start_display's display.
     def command(self, argv: list, env: dict | None = None, *, display: bool = True) -> list:
         if self.platform != "linux":
             return [str(item) for item in argv]
@@ -1436,9 +1482,11 @@ class E2E:
         variables = {"HOME": str(home), "XDG_DATA_HOME": str(home / ".local/share"),
                      "XDG_CONFIG_HOME": str(home / ".config"), "XDG_CACHE_HOME": str(home / ".cache"),
                      "PATH": "/usr/local/bin:/usr/bin:/bin", **(env or {})}
+        if display and self.display:
+            variables["DISPLAY"] = self.display
         prefix = ["sudo", "-n", "-u", self.user, "--"] if self.user else []
         return [*prefix, "env", "-i", *(f"{key}={value}" for key, value in sorted(variables.items())),
-                *(["xvfb-run", "-a"] if display else []), *[str(item) for item in argv]]
+                *[str(item) for item in argv]]
 
     def environment(self, extra: dict | None = None) -> dict | None:
         import full_optimization_package
@@ -1453,7 +1501,10 @@ class E2E:
         if self.platform == "linux":
             if not self.user:
                 return False
-            return subprocess.run(["pgrep", "-u", self.user], capture_output=True).returncode == 0
+            # Only what names the e2e folder. The display and what a windowed helper starts on
+            # it (dbus-launch, dbus-daemon, at-spi-bus-launcher) stay until end_session.
+            return subprocess.run(["pgrep", "-u", self.user, "-f", str(self.work)],
+                                  capture_output=True).returncode == 0
         listing = subprocess.run(["tasklist", "/FO", "CSV", "/NH"], capture_output=True, text=True).stdout
         return any(name.strip('"').lower().startswith(("handoff-", "rabbitlands-updater", "rabbitlands-uninstall"))
                    for name in (line.split(",", 1)[0] for line in listing.splitlines()))
@@ -1475,6 +1526,19 @@ class E2E:
             code, _ = self.run(command, self.logs / "user.log", timeout=60)
             if code:
                 raise CiError("e2e-user", "the unprivileged e2e user could not be prepared")
+
+    def start_display(self) -> None:
+        """Linux: one display for the leg, owned by the e2e user as a desktop session is by its player."""
+        if self.platform == "linux":
+            self.display = self.display_server.start(self.command(VirtualDisplay.COMMAND, display=False),
+                                                     self.logs / "xvfb.log")
+
+    def end_session(self) -> None:
+        """Stop what outlives the steps: the display, and on Linux the game download.sh's helper started."""
+        if self.user:
+            self.run(["sudo", "-n", "pkill", "-KILL", "-u", self.user], self.logs / "end-session.log", timeout=60)
+        if self.display_server is not None:
+            self.display_server.stop()
 
     def step(self, name: str, ok: bool, **detail) -> None:
         self.receipt["steps"].append({"step": name, "ok": ok, **detail})
@@ -1513,16 +1577,21 @@ class E2E:
 
     def wait_installed(self, timeout: int = DOWNLOAD_WAIT_SECONDS) -> None:
         """A first install hands over to the downloaded helper, which finishes alone."""
-        deadline, quiet = self.clock() + timeout, 0
-        while self.clock() < deadline:
-            quiet = 0 if self.alive() else quiet + 1
-            if quiet >= 3:
-                break
-            self.sleep(5)
+        quiet = self.wait_quiet(timeout)
         installed = self.root / DESCRIPTOR
         descriptor = r2._parse_json(installed.read_bytes()) if installed.is_file() else None
         self.step("installed", isinstance(descriptor, dict) and descriptor.get("commit") == self.release["commit"],
                   quiet_polls=quiet)
+
+    def wait_quiet(self, timeout: int, done=lambda: False) -> int:
+        """Wait until `done()` or no process of the install is left; returns the quiet polls counted."""
+        deadline, quiet = self.clock() + timeout, 0
+        while self.clock() < deadline and not done():
+            quiet = 0 if self.alive() else quiet + 1
+            if quiet >= 3:
+                break
+            self.sleep(5)
+        return quiet
 
     def check_files(self) -> None:
         rows = [(entry["path"], entry["size"], entry["sha256"]) for package in self.release["packages"]
@@ -1588,13 +1657,17 @@ class E2E:
               and json.loads(embedded) == json.loads(self.envelope.read_bytes()))
         self.step("download-sh-content", ok)
         target = self.work / "download-sh"
-        # download.sh starts the game after installing; the timeout ends it.
+        # The script ends when its updater hands over. The installed helper then installs
+        # alone and starts the game, which runs until end_session stops it.
         code, _ = self.run(self.command(["timeout", "-k", "10", "900", "sh", script, target]),
                            self.logs / "download-sh.log", timeout=1000)
         installed = target / "RabbitLands" / DESCRIPTOR
-        value = r2._parse_json(installed.read_bytes()) if installed.is_file() else None
-        self.step("download-sh-run", isinstance(value, dict) and value.get("commit") == self.release["commit"],
-                  code=code)
+
+        def complete() -> bool:
+            value = r2._parse_json(installed.read_bytes()) if installed.is_file() else None
+            return isinstance(value, dict) and value.get("commit") == self.release["commit"]
+        quiet = self.wait_quiet(DOWNLOAD_WAIT_SECONDS, complete)
+        self.step("download-sh-run", complete(), code=code, quiet_polls=quiet)
 
     def setup(self, installer: Path) -> None:
         import package_client
@@ -1616,15 +1689,19 @@ class E2E:
         started = self.clock()
         installer = self.stage_inputs(installer)
         self.prepare_user()
-        self.install()
-        self.check_files()
-        for profile in ("legacy", "human-testing"):
-            self.smoke(profile)
-        self.recheck()
-        if installer and self.platform == "linux":
-            self.download_script(installer)
-        elif installer:
-            self.setup(installer)
+        try:
+            self.start_display()
+            self.install()
+            self.check_files()
+            for profile in ("legacy", "human-testing"):
+                self.smoke(profile)
+            self.recheck()
+            if installer and self.platform == "linux":
+                self.download_script(installer)
+            elif installer:
+                self.setup(installer)
+        finally:
+            self.end_session()
         self.receipt["seconds"] = round(self.clock() - started, 1)
         self.receipt["disk_free"] = shutil.disk_usage(self.work).free
         return self.receipt

@@ -1283,13 +1283,21 @@ def test_linux_export_runs_native_uninstaller_and_keeps_settings(fixture):
     shutil.copyfile(helper, binary)
     settings = f["tmp_path"] / "player-settings.cfg"
     settings.write_text("keep Linux settings")
+    # A real installation always has an update cache. The helper's working directory is the installation
+    # folder (Godot starts beside the executable), and no folder can be opened once that one has gone.
+    user_dir = f["tmp_path"] / "linux-userdata/godot/app_userdata/Eloria"
+    cache = user_dir / "client-updates" / hashlib.sha256(package_client.wsl_path(installed).encode()).hexdigest()[:24]
+    (cache / "packages").mkdir(parents=True)
+    (cache / "packages/kept-part.part").write_text("a verified part")
+    (user_dir / "eloria_hud.cfg").write_text("keep the game settings")
     command = ["wsl.exe", "-d", "Ubuntu-24.04", "--exec", "env",
         "XDG_DATA_HOME=" + package_client.wsl_path(f["tmp_path"] / "linux-userdata"),
         package_client.wsl_path(binary), "--headless", "--", "--root", package_client.wsl_path(installed), "--confirm"]
     result = subprocess.run(command, capture_output=True, text=True, timeout=25)
     assert result.returncode == 0 and "SCRIPT ERROR" not in result.stdout + result.stderr, result.stdout + result.stderr
-    assert not installed.exists()
+    assert not installed.exists() and not cache.exists()
     assert settings.read_text() == "keep Linux settings"
+    assert (user_dir / "eloria_hud.cfg").read_text() == "keep the game settings"
 
 
 def installer_reads_schema_3(source=CLIENT):

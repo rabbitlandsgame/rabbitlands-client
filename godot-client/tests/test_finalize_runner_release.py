@@ -748,7 +748,7 @@ def test_a_setup_exe_skipped_for_disk_needs_the_local_pre_promote_check(scene, k
 
 
 def test_the_e2e_steps_finalize_requires_are_the_ones_the_e2e_job_records(scene, key, tmp_path):
-    from test_desktop_release_ci import FakeRuns
+    from test_desktop_release_ci import FakeDisplay, FakeRuns
     inputs, _ = scene
     item = inputs.signed["linux"]
     exec_dir = tmp_path / "exec-linux"
@@ -760,7 +760,7 @@ def test_the_e2e_steps_finalize_requires_are_the_ones_the_e2e_job_records(scene,
                                                               json.loads(item.envelope)).encode("utf-8"))
     runs = FakeRuns(item.payload, item.stage, exec_dir / "root" / fx.HELPER["linux"])
     e2e = ci.E2E(platform="linux", envelope=envelope, exec_dir=exec_dir, work=tmp_path / "e2e", public_pem=key.public,
-                 run=runs, user=None, alive=lambda: False, sleep=lambda seconds: None)
+                 run=runs, user=None, alive=lambda: False, sleep=lambda seconds: None, display_server=FakeDisplay())
     receipt = e2e.run_all(installer=script)
     (inputs.e2e["linux"] / "e2e.json").write_text(json.dumps(receipt))
     assert runner.check_e2e(inputs.e2e["linux"], item.payload)["steps"] == len(receipt["steps"])
