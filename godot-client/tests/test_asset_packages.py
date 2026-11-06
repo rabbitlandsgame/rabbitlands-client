@@ -1172,8 +1172,10 @@ def export_test_updater(f, version, platform="windows", launcher_methods="", sou
 
 
 # (shared URLs, manifest schema, Git revision of the installed "old" updater or None
-# for this tree). The last case is the real migration: an updater from before
+# for this tree). The last case is the schema migration: an updater from before
 # schema 3 meets a zstd release, replaces itself, and its successor installs it.
+# Both sides pin the fixture key, so it is not an upgrade across the 2026-11 key
+# rotation (installations from before release T cannot verify T).
 EXPORTED_UPDATER_CASES = [(False, 2, None), (True, 2, None), (True, 3, None), (False, 3, OLDER_UPDATER_REFS[0])]
 
 

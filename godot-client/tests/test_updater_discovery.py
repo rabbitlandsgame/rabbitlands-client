@@ -6,6 +6,11 @@ manifests are signed by the release tools (release_manifest.py, desktop_r2.py)
 with a test key, so the tools' formats and the client's checks are proven
 together. The GDScript rules themselves are covered by
 test_client_update_discovery.gd (run_client_update_tests.py).
+
+The release key was replaced at release T (docs/desktop-r2-delivery.md, "Key
+rotation (2026-11)"): field updaters pin the retired key and cannot verify T.
+test_field_updater_refuses_a_release_signed_with_another_key is that production
+path; the field handover check before it is pre-rotation history.
 """
 import hashlib
 import json
@@ -19,9 +24,10 @@ import time
 
 import pytest
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
 
 from test_asset_packages import (CLIENT, fixture, manifest, source, export_test_updater, older_updater_source,
-                                 older_updater_project, r2_hosted, assert_no_transaction)
+                                 older_updater_project, r2_hosted, assert_no_transaction, tree)
 
 sys.path.insert(0, str(CLIENT / "tools"))
 import client_release
@@ -31,7 +37,7 @@ import release_manifest as rm
 
 RELEASE_GD = CLIENT / "src/updates/release.gd"
 S = 1_762_300_000
-FIELD_UPDATER = "945042f0"  # the installed field updaters (945042f0/4a57cea4 share src/updates)
+FIELD_UPDATER = "945042f0"  # the field updaters before the key rotation (945042f0/4a57cea4 share src/updates)
 
 
 def gd_const(name, path=RELEASE_GD):
@@ -320,6 +326,10 @@ func _run() -> void:
 
 @pytest.mark.skipif(os.name != "nt", reason="Exports and runs the Windows updater")
 def test_field_updater_hands_off_to_the_r2_aware_updater_which_uses_the_pointer(fixture):
+    """Pre-rotation history: both updaters and the release share one test key, so
+    this proves the bootstrap schema 1 handover, not a production path. Since the
+    key rotation the field updaters pin the retired key and refuse T (the test
+    below)."""
     f = fixture
     older = older_updater_source(f, FIELD_UPDATER)
     if older is None:
@@ -377,4 +387,64 @@ def test_field_updater_hands_off_to_the_r2_aware_updater_which_uses_the_pointer(
     assert after[:2] == ["/windows.json", f"/{digest}.json"], downloads
     parts = {"/" + part["url"].rsplit("/", 1)[1] for part in release["parts"]}
     assert set(after[2:]) <= parts and len(after[2:]) == len(set(after[2:])), downloads
+    assert_no_transaction(f["installed"])
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Exports and runs the Windows updater")
+def test_field_updater_refuses_a_release_signed_with_another_key(fixture):
+    """The key rotation as installed games meet it. The field game and updater pin
+    the fixture key (the retired key); release T, its pointer and everything after
+    are signed with another key. The game offers nothing, the updater stops with
+    a signature error before it fetches any helper, and the installation is
+    unchanged: its player reinstalls from T's installer."""
+    f = fixture
+    older = older_updater_source(f, FIELD_UPDATER)
+    if older is None:
+        pytest.skip(f"The field updater revision {FIELD_UPDATER} is not available here.")
+    old = export_test_updater(f, "old", source=older)
+    for kind in ("updater", "uninstall"):
+        shutil.copyfile(old, f["installed"] / f"RabbitLands-{kind}.exe")
+    rotated = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    rotated_pem = rotated.public_key().public_bytes(serialization.Encoding.PEM,
+                                                    serialization.PublicFormat.SubjectPublicKeyInfo)
+    assert rotated_pem != public_pem(f)
+    release = r2_release(f, f["payload"], f["newer"], S + 100, None, helper_bytes=b"the rotated release's updater")
+    data = rm.sign(rm.payload_bytes(release), rotated)
+    rm.verify(data, rotated_pem)  # a valid release under the new key
+    with pytest.raises(rm.SigningError):
+        rm.verify(data, public_pem(f))
+    (f["tmp_path"] / f"{hashlib.sha256(data).hexdigest()}.json").write_bytes(data)
+    pointer = rm.pointer_envelope(platform="windows", sequence=S + 200, rollback=False, release_id=123456789,
+                                  run_id=987654321, manifest=data, private_key=rotated, public_pem=rotated_pem)
+    (f["tmp_path"] / "windows.json").write_bytes(pointer)
+    serve_alias(f, data)
+    before = tree(f["installed"])
+    helpers = {kind: client_release.digest(f["installed"] / f"RabbitLands-{kind}.exe")
+               for kind in ("updater", "uninstall")}
+
+    # The field game: the alias release fails its signature check, so it is never offered.
+    project = older_updater_project(f, FIELD_UPDATER)
+    (project / "field-game.gd").write_text(FIELD_GAME)
+    trust = {**f["identity"], "distribution": "github"}
+    request, result = f["tmp_path"] / "field-request.json", f["tmp_path"] / "field-result.json"
+    request.write_text(json.dumps({"trust": trust, "installed": f["identity"], "result": str(result),
+                                   "release": json.loads(data), "pointer": json.loads(pointer)}))
+    completed = subprocess.run([str(f["godot"]), "--headless", "--path", str(project), "--script",
+                                str(project / "field-game.gd"), "--", str(request)],
+                               env=f["env"], capture_output=True, text=True, timeout=60)
+    assert completed.returncode == 0 and "SCRIPT ERROR" not in completed.stdout + completed.stderr, completed.stderr
+    field = json.loads(result.read_text())
+    assert field["release"] == "The release signature could not be verified." and field["relation"] == "", field
+    assert "accepted" not in (field["pointer_as_release"], field["pointer_as_bootstrap"], field["pointer_as_manifest"]), field
+
+    # The field updater, run explicitly: alias only, a signature error, nothing changed.
+    f["downloads"].clear()
+    code, output = run_updater(f)
+    assert code == 1 and "The release signature could not be verified." in output, output
+    assert f["downloads"] == ["/RabbitLands-windows.json"], f["downloads"]
+    assert installed_commit(f) == "a" * 40 and record(f) is None
+    assert tree(f["installed"]) == before
+    for kind, digest in helpers.items():
+        assert client_release.digest(f["installed"] / f"RabbitLands-{kind}.exe") == digest
+    assert not (f["installed"] / ".eloria-launcher-lock").exists()
     assert_no_transaction(f["installed"])

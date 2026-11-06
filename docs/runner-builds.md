@@ -240,6 +240,11 @@ with no secret and no cache:
    - When the previous signed release has the same fingerprint, its updater and
      uninstaller rows are downloaded and checked against their signed SHA-256, so
      the helper bytes are reused exactly. Otherwise the helper is exported.
+   - The previous release counts only when it verifies with the dispatched
+     commit's key. After the 2026-11
+     [key rotation](desktop-r2-delivery.md#key-rotation-2026-11), the pre-rotation
+     `latest` does not, so T exports its helper and its content summary has no
+     previous release.
    - A change to the game's own export preset does not change the fingerprint.
    - Local and full-CI builds export their helpers the same way:
      `client_release.export_launcher` uses the same project files, fixed preset and
@@ -481,7 +486,8 @@ its own inventory. That is why the owner keeps
   - it is published, by the project account or its workflow;
   - its tag points at the commit;
   - each selected platform's manifest verifies with the dispatched commit's key and
-    is schema 3 (T or later);
+    is schema 3 (T or later; releases before T are also signed with the key
+    retired at T);
   - every download the manifest names answers an anonymous HEAD with its exact
     length.
 - **`repoint`** (`desktop-publish`) does the following:

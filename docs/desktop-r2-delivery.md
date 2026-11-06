@@ -49,14 +49,17 @@ These steps remain, in this order:
 1. **The owner's one-time setup** (below), including the push of these workflows to
    `master`, then a dry run.
 2. **The helper-train release T.** Both platforms use the `ci` source. T ships the
-   R2-aware updater and setup while the content is still on GitHub. Installed
-   updaters hand over to T's updater once, through the unchanged bootstrap contract,
-   before they read any R2 address. T's manifest copies and pointers are the first
-   objects under `desktop/v1/`.
+   R2-aware updater and setup while the content is still on GitHub. T is also the
+   first release signed with the new release key (see
+   [key rotation](#key-rotation-2026-11)): installed games cannot verify it, so
+   every player reinstalls once from T's installer. T's manifest copies and
+   pointers are the first objects under `desktop/v1/`.
 3. **The first full content upload**, after the package format settles. The zstd
    re-encode changes every part hash, so upload once, with or after it.
-4. **The first R2 content release, R1.** When its updater inputs are unchanged since
-   T, it reuses T's updater byte for byte, and players download no new updater.
+4. **The first R2 content release, R1.** Its commit pins T as the last GitHub-hosted
+   release (`PINNED_GITHUB_HOSTED`). Installations of T update to R1 through the R2
+   pointer. When its updater inputs are unchanged since T, it reuses T's updater byte
+   for byte, and players download no new updater.
 5. **Retire `desktop-release.yml`**, one release after R1.
 
 The workflow accepts an `r2` content source only for a commit whose updater reads R2
@@ -68,6 +71,46 @@ Until the owner moves the signing key into the new environments,
 `desktop-release.yml` can still be dispatched, as described in
 [runner builds](runner-builds.md#the-transitional-full-ci-workflow). It refuses to
 run once a live R2 pointer exists.
+
+## Key rotation (2026-11)
+
+**Why.** The private half of the release key that signed every release up to
+`client-945042f0` is lost, so nothing can be signed with it again. On 2026-11-06
+the owner replaced it with a new RSA-4096 key. From the rotation commit on,
+`godot-client/data/update_public.pem` holds the new public key, and
+`CLIENT_UPDATE_SIGNING_KEY` holds its private half. The trust model and every
+check are unchanged; only the key is new.
+
+- **Releases start at T.** T is the first release signed with the new key. It must
+  be built from a commit that contains the rotation: the sign job refuses a key
+  that does not match the dispatched commit's `update_public.pem`. Content sets and
+  stages made for an earlier commit pin the old key and cannot be used.
+- **What players must do.** Every installed game pins the old key: in its core pack,
+  `app/client-release.json`, its updater and its setup helper. None of them can
+  verify T or any later release. Each player reinstalls once from T's installer
+  (`<version>-setup.exe` on Windows, `<version>-download.sh` on Linux) from the
+  release page. Accounts and characters live on the server and are not affected.
+- **What old installations do.** Their shortcuts still start the installed game. Its
+  start check cannot verify T and offers nothing. An explicit updater run stops with
+  "The release signature could not be verified." and changes nothing. Once the
+  server's `required_commit` names T or later with `enforce: true`, the server
+  refuses their logins with "A game update is required. ... Older installations
+  need the latest client download." That is what makes players reinstall. Set the
+  policy as for any release, after `check-policy`.
+- **No rollback across the rotation.** A release before T is signed with the old
+  key, which T and later releases do not trust, and its manifests are not schema 3.
+  The repoint check refuses it. A rollback from R1 lands on T. Never re-publish or
+  hand out a pre-rotation installer: it installs a game that can never update.
+- **Retention and the pin apply from T on**, unchanged. T is the last GitHub-hosted
+  release, and the R1 commit pins it (`PINNED_GITHUB_HOSTED`). Pre-rotation releases
+  stay only while they are among the two most recent before `latest`, and are then
+  pruned as usual.
+- **T has no previous release.** The tools verify the previous release with the
+  dispatched commit's key, so the pre-rotation `latest` does not count. T's content
+  summary lists every package as added, and T exports its own helper.
+- **The post-publish check for T** is a fresh install from T's setup.exe, a
+  pointer re-check, and T's setup over an old installation (see
+  [the check for T](#the-check-for-t)).
 
 ## Who builds what
 
@@ -125,9 +168,10 @@ Fresh installations do not read the pointer, because the player chose a release:
 - `<version>-download.sh` downloads the updater from GitHub, checks it with
   `sha256sum`, and installs from the manifest it embeds.
 
-Games and updaters before T read only the GitHub alias. They reach T's updater
-through a helper handover; see
-[client updates](client-updates.md#release-discovery-and-freshness).
+Games and updaters before T read only the GitHub alias, and they pin the retired
+release key. They cannot verify T or any later release, so they never reach T's
+updater; their players reinstall from T's installer (see
+[key rotation](#key-rotation-2026-11)).
 
 ## R2 layout
 
@@ -191,7 +235,7 @@ narrowed by the owner (see [one-time setup](#one-time-setup)).
 ## Trust
 
 ```
-godot-client/data/update_public.pem (in Git, RSA-4096)
+godot-client/data/update_public.pem (in Git, RSA-4096; replaced at T, see Key rotation)
   pinned in: the core pack (res://data/client_release.json), app/client-release.json,
              the updater's trust file and the setup helper
       |
@@ -341,6 +385,8 @@ release T on. The publication rule is in the tools.
 
 Games and updaters before T are unchanged. They read the GitHub `latest` alias and
 compare commit ancestry, and the server enforces its required commit at login.
+Since the [key rotation](#key-rotation-2026-11) they cannot verify T or any later
+release.
 
 ### Who can do what
 
@@ -375,7 +421,9 @@ authorized, from a protected branch.
 
 **Two go-live moments.** The local R2 publish is the moment R2-aware installations
 are offered a release. The `desktop-promote` approval (GitHub `latest`) is the
-moment older installations and new downloads from the latest-release page are.
+moment new downloads from the latest-release page are, and R2-aware installations
+that fall back to the alias. Installations from before T cannot verify any new
+release (see [key rotation](#key-rotation-2026-11)).
 
 ## One-time setup
 
@@ -389,7 +437,9 @@ The owner does all of these; agents do none of them.
    - Leave "prevent self-review" off while the owner is the only reviewer;
      otherwise the owner could not approve their own dispatch.
 2. Store `CLIENT_UPDATE_SIGNING_KEY` as an environment secret of `desktop-sign`
-   and `desktop-publish`. Then **delete the repository secret**. This also stops
+   and `desktop-publish`. Since the [key rotation](#key-rotation-2026-11) this is
+   the new key, the private half of the committed `update_public.pem`. Then
+   **delete the repository secret**. This also stops
    `desktop-release.yml` from signing, which is intended.
 3. Protect `master` and `develop`: no force pushes, and restricted pushers.
 4. **Disable "Retire previous published client"**
@@ -588,7 +638,8 @@ as a path, and never print, copy or commit it.
 10. **Local pre-promote setup check, only when required.** The `Finalize the draft`
     summary asks for it when the Windows runner had too little disk for the
     setup.exe test. Install `<version>-setup.exe` from the release into a new
-    temporary folder. It must finish, and the game must start.
+    temporary folder. It must finish, and the game must start. For T, the
+    post-publish check always includes this install.
 11. **Post-publish check** (see [below](#post-publish-check)). At this point only
     the R2 pointer names X, so the check proves pointer discovery.
 12. **Approval 3: `desktop-promote`.**
@@ -653,7 +704,8 @@ new.
 ## Post-publish check
 
 Use a test installation of the previous release, never your normal game folder.
-From release T on, that installation's updater is R2-aware.
+From R1 on, that installation's updater is R2-aware. T is checked from a fresh
+installation instead ([below](#the-check-for-t)).
 
 1. Run the installed updater once with `-- --update-only` (from its folder, or with
    `-- --root <folder>`), and keep its log by passing `--log-file <file>` before the
@@ -675,19 +727,40 @@ Run the check after the local R2 publish and before approving `desktop-promote`.
 that point GitHub `latest` still names the previous release, so success can only
 come through the pointer.
 
-For T itself, the previous release's updater reads only the GitHub alias. Run the
-check after `desktop-promote` instead: it then proves the handover to the new
-updater. Keep that installation as the test installation for R1. If T's check
-fails, fix forward with a new release: installations that took T cannot be rolled
-back to an earlier release (see [rollback](#rollback-runbook)).
+### The check for T
 
-**If the check fails, do not approve `desktop-promote`.** R2-aware installations are
-already being offered X. If X itself is at fault:
+No installation from before T can update to T: they all pin the retired key (see
+[key rotation](#key-rotation-2026-11)). Check T from a fresh installation, still
+after the local R2 publish and before approving `desktop-promote`:
+
+1. Install T's `<version>-setup.exe` from the release into a new temporary folder.
+   It must finish, and `app/client-release.json` must name T.
+2. Re-check the pointer: run the installed updater once with `-- --update-only` and
+   `--log-file <file>`. The log must contain
+   `Release discovery: R2 pointer <sequence>, commit <first 9 hex digits of T>` and
+   `0 of N packages needed downloads`. GitHub `latest` still names a pre-rotation
+   release, which T cannot verify, so only the pointer can give this result.
+3. Start the game once. It must reach the login screen without an update prompt.
+4. Run the same setup.exe over a test installation of the previous release. Setup
+   keeps its application id, so it offers a player's existing folder, and most
+   Windows players reinstall this way. It must finish, `app/client-release.json`
+   must name T, and the game must start. No automated test installs over a
+   pre-rotation installation.
+
+Keep the fresh installation as the test installation for R1. An old installation's
+explicit updater run stops with "The release signature could not be verified."
+and changes nothing; that is expected, not a failure.
+
+### If the check fails
+
+**Do not approve `desktop-promote`.** R2-aware installations are already being
+offered X. If X itself is at fault:
 
 1. Reject the pending promote. A run waiting for approval holds the release
    concurrency group, so a repoint would queue behind it.
 2. Repoint the channel to the previous release, which is still GitHub `latest`
-   (see [rollback](#rollback-runbook)).
+   (see [rollback](#rollback-runbook)). T has no release to repoint to: only fresh
+   installations of T read its pointer, so fix forward with a new release.
 
 Installations that took X in the meantime keep it (see
 [what a rollback moves](#rollback-runbook)). Ship the fix as a new commit. A
@@ -728,7 +801,7 @@ deleted. A later, owner-approved cleanup would use the retained releases'
 ### Steps
 
 1. **Choose the target.** It must be a retained, published release whose manifests
-   are schema 3, so T or later.
+   are schema 3 and signed with the current key, so T or later.
 2. **Reject any waiting run.** If a release run is waiting for an approval, reject
    or cancel it first.
 3. **Dispatch the repoint workflow.** Run Actions -> **Repoint the desktop live
@@ -780,10 +853,12 @@ explicitly (`-- --update-only` or `-- --install-update`), which follows the roll
 pointer, or with the next forward release. If X harms the players who already have
 it, ship the fix as a new release.
 
-**Rolling back to a release before T is not supported for R2-aware installations.**
-Pointers name only schema-3 manifests, and the downgrade guard refuses older
-manifests reached through the alias. Roll forward instead: revert the change and
-ship a new release. A rollback from R1 lands on T, which is R2-aware.
+**Rolling back to a release before T is impossible.** Those releases are signed
+with the key retired at T (see [key rotation](#key-rotation-2026-11)), which no
+installation from T on trusts. Pointers also name only schema-3 manifests, and the
+downgrade guard refuses older manifests reached through the alias. Roll forward
+instead: revert the change and ship a new release. A rollback from R1 lands on T,
+which is R2-aware.
 
 ## The `ci` content source
 
@@ -841,10 +916,10 @@ exercised):
      `gh release edit client-<X> --repo rabbitlandsgame/rabbitlands-client --latest`.
      This is the same single move a rollback makes, on a retained, published
      release.
-   - **Effect.** Older games and updaters follow the alias. R2-aware ones cannot
-     read the pointer, fall back to the alias, and accept X because its signed
-     sequence is newer than what they have installed. Every download of X is on
-     GitHub, and its setup programs work.
+   - **Effect.** R2-aware games and updaters cannot read the pointer, fall back to
+     the alias, and accept X because its signed sequence is newer than what they
+     have installed. Every download of X is on GitHub, and its setup programs work.
+     Games from before T cannot verify X (see [key rotation](#key-rotation-2026-11)).
    - **Nothing is pruned**, because pruning runs only in promote.
    - **No `check-policy`.** It cannot pass while R2 is down. Leave the server's
      required commit unchanged unless the owner decides to raise it without that
@@ -976,8 +1051,8 @@ gh release create helper-template-4.7.2-rl1 --repo rabbitlandsgame/rabbitlands-c
   22.04 and Debian 12. The custom Linux template is pinned but blocked until it is
   built with a glibc 2.28 toolchain.
 - **ANGLE and AccessKit stay linked.** Every Windows shortcut starts the helper
-  first, including **Safe mode** and **Compatibility**, and so does the field
-  updater's handoff at T. A template without ANGLE could not open its window where
+  first, including **Safe mode** and **Compatibility**, and so does every updater
+  handover. A template without ANGLE could not open its window where
   native OpenGL 3.3 is missing, so those players could neither update nor start
   the game from a shortcut. Removing either library is a new pin, and after T it
   is another helper download for every player.

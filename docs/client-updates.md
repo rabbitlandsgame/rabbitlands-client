@@ -74,9 +74,10 @@ From release T on (the helper-train release, the first release of
 [desktop R2 delivery](desktop-r2-delivery.md)), installed games and updaters find
 releases through a small signed **pointer** on
 Cloudflare R2, and fall back to the GitHub release when it cannot be used. Games and
-updaters before T read only the GitHub alias. They reach T's updater through the
-helper handover described [below](#independent-packages-and-the-updater), before
-they read any R2 address.
+updaters before T read only the GitHub alias, and they pin the release key that was
+replaced at T ([key rotation](desktop-r2-delivery.md#key-rotation-2026-11)). They
+cannot verify T or any later release, so their players reinstall once from T's
+installer.
 
 **The pointer.** The signed record
 `https://assets.rabbitlandsgame.com/desktop/v1/channels/live/<platform>.json`
@@ -375,7 +376,10 @@ package format. If the updater needs replacement, it downloads and verifies
 its successor, hands over to a temporary copy outside the installation, closes
 the original, replaces the executables, and restarts. Windows never overwrites
 its running updater in place. Game revisions do not enter the bootstrap's
-embedded trust identity. The same existing signing key is retained.
+embedded trust identity, and a handover never changes the pinned key. Release T
+replaced the signing key
+([key rotation](desktop-r2-delivery.md#key-rotation-2026-11)), so updaters before T
+cannot verify T and never hand over to it.
 
 Each launcher start removes what earlier handovers left in the update cache
 while it holds the installation lock, and logs every removal in the Godot log.
@@ -434,14 +438,18 @@ the signing key into those jobs, it is no longer on the build machine. The signe
 local builds below need that key, so they serve only the transition before the key
 moves, and distributions with a key of their own.
 
-Signed release builds require the existing release private key matching
-`godot-client/data/update_public.pem`. The private key is not included in a
+Signed release builds require the release private key matching
+`godot-client/data/update_public.pem`. Since the
+[key rotation](desktop-r2-delivery.md#key-rotation-2026-11) of 2026-11 that is the
+new key; the earlier private key is lost, so no build of a commit before the
+rotation can be signed. The private key is not included in a
 clone. Keep it and its backup outside both repositories, never upload it, and
 select its actual private location with `--update-signing-key`. Moving a
 checkout does not create or replace that key.
 
 Players pin the public key in their initial client and restart launcher. Reuse
-that signing key for their updates. For a new distribution without an installed
+that signing key for every later update: replacing it, as in 2026-11, makes every
+installation reinstall. For a new distribution without an installed
 trust key, Godot's `tools/sign_client_release.gd` can generate a pair with
 `-- generate <private.pem> <public.pem>`; it refuses to overwrite existing keys.
 `--update-public-key` selects the matching public key if needed. Packaging
@@ -774,6 +782,8 @@ The schema 1 reader remains available for previously signed whole-game downloads
 The updater now replaces its own executable through a verified handover. Its
 original trust key remains pinned; changing that key still requires a new
 trusted installer rather than trusting a key supplied by a downloaded manifest.
+The 2026-11 [key rotation](desktop-r2-delivery.md#key-rotation-2026-11) did exactly
+that: installations from before release T reinstall from T's installer.
 
 Existing installations without this updater require one manual upgrade.
 Building artifacts does not upload them or change any live server policy.
@@ -797,10 +807,12 @@ Choose the minimum checks for the behavior being changed. For example:
   It covers mixed zstd and deflate rows, multi-chunk and empty files, repair, a
   fresh install, eight kinds of damaged chunk, the schema rules, and a download
   the game prepared that installs at restart. An older updater, taken from Git
-  (`RL_OLDER_UPDATER_REFS`, default `origin/develop`; add the live release's
+  (`RL_OLDER_UPDATER_REFS`, default `origin/develop`; add a field release's
   commit to check it too), must refuse the manifest, delete `pending.json` and
-  still replace its helpers. The exported self-replacement check includes a
-  schema 3 release and the migration from that older updater. The Inno setup
+  still replace its helpers. Its fixture signs with one test key, so this proves
+  the bootstrap contract, not an upgrade across the 2026-11 key rotation. The
+  exported self-replacement check includes a schema 3 release and the migration
+  from that older updater. The Inno setup
   checks (they need Inno Setup 6) install schema 2, schema 3, and schema 3 with
   every part at its derived R2 URL through the real setup helper;
   `test_online_installer_r2.py` covers the setup script, its disk space and a
@@ -826,7 +838,12 @@ Choose the minimum checks for the behavior being changed. For example:
   the record, an older alias refused, a signed rollback, a replayed pointer, a server
   target through the R2 copy, the handover limit, and the setup helper writing the
   record. When the field release's updater (`945042f0`) is in the local Git
-  history, it checks that updater handing over to the R2-aware one.
+  history, it also checks what that updater does now. Pinning another key than the
+  one the release is signed with, as every installation from before the key
+  rotation does with T, it offers nothing, stops with "The release signature could
+  not be verified." and changes nothing. The older check of that updater handing
+  over to the R2-aware one shares one test key on both sides; it is pre-rotation
+  history and proves only the bootstrap contract.
 - Renderer launch arguments and the relaunch handshake:
   `godot --headless --path godot-client --script res://tests/test_launch_renderer.gd`.
   The runtime runner below also runs it in its updater-only project, which proves
