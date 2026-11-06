@@ -8,6 +8,10 @@ const Transport = preload("res://src/updates/update_transport.gd")
 # by Release.move_file (a rename on one volume, a copy across volumes), so
 # it is on disk once. package_client.online_installer_space reads this line.
 const MOVES_VERIFIED_DOWNLOADS := true
+# The release key retired by the 2026-11 rotation (SHA-256 of its normalised PEM).
+# It only says a folder from before the rotation may be overwritten. It never
+# verifies anything: signatures use the identity's key alone.
+const RETIRED_KEY_SHA256 := "605e86c6eb3048180903acfab0d25f20d2d2c2be5fb40f8d9d30919246c6c625"
 var _lock := ""
 var _owns_lock := false
 var _lock_owner: FileAccess
@@ -91,6 +95,14 @@ func _ready() -> void:
 func _exit_tree() -> void:
 	_release_lock()
 
+func _may_replace(current: Dictionary, identity: Dictionary) -> bool:
+	if current.is_empty():
+		return true
+	var key: Variant = current.get("public_key")
+	if Release.update_owner(current) != "github" or not Release.same_text(current.get("repository"), identity.repository) or not key is String:
+		return false
+	return key == identity.public_key or (Release.same_text(current.get("platform"), identity.platform) and (key.replace("\r\n", "\n").strip_edges() + "\n").sha256_text() == RETIRED_KEY_SHA256)
+
 func _install_packages(release: Dictionary, identity: Dictionary) -> String:
 	var args := OS.get_cmdline_user_args()
 	if args.size() != 4 or args[0] != "--root" or args[2] != "--parts":
@@ -99,7 +111,7 @@ func _install_packages(release: Dictionary, identity: Dictionary) -> String:
 	if not root.is_absolute_path() or Release.is_link(root):
 		return "Choose a writable installation folder."
 	var current := Release.read_json(root.path_join("app/client-release.json"))
-	if not current.is_empty() and (Release.update_owner(current) != "github" or current.get("repository") != identity.repository or current.get("public_key") != identity.public_key):
+	if not _may_replace(current, identity):
 		return "This installation belongs to a different distribution or signing key."
 	if DirAccess.make_dir_recursive_absolute(root) != OK:
 		return "The installation folder cannot be created."

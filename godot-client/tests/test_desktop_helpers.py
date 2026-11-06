@@ -105,6 +105,25 @@ def test_a_src_updates_change_alters_the_fingerprint(source, key):
     assert fingerprint_of(files_of(source, key)) == after
 
 
+@pytest.mark.parametrize("platform", ["windows", "linux"])
+def test_the_setup_helper_is_no_updater_input_and_bootstrap_is(source, key, platform):
+    # A release that changes only tools/install_client_payload.gd reuses the updater
+    # byte for byte. The same change in src/updates/bootstrap.gd would make every
+    # installation take a handover, on both platforms.
+    setup_helper = source / "tools/install_client_payload.gd"
+    setup_helper.parent.mkdir()
+    shutil.copyfile(GODOT / "tools/install_client_payload.gd", setup_helper)
+    files = files_of(source, key, platform)
+    before = fingerprint_of(files, platform)
+    setup_helper.write_bytes(setup_helper.read_bytes() + b"\n# a setup change\n")
+    unchanged = files_of(source, key, platform)
+    assert unchanged == files and fingerprint_of(unchanged, platform) == before
+    bootstrap = source / "src/updates/bootstrap.gd"
+    bootstrap.write_bytes(bootstrap.read_bytes() + b"\n# an updater change\n")
+    changed = files_of(source, key, platform)
+    assert changed != files and fingerprint_of(changed, platform) != before
+
+
 def test_other_inputs_alter_the_fingerprint(source, key, other_key):
     files = files_of(source, key)
     base = fingerprint_of(files)
