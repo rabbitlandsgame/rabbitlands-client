@@ -751,6 +751,14 @@ after the local R2 publish and before approving `desktop-promote`:
    must name T, and the game must start. No automated test installs over a
    pre-rotation installation.
 
+Check on a machine with a normal installation with care. Setup keeps one uninstall
+entry and one Start Menu group per machine and ignores `/GROUP`, so a test setup
+retargets the normal installation's shortcuts and uninstall entry to the test folder,
+even when `/DIR` is correct. Export the uninstall key and copy the Start Menu group
+first, and restore both after each setup. Remove the key while the test setup runs, so
+setup cannot pick the normal folder as the previous installation. Give every test run
+its own `APPDATA` and `LOCALAPPDATA`.
+
 Keep the fresh installation as the test installation for R1. An old installation's
 explicit updater run stops with "The release signature could not be verified."
 and changes nothing; that is expected, not a failure.
