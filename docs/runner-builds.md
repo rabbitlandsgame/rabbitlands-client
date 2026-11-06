@@ -108,8 +108,9 @@ The shipped executables pin the production key, so a test-key end-to-end run is 
 possible. The dry run catches toolchain, disk and permission problems without
 touching release state. It shows a Cloudflare challenge on runner requests only
 with an `r2` source. With `ci` sources, its R2 reads fall back to GitHub without
-failing, and the first R2 reads in this workflow that must succeed are those of
-T's promote job.
+failing. T stays not latest and its promote job does not run, so the first R2 reads
+in this workflow that must succeed are those of R1's `r2` content job. That job fails
+before signing, so a bad read cannot make a bad release.
 
 An `r2` dry run needs a commit whose updater reads R2 rows and a content set already
 uploaded for that commit, so dry runs before the first content upload use `ci`
@@ -245,6 +246,10 @@ with no secret and no cache:
      [key rotation](desktop-r2-delivery.md#key-rotation-2026-11), the pre-rotation
      `latest` does not, so T exports its helper and its content summary has no
      previous release.
+   - R1's job finds T only through the live R2 pointer, because T is not GitHub
+     `latest`. A failed read then gives no previous release and a new helper export,
+     not a failure. The job summary shows `helpers_reused` and the previous release's
+     commit, so the owner can read them before approving `desktop-sign`.
    - A change to the game's own export preset does not change the fingerprint.
    - Local and full-CI builds export their helpers the same way:
      `client_release.export_launcher` uses the same project files, fixed preset and

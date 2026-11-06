@@ -396,7 +396,7 @@ def test_field_updater_refuses_a_release_signed_with_another_key(fixture):
     the fixture key (the retired key); release T, its pointer and everything after
     are signed with another key. The game offers nothing, the updater stops with
     a signature error before it fetches any helper, and the installation is
-    unchanged: its player reinstalls from T's installer."""
+    unchanged: its player converts it with R1's setup."""
     f = fixture
     older = older_updater_source(f, FIELD_UPDATER)
     if older is None:

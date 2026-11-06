@@ -25,8 +25,9 @@ Related pages:
 
 ## Status
 
-As of 2026-11-05 every part of this path is in the repository, but no release has
-used it, and nothing exists under `desktop/v1/` yet:
+As of 2026-11-06 release T (`01279356`) is published, not latest, with live R2
+pointers and manifest copies. No release has its content on R2 yet. Every part of
+this path is in the repository:
 
 - the build machine's tools: pack, upload, publish, public verification and the
   policy check;
@@ -44,22 +45,27 @@ the setup helper were tested against local HTTPS fixtures that use the same key
 layout. Still open: the same Godot download check and the updater checks on native
 Linux, a full-size setup.exe of a real release, and any IPv6 check.
 
-These steps remain, in this order:
+These are the steps, in order. T is published; everything after it remains:
 
 1. **The owner's one-time setup** (below), including the push of these workflows to
    `master`, then a dry run.
 2. **The helper-train release T.** Both platforms use the `ci` source. T ships the
    R2-aware updater and setup while the content is still on GitHub. T is also the
    first release signed with the new release key (see
-   [key rotation](#key-rotation-2026-11)): installed games cannot verify it, so
-   every player reinstalls once from T's installer. T's manifest copies and
-   pointers are the first objects under `desktop/v1/`.
+   [key rotation](#key-rotation-2026-11)), so installed games cannot verify it. T
+   stays published and not latest, as the pinned last GitHub-hosted release: its
+   setup.exe refuses every existing installation, so returning players do not use
+   it. The owner rejects T's waiting `desktop-promote`, because a waiting run holds
+   the release concurrency group. T's manifest copies and pointers are the first
+   objects under `desktop/v1/`.
 3. **The first full content upload**, after the package format settles. The zstd
    re-encode changes every part hash, so upload once, with or after it.
 4. **The first R2 content release, R1.** Its commit pins T as the last GitHub-hosted
-   release (`PINNED_GITHUB_HOSTED`). Installations of T update to R1 through the R2
-   pointer. When its updater inputs are unchanged since T, it reuses T's updater byte
-   for byte, and players download no new updater.
+   release (`PINNED_GITHUB_HOSTED`). R1 is the first new GitHub `latest` since the
+   rotation, and its setup.exe is the installer returning Windows players use.
+   Installations of T update to R1 through the R2 pointer. When its updater inputs
+   are unchanged since T, it reuses T's updater byte for byte, and players download
+   no new updater.
 5. **Retire `desktop-release.yml`**, one release after R1.
 
 The workflow accepts an `r2` content source only for a commit whose updater reads R2
@@ -74,9 +80,10 @@ run once a live R2 pointer exists.
 
 ## Key rotation (2026-11)
 
-**Why.** The private half of the release key that signed every release up to
-`client-945042f0` is lost, so nothing can be signed with it again. On 2026-11-06
-the owner replaced it with a new RSA-4096 key. From the rotation commit on,
+**Why.** The project no longer has the private half of the release key that signed
+every release up to `client-945042f0`, so it cannot sign with that key again. The key
+is retired, not gone: a copy may still exist elsewhere. On 2026-11-06 the owner
+replaced it with a new RSA-4096 key. From the rotation commit on,
 `godot-client/data/update_public.pem` holds the new public key, and
 `CLIENT_UPDATE_SIGNING_KEY` holds its private half. The trust model and every
 check are unchanged; only the key is new.
@@ -87,30 +94,73 @@ check are unchanged; only the key is new.
   stages made for an earlier commit pin the old key and cannot be used.
 - **What players must do.** Every installed game pins the old key: in its core pack,
   `app/client-release.json`, its updater and its setup helper. None of them can
-  verify T or any later release. Each player reinstalls once from T's installer
-  (`<version>-setup.exe` on Windows, `<version>-download.sh` on Linux) from the
+  verify T or any later release, so each player runs a new installer once, from R1's
   release page. Accounts and characters live on the server and are not affected.
+- **Windows: R1's setup converts the folder.** T's `<version>-setup.exe` refuses every
+  existing installation and can never be fixed, because a published commit is never
+  released twice. R1's helper may overwrite a folder whose
+  `app/client-release.json` holds the retired key (`RETIRED_KEY_SHA256` in
+  `tools/install_client_payload.gd`, which is no updater input). Any other key,
+  another repository, Steam or standalone ownership, another platform, or a missing
+  or non-text `public_key` stays refused before anything is written: "This
+  installation belongs to a different distribution or signing key." The retired key
+  decides only whether a folder may be overwritten. It never reaches a signature
+  check, so holding its private half adds nothing here, and everything setup installs
+  is verified with the new key.
+- **Close the game first.** Setup checks for a running game only after it has
+  downloaded, so a player with the game open waits, is refused, and loses that
+  download. Setup's first page and the release notes say so. A game started from a
+  `.bat` shortcut holds no lock and is not seen; the swap then fails and restores the
+  folder (read in code, not run).
+- **If setup is interrupted.** The helper finishes before Inno copies the root files.
+  A cancel or crash in between leaves the old updater beside the new descriptor, and
+  the shortcut says "Use its original installer". The original installer and the old
+  uninstaller refuse that folder too. R1's setup heals it, without downloading
+  the game again, so the release notes tell players to run it again. After a disk
+  space failure, the verified downloads stay in the update cache and the retry
+  downloads them again on top, so free more space or delete that folder's entry under
+  `client-updates` (not measured).
+- **Linux stays refused, on purpose.** `<version>-download.sh` over
+  `~/Games/RabbitLands` and a standalone updater on either platform refuse a folder
+  with the old key (`src/updates/bootstrap.gd`). Relaxing that check would change the
+  updater inputs on both platforms, and R1 could no longer reuse T's updater. A Linux
+  player with an old installation runs the old uninstaller first, or passes another
+  parent folder to `download.sh`, and expects a full download.
+- **The Inno uninstaller leaves some files.** It cannot remove prepared-world files
+  whose paths exceed 260 characters. Measured on 2026-11-06 on a `945042f0` test
+  installation: about 6,000 files and 402 MB, with paths of 263-269 characters under
+  a 33-character folder and about 285 under the default folder. A later setup over
+  those leftovers finished, and the game started.
 - **What old installations do.** Their shortcuts still start the installed game. Its
   start check cannot verify T and offers nothing. An explicit updater run stops with
   "The release signature could not be verified." and changes nothing. Once the
-  server's `required_commit` names T or later with `enforce: true`, the server
+  server's `required_commit` names R1 or later with `enforce: true`, the server
   refuses their logins with "A game update is required. ... Older installations
-  need the latest client download." That is what makes players reinstall. Set the
-  policy as for any release, after `check-policy`.
+  need the latest client download." That is what makes players run the new installer.
+  Set the policy as for any release, after `check-policy`. That check passes only
+  after promote, so R1 is the first commit to require, and T's policy is never
+  deployed.
+- **Old installations still trust the retired key.** A holder of a copy would need
+  write access to the repository's releases, a TLS break, or a player running a file
+  they supplied through `--install-manifest`. The game server cannot steer them to a
+  file. This ends for a player when they convert.
 - **No rollback across the rotation.** A release before T is signed with the old
   key, which T and later releases do not trust, and its manifests are not schema 3.
-  The repoint check refuses it. A rollback from R1 lands on T. Never re-publish or
-  hand out a pre-rotation installer: it installs a game that can never update.
-- **Retention and the pin apply from T on**, unchanged. T is the last GitHub-hosted
-  release, and the R1 commit pins it (`PINNED_GITHUB_HOSTED`). Pre-rotation releases
-  stay only while they are among the two most recent before `latest`, and are then
-  pruned as usual.
+  The repoint check refuses it. A rollback from R1 lands on T, and a repoint to T also
+  makes T GitHub `latest`, which puts its refusing setup.exe on the latest page until
+  a fix ships. Never re-publish or hand out a pre-rotation installer: it installs a
+  game that can never update. Until R1 is promoted, the latest page still offers the
+  `945042f0` installer; a player who takes it can convert later with R1's setup.
+- **Retention and the pin apply from T on**, unchanged. T stays published and not
+  latest as the last GitHub-hosted release, and the R1 commit pins it
+  (`PINNED_GITHUB_HOSTED`). Pre-rotation releases stay only while they are among the
+  two most recent before `latest`, and are then pruned as usual.
 - **T has no previous release.** The tools verify the previous release with the
   dispatched commit's key, so the pre-rotation `latest` does not count. T's content
   summary lists every package as added, and T exports its own helper.
-- **The post-publish check for T** is a fresh install from T's setup.exe, a
-  pointer re-check, and T's setup over an old installation (see
-  [the check for T](#the-check-for-t)).
+- **The post-publish check for T** is a fresh install from T's setup.exe and a
+  pointer re-check (see [the check for T](#the-check-for-t)). Setup over an old
+  installation belongs to R1 (see [the check for R1](#the-check-for-r1)).
 
 ## Who builds what
 
@@ -170,7 +220,7 @@ Fresh installations do not read the pointer, because the player chose a release:
 
 Games and updaters before T read only the GitHub alias, and they pin the retired
 release key. They cannot verify T or any later release, so they never reach T's
-updater; their players reinstall from T's installer (see
+updater; their players run R1's installer once (see
 [key rotation](#key-rotation-2026-11)).
 
 ## R2 layout
@@ -611,12 +661,18 @@ as a path, and never print, copy or commit it.
      and removed packages; whether the core `client` package changed; new file
      extensions; new bytes; and the builder block.
    - Check that each set hash is the one pack printed.
+   - Read each `Executables <platform>` job summary: `helpers_reused` and the previous
+     release's commit. For R1 it must say `true` and T's commit, unless the updater
+     inputs changed on purpose. While GitHub `latest` is the pre-rotation `945042f0`,
+     only the live pointer leads to T, and a failed read exports a new helper instead
+     of failing the job. Find out why before approving: a new export may differ in
+     bytes, and then every installation of T takes a handover.
    - Approve only if this is the content you built for X.
 8. **Approval 2: `desktop-publish`.**
    - Wait for both `End-to-end` jobs and `Finalize the draft` to pass.
    - Approving signs both pointers and publishes the release as **not latest**.
-     `/releases/latest` keeps naming the previous release, so older games and
-     updaters see nothing yet.
+     `/releases/latest` keeps naming the current `latest` (for R1, the pre-rotation
+     `945042f0`), so older games and updaters see nothing yet.
    - The job summary prints the next command.
 9. **Local R2 publish:**
 
@@ -709,7 +765,8 @@ new.
 
 Use a test installation of the previous release, never your normal game folder.
 From R1 on, that installation's updater is R2-aware. T is checked from a fresh
-installation instead ([below](#the-check-for-t)).
+installation instead ([below](#the-check-for-t)), and R1 adds a setup check over a
+pre-rotation installation ([below](#the-check-for-r1)).
 
 1. Run the installed updater once with `-- --update-only` (from its folder, or with
    `-- --root <folder>`), and keep its log by passing `--log-file <file>` before the
@@ -725,11 +782,13 @@ installation instead ([below](#the-check-for-t)).
 The other discovery lines say why the pointer was not used, for example
 `Release discovery: the R2 pointer was not used (<reason>)` followed by
 `Release discovery: GitHub alias, commit <...>`. Before promote, the alias still names
-the previous release, so a run that took that path installs nothing.
+the current `latest`, so a run that took that path installs nothing. For R1 that is
+the pre-rotation `945042f0`, which a T installation cannot verify, so the run stops
+with "The release signature could not be verified."
 
 Run the check after the local R2 publish and before approving `desktop-promote`. At
-that point GitHub `latest` still names the previous release, so success can only
-come through the pointer.
+that point GitHub `latest` has not moved, so success can only come through the
+pointer.
 
 ### The check for T
 
@@ -745,23 +804,54 @@ after the local R2 publish and before approving `desktop-promote`:
    `0 of N packages needed downloads`. GitHub `latest` still names a pre-rotation
    release, which T cannot verify, so only the pointer can give this result.
 3. Start the game once. It must reach the login screen without an update prompt.
-4. Run the same setup.exe over a test installation of the previous release. Setup
-   keeps its application id, so it offers a player's existing folder, and most
-   Windows players reinstall this way. It must finish, `app/client-release.json`
-   must name T, and the game must start. No automated test installs over a
-   pre-rotation installation.
+
+T's setup.exe cannot pass over an old installation: it exits 7 and leaves the folder
+as it was, because its helper refuses the retired key. That is why T stays not latest,
+and why that check belongs to R1 ([below](#the-check-for-r1)).
 
 Check on a machine with a normal installation with care. Setup keeps one uninstall
 entry and one Start Menu group per machine and ignores `/GROUP`, so a test setup
 retargets the normal installation's shortcuts and uninstall entry to the test folder,
 even when `/DIR` is correct. Export the uninstall key and copy the Start Menu group
 first, and restore both after each setup. Remove the key while the test setup runs, so
-setup cannot pick the normal folder as the previous installation. Give every test run
-its own `APPDATA` and `LOCALAPPDATA`.
+setup cannot pick the normal folder as the previous installation. Give every test
+installation its own `APPDATA` and `LOCALAPPDATA`.
 
 Keep the fresh installation as the test installation for R1. An old installation's
 explicit updater run stops with "The release signature could not be verified."
 and changes nothing; that is expected, not a failure.
+
+### The check for R1
+
+R1's setup.exe is what returning Windows players run, and no automated test installs
+a real release over a real pre-rotation folder. T's install took the whole-tree path,
+so this is also the first per-file install at this scale. Run this check as well as the
+post-publish check from T's test installation, after the local R2 publish and before
+approving `desktop-promote`:
+
+1. Install `945042f0` into a test folder, and start that old game once under a test
+   `APPDATA` and `LOCALAPPDATA`.
+2. Run R1's `<version>-setup.exe` over that folder under the **same** `APPDATA` and
+   `LOCALAPPDATA`, so the old game's settings and update cache are there. This is the
+   one exception to "its own `APPDATA`" above: the old game and the setup share one.
+3. Do this twice, from two copies of the folder: once with `.eloria-previous` in it
+   and once without. Field installations that ever updated hold that whole second copy
+   of the game, because no release before T removes it.
+4. Each time, setup must finish, `app/client-release.json` must name R1,
+   `.eloria-previous` must be gone, and the game must reach the login screen with the
+   old game's settings kept.
+
+The order for R1, each step on the owner's approval:
+
+1. Replay the fixed setup helper over a copy of an old installation, with an unfixed
+   helper as the control, before any dispatch.
+2. Reject T's waiting promote.
+3. Push R1's commit to `develop`. The workflow accepts only the head of `develop` or
+   `master`.
+4. Run an `r2` dry run once R1's content set exists, then dispatch R1. Read
+   `helpers_reused` before approving `desktop-sign`.
+5. Run the post-publish check and this check.
+6. Promote only after both pass, and set `enforce` only after promote.
 
 ### If the check fails
 
@@ -770,9 +860,13 @@ offered X. If X itself is at fault:
 
 1. Reject the pending promote. A run waiting for approval holds the release
    concurrency group, so a repoint would queue behind it.
-2. Repoint the channel to the previous release, which is still GitHub `latest`
-   (see [rollback](#rollback-runbook)). T has no release to repoint to: only fresh
-   installations of T read its pointer, so fix forward with a new release.
+2. From the release after R1 on, repoint the channel to the previous release, which
+   is still GitHub `latest` (see [rollback](#rollback-runbook)).
+3. For T and R1, fix forward with a new release. T has no release to repoint to. R1's
+   previous release is T, which is not `latest`, so a repoint would also make T GitHub
+   `latest` and put its refusing setup.exe on the latest page. Only fresh installations
+   of T read the pointer at this stage, so a fix forward costs little. A repoint to T
+   is an owner decision.
 
 Installations that took X in the meantime keep it (see
 [what a rollback moves](#rollback-runbook)). Ship the fix as a new commit. A
@@ -815,7 +909,10 @@ deleted. A later, owner-approved cleanup would use the retained releases'
 ### Steps
 
 1. **Choose the target.** It must be a retained, published release whose manifests
-   are schema 3 and signed with the current key, so T or later.
+   are schema 3 and signed with the current key, so T or later. A repoint to T also
+   makes T GitHub `latest`, even though it never was, and T's setup.exe refuses every
+   folder from before the rotation. Returning players then meet that setup on the
+   latest page until a fix ships, so weigh that against fixing forward.
 2. **Reject any waiting run.** If a release run is waiting for an approval, reject
    or cancel it first.
 3. **Dispatch the repoint workflow.** Run Actions -> **Repoint the desktop live
@@ -872,7 +969,7 @@ with the key retired at T (see [key rotation](#key-rotation-2026-11)), which no
 installation from T on trusts. Pointers also name only schema-3 manifests, and the
 downgrade guard refuses older manifests reached through the alias. Roll forward
 instead: revert the change and ship a new release. A rollback from R1 lands on T,
-which is R2-aware.
+which is R2-aware, but whose setup.exe refuses old folders (see step 1 above).
 
 ## The `ci` content source
 
@@ -1015,7 +1112,9 @@ was measured by comparing `ClassDB.get_class_list()` in both templates.
 - **Freeze rule for R1:** R1 reuses T's helper only if these are unchanged since
   T: the eight `src/updates` helper scripts, the branding, the trust fields,
   `desktop_helpers.py`'s project, preset and `TOOL_VERSION`, the editor and
-  `helper_template.json`'s selected pin.
+  `helper_template.json`'s selected pin. The setup helper
+  `tools/install_client_payload.gd` is not among them. R1's job finds T through the
+  live pointer, because T is not GitHub `latest`.
 
 ### Publishing the template (owner, once per pin, before T)
 

@@ -76,8 +76,11 @@ releases through a small signed **pointer** on
 Cloudflare R2, and fall back to the GitHub release when it cannot be used. Games and
 updaters before T read only the GitHub alias, and they pin the release key that was
 replaced at T ([key rotation](desktop-r2-delivery.md#key-rotation-2026-11)). They
-cannot verify T or any later release, so their players reinstall once from T's
-installer.
+cannot verify T or any later release, so their players run a new installer once. T
+stays published and not latest, because its setup refuses their folders. R1 is the
+first new GitHub `latest`, and its setup converts them. On Linux, those players run
+the old uninstaller first, or pass another parent folder to the helper, and expect a
+full download.
 
 **The pointer.** The signed record
 `https://assets.rabbitlandsgame.com/desktop/v1/channels/live/<platform>.json`
@@ -186,7 +189,9 @@ or the Linux `*-download.sh` helper. The release also provides a standalone
 to update that installation. If downloaded elsewhere, it uses the per-user
 `Programs/RabbitLands` folder on Windows or `~/Games/RabbitLands` on Linux.
 `-- --root /absolute/game/folder` selects a custom installation explicitly;
-`--update-only` checks and installs without starting the game.
+`--update-only` checks and installs without starting the game. It refuses a folder
+from before the 2026-11
+[key rotation](desktop-r2-delivery.md#key-rotation-2026-11).
 
 The schema 2 signed manifest lists independent ZIP packages. New release builds
 use checksum-named `RabbitLands-pkg-<SHA256>.zip.part` downloads in the permanent
@@ -409,7 +414,10 @@ The Inno uninstaller also removes what an interrupted update can leave:
 the installed-release record `.rabbitlands-release.json` with its `.tmp`.
 Linux removes the recognized game folder directly. Player settings outside the
 installation are retained. Windows **Installed apps** can also uninstall an
-Inno installation.
+Inno installation. The Inno uninstaller leaves prepared-world files whose paths exceed
+260 characters. Measured on 2026-11-06 on a `945042f0` installation: about 6,000 files
+and 402 MB, with paths of 263-269 characters under a 33-character folder and about 285
+under the default folder.
 
 The game server names the **client Git commit packaged for that server**. This
 is independent of the server repository's own commit. Client builds contain
@@ -441,8 +449,9 @@ moves, and distributions with a key of their own.
 Signed release builds require the release private key matching
 `godot-client/data/update_public.pem`. Since the
 [key rotation](desktop-r2-delivery.md#key-rotation-2026-11) of 2026-11 that is the
-new key; the earlier private key is lost, so no build of a commit before the
-rotation can be signed. The private key is not included in a
+new key. The earlier key is retired: the project can no longer sign with it, so no
+build of a commit before the rotation can be signed, and a copy of its private half
+may still exist elsewhere. The private key is not included in a
 clone. Keep it and its backup outside both repositories, never upload it, and
 select its actual private location with `--update-signing-key`. Moving a
 checkout does not create or replace that key.
@@ -528,7 +537,12 @@ The output is `../dist/releases/client-<full-client-commit>/`:
   downloads its content parts from R2 and the rest from GitHub. A failed or
   tampered download stops setup before its helper runs and installs nothing; run
   setup again.
-  Setup can repair the same build. Players need an internet connection, and
+  Setup can repair the same build. From R1 on it also converts a folder from before
+  the 2026-11 [key rotation](desktop-r2-delivery.md#key-rotation-2026-11), and refuses
+  a folder with any other key, repository, owner or platform before it writes
+  anything. Its check for a running game comes after the download, so players close
+  the game first. If setup is interrupted, or a shortcut says to use the original
+  installer, they run the same setup again. Players need an internet connection, and
   do not manually download the update parts. Shortcuts start the restart updater.
 - **Linux:** one `*-download.sh` helper. It verifies and starts the native
   updater, which installs the required independent packages. There is no
@@ -783,7 +797,9 @@ The updater now replaces its own executable through a verified handover. Its
 original trust key remains pinned; changing that key still requires a new
 trusted installer rather than trusting a key supplied by a downloaded manifest.
 The 2026-11 [key rotation](desktop-r2-delivery.md#key-rotation-2026-11) did exactly
-that: installations from before release T reinstall from T's installer.
+that: installations from before release T need a new installer once. On Windows that
+is R1's setup, which recognises the retired key only to decide that it may overwrite
+the folder. T's setup refuses those folders.
 
 Existing installations without this updater require one manual upgrade.
 Building artifacts does not upload them or change any live server policy.
@@ -794,6 +810,9 @@ Choose the minimum checks for the behavior being changed. For example:
 
 - Launcher shortcut changes, from the client repository:
   `python -m pytest -q godot-client/tests/test_client_release.py::test_updating_shortcuts_use_restart_launcher_for_both_platforms`.
+- Setup over a folder from before the key rotation:
+  `python -m pytest -q godot-client/tests/test_setup_over_retired_key.py`. It runs the
+  setup helper headless, with no Inno Setup, so it cannot touch a normal installation.
 - Package downloads, self-update and uninstall changes:
   `python -m pytest -q godot-client/tests/test_asset_packages.py`. Native checks use
   the installed Godot/Inno tools on Windows and WSL Ubuntu-24.04 for Linux. The
