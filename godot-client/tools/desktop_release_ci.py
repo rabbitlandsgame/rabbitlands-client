@@ -1081,6 +1081,14 @@ def helper_template_provider(platform: str, official: Path, folder: Path, downlo
     return provide
 
 
+def helper_summary(platform: str, reused: bool, previous) -> str:
+    """What the owner reads in the job summary before approving desktop-sign. A failed
+    read of the previous release is not an error: it only makes the job export a helper."""
+    commit = previous.get("commit") if isinstance(previous, dict) else None
+    found = f"`{commit}`" if commit else "none verified (no signed previous release could be read)"
+    return f"\n## Updater helper, {platform}\n\n- `helpers_reused`: {str(reused).lower()}\n- Previous release: {found}\n"
+
+
 def executables(*, platform: str, commit: str, repo: Path, godot: Path, content_dir: Path, out: Path, work: Path,
                 template: Path | None = None, run_godot=None, native_builder=build_native,
                 engine_exporter=export_engine,
@@ -1147,6 +1155,7 @@ def executables(*, platform: str, commit: str, repo: Path, godot: Path, content_
             if not local.is_file() or local.stat().st_size != part["size"] or _digest(local) != part["sha256"]:
                 raise CiError("ci-part", local.name)
     _write(out / "exec.json", _json_bytes(record))
+    _summary(helper_summary(platform, helper.reused, previous))
     if not comparison["engine_equal"]:
         _emit(f"warning: the CI {platform} engine differs from the local build's (QA record, not a trust gate)")
     return record

@@ -866,11 +866,14 @@ def test_executables_fetch_the_pinned_helper_template_only_to_export_it(repo, ch
 
 
 def test_executables_reuse_the_previous_helper_without_any_template(repo, checkout, key, tmp_path,
-                                                                    helper_template_downloads):
+                                                                    helper_template_downloads, monkeypatch):
     from test_desktop_helpers import FakeHttp
+    summary = tmp_path / "summary.md"
+    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary))
     first, _, _, content = run_executables(repo, checkout, key, tmp_path)
+    assert "- `helpers_reused`: false\n- Previous release: none verified" in summary.read_text(encoding="utf-8")
     helper = (tmp_path / "exec-windows/root/RabbitLands-updater.exe").read_bytes()
-    previous = {"platform": "windows", "helpers_fingerprint": first["helpers_fingerprint"],
+    previous = {"platform": "windows", "commit": "c" * 40, "helpers_fingerprint": first["helpers_fingerprint"],
                 **{kind: first["helpers"][kind] for kind in rm.HELPER_KINDS}}
     http = FakeHttp({first["helpers"]["updater"]["url"]: helper})
     helper_template_downloads.clear()
@@ -882,6 +885,8 @@ def test_executables_reuse_the_previous_helper_without_any_template(repo, checko
                             native_builder=fake_native(checkout, "windows"), engine_exporter=fake_engine, http=http,
                             previous=previous)
     assert record["helpers_reused"] is True and record["helpers"] == first["helpers"]
+    # The owner reads this before approving desktop-sign.
+    assert f"- `helpers_reused`: true\n- Previous release: `{'c' * 40}`\n" in summary.read_text(encoding="utf-8")
     assert helper_template_downloads == [] and not (tmp_path / "work-again/helper-template").exists()
     assert not any("--export-release" in args and "Windows Desktop" in args and "helper" in str(args)
                    for args in calls)
