@@ -43,7 +43,7 @@ anonymous HTTPS reads, Range requests, and downloads by Godot's `HTTPRequest` on
 Windows and by Inno Setup's download page. The updater, the game's start check and
 the setup helper were tested against local HTTPS fixtures that use the same key
 layout. Still open: the same Godot download check and the updater checks on native
-Linux, a full-size setup.exe of a real release, and any IPv6 check.
+Linux, a full-size setup.exe with R2 part URLs, and any IPv6 check.
 
 These are the steps, in order. T is published; everything after it remains:
 
@@ -101,9 +101,10 @@ check are unchanged; only the key is new.
   released twice. R1's helper may overwrite a folder whose
   `app/client-release.json` holds the retired key (`RETIRED_KEY_SHA256` in
   `tools/install_client_payload.gd`, which is no updater input). Any other key,
-  another repository, Steam or standalone ownership, another platform, or a missing
-  or non-text `public_key` stays refused before anything is written: "This
-  installation belongs to a different distribution or signing key." The retired key
+  another repository, Steam or standalone ownership, the retired key with another
+  platform, or a missing or non-text `public_key` stays refused before anything is
+  written: "This installation belongs to a different distribution or signing key."
+  The current key is not compared by platform, as before. The retired key
   decides only whether a folder may be overwritten. It never reaches a signature
   check, so holding its private half adds nothing here, and everything setup installs
   is verified with the new key.
@@ -115,8 +116,10 @@ check are unchanged; only the key is new.
 - **If setup is interrupted.** The helper finishes before Inno copies the root files.
   A cancel or crash in between leaves the old updater beside the new descriptor, and
   the shortcut says "Use its original installer". The original installer and the old
-  uninstaller refuse that folder too. R1's setup heals it, without downloading
-  the game again, so the release notes tell players to run it again. After a disk
+  uninstaller refuse that folder too. R1's setup heals it, so the release notes tell
+  players to run it again. Inno cannot read paths over 260 characters, so setup
+  fetches about 340 MB of such packages again and discards them; the rest is not
+  downloaded again (inferred from a probe, not run). After a disk
   space failure, the verified downloads stay in the update cache and the retry
   downloads them again on top, so free more space or delete that folder's entry under
   `client-updates` (not measured).
@@ -824,22 +827,27 @@ and changes nothing; that is expected, not a failure.
 ### The check for R1
 
 R1's setup.exe is what returning Windows players run, and no automated test installs
-a real release over a real pre-rotation folder. T's install took the whole-tree path,
-so this is also the first per-file install at this scale. Run this check as well as the
-post-publish check from T's test installation, after the local R2 publish and before
-approving `desktop-promote`:
+a real release over a real pre-rotation folder. A full-size local replay proved the
+conversion with T's GitHub rows; what this check adds first is a full-size setup with
+R2 part URLs. Run this check as well as the post-publish check from T's test
+installation, after the local R2 publish and before approving `desktop-promote`:
 
-1. Install `945042f0` into a test folder, and start that old game once under a test
-   `APPDATA` and `LOCALAPPDATA`.
+1. Follow [the care above for a machine with a normal installation](#the-check-for-t):
+   back up and park the uninstall key, and restore the Start Menu group after every
+   setup and uninstaller. Install `945042f0` into a test folder and start that old game
+   once under a test `APPDATA` and `LOCALAPPDATA`. A game that nobody logged in to
+   writes no settings file, so copy a played user folder into that `APPDATA` first and
+   record the SHA-256 of its `eloria_hud.cfg`.
 2. Run R1's `<version>-setup.exe` over that folder under the **same** `APPDATA` and
    `LOCALAPPDATA`, so the old game's settings and update cache are there. This is the
    one exception to "its own `APPDATA`" above: the old game and the setup share one.
 3. Do this twice, from two copies of the folder: once with `.eloria-previous` in it
    and once without. Field installations that ever updated hold that whole second copy
-   of the game, because no release before T removes it.
+   of the game, because no release before T removes it. A new `945042f0` holds only an
+   empty `.eloria-previous`, so copy `app/` and `eloria-assets/` into it for this case.
 4. Each time, setup must finish, `app/client-release.json` must name R1,
    `.eloria-previous` must be gone, and the game must reach the login screen with the
-   old game's settings kept.
+   hash of `eloria_hud.cfg` unchanged.
 
 The order for R1, each step on the owner's approval:
 
@@ -851,7 +859,11 @@ The order for R1, each step on the owner's approval:
 4. Run an `r2` dry run once R1's content set exists, then dispatch R1. Read
    `helpers_reused` before approving `desktop-sign`.
 5. Run the post-publish check and this check.
-6. Promote only after both pass, and set `enforce` only after promote.
+6. Update the public wiki pages `Access-and-Installation` and `Updates-and-Recovery`,
+   which still say existing installations reuse matching packages and send players to
+   the standalone updater, and add to T's release notes that its setup does not accept
+   an existing folder. T stays first on the releases list until R1 is published.
+7. Promote only after both checks pass, and set `enforce` only after promote.
 
 ### If the check fails
 

@@ -5284,6 +5284,7 @@ def online_installer_script(stage: Path, helper: Path, version: str,
                 lines.append(f"  if not InstalledFileMatches(ExpandConstant('{{app}}') + '\\{name}', '{entry['sha256']}') then Exit;")
             lines.extend(["  Result := True;", "end;"])
             checks.append("\n".join(lines))
+            queues.append(f"  InstallPage.SetProgress({index}, {len(payload['packages'])});")
             queues.append(f"  if not PackageCurrent{index} then begin")
             queues.extend(_download_line(part, "    ") for part in package["parts"])
             queues.append("  end;")
@@ -5404,7 +5405,14 @@ var
 begin
   Result := '';
   DownloadPage.Clear;
+  InstallPage.SetText('Checking your installed game files...', 'Only the files that changed will be downloaded. This can take a few minutes.');
+  InstallPage.SetProgress(0, 100);
+  InstallPage.Show;
+  try
 {downloads}
+  finally
+    InstallPage.Hide;
+  end;
   DownloadPage.Show;
   try
     try

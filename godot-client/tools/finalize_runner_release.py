@@ -467,9 +467,9 @@ The helper needs `curl` and `sha256sum`. It verifies the native updater, which
 downloads the required game packages. Pass another parent folder as its first
 argument.
 
-The helper cannot use a folder installed before November 2026. Run that game's old
-uninstaller first, or pass another parent folder to the helper, and expect a full
-download.
+If the helper says `Use its original installer`, that folder comes from a release
+before the signing key change. Run that game's old uninstaller first, or pass another
+parent folder to the helper, and expect a full download.
 
 ## Downloads and verification
 
@@ -484,8 +484,8 @@ See [installation instructions](https://github.com/{release.REPOSITORY}/wiki/Acc
 
 ## Standalone helpers
 
-These cannot convert a folder installed before November 2026. Use the downloads above
-for one.
+These stop with `Use its original installer` on a folder from before the signing key
+change. On Windows, run setup instead. On Linux, follow the steps above.
 '''
     for platform, names in helpers.items():
         text += "\n" + platform.title() + ": " + ", ".join(

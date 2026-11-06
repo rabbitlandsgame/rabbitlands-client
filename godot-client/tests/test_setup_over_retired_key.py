@@ -127,8 +127,8 @@ REFUSALS = {"another key": lambda retired: {"public_key": ANOTHER_KEY},
 
 @pytest.mark.parametrize("case", sorted(REFUSALS))
 def test_setup_refuses_every_other_folder_before_it_writes(fixture, case):
-    # A key that is not text must end with this message too. A comparison Godot
-    # refuses would abort _ready, and setup would wait forever for the helper.
+    # A key that is not text must end with this message too. Under a debug engine, a
+    # comparison Godot refuses ends _install_packages early and the run looks like a success.
     f = fixture
     set_descriptor(f, **REFUSALS[case](retired_pem()))
     cache = cache_of(f)

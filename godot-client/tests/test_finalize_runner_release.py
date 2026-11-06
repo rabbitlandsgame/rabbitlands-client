@@ -592,10 +592,10 @@ def test_r2_finalize_checks_github_rows_by_inventory_and_r2_rows_against_the_con
     assert ("Close Rabbit Lands, then run this setup; it converts your existing folder. If setup\n"
             "is interrupted or a shortcut says to use the original installer, run this setup again.") in notes
     assert "reuse their matching packages" not in notes
-    assert "Run that game's old\nuninstaller first, or pass another parent folder" in notes
-    assert "expect a full\ndownload" in notes
+    assert "Run that game's old uninstaller first, or pass another\nparent folder" in notes
+    assert "expect a full download" in notes
     standalone = notes[notes.index("## Standalone helpers"):]
-    assert "cannot convert a folder installed before November 2026" in standalone
+    assert "`Use its original installer` on a folder from before the signing key" in standalone
 
 
 @pytest.mark.parametrize("sources", [{"windows": "r2", "linux": "ci"}, {"windows": "ci", "linux": "r2"},

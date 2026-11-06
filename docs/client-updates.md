@@ -539,9 +539,10 @@ The output is `../dist/releases/client-<full-client-commit>/`:
   setup again.
   Setup can repair the same build. From R1 on it also converts a folder from before
   the 2026-11 [key rotation](desktop-r2-delivery.md#key-rotation-2026-11), and refuses
-  a folder with any other key, repository, owner or platform before it writes
-  anything. Its check for a running game comes after the download, so players close
-  the game first. If setup is interrupted, or a shortcut says to use the original
+  a folder with any other key, repository or owner before it writes anything. Before
+  it downloads, it checks the installed files and shows its progress; this took about
+  80 s on a fast NVMe drive. Its check for a running game comes after the download, so
+  players close the game first. If setup is interrupted, or a shortcut says to use the original
   installer, they run the same setup again. Players need an internet connection, and
   do not manually download the update parts. Shortcuts start the restart updater.
 - **Linux:** one `*-download.sh` helper. It verifies and starts the native
