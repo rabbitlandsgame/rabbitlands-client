@@ -302,6 +302,9 @@ def test_r2_rows_are_accepted_when_verified_and_the_helper_reads_them(tmp_path, 
     setup = built.run(verified=verified)
     assert setup.read_bytes() == b"MZ" and built.exports == [package_client.CLIENT]
     assert set(seen) >= {part["sha256"] for part in hosted}
+    # The first page says so, because the helper's own check comes after the download.
+    info = built.stage.parent / f"{built.stage.name}-online-install.txt"
+    assert "Close Rabbit Lands before continuing.\n" in info.read_text(encoding="utf-8")
     script = built.compiled[0]
     assert [row[0] for row in queued(script)] == [part["url"] for part in built.payload["parts"]]
     receipt = json.loads((built.stage.parent / f"{built.stage.name}-setup-downloads.json").read_text())

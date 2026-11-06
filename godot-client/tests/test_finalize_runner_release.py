@@ -587,6 +587,15 @@ def test_r2_finalize_checks_github_rows_by_inventory_and_r2_rows_against_the_con
     assert f"`{inputs.signed['windows'].stage.name}-setup.exe`" in notes
     assert f"`{inputs.signed['linux'].stage.name}-download.sh`" in notes
     assert "R2 objects" in inputs.summary.read_text()
+    # What a returning player reads. Setup converts an old Windows folder; the Linux
+    # helper and the standalone updaters refuse one (bootstrap.gd root_error).
+    assert ("Close Rabbit Lands, then run this setup; it converts your existing folder. If setup\n"
+            "is interrupted or a shortcut says to use the original installer, run this setup again.") in notes
+    assert "reuse their matching packages" not in notes
+    assert "Run that game's old\nuninstaller first, or pass another parent folder" in notes
+    assert "expect a full\ndownload" in notes
+    standalone = notes[notes.index("## Standalone helpers"):]
+    assert "cannot convert a folder installed before November 2026" in standalone
 
 
 @pytest.mark.parametrize("sources", [{"windows": "r2", "linux": "ci"}, {"windows": "ci", "linux": "r2"},

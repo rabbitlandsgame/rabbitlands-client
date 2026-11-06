@@ -5537,7 +5537,8 @@ def make_online_installer(stage: Path, godot: Path, iscc: Path, version: str,
     (stage.parent / f"{stage.name}-online-install.txt").write_text(
         "Rabbit Lands will download and verify its game files during setup.\n\n"
         f"Download size: approximately {payload['size'] / 1024**3:.1f} GiB. An internet connection is required.\n"
-        "You do not need to download the accompanying update files yourself.\n", encoding="utf-8")
+        "You do not need to download the accompanying update files yourself.\n"
+        "Close Rabbit Lands before continuing.\n", encoding="utf-8")
     script = logs / "online-installer.iss"
     script.write_text(online_installer_script(stage, helper, version, launch_args, payload,
                                               moves_downloads=reads["moves_downloads"]), encoding="utf-8-sig")

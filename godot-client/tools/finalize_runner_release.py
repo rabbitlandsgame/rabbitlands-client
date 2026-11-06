@@ -451,6 +451,9 @@ Client commit: `{sha}`. Releases keep the latest build and the two before it for
 Download the Windows installer, `{windows}-setup.exe`, from **Assets** below and run it.
 Setup downloads and verifies the game files. Installation is per user.
 
+Close Rabbit Lands, then run this setup; it converts your existing folder. If setup
+is interrupted or a shortcut says to use the original installer, run this setup again.
+
 ## Linux x86_64
 
 Download the Linux helper, `{linux}-download.sh`, from **Assets** below and run:
@@ -462,7 +465,11 @@ sh ./{linux}-download.sh
 
 The helper needs `curl` and `sha256sum`. It verifies the native updater, which
 downloads the required game packages. Pass another parent folder as its first
-argument. Existing installations reuse their matching packages.
+argument.
+
+The helper cannot use a folder installed before November 2026. Run that game's old
+uninstaller first, or pass another parent folder to the helper, and expect a full
+download.
 
 ## Downloads and verification
 
@@ -476,6 +483,9 @@ executable (or Windows Installed apps) to remove the game; player settings are k
 See [installation instructions](https://github.com/{release.REPOSITORY}/wiki/Access-and-Installation).
 
 ## Standalone helpers
+
+These cannot convert a folder installed before November 2026. Use the downloads above
+for one.
 '''
     for platform, names in helpers.items():
         text += "\n" + platform.title() + ": " + ", ".join(
