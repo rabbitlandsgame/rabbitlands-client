@@ -244,6 +244,7 @@ def pointer_folder(folder: Path, inputs, key, **options) -> Path:
 @pytest.fixture
 def r2_release(tmp_path, monkeypatch, key, no_network):
     """A finalized R2 draft (both platforms r2) after older releases, with this run's pointers."""
+    monkeypatch.setattr(prune, "PINNED_GITHUB_HOSTED", None)  # made-up releases, so the real pin is not among them
     monkeypatch.setattr(publisher.time, "sleep", lambda _: None)
     inputs = fin.r2_inputs(tmp_path / "run", key)
     history = (("oldest", 91), ("older", 92), ("old", 93))

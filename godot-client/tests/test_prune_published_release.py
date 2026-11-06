@@ -12,10 +12,18 @@ import prune_published_release as prune
 import shared_release_assets as shared
 
 WORKFLOWS = Path(__file__).resolve().parents[2] / ".github" / "workflows"
+COMMITTED_PIN = prune.PINNED_GITHUB_HOSTED
+
+
+@pytest.fixture(autouse=True)
+def no_pinned_release(monkeypatch):
+    """These fixtures name made-up releases, so the real pin would not be among them; tests of the pin set their own."""
+    monkeypatch.setattr(prune, "PINNED_GITHUB_HOSTED", None)
 
 
 def context(monkeypatch, *, latest=True, corrupt=False):
     """The current latest release, its two retained predecessors, one older release and a draft."""
+    monkeypatch.setattr(prune, "PINNED_GITHUB_HOSTED", None)
     current = {"id": 20, "tag_name": "client-" + "a" * 40, "draft": False,
                "author": {"login": "rabbitlandsgame"}, "published_at": "2026-10-17T12:00:00Z"}
     previous = [{"id": 12, "tag_name": "client-" + "1" * 40, "draft": False, "published_at": "2026-10-16T12:00:00Z"},
@@ -80,7 +88,7 @@ def ids(items) -> set:
 def test_retention_schema_2_constants_gate_the_r2_workflow():
     import actions_release
     assert type(prune.RETENTION_SCHEMA) is int and prune.RETENTION_SCHEMA == 2 and prune.KEEP_PREVIOUS == 2
-    assert prune.PINNED_GITHUB_HOSTED is None or shared.CLIENT_TAG.fullmatch(prune.PINNED_GITHUB_HOSTED)
+    assert shared.CLIENT_TAG.fullmatch(COMMITTED_PIN)
     assert actions_release.retention_guard() == 2
 
 

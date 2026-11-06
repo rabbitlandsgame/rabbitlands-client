@@ -33,7 +33,7 @@ RETENTION_SCHEMA = 2
 KEEP_PREVIOUS = 2
 # "client-<sha>" of the last GitHub-hosted release, kept while R2 releases follow it.
 # Set it in the first R2 content release (R1); None keeps only latest and its neighbours.
-PINNED_GITHUB_HOSTED = None
+PINNED_GITHUB_HOSTED = "client-012793568eb5a96cbce242fa0037f2743d80da97"
 _MODULE_PIN = object()  # retention() reads PINNED_GITHUB_HOSTED when it runs, not when it was defined
 
 
