@@ -22,7 +22,7 @@ SUPPLEMENTS = [
     ROOT / 'eloria-assets/source/item-icons/quivers-2026-10-20',
     ROOT / 'eloria-assets/source/item-icons/perk-capes-2026-10-22',
     ROOT / 'eloria-assets/source/item-icons/enriched-essences-2026-10-30',
-    ROOT / 'eloria-assets/source/item-icons/reagent-saver-2026-11-07',
+    ROOT / 'eloria-assets/source/item-icons/essence-keeper-2026-11-07',
 ]
 REPLACEMENTS = [
     ROOT / 'eloria-assets/source/item-icons/essences-2026-10-29',

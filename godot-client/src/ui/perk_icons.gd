@@ -25,7 +25,7 @@ const INDICES := {
 	"defensive mage": 19, "summoner": 20, "lifebinder": 21, "artificer": 22,
 	"fast regeneration": 23, "careful mixer": 24, "recycler": 25,
 	"frugal mixer": 26, "lucky harvester": 27, "much nomz wow": 28,
-	"bone eater": 29, "cooldown reduction": 30, "gatherer": 31, "reagent saver": 32,
+	"bone eater": 29, "cooldown reduction": 30, "gatherer": 31, "essence keeper": 32,
 }
 
 static var _sheet: Texture2D
