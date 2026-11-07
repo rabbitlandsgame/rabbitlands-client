@@ -25,9 +25,10 @@ Related pages:
 
 ## Status
 
-As of 2026-11-06 release T (`01279356`) is published, not latest, with live R2
-pointers and manifest copies. No release has its content on R2 yet. Every part of
-this path is in the repository:
+As of 2026-11-07 release R1 (`9baf44f2`) is GitHub `latest`, with its Windows content
+on R2 and its Linux content on GitHub. T (`01279356`) stays published and was never
+`latest`. The server's `client_updates.json` has not been changed for R1. Every part
+of this path is in the repository:
 
 - the build machine's tools: pack, upload, publish, public verification and the
   policy check;
@@ -45,7 +46,7 @@ the setup helper were tested against local HTTPS fixtures that use the same key
 layout. Still open: the same Godot download check and the updater checks on native
 Linux, a full-size setup.exe with R2 part URLs, and any IPv6 check.
 
-These are the steps, in order. T is published; everything after it remains:
+These are the steps, in order. Steps 1 to 4 are done; only step 5 remains:
 
 1. **The owner's one-time setup** (below), including the push of these workflows to
    `master`, then a dry run.
@@ -859,11 +860,14 @@ The order for R1, each step on the owner's approval:
 4. Run an `r2` dry run once R1's content set exists, then dispatch R1. Read
    `helpers_reused` before approving `desktop-sign`.
 5. Run the post-publish check and this check.
-6. Update the public wiki pages `Access-and-Installation` and `Updates-and-Recovery`,
-   which still say existing installations reuse matching packages and send players to
-   the standalone updater, and add to T's release notes that its setup does not accept
-   an existing folder. T stays first on the releases list until R1 is published.
-7. Promote only after both checks pass, and set `enforce` only after promote.
+6. Promote only after both checks pass.
+7. Right after promote, update the public wiki pages `Access-and-Installation` and
+   `Updates-and-Recovery`. Their text is true only once the release is `latest`. The
+   wiki serves `master`, and a checkout on `develop` pushes with
+   `git push origin develop:master`.
+8. Set `enforce` only after promote, and fix the server's login message first. It
+   tells a refused client to wait for a download that an old installation never
+   starts, and it links a manifest JSON file instead of the release page.
 
 ### If the check fails
 
