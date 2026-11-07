@@ -422,8 +422,13 @@ characters, and all of them from 30; the default folder has 48 or more. The setu
 uninstall code now removes the game's folders by name through the `\\?\` form before the
 `[UninstallDelete]` rows run, then the folder itself if it is empty, so a player's own
 files in it stay. An uninstaller changes only when setup runs: an update does not replace
-it. Without an Inno uninstaller, as after a standalone updater, the hidden helper cannot
-reach those paths on a machine with `LongPathsEnabled` off.
+it.
+
+Without an Inno uninstaller, as after a standalone updater, the hidden helper removes the
+files itself, also through the `\\?\` form. Up to R1 it uses plain paths: on a machine with
+`LongPathsEnabled` off it stops with an error at the first folder holding those paths, with
+the game partly removed. An update replaces this helper, in the first release that carries
+the change.
 
 The game server names the **client Git commit packaged for that server**. This
 is independent of the server repository's own commit. Client builds contain

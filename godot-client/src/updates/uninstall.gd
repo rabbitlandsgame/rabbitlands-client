@@ -6,13 +6,24 @@ static func windows_script(root: String, cache: String, pid: int, repository: St
 	# One native PowerShell process waits for our executable to close. All
 	# filesystem operations stay in that shell, use literal paths, and verify
 	# the final absolute installation path again before removing anything.
+	# Removal goes through the \\?\ form: where LongPathsEnabled is off, PowerShell
+	# does not list a plain path over 260 characters, so the folder cannot empty.
+	# Windows does not normalize that form, so it is made from the full path. The
+	# checks of the path, the marker and the lease keep using the plain path.
 	return """$ErrorActionPreference = 'Stop'
 Set-Location -LiteralPath $env:TEMP
 [Environment]::CurrentDirectory = $env:TEMP
 $target = '%s'
 $cache = '%s'
 $repository = '%s'
+function Get-RabbitLongPath([string]$path) {
+  if ($path.StartsWith('\\\\?\\')) { return $path }
+  $full = [IO.Path]::GetFullPath($path)
+  if ($full.StartsWith('\\\\')) { return '\\\\?\\UNC\\' + $full.Substring(2) }
+  return '\\\\?\\' + $full
+}
 function Remove-RabbitTree([string]$path) {
+  $path = Get-RabbitLongPath $path
   if (-not (Test-Path -LiteralPath $path)) { return }
   $entry = Get-Item -LiteralPath $path -Force
   if (($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
@@ -45,7 +56,7 @@ try {
   }
   $guard = [IO.File]::Open($owner, 'Open', 'ReadWrite', 'None')
   try {
-    foreach ($entry in Get-ChildItem -LiteralPath $resolved -Force) {
+    foreach ($entry in Get-ChildItem -LiteralPath (Get-RabbitLongPath $resolved) -Force) {
       if ($entry.Name -ne '.eloria-launcher-lock') { Remove-RabbitTree $entry.FullName }
     }
   } finally { $guard.Dispose() }

@@ -10,6 +10,7 @@ import io
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -370,7 +371,7 @@ func _run() -> void:
         return
     if error == "" and request.action == "script":
         var file := FileAccess.open(request.script, FileAccess.WRITE)
-        file.store_string(Uninstall.windows_script(request.root, request.cache, 0, request.identity.repository))
+        file.store_string(Uninstall.windows_script(request.root, request.cache, 0, request.identity.repository, false))
         file.close()
     if error == "" and request.action == "promote":
         error = await transport.worker(func() -> String: return Release.promote_staged(request.root))
@@ -1032,6 +1033,92 @@ def test_uninstall_requires_confirmation_and_refuses_steam(fixture):
     path.write_text(json.dumps(steam))
     assert f["run"]("uninstall", confirm=True)[0] == 1
     assert path.is_file()
+
+
+def long_form(path):
+    return "\\\\?\\" + str(path)
+
+
+def write_long(path, content=b"long"):
+    os.makedirs(os.path.dirname(long_form(path)), exist_ok=True)
+    with open(long_form(path), "wb") as file:
+        file.write(content)
+    return path
+
+
+def unaware_powershell(folder):
+    """A copy of powershell.exe that is not long-path aware whatever LongPathsEnabled says, as
+    powershell.exe is on a default Windows machine. A machine with the key on, or a manifest
+    without this setting, passes without the fix unless the test runs through this copy."""
+    data = (Path(os.environ["SystemRoot"]) / "System32/WindowsPowerShell/v1.0/powershell.exe").read_bytes()
+    # One space from the next line's indent keeps every offset in the file.
+    patched, hits = re.subn(rb"(longPathAware[^>]*>)true(</[a-zA-Z0-9:]*longPathAware>\r\n) ", rb"\1false\2", data)
+    assert hits <= 1 and len(patched) == len(data)
+    folder.mkdir(parents=True)
+    (folder / "powershell.exe").write_bytes(patched)
+    return folder / "powershell.exe"
+
+
+def test_windows_uninstall_script_removes_long_paths_without_long_path_awareness(fixture):
+    if os.name != "nt":
+        pytest.skip("This check runs the native Windows uninstall script.")
+    f = fixture
+    root, tmp = f["installed"], f["tmp_path"]
+    powershell = unaware_powershell(tmp / "unaware")
+    cache = tmp / "userdata/Godot/app_userdata/Eloria/client-updates/0123456789abcdef01234567"
+    settings = tmp / "userdata/Godot/app_userdata/Eloria/settings.cfg"
+    outside = tmp / "outside"
+    outside.mkdir()
+    (outside / "keep.txt").write_text("outside the game folder")
+    deep = Path("a" * 120, "b" * 120)
+    files = [write_long(root / "app/prepared-world" / deep / "long.bin"),
+             write_long(root / ".eloria-previous" / deep / "long.bin"),
+             write_long(root / "app/prepared-world/[it's a name]" / deep / "long.bin"),
+             write_long(root / ("t" * 230 + ".bin")),
+             write_long(cache / "packages" / deep / "long.part")]
+    assert all(len(str(path)) > 260 for path in files)
+    settings.write_text("keep my settings")
+    (root / ".eloria-launcher-lock").mkdir()
+    # Junctions out of the game folder, at a plain path and at one over 260 characters.
+    linked = subprocess.run(f'cmd /c mklink /J "{root / "external-settings"}" "{outside}"', capture_output=True, text=True)
+    assert linked.returncode == 0, linked.stdout + linked.stderr
+    linked = subprocess.run(f'cmd /c mklink /J "{root / "moved-link"}" "{outside}"', capture_output=True, text=True)
+    assert linked.returncode == 0, linked.stdout + linked.stderr
+    os.rename(long_form(root / "moved-link"), long_form(root / "app/prepared-world" / deep / "linked-settings"))
+
+    script = tmp / "uninstall.ps1"
+
+    def uninstall(marker=f["identity"]["repository"], lease=0, target=None):
+        (root / ".rabbitlands-install.json").write_text(json.dumps({"schema": 1, "repository": marker}))
+        (root / ".eloria-launcher-lock/owner.json").write_text(json.dumps({"pid": lease}))
+        code, error, output = f["run"]("script", script=str(script), cache=cache.as_posix(),
+                                       **({"root": target} if target else {}))
+        assert code == 0 and error == "", output
+        return subprocess.run([str(powershell), "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
+                               "-File", str(script)], capture_output=True, text=True, timeout=60)
+
+    # The copy has to fail on the plain path, or this test proves nothing.
+    literal = lambda text: "'" + text.replace("'", "''") + "'"
+    seen = subprocess.run([str(powershell), "-NoProfile", "-NonInteractive", "-Command",
+                           f"[IO.File]::Exists({literal(str(files[0]))}), [IO.File]::Exists({literal(long_form(files[0]))})"],
+                          capture_output=True, text=True, timeout=60)
+    assert seen.stdout.split() == ["False", "True"], seen.stdout + seen.stderr
+
+    # The checks compare the plain path before anything goes.
+    refusals = (("Invalid installation path", {"target": f"{root.parent.as_posix()}/./{root.name}"}),
+                ("Unrecognized installation", {"marker": "someone/else"}),
+                ("Another process opened the installation", {"lease": 4242}))
+    for message, change in refusals:
+        refused = uninstall(**change)
+        assert refused.returncode == 1 and message in " ".join(refused.stderr.split()), refused.stdout + refused.stderr
+        assert all(os.path.exists(long_form(path)) for path in files), message
+
+    removed = uninstall()
+    assert removed.returncode == 0, removed.stdout + removed.stderr
+    assert not os.path.exists(long_form(root)), removed.stdout + removed.stderr
+    assert not os.path.exists(long_form(cache)), removed.stdout + removed.stderr
+    assert (outside / "keep.txt").read_text() == "outside the game folder"
+    assert settings.read_text() == "keep my settings"
 
 
 @pytest.mark.parametrize("mutation", ["path", "duplicate", "url", "size"])

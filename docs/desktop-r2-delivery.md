@@ -142,11 +142,19 @@ check are unchanged; only the key is new.
 - **Setups built after that remove them.** Their uninstall code deletes the game's
   folders by name through the `\\?\` form first, and a `[Dirs]` row removes the folder
   when it is empty. An installation gets this uninstaller only by running such a setup:
-  an update does not replace it. An installation with no Inno uninstaller, from a
-  standalone updater, is removed by `src/updates/uninstall.gd`, whose PowerShell cannot
-  reach those paths where `LongPathsEnabled` is off (measured on that function, not a
-  whole installation). Changing it changes the updater fingerprint, so it waits for a
-  release that changes the updater anyway.
+  an update does not replace it.
+- **An installation with no Inno uninstaller**, from a standalone updater, is removed by
+  `src/updates/uninstall.gd`. Up to R1 its PowerShell cannot reach those paths where
+  `LongPathsEnabled` is off. Measured on 2026-11-07 on real R1 installations in a
+  48-character folder, through a copy of `powershell.exe` whose manifest sets
+  `longPathAware` to false: R1's helper stops with an error after removing 4,164 of the
+  26,170 files, all from `app/`, and with a leftover `.eloria-previous/` it removes none.
+  The folder and the download cache stay. The helper with the `\\?\` form removes every
+  file, the folder and the cache, and keeps the player's settings. An update does replace
+  this helper, but the change gives it a new updater fingerprint on both platforms, though
+  only Windows runs this code. So the first release carrying it exports a new helper
+  (`helpers_reused` is false, on purpose) and every installation takes a handover. The owner
+  chose on 2026-11-07 to ship it in the next release after R1.
 - **What old installations do.** Their shortcuts still start the installed game. Its
   start check cannot verify T and offers nothing. An explicit updater run stops with
   "The release signature could not be verified." and changes nothing. Once the
