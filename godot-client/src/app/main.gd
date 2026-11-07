@@ -8300,7 +8300,7 @@ func _prepare_local_closure() -> void:
 		return
 	var dto: Dictionary = _presentation_dto(AppState.actors[id])
 	if OS.has_feature("web"):
-		_browser_actor_ready(id, dto)
+		if _browser_preparation_enabled(): _browser_actor_ready(id, dto)
 		return
 	if _local_hold_matches(id, dto) or not actor_resource_warmup.closure_enabled():
 		return
@@ -8317,12 +8317,17 @@ func _note_local_body_built(id: int) -> void:
 		waited["map"] = AppState.current_map
 		Diagnostics.record("local_avatar_prepared", waited)
 
-func _browser_actor_ready(id: int, dto: Dictionary) -> bool:
-	if not OS.has_feature("web"): return true
-	if _actor_preparation_closing: return false
+func _browser_preparation_enabled() -> bool:
+	if not OS.has_feature("web"): return false
 	if not _browser_actor_preparation_configured:
 		actor_resource_warmup.configure_browser(bool(WebPrototype.configuration().get("browser_actor_preparation", true)))
 		_browser_actor_preparation_configured = true
+	return actor_resource_warmup.browser_enabled()
+
+func _browser_actor_ready(id: int, dto: Dictionary) -> bool:
+	if not OS.has_feature("web"): return true
+	if _actor_preparation_closing: return false
+	_browser_preparation_enabled()
 	if _browser_actor_assets == null:
 		_browser_actor_assets = preload("res://src/platform/browser_actor_assets.gd").new(WebPrototype)
 	var state := AppState.mount_state_for_actor(id)
@@ -8837,7 +8842,7 @@ func _prepare_selected_mount() -> void:
 	if id < 0 or not AppState.authenticated or _actor_preparation_closing:
 		return
 	if OS.has_feature("web"):
-		if AppState.actors.has(id) and game_view.visible:
+		if _browser_preparation_enabled() and AppState.actors.has(id) and game_view.visible:
 			_browser_actor_ready(id, _presentation_dto(AppState.actors[id]))
 		return
 	if not actor_resource_warmup.closure_enabled(): return
