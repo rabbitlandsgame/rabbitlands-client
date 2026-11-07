@@ -11,7 +11,6 @@ func _init() -> void:
 
 func _run() -> void:
 	root.size = Vector2i(1280, 720)
-	root.gui_embed_subwindows = true
 	OS.set_environment("ELORIA_NO_MAP_CACHE", "1")
 	var main := (load("res://src/app/main.tscn") as PackedScene).instantiate() as Control
 	root.add_child(main)
@@ -68,21 +67,29 @@ func _run() -> void:
 	right_click.button_index = MOUSE_BUTTON_RIGHT
 	right_click.pressed = true
 	fifth.gui_input.emit(right_click)
-	_expect(windows._merchant_preset_dialog.visible and windows._merchant_preset_input.text == "1000",
-		"right-click opens the preset editor with the current value")
+	_expect(windows._merchant_preset_input.visible and windows._merchant_preset_input.text == "1000",
+		"right-click puts the editable number inside its preset")
 	await _capture("merchant-preset-editor.png")
+	_expect(windows._merchant_preset_input.get_parent() == fifth
+		and windows._merchant_preset_input.get_global_rect().is_equal_approx(fifth.get_global_rect()),
+		"the editor occupies the original preset box")
+	_preset_key(KEY_BACKSPACE, 8)
+	_preset_key(KEY_2, 50)
+	_expect(windows._merchant_preset_input.text == "1002", "Backspace and number keys edit at the caret")
+	_preset_key(KEY_A, 97)
+	_expect(windows._merchant_preset_input.text == "1002", "the inline field ignores letter keys")
 	windows._merchant_preset_input.text = "0"
-	windows._merchant_preset_dialog.confirmed.emit()
-	_expect(windows._merchant_preset_dialog.visible and fifth.text == "1000",
-		"invalid edits keep the previous preset and the editor open")
+	windows._commit_merchant_preset()
+	_expect(windows._merchant_preset_input.visible and fifth.text == "1000",
+		"invalid edits keep the previous preset and the inline field open")
 	windows._merchant_preset_input.text = "1000000"
-	windows._merchant_preset_dialog.confirmed.emit()
+	windows._commit_merchant_preset()
 	_expect(fifth.text == "1000000", "the maximum valid preset can be saved")
 	await _capture("merchant-large-preset.png")
 	fifth.gui_input.emit(right_click)
 	windows._merchant_preset_input.text = "2500"
 	windows._merchant_preset_input.text_submitted.emit("2500")
-	_expect(not windows._merchant_preset_dialog.visible and fifth.text == "2500",
+	_expect(not windows._merchant_preset_input.visible and fifth.text == "2500",
 		"saving an edit updates the preset label")
 	var reloaded := preload("res://src/ui/merchant_quantities.gd").new()
 	reloaded.load_file(windows.preferences_path)
@@ -100,9 +107,26 @@ func _run() -> void:
 		"changing NPC retains the new merchant's identity")
 	fifth.gui_input.emit(right_click)
 	windows._merchant_preset_input.text = "42"
-	windows._merchant_preset_dialog.canceled.emit()
-	windows._merchant_preset_dialog.hide()
+	_preset_key(KEY_ESCAPE)
+	_expect(not windows._merchant_preset_input.visible and windows.merchant_panel.visible,
+		"Escape cancels inline editing without closing the shop")
 	_expect(fifth.text == "2500", "canceling an edit preserves its saved value")
+	fifth.gui_input.emit(right_click)
+	windows._merchant_preset_input.text = "2700"
+	var outside_click := InputEventMouseButton.new()
+	outside_click.pressed = true
+	outside_click.button_index = MOUSE_BUTTON_LEFT
+	outside_click.position = Vector2(650, 400)
+	windows._input(outside_click)
+	_expect(fifth.text == "2700" and not windows._merchant_preset_input.visible,
+		"clicking away saves the inline value")
+	reloaded.load_file(windows.preferences_path)
+	_expect(reloaded.values[4] == 2700, "click-away edits are persisted")
+	fifth.gui_input.emit(right_click)
+	windows._merchant_preset_input.text = "0"
+	windows._merchant_preset_input.release_focus()
+	_expect(fifth.text == "2700" and not windows._merchant_preset_input.visible,
+		"focus loss discards invalid text without changing the preset")
 	state.get("merchant")["actor_id"] = 91
 	state.get("merchant")["npc_name"] = "Bettany Orl"
 	windows._sync_merchant()
@@ -299,3 +323,13 @@ func _select(server_id: int, selling := false) -> void:
 func _search(query: String) -> void:
 	windows.merchant_search.text = query
 	windows.merchant_search.text_changed.emit(query)
+
+
+func _preset_key(code: Key, character := 0) -> void:
+	var event := InputEventKey.new()
+	event.keycode = code
+	event.unicode = character
+	event.pressed = true
+	root.push_input(event, true)
+	event.pressed = false
+	root.push_input(event, true)

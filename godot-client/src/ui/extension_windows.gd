@@ -130,9 +130,7 @@ var _merchant_type := "All"
 var _merchant_fit_pending := false
 var _merchant_quantities := MerchantQuantities.new()
 var _merchant_preset_buttons: Array[Button] = []
-var _merchant_preset_dialog: ConfirmationDialog
 var _merchant_preset_input: LineEdit
-var _merchant_preset_hint: Label
 var _merchant_preset_index := -1
 var _merchant_actor := -1
 var _merchant_request_pending := false
@@ -1023,6 +1021,7 @@ func _merchant_set_quantity(value: int) -> void:
 	_sync_merchant_summary()
 
 func _merchant_quantity_preset_pressed(index: int) -> void:
+	_commit_merchant_preset(true)
 	_merchant_set_quantity(_merchant_quantities.values[index])
 
 func _sync_merchant_quantity_presets() -> void:
@@ -1031,27 +1030,68 @@ func _sync_merchant_quantity_presets() -> void:
 		_merchant_preset_buttons[index].text = str(value)
 		_merchant_preset_buttons[index].tooltip_text = "Set quantity to %d. Right-click to edit." % value
 
+## Commit before the outside click reaches its target, including focusless HUD buttons.
+func _input(event: InputEvent) -> void:
+	if _merchant_preset_index < 0: return
+	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+		_end_merchant_preset_edit()
+		get_viewport().set_input_as_handled()
+	elif event is InputEventMouseButton and event.pressed \
+			and event.button_index in [MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT] \
+			and not _merchant_preset_input.get_global_rect().has_point(event.position):
+		_commit_merchant_preset(true)
+
 func _merchant_preset_gui_input(event: InputEvent, index: int) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
+		_commit_merchant_preset(true)
 		_merchant_preset_index = index
+		var button := _merchant_preset_buttons[index]
+		if _merchant_preset_input.get_parent() != button:
+			_merchant_preset_input.reparent(button)
+		_merchant_preset_input.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		_merchant_preset_input.text = str(_merchant_quantities.values[index])
-		_merchant_preset_hint.text = "Enter a whole number from 1 to 1,000,000."
-		_merchant_preset_dialog.popup_centered(Vector2i(320, 140))
+		_merchant_preset_input.tooltip_text = "Enter to save · Escape to cancel · 1–1,000,000"
+		_merchant_preset_input.add_theme_color_override("font_color", HUD_STYLE.TEXT)
+		_merchant_preset_input.show()
 		_merchant_preset_input.grab_focus()
-		_merchant_preset_input.select_all()
-		_merchant_preset_buttons[index].accept_event()
+		_merchant_preset_input.deselect()
+		_merchant_preset_input.caret_column = _merchant_preset_input.text.length()
+		button.accept_event()
 
-func _commit_merchant_preset() -> void:
+func _merchant_preset_edit_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed:
+		if event.keycode == KEY_ESCAPE:
+			_end_merchant_preset_edit()
+			_merchant_preset_input.accept_event()
+		elif event.keycode in [KEY_BACKSPACE, KEY_DELETE, KEY_LEFT, KEY_RIGHT, KEY_HOME, KEY_END, KEY_ENTER, KEY_KP_ENTER, KEY_TAB]:
+			return
+		elif event.unicode != 0 and not event.ctrl_pressed and not event.meta_pressed \
+				and (event.unicode < 48 or event.unicode > 57):
+			_merchant_preset_input.accept_event()
+
+func _end_merchant_preset_edit() -> void:
+	_merchant_preset_index = -1
+	_merchant_preset_input.hide()
+	_merchant_preset_input.release_focus()
+
+func _commit_merchant_preset(finish_on_invalid := false) -> void:
+	if _merchant_preset_index < 0: return
 	var typed := _merchant_preset_input.text.strip_edges()
 	if not typed.is_valid_int() or int(typed) < 1 or int(typed) > MerchantQuantities.MAXIMUM:
-		_merchant_preset_hint.text = "Use a whole number from 1 to 1,000,000."
+		_merchant_preset_input.tooltip_text = "Use a whole number from 1 to 1,000,000."
+		_merchant_preset_input.add_theme_color_override("font_color", Color("ee8880"))
+		if finish_on_invalid: _end_merchant_preset_edit()
 		return
 	var error := _merchant_quantities.save_value(_merchant_preset_index, int(typed), preferences_path)
 	if error != OK:
-		_merchant_preset_hint.text = "Could not save this preset: " + error_string(error)
+		_merchant_preset_input.tooltip_text = "Could not save this preset: " + error_string(error)
+		_merchant_preset_input.add_theme_color_override("font_color", Color("ee8880"))
+		if finish_on_invalid:
+			merchant_status.text = "Could not save preset."
+			_end_merchant_preset_edit()
 		return
 	_sync_merchant_quantity_presets()
-	_merchant_preset_dialog.hide()
+	_end_merchant_preset_edit()
 
 func _merchant_set_maximum() -> void:
 	merchant_quantity.text = str(maxi(1, _merchant_maximum(_merchant_entry())))
@@ -2905,25 +2945,22 @@ func _build_merchant_window() -> void:
 		_merchant_preset_buttons.append(shortcut)
 		presets.add_child(shortcut)
 	_sync_merchant_quantity_presets()
-	_merchant_preset_dialog = ConfirmationDialog.new()
-	_merchant_preset_dialog.name = "MerchantPresetEditor"
-	_merchant_preset_dialog.title = "Edit quantity preset"
-	_merchant_preset_dialog.ok_button_text = "Save"
-	_merchant_preset_dialog.dialog_hide_on_ok = false
-	add_child(_merchant_preset_dialog)
-	var edit_body := VBoxContainer.new()
-	edit_body.add_theme_constant_override("separation", 8)
-	_merchant_preset_dialog.add_child(edit_body)
-	_merchant_preset_hint = Label.new()
-	_merchant_preset_hint.custom_minimum_size.x = 300
-	_merchant_preset_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	edit_body.add_child(_merchant_preset_hint)
 	_merchant_preset_input = LineEdit.new()
 	_merchant_preset_input.name = "MerchantPresetValue"
 	_merchant_preset_input.max_length = 7
+	_merchant_preset_input.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_merchant_preset_input.context_menu_enabled = false
+	_merchant_preset_input.add_theme_constant_override("minimum_character_width", 1)
+	_merchant_preset_input.add_theme_font_size_override("font_size", 12)
+	_merchant_preset_input.add_theme_stylebox_override("normal", HUD_STYLE.box(Color("16120d"), Color("d5aa60"), 2))
+	_merchant_preset_input.add_theme_stylebox_override("focus", HUD_STYLE.box(Color("16120d"), Color("ebc982"), 2))
 	_merchant_preset_input.text_submitted.connect(func(_text: String) -> void: _commit_merchant_preset())
-	edit_body.add_child(_merchant_preset_input)
-	_merchant_preset_dialog.confirmed.connect(_commit_merchant_preset)
+	_merchant_preset_input.focus_exited.connect(func() -> void: _commit_merchant_preset(true))
+	_merchant_preset_input.gui_input.connect(_merchant_preset_edit_input)
+	merchant_panel.add_child(_merchant_preset_input)
+	_merchant_preset_input.hide()
+	merchant_panel.visibility_changed.connect(func() -> void:
+		if not merchant_panel.visible: _commit_merchant_preset(true))
 	merchant_totals = Label.new()
 	merchant_totals.name = "MerchantTotals"
 	merchant_totals.custom_minimum_size.x = 400

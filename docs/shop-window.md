@@ -14,9 +14,10 @@ in both directions, price in both directions, or item type. Sale-price sorting
 compares the price per item, including fractional bundle prices.
 
 Quantity shortcuts default to **1**, **5**, **10**, **100** and **1000** beside
-the quantity controls. Right-click a shortcut to edit its value, then Save or
-press Enter. Values must be whole numbers from 1 to 1,000,000. Cancel leaves the
-previous value intact. Edited presets are saved in local player settings and
+the quantity controls. Right-click a shortcut to put the cursor directly in that
+box. Edit with numbers and Backspace, then press Enter or click elsewhere to
+save. Escape cancels the edit. Values must be whole numbers from 1 to 1,000,000.
+Canceled or invalid edits leave the previous value intact. Edited presets are saved in local player settings and
 shared across all NPC shops, including future game sessions. Hover to see the
 full value if a large number is shortened to fit its button.
 They set an exact amount without submitting a trade. The Buy/Sell button is at
