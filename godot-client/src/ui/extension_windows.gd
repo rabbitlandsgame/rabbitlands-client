@@ -92,6 +92,7 @@ var quest_panel: PanelContainer
 var quest_list: ItemList
 var quest_detail: RichTextLabel
 var quest_track_button: Button
+var quest_show_button: Button
 var quest_replay_button: Button
 var _quest_entries: Array[Dictionary] = []
 var quest_guide: Control
@@ -104,6 +105,7 @@ var _quest_showing_archive := false
 var tracked_quest: PanelContainer
 var tracked_quest_text: RichTextLabel
 var quest_untrack_button: Button
+var quest_hide_button: Button
 var mail_panel: PanelContainer
 var mail_list: ItemList
 var mail_body: RichTextLabel
@@ -232,6 +234,7 @@ var _merchant_mode := "buy"
 ## every 224, and a tracked quest the server stops sending simply stops being
 ## tracked.
 var _tracked_quest_title := ""
+var _hidden_tracked_quests: Dictionary = {}
 var _field_tracking_title := ""
 var _tracked_quest_layout_revision := 0
 
@@ -264,6 +267,7 @@ func configure(atlas: ItemAtlas, guide: Control = null) -> void:
 	quest_guide = guide
 	if quest_guide != null:
 		quest_guide.tracking_changed.connect(_on_quest_guide_tracking_changed)
+		quest_guide.window_visibility_changed.connect(_sync_quests)
 	if is_node_ready(): _sync_quests()
 
 func _on_quest_guide_tracking_changed() -> void:
@@ -579,6 +583,7 @@ func _sync_quests() -> void:
 			+ "%s[/font_size][/center]" % tr("ELORIA_QUEST_NONE"))
 		quest_track_button.disabled = true
 		quest_track_button.text = "Track"
+		quest_show_button.hide()
 		quest_replay_button.hide()
 		_sync_tracked_quest()
 		return
@@ -598,6 +603,7 @@ func _quest_is_tracked(title: String) -> bool:
 ## would move everything else when the view changes.
 func _sync_quest_archive() -> void:
 	quest_replay_button.hide()
+	quest_show_button.hide()
 	var selected: int = _selected_index(quest_list)
 	quest_list.clear()
 	for entry: Dictionary in AppState.quest_archive:
@@ -657,6 +663,38 @@ func _on_quest_track_pressed() -> void:
 		Network.send_chat("#quests untrack")
 		_field_tracking_title = ""
 	_tracked_quest_title = "" if title == _tracked_quest_title else title
+	if not _tracked_quest_title.is_empty():
+		_hidden_tracked_quests.erase(_tracked_quest_title)
+	_sync_quests()
+
+func _on_quest_hide_pressed() -> void:
+	if not _tracked_quest_title.is_empty():
+		_hidden_tracked_quests[_tracked_quest_title] = true
+	_sync_quests()
+
+func _quest_window_hidden(entry: Dictionary) -> bool:
+	var title := str(entry.get("title", ""))
+	if bool(entry.get("_campaign", false)) and quest_guide != null:
+		return quest_guide.is_campaign_tracked() and quest_guide.is_window_hidden("campaign:" + quest_guide.campaign_identity())
+	return _quest_is_tracked(title) and (_hidden_tracked_quests.has(title) \
+		or quest_guide != null and quest_guide.is_window_hidden("quest:" + title))
+
+func _on_quest_show_pressed() -> void:
+	var index := _selected_index(quest_list)
+	if _quest_showing_archive or index < 0 or index >= _quest_entries.size():
+		return
+	var entry: Dictionary = _quest_entries[index]
+	if not _quest_window_hidden(entry):
+		return
+	if bool(entry.get("_campaign", false)) and quest_guide != null:
+		quest_guide.set_campaign_tracked(true)
+		return
+	var title := str(entry.get("title", ""))
+	_hidden_tracked_quests.erase(title)
+	if quest_guide != null:
+		quest_guide.prefer_standard_quest()
+		if quest_guide.quest_title() == title:
+			quest_guide.show_window()
 	_sync_quests()
 
 func _on_quest_untrack_pressed() -> void:
@@ -682,6 +720,9 @@ func _sync_tracked_quest() -> void:
 	if str(tracked.get("location", "")) == "Main world" or (
 			quest_guide != null and quest_guide.quest_title() == _tracked_quest_title):
 		# The guide owns this quest's window, including its tracking choice.
+		tracked_quest.hide()
+		return
+	if _hidden_tracked_quests.has(_tracked_quest_title):
 		tracked_quest.hide()
 		return
 	var target: int = int(tracked.get("target", 0))
@@ -722,11 +763,13 @@ func _fit_tracked_quest_to_content(revision: int) -> void:
 		return
 	var content_height := tracked_quest_text.get_content_height()
 	tracked_quest_text.fit_content = false
-	var desired_height := clampf(content_height + 32.0,
+	var chrome_height := 36.0 + maxf(quest_hide_button.get_combined_minimum_size().y,
+		quest_untrack_button.get_combined_minimum_size().y)
+	var desired_height := clampf(content_height + chrome_height,
 		QUEST_TRACKER_SIZE.y, QUEST_TRACKER_MAX_HEIGHT)
 	tracked_quest.custom_minimum_size.y = desired_height
 	tracked_quest.size.y = desired_height
-	tracked_quest_text.scroll_active = content_height + 32.0 > QUEST_TRACKER_MAX_HEIGHT
+	tracked_quest_text.scroll_active = content_height + chrome_height > QUEST_TRACKER_MAX_HEIGHT
 
 ## One list serves both halves of the window, so a selection has to be read
 ## against whichever half is showing - against the other one it would either
@@ -754,6 +797,7 @@ func _show_quest(index: int) -> void:
 	var entry: Dictionary = _quest_entries[index]
 	var campaign := bool(entry.get("_campaign", false)) and quest_guide != null
 	quest_track_button.text = "Untrack" if (quest_guide.using_campaign() if campaign else _quest_is_tracked(str(entry.get("title", "")))) else "Track"
+	quest_show_button.visible = _quest_window_hidden(entry)
 	quest_replay_button.visible = campaign
 	sync_campaign_replay()
 	var target: int = int(entry.get("target", 0))
@@ -2396,6 +2440,13 @@ func _build() -> void:
 	quest_actions.add_theme_constant_override("h_separation", 8)
 	quest_side.add_child(quest_actions)
 	quest_actions.add_child(quest_track_button)
+	quest_show_button = Button.new()
+	quest_show_button.name = "QuestShow"
+	quest_show_button.text = "Show quest"
+	quest_show_button.tooltip_text = "Reopen this quest's gameplay window while keeping it tracked."
+	quest_show_button.hide()
+	quest_show_button.pressed.connect(_on_quest_show_pressed)
+	quest_actions.add_child(quest_show_button)
 	quest_replay_button = Button.new()
 	quest_replay_button.name = "QuestReplayScene"
 	quest_replay_button.text = "Replay current scene"
@@ -2426,6 +2477,11 @@ func _build() -> void:
 	tracker_parchment_surface.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	tracker_parchment_surface.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	tracker_parchment.add_child(tracker_parchment_surface)
+	var tracker_column := VBoxContainer.new()
+	tracker_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tracker_column.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	tracker_column.add_theme_constant_override("separation", 4)
+	tracker_parchment_surface.add_child(tracker_column)
 	tracked_quest_text = RichTextLabel.new()
 	tracked_quest_text.name = "TrackedQuestText"
 	tracked_quest_text.bbcode_enabled = true
@@ -2433,23 +2489,29 @@ func _build() -> void:
 	tracked_quest_text.scroll_active = false
 	tracked_quest_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	tracked_quest_text.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	tracker_parchment_surface.add_child(tracked_quest_text)
+	tracker_column.add_child(tracked_quest_text)
 	_style_quest_tracker(tracker_parchment, tracker_parchment_surface)
-	var tracker_actions := Control.new()
+	var tracker_actions := HFlowContainer.new()
 	tracker_actions.name = "TrackerActions"
-	tracker_actions.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	tracked_quest.add_child(tracker_actions)
+	tracker_actions.alignment = FlowContainer.ALIGNMENT_END
+	tracker_column.add_child(tracker_actions)
+	quest_hide_button = Button.new()
+	quest_hide_button.name = "HideQuest"
+	quest_hide_button.text = "Hide"
+	quest_hide_button.tooltip_text = "Hide this window while keeping the quest tracked. Choose Show quest in Quests to reopen it."
+	quest_hide_button.flat = true
+	TextColors.bind(quest_hide_button, "ui_button")
+	quest_hide_button.add_theme_font_size_override("font_size", 12)
+	tracker_actions.add_child(quest_hide_button)
+	quest_hide_button.pressed.connect(_on_quest_hide_pressed)
 	quest_untrack_button = Button.new()
 	quest_untrack_button.name = "UntrackQuest"
-	quest_untrack_button.text = "×"
+	quest_untrack_button.text = "Untrack"
 	quest_untrack_button.tooltip_text = "Untrack quest. Choose Track in Quests to show it again."
 	quest_untrack_button.flat = true
 	TextColors.bind(quest_untrack_button, "ui_button")
-	quest_untrack_button.add_theme_font_size_override("font_size", 18)
+	quest_untrack_button.add_theme_font_size_override("font_size", 12)
 	tracker_actions.add_child(quest_untrack_button)
-	quest_untrack_button.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	quest_untrack_button.position = Vector2(-30, 4)
-	quest_untrack_button.size = Vector2(26, 26)
 	quest_untrack_button.pressed.connect(_on_quest_untrack_pressed)
 
 	mail_panel = _window("MailWindow", "Mail")
@@ -2754,6 +2816,7 @@ func _style_quest_journal(quest_views: HBoxContainer,
 	quest_detail.add_theme_color_override("selection_color", Color(0.55, 0.35, 0.12, 0.28))
 	quest_detail.add_theme_font_size_override("normal_font_size", 15)
 	_style_quest_button(quest_track_button, true)
+	_style_quest_button(quest_show_button, false)
 	_style_quest_button(quest_replay_button, false)
 	quest_track_button.custom_minimum_size.x = 154.0
 	quest_track_button.size_flags_horizontal = Control.SIZE_SHRINK_END

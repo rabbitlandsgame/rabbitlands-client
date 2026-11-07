@@ -63,6 +63,15 @@ func run() -> void:
 	expect(app.quest_journal.size()==1 and not app.quest_journal[0].has("_campaign"),"the current-expedition row does not alter the server's journal")
 	expect(windows._quest_entries.size()==2,"a campaign with no exact row is represented once beside ordinary quests")
 	select_row(campaign_row());expect(windows.quest_track_button.text=="Untrack","the existing journal recognizes the automatically tracked campaign")
+	guide.hide_button.pressed.emit();await settle()
+	expect(not guide.visible and guide.using_campaign() and guide.is_campaign_tracked()
+		and windows.quest_track_button.text=="Untrack" and windows.quest_show_button.visible,
+		"Hide closes the expedition card while preserving its tracking and work guidance")
+	state.hint="Follow the crew to the next inspection.";await show_state(state)
+	expect(not guide.visible,"an objective update does not reopen a hidden expedition card")
+	windows.quest_show_button.pressed.emit();await settle()
+	expect(guide.visible and guide.instruction.text.contains("next inspection") and not windows.quest_show_button.visible,
+		"Show quest restores the latest expedition instructions without changing tracking")
 	guide.collapse.pressed.emit();await settle()
 	expect(guide.compact and not hud.visible and guide.collapse.text=="Instructions","the existing Less control minimizes the campaign instructions")
 	state.hint="Check the cargo seal.";state.scene.token="evidence";state.key="seal";state.title="One Cargo Two Claims"
@@ -125,8 +134,12 @@ func run() -> void:
 	expect(guide.has_campaign() and campaign_row()>=0,"unfinished optional travel retains its real expedition entry")
 	await show_state(state)
 	expect(guide.has_campaign(),"an active private ending remains available for local replay even after main rewards")
-	var rescue_complete := sample();rescue_complete.kind="rescue";rescue_complete.completed=true
+	var rescue_complete := sample();rescue_complete.kind="rescue";rescue_complete.completed=false
 	rescue_complete.title="The Missing Family";rescue_complete.hint="Speak with the woman."
+	await show_state(rescue_complete)
+	guide.hide_button.pressed.emit();await settle()
+	expect(not guide.visible and guide.is_campaign_tracked(),"an active rescue can be hidden while it remains tracked")
+	rescue_complete.completed=true
 	guide.compact=true
 	await show_state(rescue_complete)
 	expect(not guide.has_campaign() and not guide.is_campaign_tracked() and campaign_row()==-1,
@@ -136,6 +149,7 @@ func run() -> void:
 		"completed rescue retains Return and replay without stale conversation or reward targets, even after minimizing instructions")
 	expect(not guide.collapse.visible and not guide.untrack.visible and not guide.instruction.text.contains("Speak"),
 		"the completion notice offers no active quest tracking or repeated conversation")
+	expect(not guide.hide_button.visible,"the completed rescue keeps its Return action accessible")
 	await capture("rescue-complete-return-1280x720")
 	var returned := rescue_complete.duplicate(true);returned.active=false
 	await show_state(returned)

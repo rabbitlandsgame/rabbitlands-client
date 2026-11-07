@@ -47,6 +47,9 @@ func click_at(point: Vector2, button := MOUSE_BUTTON_LEFT) -> void:
 	await frames()
 
 func bounds_match(view: Control) -> bool:
+	if view == main.console_panel and main.hud_workspace.model.working.console_fit_viewport:
+		var area: Rect2 = main.hud_workspace.console_view_rect()
+		return view.get_global_rect().is_equal_approx(main.game_view.get_global_transform() * area)
 	return view.get_global_rect().is_equal_approx(main.game_view.get_global_rect())
 
 func exposed_point(control: Control) -> Vector2:
@@ -184,7 +187,7 @@ func check_layout(label: String) -> void:
 	root.gui_release_focus()
 	await press(KEY_QUOTELEFT)
 	expect(main.console_panel.visible and not main.full_map.visible, label + ": console hotkey opens only the console")
-	expect(bounds_match(main.console_panel), label + ": console fills the complete game window")
+	expect(bounds_match(main.console_panel), label + ": console fits the available viewport")
 	expect(main.console_panel.get_index() > main.viewport_container.get_index()
 		and main.console_panel.get_index() < main.get_node("%Quickbar").get_index()
 		and main.console_panel.z_index <= main.get_node("%Quickbar").z_index,
@@ -277,7 +280,7 @@ func run() -> void:
 		await frames()
 		main._toggle_console()
 		await frames()
-		expect(bounds_match(main.console_panel), "visible console fills resized window %s" % dimensions)
+		expect(bounds_match(main.console_panel), "visible console fits resized viewport %s" % dimensions)
 		main._toggle_console()
 	for scale: float in [0.75, 1.5, 1.0]:
 		main._on_ui_scale_changed(scale)

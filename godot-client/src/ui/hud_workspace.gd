@@ -27,6 +27,7 @@ var containers: Dictionary = {}
 var icon_buttons: Array[Button] = []
 var utility_grid: GridContainer
 var panel: PanelContainer
+var console_fit_toggle: CheckBox
 var preset_picker: OptionButton
 var settings_picker: OptionButton
 var component_picker: OptionButton
@@ -449,6 +450,16 @@ func _build_editor() -> void:
 		_snap_enabled = value
 		_resize_snap_enabled = value)
 	aids.add_child(snap)
+	console_fit_toggle = CheckBox.new()
+	console_fit_toggle.name = "HudConsoleFitViewport"
+	console_fit_toggle.text = "Fit console to viewport"
+	console_fit_toggle.tooltip_text = "Keep the console clear of the HUD rail and bottom bars."
+	column.add_child(console_fit_toggle)
+	console_fit_toggle.toggled.connect(func(value: bool) -> void:
+		if _refreshing: return
+		_checkpoint("console_fit_viewport")
+		model.working.console_fit_viewport = value
+		main._layout_full_window_views())
 	preset_picker = OptionButton.new()
 	preset_picker.name = "EditorPresetPicker"
 	column.add_child(preset_picker)
@@ -535,6 +546,7 @@ func _build_editor() -> void:
 
 func _refresh_pickers() -> void:
 	_refreshing = true
+	console_fit_toggle.set_pressed_no_signal(model.working.console_fit_viewport)
 	for picker: OptionButton in [preset_picker, settings_picker]:
 		picker.clear()
 		for id: String in Presets.BUILT_INS:
@@ -1476,6 +1488,7 @@ func _text_config(key: String, role: String) -> Dictionary:
 func apply_layout() -> void:
 	if not ready_to_layout: return
 	_applying = true
+	console_fit_toggle.set_pressed_no_signal(model.working.console_fit_viewport)
 	var legacy := bool(model.working.legacy)
 	frame_overlay.visible = not legacy
 	main.hud_logo.texture = _centered_logo_texture if not legacy and model.working.parts.logo.style == "heritage" and _centered_logo_texture != null else _logo_texture
@@ -1786,6 +1799,7 @@ func layout_hud() -> void:
 	_layout_queued = false
 	if not ready_to_layout: return
 	if bool(model.working.legacy):
+		main._layout_full_window_views()
 		_center_editor()
 		queue_redraw()
 		return
@@ -1834,11 +1848,35 @@ func layout_hud() -> void:
 	_pack_chat()
 	_update_chrome()
 	main._layout_minimap_cardinals()
+	main._layout_full_window_views()
 	_center_editor()
 	_layout_running = false
 	if main.inventory_workspace != null: main.inventory_workspace.queue_layout()
 	if main.mixing_workspace != null: main.mixing_workspace.queue_layout()
 	queue_redraw()
+
+## The console replaces the world view while the fixed HUD remains usable.
+## Floating chat/party panels do not reserve an entire edge of the viewport.
+func console_view_rect() -> Rect2:
+	var area := Rect2(Vector2.ZERO, main.game_view.size)
+	if bool(model.working.legacy):
+		area.end = Vector2(main.right_rail.position.x, parts.utilities.position.y)
+		return area
+	var rail := _root("rail_panel")
+	if rail.is_visible_in_tree() and model.working.parts.rail_panel.full_height:
+		var rect := _visual_rect("rail_panel")
+		if rect.get_center().x >= area.get_center().x:
+			area.end.x = minf(area.end.x, rect.position.x)
+		else:
+			area = Rect2(Vector2(maxf(area.position.x, rect.end.x), area.position.y),
+				Vector2(maxf(1, area.end.x - maxf(area.position.x, rect.end.x)), area.size.y))
+	for key: String in ["utilities", "resources", "status", "xp_meter", "food_meter", "load_meter"]:
+		if not _root(key).is_visible_in_tree(): continue
+		var rect := _visual_rect(key)
+		if rect.position.y >= main.game_view.size.y * 0.5 and rect.size.x >= area.size.x * 0.5:
+			area.end.y = minf(area.end.y, rect.position.y)
+	area.size = area.size.max(Vector2.ONE)
+	return area
 
 func _fit_rail_statistics() -> void:
 	var config: Dictionary = model.working.parts.skills

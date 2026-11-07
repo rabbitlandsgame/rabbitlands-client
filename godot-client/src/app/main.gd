@@ -15208,9 +15208,14 @@ func _invasion_monitor_dock_rect() -> Rect2:
 
 
 func _layout_full_window_views() -> void:
-	# Fill the client canvas independently of movable HUD parts and presets.
-	for view: Control in [full_map, console_panel]:
-		view.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	full_map.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	console_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	if hud_workspace != null and hud_workspace.ready_to_layout \
+			and hud_workspace.model.working.console_fit_viewport:
+		var area: Rect2 = hud_workspace.console_view_rect()
+		console_panel.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+		console_panel.position = area.position
+		console_panel.size = area.size
 
 func _sync_hud_button_states(force := false) -> void:
 	if _hud_icon_regions.is_empty():
