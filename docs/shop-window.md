@@ -1,6 +1,8 @@
 # Merchant shop
 
-The compact shop uses **Buy** and **Sell** tabs with a five-column item grid.
+The compact shop uses **Buy** and **Sell** tabs with a six-column item grid.
+The grid fits its contents up to a bounded scrolling height; searches and sparse
+stock do not reserve empty rows.
 Sell shows only owned items that the merchant buys. Prices appear below each
 icon; sale tiles also show the owned count. Hover for the full item name and
 price, or select an item to read its description in the shop.

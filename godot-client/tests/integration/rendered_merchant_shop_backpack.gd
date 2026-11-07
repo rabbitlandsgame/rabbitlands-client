@@ -43,6 +43,7 @@ func _run() -> void:
 		and windows.merchant_totals.text.contains("Carry after: 23/80"), "purchase previews cost, gold and load")
 	_expect(not windows.merchant_trade.disabled, "an affordable purchase is enabled")
 	await _capture("merchant-buy.png")
+	var full_grid_height: float = windows.merchant_buy_list.size.y
 	windows._merchant_set_maximum()
 	_expect(windows.merchant_quantity.text == "25", "buy Max is limited by gold")
 	state.get("merchant")["capacity"] = 22
@@ -99,6 +100,10 @@ func _run() -> void:
 	_expect(windows.merchant_buy_list.item_count == 1 and windows.merchant_trade.disabled,
 		"search narrows the type and clears a hidden selection")
 	_expect(windows.merchant_buy_list.get_item_metadata(0) == 5, "search keeps Lemon's server ID")
+	await _settle()
+	_expect(windows.merchant_buy_list.size.y < full_grid_height,
+		"a one-item search does not reserve empty item rows")
+	await _capture("merchant-single-result.png")
 	_select(5)
 	windows.merchant_quantity.text = "2"
 	_expect(windows._merchant_trade_command() == "#shop buy 91 5 2", "filtered purchase sends the exact server ID")
@@ -134,6 +139,35 @@ func _run() -> void:
 		"Max and totals respect sale bundles")
 	_expect(windows._merchant_trade_command() == "#shop sell 91 2 12", "bundle sale retains the exact quantity and ID")
 	await _capture("merchant-sale-bundle.png")
+	# Large stock scrolls without pushing the trade controls out of the window.
+	var original: Array = state.get("merchant")["items"].duplicate(true)
+	var large_stock: Array = []
+	for number: int in range(60):
+		var item: Dictionary = original[0].duplicate(true)
+		item["index"] = 100 + number
+		item["name"] = "Demo %02d" % number
+		item["category"] = "Food"
+		large_stock.append(item)
+	state.get("merchant")["items"] = large_stock
+	windows._on_merchant_mode("buy")
+	windows._sync_merchant()
+	_select(159)
+	await _settle()
+	var large_height: float = windows.merchant_buy_list.size.y
+	_expect(large_height <= 200 and windows.merchant_buy_list.get_v_scroll_bar().visible,
+		"large stock uses a bounded scrolling grid")
+	windows._sync_merchant()
+	await _capture("merchant-large-stock.png")
+	_expect(windows._merchant_entry().index == 159, "a scrolled selection survives refreshed stock")
+	_search("Demo 59")
+	await _settle()
+	_expect(windows.merchant_buy_list.size.y < large_height,
+		"filtering a scrolled list removes unused rows")
+	await _capture("merchant-large-stock-filtered.png")
+	_search("")
+	state.get("merchant")["items"] = original
+	windows._on_merchant_mode("sell")
+	windows._sync_merchant()
 	for entry: Dictionary in state.get("merchant")["items"]:
 		entry["owned"] = 0
 	windows._sync_merchant()
@@ -160,9 +194,13 @@ func _capture(filename: String) -> void:
 	var description: Rect2 = windows.merchant_description.get_global_rect()
 	_expect(bounds.encloses(description) and description.size.y >= 48,
 		"the description stays readable inside the merchant panel")
-	_expect(windows.merchant_buy_list.get_global_rect().end.y <= description.position.y
-		and description.end.y <= action.position.y,
-		"the description does not overlap the stock or transaction controls")
+	var grid: Control = windows.merchant_list if windows.merchant_list.visible else windows.merchant_empty_pack
+	_expect(grid.get_global_rect().end.y <= description.position.y and description.end.y <= action.position.y,
+		"the description does not overlap the visible stock or transaction controls")
+	_expect(bounds.size.x <= 440, "the shop keeps its narrower footprint")
+	if windows.merchant_list.visible:
+		_expect(windows.merchant_list.size.y <= 200, "item rows do not stretch into unused space")
+	print("SHOP SIZE ", filename, " ", bounds.size)
 	var output := OS.get_environment("ELORIA_ARTIFACT_DIR")
 	if output.is_empty():
 		return

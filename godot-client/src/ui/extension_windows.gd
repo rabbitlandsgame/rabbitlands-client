@@ -126,6 +126,7 @@ var merchant_search: LineEdit
 var merchant_sort: OptionButton
 var merchant_filters: HBoxContainer
 var _merchant_type := "All"
+var _merchant_fit_pending := false
 var _merchant_actor := -1
 var _merchant_request_pending := false
 var merchant_quantity: LineEdit
@@ -918,6 +919,26 @@ func _refresh_merchant_items(select_first := false) -> void:
 		merchant_list.ensure_current_is_visible()
 	_sync_merchant_summary()
 
+## Measure actual cells after the containers have assigned the narrower width.
+## Only the item viewport is capped; descriptions and trade controls stay available.
+func _queue_merchant_fit() -> void:
+	if _merchant_fit_pending: return
+	_merchant_fit_pending = true
+	_fit_merchant_content.call_deferred()
+
+func _fit_merchant_content() -> void:
+	await get_tree().process_frame
+	_merchant_fit_pending = false
+	if not is_instance_valid(merchant_list): return
+	if merchant_list.item_count > 0:
+		merchant_list.force_update_list_size()
+		var content_bottom := merchant_list.get_item_rect(merchant_list.item_count - 1).end.y
+		merchant_list.custom_minimum_size.y = clampf(content_bottom + 8.0, 64.0, 200.0)
+	# Reset after minimum sizes propagate so searches can shrink as well as grow.
+	merchant_panel.reset_size.call_deferred()
+	if not merchant_list.get_selected_items().is_empty():
+		merchant_list.ensure_current_is_visible.call_deferred()
+
 func _merchant_filter_changed(category: String) -> void:
 	_merchant_type = category
 	_refresh_merchant_items()
@@ -931,7 +952,7 @@ func _add_merchant_row(list: ItemList, entry: Dictionary, selling: bool) -> void
 	var amount := "%d gc" % int(entry.get("sell_price" if selling else "buy_price", 0))
 	if selling and int(entry.get("sell_quantity", 1)) > 1:
 		amount += "/%d" % int(entry.sell_quantity)
-	var label := amount + ("\n×%d owned" % int(entry.get("owned", 0)) if selling else "")
+	var label := amount + ("\n×%d" % int(entry.get("owned", 0)) if selling else "")
 	var row := list.item_count
 	list.add_item(label, _named_icon(int(entry.get("image_id", 0)), name))
 	list.set_item_metadata(row, int(entry.get("index", row)))
@@ -995,6 +1016,7 @@ func _merchant_set_maximum() -> void:
 	_sync_merchant_summary()
 
 func _sync_merchant_summary(_text: String = "") -> void:
+	_queue_merchant_fit()
 	merchant_buy_list.visible = _merchant_mode == "buy" and merchant_buy_list.item_count > 0
 	merchant_sell_list.visible = _merchant_mode == "sell" and merchant_sell_list.item_count > 0
 	merchant_empty_pack.visible = merchant_list.item_count == 0
@@ -2674,10 +2696,10 @@ func _style_quest_tracker(parchment: PanelContainer,
 ## Tabbed compact shop with a single visible grid and focused transaction.
 func _build_merchant_window() -> void:
 	merchant_panel = _window("MerchantWindow", "Merchant")
-	merchant_panel.custom_minimum_size = Vector2(520, 570)
+	merchant_panel.custom_minimum_size = Vector2(440, 0)
 	merchant_panel.size = merchant_panel.custom_minimum_size
-	merchant_panel.position = Vector2(650, 48)
-	merchant_panel.add_theme_stylebox_override("panel", _quest_box(Color("15120f"), Color("9a7843"), 1, 3, 10.0))
+	merchant_panel.position = Vector2(730, 48)
+	merchant_panel.add_theme_stylebox_override("panel", _quest_box(Color("15120f"), Color("9a7843"), 1, 3, 8.0))
 	var body := _window_body(merchant_panel)
 	body.add_theme_constant_override("separation", 4)
 	var header := body.get_node("Header") as HBoxContainer
@@ -2724,21 +2746,22 @@ func _build_merchant_window() -> void:
 		tabs.add_child(mode)
 		var list := ItemList.new()
 		list.name = "MerchantBackpack" if selling else "MerchantList"
-		list.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		list.size_flags_vertical = Control.SIZE_FILL
 		list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		list.custom_minimum_size.y = 190
-		list.max_columns = 5
-		list.fixed_column_width = 90
+		list.custom_minimum_size.y = 64
+		list.max_columns = 6
+		list.fixed_column_width = 64
 		list.same_column_width = true
 		list.icon_mode = ItemList.ICON_MODE_TOP
 		list.max_text_lines = 2
-		list.fixed_icon_size = Vector2i(44, 44)
+		list.fixed_icon_size = Vector2i(36, 36)
 		list.icon_scale = 1.0
 		list.add_theme_constant_override("icon_margin", 2)
 		list.add_theme_font_size_override("font_size", 12)
 		TextColors.bind(list, "ui_label", "font_color")
 		TextColors.bind(list, "ui_label", "font_selected_color")
-		list.add_theme_constant_override("v_separation", 5)
+		list.add_theme_constant_override("v_separation", 3)
+		list.add_theme_constant_override("h_separation", 2)
 		list.add_theme_stylebox_override("panel", _quest_box(Color("151310"), Color("76603b"), 0, 0, 4.0))
 		list.add_theme_stylebox_override("selected", _quest_box(Color("40331e"), Color("c59a53"), 1, 2, 3.0))
 		list.add_theme_stylebox_override("selected_focus", _quest_box(Color("40331e"), Color("c59a53"), 1, 2, 3.0))
@@ -2753,8 +2776,8 @@ func _build_merchant_window() -> void:
 			merchant_buy_list = list
 	merchant_list = merchant_buy_list
 	merchant_empty_pack = Label.new()
-	merchant_empty_pack.custom_minimum_size = Vector2(480, 190)
-	merchant_empty_pack.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	merchant_empty_pack.custom_minimum_size = Vector2(400, 40)
+	merchant_empty_pack.size_flags_vertical = Control.SIZE_FILL
 	merchant_empty_pack.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	merchant_empty_pack.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	body.add_child(merchant_empty_pack)
@@ -2763,7 +2786,7 @@ func _build_merchant_window() -> void:
 	body.add_child(selection_row)
 	var description_panel := PanelContainer.new()
 	description_panel.name = "MerchantDescriptionPanel"
-	description_panel.add_theme_stylebox_override("panel", _quest_box(Color("1c1813"), Color("76603b"), 1, 2, 10.0))
+	description_panel.add_theme_stylebox_override("panel", _quest_box(Color("1c1813"), Color("76603b"), 1, 2, 6.0))
 	body.add_child(description_panel)
 	merchant_description = RichTextLabel.new()
 	merchant_description.name = "MerchantDescription"
@@ -2777,13 +2800,13 @@ func _build_merchant_window() -> void:
 	footer.add_theme_constant_override("separation", 14)
 	body.add_child(footer)
 	merchant_selected_icon = TextureRect.new()
-	merchant_selected_icon.custom_minimum_size = Vector2(40, 40)
+	merchant_selected_icon.custom_minimum_size = Vector2(32, 32)
 	merchant_selected_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	merchant_selected_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	selection_row.add_child(merchant_selected_icon)
 	merchant_selection = Label.new()
 	merchant_selection.name = "MerchantSelection"
-	merchant_selection.custom_minimum_size.x = 440
+	merchant_selection.custom_minimum_size.x = 360
 	merchant_selection.add_theme_font_size_override("font_size", 13)
 	merchant_selection.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	merchant_selection.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -2819,7 +2842,7 @@ func _build_merchant_window() -> void:
 	stepper.add_child(maximum)
 	merchant_totals = Label.new()
 	merchant_totals.name = "MerchantTotals"
-	merchant_totals.custom_minimum_size.x = 480
+	merchant_totals.custom_minimum_size.x = 400
 	merchant_totals.add_theme_font_size_override("font_size", 12)
 	merchant_totals.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	body.add_child(merchant_totals)
@@ -2835,7 +2858,7 @@ func _build_merchant_window() -> void:
 	footer.add_child(merchant_trade)
 	merchant_status = Label.new()
 	merchant_status.name = "MerchantStatus"
-	merchant_status.custom_minimum_size.x = 480
+	merchant_status.custom_minimum_size.x = 400
 	merchant_status.add_theme_font_size_override("font_size", 12)
 	merchant_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	body.add_child(merchant_status)
