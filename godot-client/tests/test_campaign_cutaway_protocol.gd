@@ -38,6 +38,16 @@ func run() -> void:
 	root.get_node("Network").call("block_for_hud_preview")
 	var state := snapshot()
 	var decoded := decode(state)
+	var preload_state := snapshot()
+	preload_state.scene.id = "measure.rescue.resolved"
+	preload_state.scene.preload_cutaway = preload_state.scene.cutaway
+	preload_state.scene.erase("cutaway")
+	expect(decode(preload_state).type == "campaign", "the reward scene admits the same validated mine record for hidden background loading")
+	preload_state.scene.id = "measure.rescue.injured"
+	expect(decode(preload_state).type == "invalid", "a preload record is rejected outside the outdoor reward scene")
+	preload_state.scene.id = "measure.rescue.resolved"
+	preload_state.scene.preload_cutaway.actors.lich.script = "res://unsafe.gd"
+	expect(decode(preload_state).type == "invalid", "background loading retains the exact cutaway DTO safety checks")
 	expect(decoded.type == "campaign" and decoded.state.scene.cutaway.actors.lich.name == "???",
 		"the real p191 decoder accepts the outdoor ending's exact native held boss and masked Lich")
 	expect(not decoded.state.scene.actors.has("goblin_boss") and not decoded.state.scene.actors.has("lich"),

@@ -51,7 +51,13 @@ func run() -> void:
 	local.server_target = local.position
 	var nodes := {1:local}
 	var dtos := {1:{"actor_id":1,"x":332,"y":81,"health":100}}
-	module.prepare(state,"landfall",0)
+	var warming := state.duplicate(true)
+	warming.scene.id = "measure.rescue.resolved"
+	warming.scene.preload_cutaway = warming.scene.cutaway
+	warming.scene.erase("cutaway")
+	module.prepare(warming,"landfall",0)
+	expect(not Cutaway.requested(warming) and not module.presenting,
+		"the reward conversation starts hidden background preparation without becoming a cutaway")
 	var pending: Dictionary = module.view_context(state,nodes,dtos,outside,func(_p: Vector3) -> float:return NAN)
 	expect(pending.remote and not pending.ready and pending.snapshot.map == "landfall","remote loading leaves the authenticated map outdoors and waits without moving the player")
 	expect(pending.snapshot.scene.anchors.boss_body == [83,62] and pending.snapshot.scene.actors.goblin_boss < 0,"remote anchors and proxy-only role IDs exist before shared-controller readiness is evaluated")
@@ -60,7 +66,7 @@ func run() -> void:
 	while not module.status().ready and str(module.status().error).is_empty() and Time.get_ticks_msec()<deadline:
 		await process_frame
 		await physics_frame
-		module.prepare(state,"landfall",0.016)
+		module.prepare(warming,"landfall",0.016)
 	expect(module.status().ready,"the actual maintained published mine imports and grounds both real native visual models")
 	if not module.status().ready:
 		push_error(str(module.status()))
@@ -70,6 +76,10 @@ func run() -> void:
 		await process_frame
 		quit(1)
 		return
+	var warmed_identity: String = module.status().identity
+	module.prepare(state,"landfall",0)
+	expect(module.status().ready and module.status().identity==warmed_identity,
+		"the final scene reuses the room and native models already prepared during the reward dialogue")
 	var view: Dictionary = module.view_context(state,nodes,dtos,outside,func(_p: Vector3) -> float:return NAN)
 	expect(view.ready and view.adapter != outside and view.nodes.size() == 3 and nodes.size() == 1,"the remote context augments a separate actor view and adapter without registering gameplay actors")
 	expect(JSON.stringify(state) == original and state.scene.actors == {"protagonist":1} and state.scene.cutaway.actors.goblin_boss.actor_id == 2242,"neither the native source state nor any original native ID is rewritten")
@@ -89,7 +99,7 @@ func run() -> void:
 	for light: Node3D in module.map_lights.get_children():
 		if str(light.name).begins_with("lantern_mine-lamp-"): mine_lamps += 1
 		elif str(light.name) != "lantern_mine-daylight": wrong_rooms_hidden = wrong_rooms_hidden and not light.is_visible_in_tree()
-	expect(mine_lamps == 10 and wrong_rooms_hidden,"ordinary SecretSections excludes other-room fill lights from the ten real mine lanterns")
+	expect(mine_lamps == 18 and wrong_rooms_hidden,"ordinary SecretSections keeps the expanded lower mine lanterns and excludes other-room fill lights")
 	var replay: Dictionary = module.view_context(state,nodes,dtos,outside,func(_p: Vector3) -> float:return NAN,true)
 	module.set_presenting(true,false)
 	expect(not replay.nodes.has(view.snapshot.scene.actors.lich) and not lich.is_visible_in_tree() and module.presenting,"replay geometry stays available while base actors are hidden for the controller's fresh scoped clones")

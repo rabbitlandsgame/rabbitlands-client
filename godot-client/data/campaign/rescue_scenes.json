@@ -2,6 +2,7 @@
   "version": 1,
   "scenes": {
     "measure.rescue.abduction": {
+      "handoff": {"mode": "hold", "when": "watch", "to": ["measure.rescue.injured"]},
       "title": "A Daughter in the Dark",
       "duration": 64,
       "fov": 46,
@@ -844,7 +845,7 @@
       },
       "exit_camera": {
         "mode": "keep_scene",
-        "when": "help"
+        "when": ["help", "watch"]
       },
       "hide_on_handoff": [
         "daughter",
@@ -853,6 +854,8 @@
       ]
     },
     "measure.rescue.injured": {
+      "live_camera": "gameplay",
+      "exit_camera": {"mode": "keep_scene"},
       "title": "She Is Still Alive",
       "duration": 28,
       "fov": 42,
@@ -932,6 +935,9 @@
       "events": []
     },
     "measure.rescue.commitment": {
+      "live_camera": "gameplay",
+      "exit_camera": {"mode": "keep_scene"},
+      "handoff": {"mode": "fade", "when": "accept", "to": ["measure.rescue.descent"], "variants": {"returned": {"mode": "hold", "to": ["measure.rescue.descent"]}}},
       "title": "The Way to the Mine",
       "duration": 52,
       "fov": 43,
@@ -1202,6 +1208,7 @@
       }
     },
     "measure.rescue.descent": {
+      "handoff": {"mode": "fade", "gameplay_map": "landfall_insides"},
       "title": "Below the Lanterns",
       "duration": 62,
       "fov": 45,
@@ -1321,8 +1328,9 @@
       ]
     },
     "measure.rescue.boss": {
+      "exit_camera": {"mode": "keep_scene"},
       "title": "The Captor",
-    "reveal_on_start": ["goblin_boss", "boss_minion_1", "boss_minion_2"],
+
       "duration": 46,
       "fov": 48,
       "entry_seconds": 2.4,
@@ -1385,8 +1393,7 @@
           "at": 0,
           "actor": "mother",
           "action": "combat_idle",
-          "face": "goblin_boss",
-          "destination": "boss_return"
+          "face": "goblin_boss"
         },
         {
           "at": 0,
@@ -1422,14 +1429,12 @@
           "at": 0,
           "actor": "boss_minion_1",
           "action": "combat_idle",
-          "destination": "boss_minion_1",
           "face": "protagonist"
         },
         {
           "at": 0,
           "actor": "boss_minion_2",
           "action": "combat_idle",
-          "destination": "boss_minion_2",
           "face": "protagonist"
         },
         {
@@ -1474,6 +1479,9 @@
       "events": []
     },
     "measure.rescue.captive": {
+      "live_camera": "gameplay",
+      "exit_camera": {"mode": "keep_scene"},
+      "handoff": {"mode": "fade", "to": ["measure.rescue.resolved", "measure.rescue.shadow"]},
       "title": "Liora",
       "release_actors_after": {
         "goblin_boss": 28
@@ -1699,6 +1707,7 @@
       "events": [
         {
           "id": "captive-cut-out",
+          "replay_only": true,
           "type": "fade",
           "at": 26.5,
           "until": 27.5,
@@ -1707,6 +1716,7 @@
         },
         {
           "id": "captive-cut-in",
+          "replay_only": true,
           "type": "fade",
           "at": 27.5,
           "until": 29,
@@ -1749,7 +1759,8 @@
       "inspection_timeout": 60,
       "native_roles": [
         "mother",
-        "daughter"
+        "daughter",
+        "protagonist"
       ],
       "exit_transition": {
         "mode": "fade",
@@ -1758,6 +1769,9 @@
       }
     },
     "measure.rescue.resolved": {
+      "live_camera": "gameplay",
+      "exit_camera": {"mode": "keep_scene"},
+      "handoff": {"mode": "fade", "to": ["measure.rescue.shadow"]},
       "title": "A Welcome in Landfall",
       "duration": 60,
       "fov": 44,
