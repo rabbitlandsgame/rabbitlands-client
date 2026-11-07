@@ -26,33 +26,108 @@ async function run(change = () => {}, stored = new Map(), runOptions = {}) {
         payloads.set(manifest.libraries[1].file, 'cape fixture');
     }
     change(manifest, payloads);
-    const calls = [], downloads = [];
-    const context = vm.createContext({URL, Blob, Response, crypto: webcrypto,
+    const calls = [], downloads = [], events = [], progress = [];
+    let activeDownloads = 0, maximumDownloads = 0;
+    const timers = new Set();
+    const storage = {
+        prepare: async () => {}, status: () => ({mode: runOptions.folder && !runOptions.folderInterrupted ? 'folder' : 'browser'}),
+        read: async row => {
+            await runOptions.onFolderRead?.(row, {context, stored, events});
+            return !runOptions.folderInterrupted && runOptions.folder?.get(row.sha256) || null;
+        },
+        write: async (row, bytes) => {
+            if (!runOptions.folder || runOptions.folderFailure || runOptions.folderInterrupted) return false;
+            runOptions.folder.set(row.sha256, bytes);
+            events.push(['folder', row.file]);
+            runOptions.onSaved?.(row);
+            return true;
+        },
+        hit() {}, corrupt() {},
+        // Legacy safety cases explicitly exercise the earlier on-demand mode.
+        // A separate case omits the UI to prove ALL is the loader default.
+        preload_choice: async summary => {runOptions.onChoice?.(summary); return runOptions.preloadMode || 'needed';},
+        preload_progress: state => {progress.push({...state}); runOptions.onProgress?.(state);},
+        preload_cancelled: () => Boolean(runOptions.cancelled?.()),
+        ...(runOptions.onFailure ? {preload_failure: error => runOptions.onFailure(error, {context, stored, events})} : {})
+    };
+    const context = vm.createContext({URL, Blob, Response, AbortController, crypto: webcrypto,
+        setTimeout: (callback, delay) => {
+            const timeout = runOptions.fastTimeout === true ? 15 : runOptions.fastTimeout || delay;
+            const timer = setTimeout(() => {timers.delete(timer); callback();}, timeout);
+            timers.add(timer); return timer;
+        },
+        clearTimeout: timer => {timers.delete(timer); clearTimeout(timer);},
+        setInterval: (callback, delay) => {const timer = setInterval(callback, delay); timers.add(timer); return timer;},
+        clearInterval: timer => {timers.delete(timer); clearInterval(timer);},
         console: {warn() {}}, navigator: {storage: {persist: async () => {
             if (runOptions.denyPersist) throw new Error('Protection unavailable');
             return true;
         }}},
-        caches: {open: async () => ({
+        caches: {open: async () => {
+            if (runOptions.cacheUnavailable) throw new Error('Cache unavailable');
+            return {
             match: async key => stored.has(key) ? new Response(stored.get(key)) : undefined,
             put: async (key, response) => {
-                if (runOptions.quota) throw Object.assign(new Error('quota'), {name: 'QuotaExceededError'});
+                if (typeof runOptions.quota === 'function' ? runOptions.quota() : runOptions.quota) {
+                    throw Object.assign(new Error('quota'), {name: 'QuotaExceededError'});
+                }
                 stored.set(key, await response.arrayBuffer());
+                events.push(['cache', key]);
+                runOptions.onSaved?.(key);
             },
             delete: async key => stored.delete(key)
-        })},
+        };}},
+        ...(runOptions.noStorageModule ? {} : {RabbitLandsAssetStorage: storage}),
         location: {href: 'http://127.0.0.1:8060/'},
         fetch: async (url, options) => {
             if (url === 'browser-assets.json') return new Response(JSON.stringify(manifest));
             if (String(url).startsWith('blob:')) return fetch(url);
             downloads.push({url: String(url), options});
-            if (runOptions.blockNetwork) throw new Error('Network blocked');
-            const payload = payloads.get(new URL(url).pathname.split('/').at(-1));
-            return new Response(payload ?? '', {status: payload === undefined ? 404 : 200});
+            events.push(['fetch', String(url)]);
+            runOptions.onFetch?.(url, options);
+            activeDownloads++;
+            maximumDownloads = Math.max(maximumDownloads, activeDownloads);
+            try {
+                if (runOptions.fetchDelay) await new Promise(resolve => setTimeout(resolve, runOptions.fetchDelay));
+                if (typeof runOptions.blockNetwork === 'function' ? runOptions.blockNetwork(url) : runOptions.blockNetwork) {
+                    throw new Error('Network blocked');
+                }
+                const payload = payloads.get(new URL(url).pathname.split('/').at(-1));
+                if (runOptions.stall?.file === new URL(url).pathname.split('/').at(-1)) {
+                    const aborted = reject => {
+                        const fail = () => reject(options.signal.reason || new Error('Aborted'));
+                        if (options.signal.aborted) fail();
+                        else options.signal.addEventListener('abort', fail, {once:true});
+                    };
+                    if (runOptions.stall.phase === 'headers') await new Promise((_resolve, reject) => aborted(reject));
+                    if (runOptions.stall.phase === 'body') return new Response(new ReadableStream({
+                        start: controller => aborted(error => controller.error(error))
+                    }));
+                }
+                if (runOptions.slowStream === new URL(url).pathname.split('/').at(-1)) {
+                    const bytes = Buffer.from(payload);
+                    let at = 0, ended = false;
+                    return new Response(new ReadableStream({
+                        async pull(controller) {
+                            await new Promise(resolve => setTimeout(resolve, 8));
+                            if (ended) return;
+                            if (options.signal.aborted) {controller.error(options.signal.reason); ended = true; return;}
+                            if (at === bytes.length) {controller.close(); ended = true; return;}
+                            controller.enqueue(bytes.subarray(at, ++at));
+                        },
+                        cancel() {ended = true;}
+                    }));
+                }
+                return new Response(payload ?? '', {status: payload === undefined ? 404 : 200});
+            } finally { activeDownloads--; }
         }});
     const originalFetch = context.fetch;
     vm.runInContext(source, context);
     const engine = {config: {update: cfg => calls.push(['libraries', ...cfg.gdextensionLibs])},
         init: async exe => {
+            events.push(['init']);
+            assert.equal(timers.size, 0, 'no preload poll or deadline timer may survive into engine initialization');
+            runOptions.onInit?.({stored, downloads, context});
             calls.push(['init', exe]);
             if (runOptions.libraries) {
                 assert.equal(await (await context.fetch('index.side.wasm')).text(), 'engine side fixture');
@@ -64,7 +139,7 @@ async function run(change = () => {}, stored = new Map(), runOptions = {}) {
             assert.equal(context.RL_BROWSER_TAKE_BUFFER, true);
             calls.push([name === 'index.pck' ? 'pack' : 'archive', Buffer.from(buffer).toString(), name]);
         },
-        start: async cfg => calls.push(['start', ...cfg.args])};
+        start: async cfg => {events.push(['start']); calls.push(['start', ...cfg.args]);}};
     let error;
     try {
         await context.RabbitLandsBrowser.start(engine, {executable: 'index', args: ['--verbose']});
@@ -77,7 +152,8 @@ async function run(change = () => {}, stored = new Map(), runOptions = {}) {
     assert.equal(context.RL_BROWSER_TAKE_BUFFER, undefined);
     assert.equal(context.fetch, originalFetch);
     assert.equal(context.RL_BROWSER_WASM_URL, undefined);
-    return {calls, downloads, error, stats: context.RL_BROWSER_CACHE_STATS};
+    assert.equal(timers.size, 0, 'preload failure/exit also cleans every poll and deadline');
+    return {calls, downloads, error, stats: context.RL_BROWSER_CACHE_STATS, events, progress, maximumDownloads};
 }
 
 test('verified cross-origin payloads start the ordinary package and preserve arguments', async () => {
@@ -215,4 +291,243 @@ test('denied eviction protection still permits saving files across visits', asyn
     assert.equal(result.stats.storage_error, '');
     assert.equal(result.stats.persistent, false);
     assert.equal(stored.size, 3);
+});
+
+const addRepeatedMaps = (manifest, payloads) => {
+    addMap(manifest, payloads);
+    manifest.groups['map:b'] = {archives: [{...manifest.groups['map:a'].archives[0]}, {...manifest.archives[0]}],
+        dependencies: ['map:a'], unpacked_bytes: 32};
+};
+
+test('ALL is the default and saves every unique catalog file before engine initialization', async () => {
+    const stored = new Map();
+    const result = await run(addRepeatedMaps, stored, {libraries: true, noStorageModule: true, fetchDelay: 5,
+        onInit: () => assert.equal(stored.size, 7, 'all lazy files must be saved before engine.init')});
+    assert.equal(result.error, undefined);
+    assert.equal(result.downloads.length, 7, 'runtime, libraries, parts and repeated art deduplicate by SHA');
+    assert.equal(result.stats.preload_mode, 'all');
+    assert.equal(result.stats.preload_state, 'complete');
+    assert.equal(result.stats.preload_total_files, 7);
+    assert.equal(result.stats.preload_completed_files, 7);
+    assert.equal(result.stats.preload_completed_bytes, result.stats.preload_total_bytes);
+    assert.equal(result.maximumDownloads, 2);
+    assert.equal(result.stats.preload_max_active_files, 2);
+    assert.equal(result.stats.preload_active_files, 0);
+    assert.equal(result.calls.filter(call => call[0] === 'archive').length, 0,
+        'preloading must not place lazy archives in MEMFS or unpack all maps');
+});
+
+test('ALL rechecks saved files across visits, repairs only corrupt data and downloads only newly listed data', async () => {
+    const stored = new Map();
+    const first = await run(addRepeatedMaps, stored, {preloadMode: 'all'});
+    assert.equal(first.error, undefined);
+    assert.equal(stored.size, 5);
+    const warm = await run(addRepeatedMaps, stored, {preloadMode: 'all', blockNetwork: true});
+    assert.equal(warm.error, undefined);
+    assert.equal(warm.downloads.length, 0);
+    assert.equal(warm.stats.preload_completed_files, 5);
+    const mapHash = describe('lazy map fixture', 'zip').sha256;
+    stored.set([...stored.keys()].find(key => key.endsWith(mapHash)), Buffer.from('X'.repeat('lazy map fixture'.length)));
+    const repaired = await run(addRepeatedMaps, stored, {preloadMode: 'all'});
+    assert.equal(repaired.error, undefined);
+    assert.equal(repaired.downloads.length, 1);
+    assert.ok(repaired.downloads[0].url.includes(mapHash));
+    const updated = await run((manifest, payloads) => {
+        addRepeatedMaps(manifest, payloads);
+        const row = describe('new map file', 'zip');
+        manifest.groups['map:new'] = {archives:[row], dependencies:[], unpacked_bytes:12};
+        payloads.set(row.file, 'new map file');
+    }, stored, {preloadMode:'all'});
+    assert.equal(updated.error, undefined);
+    assert.equal(updated.downloads.length, 1);
+    assert.equal(updated.stats.preload_completed_files, 6, 'a previous complete catalog never skips new manifest entries');
+});
+
+test('all modes reject conflicting size/type metadata and inconsistent package lengths before any payload fetch', async () => {
+    const changes = [
+        manifest => manifest.archives.push({...manifest.archives[0], bytes: manifest.archives[0].bytes + 1}),
+        manifest => manifest.archives.push({...manifest.wasm, file: manifest.wasm.sha256 + '.zip'}),
+        manifest => manifest.pack.bytes++,
+        manifest => manifest.pack.parts[0].file = manifest.pack.parts[0].sha256 + '.zip'
+    ];
+    for (const preloadMode of ['all', 'needed']) for (const change of changes) {
+        const result = await run(change, new Map(), {preloadMode});
+        assert.ok(result.error);
+        assert.equal(result.downloads.length, 0);
+        assert.deepEqual(result.calls, []);
+    }
+});
+
+test('ALL fails before gameplay when valid bytes cannot be persisted', async () => {
+    for (const unavailable of [{quota:true}, {cacheUnavailable:true}]) {
+        const result = await run(addRepeatedMaps, new Map(), {preloadMode:'all', ...unavailable});
+        assert.equal(result.error.name, 'AssetStorageError');
+        assert.equal(result.stats.preload_state, 'failed');
+        assert.equal(result.stats.preload_completed_files, 0);
+        assert.equal(result.stats.preload_active_files, 0);
+        assert.deepEqual(result.calls, []);
+        assert.ok(result.downloads.length <= 2, 'failure stops scheduling after bounded in-flight files');
+    }
+});
+
+test('a selected folder alone can persist ALL without browser CacheStorage', async () => {
+    const folder = new Map();
+    const result = await run(addRepeatedMaps, new Map(), {preloadMode:'all', folder, cacheUnavailable:true});
+    assert.equal(result.error, undefined);
+    assert.equal(folder.size, 5);
+    assert.equal(result.stats.preload_completed_files, 5);
+    assert.equal(result.stats.preload_state, 'complete');
+    assert.equal(result.stats.storage_error, '');
+});
+
+test('an interrupted folder cannot certify earlier folder-only files as still available', async () => {
+    const folder = new Map([[describe('wasm fixture', 'wasm').sha256, Buffer.from('wasm fixture')]]);
+    const options = {preloadMode:'all', folder, fetchDelay:5,
+        onFolderRead: async (row, {context}) => {
+            if (row.sha256 !== describe('first', 'bin').sha256) return;
+            while (!context.RL_BROWSER_CACHE_STATS.preload_completed_files) await new Promise(resolve => setTimeout(resolve, 1));
+            options.folderInterrupted = true;
+        }};
+    const result = await run(addRepeatedMaps, new Map(), options);
+    assert.equal(result.error.name, 'AssetStorageError');
+    assert.match(result.error.message, /folder became unavailable/);
+    assert.equal(result.stats.preload_state, 'failed');
+    assert.equal(result.stats.preload_active_files, 0);
+    assert.deepEqual(result.calls, []);
+});
+
+test('folder-loss recovery rechecks from the beginning against the new persistent target', async () => {
+    const folder = new Map([[describe('wasm fixture', 'wasm').sha256, Buffer.from('wasm fixture')]]);
+    const stored = new Map();
+    let recovered = false;
+    const options = {preloadMode:'all', folder, fetchDelay:5,
+        onFolderRead: async (row, {context}) => {
+            if (recovered || row.sha256 !== describe('first', 'bin').sha256) return;
+            while (!context.RL_BROWSER_CACHE_STATS.preload_completed_files) await new Promise(resolve => setTimeout(resolve, 1));
+            options.folderInterrupted = true;
+        },
+        onFailure: (_error, {context, events}) => {
+            assert.equal(context.RL_BROWSER_CACHE_STATS.preload_active_files, 0);
+            assert.ok(!events.some(event => event[0] === 'init'));
+            recovered = true;
+            options.folder = undefined;
+            options.folderInterrupted = false;
+            return 'retry';
+        }};
+    const result = await run(addRepeatedMaps, stored, options);
+    assert.equal(result.error, undefined);
+    assert.equal(result.stats.preload_attempts, 2);
+    assert.equal(result.stats.preload_failures, 1);
+    assert.equal(result.stats.preload_completed_files, 5);
+    assert.equal(stored.size, 5, 'earlier inaccessible folder files were copied/downloaded into the replacement cache');
+    assert.equal(result.downloads.filter(row => row.url.endsWith(describe('wasm fixture', 'wasm').file)).length, 1);
+});
+
+test('explicit quota recovery resets sticky write failure and resumes verified saved files', async () => {
+    let quota = true, recovered = false;
+    const stored = new Map();
+    const result = await run(addRepeatedMaps, stored, {preloadMode:'all', quota:()=>quota,
+        onFailure: (_error, {context, events}) => {
+            assert.equal(context.RL_BROWSER_CACHE_STATS.preload_active_files, 0);
+            assert.ok(!events.some(event => event[0] === 'init'));
+            assert.equal(recovered, false);
+            quota = false; recovered = true;
+            return 'retry';
+        }});
+    assert.equal(result.error, undefined);
+    assert.equal(result.stats.preload_attempts, 2);
+    assert.equal(result.stats.preload_failures, 1);
+    assert.equal(result.stats.preload_state, 'complete');
+    assert.equal(stored.size, 5);
+    assert.equal(result.stats.storage_error, '');
+});
+
+test('an interrupted download resumes later without fetching its already verified files again', async () => {
+    const stored = new Map();
+    const first = await run(addRepeatedMaps, stored, {preloadMode:'all',
+        blockNetwork:url=>String(url).endsWith(describe('art fixture', 'zip').file)});
+    assert.ok(first.error);
+    assert.ok(stored.size > 0 && stored.size < 5);
+    const savedNames = new Set([...stored.keys()].map(key => key.split('/').at(-1)));
+    const resumed = await run(addRepeatedMaps, stored, {preloadMode:'all'});
+    assert.equal(resumed.error, undefined);
+    assert.ok(resumed.downloads.every(row => !savedNames.has(row.url.split('/').at(-1).split('.')[0])));
+    assert.equal(resumed.stats.preload_state, 'complete');
+    assert.equal(stored.size, 5);
+});
+
+test('explicit on-demand recovery waits for in-flight preload work before engine initialization', async () => {
+    const result = await run(addRepeatedMaps, new Map(), {preloadMode:'all', quota:true, fetchDelay:5,
+        onFailure: (_error, {context, events}) => {
+            assert.equal(context.RL_BROWSER_CACHE_STATS.preload_active_files, 0);
+            assert.ok(!events.some(event => event[0] === 'init'));
+            return 'needed';
+        },
+        onInit: ({context}) => assert.equal(context.RL_BROWSER_CACHE_STATS.preload_active_files, 0)});
+    assert.equal(result.error, undefined);
+    assert.equal(result.stats.preload_mode, 'needed');
+    assert.equal(result.stats.preload_state, 'needed');
+    assert.ok(result.calls.some(call => call[0] === 'start'));
+});
+
+test('a mid-download explicit needed choice drains at most two active files and schedules no more', async () => {
+    let cancelled = false, afterCancel = 0;
+    const stored = new Map();
+    const result = await run(addRepeatedMaps, stored, {preloadMode:'all', fetchDelay:5,
+        onSaved: () => {if (stored.size >= 2) cancelled = true;},
+        cancelled: () => cancelled,
+        onProgress: state => {if (cancelled && state.state !== 'needed') afterCancel++;},
+        onInit: ({context, downloads}) => {
+            assert.equal(context.RL_BROWSER_CACHE_STATS.preload_active_files, 0);
+            assert.ok(downloads.length <= 3, 'only the other already-active file can finish after cancellation');
+        }});
+    assert.equal(result.error, undefined);
+    assert.equal(result.stats.preload_mode, 'needed');
+    assert.equal(result.stats.preload_state, 'needed');
+    assert.ok(result.stats.preload_completed_files < result.stats.preload_total_files);
+    assert.ok(afterCancel > 0);
+    const init = result.events.findIndex(event => event[0] === 'init');
+    assert.ok(result.events.slice(init).every(event => event[0] !== 'fetch'), 'no canceled preload downloads run during gameplay');
+});
+
+test('preload inactivity deadlines bound stalled headers and body reads without entering gameplay', async () => {
+    for (const phase of ['headers', 'body']) {
+        const result = await run(addRepeatedMaps, new Map(), {preloadMode:'all', fastTimeout:true,
+            stall: {file:describe('wasm fixture', 'wasm').file, phase}});
+        assert.equal(result.error.name, 'AssetDownloadTimeoutError');
+        assert.equal(result.stats.preload_state, 'failed');
+        assert.equal(result.stats.preload_active_files, 0);
+        assert.deepEqual(result.calls, []);
+    }
+});
+
+test('slow but active body progress renews the preload deadline instead of imposing a transfer limit', async () => {
+    const result = await run(undefined, new Map(), {preloadMode:'all', fastTimeout:40,
+        slowStream:describe('wasm fixture', 'wasm').file});
+    assert.equal(result.error, undefined);
+    assert.equal(result.stats.preload_state, 'complete');
+    assert.equal(result.stats.preload_completed_files, 4);
+});
+
+test('explicit needed cancels a stalled lazy read promptly and leaves no prefetch timers during gameplay', async () => {
+    let cancelled = false;
+    const lazy = describe('lazy map fixture', 'zip').file;
+    const result = await run(addRepeatedMaps, new Map(), {preloadMode:'all',
+        stall: {file:lazy, phase:'body'}, cancelled:()=>cancelled,
+        onFetch:url=>{if (String(url).endsWith(lazy)) cancelled = true;}});
+    assert.equal(result.error, undefined);
+    assert.equal(result.stats.preload_mode, 'needed');
+    assert.equal(result.stats.preload_state, 'needed');
+    assert.equal(result.stats.preload_active_files, 0);
+    assert.ok(result.stats.preload_completed_files < result.stats.preload_total_files);
+    assert.ok(result.calls.some(call => call[0] === 'start'));
+});
+
+test('preload streamed reads reject oversized and incomplete responses within the manifest allocation', async () => {
+    for (const bytes of ['x', 'x'.repeat(1024 * 1024)]) {
+        const result = await run((manifest, payloads)=>payloads.set(manifest.wasm.file, bytes), new Map(), {preloadMode:'all'});
+        assert.match(result.error.message, /incomplete or outdated/);
+        assert.equal(result.stats.preload_state, 'failed');
+        assert.deepEqual(result.calls, []);
+    }
 });

@@ -2024,6 +2024,8 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			# when another action interrupted this one.
 			mix_state = {
 				"served": true,
+				"storage_known": bool(event.get("storage_known", false)),
+				"storage_recipes": event.get("storage_recipes", []),
 				"near_storage": bool(event.get("near_storage", false)),
 				"running": bool(event.get("running", false)),
 				"remaining": int(event.get("remaining", 0)),

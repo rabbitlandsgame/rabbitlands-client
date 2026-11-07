@@ -191,13 +191,14 @@ func _build_recipes() -> void:
 		main.manufacturing_skill = str(skill.get_item_metadata(index))
 		main._sync_manufacturing())
 	toolbar.add_child(skill)
-	ingredients_only = _button("i", func() -> void:
+	ingredients_only = _button("Available", func() -> void:
 		main.manufacturing_ready_only.button_pressed = not main.manufacturing_ready_only.button_pressed)
 	ingredients_only.name = "MixingIngredientsOnly"
 	ingredients_only.toggle_mode = true
 	ingredients_only.set_meta("mix_compact_toggle", true)
 	ingredients_only.custom_minimum_size = Vector2(22, 24)
-	toolbar.add_child(ingredients_only)
+	header.add_child(ingredients_only)
+	header.move_child(ingredients_only, 1)
 	sort_order = _button("A", func() -> void: set_sort_mode("level" if main.manufacturing_sort_mode == "name" else "name"))
 	sort_order.name = "MixingSortOrder"
 	sort_order.set_meta("mix_compact_toggle", true)
@@ -369,7 +370,8 @@ func sync() -> void:
 	skill.tooltip_text = "Skill: " + ("All skills" if main.manufacturing_skill.is_empty() else main.manufacturing_skill.capitalize())
 	ingredients_only.set_pressed_no_signal(main.manufacturing_ready_only.button_pressed)
 	ingredients_only.disabled = main.manufacturing_ready_only.disabled
-	ingredients_only.tooltip_text = "i · Ingredients available\nIngredients for at least one mix in your pack, regardless of tools, food or skill level.\n" + main.manufacturing_ready_only.tooltip_text
+	ingredients_only.text = "Available" if main.manufacturing_ready_only.button_pressed else "All recipes"
+	ingredients_only.tooltip_text = main.manufacturing_ready_only.tooltip_text
 	sort_order.text = "L" if main.manufacturing_sort_mode == "level" else "A"
 	sort_order.tooltip_text = "L · Required level, low to high\nClick to sort alphabetically." if main.manufacturing_sort_mode == "level" else "A · Alphabetical\nClick to sort by required level."
 	for row: int in main.manufacturing_list.item_count:
@@ -433,8 +435,10 @@ func _empty_recipe_message() -> String:
 		filters.append("Skill: %s" % str(main.manufacturing_skill).capitalize())
 		actions.append("choose All skills")
 	if main.manufacturing_ready_only.button_pressed:
-		filters.append("Ingredients available: backpack")
-		actions.append("turn off Ingredients available or add ingredients to your pack")
+		filters.append("Ingredients available: " + ("storage" if main._manufacturing_from_storage() else "backpack"))
+		actions.append("choose All recipes or add ingredients to the selected source")
+		if main._manufacturing_from_storage() and not AppState.mix_state.get("storage_known", false):
+			filters.append("Waiting for storage availability from the server")
 	var message := "No recipes match the current filters."
 	if not filters.is_empty(): message += "\n" + " · ".join(filters)
 	if not actions.is_empty(): message += "\nTry: " + "; ".join(actions) + "."

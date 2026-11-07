@@ -1,21 +1,23 @@
 # Browser hosting
 
-Use a small Cloudflare Pages launcher and Cloudflare R2 Standard for the asset
+The small static HTTPS launcher uses Cloudflare R2 Standard for the asset
 archives. The current packaged assets are about 2.6 GB; keep them separate from
 the launcher and gameplay server. The player's browser runs the client, decodes
 assets and renders the world on their CPU/GPU. Hosting assets does not move that
 work to the server.
 
 The prototype's current asset origin is
-`https://assets.rabbitlandsgame.com/browser/assets/` on R2. The launch website
-remains a local development prototype; connecting the asset domain does not
-publish the launch page or deploy the gameplay server.
+`https://assets.rabbitlandsgame.com/browser/assets/` on R2. The canonical website
+is `https://play.rabbitlandsgame.com/`. Its static launcher and the direct secure
+game connection run on the existing host; large downloads go directly to R2.
+Static hosts such as Pages can also serve the launcher when they supply the
+required headers.
 
 ## Recommended setup
 
 | Component | Suggested location |
 | --- | --- |
-| Canonical browser launcher | `https://play.rabbitlandsgame.com` on Pages |
+| Canonical browser launcher | `https://play.rabbitlandsgame.com` on a static HTTPS host |
 | Content-addressed engine and asset files | R2 custom domain, for example `https://assets.rabbitlandsgame.com/browser/` |
 | Gameplay connection | Existing server through a secure `wss://` endpoint |
 
@@ -61,10 +63,12 @@ A folder makes the saved archives visible and manageable outside the browser.
 The browser may ask for permission again. Browser storage can be cleared or
 evicted, and unavailable or damaged files must be downloaded again.
 
-The first visit still downloads the engine and assets needed for the selected
-character and maps. Later visits reuse verified files; updates fetch changed
-content, while newly visited areas fetch their missing files. Local storage
-reduces network transfers, not rendering costs, and online play still needs the
+Full preparation downloads the current catalog before play by default, including
+all maps and supported actors/equipment. The player can explicitly choose
+download-as-needed for a smaller startup. Later visits reuse verified files;
+updates fetch missing or changed content. Compressed downloads stay on local
+disk and resource extraction remains lazy. Local storage reduces network
+transfers, not rendering costs, and online play still needs the
 game server. See [browser controls](browser-controls.md).
 
 ## itch.io and Steam
