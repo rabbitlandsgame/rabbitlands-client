@@ -46,6 +46,7 @@ func _run() -> void:
 	_no_ground_leaves_the_marker_alone()
 	await _an_actor_re_drapes_as_it_walks()
 	_a_harvest_node_ring_clears()
+	await _stationary_targets_follow_late_paving()
 
 	print("ground drape: ", "PASS" if _failures == 0 else "FAIL (%d)" % _failures)
 	quit(_failures)
@@ -203,6 +204,49 @@ func _a_harvest_node_ring_clears() -> void:
 		"the draped ring lies on the ridge rather than in it (%.3f m under)"
 			% buried_draped)
 	node.queue_free()
+
+## A streamed walk deck may become queryable after a marker has already
+## sampled the underlying terrain. Neither target needs to move to recover.
+func _stationary_targets_follow_late_paving() -> void:
+	var actor := ReplicatedActor3D.new()
+	root.add_child(actor)
+	var adapter := CoordinateAdapter.new({"metresPerTile": 1.0, "walkingHeight": 0.0})
+	actor.configure({"actor_id": 8, "x": 0, "y": 0, "rotation": 0,
+		"actor_type": 1, "kind": 1, "name": "Still", "health": 10,
+		"max_health": 10}, adapter, {}, {})
+	actor.set_physics_process(false)
+	actor.set_selected(true)
+	var selection := actor.get_node("SelectionRing") as MeshInstance3D
+	var combat := preload("res://src/actors/combat_target_marker_3d.gd").new()
+	root.add_child(combat)
+	combat.configure(true, Vector2.ONE, 1.0)
+	var before_selection := selection.mesh
+	var before_combat := combat.ring.mesh
+	var deck := StaticBody3D.new()
+	deck.collision_layer = WorldLoader.NAVIGATION_SURFACE_LAYER
+	var collision := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(4.0, 0.1, 4.0)
+	collision.shape = box
+	deck.add_child(collision)
+	deck.position.y = 0.55
+	root.add_child(deck)
+	for unused: int in 4:
+		await physics_frame
+	await create_timer(float(GroundDrape.REFRESH_MSEC) / 1000.0 + 0.05).timeout
+	actor.call("_level_selection_ring")
+	combat.call("_physics_process", 0.0)
+	_expect(selection.mesh != before_selection and combat.ring.mesh != before_combat,
+		"stationary selection and combat rings refresh after paving arrives")
+	for ring: MeshInstance3D in [selection, combat.ring]:
+		var lowest := INF
+		for vertex: Vector3 in ring.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]:
+			lowest = minf(lowest, (ring.global_transform * vertex).y)
+		_expect(lowest > 0.6,
+			"the stationary target circle clears the late paving (%.3f m)" % lowest)
+	actor.queue_free()
+	combat.queue_free()
+	deck.queue_free()
 
 func _expect(value: bool, label: String) -> bool:
 	if not value:

@@ -20,6 +20,10 @@ extends RefCounted
 ## depth buffer can separate the two at the distance the isometric rig looks
 ## from, small enough that the marker still reads as lying on the ground.
 const CLEARANCE := 0.05
+## Streamed paving and walk collision can arrive after the first successful
+## terrain sample. Refresh visible stationary markers too, so that first sample
+## cannot leave their outlines buried until their owners move.
+const REFRESH_MSEC := 250
 ## Ground samples this close together share a ray. A marker's mesh repeats the
 ## same corner across the triangles that meet there, and a centimetre is under
 ## the width of the outlines being draped, so this spends one query per corner

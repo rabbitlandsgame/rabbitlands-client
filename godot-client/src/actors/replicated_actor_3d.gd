@@ -161,9 +161,10 @@ var _default_melee_clips: Dictionary = {}
 ## this every time, so a marker walked over a hill and back is shaped by the
 ## ground it is on rather than by the ground it has crossed.
 var _selection_ring_flat: ArrayMesh = null
-## Where the marker was last draped, so walking re-drapes it and standing
-## still does not.
+## Last ground sample position and time: walking re-drapes immediately,
+## while stationary markers periodically pick up newly streamed surfaces.
 var _selection_ring_draped_at := Vector3(NAN, NAN, NAN)
+var _selection_ring_draped_msec := 0
 ## Metres per tile on the map this actor is on, so the marker can be
 ## the size of the ground the server reserved rather than a guess.
 var _metres_per_tile := 1.0
@@ -2286,7 +2287,7 @@ static func is_summon(dto: Dictionary) -> bool:
 		and int(dto.get("name_colour", 0)) == SUMMON_NAME_COLOUR)
 
 ## The nameplate. A guild tag arrives as part of the display name in the actor
-## packet - "Alice ELO" - so a client that takes the whole string as a
+## packet - "Alice ÂƒELO" - so a client that takes the whole string as a
 ## name renders the colour byte as mojibake and the tag as part of the player's
 ## name. The decoder splits them; this draws the tag as a tag.
 ##
@@ -3149,8 +3150,10 @@ func _drape_selection_ring() -> void:
 	if _selection_ring_flat == null or not is_inside_tree():
 		return
 	var here: Vector3 = global_position
+	var now := Time.get_ticks_msec()
 	if _selection_ring_draped_at.is_finite() and here.distance_to(
-			_selection_ring_draped_at) < RING_REDRAPE_METRES:
+			_selection_ring_draped_at) < RING_REDRAPE_METRES \
+			and now - _selection_ring_draped_msec < GroundDrape.REFRESH_MSEC:
 		return
 	var draped: ArrayMesh = GroundDrape.drape(_selection_ring,
 		_selection_ring_flat)
@@ -3163,6 +3166,7 @@ func _drape_selection_ring() -> void:
 		return
 	_selection_ring.mesh = draped
 	_selection_ring_draped_at = here
+	_selection_ring_draped_msec = now
 
 static func footprint_outline(width_m: float, depth_m: float,
 		size_scale := 1.0, thickness_scale := 1.0) -> ArrayMesh:

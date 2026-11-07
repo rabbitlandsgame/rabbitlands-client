@@ -11,6 +11,7 @@ var pointer: Label3D
 var _flat: ArrayMesh
 var _size := Vector2.ZERO
 var _draped_at := Vector3(NAN, NAN, NAN)
+var _draped_msec := 0
 var _style := Style.defaults()
 
 func _init() -> void:
@@ -74,12 +75,15 @@ func _physics_process(_delta: float) -> void:
 	# Terrain and the reserved box do not turn with the creature.
 	global_rotation = Vector3.ZERO
 	var here := global_position
-	if _draped_at.is_finite() and here.distance_to(_draped_at) < 0.05:
+	var now := Time.get_ticks_msec()
+	if _draped_at.is_finite() and here.distance_to(_draped_at) < 0.05 \
+			and now - _draped_msec < GroundDrape.REFRESH_MSEC:
 		return
 	var draped := GroundDrape.drape(ring, _flat)
 	ring.mesh = _flat if draped == null else draped
 	if draped != null:
 		_draped_at = here
+		_draped_msec = now
 
 static func outline(size_metres: Vector2, size_scale := 1.0,
 		thickness_scale := 1.0, colour := COLOUR) -> ArrayMesh:
