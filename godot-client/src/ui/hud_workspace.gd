@@ -1891,7 +1891,15 @@ func _fit_rail_statistics() -> void:
 			top = maxf(top, other.end.y)
 	var bottom := rect.end.y
 	var available := maxf(32, bottom - top)
-	if config.dock_align == "stretch" or stats.size.y * stats.scale.y > available:
+	if config.dock_align == "stretch":
+		# Stretch the empty rail below the skills, not the rows or their text.
+		# Width determines their natural scale; shrink both axes only when the
+		# space between the quick slots and research is too short to fit them.
+		var fitted_scale := minf(stats.scale.x, available / maxf(1, stats.size.y))
+		stats.scale = Vector2.ONE * fitted_scale
+		stats.size.x = rect.size.x / fitted_scale
+		stats.position.y = top
+	elif stats.size.y * stats.scale.y > available:
 		stats.scale.y = available / maxf(1, stats.size.y)
 		stats.position.y = bottom - available
 

@@ -15,11 +15,26 @@ func run() -> void:
 	main.get_node("LoginBackground").hide()
 	main.game_view.show()
 	var w: Control = main.hud_workspace
-	for viewport: Vector2i in [Vector2i(1440,900), Vector2i(1920,1080), Vector2i(800,600)]:
+	for viewport: Vector2i in [Vector2i(1440,900), Vector2i(1920,1080), Vector2i(1275,1426), Vector2i(2560,1080), Vector2i(800,600), Vector2i(1440,900)]:
 		root.size = viewport
 		for id: String in Presets.BUILT_INS:
 			w.choose_preset(id,true)
 			for index: int in 8: await process_frame
+			if id == "heritage":
+				var stats: Control = w._root("skills")
+				var skills: Rect2 = w._visual_rect("skills")
+				var research: Rect2 = w._visual_rect("research")
+				var slots_bottom: float = maxf(w._visual_rect("items").end.y, w._visual_rect("spells").end.y)
+				check(absf(stats.scale.x - stats.scale.y) < 0.001,
+					"Classic skill text keeps equal axis scales at %s" % viewport)
+				check(absf(skills.position.y - slots_bottom) < 1.1 and skills.end.y <= research.position.y + 1.1,
+					"Classic skills fit between quick slots and research at %s" % viewport)
+				check(absf(skills.size.x - research.size.x) < 1.1,
+					"Classic skills retain the full rail width at %s" % viewport)
+				print("Classic rail at %s: skills=%s scale=%s research=%s rail=%s" % [viewport, skills, stats.scale, research, w._visual_rect("rail_panel")])
+				if main.game_view.size.y > 1000:
+					check(research.position.y - skills.end.y > 20 and w._visual_rect("rail_panel").encloses(Rect2(skills.position, Vector2(skills.size.x, research.position.y - skills.position.y))),
+						"Classic empty HUD rail absorbs extra height at %s" % viewport)
 			for key: String in Presets.PARTS:
 				var config: Dictionary = w.model.working.parts[key]
 				if config.enabled and config.dock_target!="none" and w._root(key).is_visible_in_tree():
