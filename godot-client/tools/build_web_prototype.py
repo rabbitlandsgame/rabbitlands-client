@@ -102,6 +102,8 @@ def finish_site(stage: Path, assets_base_url: str):
                 "wasm": {**wasm, "file": wasm["sha256"] + ".wasm"}, "archives": report["archives"]}
     for name in ("groups", "maps", "model_groups", "equipment_groups"):
         if name in report: manifest[name] = report[name]
+    if "browser_actor_preparation" in report:
+        manifest["browser_actor_preparation"] = report["browser_actor_preparation"]
     if libraries: manifest["libraries"] = libraries
     (site / "browser-assets.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     shutil.copy2(CLIENT / "src/platform/browser_assets.js", site / "browser-assets.js")
@@ -347,7 +349,8 @@ def raw_files() -> list[Path]:
     return sorted(found)
 
 
-def stage_project(stage: Path, endpoint: str, asset_catalog: Path | None = None) -> dict:
+def stage_project(stage: Path, endpoint: str, asset_catalog: Path | None = None,
+                  prototype_lods: Path | None = None, browser_actor_preparation: bool = True) -> dict:
     project = stage / "project"
     site = stage / "site"
     project.mkdir(parents=True, exist_ok=True)
@@ -401,6 +404,10 @@ def stage_project(stage: Path, endpoint: str, asset_catalog: Path | None = None)
         model.with_name(model.name + ".import").write_text('[remap]\n\nimporter="skip"\n', encoding="utf-8")
     import browser_asset_catalog
     catalog, files = browser_asset_catalog.load(__import__(__name__), asset_catalog, assets) if asset_catalog else browser_asset_catalog.build(__import__(__name__), assets)
+    prototype_lod_report = {}
+    if prototype_lods:
+        from browser_prototype_sidecars import apply
+        catalog, prototype_lod_report = apply(catalog, prototype_lods, assets, REPO)
     asset_source = files.source_root
     # Source scenery can point into several shared map image pools, not only
     # world/_shared/images. Mirror the already verified raw dependency closure
@@ -412,10 +419,12 @@ def stage_project(stage: Path, endpoint: str, asset_catalog: Path | None = None)
             shutil.copy2(source, target)
     archives = catalog["groups"]["startup"]["archives"]
     cfg = {"schema": 3, **catalog, "endpoint": endpoint, "archives": archives,
+           "browser_actor_preparation": browser_actor_preparation,
            "live_asset_budget_bytes": 768 * 1024 * 1024}
     (project / "data/web_prototype.json").write_text(json.dumps(cfg, indent=2), encoding="utf-8")
     # A static login picture is enough for the prototype; save player choices separately.
-    report = {**cfg, "raw_files": len(files), "raw_world_scenes": len(raw_scenes), "raw_bytes": sum(p.stat().st_size for p in files),
+    report = {**cfg, "prototype_lods": prototype_lod_report,
+              "raw_files": len(files), "raw_world_scenes": len(raw_scenes), "raw_bytes": sum(p.stat().st_size for p in files),
               "download_bytes": sum(row["bytes"] for row in archives),
               "client_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO, text=True).strip()}
     (stage / "build.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
@@ -433,6 +442,8 @@ def main():
     parser.add_argument("--prepare-only", action="store_true")
     parser.add_argument("--release", action="store_true", help="Use the optimized web runtime instead of the diagnostic debug template")
     parser.add_argument("--asset-catalog", type=Path, help="Reuse verified task-local grouped assets with identical committed source inputs")
+    parser.add_argument("--prototype-lods", type=Path, help="Verified offline prototype LOD index; sidecars stay in the source's lazy asset group")
+    parser.add_argument("--browser-actor-preparation", choices=("on", "off"), default="on", help="Schedule browser actor files before body construction")
     parser.add_argument("--cape-runtime", type=Path, help="Optional compiled browser_cape.wasm; enables extension-capable templates")
     parser.add_argument("--editor-runtime", type=Path, help="Matching browser_cape editor library; required with --cape-runtime")
     args = parser.parse_args()
@@ -445,7 +456,9 @@ def main():
     if not url.hostname or url.username or url.password or url.query or url.fragment or (url.scheme != "https" and not
             (url.scheme == "http" and url.hostname in {"localhost", "127.0.0.1", "::1"})):
         parser.error("Assets require HTTPS without credentials, query or fragments; HTTP is allowed only on loopback")
-    report = stage_project(stage, args.endpoint, args.asset_catalog.resolve() if args.asset_catalog else None)
+    report = stage_project(stage, args.endpoint, args.asset_catalog.resolve() if args.asset_catalog else None,
+                           args.prototype_lods.resolve() if args.prototype_lods else None,
+                           args.browser_actor_preparation == "on")
     if args.cape_runtime:
         if not args.editor_runtime: parser.error("--cape-runtime requires --editor-runtime for extension registration during export")
         stage_browser_cape(stage, args.cape_runtime.resolve(), args.editor_runtime.resolve())

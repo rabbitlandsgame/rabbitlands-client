@@ -15,6 +15,12 @@ static func configuration() -> Dictionary:
 	if not FileAccess.file_exists(path): return {}
 	var value: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
 	_configuration = value if value is Dictionary else {}
+	if OS.has_feature("web"):
+		# This performance switch changes scheduling only. A private benchmark
+		# can compare the same export without changing its package or art.
+		var preparation: Variant = JavaScriptBridge.eval("globalThis.RL_BROWSER_ASSETS?.browser_actor_preparation")
+		if typeof(preparation) == TYPE_BOOL:
+			_configuration["browser_actor_preparation"] = preparation
 	return _configuration
 
 static func endpoint() -> String:
