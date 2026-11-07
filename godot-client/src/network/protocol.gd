@@ -1417,8 +1417,21 @@ static func decode_mix_state(payload: PackedByteArray) -> Dictionary:
 			after_name = index + 1
 			break
 		output += char(payload[index])
+	var storage_recipes: Array[int] = []
+	var offset := after_name + 1
+	var storage_known := false
+	if offset + 2 <= payload.size():
+		var count := payload.decode_u16(offset)
+		offset += 2
+		if offset + count * 2 != payload.size():
+			return {"type": "invalid", "error": "mix_storage_length"}
+		storage_known = true
+		for index: int in count:
+			storage_recipes.append(payload.decode_u16(offset + index * 2))
 	return {
 		"type": "mix_state",
+		"storage_known": storage_known,
+		"storage_recipes": storage_recipes,
 		"near_storage": payload[0] != 0,
 		"running": payload[1] != 0,
 		"remaining": payload.decode_u16(2),

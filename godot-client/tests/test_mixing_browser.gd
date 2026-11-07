@@ -40,6 +40,8 @@ func run() -> void:
 	main.get_node("GameView/ChatWindow").preferences_path = artifacts.path_join("browser_%d.cfg" % Time.get_ticks_usec())
 	root.add_child(main)
 	await frames(10)
+	while main.mixing_workspace == null or not main.mixing_workspace.ready_to_layout:
+		await process_frame
 	main.get_node("LoginPanel").hide()
 	main.get_node("LoginBackground").hide()
 	main.game_view.show()
@@ -141,10 +143,30 @@ func run() -> void:
 		await frames()
 		expect(not listed(demanding), "I excludes recipes after their ingredients are spent")
 	app.mix_state.near_storage = true
+	app.mix_state.storage_known = true
+	app.mix_state.storage_recipes = [selected]
 	main.manufacturing_source.button_pressed = true
 	main._sync_manufacturing()
 	await frames()
-	expect(workspace.ingredients_only.disabled and not workspace.ingredients_only.button_pressed and main.manufacturing_list.item_count == main.manufacturing_catalog.count(), "storage leaves unseen stock unfiltered and disables I")
+	expect(not workspace.ingredients_only.disabled and workspace.ingredients_only.button_pressed and listed(selected) and main.manufacturing_list.item_count == 1, "Available uses the full storage recipe snapshot instead of the empty pack")
+	expect(workspace.ingredients_only.text == "Available" and workspace.ingredients_only.is_visible_in_tree(), "the named filter is visible in the window header")
+	app.mix_state.storage_recipes = []
+	app.state_changed.emit(&"mix_state")
+	await frames()
+	expect(main.manufacturing_list.item_count == 0, "consuming storage ingredients updates Available")
+	workspace.ingredients_only.pressed.emit()
+	await frames()
+	expect(workspace.ingredients_only.text == "All recipes" and main.manufacturing_list.item_count == main.manufacturing_catalog.count(), "All recipes works while storage is the source")
+	workspace.ingredients_only.pressed.emit()
+	app.storage.open = true
+	main.storage_panel.show()
+	main.manufacturing_panel.hide()
+	main._on_manufacturing_button_pressed()
+	expect(main.manufacturing_panel.visible and main.storage_panel.visible, "mixing opens alongside an already open storage window")
+	app.mix_state.near_storage = false
+	app.state_changed.emit(&"mix_state")
+	await frames()
+	expect(not main.manufacturing_source.button_pressed and main.manufacturing_ready_only.button_pressed, "walking away restores inventory source and preserves Available")
 	main.manufacturing_sort_mode = "name"
 	main.manufacturing_ready_preference = false
 	workspace._load_browser_preferences()
@@ -154,6 +176,14 @@ func run() -> void:
 	main.manufacturing_panel.show()
 	await frames()
 	await screenshot("02-level-sort-and-ingredient-toggle.png")
+	for preset: String in workspace.model.BUILT_INS:
+		workspace.choose_preset(preset, true)
+		for available: bool in [true, false]:
+			main.manufacturing_ready_only.button_pressed = available
+			await frames()
+			expect(workspace.ingredients_only.is_visible_in_tree() and workspace.header.get_combined_minimum_size().x <= main.manufacturing_panel.size.x - 16,
+				"recipe filter fits the header: %s / %s" % [preset, workspace.ingredients_only.text])
+		await screenshot("filter-%s.png" % preset)
 	print("MIXING BROWSER: %d checks, %d failures" % [checks, failures])
 	main.queue_free()
 	await frames()

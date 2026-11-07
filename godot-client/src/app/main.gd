@@ -4045,8 +4045,7 @@ func _on_knowledge_button_pressed() -> void:
 	_sync_hud_button_states(true)
 
 func _on_manufacturing_button_pressed() -> void:
-	if (bool(AppState.trade.get("open", false))
-			or bool(AppState.storage.get("open", false))):
+	if bool(AppState.trade.get("open", false)):
 		return
 	manufacturing_panel.visible = not manufacturing_panel.visible
 	if manufacturing_panel.visible:
@@ -10397,6 +10396,16 @@ func _manufacturing_availability(recipe_index: int) -> Dictionary:
 	var availability := manufacturing_catalog.availability(recipe_index,
 		AppState.inventory, AppState.known_knowledge, AppState.stats,
 		AppState.inventory_names)
+	if _manufacturing_from_storage():
+		var stocked: bool = (AppState.mix_state.get("storage_recipes", []) as Array).has(recipe_index)
+		availability.ingredients_available = stocked
+		# Ingredients come from storage; tools and other requirements stay personal.
+		availability.reasons = (availability.reasons as Array).filter(func(reason: String) -> bool:
+			return not reason.begins_with("Missing ") and not reason.contains("automatic selection is unavailable"))
+		if not bool(AppState.mix_state.get("storage_known", false)):
+			availability.reasons.append("Waiting for storage ingredient availability")
+		elif not stocked:
+			availability.reasons.append("Missing ingredients in storage")
 	var definition := manufacturing_catalog.recipe(recipe_index)
 	if definition.get("skill", "") == "summoning":
 		var nexus := int(definition.get("animalNexus", 0))
@@ -10461,11 +10470,9 @@ func _sync_manufacturing_detail() -> void:
 	var availability := _manufacturing_availability(selected_manufacturing_recipe)
 	var reasons: Array = availability.get("reasons", []) as Array
 	if from_storage:
-		# The client has never been sent the contents of the storage box, so
-		# it cannot say whether a mix will succeed; only the server can, and
-		# it says so plainly when it refuses.
-		lines.append("\nDrawing from storage, which this window cannot see. "
-			+ "The server refuses if the box is short.")
+		lines.append("\nDrawing ingredients from storage. The server validates each mix.")
+		for reason_value: Variant in reasons:
+			lines.append("  • " + str(reason_value))
 	elif reasons.is_empty():
 		lines.append("\nReady. The server remains authoritative for skill chance, "
 			+ "special days, combat, capacity, and ingredient state.")
@@ -10515,13 +10522,9 @@ func _sync_manufacturing_source() -> void:
 	manufacturing_source.tooltip_text = ("Take the ingredients from your storage box"
 		if near else "Stand next to a storage keeper to mix from storage")
 	if manufacturing_ready_only != null:
-		var from_storage := _manufacturing_from_storage()
-		manufacturing_ready_only.disabled = from_storage
-		manufacturing_ready_only.set_pressed_no_signal(
-			manufacturing_ready_preference and not from_storage)
-		manufacturing_ready_only.tooltip_text = (
-			"Storage contents aren't shown here. Switch to your inventory to filter by ingredients."
-			if from_storage else "Show recipes with ingredients in your pack. Select a recipe to check food, mana, tools and books.")
+		manufacturing_ready_only.disabled = false
+		manufacturing_ready_only.set_pressed_no_signal(manufacturing_ready_preference)
+		manufacturing_ready_only.tooltip_text = "Show all recipes or only recipes with ingredients for one mix in the selected source. Tools, food, mana and books are checked separately."
 
 ## One row per tool, and a way to fix a missing one without leaving.
 ##
