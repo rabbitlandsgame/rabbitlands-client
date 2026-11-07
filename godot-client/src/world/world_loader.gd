@@ -1079,8 +1079,12 @@ func _resolve_shared_meshes(package: WorldManifest, root: Node) -> int:
 	# file's stem, so the lookup is by stem.
 	var base: String = package.source_path.get_base_dir()
 	var paths: Dictionary = {}
+	var source_identities: Dictionary = {}
 	for uri: String in (declared as Dictionary):
 		paths[uri.get_file().get_basename()] = base.path_join(uri).simplify_path()
+		# The package validation already checked this external source closure.
+		# Reuse its identity for optional browser indices; do not hash the GLB again.
+		source_identities[uri.get_file().get_basename()] = str(declared[uri])
 	var placed := 0
 	var missing: Dictionary = {}
 	var pending: Array[Node] = [root]
@@ -1100,7 +1104,7 @@ func _resolve_shared_meshes(package: WorldManifest, root: Node) -> int:
 		if path == null:
 			missing[key] = true
 			continue
-		var mesh: Mesh = ExternalMeshPool.acquire(key, str(path))
+		var mesh: Mesh = ExternalMeshPool.acquire(key, str(path), str(source_identities.get(key, "")))
 		if mesh == null:
 			missing[key] = true
 			continue

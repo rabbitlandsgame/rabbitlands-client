@@ -11,6 +11,7 @@ const GeometrySources := preload("res://src/world/map_geometry_texture_sources.g
 const MapMaterialPreparation := preload("res://src/world/map_material_preparation.gd")
 const ResourceBytes := preload("res://src/runtime/resource_bytes.gd")
 const DistanceClasses := preload("res://src/world/world_distance_classes.gd")
+const BrowserPrototypeLods := preload("res://src/world/browser_prototype_lods.gd")
 
 ## Prototype meshes that map packages name instead of carrying.
 ##
@@ -73,6 +74,8 @@ static var _published_bytes := 0
 ## qualified but meshoptimizer found no level for, the levels made, and their
 ## index bytes.
 static var _lod_generated := 0
+static var _lod_sidecar_hits := 0
+static var _lod_sidecar_misses := 0
 static var _lod_skipped := 0
 static var _lod_empty := 0
 static var _lod_levels := 0
@@ -116,7 +119,7 @@ static func index_for(prototype_path: String) -> Dictionary:
 ##
 ## Safe on a worker thread: nothing here touches the scene tree, and the images
 ## take the prepared path rather than ResourceLoader's.
-static func acquire(key: String, path: String) -> Mesh:
+static func acquire(key: String, path: String, verified_source_sha256 := "") -> Mesh:
 	if ArchivedModelPolicy.is_retired_prototype(key):
 		return null
 	var shared := _published(key)
@@ -171,7 +174,8 @@ static func acquire(key: String, path: String) -> Mesh:
 			continue
 		# Only the mesh the pool publishes (the first) is worth its levels, and
 		# they must exist before get_mesh() builds the ArrayMesh.
-		var levels := generate_lods(importer.mesh) if meshes.is_empty() and importer.mesh != null else -1
+		var levels := _prepare_lods(importer.mesh, path, verified_source_sha256) \
+			if meshes.is_empty() and importer.mesh != null else -1
 		operation_began = Time.get_ticks_usec()
 		var mesh: Mesh = importer.mesh.get_mesh() if importer.mesh != null else null
 		_record_operation(&"prototype_mesh_materialize", operation_began)
@@ -259,6 +263,23 @@ static func generate_lods(mesh: ImporterMesh) -> int:
 	if levels > 0:
 		last_lods += 1
 	return levels
+
+## Native generation remains unchanged. The optional browser sidecar travels
+## with this exact source group, and never retains a mesh or raw source file.
+static func _prepare_lods(mesh: ImporterMesh, path: String, verified_sha256 := "",
+		browser := OS.has_feature("web")) -> int:
+	if browser:
+		var began := Time.get_ticks_usec()
+		var result := BrowserPrototypeLods.apply_file(mesh, path, verified_sha256, true)
+		_record_operation(&"prototype_lod_sidecar", began)
+		_mutex.lock()
+		if bool(result.applied): _lod_sidecar_hits += 1
+		else: _lod_sidecar_misses += 1
+		_mutex.unlock()
+		if bool(result.applied):
+			last_lods += 1
+			return int(result.levels)
+	return generate_lods(mesh)
 
 ## What the LOD rule reads of a parsed `mesh`: {"triangles": its triangle
 ## count over its triangle surfaces, "radius": its box's half-diagonal in its
@@ -359,6 +380,7 @@ static func retention_snapshot() -> Dictionary:
 		"bytes_estimate_available": true, "entries": live, "bytes": live_bytes,
 		"published_bytes": _published_bytes,
 		"prototype_lods": {"generated": _lod_generated, "skipped": _lod_skipped,
+			"browser_sidecar_hits": _lod_sidecar_hits, "browser_sidecar_misses": _lod_sidecar_misses,
 			"empty": _lod_empty, "levels": _lod_levels, "index_bytes": _lod_index_bytes,
 			"live_entries": live_lods, "live_index_bytes": live_lod_bytes},
 		"timings": ResourceDiagnostics.snapshot(_resource_timings)}
