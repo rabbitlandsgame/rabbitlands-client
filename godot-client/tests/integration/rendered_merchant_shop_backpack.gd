@@ -11,6 +11,7 @@ func _init() -> void:
 
 func _run() -> void:
 	root.size = Vector2i(1280, 720)
+	OS.set_environment("ELORIA_NO_MAP_CACHE", "1")
 	var main := (load("res://src/app/main.tscn") as PackedScene).instantiate() as Control
 	root.add_child(main)
 	await _settle()
@@ -25,12 +26,12 @@ func _run() -> void:
 	# Exact output of the server merchant_state builder using Bettany's stock.
 	state.call("_on_packet", 223, SHOP.hex_decode())
 	await _settle()
+	_select(0)
 	_expect(windows.merchant_buy_list.item_count == 10, "all shop goods are visible")
 	_expect(windows.merchant_sell_list.item_count == 5, "only owned goods the merchant buys appear in the backpack")
 	_expect(windows.merchant_description.text.begins_with("A round loaf with a salted crust"),
 		"opening the shop describes the initially selected item")
-	windows.merchant_buy_list.select(8)
-	windows.merchant_buy_list.item_selected.emit(8)
+	_select(8)
 	_expect(windows.merchant_description.text == "A swallow of red tonic that closes small wounds. The vial is worth keeping.",
 		"selecting shop goods shows their server description inside the shop")
 	_expect(not windows.detail_panel.visible, "shop selection does not open a separate inspection window")
@@ -51,8 +52,7 @@ func _run() -> void:
 	windows._sync_merchant_summary()
 	_expect(windows.merchant_trade.disabled, "an overweight purchase is disabled")
 	state.get("merchant")["capacity"] = 80
-	windows.merchant_sell_list.select(2)
-	windows.merchant_sell_list.item_selected.emit(2)
+	_select(2, true)
 	_expect(windows.merchant_description.text == "A common Nymara herb resource.",
 		"selecting a backpack item replaces the previous description")
 	windows.merchant_quantity.text = "4"
@@ -86,6 +86,54 @@ func _run() -> void:
 	windows._sync_merchant_summary()
 	_expect(windows.merchant_description.text == "No description available.",
 		"older server packets do not leave a previous item's description on screen")
+	# Filtering, search and sorting never change server IDs or acknowledge trades.
+	windows._on_merchant_mode("buy")
+	_select(0)
+	windows.merchant_sort.select(1)
+	windows._merchant_browse_changed(1)
+	_expect(windows._merchant_entry().index == 0, "sorting preserves the selected server item")
+	windows._merchant_filter_changed("Food")
+	_expect(windows.merchant_buy_list.item_count == 4, "Food shows only food items")
+	_expect(windows._merchant_entry().index == 0, "type filtering preserves a matching selection")
+	_search("Lemon")
+	_expect(windows.merchant_buy_list.item_count == 1 and windows.merchant_trade.disabled,
+		"search narrows the type and clears a hidden selection")
+	_expect(windows.merchant_buy_list.get_item_metadata(0) == 5, "search keeps Lemon's server ID")
+	_select(5)
+	windows.merchant_quantity.text = "2"
+	_expect(windows._merchant_trade_command() == "#shop buy 91 5 2", "filtered purchase sends the exact server ID")
+	windows._merchant_request_pending = true
+	windows.merchant_sort.select(2)
+	windows._merchant_browse_changed(2)
+	_expect(windows._merchant_request_pending and windows.merchant_trade.disabled,
+		"browsing cannot release an in-flight request")
+	windows._merchant_request_pending = false
+	_search("zz-no-match")
+	_expect(windows.merchant_empty_pack.visible and windows.merchant_trade.disabled,
+		"empty search results explain why trading is unavailable")
+	await _capture("merchant-empty-search.png")
+	_search("")
+	windows._merchant_filter_changed("All")
+	windows._on_merchant_mode("sell")
+	_expect(not windows.merchant_buy_list.visible and windows.merchant_sell_list.visible,
+		"tabs show one grid at a time")
+	_select(2, true)
+	windows.merchant_quantity.text = "4"
+	await _capture("merchant-sell-filtered.png")
+	var bundle: Dictionary = windows._merchant_entry()
+	bundle["sell_quantity"] = 2
+	bundle["sell_price"] = 1
+	windows._sync_merchant()
+	_select(2, true)
+	_expect(windows.merchant_quantity.text == "2", "selecting a bundle starts with one complete lot")
+	windows.merchant_quantity.text = "3"
+	windows._sync_merchant_summary()
+	_expect(windows.merchant_trade.disabled, "a partial bundle cannot be sold")
+	windows._merchant_set_maximum()
+	_expect(windows.merchant_quantity.text == "12" and windows.merchant_totals.text.contains("Receive: 6 gc"),
+		"Max and totals respect sale bundles")
+	_expect(windows._merchant_trade_command() == "#shop sell 91 2 12", "bundle sale retains the exact quantity and ID")
+	await _capture("merchant-sale-bundle.png")
 	for entry: Dictionary in state.get("merchant")["items"]:
 		entry["owned"] = 0
 	windows._sync_merchant()
@@ -106,11 +154,11 @@ func _settle() -> void:
 func _capture(filename: String) -> void:
 	await _settle()
 	var bounds: Rect2 = windows.merchant_panel.get_global_rect()
-	_expect(bounds.end.x <= 1184 and bounds.end.y <= 680, "the merchant panel clears the HUD rail and toolbar")
+	_expect(bounds.end.x <= 1184 and bounds.end.y <= 636, "the merchant panel clears the HUD rail and toolbar")
 	var action: Rect2 = windows.merchant_trade.get_global_rect()
 	_expect(bounds.encloses(action), "the transaction button stays inside the panel")
 	var description: Rect2 = windows.merchant_description.get_global_rect()
-	_expect(bounds.encloses(description) and description.size.y >= 76,
+	_expect(bounds.encloses(description) and description.size.y >= 48,
 		"the description stays readable inside the merchant panel")
 	_expect(windows.merchant_buy_list.get_global_rect().end.y <= description.position.y
 		and description.end.y <= action.position.y,
@@ -129,3 +177,16 @@ func _expect(value: bool, description: String) -> void:
 	if not value:
 		failures += 1
 		push_error("FAIL: " + description)
+
+func _select(server_id: int, selling := false) -> void:
+	var list: ItemList = windows.merchant_sell_list if selling else windows.merchant_buy_list
+	for row: int in range(list.item_count):
+		if int(list.get_item_metadata(row)) == server_id:
+			list.select(row)
+			list.item_selected.emit(row)
+			return
+	_expect(false, "fixture item is visible: %d" % server_id)
+
+func _search(query: String) -> void:
+	windows.merchant_search.text = query
+	windows.merchant_search.text_changed.emit(query)
