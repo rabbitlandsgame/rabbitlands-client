@@ -5,6 +5,7 @@ const SECTION := "hud_presets"
 const VERSION := 1
 const DEFAULT_PRESET := "heritage"
 const MAX_CUSTOM := 5
+const FPS_DEFAULT_SIZE := Vector2(80, 26)
 const BUILT_INS := {"heritage": "Classic", "classic": "Compact", "modular": "Modular",
 	"adventure": "Adventure", "minimal": "Minimal"}
 const PARTS := {"rail_panel": "Blank HUD panel", "utilities": "Menu icons", "resources": "Resource meters",
@@ -263,6 +264,7 @@ static func _preset_recipe(id: String) -> Dictionary:
 	for key: String in ["rail_panel", "player_card", "food_meter", "load_meter", "xp_meter"]:
 		value.parts[key].enabled = false
 		if key in ["food_meter", "load_meter", "xp_meter"]: value.parts[key].meter_keys = [{"food_meter":"food", "load_meter":"load", "xp_meter":"experience"}[key]]
+	value.parts.fps.dimensions = FPS_DEFAULT_SIZE
 	value.parts.jukebox.enabled = false
 	value.parts.jukebox.dimensions = Vector2(560, 64)
 	value.parts.jukebox.background_color = Color("0d1824f5")

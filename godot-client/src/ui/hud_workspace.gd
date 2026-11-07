@@ -1679,7 +1679,8 @@ func _style_part(key: String) -> void:
 		(surface._fade.material as ShaderMaterial).set_shader_parameter("backdrop_color", backdrop)
 		box.bg_color.a = 0
 		surface.add_theme_stylebox_override("panel", box)
-	elif key == "gauntlet_loot":
+	elif key in ["gauntlet_loot", "fps"]:
+		# Labels read "normal"; its padding keeps FPS digits clear of the frame.
 		control.add_theme_stylebox_override("normal", box)
 	else:
 		control.add_theme_stylebox_override("panel", box)
@@ -1807,8 +1808,12 @@ func layout_hud() -> void:
 		var dimensions := control.size
 		if key in ["gauntlet_loot", "rare_drops"]:
 			dimensions = main.extension_windows.gauntlet_loot_window.default_hud_rect(key, main.game_view.size).size
-		if config.dimensions != Vector2.ZERO and key in ["chat", "system_chat", "minimap", "compass", "clock", "research", "logo", "medallion", "resources", "food_meter", "load_meter", "xp_meter", "player_card", "target", "gauntlet_loot", "rare_drops", "jukebox"]:
+		if config.dimensions != Vector2.ZERO and key in ["chat", "system_chat", "minimap", "compass", "clock", "research", "logo", "fps", "medallion", "resources", "food_meter", "load_meter", "xp_meter", "player_card", "target", "gauntlet_loot", "rare_drops", "jukebox"]:
 			dimensions = config.dimensions
+		elif key == "fps":
+			# Older saved presets used zero dimensions and shrank to the current
+			# value at startup. Reserve three digits even when it currently says 0.
+			dimensions = Presets.FPS_DEFAULT_SIZE.max(control.get_combined_minimum_size())
 		elif key == "medallion": dimensions = Vector2(240, 200)
 		if key == "rail_panel":
 			dimensions = config.dimensions.max(Vector2(24, 24))
