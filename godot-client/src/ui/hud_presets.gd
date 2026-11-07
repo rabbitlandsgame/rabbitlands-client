@@ -241,7 +241,7 @@ static func _unify_chat_opacity(value: Dictionary) -> void:
 		set_chat_opacity(value, key, opacity)
 
 static func _preset_recipe(id: String) -> Dictionary:
-	var value := {"version": VERSION, "frame_alpha_version": 1, "legacy": id == "current", "parts": {},
+	var value := {"version": VERSION, "frame_alpha_version": 1, "console_fit_viewport": true, "legacy": id == "current", "parts": {},
 		"icons": {}, "meters": {}, "meter_order": [], "resource_colors": RESOURCE_COLORS.duplicate(), "chat_windows": {}, "native_spell_bar": {}, "banner_options": {}, "banner_colors": BannerColors.normalise({})}
 	for field: String in BANNER_FIELDS:
 		value.banner_options[field] = field not in ["banner_background", "load_bar", "load_numbers"] and (id != "minimal" or field == "show_names")
@@ -665,11 +665,12 @@ static func normalise(raw: Variant) -> Dictionary:
 	if not raw is Dictionary or int(raw.get("version", 0)) != VERSION: return preset(DEFAULT_PRESET)
 	if raw.get("legacy", false) == true:
 		var migrated := preset(DEFAULT_PRESET)
-		for field: String in ["chat_windows", "banner_options", "banner_colors", "icons", "resource_colors"]:
+		for field: String in ["chat_windows", "banner_options", "banner_colors", "icons", "resource_colors", "console_fit_viewport"]:
 			if raw.has(field): migrated[field] = raw[field]
 		raw = migrated
 	var result := _preset_recipe("current")
 	result.legacy = false
+	result.console_fit_viewport = raw.get("console_fit_viewport", true) == true
 	if not raw.has("banner_options"): result.banner_options = {}
 	var parts: Variant = raw.get("parts", {})
 	if parts is Dictionary:
