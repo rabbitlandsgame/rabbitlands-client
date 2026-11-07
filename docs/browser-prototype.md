@@ -17,6 +17,11 @@ First-launch settings use Medium graphics, half-size map textures, a 60 FPS cap
 and no decorative grass. Browser preferences stay separate from the desktop
 client. Use an isolated test database and accounts for development.
 
+The [November 7 performance integration](browser-performance.md) includes the
+recent shared desktop optimizations, browser actor/mount preparation and optional
+offline prototype LODs. The builder stamps the real source revision and ancestry
+so the existing server's minimum-version policy also applies to browser logins.
+
 ## Build and run
 
 Work in a task worktree based on `origin/develop`. Use the supported Godot 4.7.2
