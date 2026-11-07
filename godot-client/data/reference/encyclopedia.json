@@ -211,19 +211,19 @@
           "id": "perks-overview",
           "title": "How perks work",
           "summary": "Pick points, tiers, exclusions and gear",
-          "body": "A perk is bought with pick points, and most of them are bought more than once. There are 32 perks on the shelf and 32 of them come in tiers.\n\nPick points come from overall levels: two for each, spent on attributes, nexus or perks, and never spent twice. Every tier of a perk costs 3 pick points, so owning one outright is 9; what climbs from tier to tier is the gold.\n\nSome perks cannot be held together - Lucky Hitter and Lucky Dodger answer the same question from opposite sides, and so do Mirror and Life Stealing. The page for each perk says what it clashes with.\n\nWorn gear can carry a perk. A cape does not simply grant one: it adds a tier, which means it is worth the same to a player who has bought all three as to one who has bought none - and it is the only way to reach the tiers above the third.\n\nA removal stone takes back one tier and returns what that tier cost. At its highest tier a perk that says so can be switched off with the #perk command, which hands back the effect and not the pick points.\n\n#list_perks names everything you hold, the tier you are at, and what that tier does.",
+          "body": "A perk is bought with pick points, and most of them are bought more than once. There are 33 perks on the shelf and 33 of them come in tiers.\n\nPick points come from overall levels: two for each, spent on attributes, nexus or perks, and never spent twice. Every tier of a perk costs 3 pick points; most perks have three purchasable tiers, and Reagent Saver has five. Gold costs rise with each tier.\n\nSome perks cannot be held together - Lucky Hitter and Lucky Dodger answer the same question from opposite sides, and so do Mirror and Life Stealing. The page for each perk says what it clashes with.\n\nWorn gear can carry a perk. A cape does not simply grant one: it adds a tier up to the perk effect cap. Most perks need gear to reach tiers four and five. Reagent Saver can learn all five levels; its cape adds one level up to the 95% cap.\n\nA removal stone takes back one tier and returns what that tier cost. At its highest tier a perk that says so can be switched off with the #perk command, which hands back the effect and not the pick points.\n\n#list_perks names everything you hold, the tier you are at, and what that tier does.",
           "facts": [
             [
               "Perks",
-              "32"
+              "33"
             ],
             [
               "Tiered",
-              "32"
+              "33"
             ],
             [
-              "Tiers each",
-              "3"
+              "Purchasable tiers",
+              "3 (Reagent Saver: 5)"
             ],
             [
               "A tier costs",
@@ -1712,6 +1712,88 @@
             [
               "Taken back by",
               "Offensive Mage Removal"
+            ]
+          ]
+        },
+        {
+          "id": "perk-reagent-saver",
+          "title": "Reagent Saver",
+          "summary": "Magic and summoning - 95% chance to keep all spell reagents when casting. Mana is still spent.",
+          "sections": [
+            {
+              "title": "How it works",
+              "kind": "prose",
+              "text": "Bought in 5 tiers. Each tier replaces the one below it rather than adding to it, so the effect shown for a tier is the whole of what the perk does at that tier."
+            },
+            {
+              "title": "Tiers",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Tier 1",
+                  "3 pick points, 300 gold. 20% chance to keep all spell reagents when casting. Mana is still spent."
+                ],
+                [
+                  "Tier 2",
+                  "3 pick points, 2,500 gold. 40% chance to keep all spell reagents when casting. Mana is still spent."
+                ],
+                [
+                  "Tier 3",
+                  "3 pick points, 12,000 gold. 60% chance to keep all spell reagents when casting. Mana is still spent."
+                ],
+                [
+                  "Tier 4",
+                  "3 pick points, 30,000 gold. 80% chance to keep all spell reagents when casting. Mana is still spent."
+                ],
+                [
+                  "Tier 5",
+                  "3 pick points, 60,000 gold. 95% chance to keep all spell reagents when casting. Mana is still spent."
+                ]
+              ]
+            },
+            {
+              "title": "Worn gear",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Carried by",
+                  "Reagent Saver's Cape"
+                ]
+              ]
+            },
+            {
+              "title": "Also",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Taken back by",
+                  "Reagent Saver Removal"
+                ]
+              ]
+            }
+          ],
+          "related": [],
+          "body": "Bought in 5 tiers, each one costing 3 pick points and more gold than the last.\n\nTier 1 - 3 pick points, 300 gold. 20% chance to keep all spell reagents when casting. Mana is still spent.\nTier 2 - 3 pick points, 2,500 gold. 40% chance to keep all spell reagents when casting. Mana is still spent.\nTier 3 - 3 pick points, 12,000 gold. 60% chance to keep all spell reagents when casting. Mana is still spent.\nTier 4 - 3 pick points, 30,000 gold. 80% chance to keep all spell reagents when casting. Mana is still spent.\nTier 5 - 3 pick points, 60,000 gold. 95% chance to keep all spell reagents when casting. Mana is still spent.\n\nWorn gear carries this perk, and adds a tier to it for anybody who has already bought one.\n\nCarried by: Reagent Saver's Cape.",
+          "facts": [
+            [
+              "Tiers",
+              "5"
+            ],
+            [
+              "All tiers",
+              "15 pick points"
+            ],
+            [
+              "Gold",
+              "104,800 gold"
+            ],
+            [
+              "Gear",
+              "Reagent Saver's Cape"
+            ],
+            [
+              "Taken back by",
+              "Reagent Saver Removal"
             ]
           ]
         },
