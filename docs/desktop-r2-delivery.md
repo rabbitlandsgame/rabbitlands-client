@@ -130,11 +130,23 @@ check are unchanged; only the key is new.
   updater inputs on both platforms, and R1 could no longer reuse T's updater. A Linux
   player with an old installation runs the old uninstaller first, or passes another
   parent folder to `download.sh`, and expects a full download.
-- **The Inno uninstaller leaves some files.** It cannot remove prepared-world files
-  whose paths exceed 260 characters. Measured on 2026-11-06 on a `945042f0` test
-  installation: about 6,000 files and 402 MB, with paths of 263-269 characters under
-  a 33-character folder and about 285 under the default folder. A later setup over
-  those leftovers finished, and the game started.
+- **Uninstallers from setups up to R1 leave some files.** Inno cannot remove paths over
+  260 characters. Both routes leave them: Windows Installed apps runs Inno's uninstaller,
+  and the Start Menu uninstaller calls it. Measured on 2026-11-07 on R1 test
+  installations in a 48-character folder, as long as the default one: 6,019 files and
+  409 MB in `app/prepared-world/`, the same again in any `.eloria-previous/`, the
+  `.eloria-launcher-lock/` the Start Menu route writes, and the folder itself. By their
+  lengths (230-236 characters inside the game folder), a folder of 22 characters or fewer
+  leaves none of them, and one of 30 or more leaves them all. A later setup over those
+  leftovers finished, and the game started (`945042f0`, 2026-11-06).
+- **Setups built after that remove them.** Their uninstall code deletes the game's
+  folders by name through the `\\?\` form first, and a `[Dirs]` row removes the folder
+  when it is empty. An installation gets this uninstaller only by running such a setup:
+  an update does not replace it. An installation with no Inno uninstaller, from a
+  standalone updater, is removed by `src/updates/uninstall.gd`, whose PowerShell cannot
+  reach those paths where `LongPathsEnabled` is off (measured on that function, not a
+  whole installation). Changing it changes the updater fingerprint, so it waits for a
+  release that changes the updater anyway.
 - **What old installations do.** Their shortcuts still start the installed game. Its
   start check cannot verify T and offers nothing. An explicit updater run stops with
   "The release signature could not be verified." and changes nothing. Once the

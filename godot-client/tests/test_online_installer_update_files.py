@@ -3,6 +3,8 @@
 - [UninstallDelete] removes everything an interrupted per-file update can leave in
   the installation folder: the stage, the backup of replaced originals, the v2
   journal and the temporary journal files `Release.save_json` writes first.
+- The uninstall code removes the game folders first, because those rows cannot reach
+  paths over 260 characters.
 - ExtraDiskSpaceRequired follows the setup helper's real peak disk use.
 """
 import fnmatch
@@ -101,6 +103,30 @@ def test_uninstall_delete_covers_every_per_file_update_leftover(tmp_path):
     assert all(row in remaining for row in wave1), rows
 
 
+def test_uninstall_code_removes_every_folder_row_by_name(tmp_path):
+    stage = tiny_stage(tmp_path)
+    script = package_client.online_installer_script(stage, stage / "RabbitLands-updater.exe", "test", [],
+                                                    schema2_payload(stage))
+    folders = [name for kind, name in uninstall_delete(script) if kind == "filesandordirs"]
+    assert ".eloria-launcher-lock" in folders
+    code = script.split("[Code]\n", 1)[1]
+    assert package_client.online_uninstall_code() in code
+    # Each one by name: {app} itself may hold the player's own files, so it is never a tree to remove.
+    assert re.findall(r"RemoveGameFolder\('([^']*)'\)", code) == folders and "" not in folders
+
+
+def test_uninstall_rows_name_what_the_game_writes_beside_its_folders(tmp_path):
+    stage = tiny_stage(tmp_path)
+    script = package_client.online_installer_script(stage, stage / "RabbitLands-updater.exe", "test", [],
+                                                    schema2_payload(stage))
+    files = [name for kind, name in uninstall_delete(script) if kind == "files"]
+    for written in ("eloria-debug.log", "eloria-compatibility.log", "eloria-safe-mode.log", ".rabbitlands-install.json.tmp",
+                    "RabbitLands-updater.exe.tmp", "RabbitLands-uninstall.exe.tmp"):
+        assert any(fnmatch.fnmatchcase(written, pattern) for pattern in files), written
+    for kept in ("player-notes.log", "eloria.log", "my-eloria-debug.log"):
+        assert not any(fnmatch.fnmatchcase(kept, pattern) for pattern in files), kept
+
+
 def _inno_or_skip():
     iscc = package_client.find_iscc(None)
     if os.name != "nt" or not iscc:
@@ -115,6 +141,7 @@ def test_production_online_installer_script_compiles_with_its_uninstall_section(
     script = package_client.online_installer_script(stage, stage / "RabbitLands-updater.exe", "test", [],
                                                     schema2_payload(stage))
     assert '\\.eloria-update-backup"' in script and "ExtraDiskSpaceRequired=" in script
+    assert "procedure CurUninstallStepChanged" in script
     iss = tmp_path / "online.iss"
     iss.write_text(script, encoding="utf-8-sig")
     result = subprocess.run([str(iscc), "/Q", str(iss)], capture_output=True, text=True, timeout=120)
@@ -122,17 +149,20 @@ def test_production_online_installer_script_compiles_with_its_uninstall_section(
     assert (stage.parent / f"{stage.name}-setup.exe").is_file()
 
 
-def test_inno_uninstaller_removes_an_interrupted_updates_files(tmp_path):
-    """A real Inno uninstall with the generated [UninstallDelete] rows.
+def real_inno_install(tmp_path: Path) -> tuple[Path, dict]:
+    """A real Inno setup with the generated [Dirs] and [UninstallDelete] rows and uninstall code.
 
     The test setup registers no uninstall entry (CreateUninstallRegKey=no), closes no
     applications and creates no shortcuts; its temporary files stay under tmp_path.
     """
     iscc = _inno_or_skip()
     stage = tiny_stage(tmp_path)
-    rows = package_client.online_installer_script(stage, stage / "RabbitLands-updater.exe", "test", [],
-                                                  schema2_payload(stage)).split("[UninstallDelete]\n", 1)[1]
-    section = "[UninstallDelete]\n" + rows.split("\n[", 1)[0].strip() + "\n"
+    generated = package_client.online_installer_script(stage, stage / "RabbitLands-updater.exe", "test", [],
+                                                       schema2_payload(stage))
+
+    def section(name: str) -> str:
+        return f"[{name}]\n" + generated.split(f"[{name}]\n", 1)[1].split("\n[", 1)[0].strip() + "\n"
+
     payload = tmp_path / "payload.txt"
     payload.write_text("installed by the test setup")
     output = tmp_path / "setup-out"
@@ -151,10 +181,13 @@ DisableProgramGroupPage=yes
 OutputDir={output}
 OutputBaseFilename=uninstall-test-setup
 
+{section("Dirs")}
 [Files]
 Source: "{payload}"; DestDir: "{{app}}"
 
-{section}"""
+{section("UninstallDelete")}
+[Code]
+{package_client.online_uninstall_code()}"""
     iss = tmp_path / "uninstall-test.iss"
     iss.write_text(script, encoding="utf-8-sig")
     result = subprocess.run([str(iscc), "/Q", str(iss)], capture_output=True, text=True, timeout=120)
@@ -163,6 +196,7 @@ Source: "{payload}"; DestDir: "{{app}}"
     temp.mkdir()
     env = {**os.environ, "TEMP": str(temp), "TMP": str(temp)}
     installed = tmp_path / "installed"
+    installed.mkdir()  # As the real setup helper does before Inno copies anything.
     setup = subprocess.run([str(output / "uninstall-test-setup.exe"), "/VERYSILENT", "/SUPPRESSMSGBOXES",
                             "/NORESTART", "/SP-", f"/DIR={installed}", f"/LOG={tmp_path / 'setup.log'}"],
                            env=env, capture_output=True, timeout=60)
@@ -173,6 +207,23 @@ Source: "{payload}"; DestDir: "{{app}}"
         for hive in (winreg.HKEY_CURRENT_USER, winreg.HKEY_LOCAL_MACHINE):
             with pytest.raises(OSError):
                 winreg.OpenKey(hive, rf"Software\Microsoft\Windows\CurrentVersion\Uninstall\{TEST_APP_ID}_is1")
+    return installed, env
+
+
+def run_inno_uninstaller(installed: Path, env: dict, log: Path) -> None:
+    uninstall = subprocess.run([str(installed / "unins000.exe"), "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART",
+                                f"/LOG={log}"], env=env, capture_output=True, timeout=60)
+    assert uninstall.returncode == 0, uninstall
+    # The uninstaller hands over to a copy of itself in TEMP; its log closes when it has finished.
+    deadline = time.monotonic() + 60
+    while not (log.is_file() and "Log closed." in log.read_text(errors="replace")):
+        assert time.monotonic() < deadline, "The uninstaller did not finish."
+        time.sleep(0.1)
+
+
+def test_inno_uninstaller_removes_an_interrupted_updates_files(tmp_path):
+    """A real Inno uninstall with the generated [UninstallDelete] rows."""
+    installed, env = real_inno_install(tmp_path)
     # A per-file update stopped mid-apply (release.gd apply_operations), plus older-updater leftovers.
     leftovers = {
         "app/RabbitLands.pck": "new pack", "eloria-assets/maps/a/world.glb": "new map",
@@ -190,15 +241,62 @@ Source: "{payload}"; DestDir: "{{app}}"
         (installed / relative).write_text(text)
     control = installed / "player-notes.tmp"  # not an updater file: must survive
     control.write_text("keep")
-    uninstall = subprocess.run([str(installed / "unins000.exe"), "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART",
-                                f"/LOG={tmp_path / 'uninstall.log'}"], env=env, capture_output=True, timeout=60)
-    assert uninstall.returncode == 0, uninstall
-    # The uninstaller hands over to a copy of itself in TEMP; wait for it to finish.
-    deadline = time.monotonic() + 30
-    while sorted(p.name for p in installed.iterdir()) != ["player-notes.tmp"]:
-        assert time.monotonic() < deadline, sorted(p.relative_to(installed).as_posix() for p in installed.rglob("*"))
-        time.sleep(0.1)
+    run_inno_uninstaller(installed, env, tmp_path / "uninstall.log")
+    assert sorted(p.name for p in installed.iterdir()) == ["player-notes.tmp"], sorted(
+        p.relative_to(installed).as_posix() for p in installed.rglob("*"))
     assert control.read_text() == "keep"
+
+
+def long_form(path: Path) -> str:
+    """Reaches a path over 260 characters whatever this machine's LongPathsEnabled says."""
+    return "\\\\?\\" + str(path)
+
+
+# As a release ships it (R1 9baf44f2): 230-236 characters inside the game folder, so all
+# over the limit under a folder of 30 characters or more. The default folder has 48 or more.
+PREPARED_WORLD_FILE = "prepared-world/" + "a" * 64 + "/collision/" + "b" * 64 + "/entries/" + "c" * 64 + ".json"
+
+
+def write_over_260(installed: Path, folder: str) -> Path:
+    path = installed / folder / PREPARED_WORLD_FILE
+    if len(str(path)) <= 260:  # a very short pytest folder
+        path = installed / folder / ("d" * 60) / PREPARED_WORLD_FILE
+    assert len(str(path)) > 260
+    os.makedirs(os.path.dirname(long_form(path)), exist_ok=True)
+    with open(long_form(path), "w", encoding="utf-8") as handle:
+        handle.write("{}")
+    return path
+
+
+@pytest.mark.parametrize("player_file", [False, True], ids=["only-game-files", "with-a-player-file"])
+def test_inno_uninstaller_removes_paths_over_260_characters(tmp_path, player_file):
+    """Inno's own rows leave these (see online_uninstall_code); nothing may stay in the game folder."""
+    installed, env = real_inno_install(tmp_path)
+    long_files = [write_over_260(installed, folder) for folder in package_client.UNINSTALL_FOLDERS]
+    assert all(os.path.isfile(long_form(path)) for path in long_files)
+    # A stale lock, and what the debug shortcuts and an interrupted update write beside the folders.
+    for name in (".eloria-launcher-lock/owner.json", "eloria-debug.log", "eloria-safe-mode.log", "eloria-compatibility.log",
+                 ".rabbitlands-install.json.tmp", "RabbitLands-updater.exe.tmp", "RabbitLands-uninstall.exe.tmp"):
+        (installed / name).write_text("left behind")
+    # Settings outside the game folder, reached through a junction inside it: never followed.
+    settings = tmp_path / "player-settings" / "settings.cfg"
+    settings.parent.mkdir()
+    settings.write_text("keep my settings")
+    linked = subprocess.run(["cmd.exe", "/D", "/C", "mklink", "/J", str(installed / "app" / "external-settings"),
+                             str(settings.parent)], capture_output=True, text=True, timeout=15)
+    assert linked.returncode == 0, linked.stdout + linked.stderr
+    control = installed / "player-notes.txt"
+    if player_file:
+        control.write_text("keep")
+    log = tmp_path / "uninstall.log"
+    run_inno_uninstaller(installed, env, log)
+    assert settings.read_text() == "keep my settings"
+    assert not any(os.path.exists(long_form(path)) for path in long_files), log.read_text(errors="replace")
+    if player_file:
+        assert sorted(p.name for p in installed.iterdir()) == ["player-notes.txt"]
+        assert control.read_text() == "keep"
+    else:
+        assert not installed.exists(), sorted(p.relative_to(installed).as_posix() for p in installed.rglob("*"))
 
 
 # --- ExtraDiskSpaceRequired ------------------------------------------------------------------------------------
