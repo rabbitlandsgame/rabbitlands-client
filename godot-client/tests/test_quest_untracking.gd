@@ -75,6 +75,26 @@ func run() -> void:
 		"tracking an ordinary quest opens its window and offers Untrack")
 	expect(windows.tracked_quest.get_global_rect().encloses(windows.quest_untrack_button.get_global_rect()),
 		"the quest window's untrack control fits within its bounds")
+	expect(windows.tracked_quest.get_global_rect().encloses(windows.quest_hide_button.get_global_rect()),
+		"the quest window's Hide control fits within its bounds")
+	main.hud_workspace.change_part("objectives", "compact", true)
+	await settle()
+	expect(windows.tracked_quest.get_global_rect().encloses(windows.quest_hide_button.get_global_rect())
+		and not windows.quest_hide_button.get_global_rect().intersects(windows.tracked_quest_text.get_global_rect()),
+		"Hide stays accessible below the objective in the compact HUD layout")
+	main.hud_workspace.change_part("objectives", "compact", false)
+	await settle()
+	await click(windows.quest_hide_button)
+	app_state.quest_journal[0].current = 2
+	app_state.state_changed.emit(&"quest_journal")
+	await settle()
+	expect(not windows.tracked_quest.visible and windows._tracked_quest_title == "First quest"
+		and windows.quest_track_button.text == "Untrack" and windows.quest_show_button.visible,
+		"Hide keeps the ordinary quest tracked and closed across progress updates")
+	windows.quest_show_button.pressed.emit()
+	await settle()
+	expect(windows.tracked_quest.visible and not windows.quest_show_button.visible,
+		"Show quest reopens the hidden ordinary tracker without untracking it")
 	await capture("quest-tracker-untrack")
 	windows.quest_list.select(1)
 	windows.quest_list.item_selected.emit(1)
@@ -108,6 +128,16 @@ func run() -> void:
 		await settle()
 		expect(guide.visible and guide.card.is_visible_in_tree() and windows.quest_track_button.text == "Untrack",
 			"the journal recognizes the active guide: " + sample.quest)
+		await click(guide.hide_button)
+		guide_state(snapshot)
+		await settle()
+		expect(not guide.visible and guide.is_quest_tracked() and windows.quest_track_button.text == "Untrack"
+			and windows.quest_show_button.visible,
+			"Hide preserves guide tracking when the server restates the quest: " + sample.quest)
+		windows.quest_show_button.pressed.emit()
+		await settle()
+		expect(guide.visible and not windows.quest_show_button.visible,
+			"Show quest restores the tracked guide: " + sample.quest)
 		if sample.tutorial == "signed_ashore":
 			await capture("quest-guide-untrack")
 		await click(guide.untrack)
@@ -157,6 +187,11 @@ func run() -> void:
 	guide_state({"active": true, "tutorial": "field_dispatch", "adventure": "The Missing Caravan",
 		"title": "Gather supplies", "hint": "Keep your supplies"})
 	expect(guide.visible and not guide.skip.visible, "dispatches expose Untrack without a duplicate Stop tracking action")
+	guide.hide_button.pressed.emit()
+	expect(not guide.visible and guide.is_quest_tracked() and windows.quest_show_button.visible,
+		"a dispatch can be hidden locally while its server-owned tracking remains active")
+	windows.quest_show_button.pressed.emit()
+	expect(guide.visible, "a hidden dispatch can be shown again without a server tracking request")
 	guide.untrack.pressed.emit()
 	expect(guide.visible and not app_state.chat_lines.is_empty()
 		and str(app_state.chat_lines.back().get("text", "")).contains("Could not update quest tracking"),

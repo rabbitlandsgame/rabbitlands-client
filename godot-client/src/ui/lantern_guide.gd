@@ -5,6 +5,7 @@ const TextColors := preload("res://src/ui/text_colors.gd")
 ## or leaving still requires the server's existing prompt.
 
 signal tracking_changed()
+signal window_visibility_changed()
 
 var main: Control
 var card: PanelContainer
@@ -15,8 +16,10 @@ var collapse: Button
 var skip: Button
 var help: Button
 var untrack: Button
+var hide_button: Button
 var state: Dictionary = {}
 var _untracked_quests: Dictionary = {}
+var _hidden_windows: Dictionary = {}
 var highlighted: Control
 var compact := false
 var docked := false
@@ -115,8 +118,32 @@ func set_campaign_tracked(tracked: bool) -> void:
 		return
 	_campaign_choices[campaign_identity()] = tracked
 	_prefer_campaign = tracked
+	if tracked:
+		_hidden_windows.erase("campaign:" + campaign_identity())
 	_refresh()
 	tracking_changed.emit()
+
+func _window_identity() -> String:
+	if using_campaign() or rescue_completed() and bool(_campaign.get("active", false)):
+		return "campaign:" + campaign_identity()
+	var title := quest_title()
+	return "quest:" + title if not title.is_empty() else ""
+
+func is_window_hidden(identity := "") -> bool:
+	return _hidden_windows.has(_window_identity() if identity.is_empty() else identity)
+
+func hide_window() -> void:
+	var identity := _window_identity()
+	if identity.is_empty():
+		return
+	_hidden_windows[identity] = true
+	_refresh()
+	window_visibility_changed.emit()
+
+func show_window() -> void:
+	_hidden_windows.erase(_window_identity())
+	_refresh()
+	window_visibility_changed.emit()
 
 func prefer_standard_quest() -> void:
 	_prefer_campaign = false
@@ -184,9 +211,15 @@ func configure(owner_ui: Control) -> void:
 	untrack = Button.new()
 	untrack.name = "UntrackQuest"
 	untrack.text = "Untrack"
-	untrack.tooltip_text = "Hide this quest window. Keep your progress and choose Track in Quests to show it again."
+	untrack.tooltip_text = "Stop tracking this quest. Keep your progress and choose Track in Quests to follow it again."
 	untrack.pressed.connect(func(): set_campaign_tracked(false) if using_campaign() else set_quest_tracked(false))
 	buttons.add_child(untrack)
+	hide_button = Button.new()
+	hide_button.name = "HideQuest"
+	hide_button.text = "Hide"
+	hide_button.tooltip_text = "Hide this window while keeping the quest tracked. Choose Show quest in Quests to reopen it."
+	hide_button.pressed.connect(hide_window)
+	buttons.add_child(hide_button)
 	skip = Button.new()
 	skip.name = "SkipTutorial"
 	skip.text = "Skip tutorial…"
@@ -241,6 +274,7 @@ func set_quest_tracked(tracked: bool) -> void:
 		return
 	if tracked:
 		_untracked_quests.erase(title)
+		_hidden_windows.erase("quest:" + title)
 	else:
 		_untracked_quests[title] = true
 	_refresh()
@@ -256,8 +290,9 @@ func _refresh() -> void:
 	if campaign:
 		collapse.visible = not complete
 		untrack.visible = not complete
+		hide_button.visible = not complete
 		visible = AppState.authenticated and is_instance_valid(campaign_content) \
-			and bool(campaign_content.call("presentation_available"))
+			and bool(campaign_content.call("presentation_available")) and (complete or not is_window_hidden())
 		card.visible = visible
 		chapter.text = "RESCUE COMPLETE" if complete else "CURRENT EXPEDITION"
 		heading.text = str(_campaign.get("title", "The Missing Measure"))
@@ -271,11 +306,12 @@ func _refresh() -> void:
 		return
 	collapse.show()
 	untrack.show()
+	hide_button.show()
 	if instruction.get_parent() != _body:
 		instruction.reparent(_body)
 		_body.move_child(instruction, heading.get_index() + 1)
 		instruction.custom_minimum_size.x = heading.custom_minimum_size.x
-	visible = AppState.authenticated and is_quest_tracked()
+	visible = AppState.authenticated and is_quest_tracked() and not is_window_hidden()
 	card.visible = visible
 	if not visible: return
 	var road := str(state.get("tutorial", "")) == "followup"
