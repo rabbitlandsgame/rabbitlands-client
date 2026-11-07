@@ -422,11 +422,19 @@ def stage_project(stage: Path, endpoint: str, asset_catalog: Path | None = None,
            "browser_actor_preparation": browser_actor_preparation,
            "live_asset_budget_bytes": 768 * 1024 * 1024}
     (project / "data/web_prototype.json").write_text(json.dumps(cfg, indent=2), encoding="utf-8")
+    # The server enforces its required source commit for browser logins too.
+    # Keep the truthful custom/source platform; never impersonate a desktop
+    # release or bypass the server's ancestry policy for a web build.
+    import client_release
+    commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO, text=True).strip()
+    identity = client_release.identity(REPO, commit, "source", None,
+                                       "rabbitlandsgame/rabbitlands-client", "standalone")
+    (project / "data/client_release.json").write_text(json.dumps(identity), encoding="utf-8")
     # A static login picture is enough for the prototype; save player choices separately.
     report = {**cfg, "prototype_lods": prototype_lod_report,
               "raw_files": len(files), "raw_world_scenes": len(raw_scenes), "raw_bytes": sum(p.stat().st_size for p in files),
               "download_bytes": sum(row["bytes"] for row in archives),
-              "client_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO, text=True).strip()}
+              "client_commit": commit}
     (stage / "build.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
     return report
 

@@ -18,7 +18,8 @@ static func configuration() -> Dictionary:
 	if OS.has_feature("web"):
 		# This performance switch changes scheduling only. A private benchmark
 		# can compare the same export without changing its package or art.
-		var preparation: Variant = JavaScriptBridge.eval("globalThis.RL_BROWSER_ASSETS?.browser_actor_preparation")
+		var preparation: Variant = JSON.parse_string(str(JavaScriptBridge.eval(
+			"JSON.stringify(window.RL_BROWSER_ASSETS?.browser_actor_preparation ?? null)")))
 		if typeof(preparation) == TYPE_BOOL:
 			_configuration["browser_actor_preparation"] = preparation
 	return _configuration
