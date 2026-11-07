@@ -3,7 +3,10 @@
 The prototype runs the shared Godot client locally in a desktop browser using the
 same game protocol and server. The build catalog covers all registered maps
 (90 canonical maps and their aliases), supported runtime actors and equipment.
-Maps, remote bodies and equipment download on demand rather than all at startup.
+By default the launcher downloads and verifies the complete catalog before play,
+including maps, characters, mounts and equipment. The compressed files stay on
+local disk; maps and models are unpacked only when needed. Players can explicitly
+choose **Download as needed** for a shorter initial download.
 Server configuration still determines which maps players can enter.
 
 New character creation uses the same Human starting looks, four callings,
@@ -136,15 +139,17 @@ protection. Desktop arrival and transport behavior remain unchanged.
 Rendering, animations, input, decompression, map construction, client CPU, GPU
 and RAM all run on the player's machine. That machine needs a current desktop
 Chrome or Edge with WebGL 2, WebAssembly, workers and cross-origin isolation.
-The launch host serves HTML/JavaScript/icons and the isolation headers; GitHub
+The launch host serves HTML/JavaScript/icons and the isolation headers; R2
 transfers runtime and art bytes. The existing game server retains authoritative
 gameplay, accounts, persistence and the normal state/message traffic, with an
 optional WebSocket listener for browsers. It does not render frames or unpack
 player assets.
 
 The expanded local catalog contains about 2.6 GB of external payloads in total.
-Startup needs roughly 963 MB before destination-specific assets; the rest is
-downloaded when used. These are current build sizes, not per-visit transfers.
+The November 7 catalog has 1,275 unique payloads totaling 2,608,678,075 bytes.
+The optional download-as-needed mode starts with roughly 964 MB, then fetches
+missing destination and actor files. These are current build sizes, not
+per-visit transfers.
 Browser-only exported hair albedo textures are limited to 1024 pixels, reducing
 the imported package by about 84 MB. Authored PNGs, raw actors and desktop art
 are unchanged. The loader transfers ownership of its immutable package/archive
@@ -231,6 +236,26 @@ minimum hardware requirements or production targets.
 
 ## Saved downloads
 
+The default **Download all game assets before play** mode prepares every unique
+runtime, package and art file in the current catalog before starting Godot.
+It shows verified file counts and byte progress. Only two files are prepared
+concurrently, and each compressed payload is released after saving. Downloading
+the full catalog does not unpack all maps or retain all characters in memory;
+ordinary map/actor residency limits and lazy extraction remain in effect.
+
+Existing files are checked against the current catalog on each visit. Only
+missing or damaged content is fetched; closing the page leaves completed saves
+available for the next attempt. A full browser restart reuses the same hash-keyed
+storage. This removes asset network waits from later gameplay, while model
+parsing, decompression, GPU upload and shader preparation still run when needed.
+
+**Download as needed** explicitly selects the smaller startup and saves that
+preference. Switching during preparation waits for the current file operations
+to finish before starting the game, so bulk downloads do not continue during
+play. A failed download or save pauses full preparation and offers retry or
+that explicit fallback. Storage location can be repaired after pending writes
+settle; the launcher never reports a complete full download when saving failed.
+
 The launcher stores verified runtime, package parts and art archives in the
 origin's `rabbitlands-browser-assets-v1` Cache storage. Entries are keyed by
 SHA-256 rather than the GitHub commit URL, so unchanged files survive an asset
@@ -254,8 +279,9 @@ while still allowing saved files to work across visits. Browsers can evict
 unprotected browser storage, and clearing the site's data removes its cached
 files and remembered folder permissions. It does not delete files in a chosen
 asset folder. Storage
-quota or access failures leave gameplay available and show that future visits
-may need to download again. Protection denial alone is not treated as a save
+quota or access failures pause full preparation; choosing download-as-needed
+keeps gameplay available and shows that future visits may need to download
+again. Protection denial alone is not treated as a save
 failure. See the browser's [Cache API](https://developer.mozilla.org/en-US/docs/Web/API/Cache)
 and [persistent storage](https://developer.mozilla.org/en-US/docs/Web/API/StorageManager/persist)
 documentation. Use a stable launch origin: changing the hostname or port uses a
@@ -263,10 +289,10 @@ different browser storage area.
 
 ## Current limits
 
-- The first load is large: this proof uses the existing desktop art in
-  compressed archives. Territory, actor and equipment downloads are on demand;
-  startup still includes the complete playable Human creation profile. The loader
-  displays progress and verifies payloads.
+- The first full download is large: this proof uses the existing desktop art in
+  compressed archives. The launcher prepares the full catalog by default;
+  download-as-needed keeps the earlier smaller startup. Resource construction
+  remains lazy, and startup includes the playable Human creation profile.
 - The threaded build requires cross-origin isolation. The local serving tool
   supplies the required headers and serves only the chosen generated site folder.
   The export reserves 16 browser workers, with four in Godot's worker pool, to

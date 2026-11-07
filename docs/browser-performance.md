@@ -41,8 +41,9 @@ python godot-client/tools/build_browser_prototype_lods.py `
 
 Pass the resulting `index.json` to the browser builder's `--prototype-lods`.
 The builder checks source hashes and packages each sidecar next to its source
-in the same lazy asset archive. These files do not become a global startup
-download. Their decoded bytes count toward that group's memory budget.
+in the same lazy asset archive. Full preparation saves that archive to disk
+before play; extraction remains lazy. Decoded sidecar bytes count toward that
+group's memory budget.
 
 The browser validates the engine, policy, source identity, base surface data
 and index bounds before applying a sidecar. Missing or invalid data retains the
