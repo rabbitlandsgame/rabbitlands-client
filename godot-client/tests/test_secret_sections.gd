@@ -105,6 +105,12 @@ func _run() -> void:
 		"an inactive controller hides nothing")
 
 	await _test_retired_scene_nodes(manifest, plain)
+	_test_retained_actor(manifest)
+	# The reported continent door: the old exterior coordinates overlap Deep
+	# Workings, while the destination is in Lantern Mine's Upper Galleries.
+	var underground := WorldManifest.load_file(
+		"res://../eloria-assets/maps/continent-v2/landfall_insides/client/world.json")
+	_test_retained_actor(underground, Vector3(50.5, 106.2, 166.5), Vector3(520.5, 0.02, 171.5))
 
 	if failures == 0:
 		print("test_secret_sections: all checks passed")
@@ -178,6 +184,51 @@ func _test_retired_scene_nodes(manifest: WorldManifest, plain: WorldManifest) ->
 	_expect(not next_beta.visible, "section culling works again after reentry")
 	sections.reset()
 	next_world.free()
+
+
+func _test_retained_actor(manifest: WorldManifest,
+		departure := Vector3(20, 0, 20), arrival := Vector3(110, 0, 20)) -> void:
+	var world := Node3D.new()
+	root.add_child(world)
+	# A held avatar stays under Main's world root at its departure position
+	# while the destination is indexed. Its meshes must not become scenery.
+	var actor := ReplicatedActor3D.new()
+	world.add_child(actor)
+	actor.position = departure
+	actor.visible = false
+	actor.process_mode = Node.PROCESS_MODE_DISABLED
+	var model := Node3D.new()
+	actor.add_child(model)
+	var body := MeshInstance3D.new()
+	body.mesh = BoxMesh.new()
+	model.add_child(body)
+	var unused := MeshInstance3D.new()
+	unused.visible = false
+	model.add_child(unused)
+	var scenery := MeshInstance3D.new()
+	scenery.position = departure
+	world.add_child(scenery)
+	var sections = SectionsScript.new()
+	_expect(sections.configure(manifest, world) == 1,
+		"a retained avatar's entire subtree is excluded from static section membership")
+	actor.position = arrival
+	actor.visible = true
+	actor.process_mode = Node.PROCESS_MODE_INHERIT
+	sections.update(actor.global_position, true)
+	sections.cull_dynamic([actor], actor)
+	_expect(actor.is_visible_in_tree() and body.is_visible_in_tree() and not scenery.visible,
+		"a reused avatar remains rendered after moving from the old section to the arrival section")
+	sections.update(departure, true)
+	sections.cull_dynamic([actor])
+	_expect(not actor.visible and body.visible,
+		"remote actors are culled at their root without changing model visibility")
+	sections.update(arrival, true)
+	sections.cull_dynamic([actor])
+	_expect(body.is_visible_in_tree() and not unused.visible,
+		"returning actors preserve their model and intentionally hidden appearance pieces")
+	sections.reset()
+	_expect(not unused.visible, "section reset leaves actor appearance visibility alone")
+	world.free()
 
 
 func _expect(condition: bool, message: String) -> void:

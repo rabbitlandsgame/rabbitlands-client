@@ -256,6 +256,13 @@ static func _spatial_nodes(root: Node) -> Array[Node3D]:
 		# Skip the whole retiring subtree, including its unmarked children.
 		if node.is_queued_for_deletion():
 			continue
+		# A retained avatar is still under Main's world root at its departure
+		# position while the new map is configured. Actors belong to the
+		# dynamic root-level cull, never to static scenery: indexing their
+		# meshes here hides the reused body in its old position's section,
+		# even when cull_dynamic exempts the local player after arrival.
+		if node is ReplicatedActor3D:
+			continue
 		for child: Node in node.get_children():
 			stack.append(child)
 		if node == root:
