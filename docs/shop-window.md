@@ -13,7 +13,9 @@ names and categories, and combines with the selected type. Sorting offers name
 in both directions, price in both directions, or item type. Sale-price sorting
 compares the price per item, including fractional bundle prices.
 
-The quantity controls and Max retain the server's carrying, gold, ownership
+Quantity shortcuts **1**, **5**, **10** and **100** sit beside the quantity controls.
+They set an exact amount without submitting a trade. The Buy/Sell button is at
+the bottom right. The quantity controls and Max retain the server's carrying, gold, ownership
 and sale-bundle limits. The transaction button shows the total gold. Filtering
 out the selected item clears the transaction; changing sort order preserves a
 selection that remains visible. A pending trade remains disabled while browsing.

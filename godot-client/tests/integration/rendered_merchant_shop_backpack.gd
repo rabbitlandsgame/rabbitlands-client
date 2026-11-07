@@ -42,6 +42,16 @@ func _run() -> void:
 		and windows.merchant_totals.text.contains("Gold after: 220 gc")
 		and windows.merchant_totals.text.contains("Carry after: 23/80"), "purchase previews cost, gold and load")
 	_expect(not windows.merchant_trade.disabled, "an affordable purchase is enabled")
+	windows.merchant_panel.find_child("MerchantQuantity5", true, false).pressed.emit()
+	_expect(windows.merchant_quantity.text == "5" and windows.merchant_totals.text.contains("Cost: 50 gc"),
+		"quantity presets update the amount and cost without submitting a trade")
+	windows.merchant_panel.find_child("MerchantQuantity100", true, false).pressed.emit()
+	_expect(windows.merchant_quantity.text == "100" and windows.merchant_trade.disabled,
+		"unaffordable presets retain the normal transaction limits")
+	windows.merchant_panel.find_child("MerchantQuantity1", true, false).pressed.emit()
+	_expect(windows.merchant_quantity.text == "1" and not windows.merchant_trade.disabled,
+		"the one-item preset restores an affordable transaction")
+	windows._merchant_set_quantity(3)
 	await _capture("merchant-buy.png")
 	var full_grid_height: float = windows.merchant_buy_list.size.y
 	windows._merchant_set_maximum()
@@ -110,6 +120,7 @@ func _run() -> void:
 	windows._merchant_request_pending = true
 	windows.merchant_sort.select(2)
 	windows._merchant_browse_changed(2)
+	windows.merchant_panel.find_child("MerchantQuantity10", true, false).pressed.emit()
 	_expect(windows._merchant_request_pending and windows.merchant_trade.disabled,
 		"browsing cannot release an in-flight request")
 	windows._merchant_request_pending = false
@@ -131,9 +142,8 @@ func _run() -> void:
 	windows._sync_merchant()
 	_select(2, true)
 	_expect(windows.merchant_quantity.text == "2", "selecting a bundle starts with one complete lot")
-	windows.merchant_quantity.text = "3"
-	windows._sync_merchant_summary()
-	_expect(windows.merchant_trade.disabled, "a partial bundle cannot be sold")
+	windows.merchant_panel.find_child("MerchantQuantity5", true, false).pressed.emit()
+	_expect(windows.merchant_trade.disabled, "a preset cannot sell a partial bundle")
 	windows._merchant_set_maximum()
 	_expect(windows.merchant_quantity.text == "12" and windows.merchant_totals.text.contains("Receive: 6 gc"),
 		"Max and totals respect sale bundles")
@@ -191,6 +201,11 @@ func _capture(filename: String) -> void:
 	_expect(bounds.end.x <= 1184 and bounds.end.y <= 636, "the merchant panel clears the HUD rail and toolbar")
 	var action: Rect2 = windows.merchant_trade.get_global_rect()
 	_expect(bounds.encloses(action), "the transaction button stays inside the panel")
+	var presets := windows.merchant_panel.find_child("MerchantQuantityPresets", true, false) as Control
+	_expect(presets.get_global_rect().position.x > windows.merchant_quantity.get_global_rect().end.x,
+		"quantity presets sit to the right of the amount field")
+	_expect(action.position.y > presets.get_global_rect().end.y and action.end.x >= bounds.end.x - 12,
+		"the transaction button sits at the bottom right")
 	var description: Rect2 = windows.merchant_description.get_global_rect()
 	_expect(bounds.encloses(description) and description.size.y >= 48,
 		"the description stays readable inside the merchant panel")

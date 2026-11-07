@@ -1011,6 +1011,10 @@ func _merchant_change_quantity(delta: int) -> void:
 	merchant_quantity.text = str(clampi(int(merchant_quantity.text) + delta * lot, lot, 1000000))
 	_sync_merchant_summary()
 
+func _merchant_set_quantity(value: int) -> void:
+	merchant_quantity.text = str(value)
+	_sync_merchant_summary()
+
 func _merchant_set_maximum() -> void:
 	merchant_quantity.text = str(maxi(1, _merchant_maximum(_merchant_entry())))
 	_sync_merchant_summary()
@@ -2840,28 +2844,47 @@ func _build_merchant_window() -> void:
 	maximum.text = "Max"
 	maximum.pressed.connect(_merchant_set_maximum)
 	stepper.add_child(maximum)
+	var presets := HBoxContainer.new()
+	presets.name = "MerchantQuantityPresets"
+	presets.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	presets.alignment = BoxContainer.ALIGNMENT_END
+	footer.add_child(presets)
+	for amount: int in [1, 5, 10, 100]:
+		var shortcut := Button.new()
+		shortcut.name = "MerchantQuantity%d" % amount
+		shortcut.text = str(amount)
+		shortcut.tooltip_text = "Set quantity to %d" % amount
+		shortcut.custom_minimum_size = Vector2(36, 32)
+		shortcut.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		HUD_STYLE.button(shortcut)
+		shortcut.pressed.connect(_merchant_set_quantity.bind(amount))
+		presets.add_child(shortcut)
 	merchant_totals = Label.new()
 	merchant_totals.name = "MerchantTotals"
 	merchant_totals.custom_minimum_size.x = 400
 	merchant_totals.add_theme_font_size_override("font_size", 12)
 	merchant_totals.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	body.add_child(merchant_totals)
+	var transaction_row := HBoxContainer.new()
+	transaction_row.name = "MerchantTransactionRow"
+	body.add_child(transaction_row)
 	merchant_trade = Button.new()
 	merchant_trade.name = "MerchantTrade"
 	merchant_trade.text = "Buy"
 	merchant_trade.custom_minimum_size = Vector2(140, 34)
-	merchant_trade.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	merchant_trade.size_flags_horizontal = Control.SIZE_SHRINK_END
 	merchant_trade.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	merchant_trade.add_theme_stylebox_override("normal", _quest_box(Color("5d4320"), Color("d5aa60"), 1, 3, 9.0))
-	merchant_trade.add_theme_stylebox_override("hover", _quest_box(Color("77552a"), Color("ebc982"), 1, 3, 9.0))
+	merchant_trade.add_theme_stylebox_override("normal", _quest_box(Color("5d4320"), Color("d5aa60"), 1, 3, 6.0))
+	merchant_trade.add_theme_stylebox_override("hover", _quest_box(Color("77552a"), Color("ebc982"), 1, 3, 6.0))
 	merchant_trade.pressed.connect(_on_merchant_trade)
-	footer.add_child(merchant_trade)
 	merchant_status = Label.new()
 	merchant_status.name = "MerchantStatus"
-	merchant_status.custom_minimum_size.x = 400
+	merchant_status.custom_minimum_size.x = 240
+	merchant_status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	merchant_status.add_theme_font_size_override("font_size", 12)
 	merchant_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	body.add_child(merchant_status)
+	transaction_row.add_child(merchant_status)
+	transaction_row.add_child(merchant_trade)
 
 func _build_market_window() -> void:
 	market_panel = _window("MarketplaceWindow", "Nymara Exchange")
