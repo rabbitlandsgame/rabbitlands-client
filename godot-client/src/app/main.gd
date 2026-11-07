@@ -1000,6 +1000,7 @@ var _deferred_map_load := false
 var _arrival_settle_frames := 0
 var _browser_mount_warmup: RefCounted
 var _browser_actor_assets: RefCounted
+var _browser_actor_preparation_configured := false
 var _browser_source_retirement: RefCounted
 var _browser_loading_lease: RefCounted
 var _browser_pinned_maps: Array = []
@@ -2201,6 +2202,7 @@ func client_diagnostic_snapshot() -> Dictionary:
 		"local_avatar_hold": _local_avatar_hold.snapshot(),
 		"local_avatar_prep": _local_avatar_prep.snapshot(),
 		"actor_preparer": actor_resource_warmup.snapshot(),
+		"browser_actor_preparation": actor_resource_warmup.browser_snapshot(),
 		"mount_binds": _mount_binds.snapshot(Time.get_ticks_msec()).merged(
 			{"visualScriptHeld": _mount_visual_script != null,
 			"visualScriptThreaded": _mount_visual_script_threaded}),
@@ -2285,6 +2287,11 @@ func _process(delta: float) -> void:
 	if ReplicatedActor3D.frame_driven():
 		_advance_remote_motion(delta)
 	if _browser_source_retirement != null: _browser_source_retirement.call("advance")
+	if OS.has_feature("web"):
+		for actor_id: int in actor_resource_warmup.take_browser_ready():
+			if AppState.actors.has(actor_id):
+				AppState.mark_actor_changed(actor_id)
+				_queue_world_sync()
 	if _browser_actor_assets != null:
 		for actor_id: int in _browser_actor_assets.call("poll"):
 			if AppState.actors.has(actor_id):
@@ -5066,6 +5073,7 @@ func _clear_world_presentation(retain_map_resources := false) -> void:
 	_local_avatar_prep.clear()
 	_mount_binds.clear()
 	_selected_mount_asked = ""
+	actor_resource_warmup.clear_browser()
 	if _browser_actor_assets != null: _browser_actor_assets.call("clear")
 	_map_actor_marker_cache.clear()
 	crowd.clear()
@@ -8043,6 +8051,7 @@ func _remove_stale_actor_nodes(changed: Variant) -> void:
 		_actor_health_seen.erase(id)
 	crowd.expire_parked(now)
 	if _browser_actor_assets != null:
+		actor_resource_warmup.prune_browser(AppState.actors, _kept_body_ids())
 		_browser_actor_assets.call("prune", AppState.actors, _kept_body_ids())
 
 ## The actor ids whose bodies are kept off the table - parked crowd bodies and
@@ -8210,8 +8219,9 @@ func _actor_assets_ready(id: int, dto: Dictionary, mount: String, priority: int)
 	var model_id := _model_for_actor(dto)
 	var config: Dictionary = models.get(model_id, {}) as Dictionary
 	if OS.has_feature("web"):
-		return _browser_actor_ready(id, dto) \
-			and actor_resource_warmup.request(config, _animation_for_model(config), priority)
+		if not _browser_actor_ready(id, dto): return false
+		return actor_resource_warmup.browser_enabled() \
+			or actor_resource_warmup.request(config, _animation_for_model(config), priority)
 	if not actor_resource_warmup.closure_enabled() or not game_view.visible:
 		# Closures are off (ELORIA_ACTOR_PREPARER=off, prepared content, legacy
 		# actor images) or the game view is hidden: no closure is computed,
@@ -8285,10 +8295,13 @@ func _local_hold_matches(id: int, dto: Dictionary) -> bool:
 ## its mount files with it (`_prepare_local_mounts`).
 func _prepare_local_closure() -> void:
 	var id: int = AppState.local_actor_id
-	if _actor_preparation_closing or OS.has_feature("web") or not AppState.actors.has(id) \
+	if _actor_preparation_closing or not AppState.actors.has(id) \
 			or actor_nodes.has(id):
 		return
 	var dto: Dictionary = _presentation_dto(AppState.actors[id])
+	if OS.has_feature("web"):
+		_browser_actor_ready(id, dto)
+		return
 	if _local_hold_matches(id, dto) or not actor_resource_warmup.closure_enabled():
 		return
 	var closure := _local_closure(id, dto)
@@ -8306,6 +8319,10 @@ func _note_local_body_built(id: int) -> void:
 
 func _browser_actor_ready(id: int, dto: Dictionary) -> bool:
 	if not OS.has_feature("web"): return true
+	if _actor_preparation_closing: return false
+	if not _browser_actor_preparation_configured:
+		actor_resource_warmup.configure_browser(bool(WebPrototype.configuration().get("browser_actor_preparation", true)))
+		_browser_actor_preparation_configured = true
 	if _browser_actor_assets == null:
 		_browser_actor_assets = preload("res://src/platform/browser_actor_assets.gd").new(WebPrototype)
 	var state := AppState.mount_state_for_actor(id)
@@ -8313,8 +8330,29 @@ func _browser_actor_ready(id: int, dto: Dictionary) -> bool:
 	# Prepare the local selected mount before the loading curtain releases it.
 	if mount.is_empty() and id == AppState.local_actor_id:
 		mount = str(state.get("selected_mount_id", ""))
-	return bool(_browser_actor_assets.call("admit", id, _model_for_actor(dto),
-		dto.get("equipment_visuals", {}), mount, _crowd_priority_actor(id)))
+	var model_id := _model_for_actor(dto)
+	if not bool(_browser_actor_assets.call("admit", id, model_id,
+			dto.get("equipment_visuals", {}), mount, _crowd_priority_actor(id))):
+		actor_resource_warmup.cancel_browser(id)
+		return false
+	if not actor_resource_warmup.browser_enabled(): return true
+	# Downloads and their source pins are complete before the first parse is
+	# queued. Preparing one file per drawn frame leaves packet handlers free.
+	var closure := ActorAssetClosureScript.memoized(dto, model_id, models, equipment_config,
+		LookProfile.quality(), {} if mount.is_empty() else {"mode": "mounted", "mount_id": mount},
+		id == AppState.local_actor_id and RLHeadLibrary.defers_loading()).duplicate(true)
+	var scenes: PackedStringArray = closure.get("scenes", PackedStringArray())
+	if bool(closure.get("creature", false)) and not str(closure.get("key", "")).is_empty():
+		var scene := str((models.get(model_id, {}) as Dictionary).get("scene", ""))
+		if not scene.is_empty() and not scenes.has(scene): scenes.append(scene)
+	if not mount.is_empty():
+		for scene: String in (ActorAssetClosureScript.mount_closure(mount, models).scenes as PackedStringArray):
+			if not scenes.has(scene): scenes.append(scene)
+	closure["scenes"] = scenes
+	var priority := ActorResourceWarmupScript.PRIORITY_LOCAL if id == AppState.local_actor_id \
+		else ActorResourceWarmupScript.PRIORITY_TARGET if _crowd_priority_actor(id) \
+		else ActorResourceWarmupScript.PRIORITY_NEAR
+	return actor_resource_warmup.request_browser_closure(closure, priority, id)
 
 func _crowd_reference_point() -> Vector3:
 	var local_value: Variant = actor_nodes.get(AppState.local_actor_id)
@@ -8540,6 +8578,7 @@ func _revive_actor(id: Variant, node: ReplicatedActor3D, dto: Dictionary,
 ## a process frame as the arrival-shared count/time allowance permits.
 ## Each is a new node in the deferred one's place, carrying on its motion.
 func _update_model_builds() -> void:
+	if OS.has_feature("web"): actor_resource_warmup.advance_browser()
 	actor_resource_warmup.poll()
 	# The preparer's main-thread publication (one parsed file a frame, packed
 	# here) is this frame's actor work too.
@@ -8627,6 +8666,8 @@ func _apply_actor_mount(id: Variant, in_build := false) -> void:
 	var state := AppState.mount_state_for_actor(int(id))
 	if OS.has_feature("web") and state.get("mode") == "mounted" and not _browser_actor_ready(int(id),
 			_presentation_dto(AppState.actors.get(id, {}))):
+		if actor_resource_warmup.browser_enabled():
+			_mount_binds.keep(int(id), "files", Time.get_ticks_msec())
 		return
 	var wait := _mount_bind_wait(int(id), node, state, in_build)
 	if not wait.is_empty():
@@ -8661,9 +8702,16 @@ func _apply_actor_mount(id: Variant, in_build := false) -> void:
 ## admission) and with closures off (ELORIA_ACTOR_PREPARER=off, prepared
 ## content, legacy actor images).
 func _mount_bind_wait(id: int, node: ReplicatedActor3D, state: Dictionary, in_build: bool) -> String:
-	if not node.mount_bind_needed(state) or not game_view.visible or _actor_preparation_closing \
-			or OS.has_feature("web") or not actor_resource_warmup.closure_enabled():
+	if not node.mount_bind_needed(state) or not game_view.visible or _actor_preparation_closing:
 		return ""
+	if OS.has_feature("web"):
+		if not actor_resource_warmup.browser_enabled(): return ""
+		if not _browser_actor_ready(id, _presentation_dto(AppState.actors.get(id, {}))) \
+				or not _mount_visual_script_ready(): return "files"
+		# A live player's mount-up is also made outside its packet handler.
+		# Body construction is already frame-budgeted and may bind immediately.
+		return "" if in_build else "turn"
+	if not actor_resource_warmup.closure_enabled(): return ""
 	var local := id == AppState.local_actor_id
 	if local and (in_build or arrival_curtain.is_showing()):
 		return ""
@@ -8786,9 +8834,13 @@ func _prepare_local_mounts(id: int) -> bool:
 ## before login, while the client closes, on the web or with closures off.
 func _prepare_selected_mount() -> void:
 	var id: int = AppState.local_actor_id
-	if id < 0 or not AppState.authenticated or _actor_preparation_closing or OS.has_feature("web") \
-			or not actor_resource_warmup.closure_enabled():
+	if id < 0 or not AppState.authenticated or _actor_preparation_closing:
 		return
+	if OS.has_feature("web"):
+		if AppState.actors.has(id) and game_view.visible:
+			_browser_actor_ready(id, _presentation_dto(AppState.actors[id]))
+		return
+	if not actor_resource_warmup.closure_enabled(): return
 	var state := AppState.mount_state_for_actor(id)
 	if state.get("mode") == "summoning":
 		_mount_files_ready(str(state.get("mount_id", "")), ActorResourceWarmupScript.PRIORITY_LOCAL)
@@ -10622,6 +10674,7 @@ func _update_animation_gate(delta: float) -> void:
 	# actor that still has a node: one AppState has just removed keeps it until
 	# the deferred world sync parks or frees it, and that sync prunes it then.
 	if crowd.expire_parked_due(now) > 0 and _browser_actor_assets != null:
+		actor_resource_warmup.prune_browser(AppState.actors, _kept_body_ids() + actor_nodes.keys())
 		_browser_actor_assets.call("prune", AppState.actors,
 			_kept_body_ids() + actor_nodes.keys())
 	_expire_held_local_avatar(now)

@@ -95,6 +95,7 @@ var _published_in_frame := 0
 var _frame_publish_usec := 0
 var _unclaimed_publish_usec := 0
 var _switch := ""
+var _browser_preparer: RefCounted
 var _stats := {"closureRequests": 0, "closureWaits": 0, "filesQueued": 0, "filesParsed": 0,
 	"filesPublished": 0, "alreadyCached": 0, "piecesPublished": 0, "fallbacks": 0, "discarded": 0,
 	"priorityRaises": 0, "rlWaits": 0, "localStartsPastLimit": 0, "localPublishedFirst": 0,
@@ -168,6 +169,55 @@ func request_closure(closure: Dictionary, priority := PRIORITY_NEAR) -> bool:
 		poll()
 	return ready
 
+## Browser closure work remains on main, spread by file across frames. It is
+## configured by Main only for web; native worker policy is unchanged.
+func configure_browser(enabled: bool) -> void:
+	if enabled and _browser_preparer == null:
+		_browser_preparer = preload("res://src/actors/browser_actor_preparation.gd").new({
+			"canonical": GlbSceneCache._canonical_path, "missing": GlbSceneCache.missing,
+			"prepare": _prepare_browser_file})
+	elif not enabled and _browser_preparer != null:
+		_browser_preparer.call("clear")
+		_browser_preparer = null
+
+func browser_enabled() -> bool:
+	return _browser_preparer != null
+
+func request_browser_closure(closure: Dictionary, priority: int, owner: int) -> bool:
+	return _browser_preparer == null or bool(_browser_preparer.call("request", closure, priority, owner))
+
+func advance_browser() -> void:
+	if _browser_preparer != null: _browser_preparer.call("advance")
+
+func take_browser_ready() -> Array[int]:
+	var ready: Array[int] = []
+	if _browser_preparer != null: ready.assign(_browser_preparer.call("take_ready"))
+	return ready
+
+func prune_browser(live: Dictionary, kept: Array = []) -> void:
+	if _browser_preparer != null: _browser_preparer.call("prune", live, kept)
+
+func clear_browser() -> void:
+	if _browser_preparer != null: _browser_preparer.call("clear")
+
+func cancel_browser(owner: int) -> void:
+	if _browser_preparer != null: _browser_preparer.call("cancel", owner)
+
+func browser_snapshot() -> Dictionary:
+	return _browser_preparer.call("snapshot") if _browser_preparer != null else {"enabled": false}
+
+static func _prepare_browser_file(path: String, names: PackedStringArray, pieces: bool) -> bool:
+	var record := GlbSceneCache.prepare_actor(path)
+	var root: Variant = record.get("root")
+	var extracted: Array = ReplicatedActor3D.equipment_pieces_from(root as Node3D, path) \
+		if pieces and typeof(root) == TYPE_OBJECT and root is Node3D else []
+	if not GlbSceneCache.install_actor_prepared(record):
+		GlbSceneCache.discard_actor_prepared(record)
+		return false
+	if not extracted.is_empty():
+		for name: String in names: ReplicatedActor3D.install_equipment_pieces(name, extracted)
+	return true
+
 ## Whether actor closures are prepared on the worker in this process (see the
 ## header). Main thread: it completes the glTF extension registration the
 ## worker relies on.
@@ -203,6 +253,7 @@ func file_pending(path: String) -> bool:
 func take_publish_usec() -> int:
 	var spent := _unclaimed_publish_usec
 	_unclaimed_publish_usec = 0
+	if _browser_preparer != null: spent += int(_browser_preparer.call("take_usec"))
 	return spent
 
 func poll() -> void:
@@ -229,6 +280,7 @@ func poll() -> void:
 	_start_next()
 
 func clear() -> void:
+	clear_browser()
 	_queue.clear()
 	_known.clear()
 	_known_sources.clear()
@@ -287,6 +339,7 @@ func snapshot() -> Dictionary:
 ## Keep readiness coherent with the browser's raw-file/template retirement.
 ## An active job finishes privately and discards its result without joining.
 func invalidate_sources(paths: PackedStringArray) -> void:
+	if _browser_preparer != null: _browser_preparer.call("invalidate_sources", paths)
 	var wanted := {}
 	for path: String in paths: wanted[GlbSceneCache._file_key(path)] = true
 	var invalid := {}
