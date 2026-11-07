@@ -10,6 +10,8 @@ globalThis.RabbitLandsAssetStorage = (() => {
     let database, directory, selected, pending, cache, prepared = false;
     let remembered = false, folderError = '', busy = false, waiting;
     let panel, startup = false;
+    let preloadMode = 'all', preloadState, preloadActive = false, preloadView = false, preloadWaiting;
+    let preloadPreferenceError = false;
     const rows = new Map();
     const statistics = {folder_hits: 0, folder_bytes: 0, folder_saves: 0,
         folder_saved_bytes: 0, folder_corrupt: 0, folder_error: ''};
@@ -73,6 +75,7 @@ globalThis.RabbitLandsAssetStorage = (() => {
         history.replaceState(null, '', url.href);
     }
     async function use_browser() {
+        if (preloadActive) return false;
         directory = undefined;
         selected = undefined;
         pending = undefined;
@@ -92,7 +95,7 @@ globalThis.RabbitLandsAssetStorage = (() => {
     async function choose_folder() {
         // Invoke the native picker before awaiting anything: this is a direct
         // HTML click handler, never a deferred Godot frame callback.
-        if (!supported()) return false;
+        if (preloadActive || !supported()) return false;
         let handle;
         try { handle = await showDirectoryPicker({id: 'rabbitlands-assets', mode: 'readwrite'}); }
         catch (error) {
@@ -131,7 +134,7 @@ globalThis.RabbitLandsAssetStorage = (() => {
         }
     }
     async function continue_saved() {
-        if (!pending) return false;
+        if (preloadActive || !pending) return false;
         const profile = pending;
         try {
             // requestPermission must be called directly by this button.
@@ -239,7 +242,101 @@ globalThis.RabbitLandsAssetStorage = (() => {
     }
     function status() {
         return {mode: directory ? 'folder' : 'browser', remembered,
-            needs_permission: Boolean(pending), supported: supported(), ...statistics};
+            needs_permission: Boolean(pending), supported: supported(), ...statistics,
+            preload_mode: preloadMode, preload_active: preloadActive};
+    }
+    // A preference selects the work to do, never certifies that the current
+    // catalog is complete. The loader verifies current hashes on every visit.
+    async function preload_choice(summary) {
+        try {
+            const saved = await setting('preload-mode');
+            preloadMode = saved === 'needed' ? 'needed' : 'all';
+        } catch (_) { preloadMode = 'all'; }
+        preloadState = {...summary, completed: 0, completed_bytes: 0,
+            state: preloadMode === 'all' ? 'checking' : 'needed'};
+        preloadActive = preloadMode === 'all';
+        preloadView = preloadActive;
+        if (preloadView && globalThis.document) {
+            if (!panel) makePanel();
+            render();
+            if (!panel.open) panel.showModal();
+        }
+        return preloadMode;
+    }
+    function preload_cancelled() { return preloadMode === 'needed'; }
+    function preload_progress(state) {
+        preloadState = {...preloadState, ...state};
+        preloadActive = ['checking', 'downloading'].includes(preloadState.state);
+        render();
+        if (['complete', 'needed'].includes(preloadState.state) && preloadView) {
+            panel?.close();
+            preloadView = false;
+        }
+    }
+    function preload_failure(error) {
+        if (!globalThis.document) return Promise.reject(new Error('Game files could not be prepared.'));
+        preloadState = {...preloadState, ...error, state: 'failed'};
+        preloadActive = false;
+        preloadView = true;
+        if (!panel) makePanel();
+        const result = new Promise(resolve => { preloadWaiting = resolve; });
+        render();
+        if (!panel.open) panel.showModal();
+        return result;
+    }
+    async function selectPreload(mode, retry = false) {
+        // Set cancellation synchronously; at most the loader's two current
+        // files finish saving before it reports terminal state and boots.
+        preloadMode = mode;
+        render();
+        try { await setting('preload-mode', mode); preloadPreferenceError = false; }
+        catch (_) { preloadPreferenceError = true; }
+        if (preloadWaiting) {
+            const resolve = preloadWaiting;
+            preloadWaiting = undefined;
+            resolve(retry ? 'retry' : 'needed');
+        }
+        render();
+    }
+    function bytes(value) {
+        const size = Math.max(0, Number(value) || 0);
+        const units = ['B', 'KB', 'MB', 'GB'];
+        const unit = Math.min(3, Math.floor(Math.log10(Math.max(1, size)) / 3));
+        return `${(size / 1000 ** unit).toLocaleString(undefined, {maximumFractionDigits: unit ? 1 : 0})} ${units[unit]}`;
+    }
+    function renderPreload() {
+        const state = preloadState;
+        control('preload').hidden = !state;
+        if (!state) return;
+        const total = Math.max(0, Number(state.total) || 0);
+        const completed = Math.max(0, Math.min(total, Number(state.completed) || 0));
+        const totalBytes = Math.max(0, Number(state.total_bytes) || 0);
+        const completedBytes = Math.max(0, Math.min(totalBytes, Number(state.completed_bytes) || 0));
+        const failed = state.state === 'failed';
+        control('preload-size').textContent = `${bytes(totalBytes)} of game files in total. Existing saved files are checked and reused.`;
+        control('preload-progress').max = Math.max(1, totalBytes);
+        control('preload-progress').value = completedBytes;
+        control('preload-count').textContent = `Verified and saved: ${completed.toLocaleString()} of ${total.toLocaleString()} files · ${bytes(completedBytes)} of ${bytes(totalBytes)}`;
+        let message;
+        if (preloadActive) message = preloadMode === 'needed' ? 'Finishing current downloads before continuing…' :
+            'Preparing all game files before play. Keep this tab open.';
+        else if (failed) message = state.name === 'QuotaExceededError' ?
+            'There is not enough storage space. Choose another asset folder, retry, or download as needed.' :
+            'The download or save was interrupted. Files already saved are kept. You can change storage, retry, or download as needed.';
+        else if (state.state === 'complete') message = 'All game files are verified and saved on this device.';
+        else message = 'Maps and characters will download when needed. This can interrupt play on a slow connection.';
+        control('preload-status').textContent = message;
+        control('preload-all').hidden = failed;
+        control('preload-all').disabled = busy || preloadActive;
+        control('preload-all').setAttribute('aria-pressed', String(preloadMode === 'all'));
+        control('preload-needed').disabled = busy || (preloadActive && preloadMode === 'needed');
+        control('preload-needed').setAttribute('aria-pressed', String(preloadMode === 'needed'));
+        control('preload-retry').hidden = !failed;
+        control('preload-retry').disabled = busy || !preloadWaiting || Boolean(pending);
+        control('preload-next').hidden = preloadActive || failed;
+        control('preload-next').textContent = preloadPreferenceError ?
+            'This choice applies to this visit. Your browser could not remember it.' :
+            `For your next visit: ${preloadMode === 'all' ? 'download all game files before play' : 'download as needed'}.`;
     }
     function shortcut() {
         if (framed()) throw new Error('Open the standalone game to save a shortcut.');
@@ -294,20 +391,23 @@ globalThis.RabbitLandsAssetStorage = (() => {
     function render() {
         if (!panel) return;
         control('location').textContent = directory ? `${selected.handle.name} / ${FOLDER}` : 'Browser storage (automatic)';
-        notice(folderError || (directory ? 'Your game files are saved in this folder. Only files you use are downloaded.' :
+        notice(folderError || (directory ? 'Your game files are saved in this folder.' :
             'Game files are saved on this device by your browser.'));
-        control('folder').disabled = busy || !supported();
-        control('browser').disabled = busy;
+        const locked = busy || preloadActive;
+        const recovery = preloadView && preloadState?.state === 'failed';
+        control('folder').disabled = locked || !supported();
+        control('browser').disabled = locked;
         control('resume').hidden = !pending || !supported();
-        control('resume').disabled = busy;
-        control('shortcut').disabled = busy || framed() || Boolean(selected && !remembered) || Boolean(pending);
-        control('continue').disabled = busy || Boolean(pending);
-        control('continue').textContent = startup ? 'Continue to login' : 'Done';
+        control('resume').disabled = locked;
+        control('shortcut').disabled = locked || framed() || Boolean(selected && !remembered) || Boolean(pending);
+        control('continue').disabled = locked || recovery || Boolean(pending);
+        control('continue').textContent = preloadActive ? 'Preparing game files…' : startup ? 'Prepare game' : 'Done';
         control('support').hidden = supported();
         control('support').textContent = framed() ?
             'Folder selection needs the game in its own browser tab. You can still use browser storage here.' :
             'Folder selection needs a supported desktop browser, such as Chrome or Edge. Browser storage remains available.';
         control('standalone').hidden = !framed();
+        renderPreload();
     }
     async function action(callback) {
         if (busy) return;
@@ -324,6 +424,18 @@ globalThis.RabbitLandsAssetStorage = (() => {
         panel.innerHTML = `<h1 id="rl-storage-title">Rabbit Lands</h1>
 <h2>Game files</h2><p>Choose where to keep your downloaded game files.</p>
 <div class="rl-storage-location" data-rl="location"></div>
+<section class="rl-preload" data-rl="preload" hidden aria-labelledby="rl-preload-title">
+<h2 id="rl-preload-title">Before you play</h2>
+<p data-rl="preload-size"></p>
+<p class="rl-storage-muted">Files are stored on this device. The game loads maps into memory only when needed.</p>
+<progress data-rl="preload-progress" aria-label="Game files verified and saved"></progress>
+<p class="rl-preload-count" data-rl="preload-count"></p>
+<p data-rl="preload-status" role="status" aria-live="polite"></p>
+<div class="rl-storage-actions"><button data-rl="preload-all">Download all before play</button>
+<button data-rl="preload-retry" hidden>Retry full download</button>
+<button data-rl="preload-needed">Download as needed</button></div>
+<p class="rl-storage-muted" data-rl="preload-next"></p>
+</section>
 <div class="rl-storage-actions"><button data-rl="folder">Choose asset folder</button>
 <button data-rl="resume" hidden>Use saved folder</button>
 <button data-rl="browser">Use browser storage</button></div>
@@ -335,16 +447,19 @@ globalThis.RabbitLandsAssetStorage = (() => {
 <p>Download and extract a Windows shortcut that reopens this website with your saved storage choice.</p>
 <button data-rl="shortcut">Download Windows shortcut</button>
 <p class="rl-storage-muted">Use the same browser profile. Your browser may ask for folder access again. Clearing site data or using another browser requires choosing the folder again. The shortcut uses your default browser; it does not set graphics options.</p>
-<div class="rl-storage-footer"><button data-rl="continue">Continue to login</button></div>`;
+<div class="rl-storage-footer"><button data-rl="continue">Prepare game</button></div>`;
         document.body.appendChild(panel);
         control('folder').addEventListener('click', () => action(choose_folder));
         control('browser').addEventListener('click', () => action(use_browser));
         control('resume').addEventListener('click', () => action(continue_saved));
+        control('preload-all').addEventListener('click', () => action(() => selectPreload('all')));
+        control('preload-needed').addEventListener('click', () => action(() => selectPreload('needed')));
+        control('preload-retry').addEventListener('click', () => action(() => selectPreload('all', true)));
         control('shortcut').addEventListener('click', () => {
             try { download_shortcut(); } catch (error) { notice(error.message); }
         });
         control('continue').addEventListener('click', async () => {
-            if (busy || pending) return;
+            if (busy || pending || preloadActive || (preloadView && preloadState?.state === 'failed')) return;
             if (!selected) await use_browser();
             panel.close();
             waiting?.();
@@ -352,7 +467,9 @@ globalThis.RabbitLandsAssetStorage = (() => {
             startup = false;
             document.getElementById('canvas')?.focus();
         });
-        panel.addEventListener('cancel', event => { if (startup || busy) event.preventDefault(); });
+        panel.addEventListener('cancel', event => {
+            if (startup || busy || preloadActive || (preloadView && preloadState?.state === 'failed')) event.preventDefault();
+        });
     }
     function show_settings(beforeStart = false) {
         if (!globalThis.document) return Promise.resolve();
@@ -363,5 +480,6 @@ globalThis.RabbitLandsAssetStorage = (() => {
         return beforeStart ? new Promise(resolve => { waiting = resolve; }) : Promise.resolve();
     }
     return {prepare, read, write, hit, corrupt, choose_folder, continue_saved, use_browser,
-        show_settings, shortcut, download_shortcut, status};
+        show_settings, shortcut, download_shortcut, status,
+        preload_choice, preload_progress, preload_failure, preload_cancelled};
 })();

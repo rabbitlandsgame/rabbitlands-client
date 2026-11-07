@@ -33,3 +33,8 @@
 .rl-storage-footer { display: flex; justify-content: flex-end; margin-top: 24px; }
 .rl-storage hr { border: 0; border-top: 1px solid #4f5b57; margin: 24px 0 8px; }
 .rl-storage a { color: #edca74; }
+.rl-storage [hidden] { display: none !important; }
+.rl-preload { padding: 4px 0 20px; margin-bottom: 20px; border-bottom: 1px solid #4f5b57; }
+.rl-preload progress { display: block; width: 100%; height: 20px; accent-color: #d0ae61; }
+.rl-preload .rl-preload-count { font-variant-numeric: tabular-nums; font-size: 14px; }
+.rl-storage button[aria-pressed="true"] { border-width: 2px; border-color: #edca74; }

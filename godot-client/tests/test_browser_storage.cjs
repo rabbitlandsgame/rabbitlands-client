@@ -110,6 +110,7 @@ function session(options = {}) {
     window.self = window; window.top = options.framed ? {} : window;
     const picks = [], warnings = [];
     const context = vm.createContext({URL, URLSearchParams, Blob, Response, window, location,
+        document: options.document,
         isSecureContext: options.secure !== false,
         crypto: {subtle: webcrypto.subtle, randomUUID: nextId},
         indexedDB: options.noIdb ? undefined : database,
@@ -123,6 +124,47 @@ function session(options = {}) {
     vm.runInContext(source, context);
     return {api: context.RabbitLandsAssetStorage, database, location, picks, warnings};
 }
+
+// Small DOM contract for real event handlers: disabled buttons do not click,
+// dialogs block cancel when prevented, and rendering stays observable.
+function documentFixture() {
+    const dialogs = [];
+    function element() {
+        const listeners = new Map();
+        const attributes = new Map();
+        const controls = new Map();
+        return {disabled: false, hidden: false, open: false, textContent: '',
+            setAttribute(name, value) { attributes.set(name, value); },
+            getAttribute(name) { return attributes.get(name); },
+            addEventListener(name, callback) {
+                if (!listeners.has(name)) listeners.set(name, []);
+                listeners.get(name).push(callback);
+            },
+            async click() {
+                if (!this.disabled) await Promise.all((listeners.get('click') || []).map(callback => callback()));
+            },
+            cancel() {
+                const event = {defaultPrevented: false, preventDefault() { this.defaultPrevented = true; }};
+                for (const callback of listeners.get('cancel') || []) callback(event);
+                if (!event.defaultPrevented) this.close();
+                return event.defaultPrevented;
+            },
+            set innerHTML(html) {
+                for (const match of html.matchAll(/<[^>]+data-rl="([^"]+)"[^>]*>/g)) {
+                    const child = element(); child.hidden = /\bhidden\b/.test(match[0]);
+                    controls.set(match[1], child);
+                }
+            },
+            querySelector(selector) { return controls.get(selector.match(/data-rl="([^"]+)"/)?.[1]); },
+            showModal() { this.open = true; }, close() { this.open = false; }, focus() {}
+        };
+    }
+    return {dialogs, body: {appendChild(child) { dialogs.push(child); }},
+        createElement: element, getElementById: () => ({focus() {}}),
+        control(name) { return dialogs.at(-1)?.querySelector(`[data-rl="${name}"]`); }};
+}
+const summary = {total: 1275, total_bytes: 2608678075, default_mode: 'all'};
+const tick = () => new Promise(resolve => setImmediate(resolve));
 
 test('folder saves commit verified bytes, reuse disk, and never touch unrelated files', async () => {
     const handle = folder(); const s = session({handle});
@@ -354,4 +396,132 @@ test('browser-cache migration errors cannot turn a working folder selection into
         assert.equal(s.api.status().remembered, true);
         assert.equal(await s.api.write(fixture, Buffer.from('game bytes')), true);
     }
+});
+
+test('full preload defaults immediately to all without storing an implicit preference', async () => {
+    const s = session(); await s.api.prepare(manifest);
+    assert.equal(await s.api.preload_choice(summary), 'all');
+    assert.equal(s.database.records.has('preload-mode'), false);
+    assert.equal(s.api.preload_cancelled(), false);
+    assert.equal(s.api.status().preload_active, true);
+    s.api.preload_progress({...summary, state: 'complete', completed: 1275, completed_bytes: 2608678075});
+    assert.equal(s.api.status().preload_active, false);
+    await assert.rejects(s.api.preload_failure({name: 'NetworkError'}), /could not be prepared/);
+    assert.equal(await session({noIdb: true}).api.preload_choice(summary), 'all');
+});
+
+test('initial storage choice says Prepare game and active progress locks location and dismissal', async () => {
+    const document = documentFixture(); const s = session({document});
+    const preparing = s.api.prepare(manifest);
+    await tick();
+    assert.equal(document.control('continue').textContent, 'Prepare game');
+    assert.equal(document.dialogs[0].open, true);
+    assert.equal(document.dialogs[0].cancel(), true);
+    await document.control('continue').click(); await preparing;
+    assert.equal(document.dialogs[0].open, false);
+    assert.equal(await s.api.preload_choice(summary), 'all');
+    assert.equal(document.dialogs[0].open, true);
+    for (const name of ['folder', 'browser', 'resume', 'shortcut', 'continue', 'preload-all'])
+        assert.equal(document.control(name).disabled, true, name + ' locked during saving');
+    assert.equal(document.control('preload-needed').disabled, false);
+    await document.control('continue').click();
+    assert.equal(document.dialogs[0].open, true);
+    assert.equal(document.dialogs[0].cancel(), true, 'Escape never silently enters gameplay');
+    s.api.preload_progress({...summary, state: 'downloading', completed: 400, completed_bytes: 1234567890});
+    assert.match(document.control('preload-size').textContent, /2\.6 GB/);
+    assert.match(document.control('preload-count').textContent, /400 of 1,275 files/);
+    assert.match(document.control('preload-count').textContent, /1\.2 GB of 2\.6 GB/);
+    assert.equal(document.control('preload-progress').max, 2608678075);
+    assert.equal(document.control('preload-progress').value, 1234567890);
+    assert.equal(s.database.records.has('preload-mode'), false);
+});
+
+test('explicit needed cancels scheduling immediately but keeps storage locked until workers settle', async () => {
+    const document = documentFixture(); const s = session({document});
+    await s.api.preload_choice(summary);
+    const selecting = document.control('preload-needed').click();
+    assert.equal(s.api.preload_cancelled(), true, 'cancellation is synchronous before IDB completes');
+    await selecting;
+    assert.equal(s.database.records.get('preload-mode'), 'needed');
+    assert.match(document.control('preload-status').textContent, /Finishing current downloads/);
+    assert.equal(document.control('folder').disabled, true);
+    assert.equal(document.control('continue').disabled, true);
+    assert.equal(document.dialogs[0].open, true);
+    s.api.preload_progress({...summary, state: 'needed', completed: 2, completed_bytes: 20});
+    assert.equal(document.dialogs[0].open, false);
+    assert.equal(document.control('folder').disabled, false);
+    const next = session({database: s.database});
+    assert.equal(await next.api.preload_choice(summary), 'needed');
+    assert.equal(next.api.status().preload_active, false);
+});
+
+test('settled failure allows storage recovery and requires explicit retry or needed', async () => {
+    const document = documentFixture(); const s = session({document});
+    await s.api.preload_choice(summary);
+    s.api.preload_progress({...summary, state: 'failed', completed: 4, completed_bytes: 40});
+    let resolved = false;
+    const recovery = s.api.preload_failure({...summary, name: 'QuotaExceededError',
+        message: 'C:/Private/Player must not appear', completed: 4, completed_bytes: 40}).then(mode => { resolved = true; return mode; });
+    await tick();
+    assert.equal(resolved, false);
+    assert.equal(document.dialogs[0].cancel(), true);
+    assert.match(document.control('preload-status').textContent, /not enough storage space/);
+    assert.ok(!document.control('preload-status').textContent.includes('Private'));
+    assert.equal(document.control('folder').disabled, false);
+    assert.equal(document.control('browser').disabled, false);
+    assert.equal(document.control('continue').disabled, true);
+    await document.control('browser').click();
+    assert.equal(resolved, false, 'changing location alone cannot bypass the preload gate');
+    await document.control('preload-retry').click();
+    assert.equal(await recovery, 'retry');
+    assert.equal(s.database.records.get('preload-mode'), 'all');
+    assert.equal(s.api.preload_cancelled(), false);
+    s.api.preload_progress({...summary, state: 'checking', completed: 0, completed_bytes: 0});
+    assert.equal(document.control('folder').disabled, true);
+    const failedAgain = s.api.preload_failure({...summary, name: 'NetworkError'});
+    await document.control('preload-needed').click();
+    assert.equal(await failedAgain, 'needed');
+    s.api.preload_progress({...summary, state: 'needed', completed: 4, completed_bytes: 40});
+    assert.equal(document.dialogs[0].open, false);
+});
+
+test('login settings save only an explicit next-visit mode and never begin background downloads', async () => {
+    const document = documentFixture(); const s = session({document});
+    await s.api.preload_choice(summary);
+    s.api.preload_progress({...summary, state: 'complete', completed: 1275, completed_bytes: 2608678075});
+    assert.equal(s.database.records.has('preload-mode'), false, 'completion is not a remembered manifest shortcut');
+    await s.api.show_settings();
+    await document.control('preload-needed').click();
+    assert.equal(s.api.status().preload_active, false);
+    assert.match(document.control('preload-next').textContent, /next visit: download as needed/);
+    assert.equal(document.dialogs[0].cancel(), false, 'ordinary settings can be dismissed');
+    assert.equal(await session({database: s.database}).api.preload_choice(summary), 'needed');
+    await s.api.show_settings(); await document.control('preload-all').click();
+    assert.equal(s.api.status().preload_active, false);
+    assert.equal(await session({database: s.database}).api.preload_choice(summary), 'all');
+});
+
+test('active preload also rejects direct storage changes until the loader reports settled state', async () => {
+    const handle = folder(); const s = session({handle});
+    await s.api.prepare(manifest); await s.api.choose_folder();
+    const picked = s.picks.length;
+    await s.api.preload_choice(summary);
+    assert.equal(await s.api.choose_folder(), false);
+    assert.equal(s.picks.length, picked);
+    assert.equal(await s.api.use_browser(), false);
+    assert.equal(s.api.status().mode, 'folder');
+    s.api.preload_progress({...summary, state: 'failed'});
+    await s.api.use_browser();
+    assert.equal(s.api.status().mode, 'browser');
+});
+
+test('failed optional preference writes do not claim the next-visit choice was remembered', async () => {
+    const document = documentFixture();
+    const s = session({document, database: idb(new Map(), {failWrite: true})});
+    await s.api.preload_choice(summary);
+    await document.control('preload-needed').click();
+    s.api.preload_progress({...summary, state: 'needed'});
+    assert.equal(s.api.preload_cancelled(), true);
+    assert.match(document.control('preload-next').textContent, /this visit.*could not remember/);
+    assert.equal(s.database.records.has('preload-mode'), false);
 });
