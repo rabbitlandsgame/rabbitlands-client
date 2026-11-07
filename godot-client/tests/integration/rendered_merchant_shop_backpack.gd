@@ -11,6 +11,7 @@ func _init() -> void:
 
 func _run() -> void:
 	root.size = Vector2i(1280, 720)
+	root.gui_embed_subwindows = true
 	OS.set_environment("ELORIA_NO_MAP_CACHE", "1")
 	var main := (load("res://src/app/main.tscn") as PackedScene).instantiate() as Control
 	root.add_child(main)
@@ -23,6 +24,12 @@ func _run() -> void:
 	var state := root.get_node("/root/AppState")
 	state.set("authenticated", true)
 	windows = main.get("extension_windows") as Control
+	windows.preferences_path = "user://merchant-presets-integration.cfg"
+	var preset_config := ConfigFile.new()
+	preset_config.set_value("unrelated", "sentinel", 37)
+	preset_config.save(windows.preferences_path)
+	windows._merchant_quantities.load_file(windows.preferences_path)
+	windows._sync_merchant_quantity_presets()
 	# Exact output of the server merchant_state builder using Bettany's stock.
 	state.call("_on_packet", 223, SHOP.hex_decode())
 	await _settle()
@@ -51,6 +58,55 @@ func _run() -> void:
 	windows.merchant_panel.find_child("MerchantQuantity1", true, false).pressed.emit()
 	_expect(windows.merchant_quantity.text == "1" and not windows.merchant_trade.disabled,
 		"the one-item preset restores an affordable transaction")
+	var fifth := windows.merchant_panel.find_child("MerchantQuantity1000", true, false) as Button
+	fifth.pressed.emit()
+	_expect(windows.merchant_quantity.text == "1000" and windows.merchant_trade.disabled,
+		"the fifth preset selects 1000 and respects trade limits")
+	windows._merchant_set_quantity(3)
+	await _capture("merchant-default-presets.png")
+	var right_click := InputEventMouseButton.new()
+	right_click.button_index = MOUSE_BUTTON_RIGHT
+	right_click.pressed = true
+	fifth.gui_input.emit(right_click)
+	_expect(windows._merchant_preset_dialog.visible and windows._merchant_preset_input.text == "1000",
+		"right-click opens the preset editor with the current value")
+	await _capture("merchant-preset-editor.png")
+	windows._merchant_preset_input.text = "0"
+	windows._merchant_preset_dialog.confirmed.emit()
+	_expect(windows._merchant_preset_dialog.visible and fifth.text == "1000",
+		"invalid edits keep the previous preset and the editor open")
+	windows._merchant_preset_input.text = "1000000"
+	windows._merchant_preset_dialog.confirmed.emit()
+	_expect(fifth.text == "1000000", "the maximum valid preset can be saved")
+	await _capture("merchant-large-preset.png")
+	fifth.gui_input.emit(right_click)
+	windows._merchant_preset_input.text = "2500"
+	windows._merchant_preset_input.text_submitted.emit("2500")
+	_expect(not windows._merchant_preset_dialog.visible and fifth.text == "2500",
+		"saving an edit updates the preset label")
+	var reloaded := preload("res://src/ui/merchant_quantities.gd").new()
+	reloaded.load_file(windows.preferences_path)
+	_expect(reloaded.values[4] == 2500, "a new settings instance restores the saved value")
+	preset_config.load(windows.preferences_path)
+	_expect(preset_config.get_value("unrelated", "sentinel", 0) == 37,
+		"preset saves preserve unrelated settings")
+	state.get("merchant")["actor_id"] = 92
+	state.get("merchant")["npc_name"] = "Another merchant"
+	windows._sync_merchant()
+	fifth.pressed.emit()
+	_expect(fifth.text == "2500" and windows.merchant_quantity.text == "2500",
+		"the edited preset is used at another NPC")
+	_expect(windows._merchant_trade_command().begins_with("#shop buy 92 "),
+		"changing NPC retains the new merchant's identity")
+	fifth.gui_input.emit(right_click)
+	windows._merchant_preset_input.text = "42"
+	windows._merchant_preset_dialog.canceled.emit()
+	windows._merchant_preset_dialog.hide()
+	_expect(fifth.text == "2500", "canceling an edit preserves its saved value")
+	state.get("merchant")["actor_id"] = 91
+	state.get("merchant")["npc_name"] = "Bettany Orl"
+	windows._sync_merchant()
+	_select(8)
 	windows._merchant_set_quantity(3)
 	await _capture("merchant-buy.png")
 	var full_grid_height: float = windows.merchant_buy_list.size.y

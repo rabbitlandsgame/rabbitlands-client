@@ -1,4 +1,5 @@
 extends Control
+const MerchantQuantities := preload("res://src/ui/merchant_quantities.gd")
 const MerchantCatalog := preload("res://src/ui/merchant_catalog.gd")
 const MerchantNames := preload("res://src/state/item_names.gd")
 const TextColors := preload("res://src/ui/text_colors.gd")
@@ -127,6 +128,12 @@ var merchant_sort: OptionButton
 var merchant_filters: HBoxContainer
 var _merchant_type := "All"
 var _merchant_fit_pending := false
+var _merchant_quantities := MerchantQuantities.new()
+var _merchant_preset_buttons: Array[Button] = []
+var _merchant_preset_dialog: ConfirmationDialog
+var _merchant_preset_input: LineEdit
+var _merchant_preset_hint: Label
+var _merchant_preset_index := -1
 var _merchant_actor := -1
 var _merchant_request_pending := false
 var merchant_quantity: LineEdit
@@ -1014,6 +1021,37 @@ func _merchant_change_quantity(delta: int) -> void:
 func _merchant_set_quantity(value: int) -> void:
 	merchant_quantity.text = str(value)
 	_sync_merchant_summary()
+
+func _merchant_quantity_preset_pressed(index: int) -> void:
+	_merchant_set_quantity(_merchant_quantities.values[index])
+
+func _sync_merchant_quantity_presets() -> void:
+	for index: int in range(_merchant_preset_buttons.size()):
+		var value: int = _merchant_quantities.values[index]
+		_merchant_preset_buttons[index].text = str(value)
+		_merchant_preset_buttons[index].tooltip_text = "Set quantity to %d. Right-click to edit." % value
+
+func _merchant_preset_gui_input(event: InputEvent, index: int) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
+		_merchant_preset_index = index
+		_merchant_preset_input.text = str(_merchant_quantities.values[index])
+		_merchant_preset_hint.text = "Enter a whole number from 1 to 1,000,000."
+		_merchant_preset_dialog.popup_centered(Vector2i(320, 140))
+		_merchant_preset_input.grab_focus()
+		_merchant_preset_input.select_all()
+		_merchant_preset_buttons[index].accept_event()
+
+func _commit_merchant_preset() -> void:
+	var typed := _merchant_preset_input.text.strip_edges()
+	if not typed.is_valid_int() or int(typed) < 1 or int(typed) > MerchantQuantities.MAXIMUM:
+		_merchant_preset_hint.text = "Use a whole number from 1 to 1,000,000."
+		return
+	var error := _merchant_quantities.save_value(_merchant_preset_index, int(typed), preferences_path)
+	if error != OK:
+		_merchant_preset_hint.text = "Could not save this preset: " + error_string(error)
+		return
+	_sync_merchant_quantity_presets()
+	_merchant_preset_dialog.hide()
 
 func _merchant_set_maximum() -> void:
 	merchant_quantity.text = str(maxi(1, _merchant_maximum(_merchant_entry())))
@@ -2848,17 +2886,44 @@ func _build_merchant_window() -> void:
 	presets.name = "MerchantQuantityPresets"
 	presets.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	presets.alignment = BoxContainer.ALIGNMENT_END
+	presets.add_theme_constant_override("separation", 2)
 	footer.add_child(presets)
-	for amount: int in [1, 5, 10, 100]:
+	_merchant_quantities.load_file(preferences_path)
+	for index: int in range(MerchantQuantities.DEFAULTS.size()):
+		var amount: int = MerchantQuantities.DEFAULTS[index]
 		var shortcut := Button.new()
 		shortcut.name = "MerchantQuantity%d" % amount
 		shortcut.text = str(amount)
 		shortcut.tooltip_text = "Set quantity to %d" % amount
-		shortcut.custom_minimum_size = Vector2(36, 32)
+		shortcut.custom_minimum_size = Vector2(40, 32)
+		shortcut.clip_text = true
+		shortcut.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		shortcut.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		HUD_STYLE.button(shortcut)
-		shortcut.pressed.connect(_merchant_set_quantity.bind(amount))
+		shortcut.pressed.connect(_merchant_quantity_preset_pressed.bind(index))
+		shortcut.gui_input.connect(_merchant_preset_gui_input.bind(index))
+		_merchant_preset_buttons.append(shortcut)
 		presets.add_child(shortcut)
+	_sync_merchant_quantity_presets()
+	_merchant_preset_dialog = ConfirmationDialog.new()
+	_merchant_preset_dialog.name = "MerchantPresetEditor"
+	_merchant_preset_dialog.title = "Edit quantity preset"
+	_merchant_preset_dialog.ok_button_text = "Save"
+	_merchant_preset_dialog.dialog_hide_on_ok = false
+	add_child(_merchant_preset_dialog)
+	var edit_body := VBoxContainer.new()
+	edit_body.add_theme_constant_override("separation", 8)
+	_merchant_preset_dialog.add_child(edit_body)
+	_merchant_preset_hint = Label.new()
+	_merchant_preset_hint.custom_minimum_size.x = 300
+	_merchant_preset_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	edit_body.add_child(_merchant_preset_hint)
+	_merchant_preset_input = LineEdit.new()
+	_merchant_preset_input.name = "MerchantPresetValue"
+	_merchant_preset_input.max_length = 7
+	_merchant_preset_input.text_submitted.connect(func(_text: String) -> void: _commit_merchant_preset())
+	edit_body.add_child(_merchant_preset_input)
+	_merchant_preset_dialog.confirmed.connect(_commit_merchant_preset)
 	merchant_totals = Label.new()
 	merchant_totals.name = "MerchantTotals"
 	merchant_totals.custom_minimum_size.x = 400
