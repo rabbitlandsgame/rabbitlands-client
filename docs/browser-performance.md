@@ -65,3 +65,38 @@ animation still use the player's CPU, GPU and memory.
 
 Local build and benchmark output is not a public release. New R2 objects,
 deployment and source integration require their separate owner approvals.
+
+## Measured result
+
+Four counterbalanced Chrome processes (off/on/on/off), two per arm, used the
+same release package, warmed hash cache, Medium quality, full rendering scale,
+half map textures and a 60 FPS cap. The fixed Landfall walking/riding route
+checked server-confirmed endpoints, first/repeat mounting and dismounting.
+All four runs made zero asset requests and reused 243 verified files (1.10 GB).
+Timings came from actual engine process ticks, not page animation callbacks.
+
+| Median of each arm's per-run result | Earlier browser scheduling | Deferred preparation |
+| --- | ---: | ---: |
+| Worst arrival frame | 2,193 ms | 1,396 ms |
+| Largest actor body construction | 1,755 ms | 1,193 ms |
+| Arrival frame p95 | 22.83 ms | 28.67 ms |
+| Gameplay frame p95 | 20.35 ms | 20.56 ms |
+| Effective gameplay FPS | 59.16 | 58.98 |
+
+The largest arrival pause fell **36.4%**, and the largest body construction
+fell **32.0%**. Spreading work increased arrival p95; steady gameplay FPS did
+not improve. Arrival wall time, repeated mounting and peak memory varied, so
+these runs do not establish benefits for those measures. Long individual
+files and terrain/shader stalls remain.
+
+This measurement used a Core Ultra 9 275HX and RTX 5080 Laptop GPU with Chrome's
+ANGLE/Vulkan profile. The same cape WASM hash was used in both arms; dynamic
+cloth mode was not separately sampled. It is representative desktop-browser
+qualification rather than a hardware-independent performance guarantee.
+
+Actual browser scenery telemetry confirmed 56 offline sidecar hits on this
+route. Separate actual-pool checks retained the native generator and exact
+geometry/materials, and verified valid hits and invalid/missing fallback with
+zero warnings or errors. The local performance evidence is retained in
+`.local/browser-performance/qa/actor-ab-fixed-route/`; rejected gate/variable-route
+attempts are explicitly excluded from this comparison.
