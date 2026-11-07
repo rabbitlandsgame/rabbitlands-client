@@ -5269,8 +5269,48 @@ def _download_line(part: dict, indent: str) -> str:
     return f"{indent}DownloadPage.Add({_pascal(part['url'])}, {_pascal(part['url'].rsplit('/', 1)[1])}, {_pascal(part['sha256'])});"
 
 
+# What the uninstaller removes from {app}, by name: a player may have installed into a folder
+# that also holds their own files, so {app} itself is never removed as a tree.
+UNINSTALL_FOLDERS = ("app", "eloria-assets", ".eloria-previous", ".eloria-update-stage", ".eloria-update-backup",
+                     ".rabbitlands-bootstrap-previous", ".eloria-launcher-lock")
+
+
+def online_uninstall_code() -> str:
+    """Inno Pascal that removes UNINSTALL_FOLDERS before [UninstallDelete] runs.
+
+    Inno is not long-path aware, whatever the machine's LongPathsEnabled says, so its rows
+    stop at 260 characters. About 6,000 prepared-world paths (400 MB) are 230-236 characters
+    inside the game folder, so a folder over 22 characters leaves some, and one of 30 or more
+    (the default has 48 or more) leaves them all. DelTree reaches them through the \\\\?\\
+    form, and it stops at junctions (measured with Inno 6.7.3, the version setup_runner_tools
+    pins; test_online_installer_update_files runs it).
+    """
+    calls = "\n".join(f"    RemoveGameFolder('{name}');" for name in UNINSTALL_FOLDERS)
+    return r"""procedure RemoveGameFolder(const Name: String);
+var
+  Path: String;
+begin
+  Path := ExpandConstant('{app}\') + Name;
+  if Copy(Path, 1, 2) = '\\' then
+    Path := '\\?\UNC\' + Copy(Path, 3, Length(Path))
+  else
+    Path := '\\?\' + Path;
+  if DirExists(Path) and not DelTree(Path, True, True, True) then
+    Log('Could not remove everything in ' + Path);
+end;
+
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+  if CurUninstallStep = usUninstall then begin
+""" + calls + """
+  end;
+end;
+"""
+
+
 def online_installer_script(stage: Path, helper: Path, version: str,
                             launch_args: list[str], payload: dict, *, moves_downloads: bool = False) -> str:
+    uninstall_rows = "\n".join(f'Type: filesandordirs; Name: "{{app}}\\{name}"' for name in UNINSTALL_FOLDERS)
     root_files = "\n".join(
         f'Source: "{path}"; DestDir: "{{app}}"; Flags: ignoreversion'
         for path in sorted(stage.iterdir()) if path.is_file() and path.name != MARKER)
@@ -5326,6 +5366,11 @@ SetupIconFile={stage}\\app\\assets\\branding\\rabbitlands-icon.ico
 UninstallDisplayIcon={{app}}\\app\\RabbitLands.exe
 InfoBeforeFile={stage.parent / (stage.name + '-online-install.txt')}
 
+[Dirs]
+; The setup helper makes {{app}} before Inno copies anything, and Inno removes only folders it made.
+; This removes it too, and only when empty: a player's own files keep it.
+Name: "{{app}}"; Flags: uninsalwaysuninstall
+
 [Files]
 Source: "{helper}"; Flags: dontcopy
 {root_files}
@@ -5338,18 +5383,17 @@ Name: "{{group}}\\RabbitLands (compatibility)"; Filename: "{{app}}\\RabbitLands 
 Name: "{{group}}\\RabbitLands (safe mode)"; Filename: "{{app}}\\RabbitLands (safe mode).bat"; WorkingDir: "{{app}}\\app"; IconFilename: "{{app}}\\app\\RabbitLands.exe"
 
 [UninstallDelete]
-Type: filesandordirs; Name: "{{app}}\\app"
-Type: filesandordirs; Name: "{{app}}\\eloria-assets"
-Type: filesandordirs; Name: "{{app}}\\.eloria-previous"
-Type: filesandordirs; Name: "{{app}}\\.eloria-update-stage"
-Type: filesandordirs; Name: "{{app}}\\.eloria-update-backup"
-Type: filesandordirs; Name: "{{app}}\\.rabbitlands-bootstrap-previous"
+{uninstall_rows}
 Type: files; Name: "{{app}}\\.rabbitlands-install.json"
+Type: files; Name: "{{app}}\\.rabbitlands-install.json.tmp"
 Type: files; Name: "{{app}}\\.rabbitlands-release.json"
 Type: files; Name: "{{app}}\\.rabbitlands-release.json.tmp"
 Type: files; Name: "{{app}}\\.eloria-update-journal.json"
 Type: files; Name: "{{app}}\\.eloria-update-journal-v2.json"
 Type: files; Name: "{{app}}\\.eloria-update-journal*.tmp"
+Type: files; Name: "{{app}}\\RabbitLands-updater.exe.tmp"
+Type: files; Name: "{{app}}\\RabbitLands-uninstall.exe.tmp"
+Type: files; Name: "{{app}}\\eloria-*.log"
 
 [Run]
 Filename: "{{app}}\\RabbitLands-updater.exe"; Parameters: "{parameters}"; WorkingDir: "{{app}}\\app"; Description: "Start Rabbit Lands"; Flags: nowait postinstall skipifsilent
@@ -5363,6 +5407,7 @@ var
 
 {package_checks}
 
+{online_uninstall_code()}
 procedure InitializeWizard;
 begin
   DownloadPage := CreateDownloadPage('Downloading Rabbit Lands', 'Downloading and verifying the game files. An internet connection is required.', nil);

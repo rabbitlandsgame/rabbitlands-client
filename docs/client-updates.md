@@ -414,10 +414,16 @@ The Inno uninstaller also removes what an interrupted update can leave:
 the installed-release record `.rabbitlands-release.json` with its `.tmp`.
 Linux removes the recognized game folder directly. Player settings outside the
 installation are retained. Windows **Installed apps** can also uninstall an
-Inno installation. The Inno uninstaller leaves prepared-world files whose paths exceed
-260 characters. Measured on 2026-11-06 on a `945042f0` installation: about 6,000 files
-and 402 MB, with paths of 263-269 characters under a 33-character folder and about 285
-under the default folder.
+Inno installation.
+
+Inno cannot reach paths over 260 characters, so an uninstaller from a setup up to R1
+leaves up to about 6,000 prepared-world files (400 MB): some under a game folder over 22
+characters, and all of them from 30; the default folder has 48 or more. The setup's
+uninstall code now removes the game's folders by name through the `\\?\` form before the
+`[UninstallDelete]` rows run, then the folder itself if it is empty, so a player's own
+files in it stay. An uninstaller changes only when setup runs: an update does not replace
+it. Without an Inno uninstaller, as after a standalone updater, the hidden helper cannot
+reach those paths on a machine with `LongPathsEnabled` off.
 
 The game server names the **client Git commit packaged for that server**. This
 is independent of the server repository's own commit. Client builds contain
