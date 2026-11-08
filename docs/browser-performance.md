@@ -104,6 +104,21 @@ audio setting enabled, an unmuted browser tab and the intended system output.
 The browser uses Godot's default Sample playback; stream-processing counters
 alone do not establish whether that path is producing sound.
 
+Two cached local observations of the startup changes (`1b6bfb98`) reached Main
+in 16.13 and 16.45 seconds, compared with 24.68–29.44 seconds in three
+observations of the published `04e30628` build. All five reused saved assets
+with zero asset requests. Both cohorts used headed Chrome with its default GPU
+selection on the same machine; the earlier launcher was public and the new one
+was served on localhost. This is an observed startup comparison, not an
+identical-origin benchmark or a gameplay FPS result.
+
+Mandatory startup extraction fell from 940.6 MB in 40 archives to 400.2 MB in
+17 archives. The two new runs reused 334.6 MB of initial buffers and accepted
+17 single-use archive proofs with no duplicate Godot-side archive hashes.
+These measurements end when Main is ready, before authentication or world
+arrival. Map construction, actor preparation and arrival rendering still
+happen after login.
+
 ## Measured result
 
 Four counterbalanced Chrome processes (off/on/on/off), two per arm, used the
