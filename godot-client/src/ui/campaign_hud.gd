@@ -15,6 +15,7 @@ signal patient_heal_requested(run_id: String, actor_id: int)
 signal transcript_requested
 signal reduced_motion_changed(value: bool)
 signal replay_requested
+signal completion_dismissed
 
 var _panel: PanelContainer
 var _body_scroll: ScrollContainer
@@ -65,6 +66,7 @@ var _replay_available := false
 var _replay_retry := false
 var _column: VBoxContainer
 var _opening_actions_first := false
+var _dismissed_completion := ""
 
 func embed_instruction(label: Label) -> void:
 	if label.get_parent() != _column:
@@ -294,7 +296,7 @@ func _build() -> void:
 	_leave = Button.new()
 	_leave.text = "Return"
 	_leave.tooltip_text = "Return to the public road. Completed milestones are saved."
-	_leave.pressed.connect(func() -> void: action_requested.emit("leave"))
+	_leave.pressed.connect(_request_leave)
 	actions.add_child(_leave)
 	_reduced = CheckButton.new()
 	_reduced.text = "Reduced camera motion"
@@ -315,7 +317,8 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 	var can_own := bool(party.get("can_start_own", false)) and str(party.get("role", "")) != "owner"
 	var travel: Dictionary = snapshot.get("travel", {})
 	var travelling := not travel.is_empty()
-	_available = not blocked and (active and matches or travelling or not active and (bool(snapshot.get("available", false)) or can_join or can_own))
+	_available = not blocked and not (complete and _dismissed_completion == tracking_identity(snapshot)) \
+		and (active and matches or travelling or not active and (bool(snapshot.get("available", false)) or can_join or can_own))
 	visible = _available
 	if not _available:
 		return
@@ -398,6 +401,17 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 		button.tooltip_text = str(target.get("detail", "Use the marked place in the world."))
 		button.pressed.connect(_request_target.bind(str(target.get("id", "")), int(target.get("object_id", -1))))
 		_targets.add_child(button)
+
+func _request_leave() -> void:
+	if not _available: return
+	if str(_state.get("kind", "")) == "rescue" and bool(_state.get("completed", false)):
+		# This is a local notice, not another quest decision. Dismiss now;
+		# the ordinary leave request still returns us from the private map.
+		_dismissed_completion = tracking_identity(_state)
+		_available = false
+		hide()
+		completion_dismissed.emit()
+	action_requested.emit("leave")
 
 func _request_entry() -> void:
 	var kind := str(_state.get("kind", ""))

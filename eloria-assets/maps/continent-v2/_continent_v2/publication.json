@@ -384,7 +384,7 @@
    ],
    "rows": {
     "spawns": 78,
-    "nodes": 57,
+    "nodes": 64,
     "npcs": 0,
     "homeNpcs": 0,
     "interactives": 4,
@@ -1076,7 +1076,7 @@
    "README": "3370dec01f13023720b6294d8e9a3ae661e4fe38ea4fbb9e069c09a32da62ba2",
    "maps.txt": "9f1375323de77dfefd3fd18bafb34062ab13b2dbfce183356111a2f074540a0a",
    "spawns.txt": "d60fb9f16c1223ca848751f5648eb9845bd6cf7d6cc4f048063f6fdd90babf79",
-   "harvesting.txt": "6ab880bdd952d8d12bf2e1dffa97465304999dd6def586058f166e05e561282c",
+   "harvesting.txt": "8d43f02a5a0f3abb99df2e96506920a4a5dc2da80902a1bc97d5280b95710c4e",
    "npcs.txt": "daf92e2604bde6c98dcf541d74c0c10d76ec90b200d0830551babada98d28cf4",
    "interactives.txt": "c1e0d679ba50c52d54b0fcd1acb2e0c7dc714e1d773687570d1f8b6ecae5fb05",
    "exterior_connections.json": "805a49705bdbc26e9b8052384b23aa1689d05415a990d1c74f1496973cff334e",
@@ -1101,7 +1101,7 @@
      "home_npcs.txt",
      "special_areas.txt"
     ],
-    "manifestBlockSha256": "a81bac114c16c379a996a56b6bae79e74f6d2f7806d49c286a32255d73baaa10"
+    "manifestBlockSha256": "885bdb5964214d74011e953fc6935860156357d24476bb8c4787b3f0b2ac601e"
    },
    "m2": {
     "files": [
@@ -1118,7 +1118,7 @@
      "home_npcs.txt",
      "special_areas.txt"
     ],
-    "manifestBlockSha256": "01293a326cece1c51568563a42d7b64b8f13a38dc5a9da5760495409f6e9cd71"
+    "manifestBlockSha256": "a56a54f71fad95a04f5ae0dc65fefdce1365b8d33a785c922c1478e298199744"
    },
    "m3": {
     "files": [
@@ -1135,7 +1135,7 @@
      "home_npcs.txt",
      "special_areas.txt"
     ],
-    "manifestBlockSha256": "291b28073e9aed4e47d14cb876a8cb6a64d41e560f13c6d9fd43fed880d27b6b"
+    "manifestBlockSha256": "103df565309bbe3c0da6f14f47845a40055b5f776d002f8101f10aa43cbf562a"
    },
    "m4": {
     "files": [
@@ -1152,7 +1152,7 @@
      "home_npcs.txt",
      "special_areas.txt"
     ],
-    "manifestBlockSha256": "1c21bf15d5bcad4b8c965ac2697aa324416ad0614a38eceaac6e486fde78eb7d"
+    "manifestBlockSha256": "43154bbc6d074e23a1bc8489a11b1cbebc9f72279c4ea2097f0bc80239a0ff6a"
    }
   },
   "manifestEntriesSha256": "5f621181e12876425780046147fe72345203a2d1e825dc31bd4d377061f58244",
@@ -2403,6 +2403,71 @@
     },
     "imageRowsSha256": "2cbdd6b7a7dc83de183721daf3bb2c83273604e54613e64e7e48035c48680565",
     "contract": "exact renderer inputs/image bytes retained; only non-render manifest fields change"
+   }
+  }
+ ],
+ "shoreResourceAmendments": [
+  {
+   "plan": "eloria-assets/maps/continent-v2/_continent_v2/content/reedfall-lakehead-resources.json",
+   "planSha256": "b2b14707a76abfda9a736e0239f3cb8915e447e6af1ffc7a6533d11f07eeb4af",
+   "baseSceneSha256": "3186c3fa7c22312e672fa6355e50f8415aeeeb5ae190cddf8ec824cf65e0c50b",
+   "sourceSceneSha256": "c2f851405c022976f6022e3b257ae466e48da61431e56941b99deb157e46b017",
+   "baseSnapshotSha256": "986537a2b3a38947707b72d80b980bff1320668499efd5fe0bac197eb0aa4e62",
+   "addedNodes": [
+    [
+     2140,
+     "Kelp",
+     279,
+     182
+    ],
+    [
+     2141,
+     "Kelp",
+     280,
+     185
+    ],
+    [
+     2142,
+     "Kelp",
+     281,
+     188
+    ],
+    [
+     2143,
+     "Kelp",
+     282,
+     191
+    ],
+    [
+     2144,
+     "Watercress",
+     283,
+     194
+    ],
+    [
+     2145,
+     "Watercress",
+     281,
+     197
+    ],
+    [
+     2146,
+     "Watercress",
+     279,
+     200
+    ]
+   ],
+   "geometry": "unchanged",
+   "collision": "unchanged; nodes occupy existing closed shoreline cells",
+   "validation": {
+    "client": {
+     "servedGridSha256": "a17740ad028c6f397dce66cac3544e256b1401ae6ec48dc8d718ca603467dd20",
+     "approach": "production reach-side checks passed"
+    },
+    "server": {
+     "servedGridSha256": "efebc54ec1c68f8ee0c2a3a163840de222d2399bfe0f41c0c66e543c0d3cc362",
+     "approach": "production reach-side checks passed"
+    }
    }
   }
  ]

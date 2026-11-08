@@ -253,7 +253,7 @@ func run() -> void:
 			actor.set_spell_variant(effect_id)
 			var action := SpellPresentation.action_for_effect(effect_id)
 			actor.play_action(action, true)
-			check(str(actor.animation_player.current_animation).begins_with("spell_variants/"), "spell has a generated rig animation")
+			check(str(actor.animation_player.current_animation).begins_with("spell_variants/") or str(actor.animation_player.current_animation).begins_with("spell_poses/"), "spell has a generated rig animation")
 			actor.animation_player.advance(0.45)
 			check(actor.spell_release_origin().is_finite(), "generated spell hand pose is finite")
 		actor.set_spell_variant(3)
@@ -318,6 +318,36 @@ func run() -> void:
 		dto = ActorReducer.apply_command(dto, 46)
 		actor.apply_server_state(dto, adapter)
 		check(actor.current_action == &"attack_secondary", "next melee command alternates cut")
+		actor.play_action(&"sit")
+		actor.animation_player.advance(0.0)
+		for seated_action: StringName in [&"cast_channel_enter", &"cast_channel", &"heal", &"cast_defensive", &"cast_exit"]:
+			actor.play_action(seated_action, true)
+			var assigned := str(actor.animation_player.assigned_animation)
+			check("_seated" in assigned, "%s uses seated spell pose: %s" % [option.model, seated_action])
+			var clip := actor.animation_player.get_animation(assigned)
+			var seat := actor.animation_player.get_animation(actor.resolver.clip_for_action(&"seated_idle"))
+			for track: int in seat.get_track_count():
+				var bone := str(seat.track_get_path(track).get_concatenated_subnames())
+				if bone not in ["pelvis", "thigh_l", "thigh_r", "calf_l", "calf_r", "foot_l", "foot_r"] or seat.track_get_type(track) != Animation.TYPE_ROTATION_3D: continue
+				var support_track := clip.find_track(seat.track_get_path(track), Animation.TYPE_ROTATION_3D)
+				check(support_track >= 0, "seated cast retains support track " + bone)
+				if support_track >= 0:
+					var seat_time := 0.2 * seat.length / clip.length if clip.loop_mode != Animation.LOOP_NONE else 0.2
+					check(clip.rotation_track_interpolate(support_track, 0.2).angle_to(seat.rotation_track_interpolate(track, seat_time)) < 0.005,
+						"seated spell keeps leg/hip pose " + bone)
+			actor.animation_player.advance(clip.length + 0.05)
+			check(actor.current_action == (&"cast_channel" if seated_action in [&"cast_channel_enter", &"cast_channel"] else &"seated_idle"),
+				"seated spell finishes in channel or seated recovery")
+		actor.play_action(&"cast_aggressive", true)
+		check("_seated" not in str(actor.animation_player.assigned_animation), "aggressive cast retains standing motion")
+		actor._in_combat = true
+		actor.play_action(&"heal", true)
+		actor.animation_player.advance(2.0)
+		check(actor.current_action == &"seated_idle", "a seated non-aggressive spell also recovers seated during combat")
+		actor._in_combat = false
+		actor.play_action(&"stand")
+		actor.animation_player.advance(2.0)
+		check(actor.current_action == &"idle" and not actor._spell_seated, "standing explicitly ends seated spell mode")
 		dto = ActorReducer.apply_command(dto, 3)
 		actor.apply_server_state(dto, adapter)
 		actor.play_action(&"heal")

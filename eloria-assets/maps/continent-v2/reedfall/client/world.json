@@ -1404,6 +1404,146 @@
         1.8
       ],
       "grouping": "reedfall-watercress-bed"
+    },
+    {
+      "id": "reedfall--harvest-2140-kelp",
+      "objectId": 2140,
+      "resource": "Kelp",
+      "serverTile": [
+        279,
+        182
+      ],
+      "position": [
+        -67.5,
+        47.988,
+        84.5
+      ],
+      "variant": 0,
+      "footprint": [
+        2.4,
+        0.65
+      ],
+      "grouping": "reedfall-lakehead-kelp"
+    },
+    {
+      "id": "reedfall--harvest-2141-kelp",
+      "objectId": 2141,
+      "resource": "Kelp",
+      "serverTile": [
+        280,
+        185
+      ],
+      "position": [
+        -66.5,
+        47.59,
+        81.5
+      ],
+      "variant": 1,
+      "footprint": [
+        2.4,
+        0.65
+      ],
+      "grouping": "reedfall-lakehead-kelp"
+    },
+    {
+      "id": "reedfall--harvest-2142-kelp",
+      "objectId": 2142,
+      "resource": "Kelp",
+      "serverTile": [
+        281,
+        188
+      ],
+      "position": [
+        -65.5,
+        48.022,
+        78.5
+      ],
+      "variant": 2,
+      "footprint": [
+        2.4,
+        0.65
+      ],
+      "grouping": "reedfall-lakehead-kelp"
+    },
+    {
+      "id": "reedfall--harvest-2143-kelp",
+      "objectId": 2143,
+      "resource": "Kelp",
+      "serverTile": [
+        282,
+        191
+      ],
+      "position": [
+        -64.5,
+        47.59,
+        75.5
+      ],
+      "variant": 3,
+      "footprint": [
+        2.4,
+        0.65
+      ],
+      "grouping": "reedfall-lakehead-kelp"
+    },
+    {
+      "id": "reedfall--harvest-2144-watercress",
+      "objectId": 2144,
+      "resource": "Watercress",
+      "serverTile": [
+        283,
+        194
+      ],
+      "position": [
+        -63.5,
+        48.077,
+        72.5
+      ],
+      "variant": 0,
+      "footprint": [
+        1.8,
+        1.8
+      ],
+      "grouping": "reedfall-lakehead-watercress"
+    },
+    {
+      "id": "reedfall--harvest-2145-watercress",
+      "objectId": 2145,
+      "resource": "Watercress",
+      "serverTile": [
+        281,
+        197
+      ],
+      "position": [
+        -65.5,
+        48.054,
+        69.5
+      ],
+      "variant": 1,
+      "footprint": [
+        1.8,
+        1.8
+      ],
+      "grouping": "reedfall-lakehead-watercress"
+    },
+    {
+      "id": "reedfall--harvest-2146-watercress",
+      "objectId": 2146,
+      "resource": "Watercress",
+      "serverTile": [
+        279,
+        200
+      ],
+      "position": [
+        -67.5,
+        48.247,
+        66.5
+      ],
+      "variant": 2,
+      "footprint": [
+        1.8,
+        1.8
+      ],
+      "grouping": "reedfall-lakehead-watercress"
     }
   ],
   "harvestGroupings": [
@@ -1453,6 +1593,49 @@
         2129,
         2130,
         2131
+      ]
+    },
+    {
+      "id": "reedfall-lakehead-kelp",
+      "name": "Lakehead Kelp",
+      "resources": [
+        "Kelp"
+      ],
+      "centre": [
+        -66.0,
+        80.0
+      ],
+      "centreTile": [
+        281,
+        187
+      ],
+      "nodeCount": 4,
+      "objectIds": [
+        2140,
+        2141,
+        2142,
+        2143
+      ]
+    },
+    {
+      "id": "reedfall-lakehead-watercress",
+      "name": "Lakehead Watercress",
+      "resources": [
+        "Watercress"
+      ],
+      "centre": [
+        -65.5,
+        69.5
+      ],
+      "centreTile": [
+        281,
+        197
+      ],
+      "nodeCount": 3,
+      "objectIds": [
+        2144,
+        2145,
+        2146
       ]
     },
     {
@@ -1890,7 +2073,72 @@
   "provenance": {
     "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
     "snapshotSha256": "986537a2b3a38947707b72d80b980bff1320668499efd5fe0bac197eb0aa4e62",
-    "sceneSha256": "3186c3fa7c22312e672fa6355e50f8415aeeeb5ae190cddf8ec824cf65e0c50b"
+    "sceneSha256": "3186c3fa7c22312e672fa6355e50f8415aeeeb5ae190cddf8ec824cf65e0c50b",
+    "shoreResourceAmendments": [
+      {
+        "plan": "eloria-assets/maps/continent-v2/_continent_v2/content/reedfall-lakehead-resources.json",
+        "planSha256": "b2b14707a76abfda9a736e0239f3cb8915e447e6af1ffc7a6533d11f07eeb4af",
+        "baseSceneSha256": "3186c3fa7c22312e672fa6355e50f8415aeeeb5ae190cddf8ec824cf65e0c50b",
+        "sourceSceneSha256": "c2f851405c022976f6022e3b257ae466e48da61431e56941b99deb157e46b017",
+        "baseSnapshotSha256": "986537a2b3a38947707b72d80b980bff1320668499efd5fe0bac197eb0aa4e62",
+        "addedNodes": [
+          [
+            2140,
+            "Kelp",
+            279,
+            182
+          ],
+          [
+            2141,
+            "Kelp",
+            280,
+            185
+          ],
+          [
+            2142,
+            "Kelp",
+            281,
+            188
+          ],
+          [
+            2143,
+            "Kelp",
+            282,
+            191
+          ],
+          [
+            2144,
+            "Watercress",
+            283,
+            194
+          ],
+          [
+            2145,
+            "Watercress",
+            281,
+            197
+          ],
+          [
+            2146,
+            "Watercress",
+            279,
+            200
+          ]
+        ],
+        "geometry": "unchanged",
+        "collision": "unchanged; nodes occupy existing closed shoreline cells",
+        "validation": {
+          "client": {
+            "servedGridSha256": "a17740ad028c6f397dce66cac3544e256b1401ae6ec48dc8d718ca603467dd20",
+            "approach": "production reach-side checks passed"
+          },
+          "server": {
+            "servedGridSha256": "efebc54ec1c68f8ee0c2a3a163840de222d2399bfe0f41c0c66e543c0d3cc362",
+            "approach": "production reach-side checks passed"
+          }
+        }
+      }
+    ]
   },
   "externalResources": {
     "../../../nymara-regions/_continent/shared-assets/0124bfa5b5c25908af99e832239ad2804211846a585b225946ec0cd2331d6630.png": "0124bfa5b5c25908af99e832239ad2804211846a585b225946ec0cd2331d6630",

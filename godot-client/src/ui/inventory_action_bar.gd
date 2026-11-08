@@ -76,7 +76,7 @@ func refresh_enabled() -> void:
 	for action: String in buttons:
 		buttons[action].disabled = not available(action)
 		buttons[action].tooltip_text = (sources[action] as Button).tooltip_text
-	buttons.store.tooltip_text = "Store all unprotected stacks. Middle-click: protection options. Open storage first."
+	buttons.store.tooltip_text = "Store all unprotected stacks, keeping Gold Coins. Middle-click: protection options. Open storage first."
 	buttons.get.tooltip_text = "Take items from the ground bag below you."
 	buttons.drop.tooltip_text = "Drop all unprotected stacks. Middle-click: protection options."
 	buttons.mix.tooltip_text = "Mix all available ingredients for the selected recipe. Middle-click: mixing options."

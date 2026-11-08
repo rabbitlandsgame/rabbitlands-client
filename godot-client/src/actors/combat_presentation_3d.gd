@@ -215,11 +215,23 @@ func update_pose() -> void:
 	if casting:
 		var size := SpellPresentation.power_scale(spell_power)
 		var radius := SpellPresentation.power_radius(spell_power)
+		var high := actor.render_quality() == ACTOR_RENDER_QUALITY.Quality.HIGH
+		if high:
+			size *= 1.25
+			radius *= 1.15
 		for hand: Vector3 in [l, r]:
 			CombatEffectMesh.arc(_mesh, hand, (0.105 + sin(time*7.0)*0.012) * radius, 0.012 * size, color,
 				time*2.0, TAU*0.8)
 			CombatEffectMesh.spark(_mesh, hand, 0.07 * size, Color(0.86, 0.95, 1.0, fade*0.8))
 			var count := SpellPresentation.power_count(6, spell_power)
+			if high:
+				count = ceili(count * 1.5)
+				# Counter-rotating tilted rings make gathering energy readable
+				# at the gameplay camera, even over pale terrain.
+				CombatEffectMesh.arc(_mesh, hand, 0.15 * radius, 0.009 * size, color,
+					-time * 3.5, TAU * 0.72, Basis(Vector3.RIGHT, PI * 0.4))
+				CombatEffectMesh.arc(_mesh, hand, 0.19 * radius, 0.007 * size, color,
+					time * 2.7, TAU * 0.6, Basis(Vector3.FORWARD, PI * 0.35))
 			for i: int in count:
 				var angle := float(i)*TAU/count + time*3.0
 				var point := hand + Vector3(cos(angle), sin(angle*1.5)*0.65, sin(angle))*0.19*radius
