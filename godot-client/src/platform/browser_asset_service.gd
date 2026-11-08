@@ -5,6 +5,7 @@ signal archive_ready(ok: bool, message: String)
 signal files_evicted(paths: PackedStringArray)
 const ARCHIVE := "/tmp/rabbitlands-prototype-assets.zip"
 const UNPACK_SLICE_USEC := 2000
+const STARTUP_UNPACK_SLICE_USEC := 12000
 const READY_GRACE_MSEC := 1500
 var bridge: JavaScriptObject
 var callback: JavaScriptObject
@@ -29,6 +30,12 @@ var budget_bytes := 768 * 1024 * 1024
 var _evictions := 0
 var archive_path := ARCHIVE
 var _archive_response: Array = []
+var _archive_proof_consumer: Callable
+var _archive_proof_hits := 0
+var _archive_proof_bytes := 0
+var _archive_sha_checks := 0
+var _archive_sha_usec := 0
+var _unpack_yields := 0
 
 func configure(configuration: Dictionary, manifest: Dictionary) -> bool:
 	groups = configuration.get("groups", {})
@@ -43,8 +50,34 @@ func configure(configuration: Dictionary, manifest: Dictionary) -> bool:
 	budget_bytes = maxi(1, int(configuration.get("live_asset_budget_bytes", budget_bytes)))
 	bridge = JavaScriptBridge.get_interface("RabbitLandsBrowser")
 	callback = JavaScriptBridge.create_callback(_archive_ready)
+	_archive_proof_consumer = Callable()
+	if OS.has_feature("web") and bridge != null:
+		_configure_archive_proof(bridge.archive_proof_version, _consume_bridge_archive_proof)
 	pin_groups("startup", ["startup"])
 	return true
+
+func _configure_archive_proof(version: Variant, consumer: Callable) -> void:
+	_archive_proof_consumer = Callable()
+	# Older launchers have no property; strings and booleans are not a version.
+	if typeof(version) in [TYPE_INT, TYPE_FLOAT] and version == 1 and consumer.is_valid():
+		_archive_proof_consumer = consumer
+
+func _consume_bridge_archive_proof(expected: String, expected_bytes: int) -> bool:
+	var result: Variant = bridge.consume_archive_proof(expected, expected_bytes)
+	return typeof(result) == TYPE_BOOL and result
+
+func _take_archive_proof(expected: String, expected_bytes: int) -> bool:
+	# Only the loader's one owned handoff file can use its page-local proof.
+	# A different path, older launcher or a consumed/mismatched proof still hashes.
+	if archive_path != ARCHIVE or expected_bytes <= 0 or not _archive_proof_consumer.is_valid():
+		return false
+	var result: Variant = _archive_proof_consumer.call(expected, expected_bytes)
+	return typeof(result) == TYPE_BOOL and result
+
+func _unpack_slice_usec() -> int:
+	# Startup blocks Main/login; spend more of its frames preparing local files.
+	# All interactive map/actor work retains the short slice.
+	return STARTUP_UNPACK_SLICE_USEC if current == "startup" else UNPACK_SLICE_USEC
 
 func _closure(ids: Array, result: Dictionary) -> bool:
 	for value: Variant in ids:
@@ -143,7 +176,7 @@ func _load_next() -> void:
 		if not bool(response[0]):
 			_fail(str(response[1]))
 			return
-		var unpacked := await _unpack(str(archives[index].sha256))
+		var unpacked := await _unpack(str(archives[index].sha256), int(archives[index].get("bytes", -1)))
 		if unpacked < 0:
 			_fail(error)
 			return
@@ -184,17 +217,32 @@ func _destination(entry: String) -> String:
 	if not path.is_absolute_path(): path = "/".path_join(path)
 	return path.simplify_path()
 
-func _unpack(expected: String) -> int:
+func _unpack(expected: String, expected_bytes := -1) -> int:
 	await get_tree().process_frame
-	if FileAccess.get_sha256(archive_path) != expected:
+	var input := FileAccess.open(archive_path, FileAccess.READ)
+	if input == null or (expected_bytes >= 0 and input.get_length() != expected_bytes):
+		if input != null: input.close()
 		error = "Game download is incomplete or outdated."
 		return -1
+	input.close()
+	if _take_archive_proof(expected, expected_bytes):
+		_archive_proof_hits += 1
+		_archive_proof_bytes += expected_bytes
+	else:
+		var hash_began := Time.get_ticks_usec()
+		var actual := FileAccess.get_sha256(archive_path)
+		_archive_sha_usec += Time.get_ticks_usec() - hash_began
+		_archive_sha_checks += 1
+		if actual != expected:
+			error = "Game download is incomplete or outdated."
+			return -1
 	var zip := ZIPReader.new()
 	if zip.open(archive_path) != OK:
 		error = "Cannot open downloaded game files."
 		return -1
 	var bytes := 0
 	var slice := Time.get_ticks_usec()
+	var slice_usec := _unpack_slice_usec()
 	for entry: String in zip.get_files():
 		if entry.ends_with("/"): continue
 		var offset := -1
@@ -236,7 +284,8 @@ func _unpack(expected: String) -> int:
 		if offset <= 0:
 			(files[current] as Array).append(destination)
 			_source_paths[destination] = "res://" + logical.trim_prefix("godot-client/") if logical.begins_with("godot-client/") else "res://../" + logical
-		if Time.get_ticks_usec() - slice >= UNPACK_SLICE_USEC:
+		if Time.get_ticks_usec() - slice >= slice_usec:
+			_unpack_yields += 1
 			await get_tree().process_frame
 			slice = Time.get_ticks_usec()
 	zip.close()
@@ -278,4 +327,8 @@ func snapshot() -> Dictionary:
 	return {"busy":busy, "current":current, "queued":queue.size(), "error":error,
 		"failed_groups":errors.keys(),
 		"live_bytes":live_bytes, "budget_bytes":budget_bytes, "over_budget":live_bytes > budget_bytes,
-		"evictions":_evictions, "completed_archives":completed_archives}
+		"evictions":_evictions, "completed_archives":completed_archives,
+		"archive_proof_hits":_archive_proof_hits, "archive_sha_checks":_archive_sha_checks,
+		"archive_proof_bytes":_archive_proof_bytes,
+		"archive_sha_usec":_archive_sha_usec, "unpack_yields":_unpack_yields,
+		"unpack_slice_usec":_unpack_slice_usec()}

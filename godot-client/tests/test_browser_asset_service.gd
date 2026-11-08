@@ -2,12 +2,65 @@ extends SceneTree
 const Service := preload("res://src/platform/browser_asset_service.gd")
 var service: Node
 
+class ArchiveProof:
+	extends RefCounted
+	var sha256 := ""
+	var bytes := 0
+	var attempts := 0
+	func consume(expected: String, expected_bytes: int) -> bool:
+		attempts += 1
+		var matches := sha256 == expected and bytes == expected_bytes
+		sha256 = ""
+		bytes = 0
+		return matches
+
 func _initialize() -> void: _run.call_deferred()
+
+func _test_archive_proof() -> void:
+	var proof := ArchiveProof.new()
+	var consumer := Callable(proof, "consume")
+	var expected := "a".repeat(64)
+	service.archive_path = Service.ARCHIVE
+	for version: Variant in [null, "1", true, 2, 1.1]:
+		service._configure_archive_proof(version, consumer)
+		assert(not service._take_archive_proof(expected, 123))
+	assert(proof.attempts == 0)
+	for version: Variant in [1, 1.0]:
+		service._configure_archive_proof(version, consumer)
+		proof.sha256 = expected
+		proof.bytes = 123
+		assert(service._take_archive_proof(expected, 123))
+		assert(not service._take_archive_proof(expected, 123)) # Consumed once.
+	proof.sha256 = expected
+	proof.bytes = 123
+	assert(not service._take_archive_proof("b".repeat(64), 123))
+	assert(not service._take_archive_proof(expected, 123)) # Mismatch consumed too.
+	proof.sha256 = expected
+	proof.bytes = 123
+	assert(not service._take_archive_proof(expected, 124))
+	assert(not service._take_archive_proof(expected, 123))
+	proof.sha256 = expected
+	proof.bytes = 123
+	var attempts := proof.attempts
+	service.archive_path = "res://fixture.zip"
+	assert(not service._take_archive_proof(expected, 123))
+	service.archive_path = Service.ARCHIVE
+	assert(not service._take_archive_proof(expected, -1))
+	assert(proof.attempts == attempts) # A custom/native path never calls JS.
+	service._configure_archive_proof(1, Callable())
+	assert(not service._take_archive_proof(expected, 123))
+	service.current = "startup"
+	assert(service._unpack_slice_usec() == 12000)
+	service.current = "map:a"
+	assert(service._unpack_slice_usec() == 2000)
+	service.current = "model:actor"
+	assert(service._unpack_slice_usec() == 2000)
 
 func _run() -> void:
 	service = Service.new()
 	root.add_child(service)
 	service.set_process(false)
+	_test_archive_proof()
 	service.groups = {
 		"startup":{"archives":[], "dependencies":[]},
 		"shared":{"archives":[], "dependencies":[]},
@@ -61,8 +114,19 @@ func _run() -> void:
 		zip.write_file(("abc" if offset == 0 else "def").to_utf8_buffer())
 		zip.close_file()
 	zip.close()
-	var bytes: int = await service._unpack(FileAccess.get_sha256(service.archive_path))
+	var archive := FileAccess.open(service.archive_path, FileAccess.READ)
+	var archive_bytes := archive.get_length()
+	archive.close()
+	var archive_sha := FileAccess.get_sha256(service.archive_path)
+	assert(await service._unpack(archive_sha, archive_bytes + 1) == -1)
+	assert(service.snapshot().archive_sha_checks == 0) # Length rejected first.
+	assert(not FileAccess.file_exists("res://assets/test_group.bin"))
+	assert(await service._unpack("0".repeat(64), archive_bytes) == -1)
+	assert(service.snapshot().archive_sha_checks == 1)
+	assert(not FileAccess.file_exists("res://assets/test_group.bin"))
+	var bytes: int = await service._unpack(archive_sha, archive_bytes)
 	assert(bytes == 6 and FileAccess.get_file_as_bytes("res://assets/test_group.bin").get_string_from_utf8() == "abcdef")
+	assert(service.snapshot().archive_proof_hits == 0 and service.snapshot().archive_sha_checks == 2)
 	var evicted: Array = []
 	service.files_evicted.connect(func(paths: PackedStringArray) -> void: evicted.append(paths))
 	service._remove_files("fixture")
@@ -71,5 +135,5 @@ func _run() -> void:
 	assert(service._destination("eloria-assets/../private.txt").is_empty())
 	assert(service._destination("godot-client/assets/C:/private.txt").is_empty())
 	service.free()
-	print("browser asset service: dependency pins, eviction, multipart extraction PASS")
+	print("browser asset service: pins, eviction, archive proof/fallback, phase budgets, multipart extraction PASS")
 	quit()
