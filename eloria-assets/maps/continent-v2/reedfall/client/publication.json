@@ -134,5 +134,70 @@
   "placementLimit": 240,
   "triangleLimit": 450000,
   "cellMetres": 96
- }
+ },
+ "shoreResourceAmendments": [
+  {
+   "plan": "eloria-assets/maps/continent-v2/_continent_v2/content/reedfall-lakehead-resources.json",
+   "planSha256": "b2b14707a76abfda9a736e0239f3cb8915e447e6af1ffc7a6533d11f07eeb4af",
+   "baseSceneSha256": "3186c3fa7c22312e672fa6355e50f8415aeeeb5ae190cddf8ec824cf65e0c50b",
+   "sourceSceneSha256": "c2f851405c022976f6022e3b257ae466e48da61431e56941b99deb157e46b017",
+   "baseSnapshotSha256": "986537a2b3a38947707b72d80b980bff1320668499efd5fe0bac197eb0aa4e62",
+   "addedNodes": [
+    [
+     2140,
+     "Kelp",
+     279,
+     182
+    ],
+    [
+     2141,
+     "Kelp",
+     280,
+     185
+    ],
+    [
+     2142,
+     "Kelp",
+     281,
+     188
+    ],
+    [
+     2143,
+     "Kelp",
+     282,
+     191
+    ],
+    [
+     2144,
+     "Watercress",
+     283,
+     194
+    ],
+    [
+     2145,
+     "Watercress",
+     281,
+     197
+    ],
+    [
+     2146,
+     "Watercress",
+     279,
+     200
+    ]
+   ],
+   "geometry": "unchanged",
+   "collision": "unchanged; nodes occupy existing closed shoreline cells",
+   "validation": {
+    "client": {
+     "servedGridSha256": "a17740ad028c6f397dce66cac3544e256b1401ae6ec48dc8d718ca603467dd20",
+     "approach": "production reach-side checks passed"
+    },
+    "server": {
+     "servedGridSha256": "efebc54ec1c68f8ee0c2a3a163840de222d2399bfe0f41c0c66e543c0d3cc362",
+     "approach": "production reach-side checks passed"
+    }
+   }
+  }
+ ]
 }
