@@ -2984,8 +2984,9 @@ static func uses_portrait_customization_for(model_config: Dictionary) -> bool:
 ## it draws the game hairstyle or the RL head (whose files RLHeadLibrary
 ## already parses on its worker, _rl_head_files_ready). Static for the actor
 ## asset closure, which asks RLHeadLibrary for them before a body is built.
+## `available_only=false` discovers the same selection before browser extraction.
 static func rl_hair_only_files_for(model_config: Dictionary, appearance: Dictionary,
-		quality: int) -> PackedStringArray:
+		quality: int, available_only: bool = true) -> PackedStringArray:
 	if not uses_portrait_customization_for(model_config) or rl_heads_classic() or appearance.has("rl_head"):
 		return PackedStringArray()
 	if ActorRenderQuality.normalized_quality(quality) == ActorRenderQuality.Quality.HIGH \
@@ -2994,7 +2995,7 @@ static func rl_hair_only_files_for(model_config: Dictionary, appearance: Diction
 	var face := RLHeadPortraitMap.face(appearance, str(model_config.get("gender", "female")), true)
 	if face == null or face.hair == RLHeadAppearance.NONE or face.hair.begins_with(RLHeadLibrary.LEGACY_PREFIX):
 		return PackedStringArray()
-	return RLHeadLibrary.face_paths(face, true)
+	return RLHeadLibrary.face_paths(face, true, available_only)
 
 ## The RL files of the RL head `_apply_rl_head_and_hair` draws for a body built
 ## from `model_config` wearing `appearance` at `quality`: a portrait Human at
@@ -3004,13 +3005,15 @@ static func rl_hair_only_files_for(model_config: Dictionary, appearance: Diction
 ## Static for the actor asset closure of the player's own body (AW-04d), which
 ## draws its RL head at once (`_rl_head_files_ready`) and so has them parsed on
 ## RLHeadLibrary's worker behind the arrival curtain before it is built.
+## `available_only=false` discovers the same selection before browser extraction.
 static func rl_head_files_for(model_config: Dictionary, appearance: Dictionary,
-		quality: int) -> PackedStringArray:
+		quality: int, available_only: bool = true) -> PackedStringArray:
 	if not uses_portrait_customization_for(model_config) or rl_heads_classic() or appearance.has("rl_head") \
 			or ActorRenderQuality.normalized_quality(quality) != ActorRenderQuality.Quality.HIGH \
 			or not rl_heads_renderer_supported():
 		return PackedStringArray()
-	return RLHeadLibrary.face_paths(RLHeadPortraitMap.face(appearance, str(model_config.get("gender", "female"))))
+	return RLHeadLibrary.face_paths(RLHeadPortraitMap.face(appearance,
+		str(model_config.get("gender", "female"))), false, available_only)
 
 func _apply_character_proportions() -> void:
 	var next := CHARACTER_PROPORTIONS.visual_scale(_appearance) if _uses_portrait_customization() else Vector3.ONE

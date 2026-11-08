@@ -440,9 +440,11 @@ static func warm_paths() -> PackedStringArray:
 	return paths
 
 
-## The RL GLBs `face` draws, those on disk: its head module (not for
-## `hair_only`), its hairstyle module and its beard (stubble is painted).
-static func face_paths(face: RLHeadAppearance, hair_only: bool = false) -> PackedStringArray:
+## The RL GLBs `face` draws: its head module (not for `hair_only`), hairstyle
+## and beard (stubble is painted). Admission can request potential paths before
+## browser archives are extracted; rendering retains the on-disk default.
+static func face_paths(face: RLHeadAppearance, hair_only: bool = false,
+		available_only: bool = true) -> PackedStringArray:
 	var paths := PackedStringArray()
 	if face == null:
 		return paths
@@ -454,7 +456,7 @@ static func face_paths(face: RLHeadAppearance, hair_only: bool = false) -> Packe
 		paths.append(beard_path(face.beard))
 	var found := PackedStringArray()
 	for path: String in paths:
-		if not path.is_empty() and glb_exists(path):
+		if not path.is_empty() and (not available_only or glb_exists(path)):
 			found.append(path)
 	return found
 
@@ -977,8 +979,8 @@ static func beard_path(style: String) -> String:
 	return BEARD_DIR + style + ".glb"
 
 
-## The hairstyles on disk, by file name without extension. With `sex`, omit
-## registered fits this body cannot wear; omitted sex lists every loose file.
+## Known hairstyles, by file name without extension. With `sex`, omit fits
+## this body cannot wear. Browser metadata includes files awaiting extraction.
 static func hair_styles(sex: String = "") -> PackedStringArray:
 	var names := _glb_names(HAIR_DIR)
 	if sex.is_empty():
@@ -990,7 +992,7 @@ static func hair_styles(sex: String = "") -> PackedStringArray:
 	return eligible
 
 
-## The beards on disk, plus `stubble`, which the skin shader paints.
+## Known beards, plus `stubble`, which the skin shader paints.
 static func beard_styles() -> PackedStringArray:
 	var names := _glb_names(BEARD_DIR)
 	if not names.has(RLHeadAppearance.STUBBLE):
@@ -998,17 +1000,31 @@ static func beard_styles() -> PackedStringArray:
 	return names
 
 
-## The GLBs in a loose folder. The folder is listed on disk at its globalized
-## path, beside the executable in an export: res:// lists only the PCK there,
-## which holds none of them.
+## Native loose folders are listed at their globalized path beside the export.
+## Browser selectors also retain names of catalogued but unextracted files.
 static func _glb_names(folder: String) -> PackedStringArray:
 	var names := PackedStringArray()
 	var on_disk := ProjectSettings.globalize_path(folder)
-	if not DirAccess.dir_exists_absolute(on_disk):
-		return names
-	for file: String in DirAccess.get_files_at(on_disk):
-		if file.get_extension().to_lower() == "glb":
-			names.append(file.get_basename())
+	if DirAccess.dir_exists_absolute(on_disk):
+		for file: String in DirAccess.get_files_at(on_disk):
+			if file.get_extension().to_lower() == "glb":
+				names.append(file.get_basename())
+	if OS.has_feature("web"):
+		for name: String in _glb_names_from_sources(folder, WebPrototype.source_paths(folder)):
+			if not names.has(name): names.append(name)
+	names.sort()
+	return names
+
+## Metadata enumerates choices without opening or parsing any GLB. Only direct
+## children belong to this folder's selector; nested paths are different groups.
+static func _glb_names_from_sources(folder: String, sources: PackedStringArray) -> PackedStringArray:
+	var names := PackedStringArray()
+	for source: String in sources:
+		if not source.begins_with(folder): continue
+		var file := source.trim_prefix(folder)
+		if file.contains("/") or file.get_extension().to_lower() != "glb": continue
+		var name := file.get_basename()
+		if not names.has(name): names.append(name)
 	names.sort()
 	return names
 
