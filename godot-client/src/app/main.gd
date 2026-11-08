@@ -4276,7 +4276,7 @@ func _on_inventory_inspect_pressed() -> void:
 
 func _configure_inventory_menus() -> void:
 	inventory_store_all.text = "Store All"
-	inventory_store_all.tooltip_text = "Store all backpack stacks. Protect equipment or supplies using the Protection button."
+	inventory_store_all.tooltip_text = "Store all backpack and pouch supplies, keeping Gold Coins. Protect equipment or supplies using the Protection button."
 	var protection := Button.new()
 	protection.name = "StorageProtection"
 	protection.text = "Protection…"
@@ -4339,6 +4339,9 @@ func _on_inventory_store_all_pressed() -> void:
 	slots.sort()
 	for raw_slot: Variant in slots:
 		var slot: int = int(raw_slot)
+		# Reference 127 is the dedicated gold balance; Store All keeps it on hand.
+		if slot == 127:
+			continue
 		if slot < 0 or (slot >= 24 and slot < 127) or _inventory_slot_is_protected(slot, "store"):
 			continue
 		var item: Dictionary = AppState.inventory.get(slot, {}) as Dictionary
