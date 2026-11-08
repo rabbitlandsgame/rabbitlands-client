@@ -12,6 +12,7 @@ var _pending: Dictionary = {}
 var _active := false
 var _busy := false
 var _generation := 0
+var _asset_job := 0
 var _registry: Dictionary = {}
 var _equipment: Dictionary = {}
 var _viewport: SubViewport
@@ -128,19 +129,25 @@ func _create_stage() -> void:
 	_stage.add_child(_camera)
 
 func _render(look: Dictionary, generation: int) -> Texture2D:
-	var owner := "leaderboard_portrait:%d" % get_instance_id()
+	_asset_job += 1
+	var owner := "leaderboard_portrait:%d:%d" % [get_instance_id(), _asset_job]
 	if OS.has_feature("web"):
 		var model_id := str((_registry.get("actorTypes", {}) as Dictionary).get(str(int(look.get("actor_type", -1))), ""))
 		var groups := WebPrototype.model_groups(model_id).duplicate()
 		groups.append_array(WebPrototype.equipment_groups(look.get("equipment_visuals", {})))
+		groups.append_array(WebPrototype.appearance_groups((_registry.get("models", {}) as Dictionary).get(model_id, {}),
+			look.get("appearance", {}), 2))
 		while generation == _generation and _active:
 			if WebPrototype.ensure_groups(groups, owner, 1): break
+			if not WebPrototype.group_failure(groups).is_empty():
+				WebPrototype.retire_groups(owner)
+				return null
 			await get_tree().create_timer(0.1).timeout
 		if generation != _generation or not _active:
-			WebPrototype.release_groups(owner)
+			WebPrototype.retire_groups(owner)
 			return null
 	var texture := await _render_ready(look, generation)
-	if OS.has_feature("web"): WebPrototype.release_groups(owner)
+	if OS.has_feature("web"): WebPrototype.retire_groups(owner)
 	return texture
 
 func _render_ready(look: Dictionary, generation: int) -> Texture2D:

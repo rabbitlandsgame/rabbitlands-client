@@ -47,6 +47,9 @@ func configure(configuration: Dictionary, manifest: Dictionary) -> bool:
 	if configuration.get("archives", []) != manifest.get("archives", []):
 		error = "Game download catalog does not match this build."
 		return false
+	if configuration.get("source_groups", {}) != manifest.get("source_groups", {}):
+		error = "Game appearance catalog does not match this build."
+		return false
 	budget_bytes = maxi(1, int(configuration.get("live_asset_budget_bytes", budget_bytes)))
 	bridge = JavaScriptBridge.get_interface("RabbitLandsBrowser")
 	callback = JavaScriptBridge.create_callback(_archive_ready)

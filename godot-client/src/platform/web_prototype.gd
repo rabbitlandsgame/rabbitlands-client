@@ -7,6 +7,7 @@ static var _loaded := false
 static var _mount_group_cache: Dictionary = {}
 static var _model_sources: Dictionary = {}
 static var _model_sources_loaded := false
+static var _source_path_lists: Dictionary = {}
 
 static func configuration() -> Dictionary:
 	if _loaded: return _configuration
@@ -56,6 +57,47 @@ static func _service() -> Node:
 static func model_groups(model_id: String) -> Array:
 	return configuration().get("model_groups", {}).get(model_id, [])
 
+static func source_paths(prefix: String) -> PackedStringArray:
+	if not _source_path_lists.has(prefix):
+		var paths := PackedStringArray()
+		for source: String in configuration().get("source_groups", {}):
+			if source.begins_with(prefix): paths.append(source)
+		paths.sort()
+		_source_path_lists[prefix] = paths
+	return (_source_path_lists[prefix] as PackedStringArray).duplicate()
+
+static func file_groups(paths: PackedStringArray) -> Array:
+	var groups: Array = []
+	var catalog: Dictionary = configuration().get("source_groups", {})
+	for source: String in paths:
+		for group: String in catalog.get(source, []):
+			if not groups.has(group): groups.append(group)
+	return groups
+
+static func appearance_groups(model_config: Dictionary, appearance: Dictionary, quality: int) -> Array:
+	# Potential paths come from the same selection policy as the body, before
+	# the lazy source files exist. Older catalogs keep these files in startup.
+	var paths := ReplicatedActor3D.rl_hair_only_files_for(model_config, appearance, quality, false)
+	paths.append_array(ReplicatedActor3D.rl_head_files_for(model_config, appearance, quality, false))
+	return file_groups(paths)
+
+static func group_failure(ids: Array, state: Dictionary = {}) -> String:
+	if state.is_empty(): state = asset_snapshot()
+	var failed: Array = state.get("failed_groups", [])
+	if failed.is_empty(): return ""
+	var queue := ids.duplicate()
+	var seen := {}
+	var groups: Dictionary = configuration().get("groups", {})
+	while not queue.is_empty():
+		var id := str(queue.pop_back())
+		if seen.has(id): continue
+		seen[id] = true
+		if failed.has(id):
+			var message := str(state.get("error", ""))
+			return message if not message.is_empty() else "Game files could not be prepared."
+		queue.append_array((groups.get(id, {}) as Dictionary).get("dependencies", []))
+	return ""
+
 static func _load_model_sources() -> void:
 	if _model_sources_loaded: return
 	_model_sources_loaded = true
@@ -101,6 +143,15 @@ static func pin_groups(owner: String, ids: Array) -> void:
 static func release_groups(owner: String) -> void:
 	var service := _service() if OS.has_feature("web") else null
 	if service != null: service.call("release_groups", owner)
+
+static func retire_groups(owner: String) -> void:
+	# A portrait node can retire before the head library finishes reading files.
+	# The static coroutine survives that node and owns only its unique pin name.
+	if not OS.has_feature("web"): return
+	var tree := Engine.get_main_loop() as SceneTree
+	while tree != null and RLHeadLibrary.warming():
+		await tree.create_timer(0.1).timeout
+	release_groups(owner)
 
 static func map_groups(map_id: String) -> Array:
 	var maps: Variant = configuration().get("maps", {})

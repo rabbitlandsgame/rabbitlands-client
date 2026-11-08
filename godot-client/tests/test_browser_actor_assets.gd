@@ -39,12 +39,32 @@ func _run() -> void:
 	gate._next_poll = 0
 	assert(gate.poll() == [1])
 	assert(files.pins["actor_active:1"] == ["model:human", "equipment:2:200"])
+	assert(not gate.admit(3, "human", {}, "", true, ["appearance:a"], [{"hair":1}, 2]))
+	assert(files.pins["actor_pending:3"] == ["model:human", "appearance:a"])
+	files.ready["appearance:a"] = true
+	gate._next_poll = 0
+	assert(gate.poll() == [3])
+	queries = files.queries
+	assert(gate.admit(3, "human", {}, "", true, ["appearance:a"], [{"hair":1}, 2]))
+	assert(files.queries == queries, "unchanged appearance does not repeat admission")
+	assert(not gate.admit(3, "human", {}, "", true, ["appearance:b"], [{"hair":2}, 2]))
+	assert(files.pins["actor_active:3"].has("appearance:a"), "displayed head remains pinned")
+	assert(not files.pins["actor_pending:3"].has("appearance:a"), "only selected replacement requested")
+	files.ready["appearance:b"] = true
+	gate._next_poll = 0
+	assert(gate.poll() == [3])
+	queries = files.queries
+	assert(gate.admit(3, "human", {}, "", true, ["appearance:b"], [{"hair":2}, 1]))
+	assert(files.queries == queries + 1, "quality changes recheck admission even with shared files")
 	gate.prune({}, [1])
 	assert(files.pins.has("actor_active:1"), "parked actors retain source groups")
 	gate.prune({})
+	assert(not files.pins.is_empty(), "retired head reads retain their pins until drained")
+	gate.release_retired()
 	assert(files.pins.is_empty())
 	assert(gate.admit(2, "", {}))
 	gate.clear()
+	gate.release_retired()
 	assert(files.pins.is_empty())
 	print("browser actor asset admission: PASS")
 	quit()

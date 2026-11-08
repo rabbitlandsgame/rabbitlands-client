@@ -37,6 +37,11 @@ var quality_level := -1
 var _browser_asset_pending := false
 var _browser_asset_poll := 0
 var _preview_equipment: Dictionary = {}
+var _browser_selection: Array = []
+var _browser_owner := ""
+var _browser_active_owner := ""
+var _browser_owner_serial := 0
+var _browser_retry: Button
 
 func _asset_owner() -> String:
 	return "appearance_preview:%d" % get_instance_id()
@@ -46,6 +51,9 @@ func set_preview_quality(level: int) -> void:
 	refresh_render_quality()
 
 func refresh_render_quality() -> void:
+	if OS.has_feature("web"):
+		_refresh()
+		return
 	if is_instance_valid(_actor):
 		_actor.apply_render_quality(quality_level if quality_level >= 0 else LookProfile.quality(), true)
 
@@ -279,13 +287,37 @@ func _refresh() -> void:
 	if not is_visible_in_tree():
 		return
 	var visuals: Dictionary = _dto.get("equipment_visuals", {}) if _show_equipment else {}
+	var look := _values()
+	var level := quality_level if quality_level >= 0 else LookProfile.quality()
 	if OS.has_feature("web"):
+		var selection := [look, visuals, level]
+		if _browser_owner.is_empty() or _browser_selection != selection:
+			if not _browser_owner.is_empty() and _browser_owner != _browser_active_owner:
+				WebPrototype.retire_groups(_browser_owner)
+			_browser_owner_serial += 1
+			_browser_owner = "%s:%d" % [_asset_owner(), _browser_owner_serial]
+			_browser_selection = selection.duplicate(true)
 		var groups := WebPrototype.scene_groups(str(_model.get("scene", ""))).duplicate()
 		groups.append_array(WebPrototype.equipment_groups(visuals))
-		_browser_asset_pending = not WebPrototype.ensure_groups(groups, _asset_owner(), 1)
+		groups.append_array(WebPrototype.appearance_groups(_model, look, level))
+		_browser_asset_pending = not WebPrototype.ensure_groups(groups, _browser_owner, 1)
 		set_process(_browser_asset_pending)
-		if _browser_asset_pending: return
-	var look := _values()
+		if _browser_asset_pending:
+			_status.text = "Preparing selected look…"
+			if not WebPrototype.group_failure(groups).is_empty():
+				_status.text = "The selected look could not be prepared. Retry or choose another look."
+				if not is_instance_valid(_browser_retry):
+					_browser_retry = Button.new()
+					_browser_retry.text = "Retry selected look"
+					_status.get_parent().add_child(_browser_retry)
+					_browser_retry.pressed.connect(func() -> void: WebPrototype.retry_failed(); _refresh())
+				_browser_retry.show()
+				set_process(false)
+			return
+		if is_instance_valid(_browser_retry): _browser_retry.hide()
+		if not _browser_active_owner.is_empty() and _browser_active_owner != _browser_owner:
+			WebPrototype.retire_groups(_browser_active_owner)
+		_browser_active_owner = _browser_owner
 	_form.set_hair_style(AppearanceVariants.hair_style(int(look.get("hair", 0))))
 	_form.update_derived(look)
 	_colours.update_context(look, _model)
@@ -308,6 +340,7 @@ func _refresh() -> void:
 		if OS.has_feature("web") and _preview_equipment != visuals:
 			_actor.apply_equipment_visuals(visuals)
 			_preview_equipment = visuals.duplicate(true)
+	if OS.has_feature("web"): _actor.apply_render_quality(level, true)
 	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	_frame()
 
@@ -358,10 +391,17 @@ func _release_preview() -> void:
 	_browser_asset_pending = false
 	set_process(false)
 	_preview_equipment.clear()
-	if OS.has_feature("web"): WebPrototype.release_groups(_asset_owner())
 	if is_instance_valid(_actor):
 		_actor.queue_free()
 		_actor = null
+	if OS.has_feature("web"):
+		if not _browser_active_owner.is_empty(): WebPrototype.retire_groups(_browser_active_owner)
+		if not _browser_owner.is_empty() and _browser_owner != _browser_active_owner:
+			WebPrototype.retire_groups(_browser_owner)
+		_browser_active_owner = ""
+		_browser_owner = ""
+		_browser_selection.clear()
+		if is_instance_valid(_browser_retry): _browser_retry.hide()
 	if is_instance_valid(_viewport):
 		_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 
@@ -369,4 +409,4 @@ func _close() -> void:
 	hide()
 
 func _exit_tree() -> void:
-	if OS.has_feature("web"): WebPrototype.release_groups(_asset_owner())
+	if OS.has_feature("web"): _release_preview()

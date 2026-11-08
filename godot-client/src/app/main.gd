@@ -1000,6 +1000,10 @@ var _deferred_map_load := false
 var _arrival_settle_frames := 0
 var _browser_mount_warmup: RefCounted
 var _browser_actor_assets: RefCounted
+var _browser_creation_assets: RefCounted
+var _browser_creation_pending: Dictionary = {}
+var _browser_creation_retry_running := false
+var _browser_creation_retry_button: Button
 var _browser_actor_preparation_configured := false
 var _browser_source_retirement: RefCounted
 var _browser_loading_lease: RefCounted
@@ -2297,6 +2301,9 @@ func _process(delta: float) -> void:
 			if AppState.actors.has(actor_id):
 				AppState.mark_actor_changed(actor_id)
 				_queue_world_sync()
+	if OS.has_feature("web") and not RLHeadLibrary.warming():
+		if _browser_actor_assets != null: _browser_actor_assets.call("release_retired")
+		if _browser_creation_assets != null: _browser_creation_assets.call("release_retired")
 	_flush_character_ui_sync()
 	if AppState.authenticated and AppState.inventory_metadata_dirty and Network._link_ready() \
 			and Time.get_ticks_msec() >= _inventory_metadata_at:
@@ -2804,6 +2811,7 @@ func _on_creation_visibility_changed() -> void:
 		# Its prewarmed files go after their retention time; a later visit
 		# prewarms again.
 		_creation_rl_prewarm_key = ""
+		if OS.has_feature("web"): _cancel_browser_creation_preview()
 	if not showing and is_instance_valid(creation_base_flow):
 		creation_base_flow.close_for_exit()
 	if showing and not is_instance_valid(preview_actor) and not creation_base_flow.entry_opening:
@@ -2980,6 +2988,7 @@ func _record_startup_window(window_name: String, began: int) -> int:
 	return Time.get_ticks_usec()
 
 func _refresh_creation_preview(starting_look: Dictionary = {}, reset_actor: bool = false) -> void:
+	if OS.has_feature("web") and not creation_panel.is_visible_in_tree(): return
 	var choosing_base := not starting_look.is_empty()
 	var actor_type: int = int(starting_look.get("actor_type", create_gender.get_selected_id()))
 	if not PLAYER_CREATION.allows_actor_type(actor_type):
@@ -3001,6 +3010,17 @@ func _refresh_creation_preview(starting_look: Dictionary = {}, reset_actor: bool
 		if creation_class_gear_visible and not choosing_base else {})
 	var model_id := _model_for_actor(dto)
 	var model_config: Dictionary = models.get(model_id, {}) as Dictionary
+	if OS.has_feature("web"):
+		var selected := WebPrototype.appearance_groups(model_config, appearance, LookProfile.quality())
+		if not _browser_creation_assets_ready(model_id, dto.equipment_visuals, appearance, selected, LookProfile.quality()):
+			_browser_creation_pending = {"look":starting_look.duplicate(true), "reset":reset_actor}
+			_browser_creation_progress("Preparing selected look…")
+			if not _browser_creation_retry_running:
+				_browser_creation_retry_running = true
+				_retry_browser_creation_preview.call_deferred()
+			return
+		_browser_creation_pending.clear()
+		if is_instance_valid(_browser_creation_retry_button): _browser_creation_retry_button.hide()
 	if not choosing_base and is_instance_valid(creation_colours) and actor_type in [0, 1]:
 		creation_colours.update_context(appearance, model_config)
 		portrait_form.set_hair_style(AppearanceVariants.hair_style(int(appearance.get("hair", 0))))
@@ -3026,14 +3046,70 @@ func _refresh_creation_preview(starting_look: Dictionary = {}, reset_actor: bool
 	elif _creation_preview_appearance != appearance:
 		preview_actor.apply_appearance_variants(appearance)
 	preview_actor.apply_equipment_visuals(dto.equipment_visuals)
+	if OS.has_feature("web"): preview_actor.apply_render_quality(LookProfile.quality(), true)
 	_creation_preview_appearance = appearance.duplicate(true)
-	_prewarm_creation_rl_heads(model_config)
+	if not OS.has_feature("web"): _prewarm_creation_rl_heads(model_config)
 	_frame_preview_actor()
 	if not _creation_preview_errors.is_empty():
 		create_status.text = "Preview warnings: " + "; ".join(_creation_preview_errors)
 	else:
 		create_status.text = "%s starting items will be granted. Drag to rotate." % \
 			creation_class_title.text
+
+func _browser_creation_assets_ready(model_id: String, equipment: Dictionary, appearance: Dictionary,
+		selected: Array, quality: int) -> bool:
+	if _browser_creation_assets == null:
+		_browser_creation_assets = preload("res://src/platform/browser_actor_assets.gd").new(WebPrototype, "creation_preview")
+	_browser_creation_assets.call("poll")
+	return bool(_browser_creation_assets.call("admit", 0, model_id, equipment, "", true,
+		selected, [appearance, quality]))
+
+func _browser_creation_progress(message: String, can_retry := false) -> void:
+	create_status.text = message
+	if not is_instance_valid(_browser_creation_retry_button):
+		_browser_creation_retry_button = Button.new()
+		_browser_creation_retry_button.name = "BrowserCreationRetry"
+		_browser_creation_retry_button.z_index = 1000
+		add_child(_browser_creation_retry_button)
+		_browser_creation_retry_button.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+		_browser_creation_retry_button.offset_left = -150
+		_browser_creation_retry_button.offset_right = 150
+		_browser_creation_retry_button.offset_top = -90
+		_browser_creation_retry_button.offset_bottom = -45
+		_browser_creation_retry_button.pressed.connect(_retry_browser_creation_pressed)
+	_browser_creation_retry_button.text = "Retry selected look" if can_retry else message
+	_browser_creation_retry_button.disabled = not can_retry
+	_browser_creation_retry_button.show()
+
+func _retry_browser_creation_preview() -> void:
+	while not _browser_creation_pending.is_empty() and creation_panel.is_visible_in_tree():
+		await get_tree().create_timer(0.1).timeout
+		if _browser_creation_pending.is_empty() or not creation_panel.is_visible_in_tree(): break
+		var request := _browser_creation_pending.duplicate(true)
+		_browser_creation_pending.clear()
+		_refresh_creation_preview(request.look, bool(request.reset))
+		if not _browser_creation_pending.is_empty() and not WebPrototype.group_failure(_browser_creation_assets.call("groups_for", 0)).is_empty():
+			_browser_creation_progress("The selected look could not be prepared. Retry or choose another look.", true)
+			break
+	_browser_creation_retry_running = false
+
+func _retry_browser_creation_pressed() -> void:
+	WebPrototype.retry_failed()
+	if not _browser_creation_pending.is_empty() and not _browser_creation_retry_running:
+		_browser_creation_progress("Preparing selected look…")
+		_browser_creation_retry_running = true
+		_retry_browser_creation_preview.call_deferred()
+
+func _cancel_browser_creation_preview() -> void:
+	_browser_creation_pending.clear()
+	if is_instance_valid(_browser_creation_retry_button): _browser_creation_retry_button.hide()
+	if is_instance_valid(preview_actor):
+		preview_actor.queue_free()
+		preview_actor = null
+	if _browser_creation_assets != null: _browser_creation_assets.call("prune", {})
+	_creation_preview_model_id = ""
+	_creation_preview_actor_type = -1
+	_creation_preview_appearance.clear()
 
 ## Character creation's High preview draws every choice of its Human body
 ## without a main-thread parse: each RL file of the preview's sex is parsed on
@@ -8335,8 +8411,11 @@ func _browser_actor_ready(id: int, dto: Dictionary) -> bool:
 	if mount.is_empty() and id == AppState.local_actor_id:
 		mount = str(state.get("selected_mount_id", ""))
 	var model_id := _model_for_actor(dto)
+	var appearance: Dictionary = dto.get("appearance", {})
+	var selected := WebPrototype.appearance_groups(models.get(model_id, {}), appearance, LookProfile.quality())
 	if not bool(_browser_actor_assets.call("admit", id, model_id,
-			dto.get("equipment_visuals", {}), mount, _crowd_priority_actor(id))):
+			dto.get("equipment_visuals", {}), mount, _crowd_priority_actor(id),
+			selected, [appearance, LookProfile.quality()])):
 		actor_resource_warmup.cancel_browser(id)
 		return false
 	if not actor_resource_warmup.browser_enabled(): return true
@@ -8438,6 +8517,10 @@ func _present_actor(id: Variant) -> void:
 	if not existing_actor.is_model_deferred() or existing_actor.is_drawn():
 		_place_actor_on_surface(existing_actor, false, actor_adapter.fallback_height())
 
+## Keep a retained body parked until its replacement appearance is available.
+func _browser_parked_actor_ready(id: int, dto: Dictionary) -> bool:
+	return not crowd.parked_actor_ids().has(id) or _browser_actor_ready(id, dto)
+
 ## Builds the node for an actor that has none yet, or - given `previous` - in
 ## place of the node it has: `build` false makes a deferred node without a body
 ## (crowd_presentation.gd). A replacement carries on the old node's motion.
@@ -8463,6 +8546,9 @@ func _spawn_actor(id: Variant, build := true,
 			return true
 		_local_avatar_hold.release("mismatch")
 	if previous == null:
+		if OS.has_feature("web") and not _browser_parked_actor_ready(int(id), dto):
+			_spawn_backlog = true
+			return false
 		var parked := crowd.take_parked(int(id), identity) as ReplicatedActor3D
 		if parked != null:
 			_revive_actor(id, parked, dto, actor_adapter)
@@ -9267,8 +9353,11 @@ func _campaign_surface_height(point: Vector3) -> float:
 ## enter the live actor dictionary, crowd budget or remote-presentation service.
 func _campaign_replay_asset_groups(dto: Dictionary) -> Array:
 	var visual := _presentation_dto(dto.duplicate(true))
-	var groups := WebPrototype.model_groups(_model_for_actor(visual)).duplicate()
+	var model_id := _model_for_actor(visual)
+	var groups := WebPrototype.model_groups(model_id).duplicate()
 	for group: Variant in WebPrototype.equipment_groups(visual.get("equipment_visuals", {})):
+		if not groups.has(group): groups.append(group)
+	for group: Variant in WebPrototype.appearance_groups(models.get(model_id, {}), visual.get("appearance", {}), LookProfile.quality()):
 		if not groups.has(group): groups.append(group)
 	return groups
 
@@ -16175,10 +16264,14 @@ func _apply_actor_render_quality() -> void:
 	for raw_id: Variant in actor_nodes:
 		var actor_value: Variant = actor_nodes[raw_id]
 		if actor_value is ReplicatedActor3D and is_instance_valid(actor_value):
+			if OS.has_feature("web") and (not AppState.actors.has(raw_id) \
+					or not _browser_actor_ready(int(raw_id), _presentation_dto(AppState.actors[raw_id]))):
+				continue
 			(actor_value as ReplicatedActor3D).apply_render_quality(
 				level, int(raw_id) == AppState.local_actor_id)
 	if is_instance_valid(preview_actor):
-		preview_actor.apply_render_quality(level, true)
+		if OS.has_feature("web"): _refresh_creation_preview()
+		else: preview_actor.apply_render_quality(level, true)
 	if is_instance_valid(appearance_editor):
 		appearance_editor.refresh_render_quality()
 

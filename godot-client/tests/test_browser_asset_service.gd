@@ -57,6 +57,11 @@ func _test_archive_proof() -> void:
 	assert(service._unpack_slice_usec() == 2000)
 
 func _run() -> void:
+	var mismatched := Service.new()
+	assert(not mismatched.configure({"archives":[], "source_groups":{"res://head.glb":["head:a"]}},
+		{"archives":[], "source_groups":{"res://head.glb":["head:b"]}}))
+	assert("appearance catalog" in mismatched.error)
+	mismatched.free()
 	service = Service.new()
 	root.add_child(service)
 	service.set_process(false)
