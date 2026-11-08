@@ -37,6 +37,7 @@ var _rescue_return_tracking: Dictionary = {}
 
 func attach_campaign(content: Control) -> void:
 	campaign_content = content
+	content.completion_dismissed.connect(_refresh)
 	content.reparent(_body)
 	_body.move_child(content, _buttons.get_index())
 	content.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
