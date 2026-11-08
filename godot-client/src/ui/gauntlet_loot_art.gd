@@ -21,11 +21,12 @@ static func wash() -> GradientTexture2D:
 static func surface(canvas: Control, opacity := 0.55) -> void:
 	canvas.draw_texture_rect(wash(), Rect2(Vector2.ONE * 2, canvas.size - Vector2.ONE * 4), false, Color(1, 1, 1, opacity))
 
-static func frame(canvas: Control) -> void:
+static func frame(canvas: Control, compact := false) -> void:
 	surface(canvas, 0.26)
 	var bounds := Rect2(Vector2(3, 3), canvas.size - Vector2(6, 6))
 	canvas.draw_rect(bounds, Color(GOLD, 0.9), false, 1.0)
 	canvas.draw_rect(bounds.grow(-4), Color(GOLD, 0.22), false, 1.0)
+	if compact: return
 	for corner: Vector2 in [bounds.position, Vector2(bounds.end.x, bounds.position.y), bounds.end, Vector2(bounds.position.x, bounds.end.y)]:
 		var direction := Vector2(1 if corner.x == bounds.position.x else -1, 1 if corner.y == bounds.position.y else -1)
 		var points := PackedVector2Array()

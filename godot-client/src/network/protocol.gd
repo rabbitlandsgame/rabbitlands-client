@@ -1870,6 +1870,17 @@ static func decode_gauntlet_loot(payload: PackedByteArray) -> Dictionary:
 	for key: String in ["revision", "assigned", "total", "page", "pages", "announcement_id"]:
 		if not _loot_integer(state.get(key)):
 			return {"type": "invalid", "error": "gauntlet_loot_number"}
+	if state.has("browse_supported"):
+		if not state.browse_supported is bool or not state.get("item_pricing_supported", false) is bool or not state.get("browse") is Dictionary or not state.get("item_types") is Array or not _loot_integer(state.get("filtered_total")):
+			return {"type": "invalid", "error": "gauntlet_loot_browse"}
+		var options: Dictionary = state.browse
+		if not options.get("query") is String or str(options.query).length() > 128 or not options.get("category") is String or str(options.category).length() > 80 or options.get("sort") not in ["original", "name_asc", "name_desc", "type", "quantity_desc", "price_desc", "npc_desc"] or options.get("assignment") not in ["all", "unassigned", "assigned", "npc", "personal"] or not options.get("rare_only") is bool:
+			return {"type": "invalid", "error": "gauntlet_loot_browse_options"}
+		if int(state.filtered_total) > int(state.total):
+			return {"type": "invalid", "error": "gauntlet_loot_filtered_total"}
+		for category: Variant in state.item_types:
+			if not category is String or category.length() > 80:
+				return {"type": "invalid", "error": "gauntlet_loot_item_type"}
 	if not state.get("members") is Array or state.members.is_empty() or state.members.size() > 8:
 		return {"type": "invalid", "error": "gauntlet_loot_members"}
 	var names: Array[String] = []
@@ -1894,6 +1905,8 @@ static func decode_gauntlet_loot(payload: PackedByteArray) -> Dictionary:
 	for row: Variant in state.rows:
 		if not row is Dictionary or not row.get("id") is String or ids.has(row.id) or not row.get("name") is String or not row.get("owner") is String or not row.get("rare") is bool or not row.get("allocations") is Dictionary:
 			return {"type": "invalid", "error": "gauntlet_loot_row"}
+		if row.has("category") and not row.category is String:
+			return {"type": "invalid", "error": "gauntlet_loot_category"}
 		ids.append(row.id)
 		if not _loot_integer(row.get("price_gold")) or not row.get("locked") is bool or row.get("source") not in ["creature", "cache", "compensation", "npc_sales"]:
 			return {"type": "invalid", "error": "gauntlet_loot_price"}

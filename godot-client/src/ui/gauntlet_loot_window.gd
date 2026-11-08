@@ -103,6 +103,17 @@ var _price_run := ""
 var _sale_run := ""
 var _exchange_run := ""
 var _confirmation_run := ""
+var _browse_bar: HBoxContainer
+var _search: LineEdit
+var _item_type: OptionButton
+var _assignment: OptionButton
+var _sort: OptionButton
+var _rare_only: CheckBox
+var _browse_timer: Timer
+var _browse_dirty := false
+var _delivery_review: Button
+var _delivery_dialog: ConfirmationDialog
+var _more_actions: MenuButton
 
 func _ready() -> void:
 	name = "GauntletLootLayer"
@@ -147,7 +158,7 @@ func _refresh_hud_visibility() -> void:
 func default_hud_rect(key: String, viewport: Vector2) -> Rect2:
 	if key == "gauntlet_loot":
 		return Rect2(Vector2(maxf(8, viewport.x - 270), 100), reopen.get_combined_minimum_size().max(Vector2(165, 34)))
-	var target := Vector2(clampf(viewport.x - 114, 640, 1460), clampf(viewport.y - 112, 380, 830))
+	var target := Vector2(clampf(viewport.x - 114, 640, 1080), clampf(viewport.y - 180, 360, 540))
 	var origin := Vector2(maxf(8, (viewport.x - 92 - target.x) / 2), maxf(48, (viewport.y - target.y) / 2))
 	return Rect2(Vector2(origin.x + 60, maxf(4, origin.y - 43)), Vector2(maxf(300, target.x - 120), 34).max(announcement.get_combined_minimum_size()))
 
@@ -181,7 +192,7 @@ func _on_text_colors_changed(role: String) -> void:
 		return
 	# Dialogs own a small inherited theme, including engine-created buttons.
 	# Refreshing its text colors leaves the ledger and allocation state intact.
-	for dialog: ConfirmationDialog in [editor, confirmation, price_dialog, sale_dialog, exchange_dialog, reprice_dialog]:
+	for dialog: ConfirmationDialog in [editor, confirmation, price_dialog, sale_dialog, exchange_dialog, reprice_dialog, _delivery_dialog]:
 		_style_dialog(dialog)
 
 func _surface(control: Control, opacity := 0.55) -> void:
@@ -205,20 +216,20 @@ func _wrap_dialog_label(label: Label, width: int) -> void:
 func _button(parent: Node, text: String, action: Callable, primary := false) -> Button:
 	var button := Button.new()
 	button.text = text
-	button.custom_minimum_size.y = 34
-	button.add_theme_font_size_override("font_size", 14)
+	button.custom_minimum_size.y = 28
+	button.add_theme_font_size_override("font_size", 13)
 	TextColors.bind(button, "loot_primary" if primary else "loot_title")
 	TextColors.bind(button, "loot_text", "font_hover_color")
 	var normal := style(CYAN if primary else BRONZE,
-		Color("8ed8e5") if primary else Color("0b191b"), 9)
+		Color("8ed8e5") if primary else Color("0b191b"), 4)
 	normal.border_color = Color("d5f9ff") if primary else BRONZE
 	normal.shadow_color = Color(0.12, 0.65, 0.77, 0.2) if primary else Color(0, 0, 0, 0)
 	normal.shadow_size = 5 if primary else 0
 	button.add_theme_stylebox_override("normal", normal)
-	button.add_theme_stylebox_override("hover", style(CYAN, Color("23383d"), 9))
-	button.add_theme_stylebox_override("pressed", style(CYAN, Color("162a2f"), 9))
-	button.add_theme_stylebox_override("disabled", style(Color("454d4a"), Color("171e1f"), 9))
-	button.add_theme_stylebox_override("focus", style(CYAN, Color(0, 0, 0, 0), 9))
+	button.add_theme_stylebox_override("hover", style(CYAN, Color("23383d"), 4))
+	button.add_theme_stylebox_override("pressed", style(CYAN, Color("162a2f"), 4))
+	button.add_theme_stylebox_override("disabled", style(Color("454d4a"), Color("171e1f"), 4))
+	button.add_theme_stylebox_override("focus", style(CYAN, Color(0, 0, 0, 0), 4))
 	button.pressed.connect(action)
 	parent.add_child(button)
 	return button
@@ -240,9 +251,9 @@ func _build() -> void:
 	announcement.hide()
 	panel = PanelContainer.new()
 	panel.name = "GauntletLootWindow"
-	panel.add_theme_stylebox_override("panel", style(BRONZE, Color("040c0d"), 20))
+	panel.add_theme_stylebox_override("panel", style(BRONZE, Color("040c0d"), 10))
 	add_child(panel)
-	panel.draw.connect(func() -> void: LedgerArt.frame(panel))
+	panel.draw.connect(func() -> void: LedgerArt.frame(panel, true))
 	panel.resized.connect(func() -> void: panel.queue_redraw())
 	panel.visibility_changed.connect(func() -> void:
 		portraits.set_active(panel.visible)
@@ -253,11 +264,11 @@ func _build() -> void:
 	var title_row := HBoxContainer.new()
 	_content.add_child(title_row)
 	var title_spacer := Control.new()
-	title_spacer.custom_minimum_size.x = 32
+	title_spacer.custom_minimum_size.x = 0
 	title_row.add_child(title_spacer)
-	heading = _label(title_row, "GAUNTLET COMPLETE", 30, GOLD)
+	heading = _label(title_row, "Gauntlet loot", 18, GOLD)
 	heading.add_theme_font_override("font", Art.title_font())
-	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_button(title_row, "×", close)
 	route = _label(_content, "", 20, GOLD)
@@ -286,6 +297,49 @@ func _build() -> void:
 		if run_id is String and not run_id.is_empty():
 			_request("open", {"run_id": run_id, "ledger_page": int(_state.get("ledger_page", 0))}))
 	_run_next = _button(_tabs, "›", func() -> void: _ledger_page(1))
+	_browse_bar = HBoxContainer.new()
+	_browse_bar.add_theme_constant_override("separation", 6)
+	_content.add_child(_browse_bar)
+	_search = LineEdit.new()
+	_search.name = "LootSearch"
+	_search.placeholder_text = "Search the entire run…"
+	_search.clear_button_enabled = true
+	_search.max_length = 128
+	_search.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_search.custom_minimum_size.x = 160
+	_search.text_changed.connect(_browse_changed)
+	_browse_bar.add_child(_search)
+	_item_type = OptionButton.new()
+	_item_type.name = "LootType"
+	_item_type.add_item("All types")
+	_item_type.set_item_metadata(0, "")
+	_item_type.custom_minimum_size.x = 120
+	_item_type.fit_to_longest_item = false
+	_item_type.item_selected.connect(_browse_changed)
+	_browse_bar.add_child(_item_type)
+	_assignment = OptionButton.new()
+	_assignment.name = "LootAssignment"
+	for pair: Array in [["Any assignment", "all"], ["Unassigned", "unassigned"], ["Assigned", "assigned"], ["NPC sale", "npc"], ["Personal", "personal"]]:
+		_assignment.add_item(pair[0])
+		_assignment.set_item_metadata(_assignment.item_count - 1, pair[1])
+	_assignment.item_selected.connect(_browse_changed)
+	_browse_bar.add_child(_assignment)
+	_sort = OptionButton.new()
+	_sort.name = "LootSort"
+	for pair: Array in [["Run order", "original"], ["Name A–Z", "name_asc"], ["Name Z–A", "name_desc"], ["Item type", "type"], ["Quantity ↓", "quantity_desc"], ["Item price ↓", "price_desc"], ["NPC value ↓", "npc_desc"]]:
+		_sort.add_item(pair[0])
+		_sort.set_item_metadata(_sort.item_count - 1, pair[1])
+	_sort.item_selected.connect(_browse_changed)
+	_browse_bar.add_child(_sort)
+	_rare_only = CheckBox.new()
+	_rare_only.text = "Rare only"
+	_rare_only.toggled.connect(_browse_changed)
+	_browse_bar.add_child(_rare_only)
+	_browse_timer = Timer.new()
+	_browse_timer.one_shot = true
+	_browse_timer.wait_time = 0.3
+	_browse_timer.timeout.connect(_submit_browse)
+	add_child(_browse_timer)
 	_columns = HBoxContainer.new()
 	_columns.add_theme_constant_override("separation", 12)
 	_columns.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -310,13 +364,14 @@ func _build() -> void:
 	var item_header := _label(header, "Item", 15, TEXT)
 	item_header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	item_header.size_flags_stretch_ratio = 0.85
+	_label(header, "Type", 13, TEXT).custom_minimum_size.x = 84
 	_label(header, "Found", 13, TEXT).custom_minimum_size.x = 46
 	var recipient_header := _label(header, "Recipient / allocation", 13, TEXT)
 	recipient_header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	recipient_header.size_flags_stretch_ratio = 1.15
 	recipient_header.custom_minimum_size.x = 135
 	_label(header, "Quantity", 13, TEXT).custom_minimum_size.x = 64
-	_label(header, "Value / sell", 12, TEXT).custom_minimum_size.x = 126
+	_label(header, "Price / actions", 12, TEXT).custom_minimum_size.x = 126
 	header_box.draw.connect(func() -> void: LedgerArt.columns(header_box, header, BRONZE))
 	header.sort_children.connect(func() -> void: header_box.queue_redraw())
 	var scroll := ScrollContainer.new()
@@ -342,6 +397,17 @@ func _build() -> void:
 	sell_all_button.tooltip_text = "Stage all sellable shared loot at NPC prices. Choose a recipient or Unassigned on an item to remove its NPC sale. Personal rewards, exchange listings and unsellable items are kept."
 	sell_unassigned_button = _button(actions, "Sell all unassigned to NPC", func() -> void: _request("sell_all_unassigned"))
 	sell_unassigned_button.tooltip_text = "Stage NPC sales only for unassigned quantities across all pages. Keep player allocations, existing NPC sales, personal rewards and exchange listings. Incomplete NPC bundles stay unassigned."
+	_more_actions = MenuButton.new()
+	_more_actions.text = "More actions (whole run)"
+	for title: String in ["Clear assignments", "Stage all NPC sales", "Stage unassigned NPC sales"]:
+		_more_actions.get_popup().add_item(title)
+	_more_actions.get_popup().id_pressed.connect(func(id: int) -> void:
+		[clear_button, sell_all_button, sell_unassigned_button][id].pressed.emit())
+	actions.add_child(_more_actions)
+	clear_button.hide()
+	sell_all_button.hide()
+	sell_unassigned_button.hide()
+	split_button.text = "Split common (whole run)"
 	_storage = PanelContainer.new()
 	_storage.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_storage.size_flags_stretch_ratio = 1.0
@@ -360,6 +426,15 @@ func _build() -> void:
 	deliveries.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	deliveries.add_theme_constant_override("separation", 8)
 	delivery_scroll.add_child(deliveries)
+	_delivery_dialog = ConfirmationDialog.new()
+	_delivery_dialog.title = "Storage deliveries • whole run"
+	_delivery_dialog.ok_button_text = "Close"
+	_delivery_dialog.get_cancel_button().hide()
+	add_child(_delivery_dialog)
+	_storage.reparent(_delivery_dialog)
+	_storage.custom_minimum_size = Vector2(420, 340)
+	_delivery_review = _button(_content, "Review storage deliveries", func() -> void:
+		_delivery_dialog.popup_centered(Vector2i(460, 440)))
 	_exchange_view = VBoxContainer.new()
 	_exchange_view.add_theme_constant_override("separation", 8)
 	_exchange_view.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -402,7 +477,7 @@ func _build() -> void:
 	send_button = _button(footer, "SAVE & EXIT TO BEAM", _confirm_send, true)
 	send_button.add_theme_font_override("font", Art.title_font())
 	send_button.add_theme_font_size_override("font_size", 15)
-	send_button.custom_minimum_size = Vector2(280, 42)
+	send_button.custom_minimum_size = Vector2(230, 34)
 	editor = ConfirmationDialog.new()
 	editor.title = "Allocate item quantities"
 	editor.ok_button_text = "Apply allocation"
@@ -517,12 +592,12 @@ func _style_dialog(dialog: ConfirmationDialog) -> void:
 
 func _layout() -> void:
 	var viewport := get_viewport_rect().size
-	var compact := viewport.y < 800
-	heading.add_theme_font_size_override("font_size", 25 if compact else 30)
+	var compact := true
+	heading.add_theme_font_size_override("font_size", 18)
 	if compact != _compact_view:
 		_compact_view = compact
 		if panel.visible and not _state.is_empty(): _render.call_deferred()
-	var target := Vector2(clampf(viewport.x - 114, 640, 1460), clampf(viewport.y - 112, 380, 830))
+	var target := Vector2(clampf(viewport.x - 114, 640, 1080), clampf(viewport.y - 180, 360, 540))
 	panel.size = target
 	panel.position = Vector2(maxf(8, (viewport.x - 92 - target.x) / 2), maxf(48, (viewport.y - target.y) / 2))
 	if _hud_managed:
@@ -586,6 +661,11 @@ func apply_snapshot(state: Dictionary) -> void:
 		reprice_dialog.hide()
 	_state = state.duplicate(true)
 	_pending_since = 0
+	if changed_run:
+		_browse_dirty = false
+		_browse_timer.stop()
+	_sync_browse_controls()
+	if _browse_dirty: _browse_timer.start(0.05)
 	set_process(_completion_open_pending)
 	if just_exited: close()
 	reopen.text = "Party exchange (%d)" % int(state.exchange_total) if int(state.get("exchange_total", 0)) > 0 and state.phase == "sent" else ("More reserved loot" if state.phase == "sent" else "Gauntlet loot (%d)" % int(state.total))
@@ -626,12 +706,17 @@ func _editable() -> bool:
 func _render() -> void:
 	if not bool(_state.get("exchange_enabled", false)): _show_exchange = false
 	_tabs.visible = bool(_state.get("exchange_enabled", false))
+	_browse_bar.visible = not _show_exchange
+	_delivery_review.visible = not _show_exchange
 	_columns.visible = not _show_exchange
 	_exchange_view.visible = _show_exchange
-	hint.visible = not _show_exchange or not _compact_view
+	hint.visible = not _compact_view
+	heading.tooltip_text = "Personal cache rewards stay with their owner. Click item icons to inspect."
 	_exchange_heading.visible = not _compact_view
 	heading.text = "GAUNTLET COMPLETE" if _state.phase == "complete" else ("LOOT DELIVERED" if _state.phase == "sent" else ("GAUNTLET IN PROGRESS" if _state.phase == "active" else "GAUNTLET ENDED"))
+	heading.text += " • " + str(_state.route)
 	route.text = str(_state.route)
+	route.hide()
 	hint.text = "Click an item icon to inspect it. Personal cache rewards stay with their owner."
 	_portrait_nodes.clear()
 	_row_panels.clear()
@@ -643,15 +728,17 @@ func _render() -> void:
 				break
 	_clear(table)
 	for row: Dictionary in _state.rows: _item_row(row)
-	if _state.rows.is_empty(): _label(table, "No creature drops collected yet.", 15, MUTED)
+	if _state.rows.is_empty(): _label(table, "No matching items. Try another type, assignment or search." if int(_state.total) > 0 else "No creature drops collected yet.", 13, MUTED)
 	_clear(deliveries)
 	for member: Dictionary in _state.members: _delivery_card(member)
 	split_button.disabled = not _editable()
 	clear_button.disabled = not _editable()
+	_more_actions.disabled = not _editable()
+	_delivery_review.text = "Storage deliveries • %d recipients • %d unassigned types • Review…" % [_state.members.size(), int(_state.total) - int(_state.assigned)]
 	sell_all_button.disabled = not _editable()
 	sell_unassigned_button.disabled = not _editable()
 	send_button.disabled = (not bool(_state.is_leader) or _pending_since > 0 or bool(_state.get("exited", false))) if _state.phase == "sent" else (not _editable() or not bool(_state.can_send))
-	send_button.text = "RETURN PARTY TO BEAM" if _state.phase == "sent" else "SAVE & EXIT TO BEAM"
+	send_button.text = "RETURN PARTY TO BEAM" if _state.phase == "sent" else "REVIEW & SEND…"
 	send_button.visible = not _show_exchange
 	approve_button.hide()
 	for member: Dictionary in _state.members:
@@ -659,7 +746,8 @@ func _render() -> void:
 			approve_button.show()
 			approve_button.text = "Revoke payment approval" if member.payment_approved else "Approve %d GC payment" % int(member.charge_gold)
 			approve_button.disabled = _pending_since > 0 or not bool(member.payment_ready)
-	pager.text = "%d of %d assigned" % [int(_state.assigned), int(_state.total)]
+	pager.text = "%d of %d assigned (whole run)" % [int(_state.assigned), int(_state.total)]
+	if _state.has("filtered_total"): pager.text += " · %d matching types" % int(_state.filtered_total)
 	if int(_state.pages) > 1: pager.text += " · %d / %d" % [int(_state.page) + 1, int(_state.pages)]
 	previous_button.disabled = int(_state.page) == 0 or _pending_since > 0
 	next_button.disabled = int(_state.page) + 1 >= int(_state.pages) or _pending_since > 0
@@ -675,7 +763,7 @@ func _render() -> void:
 			status.text = "%s needs enough Gold Coins in storage to pay %d GC. Refresh after funding storage." % [member.name, int(member.charge_gold)]
 			break
 		if not bool(member.payment_approved):
-			status.text = "%s must approve the %d GC storage payment. Rare payments and NPC proceeds are split across everyone." % [member.name, int(member.charge_gold)]
+			status.text = "%s must approve the %d GC storage payment. Item payments and NPC proceeds are split across everyone." % [member.name, int(member.charge_gold)]
 	_render_exchange()
 	if int(_state.get("exchange_plan_quantity", 0)) > 0 and not bool(_state.get("exchange_can_withdraw", false)) and _state.phase in ["complete", "ended"]:
 		status.text = "Exchange listings are staged. Visit an Exchange NPC within four tiles to confirm distribution and post them."
@@ -702,7 +790,7 @@ func _member_name(username: String) -> String:
 
 func _row_style(rare: bool, selected: bool) -> StyleBoxFlat:
 	var box := style(CYAN if selected else (Color("31585d") if rare else Color("203438")),
-		Color("0b2228") if selected else (Color("09171b") if rare else Color("050f11")), 4)
+		Color("0b2228") if selected else (Color("09171b") if rare else Color("050f11")), 2)
 	box.shadow_color = Color(0.2, 0.8, 0.95, 0.2)
 	box.shadow_size = 4 if selected else 0
 	return box
@@ -736,7 +824,7 @@ func _item_row(row: Dictionary) -> void:
 	var surround := PanelContainer.new()
 	surround.set_meta("rare", row.rare)
 	surround.add_theme_stylebox_override("panel", _row_style(bool(row.rare), str(row.id) == _selected_row))
-	surround.size_flags_vertical = Control.SIZE_EXPAND_FILL if _state.rows.size() >= 6 else Control.SIZE_FILL
+	surround.size_flags_vertical = Control.SIZE_FILL
 	_row_panels[str(row.id)] = surround
 	table.add_child(surround)
 	_surface(surround, 0.2)
@@ -745,7 +833,7 @@ func _item_row(row: Dictionary) -> void:
 			_select_row(str(row.id)))
 	var line := HBoxContainer.new()
 	line.add_theme_constant_override("separation", 8)
-	line.custom_minimum_size.y = 32 if _compact_view else 46
+	line.custom_minimum_size.y = 28 if _compact_view else 40
 	surround.add_child(line)
 	surround.draw.connect(func() -> void: LedgerArt.columns(surround, line, CYAN if row.rare else Color("597275")))
 	line.sort_children.connect(func() -> void: surround.queue_redraw())
@@ -757,7 +845,7 @@ func _item_row(row: Dictionary) -> void:
 	icon_plate.name = "InspectItem"
 	icon_plate.set_meta("gauntlet_loot_inspect", true)
 	icon_plate.tooltip_text = "Inspect %s · description and stats" % str(row.name)
-	icon_plate.custom_minimum_size = Vector2.ONE * (34 if _compact_view else 46)
+	icon_plate.custom_minimum_size = Vector2.ONE * (24 if _compact_view else 38)
 	icon_plate.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	icon_plate.add_theme_stylebox_override("normal", style(Color("2e484a"), Color("091719"), 2))
 	icon_plate.add_theme_stylebox_override("hover", style(CYAN, Color("173038"), 2))
@@ -775,12 +863,13 @@ func _item_row(row: Dictionary) -> void:
 	item_text.alignment = BoxContainer.ALIGNMENT_CENTER
 	item_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	item.add_child(item_text)
-	var item_title := "Rare payments" if row.source == "compensation" else ("NPC sale proceeds" if row.source == "npc_sales" else str(row.name))
-	var item_name := _label(item_text, item_title, 14 if get_viewport_rect().size.x < 1400 else 16, CYAN if row.rare else GOLD)
+	var item_title := "Item payments" if row.source == "compensation" else ("NPC sale proceeds" if row.source == "npc_sales" else str(row.name))
+	if row.rare and _compact_view: item_title += " ◆"
+	var item_name := _label(item_text, item_title, 13, CYAN if row.rare else GOLD)
 	item_name.add_theme_font_override("font", Art.title_font())
 	item_name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	item_name.tooltip_text = str(row.name)
-	if row.rare:
+	item_name.tooltip_text = str(row.name) + (" • Rare" if row.rare else "")
+	if row.rare and not _compact_view:
 		var rare_badge := PanelContainer.new()
 		rare_badge.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		rare_badge.add_theme_stylebox_override("panel", style(BRONZE, Color("11170f"), 2))
@@ -790,7 +879,11 @@ func _item_row(row: Dictionary) -> void:
 	if row.source == "compensation": _label(item_text, "Gold Coins · shared equally", 10, MUTED)
 	if int(row.sell_quantity) > 0: _label(item_text, "NPC: %d → %d GC" % [int(row.sell_quantity), int(row.sale_proceeds)], 10, GREEN)
 	if int(row.get("exchange_quantity", 0)) > 0: _label(item_text, "Exchange: %d × %d GC" % [int(row.exchange_quantity), int(row.exchange_price)], 10, CYAN)
-	var total := _label(line, str(int(row.quantity)), 16, GOLD)
+	var category := _label(line, str(row.get("category", "Other")), 12, MUTED)
+	category.custom_minimum_size.x = 84
+	category.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	category.tooltip_text = category.text
+	var total := _label(line, str(int(row.quantity)), 13, GOLD)
 	total.add_theme_font_override("font", Art.title_font())
 	total.custom_minimum_size.x = 46
 	total.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -884,7 +977,7 @@ func _item_row(row: Dictionary) -> void:
 	price_cell.custom_minimum_size.x = 126
 	price_cell.alignment = BoxContainer.ALIGNMENT_CENTER
 	line.add_child(price_cell)
-	if row.rare and not bool(row.locked) and int(row.available_quantity) > 0:
+	if (row.rare or bool(_state.get("item_pricing_supported", false))) and str(row.name) != "Gold Coins" and not bool(row.locked) and int(row.available_quantity) > 0:
 		var value_button := _button(price_cell, "%d GC" % int(row.price_gold), func() -> void: _edit_price(row))
 		value_button.add_theme_font_size_override("font_size", 12)
 		value_button.clip_text = true
@@ -957,7 +1050,7 @@ func _delivery_card(member: Dictionary) -> void:
 		if _state.phase == "sent": payment = "Paid %d · Rebate +%d · NPC +%d GC" % [int(member.charge_gold), int(member.rebate_gold), int(member.sale_share_gold)]
 		var payment_label := _label(body, payment, 10, CYAN if member.payment_ready else Color("ed9475"))
 		payment_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		payment_label.tooltip_text = "Storage payment: %d GC\nShare of rare payments (including buyer): %d GC\nShare of NPC proceeds: %d GC" % [int(member.charge_gold), int(member.rebate_gold), int(member.sale_share_gold)]
+		payment_label.tooltip_text = "Storage payment: %d GC\nShare of item payments (including buyer): %d GC\nShare of NPC proceeds: %d GC" % [int(member.charge_gold), int(member.rebate_gold), int(member.sale_share_gold)]
 	if int(member.charge_gold) > 0 and not member.payment_approved and _state.phase != "sent":
 		_label(body, "Awaiting buyer approval", 10, GOLD)
 
@@ -977,6 +1070,7 @@ func close() -> void:
 	_completion_ready_msec = 0
 	set_process(_pending_since > 0)
 	_announcement_active = false
+	_delivery_dialog.hide()
 	panel.hide()
 	_refresh_hud_visibility()
 	editor.hide()
@@ -985,6 +1079,53 @@ func close() -> void:
 	sale_dialog.hide()
 	exchange_dialog.hide()
 	reprice_dialog.hide()
+
+func _browse_options() -> Dictionary:
+	return {"query": _search.text.strip_edges(), "category": _item_type.get_item_metadata(_item_type.selected),
+		"assignment": _assignment.get_item_metadata(_assignment.selected),
+		"sort": _sort.get_item_metadata(_sort.selected), "rare_only": _rare_only.button_pressed}
+
+func _browse_changed(_value: Variant = 0) -> void:
+	_browse_dirty = true
+	_browse_timer.start()
+
+func _submit_browse() -> void:
+	if _pending_since > 0: return
+	_browse_dirty = false
+	_request("open", {"page": 0, "browse": _browse_options()})
+
+func _select_option(control: OptionButton, value: String) -> void:
+	for index: int in range(control.item_count):
+		if str(control.get_item_metadata(index)) == value:
+			control.select(index)
+			return
+
+func _sync_browse_controls() -> void:
+	var supported := bool(_state.get("browse_supported", false))
+	_search.editable = supported
+	_item_type.disabled = not supported
+	_assignment.disabled = not supported
+	_sort.disabled = not supported
+	_rare_only.disabled = not supported
+	_search.tooltip_text = "Search all pages in this run" if supported else "Whole-run browsing requires an updated server"
+	var chosen := str(_item_type.get_item_metadata(_item_type.selected))
+	if not _browse_dirty and _browse_timer.is_stopped():
+		var options: Dictionary = _state.get("browse", {})
+		chosen = str(options.get("category", ""))
+		_search.text = str(options.get("query", ""))
+		_select_option(_assignment, str(options.get("assignment", "all")))
+		_select_option(_sort, str(options.get("sort", "original")))
+		_rare_only.set_pressed_no_signal(bool(options.get("rare_only", false)))
+	_item_type.clear()
+	_item_type.add_item("All types")
+	_item_type.set_item_metadata(0, "")
+	for category: String in _state.get("item_types", []):
+		_item_type.add_item(category)
+		_item_type.set_item_metadata(_item_type.item_count - 1, category)
+	if not chosen.is_empty() and chosen not in _state.get("item_types", []):
+		_item_type.add_item(chosen)
+		_item_type.set_item_metadata(_item_type.item_count - 1, chosen)
+	_select_option(_item_type, chosen)
 
 func _page(direction: int) -> void:
 	_request("open", {"page": int(_state.page) + direction})
@@ -1006,6 +1147,8 @@ func _request(action: String, extra: Dictionary = {}, revision := -1, current_ru
 		"revision": int(_state.revision) if revision < 0 else revision}
 	if not current_run: data.erase("run_id")
 	data.merge(extra, true)
+	if action == "open" and bool(_state.get("browse_supported", false)) and not data.has("browse"):
+		data["browse"] = _browse_options()
 	var error: Error = _send.call("#gauntletloot " + JSON.stringify(data))
 	if error != OK:
 		status.text = "Could not send your choice. Check the connection and try again."
@@ -1105,7 +1248,7 @@ func _confirm_send() -> void:
 	for member: Dictionary in _state.members:
 		if int(member.charge_gold) > 0:
 			confirmation.dialog_text += "\n%s pays %d GC from storage and receives %d GC back." % [member.name, int(member.charge_gold), int(member.rebate_gold)]
-	confirmation.dialog_text += "\nRare-item payments are shared equally, including the buyer."
+	confirmation.dialog_text += "\nItem payments are shared equally, including the buyer."
 	var npc_total := 0
 	for member: Dictionary in _state.members: npc_total += int(member.sale_share_gold)
 	if npc_total > 0: confirmation.dialog_text += "\nStaged NPC sales add %d GC, split equally across the party." % npc_total
@@ -1117,7 +1260,7 @@ func _edit_price(row: Dictionary) -> void:
 	_priced_row = row.duplicate(true)
 	_price_run = str(_state.run_id)
 	_price_revision = int(_state.revision)
-	price_dialog.title = "Rare value · " + str(row.name)
+	price_dialog.title = "Item price · " + str(row.name)
 	price_amount.max_value = floori(2000000000.0 / int(row.quantity))
 	price_amount.value = int(row.price_gold)
 	price_dialog.popup_centered(Vector2i(460, 200))
@@ -1139,10 +1282,10 @@ func _sale_menu(parent: Node, row: Dictionary) -> void:
 	sell.text = "Exchange" if int(row.get("exchange_quantity", 0)) > 0 else ("NPC · %d GC" % int(row.sale_proceeds) if int(row.sell_quantity) == int(row.quantity) else "Sell…")
 	sell.add_theme_font_size_override("font_size", 12)
 	TextColors.bind(sell, "loot_title")
-	sell.add_theme_stylebox_override("normal", style(BRONZE, Color("0b191b"), 7))
-	sell.add_theme_stylebox_override("hover", style(CYAN, Color("173038"), 7))
-	sell.add_theme_stylebox_override("pressed", style(CYAN, Color("102228"), 7))
-	sell.custom_minimum_size.y = 34
+	sell.add_theme_stylebox_override("normal", style(BRONZE, Color("0b191b"), 4))
+	sell.add_theme_stylebox_override("hover", style(CYAN, Color("173038"), 4))
+	sell.add_theme_stylebox_override("pressed", style(CYAN, Color("102228"), 4))
+	sell.custom_minimum_size.y = 28
 	sell.disabled = not _editable()
 	parent.add_child(sell)
 	var menu := sell.get_popup()

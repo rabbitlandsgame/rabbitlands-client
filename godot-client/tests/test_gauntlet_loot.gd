@@ -266,6 +266,67 @@ func run() -> void:
 	ui.apply_snapshot(sample())
 	ui.close()
 	expect(not ui.panel.visible and ui.reopen.visible, "closing preserves a way back to reserved loot")
+	# Whole-run browsing is echoed by the server and never changes global totals.
+	var browsing := sample()
+	browsing["browse_supported"] = true
+	browsing["item_pricing_supported"] = true
+	browsing["item_types"] = ["Coins", "Animal", "Misc", "Armor"]
+	browsing["browse"] = {"query": "", "category": "", "assignment": "all", "sort": "original", "rare_only": false}
+	browsing["filtered_total"] = 6
+	for row: Dictionary in browsing.rows: row["category"] = "Coins" if row.name == "Gold Coins" else "Animal"
+	ui.apply_snapshot(browsing)
+	ui._search.text = "Fur"
+	ui._search.text_changed.emit("Fur")
+	ui._browse_timer.stop()
+	ui._submit_browse()
+	expect(sent.back().action == "open" and sent.back().page == 0 and sent.back().browse.query == "Fur",
+		"search requests whole-run filtering before pagination")
+	browsing.browse.query = "Fur"
+	browsing.rows = [browsing.rows[1]]
+	browsing.filtered_total = 1
+	browsing.total = 40
+	browsing.assigned = 40
+	browsing.rows[0].allocations = {"mira": 40}
+	expect(protocol.decode_gauntlet_loot(JSON.stringify(browsing).to_utf8_buffer()).type == "gauntlet_loot",
+		"full-run browser metadata decodes")
+	var malformed := browsing.duplicate(true)
+	malformed.browse.sort = []
+	expect(protocol.decode_gauntlet_loot(JSON.stringify(malformed).to_utf8_buffer()).type == "invalid",
+		"malformed browser metadata is rejected")
+	ui.apply_snapshot(browsing)
+	expect(ui.table.get_child_count() == 1 and ui.pager.text.contains("40 of 40") and ui.pager.text.contains("1 matching"),
+		"filtered views retain whole-run assignment totals")
+	var found_price := false
+	for child: Node in ui.table.get_child(0).find_children("*", "Button", true, false):
+		if child is Button and child.text == "0 GC":
+			found_price = true
+			child.pressed.emit()
+	expect(found_price and ui.price_dialog.visible, "an ordinary individually assigned item exposes its price")
+	ui.price_amount.get_line_edit().text = "12"
+	ui.price_dialog.confirmed.emit()
+	expect(sent.back().action == "price" and sent.back().row_id == "1" and sent.back().price_gold == 12,
+		"assigned common-item pricing preserves the server row ID and revision")
+	ui.price_dialog.hide()
+	ui.apply_snapshot(browsing)
+	ui._delivery_review.pressed.emit()
+	expect(ui._delivery_dialog.visible, "whole-run storage deliveries remain available through review")
+	ui._delivery_dialog.hide()
+	root.size = Vector2i(1280, 720)
+	await capture("dense-filtered-ledger.png")
+	var full_view := sample()
+	full_view["browse_supported"] = true
+	full_view["item_pricing_supported"] = true
+	full_view["browse"] = {"query": "", "category": "", "assignment": "all", "sort": "original", "rare_only": false}
+	full_view["filtered_total"] = 6
+	full_view["item_types"] = ["Coins", "Animal", "Misc", "Armor"]
+	var categories: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/items/categories.json")).categories
+	for row: Dictionary in full_view.rows: row["category"] = categories.get(row.name, "Other")
+	ui.apply_snapshot(full_view)
+	await capture("dense-full-ledger.png")
+	expect(ui.panel.get_global_rect().end.x <= 1188 and ui.panel.get_global_rect().end.y <= 636,
+		"dense ledger clears the game's right rail and bottom HUD")
+	expect(ui.table.get_child(5).get_global_rect().end.y <= ui.pager.get_global_rect().position.y,
+		"six compact item rows fit without pushing out the global summary")
 	ui.queue_free()
 	background.queue_free()
 	await process_frame
