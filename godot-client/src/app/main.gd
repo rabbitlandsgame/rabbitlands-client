@@ -4991,6 +4991,7 @@ func _on_login_succeeded() -> void:
 	var capabilities_error: Error = Network.send_client_capabilities()
 	if capabilities_error != OK:
 		push_warning("#clientcaps failed: " + error_string(capabilities_error))
+	extension_windows.report_quest_tracking()
 	# A new session has said nothing yet about what it holds back.
 	nearby_indicator.show_count(0)
 	if _resync_after_reconnect:

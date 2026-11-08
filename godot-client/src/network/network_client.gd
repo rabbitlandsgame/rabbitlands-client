@@ -53,6 +53,8 @@ var move_intent_keepalive_msec := 1000
 ## One-way process-local sandbox guard. Preview launchers never open a game
 ## socket, transmit actions or schedule reconnects, even via login shortcuts.
 var offline_hud_preview := false
+var _quest_tracking_ready := false
+var _quest_tracking_signature := ""
 
 func block_for_hud_preview() -> void:
 	disconnect_from_server()
@@ -519,7 +521,28 @@ func turn(left: bool) -> Error:
 var declared_actor_cap: int = preload("res://src/network/interest_protocol.gd").ACTOR_CAP_DEFAULT
 
 func send_client_capabilities() -> Error:
-	return send_frame(EloriaProtocol.client_capabilities(declared_actor_cap, OS.has_feature("web")))
+	var error:=send_frame(EloriaProtocol.client_capabilities(declared_actor_cap, OS.has_feature("web")))
+	if error==OK:_quest_tracking_ready=true
+	return error
+
+func report_quest_tracking(titles: Array) -> Error:
+	if not AppState.authenticated or not _quest_tracking_ready or offline_hud_preview:return ERR_UNAVAILABLE
+	if titles.size()>8:return ERR_INVALID_PARAMETER
+	var clean:Array[String]=[]
+	for value:Variant in titles:
+		if not value is String or str(value).strip_edges().is_empty() or str(value).length()>160:return ERR_INVALID_PARAMETER
+		var title:=str(value).strip_edges()
+		for index:int in range(title.length()):
+			var code:=title.unicode_at(index)
+			if code<32 or code>=127 and code<=159:return ERR_INVALID_PARAMETER
+		if title not in clean:clean.append(title)
+	clean.sort()
+	var signature:=JSON.stringify(clean)
+	if signature.to_utf8_buffer().size()>2048:return ERR_INVALID_PARAMETER
+	if signature==_quest_tracking_signature:return OK
+	var error:=send_chat("#questfocus "+signature)
+	if error==OK:_quest_tracking_signature=signature
+	return error
 
 func send_chat(text: String) -> Error:
 	if text.strip_edges().to_lower().begins_with("#appearance "):
@@ -1044,6 +1067,9 @@ func _trim_receive_buffer(consumed: int) -> void:
 	_rx = _rx.slice(consumed)
 
 func _set_state(value: String, force := false) -> void:
+	if value!="connected":
+		_quest_tracking_ready=false
+		_quest_tracking_signature=""
 	if _state == value and not force:
 		return
 	_state = value
