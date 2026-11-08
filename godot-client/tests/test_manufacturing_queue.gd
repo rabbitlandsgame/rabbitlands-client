@@ -38,6 +38,7 @@ func _run() -> void:
 		receiver = fixture["receiver"] as StreamPeerTCP
 		_check_open_windows()
 		_check_queue()
+		_check_mix_feedback()
 		_close_fixture(fixture)
 	main.queue_free()
 	await process_frame
@@ -216,6 +217,47 @@ func _check_queue() -> void:
 			+ str(main.get("manufacturing_server_status")))
 	main.call("_on_manufacturing_queue_clear_pressed")
 
+func _check_mix_feedback() -> void:
+	var catalog: ManufacturingCatalog = main.get("manufacturing_catalog")
+	var output: String = str(catalog.recipe(0).get("output", ""))
+	_queue(0, 3)
+	_queue(1, 2)
+	main.call("_on_manufacturing_queue_start_pressed")
+	_take_requests()
+	_serve(false, 0, 1, output, false, true, true)
+	var queue: Array = main.get("manufacturing_queue")
+	_expect(not bool(main.get("manufacturing_queue_running")) and _take_requests().is_empty(),
+		"a rare result stops the queue without sending another batch")
+	_expect(int(queue[0].made) == 1 and int(main.get("manufacturing_queue_index")) == 0,
+		"a rare result credits the item and preserves the unfinished batch")
+	main.call("_on_manufacturing_queue_start_pressed")
+	_expect(_take_requests() == [[0, 2]], "explicit Start resumes only the remaining quantity")
+	main.call("_on_manufacturing_queue_clear_pressed")
+	main.set("selected_inventory_slot", -1)
+	for result: Array in [[0, "You failed to make " + output + "."], [10, "You made " + output + " and gained 5 manufacturing experience."], [4, "You made " + output + " and gained 5 manufacturing experience."], [5, "A simple item description."]]:
+		app_state.call("_on_packet", EloriaProtocol.ServerMessage.INVENTORY_ITEM_TEXT,
+			PackedByteArray([result[0]]) + str(result[1]).to_utf8_buffer())
+		main.call("_sync_inventory")
+		var label: RichTextLabel = main.get("inventory_description")
+		var expected: Color = {0: Color("ff6666"), 10: Color("66dd88"), 4: Color("ffd166"), 5: Color.WHITE}[result[0]]
+		_expect(label.get_theme_color("default_color") == expected, "inventory feedback uses result color %d" % result[0])
+		if result[0] in [10, 4]:
+			var workspace: Control = main.get("inventory_workspace")
+			var icon: TextureRect = workspace.get("preview_icon")
+			_expect(icon.texture != null, "mix output has an icon without a selected inventory item")
+	app_state.set("inventory", {0: {"image_id": 618, "quantity": 1}})
+	app_state.set("inventory_names", {0: "Enriched Fire Essence"})
+	app_state.call("_on_packet", EloriaProtocol.ServerMessage.INVENTORY_ITEM_TEXT,
+		PackedByteArray([4]) + "You made Enriched Fire Essence and gained 8 alchemy experience.".to_utf8_buffer())
+	main.call("_sync_inventory")
+	var preview: TextureRect = main.get("inventory_workspace").get("preview_icon")
+	_expect(preview.texture == main.call("_named_icon", 618, "Enriched Fire Essence"),
+		"a rare result shows the actual enriched item icon")
+	app_state.set("inventory_text", "")
+	main.call("_sync_inventory")
+	_expect((main.get("inventory_description") as RichTextLabel).get_theme_color("default_color") == Color.WHITE,
+		"returning to inspection clears the result color")
+
 func _queue(recipe: int, wanted: int) -> void:
 	main.set("selected_manufacturing_recipe", recipe)
 	main.call("_set_manufacturing_quantity", wanted)
@@ -224,14 +266,14 @@ func _queue(recipe: int, wanted: int) -> void:
 ## A mix state as the server sends it: the byte after the name's terminator
 ## is `interrupted`, and `with_flag` false leaves it off as an older server did.
 func _serve(running: bool, remaining: int, made: int, output: String,
-		interrupted := false, with_flag := true) -> void:
+		interrupted := false, with_flag := true, rare := false) -> void:
 	var payload := PackedByteArray([0, 1 if running else 0, 0, 0, 0, 0])
 	payload.encode_u16(2, remaining)
 	payload.encode_u16(4, made)
 	payload.append_array(output.to_utf8_buffer())
 	payload.append(0)
 	if with_flag:
-		payload.append(1 if interrupted else 0)
+		payload.append((1 if interrupted else 0) | (2 if rare else 0))
 	app_state.call("_on_packet", EloriaProtocol.ServerMessage.ELORIA_MIX_STATE,
 		payload)
 

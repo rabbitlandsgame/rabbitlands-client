@@ -616,8 +616,9 @@ func _style() -> void:
 	for panel: Control in panels: _override_box(panel, "panel", _empty_box)
 	for label: RichTextLabel in [main.inventory_description, inspection_text]:
 		_override_font_size(label, "normal_font_size", config.font_size)
-		if not label.has_theme_color_override("default_color") or label.get_theme_color("default_color") != config.text:
-			label.add_theme_color_override("default_color", config.text)
+		var text_color: Color = main._inventory_feedback_color() if label == main.inventory_description else config.text
+		if not label.has_theme_color_override("default_color") or label.get_theme_color("default_color") != text_color:
+			label.add_theme_color_override("default_color", text_color)
 	_override_font_size(inspection_title, "font_size", config.font_size + 2)
 	_style_slots()
 	for index: int in main.inventory_quantity_labels.size():
@@ -848,7 +849,9 @@ func sync_inventory() -> void:
 	if not ready_to_layout: return
 	var slot: int = main.selected_inventory_slot
 	var item: Dictionary = AppState.inventory.get(slot, {})
-	preview_icon.texture = main._slot_icon(int(item.get("image_id", 0)), slot) if not item.is_empty() else null
+	var mix_icon: Texture2D = main._inventory_mix_feedback_icon()
+	preview_icon.texture = mix_icon if mix_icon != null else (main._slot_icon(int(item.get("image_id", 0)), slot) if not item.is_empty() else null)
+	main.inventory_description.add_theme_color_override("default_color", main._inventory_feedback_color())
 	# The status line keeps whatever was written last, so it follows every sync.
 	var description: Dictionary = main._inventory_description_for(slot) if slot >= 0 else {}
 	var cached: Dictionary = _detail_cache.get(slot, {})
