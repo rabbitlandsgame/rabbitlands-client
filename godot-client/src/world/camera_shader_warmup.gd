@@ -15,10 +15,14 @@ extends RefCounted
 ## nothing new to compile, so it draws a short sweep (REUSE_YAW_STEP) that
 ## still exercises the occluder fades around its new focus. Any new key draws
 ## the full sweep. ELORIA_CAMERA_WARMUP_REUSE=0 always draws the full sweep.
+## Browser presentation remains limited by requestAnimationFrame even while
+## uncapped: use representative 30-degree views with a five-second ceiling.
+## That reduced pass records its arrival, never full world-content coverage.
 
 const FRAMES_PER_VIEW := 2
 const LIMIT_MSEC := 20000
-const WEB_LIMIT_MSEC := 30000
+const WEB_LIMIT_MSEC := 5000
+const WEB_YAW_STEP := 30
 const PITCHES := [-60.0, -15.0]
 const YAW_STEP := 3
 ## Degrees between views when the arrival's content is already covered: a
@@ -80,8 +84,13 @@ static func drawing() -> bool:
 func views() -> int:
 	return PITCHES.size() * (360 / _yaw_step)
 
+func _is_web() -> bool:
+	return OS.has_feature("web")
+
 func snapshot() -> Dictionary:
 	return {"active": active(), "view": _view, "views": views(),
+		"policy": "browser_representative" if _is_web() else "native",
+		"limit_msec": WEB_LIMIT_MSEC if _is_web() else LIMIT_MSEC,
 		"elapsed_msec": Time.get_ticks_msec() - _started if active() else _elapsed, "timed_out": _timed_out,
 		"mode": _mode, "uncapped": _uncapped, "frames_per_view": _frames_per_view,
 		"max_draw_calls": _max_draw_calls, "render_size": str(_render_size),
@@ -130,7 +139,7 @@ func begin(world: Node3D, source: Camera3D, focus: Vector3) -> bool:
 		Engine.max_fps = 0
 		# Browser presentation stays on requestAnimationFrame; changing window
 		# VSync is unsupported there. Keep the native warmup policy unchanged.
-		if DisplayServer.get_name() != "headless" and not OS.has_feature("web"):
+		if DisplayServer.get_name() != "headless" and not _is_web():
 			_window_id = source.get_window().get_window_id()
 			_saved_vsync = DisplayServer.window_get_vsync_mode(_window_id)
 			DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED, _window_id)
@@ -179,10 +188,10 @@ func _choose_sweep(world: Node3D, source: Camera3D) -> void:
 	for key: String in content[0]:
 		if not covered.has(key):
 			_new_keys += 1
-	_reused = _new_keys == 0 and not covered.is_empty() \
+	_reused = not _is_web() and _new_keys == 0 and not covered.is_empty() \
 		and OS.get_environment(REUSE_VARIABLE) != "0"
-	_yaw_step = REUSE_YAW_STEP if _reused else YAW_STEP
-	_credit = {} if _reused else content[1]
+	_yaw_step = WEB_YAW_STEP if _is_web() else (REUSE_YAW_STEP if _reused else YAW_STEP)
+	_credit = {} if _is_web() or _reused else content[1]
 	_scan_usec = Time.get_ticks_usec() - started
 
 ## What a sweep around `_focus` draws, as two key sets: what it could draw and
@@ -322,7 +331,7 @@ func advance(draw_count := Engine.get_frames_drawn()) -> void:
 			or (_mode == "small" and _source.get_viewport().get_camera_3d() != _source):
 		cancel()
 		return
-	var limit := WEB_LIMIT_MSEC if OS.has_feature("web") else LIMIT_MSEC
+	var limit := WEB_LIMIT_MSEC if _is_web() else LIMIT_MSEC
 	if Time.get_ticks_msec() - _started > limit:
 		_timed_out = true
 		_finish()
@@ -351,8 +360,8 @@ func _finish() -> void:
 	if is_instance_valid(world):
 		var identity := world.get_instance_id()
 		_completed[identity] = {"root": weakref(world), "focus": _focus}
-		# Only a sweep that drew every view vouches for its content.
-		if not _timed_out and not _credit.is_empty():
+		# Only a full native sweep that drew every view vouches for its content.
+		if not _is_web() and not _timed_out and not _credit.is_empty():
 			var record: Dictionary = _coverage.get(identity, {}) as Dictionary
 			if record.is_empty():
 				record = {"root": weakref(world), "keys": {}}
