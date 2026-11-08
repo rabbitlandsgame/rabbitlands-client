@@ -799,6 +799,7 @@ var _show_through_obstacles := true
 var _bulk_exclusions: Dictionary = {
 	"store": [false, false, false, false],
 	"drop": [false, false, false, false]}
+var _store_protect_pouch := false
 var _item_lists: Dictionary = {}
 var classic_storage: ClassicStorageWorkspace
 var _store_options_menu: PopupMenu
@@ -4280,7 +4281,7 @@ func _configure_inventory_menus() -> void:
 	var protection := Button.new()
 	protection.name = "StorageProtection"
 	protection.text = "Protection…"
-	protection.tooltip_text = "Choose backpack rows or columns to keep when using Store All."
+	protection.tooltip_text = "Choose backpack rows, columns or pouch items to keep when using Store All."
 	inventory_store_all.get_parent().add_child(protection)
 	protection.pressed.connect(func():
 		_store_options_menu.position = Vector2i(protection.global_position + Vector2(0, protection.size.y))
@@ -4292,6 +4293,7 @@ func _configure_inventory_menus() -> void:
 				"Protect first column", "Protect last column"]:
 			menu.add_check_item(label)
 		inventory_panel.add_child(menu)
+	_store_options_menu.add_check_item("Protect pouch items", 4)
 	_store_options_menu.id_pressed.connect(_on_bulk_option_selected.bind("store"))
 	_drop_options_menu.id_pressed.connect(_on_bulk_option_selected.bind("drop"))
 	_sync_bulk_option_menus()
@@ -4302,6 +4304,7 @@ func _sync_bulk_option_menus() -> void:
 		var values: Array = _bulk_exclusions.get(str(menu_and_key[1]), []) as Array
 		for index: int in range(4):
 			menu.set_item_checked(index, index < values.size() and bool(values[index]))
+	_store_options_menu.set_item_checked(4, _store_protect_pouch)
 
 func _on_bulk_button_gui_input(event: InputEvent, kind: String) -> void:
 	if inventory_workspace != null:
@@ -4309,6 +4312,11 @@ func _on_bulk_button_gui_input(event: InputEvent, kind: String) -> void:
 			inventory_store_all if kind == "store" else inventory_drop_all)
 
 func _on_bulk_option_selected(option_id: int, kind: String) -> void:
+	if kind == "store" and option_id == 4:
+		_store_protect_pouch = not _store_protect_pouch
+		_sync_bulk_option_menus()
+		_save_hud_settings()
+		return
 	if option_id < 0 or option_id >= 4:
 		return
 	var values: Array = (_bulk_exclusions.get(kind, [false, false, false, false]) as Array).duplicate()
@@ -4318,6 +4326,8 @@ func _on_bulk_option_selected(option_id: int, kind: String) -> void:
 	_save_hud_settings()
 
 func _inventory_slot_is_protected(slot: int, kind: String) -> bool:
+	if kind == "store" and slot >= 128:
+		return _store_protect_pouch
 	if slot < 0 or slot >= 24: return false
 	var columns: int = maxi(1, inventory_grid.columns)
 	var last_row: int = (23 / columns) * columns
@@ -11865,6 +11875,7 @@ func _load_hud_settings() -> void:
 		_selected_quantity_box = clampi(int(config.get_value(
 			"inventory", "selected_quantity", 0)), 0, _inventory_quantities.size() - 1)
 		_inventory_quantity_override = clampi(int(config.get_value("inventory", "quantity_override", 0)), 0, 0xffffffff)
+		_store_protect_pouch = bool(config.get_value("inventory", "protect_pouch", false))
 		var bulk_value: Variant = config.get_value("inventory", "bulk_exclusions", {})
 		if bulk_value is Dictionary:
 			for kind: String in ["store", "drop"]:
@@ -12133,6 +12144,7 @@ func _save_hud_settings() -> void:
 	config.set_value("inventory", "selected_quantity", _selected_quantity_box)
 	config.set_value("inventory", "quantity_override", _inventory_quantity_override)
 	config.set_value("inventory", "bulk_exclusions", _bulk_exclusions)
+	config.set_value("inventory", "protect_pouch", _store_protect_pouch)
 	config.set_value("inventory", "item_lists", _item_lists)
 	for banner_key: String in BANNER_OPTION_NODES:
 		config.set_value("banner", banner_key, _banner_option(banner_key))
