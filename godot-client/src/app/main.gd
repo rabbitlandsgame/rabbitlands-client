@@ -14753,6 +14753,8 @@ func _sync_local_status_icons() -> void:
 		icon.tooltip_text = effect.replace("expose_", "Weakness: ").replace("_", " ").capitalize()
 		icon.mouse_filter = Control.MOUSE_FILTER_PASS
 		local_status_grid.add_child(icon)
+	# Let container minimum sizes settle before shrinking the panel after expiry.
+	_layout_actor_resource_overlay.call_deferred()
 
 func _banner_has_content() -> bool:
 	if mount_status.wants_banner():

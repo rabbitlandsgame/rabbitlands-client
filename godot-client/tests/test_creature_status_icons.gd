@@ -181,19 +181,49 @@ func _test_own_player(state: Node, effects: Array) -> void:
 	main.hide()
 	await process_frame
 	state.set("local_actor_id", 99)
+	main.set_process(false)
+	main.show()
+	(main.get("game_view") as Control).show()
+	var banner := main.get("actor_resource_overlay") as Control
+	banner.show()
+	# Runtime anchors the banner every frame, which preserves its assigned size.
+	var position_banner := func() -> void:
+		banner.position = Vector2(100, 400 - banner.size.y)
+	process_frame.connect(position_banner)
+	main.call("_layout_actor_resource_overlay")
+	for frame: int in 4: await process_frame
+	var base_height := banner.size.y
 	state.get("actors")[99] = {"actor_id": 99, "kind": 1, "health": 20, "status_effects": effects}
 	main.call("_sync_local_status_icons")
+	for frame: int in 4: await process_frame
+	var full_height := banner.size.y
+	_expect(full_height > base_height, "own banner grows for multiple status rows")
 	var grid := main.get("local_status_grid") as GridContainer
 	_expect(grid != null and grid.get_child_count() == effects.size() and grid.columns == 6,
 		"own overhead HUD shows all statuses and wraps them")
 	_expect(grid.get_parent().get_child(0) == grid, "own icons appear above the name and resources")
+	state.get("actors")[99].status_effects = ["poison"]
+	main.call("_sync_local_status_icons")
+	for frame: int in 4: await process_frame
+	_expect(banner.size.y < full_height and banner.size.y > base_height,
+		"partial expiry shrinks the own banner to one status row")
+	state.get("actors")[99].status_effects = []
+	main.call("_sync_local_status_icons")
+	for frame: int in 4: await process_frame
+	_expect(is_equal_approx(banner.size.y, base_height), "last expiry restores own banner height")
+	state.get("actors")[99].status_effects = effects
+	main.call("_sync_local_status_icons")
+	for frame: int in 4: await process_frame
 	state.get("actors")[99].health = 0
 	main.call("_sync_local_status_icons")
+	for frame: int in 4: await process_frame
 	_expect(not grid.visible, "own statuses disappear on death")
+	_expect(is_equal_approx(banner.size.y, base_height), "death restores own banner height")
 	state.get("actors")[99].health = 20
 	main.set("_nameplates_enabled", false)
 	main.call("_sync_local_status_icons")
 	_expect(not grid.visible, "own statuses respect the display setting")
+	process_frame.disconnect(position_banner)
 	state.get("actors").clear()
 	main.queue_free()
 	await process_frame
