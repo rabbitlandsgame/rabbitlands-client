@@ -1672,6 +1672,9 @@ func _ready() -> void:
 	lantern_guide.attach_campaign(campaign_hud)
 	actor_resource_overlay.get_node("Rows").add_child(mount_status)
 	mount_status.display_changed.connect(_layout_actor_resource_overlay)
+	# Rich text remeasures after the hidden login view receives its real width.
+	# Shrink the background to that settled content instead of keeping its old height.
+	actor_resource_overlay.minimum_size_changed.connect(actor_resource_overlay.reset_size)
 	var model_registry: Dictionary = _json("res://data/actors/models.json")
 	models = model_registry.get("models", {})
 	actor_type_models = model_registry.get("actorTypes", {})
