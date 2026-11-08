@@ -159,6 +159,7 @@ var inventory: Dictionary = {}
 ## finding one, which is also what an older server gets it.
 var inventory_names: Dictionary = {}
 var inventory_text := ""
+var inventory_text_color := 5
 var inventory_metadata_dirty := false
 var _inventory_text_generation := 0
 ## Resolved slot view for the UI; deadlines belong to item types, below.
@@ -1298,6 +1299,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			_sync_trade_inventory()
 		"inventory_text":
 			inventory_text = str(event.text)
+			inventory_text_color = int(event.get("color", 5))
 			_inventory_text_generation += 1
 			_expire_inventory_text(_inventory_text_generation)
 			state_changed.emit(&"inventory_text")
@@ -2049,6 +2051,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 				"made": int(event.get("made", 0)),
 				"output": str(event.get("output", "")),
 				"interrupted": bool(event.get("interrupted", false)),
+				"rare": bool(event.get("rare", false)),
 			}
 			state_changed.emit(&"mix_state")
 		"counter_layout":

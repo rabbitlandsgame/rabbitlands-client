@@ -4266,10 +4266,10 @@ func _on_mix_state_changed() -> void:
 		if str(state.get("output", "")) == str(run.get("output", "")):
 			_mix_pending.remove_at(0)
 			_settle_mix_run(run, int(state.get("made", 0)),
-				bool(state.get("interrupted", false)))
+				bool(state.get("interrupted", false)), bool(state.get("rare", false)))
 	_sync_manufacturing()
 
-func _settle_mix_run(run: Dictionary, made: int, interrupted := false) -> void:
+func _settle_mix_run(run: Dictionary, made: int, interrupted := false, rare := false) -> void:
 	if not interrupted:
 		manufacturing_server_status = ("Crafting failed: no %s made. Check the recipe requirements and supplies." % str(run.get("output", "items"))
 			if made == 0 else "Made %d %s." % [made, str(run.get("output", "items"))])
@@ -4282,12 +4282,16 @@ func _settle_mix_run(run: Dictionary, made: int, interrupted := false) -> void:
 		# way the entry keeps its place and is asked for again. Otherwise the
 		# batch ran to its end or ran out of materials, and asking again would
 		# only fail the same way.
-		if (_mix_pending.is_empty() and not interrupted
+		if (_mix_pending.is_empty() and not interrupted and not rare
 				and manufacturing_queue_index == position):
 			manufacturing_queue_index = position + 1
 	# Whatever interrupted the batch - a harvest - is what the player is doing
 	# now, and the next batch would end it in turn, because starting a mix
 	# stops a harvest. So the queue waits for Start rather than move on.
+	if rare:
+		manufacturing_queue_running = false
+		manufacturing_server_status = "Rare mix made! Batch and queue stopped."
+		_sync_manufacturing_queue()
 	if interrupted and manufacturing_queue_running:
 		manufacturing_queue_running = false
 		manufacturing_server_status = ("Mixing was interrupted, so the queue"
@@ -6932,6 +6936,10 @@ func _on_state_changed(path: StringName) -> void:
 			# window is withheld. See `_describe_slot`.
 			var short_line: String = _short_item_line()
 			if not short_line.is_empty():
+				AppState.inventory_text = ""
+				if inventory_workspace != null and inventory_workspace.ready_to_layout:
+					inventory_workspace.sync_inventory()
+				inventory_description.add_theme_color_override("default_color", Color.WHITE)
 				inventory_description.text = short_line
 		&"inventory_cooldowns":
 			_sync_quick_slots()
@@ -15807,6 +15815,7 @@ func _sync_inventory_if_shown() -> void:
 	if selected_inventory_slot >= 0 and not AppState.inventory.get(selected_inventory_slot) is Dictionary:
 		selected_inventory_slot = -1
 	_sync_quick_slots()
+	inventory_description.add_theme_color_override("default_color", _inventory_feedback_color())
 	if ground_bag_panel.visible:
 		_sync_ground_bag_actions()
 
@@ -15875,10 +15884,42 @@ func _sync_inventory() -> void:
 			AppState.inventory[selected_inventory_slot], selected_inventory_slot)
 	else:
 		inventory_description.text = "Select an item to inspect it."
+	inventory_description.add_theme_color_override("default_color", _inventory_feedback_color())
 	if ground_bag_panel.visible:
 		_sync_ground_bag_actions()
 	if inventory_workspace != null and inventory_workspace.ready_to_layout:
 		inventory_workspace.sync_inventory()
+
+## The wire color describes the result, while ordinary item descriptions stay white.
+func _inventory_feedback_color() -> Color:
+	if not AppState.inventory_text.is_empty():
+		match AppState.inventory_text_color:
+			0: return Color("ff6666")
+			10: return Color("66dd88")
+			4: return Color("ffd166")
+	return Color.WHITE
+
+## Resolve the output by identity, independently of the selected ingredient slot.
+func _inventory_mix_feedback_icon() -> Texture2D:
+	var text: String = AppState.inventory_text
+	var output := ""
+	if text.begins_with("You made "):
+		output = text.trim_prefix("You made ").get_slice(" and gained ", 0)
+	elif text.begins_with("You failed to make "):
+		output = text.trim_prefix("You failed to make ").trim_suffix(".")
+	elif text.begins_with("You critically failed to make "):
+		output = text.trim_prefix("You critically failed to make ").get_slice(";", 0)
+	elif text.is_empty() and not _mix_pending.is_empty():
+		output = str(_mix_pending[0].get("output", ""))
+	if output.is_empty(): return null
+	for slot: Variant in AppState.inventory_names:
+		if str(AppState.inventory_names[slot]) == output and AppState.inventory.has(slot):
+			return _named_icon(int(AppState.inventory[slot].get("image_id", 0)), output)
+	for index: int in manufacturing_catalog.count():
+		var recipe: Dictionary = manufacturing_catalog.recipe(index)
+		if str(recipe.get("output", "")) == output:
+			return _named_icon(int(recipe.get("outputImageId", 0)), output)
+	return null
 
 func _sync_equipment_slots() -> void:
 	for index: int in range(equipment_slot_buttons.size()):

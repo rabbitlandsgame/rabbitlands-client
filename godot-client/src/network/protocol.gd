@@ -1437,7 +1437,8 @@ static func decode_mix_state(payload: PackedByteArray) -> Dictionary:
 		"remaining": payload.decode_u16(2),
 		"made": payload.decode_u16(4),
 		"output": output,
-		"interrupted": after_name < payload.size() and payload[after_name] != 0,
+		"interrupted": after_name < payload.size() and (payload[after_name] & 1) != 0,
+		"rare": after_name < payload.size() and (payload[after_name] & 2) != 0,
 	}
 
 static func decode_counter_layout(payload: PackedByteArray) -> Dictionary:
