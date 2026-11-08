@@ -327,6 +327,7 @@ func configure(view: SubViewport = null) -> void:
 	actions.add_theme_constant_override("h_separation", 14)
 	actions.add_theme_constant_override("v_separation", 6)
 	column.add_child(actions)
+	actions.minimum_size_changed.connect(_layout_presentation)
 	_skip = Button.new()
 	_skip.text = "Return to play · Esc"
 	_skip.pressed.connect(skip)
@@ -394,11 +395,9 @@ func _layout_presentation() -> void:
 	var padding := 8 if compact else 16
 	for side: String in ["left", "right", "top", "bottom"]:
 		_margin.add_theme_constant_override("margin_" + side, padding)
-	var height := minf(300.0, maxf(160.0, area.y - 88.0)) if _choice_waiting \
-		else clampf(area.y * 0.30, 176.0, 242.0)
+	var height := clampf(area.y * 0.30, 176.0, 242.0)
 	_bottom.offset_top = -height
 	_dialogue.fit_width(maxf(160.0, area.x - padding * 2.0))
-	_dialogue.fit_content_height(maxf(64.0, height - (72.0 if compact else 96.0)))
 	_skip.text = ("Return now · Esc" if _returning else "Return · Esc") if compact \
 		else ("Return now · Esc" if _returning else "Return to play · Esc")
 	_account.text = "Scene account" if compact else "Read scene account"
@@ -407,6 +406,10 @@ func _layout_presentation() -> void:
 	_actions.add_theme_constant_override("h_separation", 8 if compact else 14)
 	for control: Control in [_skip, _account, _reduced, _inspection_retry, _line_continue, _auto]:
 		control.add_theme_font_size_override("font_size", 14 if compact else 16)
+	var column := _actions.get_parent() as VBoxContainer
+	var overhead := padding * 2.0 + _bottom.get_theme_stylebox("panel").get_minimum_size().y \
+		+ column.get_theme_constant("separation") + _actions.get_combined_minimum_size().y
+	_dialogue.fit_height(height - overhead)
 
 func blocks_input() -> bool:
 	return playing or not _scene_handoff.is_empty()

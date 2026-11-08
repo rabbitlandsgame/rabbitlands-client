@@ -78,6 +78,18 @@ func dispose(f: Dictionary) -> void:
 	f.scene.queue_free()
 	f.stage.queue_free()
 
+func expect_scroll_reachable(scroll: ScrollContainer, control: Control, message: String) -> void:
+	# A full-detail option may be taller than the shared dialogue space.
+	# Both ends must remain readable by scrolling, including replay Continue.
+	var top := control.global_position.y - scroll.global_position.y + scroll.scroll_vertical
+	scroll.scroll_vertical = roundi(top)
+	for _frame: int in range(2): await process_frame
+	var bounds := scroll.get_global_rect().grow(1)
+	var start_visible := bounds.has_point(control.global_position + Vector2(1, 1))
+	scroll.scroll_vertical = roundi(top + control.size.y - scroll.size.y)
+	for _frame: int in range(2): await process_frame
+	expect(start_visible and bounds.has_point(control.get_global_rect().end - Vector2(1, 1)), message)
+
 func run() -> void:
 	create_timer(90).timeout.connect(func() -> void: push_error("Ferry decision test timed out"); quit(1))
 	root.size = Vector2i(1280,720)
@@ -123,23 +135,29 @@ func run() -> void:
 		tick(f, 20)
 		expect(f.scene.elapsed == 6 and f.camera.global_transform.is_equal_approx(replay_view), "replay review holds the steady group frame until Continue")
 		if id == "repair":
-			for size_and_scale: Array in [[1280,720,1.0],[720,480,1.5]]:
+			for size_and_scale: Array in [[1280,720,1.0],[720,480,1.0],[480,320,1.0],[720,480,1.5]]:
 				root.size = Vector2i(size_and_scale[0],size_and_scale[1])
+				root.content_scale_size = root.size
 				root.content_scale_factor = size_and_scale[2]
+				f.scene._choice_waiting = false
+				f.scene._dialogue.set_line("Odo Fenn", "Tell me where you need me.", f.actors[2])
+				f.scene._layout_presentation()
+				for _frame: int in range(5): await process_frame
+				var npc_height: float = f.scene._bottom.size.y
+				f.scene._choice_waiting = true
+				f.scene._dialogue.set_content("MeasureHuman0", f.scene._choice_dialog, f.actors[1])
 				for _frame: int in range(5): await process_frame
 				f.scene._layout_presentation()
 				for _frame: int in range(5): await process_frame
+				expect(is_equal_approx(npc_height, f.scene._bottom.size.y), "player decisions match the NPC dialogue height at "+str(size_and_scale))
 				var viewport_box := Rect2(Vector2.ZERO,root.get_visible_rect().size)
 				var choice_box: Rect2 = f.scene._dialogue.content_slot.get_global_rect()
 				expect(viewport_box.encloses(choice_box) and f.scene._bottom.get_global_rect().encloses(choice_box), "choices stay inside the same on-screen bottom dialogue panel at "+str(size_and_scale))
 				for button: Button in f.scene._choice_dialog.option_buttons.values():
-					f.scene._dialogue.content_slot.ensure_control_visible(button)
-					for _frame: int in range(2): await process_frame
-					expect(choice_box.grow(1).encloses(button.get_global_rect()), "every full native option is reachable inside the bounded bottom slot at "+str(size_and_scale))
-				f.scene._dialogue.content_slot.ensure_control_visible(f.scene._choice_dialog.continue_button)
-				for _frame: int in range(2): await process_frame
-				expect(choice_box.grow(1).encloses(f.scene._choice_dialog.continue_button.get_global_rect()), "replay Continue is reachable in the same bounded dialogue slot")
+					await expect_scroll_reachable(f.scene._choice_scroll, button, "every full native option is reachable inside the bounded bottom slot at "+str(size_and_scale))
+				await expect_scroll_reachable(f.scene._choice_scroll, f.scene._choice_dialog.continue_button, "replay Continue is reachable in the same bounded dialogue slot")
 			root.size = Vector2i(1280,720)
+			root.content_scale_size = root.size
 			root.content_scale_factor = 1.0
 		f.scene._on_choice_option("repair", f.scene._choice_token())
 		expect(f.requests == [id], "replay cannot send a different approach")

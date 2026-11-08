@@ -22,6 +22,7 @@ var _content_body: VBoxContainer
 var _content_hint: Label
 var _custom_content: WeakRef
 var _content_height := 170.0
+var _available_height := -1.0
 var _content_revision := 0
 var _row: HBoxContainer
 var _portrait_frame: PanelContainer
@@ -200,6 +201,15 @@ func fit_content_height(height: float) -> void:
 	content_slot.custom_minimum_size.y = bounded
 	_schedule_content_hint()
 
+func fit_height(height: float) -> void:
+	_available_height = height
+	# Choices share the spoken-line height, including the name and scroll hint.
+	var overhead := 0.0
+	for label: Label in [speaker_label, _content_hint]:
+		if label.visible:
+			overhead += label.get_combined_minimum_size().y + 5.0
+	fit_content_height(height - overhead)
+
 func content_active() -> bool:
 	return content_slot.visible and _custom_content != null and is_instance_valid(_custom_content.get_ref())
 
@@ -226,6 +236,8 @@ func _update_content_hint(revision: int) -> void:
 	var overflow := bar.max_value > bar.page + 1.0
 	_content_hint.text = str(content.get_meta(&"dialogue_scroll_hint", "Scroll to read more."))
 	_content_hint.visible = overflow
+	if _available_height >= 0.0:
+		fit_height(_available_height)
 	var focused := get_viewport().gui_get_focus_owner()
 	if is_instance_valid(focused) and content.is_ancestor_of(focused):
 		content_slot.ensure_control_visible(focused)
