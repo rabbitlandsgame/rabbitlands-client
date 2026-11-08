@@ -12864,6 +12864,7 @@ func _configure_window_stack() -> void:
 		window_stack.register(controller.get("panel"))
 	for panel: Control in extension_windows._cascade():
 		window_stack.register(panel)
+	window_stack.keep_above(extension_windows.detail_panel, extension_windows.gauntlet_loot_window.panel)
 	window_stack.decorate(dialogue_panel, [get_node("%DialogueBackdrop"),
 		get_node("%DialogueFrameTexture")])
 	window_stack.attach_overlay(inventory_panel, inventory_quantity_edit)

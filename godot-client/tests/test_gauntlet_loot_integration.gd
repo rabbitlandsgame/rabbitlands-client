@@ -120,8 +120,25 @@ func run() -> void:
 		detail.append(0)
 	state._on_packet(EloriaProtocol.ServerMessage.ELORIA_ITEM_DETAIL, detail)
 	await process_frame
-	expect(main.extension_windows.detail_panel.visible and main.extension_windows.detail_text.text.contains("Used to buy goods and services.")
-		and main.extension_windows.detail_text.text.contains("Weight 0 EMU"), "the server reply opens the existing description and stats card")
+	expect(main.extension_windows.detail_panel.visible and main.inventory_workspace.inspection_text.text.contains("Used to buy goods and services.")
+		and main.inventory_workspace.inspection_text.text.contains("Weight 0 EMU"), "the server reply opens the existing description and stats card")
+	var card: Control = main.extension_windows.detail_panel
+	WindowStack.activate(ledger.panel)
+	await process_frame
+	expect(card.get_index() > ledger.panel.get_index() and card.z_index > ledger.panel.z_index,
+		"the visible item card stays above the ledger when another loot row is clicked")
+	ledger._inspect_item({"id": "1"})
+	detail = detail.duplicate()
+	detail.encode_u16(0, 1)
+	state._on_packet(EloriaProtocol.ServerMessage.ELORIA_ITEM_DETAIL, detail)
+	await process_frame
+	expect(card.visible and card.get_index() > ledger.panel.get_index(),
+		"a second item reply keeps the existing card in front")
+	main.popup_panel.show()
+	WindowStack.activate(ledger.panel)
+	await process_frame
+	expect(main.popup_panel.get_index() > card.get_index(), "confirmation dialogs remain above the item card")
+	main.popup_panel.hide()
 	state.close_item_detail()
 	snapshot.phase = "sent"
 	snapshot.exited = true

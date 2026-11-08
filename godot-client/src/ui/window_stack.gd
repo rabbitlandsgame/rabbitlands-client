@@ -15,6 +15,7 @@ var _full_window_views: Array[Control] = []
 var _world_surface: Control
 var _decorations: Dictionary = {}
 var _overlays: Dictionary = {}
+var _companions: Dictionary = {}
 var _visibility: Dictionary = {}
 var _updating := false
 var _modal_update_pending := false
@@ -65,6 +66,12 @@ func decorate(window: Control, decorations: Array) -> void:
 func attach_overlay(window: Control, overlay: Control) -> void:
 	_overlays[overlay] = window
 	_sync_layers()
+
+## A non-blocking item card stays above the ledger it describes, even when
+## another exposed ledger row receives the next click.
+func keep_above(window: Control, owner: Control) -> void:
+	_companions[window] = owner
+	_raise_modals()
 
 ## Also works for standalone windows used by previews and tools. A docked
 ## inventory activates its containing storage window without moving its layout.
@@ -172,6 +179,15 @@ func _raise_modals() -> void:
 				if view.get_index() != next_index:
 					surface.move_child(view, next_index)
 				next_index += 1
+	for raw_window: Variant in _companions:
+		if not is_instance_valid(raw_window) or not is_instance_valid(_companions[raw_window]):
+			continue
+		var window := raw_window as Control
+		var owner: Control = _companions[window]
+		if window.is_visible_in_tree() and owner.is_visible_in_tree() \
+				and window.get_parent() == surface and owner.get_parent() == surface \
+				and window.get_index() < owner.get_index():
+			window.move_to_front()
 	for modal: Control in _modals:
 		if is_instance_valid(modal) and modal.is_visible_in_tree():
 			modal.move_to_front()
