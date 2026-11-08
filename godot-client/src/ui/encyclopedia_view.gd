@@ -1,9 +1,9 @@
 class_name EncyclopediaView
 extends VBoxContainer
 const TextColors := preload("res://src/ui/text_colors.gd")
-## The Eloria encyclopedia, laid out the way Eternal Lands lays its own out:
-## an index of categories, a page of links per category, and a page per entry
-## with a Back To Index link at the foot of it.
+## Searchable reference ledger. Filter and sort the entire catalogue before
+## paging; select a row for a preview or open its full article. Existing page
+## keys remain valid for bookmarks and links.
 ##
 ## Half of it is written and half of it is built. The written half is original
 ## Eloria reference text in `data/reference/encyclopedia.json`. The built half
@@ -42,22 +42,18 @@ const CATEGORY_GLYPHS := {
 ## How far Back can walk. Long enough for any real trail through the pages,
 ## short enough that a session cannot grow it without bound.
 const HISTORY_LIMIT := 64
-## The window is 640 wide and holds three panes, so its type is set smaller
-## than the rest of the HUD: at the HUD's own size the two side panes grew to
-## fit their longest link and left the page itself a column a few words wide.
-const FONT_SIZE := 13
+## Compact type keeps the ledger readable beside the category rail.
+const FONT_SIZE := 14
 const TITLE_FONT_SIZE := 18
 ## The side panes are fixed rather than sized by what is in them. A link too
 ## long for its pane is cut short with its whole name in the tooltip, because
 ## a pane that widens for one long title narrows the page for every title.
-const BROWSE_WIDTH := 138
-const ASIDE_WIDTH := 132
+const BROWSE_WIDTH := 132
 const PANE_GAP := 6
 const BROWSE_ICON_SIZE := 18
 ## The label column of a fact table. Labels wrap inside it rather than push
 ## the values over: a value squeezed to nothing wraps a letter to a line.
-const FACT_LABEL_WIDTH := 104
-const FACT_ICON_WIDTH := 16
+const FACT_LABEL_WIDTH := 164
 
 signal bookmarks_changed(bookmarks: Array)
 
@@ -73,7 +69,7 @@ var entry_body: RichTextLabel
 var bookmarks_button: Button
 var browse_list: VBoxContainer
 var entry_page: VBoxContainer
-var page_contents: VBoxContainer
+var page_contents: Container
 var related_list: VBoxContainer
 var aside_pane: VBoxContainer
 var content_scroll: ScrollContainer
@@ -87,6 +83,26 @@ var menu: PopupMenu
 ## variable rather than a constant so a window of another size, and the suite
 ## that exercises the paging controls, can say otherwise.
 var entries_per_page := 24
+
+const ENTRY_TYPES := ["All types", "Guides", "Recipes", "Spells", "Books", "Maps", "Skills", "Perks"]
+const TYPE_IDS := ["", "guide", "recipe", "spell", "book", "map", "skill", "perk"]
+const SORT_IDS := ["name", "name_desc", "level", "level_desc", "topic", "book"]
+var type_filter: OptionButton
+var sort_filter: OptionButton
+var book_filter: OptionButton
+var level_filter: SpinBox
+var level_enabled: CheckBox
+var ledger: Tree
+var result_label: Label
+var ledger_column: VBoxContainer
+var preview_header: HBoxContainer
+var preview_title: Label
+var full_article_button: Button
+var bookmark_entry_button: Button
+var split: VSplitContainer
+var _syncing := false
+var _result_entries: Array[Dictionary] = []
+var _search_timer: Timer
 
 var _document: Dictionary = {}
 var _categories: Array[Dictionary] = []
@@ -165,14 +181,20 @@ func reset_to_index() -> void:
 	_navigate({"kind": PAGE_INDEX}, false)
 
 func open_category(category_id: String, page := 0) -> void:
-	_navigate({"kind": "category", "id": category_id, "page": page})
+	var state := _browse_state()
+	state.merge({"kind": "category", "id": category_id, "topic": category_id,
+		"page": page, "selected": ""}, true)
+	_navigate(state)
 
 func open_entry(category_id: String, entry_id: String) -> void:
-	_navigate({"kind": "entry", "category": category_id, "id": entry_id})
+	var state := _browse_state()
+	state.merge({"kind": "entry", "category": category_id, "id": entry_id,
+		"selected": "entry:%s:%s" % [category_id, entry_id]}, true)
+	_navigate(state)
 
 ## Every entry whose title, summary or text contains the words asked for.
 func search(query: String) -> void:
-	_navigate({"kind": "search", "query": query})
+	_navigate({"kind": "search", "query": query, "topic": "", "page": 0})
 
 func matches(query: String) -> Array[Dictionary]:
 	var needle: String = query.strip_edges().to_lower()
@@ -180,11 +202,15 @@ func matches(query: String) -> Array[Dictionary]:
 	if needle.is_empty():
 		return found
 	for entry: Dictionary in _flat:
-		if str(entry.get("search", "")).contains(needle):
+		if _matches_words(entry, needle):
 			found.append(entry)
 	return found
 
 func page_key() -> String:
+	if str(_page.get("kind", "")) == "browse":
+		return "browse:" + JSON.stringify(_page)
+	if str(_page.get("kind", "")) == "bookmarks":
+		return "bookmarks"
 	match str(_page.get("kind", PAGE_INDEX)):
 		"category":
 			return "cat:%s:%d" % [str(_page.get("id", "")), int(_page.get("page", 0))]
@@ -196,6 +222,9 @@ func page_key() -> String:
 	return PAGE_INDEX
 
 func page_title() -> String:
+	if str(_page.get("kind", "")) == "browse":
+		return "Browse: %s" % str(_category(str(_page.get("topic", ""))).get("title", "All topics"))
+	if str(_page.get("kind", "")) == "bookmarks": return "Bookmarks"
 	match str(_page.get("kind", PAGE_INDEX)):
 		"category":
 			return str(_category(str(_page.get("id", ""))).get("title", "Index"))
@@ -207,9 +236,16 @@ func page_title() -> String:
 	return "Index"
 
 func open_page_key(key: String) -> void:
-	if key.begins_with("cat:"):
+	if key.begins_with("browse:"):
+		var state: Variant = JSON.parse_string(key.substr(7))
+		if state is Dictionary:
+			_navigate(state)
+	elif key == "bookmarks":
+		_navigate({"kind": "bookmarks"})
+	elif key.begins_with("cat:"):
 		var parts: PackedStringArray = key.substr(4).split(":")
-		open_category(parts[0], int(parts[1]) if parts.size() > 1 else 0)
+		_navigate({"kind": "category", "id": parts[0], "topic": parts[0],
+			"page": int(parts[1]) if parts.size() > 1 else 0})
 	elif key.begins_with("entry:"):
 		var parts: PackedStringArray = key.substr(6).split(":")
 		if parts.size() > 1:
@@ -229,6 +265,7 @@ func set_bookmarks(stored: Array) -> void:
 			var bookmark: Dictionary = raw as Dictionary
 			_bookmarks.append({"key": str(bookmark.get("key", PAGE_INDEX)),
 				"label": str(bookmark.get("label", "Index"))})
+	if ledger != null: _render()
 
 func go_back() -> void:
 	if _history.is_empty():
@@ -319,6 +356,24 @@ func _rebuild_content() -> void:
 			_by_id["%s/%s" % [category_id, str(entry.get("id", ""))]] = entry
 			_flat.append(entry)
 
+	for entry: Dictionary in _flat:
+		if str(entry.get("type", "")) == "recipe":
+			for pair: Array in entry.get("facts", []) as Array:
+				if str(pair[0]) == "Required materials":
+					pair[1] = _ingredient_lines(entry.get("materials", []))
+				elif str(pair[0]) == "Tools required to have":
+					pair[1] = _ingredient_lines(entry.get("tools", []))
+		var searchable := "%s %s %s %s %s" % [entry.get("title", ""),
+			entry.get("summary", ""), entry.get("body", ""),
+			_category(str(entry.get("category", ""))).get("title", ""), entry.get("book", "")]
+		for pair: Array in entry.get("facts", []) as Array:
+			searchable += " %s %s" % [pair[0], _plain_text(str(pair[1]))]
+		for section: Dictionary in entry.get("sections", []) as Array:
+			searchable += " %s %s" % [section.get("title", ""), section.get("text", "")]
+			for pair: Array in section.get("rows", []) as Array:
+				searchable += " %s %s" % [pair[0], _plain_text(str(pair[1]))]
+		entry["search"] = searchable.to_lower()
+
 func _written_entry(raw: Dictionary, category_id: String) -> Dictionary:
 	var body: String = str(raw.get("body", ""))
 	var facts: Array[Array] = []
@@ -328,13 +383,28 @@ func _written_entry(raw: Dictionary, category_id: String) -> Dictionary:
 			if fact_value is Array and (fact_value as Array).size() >= 2:
 				facts.append([str((fact_value as Array)[0]),
 					_escape(str((fact_value as Array)[1]))])
-	return _entry_record(str(raw.get("id", "")), str(raw.get("title", "")),
+	var entry := _entry_record(str(raw.get("id", "")), str(raw.get("title", "")),
 		str(raw.get("summary", "")), body, facts, {}, category_id)
+	entry["type"] = "perk" if category_id == "perks" else "guide"
+	entry["related"] = (raw.get("related", []) as Array).duplicate(true)
+	var sections: Array[Dictionary] = []
+	for raw_section: Variant in raw.get("sections", []) as Array:
+		var section: Dictionary = (raw_section as Dictionary).duplicate(true)
+		if str(section.get("kind", "")) == "facts":
+			var rows: Array = []
+			for pair: Variant in section.get("rows", []) as Array:
+				if pair is Array and pair.size() >= 2:
+					rows.append([str(pair[0]), _escape(str(pair[1]))])
+			section["rows"] = rows
+		sections.append(section)
+	entry["sections"] = sections
+	return entry
 
 func _entry_record(id: String, title: String, summary: String, body: String,
 		facts: Array[Array], image: Dictionary, category_id: String) -> Dictionary:
 	return {"id": id, "title": title, "summary": summary, "body": body,
 		"facts": facts, "image": image, "category": category_id,
+		"type": "guide", "level": -1, "book": "",
 		"search": ("%s %s %s" % [title, summary, body]).to_lower()}
 
 ## One entry per recipe, grouped by the skill that mixes it. The fields are the
@@ -379,6 +449,9 @@ func _recipe_entries(skill_categories: Dictionary) -> Dictionary:
 		if not book.is_empty():
 			facts.append(["Knowledge needed", _link("entry:%s:%s" % [
 				_books_category, _slug(book)], book)])
+		var animal_nexus := int(recipe.get("animalNexus", 0))
+		if animal_nexus > 0:
+			facts.append(["Animal nexus required", str(animal_nexus)])
 		facts.append(["Recommended %s level" % readable_skill,
 			str(int(recipe.get("level", 0)))])
 		facts.append(["%s experience given" % readable_skill,
@@ -387,12 +460,19 @@ func _recipe_entries(skill_categories: Dictionary) -> Dictionary:
 		var mana: int = int(recipe.get("mana", 0))
 		if mana > 0:
 			facts.append(["Ether required", str(mana)])
-		var body: String = ("Mixed with the %s skill. The server checks every"
-			+ " line below before it lets the mix start, and refuses the mix"
-			+ " rather than half-making it.") % readable_skill
+		var body: String = ("Mixed with the %s skill. The listed level is recommended,"
+			+ " not a guaranteed success threshold. Attempts can fail; a critical"
+			+ " failure can consume materials. A rare result stops a running batch."
+			+ " Required knowledge, tools, food and"
+			+ " any nexus requirements are checked by the server. Near a storage"
+			+ " keeper, the mixing window can draw materials from storage; tools"
+			+ " still need to be carried or equipped.") % readable_skill
 		var image: Dictionary = _item_image(int(recipe.get("outputImageId", -1)))
 		var entry: Dictionary = _entry_record(entry_id, title, "", body, facts,
 			image, category_id)
+		entry.merge({"type": "recipe", "level": int(recipe.get("level", 0)),
+			"book": book, "output": output, "materials": recipe.get("ingredients", []),
+			"tools": recipe.get("tools", [])}, true)
 		if not by_skill.has(skill):
 			by_skill[skill] = []
 		(by_skill[skill] as Array).append(entry)
@@ -448,7 +528,8 @@ func _spell_entries(category_id: String) -> Array[Dictionary]:
 		var tome: String = catalogue.knowledge_for(spell_id)
 		facts.append(["Learned from", tome if not tome.is_empty()
 			else "Known to every mage"])
-		facts.append(["Ether", str(int(spell.get("mana", 0)))])
+		facts.append(["Ether at Power 1", str(int(spell.get("mana", 0)))])
+		facts.append(["Magic nexus required", str(int(spell.get("nexus", 0)))])
 		facts.append(["Unlock Magic level", str(int(spell.get("level", 0)))])
 		facts.append(["Recommended Magic level", str(int(spell.get("recommended_level", spell.get("level", 0))))])
 		var effect: String = str(spell.get("effect", ""))
@@ -466,8 +547,10 @@ func _spell_entries(category_id: String) -> Array[Dictionary]:
 			+ " it can be cast; Heal, Fire Bolt and Restore Ether need none. The"
 			+ " server checks the knowledge, the level and the reagents, in that"
 			+ " order.") % str(spell.get("description", ""))
-		entries.append(_entry_record(_slug(title), title, "", body, facts,
-			catalogue.icon_source(spell_id), category_id))
+		var entry := _entry_record(_slug(title), title, "", body, facts,
+			catalogue.icon_source(spell_id), category_id)
+		entry.merge({"type": "spell", "level": int(spell.get("level", 0)), "book": tome}, true)
+		entries.append(entry)
 	entries.sort_custom(_title_before)
 	return entries
 
@@ -492,12 +575,20 @@ func _book_entries(category_id: String) -> Array[Dictionary]:
 					str(row.get("id", ""))], str(row.get("title", ""))))
 		facts.append(["Opens", "\n".join(links) if not links.is_empty()
 			else "Nothing the client has a recipe for"])
-		var body: String = ("A book the server can teach you from. Reading it"
-			+ " takes time and it is read once; until the server records that"
-			+ " you have read it, what it teaches is refused however high your"
-			+ " level is.")
-		entries.append(_entry_record(_slug(title), title, "", body, facts, {},
-			category_id))
+		var spell_catalogue: SpellCatalog = _catalogues.get("spells") as SpellCatalog
+		if spell_catalogue != null:
+			for spell_id: int in spell_catalogue.spell_ids():
+				if spell_catalogue.knowledge_for(spell_id) == title:
+					var spell_name := str(spell_catalogue.spell(spell_id).get("name", ""))
+					links.append(_link("entry:spells:%s" % _slug(spell_name), spell_name))
+		facts[0][1] = "\n".join(links) if not links.is_empty() else "No recipe or spell in the loaded catalogues names this knowledge."
+		var body: String = ("Knowledge is recorded by the server after research completes."
+			+ " The Knowledge window shows what you have learned and current research."
+			+ " Spell tomes unlock their spell family. Repeatable experience books"
+			+ " are a separate kind of book; they are not permanent recipe unlocks.")
+		var entry := _entry_record(_slug(title), title, "", body, facts, {}, category_id)
+		entry["type"] = "book"
+		entries.append(entry)
 	return entries
 
 func _map_entries(category_id: String) -> Array[Dictionary]:
@@ -512,14 +603,11 @@ func _map_entries(category_id: String) -> Array[Dictionary]:
 		var title: String = str(region.get("name", ""))
 		if title.is_empty():
 			continue
-		var facts: Array[Array] = [["The server's map file",
-			str(region.get("serverMap", "unstated"))]]
-		var body: String = ("A region of Nymara. It is its own map on the"
-			+ " server, so arriving here is a change of map rather than a walk"
-			+ " across a seam, and the world around you is rebuilt as you"
-			+ " arrive.")
-		entries.append(_entry_record(_slug(title), title, "", body, facts, {},
-			category_id))
+		var facts: Array[Array] = [["Region", title]]
+		var body: String = "A region of Nymara. Use the map window to browse its terrain and map connections. Accessible destinations depend on the current server world."
+		var entry := _entry_record(_slug(title), title, "", body, facts, {}, category_id)
+		entry["type"] = "map"
+		entries.append(entry)
 	return entries
 
 func _skill_entries(category_id: String) -> Array[Dictionary]:
@@ -536,9 +624,10 @@ func _skill_entries(category_id: String) -> Array[Dictionary]:
 		var body: String = str(notes.get(skill, ""))
 		if body.is_empty():
 			body = "The server keeps a level and an experience total for this."
-		var facts: Array[Array] = [["Reported as", skill]]
-		entries.append(_entry_record(_slug(skill), skill.capitalize(), "", body,
-			facts, {}, category_id))
+		var facts: Array[Array] = [["Skill", skill.capitalize()]]
+		var entry := _entry_record(_slug(skill), skill.capitalize(), "", body, facts, {}, category_id)
+		entry["type"] = "skill"
+		entries.append(entry)
 	return entries
 
 func _ingredient_lines(value: Variant) -> String:
@@ -550,9 +639,14 @@ func _ingredient_lines(value: Variant) -> String:
 			continue
 		var ingredient: Dictionary = raw as Dictionary
 		var image: Dictionary = _item_image(int(ingredient.get("imageId", -1)))
+		var title := str(ingredient.get("name", ""))
+		var label := _escape(title)
+		for target: Dictionary in _flat:
+			if str(target.get("output", "")) == title:
+				label = _link("entry:%s:%s" % [target.category, target.id], title)
+				break
 		lines.append("%s%d %s" % [_image_tag(image, 22),
-			maxi(1, int(ingredient.get("quantity", 1))),
-			_escape(str(ingredient.get("name", "")))])
+			maxi(1, int(ingredient.get("quantity", 1))), label])
 	return "\n".join(lines)
 
 func _reagent_lines(value: Variant) -> String:
@@ -595,155 +689,124 @@ static func _slug(text: String) -> String:
 # --- rendering ---------------------------------------------------------------
 
 func _render() -> void:
-	var kind: String = str(_page.get("kind", PAGE_INDEX))
-	var pages := 1
-	var page_number := 0
-	match kind:
-		"category":
-			var category: Dictionary = _category(str(_page.get("id", "")))
-			var entries: Array = category.get("entries", []) as Array
-			pages = maxi(1, ceili(float(entries.size()) / float(entries_per_page)))
-			page_number = clampi(int(_page.get("page", 0)), 0, pages - 1)
-			_page["page"] = page_number
-			entry_body.text = _render_category(category, page_number, pages)
-		"entry":
-			_render_entry_page(str(_page.get("category", "")),
-				str(_page.get("id", "")))
-		"search":
-			entry_body.text = _render_search(str(_page.get("query", "")))
-		"bookmarks":
-			entry_body.text = _render_bookmarks()
-		_:
-			entry_body.text = _render_index()
-	# One of the two shows at a time: a page is built from controls, and the
-	# lists are a document the renderer already knows how to draw.
-	var built: bool = kind == "entry"
-	entry_page.visible = built
-	entry_body.visible = not built
-	# A list has no sections and nothing beside it, and an empty pane's width
-	# is better spent on the list.
-	aside_pane.visible = built
-	if not built:
-		_clear(entry_page)
-		_clear(page_contents)
-		_clear(related_list)
-		_anchors.clear()
+	if ledger == null:
+		return
+	_syncing = true
+	var state := _browse_state()
+	var kind := str(_page.get("kind", PAGE_INDEX))
+	var full := kind == "entry"
+	search_edit.text = str(state.get("query", ""))
+	type_filter.select(maxi(0, TYPE_IDS.find(str(state.get("type", "")))))
+	sort_filter.select(maxi(0, SORT_IDS.find(str(state.get("sort", "name")))))
+	book_filter.select(int(state.get("book_filter", 0)))
+	level_enabled.button_pressed = bool(state.get("limit_level", false))
+	level_filter.value = int(state.get("max_level", 100))
+	level_filter.editable = level_enabled.button_pressed
+	ledger_column.visible = not full
 	_sync_browse()
-	if content_scroll != null:
-		content_scroll.scroll_vertical = 0
-	back_button.disabled = _history.is_empty()
-	bookmarks_button.disabled = _bookmarks.is_empty()
-	index_button.disabled = kind == PAGE_INDEX
-	page_label.text = "Page %d/%d" % [page_number + 1, pages] if pages > 1 else ""
-	page_label.visible = pages > 1
-	previous_button.visible = pages > 1
-	next_button.visible = pages > 1
-	previous_button.disabled = page_number <= 0
+	_result_entries = filtered_entries()
+	var pages := maxi(1, ceili(float(_result_entries.size()) / maxi(1, entries_per_page)))
+	var page_number := clampi(int(state.get("page", 0)), 0, pages - 1)
+	_page["page"] = page_number
+	var first := page_number * maxi(1, entries_per_page)
+	var last := mini(first + maxi(1, entries_per_page), _result_entries.size())
+	result_label.text = "%d results · %d–%d shown · %d total entries" % [
+		_result_entries.size(), first + 1 if last > first else 0, last, _flat.size()]
+	ledger.clear()
+	var root_item := ledger.create_item()
+	var selected := str(_page.get("selected", ""))
+	var visible_entries := _result_entries.slice(first, last)
+	var has_selected := false
+	for entry: Dictionary in visible_entries:
+		if _key_for(entry) == selected:
+			has_selected = true
+	if not full and not has_selected:
+		selected = _key_for(visible_entries[0]) if not visible_entries.is_empty() else ""
+		_page["selected"] = selected
+	for entry: Dictionary in visible_entries:
+		var row := ledger.create_item(root_item)
+		var key := _key_for(entry)
+		row.set_metadata(0, key)
+		row.set_text(0, str(entry.title))
+		row.set_text(1, str(_category(str(entry.category)).get("title", "")))
+		row.set_text(2, str(entry.get("type", "guide")).capitalize())
+		row.set_text(3, str(entry.level) if int(entry.get("level", -1)) >= 0 else "—")
+		var book := str(entry.get("book", ""))
+		row.set_text(4, book if not book.is_empty() else ("None" if str(entry.get("type", "")) in ["recipe", "spell"] else "—"))
+		row.set_cell_mode(5, TreeItem.CELL_MODE_CHECK)
+		row.set_editable(5, true)
+		row.set_checked(5, _bookmark_index(key) >= 0)
+		row.set_tooltip_text(5, "Keep this article in bookmarks")
+		for column: int in range(5):
+			row.set_tooltip_text(column, row.get_text(column))
+			row.set_custom_color(column, TextColors.color("encyclopedia_text"))
+		var source: Dictionary = entry.get("image", {})
+		if not source.is_empty():
+			var texture := AtlasTexture.new()
+			texture.atlas = load(str(source.get("path", ""))) as Texture2D
+			texture.region = source.get("region", Rect2())
+			row.set_icon(0, texture)
+			row.set_icon_max_width(0, 20)
+		if key == selected:
+			row.select(0)
+	page_label.text = "Page %d/%d" % [page_number + 1, pages]
+	page_label.visible = not full
+	previous_button.visible = not full
+	next_button.visible = not full
+	previous_button.disabled = page_number == 0
 	next_button.disabled = page_number >= pages - 1
+	back_button.disabled = _history.is_empty()
+	bookmarks_button.button_pressed = kind == "bookmarks"
+	index_button.disabled = kind == PAGE_INDEX and state.get("query", "") == "" and state.get("topic", "") == ""
+	status_line.text = "Search and filters cover all entries · Select to preview · Double-click to read"
+	_render_selection(selected, full)
+	_syncing = false
 
-func _render_index() -> String:
-	var lines: Array[String] = [_title_block("")]
-	lines.append("[color=%s]%s[/color]\n" % [_text_color("encyclopedia_note"),
-		_escape(str(_document.get("note", "")))])
-	var cells: Array[String] = []
-	for category: Dictionary in _categories:
-		cells.append("[cell]%s[/cell][cell]  -  %s[/cell]" % [
-			_link("cat:%s:0" % str(category.get("id", "")),
-				str(category.get("title", ""))),
-			_escape(str(category.get("summary", "")))])
-	lines.append("[table=2]%s[/table]" % "".join(cells))
-	return "\n".join(lines)
-
-func _render_category(category: Dictionary, page_number: int, pages: int) -> String:
-	var lines: Array[String] = [_title_block(str(category.get("title", "")).to_upper())]
-	var intro: String = str(category.get("intro", ""))
-	if not intro.is_empty():
-		lines.append("[color=%s]%s[/color]\n" % [_text_color("encyclopedia_note"), _escape(intro)])
-	var entries: Array = category.get("entries", []) as Array
-	if entries.is_empty():
-		lines.append("[i]Nothing here yet. This category is filled from a"
-			+ " catalogue the client has not loaded.[/i]")
-		return "\n".join(lines)
-	var first: int = page_number * entries_per_page
-	var last: int = mini(first + entries_per_page, entries.size())
-	var cells: Array[String] = []
-	for index: int in range(first, last):
-		var entry: Dictionary = entries[index] as Dictionary
-		cells.append("[cell]%s[/cell]" % _link("entry:%s:%s" % [
-			str(category.get("id", "")), str(entry.get("id", ""))],
-			str(entry.get("title", ""))))
-	if cells.size() % 2 == 1:
-		cells.append("[cell] [/cell]")
-	lines.append("[table=2]%s[/table]" % "".join(cells))
-	if pages > 1:
-		lines.append("\n[color=%s]%d entries over %d pages.[/color]" % [
-			_text_color("encyclopedia_note"), entries.size(), pages])
-	return "\n".join(lines)
-
-func _render_entry(category_id: String, entry_id: String) -> String:
-	var entry: Dictionary = _entry(category_id, entry_id)
+func _render_selection(key: String, full := false) -> void:
+	var parts := key.split(":")
+	var entry := _entry(parts[1], parts[2]) if parts.size() >= 3 else {}
+	entry_page.visible = not entry.is_empty()
+	entry_body.visible = entry.is_empty()
+	preview_header.visible = not entry.is_empty()
+	full_article_button.visible = not full
+	aside_pane.hide()
 	if entry.is_empty():
-		return "[i]That page is not in the encyclopedia.[/i]"
-	var category: Dictionary = _category(category_id)
-	var lines: Array[String] = [_title_block(str(category.get("title", "")).to_upper())]
-	var image: Dictionary = entry.get("image", {}) as Dictionary
-	lines.append("[center]%s[color=%s][b]%s[/b][/color][/center]\n" % [
-		_image_tag(image, 40), _text_color("encyclopedia_heading"), _escape(str(entry.get("title", "")))])
-	var summary: String = str(entry.get("summary", ""))
-	if not summary.is_empty():
-		lines.append("[color=%s][i]%s[/i][/color]\n" % [_text_color("encyclopedia_note"), _escape(summary)])
-	for paragraph: String in str(entry.get("body", "")).split("\n\n", false):
-		lines.append(_escape(paragraph) + "\n")
-	var facts: Array = entry.get("facts", []) as Array
-	for fact_value: Variant in facts:
-		var fact: Array = fact_value as Array
-		var label: String = "[color=%s]%s:[/color]" % [_text_color("encyclopedia_fact"),
-			_escape(str(fact[0]))]
-		var text: String = str(fact[1])
-		if text.contains("\n"):
-			lines.append(label)
-			for line: String in text.split("\n", false):
-				lines.append("    " + line)
-		else:
-			lines.append("%s %s" % [label, text])
-	lines.append("\n[center]%s[/center]" % _link("cat:%s:0" % category_id,
-		"Back To %s Index" % str(category.get("title", ""))))
-	return "\n".join(lines)
+		_clear(entry_page)
+		entry_body.text = "[b]No matching entries.[/b]\nClear filters or try fewer search words."
+		return
+	preview_title.text = "%s · %s" % [entry.title, str(entry.get("type", "guide")).capitalize()]
+	bookmark_entry_button.text = "★ Saved" if _bookmark_index(key) >= 0 else "☆ Bookmark"
+	if full:
+		_render_entry_page(str(entry.category), str(entry.id))
+	else:
+		_render_entry_preview(entry)
+	content_scroll.scroll_vertical = 0
 
-## The pages that have been kept, as a page of their own so that Back works
-## out of it like anywhere else.
-func _render_bookmarks() -> String:
-	var lines: Array[String] = [_title_block("BOOKMARKS")]
-	if _bookmarks.is_empty():
-		lines.append("[color=%s]Nothing kept yet. Right-click a page to keep it.[/color]"
-			% _text_color("encyclopedia_note"))
-		return "\n".join(lines)
-	for raw: Variant in _bookmarks:
-		var mark: Dictionary = raw as Dictionary
-		lines.append(_link(str(mark.get("key", "")), str(mark.get("title", ""))))
-	return "\n".join(lines)
+func _render_entry_preview(entry: Dictionary) -> void:
+	_clear(entry_page)
+	var rows: Array = []
+	for pair: Array in entry.get("facts", []) as Array:
+		var label := str(pair[0])
+		if label in ["Required materials", "Tools required to have", "Knowledge needed",
+				"Learned from", "Reagents", "Magic nexus required", "Animal nexus required"] or label.begins_with("Recommended "):
+			rows.append(pair)
+	if not rows.is_empty():
+		entry_page.add_child(_fact_table(rows))
+	else:
+		var body := str(entry.get("body", entry.get("summary", "")))
+		entry_page.add_child(_shell_body(body.get_slice("\n\n", 0)))
+	var related := HFlowContainer.new()
+	related.name = "RelatedPreview"
+	related.add_child(_shell_heading("Related:"))
+	for target: Dictionary in _related_to(str(entry.category), entry):
+		var link := Button.new()
+		link.text = str(target.title)
+		link.flat = true
+		TextColors.bind(link, "encyclopedia_link")
+		link.pressed.connect(open_entry.bind(str(target.category), str(target.id)))
+		related.add_child(link)
+	entry_page.add_child(related)
 
-func _render_search(query: String) -> String:
-	var lines: Array[String] = [_title_block("SEARCH")]
-	var found: Array[Dictionary] = matches(query)
-	lines.append("[color=%s]%d %s for \"%s\".[/color]\n" % [_text_color("encyclopedia_note"), found.size(),
-		"page" if found.size() == 1 else "pages", _escape(query)])
-	for entry: Dictionary in found:
-		var category: Dictionary = _category(str(entry.get("category", "")))
-		lines.append("%s  [color=%s]- in %s[/color]" % [
-			_link("entry:%s:%s" % [str(entry.get("category", "")),
-				str(entry.get("id", ""))], str(entry.get("title", ""))),
-			_text_color("encyclopedia_note"), _escape(str(category.get("title", "")))])
-	if found.is_empty():
-		lines.append("[i]Nothing here says that.[/i]")
-	return "\n".join(lines)
-
-func _title_block(subtitle: String) -> String:
-	var block: String = "[center][color=%s]%s[/color]" % [_text_color("encyclopedia_heading"),
-		_escape(str(_document.get("title", "The Rabbit Lands Encyclopedia")))]
-	if not subtitle.is_empty():
-		block += "\n[color=%s]%s[/color]" % [_text_color("encyclopedia_heading"), _escape(subtitle)]
-	return block + "[/center]\n"
 
 func _link(meta: String, text: String) -> String:
 	return "[url=%s][color=%s]%s[/color][/url]" % [meta, _text_color("encyclopedia_link"), _escape(text)]
@@ -765,145 +828,215 @@ static func _escape(text: String) -> String:
 
 # --- the window --------------------------------------------------------------
 
-## Three panes: what there is to read, what is being read, and where to go
-## from here.
-##
-## The window was one scrolling document with a row of navigation buttons over
-## it, which meant the only way to find anything was to walk the index and the
-## only way back was the Back button. The categories are always on screen now,
-## a page says what is on it, and a page says what it is next to.
-##
-## The document model underneath is unchanged - the same categories, the same
-## generated halves, the same search and the same bookmarks. What changed is
-## that an entry is built from controls rather than written as bbcode, because
-## a fact table with an icon in every row is a table and not a paragraph.
+## Dense catalogue above a resizable preview, with topic navigation beside it.
 func _build() -> void:
 	var compact := Theme.new()
 	compact.default_font_size = FONT_SIZE
+	compact.set_stylebox("panel", "Tree", _ledger_style(Color("345052"), Color("081314")))
+	compact.set_stylebox("selected", "Tree", _ledger_style(Color("83ced9"), Color("143137")))
+	compact.set_stylebox("selected_focus", "Tree", _ledger_style(Color("83ced9"), Color("143137")))
+	compact.set_constant("v_separation", "Tree", 3)
+	compact.set_constant("h_separation", "Tree", 4)
+	for kind: String in ["Button", "OptionButton"]:
+		compact.set_stylebox("normal", kind, _ledger_style(Color("655331"), Color("0b191b")))
+		compact.set_stylebox("hover", kind, _ledger_style(Color("83ced9"), Color("173039")))
+		compact.set_stylebox("pressed", kind, _ledger_style(Color("83ced9"), Color("143137")))
+		compact.set_stylebox("focus", kind, _ledger_style(Color("83ced9"), Color(0, 0, 0, 0)))
+	compact.set_stylebox("normal", "LineEdit", _ledger_style(Color("655331"), Color("030d10")))
+	compact.set_stylebox("focus", "LineEdit", _ledger_style(Color("83ced9"), Color("030d10")))
 	theme = compact
-	add_theme_constant_override("separation", 2)
-	var shell := VBoxContainer.new()
-	shell.name = "Shell"
-	shell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	shell.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	add_child(shell)
-
+	add_theme_constant_override("separation", 4)
 	navigation = HBoxContainer.new()
 	navigation.name = "EncyclopediaNavigation"
-	shell.add_child(navigation)
+	add_child(navigation)
 	search_row = navigation
+	back_button = _navigation_button("EncyclopediaBack", "← Back", "Return to the previous view")
+	back_button.pressed.connect(go_back)
 	search_edit = LineEdit.new()
 	search_edit.name = "EncyclopediaSearch"
-	search_edit.placeholder_text = "Search the encyclopedia…"
+	search_edit.placeholder_text = "Search the entire encyclopedia…"
+	search_edit.tooltip_text = "Search titles, descriptions, materials, tools, books and facts across all entries"
 	search_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	search_edit.text_submitted.connect(_on_search_submitted)
+	search_edit.clear_button_enabled = true
 	navigation.add_child(search_edit)
-	var search_button := Button.new()
-	search_button.name = "EncyclopediaSearchGo"
-	search_button.text = "Find"
-	search_button.focus_mode = Control.FOCUS_NONE
-	search_button.pressed.connect(_on_search_pressed)
-	navigation.add_child(search_button)
-	back_button = _navigation_button("EncyclopediaBack", "← Back",
-		"Back to the page before this one")
-	back_button.pressed.connect(go_back)
-	index_button = _navigation_button("EncyclopediaIndex", "Index",
-		"Back to the list of categories")
+	_search_timer = Timer.new()
+	_search_timer.one_shot = true
+	_search_timer.wait_time = 0.18
+	add_child(_search_timer)
+	_search_timer.timeout.connect(_apply_search_text)
+	search_edit.text_changed.connect(func(_text: String):
+		if not _syncing: _search_timer.start())
+	search_edit.text_submitted.connect(_on_search_submitted)
+	index_button = _navigation_button("EncyclopediaIndex", "All entries", "Clear filters and browse everything")
 	index_button.pressed.connect(show_index)
-	bookmarks_button = _navigation_button("EncyclopediaBookmarks", "☆ Bookmarks",
-		"Pages you have kept")
+	bookmarks_button = _navigation_button("EncyclopediaBookmarks", "☆ Bookmarks", "Browse saved articles; right-click for all saved pages")
+	bookmarks_button.toggle_mode = true
 	bookmarks_button.pressed.connect(_on_bookmarks_pressed)
-	# Paging survives inside a category, which can hold a hundred recipes.
-	previous_button = _navigation_button("EncyclopediaPrevious", "<<<",
-		"The page before this one")
-	previous_button.pressed.connect(_on_previous_pressed)
-	next_button = _navigation_button("EncyclopediaNext", ">>>",
-		"The page after this one")
-	next_button.pressed.connect(_on_next_pressed)
-	page_label = Label.new()
-	page_label.name = "EncyclopediaPage"
-	navigation.add_child(page_label)
-
+	bookmarks_button.gui_input.connect(func(event: InputEvent):
+		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+			open_menu(get_global_mouse_position()))
+	var filters := HBoxContainer.new()
+	filters.name = "Filters"
+	add_child(filters)
+	type_filter = _option(filters, "TypeFilter", ENTRY_TYPES)
+	type_filter.item_selected.connect(func(index: int): _filter_changed("type", TYPE_IDS[index]))
+	sort_filter = _option(filters, "SortFilter", ["Name A–Z", "Name Z–A", "Level ↑", "Level ↓", "Topic", "Book"])
+	sort_filter.item_selected.connect(func(index: int): _filter_changed("sort", SORT_IDS[index]))
+	book_filter = _option(filters, "BookFilter", ["Any book requirement", "Book required", "No book required"])
+	book_filter.tooltip_text = "Applies to recipes and spells with explicit knowledge requirements"
+	book_filter.item_selected.connect(func(index: int): _filter_changed("book_filter", index))
+	level_enabled = CheckBox.new()
+	level_enabled.name = "LimitLevel"
+	level_enabled.text = "Max level"
+	level_enabled.tooltip_text = "Recipe recommended level or spell unlock level; entries without levels are excluded"
+	filters.add_child(level_enabled)
+	level_enabled.toggled.connect(func(enabled: bool): _filter_changed("limit_level", enabled))
+	level_filter = SpinBox.new()
+	level_filter.name = "MaxLevel"
+	level_filter.min_value = 0
+	level_filter.max_value = 1000
+	level_filter.value = 100
+	level_filter.custom_minimum_size.x = 76
+	filters.add_child(level_filter)
+	level_filter.value_changed.connect(func(value: float): _filter_changed("max_level", int(value)))
+	var clear := Button.new()
+	clear.name = "ClearFilters"
+	clear.text = "Clear filters"
+	clear.pressed.connect(show_index)
+	filters.add_child(clear)
 	var panes := HBoxContainer.new()
 	panes.name = "Panes"
 	panes.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	panes.add_theme_constant_override("separation", PANE_GAP)
-	shell.add_child(panes)
-
-	# Left: everything there is to read, always on screen.
+	add_child(panes)
 	var browse_column := VBoxContainer.new()
 	browse_column.name = "Browse"
-	browse_column.custom_minimum_size = Vector2(BROWSE_WIDTH, 0)
-	browse_column.add_theme_constant_override("separation", 2)
+	browse_column.custom_minimum_size.x = BROWSE_WIDTH
 	panes.add_child(browse_column)
-	browse_column.add_child(_shell_heading("BROWSE"))
 	var browse_scroll := ScrollContainer.new()
-	browse_scroll.name = "BrowseScroll"
 	browse_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	browse_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	browse_column.add_child(browse_scroll)
 	browse_list = VBoxContainer.new()
 	browse_list.name = "BrowseList"
 	browse_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	browse_list.add_theme_constant_override("separation", 2)
 	browse_scroll.add_child(browse_list)
-
-	# Middle: either a built page or, for the lists, the document renderer
-	# that already knows how to draw them.
-	var middle := ScrollContainer.new()
-	middle.name = "Content"
+	split = VSplitContainer.new()
+	split.name = "LedgerAndPreview"
+	split.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	split.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	panes.add_child(split)
+	ledger_column = VBoxContainer.new()
+	ledger_column.name = "Ledger"
+	ledger_column.custom_minimum_size.y = 170
+	ledger_column.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	ledger_column.size_flags_stretch_ratio = 1.8
+	split.add_child(ledger_column)
+	ledger = Tree.new()
+	ledger.name = "EntryLedger"
+	ledger.columns = 6
+	ledger.hide_root = true
+	ledger.select_mode = Tree.SELECT_ROW
+	ledger.column_titles_visible = true
+	ledger.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	ledger.custom_minimum_size.y = 140
+	ledger.set_column_title(0, "Entry")
+	ledger.set_column_title(1, "Topic")
+	ledger.set_column_title(2, "Type")
+	ledger.set_column_title(3, "Level")
+	ledger.set_column_title_tooltip_text(3, "Recipe recommended level or spell unlock level")
+	ledger.set_column_title(4, "Book required")
+	ledger.set_column_title(5, "☆")
+	var widths := [190, 100, 64, 48, 160, 30]
+	for column: int in range(6):
+		ledger.set_column_custom_minimum_width(column, widths[column])
+		ledger.set_column_expand(column, column == 0 or column == 4)
+	ledger_column.add_child(ledger)
+	ledger.item_selected.connect(_on_ledger_selected)
+	ledger.item_activated.connect(_open_selected_article)
+	ledger.item_edited.connect(_on_ledger_bookmark)
+	ledger.column_title_clicked.connect(func(column: int, _button: int):
+		var key: String = {0: "name", 1: "topic", 3: "level", 4: "book"}.get(column, "")
+		if not key.is_empty():
+			if str(_page.get("sort", "name")) == key and key in ["name", "level"]:
+				key += "_desc"
+			_filter_changed("sort", key))
+	var paging := HBoxContainer.new()
+	ledger_column.add_child(paging)
+	result_label = Label.new()
+	result_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	paging.add_child(result_label)
+	previous_button = Button.new()
+	previous_button.text = "‹"
+	previous_button.pressed.connect(_on_previous_pressed)
+	paging.add_child(previous_button)
+	page_label = Label.new()
+	paging.add_child(page_label)
+	next_button = Button.new()
+	next_button.text = "›"
+	next_button.pressed.connect(_on_next_pressed)
+	paging.add_child(next_button)
+	var preview := VBoxContainer.new()
+	preview.name = "Preview"
+	preview.custom_minimum_size.y = 170
+	preview.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	split.add_child(preview)
+	preview_header = HBoxContainer.new()
+	preview.add_child(preview_header)
+	preview_title = Label.new()
+	preview_title.clip_text = true
+	preview_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	TextColors.bind(preview_title, "encyclopedia_heading")
+	preview_header.add_child(preview_title)
+	bookmark_entry_button = Button.new()
+	bookmark_entry_button.pressed.connect(_toggle_selected_bookmark)
+	preview_header.add_child(bookmark_entry_button)
+	full_article_button = Button.new()
+	full_article_button.text = "Open full article ↗"
+	full_article_button.pressed.connect(_open_selected_article)
+	preview_header.add_child(full_article_button)
+	content_scroll = ScrollContainer.new()
+	content_scroll.name = "Content"
+	content_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	content_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	preview.add_child(content_scroll)
+	var middle := VBoxContainer.new()
 	middle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	middle.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	middle.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	panes.add_child(middle)
-	content_scroll = middle
-	var middle_column := VBoxContainer.new()
-	middle_column.name = "ContentColumn"
-	middle_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	middle.add_child(middle_column)
+	content_scroll.add_child(middle)
 	entry_page = VBoxContainer.new()
 	entry_page.name = "EntryPage"
 	entry_page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	middle_column.add_child(entry_page)
+	middle.add_child(entry_page)
 	entry_body = RichTextLabel.new()
 	entry_body.name = "EntryBody"
 	entry_body.bbcode_enabled = true
-	TextColors.bind(entry_body, "encyclopedia_text", "default_color")
 	entry_body.fit_content = true
-	entry_body.selection_enabled = true
 	entry_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	entry_body.meta_clicked.connect(_on_meta_clicked)
 	entry_body.gui_input.connect(_on_body_gui_input)
-	middle_column.add_child(entry_body)
-
-	# Right: what is on this page, and what sits beside it.
-	var aside := VBoxContainer.new()
-	aside.name = "Aside"
-	aside.custom_minimum_size = Vector2(ASIDE_WIDTH, 0)
-	aside.add_theme_constant_override("separation", 0)
-	panes.add_child(aside)
-	aside_pane = aside
-	aside.add_child(_shell_heading("ON THIS PAGE"))
+	middle.add_child(entry_body)
+	# Anchors and related links live in the article now, rather than a third pane.
+	aside_pane = VBoxContainer.new()
+	aside_pane.hide()
+	add_child(aside_pane)
 	page_contents = VBoxContainer.new()
-	page_contents.name = "OnThisPage"
-	aside.add_child(page_contents)
-	aside.add_child(_shell_heading("RELATED"))
+	aside_pane.add_child(page_contents)
 	related_list = VBoxContainer.new()
-	related_list.name = "Related"
-	aside.add_child(related_list)
-
+	aside_pane.add_child(related_list)
 	status_line = Label.new()
 	status_line.name = "EncyclopediaStatus"
-	status_line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	status_line.text = "Right-click for search and bookmark options"
 	TextColors.bind(status_line, "encyclopedia_note")
-	status_line.modulate = Color(1, 1, 1, 0.55)
-	shell.add_child(status_line)
-
+	add_child(status_line)
 	menu = PopupMenu.new()
-	menu.name = "EncyclopediaMenu"
 	menu.id_pressed.connect(_on_menu_id_pressed)
 	add_child(menu)
+
+func _option(host: Node, node_name: String, labels: Array) -> OptionButton:
+	var picker := OptionButton.new()
+	picker.name = node_name
+	for label: String in labels:
+		picker.add_item(label)
+	host.add_child(picker)
+	return picker
 
 static func _shell_heading(text: String) -> Label:
 	var label := Label.new()
@@ -924,7 +1057,10 @@ func _navigation_button(node_name: String, label: String, tooltip: String) -> Bu
 func _on_bookmarks_pressed() -> void:
 	# Bookmarks are a search over what has been kept, so they arrive as a page
 	# like any other and Back works out of them.
-	_navigate({"kind": "bookmarks"})
+	var state := _browse_state()
+	state["kind"] = PAGE_INDEX if str(_page.get("kind", "")) == "bookmarks" else "bookmarks"
+	state["page"] = 0
+	_navigate(state)
 
 ## The category list, rebuilt whenever the document is. A category the
 ## document does not have is not drawn, so an empty shelf shows as an empty
@@ -935,7 +1071,13 @@ func _sync_browse() -> void:
 	for child: Node in browse_list.get_children():
 		browse_list.remove_child(child)
 		child.queue_free()
-	var here: String = str(_page.get("category", _page.get("id", "")))
+	var here: String = str(_page.get("topic", ""))
+	var all := Button.new()
+	all.text = "All topics"
+	all.toggle_mode = true
+	all.button_pressed = here.is_empty()
+	all.pressed.connect(_filter_changed.bind("topic", ""))
+	browse_list.add_child(all)
 	for category: Dictionary in _categories:
 		var id: String = str(category.get("id", ""))
 		var row := Button.new()
@@ -957,11 +1099,10 @@ func _sync_browse() -> void:
 		row.tooltip_text = ("%s - nothing written yet" % str(category.get("title", id))
 			if count == 0 else "%s - %d pages" % [str(category.get("title", id)), count])
 		row.disabled = count == 0
-		row.pressed.connect(open_category.bind(id, 0))
+		row.pressed.connect(_filter_changed.bind("topic", id))
 		browse_list.add_child(row)
 
-## One page, built from controls: its title, where it sits, what it says, and
-## the sections it is made of.
+## Full reading mode retains breadcrumbs, section jumps, links and related pages.
 func _render_entry_page(category_id: String, entry_id: String) -> void:
 	var entry: Dictionary = _entry(category_id, entry_id)
 	var category: Dictionary = _category(category_id)
@@ -981,6 +1122,9 @@ func _render_entry_page(category_id: String, entry_id: String) -> void:
 	TextColors.bind(title, "encyclopedia_heading")
 	entry_page.add_child(title)
 	entry_page.add_child(_breadcrumbs(category, entry))
+	var anchors := HFlowContainer.new()
+	anchors.name = "ArticleSections"
+	entry_page.add_child(anchors)
 	var summary: String = str(entry.get("summary", ""))
 	if not summary.is_empty():
 		entry_page.add_child(_shell_note(summary))
@@ -994,8 +1138,9 @@ func _render_entry_page(category_id: String, entry_id: String) -> void:
 			entry_page.add_child(_fact_table(section.get("rows", []) as Array))
 		else:
 			entry_page.add_child(_shell_body(str(section.get("text", ""))))
-		_add_anchor(str(section.get("title", "")))
+		_add_anchor(str(section.get("title", "")), anchors)
 
+	entry_page.add_child(_shell_heading("RELATED"))
 	for related: Dictionary in _related_to(category_id, entry):
 		var link := Button.new()
 		link.name = "Related%s" % _slug(str(related.get("id", "")))
@@ -1006,20 +1151,20 @@ func _render_entry_page(category_id: String, entry_id: String) -> void:
 		link.flat = true
 		link.pressed.connect(open_entry.bind(str(related.get("category", "")),
 			str(related.get("id", ""))))
-		related_list.add_child(link)
+		entry_page.add_child(link)
 
-func _add_anchor(title: String) -> void:
+func _add_anchor(title: String, host: Container) -> void:
 	if title.is_empty():
 		return
 	var link := Button.new()
 	link.name = "Anchor%s" % _slug(title)
 	link.text = title
 	link.tooltip_text = title
-	_fit_to_pane(link)
+	TextColors.bind(link, "encyclopedia_link")
 	link.focus_mode = Control.FOCUS_NONE
 	link.flat = true
 	link.pressed.connect(_scroll_to_section.bind(title))
-	page_contents.add_child(link)
+	host.add_child(link)
 
 ## A button in a side pane: left-aligned, and cut short with an ellipsis rather
 ## than widening the pane it sits in.
@@ -1064,9 +1209,7 @@ func _breadcrumbs(category: Dictionary, entry: Dictionary) -> Control:
 	row.add_child(here)
 	return row
 
-## A section's rows, each a label and a value. The icon column is drawn and
-## left empty: the art for it does not exist yet, and a row that shifted
-## sideways the day it arrives would move every page at once.
+## A section's rows, with a fixed label width and wrapping linked values.
 func _fact_table(rows: Array) -> Control:
 	var table := VBoxContainer.new()
 	table.name = "Facts"
@@ -1077,10 +1220,6 @@ func _fact_table(rows: Array) -> Control:
 			continue
 		var line := HBoxContainer.new()
 		line.name = "Fact"
-		var icon := Control.new()
-		icon.name = "Icon"
-		icon.custom_minimum_size = Vector2(FACT_ICON_WIDTH, 0)
-		line.add_child(icon)
 		var label := Label.new()
 		label.name = "Label"
 		TextColors.bind(label, "encyclopedia_fact")
@@ -1179,12 +1318,14 @@ func _find_anywhere(entry_id: String) -> Dictionary:
 	return {}
 
 func _on_previous_pressed() -> void:
-	if str(_page.get("kind", "")) == "category":
-		open_category(str(_page.get("id", "")), int(_page.get("page", 0)) - 1)
+	_change_page(-1)
 
 func _on_next_pressed() -> void:
-	if str(_page.get("kind", "")) == "category":
-		open_category(str(_page.get("id", "")), int(_page.get("page", 0)) + 1)
+	_change_page(1)
+
+func _change_page(delta: int) -> void:
+	_page["page"] = maxi(0, int(_page.get("page", 0)) + delta)
+	_render()
 
 func _on_meta_clicked(meta: Variant) -> void:
 	open_page_key(str(meta))
@@ -1193,8 +1334,12 @@ func _on_search_pressed() -> void:
 	_on_search_submitted(search_edit.text)
 
 func _on_search_submitted(query: String) -> void:
-	if not query.strip_edges().is_empty():
-		search(query.strip_edges())
+	_search_timer.stop()
+	_filter_changed("query", query.strip_edges())
+
+func _apply_search_text() -> void:
+	# Preserve trailing spaces while typing a multiword query.
+	_filter_changed("query", search_edit.text)
 
 func _on_body_gui_input(event: InputEvent) -> void:
 	if not event is InputEventMouseButton:
@@ -1246,6 +1391,7 @@ func _on_menu_id_pressed(id: int) -> void:
 		3:
 			_bookmarks.clear()
 			bookmarks_changed.emit(bookmarks())
+			_render()
 
 func add_bookmark() -> void:
 	var key: String = page_key()
@@ -1253,6 +1399,7 @@ func add_bookmark() -> void:
 		return
 	_bookmarks.append({"key": key, "label": page_title()})
 	bookmarks_changed.emit(bookmarks())
+	_render()
 
 func remove_bookmark(key: String) -> void:
 	var index: int = _bookmark_index(key)
@@ -1260,6 +1407,7 @@ func remove_bookmark(key: String) -> void:
 		return
 	_bookmarks.remove_at(index)
 	bookmarks_changed.emit(bookmarks())
+	_render()
 
 static func _text_color(role: String) -> String:
 	return "#" + TextColors.color(role).to_html(false)
@@ -1270,3 +1418,122 @@ func _on_text_colors_changed(role: String) -> void:
 		_render()
 		if content_scroll != null:
 			content_scroll.scroll_vertical = scroll
+
+# --- whole-catalogue browsing -------------------------------------------------
+
+func _browse_state() -> Dictionary:
+	return _page.duplicate(true)
+
+static func _key_for(entry: Dictionary) -> String:
+	return "entry:%s:%s" % [entry.category, entry.id]
+
+static func _plain_text(text: String) -> String:
+	var images := RegEx.new()
+	images.compile("\\[img[^\\]]*\\].*?\\[/img\\]")
+	var tags := RegEx.new()
+	tags.compile("\\[[^\\]]*\\]")
+	return tags.sub(images.sub(text, "", true), "", true)
+
+static func _matches_words(entry: Dictionary, query: String) -> bool:
+	for word: String in query.to_lower().replace("\t", " ").replace("\n", " ").split(" ", false):
+		if not str(entry.get("search", "")).contains(word):
+			return false
+	return true
+
+## The filters and sort always run before slicing a page.
+func filtered_entries() -> Array[Dictionary]:
+	var found: Array[Dictionary] = []
+	var state := _browse_state()
+	for entry: Dictionary in _flat:
+		if not str(state.get("topic", "")).is_empty() and str(entry.category) != str(state.topic):
+			continue
+		if not str(state.get("type", "")).is_empty() and str(entry.get("type", "")) != str(state.type):
+			continue
+		if not _matches_words(entry, str(state.get("query", ""))):
+			continue
+		if str(state.get("kind", "")) == "bookmarks" and _bookmark_index(_key_for(entry)) < 0:
+			continue
+		var requirement := int(state.get("book_filter", 0))
+		if requirement > 0:
+			if str(entry.get("type", "")) not in ["recipe", "spell"]:
+				continue
+			if (not str(entry.get("book", "")).is_empty()) != (requirement == 1):
+				continue
+		if bool(state.get("limit_level", false)):
+			var level := int(entry.get("level", -1))
+			if level < 0 or level > int(state.get("max_level", 100)):
+				continue
+		found.append(entry)
+	found.sort_custom(_ledger_before)
+	return found
+
+func _ledger_before(a: Dictionary, b: Dictionary) -> bool:
+	var sort_key := str(_page.get("sort", "name"))
+	if sort_key in ["level", "level_desc"]:
+		var la := int(a.get("level", -1))
+		var lb := int(b.get("level", -1))
+		if la != lb:
+			if la < 0: return false
+			if lb < 0: return true
+			return la > lb if sort_key == "level_desc" else la < lb
+	elif sort_key in ["topic", "book"]:
+		var av := str(_category(str(a.category)).get("title", "")) if sort_key == "topic" else str(a.get("book", ""))
+		var bv := str(_category(str(b.category)).get("title", "")) if sort_key == "topic" else str(b.get("book", ""))
+		var diff := av.naturalnocasecmp_to(bv)
+		if diff != 0: return diff < 0
+	var diff := str(a.title).naturalnocasecmp_to(str(b.title))
+	if diff != 0: return diff > 0 if sort_key == "name_desc" else diff < 0
+	return _key_for(a) < _key_for(b)
+
+func _filter_changed(field: String, value: Variant) -> void:
+	if _syncing or _page.get(field) == value:
+		return
+	var state := _browse_state()
+	if str(state.get("kind", "")) != "bookmarks":
+		state["kind"] = "browse"
+	state[field] = value
+	state["page"] = 0
+	state["selected"] = ""
+	_navigate(state)
+
+func _on_ledger_selected() -> void:
+	if _syncing or ledger.get_selected() == null:
+		return
+	var key := str(ledger.get_selected().get_metadata(0))
+	_page["selected"] = key
+	_render_selection(key)
+
+func _open_selected_article() -> void:
+	var parts := str(_page.get("selected", "")).split(":")
+	if parts.size() >= 3:
+		open_entry(parts[1], parts[2])
+
+func _toggle_selected_bookmark() -> void:
+	_toggle_bookmark(str(_page.get("selected", "")))
+
+func _on_ledger_bookmark() -> void:
+	if _syncing or ledger.get_edited() == null:
+		return
+	_toggle_bookmark(str(ledger.get_edited().get_metadata(0)))
+
+func _toggle_bookmark(key: String) -> void:
+	var parts := key.split(":")
+	if parts.size() < 3:
+		return
+	var at := _bookmark_index(key)
+	if at >= 0:
+		_bookmarks.remove_at(at)
+	else:
+		var entry := _entry(parts[1], parts[2])
+		if entry.is_empty(): return
+		_bookmarks.append({"key": key, "label": str(entry.title)})
+	bookmarks_changed.emit(bookmarks())
+	_render()
+
+static func _ledger_style(border: Color, fill: Color) -> StyleBoxFlat:
+	var box := StyleBoxFlat.new()
+	box.bg_color = fill
+	box.border_color = border
+	box.set_border_width_all(1)
+	box.set_content_margin_all(4)
+	return box

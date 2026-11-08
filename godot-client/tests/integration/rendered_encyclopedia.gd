@@ -1,7 +1,5 @@
 extends SceneTree
-## Captures the encyclopedia's three panes on a written page, a recipe page and
-## a category list, so the width the middle pane is left with can be looked at
-## rather than argued about.
+## Captures the dense reference ledger and full articles in the real HUD.
 ##
 ## Needs a display. Writes PNGs to ELORIA_ARTIFACT_DIR.
 
@@ -23,7 +21,7 @@ func _run() -> void:
 	(main.get_node("LoginPanel") as Control).hide()
 	await process_frame
 	var window: Control = main.get("reference_window") as Control
-	var panel: PanelContainer = window.get_node("ReferenceWindow") as PanelContainer
+	var panel: PanelContainer = window.get("panel") as PanelContainer
 	var view: EncyclopediaView = window.get("encyclopedia") as EncyclopediaView
 	main.call("_input", _key(KEY_E))
 	await process_frame

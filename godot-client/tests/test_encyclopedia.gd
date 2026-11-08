@@ -24,15 +24,13 @@ func _run() -> void:
 	(main.get_node("LoginPanel") as Control).hide()
 	await process_frame
 	var window: Control = main.get("reference_window") as Control
-	var panel: PanelContainer = window.get_node("ReferenceWindow") as PanelContainer
+	var panel: PanelContainer = window.get("panel") as PanelContainer
 	var view: EncyclopediaView = window.get("encyclopedia") as EncyclopediaView
 	# The document renderer sits in the middle pane now, so it is reached
 	# through the view rather than by a path off the root.
-	var body: RichTextLabel = view.get("entry_body") as RichTextLabel
-	var buttons: String = "GameView/Quickbar/QuickRows/Buttons/"
-	var icon: Button = main.get_node(buttons + "EncyclopediaButton") as Button
-	var walk: Button = main.get_node(buttons + "WalkButton") as Button
-	var attack: Button = main.get_node(buttons + "AttackButton") as Button
+	var icon: Button = main.get_node("%EncyclopediaButton") as Button
+	var walk: Button = main.get_node("%WalkButton") as Button
+	var attack: Button = main.get_node("%AttackButton") as Button
 
 	# The icon on the lower HUD, and Ctrl+E, both open it on its own page.
 	_expect(not panel.visible, "the window starts closed")
@@ -62,11 +60,9 @@ func _run() -> void:
 	# The index: every category, each one a link.
 	_expect(view.category_count() >= 12,
 		"the index carries its categories: %d" % view.category_count())
-	_expect(body.text.contains("[url=cat:alchemy:0]")
-		and body.text.contains("[url=cat:books:0]"),
-		"and every one of them is a link off the index page")
-	_expect(body.get_parsed_text().contains("The Rabbit Lands Encyclopedia"),
-		"the index is titled")
+	_expect(view.ledger.columns == 6 and view.filtered_entries().size() == view.entry_count(),
+		"the front page is a complete six-column reference ledger")
+	_expect(view.search_edit.visible, "global search is always visible")
 
 	# The built half says what the recipe table says, and nothing else.
 	var catalogue: ManufacturingCatalog = main.get(
@@ -161,13 +157,13 @@ func _run() -> void:
 		"the page count is stated: %s" % view.page_label.text)
 	_expect(view.previous_button.disabled and not view.next_button.disabled,
 		"there is nothing before the first page and something after it")
-	var first_page: String = body.get_parsed_text()
+	var first_page: String = view.ledger.get_root().get_first_child().get_text(0)
 	view.next_button.pressed.emit()
 	_expect(view.page_label.text == "Page 2/%d" % pages
-		and body.get_parsed_text() != first_page,
+		and view.ledger.get_root().get_first_child().get_text(0) != first_page,
 		"and the forward control turns the page")
 	view.previous_button.pressed.emit()
-	_expect(body.get_parsed_text() == first_page, "the back control turns it back")
+	_expect(view.ledger.get_root().get_first_child().get_text(0) == first_page, "the back control turns it back")
 	view.open_page_key("cat:%s:%d" % [longest, pages + 5])
 	_expect(view.page_label.text == "Page %d/%d" % [pages, pages],
 		"and a page past the end lands on the last one: %s" % view.page_label.text)
@@ -183,7 +179,7 @@ func _run() -> void:
 	_expect(content.size.x >= panel.size.x * 0.5,
 		"a page keeps at least half the window: %.0f of %.0f"
 			% [content.size.x, panel.size.x])
-	_expect(panel.size.x <= 640.0,
+	_expect(panel.size.x <= 1080.0,
 		"and a long related title does not widen the window: %.0f" % panel.size.x)
 	var value: Control = view.entry_page.find_child("Value", true, false) as Control
 	_expect(value != null and value.size.x >= 120.0,
@@ -208,14 +204,13 @@ func _run() -> void:
 	view.search("harvesting")
 	_expect(view.matches("harvesting").size() >= 2,
 		"search finds the pages that say it: %d" % view.matches("harvesting").size())
-	_expect(body.get_parsed_text().contains("Harvesting"),
-		"and the results name them")
+	_expect(not view.filtered_entries().is_empty(), "the result ledger names matching pages")
 	_expect(view.matches("a phrase no page contains").is_empty(),
 		"and finds nothing when there is nothing")
 
 	# The right-click menu, which is what the status line points at.
-	_expect(view.status_line.text.contains("Right-click"),
-		"the window says where the search and the bookmarks are")
+	_expect(view.status_line.text.contains("all entries"),
+		"the window states the whole-catalogue search scope")
 	_expect(view.search_edit != null and view.search_edit.visible,
 		"and the search field is on screen rather than waiting to be summoned")
 	_expect(view.browse_list != null and view.browse_list.get_child_count() > 0,
@@ -223,7 +218,8 @@ func _run() -> void:
 	view.call("_on_menu_id_pressed", 0)
 	_expect(view.search_row.visible, "the menu's search entry brings it up")
 	view.call("_on_search_submitted", "sigils")
-	_expect(view.page_key() == "search:sigils", "and submitting it searches")
+	_expect(view.search_edit.text == "sigils", "and submitting it searches")
+	view.show_index()
 
 	# A bookmark is the player's own, and is kept in the client's own file.
 	view.open_category("alchemy", 0)

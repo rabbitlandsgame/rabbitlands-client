@@ -1,40 +1,40 @@
 {
   "schema": "eloria.encyclopedia/2",
   "title": "The Rabbit Lands Encyclopedia",
-  "note": "IN DEVELOPMENT! Every page here is either original Rabbit Lands reference text or is built from the client's own catalogues, so a recipe, spell or book that changes in the data changes here too. Report corrections through the Rabbit Lands project issue tracker.",
+  "note": "Search all entries by title, topic, material, tool or knowledge. Recipe, spell, book, map and skill pages use the installed game catalogues. The live server decides action eligibility and current prices.",
   "skillNotes": {
     "attack": "How hard you hit and how often you connect. The server rolls it; the client only shows what it said happened.",
     "defense": "How often a blow misses you, and how much of one your armour is allowed to soak.",
-    "harvesting": "How quickly you take from a resource node, and which nodes the server will let you start on at all.",
+    "harvesting": "Train by gathering resources. Skill and recommended resource level affect success and timing; tools and carrying capacity also matter.",
     "alchemy": "Essences, bars, and the ingredients the rest of the trades are built out of.",
-    "magic": "The ceiling on which spells you may cast, and on the power you may ask for.",
+    "magic": "Spell unlocks, power and potency depend on Magic level and Magic nexus; family tomes and reagents can also be required.",
     "potion": "Everything that ends up in a vial, from the plain healing draught upwards.",
     "summoning": "Calling a creature to fight beside you, and the stones and flesh it costs.",
     "manufacturing": "Metal work: armour, weapons, and the plates and rings they are made from.",
     "crafting": "Rings, medallions and the small worked goods that need a mould.",
     "engineering": "Devices and traps, and the tools that build them.",
     "tailoring": "Thread, cloth, dye, and every garment made from them.",
-    "ranging": "Shooting at distance. The server refuses a shot at a target standing too close.",
-    "overall": "Not a trade of its own. It is the sum the server keeps across all the others."
+    "ranging": "Train by ranged combat. Ranging increases maximum distance; shooting remains possible in melee with penalties.",
+    "overall": "The server tracks overall experience and awards overall levels separately from individual skill levels."
   },
   "categories": [
     {
       "id": "world",
       "title": "The World",
       "summary": "Nymara, its hours and its weather",
-      "intro": "Eloria is played on Nymara. The server owns the world and the clock; this client draws what it is told and asks for the rest.",
+      "intro": "Rabbit Lands takes place on Nymara in the world of Eloria. The server owns world state and the game clock.",
       "entries": [
         {
           "id": "authority",
           "title": "What the server decides",
-          "summary": "Why nothing here is a guess",
-          "body": "Every fact in this client came from the server: where you stand, what you carry, what you hit and what hit you. The client picks the artwork and the camera, and nothing else.\n\nThat is worth knowing when a click seems to do nothing. Asking to walk somewhere, to attack someone, or to take from a node is a request. The server answers it, and the answer may be no. What you see on screen is the answer, not the request."
+          "summary": "Actions are checked by the server",
+          "body": "The server decides movement, combat, inventory changes, harvesting and trades. The client displays those results and sends your requests.\n\nThe encyclopedia combines written guides with installed recipe, spell, book, skill and map catalogues. Those catalogues describe the client build; the live server still decides whether an action is allowed."
         },
         {
           "id": "time",
           "title": "Day and night",
           "summary": "Six real hours to a Nymaran day",
-          "body": "A full day is 360 game minutes and one game minute is one real minute, so the world turns through dawn, noon, dusk and night over six hours.\n\nThe light you see follows the same curve the server uses to decide how far creatures can be seen, so a dark night is dark for both of you.",
+          "body": "A full day is 360 game minutes. At ordinary clock speed one game minute is one real minute, so a Nymaran day lasts six real hours.\n\nDaylight changes creature visibility as well as the scene lighting. See the Almanac tab for the date and current special day.",
           "facts": [
             [
               "Length of a day",
@@ -64,48 +64,9 @@
         },
         {
           "id": "world-weather-todo",
-          "title": "Weather and night do nothing yet",
-          "summary": "TODO - not written yet",
-          "sections": [
-            {
-              "title": "Not written yet",
-              "kind": "prose",
-              "text": "A page describing what weather and nightfall do to play would be describing nothing. Weather is a wet chance, a storm chance and an intensity, sent so the client can draw rain; the day and night cycle has no server-side effect at all. The axis has to exist before a page can explain it."
-            },
-            {
-              "title": "What it needs",
-              "kind": "facts",
-              "rows": [
-                [
-                  "Have",
-                  "Rain drawn from a per-map climate"
-                ],
-                [
-                  "Need",
-                  "Weather and night that change play"
-                ],
-                [
-                  "Where",
-                  "dev-server/eloria/weather.py"
-                ]
-              ]
-            }
-          ],
-          "body": "TODO. A page describing what weather and nightfall do to play would be describing nothing. Weather is a wet chance, a storm chance and an intensity, sent so the client can draw rain; the day and night cycle has no server-side effect at all. The axis has to exist before a page can explain it.",
-          "facts": [
-            [
-              "Have",
-              "Rain drawn from a per-map climate"
-            ],
-            [
-              "Need",
-              "Weather and night that change play"
-            ],
-            [
-              "Where",
-              "dev-server/eloria/weather.py"
-            ]
-          ]
+          "title": "Night visibility and weather",
+          "summary": "Night changes which creatures you can see",
+          "body": "Night reduces the distance at which ordinary creatures become visible. Perception and concealment can also affect visibility. A clear-looking road is not proof that no creature is nearby.\n\nWeather is shared by players on the same map. Outdoor maps can have different weather profiles and changing conditions; interiors without a weather profile do not receive outdoor weather. The Almanac tab describes the current special day and any stated effects."
         }
       ]
     },
@@ -118,48 +79,9 @@
       "entries": [
         {
           "id": "skills-todo",
-          "title": "Skill pages are one line deep",
-          "summary": "TODO - not written yet",
-          "sections": [
-            {
-              "title": "Not written yet",
-              "kind": "prose",
-              "text": "Every skill has a page, and each says what the server reports and little else. What a skill affects and how it is trained are not recorded anywhere - they are design knowledge that has never been written down, so there is nothing to generate them from."
-            },
-            {
-              "title": "What it needs",
-              "kind": "facts",
-              "rows": [
-                [
-                  "Have",
-                  "A level, an experience total, and a one-line note"
-                ],
-                [
-                  "Need",
-                  "What each skill affects, and how it is trained"
-                ],
-                [
-                  "Where",
-                  "skillNotes in this document"
-                ]
-              ]
-            }
-          ],
-          "body": "TODO. Every skill has a page, and each says what the server reports and little else. What a skill affects and how it is trained are not recorded anywhere - they are design knowledge that has never been written down, so there is nothing to generate them from.",
-          "facts": [
-            [
-              "Have",
-              "A level, an experience total, and a one-line note"
-            ],
-            [
-              "Need",
-              "What each skill affects, and how it is trained"
-            ],
-            [
-              "Where",
-              "skillNotes in this document"
-            ]
-          ]
+          "title": "Training skills",
+          "summary": "Practice, experience and recommended levels",
+          "body": "Combat, harvesting, mixing and spellcasting award experience through their own server rules. The Statistics window shows your levels and experience. Spending pick points on attributes, nexus or perks is separate from training a skill.\n\nRecipe levels are recommendations used in success calculations. A listed level does not guarantee a successful mix. Spell pages distinguish an unlock level from a recommended level. Consult the matching recipe or spell for materials, knowledge and nexus requirements."
         }
       ]
     },
@@ -192,14 +114,14 @@
         {
           "id": "ranging",
           "title": "Ranging",
-          "summary": "Bows, arrows and distance",
-          "body": "A bow and matching ammunition let you attack from a distance. The server refuses a shot at a target standing too close - move away and try again.\n\nEach shot is announced twice: once as an aim, once as the arrow leaving. The damage is resolved by the server and arrives separately."
+          "summary": "Range, reusable ammunition and close combat",
+          "body": "Equip a ranged weapon and compatible ammunition or quiver. Maximum range starts at six tiles and increases by one tile for every ten Ranging levels. Perception improves damage and reduces distance loss.\n\nYou can keep shooting in melee, with reduced accuracy and damage. A distant hit can draw a creature towards you. Clicking the same target again stops shooting. The server resolves hit chance, damage, range and engagement."
         },
         {
           "id": "armour",
           "title": "Armour and damage",
-          "summary": "What a suit is allowed to soak",
-          "body": "Armour is worn in pieces - helm, torso, legs, boots and a shield - and each piece carries its own absorption and its own penalties. A heavy suit soaks more, and costs you accuracy and movement to wear.\n\nWhat a piece absorbs is what the server allows it to take off a blow, not what it will take off every blow. The roll is still the server's."
+          "summary": "Protection depends on the equipped piece and the attack",
+          "body": "Equipment contributes the protection and modifiers shown in its item details and the Equipment window. Different attacks can deal physical or elemental damage; resistance and other effects can change the result.\n\nUse the actual item details rather than judging protection by its appearance. Combat and damage are resolved by the server."
         }
       ]
     },
@@ -2543,7 +2465,7 @@
           "id": "harvesting",
           "title": "Harvesting",
           "summary": "Nodes, levels, and why you stopped",
-          "body": "Resource nodes belong to the server, not to the scenery. It tells the client which objects on the map can be gathered, what each one yields and what level it needs, so a node you can see is a node the server knows about.\n\nClick a node to start. The server reports that harvesting has begun and reports again when it stops - because you moved, because your backpack filled, or because something interrupted you. The client never decides that you have stopped.",
+          "body": "The server controls which objects are resource nodes and what they yield. Resource requirements and your character determine whether gathering can proceed.\n\nClick a node to start. The server reports when harvesting starts and stops. Moving, missing a tool, running out of space or another interruption can stop gathering. Search a resource name in the encyclopedia to find recipes that use it.",
           "facts": [
             [
               "Started by",
@@ -2559,58 +2481,19 @@
           "id": "bags",
           "title": "Bags on the ground",
           "summary": "What is dropped, and who may take it",
-          "body": "Anything dropped becomes a bag standing on the ground where it fell. Opening one asks the server to describe it; what comes back is its contents at that moment and nothing older.\n\nA bag is not yours. Another player standing over it sees the same bag and can take from it, and the server settles who got what."
+          "body": "Dropped goods appear in bags on the ground. Opening a bag requests its current contents from the server.\n\nYou must reach the bag tile to open it and pick up items. Other players can view the same bag. The server settles pickup requests and limits how much fits in your backpack and carrying capacity."
         },
         {
           "id": "storage",
           "title": "Storage",
           "summary": "What a storage keeper holds for you",
-          "body": "Storage is held by the server, one set of shelves per character, reachable from a storage keeper. Deposits and withdrawals are its decision; the window shows the shelves as they were when it last described them.\n\nCarrying capacity applies on the way out. A withdrawal that would overload you is refused, and the goods stay where they were."
+          "body": "Each character has storage held by the server. A storage keeper allows deposits and withdrawals. Use #storage view for a view-only preview from anywhere.\n\nWithdrawals are checked against carrying capacity. The mixing window can draw materials from nearby storage; required tools must still be carried or equipped. Loot delivery and player payments can also involve storage, with the required approvals."
         },
         {
           "id": "harvesting-todo",
-          "title": "There is no page per resource",
-          "summary": "TODO - not written yet",
-          "sections": [
-            {
-              "title": "Not written yet",
-              "kind": "prose",
-              "text": "Harvesting has written pages about how gathering works, but not one page per resource. The server knows where a resource stands and what it yields; it does not record a harvest level, a respawn time or what the thing is used for afterwards."
-            },
-            {
-              "title": "What it needs",
-              "kind": "facts",
-              "rows": [
-                [
-                  "Have",
-                  "Resource placement and yields, server-side"
-                ],
-                [
-                  "Need",
-                  "Harvest level, respawn, and uses per resource"
-                ],
-                [
-                  "Where",
-                  "config/eloria/harvesting.txt"
-                ]
-              ]
-            }
-          ],
-          "body": "TODO. Harvesting has written pages about how gathering works, but not one page per resource. The server knows where a resource stands and what it yields; it does not record a harvest level, a respawn time or what the thing is used for afterwards.",
-          "facts": [
-            [
-              "Have",
-              "Resource placement and yields, server-side"
-            ],
-            [
-              "Need",
-              "Harvest level, respawn, and uses per resource"
-            ],
-            [
-              "Where",
-              "config/eloria/harvesting.txt"
-            ]
-          ]
+          "title": "Resource requirements",
+          "summary": "Levels, tools and yields",
+          "body": "Resource definitions include a recommended Harvesting level, experience, a base gathering interval and, for some resources, a required tool. The live server controls the nodes and whether harvesting can start or continue.\n\nHarvesting success and timing depend on the resource and your character. Some resources are ingredients in recipes; search their name across the encyclopedia to find uses. This client does not ship a complete per-resource location directory."
         }
       ]
     },
@@ -2629,8 +2512,8 @@
         {
           "id": "prices",
           "title": "What a thing is worth",
-          "summary": "There is no fixed price list",
-          "body": "Nothing in this encyclopedia states a price. The client is not told one, and a made-up figure would be worse than none.\n\nWhat the pages below do state is what a thing costs to make: its materials, the level it wants, and the food it burns. That is the floor under any price, and it comes from the server's own recipe table."
+          "summary": "NPC prices, the exchange and player-set prices",
+          "body": "NPC shop windows show their current buy and sell prices. Exchange listings and direct trades use their own offered prices. A recipe is a materials and requirements reference, rather than a market valuation.\n\nGauntlet loot can be assigned to individual players or split. The leader can set a price on eligible assigned items; payments use the storage approval flow before delivery. Personal rewards stay with their owner. Review quantities, prices and recipients before approving."
         }
       ]
     },
@@ -2701,7 +2584,7 @@
           "id": "magic",
           "title": "Casting and power",
           "summary": "One effect, ten power levels",
-          "body": "Own every listed sigil, carry the reagents and choose a power your Magic level and nexus support. Higher power increases healing, damage, protection or duration and costs more ether and reagents. Heal and Poison have no separate Greater versions. The spell window can be searched and filtered by targeting mode."
+          "body": "Learn the required spell-family tome, carry the reagents and choose a power your Magic level and Magic nexus support. Heal, Fire Bolt and Restore Ether need no tome. Higher power changes strength, duration or utility and can cost more ether and reagents.\n\nThe spell window can be searched and filtered by targeting mode. Generated spell pages list the unlock level, recommended level, base ether cost, nexus and Power 1 reagents. The live casting preview gives the exact cost at your chosen power."
         },
         {
           "id": "spell-targets",
@@ -2751,56 +2634,9 @@
       "entries": [
         {
           "id": "commands-todo",
-          "title": "Chat commands",
-          "summary": "TODO - not written yet",
-          "sections": [
-            {
-              "title": "Not written yet",
-              "kind": "prose",
-              "text": "The server keeps a one-line description of every chat command and answers #help with it. That line is all there is: nothing records a command's syntax, what it costs, where it cannot be used, or what it does on success, so a page per command cannot be generated from anything yet."
-            },
-            {
-              "title": "What it needs",
-              "kind": "facts",
-              "rows": [
-                [
-                  "Have",
-                  "One help line per command, server-side"
-                ],
-                [
-                  "Need",
-                  "Syntax, requirements and result per command"
-                ],
-                [
-                  "Where",
-                  "COMMAND_HELP in dev-server/eloria/server.py"
-                ],
-                [
-                  "Then",
-                  "A generator like tools/generate_perk_reference.py"
-                ]
-              ]
-            }
-          ],
-          "body": "TODO. The server keeps a one-line description of every chat command and answers #help with it. That line is all there is: nothing records a command's syntax, what it costs, where it cannot be used, or what it does on success, so a page per command cannot be generated from anything yet.",
-          "facts": [
-            [
-              "Have",
-              "One help line per command, server-side"
-            ],
-            [
-              "Need",
-              "Syntax, requirements and result per command"
-            ],
-            [
-              "Where",
-              "COMMAND_HELP in dev-server/eloria/server.py"
-            ],
-            [
-              "Then",
-              "A generator like tools/generate_perk_reference.py"
-            ]
-          ]
+          "title": "Finding chat commands",
+          "summary": "Use #help for the current command list",
+          "body": "Type #help or #list for the commands available to you on the current server. The Help tab lists local controls and commands handled by this client. A command beginning with # that the client does not handle is sent to the server.\n\nUseful reference commands include #storage view for a view-only storage preview, #research for current research progress, #list_quests for quest numbers and #list_knowledge for knowledge numbers. Reset commands require a repeated confirmation and can remove progress: read the server response before confirming."
         }
       ]
     }

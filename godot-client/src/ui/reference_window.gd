@@ -37,6 +37,7 @@ const TextColors := preload("res://src/ui/text_colors.gd")
 ## autoload singletons are registered, and this reads `AppState` directly.
 
 const PANEL_SIZE := Vector2(640.0, 460.0)
+const ENCYCLOPEDIA_SIZE := Vector2(1080.0, 620.0)
 const ChatMessages := preload("res://src/ui/chat_messages.gd")
 ## The tab the encyclopedia icon and Ctrl+E open on.
 const ENCYCLOPEDIA_TAB := 3
@@ -394,6 +395,8 @@ func _build() -> void:
 	tabs.name = "ReferenceTabs"
 	tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(tabs)
+	tabs.tab_changed.connect(func(_index: int): _fit_reference_panel())
+	get_viewport().size_changed.connect(_fit_reference_panel)
 
 	var help_page := VBoxContainer.new()
 	help_page.name = "Help"
@@ -508,3 +511,22 @@ func _build() -> void:
 func _on_text_colors_changed(role: String) -> void:
 	if role.is_empty() or role.begins_with("reference_"):
 		_refresh_buddies()
+
+## Encyclopedia uses a wide ledger; other reference tabs retain their compact size.
+func _fit_reference_panel() -> void:
+	if panel == null or tabs == null:
+		return
+	var available := get_viewport_rect().size - Vector2(RESERVED_RIGHT_RAIL + 24.0, 80.0)
+	var desired := ENCYCLOPEDIA_SIZE if tabs.current_tab == ENCYCLOPEDIA_TAB else PANEL_SIZE
+	var is_encyclopedia := tabs.current_tab == ENCYCLOPEDIA_TAB
+	var title: Label = panel.find_child("ReferenceTitle", true, false) as Label
+	if title != null:
+		title.text = "Rabbit Lands Encyclopedia" if is_encyclopedia else "Reference"
+	if is_encyclopedia:
+		panel.add_theme_stylebox_override("panel", EncyclopediaView._ledger_style(Color("94723e"), Color("040c0d")))
+	else:
+		panel.remove_theme_stylebox_override("panel")
+	panel.custom_minimum_size = Vector2.ZERO
+	panel.size = desired.min(available)
+	panel.position = Vector2(maxf(12.0, (available.x - panel.size.x) * 0.5 + 12.0),
+		maxf(12.0, (get_viewport_rect().size.y - panel.size.y) * 0.5 - 16.0))
