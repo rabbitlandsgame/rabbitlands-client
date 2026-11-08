@@ -2,7 +2,8 @@ extends RefCounted
 ## A reversible, per-view grapple using the current native rigs and clips.
 ## These aliases never invoke gameplay death or change equipment/health state.
 const NAMESPACE := &"cinematic_grapple"
-const ACTIONS := [&"restraint_hold",&"restraint_held",&"tackle_lunge",&"tackle_fall",&"tackle_down",&"tackle_rise"]
+const ACTIONS := [&"restraint_hold",&"restraint_held",&"restraint_release",&"tackle_lunge",&"tackle_fall",&"tackle_down",&"tackle_rise"]
+const RELEASE_SECONDS := 0.95
 const FALL_SECONDS := 0.95
 const RISE_SECONDS := 2.2
 const LUNGE_SECONDS := 0.7
@@ -24,6 +25,7 @@ var _weapon_carry_active := false
 
 static func accepts(value: StringName) -> bool: return value in ACTIONS
 static func duration(value: StringName) -> float:
+	if value==&"restraint_release":return RELEASE_SECONDS
 	if value==&"tackle_rise":return RISE_SECONDS
 	if value==&"tackle_lunge":return LUNGE_SECONDS
 	if value in [&"tackle_fall",&"tackle_down"]:return FALL_SECONDS
@@ -69,6 +71,9 @@ func sample(seconds: float, authored := true) -> void:
 			var strain:=sin(elapsed*4.0)*0.025
 			_arm(actor,"l",Vector3(-0.22,1.04+strain,-0.20),true)
 			_arm(actor,"r",Vector3(0.22,1.04-strain,-0.20),true)
+		&"restraint_release":
+			# A standing chest recoil releases the hold without sampling a fall.
+			_seek(_human_clip("Hit_Chest"),minf(elapsed,RELEASE_SECONDS))
 		&"tackle_lunge":
 			_seek(_human_clip("Crouch_Idle"),elapsed)
 			_arm(actor,"l",Vector3(-0.18,1.0,-0.52),true)
@@ -180,7 +185,7 @@ func _install(actor: Node3D, player: AnimationPlayer, skeleton: Skeleton3D) -> b
 	var path:String=actor.call("_external_path",str(config.get("animationLibrary","")))
 	if not path.ends_with("Universal_Animation_Library.glb"):return false
 	var result:=NativeAnimationImporter.import_library(actor,path,skeleton,config.get("boneAliases",{}),
-		PackedStringArray(["Idle_Hurt","Crouch_Idle","Hit_Knockback","LayToIdle"]),PackedStringArray(["Idle_Hurt","Crouch_Idle"]))
+		PackedStringArray(["Idle_Hurt","Hit_Chest","Crouch_Idle","Hit_Knockback","LayToIdle"]),PackedStringArray(["Idle_Hurt","Crouch_Idle"]))
 	var extra:=result.get("player") as AnimationPlayer
 	if extra==null:return false
 	if not (result.get("errors",PackedStringArray()) as PackedStringArray).is_empty():extra.free();return false

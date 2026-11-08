@@ -1,5 +1,6 @@
 extends SceneTree
 ## Real native rigs: contact, clock ownership, living fall/rise, and cleanup.
+const Scene := preload("res://src/world/campaign_scene.gd")
 var checks:=0
 var failures:=0
 var measurements:Dictionary={}
@@ -107,7 +108,7 @@ func run()->void:
 	expect(player_hidden,"a real skeleton/combat refresh keeps both bow and native hand gear suppressed")
 	expect(bone(player,"pelvis").y<0.85 and player.current_action!=&"death",
 		"the player ducks into a living shoulder-first tackle")
-	for actor:ReplicatedActor3D in [goblin,mother,player]:
+	for actor:ReplicatedActor3D in [goblin,player]:
 		var point:=actor.global_position
 		actor.set_cinematic_presentation(point,0,&"tackle_fall")
 		actor.set_cinematic_action_elapsed(0.95)
@@ -123,6 +124,7 @@ func run()->void:
 		actor.end_cinematic_presentation()
 		expect(actor.current_action==&"idle" and not actor._cinematic_active,
 			"actor"+str(actor.actor_id)+" returns to ordinary idle after the grapple lease")
+	mother.end_cinematic_presentation()
 	var restored:=true
 	for row:Dictionary in mother_gear.values():restored=restored and row.node.visible==row.visible
 	expect(restored and mother.animation_player.callback_mode_process==previous_mode
@@ -135,11 +137,59 @@ func run()->void:
 	expect([goblin._health_current,mother._health_current,player._health_current]==original_health
 		and [goblin.server_target,mother.server_target,player.server_target]==original_targets,
 		"all native health and authoritative destinations remain unchanged")
+	await check_help_choreography(mother,goblin,player)
 	for actor:ReplicatedActor3D in [goblin,mother,player]:actor.queue_free()
 	await process_frame;await process_frame
 	NativeAnimationImporter.clear();GlbSceneCache.clear();await process_frame
 	print("Native grapple poses: ",checks," checks; ",failures," failures")
 	quit(1 if failures else 0)
+
+func check_help_choreography(mother:ReplicatedActor3D,goblin:ReplicatedActor3D,player:ReplicatedActor3D)->void:
+	var scene:=Scene.new();root.add_child(scene)
+	scene._definition=Scene.scene_definitions()["measure.rescue.abduction"].duplicate(true)
+	scene._choice_state={"selected":"help"}
+	scene._actors={"mother":mother,"guard":goblin,"protagonist":player}
+	for role:String in scene._actors:scene._posts[role]=scene._actors[role].global_transform
+	scene._anchors={"mother_intercept":Vector3.ZERO,"guard_combat":Vector3(2,0,0),
+		"player_help":Vector3(1,0,0),"protagonist_post":Vector3(-3,0,-6)}
+	var minimum_head:=INF
+	var minimum_hip:=INF
+	var falls_only_on_combatants:=true
+	for frame:int in range(130):
+		scene.elapsed=45.5+frame*0.05;scene._apply_actors()
+		if mother._cinematic_injury!=null:mother._cinematic_injury.advance(0.05)
+		minimum_head=minf(minimum_head,bone(mother,"Head").y)
+		minimum_hip=minf(minimum_hip,bone(mother,"pelvis").y)
+		falls_only_on_combatants=falls_only_on_combatants and not str(mother.current_action).begins_with("tackle_")
+	expect(falls_only_on_combatants and minimum_head>1.0 and minimum_hip>0.6,
+		"the actual Help timeline keeps the native mother standing throughout the impact and recovery")
+	scene.elapsed=46.15;scene._apply_actors()
+	expect(player.position.distance_to(goblin.position)<player.position.distance_to(mother.position),
+		"the player's shoulder reaches the goblin before the woman")
+	scene.elapsed=48;scene._apply_actors()
+	expect(mother.position.x<-1.0 and mother.position.distance_to(player.position)>1.2,
+		"the released woman recoils backward clear of the falling pair")
+	expect(bone(goblin,"head").y<0.65 and bone(player,"Head").y<0.65,
+		"only the goblin and player lie on the ground after the collision")
+	var out:=OS.get_environment("RL_RESCUE_TACKLE_RENDER_OUT")
+	if not out.is_empty() and DisplayServer.get_name()!="headless":
+		DirAccess.make_dir_recursive_absolute(out);root.size=Vector2i(1280,720)
+		var camera:=Camera3D.new();root.add_child(camera);camera.position=Vector3(-4.5,4.5,-6.5)
+		camera.look_at(Vector3(0.25,0.8,0));camera.fov=45;camera.current=true;camera.cull_mask=1
+		var light:=DirectionalLight3D.new();root.add_child(light);light.rotation_degrees=Vector3(-50,-30,0)
+		light.light_energy=1.5
+		var floor:=MeshInstance3D.new();var mesh:=BoxMesh.new();mesh.size=Vector3(30,0.1,30)
+		floor.mesh=mesh;floor.position.y=-0.05;root.add_child(floor)
+		var world:=WorldEnvironment.new();world.environment=Environment.new();root.add_child(world)
+		world.environment.background_mode=Environment.BG_COLOR;world.environment.background_color=Color(0.16,0.19,0.22)
+		world.environment.ambient_light_source=Environment.AMBIENT_SOURCE_COLOR
+		world.environment.ambient_light_color=Color.WHITE;world.environment.ambient_light_energy=0.65
+		for at:float in [45.8,46.35,47.1,49.5,54.0]:
+			scene.elapsed=at;scene._apply_actors()
+			await process_frame;await RenderingServer.frame_post_draw
+			expect(root.get_texture().get_image().save_png(out.path_join("tackle-%.2f.png"%at))==OK,"rendered native tackle at %.2f"%at)
+		for node:Node in [camera,light,floor,world]:node.queue_free()
+	scene.cancel("test_cleanup");scene.queue_free()
 
 func arr(point:Vector3)->Array:return [point.x,point.y,point.z]
 func nearest(point:Vector3,cloud:PackedVector3Array)->float:

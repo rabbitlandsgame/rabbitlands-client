@@ -502,7 +502,7 @@
           "from": "protagonist_post",
           "destination": "mother_intercept",
           "destination_offset": [
-            -0.2,
+            -0.42,
             0,
             -1.05
           ],
@@ -510,9 +510,9 @@
           "face": "mother_intercept",
           "when": "help",
           "face_offset": [
+            -0.42,
             0,
-            0,
-            1
+            0
           ]
         },
         {
@@ -521,23 +521,23 @@
           "action": "tackle_lunge",
           "from": "mother_intercept",
           "from_offset": [
-            -0.2,
+            -0.42,
             0,
             -1.05
           ],
           "destination": "mother_intercept",
           "destination_offset": [
-            -0.2,
+            -0.42,
             0,
-            -0.45
+            -0.25
           ],
           "move_seconds": 0.7,
           "face": "mother_intercept",
           "when": "help",
           "face_offset": [
+            -0.42,
             0,
-            0,
-            1
+            0
           ]
         },
         {
@@ -571,13 +571,13 @@
         {
           "at": 46.15,
           "actor": "mother",
-          "action": "tackle_fall",
+          "action": "restraint_release",
           "from": "mother_intercept",
           "destination": "mother_intercept",
           "destination_offset": [
-            0.85,
+            -1.1,
             0,
-            -0.65
+            -0.6
           ],
           "move_seconds": 0.95,
           "face": "guard_combat",
@@ -589,9 +589,9 @@
           "action": "tackle_fall",
           "from": "mother_intercept",
           "from_offset": [
-            -0.2,
+            -0.42,
             0,
-            -0.45
+            -0.25
           ],
           "destination": "mother_intercept",
           "destination_offset": [
@@ -632,12 +632,12 @@
         {
           "at": 47.1,
           "actor": "mother",
-          "action": "tackle_down",
+          "action": "injury_standing",
           "destination": "mother_intercept",
           "destination_offset": [
-            0.85,
+            -1.1,
             0,
-            -0.65
+            -0.6
           ],
           "face": "guard_combat",
           "when": "help"
@@ -687,12 +687,12 @@
         {
           "at": 49.4,
           "actor": "mother",
-          "action": "tackle_rise",
+          "action": "defend",
           "destination": "mother_intercept",
           "destination_offset": [
-            0.85,
+            -1.1,
             0,
-            -0.65
+            -0.6
           ],
           "face": "guard_combat",
           "when": "help"
@@ -731,9 +731,9 @@
           "action": "walk",
           "from": "mother_intercept",
           "from_offset": [
-            0.85,
+            -1.1,
             0,
-            -0.65
+            -0.6
           ],
           "destination": "mother_intercept",
           "move_seconds": 2,
