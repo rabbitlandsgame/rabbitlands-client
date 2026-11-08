@@ -165,6 +165,9 @@ var _selection_ring_flat: ArrayMesh = null
 ## while stationary markers periodically pick up newly streamed surfaces.
 var _selection_ring_draped_at := Vector3(NAN, NAN, NAN)
 var _selection_ring_draped_msec := 0
+## Only a visible selected marker needs a clock after its actor has settled.
+## Keep it under the ring, outside the actor's visual-root child traversal.
+var _selection_ring_refresh: Timer
 ## Metres per tile on the map this actor is on, so the marker can be
 ## the size of the ground the server reserved rather than a guess.
 var _metres_per_tile := 1.0
@@ -738,6 +741,7 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 	selection_ring.layers = GAMEPLAY_ONLY_VISUAL_LAYER
 	add_child(selection_ring)
 	_selection_ring = selection_ring
+	selection_ring.visibility_changed.connect(_sync_selection_ring_refresh)
 	_resize_selection()
 	_add_nameplate(dto)
 	_add_map_dot(dto)
@@ -3137,6 +3141,41 @@ func _level_selection_ring() -> void:
 	if _selection_ring != null and _selection_ring.visible:
 		_selection_ring.rotation.y = -rotation.y
 		_drape_selection_ring()
+
+## Idle actors deliberately stop both presentation clocks. Their one visible
+## selection ring still needs to pick up streamed ground, without waking the
+## body or adding a processing callback to every unselected actor.
+func _sync_selection_ring_refresh() -> void:
+	if _selection_ring == null or not _selection_ring.is_visible_in_tree():
+		_stop_selection_ring_refresh()
+		return
+	if not is_instance_valid(_selection_ring_refresh):
+		# Visibility can arrive while children are entering the tree.
+		call_deferred("_create_selection_ring_refresh")
+	elif _selection_ring_refresh.is_inside_tree() and _selection_ring_refresh.is_stopped():
+		_selection_ring_refresh.start()
+
+func _create_selection_ring_refresh() -> void:
+	if _selection_ring == null or not _selection_ring.is_visible_in_tree():
+		return
+	if not is_instance_valid(_selection_ring_refresh):
+		_selection_ring_refresh = Timer.new()
+		_selection_ring_refresh.name = "SelectionGroundRefresh"
+		_selection_ring_refresh.process_callback = Timer.TIMER_PROCESS_PHYSICS
+		_selection_ring_refresh.wait_time = float(GroundDrape.REFRESH_MSEC) / 1000.0
+		_selection_ring_refresh.timeout.connect(_refresh_selection_ring_ground)
+		_selection_ring.add_child(_selection_ring_refresh)
+	_sync_selection_ring_refresh()
+
+func _stop_selection_ring_refresh() -> void:
+	if is_instance_valid(_selection_ring_refresh):
+		_selection_ring_refresh.stop()
+
+func _refresh_selection_ring_ground() -> void:
+	if _selection_ring != null and _selection_ring.is_visible_in_tree():
+		_level_selection_ring()
+	else:
+		_stop_selection_ring_refresh()
 
 ## Lay the marker back onto the ground the actor is standing on now.
 ##
@@ -7072,6 +7111,9 @@ func set_spell_variant(effect: int) -> void:
 
 func _enter_tree() -> void:
 	call_deferred("_restore_remote_pending")
+	# Children have entered before this runs; never start a Timer outside a tree.
+	if _selection_ring != null and _selection_ring.visible:
+		call_deferred("_sync_selection_ring_refresh")
 	# A frame-clock actor that left the tree awake (a reparent) is stepped
 	# again, on whichever clock is in force now, as physics would resume it.
 	if _frame_presenting:
@@ -7081,6 +7123,7 @@ func _restore_remote_pending() -> void:
 	RemotePresentationService.restore_pending(self)
 
 func _exit_tree() -> void:
+	_stop_selection_ring_refresh()
 	if _cinematic_grapple != null:_cinematic_grapple.clear()
 	if is_instance_valid(_native_model):
 		HIGH_HAIR.release(_native_model)

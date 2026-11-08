@@ -1673,7 +1673,7 @@ func _ready() -> void:
 	animation_configs["res://data/animations/luminous.json"] = animation_config
 	var registry_document := _json("res://data/maps/registry.json")
 	map_registry = registry_document.get("maps", {})
-	campaign_cutaway.configure(map_registry, _campaign_replay_visual)
+	campaign_cutaway.configure(map_registry, _campaign_replay_visual, _campaign_replay_asset_groups)
 	var coordinate_catalog: Dictionary = Network.configure_coordinate_profiles(
 		registry_document.get("coordinateProfiles", {}), registry_document.get("coordinateMapNames", {}), map_registry)
 	if not coordinate_catalog.ok:
@@ -9090,6 +9090,7 @@ func _on_campaign_replay() -> void:
 			if _try_restage_rescue_intro():
 				return
 			if not str(campaign_cutaway.status().get("error", "")).is_empty():
+				campaign_cutaway.retry_browser_assets()
 				_clear_campaign_cutaway()
 		campaign_scene.request_replay(AppState.campaign, AppState.current_map)
 
@@ -9264,6 +9265,13 @@ func _campaign_surface_height(point: Vector3) -> float:
 
 ## Read-only replay bodies use the existing preview constructor. They never
 ## enter the live actor dictionary, crowd budget or remote-presentation service.
+func _campaign_replay_asset_groups(dto: Dictionary) -> Array:
+	var visual := _presentation_dto(dto.duplicate(true))
+	var groups := WebPrototype.model_groups(_model_for_actor(visual)).duplicate()
+	for group: Variant in WebPrototype.equipment_groups(visual.get("equipment_visuals", {})):
+		if not groups.has(group): groups.append(group)
+	return groups
+
 func _campaign_replay_visual(dto: Dictionary, parent: Node3D, replay_adapter: CoordinateAdapter,
 		sample: Callable) -> Node3D:
 	if dto.is_empty() or not is_instance_valid(parent) or replay_adapter == null or not sample.is_valid():

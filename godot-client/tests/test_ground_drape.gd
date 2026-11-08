@@ -214,9 +214,17 @@ func _stationary_targets_follow_late_paving() -> void:
 	actor.configure({"actor_id": 8, "x": 0, "y": 0, "rotation": 0,
 		"actor_type": 1, "kind": 1, "name": "Still", "health": 10,
 		"max_health": 10}, adapter, {}, {})
-	actor.set_physics_process(false)
-	actor.set_selected(true)
 	var selection := actor.get_node("SelectionRing") as MeshInstance3D
+	_expect(selection.get_node_or_null("SelectionGroundRefresh") == null,
+		"unselected actors never allocate a selection clock")
+	actor.set_selected(true)
+	actor.advance_presentation(0.0)
+	_expect(not actor.is_presenting() and actor.get("_settled"),
+		"the stationary selected actor keeps its presentation asleep")
+	await process_frame
+	var refresh := selection.get_node_or_null("SelectionGroundRefresh") as Timer
+	_expect(refresh != null and refresh.process_callback == Timer.TIMER_PROCESS_PHYSICS,
+		"only the visible selection ring owns a physics refresh timer")
 	var combat := preload("res://src/actors/combat_target_marker_3d.gd").new()
 	root.add_child(combat)
 	combat.configure(true, Vector2.ONE, 1.0)
@@ -233,20 +241,60 @@ func _stationary_targets_follow_late_paving() -> void:
 	root.add_child(deck)
 	for unused: int in 4:
 		await physics_frame
-	await create_timer(float(GroundDrape.REFRESH_MSEC) / 1000.0 + 0.05).timeout
-	actor.call("_level_selection_ring")
-	combat.call("_physics_process", 0.0)
+	await _wait_for_marker_refresh()
 	_expect(selection.mesh != before_selection and combat.ring.mesh != before_combat,
-		"stationary selection and combat rings refresh after paving arrives")
+		"stationary selection and combat rings refresh automatically after paving arrives")
+	_expect(not actor.is_presenting() and actor.get("_settled"),
+		"automatic ground refresh never wakes the actor's presentation")
 	for ring: MeshInstance3D in [selection, combat.ring]:
 		var lowest := INF
 		for vertex: Vector3 in ring.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]:
 			lowest = minf(lowest, (ring.global_transform * vertex).y)
 		_expect(lowest > 0.6,
 			"the stationary target circle clears the late paving (%.3f m)" % lowest)
+	actor.hide()
+	_expect(refresh != null and refresh.is_stopped(),
+		"inherited visibility stops the selection clock")
+	var hidden_mesh := selection.mesh
+	await _wait_for_marker_refresh()
+	_expect(selection.mesh == hidden_mesh, "hidden selection rings do not resample ground")
+	actor.show()
+	_expect(refresh != null and selection.get_node_or_null("SelectionGroundRefresh") == refresh \
+		and not refresh.is_stopped(), "showing the actor reuses and restarts its selection clock")
+	await _wait_for_marker_refresh()
+	_expect(selection.mesh != hidden_mesh and not actor.is_presenting(),
+		"a shown idle selection resumes automatic ground refresh without waking")
+	actor.set_selected(false)
+	_expect(refresh != null and refresh.is_stopped(), "deselection stops the selection clock")
+	var unselected_mesh := selection.mesh
+	await _wait_for_marker_refresh()
+	_expect(selection.mesh == unselected_mesh, "deselected rings do not resample ground")
+	actor.set_selected(true)
+	_expect(refresh != null and selection.get_node_or_null("SelectionGroundRefresh") == refresh \
+		and not refresh.is_stopped(), "reselection reuses the same bounded clock")
+	actor.current_action = &"death"
+	actor.set_selected(true)
+	_expect(not selection.visible and refresh != null and refresh.is_stopped(),
+		"the existing death visibility rule also stops the selection clock")
+	actor.current_action = &"idle"
+	actor.set_selected(true)
+	root.remove_child(actor)
+	_expect(refresh != null and refresh.is_stopped(), "leaving the tree stops the selection clock")
+	root.add_child(actor)
+	await process_frame
+	_expect(refresh != null and not refresh.is_stopped() and not actor.is_presenting(),
+		"tree reentry safely restarts only the visible marker clock")
 	actor.queue_free()
 	combat.queue_free()
 	deck.queue_free()
+	await process_frame
+	_expect(not is_instance_valid(refresh), "freeing the actor also frees its selection clock")
+
+func _wait_for_marker_refresh() -> void:
+	# Timer time advances on physics ticks; the drape throttle uses wall time.
+	# An early first tick may wait for the next interval before it can sample.
+	await create_timer(float(GroundDrape.REFRESH_MSEC) / 500.0 + 0.1, true, true).timeout
+	await physics_frame
 
 func _expect(value: bool, label: String) -> bool:
 	if not value:
