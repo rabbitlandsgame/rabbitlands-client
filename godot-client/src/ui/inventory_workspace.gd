@@ -70,7 +70,9 @@ func configure(owner_main: Control) -> void:
 	name = "InventoryWorkspace"
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	z_index = 290
+	# Screen-space dividers and edit outlines belong to inventory's window group,
+	# including its storage host while docked, rather than covering other windows.
+	main.window_stack.attach_overlay(main.inventory_panel, self)
 	preferences_path = main.chat_hud.preferences_path
 	model.load_file(preferences_path)
 	(main.inventory_panel.get_node("Content") as Control).hide()

@@ -47,6 +47,7 @@ func run() -> void:
 	main._sync_inventory()
 	await _check_bulk_shortcuts()
 	await _check_window_move_redraw()
+	await _check_window_layer()
 	var pack_buttons: Array = main.inventory_slot_buttons.duplicate()
 	var worn_buttons: Array = main.equipment_slot_buttons.duplicate()
 	var hud_before: Dictionary = main.hud_workspace.model.working.duplicate(true)
@@ -172,12 +173,18 @@ func run() -> void:
 	workspace.finish_edit(false)
 	main.classic_storage._attach_inventory()
 	workspace.apply_layout()
+	await frames()
 	expect(main.classic_storage.is_inventory_docked() and main.inventory_panel.get_parent() == main.classic_storage.body,
 		"storage can still dock the customized real inventory")
+	expect(workspace.z_index == main.storage_panel.z_index + 1,
+		"inventory dividers follow storage's window layer while docked")
 	main.classic_storage._detach_inventory()
 	workspace.apply_layout()
+	await frames()
 	expect(main.inventory_panel.get_parent() == main.game_view and main.inventory_grid.get_child_count() == 24,
 		"undocking restores the customized inventory and all its controls")
+	expect(workspace.z_index == main.inventory_panel.z_index + 1,
+		"inventory dividers return to inventory's window layer after undocking")
 	workspace.open_editor()
 	workspace.editor.select_component("pouch")
 	expect(workspace.editor.selected == "pouch", "Pouch is a selectable inventory customization section")
@@ -314,6 +321,24 @@ func _check_window_move_redraw() -> void:
 	workspace.draw.disconnect(count_draw)
 	main.inventory_panel.position = original
 	await frames()
+
+func _check_window_layer() -> void:
+	var book: Control = main.reference_window.panel
+	book.show()
+	WindowStack.activate(book)
+	await frames()
+	expect(workspace.z_index < book.z_index,
+		"inventory dividers stay behind the encyclopedia when it is in front")
+	WindowStack.activate(main.inventory_panel)
+	await frames()
+	expect(not workspace.z_as_relative and workspace.z_index == main.inventory_panel.z_index + 1
+		and workspace.z_index > book.z_index,
+		"raising inventory raises its dividers with it")
+	WindowStack.activate(book)
+	await frames()
+	expect(workspace.z_index < book.z_index,
+		"raising the encyclopedia covers the inventory dividers again")
+	book.hide()
 
 func _bread() -> Dictionary:
 	return {"open": true, "image_id": 1, "name": "Hearth Bread", "category": "Food", "quantity": 24,
