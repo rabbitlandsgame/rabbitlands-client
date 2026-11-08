@@ -100,7 +100,7 @@ def finish_site(stage: Path, assets_base_url: str):
     manifest = {"schema": 1, "base_url": assets_base_url.rstrip("/") + "/",
                 "pack": {"bytes": pack.stat().st_size, "parts": parts},
                 "wasm": {**wasm, "file": wasm["sha256"] + ".wasm"}, "archives": report["archives"]}
-    for name in ("groups", "maps", "model_groups", "equipment_groups"):
+    for name in ("groups", "maps", "model_groups", "equipment_groups", "source_groups"):
         if name in report: manifest[name] = report[name]
     if "browser_actor_preparation" in report:
         manifest["browser_actor_preparation"] = report["browser_actor_preparation"]

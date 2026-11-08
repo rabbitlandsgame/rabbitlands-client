@@ -13,7 +13,7 @@ INPUTS = ("godot-client/assets", "godot-client/data/actors", "godot-client/data/
           "godot-client/data/assets", "godot-client/src/ui/creation_archetypes.gd",
           "godot-client/src/actors/player_creation_policy.gd",
           "eloria-assets/maps", "eloria-assets/world", "eloria-assets/fonts")
-POLICY = "rl-browser-groups-zip2m-v3"
+POLICY = "rl-browser-groups-zip2m-heads-v4"
 
 class Sources(set):
     def __init__(self, paths, root):
@@ -141,9 +141,9 @@ def group_sources(web, *, include_map_geometry=True):
     models = model_registry["models"]
     equipment = json.loads((client / "data/actors/equipment.json").read_text())["models"]
     registry = json.loads((client / "data/maps/registry.json").read_text())["maps"]
-    groups = {}; model_groups = {}; equipment_groups = {}; map_groups = {}
+    groups = {}; model_groups = {}; equipment_groups = {}; map_groups = {}; source_groups = {}
     startup = set()
-    for root in ("rl_heads", "rl_head_textures", "face_masks"):
+    for root in ("rl_head_textures", "face_masks"):
         startup.update(path for path in (client / "assets/actors/native" / root).rglob("*")
                        if path.is_file() and path.suffix not in {".uid", ".import", ".md"}
                        and path.relative_to(repository).as_posix() in tracked)
@@ -152,7 +152,18 @@ def group_sources(web, *, include_map_geometry=True):
     startup.add(client / "assets/actors/native/races/luminous_female_shirt.glb")
     for value in actor_asset_literals(client):
         path = client / value[6:]
-        if path.is_file(): startup.add(path)
+        if path.is_file() and not path.is_relative_to(client / "assets/actors/native/rl_heads"):
+            startup.add(path)
+    # Character choices remain available in the catalog, but a login must not
+    # unpack every hairstyle. Admit the selected face's exact source closure
+    # before creating an avatar or preview. ALL still saves every archive first.
+    for path in sorted((client / "assets/actors/native/rl_heads").rglob("*.glb")):
+        relative = path.relative_to(repository).as_posix()
+        if relative not in tracked: continue
+        resource = "res://" + path.relative_to(client).as_posix()
+        key = "head-source:" + hashlib.sha256(resource.encode()).hexdigest()[:24]
+        groups[key] = closure([path])
+        source_groups[resource] = [key]
     for root in (repository / "eloria-assets/fonts", repository / "eloria-assets/world/_shared/images", client / "assets/world"):
         startup.update(path for path in root.rglob("*") if path.is_file() and path.suffix.lower() in {".glb", ".json", ".png", ".jpg", ".jpeg", ".webp", ".ttf", ".otf"}
                        and path.relative_to(repository).as_posix() in tracked)
@@ -202,7 +213,8 @@ def group_sources(web, *, include_map_geometry=True):
         # Small root metadata enables portal relationships, route planning and
         # streamed-map detection before a territory is downloaded.
         groups["startup"].add(manifest.resolve())
-    return groups, {"maps": map_groups, "model_groups": model_groups, "equipment_groups": equipment_groups}
+    return groups, {"maps": map_groups, "model_groups": model_groups,
+                    "equipment_groups": equipment_groups, "source_groups": source_groups}
 
 
 def factor_groups(sources):

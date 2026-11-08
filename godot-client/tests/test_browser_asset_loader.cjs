@@ -26,7 +26,7 @@ async function run(change = () => {}, stored = new Map(), runOptions = {}) {
         payloads.set(manifest.libraries[1].file, 'cape fixture');
     }
     change(manifest, payloads);
-    const calls = [], downloads = [], events = [], progress = [];
+    const calls = [], downloads = [], events = [], progress = [], cacheReads = [], digests = [];
     let activeDownloads = 0, maximumDownloads = 0;
     const timers = new Set();
     const storage = {
@@ -50,7 +50,10 @@ async function run(change = () => {}, stored = new Map(), runOptions = {}) {
         preload_cancelled: () => Boolean(runOptions.cancelled?.()),
         ...(runOptions.onFailure ? {preload_failure: error => runOptions.onFailure(error, {context, stored, events})} : {})
     };
-    const context = vm.createContext({URL, Blob, Response, AbortController, crypto: webcrypto,
+    const context = vm.createContext({URL, Blob, Response, AbortController,
+        crypto: {subtle: {digest: async (algorithm, bytes) => {
+            digests.push(bytes.byteLength); return webcrypto.subtle.digest(algorithm, bytes);
+        }}},
         setTimeout: (callback, delay) => {
             const timeout = runOptions.fastTimeout === true ? 15 : runOptions.fastTimeout || delay;
             const timer = setTimeout(() => {timers.delete(timer); callback();}, timeout);
@@ -66,7 +69,7 @@ async function run(change = () => {}, stored = new Map(), runOptions = {}) {
         caches: {open: async () => {
             if (runOptions.cacheUnavailable) throw new Error('Cache unavailable');
             return {
-            match: async key => stored.has(key) ? new Response(stored.get(key)) : undefined,
+            match: async key => {cacheReads.push(key); return stored.has(key) ? new Response(stored.get(key)) : undefined;},
             put: async (key, response) => {
                 if (typeof runOptions.quota === 'function' ? runOptions.quota() : runOptions.quota) {
                     throw Object.assign(new Error('quota'), {name: 'QuotaExceededError'});
@@ -153,7 +156,8 @@ async function run(change = () => {}, stored = new Map(), runOptions = {}) {
     assert.equal(context.fetch, originalFetch);
     assert.equal(context.RL_BROWSER_WASM_URL, undefined);
     assert.equal(timers.size, 0, 'preload failure/exit also cleans every poll and deadline');
-    return {calls, downloads, error, stats: context.RL_BROWSER_CACHE_STATS, events, progress, maximumDownloads};
+    return {calls, downloads, error, stats: context.RL_BROWSER_CACHE_STATS, events, progress,
+        maximumDownloads, cacheReads, digests, bridge: context.RabbitLandsBrowser};
 }
 
 test('verified cross-origin payloads start the ordinary package and preserve arguments', async () => {
@@ -315,6 +319,58 @@ test('ALL is the default and saves every unique catalog file before engine initi
     assert.equal(result.stats.preload_active_files, 0);
     assert.equal(result.calls.filter(call => call[0] === 'archive').length, 0,
         'preloading must not place lazy archives in MEMFS or unpack all maps');
+});
+
+test('ALL reuses only the bounded verified engine payload, without reading or hashing it twice', async () => {
+    const stored = new Map();
+    await run(addRepeatedMaps, stored, {preloadMode: 'all', libraries: true});
+    const warm = await run(addRepeatedMaps, stored, {preloadMode: 'all', libraries: true, blockNetwork: true});
+    assert.equal(warm.error, undefined);
+    assert.equal(warm.downloads.length, 0);
+    assert.equal(warm.cacheReads.length, 7, 'each unique catalog entry is read exactly once before launch');
+    assert.equal(warm.digests.length, 7, 'integrity still covers every file, without duplicate engine hashes');
+    assert.equal(warm.stats.initial_reused_files, 5);
+    const initialBytes = Buffer.byteLength('wasm fixtureengine side fixturecape fixturefirstsecond');
+    assert.equal(warm.stats.initial_reused_bytes, initialBytes);
+    assert.equal(warm.stats.initial_retained_peak_bytes, initialBytes, 'lazy map/startup ZIP buffers are not retained');
+    assert.ok(warm.calls.some(call => call[0] === 'pack' && call[1] === 'firstsecond'));
+});
+
+test('repeated identical package parts retain their exact order and share one verification', async () => {
+    const result = await run(manifest => {
+        manifest.pack.parts[1] = {...manifest.pack.parts[0]};
+        manifest.pack.bytes = 10;
+    }, new Map(), {preloadMode: 'all'});
+    assert.equal(result.error, undefined);
+    assert.equal(result.digests.length, 3);
+    assert.ok(result.calls.some(call => call[0] === 'pack' && call[1] === 'firstfirst'));
+});
+
+test('a verified archive handoff proof is exact, single-use and never persists across sessions', async () => {
+    const result = await run(undefined, new Map(), {archives: true});
+    const art = describe('art fixture', 'zip');
+    assert.equal(result.error, undefined);
+    assert.equal(result.bridge.archive_proof_version, 1);
+    assert.equal(result.bridge.consume_archive_proof(art.sha256, art.bytes), true);
+    assert.equal(result.bridge.consume_archive_proof(art.sha256, art.bytes), false);
+    const mismatch = await run(undefined, new Map(), {archives: true});
+    assert.equal(mismatch.bridge.consume_archive_proof(art.sha256, art.bytes + 1), false);
+    assert.equal(mismatch.bridge.consume_archive_proof(art.sha256, art.bytes), false, 'a rejected proof is also consumed');
+    const next = await run();
+    assert.equal(next.bridge.consume_archive_proof(art.sha256, art.bytes), false);
+});
+
+test('lazy appearance source metadata admits only known groups and safe resource paths', async () => {
+    const valid = await run((manifest, payloads) => {
+        addMap(manifest, payloads);
+        manifest.source_groups = {'res://assets/actors/native/rl_heads/hair/fixture.glb':['map:a']};
+    });
+    assert.equal(valid.error, undefined);
+    for (const path of ['res://assets/actors/native/rl_heads/../private.glb', 'res://other/file.glb']) {
+        const bad = await run(manifest => {manifest.source_groups = {[path]:['missing']};});
+        assert.match(bad.error.message, /Invalid game source groups/);
+        assert.equal(bad.downloads.length, 0);
+    }
 });
 
 test('ALL rechecks saved files across visits, repairs only corrupt data and downloads only newly listed data', async () => {

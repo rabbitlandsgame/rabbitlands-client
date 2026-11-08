@@ -7,11 +7,29 @@ import unittest
 import zipfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
-from browser_asset_catalog import factor_groups, creation_models
+from browser_asset_catalog import factor_groups, creation_models, group_sources
 import build_web_prototype as web
 
 
 class BrowserGroupCatalogTests(unittest.TestCase):
+    def test_appearance_sources_are_available_without_unpacking_all_heads_at_login(self):
+        sources, catalog = group_sources(web, include_map_geometry=False)
+        head_root = web.CLIENT / "assets/actors/native/rl_heads"
+        expected = {path.resolve() for path in head_root.rglob("*.glb")}
+        self.assertGreater(len(expected), 40)
+        self.assertTrue(sources["startup"].isdisjoint(expected))
+        mapped = set()
+        for resource, group_ids in catalog["source_groups"].items():
+            path = (web.CLIENT / resource.removeprefix("res://")).resolve()
+            self.assertIn(path, expected)
+            self.assertEqual(len(group_ids), 1)
+            self.assertIn(path, sources[group_ids[0]])
+            mapped.add(path)
+        self.assertEqual(mapped, expected, "all existing head/hair/beard choices remain in the catalog")
+        bundles, _ = factor_groups(sources)
+        self.assertTrue(bundles["startup"].isdisjoint(expected))
+        self.assertTrue(expected.issubset(set().union(*bundles.values())))
+
     def test_only_current_playable_models_are_required_before_character_creation(self):
         with tempfile.TemporaryDirectory() as temporary:
             client = Path(temporary)

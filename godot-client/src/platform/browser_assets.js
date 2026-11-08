@@ -3,13 +3,18 @@
 globalThis.RabbitLandsBrowser = (() => {
     const LIMIT = 64 * 1024 * 1024;
     const CACHE = 'rabbitlands-browser-assets-v1';
+    // Keep only the initial engine payload, never the full downloaded catalog.
+    const INITIAL_REUSE_LIMIT = 384 * 1024 * 1024;
     let runtime, manifest, base, cache;
+    let archiveProof;
     let canWrite = true, cacheFailure = '';
     const stats = {hits: 0, hit_bytes: 0, network_files: 0, download_bytes: 0,
         saved_files: 0, storage_error: '', persistent: false,
         preload_mode: 'all', preload_state: 'idle', preload_total_files: 0, preload_total_bytes: 0,
         preload_completed_files: 0, preload_completed_bytes: 0, preload_attempts: 0,
-        preload_failures: 0, preload_error: '', preload_active_files: 0, preload_max_active_files: 0};
+        preload_failures: 0, preload_error: '', preload_active_files: 0, preload_max_active_files: 0,
+        initial_reused_files: 0, initial_reused_bytes: 0, initial_retained_peak_bytes: 0,
+        archive_proof_hits: 0};
     globalThis.RL_BROWSER_CACHE_STATS = stats;
 
     function validate(row) {
@@ -158,7 +163,53 @@ globalThis.RabbitLandsBrowser = (() => {
             cache = await caches.open(CACHE);
         } catch (error) { cache = undefined; storageError(error); }
     }
-    async function preloadAll(summary, callbacks) {
+    function initialPayloads(libraries) {
+        const total = manifest.pack.bytes + manifest.wasm.bytes + libraries.reduce((n, row) => n + row.bytes, 0);
+        const enabled = total <= INITIAL_REUSE_LIMIT;
+        const modules = new Set([manifest.wasm, ...libraries].map(row => row.sha256));
+        const buffers = new Map(), positions = new Map(), complete = new Set();
+        let pack, offset = 0, moduleBytes = 0;
+        for (const row of manifest.pack.parts) {
+            if (!positions.has(row.sha256)) positions.set(row.sha256, []);
+            positions.get(row.sha256).push(offset);
+            offset += row.bytes;
+        }
+        return {
+            capture(row, bytes) {
+                if (!enabled) return;
+                if (modules.has(row.sha256) && !buffers.has(row.sha256)) {
+                    buffers.set(row.sha256, bytes);
+                    moduleBytes += bytes.byteLength;
+                }
+                if (positions.has(row.sha256)) {
+                    pack ||= new Uint8Array(manifest.pack.bytes);
+                    for (const at of positions.get(row.sha256)) pack.set(new Uint8Array(bytes), at);
+                    complete.add(row.sha256);
+                }
+                stats.initial_retained_peak_bytes = Math.max(stats.initial_retained_peak_bytes,
+                    moduleBytes + (pack?.byteLength || 0));
+            },
+            take(row) {
+                const bytes = buffers.get(row.sha256);
+                if (!bytes) return null;
+                buffers.delete(row.sha256);
+                moduleBytes -= bytes.byteLength;
+                stats.initial_reused_files++;
+                stats.initial_reused_bytes += bytes.byteLength;
+                return bytes;
+            },
+            takePack() {
+                if (!pack || complete.size !== positions.size) return null;
+                const bytes = pack;
+                pack = undefined;
+                stats.initial_reused_files += manifest.pack.parts.length;
+                stats.initial_reused_bytes += bytes.byteLength;
+                return bytes;
+            },
+            clear() { buffers.clear(); pack = undefined; complete.clear(); moduleBytes = 0; }
+        };
+    }
+    async function preloadAll(summary, callbacks, initial) {
         const storage = globalThis.RabbitLandsAssetStorage;
         const mode = await storage?.preload_choice?.({total: summary.total, total_bytes: summary.total_bytes, default_mode: 'all'});
         stats.preload_mode = mode === 'needed' ? 'needed' : 'all';
@@ -201,8 +252,9 @@ globalThis.RabbitLandsBrowser = (() => {
                     try {
                         // No array of payload bytes survives this await. Only two
                         // files can be read, verified and saved at any one time.
-                        await verified(row, true, () => { phase = 'downloading'; report(phase); }, reads);
+                        const bytes = await verified(row, true, () => { phase = 'downloading'; report(phase); }, reads);
                         checkLocation();
+                        initial.capture(row, bytes);
                         stats.preload_completed_files++;
                         stats.preload_completed_bytes += row.bytes;
                         callbacks.onProgress?.(stats.preload_completed_bytes, summary.total_bytes);
@@ -251,13 +303,24 @@ globalThis.RabbitLandsBrowser = (() => {
     }
     async function archive(rows, index, callback) {
         try {
+            archiveProof = undefined;
             if (!runtime || !Array.isArray(rows) || !Number.isSafeInteger(index) || index < 0 || index >= rows.length) {
                 throw new Error('Invalid game archive request.');
             }
             const bytes = await verified(rows[index]);
             takeFile('/tmp/rabbitlands-prototype-assets.zip', bytes);
+            // Same bytes just verified and synchronously handed to MEMFS. This
+            // proof exists only until its one consumer accepts (or rejects) it.
+            archiveProof = {sha256: rows[index].sha256, bytes: bytes.byteLength};
             callback(true, '');
-        } catch (error) { callback(false, error.message); }
+        } catch (error) { archiveProof = undefined; callback(false, error.message); }
+    }
+    function consume_archive_proof(sha256, bytes) {
+        const proof = archiveProof;
+        archiveProof = undefined;
+        const matched = Boolean(proof && proof.sha256 === sha256 && proof.bytes === bytes);
+        if (matched) stats.archive_proof_hits++;
+        return matched;
     }
     async function fetch_archive(index, callback) { return archive(manifest.archives, index, callback); }
     async function fetch_group_archive(group, index, callback) {
@@ -287,6 +350,19 @@ globalThis.RabbitLandsBrowser = (() => {
                 group.archives.forEach(validate);
             }
         }
+        if (manifest.source_groups !== undefined) {
+            const sources = manifest.source_groups;
+            if (!sources || typeof sources !== 'object' || Array.isArray(sources) || Object.keys(sources).length > 8192) {
+                throw new Error('Invalid game source groups.');
+            }
+            for (const [path, ids] of Object.entries(sources)) {
+                if (!/^res:\/\/assets\/actors\/native\/rl_heads\/[a-zA-Z0-9_./-]+\.glb$/.test(path) ||
+                        path.split('/').includes('..') || !Array.isArray(ids) || ids.length < 1 || ids.length > 64 ||
+                        ids.some(id => typeof id !== 'string' || !Object.hasOwn(manifest.groups || {}, id))) {
+                    throw new Error('Invalid game source groups.');
+                }
+            }
+        }
         const libraries = manifest.libraries || [];
         if (!Array.isArray(libraries) || libraries.length > 16) throw new Error('Invalid browser libraries.');
         const names = new Set();
@@ -306,11 +382,16 @@ globalThis.RabbitLandsBrowser = (() => {
             try { stats.persistent = await navigator.storage.persist(); }
             catch (_) { stats.persistent = false; }
         }
-        await preloadAll(downloads, callbacks);
+        const initial = initialPayloads(libraries);
+        try { await preloadAll(downloads, callbacks, initial); }
+        catch (error) { initial.clear(); throw error; }
+        // A canceled or recovered partial preload must never supply a partial
+        // package. The smaller mode retains its ordinary verified read path.
+        if (stats.preload_state !== 'complete') initial.clear();
         let completed = 0;
         const total = manifest.pack.bytes + manifest.wasm.bytes + libraries.reduce((n, row) => n + row.bytes, 0);
         async function load(row) {
-            const bytes = await verified(row);
+            const bytes = initial.take(row) || await verified(row);
             completed += bytes.byteLength;
             callbacks.onProgress?.(completed, total);
             return bytes;
@@ -335,6 +416,9 @@ globalThis.RabbitLandsBrowser = (() => {
                 };
             }
             await engine.init(config.executable);
+        } catch (error) {
+            initial.clear();
+            throw error;
         }
         finally {
             globalThis.fetch = originalFetch;
@@ -343,18 +427,26 @@ globalThis.RabbitLandsBrowser = (() => {
             delete globalThis.RL_BROWSER_WASM_URL;
         }
         runtime = engine;
-        let pack = new Uint8Array(manifest.pack.bytes);
-        let offset = 0;
-        for (const row of manifest.pack.parts) {
-            const bytes = await load(row);
-            if (offset + bytes.byteLength > pack.byteLength) throw new Error('Invalid game package length.');
-            pack.set(new Uint8Array(bytes), offset);
-            offset += bytes.byteLength;
+        let pack = initial.takePack();
+        if (pack) {
+            completed += pack.byteLength;
+            callbacks.onProgress?.(completed, total);
+        } else {
+            pack = new Uint8Array(manifest.pack.bytes);
+            let offset = 0;
+            for (const row of manifest.pack.parts) {
+                const bytes = await load(row);
+                if (offset + bytes.byteLength > pack.byteLength) throw new Error('Invalid game package length.');
+                pack.set(new Uint8Array(bytes), offset);
+                offset += bytes.byteLength;
+            }
+            if (offset !== pack.byteLength) throw new Error('Incomplete game package.');
         }
-        if (offset !== pack.byteLength) throw new Error('Incomplete game package.');
+        initial.clear();
         takeFile('index.pck', pack.buffer);
         pack = null;
         await engine.start({args: ['--main-pack', 'index.pck', ...config.args]});
     }
-    return {start, fetch_archive, fetch_group_archive, stats};
+    return {start, fetch_archive, fetch_group_archive, consume_archive_proof,
+        archive_proof_version: 1, stats};
 })();
