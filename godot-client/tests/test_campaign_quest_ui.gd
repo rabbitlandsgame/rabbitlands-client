@@ -153,6 +153,20 @@ func run() -> void:
 		"the completion notice offers no active quest tracking or repeated conversation")
 	expect(not guide.hide_button.visible,"the completed rescue keeps its Continue action accessible")
 	await capture("rescue-complete-return-1280x720")
+	var departures:Array[String]=[]
+	hud.action_requested.connect(func(action:String)->void:departures.append(action))
+	var continue_position:Vector2=hud._leave.get_global_rect().get_center()
+	var pointer:=InputEventMouseMotion.new();pointer.position=continue_position
+	root.push_input(pointer,true)
+	for pressed:bool in [true,false]:
+		var click:=InputEventMouseButton.new();click.button_index=MOUSE_BUTTON_LEFT
+		click.position=continue_position;click.pressed=pressed;root.push_input(click,true)
+	await settle()
+	expect(not guide.card.visible and not hud.visible,"Continue immediately dismisses the completion notice before the server responds")
+	hud._leave.pressed.emit()
+	expect(departures==["leave"],"Continue requests the ordinary private-map departure once")
+	await show_state(rescue_complete)
+	expect(not guide.card.visible and not hud.visible,"delayed completed snapshots cannot reopen the dismissed notice")
 	var returned := rescue_complete.duplicate(true);returned.active=false
 	await show_state(returned)
 	expect(not guide.has_campaign() and guide.quest_title()=="Signed Ashore",
