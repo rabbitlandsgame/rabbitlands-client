@@ -619,7 +619,7 @@ func _style() -> void:
 	for panel: Control in panels: _override_box(panel, "panel", _empty_box)
 	for label: RichTextLabel in [main.inventory_description, inspection_text]:
 		_override_font_size(label, "normal_font_size", config.font_size)
-		var text_color: Color = main._inventory_feedback_color() if label == main.inventory_description else config.text
+		var text_color: Color = main._inventory_feedback_color() if label == main.inventory_description or not main._inventory_mix_feedback_output().is_empty() else config.text
 		if not label.has_theme_color_override("default_color") or label.get_theme_color("default_color") != text_color:
 			label.add_theme_color_override("default_color", text_color)
 	_override_font_size(inspection_title, "font_size", config.font_size + 2)
@@ -762,6 +762,12 @@ func inspect_selected() -> void:
 	if model.working.inspection_mode == "inline" and _inspection_open:
 		close_inspection()
 		return
+	if not main._inventory_mix_feedback_output().is_empty():
+		_inspection_open = true
+		if model.working.inspection_mode == "replace": _set_tab(2)
+		sync_inventory()
+		queue_layout()
+		return
 	if main.selected_inventory_slot < 0: return
 	main._describe_slot(main.selected_inventory_slot, true)
 
@@ -797,6 +803,20 @@ func present_detail(value: Dictionary, allowed: bool) -> void:
 	queue_layout()
 
 func _render_detail() -> void:
+	var mix_output: String = main._inventory_mix_feedback_output()
+	if not mix_output.is_empty():
+		inspection_title.text = ItemNames.display(mix_output)
+		inspection_title.tooltip_text = ItemNames.tooltip(mix_output)
+		inspection_category.text = "Mixing"
+		inspection_category.tooltip_text = ""
+		inspection_icon.texture = preview_icon.texture
+		inspection_text.text = main.inventory_description.text
+		inspection_text.tooltip_text = inspection_text.text
+		inspection_text.add_theme_color_override("default_color", main._inventory_feedback_color())
+		refresh_actions()
+		return
+	inspection_text.add_theme_color_override("default_color", model.working.text)
+	inspection_text.tooltip_text = ""
 	inspection_title.text = ItemNames.display(str(_detail.get("name", "Item details")))
 	inspection_title.tooltip_text = ItemNames.tooltip(str(_detail.get("name", "Item details")))
 	var current: Dictionary = AppState.inventory.get(_detail_slot, {})
@@ -819,7 +839,7 @@ func refresh_actions() -> void:
 	var selected: Dictionary = AppState.inventory.get(main.selected_inventory_slot, {})
 	main.inventory_use_button.disabled = selected.is_empty() or main.selected_inventory_slot >= 36 or not selected.get("inventory_usable", false) or main._inventory_cooldown_remaining(main.selected_inventory_slot) > 0
 	var item: Dictionary = AppState.inventory.get(_detail_slot, {})
-	var matches := _detail_slot >= 0 and int(item.get("image_id", -1)) == int(_detail.get("image_id", -2))
+	var matches: bool = main._inventory_mix_feedback_output().is_empty() and _detail_slot >= 0 and int(item.get("image_id", -1)) == int(_detail.get("image_id", -2))
 	for button: Button in inspection_actions.get_children():
 		button.visible = matches and ((button.name == "use" and item.get("inventory_usable", false) and _detail_slot < 36)
 			or (button.name == "drop" and (_detail_slot < 24 or _detail_slot >= 127)) or (button.name == "equip" and _detail_slot < 36 and str(_detail.get("equip_type", "")) not in ["", "none"])
@@ -862,7 +882,9 @@ func sync_inventory() -> void:
 	var item_name := ItemNames.display(str(cached.get("name", description.get("name", AppState.inventory_names.get(slot, "Item")))))
 	var category := str(cached.get("category", description.get("category", "")))
 	var status: String = main.inventory_description.text
-	if AppState.inventory_text.is_empty() and not status.begins_with("Could not") and not status.begins_with("Requested") and not status.begins_with("Dropped"):
+	if AppState.inventory_text.is_empty() and not main._inventory_mix_feedback_output().is_empty():
+		main.inventory_description.text = "Mixing %s…" % ItemNames.display(main._inventory_mix_feedback_output())
+	elif AppState.inventory_text.is_empty() and not status.begins_with("Could not") and not status.begins_with("Requested") and not status.begins_with("Dropped"):
 		main.inventory_description.text = "%s%s · ×%s\n%s" % [item_name, " · " + category if not category.is_empty() else "",
 			main._grouped(int(item.get("quantity", 0))), str(cached.get("stats", "Weight %s" % description.emu if description.has("emu") else "Choose Look for item details"))] if not item.is_empty() else "Select an item to inspect it."
 	main.inventory_description.text = ItemNames.in_text(main.inventory_description.text)

@@ -236,7 +236,7 @@ func _check_mix_feedback() -> void:
 	main.set("selected_inventory_slot", -1)
 	for result: Array in [[0, "You failed to make " + output + "."], [10, "You made " + output + " and gained 5 manufacturing experience."], [4, "You made " + output + " and gained 5 manufacturing experience."], [5, "A simple item description."]]:
 		app_state.call("_on_packet", EloriaProtocol.ServerMessage.INVENTORY_ITEM_TEXT,
-			PackedByteArray([result[0]]) + str(result[1]).to_utf8_buffer())
+			PackedByteArray([127 + result[0]]) + str(result[1]).to_utf8_buffer())
 		main.call("_sync_inventory")
 		var label: RichTextLabel = main.get("inventory_description")
 		var expected: Color = {0: Color("ff6666"), 10: Color("66dd88"), 4: Color("ffd166"), 5: Color.WHITE}[result[0]]
@@ -248,7 +248,7 @@ func _check_mix_feedback() -> void:
 	app_state.set("inventory", {0: {"image_id": 618, "quantity": 1}})
 	app_state.set("inventory_names", {0: "Enriched Fire Essence"})
 	app_state.call("_on_packet", EloriaProtocol.ServerMessage.INVENTORY_ITEM_TEXT,
-		PackedByteArray([4]) + "You made Enriched Fire Essence and gained 8 alchemy experience.".to_utf8_buffer())
+		PackedByteArray([131]) + "You made Enriched Fire Essence and gained 8 alchemy experience.".to_utf8_buffer())
 	main.call("_sync_inventory")
 	var preview: TextureRect = main.get("inventory_workspace").get("preview_icon")
 	_expect(preview.texture == main.call("_named_icon", 618, "Enriched Fire Essence"),

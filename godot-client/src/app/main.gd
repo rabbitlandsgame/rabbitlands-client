@@ -4272,6 +4272,7 @@ func _on_mix_state_changed() -> void:
 			_settle_mix_run(run, int(state.get("made", 0)),
 				bool(state.get("interrupted", false)), bool(state.get("rare", false)))
 	_sync_manufacturing()
+	_sync_inventory_if_shown()
 
 func _settle_mix_run(run: Dictionary, made: int, interrupted := false, rare := false) -> void:
 	if not interrupted:
@@ -15953,7 +15954,7 @@ func _inventory_feedback_color() -> Color:
 	return Color.WHITE
 
 ## Resolve the output by identity, independently of the selected ingredient slot.
-func _inventory_mix_feedback_icon() -> Texture2D:
+func _inventory_mix_feedback_output() -> String:
 	var text: String = AppState.inventory_text
 	var output := ""
 	if text.begins_with("You made "):
@@ -15964,6 +15965,10 @@ func _inventory_mix_feedback_icon() -> Texture2D:
 		output = text.trim_prefix("You critically failed to make ").get_slice(";", 0)
 	elif text.is_empty() and not _mix_pending.is_empty():
 		output = str(_mix_pending[0].get("output", ""))
+	return output
+
+func _inventory_mix_feedback_icon() -> Texture2D:
+	var output := _inventory_mix_feedback_output()
 	if output.is_empty(): return null
 	for slot: Variant in AppState.inventory_names:
 		if str(AppState.inventory_names[slot]) == output and AppState.inventory.has(slot):

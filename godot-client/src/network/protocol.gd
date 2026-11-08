@@ -821,7 +821,7 @@ static func decode_server(command: int, payload: PackedByteArray, logical_coordi
 		ServerMessage.INVENTORY_ITEM_TEXT:
 			if payload.is_empty():
 				return {"type": "invalid", "error": "inventory_text_length"}
-			return {"type": "inventory_text", "color": int(payload[0]),
+			return {"type": "inventory_text", "color": int(payload[0]) - 127,
 				"text": nul_string(payload.slice(1))}
 		ServerMessage.GET_NEW_BAG:
 			return decode_ground_bag(payload)
