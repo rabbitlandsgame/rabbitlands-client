@@ -14,7 +14,7 @@ static func is_opening(snapshot: Dictionary) -> bool:
 	return str(snapshot.get("kind", "opening")) in ["", "opening"]
 
 static func is_guided(snapshot: Dictionary) -> bool:
-	return is_opening(snapshot) or str(snapshot.get("kind", "")) == "rescue"
+	return is_opening(snapshot) or str(snapshot.get("kind", "")) in ["rescue", "shelves"]
 
 static func work_targets(snapshot: Dictionary) -> Array[Dictionary]:
 	var targets: Array[Dictionary] = []

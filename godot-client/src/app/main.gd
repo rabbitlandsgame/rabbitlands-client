@@ -65,6 +65,7 @@ const CampaignHudScript = preload("res://src/ui/campaign_hud.gd")
 const CampaignWorksScript = preload("res://src/world/campaign_works.gd")
 const CampaignBankWorksScript = preload("res://src/world/campaign_bank_works.gd")
 const CampaignRoadWorksScript = preload("res://src/world/campaign_road_works.gd")
+const CampaignShelvesWorksScript = preload("res://src/world/campaign_shelves_works.gd")
 const CampaignLampsWorksScript = preload("res://src/world/campaign_lamps_works.gd")
 const CampaignGuidanceScript = preload("res://src/world/campaign_guidance.gd")
 const CampaignCrossingScript = preload("res://src/world/campaign_crossing.gd")
@@ -76,6 +77,7 @@ const CampaignCutawayScript = preload("res://src/world/campaign_cutaway.gd")
 @onready var campaign_works := CampaignWorksScript.new()
 @onready var campaign_bank_works := CampaignBankWorksScript.new()
 @onready var campaign_road_works := CampaignRoadWorksScript.new()
+@onready var campaign_shelves_works := CampaignShelvesWorksScript.new()
 @onready var campaign_lamps_works := CampaignLampsWorksScript.new()
 @onready var campaign_guidance := CampaignGuidanceScript.new()
 @onready var campaign_crossing := CampaignCrossingScript.new()
@@ -91,6 +93,7 @@ const ArrivalPrewarmScript = preload("res://src/world/arrival_prewarm.gd")
 var respawn_prewarm := ArrivalPrewarmScript.new()
 ## The beam's ground, loaded quietly while completed gauntlet loot is split.
 var gauntlet_prewarm := ArrivalPrewarmScript.new()
+var shelves_prewarm := ArrivalPrewarmScript.new()
 const WorldParkScript = preload("res://src/world/world_park.gd")
 ## The map left for one of its interiors (or the interior left for its map),
 ## kept detached for the way back, and an interior built while the player
@@ -1630,6 +1633,7 @@ func _ready() -> void:
 	world_root.add_child(campaign_works)
 	world_root.add_child(campaign_bank_works)
 	world_root.add_child(campaign_road_works)
+	world_root.add_child(campaign_shelves_works)
 	world_root.add_child(campaign_lamps_works)
 	world_root.add_child(campaign_guidance)
 	world_root.add_child(campaign_crossing)
@@ -4928,6 +4932,7 @@ func _close_client() -> void:
 	campaign_scene.cancel("client_closed")
 	_clear_campaign_cutaway()
 	gauntlet_prewarm.discard()
+	shelves_prewarm.discard()
 	await get_tree().process_frame
 	exterior_stream.clear()
 	await ExitDrain.wait_until(get_tree(), "exterior_stream", exterior_stream.is_idle)
@@ -4965,7 +4970,7 @@ func _exit_tree() -> void:
 		# Explicit maintenance exits before these entry helpers acquire parents.
 		for helper: Variant in [remote_presentation, character_intro, campaign_scene,
 				campaign_guidance, campaign_crossing, campaign_cart, campaign_rescue, campaign_cutaway,
-				campaign_hud, campaign_works, campaign_bank_works, campaign_road_works,
+				campaign_hud, campaign_works, campaign_bank_works, campaign_road_works, campaign_shelves_works,
 				campaign_lamps_works, arrival_curtain, quest_trail, mount_status]:
 			if is_instance_valid(helper) and helper is Node and helper.get_parent() == null:
 				helper.free()
@@ -5043,6 +5048,7 @@ func _on_connection_state_changed(value: String) -> void:
 		campaign_works.clear()
 		campaign_bank_works.clear()
 		campaign_road_works.clear()
+		campaign_shelves_works.clear()
 		campaign_lamps_works.clear()
 		campaign_guidance.clear()
 		campaign_crossing.clear()
@@ -5053,6 +5059,7 @@ func _on_connection_state_changed(value: String) -> void:
 		if not game_view.visible or _leaving_session:
 			respawn_prewarm.discard()
 			gauntlet_prewarm.discard()
+			shelves_prewarm.discard()
 		_pickpoint_draft.clear()
 		_pickpoint_submitting = false
 	status_label.text = ("Securing the connection…" if value == "securing"
@@ -5149,6 +5156,7 @@ func _clear_world_presentation(retain_map_resources := false) -> void:
 		SeasonSurfaces.set_season({})
 		respawn_prewarm.discard()
 		gauntlet_prewarm.discard()
+		shelves_prewarm.discard()
 	quest_trail.clear()
 	character_intro.cancel()
 	_clear_map_walk_target()
@@ -6803,6 +6811,7 @@ func _on_state_changed(path: StringName) -> void:
 			campaign_works.clear()
 			campaign_bank_works.clear()
 			campaign_road_works.clear()
+			campaign_shelves_works.clear()
 			campaign_lamps_works.clear()
 			campaign_guidance.clear()
 			campaign_crossing.clear()
@@ -7033,7 +7042,7 @@ func _update_browser_asset_pins() -> void:
 	maps.append_array(world_park.parked_maps())
 	maps.append_array(world_park._estimating.keys())
 	if not world_park._preload.is_empty(): maps.append(str(world_park._preload.get("map", "")))
-	for prewarm: RefCounted in [respawn_prewarm, gauntlet_prewarm]:
+	for prewarm: RefCounted in [respawn_prewarm, gauntlet_prewarm, shelves_prewarm]:
 		if not str(prewarm.get("map_id")).is_empty(): maps.append(str(prewarm.get("map_id")))
 	if character_intro.pending or character_intro.is_active(): maps.append(NewCharacterIntroScript.MAP)
 	if maps == _browser_pinned_maps: return
@@ -7147,9 +7156,12 @@ func _load_server_map() -> void:
 		var prewarmed: Dictionary = {} if not kept.is_empty() else gauntlet_prewarm.take(normalized_map)
 		if prewarmed.is_empty() and kept.is_empty():
 			prewarmed = respawn_prewarm.take(normalized_map)
+		if prewarmed.is_empty() and kept.is_empty():
+			prewarmed = shelves_prewarm.take(normalized_map)
 		if not kept.is_empty():
 			gauntlet_prewarm.discard()
 			respawn_prewarm.discard()
+			shelves_prewarm.discard()
 			handoff = {"resident": kept, "continuous": false, "kept": true}
 		elif not prewarmed.is_empty():
 			handoff = {"resident": prewarmed, "continuous": false}
@@ -7266,7 +7278,8 @@ func _map_change_curtain_kind(normalized_map: String, focus: Vector3) -> StringN
 	if world_park.has_parked(normalized_map) or not world_park.preload_state(normalized_map).is_empty():
 		return &""
 	if (gauntlet_prewarm.pending() and gauntlet_prewarm.map_id == normalized_map) \
-			or (respawn_prewarm.pending() and respawn_prewarm.map_id == normalized_map):
+			or (respawn_prewarm.pending() and respawn_prewarm.map_id == normalized_map) \
+			or (shelves_prewarm.pending() and shelves_prewarm.map_id == normalized_map):
 		return MapChangeCurtainScript.PREWARM
 	return &""
 
@@ -7906,6 +7919,18 @@ func _prefetch_gauntlet_exit() -> void:
 	var entry: Dictionary = MapRegistry.resolve(map_registry, server_map)
 	if not entry.is_empty():
 		gauntlet_prewarm.prewarm(entry, map_id, Vector2i(int(target.x), int(target.y)), world_root)
+
+func _prefetch_shelves_field() -> void:
+	if _map_change_adopts_prewarm(shelves_prewarm.map_id):return
+	var state:Dictionary=AppState.campaign
+	var ledger:Dictionary=state.get("shelves",{})
+	var tile:Variant=ledger.get("arrival_tile")
+	if str(state.get("kind",""))!="shelves" or not bool(state.get("active",false)) \
+			or MapRegistry.normalize_server_map_id(AppState.current_map)!="landfall_town" \
+			or not world_park.preload_enabled or world_park.has_parked("landfall") or not tile is Array or tile.size()!=2:
+		shelves_prewarm.discard();return
+	var entry:Dictionary=MapRegistry.resolve(map_registry,"landfall")
+	if not entry.is_empty():shelves_prewarm.prewarm(entry,"landfall",Vector2i(int(tile[0]),int(tile[1])),world_root)
 
 ## While dead, the ground where a respawn will land is loaded in the background
 ## (the death state's `destination`): kept resident on this map, or prewarmed
@@ -9074,6 +9099,7 @@ func _update_campaign(delta: float) -> void:
 		campaign_works.clear()
 		campaign_bank_works.clear()
 		campaign_road_works.clear()
+		campaign_shelves_works.clear()
 		campaign_lamps_works.clear()
 		campaign_guidance.clear()
 		campaign_crossing.clear()
@@ -9161,6 +9187,7 @@ func _apply_campaign_world() -> void:
 		_campaign_surface_height, campaign_scene.reduced_motion)
 	campaign_road_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
 		_campaign_surface_height, campaign_scene.reduced_motion)
+	campaign_shelves_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map, _campaign_surface_height)
 	campaign_lamps_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
 		_campaign_surface_height, campaign_scene.reduced_motion)
 	campaign_crossing.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
@@ -9212,6 +9239,12 @@ func _on_campaign_target(object_id: int, tile: Vector2i, nearby: bool) -> void:
 			!= EloriaProtocol.map_id_from_reference(AppState.current_map):
 		return
 	magic_selection.cancel()
+	if str(AppState.campaign.get("kind",""))=="shelves":
+		for target: Dictionary in AppState.campaign.get("targets",[]):
+			if int(target.get("object_id",-1))==object_id and bool(target.get("harvest",false)):
+				if nearby: Network.harvest(object_id)
+				else: Network.move_to(tile)
+				return
 	if object_id == 0:
 		Network.move_to(tile) # A campaign route pin is navigation, never a use request.
 	elif nearby:
@@ -9571,7 +9604,27 @@ func _on_rescue_family(action: String) -> void:
 		if action == "start":
 			AppState.append_local_message("Could not begin the family's return. Please try again.")
 
+func _on_shelves_choice(option_id: String) -> void:
+	var snapshot: Dictionary = AppState.campaign
+	var scene: Dictionary = snapshot.get("scene",{})
+	var choice: Dictionary = scene.get("choice",{})
+	var context: Dictionary = campaign_scene.choice_context()
+	if not AppState.authenticated or _disconnect_console_active or bool(AppState.death.get("dead",false)) \
+			or not campaign_scene.playing or campaign_scene.is_replaying() or not bool(snapshot.get("active",false)) \
+			or not str(scene.get("id", "")).begins_with("measure.shelves.") \
+			or not EloriaProtocol.campaign_scene_choice_valid(choice) \
+			or not bool(choice.get("can_choose",false)) or not bool(choice.get("owner_is_you",false)) \
+			or not str(choice.get("selected","")).is_empty() or not bool(context.get("waiting",false)) \
+			or str(context.get("run_id",""))!=str(snapshot.get("run_id","")) \
+			or str(context.get("token",""))!=str(scene.get("token","")) or str(context.get("id",""))!=str(choice.get("id","")):
+		return
+	if Network.campaign_shelves_choice(str(snapshot.run_id),str(scene.token),option_id)!=OK:
+		campaign_scene.choice_send_failed()
+
 func _on_campaign_scene_choice(option_id: String) -> void:
+	if str(AppState.campaign.get("kind", "")) == "shelves":
+		_on_shelves_choice(option_id)
+		return
 	if str(AppState.campaign.get("kind", "")) == "rescue":
 		_on_rescue_scene_choice(option_id)
 		return
@@ -19105,6 +19158,10 @@ func _observe_world_park() -> void:
 			_prefetch_rescue_return(stream)
 	var anticipated := PackedStringArray()
 	var rescue: Dictionary = AppState.campaign
+	_prefetch_shelves_field()
+	if str(rescue.get("kind",""))=="shelves" and bool(rescue.get("active",false)) \
+			and MapRegistry.normalize_server_map_id(loaded_server_map)=="landfall":
+		anticipated.append("landfall_town")
 	if bool(rescue.get("active", false)) and str(rescue.get("kind", "")) == "rescue" \
 			and MapRegistry.normalize_server_map_id(loaded_server_map) == "landfall" \
 			and str(rescue.get("rescue", {}).get("stage", "")) in ["choice", "ambush", "injured", "ready", "to_mine", "deferred"]:

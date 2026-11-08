@@ -28,6 +28,7 @@ var _bank: Label
 var _road: Label
 var _lamps: Label
 var _rescue: Label
+var _shelves: Label
 var _rescue_actions: HFlowContainer
 var _rescue_buttons: Dictionary = {}
 var _rescue_rewards: HFlowContainer
@@ -171,6 +172,11 @@ func _build() -> void:
 	_rescue.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_rescue.add_theme_font_size_override("font_size", 14)
 	column.add_child(_rescue)
+	_shelves = Label.new()
+	_shelves.name = "SupplyLedger"
+	_shelves.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_shelves.add_theme_font_size_override("font_size", 14)
+	column.add_child(_shelves)
 	_rescue_actions = HFlowContainer.new()
 	_rescue_actions.add_theme_constant_override("h_separation", 5)
 	_rescue_actions.add_theme_constant_override("v_separation", 5)
@@ -335,6 +341,7 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 	_apply_road(snapshot.get("road", {}))
 	_apply_lamps(snapshot.get("lamps", {}))
 	_apply_rescue(snapshot.get("rescue", {}))
+	_apply_shelves(snapshot.get("shelves", {}))
 	_apply_party(party, snapshot.get("adoption", {}))
 	_apply_companion(snapshot.get("companion", {}))
 	_entry.visible = (not active or travelling) and bool(snapshot.get("available", false)) and not can_own
@@ -415,7 +422,19 @@ func _request_leave() -> void:
 
 func _request_entry() -> void:
 	var kind := str(_state.get("kind", ""))
-	action_requested.emit(kind if kind in ["bank", "road", "lamps", "rescue"] else "resume" if bool(_state.get("started", false)) else "start")
+	action_requested.emit(kind if kind in ["bank", "road", "lamps", "rescue", "shelves"] else "resume" if bool(_state.get("started", false)) else "start")
+
+func _apply_shelves(ledger: Dictionary) -> void:
+	_shelves.visible = not ledger.is_empty()
+	if ledger.is_empty(): return
+	var lines: PackedStringArray = ["SUPPLY LEDGER"]
+	for row: Dictionary in ledger.get("objectives", []):
+		lines.append(("✓ " if int(row.current)>=int(row.target) else "• ") + str(row.label)
+			+ " · %d/%d" % [int(row.current),int(row.target)] + (" · your practice" if bool(row.get("personal",false)) else " · party"))
+	lines.append("Shelves restored: " + (", ".join(ledger.get("unlocked", [])) if not (ledger.get("unlocked", []) as Array).is_empty() else "None yet"))
+	if str(ledger.get("chapter", "")) == "magic":lines.append("Spider specimens examined: %d/12" % int(ledger.get("samples",0)))
+	if str(ledger.get("chapter", "")) == "earth":lines.append("Cart integrity: %d%%. Stay near the cart; clear each ambush before moving on." % int(ledger.get("cart_integrity",100)))
+	_shelves.text = "\n".join(lines)
 
 func _rescue_local() -> bool:
 	return str(_state.get("kind", "")) == "rescue" and bool(_state.get("active", false)) \

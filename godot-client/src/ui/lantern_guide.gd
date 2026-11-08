@@ -74,6 +74,7 @@ func campaign_identity() -> String:
 	return str(_campaign.get("kind", "opening")) + ":" + str(_campaign.get("run_id", "lead"))
 
 func has_campaign() -> bool:
+	if str(_campaign.get("kind", "")) == "shelves" and bool(_campaign.get("completed", false)) and not bool(_campaign.get("active", false)): return false
 	# Map membership keeps the ending and Return action alive. It must not
 	# fabricate an active journal quest after the server archives this account.
 	if rescue_completed():
@@ -106,7 +107,7 @@ func campaign_entry() -> Dictionary:
 	return {"title":str(_campaign.get("title", "The Missing Measure")), "objective":objective,
 		"location":location,
 		"_campaign":true, "_campaign_identity":campaign_identity(),
-		"_exact_title":str(_campaign.get("kind", "opening")) in ["opening", "rescue"]}
+		"_exact_title":str(_campaign.get("kind", "opening")) in ["opening", "rescue", "shelves"]}
 
 func is_campaign_tracked() -> bool:
 	return has_campaign() and bool(_campaign_choices.get(campaign_identity(), false))

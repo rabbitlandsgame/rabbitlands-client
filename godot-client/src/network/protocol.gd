@@ -305,6 +305,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"campaign_party_v1",
 	"campaign_cart_v1",
 	"campaign_rescue_v1",
+	"campaign_shelves_v1",
 	"campaign_bank_v1",
 	"campaign_road_v1",
 	"campaign_lamps_v1",
@@ -3834,6 +3835,20 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 		return {"type": "invalid", "error": "campaign_inquiry"}
 	if not campaign_rescue_valid(value.get("rescue", {})):
 		return {"type": "invalid", "error": "campaign_rescue"}
+	if not campaign_shelves_valid(value.get("shelves", {})):
+		return {"type":"invalid","error":"campaign_shelves"}
+	if str(value.get("kind",""))=="shelves":
+		if bool(value.get("active",false)) and (value.get("shelves",{}) as Dictionary).is_empty():
+			return {"type":"invalid","error":"campaign_shelves_missing"}
+		if map_id_from_reference(str(value.get("map",""))) not in ["landfall","landfall_town"]:
+			return {"type":"invalid","error":"campaign_shelves_map"}
+		var choice_id:=str((scene.get("choice",{}) as Dictionary).get("id",""))
+		var expected_scene: Dictionary={"shelves_route":"measure.shelves.brief","shelves_lesson":"measure.shelves.lesson",
+			"shelves_cape":"measure.shelves.review","shelves_gear":"measure.shelves.gear","shelves_enriched":"measure.shelves.enriched"}
+		if not choice_id.is_empty() and (not expected_scene.has(choice_id) or str(scene.get("id",""))!=str(expected_scene[choice_id])):
+			return {"type":"invalid","error":"campaign_shelves_choice"}
+	elif str((scene.get("choice",{}) as Dictionary).get("id","")).begins_with("shelves_") or not (value.get("shelves",{}) as Dictionary).is_empty():
+		return {"type":"invalid","error":"campaign_shelves_binding"}
 	var rescue: Dictionary = value.get("rescue", {})
 	if str(value.get("kind", "")) == "rescue" and map_id_from_reference(str(value.get("map", ""))) not in ["landfall", "landfall_insides"]:
 		return {"type":"invalid", "error":"campaign_rescue_map"}
@@ -3865,6 +3880,30 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 
 ## One actual held boss may be reconstructed as a collision-free scene visual
 ## outside native creature interest. This never admits a network gameplay actor.
+static func campaign_shelves_valid(value: Variant) -> bool:
+	if not value is Dictionary:return false
+	if value.is_empty():return true
+	if value.get("chapter") not in ["intro","life","fire","water","earth","school","wind","magic","death","frost","finale"] \
+			or value.get("phase") not in ["contact","brief","arrival","work","lesson","review","complete"]:
+		return false
+	var objectives: Variant=value.get("objectives")
+	if not objectives is Array or objectives.size()>32:return false
+	var seen: Array=[]
+	for row: Variant in objectives:
+		if not row is Dictionary or not row.get("id") is String or not row.get("label") is String \
+				or str(row.id).is_empty() or str(row.label).length()>240 or row.id in seen \
+				or not _campaign_integer(row.get("target"),1,100000) or not _campaign_integer(row.get("current"),0,float(row.target)) \
+				or not row.get("personal") is bool:return false
+		seen.append(row.id)
+	var unlocked: Variant=value.get("unlocked")
+	if not unlocked is Array or unlocked.size()>8:return false
+	seen=[]
+	for family: Variant in unlocked:
+		if family not in ["Life","Fire","Water","Earth","Wind","Magic","Death","Frost"] or family in seen:return false
+		seen.append(family)
+	return (not value.has("arrival_tile") or _campaign_tile(value.arrival_tile)) and _campaign_tile(value.get("cart_tile")) and _campaign_integer(value.get("cart_integrity"),0,100) \
+		and _campaign_integer(value.get("samples"),0,12) and value.get("can_complete") is bool
+
 static func campaign_corpse_template_valid(value: Variant) -> bool:
 	if not value is Dictionary or value.is_empty() or JSON.stringify(value).to_utf8_buffer().size() > 4096:
 		return false
@@ -4120,7 +4159,11 @@ static func campaign_scene_choice_valid(choice: Variant) -> bool:
 	var allowed: Array = {"opening_rescue": ["defend", "repair", "evacuate"],
 		"cart_release": ["unload", "lever", "haul"], "claims_lead": ["physical", "chronology", "records"],
 		"rescue_response": ["help", "watch"], "rescue_accept": ["accept", "defer"],
-		"rescue_reward": ["sword", "bow", "wand"]}.get(str(choice.get("id", "")), [])
+		"rescue_reward": ["sword", "bow", "wand"],
+		"shelves_route": ["direct", "careful"], "shelves_lesson": ["ingredients", "food", "tool"],
+		"shelves_gear": ["wand", "charm", "robe"],
+		"shelves_cape": ["keeper", "artificer"],
+		"shelves_enriched": ["life", "fire", "water", "earth", "wind", "magic", "death", "frost"]}.get(str(choice.get("id", "")), [])
 	if allowed.is_empty() or not choice.get("selected") is String \
 			or (not str(choice.selected).is_empty() and choice.selected not in allowed):
 		return false

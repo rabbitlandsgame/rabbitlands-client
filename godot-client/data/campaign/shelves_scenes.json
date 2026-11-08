@@ -1,0 +1,577 @@
+{
+  "version": 1,
+  "scenes": {
+    "measure.shelves.brief": {
+      "title": "The Empty Shelves of Landfall",
+      "duration": 46,
+      "entry_seconds": 2,
+      "exit_seconds": 1.2,
+      "fov": 48,
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "protagonist",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "shots": [
+        {
+          "t": 0,
+          "anchor_actor": "mentor",
+          "position": [
+            -4,
+            5.5,
+            6
+          ],
+          "target": [
+            0,
+            1,
+            0
+          ]
+        }
+      ],
+      "dialogue_holds": [
+        12,
+        36
+      ],
+      "choice_id": "shelves_route",
+      "choice_at": 14,
+      "choice_response_until": 44,
+      "response_speaker": "Ilka Tarn",
+      "response_actor": "mentor",
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "variants": {
+            "intro": "These shelves once supplied half the coast. Now every road brings another excuse. Let us begin with enough magic to keep a worker alive.",
+            "life": "The growers left good roots in the ground. They need a safe place to work and someone to show that the next harvest will reach us.",
+            "fire": "The goblins charge the miners for entering their own workings. Coal is piling up behind three barricades. The toll ends today.",
+            "water": "Water is standing over the gathering beds, while the lower channels are dry. Mend the watercourse and the cutters can work again.",
+            "earth": "The potters have Clay and Peat. Their cart has been turned back twice. Bring them here alive, and every mixer in the village can start again.",
+            "school": "We have ingredients. We do not yet have enough people who can make anything with them. Help me teach three new hands.",
+            "wind": "The seed growers and reed cutters blame one another for ruined loads. Their harvests are good; their drying stations are not.",
+            "magic": "The refining apparatus leaks. I can mend its joints with a stabilizer, but the only clean binding agent comes from an intact cave-spider gland.",
+            "death": "One bitter shipment frightened the marsh gatherers away. Someone changed the labels, then spread the story that every Death Essence was poison.",
+            "frost": "The cold-storage works have stopped. The stock will spoil before another cart arrives unless we restore circulation and protect the workers.",
+            "finale": "Every route we reopened is being watched. They mean to burn the workshop and every shipment beside it. This time we have workers, supplies, and a plan."
+          },
+          "text": "Let us put these shelves back to work."
+        },
+        {
+          "at": 36,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "variants": {
+            "intro": "Aim Heal Target at Mara herself. Heal mends you; Restore Ether spends Water Essence to refill ether. Fire Bolt is for a hostile target. Your pouch shows what every cast will cost.",
+            "life": "Sage and Hearthroot make Life Essence: two measures of Sage, one of Hearthroot. Keep enough for your own ten mixes; put the growers' share in the collection chest. The gatherersÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ caches let you store ingredients and mix from storage beside each patch.",
+            "fire": "A direct assault is quicker. The miners' side approach lets you silence their signal first. Both roads end with the workers owning their coal and flint again.",
+            "water": "Work from the upper gate down. The bypass takes fewer repairs, but brings a smaller shipment. Kelp and Watercress make Water Essence; it fuels Restore Ether and joins Life Essence in Heal Target.",
+            "earth": "Stay with the cart. It stops for enemies, damage, and anyone left behind. Heal Mara if she is hurt; repair the cart at a safe halt. Choose the main road for speed or the longer sheltered route.",
+            "school": "Mara keeps choosing the wrong ingredients. Tovin's hands shake because he has not eaten. Sela borrowed a bowl and thought it would replace a Mortar and Pestle. Listen before you offer advice.",
+            "wind": "Keep fresh reeds away from damp seed sacks. Repair the racks, set the vanes, and choose between a sheltered site and a larger exposed station.",
+            "magic": "Track the spiders near the resin station. Damaged glands still teach us where to look; after twelve eligible specimens you will have a usable one. Mix the stabilizer, then make Magic Essence from Lotus and Resin.",
+            "death": "Compare the labels with the samples. Toadstool and Thistle are useful when handled properly. We can inspect every batch, or follow the false labels back to the saboteurs.",
+            "frost": "Set the intake first, then seal the containers. A trained villager will handle Frost production; your personal Frost mixing assignment opens at Potion level sixteen.",
+            "finale": "Choose where the trained crew will stand. Hold the receiving yard, help the wounded, and stop their quartermaster before he reaches the workshop."
+          },
+          "text": "Check the supply ledger before setting out."
+        }
+      ],
+      "handoff": {
+        "mode": "fade",
+        "gameplay_map": "landfall",
+        "to": [
+          "measure.shelves.arrival"
+        ]
+      },
+      "choice_actor": "recipient",
+      "cues": [
+        {
+          "at": 0,
+          "actor": "mentor",
+          "action": "idle",
+          "face": "recipient"
+        }
+      ]
+    },
+    "measure.shelves.review": {
+      "title": "A Reliable Supply",
+      "duration": 38,
+      "entry_seconds": 1.5,
+      "exit_seconds": 1.2,
+      "fov": 48,
+      "live_camera": "gameplay",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "shots": [
+        {
+          "t": 0,
+          "anchor_actor": "mentor",
+          "position": [
+            -4,
+            5.5,
+            6
+          ],
+          "target": [
+            0,
+            1,
+            0
+          ]
+        }
+      ],
+      "dialogue_holds": [
+        14,
+        34
+      ],
+      "choice_id": "shelves_cape",
+      "choice_actor": "recipient",
+      "choice_at": 16,
+      "choice_response_until": 34,
+      "response_speaker": "Ilka Tarn",
+      "response_actor": "mentor",
+      "lines": [
+        {
+          "at": 1,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "variants": {
+            "intro": "You can mend, aim, recover and mix. Now we can do more than ration what remains.",
+            "life": "The growers have a protected station and a buyer they can trust. There will be Life Essence on my shelf again.",
+            "fire": "No toll, no stolen loads. Coal and Flint can reach the mixers, and Fire Essence can reach the shelf.",
+            "water": "The channels run clear. The crew has its beds back, and our Water Essence supply has returned.",
+            "earth": "The potters' cart has arrived. This is what a supply line looks like: people reaching home with something useful.",
+            "school": "Three learners, three useful batches. The next shipment no longer depends on one tired pair of hands.",
+            "wind": "Dry seed, sound reeds, and people finally talking to one another. Wind Essence joins the shelf.",
+            "magic": "The apparatus holds a true note again. Keep this enriched essence as thanks; ordinary mixes still have their ordinary rare-result chances.",
+            "death": "A name is not a verdict. The marsh workers have a safe process, and Death Essence has an honest place on the shelf.",
+            "frost": "The cold holds, and the workers can promise a shipment instead of an apology. Frost Essence is available again.",
+            "finale": "Listen. Mortars, wheels, voices, and no empty shelves. We did not merely save a shipment. We taught this place how to keep going."
+          },
+          "text": "This supply can be relied on again."
+        },
+        {
+          "at": 34,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "There is one more gift: an enriched essence from my reserve. Choose the one that will serve your next journey."
+        }
+      ],
+      "handoff": {
+        "mode": "fade",
+        "gameplay_map": "landfall_town",
+        "to": [],
+        "variants": {
+          "finale": {
+            "mode": "hold",
+            "gameplay_map": "",
+            "to": [
+              "measure.shelves.enriched"
+            ]
+          }
+        }
+      },
+      "cues": [
+        {
+          "at": 0,
+          "actor": "mentor",
+          "action": "idle",
+          "face": "recipient"
+        }
+      ]
+    },
+    "measure.shelves.lesson": {
+      "title": "Many Hands at the Mortar",
+      "duration": 34,
+      "entry_seconds": 1.2,
+      "exit_seconds": 1.2,
+      "fov": 48,
+      "live_camera": "gameplay",
+      "required_actors": [
+        "mentor",
+        "student"
+      ],
+      "cast_roles": [
+        "mentor",
+        "student",
+        "protagonist",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "shots": [
+        {
+          "t": 0,
+          "anchor_actor": "mentor",
+          "position": [
+            -4,
+            5.5,
+            6
+          ],
+          "target": [
+            0,
+            1,
+            0
+          ]
+        }
+      ],
+      "dialogue_holds": [
+        10,
+        30
+      ],
+      "choice_id": "shelves_lesson",
+      "choice_at": 12,
+      "choice_response_until": 32,
+      "response_speaker": "Apprentice",
+      "response_actor": "student",
+      "lines": [
+        {
+          "at": 1,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "Listen to the problem before you choose the advice."
+        },
+        {
+          "at": 4,
+          "speaker": "Apprentice",
+          "speaker_actor": "student",
+          "variants": {
+            "mara": "I brought Sage and Reed. They look right, but I cannot make Life Essence.",
+            "tovin": "I have the right ingredients and tool. I skipped breakfast, and now I cannot keep mixing.",
+            "sela": "I used a bowl to crush the herbs. Surely any bowl works like a Mortar and Pestle?"
+          },
+          "text": "Can you help me find the mistake?",
+          "speaker_variants": {
+            "mara": "Mara Vale",
+            "tovin": "Tovin",
+            "sela": "Sela"
+          }
+        },
+        {
+          "at": 30,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "A successful mixture needs the right ingredients, a proper tool, and food. Try a real batch at your bench."
+        }
+      ],
+      "response_speakers": {
+        "mara": "Mara Vale",
+        "tovin": "Tovin",
+        "sela": "Sela"
+      },
+      "choice_actor": "recipient",
+      "cues": [
+        {
+          "at": 0,
+          "actor": "mentor",
+          "action": "idle",
+          "face": "student"
+        },
+        {
+          "at": 0,
+          "actor": "student",
+          "action": "idle",
+          "face": "mentor"
+        }
+      ]
+    },
+    "measure.shelves.enriched": {
+      "title": "The True Note",
+      "duration": 32,
+      "entry_seconds": 0,
+      "exit_seconds": 1.2,
+      "live_camera": "gameplay",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "dialogue_holds": [
+        8,
+        29
+      ],
+      "choice_id": "shelves_enriched",
+      "choice_actor": "recipient",
+      "choice_at": 10,
+      "choice_response_until": 28,
+      "response_speaker": "Ilka Tarn",
+      "response_actor": "mentor",
+      "lines": [
+        {
+          "at": 1,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "And one enriched essence, from my own reserve. Choose the one that will serve your next journey."
+        },
+        {
+          "at": 29,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "These shelves will stay open to you. Come back for supply contracts, and bring news of the roads."
+        }
+      ],
+      "handoff": {
+        "mode": "fade",
+        "gameplay_map": "landfall_town",
+        "to": []
+      },
+      "cues": [
+        {
+          "at": 0,
+          "actor": "mentor",
+          "action": "idle",
+          "face": "recipient"
+        }
+      ]
+    },
+    "measure.shelves.arrival": {
+      "title": "The Last Few Measures",
+      "duration": 55,
+      "entry_seconds": 1.6,
+      "exit_seconds": 1.2,
+      "fov": 48,
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor",
+        "worker"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist"
+      ],
+      "reveal_on_start": [
+        "worker"
+      ],
+      "stage_protagonist": false,
+      "shots": [
+        {
+          "t": 0,
+          "anchor_actor": "mentor",
+          "position": [
+            -4,
+            5.5,
+            6
+          ],
+          "target": [
+            0,
+            1,
+            0
+          ]
+        }
+      ],
+      "dialogue_holds": [
+        12
+      ],
+      "cues": [
+        {
+          "at": 0,
+          "actor": "mentor",
+          "action": "idle",
+          "face": "worker"
+        },
+        {
+          "at": 0,
+          "actor": "worker",
+          "action": "run",
+          "from": "worker_entry",
+          "destination": "worker_stop",
+          "move_seconds": 4,
+          "face": "mentor"
+        },
+        {
+          "at": 4,
+          "actor": "worker",
+          "action": "injury_standing",
+          "destination": "worker_stop",
+          "face": "mentor"
+        }
+      ],
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "Mara Vale",
+          "speaker_actor": "worker",
+          "text": "Ilka! The herb growers turned back again. The road is closed, and I could not get through without a fight."
+        },
+        {
+          "at": 12,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "Open Magic. Heal mends you; aim Heal Target at Mara. Restore Ether spends Water Essence; Fire Bolt needs a hostile target. Check each cast’s cost.\n\nOpen Mixing, then Alchemy. Two Sage and one Hearthroot make Life Essence. Keep your Mortar and Pestle in your pack and eat before mixing. Bank spare materials in the supply chest.\n\nThe practice station provides safe injuries and replaces critically lost ingredients. Return after all four casts and three Life Essence mixes."
+        }
+      ]
+    },
+    "measure.shelves.gear": {
+      "title": "The Road Must Hold",
+      "duration": 38,
+      "entry_seconds": 1.5,
+      "exit_seconds": 1.2,
+      "fov": 48,
+      "live_camera": "gameplay",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "shots": [
+        {
+          "t": 0,
+          "anchor_actor": "mentor",
+          "position": [
+            -4,
+            5.5,
+            6
+          ],
+          "target": [
+            0,
+            1,
+            0
+          ]
+        }
+      ],
+      "dialogue_holds": [
+        14,
+        34
+      ],
+      "choice_id": "shelves_gear",
+      "choice_actor": "recipient",
+      "choice_at": 16,
+      "choice_response_until": 34,
+      "response_speaker": "Ilka Tarn",
+      "response_actor": "mentor",
+      "lines": [
+        {
+          "at": 1,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "variants": {
+            "intro": "You can mend, aim, recover and mix. Now we can do more than ration what remains.",
+            "life": "The growers have a protected station and a buyer they can trust. There will be Life Essence on my shelf again.",
+            "fire": "No toll, no stolen loads. Coal and Flint can reach the mixers, and Fire Essence can reach the shelf.",
+            "water": "The channels run clear. The crew has its beds back, and our Water Essence supply has returned.",
+            "earth": "The potters' cart has arrived. This is what a supply line looks like: people reaching home with something useful. The potters have offered you a useful upgrade. Take a wand, a charm, or a robe. Each of you may choose for yourselves.",
+            "school": "Three learners, three useful batches. The next shipment no longer depends on one tired pair of hands.",
+            "wind": "Dry seed, sound reeds, and people finally talking to one another. Wind Essence joins the shelf.",
+            "magic": "The apparatus holds a true note again. Keep this enriched essence as thanks; ordinary mixes still have their ordinary rare-result chances.",
+            "death": "A name is not a verdict. The marsh workers have a safe process, and Death Essence has an honest place on the shelf.",
+            "frost": "The cold holds, and the workers can promise a shipment instead of an apology. Frost Essence is available again.",
+            "finale": "Listen. Mortars, wheels, voices, and no empty shelves. We did not merely save a shipment. We taught this place how to keep going."
+          },
+          "text": "This supply can be relied on again."
+        },
+        {
+          "at": 34,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "Your work and reward are recorded. Let us return to The True Note."
+        }
+      ],
+      "handoff": {
+        "mode": "fade",
+        "gameplay_map": "landfall_town",
+        "to": []
+      },
+      "cues": [
+        {
+          "at": 0,
+          "actor": "mentor",
+          "action": "idle",
+          "face": "recipient"
+        }
+      ]
+    },
+    "measure.shelves.resolved": {
+      "title": "A Reliable Supply",
+      "duration": 22,
+      "entry_seconds": 1.5,
+      "exit_seconds": 1.2,
+      "fov": 48,
+      "live_camera": "gameplay",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "shots": [
+        {
+          "t": 0,
+          "anchor_actor": "mentor",
+          "position": [
+            -4,
+            5.5,
+            6
+          ],
+          "target": [
+            0,
+            1,
+            0
+          ]
+        }
+      ],
+      "dialogue_holds": [
+        14
+      ],
+      "response_speaker": "Ilka Tarn",
+      "response_actor": "mentor",
+      "lines": [
+        {
+          "at": 1,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "variants": {
+            "intro": "You can mend, aim, recover and mix. Now we can do more than ration what remains. Let us return to The True Note.",
+            "life": "The growers have a protected station and a buyer they can trust. There will be Life Essence on my shelf again. Let us return to The True Note.",
+            "fire": "No toll, no stolen loads. Coal and Flint can reach the mixers, and Fire Essence can reach the shelf. Let us return to The True Note.",
+            "water": "The channels run clear. The crew has its beds back, and our Water Essence supply has returned. Let us return to The True Note.",
+            "earth": "The potters' cart has arrived. This is what a supply line looks like: people reaching home with something useful. Let us return to The True Note.",
+            "school": "Three learners, three useful batches. The next shipment no longer depends on one tired pair of hands. Let us return to The True Note.",
+            "wind": "Dry seed, sound reeds, and people finally talking to one another. Wind Essence joins the shelf. Let us return to The True Note.",
+            "magic": "The apparatus holds a true note again. Keep this enriched essence as thanks; ordinary mixes still have their ordinary rare-result chances. Let us return to The True Note.",
+            "death": "A name is not a verdict. The marsh workers have a safe process, and Death Essence has an honest place on the shelf. Let us return to The True Note.",
+            "frost": "The cold holds, and the workers can promise a shipment instead of an apology. Frost Essence is available again. Let us return to The True Note.",
+            "finale": "Listen. Mortars, wheels, voices, and no empty shelves. We did not merely save a shipment. We taught this place how to keep going. Let us return to The True Note."
+          },
+          "text": "This supply can be relied on again. Let us return to The True Note."
+        }
+      ],
+      "handoff": {
+        "mode": "fade",
+        "gameplay_map": "landfall_town",
+        "to": []
+      },
+      "cues": [
+        {
+          "at": 0,
+          "actor": "mentor",
+          "action": "idle",
+          "face": "recipient"
+        }
+      ]
+    }
+  }
+}

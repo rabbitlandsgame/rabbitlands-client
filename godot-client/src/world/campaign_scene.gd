@@ -4,6 +4,7 @@ extends Node
 const DATA_PATH := "res://data/campaign/scenes.json"
 const CART_DATA_PATH := "res://data/campaign/last_cart_scenes.json"
 const RESCUE_DATA_PATH := "res://data/campaign/rescue_scenes.json"
+const SHELVES_DATA_PATH := "res://data/campaign/shelves_scenes.json"
 const Dialogue := preload("res://src/ui/campaign_dialogue.gd")
 const Choice := preload("res://src/ui/campaign_choice.gd")
 const WAIT_LIMIT := 45.0
@@ -150,6 +151,9 @@ static func scene_definitions() -> Dictionary:
 	if FileAccess.file_exists(RESCUE_DATA_PATH):
 		var rescue: Variant = JSON.parse_string(FileAccess.get_file_as_string(RESCUE_DATA_PATH))
 		if rescue is Dictionary: definitions.merge(rescue.get("scenes", {}), false)
+	if FileAccess.file_exists(SHELVES_DATA_PATH):
+		var shelves: Variant = JSON.parse_string(FileAccess.get_file_as_string(SHELVES_DATA_PATH))
+		if shelves is Dictionary: definitions.merge(shelves.get("scenes", {}), false)
 	return definitions
 
 func event_context() -> Dictionary:
@@ -1274,7 +1278,7 @@ func _uses_gameplay_camera() -> bool:
 	return not _replaying and str(_definition.get("live_camera", "")) == "gameplay"
 
 func _returns_to_player() -> bool:
-	return not _replaying and _scene_id.begins_with("measure.rescue.")
+	return not _replaying and (_scene_id.begins_with("measure.rescue.") or _scene_id.begins_with("measure.shelves."))
 
 func _has_scene_handoff() -> bool:
 	if _replaying: return false
@@ -1345,7 +1349,9 @@ func _commit_scene_handoff() -> void:
 func _advance_scene_handoff(delta: float, snapshot: Dictionary, rig: Node3D, nodes: Dictionary,
 		local_id: int, current_map: String, world_ready: bool) -> bool:
 	_scene_handoff.elapsed = float(_scene_handoff.elapsed) + maxf(delta, 0.0)
-	if not bool(snapshot.get("active", false)) or str(snapshot.get("run_id", "")) != str(_scene_handoff.run):
+	var supply_return := str(snapshot.get("kind", "")) == "shelves" \
+		and str(_scene_handoff.gameplay_map) == "landfall_town"
+	if (not bool(snapshot.get("active", false)) and not supply_return) or str(snapshot.get("run_id", "")) != str(_scene_handoff.run):
 		cancel("inactive")
 		return false
 	if maxf(float(_scene_handoff.elapsed), (Time.get_ticks_msec() - int(_scene_handoff.started)) / 1000.0) >= WAIT_LIMIT:
@@ -1580,11 +1586,12 @@ func _carry_attachment_frame(carrier: Node3D, bone_name: String) -> Transform3D:
 
 func _line_text(line: Dictionary) -> String:
 	var branch := str(_choice_state.get("selected", ""))
-	return str((line.get("variants", {}) as Dictionary).get(branch if not branch.is_empty() else _variant, line.get("text", "")))
+	var variants: Dictionary=line.get("variants",{})
+	return str(variants.get(branch, variants.get(_variant,line.get("text",""))))
 
 func _response_speaker() -> String:
 	var speakers: Dictionary = _definition.get("response_speakers", {})
-	return str(speakers.get(str(_choice_state.get("selected", "")), _definition.get("response_speaker", "Odo Fenn")))
+	return str(speakers.get(str(_choice_state.get("selected", "")), speakers.get(_variant,_definition.get("response_speaker", "Odo Fenn"))))
 
 func _update_caption() -> void:
 	_skip.text = "Skip to decision · Esc" if _inspection_error.is_empty() and _has_choice() and not _choice_completed else "Return to play · Esc"
@@ -1600,6 +1607,7 @@ func _update_caption() -> void:
 		if not _beat_matches(line): continue
 		chosen = line
 	var speaker := str(chosen.get("speaker", ""))
+	speaker=str((chosen.get("speaker_variants",{}) as Dictionary).get(_variant,speaker))
 	var role := str(chosen.get("speaker_actor", ""))
 	if role == "protagonist": speaker = _protagonist_name
 	var text := _line_text(chosen)

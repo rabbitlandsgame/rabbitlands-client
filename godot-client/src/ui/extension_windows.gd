@@ -999,6 +999,7 @@ func _add_merchant_row(list: ItemList, entry: Dictionary, selling: bool) -> void
 	var name := str(entry.get("name", ""))
 	var price := _merchant_price_label(entry, selling)
 	var amount := "%d gc" % int(entry.get("sell_price" if selling else "buy_price", 0))
+	if not selling and int(entry.get("buy_price",0))<=0:amount="Out of stock"
 	if selling and int(entry.get("sell_quantity", 1)) > 1:
 		amount += "/%d" % int(entry.sell_quantity)
 	var label := amount + ("\n×%d" % int(entry.get("owned", 0)) if selling else "")
@@ -1009,6 +1010,7 @@ func _add_merchant_row(list: ItemList, entry: Dictionary, selling: bool) -> void
 
 func _merchant_price_label(entry: Dictionary, selling: bool) -> String:
 	var price := int(entry.get("sell_price" if selling else "buy_price", 0))
+	if not selling and price<=0:return "Out of stock"
 	var lot := maxi(1, int(entry.get("sell_quantity", 1))) if selling else 1
 	return "%d gc each" % price if lot == 1 else "%s gc each (%d for %d gc)" % [str(float(price) / lot), lot, price]
 
@@ -1048,7 +1050,8 @@ func _merchant_maximum(entry: Dictionary) -> int:
 		var owned := mini(1000000, int(entry.get("owned", 0)))
 		return owned - owned % lot
 	var price := int(entry.get("buy_price", 0))
-	var maximum := mini(1000000, int(AppState.merchant.get("gold", 0)) / price) if price > 0 else 1000000
+	if price<=0:return 0
+	var maximum := mini(1000000, int(AppState.merchant.get("gold", 0)) / price)
 	var weight := int(entry.get("emu", 0))
 	if weight > 0:
 		var free := maxi(0, int(AppState.merchant.get("capacity", 0)) - int(AppState.merchant.get("carried", 0)))
@@ -1162,6 +1165,12 @@ func _sync_merchant_summary(_text: String = "") -> void:
 		return
 	var buying := _merchant_mode == "buy"
 	var price := int(entry.get("buy_price" if buying else "sell_price", 0))
+	if buying and price<=0:
+		merchant_selected_icon.texture=_named_icon(int(entry.get("image_id",0)),str(entry.get("name","")))
+		merchant_selection.text=MerchantNames.display(str(entry.get("name","")))+"\nOut of stock"
+		merchant_description.text=str(entry.get("description","Restore this merchant’s supply line to unlock purchases."))
+		merchant_totals.text="Out of stock · speak with Ilka Tarn about the supply ledger."
+		return
 	merchant_selection.text = "%s\n%s · %s" % [MerchantNames.display(str(entry.get("name", ""))), MerchantCatalog.category(entry), _merchant_price_label(entry, not buying)]
 	merchant_selection.tooltip_text = merchant_selection.text
 	merchant_selected_icon.texture = _named_icon(int(entry.get("image_id", 0)), str(entry.get("name", "")))

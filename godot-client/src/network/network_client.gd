@@ -613,9 +613,15 @@ func use_map_object(object_id: int) -> Error:
 	return send_frame(EloriaProtocol.use_map_object(object_id))
 
 func campaign_request(action: String) -> Error:
-	if action not in ["start", "resume", "leave", "hint", "join", "own", "bank", "road", "lamps", "cart", "continue", "rescue", "rescue replay", "accept", "defer", "supplies"]:
+	if action not in ["start", "resume", "leave", "hint", "join", "own", "bank", "road", "lamps", "cart", "continue", "rescue", "rescue replay", "accept", "defer", "supplies", "shelves"]:
 		return ERR_INVALID_PARAMETER
 	return send_chat("#campaign " + action)
+
+func campaign_shelves_choice(run_id: String, token: String, option_id: String) -> Error:
+	if not _campaign_identifier(run_id) or not _campaign_identifier(token) \
+			or option_id not in ["direct","careful","ingredients","food","tool","wand","charm","robe","keeper","artificer","life","fire","water","earth","wind","magic","death","frost"]:
+		return ERR_INVALID_PARAMETER
+	return send_chat("#campaign shelves_choice %s %s %s" % [run_id,token,option_id])
 
 func campaign_decision(action: String, run_id: String, revision: int) -> Error:
 	if action not in ["adopt", "help"] or not _campaign_identifier(run_id) or revision < 0:
