@@ -161,7 +161,11 @@ var inventory_names: Dictionary = {}
 var inventory_text := ""
 var inventory_metadata_dirty := false
 var _inventory_text_generation := 0
+## Resolved slot view for the UI; deadlines belong to item types, below.
 var inventory_cooldowns: Dictionary = {}
+var _item_cooldowns: Dictionary = {}
+## Potion consumption can remove the last item before announcing its timer.
+var _removed_cooldown_items: Dictionary = {}
 var active_spells: Dictionary = {}
 var last_spell_result: Dictionary = {}
 var death: Dictionary = {}
@@ -899,6 +903,8 @@ func _on_connection_state_changed(value: String) -> void:
 		inventory.clear()
 		inventory_text = ""
 		inventory_cooldowns.clear()
+		_item_cooldowns.clear()
+		_removed_cooldown_items.clear()
 		active_spells.clear()
 		last_spell_result.clear()
 		death.clear()
@@ -1253,6 +1259,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			state_changed.emit(&"stats")
 		"inventory":
 			inventory_metadata_dirty = true
+			_removed_cooldown_items.clear()
 			var previous_inventory := inventory.duplicate()
 			inventory.clear()
 			for raw_item: Variant in event.items:
@@ -1262,6 +1269,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 				if not inventory.has(slot) or int(inventory[slot].get("image_id", -1)) != int(
 						(previous_inventory.get(slot, {}) as Dictionary).get("image_id", -2)):
 					inventory_names.erase(slot)
+			_refresh_inventory_cooldowns()
 			state_changed.emit(&"inventory")
 			_sync_trade_inventory()
 		"inventory_update":
@@ -1269,16 +1277,23 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			var updated_item: Dictionary = event.item as Dictionary
 			var updated_slot := int(updated_item.get("slot", -1))
 			var previous_item: Dictionary = inventory.get(updated_slot, {}) as Dictionary
+			_removed_cooldown_items.erase(updated_slot)
+			if int(updated_item.get("quantity", 0)) <= 0 and not previous_item.is_empty():
+				_removed_cooldown_items[updated_slot] = previous_item
 			if int(previous_item.get("image_id", -1)) != int(updated_item.get("image_id", -2)):
 				inventory_names.erase(updated_slot)
 			inventory[int(updated_item.get("slot", -1))] = updated_item
+			_refresh_inventory_cooldowns()
 			state_changed.emit(&"inventory")
 			_sync_trade_inventory()
 		"inventory_remove":
 			inventory_metadata_dirty = true
 			for raw_slot: Variant in event.slots:
+				if inventory.has(int(raw_slot)):
+					_removed_cooldown_items[int(raw_slot)] = inventory[int(raw_slot)]
 				inventory.erase(int(raw_slot))
 				inventory_names.erase(int(raw_slot))
+			_refresh_inventory_cooldowns()
 			state_changed.emit(&"inventory")
 			_sync_trade_inventory()
 		"inventory_text":
@@ -1452,21 +1467,23 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			storage["text"] = str(event.text)
 			state_changed.emit(&"storage")
 		"item_cooldowns":
-			# The server announces one slot per packet - a fresh cooldown
-			# starting, or a reuse attempt while one is still running - and
-			# never resends the full active set, so incoming slots must be
-			# merged rather than replacing the map: clearing here dropped
-			# every other slot's countdown the moment a second item's
-			# cooldown was announced.
+			# Slots identify the item at receipt, not the lifetime of the timer.
+			# Merge announcements: the server does not resend the active set.
 			var received_msec: int = Time.get_ticks_msec()
 			for raw_cooldown: Variant in event.cooldowns:
 				var cooldown: Dictionary = raw_cooldown as Dictionary
 				var slot: int = int(cooldown.get("slot", -1))
+				var item: Dictionary = inventory.get(slot, {})
+				if int(item.get("quantity", 0)) <= 0:
+					item = _removed_cooldown_items.get(slot, {})
+				if item.is_empty():
+					continue
 				var maximum_seconds: int = int(cooldown.get("maximum_seconds", 0))
 				var remaining_seconds: int = int(cooldown.get("remaining_seconds", 0))
-				inventory_cooldowns[slot] = {
+				_item_cooldowns[_inventory_cooldown_item_key(item)] = {
 					"maximum_msec": maximum_seconds * 1000,
 					"end_msec": received_msec + remaining_seconds * 1000}
+			_refresh_inventory_cooldowns()
 			state_changed.emit(&"inventory_cooldowns")
 		"spell_result":
 			last_spell_result = {"status": int(event.status), "spell_id": int(event.spell_id)}
@@ -2231,6 +2248,25 @@ func close_dialogue() -> void:
 	npc_dialogue["open"] = false
 	npc_dialogue["options"] = []
 	state_changed.emit(&"npc_dialogue")
+
+## The stock inventory wire format identifies types by image and trait flags.
+## Quantity and position can change without changing the item on cooldown.
+func _inventory_cooldown_item_key(item: Dictionary) -> Vector2i:
+	return Vector2i(int(item.get("image_id", -1)), int(item.get("flags", 0)))
+
+func _refresh_inventory_cooldowns() -> void:
+	var now := Time.get_ticks_msec()
+	for key: Variant in _item_cooldowns.keys():
+		if int(_item_cooldowns[key].get("end_msec", 0)) <= now:
+			_item_cooldowns.erase(key)
+	inventory_cooldowns.clear()
+	for slot: Variant in inventory:
+		var item: Dictionary = inventory[slot]
+		if int(item.get("quantity", 0)) <= 0:
+			continue
+		var key := _inventory_cooldown_item_key(item)
+		if _item_cooldowns.has(key):
+			inventory_cooldowns[slot] = _item_cooldowns[key]
 
 func _sync_trade_inventory() -> void:
 	if bool(trade.get("open", false)):
