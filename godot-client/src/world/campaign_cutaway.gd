@@ -6,6 +6,8 @@ const VramTextures := preload("res://src/world/vram_textures.gd")
 const MapMeshExtension := preload("res://src/world/map_mesh_extension.gd")
 const GROUND_LAYER := 1 << 29
 const LOAD_LIMIT := 40.0
+const ASSET_POLL_MSEC := 250
+const ASSET_WAIT_MSEC := 300000
 const VISUAL_ID_BASE := -1000000
 var manifest: WorldManifest
 var adapter: CoordinateAdapter
@@ -14,6 +16,7 @@ var map_lights: Node3D
 var presenting := false
 var _registry: Dictionary = {}
 var _factory: Callable
+var _asset_resolver: Callable
 var _identity := ""
 var _source: Dictionary = {}
 var _thread: Thread
@@ -26,14 +29,27 @@ var _loaded_ready := false
 var _failed := ""
 var _elapsed := 0.0
 var _sections := SecretSections.new()
+var _load_started := false
+var _asset_owner := ""
+var _asset_generation := 0
+var _asset_groups: Array = []
+var _asset_required: Dictionary = {}
+var _asset_admitted := false
+var _asset_check_at := 0
+var _asset_progress := -1
+var _asset_progress_at := 0
+var _asset_worker: Thread
+var _web_generation := 0
+var _web_pending := false
 
 func _ready() -> void:
 	top_level = true
 	global_transform = Transform3D.IDENTITY
 
-func configure(registry: Dictionary, visual_factory: Callable) -> void:
+func configure(registry: Dictionary, visual_factory: Callable, asset_resolver := Callable()) -> void:
 	_registry = registry
 	_factory = visual_factory
+	_asset_resolver = asset_resolver
 
 static func requested(snapshot: Dictionary) -> bool:
 	var scene: Dictionary = snapshot.get("scene", {})
@@ -57,6 +73,10 @@ func prepare(snapshot: Dictionary, current_map: String, delta := 1.0 / 60.0) -> 
 		clear()
 		_identity = identity
 		_source = source.duplicate(true)
+		if _uses_browser_assets(): _collect_browser_assets()
+	if not _load_started and _failed.is_empty():
+		if _uses_browser_assets() and not _admit_browser_assets(): return
+		_load_started = true
 		_begin()
 	_elapsed += maxf(0.0, delta)
 	_poll()
@@ -64,6 +84,77 @@ func prepare(snapshot: Dictionary, current_map: String, delta := 1.0 / 60.0) -> 
 		_fail("remote_ground_timeout")
 	if _failed.is_empty() and manifest != null:
 		_build_cast()
+
+func _uses_browser_assets() -> bool:
+	return OS.has_feature("web")
+
+## Resolve once per preparation, with the same model policy as the factory.
+## Downloaded archives remain on disk; only this room/cast is admitted to MEMFS.
+func _collect_browser_assets() -> void:
+	_asset_groups = WebPrototype.map_groups(str(_source.map)).duplicate()
+	if _asset_groups.is_empty() or not _asset_resolver.is_valid():
+		_fail("remote_browser_assets_unavailable")
+		return
+	for role: String in _source.actors:
+		var resolved: Variant = _asset_resolver.call(_source.actors[role])
+		if not resolved is Array or resolved.is_empty():
+			_fail("remote_browser_cast_assets_unavailable: " + role)
+			return
+		for group: Variant in resolved:
+			if not _asset_groups.has(group): _asset_groups.append(group)
+	var catalog: Dictionary = WebPrototype.configuration().get("groups", {})
+	var pending := _asset_groups.duplicate()
+	while not pending.is_empty():
+		var group := str(pending.pop_back())
+		if _asset_required.has(group): continue
+		if not catalog.get(group) is Dictionary:
+			_fail("remote_browser_asset_group_unavailable: " + group)
+			return
+		_asset_required[group] = true
+		pending.append_array(catalog[group].get("dependencies", []))
+	_asset_generation += 1
+	_asset_owner = "campaign-cutaway:%s:%s" % [get_instance_id(), _asset_generation]
+	_asset_progress_at = Time.get_ticks_msec()
+
+func _request_browser_assets() -> bool:
+	return WebPrototype.ensure_groups(_asset_groups, _asset_owner, 1)
+
+func _browser_asset_state() -> Dictionary:
+	return WebPrototype.asset_snapshot()
+
+func _browser_asset_release() -> Callable:
+	return WebPrototype.release_groups
+
+func _retry_browser_asset_groups() -> int:
+	return WebPrototype.retry_failed()
+
+## Only the player's explicit Retry action resets sticky download failures.
+func retry_browser_assets() -> void:
+	if _uses_browser_assets() and _failed.begins_with("remote_browser_asset_"):
+		_retry_browser_asset_groups()
+
+func _admit_browser_assets() -> bool:
+	var now := Time.get_ticks_msec()
+	if now < _asset_check_at: return false
+	_asset_check_at = now + ASSET_POLL_MSEC
+	if _request_browser_assets():
+		_asset_admitted = true
+		return true
+	var state := _browser_asset_state()
+	if state.is_empty():
+		_fail("remote_browser_asset_service_unavailable")
+		return false
+	for group: Variant in state.get("failed_groups", []):
+		if _asset_required.has(str(group)):
+			_fail("remote_browser_asset_download: " + str(state.get("error", "download_failed")))
+			return false
+	var progress := int(state.get("completed_archives", 0))
+	if progress != _asset_progress:
+		_asset_progress = progress
+		_asset_progress_at = now
+	if now - _asset_progress_at >= ASSET_WAIT_MSEC:
+		_fail("remote_browser_asset_timeout")
+	return false
 
 func _begin() -> void:
 	var entry := MapRegistry.resolve(_registry, str(_source.map))
@@ -84,17 +175,37 @@ func _begin() -> void:
 	if not GltfQuantization.ensure_registered() or not VramTextures.ensure_registered() or not MapMeshExtension.ensure_registered():
 		_fail("remote_import_registration")
 		return
+	if OS.has_feature("web"):
+		# Match the streamed-world browser path: WebGL materialization stays
+		# on Main, and a cancelled deferred load never publishes another room.
+		_web_pending = true
+		_prepare_web_world.call_deferred(ProjectSettings.globalize_path(path), _web_generation)
+		return
 	_thread = Thread.new()
+	if not _asset_owner.is_empty(): _asset_worker = _thread
 	var error := _thread.start(WorldLoader.prepare_detached.bind(ProjectSettings.globalize_path(path),
 		MapSceneCache.is_enabled(), PackedStringArray(), Vector3.INF, true))
 	if error != OK:
 		_thread = null
 		_fail("remote_worker_start: " + error_string(error))
 
+func _prepare_web_world(path: String, generation: int) -> void:
+	if generation != _web_generation or not _web_pending: return
+	var builder := WorldLoader.prepare_detached(path, MapSceneCache.is_enabled(),
+		PackedStringArray(), Vector3.INF, true)
+	if generation != _web_generation or not _web_pending:
+		if builder != null: builder.free()
+		return
+	_web_pending = false
+	_adopt_builder(builder)
+
 func _poll() -> void:
 	if _thread == null or _thread.is_alive(): return
 	var builder := _thread.wait_to_finish() as WorldLoader
 	_thread = null
+	_adopt_builder(builder)
+
+func _adopt_builder(builder: WorldLoader) -> void:
 	if builder == null:
 		_fail("remote_import_failed")
 		return
@@ -212,6 +323,9 @@ func set_presenting(value: bool, show_native_cast := true) -> void:
 		_cast_root.process_mode = Node.PROCESS_MODE_INHERIT if _cast_root.visible else Node.PROCESS_MODE_DISABLED
 
 func _fail(reason: String) -> void:
+	_web_generation += 1
+	_web_pending = false
+	_release_asset_owner()
 	_failed = reason
 	_loaded_ready = false
 	set_presenting(false)
@@ -220,6 +334,15 @@ func _fail(reason: String) -> void:
 		_thread = null
 
 func clear() -> void:
+	_web_generation += 1
+	_web_pending = false
+	_release_asset_owner()
+	_asset_groups.clear()
+	_asset_required.clear()
+	_asset_admitted = false
+	_asset_check_at = 0
+	_asset_progress = -1
+	_load_started = false
 	if _thread != null:
 		ContinentChunkStream._orphan(_thread,{"id":"campaign_cutaway","estimatedResidentBytes":0})
 		_thread = null
@@ -241,11 +364,31 @@ func clear() -> void:
 	_failed = ""
 	_elapsed = 0.0
 
+func _release_asset_owner() -> void:
+	if not _asset_owner.is_empty():
+		var release := _browser_asset_release()
+		if _asset_worker != null and _asset_worker.is_alive():
+			_release_after_worker(_asset_worker, _asset_owner, release)
+		elif release.is_valid(): release.call(_asset_owner)
+	_asset_owner = ""
+	_asset_worker = null
+
+## The callback belongs to the asset service, never to this retiring module.
+## The ordinary orphan reaper owns joining/freeing the worker's result.
+static func _release_after_worker(worker: Thread, owner: String, release: Callable) -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	while worker.is_alive():
+		if tree == null or not is_instance_valid(tree.root): return
+		await tree.create_timer(0.25).timeout
+	if release.is_valid(): release.call(owner)
+
 func status() -> Dictionary:
-	return {"ready":_loaded_ready,"loading":_thread != null,"error":_failed,"elapsed":_elapsed,
-		"identity":_identity,"presenting":presenting,"cast":_nodes.size()}
+	return {"ready":_loaded_ready,"loading":_thread != null or _web_pending,"error":_failed,"elapsed":_elapsed,
+		"identity":_identity,"presenting":presenting,"cast":_nodes.size(),
+		"asset_owner":_asset_owner,"asset_groups":_asset_groups.duplicate(),"asset_admitted":_asset_admitted,
+		"asset_waiting":not _asset_owner.is_empty() and not _asset_admitted and _failed.is_empty()}
 
 func is_idle() -> bool:
-	return _thread == null and ContinentChunkStream.reap_orphans() == 0
+	return _thread == null and not _web_pending and ContinentChunkStream.reap_orphans() == 0
 
 func _exit_tree() -> void: clear()
