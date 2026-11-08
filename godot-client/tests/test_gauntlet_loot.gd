@@ -327,11 +327,43 @@ func run() -> void:
 		"dense ledger clears the game's right rail and bottom HUD")
 	expect(ui.table.get_child(5).get_global_rect().end.y <= ui.pager.get_global_rect().position.y,
 		"six compact item rows fit without pushing out the global summary")
+	await check_browse_close_lifecycle(ui, full_view)
 	ui.queue_free()
 	background.queue_free()
 	await process_frame
 	print("Gauntlet loot UI: %d checks, %d failures" % [checks, failures])
 	quit(failures)
+
+func check_browse_close_lifecycle(ui: Control, state: Dictionary) -> void:
+	sent.clear()
+	ui._search.text = "Wolf"
+	ui._search.text_changed.emit("Wolf")
+	expect(not ui._browse_timer.is_stopped(), "typing starts the browsing debounce")
+	ui.close()
+	expect(not ui.panel.visible and ui._browse_timer.is_stopped() and not ui._browse_dirty,
+		"Close cancels the pending filter and hides the ledger")
+	await create_timer(0.45).timeout
+	expect(sent.is_empty(), "the closed ledger sends no delayed browsing request")
+	# Settle any response in a failed baseline before checking another close.
+	ui.apply_snapshot(state)
+	ui.close()
+	sent.clear()
+	ui._submit_browse()
+	expect(sent.is_empty(), "an obsolete hidden submit cannot reopen the ledger")
+	ui.apply_snapshot(state)
+	ui.close()
+	sent.clear()
+	ui.reopen.pressed.emit()
+	expect(sent.size() == 1 and sent[0].action == "open", "explicit reopen still refreshes the ledger")
+	ui.apply_snapshot(state)
+	expect(ui.panel.visible, "the explicit reopen response shows the ledger")
+	sent.clear()
+	ui._search.text = "Bones"
+	ui._search.text_changed.emit("Bones")
+	await create_timer(0.45).timeout
+	expect(sent.size() == 1 and sent[0].action == "open" and sent[0].browse.query == "Bones",
+		"a fresh query after reopening sends its normal debounced request")
+	ui.apply_snapshot(state)
 
 func paid_sample() -> Dictionary:
 	var state := sample()
