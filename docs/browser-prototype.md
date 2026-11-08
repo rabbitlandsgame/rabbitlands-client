@@ -291,8 +291,9 @@ different browser storage area.
 
 - The first full download is large: this proof uses the existing desktop art in
   compressed archives. The launcher prepares the full catalog by default;
-  download-as-needed keeps the earlier smaller startup. Resource construction
-  remains lazy, and startup includes the playable Human creation profile.
+  download-as-needed keeps the smaller startup. Resource construction remains
+  lazy, including the selected Human creation appearance. Unselected RL
+  head, hair and beard sources stay compressed on disk until needed.
 - The threaded build requires cross-origin isolation. The local serving tool
   supplies the required headers and serves only the chosen generated site folder.
   The export reserves 16 browser workers, with four in Godot's worker pool, to
@@ -308,6 +309,9 @@ different browser storage area.
   preserve the Windows `.url` extension. See [browser controls](browser-controls.md)
   for browser and permission limits. A subsequent visit still reconstructs runtime resources from saved
   files; the cache removes the repeated network transfer, not all startup work.
+  Full preparation still checks every saved payload. The launcher reuses the
+  engine/package buffers verified during that pass, within a 384 MiB limit,
+  and extracts only mandatory startup and selected appearance files into memory.
   Browser settings use a separate application storage directory. Login
   credentials remain in process memory and clear through the existing logout
   and failed-authentication paths. Closing a tab loses an active connection;

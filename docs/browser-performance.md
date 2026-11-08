@@ -67,6 +67,43 @@ animation still use the player's CPU, GPU and memory.
 Local build and benchmark output is not a public release. New R2 objects,
 deployment and source integration require their separate owner approvals.
 
+## Cached startup
+
+Saved downloads remove network transfer on repeat visits. A new browser tab
+still verifies saved bytes, initializes WASM, fills its memory-backed filesystem,
+extracts required archives and creates renderer resources. The desktop client
+can read its installed loose files directly. These are different startup paths;
+cached downloads alone do not make their loading times equal.
+
+The launcher retains only verified initial engine/package buffers, capped at
+384 MiB, while full preparation continues to save and verify the complete
+catalog. The engine consumes those same buffers rather than reading and hashing
+them again. A versioned, single-use proof also avoids hashing the same verified
+archive twice across the JavaScript-to-Godot handoff. File length, ZIP entries
+and extraction paths remain checked. Older launchers and unavailable or
+mismatched proofs retain the ordinary SHA-256 check.
+
+RL head, hair and beard GLBs have individual lazy groups. Creation, actors and
+appearance previews admit the selected sources before drawing them and keep
+their files pinned through asynchronous reads. Full preparation downloads them
+before play; unselected sources no longer need startup extraction into RAM.
+The pre-login startup extractor uses a 12 ms slice; interactive extraction keeps
+its 2 ms slice and existing residency budget. Neither slice limits a single
+indivisible decompression or resource operation.
+
+The browser's arrival camera uses 24 representative views with two actual draws
+per view and a 5 second deadline, checked between frames. A blocked render can
+exceed that deadline until control returns. This pass never credits full
+world-content coverage. Native full and reused sweeps retain their existing
+view counts and 20 second deadline. Keep first-turn and mount frame checks
+alongside loading-time comparisons when changing this policy.
+
+Music and effects are included in browser packages. Browsers can require a
+trusted click or key before audio starts. Compare sound with the game's Master
+audio setting enabled, an unmuted browser tab and the intended system output.
+The browser uses Godot's default Sample playback; stream-processing counters
+alone do not establish whether that path is producing sound.
+
 ## Measured result
 
 Four counterbalanced Chrome processes (off/on/on/off), two per arm, used the
