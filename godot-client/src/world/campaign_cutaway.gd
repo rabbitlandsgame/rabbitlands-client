@@ -45,11 +45,13 @@ static func requested(snapshot: Dictionary) -> bool:
 
 func prepare(snapshot: Dictionary, current_map: String, delta := 1.0 / 60.0) -> void:
 	ContinentChunkStream.reap_orphans()
-	if not requested(snapshot) or MapRegistry.normalize_server_map_id(str(snapshot.get("map", ""))) \
+	var scene: Dictionary = snapshot.get("scene", {})
+	var warming := str(scene.get("id", "")) == "measure.rescue.resolved" and scene.has("preload_cutaway")
+	if (not requested(snapshot) and not warming) or MapRegistry.normalize_server_map_id(str(snapshot.get("map", ""))) \
 			!= MapRegistry.normalize_server_map_id(current_map):
 		clear()
 		return
-	var source: Dictionary = snapshot.scene.cutaway
+	var source: Dictionary = scene.preload_cutaway if warming else scene.cutaway
 	var identity := str(snapshot.run_id) + ":" + MapRegistry.normalize_server_map_id(current_map) + ":" + str(source.map)
 	if identity != _identity:
 		clear()

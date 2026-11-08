@@ -128,6 +128,7 @@ var _reduced_origin := Vector3.ZERO
 var _resume_view: Dictionary = {}
 var _resume_at := 0.0
 var _resume_seconds := 0.0
+var _scene_handoff: Dictionary = {}
 
 func _ready() -> void:
 	var config := ConfigFile.new()
@@ -226,6 +227,7 @@ func _replay_view_nodes(snapshot: Dictionary, live_nodes: Dictionary) -> Diction
 	return view
 
 func _beat_matches(beat: Dictionary) -> bool:
+	if bool(beat.get("replay_only", false)) and not _replaying: return false
 	var excluded: Variant = beat.get("unless_variant", "")
 	if (excluded is String and not excluded.is_empty() and excluded == _variant) \
 			or (excluded is Array and _variant in excluded): return false
@@ -398,10 +400,10 @@ func _layout_presentation() -> void:
 		control.add_theme_font_size_override("font_size", 14 if compact else 16)
 
 func blocks_input() -> bool:
-	return playing
+	return playing or not _scene_handoff.is_empty()
 
 func is_active() -> bool:
-	return pending or playing
+	return pending or playing or not _scene_handoff.is_empty()
 
 func is_replaying() -> bool:
 	return _replaying
@@ -791,6 +793,8 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 		coordinate_adapter: CoordinateAdapter = null, surface_sample := Callable()) -> void:
 	_update_entry_visibility(snapshot, actor_nodes, current_map)
 	_update_handoff_visibility(snapshot, actor_nodes, current_map)
+	if not _scene_handoff.is_empty() and _advance_scene_handoff(delta, snapshot, rig, actor_nodes, local_actor_id, current_map, world_ready):
+		return
 	if not _exit_fade.is_empty():
 		var leaving := str(_exit_fade.phase) == "out"
 		var changed := map_key(current_map) != str(_exit_fade.map) \
@@ -815,7 +819,7 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 		return
 	var next_token := str(scene.get("token", ""))
 	var next_run := str(snapshot.get("run_id", ""))
-	if is_active() and (_token != next_token or _run != next_run or _map != here):
+	if (playing or pending) and (_token != next_token or _run != next_run or _map != here):
 		cancel("replaced")
 		# The old film restores its cast's visibility while relinquishing poses.
 		# Reapply the incoming lease before rendering any replacement frame.
@@ -837,7 +841,7 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 	if _ack_identity != ack_identity or not bool(scene.get("requires_ack", false)):
 		_ack_identity = ack_identity
 		_ack_requested = false
-	if not is_active():
+	if not pending and not playing:
 		var interactive := _interactive_requested_identity == identity
 		_interactive_requested_identity = ""
 		var replay := _replay_requested_identity == identity and _replay_allowed(snapshot, current_map)
@@ -1032,6 +1036,9 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 func _start(rig: Node3D, camera: Camera3D, local: Node3D, nodes: Dictionary,
 		bindings: Dictionary) -> void:
 	configure()
+	var chained_fade := str(_scene_handoff.get("mode", "")) == "fade"
+	if chained_fade and rig.has_method("set_focus"):
+		rig.call("set_focus", local.global_position)
 	_playback_generation += 1
 	if not is_instance_valid(_view_focus):
 		_view_focus = Node3D.new()
@@ -1119,13 +1126,21 @@ func _start(rig: Node3D, camera: Camera3D, local: Node3D, nodes: Dictionary,
 	_skip.grab_focus()
 	pending = false
 	playing = true
+	_scene_handoff.clear()
 	_last_return_reason = ""
 	_last_playback_replay = _replaying
 	_apply_actors()
 	_apply_camera()
 	_update_caption()
+	if chained_fade:
+		_exit_fade = {"phase":"in", "elapsed":0.0, "out":0.5, "in":0.5, "run":_run, "map":_map}
+		_set_exit_black(1.0)
 
 func _apply_camera(exit_view := false) -> void:
+	if _uses_gameplay_camera():
+		_apply_camera_pose(_gameplay_camera())
+		_screen.modulate.a = 1.0
+		return
 	var shots: Array = []
 	for shot: Dictionary in _definition.get("shots", []):
 		if _beat_matches(shot): shots.append(shot)
@@ -1224,7 +1239,74 @@ func _handoff_seconds(key: String) -> float:
 	return clampf(float(_definition.get(key, 0.0)), 0.0, minf(5.0, _duration() * 0.5))
 
 func _camera_handoff() -> bool:
-	return _handoff_seconds("entry_seconds") > 0.0 or _handoff_seconds("exit_seconds") > 0.0
+	return _uses_gameplay_camera() or _handoff_seconds("entry_seconds") > 0.0 or _handoff_seconds("exit_seconds") > 0.0
+
+func _uses_gameplay_camera() -> bool:
+	return not _replaying and str(_definition.get("live_camera", "")) == "gameplay"
+
+func _begin_scene_handoff(reason: String) -> bool:
+	if _replaying or not playing or reason != "finished" or not _scene_handoff.is_empty():
+		return false
+	var policy: Dictionary = (_definition.get("handoff", {}) as Dictionary).duplicate(true)
+	policy.merge((policy.get("variants", {}) as Dictionary).get(_variant, {}), true)
+	if policy.is_empty() or not _beat_matches(policy): return false
+	_scene_handoff = {"mode":str(policy.get("mode", "hold")), "to":policy.get("to", []),
+		"gameplay_map":str(policy.get("gameplay_map", "")), "run":_run, "map":_map,
+		"token":_token, "elapsed":0.0, "started":Time.get_ticks_msec(), "phase":"out", "reason":reason}
+	_line_holding = false
+	_line_continue.hide()
+	if str(_scene_handoff.mode) == "hold": _commit_scene_handoff()
+	return true
+
+func _commit_scene_handoff() -> void:
+	_scene_handoff.phase = "waiting"
+	_scene_handoff.committing = true
+	if str(_scene_handoff.mode) == "hold":
+		# The last shot becomes an ordinary orbit view before the next dialogue.
+		# This preserves framing without borrowing the previous film's restore state.
+		_definition.exit_camera = {"mode":"keep_scene"}
+	cancel(str(_scene_handoff.reason))
+	if _scene_handoff.is_empty(): return # A completion listener may disconnect.
+	_scene_handoff.erase("committing")
+	if str(_scene_handoff.mode) == "hold":
+		_screen.modulate.a = 1.0
+		_layer.show()
+	else: _set_exit_black(1.0)
+
+func _advance_scene_handoff(delta: float, snapshot: Dictionary, rig: Node3D, nodes: Dictionary,
+		local_id: int, current_map: String, world_ready: bool) -> bool:
+	_scene_handoff.elapsed = float(_scene_handoff.elapsed) + maxf(delta, 0.0)
+	if not bool(snapshot.get("active", false)) or str(snapshot.get("run_id", "")) != str(_scene_handoff.run):
+		cancel("inactive")
+		return false
+	if maxf(float(_scene_handoff.elapsed), (Time.get_ticks_msec() - int(_scene_handoff.started)) / 1000.0) >= WAIT_LIMIT:
+		cancel("handoff_timeout")
+		return true
+	if str(_scene_handoff.phase) == "out":
+		_set_exit_black(smoothstep(0.0, 0.5, float(_scene_handoff.elapsed)))
+		if float(_scene_handoff.elapsed) >= 0.5: _commit_scene_handoff()
+		return true
+	var scene: Dictionary = snapshot.get("scene", {})
+	var here := map_key(current_map)
+	var matches_map := here == map_key(str(snapshot.get("map", "")))
+	var gameplay := str(_scene_handoff.gameplay_map)
+	if not gameplay.is_empty() and here == gameplay and matches_map and world_ready \
+			and not bool(scene.get("requires_ack", false)) and _body_ready(nodes.get(local_id)):
+		if rig.has_method("set_focus"): rig.call("set_focus", (nodes[local_id] as Node3D).global_position)
+		_scene_handoff.clear()
+		_exit_fade = {"phase":"in", "elapsed":0.0, "out":0.5, "in":0.5,
+			"run":str(snapshot.get("run_id", "")), "map":here}
+		_layer.hide()
+		return false
+	if str(scene.get("token", "")) != str(_scene_handoff.token) \
+			and str(scene.get("id", "")) in _scene_handoff.to:
+		# The state packet may precede CHANGE_MAP. Keep black until both agree,
+		# then let the ordinary readiness barrier wait for the new native cast.
+		return not matches_map
+	if str(scene.get("token", "")) != str(_scene_handoff.token) and not scene.is_empty():
+		cancel("replaced")
+		return false
+	return true
 
 func _keeps_exit_camera() -> bool:
 	var policy: Variant = _definition.get("exit_camera", {})
@@ -1290,6 +1372,7 @@ func _local_position() -> Vector3:
 	if _local_actor != null:
 		var local := _local_actor.get_ref() as Node3D
 		if is_instance_valid(local):
+			if _uses_gameplay_camera() and "protagonist" in _definition.get("native_roles", []): return local.global_position
 			return _authoritative_position(local) if _actors.get("protagonist") == local else local.global_position
 	return _local_start
 
@@ -1493,7 +1576,7 @@ func _build_transcript() -> void:
 	transcript_changed.emit(_last_transcript)
 
 func handle_input(event: InputEvent) -> bool:
-	if not playing:
+	if not playing and _scene_handoff.is_empty():
 		return false
 	if event is InputEventKey and event.is_pressed() and not (event as InputEventKey).echo:
 		if (event as InputEventKey).physical_keycode == KEY_ESCAPE:
@@ -1506,9 +1589,13 @@ func handle_input(event: InputEvent) -> bool:
 	return false
 
 func skip() -> void:
+	if not _scene_handoff.is_empty():
+		cancel("handoff_cancelled")
+		return
 	_return_to_play("skipped")
 
 func _return_to_play(reason: String) -> void:
+	if _begin_scene_handoff(reason): return
 	if playing and _uses_exit_fade():
 		cancel(reason)
 		return
@@ -1533,7 +1620,11 @@ func _return_to_play(reason: String) -> void:
 		cancel(reason)
 
 func cancel(reason := "cancelled") -> void:
-	if is_active() and reason in ["finished", "skipped"] and _uses_exit_fade() and not _exit_fade_committing:
+	if _begin_scene_handoff(reason): return
+	var retaining_handoff := not _scene_handoff.is_empty() and ((bool(_scene_handoff.get("committing", false)) and reason == str(_scene_handoff.reason)) \
+		or str(_scene_handoff.mode) == "fade" and reason == "map_changed")
+	if not retaining_handoff: _scene_handoff.clear()
+	if (pending or playing) and reason in ["finished", "skipped"] and _uses_exit_fade() and not _exit_fade_committing and not retaining_handoff:
 		if _exit_fade.is_empty(): _begin_exit_fade(reason)
 		return
 	# Completed native state may arrive during the cosmetic fade-in. It must
@@ -1544,7 +1635,7 @@ func cancel(reason := "cancelled") -> void:
 	# A replacement may already have concealed its new cast in Main's spawn
 	# path. Finishing the old presentation must not release the new one's lease.
 	_release_entry_visibility(0, _run + ":" + _token if reason in ["replaced", "finished", "skipped"] else "")
-	var owned := is_active()
+	var owned := pending or playing
 	var was_replay := _replaying
 	if owned and not was_replay:
 		var identity := _run + ":" + _token
@@ -1670,6 +1761,7 @@ func cancel(reason := "cancelled") -> void:
 		_clear_replay_cast()
 	if reason not in ["finished", "skipped"]:
 		_release_ambient()
+	if retaining_handoff and str(_scene_handoff.get("mode", "")) == "fade": _set_exit_black(1.0)
 
 func _handoff_native_stamp(actor: Node3D) -> Dictionary:
 	var stamp := {"position":_authoritative_position(actor),

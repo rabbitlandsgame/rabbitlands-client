@@ -3694,6 +3694,8 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 	elif str(value.get("kind", "")) == "rescue" and str(scene.get("id", "")) == "measure.rescue.shadow" \
 			and map_id_from_reference(str(value.get("map", ""))) == "landfall":
 		return {"type":"invalid", "error":"campaign_cutaway_missing"}
+	if scene.has("preload_cutaway") and not campaign_cutaway_valid(scene.preload_cutaway, value, scene, true):
+		return {"type":"invalid", "error":"campaign_scene_preload_cutaway"}
 	var inspection: Dictionary = scene.get("inspection", {})
 	var inspection_role := "mother" if str(inspection.get("id", "")) == "rescue_family" else "protagonist"
 	if not inspection.is_empty() and int(inspection.actor_id) > 0 \
@@ -3878,11 +3880,11 @@ static func campaign_corpse_template_valid(value: Variant) -> bool:
 ## A remote ending is a bounded visual record from the retained mine. Raw IDs
 ## may have been reused outdoors; consumers isolate these records as visual
 ## handles and never insert their roles or DTOs into the native actor registry.
-static func campaign_cutaway_valid(value: Variant, campaign: Dictionary, scene: Dictionary) -> bool:
+static func campaign_cutaway_valid(value: Variant, campaign: Dictionary, scene: Dictionary, preload_only := false) -> bool:
 	if not campaign.get("kind") is String or not campaign.get("map") is String or not scene.get("id") is String:
 		return false
 	if campaign.kind != "rescue" or campaign.map != "landfall" \
-			or not bool(campaign.get("active", false)) or scene.get("id") != "measure.rescue.shadow" \
+			or not bool(campaign.get("active", false)) or scene.get("id") != ("measure.rescue.resolved" if preload_only else "measure.rescue.shadow") \
 			or scene.has("corpse_template") or not value is Dictionary or value.size() != 3 \
 			or not value.get("map") is String or value.map != "landfall_insides" or not value.get("actors") is Dictionary \
 			or not value.get("anchors") is Dictionary or JSON.stringify(value).to_utf8_buffer().size() > 12288:
