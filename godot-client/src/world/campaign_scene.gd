@@ -45,6 +45,10 @@ var _staged_actor_roles: Dictionary = {}
 var _rig: Node3D
 var _camera: Camera3D
 var _saved: Dictionary = {}
+# A held conversation may adopt another film's shot. Keep the original player
+# orbit separately until the whole connected sequence gives back control.
+var _player_camera: Dictionary = {}
+var _player_actor: WeakRef
 var _origin := Vector3.ZERO
 var _saved_focus: WeakRef
 var _layer: CanvasLayer
@@ -966,7 +970,7 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 		if _returning:
 			_return_elapsed = minf(_return_elapsed + maxf(0.0, delta), _return_duration)
 			var weight := smoothstep(0.0, _return_duration, _return_elapsed)
-			_apply_camera_pose(_mix_camera(_return_start, _gameplay_camera(), weight))
+			_apply_camera_pose(_mix_camera(_return_start, _gameplay_camera(true), weight))
 			_screen.modulate.a = 1.0 - weight
 			if _return_elapsed >= _return_duration:
 				cancel(_return_reason)
@@ -1047,7 +1051,14 @@ func _start(rig: Node3D, camera: Camera3D, local: Node3D, nodes: Dictionary,
 	configure()
 	var chained_fade := str(_scene_handoff.get("mode", "")) == "fade"
 	var seek_next := bool(_scene_handoff.get("seek_decision", false))
-	if chained_fade and rig.has_method("set_focus"):
+	var player_camera: Dictionary = (_scene_handoff.get("player_camera", {}) as Dictionary).duplicate(true)
+	if chained_fade and not player_camera.is_empty():
+		_player_camera = player_camera
+		_player_actor = weakref(local)
+		_rig = rig
+		_camera = camera
+		_restore_player_camera()
+	elif chained_fade and rig.has_method("set_focus"):
 		rig.call("set_focus", local.global_position)
 	_playback_generation += 1
 	if not is_instance_valid(_view_focus):
@@ -1066,6 +1077,9 @@ func _start(rig: Node3D, camera: Camera3D, local: Node3D, nodes: Dictionary,
 		"pitch_degrees": rig.get("pitch_degrees"), "yaw_degrees": rig.get("yaw_degrees")}
 	if rig.has_method("capture_follow_state"):
 		_saved["follow_state"] = rig.call("capture_follow_state")
+	if _returns_to_player():
+		_player_camera = player_camera if not player_camera.is_empty() else _saved.duplicate(true)
+		_player_actor = weakref(local)
 	_local_actor = weakref(local)
 	_local_start = local.global_position
 	_returning = false
@@ -1149,7 +1163,11 @@ func _start(rig: Node3D, camera: Camera3D, local: Node3D, nodes: Dictionary,
 
 func _apply_camera(exit_view := false) -> void:
 	if _uses_gameplay_camera():
-		_apply_camera_pose(_gameplay_camera())
+		var pose := _gameplay_camera()
+		var exit := _handoff_seconds("exit_seconds")
+		if exit > 0.0 and elapsed > _duration() - exit and not _has_scene_handoff():
+			pose = _mix_camera(pose, _gameplay_camera(true), smoothstep(_duration() - exit, _duration(), elapsed))
+		_apply_camera_pose(pose)
 		_screen.modulate.a = 1.0
 		return
 	var shots: Array = []
@@ -1206,8 +1224,8 @@ func _apply_camera(exit_view := false) -> void:
 			if entry > 0.0 and _camera_entry_elapsed < entry and not exit_view:
 				pose = _mix_camera(_gameplay_camera(), pose, smoothstep(0.0, entry, _camera_entry_elapsed))
 			var exit := _handoff_seconds("exit_seconds")
-			if exit > 0.0 and elapsed > _duration() - exit and not _keeps_exit_camera() and not _uses_exit_fade():
-				pose = _mix_camera(pose, _gameplay_camera(), smoothstep(_duration() - exit, _duration(), elapsed))
+			if exit > 0.0 and elapsed > _duration() - exit and not _keeps_exit_camera() and not _uses_exit_fade() and not _has_scene_handoff():
+				pose = _mix_camera(pose, _gameplay_camera(true), smoothstep(_duration() - exit, _duration(), elapsed))
 			if not _resume_view.is_empty() and not exit_view:
 				pose = _mix_camera(_resume_view, pose, smoothstep(_resume_at, _resume_at + _resume_seconds, elapsed))
 		var opacity := 1.0
@@ -1255,6 +1273,43 @@ func _camera_handoff() -> bool:
 func _uses_gameplay_camera() -> bool:
 	return not _replaying and str(_definition.get("live_camera", "")) == "gameplay"
 
+func _returns_to_player() -> bool:
+	return not _replaying and _scene_id.begins_with("measure.rescue.")
+
+func _has_scene_handoff() -> bool:
+	if _replaying: return false
+	var policy: Dictionary = (_definition.get("handoff", {}) as Dictionary).duplicate(true)
+	policy.merge((policy.get("variants", {}) as Dictionary).get(_variant, {}), true)
+	return not policy.is_empty() and _beat_matches(policy)
+
+func _player_camera_pose() -> Dictionary:
+	var point := _local_position()
+	if _player_actor != null and is_instance_valid(_player_actor.get_ref()):
+		point = _authoritative_position(_player_actor.get_ref())
+	var yaw := deg_to_rad(float(_player_camera.get("yaw_degrees", 0.0)))
+	var pitch := deg_to_rad(float(_player_camera.get("pitch_degrees", -60.0)))
+	var distance := float(_player_camera.get("distance", 26.0))
+	var frame: Transform3D = _player_camera.get("rig", Transform3D.IDENTITY)
+	var offset := frame.basis * Vector3(sin(yaw)*cos(pitch), -sin(pitch), cos(yaw)*cos(pitch)) * distance
+	var target := point + Vector3.UP*1.2
+	return {"transform":Transform3D(Basis.IDENTITY, point+offset).looking_at(target, Vector3.UP),
+		"target":target,"fov":float(_player_camera.get("fov", 50.0)),
+		"near":float(_player_camera.get("near", 1.0)),"far":float(_player_camera.get("far", 4000.0))}
+
+func _restore_player_camera() -> void:
+	if _player_camera.is_empty() or not is_instance_valid(_rig) or not is_instance_valid(_camera) \
+			or not _rig.has_method("reset_follow_offset") or not _rig.has_method("set_focus"): return
+	var pose := _player_camera_pose()
+	for key: String in ["distance", "pitch_degrees", "yaw_degrees"]:
+		if _player_camera.get(key) != null: _rig.set(key, _player_camera[key])
+	_rig.global_basis = (_player_camera.rig as Transform3D).basis
+	_rig.call("reset_follow_offset")
+	_rig.call("set_focus", (pose.target as Vector3) - Vector3.UP*1.2)
+	_camera.global_transform = pose.transform
+	_camera.fov = pose.fov
+	_camera.near = pose.near
+	_camera.far = pose.far
+
 func _begin_scene_handoff(reason: String) -> bool:
 	if _replaying or not playing or reason not in ["finished", "skipped"] or not _scene_handoff.is_empty():
 		return false
@@ -1266,7 +1321,7 @@ func _begin_scene_handoff(reason: String) -> bool:
 	_scene_handoff = {"mode":str(policy.get("mode", "hold")), "to":policy.get("to", []),
 		"gameplay_map":str(policy.get("gameplay_map", "")), "run":_run, "map":_map,
 		"token":_token, "elapsed":0.0, "started":Time.get_ticks_msec(), "phase":"out", "reason":reason,
-		"seek_decision":_seeking_decision}
+		"seek_decision":_seeking_decision,"player_camera":_player_camera.duplicate(true)}
 	_line_holding = false
 	_line_continue.hide()
 	if str(_scene_handoff.mode) == "hold": _commit_scene_handoff()
@@ -1307,6 +1362,10 @@ func _advance_scene_handoff(delta: float, snapshot: Dictionary, rig: Node3D, nod
 	if not gameplay.is_empty() and here == gameplay and matches_map and world_ready \
 			and not bool(scene.get("requires_ack", false)) and _body_ready(nodes.get(local_id)):
 		if rig.has_method("set_focus"): rig.call("set_focus", (nodes[local_id] as Node3D).global_position)
+		_player_actor = weakref(nodes[local_id])
+		_restore_player_camera()
+		_player_camera.clear()
+		_player_actor = null
 		_scene_handoff.clear()
 		_exit_fade = {"phase":"in", "elapsed":0.0, "out":0.5, "in":0.5,
 			"run":str(snapshot.get("run_id", "")), "map":here}
@@ -1409,7 +1468,8 @@ func _authoritative_yaw(actor: Node3D, fallback: float) -> float:
 			if value is Transform3D: return value.basis.get_euler().y
 	return fallback
 
-func _gameplay_camera() -> Dictionary:
+func _gameplay_camera(for_return := false) -> Dictionary:
+	if for_return and _returns_to_player() and not _player_camera.is_empty(): return _player_camera_pose()
 	var movement := _local_position() - _local_start if _camera_handoff() else Vector3.ZERO
 	var transform: Transform3D = _saved.get("camera", Transform3D.IDENTITY)
 	transform.origin += movement
@@ -1758,6 +1818,10 @@ func cancel(reason := "cancelled") -> void:
 			_camera.fov = float(_saved.fov)
 			_camera.near = float(_saved.near)
 			_camera.far = float(_saved.far)
+	if not retaining_handoff:
+		if not was_replay and _returns_to_player(): _restore_player_camera()
+		_player_camera.clear()
+		_player_actor = null
 	_saved.clear()
 	_local_actor = null
 	_reduced_view.clear()
