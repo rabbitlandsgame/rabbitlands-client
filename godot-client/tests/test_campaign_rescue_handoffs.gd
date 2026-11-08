@@ -79,15 +79,18 @@ func run() -> void:
 	expect(not f.scene.blocks_input() and f.rig.focus.is_equal_approx(f.actor.position),"descent hands off to playable mine from its real arrival position")
 	dispose(f)
 
-	for interruption: String in ["disconnected","handoff_timeout","escape"]:
+	for interruption: String in ["disconnected","handoff_timeout"]:
 		f=fixture(); f.scene.cancel("finished")
-		if interruption=="escape":
-			var key:=InputEventKey.new(); key.physical_keycode=KEY_ESCAPE; key.pressed=true
-			expect(f.scene.handle_input(key),"Escape is available while awaiting the next scene")
-		elif interruption=="handoff_timeout":tick(f,46)
+		if interruption=="handoff_timeout":tick(f,46)
 		else:f.scene.cancel(interruption)
 		expect(not f.scene.is_active() and f.acks.size()==1,interruption+" releases the transition without duplicate quest acknowledgement")
 		dispose(f)
+	f=fixture(); f.scene.cancel("finished")
+	var key:=InputEventKey.new(); key.physical_keycode=KEY_ESCAPE; key.pressed=true
+	expect(f.scene.handle_input(key) and f.scene._scene_handoff.seek_decision,
+		"Escape during a handoff carries the seek forward to the next question")
+	expect(f.scene.blocks_input() and f.acks.size()==1,"seeking through a handoff keeps its continuous frame without another acknowledgement")
+	dispose(f)
 	f=fixture(); f.scene._replaying=true
 	f.scene.cancel("finished")
 	expect(not f.scene.blocks_input() and f.scene._scene_handoff.is_empty() and f.acks.is_empty(),"read-only replay restores its saved view without waiting for or acknowledging a quest transition")
@@ -103,6 +106,23 @@ func run() -> void:
 		expect(definitions["measure.rescue."+id].live_camera=="gameplay",id+" keeps live player framing")
 	expect("protagonist" in definitions["measure.rescue.captive"].native_roles,"the real player can walk with the rescued family")
 	expect(not definitions["measure.rescue.boss"].has("reveal_on_start"),"the boss and guards remain visible before the confrontation")
+	for ending: String in ["finished","skipped"]:
+		f=fixture()
+		var player_view:Transform3D=f.rig.camera.global_transform
+		var player_fov:float=f.rig.camera.fov
+		f.scene._definition=definitions["measure.rescue.boss"].duplicate(true)
+		f.scene.elapsed=10;f.scene._camera_entry_elapsed=10;f.scene._apply_camera()
+		expect(not f.rig.camera.global_transform.is_equal_approx(player_view),"the boss introduction establishes its conversation view")
+		if ending=="skipped":
+			f.scene.skip()
+			expect(f.scene._returning and f.acks.is_empty(),"boss Skip restores the camera before acknowledging the start of combat")
+			tick(f,0.7)
+		else:
+			f.scene.elapsed=f.scene._duration();f.scene._apply_camera();f.scene.cancel("finished")
+		expect(not f.scene.blocks_input() and f.acks.size()==1 and f.rig.camera.global_transform.is_equal_approx(player_view) and f.rig.camera.fov==player_fov,"boss "+ending+" returns the exact player view and lens for combat")
+		f.actor.position+=Vector3(2,0,1);f.actor.server_target=f.actor.position;f.rig.set_focus(f.actor.position)
+		expect(f.rig.camera.global_position.is_equal_approx(player_view.origin+Vector3(2,0,1)),"ordinary camera follow stays centered on the player after boss "+ending)
+		dispose(f)
 	await process_frame
 	print("Rescue handoff checks: ",checks,"; failures: ",failures)
 	quit(1 if failures else 0)

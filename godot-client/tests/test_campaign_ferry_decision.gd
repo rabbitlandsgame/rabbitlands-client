@@ -183,9 +183,9 @@ func run() -> void:
 		and rewarded.scene._caption.text == rewarded.state.scene.choice.response,
 		"the authored rescue reward scene resumes the server-confirmed weapon response without another reward prompt")
 	at(rewarded,60); tick(rewarded,2)
-	expect(not rewarded.scene.is_active() and rewarded.requests.is_empty()
+	expect(not rewarded.scene.playing and not rewarded.scene._scene_handoff.is_empty() and rewarded.requests.is_empty()
 		and rewarded.ordinary == [["confirmed-rescue-reward","finished"]],
-		"the resumed rescue reward reaches its ending once without another weapon request")
+		"the resumed rescue reward reaches its ending once and holds for the next film without another weapon request")
 	dispose(rewarded)
 	var helper := fixture("helper-plan", false)
 	tick(helper, 0); at(helper, 6)
@@ -200,6 +200,9 @@ func run() -> void:
 	var empty := fixture("empty-plan")
 	tick(empty, 0); at(empty, 6)
 	empty.scene.skip(); tick(empty,0.7)
+	expect(empty.scene._choice_waiting and empty.ordinary.is_empty(),"Return stops at the live unanswered plan instead of acknowledging it")
+	# Historical skips still have a read-only review, independent of today's control.
+	empty.scene.cancel("skipped");tick(empty,0)
 	expect(empty.scene.request_replay(empty.state,"greenlight"), "an originally skipped, unchosen scene can be reviewed")
 	tick(empty, 0); at(empty, 6)
 	expect("No plan recorded yet" in empty.scene._choice_dialog.status_label.text and empty.scene._choice_dialog.option_buttons.size() == 3, "an empty replay honestly shows all options without inventing a plan")
@@ -256,6 +259,8 @@ func run() -> void:
 	var handled := fixture("helper-renewed",false)
 	tick(handled,0); at(handled,6)
 	handled.scene.skip(); tick(handled,0.7)
+	expect(handled.scene._choice_waiting and handled.ordinary.is_empty(),"a helper's Return retains the owner's unanswered question")
+	handled.scene.cancel("skipped");tick(handled,0)
 	expect(handled.ordinary == [["helper-renewed","skipped"]] and not handled.scene.is_active(), "the helper has already handled the original scene token before the owner's delayed selection")
 	tick(handled,65)
 	expect(handled.ordinary.size() == 1 and handled.requests.is_empty(), "an unchanged expired-barrier snapshot does not replay or duplicate the helper's acknowledgement")

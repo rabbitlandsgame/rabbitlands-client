@@ -63,6 +63,7 @@ var _choice_completed := false
 var _choice_review := false
 var _choice_pending_at := -1
 var _choice_error := ""
+var _seeking_decision := false
 var _inspection_state: Dictionary = {}
 var _inspection_sent := false
 var _inspection_active := false
@@ -975,6 +976,8 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 		_line_advance_pending = false
 		_camera_entry_elapsed += maxf(0.0, delta)
 		var next_elapsed := minf(elapsed + maxf(0.0, delta), _duration())
+		if _seeking_decision:
+			next_elapsed = _duration()
 		# A local reading pause cannot advance beyond an unresolved native
 		# inspection or decision, even after a long frame or an Auto toggle.
 		if _has_inspection() and not _replaying and str(_inspection_state.get("status", "")) != "complete":
@@ -982,6 +985,11 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 		if _has_choice() and not _choice_completed:
 			var decision_at := float(_definition.get("choice_at", -1.0))
 			if decision_at >= 0.0: next_elapsed = minf(next_elapsed, decision_at)
+		if _seeking_decision:
+			_line_holding = false
+			for hold: Variant in _definition.get("dialogue_holds", []):
+				if float(hold) <= next_elapsed: _line_released[str(float(hold))] = true
+			_camera_entry_elapsed = maxf(_camera_entry_elapsed, next_elapsed)
 		if _hold_dialogue(next_elapsed):
 			_apply_actors()
 			_apply_camera()
@@ -1019,6 +1027,7 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 			if not _choice_review and not str(_choice_state.get("selected", "")).is_empty():
 				_finish_choice()
 			else:
+				_seeking_decision = false
 				if _choice_pending_at >= 0 and Time.get_ticks_msec() - _choice_pending_at >= 8000:
 					choice_send_failed()
 				_show_choice()
@@ -1031,12 +1040,13 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 		_apply_camera()
 		_update_caption()
 		if elapsed >= _duration():
-			cancel("finished")
+			cancel("skipped" if _seeking_decision else "finished")
 
 func _start(rig: Node3D, camera: Camera3D, local: Node3D, nodes: Dictionary,
 		bindings: Dictionary) -> void:
 	configure()
 	var chained_fade := str(_scene_handoff.get("mode", "")) == "fade"
+	var seek_next := bool(_scene_handoff.get("seek_decision", false))
 	if chained_fade and rig.has_method("set_focus"):
 		rig.call("set_focus", local.global_position)
 	_playback_generation += 1
@@ -1061,6 +1071,7 @@ func _start(rig: Node3D, camera: Camera3D, local: Node3D, nodes: Dictionary,
 	_returning = false
 	_return_start.clear()
 	_choice_revealed = false
+	_seeking_decision = seek_next
 	_choice_waiting = false
 	_choice_completed = false
 	_choice_review = false
@@ -1245,14 +1256,17 @@ func _uses_gameplay_camera() -> bool:
 	return not _replaying and str(_definition.get("live_camera", "")) == "gameplay"
 
 func _begin_scene_handoff(reason: String) -> bool:
-	if _replaying or not playing or reason != "finished" or not _scene_handoff.is_empty():
+	if _replaying or not playing or reason not in ["finished", "skipped"] or not _scene_handoff.is_empty():
 		return false
+	if _has_inspection() and str(_inspection_state.get("status", "")) != "complete":
+		return false # A blocked native action must still allow manual recovery.
 	var policy: Dictionary = (_definition.get("handoff", {}) as Dictionary).duplicate(true)
 	policy.merge((policy.get("variants", {}) as Dictionary).get(_variant, {}), true)
 	if policy.is_empty() or not _beat_matches(policy): return false
 	_scene_handoff = {"mode":str(policy.get("mode", "hold")), "to":policy.get("to", []),
 		"gameplay_map":str(policy.get("gameplay_map", "")), "run":_run, "map":_map,
-		"token":_token, "elapsed":0.0, "started":Time.get_ticks_msec(), "phase":"out", "reason":reason}
+		"token":_token, "elapsed":0.0, "started":Time.get_ticks_msec(), "phase":"out", "reason":reason,
+		"seek_decision":_seeking_decision}
 	_line_holding = false
 	_line_continue.hide()
 	if str(_scene_handoff.mode) == "hold": _commit_scene_handoff()
@@ -1513,6 +1527,7 @@ func _response_speaker() -> String:
 	return str(speakers.get(str(_choice_state.get("selected", "")), _definition.get("response_speaker", "Odo Fenn")))
 
 func _update_caption() -> void:
+	_skip.text = "Skip to decision · Esc" if _inspection_error.is_empty() and _has_choice() and not _choice_completed else "Return to play · Esc"
 	if _choice_waiting:
 		_dialogue.set_content(_protagonist_name, _choice_dialog,
 			_actors.get(str(_definition.get("choice_actor", "protagonist"))) as Node3D)
@@ -1590,7 +1605,18 @@ func handle_input(event: InputEvent) -> bool:
 
 func skip() -> void:
 	if not _scene_handoff.is_empty():
-		cancel("handoff_cancelled")
+		_scene_handoff.seek_decision = true
+		return
+	# Keep native decisions in their cinematic dialogue. A seek only advances
+	# presentation time; the normal inspection/choice barriers still authorize it.
+	if playing and not _returning and _inspection_error.is_empty() and (
+			(_has_choice() and not _choice_completed) \
+			or (_has_inspection() and not _replaying and str(_inspection_state.get("status", "")) != "complete") \
+			or (not _replaying and not (_definition.get("handoff", {}) as Dictionary).is_empty())):
+		_seeking_decision = true
+		_line_holding = false
+		_line_advance_pending = false
+		if is_instance_valid(_transcript): _transcript.hide()
 		return
 	_return_to_play("skipped")
 
@@ -1671,6 +1697,7 @@ func cancel(reason := "cancelled") -> void:
 	_return_elapsed = 0.0
 	_return_start.clear()
 	_choice_waiting = false
+	_seeking_decision = false
 	_choice_pending_at = -1
 	_line_holding = false
 	_line_gate = -1.0

@@ -144,17 +144,29 @@ func run() -> void:
 	await show_state(rescue_complete)
 	expect(not guide.has_campaign() and not guide.is_campaign_tracked() and campaign_row()==-1,
 		"personal rescue completion removes the active journal row and tracked objective while still in the private map")
-	expect(guide.card.visible and guide.chapter.text=="RESCUE COMPLETE" and hud.visible
+	expect(guide.card.visible and guide.heading.text=="Quest complete!" and hud.visible
 		and hud._leave.visible and not hud._scroll.visible and not hud._rescue_rewards.visible,
-		"completed rescue retains Return and replay without stale conversation or reward targets, even after minimizing instructions")
+		"completed rescue shows a simple quest-complete notice without stale conversation or reward targets")
+	expect(hud._leave.text=="Continue" and not hud._replay.visible and not hud._reduced.visible
+		and guide.instruction.text.contains("check in on Liora later"),"the ending offers the Liora follow-up message and one Continue action")
 	expect(not guide.collapse.visible and not guide.untrack.visible and not guide.instruction.text.contains("Speak"),
 		"the completion notice offers no active quest tracking or repeated conversation")
-	expect(not guide.hide_button.visible,"the completed rescue keeps its Return action accessible")
+	expect(not guide.hide_button.visible,"the completed rescue keeps its Continue action accessible")
 	await capture("rescue-complete-return-1280x720")
 	var returned := rescue_complete.duplicate(true);returned.active=false
 	await show_state(returned)
 	expect(not guide.has_campaign() and guide.quest_title()=="Signed Ashore",
 		"returning from a completed rescue restores the ordinary quest guide")
+	app.quest_journal.append({"quest_id":1065,"title":"Check in with Liora","objective":"Visit Liora in Landfall later and ask how she is feeling.","location":"Landfall","current":0,"target":1,"ready":false})
+	app.state_changed.emit(&"quest_journal");await settle()
+	var followup_row:=-1
+	for i:int in windows._quest_entries.size():
+		if windows._quest_entries[i].title=="Check in with Liora":followup_row=i
+	expect(followup_row>=0 and not windows._quest_entries[followup_row].get("_campaign",false),"Liora's follow-up is an ordinary saved journal quest")
+	select_row(followup_row);windows.quest_track_button.pressed.emit();await settle()
+	expect(windows.quest_track_button.text=="Untrack" and windows._tracked_quest_title=="Check in with Liora","the follow-up uses normal quest tracking")
+	windows.quest_track_button.pressed.emit();await settle()
+	expect(windows.quest_track_button.text=="Track" and windows._tracked_quest_title.is_empty(),"the follow-up can be untracked normally")
 	rescue_complete.completed=false;rescue_complete.run_id="another-rescue"
 	await show_state(rescue_complete)
 	expect(guide.has_campaign() and guide.is_campaign_tracked() and guide.untrack.visible,

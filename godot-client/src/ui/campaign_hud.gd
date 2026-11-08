@@ -341,6 +341,10 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 	if travelling:
 		_entry.text = "Continue at " + str(travel.get("npc", "Odo"))
 	_leave.visible = active and not travelling
+	_leave.text = "Continue" if complete else "Return"
+	_leave.tooltip_text = "Continue your journey. Your follow-up is in the quest log." if complete else "Return to the public road. Completed milestones are saved."
+	_replay.visible = not complete
+	_reduced.visible = not complete
 	_help.visible = active or travelling
 	_account.visible = active
 	_scroll.visible = active and not travelling
@@ -348,9 +352,8 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 	_guidance.visible = active and matches and not travelling and Guidance.is_guided(snapshot)
 	_guidance.text = Guidance.legend(snapshot) if _guidance.visible else ""
 	if complete:
-		# Keep scene replay and Return accessible without another objective,
-		# conversation or reward selection after personal completion.
-		_hint.text = "Your rewards and account are saved."
+		_title.text = "Quest complete!"
+		_hint.text = "But maybe you should check in on Liora later to see how she is feeling."
 		for control: Control in [_notice, _opening_details, _rescue, _rescue_actions,
 				_rescue_rewards, _scroll, _guidance, _help, _account, _entry, _join, _own,
 				_bank, _road, _lamps, _prediction_actions, _party, _adoption, _adoption_actions,

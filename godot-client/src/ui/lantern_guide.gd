@@ -284,6 +284,7 @@ func _refresh() -> void:
 	if card == null:
 		return
 	var complete := rescue_completed() and bool(_campaign.get("active", false))
+	chapter.visible = not complete
 	var campaign := using_campaign() or complete
 	if is_instance_valid(campaign_content):
 		campaign_content.visible = campaign and (complete or not compact) and bool(campaign_content.call("presentation_available"))
@@ -295,9 +296,9 @@ func _refresh() -> void:
 			and bool(campaign_content.call("presentation_available")) and (complete or not is_window_hidden())
 		card.visible = visible
 		chapter.text = "RESCUE COMPLETE" if complete else "CURRENT EXPEDITION"
-		heading.text = str(_campaign.get("title", "The Missing Measure"))
+		heading.text = "Quest complete!" if complete else str(_campaign.get("title", "The Missing Measure"))
 		campaign_content.call("embed_instruction", instruction)
-		instruction.text = "Your rewards and account are saved." if complete else str(campaign_entry().get("objective", ""))
+		instruction.text = "But maybe you should check in on Liora later to see how she is feeling." if complete else str(campaign_entry().get("objective", ""))
 		instruction.visible = complete or not compact
 		skip.hide()
 		help.hide()
