@@ -51,3 +51,64 @@ static func _base_clip(player: AnimationPlayer, base_name: String,
 	if source_library != null and source_library.has_animation(base_name):
 		return source_library.get_animation(base_name)
 	return player.get_animation(base_name) if player.has_animation(base_name) else null
+
+## Instance-local variants: retain the seated support pose and the donor's
+## release clock. No mesh, bind, source clip or shared library is modified.
+static func presentation_clip(player: AnimationPlayer, skeleton: Skeleton3D,
+		base_name: String, seat_name: String, high: bool) -> String:
+	if seat_name.is_empty() and not high:
+		return base_name
+	var key := base_name.replace("/", "_") + ("_seated" if not seat_name.is_empty() else "") + ("_high" if high else "")
+	if not player.has_animation_library("spell_poses"):
+		player.add_animation_library("spell_poses", AnimationLibrary.new())
+	var library := player.get_animation_library("spell_poses")
+	if library.has_animation(key):
+		return "spell_poses/" + key
+	var source := player.get_animation(base_name)
+	var clip := source.duplicate(true) as Animation
+	var spine := skeleton.find_bone("spine_01")
+	if spine < 0: return base_name
+	var upper: Array[String] = []
+	for bone: int in skeleton.get_bone_count():
+		var ancestor := bone
+		while ancestor >= 0 and ancestor != spine:
+			ancestor = skeleton.get_bone_parent(ancestor)
+		if ancestor == spine: upper.append(skeleton.get_bone_name(bone))
+	if not seat_name.is_empty() and player.has_animation(seat_name):
+		var seat := player.get_animation(seat_name)
+		# Replace all support channels, including root translation and scale.
+		for track: int in range(clip.get_track_count() - 1, -1, -1):
+			if clip.track_get_type(track) in [Animation.TYPE_ROTATION_3D, Animation.TYPE_POSITION_3D, Animation.TYPE_SCALE_3D] and str(clip.track_get_path(track).get_concatenated_subnames()) not in upper:
+				clip.remove_track(track)
+		for track: int in seat.get_track_count():
+			if seat.track_get_type(track) not in [Animation.TYPE_ROTATION_3D, Animation.TYPE_POSITION_3D, Animation.TYPE_SCALE_3D]: continue
+			if str(seat.track_get_path(track).get_concatenated_subnames()) in upper: continue
+			seat.copy_track(track, clip)
+			var added := clip.get_track_count() - 1
+			# Meditate is a loop. Keep its breathing over a one-shot's duration.
+			var keys := clip.track_get_key_count(added)
+			for key_index: int in range(keys - 1, -1, -1):
+				clip.track_remove_key(added, key_index)
+			var samples := ceili(clip.length * 30.0)
+			for sample: int in range(samples + 1):
+				var time := minf(sample / 30.0, clip.length)
+				var phase := time * seat.length / clip.length if clip.loop_mode != Animation.LOOP_NONE else fposmod(time, seat.length)
+				match seat.track_get_type(track):
+					Animation.TYPE_ROTATION_3D: clip.rotation_track_insert_key(added, time, seat.rotation_track_interpolate(track, phase))
+					Animation.TYPE_POSITION_3D: clip.position_track_insert_key(added, time, seat.position_track_interpolate(track, phase))
+					Animation.TYPE_SCALE_3D: clip.scale_track_insert_key(added, time, seat.scale_track_interpolate(track, phase))
+					_: pass
+	if high:
+		for track: int in clip.get_track_count():
+			if clip.track_get_type(track) != Animation.TYPE_ROTATION_3D: continue
+			var bone := str(clip.track_get_path(track).get_concatenated_subnames())
+			if bone not in ["arm_l", "arm_r", "forearm_l", "forearm_r"]: continue
+			for key_index: int in clip.track_get_key_count(track):
+				var rotation: Quaternion = clip.track_get_key_value(track, key_index)
+				# Broader gestures retain endpoints and release timing.
+				var phase := clip.track_get_key_time(track, key_index) / maxf(clip.length, 0.01)
+				var envelope := pow(sin(phase * PI), 2.0)
+				var side := 1.0 if bone.ends_with("_l") else -1.0
+				clip.track_set_key_value(track, key_index, rotation * Quaternion(Vector3.FORWARD, side * 0.16 * envelope))
+	library.add_animation(key, clip)
+	return "spell_poses/" + key

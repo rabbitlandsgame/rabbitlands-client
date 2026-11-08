@@ -690,6 +690,7 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 		model_config: Dictionary, animation_config: Dictionary,
 		equipment_config: Dictionary = {}, build_model := true) -> Array[String]:
 	var configure_started := Time.get_ticks_usec()
+	_spell_seated = bool(dto.get("sitting", false))
 	_configuration_phases_us.clear()
 	_configuration_profile_scope = ""
 	var profile_build := OS.get_environment("ELORIA_ACTOR_BUILD_PROFILE") == "1"
@@ -3271,6 +3272,7 @@ func rebase_world(frame: Transform3D) -> void:
 	if remote != null: remote.sync_transfer(self)
 
 func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport := false) -> void:
+	if dto.has("sitting"): _spell_seated = bool(dto.sitting)
 	if not _remote_pending_transfer.is_empty():
 		RemotePresentationService.restore_pending(self)
 		if is_queued_for_deletion(): return
@@ -5642,11 +5644,18 @@ func _play_action_legacy(action: StringName, restart := false) -> void:
 		return
 	if animation_player == null or resolver == null:
 		return
+	if action in [&"sit", &"seated_idle"]: _spell_seated = true
+	elif action in [&"stand", &"walk", &"run", &"death"]: _spell_seated = false
+	if _spell_seated and action in [&"idle", &"combat_idle", &"turn"]: action = &"seated_idle"
 	if not resolver.action_to_clip.has(String(action)):
 		return
 	var clip := resolver.clip_for_action(action)
 	if clip.is_empty() or not animation_player.has_animation(clip):
 		return
+	if action in [&"cast", &"cast_channel_enter", &"cast_channel", &"cast_aggressive", &"cast_defensive", &"heal", &"cast_exit"]:
+		var seat: String = resolver.clip_for_action(&"seated_idle") if _spell_seated and action not in [&"cast", &"cast_aggressive"] else ""
+		clip = SpellAnimationLibrary.presentation_clip(animation_player, get_skeleton(), clip, seat,
+			_render_quality == ACTOR_RENDER_QUALITY.Quality.HIGH)
 	animation_player.speed_scale = _playback_speed_for(action)
 	if current_action == action and animation_player.is_playing() and not restart:
 		return
@@ -7095,6 +7104,7 @@ static func _external_path(path: String) -> String:
 	return ProjectSettings.globalize_path(path) if path.begins_with("res://") else path
 
 var _spell_variants: Dictionary = {}
+var _spell_seated := false
 var _spell_base_clips: Dictionary = {}
 
 func set_spell_variant(effect: int) -> void:
