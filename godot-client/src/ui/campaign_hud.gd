@@ -331,8 +331,8 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 	_title.text = str(travel.get("title", snapshot.get("title", "The Missing Measure")))
 	_hint.text = str(snapshot.get("hint", "Explore the quay and speak with the field crew."))
 	if travelling:
-		_hint.text = str(travel.get("route", "Explore the public roads to " + str(travel.get("map", "Twinbrook")) + ".")) \
-			+ "\nSpeak with " + str(travel.get("npc", "Odo Fenn")) + " there to continue."
+		_hint.text = str(travel.get("route", "Explore the public roads to " + str(travel.get("map", "Twinbrook")) + "."))
+		if not str(travel.get("npc", "")).is_empty():_hint.text += "\nSpeak with " + str(travel.npc) + " there to continue."
 	_notice.text = str(snapshot.get("party_notice", ""))
 	_notice.visible = not _notice.text.is_empty()
 	_opening_details.text = opening_details(snapshot)
@@ -348,9 +348,16 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 	_join.visible = not active and can_join
 	_own.visible = can_own
 	_entry.text = ("Continue " if bool(snapshot.get("started", false)) else "Begin ") + str(snapshot.get("title", "The Missing Measure"))
+	_entry.tooltip_text="Continue the current assignment."
 	if travelling:
 		_entry.text = "Continue at " + str(travel.get("npc", "Odo"))
+	if travelling and str(snapshot.get("kind", ""))=="shelves":
+		_entry.show()
+		var ledger:Dictionary=snapshot.get("shelves",{})
+		_entry.text=str(ledger.get("start_label","Start work")) if bool(ledger.get("can_begin",false)) else "Do now · Show on map"
+		_entry.tooltip_text="Start here when you are ready." if bool(ledger.get("can_begin",false)) else "Show the destination or the next door on your map. Walk there when you are ready; Untrack keeps the assignment in your quest log."
 	_leave.visible = active and not travelling
+	if str(snapshot.get("kind", ""))=="shelves" and _current_map=="landfall_town":_leave.hide()
 	_leave.text = "Continue" if complete else "Return"
 	_leave.tooltip_text = "Continue your journey. Your follow-up is in the quest log." if complete else "Return to the public road. Completed milestones are saved."
 	_replay.visible = not complete
@@ -422,12 +429,16 @@ func _request_leave() -> void:
 
 func _request_entry() -> void:
 	var kind := str(_state.get("kind", ""))
+	if kind=="shelves" and not (_state.get("travel",{}) as Dictionary).is_empty() \
+			and not bool((_state.get("shelves",{}) as Dictionary).get("can_begin",false)):
+		action_requested.emit("shelves_destination")
+		return
 	action_requested.emit(kind if kind in ["bank", "road", "lamps", "rescue", "shelves"] else "resume" if bool(_state.get("started", false)) else "start")
 
 func _apply_shelves(ledger: Dictionary) -> void:
 	_shelves.visible = not ledger.is_empty()
 	if ledger.is_empty(): return
-	var lines: PackedStringArray = ["SUPPLY LEDGER"]
+	var lines: PackedStringArray = ["NEXT STEP" if str(ledger.get("phase","")) in ["travel","report"] else "SUPPLY LEDGER"]
 	for row: Dictionary in ledger.get("objectives", []):
 		lines.append(("✓ " if int(row.current)>=int(row.target) else "• ") + str(row.label)
 			+ " · %d/%d" % [int(row.current),int(row.target)] + (" · your practice" if bool(row.get("personal",false)) else " · party"))

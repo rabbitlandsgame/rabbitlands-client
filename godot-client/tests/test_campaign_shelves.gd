@@ -89,6 +89,42 @@ func run()->void:
 	expect(windows._merchant_price_label({"buy_price":0},false)=="Out of stock","locked essence rows show Out of stock")
 	expect(main._model_for_actor({"actor_type":0,"kind":2,"name":"Mara Vale"})=="luminous_female"
 		and not main._model_for_actor({"actor_type":309,"kind":2,"name":"Tovin"}).is_empty(),"the apprentices use supported native bodies rather than legacy placeholder records")
+	var travel:=snapshot();travel.stage="travel";travel.scene={};travel.targets=[]
+	travel.shelves.phase="travel";travel.shelves.can_begin=false;travel.shelves.start_label="Start the delivery escort"
+	travel.travel={"map":"landfall","tile":[268,128],"label":"Potters’ loading point","route":"Walk to the loading point and start the delivery when ready.",
+		"via":[{"map":"landfall_town","tile":[175,21],"label":"Leave The True Note for the supply worksite"}]}
+	expect(EloriaProtocol.decode_campaign(JSON.stringify(travel).to_utf8_buffer()).type=="campaign","a saved travel assignment passes the native decoder")
+	var invalid_pin:=travel.duplicate(true);invalid_pin.travel.via[0].tile=[-1,21]
+	expect(EloriaProtocol.decode_campaign(JSON.stringify(invalid_pin).to_utf8_buffer()).type=="invalid","malformed route markers are rejected")
+	var guide:Script=preload("res://src/world/campaign_guidance.gd")
+	expect(guide.navigation_targets(travel,"landfall",true)[0].tile==[268,128],"Landfall shows the actual worksite marker")
+	expect(guide.navigation_targets(travel,"landfall_town",true)[0].tile==[175,21],"the shop map marks its exit instead of plotting outdoor coordinates inside the shop")
+	expect(guide.navigation_targets(travel,"twinbrook",true).is_empty(),"markers do not leak onto another region")
+	expect(guide.navigation_targets(travel,"landfall",false).is_empty(),"untracking removes destination markers without changing the assignment")
+	app.campaign=travel;app.current_map="landfall_town"
+	main.lantern_guide.apply_campaign(travel);main.lantern_guide.set_campaign_tracked(true)
+	expect(not str(main.lantern_guide.campaign_entry().objective).contains("Speak with the local crew"),"travel instructions do not invent a conversation at an unmanned worksite")
+	expect(main._campaign_destination_marks().size()==1,"the actual map collector receives the tracked quest’s door marker")
+	main.lantern_guide.hide_window()
+	expect(main._campaign_destination_marks().size()==1,"hiding the quest window retains its tracked map marker")
+	main.lantern_guide.set_campaign_tracked(false)
+	expect(main._campaign_destination_marks().is_empty(),"the actual map collector drops an untracked quest")
+	var hud:Control=load("res://src/ui/campaign_hud.gd").new();root.add_child(hud)
+	var actions:Array=[];hud.action_requested.connect(func(action:String)->void:actions.append(action))
+	hud.apply_state(travel,Vector2i(178,26),"landfall_town")
+	expect(hud._entry.visible and hud._entry.text=="Do now · Show on map" and hud._shelves.text.contains("Mix three Life Essences"),"the quest instructions retain a checklist and an optional Do now action while travelling")
+	hud._request_entry()
+	expect(actions==["shelves_destination"],"Do now requests the map, never remote encounter entry or fast travel")
+	travel.shelves.can_begin=true;hud.apply_state(travel,Vector2i(268,128),"landfall")
+	hud._request_entry()
+	expect(hud._entry.text=="Start the delivery escort" and actions.back()=="shelves","arrival offers an explicit event start using the normal campaign request")
+	app.current_map="landfall";network.sent_frames.clear()
+	travel.targets=[{"id":"shelves_start","object_id":61974,"tile":[268,128],"label":"Start the delivery escort","enabled":true}]
+	main._on_campaign_target(61974,Vector2i(268,128),true)
+	expect(network.sent_frames.size()==1 and network.sent_frames[0]==EloriaProtocol.use_map_object(61974),"an untracked public worksite still uses the normal interaction request")
+	for identity:String in ["measure.shelves.brief","measure.shelves.gear","measure.shelves.resolved","measure.shelves.enriched"]:
+		expect(not scene._definitions[identity].has("handoff"),identity+" releases the player without waiting for automatic travel")
+	hud.queue_free()
 	var f:=return_fixture()
 	f.scene.cancel("finished");return_tick(f,.6)
 	f.state.active=false;f.state.completed=true;f.state.map="landfall_town";f.state.scene={}

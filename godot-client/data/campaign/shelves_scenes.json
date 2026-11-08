@@ -67,28 +67,21 @@
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
           "variants": {
-            "intro": "Aim Heal Target at Mara herself. Heal mends you; Restore Ether spends Water Essence to refill ether. Fire Bolt is for a hostile target. Your pouch shows what every cast will cost.",
-            "life": "Sage and Hearthroot make Life Essence: two measures of Sage, one of Hearthroot. Keep enough for your own ten mixes; put the growers' share in the collection chest. The gatherersÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ caches let you store ingredients and mix from storage beside each patch.",
-            "fire": "A direct assault is quicker. The miners' side approach lets you silence their signal first. Both roads end with the workers owning their coal and flint again.",
-            "water": "Work from the upper gate down. The bypass takes fewer repairs, but brings a smaller shipment. Kelp and Watercress make Water Essence; it fuels Restore Ether and joins Life Essence in Heal Target.",
-            "earth": "Stay with the cart. It stops for enemies, damage, and anyone left behind. Heal Mara if she is hurt; repair the cart at a safe halt. Choose the main road for speed or the longer sheltered route.",
-            "school": "Mara keeps choosing the wrong ingredients. Tovin's hands shake because he has not eaten. Sela borrowed a bowl and thought it would replace a Mortar and Pestle. Listen before you offer advice.",
-            "wind": "Keep fresh reeds away from damp seed sacks. Repair the racks, set the vanes, and choose between a sheltered site and a larger exposed station.",
-            "magic": "Track the spiders near the resin station. Damaged glands still teach us where to look; after twelve eligible specimens you will have a usable one. Mix the stabilizer, then make Magic Essence from Lotus and Resin.",
-            "death": "Compare the labels with the samples. Toadstool and Thistle are useful when handled properly. We can inspect every batch, or follow the false labels back to the saboteurs.",
-            "frost": "Set the intake first, then seal the containers. A trained villager will handle Frost production; your personal Frost mixing assignment opens at Potion level sixteen.",
-            "finale": "Choose where the trained crew will stand. Hold the receiving yard, help the wounded, and stop their quartermaster before he reaches the workshop."
+            "intro": "Leave The True Note and walk to the coastal practice camp in Landfall. The quest marker is at (273, 124). Travel there when you are ready; your quest instructions list the work. Return here afterward for your reward.",
+            "life": "Leave The True Note and find the Sage beds west of the city in Landfall. The quest marker is at (64, 249). Travel there when you are ready; your quest instructions list the work. Return here afterward for your reward.",
+            "fire": "Leave The True Note and find the flint workings west of Landfall city. Start the raid there when ready. The quest marker is at (51, 216). Travel there when you are ready; your quest instructions list the work. Return here afterward for your reward.",
+            "water": "Follow the Landfall coast to the sluice worksite marked on your map. The quest marker is at (279, 112). Travel there when you are ready; your quest instructions list the work. Return here afterward for your reward.",
+            "earth": "Meet the potters at the loading point on the coastal road in Landfall. Load their cart there to begin the delivery. The quest marker is at (268, 128). Travel there when you are ready; your quest instructions list the work. Return here afterward for your reward.",
+            "school": "Meet Mara, Tovin and Sela at the coastal teaching bench in Landfall. The quest marker is at (273, 124). Travel there when you are ready; your quest instructions list the work. Return here afterward for your reward.",
+            "wind": "Walk to the coastal drying station in Landfall and meet the seed growers and reed cutters. The quest marker is at (270, 126). Travel there when you are ready; your quest instructions list the work. Return here afterward for your reward.",
+            "magic": "Meet the refiners at the resin station on the Landfall coast. Begin the spider hunt there. The quest marker is at (273, 115). Travel there when you are ready; your quest instructions list the work. Return here afterward for your reward.",
+            "death": "Meet the marsh gatherers at their southern collection station in Landfall. The quest marker is at (146, 382). Travel there when you are ready; your quest instructions list the work. Return here afterward for your reward.",
+            "frost": "Meet the cold-storage workers at the coastal works in Landfall. The quest marker is at (279, 112). Travel there when you are ready; your quest instructions list the work. Return here afterward for your reward.",
+            "finale": "Meet the trained crew at the coastal workshop receiving yard in Landfall. Begin the defense when your party is ready. The quest marker is at (273, 124). Travel there when you are ready; your quest instructions list the work. Return here afterward for your reward."
           },
           "text": "Check the supply ledger before setting out."
         }
       ],
-      "handoff": {
-        "mode": "fade",
-        "gameplay_map": "landfall",
-        "to": [
-          "measure.shelves.arrival"
-        ]
-      },
       "choice_actor": "recipient",
       "cues": [
         {
@@ -170,18 +163,10 @@
         }
       ],
       "handoff": {
-        "mode": "fade",
-        "gameplay_map": "landfall_town",
-        "to": [],
-        "variants": {
-          "finale": {
-            "mode": "hold",
-            "gameplay_map": "",
-            "to": [
-              "measure.shelves.enriched"
-            ]
-          }
-        }
+        "mode": "hold",
+        "to": [
+          "measure.shelves.enriched"
+        ]
       },
       "cues": [
         {
@@ -324,11 +309,6 @@
           "text": "These shelves will stay open to you. Come back for supply contracts, and bring news of the roads."
         }
       ],
-      "handoff": {
-        "mode": "fade",
-        "gameplay_map": "landfall_town",
-        "to": []
-      },
       "cues": [
         {
           "at": 0,
@@ -339,18 +319,16 @@
       ]
     },
     "measure.shelves.arrival": {
-      "title": "The Last Few Measures",
-      "duration": 55,
+      "title": "At the Supply Worksite",
+      "duration": 40,
       "entry_seconds": 1.6,
       "exit_seconds": 1.2,
       "fov": 48,
-      "anchor": "mentor",
+      "anchor": "worker",
       "required_actors": [
-        "mentor",
         "worker"
       ],
       "cast_roles": [
-        "mentor",
         "worker",
         "protagonist"
       ],
@@ -358,47 +336,16 @@
         "worker"
       ],
       "stage_protagonist": false,
-      "shots": [
-        {
-          "t": 0,
-          "anchor_actor": "mentor",
-          "position": [
-            -4,
-            5.5,
-            6
-          ],
-          "target": [
-            0,
-            1,
-            0
-          ]
-        }
-      ],
+      "shots": [],
       "dialogue_holds": [
-        12
+        28
       ],
       "cues": [
         {
           "at": 0,
-          "actor": "mentor",
+          "actor": "worker",
           "action": "idle",
-          "face": "worker"
-        },
-        {
-          "at": 0,
-          "actor": "worker",
-          "action": "run",
-          "from": "worker_entry",
-          "destination": "worker_stop",
-          "move_seconds": 4,
-          "face": "mentor"
-        },
-        {
-          "at": 4,
-          "actor": "worker",
-          "action": "injury_standing",
-          "destination": "worker_stop",
-          "face": "mentor"
+          "face": "protagonist"
         }
       ],
       "lines": [
@@ -406,15 +353,23 @@
           "at": 2,
           "speaker": "Mara Vale",
           "speaker_actor": "worker",
-          "text": "Ilka! The herb growers turned back again. The road is closed, and I could not get through without a fight."
-        },
-        {
-          "at": 12,
-          "speaker": "Ilka Tarn",
-          "speaker_actor": "mentor",
-          "text": "Open Magic. Heal mends you; aim Heal Target at Mara. Restore Ether spends Water Essence; Fire Bolt needs a hostile target. Check each cast’s cost.\n\nOpen Mixing, then Alchemy. Two Sage and one Hearthroot make Life Essence. Keep your Mortar and Pestle in your pack and eat before mixing. Bank spare materials in the supply chest.\n\nThe practice station provides safe injuries and replaces critically lost ingredients. Return after all four casts and three Life Essence mixes."
+          "text": "You made it. Let us put these supplies back on the road.",
+          "variants": {
+            "intro": "Open Magic. Heal mends you; aim Heal Target at me. Restore Ether spends Water Essence; Fire Bolt needs a hostile target. Check each cast's cost.\n\nOpen Mixing, then Alchemy. Two Sage and one Hearthroot make Life Essence. Keep your Mortar and Pestle in your pack and eat first. The practice station provides safe injuries and replacement ingredients after a critical loss.\n\nComplete all four casts and three Life Essence mixes, then report to Ilka at her shop.",
+            "life": "Sage and Hearthroot make Life Essence: two Sage, one Hearthroot. Keep enough for your ten mixes; put the growers' share in the collection chest. Use the gatherers' caches for storage and mixing.\n\nYour quest instructions list each task. When the work is done, walk back to Ilka at The True Note for your reward.",
+            "fire": "A direct assault is quicker. The miners' side approach lets you silence their signal first. Both roads end with the workers owning their coal and flint again.\n\nYour quest instructions list each task. When the work is done, walk back to Ilka at The True Note for your reward.",
+            "water": "Work from the upper gate down. The bypass takes fewer repairs, but brings a smaller shipment. Kelp and Watercress make Water Essence; it fuels Restore Ether and joins Life Essence in Heal Target.\n\nYour quest instructions list each task. When the work is done, walk back to Ilka at The True Note for your reward.",
+            "earth": "Stay with the cart. It stops for enemies, damage, and anyone left behind. Heal Mara if she is hurt; repair the cart at a safe halt. Choose the main road for speed or the longer sheltered route.\n\nYour quest instructions list each task. When the work is done, walk back to Ilka at The True Note for your reward.",
+            "school": "Mara keeps choosing the wrong ingredients. Tovin's hands shake because he has not eaten. Sela borrowed a bowl and thought it would replace a Mortar and Pestle. Listen before you offer advice.\n\nYour quest instructions list each task. When the work is done, walk back to Ilka at The True Note for your reward.",
+            "wind": "Keep fresh reeds away from damp seed sacks. Repair the racks, set the vanes, and choose between a sheltered site and a larger exposed station.\n\nYour quest instructions list each task. When the work is done, walk back to Ilka at The True Note for your reward.",
+            "magic": "Track the spiders near the resin station. Damaged glands still teach us where to look; after twelve eligible specimens you will have a usable one. Mix the stabilizer, then make Magic Essence from Lotus and Resin.\n\nYour quest instructions list each task. When the work is done, walk back to Ilka at The True Note for your reward.",
+            "death": "Compare the labels with the samples. Toadstool and Thistle are useful when handled properly. We can inspect every batch, or follow the false labels back to the saboteurs.\n\nYour quest instructions list each task. When the work is done, walk back to Ilka at The True Note for your reward.",
+            "frost": "Set the intake first, then seal the containers. A trained villager will handle Frost production; your personal Frost mixing assignment opens at Potion level sixteen.\n\nYour quest instructions list each task. When the work is done, walk back to Ilka at The True Note for your reward.",
+            "finale": "Choose where the trained crew will stand. Hold the receiving yard, help the wounded, and stop their quartermaster before he reaches the workshop.\n\nYour quest instructions list each task. When the work is done, walk back to Ilka at The True Note for your reward."
+          }
         }
-      ]
+      ],
+      "live_camera": "gameplay"
     },
     "measure.shelves.gear": {
       "title": "The Road Must Hold",
@@ -486,11 +441,6 @@
           "text": "Your work and reward are recorded. Let us return to The True Note."
         }
       ],
-      "handoff": {
-        "mode": "fade",
-        "gameplay_map": "landfall_town",
-        "to": []
-      },
       "cues": [
         {
           "at": 0,
@@ -559,11 +509,6 @@
           "text": "This supply can be relied on again. Let us return to The True Note."
         }
       ],
-      "handoff": {
-        "mode": "fade",
-        "gameplay_map": "landfall_town",
-        "to": []
-      },
       "cues": [
         {
           "at": 0,

@@ -9235,7 +9235,7 @@ func _on_campaign_target(object_id: int, tile: Vector2i, nearby: bool) -> void:
 		return
 	if _world_input_blocked() or not bool(AppState.campaign.get("active", false)):
 		return
-	if not (AppState.campaign.get("travel", {}) as Dictionary).is_empty() \
+	if (not (AppState.campaign.get("travel", {}) as Dictionary).is_empty() and str(AppState.campaign.get("kind",""))!="shelves") \
 			or EloriaProtocol.map_id_from_reference(str(AppState.campaign.get("map", ""))) \
 			!= EloriaProtocol.map_id_from_reference(AppState.current_map):
 		return
@@ -9255,6 +9255,15 @@ func _on_campaign_target(object_id: int, tile: Vector2i, nearby: bool) -> void:
 
 func _on_campaign_action(action: String) -> void:
 	if _world_input_blocked():
+		return
+	if action=="shelves_destination":
+		if not full_map.visible:_toggle_full_map()
+		var pins:=_campaign_destination_marks()
+		if not pins.is_empty():
+			_full_map_panned=true
+			_full_map_pan_position=pins[0].position
+			_update_full_map_focus()
+		_request_map_redraw()
 		return
 	if action in ["accept", "defer", "supplies"]:
 		_on_rescue_action(action, str(AppState.campaign.get("run_id", "")))
@@ -12693,6 +12702,7 @@ func _apply_minimap_shape() -> void:
 ## switch is read in one place rather than in five.
 func _collect_minimap_marks() -> Array[Dictionary]:
 	var marks: Array[Dictionary] = []
+	marks.append_array(_campaign_destination_marks())
 	_map_actor_marker_cache.retain(actor_nodes)
 	var service_names := {}
 	for service: Dictionary in _current_service_records():
@@ -12896,8 +12906,18 @@ static func _minimap_object_type(map_object: MapObject3D) -> StringName:
 	return &"harvest" if map_object.is_harvestable() else &"interactive"
 
 ## Waygates and exits use glyphs on the full map, with names on hover.
+func _campaign_destination_marks() -> Array[Dictionary]:
+	var result:Array[Dictionary]=[]
+	for pin:Dictionary in CampaignGuidanceScript.navigation_targets(AppState.campaign,AppState.current_map,lantern_guide.is_campaign_tracked()):
+		var tile:Array=pin.tile
+		result.append({"position":adapter.server_to_godot(float(tile[0])+0.5,float(tile[1])+0.5),
+			"type":&"marker","glyph":"!","colour":CampaignGuidanceScript.NEXT_COLOUR,
+			"radius":MinimapMarkerOverlayScript.PIN_RADIUS,"label":str(pin.label)})
+	return result
+
 func _collect_map_waypoints() -> Array[Dictionary]:
 	var waypoints: Array[Dictionary] = []
+	waypoints.append_array(_campaign_destination_marks())
 	var entrance_ids := _current_entrance_ids()
 	var border_labels := _current_border_exit_labels()
 	for raw_object: Variant in map_object_nodes.values():

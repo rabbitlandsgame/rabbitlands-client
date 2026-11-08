@@ -26,9 +26,15 @@ For the eight essence supply chapters, the direct route adds 150 Magic XP and 10
 
 ## Playing together and recovering
 
+Ilka assigns each chapter at The True Note and gives directions in her conversation. Accepting an assignment keeps the player at the shop. The quest instructions list the destination and tasks; **Do now · Show on map** opens the map without moving the player. The normal Instructions, minimize, Hide and Untrack controls remain available, and the assignment stays in the quest log.
+
+A tracked assignment adds a gold **!** to the map and minimap. Inside the shop, it marks the correct door; outdoors, it marks the worksite. Walk there and use the labelled start interaction or the quest card's **Start** button when ready. Raids, spider hunts and delivery escorts begin at their worksite. Walking past a marker alone does not force a cinematic or encounter. Nearby party members enter by travelling there too.
+
+Field introductions use Mara's portrait and the player's current camera. Ilka stays in her shop. Finishing the field work returns players to the same geographical position on the public map, then directs them back to The True Note. Players walk back and report to Ilka for the chapter reward and their next assignment. There is no automatic trip between the shop and worksite.
+
 One to eight players can take an expedition together through their normal party. Shared fights, repairs and deliveries count for the expedition; each learner demonstrates their own casts, gathering and mixtures. Unlocks and rewards are personal and paid once. Completed players can help another party member without receiving the same chapter reward again.
 
-Mara Vale accompanies field work as a novice Warden healer, using real healing spells and finite ether. Leaving saves the expedition, cart and surviving enemies' health. A returning learner can finish personal practice after other members have collected their rewards.
+Mara Vale accompanies field work as a novice Warden healer, using real healing spells and finite ether. Leaving saves the expedition, cart and surviving enemies' health; resume at the marked worksite. A returning learner can finish personal practice after other members have collected their rewards.
 
 Supply chests use normal personal storage. Gatherers' caches beside the resource patches let players bank materials and mix from storage. Crops not yet native to Landfall arrive in the crew's cultivation trays. A genuine critical mixing failure permits replacement of the lost training ingredients; repeated requests alone do not generate supplies.
 

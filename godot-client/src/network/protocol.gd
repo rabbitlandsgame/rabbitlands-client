@@ -306,6 +306,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"campaign_cart_v1",
 	"campaign_rescue_v1",
 	"campaign_shelves_v1",
+	"campaign_shelves_travel_v1",
 	"campaign_bank_v1",
 	"campaign_road_v1",
 	"campaign_lamps_v1",
@@ -3786,6 +3787,16 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 			return {"type": "invalid", "error": "campaign_travel_text"}
 	if not travel.is_empty() and str(travel.get("map", "")).is_empty():
 		return {"type": "invalid", "error": "campaign_travel_map"}
+	if travel.has("tile") and not _campaign_navigation_tile(travel.tile):
+		return {"type":"invalid","error":"campaign_travel_tile"}
+	if travel.has("via"):
+		if not travel.via is Array or travel.via.size()>8:return {"type":"invalid","error":"campaign_travel_via"}
+		for pin: Variant in travel.via:
+			if not pin is Dictionary or not pin.get("map") is String or map_id_from_reference(pin.map) not in ["landfall","landfall_town"] \
+					or not _campaign_navigation_tile(pin.get("tile")) or not pin.get("label") is String or str(pin.label).length()>240:
+				return {"type":"invalid","error":"campaign_travel_via"}
+	if travel.has("label") and (not travel.label is String or str(travel.label).length()>240):
+		return {"type":"invalid","error":"campaign_travel_label"}
 	var companion: Variant = value.get("companion", {})
 	if not companion is Dictionary:
 		return {"type": "invalid", "error": "campaign_companion"}
@@ -3884,7 +3895,7 @@ static func campaign_shelves_valid(value: Variant) -> bool:
 	if not value is Dictionary:return false
 	if value.is_empty():return true
 	if value.get("chapter") not in ["intro","life","fire","water","earth","school","wind","magic","death","frost","finale"] \
-			or value.get("phase") not in ["contact","brief","arrival","work","lesson","review","complete"]:
+			or value.get("phase") not in ["contact","brief","travel","arrival","work","lesson","report","review","complete"]:
 		return false
 	var objectives: Variant=value.get("objectives")
 	if not objectives is Array or objectives.size()>32:return false
@@ -3901,6 +3912,8 @@ static func campaign_shelves_valid(value: Variant) -> bool:
 	for family: Variant in unlocked:
 		if family not in ["Life","Fire","Water","Earth","Wind","Magic","Death","Frost"] or family in seen:return false
 		seen.append(family)
+	if value.has("can_begin") and not value.can_begin is bool:return false
+	if value.has("start_label") and (not value.start_label is String or str(value.start_label).length()>200):return false
 	return (not value.has("arrival_tile") or _campaign_tile(value.arrival_tile)) and _campaign_tile(value.get("cart_tile")) and _campaign_integer(value.get("cart_integrity"),0,100) \
 		and _campaign_integer(value.get("samples"),0,12) and value.get("can_complete") is bool
 
@@ -4341,6 +4354,9 @@ static func _campaign_road_valid(road: Variant) -> bool:
 	var optional: Variant = road.get("optional", {})
 	return optional is Dictionary and optional.get("supper", "unfound") in ["unfound", "found", "treated", "safe", "completed"] \
 		and optional.get("last_bowl", "unstarted") in ["unstarted", "portioned", "completed"]
+
+static func _campaign_navigation_tile(tile: Variant) -> bool:
+	return _campaign_tile(tile) and int(tile[0])>=0 and int(tile[1])>=0 and int(tile[0])<=2047 and int(tile[1])<=2047
 
 static func _campaign_tile(tile: Variant) -> bool:
 	return tile is Array and tile.size() == 2 and _campaign_integer(tile[0], -2147483648.0, 2147483647.0) \

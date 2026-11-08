@@ -95,7 +95,8 @@ func campaign_entry() -> Dictionary:
 	var adoption: Dictionary = _campaign.get("adoption", {})
 	var objective := str(_campaign.get("hint", "Explore with the field crew."))
 	if not travel.is_empty():
-		objective = str(travel.get("route", objective)) + "\nSpeak with " + str(travel.get("npc", "the local crew")) + " to continue."
+		objective = str(travel.get("route", objective))
+		if not str(travel.get("npc", "")).is_empty():objective += "\nSpeak with " + str(travel.npc) + " to continue."
 	if str(adoption.get("state", "")) == "pending":
 		objective += "\n\nYour account: " + str(adoption.get("summary", "Choose whether to record this shared outcome."))
 		if not bool(adoption.get("can_adopt", false)):
@@ -157,7 +158,7 @@ func follow_campaign_request(action: String) -> void:
 	# Explicitly beginning/joining from a pinned contact card follows that new
 	# run; mere availability at a contact never pins a card by itself.
 	if using_campaign() and str(_campaign.get("run_id", "")).is_empty() \
-			and action in ["start", "resume", "join", "bank", "road", "lamps", "rescue"]:
+			and action in ["start", "resume", "join", "bank", "road", "lamps", "rescue", "shelves"]:
 		_pending_campaign_kind = str(_campaign.get("kind", "opening"))
 		_pending_campaign_msec = Time.get_ticks_msec()
 

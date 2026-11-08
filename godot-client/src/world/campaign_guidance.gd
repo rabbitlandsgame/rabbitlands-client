@@ -16,6 +16,19 @@ static func is_opening(snapshot: Dictionary) -> bool:
 static func is_guided(snapshot: Dictionary) -> bool:
 	return is_opening(snapshot) or str(snapshot.get("kind", "")) in ["rescue", "shelves"]
 
+static func navigation_targets(snapshot: Dictionary, current_map: String, tracked: bool) -> Array[Dictionary]:
+	var result:Array[Dictionary]=[]
+	if not tracked or str(snapshot.get("kind",""))!="shelves":return result
+	var travel:Dictionary=snapshot.get("travel",{})
+	if travel.is_empty():return result
+	var here:=EloriaProtocol.map_id_from_reference(current_map)
+	if EloriaProtocol.map_id_from_reference(str(travel.get("map","")))==here:
+		if travel.get("tile") is Array:result.append({"tile":travel.tile,"label":str(travel.get("label",snapshot.get("title","Quest destination")))})
+	else:
+		for pin:Dictionary in travel.get("via",[]):
+			if EloriaProtocol.map_id_from_reference(str(pin.get("map","")))==here:result.append(pin)
+	return result
+
 static func work_targets(snapshot: Dictionary) -> Array[Dictionary]:
 	var targets: Array[Dictionary] = []
 	for navigation: bool in [true, false]:
@@ -80,7 +93,7 @@ static func legend(snapshot: Dictionary) -> String:
 func apply_snapshot(snapshot: Dictionary, objects: Dictionary, actors: Dictionary,
 		current_map: String, local_tile: Vector2i, tracked: bool, blocked: bool) -> void:
 	if not is_guided(snapshot) or not bool(snapshot.get("active", false)) \
-			or not (snapshot.get("travel", {}) as Dictionary).is_empty() \
+			or (not (snapshot.get("travel", {}) as Dictionary).is_empty() and str(snapshot.get("kind",""))!="shelves") \
 			or EloriaProtocol.map_id_from_reference(str(snapshot.get("map", ""))) \
 			!= EloriaProtocol.map_id_from_reference(current_map):
 		clear()
