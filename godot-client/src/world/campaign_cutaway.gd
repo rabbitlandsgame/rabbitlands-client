@@ -123,7 +123,7 @@ func _browser_asset_state() -> Dictionary:
 	return WebPrototype.asset_snapshot()
 
 func _browser_asset_release() -> Callable:
-	return WebPrototype.release_groups
+	return WebPrototype.retire_groups
 
 func _retry_browser_asset_groups() -> int:
 	return WebPrototype.retry_failed()

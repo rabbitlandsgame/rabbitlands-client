@@ -14,6 +14,7 @@ class PendingCutaway extends Cutaway:
 	var pins: Dictionary = {}
 	var released: Array = []
 	var retries := 0
+	var release_callback: Callable
 	func _uses_browser_assets() -> bool: return true
 	func _request_browser_assets() -> bool:
 		requests += 1
@@ -22,12 +23,25 @@ class PendingCutaway extends Cutaway:
 	func _browser_asset_state() -> Dictionary:
 		return {"completed_archives":progress,"failed_groups":failed,"error":"fixture download failure"}
 	func _browser_asset_release() -> Callable:
+		if release_callback.is_valid(): return release_callback
 		return func(owner: String) -> void: pins.erase(owner); released.append(owner)
 	func _retry_browser_asset_groups() -> int:
 		retries += 1
 		failed.clear()
 		return 1
 	func _begin() -> void: starts += 1
+
+class HeadReads extends RefCounted:
+	var busy := true
+	var pins: Dictionary = {}
+	var pending: Array[String] = []
+	func retire(owner: String) -> void:
+		if busy: pending.append(owner)
+		else: pins.erase(owner)
+	func finish() -> void:
+		busy = false
+		for owner: String in pending: pins.erase(owner)
+		pending.clear()
 
 func _init() -> void: run.call_deferred()
 func expect(ok: bool, label: String) -> void:
@@ -125,9 +139,27 @@ func run() -> void:
 	module.prepare(snapshot("timeout"),"landfall",0.016)
 	expect(module.status().error == "remote_browser_asset_timeout", "a stalled asset wait has a bounded timeout")
 	module.clear()
+	var reads := HeadReads.new()
+	reads.pins = module.pins
+	module.release_callback = reads.retire
+	module.failed.clear()
+	module.prepare(snapshot("head-reading"),"landfall",0.016)
+	var head_owner := str(module.status().asset_owner)
+	module.clear()
+	expect(module.pins.has(head_owner) and reads.pending == [head_owner],
+		"cutaway clear transfers its lease to head-read retirement instead of dropping pending source files")
+	module.prepare(snapshot("head-next"),"landfall",0.016)
+	var head_next_owner := str(module.status().asset_owner)
+	reads.finish()
+	expect(not module.pins.has(head_owner) and module.pins.has(head_next_owner),
+		"finished head reads release only their old generation and preserve the new cutaway")
+	module.clear()
+	module.release_callback = Callable()
 	var native := Cutaway.new()
 	root.add_child(native)
 	native.configure({}, Callable())
+	expect(native._browser_asset_release().get_method() == &"retire_groups",
+		"the real browser release policy drains head reads as well as the map worker")
 	native.prepare(state,"landfall",0.016)
 	expect(native.status().error == "remote_manifest_unavailable" and native.status().asset_owner.is_empty(),
 		"desktop keeps its original direct loader and requires no browser resolver")

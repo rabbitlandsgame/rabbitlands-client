@@ -13,6 +13,7 @@ var _active := false
 var _busy := false
 var _generation := 0
 var _asset_job := 0
+var _asset_owners: Dictionary = {}
 var _registry: Dictionary = {}
 var _equipment: Dictionary = {}
 var _viewport: SubViewport
@@ -65,6 +66,27 @@ func clear() -> void:
 		_viewport.queue_free()
 		_viewport = null
 		_stage = null
+
+func _retire_asset_owner(owner: String) -> void:
+	if not _asset_owners.has(owner): return
+	_asset_owners.erase(owner)
+	WebPrototype.retire_groups(owner)
+
+func _retire_asset_owners(retire: Callable = Callable()) -> void:
+	if not retire.is_valid(): retire = WebPrototype.retire_groups
+	var owners := _asset_owners.keys()
+	_asset_owners.clear()
+	for owner: String in owners: retire.call(owner)
+
+func _exit_tree() -> void:
+	if not OS.has_feature("web"): return
+	_generation += 1
+	_active = false
+	_queue.clear()
+	_pending.clear()
+	# A node destroyed during an awaited download/draw cannot finish _render.
+	# Transfer every outstanding lease to the static head-read drain instead.
+	_retire_asset_owners()
 
 func _pump() -> void:
 	if _busy or not _active or _queue.is_empty():
@@ -132,6 +154,7 @@ func _render(look: Dictionary, generation: int) -> Texture2D:
 	_asset_job += 1
 	var owner := "leaderboard_portrait:%d:%d" % [get_instance_id(), _asset_job]
 	if OS.has_feature("web"):
+		_asset_owners[owner] = true
 		var model_id := str((_registry.get("actorTypes", {}) as Dictionary).get(str(int(look.get("actor_type", -1))), ""))
 		var groups := WebPrototype.model_groups(model_id).duplicate()
 		groups.append_array(WebPrototype.equipment_groups(look.get("equipment_visuals", {})))
@@ -140,14 +163,14 @@ func _render(look: Dictionary, generation: int) -> Texture2D:
 		while generation == _generation and _active:
 			if WebPrototype.ensure_groups(groups, owner, 1): break
 			if not WebPrototype.group_failure(groups).is_empty():
-				WebPrototype.retire_groups(owner)
+				_retire_asset_owner(owner)
 				return null
 			await get_tree().create_timer(0.1).timeout
 		if generation != _generation or not _active:
-			WebPrototype.retire_groups(owner)
+			_retire_asset_owner(owner)
 			return null
 	var texture := await _render_ready(look, generation)
-	if OS.has_feature("web"): WebPrototype.retire_groups(owner)
+	if OS.has_feature("web"): _retire_asset_owner(owner)
 	return texture
 
 func _render_ready(look: Dictionary, generation: int) -> Texture2D:
