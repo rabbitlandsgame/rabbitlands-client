@@ -214,6 +214,19 @@ this); then the publication above (`publish_server.py --check`, and `--apply` on
 
 ## Boats
 
+Lakehead Landing's west lake edge also has four Kelp and three Watercress
+patches, object IDs 2140–2146. Their saved scene markers and the two client map
+groupings come from `content/reedfall-lakehead-resources.json`.
+`publish_lakehead_resources.py --base-bake <certified Reedfall bake directory>
+--server <server worktree> --apply` applies this narrow source amendment;
+repeat with `--check` to verify it. It requires the pinned original scene,
+preserves every existing marker, and checks the production harvest approaches
+on both client and server grids. These nodes use already closed waterline
+cells, so geometry, half-cell collision, served grids and boat access stay
+unchanged. `shoreResourceAmendments` records the source delta separately from
+the original geometry bake. It also carries forward the static map picture
+only after checking its unchanged rendering inputs and image bytes.
+
 Owner-approved 2026-10-19 as in Eternal Lands: one boat per destination, several boats at a dock, all free, so players
 chain boats to cross Landfall quickly. `content/boat-network.json` lists the docks and 12 of the 14 approved routes
 (one boat each way). The hub is Lakehead Landing, a lake jetty on Reedfall's lake, with boats to Stagheath, Ravenhead,
