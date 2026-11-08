@@ -4,14 +4,56 @@
   "date": "2026-11-07",
   "draft": false,
   "decorativeFrame": false,
-  "provenance": "Original vector cape illustration matching the lavender runtime tint and returning-reagent emblem; rendered with Godot SVG renderer.",
+  "provenance": "Painted inventory illustration generated with built-in image generation, matching the existing Conjurer and Mirror cape icon style and the Essence Keeper lavender palette and returning-reagent emblem. Original alpha is retained through Lanczos downscaling and composited on the standard dark teal inventory backing.",
   "items": [
     {
       "imageId": 625,
       "itemId": 1958,
       "name": "Essence Keeper's Cape",
       "source": "cape.png",
-      "sourceSha256": "b3a3171d1a244d87f09dcc6dff519db6b0d699bd0047e7179f8f5a857321b738"
+      "sourceSha256": "6595f6aa6a5a019a1ce808f19e00f5b5eacec6f8633d4b68b05f0be6ae12c428",
+      "sourceKind": "paintedEquipment",
+      "paintedSourceSha256": "8ba38f4e3c904e35ca3bac243e52d3409897e2ead821b9e679a10a103154b41d",
+      "paintedSourceSize": [
+        1254,
+        1254
+      ],
+      "verdict": "pass",
+      "review": "Matches existing painted cape style; complete silhouette, lavender cloth and ivory returning-arrow/crystal emblem remain readable at 50px."
     }
-  ]
+  ],
+  "productionMode": "faithful recreation for inventory icons",
+  "camera": "nearly straight back view, isolated unworn cape",
+  "generationPrompt": "Use case: stylized-concept. Asset: ONE painted fantasy RPG inventory icon for Rabbit Lands, Essence Keeper's Cape.\nReference images 1 and 2 are STYLE ONLY: the existing Conjurer and Mirror cape inventory icons. Match their hand-painted equipment look, broad matte cloth folds, restrained warm highlights, visible fabric weight, clean silhouette and simple details that read at 50x50 pixels. The final game cell is only 50x50: avoid fine ornamental detail.\nReference image 3 is DESIGN ONLY: keep its lavender cloth (#9477c8), pale ivory trim (#efe4ce), darker violet folds (#493961), and Essence Keeper emblem. Do NOT copy its flat vector rendering; repaint it in the style of the first two.\nPaint ONE isolated unworn cape, viewed nearly straight at the BACK, suspended naturally with no person or mannequin. Simple round shoulder yoke, broad pleats, gently flared hem. Full cape visible, centered, occupying 85% of square canvas with empty margin.\nBack emblem: a large pale ivory circular returning arrow surrounding ONE vertical hollow diamond-shaped reagent crystal. Place embroidered emblem centrally on the upper-middle back, bold and legible. One arrow and one diamond only. Preserve the shape from design reference 3, integrated as embroidery following the fabric folds.\nActual transparent background. No floor, scenery, pedestal, cast shadow, frame, tile border, labels, lettering, numbers, person, hood, separate tools, sparkles, dramatic glow, glossy plastic, extra symbols or logos.\nDeliver high-resolution painted artwork; it will be downscaled for the existing item atlas.",
+  "styleReferences": [
+    {
+      "source": "eloria-assets/source/item-icons/perk-capes-2026-10-22/rl-perk-cape-conjurer.png",
+      "sha256": "fa0019fd99d824d0bee6d6cc9e9c4a096880258b9c781341f8744a72b6fef43c"
+    },
+    {
+      "source": "eloria-assets/source/item-icons/perk-capes-2026-10-22/rl-perk-cape-mirror.png",
+      "sha256": "45ddc162a9cc968402a53cf59408c427feda7fd92178c495ac27efda1c493906"
+    }
+  ],
+  "designReference": {
+    "source": "godot-client/assets/actors/native/equipment/perk_capes/essence_keeper.svg",
+    "sha256": "9b66b2c8b95c4f24e973daa0984ad77fc30ad02dcf80edea05d5c3cc31d2db33"
+  },
+  "packing": {
+    "cellSize": [
+      50,
+      50
+    ],
+    "subjectMaximum": [
+      44,
+      44
+    ],
+    "backgroundRgba": [
+      5,
+      15,
+      18,
+      255
+    ],
+    "resampling": "Lanczos"
+  }
 }
