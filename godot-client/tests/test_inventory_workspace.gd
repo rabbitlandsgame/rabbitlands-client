@@ -46,6 +46,7 @@ func run() -> void:
 	main.inventory_panel.show()
 	main._sync_inventory()
 	await _check_bulk_shortcuts()
+	await _check_window_move_redraw()
 	var pack_buttons: Array = main.inventory_slot_buttons.duplicate()
 	var worn_buttons: Array = main.equipment_slot_buttons.duplicate()
 	var hud_before: Dictionary = main.hud_workspace.model.working.duplicate(true)
@@ -300,6 +301,19 @@ func _check_packet_refreshes() -> void:
 	expect(main.inventory_panel.theme != design_theme and main.inventory_panel.theme == main.extension_windows.detail_panel.theme
 		and main.inventory_panel.theme.get_color("font_color", "Label") == Color("f1e2c3"), "a design change still rebuilds the shared theme")
 	print("inventory_sync_us ", JSON.stringify({"shown_main_sync": shown_us, "hidden_main_sync": hidden_us, "forced_restyle": restyle_us}))
+
+func _check_window_move_redraw() -> void:
+	await frames()
+	var draws := {"count": 0}
+	var count_draw := func() -> void: draws.count += 1
+	workspace.draw.connect(count_draw)
+	var original: Vector2 = main.inventory_panel.position
+	main.inventory_panel.position += Vector2(-60, 20)
+	await frames()
+	expect(draws.count > 0, "moving inventory redraws its divider at the new window position")
+	workspace.draw.disconnect(count_draw)
+	main.inventory_panel.position = original
+	await frames()
 
 func _bread() -> Dictionary:
 	return {"open": true, "image_id": 1, "name": "Hearth Bread", "category": "Food", "quantity": 24,

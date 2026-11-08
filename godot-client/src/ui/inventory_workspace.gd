@@ -203,6 +203,9 @@ func configure(owner_main: Control) -> void:
 	editor.configure(self)
 	main.window_stack.register(editor, true)
 	main.extension_windows.item_detail_presenter = present_detail
+	# Dividers and editor outlines are drawn here in screen space, outside the
+	# moving panel. Invalidate their cached draw commands when its rect changes.
+	main.inventory_panel.item_rect_changed.connect(queue_redraw)
 	main.inventory_panel.visibility_changed.connect(_visibility_changed)
 	main.extension_windows.detail_panel.visibility_changed.connect(_queue_presented_sync)
 	get_viewport().size_changed.connect(queue_layout)
