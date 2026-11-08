@@ -315,6 +315,7 @@ func _refresh() -> void:
 				set_process(false)
 			return
 		if is_instance_valid(_browser_retry): _browser_retry.hide()
+		_status.text = ""
 		if not _browser_active_owner.is_empty() and _browser_active_owner != _browser_owner:
 			WebPrototype.retire_groups(_browser_active_owner)
 		_browser_active_owner = _browser_owner
