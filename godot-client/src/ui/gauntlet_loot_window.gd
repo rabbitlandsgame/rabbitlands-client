@@ -1066,6 +1066,8 @@ func _open() -> void:
 	_request("open", {"page": int(_state.get("page", 0)), "exchange_page": int(_state.get("exchange_page", 0)), "ledger_page": int(_state.get("ledger_page", 0))}, -1, _state.get("phase", "") != "sent" or int(_state.get("exchange_total", 0)) > 0)
 
 func close() -> void:
+	_browse_timer.stop()
+	_browse_dirty = false
 	_completion_open_pending = false
 	_completion_ready_msec = 0
 	set_process(_pending_since > 0)
@@ -1090,6 +1092,9 @@ func _browse_changed(_value: Variant = 0) -> void:
 	_browse_timer.start()
 
 func _submit_browse() -> void:
+	if not panel.visible:
+		_browse_dirty = false
+		return
 	if _pending_since > 0: return
 	_browse_dirty = false
 	_request("open", {"page": 0, "browse": _browse_options()})
