@@ -26,7 +26,6 @@ var _image_size := Vector2.ZERO
 var _regions: Array[Dictionary] = []
 var _current_index := -1
 var _hovered_index := -1
-var _marker_positions: Array[Vector2] = []
 var _dock_legend := false
 
 func _ready() -> void:
@@ -46,12 +45,7 @@ func label_color(index: int) -> Color:
 func configure(image_size: Vector2, regions: Array[Dictionary]) -> void:
 	_image_size = image_size
 	_regions = regions
-	_marker_positions.clear()
 	_hovered_index = -1
-	queue_redraw()
-
-func set_marker_positions(points: Array[Vector2]) -> void:
-	_marker_positions = points
 	queue_redraw()
 
 ## The legend explains the boat docks only on a picture that has some.
@@ -277,18 +271,8 @@ func _draw_label(font: Font, rect: Rect2, text: String, colour: Color) -> void:
 		baseline_y = rect.get_center().y + (ascent - descent) * 0.5
 	var lines := _label_lines(font, text, maxf(72.0, rect.size.x - 8.0))
 	baseline_y -= float(lines.size()-1) * (ascent + descent)
-	# Keep region names clear of permanent storage dots at any image size.
-	var width := 0.0
-	for line: String in lines:
-		width = maxf(width, font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE).x)
-	var text_rect := Rect2(Vector2(rect.get_center().x - width * 0.5, baseline_y - ascent),
-		Vector2(width, float(lines.size()) * (ascent + descent)))
-	var display := display_rect()
-	for point: Vector2 in _marker_positions:
-		var pixel := display.position + point * (display.size / _image_size)
-		if text_rect.intersects(Rect2(pixel - Vector2(10, 10), Vector2(20, 20))):
-			baseline_y -= 24.0
-			text_rect.position.y -= 24.0
+	# Keep names at their geographic anchors. Repeated marker-avoidance shifts
+	# can move a crowded region's name into a different region.
 	for line: String in lines:
 		var extent: Vector2 = font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE)
 		var baseline := Vector2(rect.get_center().x - extent.x * 0.5, baseline_y)

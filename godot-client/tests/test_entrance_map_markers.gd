@@ -129,6 +129,7 @@ func run() -> void:
 		main._preview_region(main._region_index_for_map(mid))
 		await process_frame
 		var overlay: Control = main._entrance_preview_overlay
+		expect(overlay.labels_visible, "Individual map previews retain entrance names")
 		expect(overlay._marks.size() == count, "Region preview has every entrance of " + mid)
 		for mark: Dictionary in overlay._marks:
 			var door_index := wanted_doors.find_custom(func(door: Array) -> bool: return int(door[3]) == int(mark.objectId))
@@ -155,8 +156,9 @@ func run() -> void:
 	main._configure_continent_overlay(main._active_continent_data())
 	var overview: Array = main._entrance_continent_overlay._marks
 	expect(overview.size() == cave_doors and not overview.any(func(mark: Dictionary) -> bool: return EntranceOverlay.is_building(mark)),
-		"Landfall overview labels every cave entrance and leaves building doors to the region maps: %d of %d" % [
+		"Landfall overview retains cave dots and leaves building doors to the region maps: %d of %d" % [
 			overview.size(), cave_doors])
+	expect(not main._entrance_continent_overlay.labels_visible, "Continent leaves entrance names to individual maps")
 	main._show_continent_view()
 	await capture("landfall-entrances-overview.png")
 	print("Entrance map markers: ", failures, " failures (", doors, " doors, ", doors - cave_doors, " building doors)")

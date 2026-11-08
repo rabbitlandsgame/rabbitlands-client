@@ -13,7 +13,11 @@ const TEXT_COLOUR := Color("f2e4b7")
 const TEXT_OUTLINE := Color(0.04, 0.04, 0.05, 0.95)
 const LABEL_SIZE := 13
 const TextColors := preload("res://src/ui/text_colors.gd")
-var _region_names: Array = []
+## The continent keeps entrance dots, with names left to individual maps.
+var labels_visible := true:
+	set(value):
+		labels_visible = value
+		queue_redraw()
 
 ## Whether a door record or mark is a building's door rather than a cave's.
 static func is_building(mark: Dictionary) -> bool:
@@ -31,18 +35,7 @@ func _ready() -> void:
 func _on_text_colors_changed(_role: String) -> void:
 	queue_redraw()
 
-func set_region_names(names: Array) -> void:
-	_region_names = names
-	queue_redraw()
-
 func _draw() -> void:
-	var avoid: Array[Rect2] = []
-	var font := get_theme_default_font()
-	for value: Variant in _region_names:
-		var point: Variant = mark_point(value as Dictionary)
-		if point is Vector2 and font != null:
-			var width := font.get_string_size(str(value.label), HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x
-			avoid.append(Rect2((point as Vector2)-Vector2(width*.5+3, 17), Vector2(width+6, 34)))
 	# Building doors first, so a cave's name is never drawn under a door dot.
 	for buildings: bool in [true, false]:
 		for value: Variant in _marks:
@@ -52,10 +45,10 @@ func _draw() -> void:
 			var point: Variant = mark_point(mark)
 			if not point is Vector2:
 				continue
-			if buildings:
+			if buildings or not labels_visible:
 				draw_dot(self, point as Vector2, mark.get("colour", DOT_COLOUR) as Color)
 			else:
-				draw_marker(self, point as Vector2, str(mark.get("label", "Entrance")), LABEL_SIZE, 4.0, avoid)
+				draw_marker(self, point as Vector2, str(mark.get("label", "Entrance")), LABEL_SIZE, 4.0)
 
 static func label_lines(font: Font, text: String, font_size: int) -> PackedStringArray:
 	var lines := PackedStringArray()

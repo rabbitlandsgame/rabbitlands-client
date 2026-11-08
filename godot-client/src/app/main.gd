@@ -11472,11 +11472,13 @@ func _configure_cartography() -> void:
 	region_preview.add_child(_entrance_preview_overlay)
 	_entrance_preview_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_entrance_continent_overlay = EntranceOverlayScript.new()
+	_entrance_continent_overlay.labels_visible = false
 	_entrance_continent_overlay.z_index = 2
 	continent_image.add_child(_entrance_continent_overlay)
 	_entrance_continent_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	continent_map = ContinentMapScript.new()
 	continent_map.name = "ContinentMap"
+	continent_map.z_index = 3
 	continent_view.add_child(continent_map)
 	continent_map.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	continent_map.region_selected.connect(_preview_continent_region)
@@ -11527,7 +11529,6 @@ func _configure_continent_overlay(continent: Dictionary) -> void:
 		var marks: Array = []
 		var entrances: Array = []
 		var services: Array = []
-		var marker_pixels: Array[Vector2] = []
 		for index: int in _continent_region_indices:
 			var region: Dictionary = cartography_regions[index] as Dictionary
 			var translation: Array = region.get("globalTranslation", [0, 0, 0]) as Array
@@ -11536,15 +11537,11 @@ func _configure_continent_overlay(continent: Dictionary) -> void:
 				var at: Array = mark["position"] as Array
 				mark["position"] = [float(at[0]) + float(translation[0]), float(at[1]) + float(translation[2])]
 				services.append(mark)
-				marker_pixels.append((Vector2(float(mark.position[0]), float(mark.position[1])) - minimum)
-					/ float(continent.get("metresPerPixel", 1.0)))
 			for value: Variant in region.get("storageMarkers", []):
 				var mark: Dictionary = (value as Dictionary).duplicate()
 				var at: Array = mark["position"] as Array
 				mark["position"] = [float(at[0]) + float(translation[0]), float(at[1]) + float(translation[2])]
 				marks.append(mark)
-				marker_pixels.append((Vector2(float(mark.position[0]), float(mark.position[1])) - minimum)
-					/ float(continent.get("metresPerPixel", 1.0)))
 			for value: Variant in region.get("entranceMarkers", []):
 				# A town's doors stand metres apart, a pixel or two on the
 				# overview: they are left to the region's own map.
@@ -11554,18 +11551,11 @@ func _configure_continent_overlay(continent: Dictionary) -> void:
 				var at: Array = mark["position"] as Array
 				mark["position"] = [float(at[0]) + float(translation[0]), float(at[1]) + float(translation[2])]
 				entrances.append(mark)
-				marker_pixels.append((Vector2(float(mark.position[0]), float(mark.position[1])) - minimum)
-					/ float(continent.get("metresPerPixel", 1.0)))
 		# The boat network is written in the picture's own metres.
 		var boats: Dictionary = {}
 		if not frame.is_empty() and frame == str(_v2_cartography.get("frame", "")):
 			boats = _v2_cartography.get("boatNetwork", {}) as Dictionary
 		var docks: Array = boats.get("docks", []) as Array
-		for value: Variant in docks:
-			var at: Array = (value as Dictionary).get("position", [0, 0]) as Array
-			marker_pixels.append((Vector2(float(at[0]), float(at[1])) - minimum)
-				/ float(continent.get("metresPerPixel", 1.0)))
-		continent_map.set_marker_positions(marker_pixels)
 		continent_map.set_dock_legend(not docks.is_empty())
 		_boat_continent_overlay.configure(minimum,
 			minimum + pixels * float(continent.get("metresPerPixel", 1.0)), pixels, docks)
@@ -11576,15 +11566,6 @@ func _configure_continent_overlay(continent: Dictionary) -> void:
 			minimum + pixels * float(continent.get("metresPerPixel", 1.0)), pixels, marks)
 		_entrance_continent_overlay.configure(minimum,
 			minimum + pixels * float(continent.get("metresPerPixel", 1.0)), pixels, entrances)
-		var region_names: Array = []
-		for value: Variant in continent.get("regions", []):
-			var row: Dictionary = value as Dictionary
-			var at: Array = row.get("label", []) as Array
-			if at.size() == 2:
-				region_names.append({"label":row.get("name", ""), "position":[
-					minimum.x+float(at[0])*float(continent.get("metresPerPixel", 1.0)),
-					minimum.y+float(at[1])*float(continent.get("metresPerPixel", 1.0))]})
-		_entrance_continent_overlay.set_region_names(region_names)
 
 func _preview_continent_region(local_index: int) -> void:
 	if local_index >= 0 and local_index < _continent_region_indices.size():
