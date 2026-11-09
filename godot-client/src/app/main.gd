@@ -1119,6 +1119,7 @@ var effect_budget = LiveEffectBudgetScript.new()
 ## so a pass only touches the actors whose answer changed.
 var _selection_ring_actor := -1
 var _overhead_target_actor := -1
+var _shelves_health_actor := -1
 ## Built bodies (not deferred), recounted on every gate pass and kept up to
 ## date in between by the passes that build or remove one; the body cap reads it.
 var _built_bodies := 0
@@ -6002,6 +6003,8 @@ func _overhead_health_for(actor_id: int, dto: Dictionary,
 		target_id: int) -> bool:
 	if actor_id == target_id:
 		return true
+	if _is_shelves_training_opponent(actor_id, dto):
+		return true
 	return _minimap_actor_type(dto) != &"npc"
 
 ## Hands every actor its answer to those questions. A pass over the actors one
@@ -6969,6 +6972,13 @@ func _on_state_changed(path: StringName) -> void:
 			# old and the new target can have changed.
 			_sync_overhead_health_for([])
 			_queue_character_ui_sync(CHARACTER_UI_CRAFTING)
+		&"campaign":
+			# Sparring can begin/end without an actor packet. Refresh the old
+			# and new instructor immediately when the quest state changes.
+			var mentor := int((AppState.campaign.get("actors", {}) as Dictionary).get("mentor", -1)) \
+				if str(AppState.campaign.get("kind", "")) == "shelves" else -1
+			_sync_overhead_health_for([_shelves_health_actor, mentor])
+			_shelves_health_actor = mentor
 		&"npc_dialogue":
 			_sync_dialogue()
 		&"popup":
