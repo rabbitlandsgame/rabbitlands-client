@@ -865,6 +865,11 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 	_configuration_profile_scope = ""
 	_configuration_phases_us["equipment"] = Time.get_ticks_usec() - phase_started
 	_lift_overhead(server_scale)
+	if dto.has("workstation") and _native_skeleton != null:
+		var work_pose: SkeletonModifier3D = (load("res://src/actors/seated_work_pose.gd") as Script).new()
+		work_pose.name = "SeatedWorkPose"
+		_native_skeleton.add_child(work_pose)
+		errors.append_array(Array(work_pose.call("setup", self, dto.workstation)))
 	_configuration_phases_us["total"] = Time.get_ticks_usec() - configure_started
 	return errors
 

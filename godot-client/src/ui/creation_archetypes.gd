@@ -14,8 +14,8 @@ const CLASSES: Array[Dictionary] = [
 		"label": "Vanguard",
 		"tagline": "Hold the line",
 		"description": "A steady front-line adventurer equipped to meet danger face to face.",
-		"starting_items": "Militia sword and round shield, guard cape, Leather Helm, Studded Jack, Leather Kneecops and Banded Warboots",
-		"equipment_visuals": {0: 114, 1: 106, 2: 105, 3: 134, 4: 220, 5: 209, 6: 249},
+		"starting_items": "Militia sword and round shield, Bloodbound Cape, Leather Helm, Studded Jack, Leather Kneecops and Banded Warboots",
+		"equipment_visuals": {0: 114, 1: 106, 2: 147, 3: 134, 4: 220, 5: 209, 6: 249},
 	},
 	{
 		"id": 1,
@@ -23,8 +23,8 @@ const CLASSES: Array[Dictionary] = [
 		"label": "Ranger",
 		"tagline": "Choose the distant path",
 		"description": "A mobile hunter who reads the land and strikes before danger closes in.",
-		"starting_items": "Amberwood longbow and reusable Basic Quiver, Buckled Hood, Scout Vest, Sidelace Breeches and Laced Fieldboots",
-		"equipment_visuals": {0: 164, 3: 159, 4: 230, 5: 225, 6: 226, 8: 1},
+		"starting_items": "Amberwood longbow and reusable Basic Quiver, Eagle Eye Cape, Buckled Hood, Scout Vest, Sidelace Breeches and Laced Fieldboots",
+		"equipment_visuals": {0: 164, 2: 148, 3: 159, 4: 230, 5: 225, 6: 226, 8: 1},
 	},
 	{
 		"id": 2,
@@ -32,8 +32,8 @@ const CLASSES: Array[Dictionary] = [
 		"label": "Arcanist",
 		"tagline": "Shape the unseen",
 		"description": "A student of tomes and ether prepared to solve threats with careful magic.",
-		"starting_items": "Arcane focus wand, Acolyte Hood, Tunic, Legguards and Boots, and 3 mana potions",
-		"equipment_visuals": {0: 142, 3: 115, 4: 185, 5: 222, 6: 198},
+		"starting_items": "Arcane focus wand, Conjurer's Cape, Acolyte Hood, Tunic, Legguards and Boots, and 3 mana potions",
+		"equipment_visuals": {0: 142, 2: 146, 3: 115, 4: 185, 5: 222, 6: 198},
 	},
 	{
 		"id": 3,
@@ -41,8 +41,8 @@ const CLASSES: Array[Dictionary] = [
 		"label": "Warden",
 		"tagline": "Guard the old roads",
 		"description": "A resilient trail-keeper who pairs practical arms with woodland craft.",
-		"starting_items": "Fighting quarterstaff, leaf cape, Antler Hood, Furtrim Coat, Legguards and Boots",
-		"equipment_visuals": {0: 163, 2: 100, 3: 122, 4: 176, 5: 189, 6: 205},
+		"starting_items": "Fighting quarterstaff, Cape of Renewal (Fast Regeneration), Antler Hood, Furtrim Coat, Legguards and Boots",
+		"equipment_visuals": {0: 163, 2: 142, 3: 122, 4: 176, 5: 189, 6: 205},
 	},
 ]
 
