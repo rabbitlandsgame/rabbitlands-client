@@ -74,6 +74,8 @@ func _run() -> void:
 	await _test_eviction()
 	await _test_preload()
 	await _test_anticipated_travel()
+	await _test_parked_anticipated_destination()
+	await _test_canceled_preload_capacity()
 	await _test_wait_and_miss()
 	await _test_parent_kept_inside()
 	await _test_replaced_park()
@@ -576,6 +578,66 @@ func _test_anticipated_travel() -> void:
 		"the quest map change adopts the prepared world without loading it again")
 	if is_instance_valid(resident.get("root")): resident.root.free()
 	park.clear()
+	park.release_now()
+	park.queue_free()
+	await _frames(2)
+
+func _test_parked_anticipated_destination() -> void:
+	var park := _park()
+	park.registry = registry.duplicate(true)
+	park.registry.cellar["preloadOnApproach"] = true
+	var loader := _loader_with("cellar")
+	park.leave(loader, "cellar", "exterior")
+	_expect(park.has_parked("cellar"), "(fixture) the quest destination is already parked")
+	park.bind_map("exterior")
+	park.finish_estimates(true)
+	park.prepare_function = _slow_prepare
+	var anticipated := PackedStringArray(["cellar"])
+	var objects := {DOOR: {"x": 12, "y": 18}}
+	park.observe("exterior", Vector2i(12, 18), objects, true, anticipated)
+	var original: Thread = park._preload.get("thread")
+	for frame: int in 8:
+		park.observe("exterior", Vector2i(12, 18), objects, true, anticipated)
+	_expect(park.preload_state("interior") == "running" and park._preload.get("thread") == original
+		and int(park.counters.preload_start) == 1 and int(park.counters.preload_drop) == 0
+		and park._orphans.is_empty(), "a parked quest destination never cancels or restarts a nearby interior worker")
+	var ready: bool = await _until(func() -> bool: return park.preload_state("interior") == "ready")
+	_expect(ready, "the nearby interior finishes while the quest destination stays parked")
+	for frame: int in 8:
+		park.observe("exterior", Vector2i(12, 18), objects, true, anticipated)
+	_expect(park.preload_state("interior") == "ready" and int(park.counters.preload_start) == 1
+		and int(park.counters.preload_drop) == 0, "a parked quest destination also preserves the ready nearby interior")
+	park.clear()
+	await _until(func() -> bool: return park.is_idle())
+	park.release_now()
+	loader.queue_free()
+	park.queue_free()
+	await _frames(2)
+
+func _test_canceled_preload_capacity() -> void:
+	var park := _park()
+	park.registry = registry.duplicate(true)
+	park.registry.cellar["preloadOnApproach"] = true
+	park.bind_map("exterior")
+	park.finish_estimates(true)
+	park.prepare_function = _slow_prepare
+	_expect(park.start_preload("interior", DOOR, 3.0), "(fixture) the old destination starts building")
+	var anticipated := PackedStringArray(["cellar"])
+	for frame: int in 8:
+		park.observe("exterior", Vector2i(200, 200), {}, true, anticipated)
+	_expect(park.preload_state() == "" and park._orphans.size() == 1
+		and int(park.counters.preload_start) == 1 and int(park.counters.preload_drop) == 1,
+		"a replacement destination waits while the canceled worker still owns resources")
+	_expect(not park.start_preload("interior", DOOR, 3.0), "direct preload requests respect canceled worker capacity too")
+	var drained: bool = await _until(func() -> bool: return park._orphans.is_empty())
+	_expect(drained, "the canceled worker is reaped without joining it while running")
+	park.observe("exterior", Vector2i(200, 200), {}, true, anticipated)
+	_expect(park.preload_state("cellar") == "running" and int(park.counters.preload_start) == 2,
+		"the replacement starts once the canceled worker has released its result")
+	var ready: bool = await _until(func() -> bool: return park.preload_state("cellar") == "ready")
+	_expect(ready, "the replacement destination still completes normally")
+	park.clear()
+	await _until(func() -> bool: return park.is_idle())
 	park.release_now()
 	park.queue_free()
 	await _frames(2)

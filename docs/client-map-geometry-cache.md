@@ -27,6 +27,12 @@ underground (~1.58 GiB on source fallback) is loaded cold there each time. This
 preparation uses existing source validation and caches without changing their
 format.
 
+An anticipated quest destination already parked in memory does not cancel a
+different interior loading on approach. Canceled preload workers still occupy
+the single background slot until their results are reaped on the main thread:
+abandoning a result cannot interrupt its texture uploads. This bounds concurrent
+preload work without changing texture quality or prepared cache formats.
+
 Published static map GLBs also consolidate byte-identical complete vertex records
 with `eloria-assets/tools/consolidate_map_vertices.py`, called by
 `publish_finish.py` after normal/tangent quantization and before prototype hash
