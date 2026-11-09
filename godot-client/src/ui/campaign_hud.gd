@@ -362,7 +362,8 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 		_entry.text=str(ledger.get("start_label","Start work")) if bool(ledger.get("can_begin",false)) else "Do now · Show on map"
 		_entry.tooltip_text="Start here when you are ready." if bool(ledger.get("can_begin",false)) else "Show the destination or the next door on your map. Walk there when you are ready; Untrack keeps the assignment in your quest log."
 	_leave.visible = active and not travelling
-	if str(snapshot.get("kind", ""))=="shelves" and _current_map=="landfall_town":_leave.hide()
+	if str(snapshot.get("kind", ""))=="shelves" and _current_map=="landfall_town":
+		_leave.visible = bool((snapshot.get("shelves",{}) as Dictionary).get("private_practice",false))
 	_leave.text = "Continue" if complete else "Return"
 	_leave.tooltip_text = "Continue your journey. Your follow-up is in the quest log." if complete else "Return to the public road. Completed milestones are saved."
 	_replay.visible = not complete
@@ -447,10 +448,12 @@ func _apply_shelves(ledger: Dictionary) -> void:
 	_lesson_window.text = "Open Magic" if str(ledger.get("lesson_window", "")) == "spells" else "Open Mixing"
 	if ledger.is_empty(): return
 	var lines: PackedStringArray = ["NEXT STEP" if str(ledger.get("phase","")) in ["travel","report"] else "SUPPLY LEDGER"]
+	if not str(ledger.get("current_supply","")).is_empty():
+		lines[0] = "Current supply: " + str(ledger.current_supply) + " Essence"
 	for row: Dictionary in ledger.get("objectives", []):
 		lines.append(("✓ " if int(row.current)>=int(row.target) else "• ") + str(row.label)
-			+ " · %d/%d" % [int(row.current),int(row.target)] + (" · your practice" if bool(row.get("personal",false)) else " · party"))
-	lines.append("Shelves restored: " + (", ".join(ledger.get("unlocked", [])) if not (ledger.get("unlocked", []) as Array).is_empty() else "None yet"))
+			+ " · %d/%d" % [int(row.current),int(row.target)] + ("" if bool(row.get("personal",false)) else " · party"))
+	lines.append("Restored stock: " + (", ".join(ledger.get("unlocked", [])) if not (ledger.get("unlocked", []) as Array).is_empty() else "None yet"))
 	if str(ledger.get("chapter", "")) == "magic":lines.append("Spider specimens examined: %d/12" % int(ledger.get("samples",0)))
 	if str(ledger.get("chapter", "")) == "earth":lines.append("Cart integrity: %d%%. Stay near the cart; clear each ambush before moving on." % int(ledger.get("cart_integrity",100)))
 	_shelves.text = "\n".join(lines)

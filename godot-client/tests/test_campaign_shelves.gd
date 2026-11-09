@@ -124,6 +124,16 @@ func run()->void:
 	expect(network.sent_frames.size()==1 and network.sent_frames[0]==EloriaProtocol.use_map_object(61974),"an untracked public worksite still uses the normal interaction request")
 	for identity:String in ["measure.shelves.brief","measure.shelves.gear","measure.shelves.resolved","measure.shelves.enriched"]:
 		expect(not scene._definitions[identity].has("handoff"),identity+" releases the player without waiting for automatic travel")
+	var spar:=snapshot();spar.scene={};spar.map="landfall_town";spar.shelves.private_practice=true;spar.shelves.sparring=true
+	app.current_map="landfall_town";app.campaign=spar
+	app.actors[20]={"actor_id":20,"kind":2,"health":35,"alive":true}
+	app.actors[21]={"actor_id":21,"kind":2,"health":35,"alive":true}
+	expect(main._spell_target_candidate(68,20),"Fire Bolt can target the actual NPC mentor during the private arena bout")
+	expect(not main._spell_target_candidate(68,21),"other NPCs remain protected during that bout")
+	spar.shelves.sparring=false
+	expect(not main._spell_target_candidate(68,20),"the teacher stays protected in the practice range and during conversations")
+	spar.shelves.sparring=true;app.current_map="landfall"
+	expect(not main._spell_target_candidate(68,20),"a stale temple snapshot cannot expose an NPC on another map")
 	hud.queue_free()
 	var f:=return_fixture()
 	f.scene.cancel("finished");return_tick(f,.6)

@@ -3922,6 +3922,9 @@ static func campaign_shelves_valid(value: Variant) -> bool:
 		if family not in ["Life","Fire","Water","Earth","Wind","Magic","Death","Frost"] or family in seen:return false
 		seen.append(family)
 	if value.has("can_begin") and not value.can_begin is bool:return false
+	if value.has("current_supply") and value.current_supply not in ["Life","Fire","Water","Earth","Wind","Magic","Death","Frost"]:return false
+	if value.has("private_practice") and not value.private_practice is bool:return false
+	if value.has("sparring") and not value.sparring is bool:return false
 	if value.has("lesson_window") and value.lesson_window not in ["spells","mixing"]:return false
 	if value.has("preload"):
 		if not value.preload is Dictionary or value.preload.get("map")!="landfall_town" or not _campaign_navigation_tile(value.preload.get("tile")):return false

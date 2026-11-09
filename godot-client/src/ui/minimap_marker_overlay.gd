@@ -52,6 +52,7 @@ static var _fan := PackedInt32Array()
 const GLYPH_SCALE := 2.8
 const GLYPH_MINIMUM_SIZE := 9
 const EntranceOverlayScript := preload("res://src/ui/entrance_map_overlay.gd")
+const QuestMarker := preload("res://src/ui/quest_map_marker.gd")
 
 var _camera: Camera3D
 var _viewport_size := Vector2i.ZERO
@@ -195,13 +196,16 @@ func mark_point(mark: Dictionary) -> Variant:
 ## dots standing next to it would otherwise cover it.
 func draw_order(marks: Array[Dictionary]) -> Array[Dictionary]:
 	var others: Array[Dictionary] = []
+	var quests: Array[Dictionary] = []
 	var own: Array[Dictionary] = []
 	for mark: Dictionary in marks:
 		if mark.get("type", &"") == &"self":
 			own.append(mark)
+		elif bool(mark.get("quest",false)):
+			quests.append(mark)
 		else:
 			others.append(mark)
-	return others + own
+	return others + quests + own
 
 func _draw() -> void:
 	_drawn_view = _view_key()
@@ -209,6 +213,8 @@ func _draw() -> void:
 	if not is_instance_valid(_camera):
 		return
 	_draw_boundaries()
+	var quest_labels: Array[Dictionary] = []
+	var occupied: Array[Rect2] = []
 	for mark: Dictionary in draw_order(_marks):
 		var type: StringName = mark.get("type", &"") as StringName
 		if not type_enabled(type):
@@ -220,7 +226,13 @@ func _draw() -> void:
 		var colour: Color = mark.get("colour", Color.WHITE) as Color
 		var radius: float = mark_radius(mark)
 		var glyph: String = str(mark.get("glyph", ""))
-		if type == &"entrance" and EntranceOverlayScript.is_building(mark):
+		if bool(mark.get("quest",false)):
+			_flush_dots()
+			var glyph_size := maxi(18,roundi(QuestMarker.MINIMAP_GLYPH_SIZE*_marker_scale))
+			QuestMarker.draw_icon(self,point,colour,glyph_size)
+			quest_labels.append({"point":point,"label":str(mark.get("label","")),"colour":colour,"glyph_size":glyph_size})
+			occupied.append(Rect2(point-Vector2.ONE*glyph_size*0.5,Vector2.ONE*glyph_size))
+		elif type == &"entrance" and EntranceOverlayScript.is_building(mark):
 			# main.gd gives a building's door DOOR_RADIUS and its shop's colour.
 			_queue_dot(point, radius, colour)
 		elif type == &"entrance":
@@ -234,7 +246,10 @@ func _draw() -> void:
 			_draw_pin(point, radius, colour)
 		else:
 			_queue_dot(point, radius, colour)
+		if type == &"self":occupied.append(Rect2(point-Vector2.ONE*radius,Vector2.ONE*radius*2))
 	_flush_dots()
+	for quest: Dictionary in quest_labels:
+		occupied.append(QuestMarker.draw_label(self,quest.point,quest.label,quest.colour,quest.glyph_size,true,_round,occupied))
 	var target: Variant = walk_target_point()
 	if target is Vector2:
 		draw_walk_target(self, target as Vector2, _marker_scale)

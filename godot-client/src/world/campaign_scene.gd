@@ -1326,6 +1326,7 @@ func _begin_scene_handoff(reason: String) -> bool:
 	policy.merge((policy.get("variants", {}) as Dictionary).get(_variant, {}), true)
 	if policy.is_empty() or not _beat_matches(policy): return false
 	_scene_handoff = {"mode":str(policy.get("mode", "hold")), "to":policy.get("to", []),
+		"keep_dialogue":bool(policy.get("keep_dialogue",false)),
 		"gameplay_map":str(policy.get("gameplay_map", "")), "run":_run, "map":_map,
 		"token":_token, "elapsed":0.0, "started":Time.get_ticks_msec(), "phase":"out", "reason":reason,
 		"seek_decision":_seeking_decision,"player_camera":_player_camera.duplicate(true)}
@@ -1841,7 +1842,7 @@ func cancel(reason := "cancelled") -> void:
 	playing = false
 	if _layer != null:
 		_layer.hide()
-	if is_instance_valid(_dialogue):
+	if is_instance_valid(_dialogue) and not (retaining_handoff and bool(_scene_handoff.get("keep_dialogue",false))):
 		_dialogue.reset()
 	if is_instance_valid(_transcript):
 		_transcript.hide()
