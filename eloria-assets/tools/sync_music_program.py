@@ -60,11 +60,17 @@ def interior_zones(map_id: str, metadata: dict) -> tuple[list, str]:
             bounds=[round(min(a[0],b[0]),3), round(min(a[1],b[1]),3),
                     round(max(a[0],b[0]),3), round(max(a[1],b[1]),3)],
             day=program, night='home_night' if program=='home_day' else program))
+    exact_town_rooms = world.get('asset', {}).get('id') == 'landfall_town'
     for name, space in world.get('spaces', {}).items():
-        program = room_program(name)
+        program = room_program(name) or (room_program(space.get('section', '')) if exact_town_rooms else None)
         if program and all(k in space for k in ('x0','x1','z0','z1')):
             add(name, (space['x0']-.6,space['z0']-.6,space['x1']+.6,space['z1']+.6), program)
     for chamber in world.get('chambers', []):
+        # Town rooms have exact authored rectangles. A padded square around
+        # a long room can extend across the next room's doorway and win its
+        # smaller-area music selection, so use the rectangle alone there.
+        if exact_town_rooms and chamber.get('name') in world.get('spaces', {}):
+            continue
         # The chamber's name first: the Cenote Deeps keeps its section id, spindle_cavern, from its cavern days.
         program = room_program(chamber.get('name', '')) or room_program(chamber.get('section', ''))
         if program:

@@ -594,6 +594,7 @@ var models: Dictionary = {}
 var actor_type_models: Dictionary = {}
 var npc_looks: Dictionary = {}
 var npc_characters: Dictionary = {}
+var npc_workstations: Dictionary = {}
 var creation_options: Array = []
 var selected_creation_class := 0
 var creation_class_gear_visible := true
@@ -1681,6 +1682,7 @@ func _ready() -> void:
 	actor_type_models = model_registry.get("actorTypes", {})
 	npc_looks = model_registry.get("npcLooks", {})
 	npc_characters = _json("res://data/actors/npc_characters.json")
+	npc_workstations = _json("res://data/actors/workstations.json")
 	creation_options = PLAYER_CREATION.options(model_registry)
 	animation_config = _json("res://data/animations/luminous.json")
 	animation_configs["res://data/animations/luminous.json"] = animation_config
@@ -20384,6 +20386,11 @@ func _presentation_dto(dto: Dictionary) -> Dictionary:
 	# dictionary; other actors share their unchanged appearance with the state.
 	var character := NpcCharacterLooks.find(dto, npc_characters)
 	var result: Dictionary = NpcCharacterLooks.present(dto, character)
+	var station: Dictionary = npc_workstations.get(str(dto.get("name", "")).to_lower(), {})
+	var station_tile: Array = station.get("tile", [-1, -1])
+	if int(dto.get("kind", 0)) == 2 and int(dto.get("actor_type", -1)) == int(station.get("actorType", -2)) \
+			and int(dto.get("x", -1)) == int(station_tile[0]) and int(dto.get("y", -1)) == int(station_tile[1]):
+		result["workstation"] = station
 	# Creation bytes (skin, hair, shirt, pants, boots, head, eyes) select skinned
 	# surfaces already authored into each actor GLB, so they are deliberately
 	# never reinterpreted as rigid BoneAttachment3D equipment and contribute

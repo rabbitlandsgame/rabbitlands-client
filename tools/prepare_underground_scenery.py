@@ -262,6 +262,7 @@ KITS = {'lf-biomes': 'godot-client/world_authoring/continent-v2/kits/lf-biomes/p
 # and dressing, at the size they were reviewed at (the kit's own measured height or length). A row is packaged only
 # once an interior places it (main), so the shared folder holds no unused town art. This tool generates no models.
 TOWN_SELECTION = {
+    'sewing_machine': ('lf-interiors','sewing-machine-1','length',.95),
     'flower_cart': ('four_gates','flower-cart-1','length',2.4),
     'produce_stall': ('lf-biomes','produce-stall-1','length',2.4),
     'flower_planter': ('crownwater','flower-planter-1','length',2.0),

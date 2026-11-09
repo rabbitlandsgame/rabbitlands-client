@@ -374,30 +374,33 @@
       "spawns": []
     },
     {
-      "id": "weaver_house", "name": "The weaver's house", "style": "house", "danger": "A private home, open by day",
-      "about": "The weaver's house in #27 on the avenue's south side (door H, facing north: the north wall): the loom workroom in the middle, the street door in its north wall, where Wynn weaves the cloth for her daughter Mara's capes; the kitchen to the west and the bedroom to the east.",
-      "rooms": [[65.5,88,5,3.5],[57.5,88,3,3.5],[73.5,88,3,3.5]],
-      "roomNames": ["Loom workroom","Weaver's kitchen","Weaver's bedroom"],
-      "links": [[0,1,3.6,[[60.5,87.5]]],[0,2,3.6,[[70.5,87.5]]]],
-      "floors": ["oak_planks","oak_planks","oak_planks"],
+      "id": "weaver_house", "name": "The weaver's house", "style": "house", "danger": "Home, workshop and cape shop; open by day",
+      "about": "Wynn and Mara's home and cape shop on the avenue: the original loom room, kitchen and bedroom open into a southern sewing workshop and Mara's cape showroom. Wynn stitches at her workbench while Mara serves customers across the hall.",
+      "rooms": [[65.5,88,5,3.5],[57.5,88,3,3.5],[73.5,88,3,3.5],[57,79.5,3.5,5],[65.5,79.5,5,5]],
+      "roomNames": ["Loom workroom","Weaver's kitchen","Weaver's bedroom","Wynn's sewing workshop","Mara's cape shop"],
+      "links": [[0,1,3.6,[[60.5,87.5]]],[0,2,3.6,[[70.5,87.5]]],[1,3,3.6,[[57,84.5]]],[0,4,3.6,[[65,84.5]]],[3,4,3.6,[[60.5,79.5]]]],
+      "floors": ["oak_planks","oak_planks","oak_planks","oak_planks","oak_planks"],
       "walls": "lime_plaster",
       "windows": [
         {"room": 0, "side": "north", "at": 0.87, "width": 1.0},
-        {"room": 0, "side": "south", "at": 0.3, "width": 1.0},
-        {"room": 0, "side": "south", "at": 0.55, "width": 1.0},
         {"room": 1, "side": "west", "at": 0.35, "width": 1.0},
-        {"room": 1, "side": "south", "at": 0.5, "width": 1.0},
         {"room": 2, "side": "east", "at": 0.3, "width": 1.0},
-        {"room": 2, "side": "north", "at": 0.5, "width": 1.0}
+        {"room": 2, "side": "north", "at": 0.5, "width": 1.0},
+        {"room": 3, "side": "west", "at": 0.65, "width": 1.4},
+        {"room": 3, "side": "south", "at": 0.5, "width": 1.4},
+        {"room": 4, "side": "south", "at": 0.25, "width": 1.6},
+        {"room": 4, "side": "south", "at": 0.75, "width": 1.6},
+        {"room": 4, "side": "east", "at": 0.65, "width": 1.2}
       ],
       "decals": [
         {"image": "rug_runner", "room": 0, "side": "floor", "at": [0.3,0.45], "size": [1.0,3.0]},
         {"image": "rug_home", "room": 2, "side": "floor", "at": [0.45,0.4], "size": [2.1,1.4]},
         {"image": "botanical_prints", "room": 2, "side": "west", "at": [0.82,0.6], "size": [1.4,0.7]},
-        {"image": "rug_home", "room": 1, "side": "floor", "at": [0.5,0.42], "size": [2.1,1.4]}
+        {"image": "rug_home", "room": 1, "side": "floor", "at": [0.5,0.42], "size": [2.1,1.4]},
+        {"image": "rug_runner", "room": 4, "side": "floor", "at": [0.5,0.36], "size": [1,3]}
       ],
       "entrances": [
-        {"map": "landfall", "kind": "building", "object": 59207, "tile": [152,252], "position": [-129.7,121.49,-3.4], "returnTile": [149,255], "arrival": [63,88], "exit": [63,90], "exitFacing": [0,1], "label": "The weaver's house", "exitLabel": "The avenue"}
+        {"map": "landfall", "kind": "building", "object": 59207, "tile": [152,252], "position": [-129.7,121.49,-3.4], "returnTile": [149,255], "arrival": [63,88], "exit": [63,90], "exitFacing": [0,1], "label": "Mara's Capes / The weaver's house", "exitLabel": "The avenue", "category": "general_store"}
       ],
       "props": [
         {"asset": "loom", "at": [66.0,90.42], "yaw": 0, "blockBox": [0.93,0.99], "wall": "north"},
@@ -405,7 +408,6 @@
         {"asset": "harvest_baskets", "at": [67.45,91.19], "yaw": 0, "blockBox": [0.39,0.22], "wall": "north"},
         {"asset": "harvest_baskets", "at": [68.35,91.19], "yaw": 0, "blockBox": [0.39,0.22], "wall": "north"},
         {"asset": "goods_shelf_stocked", "at": [61.06,90.15], "yaw": 90, "blockBox": [0.85,0.37]},
-        {"asset": "trestle_table", "at": [64.6,85.55], "yaw": 0, "blockBox": [1.04,0.36]},
         {"asset": "crate_stack", "at": [69.0,85.4], "yaw": 0, "blockBox": [0.86,0.85]},
         {"asset": "wall_sconce", "at": [70.28,90.3], "yaw": 270, "height": 1.5},
         {"asset": "kitchen_hearth_pot_spit", "at": [57.4,90.9], "yaw": 0, "blockBox": [0.9,0.5], "wall": "north"},
@@ -420,7 +422,19 @@
         {"asset": "supply_chest", "at": [74.1,89.6], "yaw": 270, "blockBox": [0.5,0.3]},
         {"asset": "wardrobe", "at": [72.2,91.17], "yaw": 0, "blockBox": [0.6,0.26], "wall": "north"},
         {"asset": "stool", "at": [75.6,87.4], "yaw": 0, "blockBox": [0.2,0.2]},
-        {"asset": "wall_sconce", "at": [76.29,88.3], "yaw": 270, "wall": "east", "height": 1.5}
+        {"asset": "wall_sconce", "at": [76.29,88.3], "yaw": 270, "wall": "east", "height": 1.5},
+        {"asset": "trestle_table", "at": [57,80.6], "yaw": 0, "blockBox": [1.04,0.36]},
+        {"asset": "stool", "at": [57.5,79.8], "yaw": 0},
+        {"asset": "trestle_table", "at": [56.5,75.5], "yaw": 0, "blockBox": [1.04,0.36]},
+        {"asset": "tool_rack", "at": [54.3,82.8], "yaw": 90, "blockBox": [0.6,0.35], "wall": "west"},
+        {"asset": "goods_shelf_stocked", "at": [58.6,75.2], "yaw": 0, "blockBox": [0.85,0.37], "wall": "south"},
+        {"asset": "harvest_baskets", "at": [58.6,82.8], "yaw": 0, "blockBox": [0.39,0.22]},
+        {"asset": "shop_counter", "at": [66,80.5], "yaw": 0, "blockBox": [1.08,0.42]},
+        {"asset": "wardrobe", "at": [69.7,76.5], "yaw": 270, "blockBox": [0.6,0.26], "wall": "east"},
+        {"asset": "goods_shelf_stocked", "at": [62,75.2], "yaw": 0, "blockBox": [0.85,0.37], "wall": "south"},
+        {"asset": "supply_chest", "at": [69.2,83.3], "yaw": 0, "blockBox": [0.5,0.3]},
+        {"asset": "bench", "at": [62,82.9], "yaw": 0, "blockBox": [0.88,0.22]},
+        {"asset": "sewing_machine", "at": [57.5,80.6], "yaw": 0, "height": 0.78}
       ],
       "lights": [
         {"at": [66.0,88.0], "height": 2.6, "colour": [1.0,0.82,0.6], "energy": 0.9, "range": 7},
@@ -432,13 +446,18 @@
         {"at": [55.0,87.0], "height": 2.0, "colour": [0.74,0.82,1.0], "energy": 0.3, "range": 4},
         {"at": [73.5,88.0], "height": 2.6, "colour": [1.0,0.82,0.6], "energy": 0.6, "range": 6},
         {"at": [76.2,88.3], "height": 1.9, "colour": [1.0,0.74,0.46], "energy": 0.5, "range": 4},
-        {"at": [76.2,86.6], "height": 2.0, "colour": [0.74,0.82,1.0], "energy": 0.25, "range": 4}
+        {"at": [76.2,86.6], "height": 2.0, "colour": [0.74,0.82,1.0], "energy": 0.25, "range": 4},
+        {"at": [57,79.5], "height": 2.7, "colour": [1,0.82,0.6], "energy": 1.1, "range": 8},
+        {"at": [65.5,79.5], "height": 2.7, "colour": [1,0.82,0.6], "energy": 1.2, "range": 8}
       ],
       "npcs": [
-        {"name": "Wynn Vell", "role": "dialogue", "occupation": "Weaver", "actorType": 306, "facing": "W", "tile": [68,88], "greeting": "Mind the warp; it is longer than the room. Mara sells the capes. I make them, and I make them slowly."}
+        {"name": "Wynn Vell", "role": "dialogue", "occupation": "Weaver", "actorType": 306, "facing": "N", "tile": [57,79], "greeting": "Mind the warp; it is longer than the room. Mara sells the capes. I make them, and I make them slowly.", "seatedWork": true},
+        {"name": "Mara Vell", "role": "shop", "occupation": "Cape Seller", "actorType": 305, "facing": "S", "tile": [66,82], "greeting": "A cape for your calling. Each adds one perk tier, up to that perk's limit.", "mapCategory": "general_store", "mapLabel": "Mara's Capes"}
       ],
       "interactives": [
-        {"object": 59282, "tile": [66,88], "role": "information", "text": "Wynn's loom, strung with cape cloth in cobalt and cream. Mara sells what comes off it on the plaza; the hem stitch is her mother's.", "label": "Wynn's loom", "at": [66.0,90.42]}
+        {"object": 59282, "tile": [66,88], "role": "information", "text": "Wynn's loom, strung with cape cloth in cobalt and cream. Mara sells the finished capes in the adjoining shop; the hem stitch is her mother's.", "label": "Wynn's loom", "at": [66.0,90.42]},
+        {"object": 59291, "tile": [57,81], "role": "information", "label": "Wynn's sewing machine", "text": "Wynn's hand-cranked sewing machine. A cobalt hem waits beneath the needle, ready for the next slow seam.", "at": [57,80.6], "height": 1.2},
+        {"object": 59292, "tile": [56,77], "role": "information", "label": "Wynn's cutting workbench", "text": "A cutting workbench for measuring, piecing and hemming cape cloth before it reaches Mara's shop.", "at": [56.5,75.5]}
       ],
       "nodes": [],
       "spawns": []
