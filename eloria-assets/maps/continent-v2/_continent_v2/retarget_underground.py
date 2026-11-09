@@ -203,7 +203,8 @@ def building_record(door, checkout):
         record["exitOffset"] = inside
     if door.get("category"):
         record["category"] = door["category"]
-    return {**record, **BUILDING_DOOR}
+    return {**record, **BUILDING_DOOR,
+            **({'height': door['pickHeight']} if 'pickHeight' in door else {})}
 
 
 def prop_sizes(checkout):

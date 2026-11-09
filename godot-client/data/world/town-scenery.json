@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "map": "landfall_town",
-  "sourcePlanSha256": "d84e09ec09e5d8fa1f302c5c4e5c954be3106bfe95d6b858da78f24dc4f703ab",
+  "sourcePlanSha256": "2f7d30ed84e9552137e30b42282dc329884cf928a4e040e90fa073dc2e3f165e",
   "assets": {
     "crystal_cluster": "res://assets/world/underground/crystal_cluster.glb",
     "supply_crate": "res://assets/world/underground/supply_crate.glb",
@@ -205,6 +205,19 @@
     },
     "library": {
       "theme": "shop",
+      "floor": {
+        "texture": "authored",
+        "tint": [
+          1,
+          1,
+          1
+        ]
+      },
+      "rockLift": null,
+      "water": null
+    },
+    "temple_practice": {
+      "theme": "castle",
       "floor": {
         "texture": "authored",
         "tint": [
@@ -4915,6 +4928,69 @@
       ],
       "yaw": 215,
       "scale": 0.95
+    },
+    {
+      "asset": "bench",
+      "position": [
+        233.4,
+        0,
+        177.5
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_temple_practice_west_ashlar_wall"
+    },
+    {
+      "asset": "bench",
+      "position": [
+        243.5,
+        0,
+        177.5
+      ],
+      "yaw": 270,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_temple_practice_east_ashlar_wall"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        240,
+        0,
+        154.1
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_temple_practice_north_ashlar_wall"
+    },
+    {
+      "asset": "notice_board",
+      "position": [
+        242.7,
+        0,
+        170.0
+      ],
+      "yaw": 90
+    },
+    {
+      "asset": "notice_board",
+      "position": [
+        243.0,
+        0,
+        167.7
+      ],
+      "yaw": 90
     }
   ]
 }

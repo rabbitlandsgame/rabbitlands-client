@@ -55,10 +55,12 @@ EDGE tiles from the map's edge):
                                   multiplier (default the kind's, as the server's own rows use it: fast_reading 3).
                                   publish_server.py writes one `area | kind | map | x0 | y0 | x1 | y1 | factor` row per
                                   entry into the overlay's continent-v2/special_areas.txt (eloria/areas.py reads it)
-  nodes [], spawns []             required and empty: the town has no harvest nodes and no encounters
+  nodes [], spawns []             no harvest nodes or hostile encounters. The temple practice section may place
+                                  stationary temple_practice_dummy targets as [species, x, y, 1].
 
 DOORS ("entrances"; write each on ONE line):
-  {map, kind: "building", object, tile, position, returnTile, arrival, exit, exitFacing, category?, label, exitLabel}
+  {map, kind: "building", object, tile, position, returnTile, arrival, exit, exitFacing, category?, label, exitLabel,
+   pickHeight?}  pickHeight optionally raises the click shape for a doorway above exterior steps (metres, .5..8).
   `tile` is the exterior door tile on `map` (the object stands there; clicking it walks the player to it and in) and
   `returnTile` where the way out lands; `position` the painted door point on the exterior facade (world metres) that
   cartography draws. A building door has no scene marker. Inside, the same object stands on `exit` (the first walkable
@@ -252,7 +254,7 @@ def doors(item):
         missing = [k for k in needed if k not in door]
         if missing:
             raise SourceError(f"{where} lacks {missing}")
-        known = set(needed) | {"exitFacing", "category", "label", "exitLabel", "marker"}
+        known = set(needed) | {"exitFacing", "category", "label", "exitLabel", "marker", "pickHeight"}
         extra = sorted(set(door) - known)
         if extra:
             raise SourceError(f"{where}: unknown keys {extra}")
@@ -264,6 +266,8 @@ def doors(item):
             raise SourceError(f"{where}: position is the door's world point [x, y, z]")
         for value in door["position"]:
             _number(value, f"{where} position")
+        if "pickHeight" in door:
+            _number(door["pickHeight"], f"{where} pickHeight", .5, 8)
         facing = door.get("exitFacing", [0, -1])
         if tuple(facing) not in SIDE_TILE.values():
             raise SourceError(f"{where}: exitFacing {facing} must point straight at one wall ([0,-1] south, [0,1] "
@@ -489,8 +493,14 @@ def _check_section(design, section, cells):
         _text(section[key], f"{sid} {key}")
     if section["style"] not in STYLES:
         raise SourceError(f"{sid}: style {section['style']!r} is not one of {STYLES}")
-    if section["nodes"] or section["spawns"]:
-        raise SourceError(f"{sid}: the town has no harvest nodes or encounters (`nodes` and `spawns` stay empty)")
+    if section["nodes"]:
+        raise SourceError(f"{sid}: the town has no harvest nodes")
+    for spawn in section["spawns"]:
+        if (sid != "temple_practice" or not isinstance(spawn, list) or len(spawn) != 4
+                or spawn[0] != "temple_practice_dummy" or spawn[3] != 1
+                or any(type(v) is not int for v in spawn[1:])
+                or room_of(section, spawn[1]+.5, spawn[2]+.5) is None):
+            raise SourceError(f"{sid}: only stationary temple practice targets may spawn in town")
     count = len(section["rooms"])
     if not count:
         raise SourceError(f"{sid}: give at least one room")

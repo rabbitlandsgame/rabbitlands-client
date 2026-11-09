@@ -22,14 +22,25 @@ tile. Entry requires a client declaring `landfall_town_v1`.
 | `netmender_house` The net-mender's house | #56, door J (west wall) | Hearth kitchen, net loft | oak / plaster |
 | `castle` The keep | #1, door K (west wall) | Gate Hall, Hall of Eight Seats, Register Archive, Palace Chancery, the sealed-stair alcove | limestone flagstone / ashlar |
 | `library` Calloway's Books | #28 joined through to #29, door L Calloway's Books (bookshop; north wall) | Bookshop, library reading room (fast reading), library stacks | oak / plaster |
+| `temple_practice` Temple Practice Halls | Temple beside Ostrid Hollin, object 59212 | Vestibule, magic practice range, separate no-drop PK arena | limestone and cobalt tile / ashlar |
+
+The temple entrance is at Landfall (138, 195), beside Ostrid; the return tile is
+(138, 198). Its three armoured practice dummies stand at (235, 168), (238, 168)
+and (241, 168) in `landfall_town`. They are targetable actors reusing the reviewed
+imported armour stand, remain stationary, never retaliate and mend themselves.
+Spells retain their normal mana and ingredient costs; dummies yield no kills or
+loot. The adjoining sparring room alone is PK, over inclusive tiles
+(245, 151)-(271, 169). The partition doorway, practice range and vestibule are
+safe. Signs explain the boundary and no-drop rules. Arena deaths preserve
+inventory, equipment, gold and protection stones; ordinary respawn rules apply.
 
 Each street door stands in the interior wall matching its facade's direction
 (south for the avenue's north side and the SW-facing main row, north for #27 and
-#28, west for #11, #56 and the keep). Building doors use objects 59201-59211 (one id
+#28, west for #11, #56 and the keep). Building doors use objects 59201-59212 (one id
 serves both ends), the tavern stairs 59221/59222; the keep's sealed stair is art only,
 with no portal. A coloured door is named as its shopkeeper is on the map.
 
-The rooms are furnished with 410 placed pieces: the 35-piece `lf-interiors`
+The rooms are furnished with 415 placed pieces: the 35-piece `lf-interiors`
 furniture kit (beds, tables, benches, counters, shelves, hearths, the forge, the
 anvil, the loom, the eight high seats and the council map table; Meshy pieces
 prepared at real size), its writing desk's own two closed books packaged on their
@@ -108,9 +119,9 @@ pocket of floor larger than six tiles cut off from a section's arrival.
 
 ## Package
 
-11 sections, 33 rooms, 1,841 walkable tiles (tavern 130 + upstairs 133, shops 142,
-magic shop 86, smithy 96, houses 77-114, keep 668, library 196), 112 light markers
-(97 lights and 15 lamp props). `world.glb` is 1,023,940 bytes with its 27 images in the shared
+12 sections, 36 rooms, 2,630 walkable tiles (789 in the temple; tavern 130 + upstairs 133, shops 142,
+magic shop 86, smithy 96, houses 77-114, keep 668, library 196), 117 light markers
+(102 lights and 15 lamp props). `world.glb` is 1,042,004 bytes with its 27 images in the shared
 pool (decals clamp to their edge, surfaces repeat); `collision.bin` (EWCG-v2),
 `served-grid.escg.gz` (ESCG-v2) and `minimap.webp` beside it. The manifest's
 `minimap.liveSpanMetres` (40) frames the live minimap at a room's scale, so a room

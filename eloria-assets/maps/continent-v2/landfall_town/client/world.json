@@ -23,7 +23,7 @@
         148.0
       ],
       "max": [
-        222.8,
+        273.0,
         4.6,
         303.8
       ]
@@ -235,6 +235,22 @@
         91
       ],
       "rotationDegrees": 0
+    },
+    {
+      "id": "temple_practice",
+      "name": "Temple Practice Halls",
+      "section": "temple_practice",
+      "default": false,
+      "position": [
+        238,
+        0.05,
+        178
+      ],
+      "serverTile": [
+        238,
+        146
+      ],
+      "rotationDegrees": 180
     }
   ],
   "chambers": [
@@ -600,6 +616,39 @@
       ],
       "radius": 3.5,
       "name": "Library stacks"
+    },
+    {
+      "id": "temple_practice-0",
+      "section": "temple_practice",
+      "position": [
+        238.5,
+        0,
+        177.5
+      ],
+      "radius": 5,
+      "name": "Temple vestibule"
+    },
+    {
+      "id": "temple_practice-1",
+      "section": "temple_practice",
+      "position": [
+        238.5,
+        0,
+        163.5
+      ],
+      "radius": 9,
+      "name": "Magic practice range"
+    },
+    {
+      "id": "temple_practice-2",
+      "section": "temple_practice",
+      "position": [
+        258.5,
+        0,
+        163.5
+      ],
+      "radius": 13,
+      "name": "No-drop PK arena"
     }
   ],
   "spaces": {
@@ -865,6 +914,30 @@
       "z0": 229.5,
       "z1": 237.5,
       "section": "library",
+      "room": 2
+    },
+    "Temple vestibule": {
+      "x0": 232.5,
+      "x1": 244.5,
+      "z0": 173.5,
+      "z1": 181.5,
+      "section": "temple_practice",
+      "room": 0
+    },
+    "Magic practice range": {
+      "x0": 232.5,
+      "x1": 244.5,
+      "z0": 153.5,
+      "z1": 173.5,
+      "section": "temple_practice",
+      "room": 1
+    },
+    "No-drop PK arena": {
+      "x0": 244.5,
+      "x1": 272.5,
+      "z0": 153.5,
+      "z1": 173.5,
+      "section": "temple_practice",
       "room": 2
     }
   },
@@ -1167,6 +1240,28 @@
       ],
       "section": "library",
       "label": "The avenue"
+    },
+    {
+      "id": "temple_practice-exit",
+      "objectId": 59212,
+      "role": "portal",
+      "kind": "building",
+      "position": [
+        238,
+        0,
+        181
+      ],
+      "serverTile": [
+        238,
+        143
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        138,
+        198
+      ],
+      "section": "temple_practice",
+      "label": "Ostrid and the temple grounds"
     }
   ],
   "interactives": [
@@ -1467,6 +1562,28 @@
       ],
       "section": "library",
       "label": "The avenue"
+    },
+    {
+      "id": "temple_practice-exit",
+      "objectId": 59212,
+      "role": "portal",
+      "kind": "building",
+      "position": [
+        238,
+        0,
+        181
+      ],
+      "serverTile": [
+        238,
+        143
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        138,
+        198
+      ],
+      "section": "temple_practice",
+      "label": "Ostrid and the temple grounds"
     },
     {
       "id": "tavern_ground-interactive0",
@@ -1787,6 +1904,38 @@
       ],
       "section": "library",
       "label": "Ennis's catalogue: every book in the shop, entered twice in two inks and checked against the shelves each evening. The two columns have agreed for nine years."
+    },
+    {
+      "id": "temple_practice-interactive0",
+      "objectId": 59289,
+      "role": "information",
+      "position": [
+        241,
+        0,
+        170
+      ],
+      "serverTile": [
+        241,
+        154
+      ],
+      "section": "temple_practice",
+      "label": "Magic practice range. Select a practice dummy as your spell target. Dummies stay in place, never retaliate and mend themselves. Spells use their normal mana and ingredients. Player combat is allowed only through the marked arena doorway."
+    },
+    {
+      "id": "temple_practice-interactive1",
+      "objectId": 59290,
+      "role": "information",
+      "position": [
+        242,
+        0,
+        168
+      ],
+      "serverTile": [
+        242,
+        156
+      ],
+      "section": "temple_practice",
+      "label": "Beyond this doorway: NO-DROP PK ARENA. Players inside may attack one another with weapons or magic. Death here keeps your belongings and protection stones. The range, vestibule and doorway are outside the arena. Normal death and return rules still apply."
     }
   ],
   "navigation": {
@@ -1811,7 +1960,7 @@
       "step": 0.1
     },
     "gridAlignment": "tile-centres-v1",
-    "sha256": "d0977998ba9b53c632a4fa69235711ac5f3aa9197288bf1b87e71bfc9d700472",
+    "sha256": "79f5c228cc5f61f00764dd530bdc334dea4f208dd81a4f68bb4bdc54c4fcd7a2",
     "nodeNames": [
       "Build_castle_east_ashlar_wall",
       "Build_castle_east_decal_banner_glasswarden",
@@ -1992,6 +2141,25 @@
       "Build_tavern_upper_west_timber_band",
       "Build_tavern_upper_west_wall_cap",
       "Build_tavern_upper_west_window_leaded",
+      "Build_temple_practice_east_ashlar_wall",
+      "Build_temple_practice_east_timber_band",
+      "Build_temple_practice_east_wall_cap",
+      "Build_temple_practice_north_ashlar_wall",
+      "Build_temple_practice_north_decal_star_chart",
+      "Build_temple_practice_north_timber_band",
+      "Build_temple_practice_north_wall_cap",
+      "Build_temple_practice_north_window_leaded_tall",
+      "Build_temple_practice_south_ashlar_wall",
+      "Build_temple_practice_south_door_daylight",
+      "Build_temple_practice_south_iron",
+      "Build_temple_practice_south_oak_planks_shade",
+      "Build_temple_practice_south_timber_band",
+      "Build_temple_practice_south_wall_cap",
+      "Build_temple_practice_west_ashlar_wall",
+      "Build_temple_practice_west_decal_banner_votary",
+      "Build_temple_practice_west_timber_band",
+      "Build_temple_practice_west_wall_cap",
+      "Build_temple_practice_west_window_leaded_tall",
       "Build_watch_house_east_lime_plaster",
       "Build_watch_house_east_timber_band",
       "Build_watch_house_east_wall_cap",
@@ -2123,6 +2291,12 @@
       "Part_tavern_upper_6_lime_plaster",
       "Part_tavern_upper_6_timber_band",
       "Part_tavern_upper_6_wall_cap",
+      "Part_temple_practice_0_ashlar_wall",
+      "Part_temple_practice_0_timber_band",
+      "Part_temple_practice_0_wall_cap",
+      "Part_temple_practice_1_ashlar_wall",
+      "Part_temple_practice_1_timber_band",
+      "Part_temple_practice_1_wall_cap",
       "Part_watch_house_0_lime_plaster",
       "Part_watch_house_0_timber_band",
       "Part_watch_house_0_wall_cap",
@@ -2143,7 +2317,7 @@
     "servedGrid": {
       "binary": "served-grid.escg.gz",
       "format": "ESCG-v2",
-      "sha256": "28a8240f5aed98b8e0e57ba10d0647b840d97fc81b92df850b3d69f545afa64b",
+      "sha256": "0e4ebe849793318bb4d868955427fc2224835320b95ad81d42473ef90abab97b",
       "unitMetres": 0.05,
       "climbMetres": 1.0,
       "originMetres": -100.0,
@@ -3976,6 +4150,86 @@
         "energyHint": 1.0,
         "rangeHint": 7,
         "section": "library"
+      },
+      {
+        "id": "temple_practice-light-0",
+        "position": [
+          238,
+          3,
+          178
+        ],
+        "color": [
+          1,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.9,
+        "rangeHint": 10,
+        "section": "temple_practice"
+      },
+      {
+        "id": "temple_practice-light-1",
+        "position": [
+          236,
+          3,
+          166
+        ],
+        "color": [
+          0.62,
+          0.76,
+          1
+        ],
+        "energyHint": 1,
+        "rangeHint": 12,
+        "section": "temple_practice"
+      },
+      {
+        "id": "temple_practice-light-2",
+        "position": [
+          240,
+          3,
+          157
+        ],
+        "color": [
+          0.62,
+          0.76,
+          1
+        ],
+        "energyHint": 0.8,
+        "rangeHint": 10,
+        "section": "temple_practice"
+      },
+      {
+        "id": "temple_practice-light-3",
+        "position": [
+          253,
+          3,
+          166
+        ],
+        "color": [
+          1,
+          0.78,
+          0.5
+        ],
+        "energyHint": 1,
+        "rangeHint": 12,
+        "section": "temple_practice"
+      },
+      {
+        "id": "temple_practice-light-4",
+        "position": [
+          265,
+          3,
+          159
+        ],
+        "color": [
+          1,
+          0.78,
+          0.5
+        ],
+        "energyHint": 1,
+        "rangeHint": 12,
+        "section": "temple_practice"
       }
     ]
   },
@@ -3990,6 +4244,7 @@
       "Roof_smithy_wall_cap",
       "Roof_tavern_ground_wall_cap",
       "Roof_tavern_upper_wall_cap",
+      "Roof_temple_practice_wall_cap",
       "Roof_watch_house_wall_cap",
       "Roof_weaver_house_wall_cap"
     ],
@@ -5604,6 +5859,177 @@
           0.0
         ],
         "section": "tavern_upper"
+      },
+      {
+        "node": "Build_temple_practice_east_ashlar_wall",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "temple_practice"
+      },
+      {
+        "node": "Build_temple_practice_east_timber_band",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "temple_practice"
+      },
+      {
+        "node": "Build_temple_practice_east_wall_cap",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "temple_practice"
+      },
+      {
+        "node": "Build_temple_practice_north_ashlar_wall",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "temple_practice"
+      },
+      {
+        "node": "Build_temple_practice_north_decal_star_chart",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "temple_practice"
+      },
+      {
+        "node": "Build_temple_practice_north_timber_band",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "temple_practice"
+      },
+      {
+        "node": "Build_temple_practice_north_wall_cap",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "temple_practice"
+      },
+      {
+        "node": "Build_temple_practice_north_window_leaded_tall",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "temple_practice"
+      },
+      {
+        "node": "Build_temple_practice_south_ashlar_wall",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "temple_practice"
+      },
+      {
+        "node": "Build_temple_practice_south_door_daylight",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "temple_practice"
+      },
+      {
+        "node": "Build_temple_practice_south_iron",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "temple_practice"
+      },
+      {
+        "node": "Build_temple_practice_south_oak_planks_shade",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "temple_practice"
+      },
+      {
+        "node": "Build_temple_practice_south_timber_band",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "temple_practice"
+      },
+      {
+        "node": "Build_temple_practice_south_wall_cap",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "temple_practice"
+      },
+      {
+        "node": "Build_temple_practice_west_ashlar_wall",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "temple_practice"
+      },
+      {
+        "node": "Build_temple_practice_west_decal_banner_votary",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "temple_practice"
+      },
+      {
+        "node": "Build_temple_practice_west_timber_band",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "temple_practice"
+      },
+      {
+        "node": "Build_temple_practice_west_wall_cap",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "temple_practice"
+      },
+      {
+        "node": "Build_temple_practice_west_window_leaded_tall",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "temple_practice"
       },
       {
         "node": "Build_watch_house_east_lime_plaster",
@@ -8027,6 +8453,138 @@
         ]
       },
       {
+        "node": "Part_temple_practice_0_ashlar_wall",
+        "section": "temple_practice",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          238.5,
+          173.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_temple_practice_0_timber_band",
+        "section": "temple_practice",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          238.5,
+          173.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_temple_practice_0_wall_cap",
+        "section": "temple_practice",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          238.5,
+          173.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_temple_practice_1_ashlar_wall",
+        "section": "temple_practice",
+        "rooms": [
+          1,
+          2
+        ],
+        "centre": [
+          244.5,
+          163.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_temple_practice_1_timber_band",
+        "section": "temple_practice",
+        "rooms": [
+          1,
+          2
+        ],
+        "centre": [
+          244.5,
+          163.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_temple_practice_1_wall_cap",
+        "section": "temple_practice",
+        "rooms": [
+          1,
+          2
+        ],
+        "centre": [
+          244.5,
+          163.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
         "node": "Part_watch_house_0_lime_plaster",
         "section": "watch_house",
         "rooms": [
@@ -8404,6 +8962,20 @@
           248.5
         ]
       }
+    },
+    {
+      "id": "temple_practice",
+      "name": "Temple Practice Halls",
+      "bounds": {
+        "min": [
+          230.5,
+          151.5
+        ],
+        "max": [
+          274.5,
+          183.5
+        ]
+      }
     }
   ],
   "minimap": {
@@ -8426,12 +8998,12 @@
   },
   "provenance": {
     "source": "_continent_v2/content/landfall_town.json",
-    "sourceSha256": "d84e09ec09e5d8fa1f302c5c4e5c954be3106bfe95d6b858da78f24dc4f703ab",
+    "sourceSha256": "2f7d30ed84e9552137e30b42282dc329884cf928a4e040e90fa073dc2e3f165e",
     "builder": "_continent_v2/build_town_interiors.py",
     "builderSha256": "efc1ad30222572a77ae78d83d6ed9fff8c733880ce0183462aae7c1940a338c2",
     "imports": {
       "_continent_v2/build_underground.py": "d4ad29b2b55f51752aea4478d782915cd1b774cf59611e689b84d868468e2845",
-      "_continent_v2/town_source.py": "714a99d1ea299e75d5ef2a45cc832881a7d81dc0e71bbd76877e5e89739230af",
+      "_continent_v2/town_source.py": "c9197bea79d016881288dcb670b378392e6130c45cf7f91cb9286e28762c2f61",
       "_continent_v2/underground_source.py": "1c96af628d148d491d1a5b021470bdbdbf35885ef53d605c953ce97e03f26981"
     },
     "surfaces": {
@@ -8543,7 +9115,7 @@
         "sha256": "7c6a93fb1d841d589941c3a70fb74cda92747d503cf60c52803c89e091e1ef38"
       }
     },
-    "ownerApproved": "owner, 2026-10-27, chat: 'Implement your plan' - Landfall town interiors room shells; owner, 2026-10-28, chat: 'Add a library with a book seller NPC' - Calloway's Books (build_town_interiors.py)"
+    "ownerApproved": "Owner request 2026-11-08: temple magic practice interior and no-drop PK arena near Ostrid; existing shell builder and imported furniture"
   },
   "externalResources": {
     "../../../_shared/images/051bdd722e50093d9fe4a642e056c12db638bc003c01fe9e0f42373c64afc0cd.png": "051bdd722e50093d9fe4a642e056c12db638bc003c01fe9e0f42373c64afc0cd",
