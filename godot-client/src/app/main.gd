@@ -10544,19 +10544,20 @@ func _sync_manufacturing() -> void:
 	_sync_manufacturing_source()
 	_sync_manufacturing_tabs()
 	manufacturing_list.clear()
-	var filter_text: String = manufacturing_filter.text.strip_edges().to_lower()
+	var outputs: Dictionary = {}
 	for recipe_index: int in _manufacturing_recipe_order():
 		var definition: Dictionary = manufacturing_catalog.recipe(recipe_index)
-		if (not manufacturing_skill.is_empty()
-				and str(definition.get("skill", "")) != manufacturing_skill):
-			continue
-		if not filter_text.is_empty() and not _manufacturing_searchable(
-				definition).contains(filter_text):
-			continue
+		var output := str(definition.get("output", ""))
+		if outputs.has(output) or not _manufacturing_recipe_matches(recipe_index): continue
+		outputs[output] = true
+		# Keep the exact chosen alternative when it still matches the filters.
+		# Otherwise the first matching recipe in the current sort represents it.
+		if (manufacturing_catalog.alternatives(recipe_index).has(selected_manufacturing_recipe)
+				and _manufacturing_recipe_matches(selected_manufacturing_recipe)):
+			recipe_index = selected_manufacturing_recipe
+			definition = manufacturing_catalog.recipe(recipe_index)
 		var availability := _manufacturing_availability(recipe_index)
 		var reasons: Array = availability.get("reasons", []) as Array
-		if manufacturing_ready_only.button_pressed and not bool(availability.get("ingredients_available", false)):
-			continue
 		var reason_lines: Array[String] = []
 		for reason_value: Variant in reasons:
 			reason_lines.append(str(reason_value))
@@ -10592,6 +10593,15 @@ func _manufacturing_recipe_order() -> Array[int]:
 		var compared := ItemNames.display(str(left.get("output", ""))).naturalnocasecmp_to(ItemNames.display(str(right.get("output", ""))))
 		return a < b if compared == 0 else compared < 0)
 	return order
+
+func _manufacturing_recipe_matches(index: int) -> bool:
+	var definition := manufacturing_catalog.recipe(index)
+	if definition.is_empty(): return false
+	if not manufacturing_skill.is_empty() and str(definition.get("skill", "")) != manufacturing_skill:
+		return false
+	var query := manufacturing_filter.text.strip_edges().to_lower()
+	if not query.is_empty() and not _manufacturing_searchable(definition).contains(query): return false
+	return not manufacturing_ready_only.button_pressed or bool(_manufacturing_availability(index).get("ingredients_available", false))
 
 func _manufacturing_availability(recipe_index: int) -> Dictionary:
 	var availability := manufacturing_catalog.availability(recipe_index,

@@ -68,13 +68,11 @@ func _run() -> void:
 	var catalogue: ManufacturingCatalog = main.get(
 		"manufacturing_catalog") as ManufacturingCatalog
 	_expect(catalogue.count() > 0, "the client has a recipe table to build from")
-	var alchemy := 0
+	var alchemy: Dictionary = {}
 	for index: int in range(catalogue.count()):
 		if str(catalogue.recipe(index).get("skill", "")) == "alchemy":
-			alchemy += 1
-	# Every alchemy recipe has a page of its own, and each page carries the
-	# numbers and the materials that recipe states. Two ways of making the same
-	# thing are two recipes and get two pages.
+			alchemy[str(catalogue.recipe(index).get("output", ""))] = true
+	# Each output has one page, preserving every alternative's facts.
 	var recipe_pages: Array[String] = []
 	for id: String in view.entry_ids_in("alchemy"):
 		view.open_entry("alchemy", id)
@@ -84,9 +82,9 @@ func _run() -> void:
 		# time in the browse pane beside it.
 		_expect(_crumb_text(view).contains("Alchemy"),
 			"%s says which category it sits in" % id)
-	_expect(alchemy > 0 and recipe_pages.size() == alchemy,
-		"one page per alchemy recipe: %d pages for %d recipes"
-			% [recipe_pages.size(), alchemy])
+	_expect(not alchemy.is_empty() and recipe_pages.size() == alchemy.size(),
+		"one page per alchemy output: %d pages for %d outputs"
+			% [recipe_pages.size(), alchemy.size()])
 	for index: int in range(catalogue.count()):
 		var recipe: Dictionary = catalogue.recipe(index)
 		if str(recipe.get("skill", "")) != "alchemy":

@@ -156,7 +156,7 @@ func run() -> void:
 	expect(main.manufacturing_list.item_count == 0, "consuming storage ingredients updates Available")
 	workspace.ingredients_only.pressed.emit()
 	await frames()
-	expect(workspace.ingredients_only.text == "All recipes" and main.manufacturing_list.item_count == main.manufacturing_catalog.count(), "All recipes works while storage is the source")
+	expect(workspace.ingredients_only.text == "All recipes" and main.manufacturing_list.item_count == main.manufacturing_catalog.output_count(), "All recipes shows each output once while storage is the source")
 	workspace.ingredients_only.pressed.emit()
 	app.storage.open = true
 	main.storage_panel.show()

@@ -64,7 +64,7 @@ func run() -> void:
 	expect(not view.filtered_entries().is_empty(), "typing searches without submitting")
 	view.show_index()
 	view.call("_filter_changed", "type", "recipe")
-	expect(view.filtered_entries().size() == recipes.count(), "one indexed row per recipe, across all topics")
+	expect(view.filtered_entries().size() == recipes.output_count(), "one indexed row per output, across all topics")
 	view.call("_filter_changed", "sort", "level")
 	var previous := -1
 	for entry: Dictionary in view.filtered_entries():

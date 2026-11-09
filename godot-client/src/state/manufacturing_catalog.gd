@@ -7,15 +7,39 @@ extends RefCounted
 const AMBIGUOUS := -2
 
 var _recipes: Array[Dictionary] = []
+var _outputs: Dictionary = {}
 
 func configure(config: Dictionary) -> void:
 	_recipes.clear()
+	_outputs.clear()
 	var recipes_value: Variant = config.get("recipes", [])
 	if not recipes_value is Array:
 		return
 	for recipe_value: Variant in recipes_value as Array:
 		if recipe_value is Dictionary:
 			_recipes.append((recipe_value as Dictionary).duplicate(true))
+			var output := str(recipe_value.get("output", ""))
+			if not _outputs.has(output): _outputs[output] = []
+			(_outputs[output] as Array).append(_recipes.size() - 1)
+
+## Catalogue positions remain the server's recipe identities; grouping only
+## changes how recipes are presented.
+func output_count() -> int:
+	return _outputs.size()
+
+func alternatives(index: int) -> Array[int]:
+	var indices: Array[int] = []
+	for value: int in _outputs.get(str(recipe(index).get("output", "")), []):
+		indices.append(value)
+	return indices
+
+func variant_label(index: int) -> String:
+	var definition := recipe(index)
+	var materials: Array[String] = []
+	for ingredient: Dictionary in definition.get("ingredients", []):
+		materials.append("%s ×%d" % [ingredient.get("name", ""), int(ingredient.get("quantity", 1))])
+	return "%s · %s %d" % [", ".join(materials),
+		str(definition.get("skill", "")).capitalize(), int(definition.get("level", 0))]
 
 func count() -> int:
 	return _recipes.size()

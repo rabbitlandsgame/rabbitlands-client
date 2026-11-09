@@ -1050,7 +1050,7 @@ func _run() -> void:
 		and manufacturing_list.item_count < (main.get("manufacturing_catalog") as ManufacturingCatalog).count(),
 		"mixing starts with only currently available recipes")
 	ready_only.button_pressed = false
-	_expect(manufacturing_panel.visible and manufacturing_list.item_count == (main.get("manufacturing_catalog") as ManufacturingCatalog).count()
+	_expect(manufacturing_panel.visible and manufacturing_list.item_count == (main.get("manufacturing_catalog") as ManufacturingCatalog).output_count()
 		and root.get_visible_rect().encloses(manufacturing_panel.get_global_rect()),
 		"the served recipe catalog opens within the reference viewport: %d"
 			% manufacturing_list.item_count)

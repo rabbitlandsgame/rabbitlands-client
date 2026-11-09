@@ -65,7 +65,7 @@ func run() -> void:
 	expect(ready.button_pressed and listed(medicine) and list.item_count < catalog.count(),
 		"mixing defaults to ready recipes, including the carried Bandage supplies")
 	ready.button_pressed = false
-	expect(list.item_count == catalog.count(), "turning off the option shows every recipe")
+	expect(list.item_count == catalog.output_count(), "turning off the option shows every output")
 	ready.button_pressed = true
 	main.set("manufacturing_skill", "potion")
 	var search: LineEdit = main.get("manufacturing_filter")
@@ -119,7 +119,7 @@ func run() -> void:
 	app_state.state_changed.emit(&"mix_state")
 	var source: CheckButton = main.get("manufacturing_source")
 	source.button_pressed = true
-	expect(ready.disabled and not ready.button_pressed and list.item_count == catalog.count(),
+	expect(ready.disabled and not ready.button_pressed and list.item_count == catalog.output_count(),
 		"storage allows browsing recipes without assuming its unseen stock")
 	app_state.mix_state.near_storage = false
 	app_state.state_changed.emit(&"mix_state")
@@ -128,7 +128,7 @@ func run() -> void:
 	ready.button_pressed = false
 	main.call("_on_manufacturing_close_pressed")
 	main.call("_on_manufacturing_button_pressed")
-	expect(not ready.button_pressed and list.item_count == catalog.count(),
+	expect(not ready.button_pressed and list.item_count == catalog.output_count(),
 		"the selected option survives closing and reopening the window")
 	main.queue_free()
 	await process_frame

@@ -19,6 +19,7 @@ var skill: OptionButton
 var ingredients_only: Button
 var sort_order: Button
 var selector: OptionButton
+var variant_selector: OptionButton
 var details: VBoxContainer
 var detail_scroll: ScrollContainer
 var queue_body: VBoxContainer
@@ -377,9 +378,15 @@ func sync() -> void:
 	for row: int in main.manufacturing_list.item_count:
 		var definition: Dictionary = main.manufacturing_catalog.recipe(int(main.manufacturing_list.get_item_metadata(row)))
 		var output := str(definition.get("output", "Unknown"))
-		main.manufacturing_list.set_item_text(row, ("%d · " % int(definition.get("level", 0)) if main.manufacturing_sort_mode == "level" else "") + ItemNames.display(output))
+		var alternatives: Array[int] = main.manufacturing_catalog.alternatives(int(main.manufacturing_list.get_item_metadata(row)))
+		var level := int(definition.get("level", 0))
+		for index: int in alternatives:
+			if main._manufacturing_recipe_matches(index): level = mini(level, int(main.manufacturing_catalog.recipe(index).get("level", 0)))
+		main.manufacturing_list.set_item_text(row, ("%d · " % level if main.manufacturing_sort_mode == "level" else "") + ItemNames.display(output))
 		main.manufacturing_list.set_item_icon(row, main._slot_icon(int(definition.get("outputImageId", 0)), -1))
 		main.manufacturing_list.set_item_tooltip(row, ItemNames.tooltip(output) + "\n%s level %d\n%s" % [str(definition.get("skill", "")).capitalize(), int(definition.get("level", 0)), str(main._manufacturing_availability(int(main.manufacturing_list.get_item_metadata(row))).reasons)])
+		if alternatives.size() > 1:
+			main.manufacturing_list.set_item_tooltip(row, main.manufacturing_list.get_item_tooltip(row) + "\n%d alternative recipes; choose one in Mix." % alternatives.size())
 	if _display_recipe != main.selected_manufacturing_recipe:
 		_display_recipe = main.selected_manufacturing_recipe
 		for row: int in main.manufacturing_list.item_count:
@@ -446,6 +453,7 @@ func _empty_recipe_message() -> String:
 
 func _render_detail() -> void:
 	_clear(details)
+	variant_selector = null
 	var definition: Dictionary = main.manufacturing_catalog.recipe(main.selected_manufacturing_recipe)
 	var title := HBoxContainer.new()
 	title.add_theme_constant_override("separation", 3)
@@ -488,6 +496,33 @@ func _render_detail() -> void:
 		explanation.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		details.add_child(explanation)
 		return
+	var alternatives: Array[int] = main.manufacturing_catalog.alternatives(main.selected_manufacturing_recipe)
+	if alternatives.size() > 1:
+		var variant_heading := _label("Alternative recipe")
+		variant_heading.add_theme_font_size_override("font_size", 11)
+		details.add_child(variant_heading)
+		variant_selector = OptionButton.new()
+		variant_selector.name = "MixingVariantSelector"
+		variant_selector.fit_to_longest_item = false
+		variant_selector.clip_text = true
+		variant_selector.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		for index: int in alternatives:
+			var label: String = ItemNames.in_text(main.manufacturing_catalog.variant_label(index))
+			variant_selector.add_item(label)
+			var row := variant_selector.item_count - 1
+			variant_selector.set_item_metadata(row, index)
+			variant_selector.set_item_tooltip(row, label)
+			variant_selector.set_item_disabled(row, not main._manufacturing_recipe_matches(index))
+			if variant_selector.is_item_disabled(row):
+				variant_selector.set_item_tooltip(row, label + "\nDoes not match the current search, skill or availability filters.")
+			if index == main.selected_manufacturing_recipe:
+				variant_selector.select(row)
+				variant_selector.tooltip_text = label
+		variant_selector.item_selected.connect(func(row: int) -> void:
+			main.selected_manufacturing_recipe = int(variant_selector.get_item_metadata(row))
+			main.manufacturing_server_status = "Ready for server validation."
+			main._sync_manufacturing())
+		details.add_child(variant_selector)
 	var meta := _label("%s %d · %d XP · Food %d" % [str(definition.get("skill", "")).capitalize(), int(definition.get("level", 0)), int(definition.get("experience", 0)), int(definition.get("food", 0))])
 	meta.clip_text = true
 	meta.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS

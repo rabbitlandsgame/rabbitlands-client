@@ -151,13 +151,20 @@ func category_ids() -> Array[String]:
 	return ids
 
 func entry_count_in(category_id: String) -> int:
-	return (_category(category_id).get("entries", []) as Array).size()
+	return _entries_in(category_id).size()
 
 func entry_ids_in(category_id: String) -> Array[String]:
 	var ids: Array[String] = []
-	for entry_value: Variant in _category(category_id).get("entries", []) as Array:
+	for entry_value: Variant in _entries_in(category_id):
 		ids.append(str((entry_value as Dictionary).get("id", "")))
 	return ids
+
+func _entries_in(category_id: String) -> Array[Dictionary]:
+	var entries: Array[Dictionary] = []
+	for entry: Dictionary in _flat:
+		if str(entry.category) == category_id or _recipe_variants_match(entry.get("variants", []), {"topic": category_id}):
+			entries.append(entry)
+	return entries
 
 func entry_count() -> int:
 	return _flat.size()
@@ -358,6 +365,12 @@ func _rebuild_content() -> void:
 
 	for entry: Dictionary in _flat:
 		if str(entry.get("type", "")) == "recipe":
+			var catalogue: ManufacturingCatalog = _catalogues.get("manufacturing") as ManufacturingCatalog
+			# Ingredient links can only resolve after all output pages exist.
+			for position: int in (entry.variants as Array).size():
+				var facts := _recipe_facts(catalogue.recipe(int(entry.variants[position].index)))
+				entry.variants[position]["facts"] = facts
+				if entry.has("sections"): entry.sections[position + 1]["rows"] = facts
 			for pair: Array in entry.get("facts", []) as Array:
 				if str(pair[0]) == "Required materials":
 					pair[1] = _ingredient_lines(entry.get("materials", []))
@@ -373,6 +386,10 @@ func _rebuild_content() -> void:
 			for pair: Array in section.get("rows", []) as Array:
 				searchable += " %s %s" % [pair[0], _plain_text(str(pair[1]))]
 		entry["search"] = searchable.to_lower()
+	# Old recipe bookmarks and links still lead to the grouped item page.
+	for entry: Dictionary in _flat:
+		for alias: String in entry.get("recipe_aliases", []):
+			if not _by_id.has(alias): _by_id[alias] = entry
 
 func _written_entry(raw: Dictionary, category_id: String) -> Dictionary:
 	var body: String = str(raw.get("body", ""))
@@ -407,19 +424,15 @@ func _entry_record(id: String, title: String, summary: String, body: String,
 		"type": "guide", "level": -1, "book": "",
 		"search": ("%s %s %s" % [title, summary, body]).to_lower()}
 
-## One entry per recipe, grouped by the skill that mixes it. The fields are the
-## recipe's own: what it takes, what it wants you to have read, and what it
-## gives back.
+## One entry per output, with each recipe's own materials and requirements.
+## Cross-skill alternatives share a page and remain discoverable by either topic.
 func _recipe_entries(skill_categories: Dictionary) -> Dictionary:
 	var by_skill: Dictionary = {}
 	_recipes_by_book.clear()
 	var catalogue: ManufacturingCatalog = _catalogues.get("manufacturing") as ManufacturingCatalog
 	if catalogue == null:
 		return by_skill
-	# The table can hold two ways of making the same thing. Both are real
-	# recipes and both get a page, so a name used twice is qualified by what
-	# actually differs: the level, then the first material, then the recipe's
-	# own place in the table. Two pages may not answer to one name.
+	# Retain former page names as aliases for saved bookmarks.
 	var repeated: Dictionary = {}
 	for index: int in range(catalogue.count()):
 		for key: String in _naming_keys(catalogue.recipe(index)):
@@ -427,56 +440,54 @@ func _recipe_entries(skill_categories: Dictionary) -> Dictionary:
 	var used: Dictionary = {}
 	for index: int in range(catalogue.count()):
 		var recipe: Dictionary = catalogue.recipe(index)
+		var output: String = str(recipe.get("output", ""))
+		if used.has(output): continue
 		var skill: String = str(recipe.get("skill", ""))
 		var category_id: String = str(skill_categories.get(skill, ""))
 		if category_id.is_empty():
 			continue
-		var output: String = str(recipe.get("output", ""))
-		var readable_skill: String = skill.capitalize()
-		var title: String = _recipe_title(recipe, repeated)
+		used[output] = true
+		var title: String = output
 		var entry_id: String = _slug(title)
-		if used.has("%s/%s" % [category_id, entry_id]):
-			entry_id = "%s-%d" % [entry_id, int(recipe.get("id", index))]
-		used["%s/%s" % [category_id, entry_id]] = true
-		var facts: Array[Array] = []
-		var materials: String = _ingredient_lines(recipe.get("ingredients", []))
-		facts.append(["Required materials",
-			materials if not materials.is_empty() else "None"])
-		var tools: String = _ingredient_lines(recipe.get("tools", []))
-		if not tools.is_empty():
-			facts.append(["Tools required to have", tools])
-		var book: String = str(recipe.get("knowledge", ""))
-		if not book.is_empty():
-			facts.append(["Knowledge needed", _link("entry:%s:%s" % [
-				_books_category, _slug(book)], book)])
-		var animal_nexus := int(recipe.get("animalNexus", 0))
-		if animal_nexus > 0:
-			facts.append(["Animal nexus required", str(animal_nexus)])
-		facts.append(["Recommended %s level" % readable_skill,
-			str(int(recipe.get("level", 0)))])
-		facts.append(["%s experience given" % readable_skill,
-			str(int(recipe.get("experience", 0)))])
-		facts.append(["Food subtracted", str(int(recipe.get("food", 0)))])
-		var mana: int = int(recipe.get("mana", 0))
-		if mana > 0:
-			facts.append(["Ether required", str(mana)])
-		var body: String = ("Mixed with the %s skill. The listed level is recommended,"
+		var body: String = ("Each recipe makes the same item. The listed level is recommended,"
 			+ " not a guaranteed success threshold. Attempts can fail; a critical"
 			+ " failure can consume materials. A rare result stops a running batch."
 			+ " Required knowledge, tools, food and"
 			+ " any nexus requirements are checked by the server. Near a storage"
 			+ " keeper, the mixing window can draw materials from storage; tools"
-			+ " still need to be carried or equipped.") % readable_skill
+			+ " still need to be carried or equipped.")
+		var variants: Array[Dictionary] = []
+		var sections: Array[Dictionary] = [{"title": "Overview", "kind": "prose", "text": body}]
+		var aliases: Array[String] = []
+		var books: Array[String] = []
+		var minimum_level := int(recipe.get("level", 0))
+		for alternative: int in catalogue.alternatives(index):
+			var variant := catalogue.recipe(alternative)
+			var variant_category := str(skill_categories.get(str(variant.get("skill", "")), ""))
+			var facts := _recipe_facts(variant)
+			variants.append({"index": alternative, "category": variant_category, "level": int(variant.get("level", 0)),
+				"book": str(variant.get("knowledge", "")), "facts": facts})
+			minimum_level = mini(minimum_level, int(variant.get("level", 0)))
+			sections.append({"title": "Recipe %d · %s level %d" % [variants.size(),
+				str(variant.get("skill", "")).capitalize(), int(variant.get("level", 0))],
+				"kind": "facts", "rows": facts})
+			aliases.append("%s/%s" % [variant_category, _slug(_recipe_title(variant, repeated))])
+			aliases.append("%s/%s" % [variant_category, entry_id])
+			var book := str(variant.get("knowledge", ""))
+			if not book.is_empty() and not books.has(book): books.append(book)
 		var image: Dictionary = _item_image(int(recipe.get("outputImageId", -1)))
-		var entry: Dictionary = _entry_record(entry_id, title, "", body, facts,
+		var entry: Dictionary = _entry_record(entry_id, title, "", body, _recipe_facts(recipe),
 			image, category_id)
-		entry.merge({"type": "recipe", "level": int(recipe.get("level", 0)),
-			"book": book, "output": output, "materials": recipe.get("ingredients", []),
-			"tools": recipe.get("tools", [])}, true)
+		entry.merge({"type": "recipe", "level": minimum_level,
+			"book": ", ".join(books), "output": output, "materials": recipe.get("ingredients", []),
+			"tools": recipe.get("tools", []), "variants": variants, "recipe_aliases": aliases}, true)
+		if variants.size() > 1:
+			entry["sections"] = sections
+			entry["summary"] = "%d alternative recipes for the same item." % variants.size()
 		if not by_skill.has(skill):
 			by_skill[skill] = []
 		(by_skill[skill] as Array).append(entry)
-		if not book.is_empty():
+		for book: String in books:
 			if not _recipes_by_book.has(book):
 				_recipes_by_book[book] = []
 			(_recipes_by_book[book] as Array).append({"category": category_id,
@@ -484,6 +495,23 @@ func _recipe_entries(skill_categories: Dictionary) -> Dictionary:
 	for skill: Variant in by_skill:
 		(by_skill[skill] as Array).sort_custom(_title_before)
 	return by_skill
+
+func _recipe_facts(recipe: Dictionary) -> Array[Array]:
+	var skill := str(recipe.get("skill", "")).capitalize()
+	var materials := _ingredient_lines(recipe.get("ingredients", []))
+	var facts: Array[Array] = [["Required materials", materials if not materials.is_empty() else "None"]]
+	var tools := _ingredient_lines(recipe.get("tools", []))
+	if not tools.is_empty(): facts.append(["Tools required to have", tools])
+	var book := str(recipe.get("knowledge", ""))
+	if not book.is_empty():
+		facts.append(["Knowledge needed", _link("entry:%s:%s" % [_books_category, _slug(book)], book)])
+	if int(recipe.get("animalNexus", 0)) > 0:
+		facts.append(["Animal nexus required", str(int(recipe.animalNexus))])
+	facts.append(["Recommended %s level" % skill, str(int(recipe.get("level", 0)))])
+	facts.append(["%s experience given" % skill, str(int(recipe.get("experience", 0)))])
+	facts.append(["Food subtracted", str(int(recipe.get("food", 0)))])
+	if int(recipe.get("mana", 0)) > 0: facts.append(["Ether required", str(int(recipe.mana))])
+	return facts
 
 ## The three names a recipe could be filed under, narrowest last. Counting all
 ## three in one pass is what lets the next pass tell which of them is enough.
@@ -728,7 +756,11 @@ func _render() -> void:
 		var key := _key_for(entry)
 		row.set_metadata(0, key)
 		row.set_text(0, str(entry.title))
-		row.set_text(1, str(_category(str(entry.category)).get("title", "")))
+		var topics: Array[String] = []
+		for variant: Dictionary in entry.get("variants", []):
+			var topic := str(_category(str(variant.category)).get("title", ""))
+			if not topics.has(topic): topics.append(topic)
+		row.set_text(1, ", ".join(topics) if not topics.is_empty() else str(_category(str(entry.category)).get("title", "")))
 		row.set_text(2, str(entry.get("type", "guide")).capitalize())
 		row.set_text(3, str(entry.level) if int(entry.get("level", -1)) >= 0 else "—")
 		var book := str(entry.get("book", ""))
@@ -784,6 +816,21 @@ func _render_selection(key: String, full := false) -> void:
 
 func _render_entry_preview(entry: Dictionary) -> void:
 	_clear(entry_page)
+	_anchors.clear()
+	var variants: Array = entry.get("variants", [])
+	if variants.size() > 1:
+		entry_page.add_child(_shell_note(str(entry.get("summary", ""))))
+		var links := HFlowContainer.new()
+		links.name = "AlternativeRecipes"
+		entry_page.add_child(links)
+		for section: Dictionary in entry.get("sections", []):
+			if section.get("kind") != "facts": continue
+			var heading := _shell_heading(str(section.title))
+			entry_page.add_child(heading)
+			_anchors[str(section.title)] = heading
+			_add_anchor(str(section.title), links)
+			entry_page.add_child(_fact_table(section.rows))
+		return
 	var rows: Array = []
 	for pair: Array in entry.get("facts", []) as Array:
 		var label := str(pair[0])
@@ -1095,7 +1142,7 @@ func _sync_browse() -> void:
 		row.focus_mode = Control.FOCUS_NONE
 		row.toggle_mode = true
 		row.button_pressed = id == here
-		var count: int = (category.get("entries", []) as Array).size()
+		var count: int = entry_count_in(id)
 		row.tooltip_text = ("%s - nothing written yet" % str(category.get("title", id))
 			if count == 0 else "%s - %d pages" % [str(category.get("title", id)), count])
 		row.disabled = count == 0
@@ -1369,10 +1416,18 @@ func open_menu(where: Vector2) -> void:
 	menu.popup()
 
 func _bookmark_index(key: String) -> int:
+	var canonical := _canonical_page_key(key)
 	for index: int in range(_bookmarks.size()):
-		if str(_bookmarks[index].get("key", "")) == key:
+		if _canonical_page_key(str(_bookmarks[index].get("key", ""))) == canonical:
 			return index
 	return -1
+
+func _canonical_page_key(key: String) -> String:
+	var parts := key.split(":")
+	if parts.size() == 3 and parts[0] == "entry":
+		var entry := _entry(parts[1], parts[2])
+		if not entry.is_empty(): return _key_for(entry)
+	return key
 
 func _on_menu_id_pressed(id: int) -> void:
 	if id >= 100:
@@ -1402,10 +1457,13 @@ func add_bookmark() -> void:
 	_render()
 
 func remove_bookmark(key: String) -> void:
-	var index: int = _bookmark_index(key)
-	if index < 0:
-		return
-	_bookmarks.remove_at(index)
+	var canonical := _canonical_page_key(key)
+	var removed := false
+	for index: int in range(_bookmarks.size() - 1, -1, -1):
+		if _canonical_page_key(str(_bookmarks[index].get("key", ""))) == canonical:
+			_bookmarks.remove_at(index)
+			removed = true
+	if not removed: return
 	bookmarks_changed.emit(bookmarks())
 	_render()
 
@@ -1445,7 +1503,9 @@ func filtered_entries() -> Array[Dictionary]:
 	var found: Array[Dictionary] = []
 	var state := _browse_state()
 	for entry: Dictionary in _flat:
-		if not str(state.get("topic", "")).is_empty() and str(entry.category) != str(state.topic):
+		var variants: Array = entry.get("variants", [])
+		if not variants.is_empty() and not _recipe_variants_match(variants, state): continue
+		if variants.is_empty() and not str(state.get("topic", "")).is_empty() and str(entry.category) != str(state.topic):
 			continue
 		if not str(state.get("type", "")).is_empty() and str(entry.get("type", "")) != str(state.type):
 			continue
@@ -1454,18 +1514,30 @@ func filtered_entries() -> Array[Dictionary]:
 		if str(state.get("kind", "")) == "bookmarks" and _bookmark_index(_key_for(entry)) < 0:
 			continue
 		var requirement := int(state.get("book_filter", 0))
-		if requirement > 0:
+		if variants.is_empty() and requirement > 0:
 			if str(entry.get("type", "")) not in ["recipe", "spell"]:
 				continue
 			if (not str(entry.get("book", "")).is_empty()) != (requirement == 1):
 				continue
-		if bool(state.get("limit_level", false)):
+		if variants.is_empty() and bool(state.get("limit_level", false)):
 			var level := int(entry.get("level", -1))
 			if level < 0 or level > int(state.get("max_level", 100)):
 				continue
 		found.append(entry)
 	found.sort_custom(_ledger_before)
 	return found
+
+func _recipe_variants_match(variants: Array, state: Dictionary) -> bool:
+	# Combined filters must describe one actual alternative, rather than
+	# borrowing a low level from one recipe and a book from another.
+	for variant: Dictionary in variants:
+		var topic := str(state.get("topic", ""))
+		if not topic.is_empty() and str(variant.category) != topic: continue
+		var requirement := int(state.get("book_filter", 0))
+		if requirement > 0 and (not str(variant.book).is_empty()) != (requirement == 1): continue
+		if bool(state.get("limit_level", false)) and int(variant.level) > int(state.get("max_level", 100)): continue
+		return true
+	return false
 
 func _ledger_before(a: Dictionary, b: Dictionary) -> bool:
 	var sort_key := str(_page.get("sort", "name"))
@@ -1522,7 +1594,8 @@ func _toggle_bookmark(key: String) -> void:
 		return
 	var at := _bookmark_index(key)
 	if at >= 0:
-		_bookmarks.remove_at(at)
+		remove_bookmark(key)
+		return
 	else:
 		var entry := _entry(parts[1], parts[2])
 		if entry.is_empty(): return
