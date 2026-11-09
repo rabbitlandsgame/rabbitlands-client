@@ -14,6 +14,7 @@ const MAP_STORAGE_COORDS_CAPABILITY := "map_storage_coords_v1"
 const CoordinateTransport = preload("res://src/network/coordinate_transport.gd")
 const InterestProtocol := preload("res://src/network/interest_protocol.gd")
 const GauntletProgressProtocol := preload("res://src/network/gauntlet_progress_protocol.gd")
+const DescentFog := preload("res://src/world/descent_fog.gd")
 
 ## The guild packet's permissions field: what the server says this reader may
 ## do. They live here, with the packet they arrive in, and the rank each power
@@ -145,6 +146,9 @@ enum ServerMessage {
 	ELORIA_CAMPAIGN_STATE = 191,
 	ELORIA_APPEARANCE_PROTOCOL = 190,
 	ELORIA_GAUNTLET_PROGRESS_STATE = 189,
+	## A party descent (descent_v1): the floor, its fog of war and the clock,
+	## or the boss reward's three-way pick. JSON, `kind` "state" or "reward".
+	ELORIA_DESCENT_STATE = 188,
 	# Which map package the server was built against. Continues the same
 	# downward run below 211.
 	ELORIA_MAP_DIGEST = 209,
@@ -342,6 +346,9 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"gauntlet_ready_v1",
 	"gauntlet_loot_v1",
 	"gauntlet_progress_v1",
+	# ELORIA_DESCENT_STATE: a descent's floor, fog of war, clock and reward
+	# pick. The server admits nobody to a descent without it.
+	"descent_v1",
 	"perk_catalog_v3",
 	"player_info_v1",
 	"achievements_window_v1",
@@ -1263,6 +1270,8 @@ static func decode_server(command: int, payload: PackedByteArray, logical_coordi
 			return decode_gauntlet_loot(payload)
 		ServerMessage.ELORIA_GAUNTLET_PROGRESS_STATE:
 			return GauntletProgressProtocol.decode(payload)
+		ServerMessage.ELORIA_DESCENT_STATE:
+			return decode_descent(payload)
 		ServerMessage.ELORIA_CAMPAIGN_STATE:
 			return decode_campaign(payload)
 		ServerMessage.ELORIA_LANTERN_STATE:
@@ -1849,6 +1858,80 @@ static func decode_gauntlet_ready(payload: PackedByteArray) -> Dictionary:
 						or int(member.class_id) < 0 or int(member.class_id) > 3):
 					return {"type": "invalid", "error": "gauntlet_ready_bot"}
 	return {"type": "gauntlet_ready", "data": state}
+
+## Command 188 (descent_v1). `kind` "state": the floor the player is on in a
+## descent, its grid and explored cells (decoded into `mask`, the bits as
+## sent), the clock and the boss; `open` false when the player left. `kind`
+## "reward": the boss reward's offer of three, answered with
+## `#descent pick <offer> <index>`; `open` false closes it.
+static func decode_descent(payload: PackedByteArray) -> Dictionary:
+	var state: Variant = JSON.parse_string(payload.get_string_from_utf8())
+	if not state is Dictionary or state.get("version") != 1.0 or not state.get("open") is bool \
+			or not (state.get("kind") in ["state", "reward"]):
+		return {"type": "invalid", "error": "descent_shape"}
+	var kind: String = state.kind
+	var type := "descent_state" if kind == "state" else "descent_reward"
+	if not state.open:
+		return {"type": type, "data": {"version": 1, "kind": kind, "open": false}}
+	if kind == "reward":
+		return _decode_descent_reward(state)
+	for key: String in ["run", "section", "explored"]:
+		if not state.get(key) is String or str(state[key]).is_empty():
+			return {"type": "invalid", "error": "descent_text"}
+	for key: String in ["dungeon", "name", "difficulty", "floor_name", "boss"]:
+		if state.has(key) and not state[key] is String:
+			return {"type": "invalid", "error": "descent_text"}
+	if state.has("boss") and not (state.boss in ["", "waiting", "fighting", "defeated"]):
+		return {"type": "invalid", "error": "descent_boss"}
+	for key: String in ["floor", "floors", "cell_tiles", "width", "height", "time_left"]:
+		if not _whole_number(state.get(key)) or float(state[key]) < (0.0 if key == "time_left" else 1.0):
+			return {"type": "invalid", "error": "descent_number"}
+	if int(state.floor) > int(state.floors):
+		return {"type": "invalid", "error": "descent_floor"}
+	var origin: Variant = state.get("origin")
+	if not origin is Array or (origin as Array).size() != 2 or not _whole_number(origin[0]) \
+			or not _whole_number(origin[1]) or float(origin[0]) < 0.0 or float(origin[1]) < 0.0:
+		return {"type": "invalid", "error": "descent_origin"}
+	var mask := DescentFog.decode_mask(str(state.explored), int(state.width), int(state.height))
+	if mask.is_empty():
+		return {"type": "invalid", "error": "descent_explored"}
+	var data: Dictionary = {"version": 1, "kind": "state", "open": true,
+		"run": state.run, "dungeon": str(state.get("dungeon", "")),
+		"name": str(state.get("name", "")), "difficulty": str(state.get("difficulty", "")),
+		"floor": int(state.floor), "floors": int(state.floors),
+		"floor_name": str(state.get("floor_name", "")), "section": state.section,
+		"origin": [int(origin[0]), int(origin[1])], "cell_tiles": int(state.cell_tiles),
+		"width": int(state.width), "height": int(state.height),
+		"explored": state.explored, "mask": mask,
+		"time_left": int(state.time_left), "boss": str(state.get("boss", ""))}
+	return {"type": "descent_state", "data": data}
+
+static func _decode_descent_reward(state: Dictionary) -> Dictionary:
+	if not state.get("offer") is String or str(state.offer).is_empty():
+		return {"type": "invalid", "error": "descent_reward_offer"}
+	if state.has("title") and not state.title is String:
+		return {"type": "invalid", "error": "descent_reward_title"}
+	if not state.get("items") is Array or state.items.is_empty() or state.items.size() > 6:
+		return {"type": "invalid", "error": "descent_reward_items"}
+	var items: Array[Dictionary] = []
+	for raw: Variant in state.items:
+		if not raw is Dictionary or not raw.get("item") is String or str(raw.item).is_empty() \
+				or not _whole_number(raw.get("index")) or float(raw.index) < 0.0 \
+				or not _whole_number(raw.get("quantity")) or float(raw.quantity) < 1.0 \
+				or not _whole_number(raw.get("image_id")) or float(raw.image_id) < 0.0 \
+				or (raw.has("rare") and not raw.rare is bool):
+			return {"type": "invalid", "error": "descent_reward_item"}
+		items.append({"index": int(raw.index), "item": raw.item, "quantity": int(raw.quantity),
+			"image_id": int(raw.image_id), "rare": bool(raw.get("rare", false))})
+	var title: String = str(state.get("title", ""))
+	return {"type": "descent_reward", "data": {"version": 1, "kind": "reward", "open": true,
+		"offer": state.offer, "title": title if not title.is_empty() else "Choose your reward",
+		"items": items}}
+
+## A JSON number holding a whole value (JSON numbers decode as floats).
+static func _whole_number(value: Variant) -> bool:
+	return (value is float or value is int) and is_finite(float(value)) \
+		and float(value) == floorf(float(value)) and absf(float(value)) <= 2147483647.0
 
 ## A bounded page of the authoritative escrow ledger; quantities are integers.
 static func decode_gauntlet_loot(payload: PackedByteArray) -> Dictionary:

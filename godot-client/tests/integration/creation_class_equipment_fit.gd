@@ -54,13 +54,13 @@ func run() -> void:
 	slugs.sort()
 	expect(slugs.size() == 16, "class equipment sweep covers all sixteen player rigs")
 	expect(CreationArchetypes.count() == 4, "four creation classes are fitted")
-	expect(CreationArchetypes.loadout_at(0) == {0: 114, 1: 106, 2: 105, 3: 134, 4: 220, 5: 209, 6: 249},
+	expect(CreationArchetypes.loadout_at(0) == {0: 114, 1: 106, 2: 147, 3: 134, 4: 220, 5: 209, 6: 249},
 		"Vanguard previews the whole militia set")
-	expect(CreationArchetypes.loadout_at(1) == {0: 164, 3: 159, 4: 230, 5: 225, 6: 226, 8: 1},
+	expect(CreationArchetypes.loadout_at(1) == {0: 164, 2: 148, 3: 159, 4: 230, 5: 225, 6: 226, 8: 1},
 		"Ranger previews hood, vest, breeches and fieldboots")
-	expect(CreationArchetypes.loadout_at(2) == {0: 142, 3: 115, 4: 185, 5: 222, 6: 198},
+	expect(CreationArchetypes.loadout_at(2) == {0: 142, 2: 146, 3: 115, 4: 185, 5: 222, 6: 198},
 		"Arcanist previews the whole Acolyte set")
-	expect(CreationArchetypes.loadout_at(3) == {0: 163, 2: 100, 3: 122, 4: 176, 5: 189, 6: 205},
+	expect(CreationArchetypes.loadout_at(3) == {0: 163, 2: 142, 3: 122, 4: 176, 5: 189, 6: 205},
 		"Warden previews the Antler Hood and the Furtrim set")
 	for slug_value: Variant in slugs:
 		var slug := str(slug_value)

@@ -927,6 +927,9 @@ func _add_model(entry: Dictionary) -> float:
 	add_child(model)
 	if entry.has("resourcePalette"):
 		preload("res://src/world/mineral_appearance.gd").apply(model,entry.resourcePalette)
+	# A reused prop may be tinted for its role (a descent's finer chests).
+	if entry.get("tint") is String:
+		_tint_model(model, Color.from_string(str(entry.tint), Color.WHITE))
 	model_id = str(entry.get("id", ""))
 	# The same node id stands on every map that declares it, so an unvaried
 	# model reads as a stamped copy wherever two are in view of each other.
@@ -941,13 +944,31 @@ func _add_model(entry: Dictionary) -> float:
 	# butted row segments meet end to end.
 	_model_yaw = deg_to_rad(float(presentation.yaw)) if _stated_number("yaw") else random_yaw
 	model.rotation.y = _model_yaw
-	model.scale = Vector3.ONE * (1.0 if not _footprint().is_empty() else random_scale)
+	# A registry `scale` sizes a reused prop for its role (the descent's chest
+	# tiers, its reward dais); the seeded variation still applies around it.
+	var stated: Variant = entry.get("scale", 1.0)
+	var role_scale: float = float(stated) if (stated is float or stated is int) and float(stated) > 0.0 else 1.0
+	model.scale = Vector3.ONE * (1.0 if not _footprint().is_empty() else random_scale) * role_scale
 	# A wall node's model stands in the rock face, `inset` metres back from the
 	# tile's centre against its facing (the yaw's +Z points out of the rock).
 	if is_wall_placed() and _stated_number("inset"):
 		_model_offset = -Vector3(sin(_model_yaw), 0.0, cos(_model_yaw)) * float(presentation.inset)
 		model.position = _model_offset
 	return float(entry.get("height", 1.0)) * model.scale.y
+
+## Multiplies every surface's albedo by `colour`, on copies of the shared
+## materials so other instances of the same GLB keep their own colour.
+static func _tint_model(model: Node3D, colour: Color) -> void:
+	for mesh: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+		if mesh.mesh == null:
+			continue
+		for surface: int in range(mesh.mesh.get_surface_count()):
+			var original := mesh.get_active_material(surface) as BaseMaterial3D
+			if original == null:
+				continue
+			var tinted := original.duplicate() as BaseMaterial3D
+			tinted.albedo_color = original.albedo_color * colour
+			mesh.set_surface_override_material(surface, tinted)
 
 ## A record's `modelOffset` [dx, dy, dz] (metres from the tile's centre) laid
 ## flat, or zero for none.

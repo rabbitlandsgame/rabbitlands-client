@@ -28,6 +28,9 @@ REPLACEMENTS = [
     ROOT / 'eloria-assets/source/item-icons/essences-2026-10-29',
     ROOT / 'eloria-assets/source/item-icons/enriched-essences-radiant-2026-10-30',
 ]
+STYLE_REFRESHES = [
+    ROOT / 'eloria-assets/source/item-icons/painted-refresh-2026-11-09',
+]
 
 
 def planned_atlases() -> list[tuple[Path, Image.Image]]:
@@ -76,7 +79,7 @@ def planned_atlases() -> list[tuple[Path, Image.Image]]:
     if [image_id for image_id, _ in cells] != list(range(count)):
         raise ValueError('Base paintings and supplements must cover every image ID exactly once')
     replaced = set()
-    for folder in REPLACEMENTS:
+    for folder in REPLACEMENTS + STYLE_REFRESHES:
         replacement = json.loads((folder / 'manifest.json').read_text(encoding='utf-8'))
         if replacement.get('draft') or replacement.get('decorativeFrame'):
             raise ValueError('Only selected unframed replacement paintings can be packed')

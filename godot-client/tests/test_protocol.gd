@@ -91,6 +91,7 @@ func _init() -> void:
 		"guild_window_v1": EloriaProtocol.ServerMessage.ELORIA_GUILD_STATE,
 		"party_window_v1": EloriaProtocol.ServerMessage.ELORIA_PARTY_STATE,
 		"gauntlet_ready_v1": EloriaProtocol.ServerMessage.ELORIA_GAUNTLET_READY_STATE,
+		"descent_v1": EloriaProtocol.ServerMessage.ELORIA_DESCENT_STATE,
 		"perk_catalog_v3": EloriaProtocol.ServerMessage.ELORIA_PERK_CATALOG,
 		"quest_archive_v1":
 			EloriaProtocol.ServerMessage.ELORIA_QUEST_ARCHIVE_STATE,
@@ -111,6 +112,13 @@ func _init() -> void:
 	var capability_probes: Dictionary = {
 		EloriaProtocol.ServerMessage.ELORIA_GAUNTLET_READY_STATE:
 			'{"version":1,"open":false,"reason":"Cancelled"}'.to_utf8_buffer().hex_encode(),
+		# A descent floor of 4 x 2 cells with cells (0, 0) and (3, 1) revealed:
+		# i = cy * width + cx, bit i & 7 of byte i >> 3, so one byte 0x81.
+		EloriaProtocol.ServerMessage.ELORIA_DESCENT_STATE: ('{"version":1,"kind":"state","open":true,'
+			+ '"run":"a91c","dungeon":"serpent_deep","name":"The Serpent Deep","difficulty":"Hard",'
+			+ '"floor":3,"floors":6,"floor_name":"The Buried Streets","section":"serpent_deep_f3v2",'
+			+ '"origin":[288,160],"cell_tiles":2,"width":4,"height":2,"explored":"gQ==",'
+			+ '"time_left":2345,"boss":""}').to_utf8_buffer().hex_encode(),
 		EloriaProtocol.ServerMessage.ELORIA_LEADERBOARD_STATE: (
 			'{"version":1,"category":"overall","days":0,"request_id":0,'
 			+ '"categories":[{"key":"overall","label":"Overall","group":"Skills","unit":"XP","icon":"overall"}],'
@@ -255,6 +263,14 @@ func _init() -> void:
 			if capability == "spell_ring_v1":
 				_expect(probe.type == "lantern_tutorial" and probe.state.ring_training,
 					"ring training survives its tutorial packet")
+	var descent: Dictionary = EloriaProtocol.decode_server(EloriaProtocol.ServerMessage.ELORIA_DESCENT_STATE,
+		_hex(str(capability_probes[EloriaProtocol.ServerMessage.ELORIA_DESCENT_STATE])))
+	_expect(descent.type == "descent_state" and descent.data.mask == PackedByteArray([0x81])
+		and descent.data.section == "serpent_deep_f3v2" and int(descent.data.width) == 4,
+		"the descent state keeps its floor grid and explored bits")
+	_expect(EloriaProtocol.decode_server(EloriaProtocol.ServerMessage.ELORIA_DESCENT_STATE,
+		'{"version":1,"kind":"reward","open":false}'.to_utf8_buffer()).type == "descent_reward",
+		"a closed descent reward decodes")
 	# Held keyboard directions (keyboard_intent_v1): the server's direction
 	# order, 255 for a release, the epoch the server last sent.
 	_expect(EloriaProtocol.move_intent(3, Vector2i(1, -1), true)
