@@ -49,8 +49,26 @@ def test_the_source_writer_reproduces_the_authored_file():
     assert TS.dump(annotated).encode('utf-8') == raw
     # one door, prop, window, decal and light per line
     lines = raw.decode('utf-8').splitlines()
-    assert sum('"object": 592' in line and '"kind": "building"' in line for line in lines) == 11
+    assert sum('"object": 592' in line and '"kind": "building"' in line for line in lines) == 12
     assert all(line.count('"kind": "building"') <= 1 for line in lines)
+
+
+def test_temple_range_and_arena_are_separate_and_raised_door_is_pickable(monkeypatch):
+    import retarget_underground as retarget
+    design = TS.load(SOURCE)
+    section = next(s for s in design['sections'] if s['id'] == 'temple_practice')
+    assert TS.room_tiles(section, 2) == (245, 151, 271, 169)
+    assert len(section['spawns']) == 3
+    assert all(species == 'temple_practice_dummy' and TS.room_of(section, x+.5, y+.5) == 1
+               for species,x,y,_ in section['spawns'])
+    monkeypatch.setattr(retarget, 'door_offset', lambda *_args: [0, 0, 0])
+    door = TS.doors(section)[0]
+    assert retarget.building_record(door, HERE)['height'] == 5.2
+    assert retarget.building_record(TS.doors(design)[0], HERE)['height'] == retarget.BUILDING_DOOR['height']
+    invalid = copy.deepcopy(design)
+    invalid['sections'][-1]['entrances'][0]['pickHeight'] = 100
+    with pytest.raises(TS.SourceError, match='pickHeight'):
+        TS.check(invalid)
 
 
 def test_the_authored_source_holds_the_spec_doors_and_the_stairs():
@@ -70,7 +88,8 @@ def test_the_authored_source_holds_the_spec_doors_and_the_stairs():
              (59208, 'watch_house', [86, 275], [83, 275], None),
              (59209, 'netmender_house', [239, 208], [234, 207], None),
              (59210, 'castle', [221, 276], [218, 273], None),
-             (59211, 'library', [159, 253], [158, 256], 'bookshop')]
+             (59211, 'library', [159, 253], [158, 256], 'bookshop'),
+             (59212, 'temple_practice', [138, 195], [138, 198], None)]
     assert sorted(by_object) == [row[0] for row in table]
     for oid, section, tile, back, category in table:
         door = by_object[oid]

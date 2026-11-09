@@ -792,7 +792,9 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 			skeleton = node as Skeleton3D
 			break
 		if skeleton == null:
-			errors.append("Skeleton3D missing")
+			# Practice targets are rigid imported props with normal actor picking/HP.
+			if not bool(model_config.get("staticModel", false)):
+				errors.append("Skeleton3D missing")
 		else:
 			_native_skeleton = skeleton
 			if model_config.has("culture"):

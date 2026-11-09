@@ -221,6 +221,16 @@ func _enter(map_id: String, tile: Vector2i) -> bool:
 	if map_id == INTERIOR:
 		var index := 0
 		for section: Dictionary in plan.sections:
+			for spawn: Array in section.get("spawns", []):
+				if str(spawn[0]) != "temple_practice_dummy":
+					continue
+				var target_id := NPC_BASE + index
+				index += 1
+				var target := _actor(target_id, "Magic practice dummy",
+					Vector2i(int(spawn[1]), int(spawn[2])), 790, 3, 4)
+				target["health"] = 1000
+				target["max_health"] = 1000
+				actors[target_id] = target
 			for person: Dictionary in section.get("npcs", []):
 				var id := NPC_BASE + index
 				index += 1
