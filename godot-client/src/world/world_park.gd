@@ -635,7 +635,9 @@ func observe(map_id: String, tile: Vector2i, map_objects: Dictionary = {}, settl
 		if not _flagged(interior) or parent_of(interior) != _bound_map: continue
 		nearest[interior] = 0.0
 		nearest_door[interior] = -1
-		if not _preload.is_empty() and str(_preload.map) != interior and settled:
+		# A parked destination is already prepared. It must not preempt a
+		# different nearby preload, which would restart again below each frame.
+		if not _parked.has(interior) and not _preload.is_empty() and str(_preload.map) != interior and settled:
 			_drop_preload("anticipated_travel")
 		nearest = _prioritize(nearest, interior)
 		break # One background slot; the first eligible destination has priority.
@@ -722,6 +724,11 @@ func start_preload(interior: String, door := -1, distance := INF) -> bool:
 		if not WebPrototype.map_ready(interior): WebPrototype.ensure_map(interior)
 		return false
 	if not _preload.is_empty() or _parked.has(interior):
+		return false
+	# Cancellation only abandons a worker's result; it cannot interrupt its
+	# texture uploads. Keep the single background slot occupied until tick()
+	# has reaped that result, rather than stacking whole-world builds.
+	if not _orphans.is_empty():
 		return false
 	var entry := MapRegistry.resolve(registry, interior)
 	var path := ProjectSettings.globalize_path(str(entry.get("manifest", "")))

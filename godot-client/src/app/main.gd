@@ -9064,7 +9064,9 @@ func _update_local_actor_follow() -> void:
 		return
 	var focus_position: Vector3 = target.global_position
 	if not character_intro.blocks_input() and not campaign_scene.blocks_input():
-		camera_rig.set_focus(focus_position)
+		var posture_offset: float = (float(target.call("posture_height_offset"))
+			if target.has_method("posture_height_offset") else 0.0)
+		camera_rig.set_focus(focus_position + Vector3.UP * posture_offset)
 	map_camera.global_position = focus_position + Vector3(0, 220, 0)
 	var minimap_heading := 0.0
 	if _minimap_orientation == "player_up":
