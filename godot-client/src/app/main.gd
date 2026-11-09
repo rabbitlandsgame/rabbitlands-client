@@ -18687,13 +18687,21 @@ func _is_rescue_companion(actor_id: int) -> bool:
 	return int(actual.get("kind", 0)) == 2 and EloriaProtocol.campaign_rescue_valid(snapshot.get("rescue", {})) \
 		and not (snapshot.get("rescue", {}) as Dictionary).is_empty()
 
+func _is_shelves_training_opponent(actor_id: int, dto: Dictionary) -> bool:
+	var state:Dictionary=AppState.campaign
+	var ledger:Dictionary=state.get("shelves",{})
+	return int(dto.get("kind",0))==2 and str(state.get("kind",""))=="shelves" and bool(state.get("active",false)) \
+		and not str(state.get("run_id","")).is_empty() and bool(ledger.get("private_practice",false)) \
+		and bool(ledger.get("sparring",false)) and int((state.get("actors",{}) as Dictionary).get("mentor",-1))==actor_id \
+		and EloriaProtocol.map_id_from_reference(str(state.get("map","")))==EloriaProtocol.map_id_from_reference(AppState.current_map)
+
 func _is_attackable_actor(actor_id: int, dto: Dictionary) -> bool:
 	if actor_id < 0 or actor_id == AppState.local_actor_id or dto.is_empty():
 		return false
 	if _is_tutorial_companion(actor_id):
 		return false
 	var kind: int = int(dto.get("kind", 0))
-	return kind in [1, 3, 4, 5] and bool(dto.get("alive", int(dto.get("health", 0)) > 0))
+	return (kind in [1, 3, 4, 5] or _is_shelves_training_opponent(actor_id,dto)) and bool(dto.get("alive", int(dto.get("health", 0)) > 0))
 
 func _is_tradeable_player(actor_id: int, dto: Dictionary) -> bool:
 	if actor_id < 0 or actor_id == AppState.local_actor_id or dto.is_empty():
