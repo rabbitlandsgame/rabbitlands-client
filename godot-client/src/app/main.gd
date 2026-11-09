@@ -18949,6 +18949,22 @@ func _pick_actor(viewport_position: Vector2) -> int:
 func _pick_map_object(viewport_position: Vector2) -> MapObject3D:
 	if gameplay_world == null:
 		return null
+	# A door's visible instructions remain clickable when their billboard
+	# reaches past the physical doorway or is lifted clear of the bottom HUD.
+	var named_door: MapObject3D = null
+	var nearest := INF
+	for value: Variant in map_object_nodes.values():
+		if not is_instance_valid(value) or not value is MapObject3D:
+			continue
+		var door := value as MapObject3D
+		if not door.door_label_rect(gameplay_camera).has_point(viewport_position):
+			continue
+		var distance := gameplay_camera.global_position.distance_squared_to(door.global_position)
+		if distance < nearest:
+			nearest = distance
+			named_door = door
+	if named_door != null:
+		return named_door
 	var origin: Vector3 = camera_rig.ray_origin(viewport_position)
 	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
 		origin, origin + camera_rig.ray_direction(viewport_position) * 2000.0,

@@ -410,6 +410,20 @@ func label_span(camera: Camera3D) -> Vector2:
 	var half := label_half_width(title) * screen_pixels_per_unit(camera)
 	return Vector2(anchor.x - half, anchor.x + half)
 
+## The visible door text is also a click target. Its billboard can extend
+## beyond the doorway's physical pick, especially after a HUD clearance lift.
+func door_label_rect(camera: Camera3D) -> Rect2:
+	var title := get_node_or_null("EntranceLabel") as Label3D
+	if not (building_door or building_exit) or title == null or not title.is_visible_in_tree() \
+			or camera == null or not camera.is_inside_tree() or not title.is_inside_tree() \
+			or camera.is_position_behind(title.global_position):
+		return Rect2()
+	var per_unit := screen_pixels_per_unit(camera)
+	var center := camera.unproject_position(title.global_position) \
+		+ Vector2(title.offset.x, -title.offset.y) * title.pixel_size * per_unit
+	var half := Vector2(label_half_width(title), label_half_height(title)) * per_unit
+	return Rect2(center - half, half * 2.0)
+
 ## The floor a label spanning `left`..`right` (viewport pixels) keeps above:
 ## the top of the highest rectangle of `hud` (the bottom HUD's, in the same
 ## pixels: Main._bottom_hud_rects) reaching under that span, else
