@@ -594,6 +594,7 @@ var models: Dictionary = {}
 var actor_type_models: Dictionary = {}
 var npc_looks: Dictionary = {}
 var npc_characters: Dictionary = {}
+var npc_human_faces: Dictionary = {}
 var npc_workstations: Dictionary = {}
 var creation_options: Array = []
 var selected_creation_class := 0
@@ -1683,6 +1684,7 @@ func _ready() -> void:
 	actor_type_models = model_registry.get("actorTypes", {})
 	npc_looks = model_registry.get("npcLooks", {})
 	npc_characters = _json("res://data/actors/npc_characters.json")
+	npc_human_faces = _json("res://data/actors/npc_human_faces.json")
 	npc_workstations = _json("res://data/actors/workstations.json")
 	creation_options = PLAYER_CREATION.options(model_registry)
 	animation_config = _json("res://data/animations/luminous.json")
@@ -20381,6 +20383,9 @@ func _model_for_actor(dto: Dictionary) -> String:
 	var character := NpcCharacterLooks.find(dto, npc_characters)
 	if not character.is_empty():
 		return str(character["model"])
+	var face := NpcCharacterLooks.face(dto, npc_human_faces)
+	if not face.is_empty():
+		return str(face["model"])
 	var actor_type_value := int(dto.get("actor_type", 1))
 	var actor_type := str(actor_type_value)
 	var kind := int(dto.get("kind", 0))
@@ -20403,7 +20408,8 @@ func _presentation_dto(dto: Dictionary) -> Dictionary:
 	# Keep the actor record shallow. Named NPCs get a separate appearance
 	# dictionary; other actors share their unchanged appearance with the state.
 	var character := NpcCharacterLooks.find(dto, npc_characters)
-	var result: Dictionary = NpcCharacterLooks.present(dto, character)
+	var result: Dictionary = NpcCharacterLooks.present(dto, character,
+		NpcCharacterLooks.face(dto, npc_human_faces))
 	var station: Dictionary = npc_workstations.get(str(dto.get("name", "")).to_lower(), {})
 	var station_tile: Array = station.get("tile", [-1, -1])
 	if int(dto.get("kind", 0)) == 2 and int(dto.get("actor_type", -1)) == int(station.get("actorType", -2)) \

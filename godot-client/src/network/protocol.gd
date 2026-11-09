@@ -3297,7 +3297,9 @@ static func decode_actor(payload: PackedByteArray, enhanced: bool, extended := f
 		var name_end: int = payload.find(0, 28)
 		if name_end < 0:
 			name_end = min(payload.size(), 58)
-		actor.merge(decode_actor_name(payload.slice(28, name_end)))
+		# Enhanced NPC spawns carry full names too. A space separates an
+		# uncoloured guild tag only on players, never on Elen Reed or a crew hand.
+		actor.merge(decode_actor_name(payload.slice(28, name_end), int(actor["kind"]) in [1,4]))
 		# The enhanced-actor trailer follows the variable-length name: model
 		# scale, the attachment sentinel, eye style, and neck visual. Preserve
 		# eye choices across the real server round trip instead of silently
