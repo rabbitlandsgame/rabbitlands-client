@@ -456,6 +456,16 @@ func _apply_shelves(ledger: Dictionary) -> void:
 	lines.append("Restored stock: " + (", ".join(ledger.get("unlocked", [])) if not (ledger.get("unlocked", []) as Array).is_empty() else "None yet"))
 	if str(ledger.get("chapter", "")) == "magic":lines.append("Spider specimens examined: %d/12" % int(ledger.get("samples",0)))
 	if str(ledger.get("chapter", "")) == "earth":lines.append("Cart integrity: %d%%. Stay near the cart; clear each ambush before moving on." % int(ledger.get("cart_integrity",100)))
+	var growers: Dictionary=ledger.get("growers",{})
+	if not growers.is_empty() and not bool(growers.get("raid",false)):
+		var field:=str(growers.get("field","sage"))
+		var crop:="Sage" if field=="sage" else "Hearthroot"
+		var stored:=int((growers.get("stored",{}) as Dictionary).get(field,0))
+		var carried:=int(growers.get("carried",0))
+		lines.append("%s gathered: %s · In bags: %s · In crew storage: %s" % [crop,str(stored+carried),str(carried),str(stored)])
+		lines.append("Four level-10 harvesters · 250 per bag · Raiding waves: %d" % int(growers.get("wave",0)))
+		for worker: Dictionary in growers.get("workers",[]):
+			lines.append("%s · %d/%d health · %d carried · %s" % [worker.name,int(worker.health),int(worker.max_health),int(worker.cargo),"DOWNED — use Heal Target" if bool(worker.downed) else "Carrying to storage" if str(worker.activity)=="return" else "Harvesting"])
 	_shelves.text = "\n".join(lines)
 
 func _rescue_local() -> bool:

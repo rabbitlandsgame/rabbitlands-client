@@ -308,6 +308,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"campaign_shelves_v1",
 	"campaign_shelves_travel_v1",
 	"campaign_shelves_basics_v1",
+	"campaign_shelves_patrol_v1",
 	"campaign_bank_v1",
 	"campaign_road_v1",
 	"campaign_lamps_v1",
@@ -3864,7 +3865,7 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 		var choice_id:=str((scene.get("choice",{}) as Dictionary).get("id",""))
 		var expected_scene: Dictionary={"shelves_route":"measure.shelves.brief","shelves_lesson":"measure.shelves.lesson",
 			"shelves_cape":"measure.shelves.review","shelves_gear":"measure.shelves.gear","shelves_enriched":"measure.shelves.enriched",
-			"shelves_basics":"measure.shelves.basics.offer"}
+			"shelves_basics":"measure.shelves.basics.offer","shelves_patrol_retry":"measure.shelves.growers.retry"}
 		if not choice_id.is_empty() and (not expected_scene.has(choice_id) or str(scene.get("id",""))!=str(expected_scene[choice_id])):
 			return {"type":"invalid","error":"campaign_shelves_choice"}
 	elif str((scene.get("choice",{}) as Dictionary).get("id","")).begins_with("shelves_") or not (value.get("shelves",{}) as Dictionary).is_empty():
@@ -3903,7 +3904,7 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 static func campaign_shelves_valid(value: Variant) -> bool:
 	if not value is Dictionary:return false
 	if value.is_empty():return true
-	if value.get("chapter") not in ["intro","life","fire","water","earth","school","wind","magic","death","frost","finale"] \
+	if value.get("chapter") not in ["intro","life","life_raid","fire","water","earth","school","wind","magic","death","frost","finale"] \
 			or value.get("phase") not in ["contact","brief","travel","arrival","work","lesson","report","review","complete"]:
 		return false
 	var objectives: Variant=value.get("objectives")
@@ -3927,10 +3928,28 @@ static func campaign_shelves_valid(value: Variant) -> bool:
 	if value.has("sparring") and not value.sparring is bool:return false
 	if value.has("lesson_window") and value.lesson_window not in ["spells","mixing"]:return false
 	if value.has("preload"):
-		if not value.preload is Dictionary or value.preload.get("map")!="landfall_town" or not _campaign_navigation_tile(value.preload.get("tile")):return false
+		if not value.preload is Dictionary or value.preload.get("map") not in ["landfall_town","landfall_insides"] or not _campaign_navigation_tile(value.preload.get("tile")):return false
+	if value.has("growers") and not campaign_growers_valid(value.growers):return false
 	if value.has("start_label") and (not value.start_label is String or str(value.start_label).length()>200):return false
 	return (not value.has("arrival_tile") or _campaign_tile(value.arrival_tile)) and _campaign_tile(value.get("cart_tile")) and _campaign_integer(value.get("cart_integrity"),0,100) \
 		and _campaign_integer(value.get("samples"),0,12) and value.get("can_complete") is bool
+
+static func campaign_growers_valid(value: Variant) -> bool:
+	if not value is Dictionary or value.get("field") not in ["sage","root"] or not value.get("raid") is bool:return false
+	if not _campaign_integer(value.get("wave"),0,1000000) or not _campaign_integer(value.get("carried"),0,1000):return false
+	var stored: Variant=value.get("stored")
+	if not stored is Dictionary or not _campaign_integer(stored.get("sage"),0,10000) or not _campaign_integer(stored.get("root"),0,5000):return false
+	var workers: Variant=value.get("workers")
+	if not workers is Array or workers.size()>4:return false
+	var seen: Array=[]
+	for worker: Variant in workers:
+		if not worker is Dictionary or not _campaign_integer(worker.get("actor_id"),1,65535) or worker.actor_id in seen \
+				or not worker.get("name") is String or str(worker.name).length()>64 \
+				or not _campaign_integer(worker.get("max_health"),1,10000) or not _campaign_integer(worker.get("health"),0,float(worker.max_health)) \
+				or not worker.get("downed") is bool or not _campaign_integer(worker.get("cargo"),0,250) \
+				or not worker.get("harvesting") is bool or worker.get("activity") not in ["harvest","return"]:return false
+		seen.append(worker.actor_id)
+	return true
 
 static func campaign_corpse_template_valid(value: Variant) -> bool:
 	if not value is Dictionary or value.is_empty() or JSON.stringify(value).to_utf8_buffer().size() > 4096:
@@ -4190,6 +4209,7 @@ static func campaign_scene_choice_valid(choice: Variant) -> bool:
 		"rescue_reward": ["sword", "bow", "wand"],
 		"shelves_route": ["direct", "careful"], "shelves_lesson": ["ingredients", "food", "tool"],
 		"shelves_basics": ["basics_accept", "basics_defer"],
+		"shelves_patrol_retry": ["retry", "cancel"],
 		"shelves_gear": ["wand", "charm", "robe"],
 		"shelves_cape": ["keeper", "artificer"],
 		"shelves_enriched": ["life", "fire", "water", "earth", "wind", "magic", "death", "frost"]}.get(str(choice.get("id", "")), [])
