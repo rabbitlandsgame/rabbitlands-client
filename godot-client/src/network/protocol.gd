@@ -375,6 +375,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"guild_window_v1",
 	"quest_archive_v1",
 	"quest_journal_v1",
+	"quest_tracking_v1",
 	"spell_power_v1",
 	"magic_book_v2",
 	"spell_visuals_v1",

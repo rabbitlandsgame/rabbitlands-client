@@ -27,6 +27,8 @@ Companions follow their owner through ordinary walkable routes. Their health dec
 
 The quest journal lets you track a dispatch again after stopping its guide. Stopping tracking keeps your progress. A destination on another map names that map in the guide.
 
+Automatic area quests wait while another quest is tracked. A system message names that quest; finish it or choose **Untrack**, then leave and re-enter the area to begin the new quest. **Hide** keeps a quest tracked, even while its window is closed.
+
 For the medicine errand, gather the Sage, Hearthroot and Bramble in one trip, in any order. You can make both medicine bottles together; keep the spare for the second delivery. Issued supplies that do not fit in your pack go into storage, and the guide identifies them.
 
 The crafting filter **Has ingredients only** checks ingredients. You may still need food, ether, a tool, knowledge or a higher skill. The recipe details explain those requirements, and an unsuccessful attempt shows a red result.

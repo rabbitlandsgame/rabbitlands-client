@@ -703,7 +703,22 @@ func _on_quest_untrack_pressed() -> void:
 
 ## The tracked quest as the server last stated it. Nothing is remembered from
 ## an earlier journal: if the server stops listing the quest, the readout goes.
+func tracked_quest_titles() -> Array[String]:
+	var titles:Array[String]=[]
+	if quest_guide!=null and quest_guide.is_quest_tracked():
+		var title:String=quest_guide.quest_title()
+		if not title.is_empty():titles.append(title)
+	if not _tracked_quest_title.is_empty() and _quest_is_tracked(_tracked_quest_title):
+		for entry:Dictionary in AppState.quest_journal:
+			if str(entry.get("title",""))==_tracked_quest_title and _tracked_quest_title not in titles:
+				titles.append(_tracked_quest_title)
+	return titles
+
+func report_quest_tracking() -> void:
+	Network.report_quest_tracking(tracked_quest_titles())
+
 func _sync_tracked_quest() -> void:
+	report_quest_tracking()
 	if quest_guide != null and quest_guide.has_method("using_campaign") and quest_guide.using_campaign():
 		tracked_quest.hide()
 		return
