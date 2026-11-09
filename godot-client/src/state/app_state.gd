@@ -247,6 +247,14 @@ var gauntlet_ready: Dictionary = {}
 var gauntlet_loot: Dictionary = {}
 var gauntlet_progress: Dictionary = {}
 var gauntlet_progress_anchor_msec := 0
+## The descent the player is in (descent_v1, server message 188): the floor,
+## its fog-of-war grid with the explored bits decoded into `mask`, and the
+## clock, whole as the server last stated it; empty outside a descent. The
+## clock counts on from `descent_anchor_msec`, when it arrived.
+var descent: Dictionary = {}
+var descent_anchor_msec := 0
+## The boss reward's open offer of three, empty when none is open.
+var descent_reward: Dictionary = {}
 ## What each player on this map is calling themselves, {actor_id: title}. Kept
 ## apart from the actor's display name, which carries a colour byte, the name
 ## and the guild tag in one string that every client unpicks by hand.
@@ -954,6 +962,9 @@ func _on_connection_state_changed(value: String) -> void:
 		gauntlet_loot.clear()
 		gauntlet_progress.clear()
 		gauntlet_progress_anchor_msec = 0
+		descent.clear()
+		descent_anchor_msec = 0
+		descent_reward.clear()
 		actor_titles.clear()
 		actor_occupations.clear()
 		actor_mounts.clear()
@@ -1836,6 +1847,16 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			gauntlet_progress = progress.duplicate(true) if bool(progress.get("active", false)) else {}
 			gauntlet_progress_anchor_msec = Time.get_ticks_msec()
 			state_changed.emit(&"gauntlet_progress")
+		"descent_state":
+			# Each state is whole; `open` false means the player left.
+			var floor_state: Dictionary = event.data
+			descent = floor_state.duplicate(true) if bool(floor_state.get("open", false)) else {}
+			descent_anchor_msec = Time.get_ticks_msec() if not descent.is_empty() else 0
+			state_changed.emit(&"descent")
+		"descent_reward":
+			var offer: Dictionary = event.data
+			descent_reward = offer.duplicate(true) if bool(offer.get("open", false)) else {}
+			state_changed.emit(&"descent_reward")
 		"party":
 			party = {"in_party": bool(event.in_party),
 				"members": event.members,

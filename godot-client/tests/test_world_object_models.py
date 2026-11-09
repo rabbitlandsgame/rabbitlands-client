@@ -132,7 +132,7 @@ class WorldObjectModelTest(unittest.TestCase):
             for model_id, entry in section["models"].items():
                 with self.subTest(model=model_id):
                     wide = (model_id in listed[0 if section is self.harvestables else 1]
-                            or (section is self.harvestables and entry.get("reusedScenery")))
+                            or entry.get("reusedScenery"))
                     low, high = (imported.IMPORTED_TRIANGLE_BAND if wide
                                  else imported.PROCEDURAL_TRIANGLE_BAND)
                     self.assertGreaterEqual(entry["triangles"], low)
@@ -204,6 +204,41 @@ class WorldObjectModelTest(unittest.TestCase):
                 self.assertEqual(self.harvestables["resources"].get(entry["label"]), model_id)
                 self.assertTrue(models[entry["replaces"]].get("retired"))
                 self.assertEqual(models[entry["replaces"]]["tier"], entry["tier"])
+
+    def test_reused_scenery_interactives_match_their_record(self) -> None:
+        """The descent's chests and reward dais draw packaged underground scenery.
+
+        Like the reused minerals, they are not rows of the imported table: the
+        chest tiers share one GLB (told apart by the entry's `scale` and
+        `tint`), and each entry is held to the file the reuse record names,
+        measured as an imported model is, inside the imported band.
+        """
+        record = json.loads((CLIENT.parent / "eloria-assets/source/world_objects/underground/"
+                             "reused-scenery.json").read_text(encoding="utf-8"))
+        packaged = {asset["output"]: asset["sha256"] for asset in record["assets"]}
+        models = self.interactives["models"]
+        reused = {model_id: entry for model_id, entry in models.items()
+                  if entry.get("reusedScenery")}
+        self.assertEqual({entry["label"] for entry in reused.values()},
+                         {"Descent Chest", "Descent Fine Chest", "Descent Ornate Chest",
+                          "Descent Dais"})
+        low, high = imported.IMPORTED_TRIANGLE_BAND
+        for model_id, entry in reused.items():
+            with self.subTest(model=model_id):
+                self.assertNotIn("imported", entry)
+                self.assertEqual(self.interactives["roles"][entry["label"]], model_id)
+                # Not the storage chest: is_storage() would give it the storage glow.
+                self.assertNotEqual(model_id, "storage")
+                output = "godot-client/" + entry["scene"].removeprefix("res://")
+                self.assertIn(output, packaged)
+                measured = imported.measure_glb(CLIENT.parent / output)
+                self.assertEqual(measured["sha256"], packaged[output])
+                for key, value in measured.items():
+                    self.assertEqual(entry[key], value, key)
+                self.assertTrue(low <= entry["triangles"] <= high)
+                self.assertGreater(entry.get("scale", 1.0), 0.0)
+                if "tint" in entry:
+                    self.assertRegex(entry["tint"], r"^#[0-9a-f]{6}$")
 
     def test_imported_interactives_match_the_reviewed_files(self) -> None:
         models = self.interactives["models"]

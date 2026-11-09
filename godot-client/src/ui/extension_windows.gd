@@ -192,6 +192,10 @@ var party_panel: PanelContainer
 var gauntlet_ready_window: Control
 var gauntlet_loot_window: Control
 var gauntlet_progress_hud: Control
+## A descent's floor and clock, and its boss reward's pick of three
+## (descent_v1, server message 188).
+var descent_status_hud: Control
+var descent_reward_window: Control
 var party_header: Label
 var party_rows: VBoxContainer
 var party_invite_row: HBoxContainer
@@ -253,8 +257,14 @@ func _ready() -> void:
 	gauntlet_progress_hud.configure(func() -> Rect2: return combat_panel.get_global_rect(),
 		func() -> bool: return combat_hud_enabled)
 	add_child(gauntlet_progress_hud)
+	descent_status_hud = preload("res://src/ui/descent_status_hud.gd").new()
+	descent_status_hud.configure(func() -> Rect2: return combat_panel.get_global_rect())
+	add_child(descent_status_hud)
+	descent_reward_window = preload("res://src/ui/descent_reward_window.gd").new()
+	add_child(descent_reward_window)
 	gauntlet_loot_window.item_inspection_requested.connect(func() -> void: detail_popup_allowed = true)
 	if item_atlas != null: gauntlet_loot_window.configure(item_atlas)
+	if item_atlas != null: descent_reward_window.configure_atlas(item_atlas)
 	gauntlet_loot_window.call("_style_dialog", market_price_dialog)
 	AppState.state_changed.connect(_on_state_changed)
 	TextColors.events().changed.connect(_on_text_colors_changed)
@@ -264,6 +274,7 @@ func _ready() -> void:
 func configure(atlas: ItemAtlas, guide: Control = null) -> void:
 	item_atlas = atlas
 	if gauntlet_loot_window != null: gauntlet_loot_window.configure(atlas)
+	if descent_reward_window != null: descent_reward_window.configure_atlas(atlas)
 	quest_guide = guide
 	if quest_guide != null:
 		quest_guide.tracking_changed.connect(_on_quest_guide_tracking_changed)
@@ -292,6 +303,9 @@ func close_top(include_party := false) -> bool:
 			continue
 		if panel == gauntlet_loot_window.panel:
 			gauntlet_loot_window.close()
+		elif panel == descent_reward_window.panel:
+			# The offer stays open on the server; the dais offers it again.
+			descent_reward_window.close()
 		elif panel == gauntlet_ready_window.panel:
 			gauntlet_ready_window.cancel()
 			panel.hide()
@@ -325,15 +339,16 @@ func toggle_achievements() -> void:
 func _cascade() -> Array[PanelContainer]:
 	# The tracked-quest readout is deliberately absent: it is a HUD element the
 	# player pinned, not a window covering the screen, so cancel leaves it be.
-	return [gauntlet_loot_window.panel, gauntlet_ready_window.panel, merchant_panel, market_panel, detail_panel, mail_panel,
-		quest_panel, party_panel, achievements_panel]
+	return [gauntlet_loot_window.panel, descent_reward_window.panel, gauntlet_ready_window.panel, merchant_panel,
+		market_panel, detail_panel, mail_panel, quest_panel, party_panel, achievements_panel]
 
 func _toggle(panel: PanelContainer) -> void:
 	if panel.visible:
 		panel.hide()
 		return
 	for other: PanelContainer in _cascade():
-		if other != panel and other != party_panel and other != gauntlet_ready_window.panel:
+		if other != panel and other != party_panel and other != gauntlet_ready_window.panel \
+				and other != descent_reward_window.panel:
 			other.hide()
 	panel.show()
 	panel.move_to_front()
