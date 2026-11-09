@@ -204,7 +204,9 @@ func _check_mesh(grid: Dictionary) -> void:
 		var into := Vector2(normal.x, normal.z) * 0.5
 		var inside: Vector2i = adapter.godot_to_server(Vector3(middle.x + into.x, 0, middle.y + into.y))
 		facing_ok = facing_ok and DescentFog.tile_revealed(grid, inside.x, inside.y)
-	_expect(heights_ok, "tops stand at 7 m over the floor and sides reach from below it to the top")
+	_expect(DescentFog.TOP_METRES == 5.5 and DescentFog.BELOW_METRES == 1.0,
+		"the volume's top is 5.5 m (over the 5.0 m Serpent walls) and its sides reach 1 m below the floor")
+	_expect(heights_ok, "tops stand at 5.5 m over the floor and sides reach from 1 m below it to the top")
 	_expect(facing_ok, "every side faces the revealed cell beside it")
 	var covered_wrong := 0
 	for cy: int in range(HEIGHT):

@@ -19,10 +19,12 @@ extends RefCounted
 ## - the test that hides creatures and objects on unrevealed cells
 ##   (`tile_hidden`).
 
-## The top of the volume above the floor, well above the tallest wall of an
-## underground floor (the contract's 7 m), so the black lies over the walls,
-## not in them.
-const TOP_METRES := 7.0
+## The top of the volume above the floor: just above the tallest Serpent
+## theme wall (5.0 m), so the black lies over the walls, not in them, and low
+## enough that the 60 degree camera sees revealed floor past it (5.5 / tan 60
+## = 3.2 m, inside the two cells of rock the server reveals beside revealed
+## floor). The contract's 5.5 m.
+const TOP_METRES := 5.5
 ## The side faces reach this far below the floor, so no seam of light shows
 ## where they meet uneven ground.
 const BELOW_METRES := 1.0
