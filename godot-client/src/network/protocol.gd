@@ -400,6 +400,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	# ELORIA_MAGIC_STATE kind "techniques".
 	"techniques_v1",
 	"technique_effects_v1",
+	"boss_mechanics_v1",
 	# Repeat casting: whether it is on and running, ELORIA_MAGIC_STATE kind
 	# "autocast"; switched with magic_request {"op": "autocast"}.
 	"magic_autocast_v1",
