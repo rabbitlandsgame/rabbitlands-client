@@ -3,7 +3,8 @@ extends Control
 ##
 ## Terrain is rendered by a top-down camera. Glyphs, pins and live dots are
 ## drawn in screen pixels, so framing a small room cannot turn them into
-## oversized discs. Names are available on hover without covering the map.
+## oversized discs. Tracked quest destinations keep their names visible;
+## other pins remain named on hover.
 ##
 ## It holds no marker state. `main.gd` hands it the markers the server placed on
 ## the map the player is standing on, and it projects them through the same
@@ -20,6 +21,7 @@ const GLYPH_OUTLINE := 4
 const LiveOverlayScript := preload("res://src/ui/minimap_marker_overlay.gd")
 const EntranceOverlayScript := preload("res://src/ui/entrance_map_overlay.gd")
 const TextColors := preload("res://src/ui/text_colors.gd")
+const QuestMarker := preload("res://src/ui/quest_map_marker.gd")
 
 var _camera: Camera3D
 var _adapter: CoordinateAdapter
@@ -37,6 +39,7 @@ var _player_marks: Array[Dictionary] = []
 ## (PackedVector3Array), `label` (Vector3, INF for none) and `current`.
 var _boundaries: Array[Dictionary] = []
 var _live_overlay: Control
+var _label_avoid_positions := PackedVector3Array()
 var _walk_target: Variant = null
 const BOUNDARY_COLOUR := Color(1.0, 1.0, 1.0, 0.8)
 const BOUNDARY_LABEL_COLOUR := Color(1.0, 0.95, 0.8, 0.95)
@@ -56,9 +59,14 @@ func _on_text_colors_changed(_role: String) -> void:
 ## large exterior. Portals and pins are drawn by this overlay instead.
 func set_live_marks(marks: Array[Dictionary]) -> void:
 	var dots: Array[Dictionary] = []
+	var avoid_positions := PackedVector3Array()
 	for mark: Dictionary in marks:
+		if mark.get("type") == &"self":avoid_positions.append(mark.get("position",Vector3.ZERO))
 		if str(mark.get("glyph", "")).is_empty() and mark.get("type") not in [&"marker", &"entrance"]:
 			dots.append(mark)
+	if avoid_positions != _label_avoid_positions:
+		_label_avoid_positions = avoid_positions
+		queue_redraw()
 	_live_overlay.set_marks(dots)
 
 func configure(camera: Camera3D, adapter: CoordinateAdapter,
@@ -167,6 +175,7 @@ func _draw() -> void:
 	_draw_waypoints(font)
 	_draw_set(_markers, MARKER_COLOUR)
 	_draw_set(_player_marks, PLAYER_MARK_COLOUR)
+	_draw_quest_destinations()
 	var target: Variant = walk_target_point()
 	if target is Vector2:
 		LiveOverlayScript.draw_walk_target(self, target as Vector2)
@@ -178,6 +187,7 @@ func _draw_waypoints(font: Font) -> void:
 	if font == null:
 		return
 	for waypoint: Dictionary in _waypoints:
+		if bool(waypoint.get("quest",false)):continue
 		var world: Vector3 = waypoint.get("position", Vector3.ZERO) as Vector3
 		if _camera.is_position_behind(world):
 			continue
@@ -206,6 +216,26 @@ func _draw_waypoints(font: Font) -> void:
 		draw_string_outline(font, baseline, glyph, HORIZONTAL_ALIGNMENT_LEFT, -1,
 			GLYPH_SIZE, GLYPH_OUTLINE, Color(0.04, 0.04, 0.05, 0.95))
 		draw_string(font, baseline, glyph, HORIZONTAL_ALIGNMENT_LEFT, -1, GLYPH_SIZE, colour)
+
+func _draw_quest_destinations() -> void:
+	var labels: Array[Dictionary] = []
+	var occupied: Array[Rect2] = []
+	for world: Vector3 in _label_avoid_positions:
+		if _camera.is_position_behind(world):continue
+		var player_point: Variant = _texture_position(_camera.unproject_position(world))
+		if player_point is Vector2:occupied.append(Rect2(player_point-Vector2(8,8),Vector2(16,16)))
+	for waypoint: Dictionary in _waypoints:
+		if not bool(waypoint.get("quest",false)):continue
+		var world: Vector3 = waypoint.get("position",Vector3.ZERO)
+		if _camera.is_position_behind(world):continue
+		var point: Variant = _texture_position(_camera.unproject_position(world))
+		if not point is Vector2:continue
+		var colour: Color = waypoint.get("colour",MARKER_COLOUR)
+		QuestMarker.draw_icon(self,point,colour,QuestMarker.GLYPH_SIZE)
+		labels.append({"point":point,"label":str(waypoint.get("label","")),"colour":colour})
+		occupied.append(Rect2(point-Vector2.ONE*QuestMarker.GLYPH_SIZE*0.5,Vector2.ONE*QuestMarker.GLYPH_SIZE))
+	for label: Dictionary in labels:
+		occupied.append(QuestMarker.draw_label(self,label.point,label.label,label.colour,QuestMarker.GLYPH_SIZE,false,false,occupied))
 
 func _draw_set(marks: Array[Dictionary], colour: Color) -> void:
 	for marker: Dictionary in marks:

@@ -34,17 +34,17 @@
         }
       ],
       "dialogue_holds": [
-        12,
-        36
+        36.0,
+        46
       ],
       "choice_id": "shelves_route",
       "choice_at": 14,
-      "choice_response_until": 44,
+      "choice_response_until": 36.0,
       "response_speaker": "Ilka Tarn",
       "response_actor": "mentor",
       "lines": [
         {
-          "at": 2,
+          "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
           "variants": {
@@ -95,8 +95,8 @@
     "measure.shelves.review": {
       "title": "A Reliable Supply",
       "duration": 38,
-      "entry_seconds": 1.5,
-      "exit_seconds": 1.2,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
       "fov": 48,
       "live_camera": "gameplay",
       "required_actors": [
@@ -126,18 +126,18 @@
         }
       ],
       "dialogue_holds": [
-        14,
-        34
+        34.0,
+        38
       ],
       "choice_id": "shelves_cape",
       "choice_actor": "recipient",
       "choice_at": 16,
-      "choice_response_until": 34,
+      "choice_response_until": 34.0,
       "response_speaker": "Ilka Tarn",
       "response_actor": "mentor",
       "lines": [
         {
-          "at": 1,
+          "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
           "variants": {
@@ -166,7 +166,8 @@
         "mode": "hold",
         "to": [
           "measure.shelves.enriched"
-        ]
+        ],
+        "keep_dialogue": true
       },
       "cues": [
         {
@@ -180,8 +181,8 @@
     "measure.shelves.lesson": {
       "title": "Many Hands at the Mortar",
       "duration": 34,
-      "entry_seconds": 1.2,
-      "exit_seconds": 1.2,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
       "fov": 48,
       "live_camera": "gameplay",
       "required_actors": [
@@ -212,17 +213,18 @@
         }
       ],
       "dialogue_holds": [
-        10,
-        30
+        4.0,
+        30.0,
+        34
       ],
       "choice_id": "shelves_lesson",
       "choice_at": 12,
-      "choice_response_until": 32,
+      "choice_response_until": 30.0,
       "response_speaker": "Apprentice",
       "response_actor": "student",
       "lines": [
         {
-          "at": 1,
+          "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
           "text": "Listen to the problem before you choose the advice."
@@ -275,7 +277,7 @@
       "title": "The True Note",
       "duration": 32,
       "entry_seconds": 0,
-      "exit_seconds": 1.2,
+      "exit_seconds": 0,
       "live_camera": "gameplay",
       "required_actors": [
         "mentor"
@@ -286,18 +288,18 @@
       ],
       "stage_protagonist": false,
       "dialogue_holds": [
-        8,
-        29
+        29.0,
+        32
       ],
       "choice_id": "shelves_enriched",
       "choice_actor": "recipient",
       "choice_at": 10,
-      "choice_response_until": 28,
+      "choice_response_until": 29.0,
       "response_speaker": "Ilka Tarn",
       "response_actor": "mentor",
       "lines": [
         {
-          "at": 1,
+          "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
           "text": "And one enriched essence, from my own reserve. Choose the one that will serve your next journey."
@@ -321,8 +323,8 @@
     "measure.shelves.arrival": {
       "title": "At the Supply Worksite",
       "duration": 40,
-      "entry_seconds": 1.6,
-      "exit_seconds": 1.2,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
       "fov": 48,
       "anchor": "worker",
       "required_actors": [
@@ -338,7 +340,7 @@
       "stage_protagonist": false,
       "shots": [],
       "dialogue_holds": [
-        28
+        40
       ],
       "cues": [
         {
@@ -350,7 +352,7 @@
       ],
       "lines": [
         {
-          "at": 2,
+          "at": 0,
           "speaker": "Mara Vale",
           "speaker_actor": "worker",
           "text": "You made it. Let us put these supplies back on the road.",
@@ -374,8 +376,8 @@
     "measure.shelves.gear": {
       "title": "The Road Must Hold",
       "duration": 38,
-      "entry_seconds": 1.5,
-      "exit_seconds": 1.2,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
       "fov": 48,
       "live_camera": "gameplay",
       "required_actors": [
@@ -405,18 +407,18 @@
         }
       ],
       "dialogue_holds": [
-        14,
-        34
+        34.0,
+        38
       ],
       "choice_id": "shelves_gear",
       "choice_actor": "recipient",
       "choice_at": 16,
-      "choice_response_until": 34,
+      "choice_response_until": 34.0,
       "response_speaker": "Ilka Tarn",
       "response_actor": "mentor",
       "lines": [
         {
-          "at": 1,
+          "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
           "variants": {
@@ -453,8 +455,8 @@
     "measure.shelves.resolved": {
       "title": "A Reliable Supply",
       "duration": 22,
-      "entry_seconds": 1.5,
-      "exit_seconds": 1.2,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
       "fov": 48,
       "live_camera": "gameplay",
       "required_actors": [
@@ -484,13 +486,13 @@
         }
       ],
       "dialogue_holds": [
-        14
+        22
       ],
       "response_speaker": "Ilka Tarn",
       "response_actor": "mentor",
       "lines": [
         {
-          "at": 1,
+          "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
           "variants": {
@@ -521,8 +523,8 @@
     "measure.shelves.basics.offer": {
       "title": "Restocking the Basics",
       "duration": 24,
-      "entry_seconds": 1,
-      "exit_seconds": 0.8,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
       "fov": 48,
       "live_camera": "gameplay",
       "required_actors": [
@@ -536,11 +538,11 @@
       "stage_protagonist": false,
       "shots": [],
       "dialogue_holds": [
-        2
+        24
       ],
       "lines": [
         {
-          "at": 2,
+          "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
           "text": "These shelves once supplied half the coast, but now I cannot even keep enough stocked to supply our patrols. Could you help us re-establish our supply lines?"
@@ -548,7 +550,7 @@
       ],
       "choice_id": "shelves_basics",
       "choice_at": 16,
-      "choice_response_until": 23,
+      "choice_response_until": 24,
       "choice_actor": "recipient",
       "response_speaker": "Ilka Tarn",
       "response_actor": "mentor"
@@ -556,8 +558,8 @@
     "measure.shelves.basics.accepted_fire": {
       "title": "Restocking the Basics",
       "duration": 24,
-      "entry_seconds": 1,
-      "exit_seconds": 0.8,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
       "fov": 48,
       "live_camera": "gameplay",
       "required_actors": [
@@ -571,11 +573,11 @@
       "stage_protagonist": false,
       "shots": [],
       "dialogue_holds": [
-        2
+        24
       ],
       "lines": [
         {
-          "at": 2,
+          "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
           "text": "Thank you for your help, here is 500 gold coins for your work. Next we will need to gather ingredients for fire essences to supply our offensive magic. Please gather 100 coal and 50 flint and bring them to me so we can mix a new supply of fire essences. I have marked the mines on your map. You will need a pickaxe to harvest these, so please take these with you."
@@ -585,8 +587,8 @@
     "measure.shelves.basics.accepted_water": {
       "title": "Restocking the Basics",
       "duration": 24,
-      "entry_seconds": 1,
-      "exit_seconds": 0.8,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
       "fov": 48,
       "live_camera": "gameplay",
       "required_actors": [
@@ -600,11 +602,11 @@
       "stage_protagonist": false,
       "shots": [],
       "dialogue_holds": [
-        2
+        24
       ],
       "lines": [
         {
-          "at": 2,
+          "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
           "text": "Thank you for your help, here is 500 gold coins for your work. The last basic essence we need to prepare is water essence. Please gather 100 kelp and 50 watercress and bring them to me so we can mix a new supply of water essences. You will need to travel east to Reedfall to gather these. I have marked their location on your map."
@@ -614,8 +616,8 @@
     "measure.shelves.basics.gathered": {
       "title": "Restocking the Basics",
       "duration": 24,
-      "entry_seconds": 1,
-      "exit_seconds": 0.8,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
       "fov": 48,
       "live_camera": "gameplay",
       "required_actors": [
@@ -629,22 +631,31 @@
       "stage_protagonist": false,
       "shots": [],
       "dialogue_holds": [
-        2
+        24
       ],
       "lines": [
         {
-          "at": 2,
+          "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
           "text": "Thank you for gathering the ingredients. Keep them in your pack: we will use them to mix the essences. Your harvesting reward is recorded."
         }
-      ]
+      ],
+      "handoff": {
+        "mode": "hold",
+        "keep_dialogue": true,
+        "to": [
+          "measure.shelves.basics.mixing_life",
+          "measure.shelves.basics.mixing_fire",
+          "measure.shelves.basics.mixing_water"
+        ]
+      }
     },
     "measure.shelves.basics.delivery": {
       "title": "Restocking the Basics",
       "duration": 24,
-      "entry_seconds": 1,
-      "exit_seconds": 0.8,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
       "fov": 48,
       "live_camera": "gameplay",
       "required_actors": [
@@ -658,22 +669,31 @@
       "stage_protagonist": false,
       "shots": [],
       "dialogue_holds": [
-        2
+        24
       ],
       "lines": [
         {
-          "at": 2,
+          "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
           "text": "Thank you — these essences will help our patrols. I will pay you 500 gold coins for your work, and this essence will be available in my shop."
         }
-      ]
+      ],
+      "handoff": {
+        "mode": "hold",
+        "keep_dialogue": true,
+        "to": [
+          "measure.shelves.basics.accepted_fire",
+          "measure.shelves.basics.accepted_water",
+          "measure.shelves.basics.trainer"
+        ]
+      }
     },
     "measure.shelves.basics.missing": {
       "title": "Restocking the Basics",
       "duration": 24,
-      "entry_seconds": 1,
-      "exit_seconds": 0.8,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
       "fov": 48,
       "live_camera": "gameplay",
       "required_actors": [
@@ -687,11 +707,11 @@
       "stage_protagonist": false,
       "shots": [],
       "dialogue_holds": [
-        2
+        24
       ],
       "lines": [
         {
-          "at": 2,
+          "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
           "text": "I am glad you were able to mix them. Please bring them to me in your inventory."
@@ -701,8 +721,8 @@
     "measure.shelves.basics.trainer": {
       "title": "Restocking the Basics",
       "duration": 24,
-      "entry_seconds": 1,
-      "exit_seconds": 0.8,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
       "fov": 48,
       "live_camera": "gameplay",
       "required_actors": [
@@ -716,11 +736,11 @@
       "stage_protagonist": false,
       "shots": [],
       "dialogue_holds": [
-        2
+        24
       ],
       "lines": [
         {
-          "at": 2,
+          "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
           "text": "Next we will need to teach you the basics of magic so that you can help defend our patrols. Go to Ostrid Hollin at the temple and she will teach you."
@@ -730,8 +750,8 @@
     "measure.shelves.basics.heal": {
       "title": "Practicing the Basics",
       "duration": 76,
-      "entry_seconds": 1,
-      "exit_seconds": 0.8,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
       "fov": 48,
       "live_camera": "gameplay",
       "required_actors": [
@@ -745,14 +765,14 @@
       "stage_protagonist": false,
       "shots": [],
       "dialogue_holds": [
-        2,
-        20,
-        38,
-        56
+        20.0,
+        38.0,
+        56.0,
+        76
       ],
       "lines": [
         {
-          "at": 2,
+          "at": 0,
           "speaker": "Ostrid Hollin",
           "speaker_actor": "mentor",
           "text": "We need all the help we can get to protect the city. Let's go into the temple to practice."
@@ -780,8 +800,8 @@
     "measure.shelves.basics.fire": {
       "title": "Practicing the Basics",
       "duration": 40,
-      "entry_seconds": 1,
-      "exit_seconds": 0.8,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
       "fov": 48,
       "live_camera": "gameplay",
       "required_actors": [
@@ -795,12 +815,12 @@
       "stage_protagonist": false,
       "shots": [],
       "dialogue_holds": [
-        2,
-        20
+        20.0,
+        40
       ],
       "lines": [
         {
-          "at": 2,
+          "at": 0,
           "speaker": "Ostrid Hollin",
           "speaker_actor": "mentor",
           "text": "Next let's learn to cast fire bolt on your opponents. Open the spell window."
@@ -809,15 +829,15 @@
           "at": 20,
           "speaker": "Ostrid Hollin",
           "speaker_actor": "mentor",
-          "text": "Here you see there are only two options for offensive magic: one target or an area of effect. Casting fire bolt on one target costs 5 ether and 1 fire essence. The amount of damage your spell will do scales with your magic level, your magic offense attribute, and any elemental weaknesses or resistances on the target. Try casting fire bolt on the warded practice target over there."
+          "text": "Here you see there are only two options for offensive magic: one target or an area of effect. Casting fire bolt on one target costs 5 ether and 1 fire essence. The amount of damage your spell will do scales with your magic level, your magic offense attribute, and any elemental weaknesses or resistances on the target. Try casting fire bolt on the practice dummy over there."
         }
       ]
     },
     "measure.shelves.basics.ether": {
       "title": "Practicing the Basics",
       "duration": 58,
-      "entry_seconds": 1,
-      "exit_seconds": 0.8,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
       "fov": 48,
       "live_camera": "gameplay",
       "required_actors": [
@@ -831,13 +851,13 @@
       "stage_protagonist": false,
       "shots": [],
       "dialogue_holds": [
-        2,
-        20,
-        38
+        20.0,
+        38.0,
+        58
       ],
       "lines": [
         {
-          "at": 2,
+          "at": 0,
           "speaker": "Ostrid Hollin",
           "speaker_actor": "mentor",
           "text": "Note that your ether is going down as we are casting spells. You can also regain ether with magic. Open the spell window."
@@ -859,8 +879,8 @@
     "measure.shelves.basics.spar": {
       "title": "Practicing the Basics",
       "duration": 40,
-      "entry_seconds": 1,
-      "exit_seconds": 0.8,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
       "fov": 48,
       "live_camera": "gameplay",
       "required_actors": [
@@ -874,15 +894,15 @@
       "stage_protagonist": false,
       "shots": [],
       "dialogue_holds": [
-        2,
-        20
+        20.0,
+        40
       ],
       "lines": [
         {
-          "at": 2,
+          "at": 0,
           "speaker": "Ostrid Hollin",
           "speaker_actor": "mentor",
-          "text": "Let's spar with magic to see what you have learned. Keep your health and ether up, and try to take me down with your fire bolt."
+          "text": "Meet me in the sparring arena through the doorway on the right. Let's spar with magic to see what you have learned. Keep your health and ether up, and try to take me down with your fire bolt."
         },
         {
           "at": 20,
@@ -895,8 +915,8 @@
     "measure.shelves.basics.retry": {
       "title": "Practicing the Basics",
       "duration": 24,
-      "entry_seconds": 1,
-      "exit_seconds": 0.8,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
       "fov": 48,
       "live_camera": "gameplay",
       "required_actors": [
@@ -910,11 +930,11 @@
       "stage_protagonist": false,
       "shots": [],
       "dialogue_holds": [
-        2
+        24
       ],
       "lines": [
         {
-          "at": 2,
+          "at": 0,
           "speaker": "Ostrid Hollin",
           "speaker_actor": "mentor",
           "text": "Steady yourself. There is no shame in practicing again. Keep your health up with Heal, strike me with Fire Bolt, and make room to recover ether. Talk to me when you are ready to try again."
@@ -924,8 +944,8 @@
     "measure.shelves.basics.victory": {
       "title": "Practicing the Basics",
       "duration": 24,
-      "entry_seconds": 1,
-      "exit_seconds": 0.8,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
       "fov": 48,
       "live_camera": "gameplay",
       "required_actors": [
@@ -939,11 +959,11 @@
       "stage_protagonist": false,
       "shots": [],
       "dialogue_holds": [
-        2
+        24
       ],
       "lines": [
         {
-          "at": 2,
+          "at": 0,
           "speaker": "Ostrid Hollin",
           "speaker_actor": "mentor",
           "text": "Excellent work. You should be ready to defend our caravans. Go back to Ilka when you are ready to help. Here are a few more essences for you to use to continue practicing."
@@ -953,8 +973,8 @@
     "measure.shelves.basics.mixing_life": {
       "title": "Restocking the Basics",
       "duration": 24,
-      "entry_seconds": 1,
-      "exit_seconds": 0.8,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
       "fov": 48,
       "live_camera": "gameplay",
       "required_actors": [
@@ -968,11 +988,11 @@
       "stage_protagonist": false,
       "shots": [],
       "dialogue_holds": [
-        2
+        24
       ],
       "lines": [
         {
-          "at": 2,
+          "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
           "text": "Thank you. Let's mix these into life essences to provide to the guards defending our caravans. Open the mixing window and mix 25 life essences. Here are a few Potions of Feasting and mortar and pestles you can use."
@@ -982,8 +1002,8 @@
     "measure.shelves.basics.reminder_life": {
       "title": "Restocking the Basics",
       "duration": 24,
-      "entry_seconds": 1,
-      "exit_seconds": 0.8,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
       "fov": 48,
       "live_camera": "gameplay",
       "required_actors": [
@@ -997,11 +1017,11 @@
       "stage_protagonist": false,
       "shots": [],
       "dialogue_holds": [
-        2
+        24
       ],
       "lines": [
         {
-          "at": 2,
+          "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
           "text": "Keep gathering the marked ingredients, or finish your 25 successful mixes. Bring your work back to me here at The True Note. Your quest instructions show your remaining tasks."
@@ -1011,8 +1031,8 @@
     "measure.shelves.basics.mixing_fire": {
       "title": "Restocking the Basics",
       "duration": 24,
-      "entry_seconds": 1,
-      "exit_seconds": 0.8,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
       "fov": 48,
       "live_camera": "gameplay",
       "required_actors": [
@@ -1026,11 +1046,11 @@
       "stage_protagonist": false,
       "shots": [],
       "dialogue_holds": [
-        2
+        24
       ],
       "lines": [
         {
-          "at": 2,
+          "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
           "text": "Thank you. Let's mix these into fire essences to provide our mages with reagents for offensive magic. Open the mixing window and mix 25 fire essences. Here are a few Potions of Feasting and mortar and pestles you can use."
@@ -1040,8 +1060,8 @@
     "measure.shelves.basics.reminder_fire": {
       "title": "Restocking the Basics",
       "duration": 24,
-      "entry_seconds": 1,
-      "exit_seconds": 0.8,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
       "fov": 48,
       "live_camera": "gameplay",
       "required_actors": [
@@ -1055,11 +1075,11 @@
       "stage_protagonist": false,
       "shots": [],
       "dialogue_holds": [
-        2
+        24
       ],
       "lines": [
         {
-          "at": 2,
+          "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
           "text": "Keep gathering the marked ingredients, or finish your 25 successful mixes. Bring your work back to me here at The True Note. Your quest instructions show your remaining tasks."
@@ -1069,8 +1089,8 @@
     "measure.shelves.basics.mixing_water": {
       "title": "Restocking the Basics",
       "duration": 24,
-      "entry_seconds": 1,
-      "exit_seconds": 0.8,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
       "fov": 48,
       "live_camera": "gameplay",
       "required_actors": [
@@ -1084,11 +1104,11 @@
       "stage_protagonist": false,
       "shots": [],
       "dialogue_holds": [
-        2
+        24
       ],
       "lines": [
         {
-          "at": 2,
+          "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
           "text": "Thank you. Let's mix these into water essences to provide our mages with reagents for defensive magic. Open the mixing window and mix 25 water essences. Here are a few Potions of Feasting and mortar and pestles you can use."
@@ -1098,8 +1118,8 @@
     "measure.shelves.basics.reminder_water": {
       "title": "Restocking the Basics",
       "duration": 24,
-      "entry_seconds": 1,
-      "exit_seconds": 0.8,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
       "fov": 48,
       "live_camera": "gameplay",
       "required_actors": [
@@ -1113,11 +1133,11 @@
       "stage_protagonist": false,
       "shots": [],
       "dialogue_holds": [
-        2
+        24
       ],
       "lines": [
         {
-          "at": 2,
+          "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
           "text": "Keep gathering the marked ingredients, or finish your 25 successful mixes. Bring your work back to me here at The True Note. Your quest instructions show your remaining tasks."

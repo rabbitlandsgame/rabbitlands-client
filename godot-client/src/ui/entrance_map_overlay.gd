@@ -50,12 +50,12 @@ func _draw() -> void:
 			else:
 				draw_marker(self, point as Vector2, str(mark.get("label", "Entrance")), LABEL_SIZE, 4.0)
 
-static func label_lines(font: Font, text: String, font_size: int) -> PackedStringArray:
+static func label_lines(font: Font, text: String, font_size: int, max_width := 150.0) -> PackedStringArray:
 	var lines := PackedStringArray()
 	var line := ""
 	for word: String in text.split(" ", false):
 		var next := word if line.is_empty() else line + " " + word
-		if not line.is_empty() and font.get_string_size(next, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x > 150.0:
+		if not line.is_empty() and font.get_string_size(next, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x > max_width:
 			lines.append(line)
 			line = word
 		else:

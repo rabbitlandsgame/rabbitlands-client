@@ -7935,7 +7935,7 @@ func _prefetch_shelves_field() -> void:
 		if MapRegistry.normalize_server_map_id(AppState.current_map)==practice_map or world_park.has_parked(practice_map):
 			shelves_prewarm.discard();return
 		var practice_entry:Dictionary=MapRegistry.resolve(map_registry,practice_map)
-		var practice_tile:Array=practice.get("tile",[40,154])
+		var practice_tile:Array=practice.get("tile",[238,160])
 		if not practice_entry.is_empty():shelves_prewarm.prewarm(practice_entry,practice_map,Vector2i(int(practice_tile[0]),int(practice_tile[1])),world_root)
 		return
 	var tile:Variant=ledger.get("arrival_tile")
@@ -12910,8 +12910,8 @@ func _campaign_destination_marks() -> Array[Dictionary]:
 	for pin:Dictionary in CampaignGuidanceScript.navigation_targets(AppState.campaign,AppState.current_map,lantern_guide.is_campaign_tracked()):
 		var tile:Array=pin.tile
 		result.append({"position":adapter.server_to_godot(float(tile[0])+0.5,float(tile[1])+0.5),
-			"type":&"marker","glyph":"!","colour":CampaignGuidanceScript.NEXT_COLOUR,
-			"radius":MinimapMarkerOverlayScript.PIN_RADIUS,"label":str(pin.label)})
+			"type":&"marker","glyph":"!","quest":true,"colour":CampaignGuidanceScript.NEXT_COLOUR,
+			"radius":MinimapMarkerOverlayScript.QuestMarker.RADIUS,"label":str(pin.label)})
 	return result
 
 func _collect_map_waypoints() -> Array[Dictionary]:
