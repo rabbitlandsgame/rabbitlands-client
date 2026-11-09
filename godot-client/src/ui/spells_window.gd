@@ -80,7 +80,7 @@ var _reasons: Dictionary = {}
 var _tab_buttons: Dictionary = {}
 var _filter_buttons: Dictionary = {}
 var _favorites: Array = []
-var _filter := "all"
+var _filter := "learned"
 var _profile := ""
 var _empty_label: Label
 var _quote_request := ""
@@ -146,7 +146,7 @@ func _restore_preferences() -> void:
 	_profile = loadout.profile
 	var preferences: Dictionary = loadout.book_preferences.get("magic", {})
 	_favorites = preferences.get("favorites", []).duplicate()
-	set_filter(str(preferences.get("filter", "all")), false)
+	set_filter(str(preferences.get("filter", "learned")), false)
 
 func _save_preferences() -> void:
 	if loadout == null: return
@@ -619,6 +619,7 @@ func _build() -> void:
 	var filters := HBoxContainer.new()
 	toolbar.add_child(filters)
 	_filter_buttons = UI.filters(filters, set_filter)
+	set_filter(_filter, false)
 	# Kept as a programmatic scope filter for the practice tools; the grid
 	# itself chooses variants directly and needs no extra target dropdown.
 	scope_filter = OptionButton.new()

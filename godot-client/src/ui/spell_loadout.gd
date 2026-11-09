@@ -38,7 +38,7 @@ func load_profile(key: String) -> void:
 			for tab: String in ["magic", "techniques"]:
 				var value: Variant = saved_book.get(tab)
 				if value is Dictionary:
-					book_preferences[tab] = {"filter": str(value.get("filter", "all")),
+					book_preferences[tab] = {"filter": str(value.get("filter", "learned" if tab == "magic" else "all")),
 						"favorites": value.get("favorites", []).duplicate() if value.get("favorites") is Array else []}
 		wheel_power = clampi(int(config.get_value(profile, "wheel_power", 1)), 1, 10)
 		ring_size = clampi(int(config.get_value(profile, "ring_size", 100)), 75, 125)
