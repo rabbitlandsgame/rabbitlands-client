@@ -55,6 +55,17 @@ the codex surfaces under `godot-client/src/world/look/textures/interior/`.
 Furniture is reviewed Meshy kit scenery placed by the scenery packager; the
 builder makes no props or models.
 
+The cave builder ran once more on 2026-11-09 (owner, chat: "baked pool for now
+is okay", The Serpent Deep descent): `_continent_v2/build_descent_pool.py`
+bakes the server's generated descent floors (`eloria/descent.py`
+`pool_design`, pinned by the plan's `pool.signature`) into the sectioned
+interior `serpent_deep_descent` from `_continent_v2/content/serpent_deep_descent.json`.
+It imports `build_underground.py` without changing it (it only sets that
+module's frame to the source's 840 tiles while it builds), refuses to run
+without `--owner-approved`, and draws only the floors' rock shells in the
+existing Serpent themes; the walls' set pieces are the reviewed Meshy kit
+pieces those themes already use (`godot-client/data/world/descent-scenery.json`).
+
 Procedural actor and equipment definitions are removed, including 158 actor
 model entries, 163 actor-type mappings, four equipment visuals and 710 obsolete
 authoring-catalog records. Historical identifiers remain reserved in the

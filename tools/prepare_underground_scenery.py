@@ -14,6 +14,7 @@ scenery config per interior map (INTERIORS: the map's plan source, the builder
 whose dressing and themes it reads, and its config file):
   landfall_insides  content/underground.json   build_underground     data/world/underground-scenery.json
   landfall_town     content/landfall_town.json build_town_interiors  data/world/town-scenery.json
+  serpent_deep_descent  content/serpent_deep_descent.json  build_underground  data/world/descent-scenery.json
 A config holds every section's placements (<builder>.dressing: the source's
 props and the theme's wall pieces), `harvestPresentation` (the caves' nodes)
 and `surfaces` (<builder>.surfaces: each section's theme styling, which
@@ -362,6 +363,11 @@ INTERIORS = {
     'landfall_town': {'plan': f'{CONTENT}/landfall_town.json', 'builder': 'build_town_interiors',
                       'config': 'godot-client/data/world/town-scenery.json', 'assets': 'placed',
                       'harvest': False},
+    # The Serpent Deep's baked floor pool (owner 2026-11-09): the cave builder's dressing of the server's generated
+    # floors (build_descent_pool.py), in the Serpent themes; no harvest nodes.
+    'serpent_deep_descent': {'plan': f'{CONTENT}/serpent_deep_descent.json', 'builder': 'build_underground',
+                             'config': 'godot-client/data/world/descent-scenery.json', 'assets': 'placed',
+                             'harvest': False},
 }
 # Optional dressing keys a placement carries over, in this order: `outward` (the facing of the wall the piece is cut
 # away with: a cave's wall rock, a town prop standing against a wall), `cutawayWall` (a town prop's own wall node: the
