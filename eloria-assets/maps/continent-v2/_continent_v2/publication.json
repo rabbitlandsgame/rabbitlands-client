@@ -1101,7 +1101,7 @@
      "home_npcs.txt",
      "special_areas.txt"
     ],
-    "manifestBlockSha256": "da980f61b2e7847da2923c0c008781e2ed86df2fccba22fade0df15f9c4a8048"
+    "manifestBlockSha256": "40816d9af0072b9a7b86acf13f74c8b2a491daba8a312cb4306184b73196ed0d"
    },
    "m2": {
     "files": [
@@ -1118,7 +1118,7 @@
      "home_npcs.txt",
      "special_areas.txt"
     ],
-    "manifestBlockSha256": "895f4555cb331ade143abd21ead620352790554977fbc60e7505467e9d76f59c"
+    "manifestBlockSha256": "4253d054e96248e78c0b9766e5f57d4e178df24fed2d1c0d9f41f70c29e193dc"
    },
    "m3": {
     "files": [
@@ -1135,7 +1135,7 @@
      "home_npcs.txt",
      "special_areas.txt"
     ],
-    "manifestBlockSha256": "d1be521c28bdb0cb2c98ce6eee67a46b314286881f253bd0e7d2ac31ae0578a9"
+    "manifestBlockSha256": "7ec640f9a11bf4783dc72cf4f3ee2256138bcc63feab75de94e0424f2e95681f"
    },
    "m4": {
     "files": [
@@ -1152,7 +1152,7 @@
      "home_npcs.txt",
      "special_areas.txt"
     ],
-    "manifestBlockSha256": "64f16a3ae4b4d25889fca7086e727378cc5a4f9c84c4f1991b60bfaa5f62badb"
+    "manifestBlockSha256": "7c2d149a8ced906effb581828bed8179b884202f3476ff7318d8f81c42fa85fb"
    }
   },
   "manifestEntriesSha256": "881dd22c0916029c4c0bf5a4fb0888b0661a84a5eae6743cad3d4c39912f2ec7",
@@ -1175,7 +1175,7 @@
    "warrenmead": "a92723729175fd24b9730080dc2c80cba0bf00cb3f5a01c84a8743ccf3510fd1",
    "whitepeak": "809bcc2249ce924b2db3a0815bdcc50d9e4d6dc98c4f16d98745aad11f967881",
    "landfall_insides": "dd55f2df9f9b3b944d0f6e335e2561d5dc4b640929a27ebbcd9de08f144ac94d",
-   "landfall_town": "2f5c4544c6f5069ee064a2cb879ad7ff5a72adc10774c74e1fa17974aec9977f"
+   "landfall_town": "6309a22c9037221ebe9478bb47377e65807e690aa2a4a0176da0f19fcf5c828b"
   }
  },
  "interiors": {
@@ -1969,10 +1969,10 @@
     26,
     23
    ],
-   "servedGridSha256": "2f5c4544c6f5069ee064a2cb879ad7ff5a72adc10774c74e1fa17974aec9977f",
-   "collisionSha256": "b1d4beede880cde80071c0e90b2fb770fa648a22511d25a27e3148919ef8bd35",
-   "sourceSha256": "b47369fc7de6c16c7336db9ee6e442f52571159d88dd89c16fcce9a6b2a513d5",
-   "manifestSha256": "29e5c03a51e36e2a47bceec604abc5d885ad93d6cfc9fbe9f2df86d889eb613d",
+   "servedGridSha256": "6309a22c9037221ebe9478bb47377e65807e690aa2a4a0176da0f19fcf5c828b",
+   "collisionSha256": "74505edea88173400330159ed433613a1ce04ece9c2cf2d61a46d9415af5519b",
+   "sourceSha256": "969f07401d06643b396fb71332cfd10e84211c4714fec857da80f336b8974896",
+   "manifestSha256": "bb0569f01c33da9c3d0bae7490ad83f6cc9e2688846ecf8e197b096db5c38bea",
    "sections": [
     {
      "id": "tavern_ground",
@@ -2331,7 +2331,7 @@
     "npcs": 22,
     "specialAreas": 1
    },
-   "walkableTiles": 2740
+   "walkableTiles": 2712
   }
  },
  "interiorResourceAmendments": [
@@ -2537,6 +2537,27 @@
    "validation": "Baseline and decorated room-shell builds are byte-identical; published world.glb retained exactly. All changed served cells are inside the weaver house; NPC approaches, exits and all room connections remain reached.",
    "newSceneryModels": 4,
    "tailorPlacements": 16
+  },
+  {
+   "date": "2026-11-09",
+   "map": "landfall_town",
+   "sections": [
+    "library",
+    "magic_shop",
+    "market",
+    "smithy",
+    "tavern_ground"
+   ],
+   "reason": "Add themed merchandise and working supplies to the provisioner, florist, magic shop, forge, bookshop and tavern.",
+   "baseSourceSha256": "b47369fc7de6c16c7336db9ee6e442f52571159d88dd89c16fcce9a6b2a513d5",
+   "sourceSha256": "969f07401d06643b396fb71332cfd10e84211c4714fec857da80f336b8974896",
+   "baseServedGridSha256": "2f5c4544c6f5069ee064a2cb879ad7ff5a72adc10774c74e1fa17974aec9977f",
+   "servedGridSha256": "6309a22c9037221ebe9478bb47377e65807e690aa2a4a0176da0f19fcf5c828b",
+   "manifestSha256": "bb0569f01c33da9c3d0bae7490ad83f6cc9e2688846ecf8e197b096db5c38bea",
+   "newSceneryModels": 0,
+   "addedPlacements": 43,
+   "replacedGenericProps": 3,
+   "validation": "Room-shell builds byte-identical; original published world.glb and all twelve section pictures retained. Only shop-room collision changes. All NPC posts, doorways, information points and room links pass strict access checks; NPC-blocked routes also pass."
   }
  ]
 }
