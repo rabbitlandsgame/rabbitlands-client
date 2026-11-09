@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "map": "landfall_town",
-  "sourcePlanSha256": "922cfbc3b08dff4625645f84e847a5ac2f03c07a34a1e9fc47cf82d4a376b7bf",
+  "sourcePlanSha256": "b47369fc7de6c16c7336db9ee6e442f52571159d88dd89c16fcce9a6b2a513d5",
   "assets": {
     "crystal_cluster": "res://assets/world/underground/crystal_cluster.glb",
     "supply_crate": "res://assets/world/underground/supply_crate.glb",
@@ -23,6 +23,10 @@
     "lens_tripod": "res://assets/world/underground/lens_tripod.glb",
     "lens_grinder": "res://assets/world/underground/lens_grinder.glb",
     "lens_crate": "res://assets/world/underground/lens_crate.glb",
+    "tailor_cape_rail": "res://assets/world/underground/tailor_cape_rail.glb",
+    "tailor_fabric_cabinet": "res://assets/world/underground/tailor_fabric_cabinet.glb",
+    "tailor_tunic_form": "res://assets/world/underground/tailor_tunic_form.glb",
+    "tailor_sewing_tray": "res://assets/world/underground/tailor_sewing_tray.glb",
     "sewing_machine": "res://assets/world/underground/sewing_machine.glb",
     "flower_planter": "res://assets/world/underground/flower_planter.glb",
     "citrus_planter": "res://assets/world/underground/citrus_planter.glb",
@@ -1882,55 +1886,6 @@
       "yaw": 180
     },
     {
-      "asset": "harvest_baskets",
-      "position": [
-        67.45,
-        0,
-        232.81
-      ],
-      "yaw": 0,
-      "outward": [
-        0.0,
-        0,
-        -1.0
-      ],
-      "cutawayWall": "Build_weaver_house_north_lime_plaster"
-    },
-    {
-      "asset": "harvest_baskets",
-      "position": [
-        68.35,
-        0,
-        232.81
-      ],
-      "yaw": 0,
-      "outward": [
-        0.0,
-        0,
-        -1.0
-      ],
-      "cutawayWall": "Build_weaver_house_north_lime_plaster"
-    },
-    {
-      "asset": "goods_shelf_stocked",
-      "position": [
-        61.06,
-        0,
-        233.85
-      ],
-      "yaw": 90,
-      "cutawayWall": "Part_weaver_house_0_lime_plaster"
-    },
-    {
-      "asset": "crate_stack",
-      "position": [
-        69.0,
-        0,
-        238.6
-      ],
-      "yaw": 0
-    },
-    {
       "asset": "wall_sconce",
       "position": [
         70.28,
@@ -2127,98 +2082,11 @@
       "yaw": 0
     },
     {
-      "asset": "tool_rack",
-      "position": [
-        54.3,
-        0,
-        241.2
-      ],
-      "yaw": 90,
-      "outward": [
-        -1.0,
-        0,
-        0.0
-      ],
-      "cutawayWall": "Build_weaver_house_west_lime_plaster"
-    },
-    {
-      "asset": "goods_shelf_stocked",
-      "position": [
-        58.6,
-        0,
-        248.8
-      ],
-      "yaw": 0,
-      "outward": [
-        0.0,
-        0,
-        1.0
-      ],
-      "cutawayWall": "Build_weaver_house_south_lime_plaster"
-    },
-    {
-      "asset": "harvest_baskets",
-      "position": [
-        58.6,
-        0,
-        241.2
-      ],
-      "yaw": 0
-    },
-    {
       "asset": "shop_counter",
       "position": [
         66,
         0,
         243.5
-      ],
-      "yaw": 0
-    },
-    {
-      "asset": "wardrobe",
-      "position": [
-        69.7,
-        0,
-        247.5
-      ],
-      "yaw": 270,
-      "outward": [
-        1.0,
-        0,
-        0.0
-      ],
-      "cutawayWall": "Build_weaver_house_east_lime_plaster"
-    },
-    {
-      "asset": "goods_shelf_stocked",
-      "position": [
-        62,
-        0,
-        248.8
-      ],
-      "yaw": 0,
-      "outward": [
-        0.0,
-        0,
-        1.0
-      ],
-      "cutawayWall": "Build_weaver_house_south_lime_plaster"
-    },
-    {
-      "asset": "supply_chest",
-      "position": [
-        69.2,
-        0,
-        240.7
-      ],
-      "yaw": 0
-    },
-    {
-      "asset": "bench",
-      "position": [
-        62,
-        0,
-        241.1
       ],
       "yaw": 0
     },
@@ -2230,6 +2098,161 @@
         243.4
       ],
       "yaw": 0
+    },
+    {
+      "asset": "tailor_fabric_cabinet",
+      "position": [
+        61.06,
+        0,
+        233.85
+      ],
+      "yaw": 90,
+      "cutawayWall": "Part_weaver_house_0_lime_plaster"
+    },
+    {
+      "asset": "tailor_fabric_cabinet",
+      "position": [
+        68.8,
+        0,
+        233.05
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "tailor_cape_rail",
+      "position": [
+        68.4,
+        0,
+        238.75
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "tailor_tunic_form",
+      "position": [
+        62,
+        0,
+        238.2
+      ],
+      "yaw": 15
+    },
+    {
+      "asset": "tailor_fabric_cabinet",
+      "position": [
+        54.3,
+        0,
+        241.2
+      ],
+      "yaw": 90
+    },
+    {
+      "asset": "tailor_fabric_cabinet",
+      "position": [
+        59.5,
+        0,
+        248.2
+      ],
+      "yaw": 270
+    },
+    {
+      "asset": "tailor_cape_rail",
+      "position": [
+        54.2,
+        0,
+        246.5
+      ],
+      "yaw": 90
+    },
+    {
+      "asset": "tailor_tunic_form",
+      "position": [
+        59.15,
+        0,
+        241.15
+      ],
+      "yaw": 340
+    },
+    {
+      "asset": "tailor_sewing_tray",
+      "position": [
+        56.35,
+        0.75,
+        243.4
+      ],
+      "yaw": 10,
+      "scale": 0.8
+    },
+    {
+      "asset": "tailor_sewing_tray",
+      "position": [
+        56.35,
+        0.75,
+        248.5
+      ],
+      "yaw": 350
+    },
+    {
+      "asset": "tailor_cape_rail",
+      "position": [
+        69.5,
+        0,
+        246.65
+      ],
+      "yaw": 270
+    },
+    {
+      "asset": "tailor_cape_rail",
+      "position": [
+        63.25,
+        0,
+        248.6
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "tailor_fabric_cabinet",
+      "position": [
+        69.1,
+        0,
+        240.35
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "tailor_tunic_form",
+      "position": [
+        62,
+        0,
+        246.7
+      ],
+      "yaw": 20
+    },
+    {
+      "asset": "tailor_tunic_form",
+      "position": [
+        67,
+        0,
+        248.4
+      ],
+      "yaw": 345
+    },
+    {
+      "asset": "trestle_table",
+      "position": [
+        62.2,
+        0,
+        241.5
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "tailor_sewing_tray",
+      "position": [
+        62.2,
+        0.75,
+        241.5
+      ],
+      "yaw": 5
     },
     {
       "asset": "stone_fireplace",
