@@ -75,7 +75,14 @@
         {"asset": "wall_sconce", "at": [39.3,27.6], "yaw": 270, "height": 1.75, "light": true},
         {"asset": "bench", "at": [23.3,21.0], "yaw": 180, "blockBox": [0.88,0.22]},
         {"asset": "weapon_rack_with_weapons", "at": [31.95,21.62], "yaw": 270, "blockBox": [0.62,0.36]},
-        {"asset": "potted_cypress", "at": [21.05,21.05], "yaw": 0, "blockBox": [0.48,0.44]}
+        {"asset": "potted_cypress", "at": [21.05,21.05], "yaw": 0, "blockBox": [0.48,0.44]},
+        {"asset": "dresser_crockery", "at": [29.9,32.1], "yaw": 0, "wall": "north", "blockBox": [0.66,0.36]},
+        {"asset": "cask_cradle_tap", "at": [23.1,31.8], "yaw": 0, "wall": "north", "blockBox": [0.81,0.66]},
+        {"asset": "harvest_baskets", "at": [29.1,22.05], "yaw": 0, "height": 0.61, "scale": 0.7},
+        {"asset": "mushroom_basket", "at": [30.2,22.05], "yaw": 20, "height": 0.61, "scale": 0.65},
+        {"asset": "herb_drying_rack", "at": [36.5,26.0], "yaw": 0, "scale": 0.65, "blockBox": [0.72,0.37]},
+        {"asset": "clay_jars", "at": [39.04,22.5], "yaw": 0, "height": 0.61, "scale": 0.35},
+        {"asset": "wooden_pail", "at": [35.55,25.0], "yaw": 0, "blockBox": [0.16,0.14]}
       ],
       "lights": [
         {"at": [21.75,26.5], "height": 0.7, "colour": [1.0,0.6,0.3], "energy": 2.0, "range": 9},
@@ -133,7 +140,6 @@
         {"asset": "feed_sacks", "at": [140.1,24.46], "yaw": 270, "blockBox": [0.63,0.34], "wall": "east"},
         {"asset": "barrel_stack", "at": [139.83,26.4], "yaw": 270, "blockBox": [0.82,0.61], "wall": "east"},
         {"asset": "rope_coils", "at": [139.66,28.35], "yaw": 270, "blockBox": [0.75,0.78], "wall": "east"},
-        {"asset": "crate_stack", "at": [139.5,30.54], "yaw": 0, "blockBox": [0.9,0.89], "wall": "north"},
         {"asset": "apple_cart", "at": [131.45,29.55], "yaw": 90, "blockBox": [1.18,0.77]},
         {"asset": "wooden_pail", "at": [131.35,21.3], "yaw": 0, "blockBox": [0.16,0.14]},
         {"asset": "wall_sconce", "at": [130.84,27.95], "yaw": 90, "height": 1.9, "light": true},
@@ -152,8 +158,19 @@
         {"asset": "wall_sconce", "at": [120.72,24.75], "yaw": 90, "height": 1.9, "wall": "west", "light": true},
         {"asset": "trestle_table", "at": [132.75,23.4], "yaw": 90, "blockBox": [1.04,0.36]},
         {"asset": "harvest_baskets", "at": [132.75,22.85], "yaw": 90, "height": 0.61},
-        {"asset": "mushroom_basket", "at": [132.75,23.95], "yaw": 0, "height": 0.61},
-        {"asset": "barrel_stack", "at": [138.9,21.45], "yaw": 90, "blockBox": [0.8,0.6]}
+        {"asset": "barrel_stack", "at": [138.9,21.45], "yaw": 90, "blockBox": [0.8,0.6]},
+        {"asset": "tailor_fabric_cabinet", "at": [139.55,31.0], "yaw": 0, "wall": "north", "blockBox": [0.9,0.34]},
+        {"asset": "tailor_sewing_tray", "at": [132.75,23.95], "yaw": 90, "height": 0.61, "scale": 0.85},
+        {"asset": "wall_shelf_jars_bottles", "at": [130.72,21.65], "yaw": 90, "height": 1.35},
+        {"asset": "book_stack", "at": [132.75,23.47], "yaw": 80, "height": 0.61, "scale": 0.7},
+        {"asset": "feed_sacks", "at": [131.15,22.2], "yaw": 90, "scale": 0.75, "blockBox": [0.46,0.26]},
+        {"asset": "clay_jars", "at": [137.7,29.55], "yaw": 0, "scale": 0.5, "blockBox": [0.31,0.28]},
+        {"asset": "flower_buckets", "at": [123.4,26.55], "yaw": 0, "height": 0.61, "scale": 0.72},
+        {"asset": "tailor_sewing_tray", "at": [124.1,26.55], "yaw": 0, "height": 0.61, "scale": 0.6},
+        {"asset": "tiered_flower_stand", "at": [122.8,21.3], "yaw": 0, "blockBox": [0.69,0.52]},
+        {"asset": "flower_buckets", "at": [122.0,25.4], "yaw": 35, "scale": 0.85, "blockBox": [0.43,0.29]},
+        {"asset": "clay_jars", "at": [129.7,22.0], "yaw": 20, "scale": 0.5, "blockBox": [0.31,0.28]},
+        {"asset": "wooden_pail", "at": [122.15,26.65], "yaw": 0, "blockBox": [0.16,0.14]}
       ],
       "lights": [
         {"at": [135.5,28.0], "height": 2.9, "colour": [1.0,0.82,0.6], "energy": 1.2, "range": 8},
@@ -208,7 +225,16 @@
         {"asset": "lens_grinder", "at": [171.21,31.0], "yaw": 90, "blockBox": [0.65,0.65], "wall": "west"},
         {"asset": "lens_crate", "at": [180.75,30.1], "yaw": 0, "scale": 0.7, "blockBox": [0.4,0.4]},
         {"asset": "trestle_table", "at": [177.3,30.65], "yaw": 0, "blockBox": [1.04,0.36]},
-        {"asset": "stool", "at": [177.3,29.75], "yaw": 0, "blockBox": [0.22,0.22]}
+        {"asset": "stool", "at": [177.3,29.75], "yaw": 0, "blockBox": [0.22,0.22]},
+        {"asset": "trestle_table", "at": [179.4,21.5], "yaw": 0, "blockBox": [1.1,0.43]},
+        {"asset": "split_geode", "at": [178.85,21.5], "yaw": 20, "height": 0.61, "scale": 0.25},
+        {"asset": "crystal_ball_stand", "at": [179.8,21.5], "yaw": 0, "height": 0.61, "scale": 0.55},
+        {"asset": "book_stack", "at": [180.25,21.5], "yaw": 60, "height": 0.61, "scale": 0.85},
+        {"asset": "book_stack", "at": [176.65,30.65], "yaw": 35, "height": 0.61},
+        {"asset": "clay_jars", "at": [177.5,30.65], "yaw": 0, "height": 0.61, "scale": 0.32},
+        {"asset": "book_stack", "at": [178.0,30.65], "yaw": 110, "height": 0.61, "scale": 0.8},
+        {"asset": "herb_drying_rack", "at": [180.9,31.8], "yaw": 270, "scale": 0.65, "wall": "east", "blockBox": [0.72,0.37]},
+        {"asset": "wall_shelf_jars_bottles", "at": [173.4,33.32], "yaw": 0, "height": 1.65, "wall": "north"}
       ],
       "lights": [
         {"at": [178.5,26.2], "height": 2.9, "colour": [0.82,0.78,1.0], "energy": 1.2, "range": 8},
@@ -255,7 +281,6 @@
         {"asset": "weapon_rack_with_weapons", "at": [222.06,26.2], "yaw": 270, "blockBox": [0.65,0.38], "wall": "east"},
         {"asset": "armour_stand", "at": [222.05,23.0], "yaw": 270, "blockBox": [0.47,0.39], "wall": "east"},
         {"asset": "armour_stand", "at": [222.05,27.6], "yaw": 270, "blockBox": [0.47,0.39], "wall": "east"},
-        {"asset": "crate_stack", "at": [221.55,21.45], "yaw": 270, "blockBox": [0.9,0.89], "wall": "east"},
         {"asset": "tool_rack", "at": [211.08,24.0], "yaw": 90, "blockBox": [0.92,0.52], "wall": "west"},
         {"asset": "barrel_stack", "at": [211.4,27.71], "yaw": 0, "blockBox": [0.82,0.61]},
         {"asset": "woodcutter_block", "at": [211.45,21.35], "yaw": 0, "blockBox": [0.7,0.58]},
@@ -275,7 +300,14 @@
         {"asset": "harvest_baskets", "at": [213.7,34.1], "yaw": 0, "blockBox": [0.43,0.26], "wall": "north"},
         {"asset": "mushroom_basket", "at": [214.4,31.5], "yaw": 0, "height": 0.61},
         {"asset": "wooden_pail", "at": [212.3,33.9], "yaw": 0, "blockBox": [0.16,0.14]},
-        {"asset": "wall_sconce", "at": [217.28,33.6], "yaw": 270, "height": 1.7, "light": true}
+        {"asset": "wall_sconce", "at": [217.28,33.6], "yaw": 270, "height": 1.7, "light": true},
+        {"asset": "weapon_rack_with_weapons", "at": [220.9,21.15], "yaw": 0, "blockBox": [0.68,0.41]},
+        {"asset": "armour_stand", "at": [219.5,21.15], "yaw": 10, "blockBox": [0.5,0.42]},
+        {"asset": "trestle_table", "at": [213.9,21.2], "yaw": 0, "blockBox": [1.1,0.43]},
+        {"asset": "tailor_sewing_tray", "at": [213.5,21.2], "yaw": 10, "height": 0.61, "scale": 0.8},
+        {"asset": "book_stack", "at": [214.65,21.2], "yaw": 285, "height": 0.61, "scale": 0.9},
+        {"asset": "wooden_pail", "at": [214.2,27.4], "yaw": 0, "blockBox": [0.16,0.14]},
+        {"asset": "wall_shelf_jars_bottles", "at": [210.72,22.9], "yaw": 90, "height": 1.7, "wall": "west"}
       ],
       "lights": [
         {"at": [218.9,26.7], "height": 1.0, "colour": [1.0,0.5,0.2], "energy": 2.2, "range": 10},
@@ -976,7 +1008,15 @@
         {"asset": "chair", "at": [196.3,92.75], "yaw": 180, "blockBox": [0.25,0.25]},
         {"asset": "bookcase", "at": [191.3,94.1], "yaw": 0, "scale": 0.97, "blockBox": [0.669,0.233], "wall": "north"},
         {"asset": "stool", "at": [197.55,89.9], "yaw": 340, "blockBox": [0.2,0.2]},
-        {"asset": "book_stack", "at": [197.55,89.9], "yaw": 215, "scale": 0.95, "height": 0.5}
+        {"asset": "book_stack", "at": [197.55,89.9], "yaw": 215, "scale": 0.95, "height": 0.5},
+        {"asset": "trestle_table", "at": [194.8,84.6], "yaw": 0, "blockBox": [1.1,0.43]},
+        {"asset": "tailor_sewing_tray", "at": [194.3,84.6], "yaw": 0, "height": 0.61, "scale": 0.85},
+        {"asset": "book_stack", "at": [195.15,84.6], "yaw": 20, "height": 0.61, "scale": 1.05},
+        {"asset": "book_stack", "at": [195.15,84.6], "yaw": 65, "height": 0.738, "scale": 0.9},
+        {"asset": "book_stack", "at": [195.6,84.6], "yaw": 150, "height": 0.61, "scale": 0.85},
+        {"asset": "stool", "at": [190.3,93.8], "yaw": 10, "wall": "north", "blockBox": [0.22,0.22]},
+        {"asset": "book_stack", "at": [190.3,93.8], "yaw": 75, "height": 0.5},
+        {"asset": "book_stack", "at": [190.3,93.8], "yaw": 110, "height": 0.622, "scale": 0.9}
       ],
       "lights": [
         {"at": [186.9,91.8], "height": 2.7, "colour": [1.0,0.82,0.6], "energy": 0.9, "range": 5},

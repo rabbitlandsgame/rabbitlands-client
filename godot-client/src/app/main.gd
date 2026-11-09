@@ -1122,6 +1122,7 @@ var effect_budget = LiveEffectBudgetScript.new()
 var _selection_ring_actor := -1
 var _overhead_target_actor := -1
 var _shelves_health_actor := -1
+var _grower_health_actors: Array = []
 ## Built bodies (not deferred), recounted on every gate pass and kept up to
 ## date in between by the passes that build or remove one; the body cap reads it.
 var _built_bodies := 0
@@ -6009,6 +6010,8 @@ func _overhead_health_for(actor_id: int, dto: Dictionary,
 		return true
 	if _is_shelves_training_opponent(actor_id, dto):
 		return true
+	if _is_shelves_grower(actor_id, dto):
+		return true
 	return _minimap_actor_type(dto) != &"npc"
 
 ## Hands every actor its answer to those questions. A pass over the actors one
@@ -6983,6 +6986,11 @@ func _on_state_changed(path: StringName) -> void:
 				if str(AppState.campaign.get("kind", "")) == "shelves" else -1
 			_sync_overhead_health_for([_shelves_health_actor, mentor])
 			_shelves_health_actor = mentor
+			var workers: Array=((AppState.campaign.get("shelves",{}) as Dictionary).get("growers",{}) as Dictionary).get("workers",[])
+			var worker_ids: Array=[]
+			for worker: Dictionary in workers:worker_ids.append(int(worker.actor_id))
+			_sync_overhead_health_for(_grower_health_actors+worker_ids)
+			_grower_health_actors=worker_ids
 		&"npc_dialogue":
 			_sync_dialogue()
 		&"popup":
@@ -9219,6 +9227,7 @@ func _apply_campaign_world() -> void:
 	campaign_road_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
 		_campaign_surface_height, campaign_scene.reduced_motion)
 	campaign_shelves_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map, _campaign_surface_height)
+	campaign_shelves_works.apply_workers(AppState.campaign, actor_nodes)
 	campaign_lamps_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
 		_campaign_surface_height, campaign_scene.reduced_motion)
 	campaign_crossing.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
@@ -18760,6 +18769,15 @@ func _is_shelves_training_opponent(actor_id: int, dto: Dictionary) -> bool:
 		and not str(state.get("run_id","")).is_empty() and bool(ledger.get("private_practice",false)) \
 		and bool(ledger.get("sparring",false)) and int((state.get("actors",{}) as Dictionary).get("mentor",-1))==actor_id \
 		and EloriaProtocol.map_id_from_reference(str(state.get("map","")))==EloriaProtocol.map_id_from_reference(AppState.current_map)
+
+func _is_shelves_grower(actor_id: int, dto: Dictionary) -> bool:
+	var state: Dictionary=AppState.campaign
+	if int(dto.get("kind",0))!=2 or str(state.get("kind",""))!="shelves" or not bool(state.get("active",false)) \
+			or EloriaProtocol.map_id_from_reference(str(state.get("map","")))!=EloriaProtocol.map_id_from_reference(AppState.current_map):return false
+	var growers: Dictionary=(state.get("shelves",{}) as Dictionary).get("growers",{})
+	for worker: Dictionary in growers.get("workers",[]):
+		if int(worker.get("actor_id",-1))==actor_id:return true
+	return false
 
 func _is_attackable_actor(actor_id: int, dto: Dictionary) -> bool:
 	if _is_boss_objective(actor_id): return false

@@ -676,7 +676,7 @@
           "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
-          "text": "Thank you — these essences will help our patrols. I will pay you 500 gold coins for your work, and this essence will be available in my shop."
+          "text": "Thank you â€” that is a sound practice batch. You have earned 500 gold and the lesson experience. The shop stock will remain reserved until we secure the gathering crews and their supply route."
         }
       ],
       "handoff": {
@@ -1143,6 +1143,527 @@
           "text": "Keep gathering the marked ingredients, or finish your 25 successful mixes. Bring your work back to me here at The True Note. Your quest instructions show your remaining tasks."
         }
       ]
+    },
+    "measure.shelves.growers.brief_crew": {
+      "title": "A Harvest Worth Defending",
+      "duration": 40,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "live_camera": "gameplay",
+      "dialogue_holds": [
+        20,
+        40
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "Four villagers have offered to gather our next shipment. Goblins have been coming out of the Old Warren to drive them off. Will you keep the crew safe?"
+        },
+        {
+          "at": 20,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "The crew needs 10,000 Sage, then 5,000 Hearthroot. They will harvest and carry the loads themselves. Protect all four. If someone falls, use Heal Target on her; she will get back to work. Go to the marked beds when you are ready. I have put a guard allowance in your pack or personal storage. These practice supplies do not reopen the shop stock."
+        }
+      ]
+    },
+    "measure.shelves.growers.sage_entry": {
+      "title": "A Harvest Worth Defending",
+      "duration": 40,
+      "entry_seconds": 1.5,
+      "exit_seconds": 1.2,
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "dialogue_holds": [
+        20,
+        40
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Fenna Ash",
+          "speaker_actor": "mentor",
+          "text": "We will harvest the Sage and carry full bags to that store. Watch the approach from the Old Warren. The goblins have been coming south out of its mouth."
+        },
+        {
+          "at": 20,
+          "speaker": "Fenna Ash",
+          "speaker_actor": "mentor",
+          "text": "Our four health bars tell you who needs help. Heal Target gets a fallen worker back on her feet. The shipment counts only when a bag reaches storage. You can pause from the quest window; nobody keeps harvesting while you are away."
+        }
+      ],
+      "shots": [
+        {
+          "t": 0,
+          "anchor_actor": "mentor",
+          "position": [
+            -8,
+            7,
+            10
+          ],
+          "target": [
+            0,
+            1,
+            0
+          ]
+        }
+      ]
+    },
+    "measure.shelves.growers.sage_done": {
+      "title": "The Sage is safe",
+      "duration": 20,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "live_camera": "gameplay",
+      "dialogue_holds": [
+        20
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Fenna Ash",
+          "speaker_actor": "mentor",
+          "text": "All 10,000 Sage are in storage. Keep the bags here; the next crew will turn them into essences. Meet us at the Hearthroot patch marked on your map. We only need 5,000 roots for the same number of mixes."
+        }
+      ]
+    },
+    "measure.shelves.growers.root_entry": {
+      "title": "Guard the Hearthroot crew",
+      "duration": 20,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "live_camera": "gameplay",
+      "dialogue_holds": [
+        20
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Fenna Ash",
+          "speaker_actor": "mentor",
+          "text": "Same work, new ground. We need 5,000 Hearthroot in storage. The goblins still come out of the Old Warren, but now their route leads east toward these beds. Watch the western approach."
+        }
+      ]
+    },
+    "measure.shelves.growers.root_done": {
+      "title": "The shipment is ready",
+      "duration": 20,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "live_camera": "gameplay",
+      "dialogue_holds": [
+        20
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Fenna Ash",
+          "speaker_actor": "mentor",
+          "text": "That is the last of the Hearthroot. Every goblin came from the same tunnels. Tell Ilka what we saw. A full store will not help if the next gathering crew cannot reach these beds."
+        }
+      ]
+    },
+    "measure.shelves.growers.report_crew": {
+      "title": "A trail back to the Warren",
+      "duration": 40,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "live_camera": "gameplay",
+      "dialogue_holds": [
+        20,
+        40
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "Ten thousand Sage and five thousand Hearthroot, safely stored. But the crew saw every raider coming from the Old Warren. We have enough ingredients; we still need a road that stays safe."
+        },
+        {
+          "at": 20,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "You have earned your pay for protecting the crew. There is another job when you are ready: go into the Old Warren and stop whoever is sending those raiders. Our Life Essence stock will open once that route is safe."
+        }
+      ],
+      "handoff": {
+        "to": [
+          "measure.shelves.growers.brief_raid"
+        ],
+        "gameplay_map": "landfall_town",
+        "keep_dialogue": true
+      }
+    },
+    "measure.shelves.growers.brief_raid": {
+      "title": "The Hand Behind the Raids",
+      "duration": 40,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "live_camera": "gameplay",
+      "dialogue_holds": [
+        20,
+        40
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "Every raider came from the Old Warren. Goblins and their wolves have a leader down there. Break their hold before another gathering crew takes the road."
+        },
+        {
+          "at": 20,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "Enter the Old Warren west of town. Your party can join at the entrance. Follow the goblin tracks and wolf prints into the deeper western caves and confront Grask, the orc directing the raids."
+        }
+      ]
+    },
+    "measure.shelves.growers.raid_entry": {
+      "title": "Inside the Old Warren",
+      "duration": 20,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "protagonist",
+      "required_actors": [
+        "protagonist"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "live_camera": "gameplay",
+      "dialogue_holds": [
+        20
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "You",
+          "speaker_actor": "protagonist",
+          "text": "Goblin tracks, wolf prints, and heavy boots. Someone larger is directing these raids. The tunnels bend deeper to the west. We should keep an eye on the side caves."
+        }
+      ]
+    },
+    "measure.shelves.growers.boss": {
+      "title": "The Burrow-Taker",
+      "duration": 40,
+      "entry_seconds": 1.5,
+      "exit_seconds": 1.2,
+      "anchor": "boss",
+      "required_actors": [
+        "boss"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "dialogue_holds": [
+        20,
+        40
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Grask, the Burrow-Taker",
+          "speaker_actor": "boss",
+          "text": "Little harvesters, little guards. Every sack on that road belongs to Grask. You came all this way to become another missing shipment?"
+        },
+        {
+          "at": 20,
+          "speaker": "You",
+          "speaker_actor": "protagonist",
+          "text": "Your goblins will not touch the gathering crews again."
+        }
+      ],
+      "shots": [
+        {
+          "t": 0,
+          "anchor_actor": "boss",
+          "position": [
+            -10,
+            8,
+            12
+          ],
+          "target": [
+            0,
+            1,
+            0
+          ]
+        }
+      ]
+    },
+    "measure.shelves.growers.raid_done": {
+      "title": "A road worth keeping",
+      "duration": 20,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "protagonist",
+      "required_actors": [
+        "protagonist"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "live_camera": "gameplay",
+      "dialogue_holds": [
+        20
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "You",
+          "speaker_actor": "protagonist",
+          "text": "The raids end here. The crew can reach the beds again. We should tell Ilka the route is safe."
+        }
+      ]
+    },
+    "measure.shelves.growers.report_raid": {
+      "title": "Life supply restored",
+      "duration": 20,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "live_camera": "gameplay",
+      "dialogue_holds": [
+        20
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "Grask is gone, the crew has a safe route, and we can finally promise a steady supply. Life Essence is now available here. Fire and Water must wait until we secure their own gathering crews."
+        }
+      ]
+    },
+    "measure.shelves.growers.retry": {
+      "title": "Regroup for another attempt",
+      "duration": 20,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "protagonist",
+      "required_actors": [
+        "protagonist"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "live_camera": "gameplay",
+      "dialogue_holds": [
+        20
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "You",
+          "speaker_actor": "protagonist",
+          "text": "We were overwhelmed. We can regroup and try again, or leave for now. What should we do?"
+        }
+      ],
+      "choice_id": "shelves_patrol_retry",
+      "choice_at": 0,
+      "choice_response_until": 20,
+      "response_actor": "protagonist",
+      "response_speaker": "You"
     }
   }
 }
