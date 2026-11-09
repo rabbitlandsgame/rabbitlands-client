@@ -22,6 +22,7 @@ tile. Entry requires a client declaring `landfall_town_v1`.
 | `netmender_house` The net-mender's house | #56, door J (west wall) | Hearth kitchen, net loft | oak / plaster |
 | `castle` The keep | #1, door K (west wall) | Gate Hall, Hall of Eight Seats, Register Archive, Palace Chancery, the sealed-stair alcove | limestone flagstone / ashlar |
 | `library` Calloway's Books | #28 joined through to #29, door L Calloway's Books (bookshop; north wall) | Bookshop, library reading room (fast reading), library stacks | oak / plaster |
+| `potion_shop` The Measured Drop | #21, door M (potion shop) | Apothecary shop, brewing workshop | cobalt tile / plaster |
 | `temple_practice` Temple Practice Halls | Temple beside Ostrid Hollin, object 59212 | Vestibule, magic practice range, separate no-drop PK arena | limestone and cobalt tile / ashlar |
 
 The temple entrance is at Landfall (138, 195), beside Ostrid; the return tile is
@@ -36,11 +37,11 @@ inventory, equipment, gold and protection stones; ordinary respawn rules apply.
 
 Each street door stands in the interior wall matching its facade's direction
 (south for the avenue's north side and the SW-facing main row, north for #27 and
-#28, west for #11, #56 and the keep). Building doors use objects 59201-59212 (one id
+#28, west for #11, #56 and the keep). Building doors use objects 59201-59213 (one id
 serves both ends), the tavern stairs 59221/59222; the keep's sealed stair is art only,
 with no portal. A coloured door is named as its shopkeeper is on the map.
 
-The rooms are furnished with 415 placed pieces: the 35-piece `lf-interiors`
+The rooms are furnished with 426 placed pieces: the 35-piece `lf-interiors`
 furniture kit (beds, tables, benches, counters, shelves, hearths, the forge, the
 anvil, the loom, the eight high seats and the council map table; Meshy pieces
 prepared at real size), its writing desk's own two closed books packaged on their
@@ -52,10 +53,10 @@ drawn by the client's MineralAppearance shader): the three lichen crusts on the
 Mycelari seat and the Stoneborn standing stone in the Hall of Eight Seats. The
 library's 36 bookcases keep their coloured spines (a tint recolours the books too)
 and none is drawn mirrored (a mirrored case lit darker): cases side by side in a row
-alternate in size (0.95-1.05), so their tops step. Twenty-one people stand at their posts (six shopkeepers: Hob
+alternate in size (0.95-1.05), so their tops step. Twenty-two people stand at their posts (seven shopkeepers: Hob
 Tennant, Hanne Ashby, Bryony Larch, Ilka Tarn, Hild Ashlar and the bookseller Ennis
-Calloway), and 20 interior interactives (59251-59254, 59271-59278, 59281-59284,
-59285-59288) hold the lore objects and the smithy's anvil, a crafting station that publishes as `smithing`. A lore object is
+Calloway, plus the apothecary Nella Fenwick), and 23 interior interactives (59251-59254, 59271-59278, 59281-59284,
+59285-59291) hold the lore objects and the smithy's anvil, a crafting station that publishes as `smithing`. A lore object is
 a pick-only record in `objects.json` (`pickOnly`): a click shape and a hover name
 on the prop it describes (the source's `at`), with no ring or stand-in model.
 
@@ -119,9 +120,9 @@ pocket of floor larger than six tiles cut off from a section's arrival.
 
 ## Package
 
-12 sections, 36 rooms, 2,630 walkable tiles (789 in the temple; tavern 130 + upstairs 133, shops 142,
-magic shop 86, smithy 96, houses 77-114, keep 668, library 196), 117 light markers
-(102 lights and 15 lamp props). `world.glb` is 1,042,004 bytes with its 27 images in the shared
+13 sections, 38 rooms, 2,724 walkable tiles (789 in the temple; tavern 130 + upstairs 133, shops 142,
+magic shop 86, smithy 96, houses 77-114, keep 668, library 196), 123 light markers
+(including the apothecary's shop and workshop lights). `world.glb` is 1,098,360 bytes with its 27 images in the shared
 pool (decals clamp to their edge, surfaces repeat); `collision.bin` (EWCG-v2),
 `served-grid.escg.gz` (ESCG-v2) and `minimap.webp` beside it. The manifest's
 `minimap.liveSpanMetres` (40) frames the live minimap at a room's scale, so a room
@@ -182,3 +183,23 @@ The registry flags the map `preloadOnApproach` with `interiorOf: landfall`
   entry was ready in 27-49 ms (644-885 ms cold) and the parked return to Landfall
   in 35-54 ms (1.4-1.7 s cold). Before the tint shader was warmed, runs on an
   empty cache had a 67-79 ms preload frame.
+
+## The Measured Drop
+
+Nella Fenwick keeps the potion shop in the previously unused #21 frontage on
+the avenue, between Hanne's Provisions and Hemmen's house. Door 59213 is at
+Landfall (141, 257), with a return at (141, 254); it enters the new independent
+`potion_shop` section at (111, 147). Nella stands at (114, 150). The counter,
+colourful bottle shelves, botanical print and glassware cart face a brewing
+workshop with an alembic and cauldron. Existing Meshy furniture is reused.
+
+The door and shopkeeper have the cyan Potions map category. The batch ledger
+is object 59291. The shop sells healing, mana, heat-protection and feasting
+potions, antidote, focus wraps and empty vials. Ennis keeps all books, Bryony
+the plants, Hild equipment and raw minerals, Hanne general crafting supplies,
+Hob food, and Ilka essences, prepared reagents and focuses.
+
+The extension retains every existing shell mesh, material, section, scenery
+placement and walk-grid cell outside its new section. The twelve existing
+section pictures retain their certified image bytes; the new potion-shop
+picture is rendered separately from the published geometry.

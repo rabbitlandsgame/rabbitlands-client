@@ -251,6 +251,22 @@
         146
       ],
       "rotationDegrees": 180
+    },
+    {
+      "id": "potion_shop",
+      "name": "The Measured Drop",
+      "section": "potion_shop",
+      "default": false,
+      "position": [
+        111,
+        0.05,
+        177
+      ],
+      "serverTile": [
+        111,
+        147
+      ],
+      "rotationDegrees": 180
     }
   ],
   "chambers": [
@@ -649,6 +665,28 @@
       ],
       "radius": 13,
       "name": "No-drop PK arena"
+    },
+    {
+      "id": "potion_shop-0",
+      "section": "potion_shop",
+      "position": [
+        112,
+        0,
+        175.5
+      ],
+      "radius": 4.5,
+      "name": "The Measured Drop potion shop"
+    },
+    {
+      "id": "potion_shop-1",
+      "section": "potion_shop",
+      "position": [
+        112,
+        0,
+        169
+      ],
+      "radius": 4.5,
+      "name": "Apothecary brewing workshop"
     }
   ],
   "spaces": {
@@ -939,6 +977,22 @@
       "z1": 173.5,
       "section": "temple_practice",
       "room": 2
+    },
+    "The Measured Drop potion shop": {
+      "x0": 106.5,
+      "x1": 117.5,
+      "z0": 171.5,
+      "z1": 179.5,
+      "section": "potion_shop",
+      "room": 0
+    },
+    "Apothecary brewing workshop": {
+      "x0": 106.5,
+      "x1": 117.5,
+      "z0": 166.5,
+      "z1": 171.5,
+      "section": "potion_shop",
+      "room": 1
     }
   },
   "harvestables": [],
@@ -1262,6 +1316,28 @@
       ],
       "section": "temple_practice",
       "label": "Ostrid and the temple grounds"
+    },
+    {
+      "id": "potion_shop-exit",
+      "objectId": 59213,
+      "role": "portal",
+      "kind": "building",
+      "position": [
+        111,
+        0,
+        179
+      ],
+      "serverTile": [
+        111,
+        145
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        141,
+        254
+      ],
+      "section": "potion_shop",
+      "label": "The avenue"
     }
   ],
   "interactives": [
@@ -1584,6 +1660,28 @@
       ],
       "section": "temple_practice",
       "label": "Ostrid and the temple grounds"
+    },
+    {
+      "id": "potion_shop-exit",
+      "objectId": 59213,
+      "role": "portal",
+      "kind": "building",
+      "position": [
+        111,
+        0,
+        179
+      ],
+      "serverTile": [
+        111,
+        145
+      ],
+      "destinationMap": "landfall",
+      "destinationTile": [
+        141,
+        254
+      ],
+      "section": "potion_shop",
+      "label": "The avenue"
     },
     {
       "id": "tavern_ground-interactive0",
@@ -1936,6 +2034,22 @@
       ],
       "section": "temple_practice",
       "label": "Beyond this doorway: NO-DROP PK ARENA. Players inside may attack one another with weapons or magic. Death here keeps your belongings and protection stones. The range, vestibule and doorway are outside the arena. Normal death and return rules still apply."
+    },
+    {
+      "id": "potion_shop-interactive0",
+      "objectId": 59291,
+      "role": "information",
+      "position": [
+        108,
+        0,
+        173
+      ],
+      "serverTile": [
+        108,
+        151
+      ],
+      "section": "potion_shop",
+      "label": "Nella's batch ledger: each bottle records its ingredients, measure and brewing date. A note in the margin reads: if the label is unclear, ask before drinking."
     }
   ],
   "navigation": {
@@ -1960,7 +2074,7 @@
       "step": 0.1
     },
     "gridAlignment": "tile-centres-v1",
-    "sha256": "79f5c228cc5f61f00764dd530bdc334dea4f208dd81a4f68bb4bdc54c4fcd7a2",
+    "sha256": "f3955bbeb58011acc5d3b3260c523cc1782ba24eb8829d7cf9fc0d2a6493f08a",
     "nodeNames": [
       "Build_castle_east_ashlar_wall",
       "Build_castle_east_decal_banner_glasswarden",
@@ -2082,6 +2196,23 @@
       "Build_netmender_house_west_timber_band",
       "Build_netmender_house_west_wall_cap",
       "Build_netmender_house_west_window_leaded",
+      "Build_potion_shop_east_lime_plaster",
+      "Build_potion_shop_east_timber_band",
+      "Build_potion_shop_east_wall_cap",
+      "Build_potion_shop_east_window_leaded",
+      "Build_potion_shop_north_lime_plaster",
+      "Build_potion_shop_north_timber_band",
+      "Build_potion_shop_north_wall_cap",
+      "Build_potion_shop_north_window_leaded",
+      "Build_potion_shop_south_door_daylight",
+      "Build_potion_shop_south_lime_plaster",
+      "Build_potion_shop_south_timber_band",
+      "Build_potion_shop_south_wall_cap",
+      "Build_potion_shop_south_window_leaded",
+      "Build_potion_shop_west_lime_plaster",
+      "Build_potion_shop_west_timber_band",
+      "Build_potion_shop_west_wall_cap",
+      "Build_potion_shop_west_window_leaded",
       "Build_smithy_east_lime_plaster",
       "Build_smithy_east_soot_brick",
       "Build_smithy_east_timber_band",
@@ -2248,6 +2379,10 @@
       "Part_netmender_house_0_lime_plaster",
       "Part_netmender_house_0_timber_band",
       "Part_netmender_house_0_wall_cap",
+      "Part_potion_shop_0_decal_botanical_prints",
+      "Part_potion_shop_0_lime_plaster",
+      "Part_potion_shop_0_timber_band",
+      "Part_potion_shop_0_wall_cap",
       "Part_smithy_0_lime_plaster",
       "Part_smithy_0_soot_brick",
       "Part_smithy_0_timber_band",
@@ -2317,7 +2452,7 @@
     "servedGrid": {
       "binary": "served-grid.escg.gz",
       "format": "ESCG-v2",
-      "sha256": "0e4ebe849793318bb4d868955427fc2224835320b95ad81d42473ef90abab97b",
+      "sha256": "0b4b490e8ca0531ed77c0b4cbec9723fb20ecf4a7cd40fabd56febd056937e80",
       "unitMetres": 0.05,
       "climbMetres": 1.0,
       "originMetres": -100.0,
@@ -4230,6 +4365,102 @@
         "energyHint": 1,
         "rangeHint": 12,
         "section": "temple_practice"
+      },
+      {
+        "id": "potion_shop-light-0",
+        "position": [
+          114.5,
+          2.9,
+          173.8
+        ],
+        "color": [
+          0.82,
+          0.78,
+          1.0
+        ],
+        "energyHint": 1.2,
+        "rangeHint": 8,
+        "section": "potion_shop"
+      },
+      {
+        "id": "potion_shop-light-1",
+        "position": [
+          111.0,
+          2.9,
+          177.0
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.8,
+        "rangeHint": 7,
+        "section": "potion_shop"
+      },
+      {
+        "id": "potion_shop-light-2",
+        "position": [
+          109.25,
+          2.0,
+          178.8
+        ],
+        "color": [
+          0.72,
+          0.82,
+          1.0
+        ],
+        "energyHint": 0.3,
+        "rangeHint": 4,
+        "section": "potion_shop"
+      },
+      {
+        "id": "potion_shop-light-3",
+        "position": [
+          112.80000000000001,
+          1.0,
+          168.1
+        ],
+        "color": [
+          0.6,
+          1.0,
+          0.7
+        ],
+        "energyHint": 0.5,
+        "rangeHint": 4,
+        "section": "potion_shop"
+      },
+      {
+        "id": "potion_shop-light-4",
+        "position": [
+          110.0,
+          2.9,
+          169.0
+        ],
+        "color": [
+          1.0,
+          0.82,
+          0.6
+        ],
+        "energyHint": 0.8,
+        "rangeHint": 6,
+        "section": "potion_shop"
+      },
+      {
+        "id": "potion_shop-lamp-0",
+        "position": [
+          106.72,
+          2.85,
+          173.4
+        ],
+        "color": [
+          1,
+          0.72,
+          0.42
+        ],
+        "energyHint": 1.0,
+        "rangeHint": 7,
+        "section": "potion_shop"
       }
     ]
   },
@@ -4241,6 +4472,7 @@
       "Roof_magic_shop_wall_cap",
       "Roof_market_wall_cap",
       "Roof_netmender_house_wall_cap",
+      "Roof_potion_shop_wall_cap",
       "Roof_smithy_wall_cap",
       "Roof_tavern_ground_wall_cap",
       "Roof_tavern_upper_wall_cap",
@@ -5328,6 +5560,159 @@
           0.0
         ],
         "section": "netmender_house"
+      },
+      {
+        "node": "Build_potion_shop_east_lime_plaster",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "potion_shop"
+      },
+      {
+        "node": "Build_potion_shop_east_timber_band",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "potion_shop"
+      },
+      {
+        "node": "Build_potion_shop_east_wall_cap",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "potion_shop"
+      },
+      {
+        "node": "Build_potion_shop_east_window_leaded",
+        "outward": [
+          1.0,
+          0,
+          0.0
+        ],
+        "section": "potion_shop"
+      },
+      {
+        "node": "Build_potion_shop_north_lime_plaster",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "potion_shop"
+      },
+      {
+        "node": "Build_potion_shop_north_timber_band",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "potion_shop"
+      },
+      {
+        "node": "Build_potion_shop_north_wall_cap",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "potion_shop"
+      },
+      {
+        "node": "Build_potion_shop_north_window_leaded",
+        "outward": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "section": "potion_shop"
+      },
+      {
+        "node": "Build_potion_shop_south_door_daylight",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "potion_shop"
+      },
+      {
+        "node": "Build_potion_shop_south_lime_plaster",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "potion_shop"
+      },
+      {
+        "node": "Build_potion_shop_south_timber_band",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "potion_shop"
+      },
+      {
+        "node": "Build_potion_shop_south_wall_cap",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "potion_shop"
+      },
+      {
+        "node": "Build_potion_shop_south_window_leaded",
+        "outward": [
+          0.0,
+          0,
+          1.0
+        ],
+        "section": "potion_shop"
+      },
+      {
+        "node": "Build_potion_shop_west_lime_plaster",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "potion_shop"
+      },
+      {
+        "node": "Build_potion_shop_west_timber_band",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "potion_shop"
+      },
+      {
+        "node": "Build_potion_shop_west_wall_cap",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "potion_shop"
+      },
+      {
+        "node": "Build_potion_shop_west_window_leaded",
+        "outward": [
+          -1.0,
+          0,
+          0.0
+        ],
+        "section": "potion_shop"
       },
       {
         "node": "Build_smithy_east_lime_plaster",
@@ -7507,6 +7892,94 @@
         ]
       },
       {
+        "node": "Part_potion_shop_0_decal_botanical_prints",
+        "section": "potion_shop",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          112.0,
+          171.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_potion_shop_0_lime_plaster",
+        "section": "potion_shop",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          112.0,
+          171.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_potion_shop_0_timber_band",
+        "section": "potion_shop",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          112.0,
+          171.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
+        "node": "Part_potion_shop_0_wall_cap",
+        "section": "potion_shop",
+        "rooms": [
+          0,
+          1
+        ],
+        "centre": [
+          112.0,
+          171.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          0.0,
+          0,
+          1.0
+        ]
+      },
+      {
         "node": "Part_smithy_0_lime_plaster",
         "section": "smithy",
         "rooms": [
@@ -8976,6 +9449,20 @@
           183.5
         ]
       }
+    },
+    {
+      "id": "potion_shop",
+      "name": "The Measured Drop",
+      "bounds": {
+        "min": [
+          104.5,
+          164.5
+        ],
+        "max": [
+          119.5,
+          181.5
+        ]
+      }
     }
   ],
   "minimap": {
@@ -8998,7 +9485,7 @@
   },
   "provenance": {
     "source": "_continent_v2/content/landfall_town.json",
-    "sourceSha256": "2f7d30ed84e9552137e30b42282dc329884cf928a4e040e90fa073dc2e3f165e",
+    "sourceSha256": "92566907b36d4bd8e660042ffac405b89f6cd8b45e821bcb17144cb5c9d55fbf",
     "builder": "_continent_v2/build_town_interiors.py",
     "builderSha256": "efc1ad30222572a77ae78d83d6ed9fff8c733880ce0183462aae7c1940a338c2",
     "imports": {
@@ -9115,7 +9602,7 @@
         "sha256": "7c6a93fb1d841d589941c3a70fb74cda92747d503cf60c52803c89e091e1ef38"
       }
     },
-    "ownerApproved": "Owner request 2026-11-08: temple magic practice interior and no-drop PK arena near Ostrid; existing shell builder and imported furniture"
+    "ownerApproved": "Owner 2026-11-09: add a new potion shop NPC and insides building, and redistribute Landfall shop stock"
   },
   "externalResources": {
     "../../../_shared/images/051bdd722e50093d9fe4a642e056c12db638bc003c01fe9e0f42373c64afc0cd.png": "051bdd722e50093d9fe4a642e056c12db638bc003c01fe9e0f42373c64afc0cd",

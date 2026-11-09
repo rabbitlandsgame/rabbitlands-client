@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "map": "landfall_town",
-  "sourcePlanSha256": "2f7d30ed84e9552137e30b42282dc329884cf928a4e040e90fa073dc2e3f165e",
+  "sourcePlanSha256": "92566907b36d4bd8e660042ffac405b89f6cd8b45e821bcb17144cb5c9d55fbf",
   "assets": {
     "crystal_cluster": "res://assets/world/underground/crystal_cluster.glb",
     "supply_crate": "res://assets/world/underground/supply_crate.glb",
@@ -218,6 +218,19 @@
     },
     "temple_practice": {
       "theme": "castle",
+      "floor": {
+        "texture": "authored",
+        "tint": [
+          1,
+          1,
+          1
+        ]
+      },
+      "rockLift": null,
+      "water": null
+    },
+    "potion_shop": {
+      "theme": "shop",
       "floor": {
         "texture": "authored",
         "tint": [
@@ -4991,6 +5004,137 @@
         167.7
       ],
       "yaw": 90
+    },
+    {
+      "asset": "shop_counter",
+      "position": [
+        114.5,
+        0,
+        175.4
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "potion_shelf",
+      "position": [
+        113.75,
+        0,
+        171.82999999999998
+      ],
+      "yaw": 0,
+      "cutawayWall": "Part_potion_shop_0_lime_plaster"
+    },
+    {
+      "asset": "potion_shelf",
+      "position": [
+        115.75,
+        0,
+        171.82999999999998
+      ],
+      "yaw": 0,
+      "cutawayWall": "Part_potion_shop_0_lime_plaster"
+    },
+    {
+      "asset": "glassware_cart",
+      "position": [
+        107.80000000000001,
+        0,
+        177.75
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_potion_shop_west_lime_plaster"
+    },
+    {
+      "asset": "lectern",
+      "position": [
+        108.4,
+        0,
+        172.7
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wall_sconce",
+      "position": [
+        106.72,
+        1.85,
+        173.4
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_potion_shop_west_lime_plaster"
+    },
+    {
+      "asset": "bookcase",
+      "position": [
+        108.19999999999999,
+        0,
+        166.8
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_potion_shop_north_lime_plaster"
+    },
+    {
+      "asset": "alchemy_table_alembic",
+      "position": [
+        110.4,
+        0,
+        166.99
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_potion_shop_north_lime_plaster"
+    },
+    {
+      "asset": "cauldron",
+      "position": [
+        112.80000000000001,
+        0,
+        167.07999999999998
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_potion_shop_north_lime_plaster"
+    },
+    {
+      "asset": "trestle_table",
+      "position": [
+        113.30000000000001,
+        0,
+        169.35
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "stool",
+      "position": [
+        113.30000000000001,
+        0,
+        170.25
+      ],
+      "yaw": 0
     }
   ]
 }

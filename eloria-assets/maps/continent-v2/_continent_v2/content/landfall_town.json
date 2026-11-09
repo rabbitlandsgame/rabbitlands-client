@@ -163,7 +163,7 @@
         {"at": [123.0,30.6], "height": 2.0, "colour": [0.72,0.82,1.0], "energy": 0.3, "range": 4}
       ],
       "npcs": [
-        {"name": "Hanne Ashby", "role": "shop", "occupation": "Provisioner", "actorType": 301, "facing": "S", "tile": [135,28], "greeting": "Wraps, antidote, vials, cloth, needles and planks. Everything the plaza forgot, at the plaza's prices.", "mapCategory": "general_store", "mapLabel": "Hanne's Provisions"},
+        {"name": "Hanne Ashby", "role": "shop", "occupation": "Provisioner", "actorType": 301, "facing": "S", "tile": [135,28], "greeting": "Cloth, leather, needles, planks and everyday supplies. Nella Fenwick at The Measured Drop keeps the medicines and vials.", "mapCategory": "general_store", "mapLabel": "Hanne's Provisions"},
         {"name": "Bryony Larch", "role": "shop", "occupation": "Florist", "actorType": 371, "facing": "S", "tile": [124,28], "greeting": "Sage for the temple, lavender for your pack, and nothing from the high branches. The grove and I have an understanding.", "mapCategory": "flower_shop", "mapLabel": "Bryony's Flowers"}
       ],
       "interactives": [],
@@ -218,7 +218,7 @@
         {"at": [174.0,31.0], "height": 2.9, "colour": [1.0,0.82,0.6], "energy": 0.8, "range": 6}
       ],
       "npcs": [
-        {"name": "Ilka Tarn", "role": "shop", "occupation": "Arcanist", "actorType": 323, "facing": "S", "tile": [178,26], "greeting": "The True Note. Higher reagents and focuses, every one of them tested by ear. If it does not ring, it is not on the shelf.", "mapCategory": "magic_shop", "mapLabel": "The True Note"}
+        {"name": "Ilka Tarn", "role": "shop", "occupation": "Arcanist", "actorType": 323, "facing": "S", "tile": [178,26], "greeting": "The True Note. Essences, prepared reagents and focuses, tested before they reach your pack. Ennis Calloway keeps the tomes.", "mapCategory": "magic_shop", "mapLabel": "The True Note"}
       ],
       "interactives": [
         {"object": 59253, "tile": [173,27], "role": "information", "text": "A star chart in gilt on deep blue. Small notes in the margin mark which stars ring truest through a tuning glass.", "label": "The star chart", "at": [172.37,28.35], "height": 2.5, "radius": 0.8}
@@ -286,7 +286,7 @@
         {"at": [221.9,31.5], "height": 2.0, "colour": [0.72,0.82,1.0], "energy": 0.25, "range": 3}
       ],
       "npcs": [
-        {"name": "Hild Ashlar", "role": "shop", "occupation": "Blacksmith", "actorType": 363, "facing": "SE", "tile": [213,25], "greeting": "Arms and armour at the quartermaster's prices, and not a copper under. The forge is hot if you would rather make your own.", "mapCategory": "blacksmith", "mapLabel": "Hild's Forge"},
+        {"name": "Hild Ashlar", "role": "shop", "occupation": "Blacksmith", "actorType": 363, "facing": "SE", "tile": [213,25], "greeting": "Arms, armour, mining tools and mineral supplies. The forge is hot if you would rather make your own.", "mapCategory": "blacksmith", "mapLabel": "Hild's Forge"},
         {"name": "Pim", "role": "dialogue", "occupation": "Apprentice", "actorType": 309, "facing": "SW", "tile": [218,24], "greeting": "Mind the bellows. If you want Hild, she is the one hitting things. If you want somebody to talk to, I am the one not hitting things."}
       ],
       "interactives": [
@@ -1022,6 +1022,57 @@
       ],
       "nodes": [],
       "spawns": [["temple_practice_dummy",235,168,1],["temple_practice_dummy",238,168,1],["temple_practice_dummy",241,168,1]]
+    },
+    {
+      "id": "potion_shop", "name": "The Measured Drop", "style": "shop", "danger": "Open to all",
+      "about": "The apothecary in unused avenue frontage #21, between Hanne's Provisions and Hemmen's house. Nella Fenwick keeps a tiled shop and brewing workshop. The entrance reuses the existing townhouse without moving street geometry.",
+      "rooms": [[112,148.5,5.5,4],[112,155,5.5,2.5]],
+      "roomNames": ["The Measured Drop potion shop","Apothecary brewing workshop"],
+      "links": [[0,1,2.4,[[111.5,152.5]]]],
+      "floors": ["cobalt_tile","cobalt_tile"],
+      "walls": "lime_plaster",
+      "windows": [
+        {"room": 0, "side": "south", "at": 0.25, "width": 1.2},
+        {"room": 0, "side": "south", "at": 0.8, "width": 1.2},
+        {"room": 0, "side": "west", "at": 0.5, "width": 1.2},
+        {"room": 0, "side": "east", "at": 0.5, "width": 1.2},
+        {"room": 1, "side": "north", "at": 0.57, "width": 1.0},
+        {"room": 1, "side": "east", "at": 0.5, "width": 1.0}
+      ],
+      "decals": [
+        {"image": "botanical_prints", "room": 0, "side": "north", "at": [0.17,0.5], "size": [1.4,0.7]}
+      ],
+      "entrances": [
+        {"map": "landfall", "kind": "building", "object": 59213, "tile": [141,257], "position": [-142.62,121.494,-9.73], "returnTile": [141,254], "arrival": [111,147], "exit": [111,145], "exitFacing": [0,-1], "category": "potion_shop", "label": "The Measured Drop", "exitLabel": "The avenue"}
+      ],
+      "props": [
+        {"asset": "shop_counter", "at": [114.5,148.6], "yaw": 0, "blockBox": [1.08,0.42]},
+        {"asset": "potion_shelf", "at": [113.75,152.17000000000002], "yaw": 0, "blockBox": [0.52,0.15]},
+        {"asset": "potion_shelf", "at": [115.75,152.17000000000002], "yaw": 0, "blockBox": [0.52,0.15]},
+        {"asset": "glassware_cart", "at": [107.80000000000001,146.25], "yaw": 90, "blockBox": [1.18,0.82], "wall": "west"},
+        {"asset": "lectern", "at": [108.4,151.3], "yaw": 0, "blockBox": [0.4,0.33]},
+        {"asset": "wall_sconce", "at": [106.72,150.6], "yaw": 90, "height": 1.85, "wall": "west", "light": true},
+        {"asset": "bookcase", "at": [108.19999999999999,157.2], "yaw": 0, "blockBox": [0.69,0.24], "wall": "north"},
+        {"asset": "alchemy_table_alembic", "at": [110.4,157.01], "yaw": 0, "blockBox": [0.78,0.43], "wall": "north"},
+        {"asset": "cauldron", "at": [112.80000000000001,156.92000000000002], "yaw": 0, "blockBox": [0.41,0.48], "wall": "north"},
+        {"asset": "trestle_table", "at": [113.30000000000001,154.65], "yaw": 0, "blockBox": [1.04,0.36]},
+        {"asset": "stool", "at": [113.30000000000001,153.75], "yaw": 0, "blockBox": [0.22,0.22]}
+      ],
+      "lights": [
+        {"at": [114.5,150.2], "height": 2.9, "colour": [0.82,0.78,1.0], "energy": 1.2, "range": 8},
+        {"at": [111.0,147.0], "height": 2.9, "colour": [1.0,0.82,0.6], "energy": 0.8, "range": 7},
+        {"at": [109.25,145.2], "height": 2.0, "colour": [0.72,0.82,1.0], "energy": 0.3, "range": 4},
+        {"at": [112.80000000000001,155.9], "height": 1.0, "colour": [0.6,1.0,0.7], "energy": 0.5, "range": 4},
+        {"at": [110.0,155.0], "height": 2.9, "colour": [1.0,0.82,0.6], "energy": 0.8, "range": 6}
+      ],
+      "npcs": [
+        {"name": "Nella Fenwick", "role": "shop", "occupation": "Apothecary", "actorType": 305, "facing": "S", "tile": [114,150], "greeting": "The Measured Drop. Healing, mana, protection, antidote and clean vials. Read the label before drinking.", "mapCategory": "potion_shop", "mapLabel": "The Measured Drop"}
+      ],
+      "interactives": [
+        {"object": 59291, "tile": [108,151], "role": "information", "text": "Nella's batch ledger: each bottle records its ingredients, measure and brewing date. A note in the margin reads: if the label is unclear, ask before drinking.", "label": "The batch ledger", "at": [108.4,151.3], "height": 1.1, "radius": 0.5}
+      ],
+      "nodes": [],
+      "spawns": []
     }
   ],
   "passages": [

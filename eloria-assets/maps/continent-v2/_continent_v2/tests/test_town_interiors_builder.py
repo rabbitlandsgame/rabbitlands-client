@@ -49,7 +49,7 @@ def test_the_source_writer_reproduces_the_authored_file():
     assert TS.dump(annotated).encode('utf-8') == raw
     # one door, prop, window, decal and light per line
     lines = raw.decode('utf-8').splitlines()
-    assert sum('"object": 592' in line and '"kind": "building"' in line for line in lines) == 12
+    assert sum('"object": 592' in line and '"kind": "building"' in line for line in lines) == 13
     assert all(line.count('"kind": "building"') <= 1 for line in lines)
 
 
@@ -66,7 +66,7 @@ def test_temple_range_and_arena_are_separate_and_raised_door_is_pickable(monkeyp
     assert retarget.building_record(door, HERE)['height'] == 5.2
     assert retarget.building_record(TS.doors(design)[0], HERE)['height'] == retarget.BUILDING_DOOR['height']
     invalid = copy.deepcopy(design)
-    invalid['sections'][-1]['entrances'][0]['pickHeight'] = 100
+    next(s for s in invalid['sections'] if s['id'] == 'temple_practice')['entrances'][0]['pickHeight'] = 100
     with pytest.raises(TS.SourceError, match='pickHeight'):
         TS.check(invalid)
 
@@ -89,7 +89,8 @@ def test_the_authored_source_holds_the_spec_doors_and_the_stairs():
              (59209, 'netmender_house', [239, 208], [234, 207], None),
              (59210, 'castle', [221, 276], [218, 273], None),
              (59211, 'library', [159, 253], [158, 256], 'bookshop'),
-             (59212, 'temple_practice', [138, 195], [138, 198], None)]
+             (59212, 'temple_practice', [138, 195], [138, 198], None),
+             (59213, 'potion_shop', [141, 257], [141, 254], 'potion_shop')]
     assert sorted(by_object) == [row[0] for row in table]
     for oid, section, tile, back, category in table:
         door = by_object[oid]
@@ -110,7 +111,7 @@ def test_the_authored_source_holds_the_spec_doors_and_the_stairs():
     # the cast (2026-10-27): every coloured door opens on a shopkeeper of its category, who is named on the map as the
     # door is; the lore objects keep to the interior band
     people = TS.npcs(design)
-    assert len({p['name'] for p in people}) == len(people) == 21
+    assert len({p['name'] for p in people}) == len(people) == 22
     keepers = {(p['section'], p['mapCategory']): p for p in people if p.get('mapCategory')}
     assert all(p['role'] == 'shop' for p in keepers.values())
     for oid, section, _tile, _back, category in table:
