@@ -50,17 +50,17 @@ func run() -> void:
 	expect(main.get("preview_actor") is ReplicatedActor3D,
 		"opening creation builds the fixed initial preview")
 	var vanguard_loadout: Dictionary = main.call("_creation_class_loadout")
-	expect(vanguard_loadout == {0: 114, 1: 106, 2: 105, 3: 134, 4: 220, 5: 209, 6: 249},
+	expect(vanguard_loadout == {0: 114, 1: 106, 2: 147, 3: 134, 4: 220, 5: 209, 6: 249},
 		"Vanguard previews the whole militia set: helm, jack, kneecops, warboots, sword and shield")
 	expect(CreationArchetypes.loadout_at(1) ==
-		{0: 164, 3: 159, 4: 230, 5: 225, 6: 226, 8: 1},
+		{0: 164, 2: 148, 3: 159, 4: 230, 5: 225, 6: 226, 8: 1},
 		"Ranger previews hood, vest, breeches, fieldboots, longbow and quiver")
 	expect(CreationArchetypes.loadout_at(2) ==
-		{0: 142, 3: 115, 4: 185, 5: 222, 6: 198} and
+		{0: 142, 2: 146, 3: 115, 4: 185, 5: 222, 6: 198} and
 		str(CreationArchetypes.at(2).get("starting_items", "")).contains("Acolyte"),
 		"Arcanist previews the whole Acolyte set and names it")
 	expect(CreationArchetypes.loadout_at(3) ==
-		{0: 163, 2: 100, 3: 122, 4: 176, 5: 189, 6: 205},
+		{0: 163, 2: 142, 3: 122, 4: 176, 5: 189, 6: 205},
 		"Warden previews the Antler Hood and the Furtrim set with the quarterstaff")
 	for index in CreationArchetypes.count():
 		var parts: Dictionary = CreationArchetypes.loadout_at(index)
