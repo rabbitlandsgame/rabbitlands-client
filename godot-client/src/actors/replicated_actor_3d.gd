@@ -691,6 +691,7 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 		equipment_config: Dictionary = {}, build_model := true) -> Array[String]:
 	var configure_started := Time.get_ticks_usec()
 	_spell_seated = bool(dto.get("sitting", false))
+	_seated_head_delta = Vector3.INF
 	_configuration_phases_us.clear()
 	_configuration_profile_scope = ""
 	var profile_build := OS.get_environment("ELORIA_ACTOR_BUILD_PROFILE") == "1"
@@ -863,6 +864,7 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 		dto.get("equipment_fallback_parts", []) as Array)
 	_configuration_profile_scope = ""
 	_configuration_phases_us["equipment"] = Time.get_ticks_usec() - phase_started
+	_lift_overhead(server_scale)
 	_configuration_phases_us["total"] = Time.get_ticks_usec() - configure_started
 	return errors
 
@@ -3091,13 +3093,61 @@ func head_height() -> float:
 func banner_head_height() -> float:
 	if is_instance_valid(_mount_visual):
 		return float(_mount_visual.get("banner_head_height"))
-	return head_height()
+	return head_height() + posture_height_offset()
+
+## Share the seated head drop with the camera. Sample the support pose once,
+## rather than following breathing or spell gestures with the UI and camera.
+func posture_height_offset() -> float:
+	if not _spell_seated or _is_creature or is_instance_valid(_mount_visual):
+		return 0.0
+	if not is_instance_valid(_native_skeleton) or animation_player == null or resolver == null:
+		return -head_height() * 0.45
+	if not _seated_head_delta.is_finite():
+		var head := _native_skeleton.find_bone(str((_model_config.get("boneAliases", {}) as Dictionary).get("head", "Head")))
+		var clip: String = resolver.clip_for_action(&"seated_idle")
+		if head < 0 or clip.is_empty() or not animation_player.has_animation(clip):
+			return -head_height() * 0.45
+		var animation := animation_player.get_animation(clip)
+		var chain: Dictionary = {}
+		var bone := head
+		while bone >= 0:
+			chain[_native_skeleton.get_bone_name(bone)] = _native_skeleton.get_bone_rest(bone)
+			bone = _native_skeleton.get_bone_parent(bone)
+		for track: int in animation.get_track_count():
+			var name := StringName(animation.track_get_path(track).get_concatenated_subnames())
+			if not chain.has(name) or not animation.track_is_enabled(track) or animation.track_get_key_count(track) == 0:
+				continue
+			var pose: Transform3D = chain[name]
+			match animation.track_get_type(track):
+				Animation.TYPE_POSITION_3D:
+					pose.origin = animation.position_track_interpolate(track, 0.0)
+				Animation.TYPE_ROTATION_3D:
+					pose.basis = Basis(animation.rotation_track_interpolate(track, 0.0)).scaled(pose.basis.get_scale())
+				Animation.TYPE_SCALE_3D:
+					pose.basis = pose.basis.orthonormalized().scaled(animation.scale_track_interpolate(track, 0.0))
+			chain[name] = pose
+		var seated := Transform3D.IDENTITY
+		bone = head
+		while bone >= 0:
+			seated = (chain[_native_skeleton.get_bone_name(bone)] as Transform3D) * seated
+			bone = _native_skeleton.get_bone_parent(bone)
+		_seated_head_delta = seated.origin - _native_skeleton.get_bone_global_rest(head).origin
+	var basis_to_actor := global_basis.inverse() * _native_skeleton.global_basis
+	return minf(0.0, (basis_to_actor * _seated_head_delta).y)
+
+func _set_seated(seated: bool) -> void:
+	if _spell_seated == seated:
+		return
+	_spell_seated = seated
+	_lift_overhead(server_scale)
 
 ## Keep the overhead furniture above the model as it grows.
 func _lift_overhead(factor: float) -> void:
 	var height: float = NAMEPLATE_HEIGHT * factor
 	if is_instance_valid(_native_model) and _native_body_bounds.size.y > 0.0:
 		height = banner_head_height() + NAMEPLATE_CLEARANCE
+	else:
+		height += posture_height_offset()
 	# One height for the lot: the bar, the numbers and the bubble sit above or
 	# below the name inside the block rather than at world heights of their
 	# own, so the gaps between them hold their size along with the text.
@@ -3277,7 +3327,7 @@ func rebase_world(frame: Transform3D) -> void:
 	if remote != null: remote.sync_transfer(self)
 
 func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport := false) -> void:
-	if dto.has("sitting"): _spell_seated = bool(dto.sitting)
+	if dto.has("sitting"): _set_seated(bool(dto.sitting))
 	if not _remote_pending_transfer.is_empty():
 		RemotePresentationService.restore_pending(self)
 		if is_queued_for_deletion(): return
@@ -5647,10 +5697,10 @@ func _play_action_legacy(action: StringName, restart := false) -> void:
 	if is_instance_valid(_mount_visual):
 		_mount_visual.call("play_action", action, restart)
 		return
+	if action in [&"sit", &"seated_idle"]: _set_seated(true)
+	elif action in [&"stand", &"walk", &"run", &"death"]: _set_seated(false)
 	if animation_player == null or resolver == null:
 		return
-	if action in [&"sit", &"seated_idle"]: _spell_seated = true
-	elif action in [&"stand", &"walk", &"run", &"death"]: _spell_seated = false
 	if _spell_seated and action in [&"idle", &"combat_idle", &"turn"]: action = &"seated_idle"
 	if not resolver.action_to_clip.has(String(action)):
 		return
@@ -7110,6 +7160,7 @@ static func _external_path(path: String) -> String:
 
 var _spell_variants: Dictionary = {}
 var _spell_seated := false
+var _seated_head_delta := Vector3.INF
 var _spell_base_clips: Dictionary = {}
 
 func set_spell_variant(effect: int) -> void:
