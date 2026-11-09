@@ -642,7 +642,7 @@ func campaign_request(action: String) -> Error:
 
 func campaign_shelves_choice(run_id: String, token: String, option_id: String) -> Error:
 	if not _campaign_identifier(run_id) or not _campaign_identifier(token) \
-			or option_id not in ["direct","careful","ingredients","food","tool","wand","charm","robe","keeper","artificer","life","fire","water","earth","wind","magic","death","frost"]:
+			or option_id not in ["basics_accept","basics_defer","direct","careful","ingredients","food","tool","wand","charm","robe","keeper","artificer","life","fire","water","earth","wind","magic","death","frost"]:
 		return ERR_INVALID_PARAMETER
 	return send_chat("#campaign shelves_choice %s %s %s" % [run_id,token,option_id])
 

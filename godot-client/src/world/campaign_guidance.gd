@@ -22,6 +22,13 @@ static func navigation_targets(snapshot: Dictionary, current_map: String, tracke
 	var travel:Dictionary=snapshot.get("travel",{})
 	if travel.is_empty():return result
 	var here:=EloriaProtocol.map_id_from_reference(current_map)
+	if travel.has("markers"):
+		for pin:Dictionary in travel.markers:
+			if EloriaProtocol.map_id_from_reference(str(pin.get("map","")))==here:result.append(pin)
+		if not result.is_empty():return result
+		for pin:Dictionary in travel.get("via",[]):
+			if EloriaProtocol.map_id_from_reference(str(pin.get("map","")))==here:result.append(pin)
+		return result
 	if EloriaProtocol.map_id_from_reference(str(travel.get("map","")))==here:
 		if travel.get("tile") is Array:result.append({"tile":travel.tile,"label":str(travel.get("label",snapshot.get("title","Quest destination")))})
 	else:

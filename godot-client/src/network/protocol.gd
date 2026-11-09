@@ -307,6 +307,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"campaign_rescue_v1",
 	"campaign_shelves_v1",
 	"campaign_shelves_travel_v1",
+	"campaign_shelves_basics_v1",
 	"campaign_bank_v1",
 	"campaign_road_v1",
 	"campaign_lamps_v1",
@@ -3793,9 +3794,15 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 	if travel.has("via"):
 		if not travel.via is Array or travel.via.size()>8:return {"type":"invalid","error":"campaign_travel_via"}
 		for pin: Variant in travel.via:
-			if not pin is Dictionary or not pin.get("map") is String or map_id_from_reference(pin.map) not in ["landfall","landfall_town"] \
+			if not pin is Dictionary or not pin.get("map") is String or map_id_from_reference(pin.map) not in ["landfall","landfall_town","landfall_insides","reedfall"] \
 					or not _campaign_navigation_tile(pin.get("tile")) or not pin.get("label") is String or str(pin.label).length()>240:
 				return {"type":"invalid","error":"campaign_travel_via"}
+	if travel.has("markers"):
+		if not travel.markers is Array or travel.markers.size()>8:return {"type":"invalid","error":"campaign_travel_markers"}
+		for pin:Variant in travel.markers:
+			if not pin is Dictionary or not pin.get("map") is String or map_id_from_reference(pin.map) not in ["landfall","landfall_town","landfall_insides","reedfall"] \
+					or not _campaign_navigation_tile(pin.get("tile")) or not pin.get("label") is String or str(pin.label).length()>240:
+				return {"type":"invalid","error":"campaign_travel_markers"}
 	if travel.has("label") and (not travel.label is String or str(travel.label).length()>240):
 		return {"type":"invalid","error":"campaign_travel_label"}
 	var companion: Variant = value.get("companion", {})
@@ -3852,11 +3859,12 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 	if str(value.get("kind",""))=="shelves":
 		if bool(value.get("active",false)) and (value.get("shelves",{}) as Dictionary).is_empty():
 			return {"type":"invalid","error":"campaign_shelves_missing"}
-		if map_id_from_reference(str(value.get("map",""))) not in ["landfall","landfall_town"]:
+		if map_id_from_reference(str(value.get("map",""))) not in ["landfall","landfall_town","landfall_insides","reedfall"]:
 			return {"type":"invalid","error":"campaign_shelves_map"}
 		var choice_id:=str((scene.get("choice",{}) as Dictionary).get("id",""))
 		var expected_scene: Dictionary={"shelves_route":"measure.shelves.brief","shelves_lesson":"measure.shelves.lesson",
-			"shelves_cape":"measure.shelves.review","shelves_gear":"measure.shelves.gear","shelves_enriched":"measure.shelves.enriched"}
+			"shelves_cape":"measure.shelves.review","shelves_gear":"measure.shelves.gear","shelves_enriched":"measure.shelves.enriched",
+			"shelves_basics":"measure.shelves.basics.offer"}
 		if not choice_id.is_empty() and (not expected_scene.has(choice_id) or str(scene.get("id",""))!=str(expected_scene[choice_id])):
 			return {"type":"invalid","error":"campaign_shelves_choice"}
 	elif str((scene.get("choice",{}) as Dictionary).get("id","")).begins_with("shelves_") or not (value.get("shelves",{}) as Dictionary).is_empty():
@@ -3914,6 +3922,9 @@ static func campaign_shelves_valid(value: Variant) -> bool:
 		if family not in ["Life","Fire","Water","Earth","Wind","Magic","Death","Frost"] or family in seen:return false
 		seen.append(family)
 	if value.has("can_begin") and not value.can_begin is bool:return false
+	if value.has("lesson_window") and value.lesson_window not in ["spells","mixing"]:return false
+	if value.has("preload"):
+		if not value.preload is Dictionary or value.preload.get("map")!="landfall_town" or not _campaign_navigation_tile(value.preload.get("tile")):return false
 	if value.has("start_label") and (not value.start_label is String or str(value.start_label).length()>200):return false
 	return (not value.has("arrival_tile") or _campaign_tile(value.arrival_tile)) and _campaign_tile(value.get("cart_tile")) and _campaign_integer(value.get("cart_integrity"),0,100) \
 		and _campaign_integer(value.get("samples"),0,12) and value.get("can_complete") is bool
@@ -4175,6 +4186,7 @@ static func campaign_scene_choice_valid(choice: Variant) -> bool:
 		"rescue_response": ["help", "watch"], "rescue_accept": ["accept", "defer"],
 		"rescue_reward": ["sword", "bow", "wand"],
 		"shelves_route": ["direct", "careful"], "shelves_lesson": ["ingredients", "food", "tool"],
+		"shelves_basics": ["basics_accept", "basics_defer"],
 		"shelves_gear": ["wand", "charm", "robe"],
 		"shelves_cape": ["keeper", "artificer"],
 		"shelves_enriched": ["life", "fire", "water", "earth", "wind", "magic", "death", "frost"]}.get(str(choice.get("id", "")), [])

@@ -517,6 +517,612 @@
           "face": "recipient"
         }
       ]
+    },
+    "measure.shelves.basics.offer": {
+      "title": "Restocking the Basics",
+      "duration": 24,
+      "entry_seconds": 1,
+      "exit_seconds": 0.8,
+      "fov": 48,
+      "live_camera": "gameplay",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "protagonist",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "shots": [],
+      "dialogue_holds": [
+        2
+      ],
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "These shelves once supplied half the coast, but now I cannot even keep enough stocked to supply our patrols. Could you help us re-establish our supply lines?"
+        }
+      ],
+      "choice_id": "shelves_basics",
+      "choice_at": 16,
+      "choice_response_until": 23,
+      "choice_actor": "recipient",
+      "response_speaker": "Ilka Tarn",
+      "response_actor": "mentor"
+    },
+    "measure.shelves.basics.accepted_fire": {
+      "title": "Restocking the Basics",
+      "duration": 24,
+      "entry_seconds": 1,
+      "exit_seconds": 0.8,
+      "fov": 48,
+      "live_camera": "gameplay",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "protagonist",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "shots": [],
+      "dialogue_holds": [
+        2
+      ],
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "Thank you for your help, here is 500 gold coins for your work. Next we will need to gather ingredients for fire essences to supply our offensive magic. Please gather 100 coal and 50 flint and bring them to me so we can mix a new supply of fire essences. I have marked the mines on your map. You will need a pickaxe to harvest these, so please take these with you."
+        }
+      ]
+    },
+    "measure.shelves.basics.accepted_water": {
+      "title": "Restocking the Basics",
+      "duration": 24,
+      "entry_seconds": 1,
+      "exit_seconds": 0.8,
+      "fov": 48,
+      "live_camera": "gameplay",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "protagonist",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "shots": [],
+      "dialogue_holds": [
+        2
+      ],
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "Thank you for your help, here is 500 gold coins for your work. The last basic essence we need to prepare is water essence. Please gather 100 kelp and 50 watercress and bring them to me so we can mix a new supply of water essences. You will need to travel east to Reedfall to gather these. I have marked their location on your map."
+        }
+      ]
+    },
+    "measure.shelves.basics.gathered": {
+      "title": "Restocking the Basics",
+      "duration": 24,
+      "entry_seconds": 1,
+      "exit_seconds": 0.8,
+      "fov": 48,
+      "live_camera": "gameplay",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "protagonist",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "shots": [],
+      "dialogue_holds": [
+        2
+      ],
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "Thank you for gathering the ingredients. Keep them in your pack: we will use them to mix the essences. Your harvesting reward is recorded."
+        }
+      ]
+    },
+    "measure.shelves.basics.delivery": {
+      "title": "Restocking the Basics",
+      "duration": 24,
+      "entry_seconds": 1,
+      "exit_seconds": 0.8,
+      "fov": 48,
+      "live_camera": "gameplay",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "protagonist",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "shots": [],
+      "dialogue_holds": [
+        2
+      ],
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "Thank you — these essences will help our patrols. I will pay you 500 gold coins for your work, and this essence will be available in my shop."
+        }
+      ]
+    },
+    "measure.shelves.basics.missing": {
+      "title": "Restocking the Basics",
+      "duration": 24,
+      "entry_seconds": 1,
+      "exit_seconds": 0.8,
+      "fov": 48,
+      "live_camera": "gameplay",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "protagonist",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "shots": [],
+      "dialogue_holds": [
+        2
+      ],
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "I am glad you were able to mix them. Please bring them to me in your inventory."
+        }
+      ]
+    },
+    "measure.shelves.basics.trainer": {
+      "title": "Restocking the Basics",
+      "duration": 24,
+      "entry_seconds": 1,
+      "exit_seconds": 0.8,
+      "fov": 48,
+      "live_camera": "gameplay",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "protagonist",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "shots": [],
+      "dialogue_holds": [
+        2
+      ],
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "Next we will need to teach you the basics of magic so that you can help defend our patrols. Go to Ostrid Hollin at the temple and she will teach you."
+        }
+      ]
+    },
+    "measure.shelves.basics.heal": {
+      "title": "Practicing the Basics",
+      "duration": 76,
+      "entry_seconds": 1,
+      "exit_seconds": 0.8,
+      "fov": 48,
+      "live_camera": "gameplay",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "protagonist",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "shots": [],
+      "dialogue_holds": [
+        2,
+        20,
+        38,
+        56
+      ],
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "Ostrid Hollin",
+          "speaker_actor": "mentor",
+          "text": "We need all the help we can get to protect the city. Let's go into the temple to practice."
+        },
+        {
+          "at": 20,
+          "speaker": "Ostrid Hollin",
+          "speaker_actor": "mentor",
+          "text": "There are three basic spells that you will need to know to help our patrols. Open the spell window and we will get started."
+        },
+        {
+          "at": 38,
+          "speaker": "Ostrid Hollin",
+          "speaker_actor": "mentor",
+          "text": "There are many different spells available for advanced mages, but for now we will focus on how to heal yourself, how to damage an enemy with fire, and how to restore your ether when you are low. Many spells have different targeting options. You see for heal four options are available. From left to right you can target yourself, another individual target, your allies, or an area of effect. The ether, reagent costs, and recommended magic levels are higher for targeting others than yourself."
+        },
+        {
+          "at": 56,
+          "speaker": "Ostrid Hollin",
+          "speaker_actor": "mentor",
+          "text": "Healing yourself costs 5 ether and 1 life essence. The amount of health you heal will scale with your magic level and your magic defense attribute. You can cast heal by clicking in this window or using it from the quickspell bar if you have it assigned. Here are some life essences for you to practice with. Try casting heal on yourself."
+        }
+      ]
+    },
+    "measure.shelves.basics.fire": {
+      "title": "Practicing the Basics",
+      "duration": 40,
+      "entry_seconds": 1,
+      "exit_seconds": 0.8,
+      "fov": 48,
+      "live_camera": "gameplay",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "protagonist",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "shots": [],
+      "dialogue_holds": [
+        2,
+        20
+      ],
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "Ostrid Hollin",
+          "speaker_actor": "mentor",
+          "text": "Next let's learn to cast fire bolt on your opponents. Open the spell window."
+        },
+        {
+          "at": 20,
+          "speaker": "Ostrid Hollin",
+          "speaker_actor": "mentor",
+          "text": "Here you see there are only two options for offensive magic: one target or an area of effect. Casting fire bolt on one target costs 5 ether and 1 fire essence. The amount of damage your spell will do scales with your magic level, your magic offense attribute, and any elemental weaknesses or resistances on the target. Try casting fire bolt on the warded practice target over there."
+        }
+      ]
+    },
+    "measure.shelves.basics.ether": {
+      "title": "Practicing the Basics",
+      "duration": 58,
+      "entry_seconds": 1,
+      "exit_seconds": 0.8,
+      "fov": 48,
+      "live_camera": "gameplay",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "protagonist",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "shots": [],
+      "dialogue_holds": [
+        2,
+        20,
+        38
+      ],
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "Ostrid Hollin",
+          "speaker_actor": "mentor",
+          "text": "Note that your ether is going down as we are casting spells. You can also regain ether with magic. Open the spell window."
+        },
+        {
+          "at": 20,
+          "speaker": "Ostrid Hollin",
+          "speaker_actor": "mentor",
+          "text": "The gain ether spell can be used when you are not engaged in combat to restore ether over time. The amount of ether you gain scales with your magic level and magic defense attribute. Restoring your own ether costs 1 water essence and no ether. Try casting gain ether on yourself."
+        },
+        {
+          "at": 38,
+          "speaker": "Ostrid Hollin",
+          "speaker_actor": "mentor",
+          "text": "Gain Ether is also called Restore Ether. Taking damage or entering melee ends its recovery. You can cast at range, but stay clear of incoming attacks while recovering."
+        }
+      ]
+    },
+    "measure.shelves.basics.spar": {
+      "title": "Practicing the Basics",
+      "duration": 40,
+      "entry_seconds": 1,
+      "exit_seconds": 0.8,
+      "fov": 48,
+      "live_camera": "gameplay",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "protagonist",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "shots": [],
+      "dialogue_holds": [
+        2,
+        20
+      ],
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "Ostrid Hollin",
+          "speaker_actor": "mentor",
+          "text": "Let's spar with magic to see what you have learned. Keep your health and ether up, and try to take me down with your fire bolt."
+        },
+        {
+          "at": 20,
+          "speaker": "Ostrid Hollin",
+          "speaker_actor": "mentor",
+          "text": "This is a private, nonlethal practice bout. I will stop if either of us falls. Talk to me to review the lesson or retry."
+        }
+      ]
+    },
+    "measure.shelves.basics.retry": {
+      "title": "Practicing the Basics",
+      "duration": 24,
+      "entry_seconds": 1,
+      "exit_seconds": 0.8,
+      "fov": 48,
+      "live_camera": "gameplay",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "protagonist",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "shots": [],
+      "dialogue_holds": [
+        2
+      ],
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "Ostrid Hollin",
+          "speaker_actor": "mentor",
+          "text": "Steady yourself. There is no shame in practicing again. Keep your health up with Heal, strike me with Fire Bolt, and make room to recover ether. Talk to me when you are ready to try again."
+        }
+      ]
+    },
+    "measure.shelves.basics.victory": {
+      "title": "Practicing the Basics",
+      "duration": 24,
+      "entry_seconds": 1,
+      "exit_seconds": 0.8,
+      "fov": 48,
+      "live_camera": "gameplay",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "protagonist",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "shots": [],
+      "dialogue_holds": [
+        2
+      ],
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "Ostrid Hollin",
+          "speaker_actor": "mentor",
+          "text": "Excellent work. You should be ready to defend our caravans. Go back to Ilka when you are ready to help. Here are a few more essences for you to use to continue practicing."
+        }
+      ]
+    },
+    "measure.shelves.basics.mixing_life": {
+      "title": "Restocking the Basics",
+      "duration": 24,
+      "entry_seconds": 1,
+      "exit_seconds": 0.8,
+      "fov": 48,
+      "live_camera": "gameplay",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "protagonist",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "shots": [],
+      "dialogue_holds": [
+        2
+      ],
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "Thank you. Let's mix these into life essences to provide to the guards defending our caravans. Open the mixing window and mix 25 life essences. Here are a few Potions of Feasting and mortar and pestles you can use."
+        }
+      ]
+    },
+    "measure.shelves.basics.reminder_life": {
+      "title": "Restocking the Basics",
+      "duration": 24,
+      "entry_seconds": 1,
+      "exit_seconds": 0.8,
+      "fov": 48,
+      "live_camera": "gameplay",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "protagonist",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "shots": [],
+      "dialogue_holds": [
+        2
+      ],
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "Keep gathering the marked ingredients, or finish your 25 successful mixes. Bring your work back to me here at The True Note. Your quest instructions show your remaining tasks."
+        }
+      ]
+    },
+    "measure.shelves.basics.mixing_fire": {
+      "title": "Restocking the Basics",
+      "duration": 24,
+      "entry_seconds": 1,
+      "exit_seconds": 0.8,
+      "fov": 48,
+      "live_camera": "gameplay",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "protagonist",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "shots": [],
+      "dialogue_holds": [
+        2
+      ],
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "Thank you. Let's mix these into fire essences to provide our mages with reagents for offensive magic. Open the mixing window and mix 25 fire essences. Here are a few Potions of Feasting and mortar and pestles you can use."
+        }
+      ]
+    },
+    "measure.shelves.basics.reminder_fire": {
+      "title": "Restocking the Basics",
+      "duration": 24,
+      "entry_seconds": 1,
+      "exit_seconds": 0.8,
+      "fov": 48,
+      "live_camera": "gameplay",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "protagonist",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "shots": [],
+      "dialogue_holds": [
+        2
+      ],
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "Keep gathering the marked ingredients, or finish your 25 successful mixes. Bring your work back to me here at The True Note. Your quest instructions show your remaining tasks."
+        }
+      ]
+    },
+    "measure.shelves.basics.mixing_water": {
+      "title": "Restocking the Basics",
+      "duration": 24,
+      "entry_seconds": 1,
+      "exit_seconds": 0.8,
+      "fov": 48,
+      "live_camera": "gameplay",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "protagonist",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "shots": [],
+      "dialogue_holds": [
+        2
+      ],
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "Thank you. Let's mix these into water essences to provide our mages with reagents for defensive magic. Open the mixing window and mix 25 water essences. Here are a few Potions of Feasting and mortar and pestles you can use."
+        }
+      ]
+    },
+    "measure.shelves.basics.reminder_water": {
+      "title": "Restocking the Basics",
+      "duration": 24,
+      "entry_seconds": 1,
+      "exit_seconds": 0.8,
+      "fov": 48,
+      "live_camera": "gameplay",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "protagonist",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "shots": [],
+      "dialogue_holds": [
+        2
+      ],
+      "lines": [
+        {
+          "at": 2,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "Keep gathering the marked ingredients, or finish your 25 successful mixes. Bring your work back to me here at The True Note. Your quest instructions show your remaining tasks."
+        }
+      ]
     }
   }
 }

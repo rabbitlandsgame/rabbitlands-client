@@ -52,6 +52,7 @@ var _convoy_buttons: Dictionary = {}
 var _scroll: ScrollContainer
 var _targets: VBoxContainer
 var _entry: Button
+var _lesson_window: Button
 var _leave: Button
 var _help: Button
 var _account: Button
@@ -274,6 +275,10 @@ func _build() -> void:
 	_entry.text = "Begin The Missing Measure"
 	_entry.pressed.connect(_request_entry)
 	column.add_child(_entry)
+	_lesson_window = Button.new()
+	_lesson_window.name = "OpenLessonWindow"
+	_lesson_window.pressed.connect(func() -> void: action_requested.emit("shelves_lesson_window"))
+	column.add_child(_lesson_window)
 	_join = Button.new()
 	_join.text = "Join the party's expedition"
 	_join.pressed.connect(func() -> void: action_requested.emit("join"))
@@ -376,6 +381,7 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 				_bank, _road, _lamps, _prediction_actions, _party, _adoption, _adoption_actions,
 				_companion, _companion_actions, _convoy, _convoy_actions]:
 			control.hide()
+		_lesson_window.hide()
 	if _guidance.visible != _opening_actions_first:
 		_opening_actions_first = _guidance.visible
 		_column.move_child(_scroll, _hint.get_index() + 1 if _opening_actions_first else _entry.get_index() - 1)
@@ -437,6 +443,8 @@ func _request_entry() -> void:
 
 func _apply_shelves(ledger: Dictionary) -> void:
 	_shelves.visible = not ledger.is_empty()
+	_lesson_window.visible = str(ledger.get("lesson_window", "")) in ["spells", "mixing"]
+	_lesson_window.text = "Open Magic" if str(ledger.get("lesson_window", "")) == "spells" else "Open Mixing"
 	if ledger.is_empty(): return
 	var lines: PackedStringArray = ["NEXT STEP" if str(ledger.get("phase","")) in ["travel","report"] else "SUPPLY LEDGER"]
 	for row: Dictionary in ledger.get("objectives", []):

@@ -7929,6 +7929,15 @@ func _prefetch_shelves_field() -> void:
 	if _map_change_adopts_prewarm(shelves_prewarm.map_id):return
 	var state:Dictionary=AppState.campaign
 	var ledger:Dictionary=state.get("shelves",{})
+	var practice:Dictionary=ledger.get("preload",{})
+	if str(state.get("kind",""))=="shelves" and not practice.is_empty() and world_park.preload_enabled:
+		var practice_map:=str(practice.get("map",""))
+		if MapRegistry.normalize_server_map_id(AppState.current_map)==practice_map or world_park.has_parked(practice_map):
+			shelves_prewarm.discard();return
+		var practice_entry:Dictionary=MapRegistry.resolve(map_registry,practice_map)
+		var practice_tile:Array=practice.get("tile",[40,154])
+		if not practice_entry.is_empty():shelves_prewarm.prewarm(practice_entry,practice_map,Vector2i(int(practice_tile[0]),int(practice_tile[1])),world_root)
+		return
 	var tile:Variant=ledger.get("arrival_tile")
 	if str(state.get("kind",""))!="shelves" or not bool(state.get("active",false)) \
 			or MapRegistry.normalize_server_map_id(AppState.current_map)!="landfall_town" \
@@ -9259,6 +9268,11 @@ func _on_campaign_target(object_id: int, tile: Vector2i, nearby: bool) -> void:
 
 func _on_campaign_action(action: String) -> void:
 	if _world_input_blocked():
+		return
+	if action=="shelves_lesson_window":
+		var lesson:=str((AppState.campaign.get("shelves",{}) as Dictionary).get("lesson_window",""))
+		if lesson=="spells":_on_spells_button_pressed()
+		elif lesson=="mixing":_on_manufacturing_button_pressed()
 		return
 	if action=="shelves_destination":
 		if not full_map.visible:_toggle_full_map()
