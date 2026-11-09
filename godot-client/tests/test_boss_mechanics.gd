@@ -72,7 +72,7 @@ func run() -> void:
 	var source := FileAccess.get_file_as_string("res://src/app/main.gd")
 	var harness := GDScript.new()
 	harness.source_code = """extends Node
-class MapRegistry:
+class BossTestMapRegistry:
 	static func normalize_server_map_id(value: String) -> String: return value
 var AppState := {"current_map":"arena"}
 var adapter = preload("res://src/world/coordinate_adapter.gd").new()
@@ -83,6 +83,8 @@ var _effects_enabled := false
 func _campaign_surface_height(_point: Vector3) -> float: return 0.0
 """ + method(source, "_on_boss_mechanic") + "\n" + method(source, "_clear_boss_mechanic_cues") \
 		+ "\n" + method(source, "_is_boss_objective")
+	# Keep the dependency shim distinct from the imported global script class.
+	harness.source_code = harness.source_code.replace("MapRegistry.", "BossTestMapRegistry.")
 	var loaded := harness.reload()
 	check(loaded == OK, "live boss-warning dispatch compiles")
 	if loaded == OK:
