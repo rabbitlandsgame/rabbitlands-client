@@ -314,6 +314,9 @@ TOWN_SELECTION = {
     'flower_buckets': ('lf-interiors','flower-buckets-1','length',1.0),
     'tiered_flower_stand': ('lf-interiors','tiered-flower-stand-1','length',1.4),
     'potion_shelf': ('lf-interiors','potion-shelf-1','height',1.6),
+    # Imported wooden frame with existing crystals, orbs and lenses; Nella
+    # continues using the unmodified bottle-stocked potion_shelf.
+    'magic_shelf': ('lf-interiors','potion-shelf-1','height',1.6),
     'alchemy_table_alembic': ('lf-interiors','alchemy-table-alembic-1','length',1.6),
     'crystal_ball_stand': ('lf-interiors','crystal-ball-stand-1','height',1.3),
     'cauldron': ('lf-interiors','cauldron-1','length',1.0),
@@ -346,6 +349,8 @@ def _desk_book_stack(positions, faces):
 # Pieces packaged from part of their source model: name -> (the record's geometrySelection, a rule choosing the faces
 # kept, from the source's positions and its triangles). Only the index list changes: the source's vertices, UVs and
 # textures stay as they are (the binary prefix check holds) and the faces left out are simply not drawn.
+DERIVED_SELECTIONS = {'magic_shelf'}
+
 FACE_SELECTIONS = {
     'wall_lantern': ('Original upper lantern/bracket faces only', _lantern_head),
     'book_stack': ("Original closed-book stack faces only (the writing desk's left end)", _desk_book_stack),
@@ -604,6 +609,9 @@ def bounds(document, blob):
 
 
 def package(name, spec, output):
+    if name == 'magic_shelf':
+        from prepare_magic_shelf import package_magic_shelf
+        return package_magic_shelf(output, ROOT)
     region, slug, measure, size = spec
     source = ROOT / KITS.get(region, f'godot-client/world_authoring/regions/{region}/assets/prototypes') / f'kit-{slug}.glb'
     if name == 'cave_mouth':

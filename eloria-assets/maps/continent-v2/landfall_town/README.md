@@ -203,3 +203,19 @@ The extension retains every existing shell mesh, material, section, scenery
 placement and walk-grid cell outside its new section. The twelve existing
 section pictures retain their certified image bytes; the new potion-shop
 picture is rendered separately from the published geometry.
+
+## The True Note display shelves
+
+Ilka's two shelves use `magic_shelf`: the existing imported wooden cabinet
+with its bottle components removed and nine miniature crystal focuses,
+crystal-ball stands and mounted lenses arranged on the original three boards.
+`tools/prepare_magic_shelf.py` reproduces this variant from the four existing
+imported scenery models, preserving their geometry, materials and texture
+policies. The original `potion_shelf` remains at The Measured Drop. No room,
+walk grid, collision box, NPC post or shop inventory changes with this dressing.
+
+Run `python tools/prepare_magic_shelf.py` for only this asset and its source
+record, then `python tools/prepare_underground_scenery.py --map landfall_town
+--configs-only` for placements. Full scenery packaging also handles the
+derived variant. Asset hashes invalidate scenery inputs normally; no geometry
+cache policy or preparation scope changes.
