@@ -74,6 +74,12 @@ func _run() -> void:
 	await process_frame
 	_expect(window.panel.visible and window.panel in stack._windows, "the offer opens the window in the window stack")
 	_expect(window.title.text == "Choose your reward", "the server's title is shown")
+	# _layout runs deferred: the panel is sized to its cards, hint and button.
+	await process_frame
+	await process_frame
+	var tall: float = window.panel.size.y
+	_expect(tall < root.size.y * 0.6 and tall >= window.cards.get_combined_minimum_size().y,
+		"the window is as tall as its content, well under the screen (%d of %d px)" % [tall, root.size.y])
 	var cards: Array[Node] = window.cards.get_children()
 	_expect(cards.size() == 3, "three cards are offered")
 	if cards.size() == 3:

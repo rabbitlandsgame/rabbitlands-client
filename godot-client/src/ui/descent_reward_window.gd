@@ -54,7 +54,11 @@ func _ready() -> void:
 	cards.add_theme_constant_override("separation", 10)
 	body.add_child(cards)
 	hint = Label.new()
-	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	# One line, not wrapped: a wrapping label measures its height at the width
+	# it has when the panel is sized (none yet), one letter a line, and the
+	# panel grew to the whole screen. The hints are short and the cards' row
+	# is wider than any of them.
+	hint.autowrap_mode = TextServer.AUTOWRAP_OFF
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	body.add_child(hint)
 	var actions := HBoxContainer.new()
