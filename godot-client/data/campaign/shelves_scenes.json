@@ -2109,6 +2109,575 @@
       "choice_response_until": 20,
       "response_actor": "protagonist",
       "response_speaker": "You"
+    },
+    "measure.shelves.water.brief": {
+      "title": "Where the Water Goes",
+      "duration": 20,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "dialogue_holds": [
+        20
+      ],
+      "lines": [
+        {
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "variants": {
+            "water": "Flint and Coal are reaching us again. But the coastal cutters have stopped coming. Someone is charging them to use their own water.\n\nWalk to the coastal waterworks marked east of the city and speak with Iona Reed. The keeper needs fresh water for Watercress and tidal water for Kelp. I have put 150 Life Essences, 300 Water Essences and 20 minor healing potions in your pouch. Overflow goes to storage. Heal Target restores a worker; Restore Ether replenishes your ether. The shop stock must wait until the whole route is secure.",
+            "water_cutters": "Both gathering channels are open. Iona has four villagers ready to bring in our first shipment: four thousand Kelp and two thousand Watercress. Two Kelp and one Watercress make one Water Essence.\n\nMeet them at the coastal landing. You can order Work, Regroup or Wait from the marked crew station. The hauler must bring every load into secured storage. Their cargo belongs to the shop; the smaller marked patches are available for your own spell ingredients. Keep the cutters alive, and use Heal Target if one falls.",
+            "water_barge": "The cutters have secured the ingredients. Now we need the boat to reach our landing. Follow the towpath beside it; you do not need to board.\n\nIona will offer the sheltered channel or the coastal passage. Order Sail when ready and Wait when the party needs to regroup. Heal the crew, but use Wood Planks to repair the hull at a safe halt. I have supplied twelve planks once; bring replacements from the general store if needed. Secured cargo survives a failed crossing.",
+            "water_keeper": "The delivery proves this route can work, but Veyra Lockhand will keep attacking it while she holds the upper gatehouse. Confront her at the marked gatehouse.\n\nThe gate controls can separate her guards if you prefer. No particular spell is required. Watch for marked surges and move out before they strike. Once she is gone and you return with the news, I can promise Water Essence stock again."
+          },
+          "at": 0,
+          "text": "Flint and Coal are reaching us again. But the coastal cutters have stopped coming. Someone is charging them to use their own water.\n\nWalk to the coastal waterworks marked east of the city and speak with Iona Reed. The keeper needs fresh water for Watercress and tidal water for Kelp. I have put 150 Life Essences, 300 Water Essences and 20 minor healing potions in your pouch. Overflow goes to storage. Heal Target restores a worker; Restore Ether replenishes your ether. The shop stock must wait until the whole route is secure."
+        }
+      ],
+      "live_camera": "gameplay"
+    },
+    "measure.shelves.water.entry_water": {
+      "title": "Where the Water Goes",
+      "duration": 40,
+      "entry_seconds": 1.5,
+      "exit_seconds": 1.2,
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "dialogue_holds": [
+        20,
+        40
+      ],
+      "lines": [
+        {
+          "speaker": "Iona Reed",
+          "speaker_actor": "mentor",
+          "text": "Fresh water belongs in the Watercress channel; tidal water belongs in the Kelp beds. The keeper’s marks are Fresh two, Tide one, Drain zero. Turn a named gate to cycle its setting, then test the channels.\n\nOr we can clear the six bandits at the diversion and breach their spillway. Either way restores both beds. Which approach shall we take?",
+          "at": 0
+        }
+      ],
+      "shots": [
+        {
+          "t": 0,
+          "anchor_actor": "mentor",
+          "position": [
+            10,
+            9,
+            12
+          ],
+          "target": [
+            0,
+            1,
+            0
+          ]
+        }
+      ],
+      "choice_id": "shelves_water_gates",
+      "choice_at": 20,
+      "choice_response_until": 40,
+      "response_actor": "mentor",
+      "response_speaker": "Iona Reed",
+      "choice_actor": "recipient"
+    },
+    "measure.shelves.water.entry_water_cutters": {
+      "title": "Where the Water Goes",
+      "duration": 20,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "dialogue_holds": [
+        20
+      ],
+      "lines": [
+        {
+          "speaker": "Iona Reed",
+          "speaker_actor": "mentor",
+          "text": "Tamsin and I will cut Kelp, Nell will gather Watercress, and Ada will haul the bags from the loading point into storage. We work at the level-ten harvesting rate.\n\nOrder Work when you are ready. Regroup brings us to the active landing; Wait stops the crew. Only secured loads count. Once the first beds are cleared, we will move to the next landing together. Protect anyone who is isolated, and Heal Target a fallen worker.",
+          "at": 0
+        }
+      ],
+      "live_camera": "gameplay"
+    },
+    "measure.shelves.water.move": {
+      "title": "Where the Water Goes",
+      "duration": 20,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "dialogue_holds": [
+        20
+      ],
+      "lines": [
+        {
+          "speaker": "Iona Reed",
+          "speaker_actor": "mentor",
+          "text": "The first beds are cleared and their cargo is secure. We are regrouping at the second loading point. Follow the marked crew station, then order Work when you are ready. No tide deadline will rush you.",
+          "at": 0
+        }
+      ],
+      "live_camera": "gameplay"
+    },
+    "measure.shelves.water.entry_water_barge": {
+      "title": "Where the Water Goes",
+      "duration": 40,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "dialogue_holds": [
+        20,
+        40
+      ],
+      "lines": [
+        {
+          "speaker": "Iona Reed",
+          "speaker_actor": "mentor",
+          "text": "Our barge follows this stepped waterway while we take the towpath beside it. The sheltered channel has three blocked passages to clear under attack. The coastal passage has fewer delays, but heavier ambushes.\n\nSail begins each leg. Wait halts the boat, and it also waits if the party falls behind. One Wood Plank repairs forty hull at a safe halt. Healing is for people, not planks. Which passage shall we take?",
+          "at": 0
+        }
+      ],
+      "live_camera": "gameplay",
+      "choice_id": "shelves_water_route",
+      "choice_at": 20,
+      "choice_response_until": 40,
+      "response_actor": "mentor",
+      "response_speaker": "Iona Reed",
+      "choice_actor": "recipient"
+    },
+    "measure.shelves.water.entry_water_keeper": {
+      "title": "Where the Water Goes",
+      "duration": 20,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "dialogue_holds": [
+        20
+      ],
+      "lines": [
+        {
+          "speaker": "Iona Reed",
+          "speaker_actor": "mentor",
+          "text": "Veyra is already in the gatehouse yard. Her north and south guards watch the controls. Closing a gate traps its two guards behind the barrier, but you can also fight straight through.\n\nHer surges are marked on the ground for four seconds. Step clear before the water strikes. We will hold here; you and your party can approach whenever you are ready.",
+          "at": 0
+        }
+      ],
+      "live_camera": "gameplay"
+    },
+    "measure.shelves.water.boss": {
+      "title": "Where the Water Goes",
+      "duration": 40,
+      "entry_seconds": 1.5,
+      "exit_seconds": 1.2,
+      "anchor": "boss",
+      "required_actors": [
+        "boss"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "dialogue_holds": [
+        20,
+        40
+      ],
+      "lines": [
+        {
+          "speaker": "Veyra Lockhand",
+          "speaker_actor": "boss",
+          "text": "Every cutter, every boat, every little spark in that shop pays my toll. You have cost me three shipments. You will not cost me a fourth.",
+          "at": 0
+        },
+        {
+          "speaker": "You",
+          "speaker_actor": "recipient",
+          "text": "The cutters keep their harvest. Open the route, or we will.",
+          "at": 20
+        }
+      ],
+      "shots": [
+        {
+          "t": 0,
+          "anchor_actor": "boss",
+          "position": [
+            10,
+            9,
+            12
+          ],
+          "target": [
+            0,
+            1,
+            0
+          ]
+        }
+      ]
+    },
+    "measure.shelves.water.done": {
+      "title": "Where the Water Goes",
+      "duration": 20,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "recipient",
+      "required_actors": [
+        "recipient"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "dialogue_holds": [
+        20
+      ],
+      "lines": [
+        {
+          "speaker": "You",
+          "speaker_actor": "recipient",
+          "variants": {
+            "water": "Fresh water reaches the Watercress, and tidal water reaches the Kelp. I should tell Ilka that the crew can begin.",
+            "water_cutters": "Four thousand Kelp and two thousand Watercress are secured. I should return to Ilka before we launch the shipment.",
+            "water_barge": "The cargo has reached the final landing. The ambushers’ orders point to Veyra at the upper gatehouse. Ilka needs to hear this.",
+            "water_keeper": "Veyra is defeated and the gate controls are free. Iona can reopen the route. I should return to Ilka to restore Water Essence stock."
+          },
+          "at": 0,
+          "text": "Fresh water reaches the Watercress, and tidal water reaches the Kelp. I should tell Ilka that the crew can begin."
+        }
+      ],
+      "live_camera": "gameplay"
+    },
+    "measure.shelves.water.report": {
+      "title": "Where the Water Goes",
+      "duration": 20,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "dialogue_holds": [
+        20
+      ],
+      "lines": [
+        {
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "variants": {
+            "water": "Both beds have water again. Here is your pay. Now let us put Iona’s cutters back to work.",
+            "water_cutters": "Four thousand Kelp and two thousand Watercress, all secured. You have earned this reward. The shipment still needs a boat and a safe passage.",
+            "water_barge": "The cargo arrived, but those orders explain why the attacks keep coming. Take your reward. We must deal with the keeper of that toll."
+          },
+          "at": 0,
+          "text": "Both beds have water again. Here is your pay. Now let us put Iona’s cutters back to work."
+        }
+      ],
+      "live_camera": "gameplay",
+      "handoff": {
+        "to": [
+          "measure.shelves.water.brief"
+        ],
+        "gameplay_map": "landfall_town",
+        "keep_dialogue": true
+      }
+    },
+    "measure.shelves.water.report_final": {
+      "title": "Where the Water Goes",
+      "duration": 20,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "dialogue_holds": [
+        20
+      ],
+      "lines": [
+        {
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "The cutters have their water, the boat has its route, and Veyra has lost her toll. Water Essence is now available here. You have earned this enriched essence and your pay.\n\nThese attacks were too coordinated to be simple theft. Keep those orders safe; we may need to learn who wanted Landfall’s essence shelves empty.",
+          "at": 0
+        }
+      ],
+      "live_camera": "gameplay"
+    },
+    "measure.shelves.water.resume": {
+      "title": "Where the Water Goes",
+      "duration": 20,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "dialogue_holds": [
+        20
+      ],
+      "lines": [
+        {
+          "speaker": "Iona Reed",
+          "speaker_actor": "mentor",
+          "text": "Your secured cargo and finished preparations are safe. Check the quest instructions for our next step. Order the crew or boat to continue when you are ready, and Heal Target anyone who has fallen.",
+          "at": 0
+        }
+      ],
+      "live_camera": "gameplay"
+    },
+    "measure.shelves.water.retry": {
+      "title": "Where the Water Goes",
+      "duration": 20,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "recipient",
+      "required_actors": [
+        "recipient"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "dialogue_holds": [
+        20
+      ],
+      "lines": [
+        {
+          "speaker": "You",
+          "speaker_actor": "recipient",
+          "text": "We can regroup at the saved landing or leave for now. The secured cargo is safe; unfinished loads must be gathered again.",
+          "at": 0
+        }
+      ],
+      "live_camera": "gameplay",
+      "choice_id": "shelves_water_retry",
+      "choice_at": 0,
+      "choice_response_until": 20,
+      "response_actor": "recipient",
+      "response_speaker": "You",
+      "choice_actor": "recipient"
+    },
+    "measure.shelves.water.done_keeper": {
+      "title": "Where the Water Goes",
+      "duration": 40,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "dialogue_holds": [
+        20,
+        40
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Iona Reed",
+          "speaker_actor": "mentor",
+          "text": "The toll is finished. Both gates are open. Tamsin, Nell, Ada — take the cutters through. We can use our own water again."
+        },
+        {
+          "at": 20,
+          "speaker": "You",
+          "speaker_actor": "recipient",
+          "text": "The route is open and the cutters are passing freely. I should tell Ilka that Water Essence supplies can resume."
+        }
+      ],
+      "live_camera": "gameplay"
     }
   }
 }

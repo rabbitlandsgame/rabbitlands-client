@@ -476,6 +476,16 @@ func _apply_shelves(ledger: Dictionary) -> void:
 			if not (fire.hazards as Array).is_empty():lines.append("MOVE OUT OF THE MARKED BLAST AREA")
 		for worker: Dictionary in fire.get("workers",[]):
 			lines.append("%s · %d/%d health · %d carried · %s" % [worker.name,int(worker.health),int(worker.max_health),int(worker.cargo),"DOWNED — use Heal Target" if bool(worker.downed) else "Hauling" if str(worker.activity)=="return" else "Working"])
+	var water:Dictionary=ledger.get("water",{})
+	if not water.is_empty():
+		if str(water.stage)=="water":lines.append("Channel settings · Fresh %d/2 · Tide %d/2 · Drain %d/2\nKeeper’s marks: Fresh 2, Tide 1, Drain 0" % [int(water.flow[0]),int(water.flow[1]),int(water.flow[2])])
+		elif str(water.stage)=="water_cutters":
+			lines.append("Crew: %s · Gathering beds %d/2" % [str(water.command).capitalize(),int(water.bed)+1])
+			for crop:String in ["kelp","cress"]:lines.append("%s · Cut %d/%d · At loading point %d · Secured %d/%d" % ["Kelp" if crop=="kelp" else "Watercress",int(water.cut[crop]),int(water.goals[crop]),int(water.bins[crop]),int(water.stored[crop]),int(water.goals[crop])])
+		elif str(water.stage)=="water_barge":lines.append("Barge hull: %d/100 · Landings: %d/3 · %s\nStay close and drive attackers away. Heal the crew; repair the boat with Wood Planks." % [int(water.hull),int(water.landing),"Departure ordered" if water.sailing else "Waiting for your departure order"])
+		else:lines.append("North guards isolated: %s · South guards isolated: %s" % ["Yes" if water.north else "No","Yes" if water.south else "No"])
+		if not (water.hazards as Array).is_empty():lines.append("MOVE OUT OF THE MARKED SURGE")
+		for worker:Dictionary in water.workers:lines.append("%s · %d/%d health · %d carried · %s" % [worker.name,int(worker.health),int(worker.max_health),int(worker.cargo),"DOWNED — use Heal Target" if worker.downed else "Hauling" if str(worker.activity)=="return" else "Cutting" if worker.harvesting else "Ready"])
 	_shelves.text = "\n".join(lines)
 
 func _rescue_local() -> bool:

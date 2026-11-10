@@ -1,6 +1,6 @@
 # The Empty Shelves of Landfall
 
-Ilka Tarn's shop, The True Note, has tools and empty essence shelves. The player learns to gather, mix and use magic, then protects the people who supply the shop. Practice batches do not open merchant stock. Life Essence becomes available after the Old Warren raid. The Price of a Spark restores Fire through quarry recovery, Coal extraction and a sapper confrontation. Water remains out of stock until its protection quests are developed.
+Ilka Tarn's shop, The True Note, has tools and empty essence shelves. The player learns to gather, mix and use magic, then protects the people who supply the shop. Practice batches do not open merchant stock. Life Essence becomes available after the Old Warren raid. The Price of a Spark restores Fire through quarry recovery, Coal extraction and a sapper confrontation. Where the Water Goes restores Water through coastal sluices, cutter protection, a barge escort and the upper gatehouse.
 
 ## The chapters
 
@@ -31,13 +31,31 @@ Assignments mark the real worksites; players walk there and choose when to begin
 
 The target is roughly 50–75 minutes including travel and combat, subject to a full-length pacing playtest. Native automated journeys accelerate quantities and clocks while retaining real movement, spell costs, creature deaths and reward validation.
 
-### Retained later designs
+### Where the Water Goes
 
-Water is being held for its protection quests after the Fire supply series. The older designs below remain as reference and support for advanced saves; Water is unavailable as a new assignment until redesigned.
+| Chapter | What the player does | Bonus experience | Other reward |
+| --- | --- | --- | --- |
+| **Water Behind the Gates** | Meet Iona at the coastal worksite (400, 315). Balance Fresh 2 / Tide 1 / Drain 0, or defeat six guards and breach their diversion. Both restore both gathering beds. | 1,000 Alchemy, 750 Magic | 1,000 gold and 100 Water Essences; repairs add 500 Alchemy XP, breaching adds 500 Attack XP. |
+| **The Cutters’ Share** | Protect two Kelp cutters, one Watercress gatherer and a hauler. Secure 4,000 Kelp and 2,000 Watercress across two loading sites. Order Work, Regroup or Wait. | 2,000 Harvesting, 1,000 Defense | 1,500 gold and 150 Water Essences. |
+| **A Boat Against the Current** | Follow the towpath beside the cargo boat. Choose three defended obstruction stops or stronger coastal ambushes. Order Sail at each landing; Wait halts the boat. | 1,500 Magic, 1,500 Defense | 2,000 gold and 20 minor healing potions. Sheltered adds 500 Defense XP and 10 potions; coastal adds 500 Attack XP and 500 gold. |
+| **The Keeper of the Toll** | Confront Veyra and four guards at the upper gatehouse (405, 325). Optional gates isolate guard pairs; avoid four-second marked surges. | 2,000 Magic, 2,000 Alchemy | 3,000 gold, one Enriched Water Essence and permanent Water Essence shop stock. Each used guard gate adds 250 Alchemy XP. |
+
+Ilka supplies 150 Life Essences, 300 Water Essences and 20 minor healing potions once when assigning the sluices. The boat assignment supplies twelve Wood Planks once. Overflow goes to personal storage. Heal Target revives crew members; Restore Ether replenishes the player's ether. Separate native Kelp and Watercress patches allow personal gathering and mixing without borrowing the merchant shipment.
+
+The level-10 cutters deliver bags to a loading point; the hauler walks them into secured storage. The ledger distinguishes cut, waiting and secured quantities for each crop. Once half of each shipment is secured and all old-bed cargo is deposited, the crew regroups at the second beds. There is no tide deadline. Only Work produces yields, with no cinematic or offline catch-up.
+
+The cargo boat follows a connected route through three landings while players use the adjacent towpath. It waits if the party falls behind. Ada must be standing to pilot it. A Wood Plank restores 40 hull at a safe halt; healing cannot repair the boat. Secured loads, completed preparations and landing checkpoints survive retries. Unsecured bags are lost on defeat. A broken hull or the story owner's defeat offers Retry/Cancel at the saved landing.
+
+The party copies reuse Landfall's existing terrain, collision, streaming and map preparation. Approved gates, jetties, gathering plants and a cargo-carrying boat dress the worksite; the existing flow-effect renderer makes channels and the accepted boat passage visible. Public worksites are marked only for the assigned expedition. Native bandits use approved Human bodies and invasion colors, with ordinary combat experience.
+
+Veyra has 500 health and is present from the start. Closing either guard gate is optional; no offensive school is required. After her defeat the gates reopen and the surviving cutters walk through during a settled closing conversation. Only Ilka's final report opens Water stock. Every reward is personal and paid once; helpers keep their own quest progress. Portrait choices, read-only replay, immediate Continue and seamless report-to-briefing handoffs use the normal quest controls. Full-duration pacing and novice balance remain playtest tuning tasks.
+
+### Later chapters
+
+The remaining chapters keep their earlier designs. Earth follows the completed gatehouse report.
 
 | Chapter | Retained design | Bonus experience | Other reward |
 | --- | --- | --- | --- |
-| **Water Behind the Gates** | Restore the sluices in order or clear a temporary bypass. Gather Kelp and Watercress, make ten Water Essences and load the cutters' shipment. | 1,000 Alchemy, 800 Magic, 500 Harvesting | Water Essence stock and 40 Water Essences. |
 | **The Road Must Hold** | Load the potters' cart and escort it through road ambushes. Keep the party together, drive attackers away, repair damage with planks and unload the shipment. | 1,500 Magic, 800 Alchemy | Earth Essence stock, 700 gold, and each player's choice of a Focus Wand, Woven Charm or Seawrap Robe. |
 | **Many Hands at the Mortar** | Diagnose three apprentices' actual problems: wrong ingredients, no food and an unsuitable tool. Demonstrate fifteen successful Life Essence mixes. | 2,500 Alchemy | Gatherer's Cape and the ability to buy ten-mix ingredient bundles for restored essences. |
 | **Seeds on the Wind** | Gather Seed and Reed, repair drying racks, protect the larger station or fit sheltered wind vanes, and prepare ten Wind Essences. | 1,800 Alchemy, 2,000 Harvesting | Wind Essence stock, 40 Wind Essences and 400 gold. |
@@ -46,7 +64,7 @@ Water is being held for its protection quests after the Fire supply series. The 
 | **Keeping the Cold** | Restore intake and seals, then defend the workers or repair a protected circulation loop. The trained villagers handle Frost production. | 1,500 Alchemy, 800 Magic | Frost Essence stock, ten Frost Essences, 600 gold and an optional advanced mixing assignment. |
 | **The True Note** | Deploy the trained crew, defend the receiving yard and defeat the quartermaster. Recover his orders. | 4,000 Magic, 2,500 Alchemy | 2,000 gold; each player's choice of an Essence Keeper's or Artificer's Cape, plus one enriched essence of their choice. Daily supply contracts become available. |
 
-The Fire supply series follows Life; Water will follow Fire. After the teaching chapter, Wind and Magic can be restored in either order; Death and Frost then form another pair. Both members of each pair are required before the next major chapter.
+The Fire supply series follows Life, and Water follows Fire. After the teaching chapter, Wind and Magic can be restored in either order; Death and Frost then form another pair. Both members of each pair are required before the next major chapter.
 
 The retained route-choice chapters show their extra experience and item rewards before the player chooses. The new crew-defense task and Old Warren raid follow their own sequence.
 

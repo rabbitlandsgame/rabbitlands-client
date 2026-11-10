@@ -150,8 +150,8 @@ func _readout_quad(size: Vector2, colour: Color) -> MeshInstance3D:
 	add_child(node)
 	return node
 
-func _flow_segment(start: Vector3, finish: Vector3) -> void:
-	var sideways := Vector3(-(finish - start).z, 0, (finish - start).x).normalized() * 0.34
+func _flow_segment(start: Vector3, finish: Vector3, half_width := 0.34) -> void:
+	var sideways := Vector3(-(finish - start).z, 0, (finish - start).x).normalized() * half_width
 	if sideways.length_squared() < 0.01:
 		return
 	var mesh := ImmediateMesh.new()

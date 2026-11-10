@@ -17,13 +17,13 @@ var _worker_nodes: Dictionary={}
 
 func apply_workers(snapshot:Dictionary,actors:Dictionary)->void:
 	_worker_nodes.clear()
-	var rows:Array=((snapshot.get("shelves",{}) as Dictionary).get("growers",(snapshot.get("shelves",{}) as Dictionary).get("fire",{})) as Dictionary).get("workers",[])
+	var rows:Array=((snapshot.get("shelves",{}) as Dictionary).get("growers",(snapshot.get("shelves",{}) as Dictionary).get("fire",(snapshot.get("shelves",{}) as Dictionary).get("water",{}))) as Dictionary).get("workers",[])
 	var wanted:Dictionary={}
 	for worker:Dictionary in rows:
 		var actor:=actors.get(int(worker.actor_id)) as ReplicatedActor3D
 		if not is_instance_valid(actor):continue
 		var key:="bag_"+str(worker.actor_id)
-		var fire:Dictionary=(snapshot.get("shelves",{}) as Dictionary).get("fire",{})
+		var fire:Dictionary=(snapshot.get("shelves",{}) as Dictionary).get("fire",(snapshot.get("shelves",{}) as Dictionary).get("water",{}))
 		var hauls_cart:bool=(fire.get("carts",[]) as Array).any(func(cart:Dictionary)->bool:return int(cart.actor_id)==int(worker.actor_id))
 		if int(worker.cargo)>0 and not bool(worker.downed) and not hauls_cart:
 			wanted[key]=true;_worker_nodes[key]=actor
@@ -50,7 +50,7 @@ func apply_snapshot(snapshot:Dictionary,adapter:CoordinateAdapter,current_map:St
 	_adapter=adapter;_sample=sample
 	var identity:=str(snapshot.get("run_id",""))+":"+here+":"+str(ledger.get("chapter",""))
 	if identity!=_identity:clear();_identity=identity
-	var anchors:Dictionary={} if ledger.has("fire") else snapshot.get("anchors",{})
+	var anchors:Dictionary={} if ledger.has("fire") or ledger.has("water") else snapshot.get("anchors",{})
 	if anchors.has("stock_display"):
 		for index:int in (ledger.get("unlocked",[]) as Array).size():
 			var key:="shelf_"+str(index)
