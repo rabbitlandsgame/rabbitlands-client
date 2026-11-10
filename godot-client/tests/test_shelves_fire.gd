@@ -62,7 +62,8 @@ func run()->void:
 	expect(errors.is_empty() and actor.get_node_or_null("NativeModel")!=null,"the spell target is an actual approved barrel model")
 	var works:Node3D=load("res://src/world/campaign_fire_works.gd").new();root.add_child(works)
 	s.shelves.fire.stage="fire_coal";s.anchors={"lift":[51,216],"storage":[54,216],"stock":[48,216]}
-	s.shelves.fire.hazards=[{"kind":"warning","tile":[52,216],"radius":2,"seconds":4}]
+	s.shelves.fire.hazards=[{"kind":"warning","tile":[52,216],"radius":2,"seconds":4},
+		{"kind":"explosion","tile":[50,216],"radius":1,"seconds":2}]
 	works.apply_snapshot(s,main.adapter,"landfall",func(_p:Vector3)->float:return 0.0)
 	expect(works.props.has("lift") and works.props.has("cart") and works.props.has("cart_two"),"the Coal route shows native hauling machinery and both crew carts")
 	expect(is_instance_valid(works._warning) and works._warning.get("pointer").text.contains("MOVE"),"blast warnings explain the required action on the ground")
