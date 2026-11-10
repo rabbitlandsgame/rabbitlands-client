@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "product": "Rabbit Lands",
+  "date": "2026-11-09",
+  "draft": false,
+  "decorativeFrame": false,
+  "generator": "built-in imagegen",
+  "productionMode": "individual painted inventory icons",
+  "camera": "restrained three-quarter view",
+  "provenance": "Individually generated paintings. Original alpha preserved through Lanczos downscaling and composited over the same dark teal backing as the existing Artificer cape. Full-resolution originals retained in ignored local authoring storage.",
+  "packing": {
+    "cellSize": [
+      50,
+      50
+    ],
+    "subjectMaximum": [
+      44,
+      44
+    ],
+    "backgroundRgba": [
+      5,
+      15,
+      18,
+      255
+    ],
+    "resampling": "Lanczos"
+  },
+  "items": [
+    {
+      "imageId": 33,
+      "itemId": 1803,
+      "name": "Stormglass Ingot",
+      "source": "stormglass_ingot.png",
+      "sourceSha256": "1e395041de06b5907379ddefae93d403a67bf4ba04aad6b1a02e92cf3d7ced91",
+      "sourceKind": "paintedMetal",
+      "paintedSourceSha256": "efe7cca618041d1060bc318659fda1385bb9096e0ab66705f1a11021de8beb27",
+      "paintedSourceSize": [
+        1254,
+        1254
+      ],
+      "paintedSourceAlphaBounds": [
+        33,
+        25,
+        1202,
+        1254
+      ],
+      "generationPrompt": "Use case: stylized-concept. Asset type: ONE production inventory icon for Rabbit Lands, final cell 50x50 pixels. Input images are STYLE ONLY: match their chunky hand-painted fantasy forms, broad simplified planes, readable material groupings, matte paint with restrained highlights, crisp silhouette and practical weight. Do not copy the cape or other reference subjects. One complete isolated object, centered, filling 80-85% of a square canvas with generous margin on ALL sides. Restrained three-quarter view, the long axis runs lower-left to upper-right. Clearly different color and outline from the other metals. TRUE TRANSPARENT BACKGROUND with real alpha; the game will composite it on the identical dark teal RGB(5,15,18) used by the reference cape. Keep lighting and all luminosity within the object. No haze, fog, glow, bloom, scenery, floor, ground shadow, pedestal, frame, tile, text, numbers, lettering, hallmark, logo, hands, person, extra objects or photorealistic microtexture. Subject: STORMGLASS INGOT, storm-fused magical glass drawn into a bar. One chunky tapered hexagonal ingot with slightly irregular glass-fused ends, rich teal-blue glass, cyan interior facets, smoky indigo underside. Semi-translucent material with opaque painted edges, like dense polished sea glass. A small pale blue branching lightning fissure is enclosed INSIDE the glass, no sparks outside. Long angular silhouette, unmistakably glass rather than a gold or metal bar. No external radiance.",
+      "styleReferences": [
+        {
+          "source": "eloria-assets/source/item-icons/painted-refresh-2026-11-09/item-031.png",
+          "sha256": "2670b2141c30ce495209eafc1fad32ef7c19f15126dd8efed4f45cac63a7133e",
+          "role": "painted style, materials and inventory backing only"
+        },
+        {
+          "source": "eloria-assets/source/item-icons/painted-refresh-2026-11-09/item-032.png",
+          "sha256": "3819e46a240e0c93f93229d54d195d91084ff5d1cb1e522812bc0bf220f36543",
+          "role": "painted style, materials and inventory backing only"
+        },
+        {
+          "source": "eloria-assets/source/item-icons/perk-capes-2026-10-22/rl-perk-cape-artificer.png",
+          "sha256": "5553785348cdc12da75b693aee117314339a389a846da4ec06fa336bd4f54266",
+          "role": "painted style, materials and inventory backing only"
+        }
+      ],
+      "attempt": 1,
+      "verdict": "pass",
+      "review": "Complete isolated subject; distinct material palette and silhouette; no haze or scene; inspected at full resolution and packed inventory size.",
+      "replacesCellSha256": "b9c334b103519c486a28b20673160115db75c4660bd9534494e4530e9073fc5f"
+    }
+  ]
+}

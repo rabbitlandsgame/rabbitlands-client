@@ -92,7 +92,9 @@ func run() -> void:
 		var presented: Dictionary = main.call("_presentation_dto", dto)
 		var slug: String = main.call("_model_for_actor", dto)
 		expect(slug == person["model"], key + " model matches its story")
-		expect(presented["appearance"] == person["appearance"], key + " production appearance")
+		var expected_appearance: Dictionary = (person["appearance"] as Dictionary).merged(
+			NpcCharacterLooks.face_appearance(NpcCharacterLooks.face(dto, main.npc_human_faces), person["appearance"]), true)
+		expect(presented["appearance"] == expected_appearance, key + " production appearance")
 		var actor := ReplicatedActor3D.new()
 		stage.add_child(actor)
 		var errors := actor.configure(presented, CoordinateAdapter.new({"walkingHeight": 0.0}),

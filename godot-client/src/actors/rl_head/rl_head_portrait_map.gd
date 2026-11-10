@@ -134,6 +134,14 @@ static func face(appearance: Dictionary, sex: String, native_hair_only := false)
 	var values: Dictionary = {} if native_hair_only else controls(appearance, sex)
 	for control: String in values:
 		result.set_control(control, float(values[control]))
+	# Named NPCs retain the exact updated identity, including controls that the
+	# player sliders cannot represent. This does not force High on lower tiers.
+	var npc_id := str(appearance.get("npc_face", ""))
+	var npc: Dictionary = RLHeadAppearance.presets().get(npc_id, {}) if not npc_id.is_empty() else {}
+	if not native_hair_only and str(npc.get("sex", "")) == sex:
+		result.controls = (npc.get("controls", {}) as Dictionary).duplicate()
+		result.preset = npc_id
+		result.label = str(npc.get("label", ""))
 	var skin_index := palette_index(appearance, "skin", 10)
 	var config := human_config(sex)
 	var custom_skin := COLOURS.skin(appearance, config)
