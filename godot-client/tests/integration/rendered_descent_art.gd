@@ -1,6 +1,8 @@
 extends SceneTree
 ## The Serpent Deep's own art in the complete client: the descent temple on
-## Suncoil (map object 59480, "Descent Temple", objects.json authoredObjects)
+## Suncoil (static scenery of the Suncoil package since its republish, the kit
+## prototype kit-descent-temple-1; map object 59480, "Descent Temple", is only a
+## pick-only click target on its front tile, so the temple is drawn once)
 ## beside Warden Sethra and the Serpent Catacombs door, and the boss floor's
 ## reward dais (59490) and way out (59491, "Descent Exit") on the real
 ## serpent_deep_descent package. The objects arrive as the server would send
@@ -79,8 +81,12 @@ func _temple() -> void:
 	await _wait_chunks()
 	await _settle(90)
 	var temple: Node3D = (main.get("map_object_nodes") as Dictionary).get(TEMPLE)
-	_expect(is_instance_valid(temple) and temple.has_node("EntranceModel"), "the temple stands its model")
-	report["temple"] = _bounds(temple, "EntranceModel")
+	_expect(is_instance_valid(temple) and not temple.has_node("EntranceModel") and not temple.has_node("Model")
+		and bool(temple.get("pick_only")), "the temple's map object is a click target only")
+	var drawn := _named_visuals("descent_temple")
+	_expect(drawn.size() == 1, "the map draws the temple once (%d)" % drawn.size())
+	report["temple"] = _visual_bounds(drawn)
+	report["temple_visuals"] = drawn.map(func(v: VisualInstance3D) -> String: return str(v.get_path()))
 	report["temple_ground"] = _ground_under(FOOTPRINT)
 	var rig: Node3D = main.get("camera_rig")
 	rig.set("yaw_degrees", 0.0)
@@ -153,6 +159,39 @@ func _bounds(node: Node3D, child: String) -> Dictionary:
 	return {"node": [snappedf(node.global_position.x, .01), snappedf(node.global_position.y, .01),
 			snappedf(node.global_position.z, .01)],
 		"tiles_x": [snappedf(minf(a.x, b.x), .01), snappedf(maxf(a.x, b.x), .01)],
+		"tiles_y": [snappedf(minf(a.y, b.y), .01), snappedf(maxf(a.y, b.y), .01)],
+		"bottom": snappedf(box.position.y, .01), "top": snappedf(box.end.y, .01)}
+
+## The visual instances under the world whose node or mesh name holds `word`
+## (dashes read as underscores).
+func _named_visuals(word: String) -> Array:
+	var found := []
+	var root_node: Node = (main.get("world_loader") as WorldLoader).world_root
+	for visual: VisualInstance3D in root_node.find_children("*", "VisualInstance3D", true, false):
+		var names := str(visual.name)
+		if visual is MeshInstance3D and (visual as MeshInstance3D).mesh != null:
+			names += " " + (visual as MeshInstance3D).mesh.resource_name
+		if (visual is MultiMeshInstance3D and (visual as MultiMeshInstance3D).multimesh != null
+				and (visual as MultiMeshInstance3D).multimesh.mesh != null):
+			names += " " + (visual as MultiMeshInstance3D).multimesh.mesh.resource_name
+		if names.to_lower().replace("-", "_").contains(word):
+			found.append(visual)
+	return found
+
+## The world bounds of `visuals` as server tiles (min/max x and y) and metres (height).
+func _visual_bounds(visuals: Array) -> Dictionary:
+	if visuals.is_empty():
+		return {}
+	var box := AABB()
+	var first := true
+	for visual: VisualInstance3D in visuals:
+		var world := visual.global_transform * visual.get_aabb()
+		box = world if first else box.merge(world)
+		first = false
+	var adapter: CoordinateAdapter = main.get("adapter")
+	var a := _server(adapter, box.position)
+	var b := _server(adapter, box.end)
+	return {"tiles_x": [snappedf(minf(a.x, b.x), .01), snappedf(maxf(a.x, b.x), .01)],
 		"tiles_y": [snappedf(minf(a.y, b.y), .01), snappedf(maxf(a.y, b.y), .01)],
 		"bottom": snappedf(box.position.y, .01), "top": snappedf(box.end.y, .01)}
 

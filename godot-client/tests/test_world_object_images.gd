@@ -21,9 +21,9 @@ func _init() -> void:
 	if extension._import_post_parse(untagged) != OK:
 		push_error("An untagged import's post-parse must be a quiet no-op")
 		failures += 1
-	# The Serpent Deep's temple and way out embed their images (2026-11-09).
+	# The Serpent Deep's way out embeds its images (2026-11-09).
 	for name in ["underground/crystal_arch", "underground/cave_mouth", "underground/mine_rail",
-			"descent/descent_temple", "descent/descent_exit_portal"]:
+			"descent/descent_exit_portal"]:
 		var document := GLTFDocument.new()
 		var state := GLTFState.new()
 		state.set_additional_data(Images.ENABLED, true)

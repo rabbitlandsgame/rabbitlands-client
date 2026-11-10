@@ -3,11 +3,11 @@
   "purpose": "The Serpent Deep descent: the temple on Suncoil (map object 59480, 'Descent Temple') and the boss floor's way out (map object 59491, 'Descent Exit')",
   "request": "owner, 2026-11-09 chat: new Meshy art for the descent temple and its exit",
   "stage": ".local/asset-authoring/workspace/work-output/descent-temple-exit-2026-11-09 (concepts, Meshy inputs, raw models, QA renders; ignored, private)",
-  "preparation": "Blender (background) prepare_prop.py: uniform scale to the target height, base centre on the origin (+Y up, min y = 0), Meshy's front (+Z) kept, transforms applied, geometry otherwise as generated; self-contained GLB with a JPEG base colour",
+  "preparation": "per asset (\"preparation\"); the portal: Blender prepare_prop.py (uniform scale to the target height, base centre on the origin, +Y up, Meshy front +Z kept, self-contained GLB with a JPEG base colour)",
   "assets": [
     {
-      "id": "descent_temple",
-      "scene": "res://assets/world/descent/descent_temple.glb",
+      "id": "kit-descent-temple-1",
+      "scene": "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-descent-temple-1.glb",
       "concept": {
         "slug": "descent-temple-1",
         "generator": "gpt-image-bridge (gpt-image-2)",
@@ -21,14 +21,20 @@
         "rawModelSha256": "f8988f0d6c7b1010f9dc2ee20148a5ac8db31406aeba1ada7f7e1ee972060806"
       },
       "targetHeightMetres": 8.5,
-      "sizeMetres": [7.752, 8.5, 8.139],
+      "sizeMetres": [
+        7.752,
+        8.5,
+        8.139
+      ],
       "model": {
         "vertices": 6072,
         "triangles": 6129,
         "alphaTested": false,
         "height": 8.5,
-        "sha256": "9b2266d4240c4ff70e066993a7aa46b3d6428ed8690a6dba15146a43768f93c0"
-      }
+        "sha256": "d09bd320bb4b14efb1ea517a449a3e5faeb7d87c4677051084bde83ce0593eb3"
+      },
+      "use": "Suncoil static scenery: suncoil.tscn AuthoredAssets \"dp_suncoil_Descent Temple 1 1\" (collision_role solid) on tiles x 272-279, y 744-751, yaw 90 (serpent mouth east); map object 59480 is a pick-only click target on its front tile (280, 747)",
+      "preparation": "the Landfall A3 kit tool (a3_prepare.py, generator \"Eloria Landfall A3 prepare_meshy_kit\"): node transforms baked, uniform scale to 8.5 m tall, base centre on the origin, base colour 1024 px JPEG under ../textures (content-addressed), one mesh node kit-descent-temple-1"
     },
     {
       "id": "descent_exit_portal",
@@ -46,14 +52,20 @@
         "rawModelSha256": "ef04f72ae91e45db82f88b6c759be9516b7b4a2c398a81ec08c6f34b426546dc"
       },
       "targetHeightMetres": 3.4,
-      "sizeMetres": [2.652, 3.4, 2.546],
+      "sizeMetres": [
+        2.652,
+        3.4,
+        2.546
+      ],
       "model": {
         "vertices": 4605,
         "triangles": 3736,
         "alphaTested": false,
         "height": 3.4,
         "sha256": "87cc4970f5ba40a74fe7fc3c6761a7fdda9c1f6fdde2532d2cb498c6df19e242"
-      }
+      },
+      "use": "map object 59491 (Descent Exit) on serpent_deep_descent, objects.json authoredObjects, yaw 180 toward the landing",
+      "preparation": "Blender (background) prepare_prop.py: uniform scale to 3.4 m tall, base centre on the origin (+Y up), Meshy front (+Z) kept, self-contained GLB with a JPEG base colour"
     }
   ]
 }

@@ -27,6 +27,9 @@
 [ext_resource type="PackedScene" path="res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-temple-sanctum-1.glb" id="a3_temple_sanctum_1"]
 
 
+[ext_resource type="PackedScene" path="res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-descent-temple-1.glb" id="dp_descent_temple_1"]
+
+
 [ext_resource type="PackedScene" path="res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-serpent-incense-brazier-1.glb" id="a3_serpent_incense_brazier_1"]
 
 
@@ -960,6 +963,24 @@ transform = Transform3D(-1.83697e-16, 0, -1, 0, 1, 0, 1, 0, -1.83697e-16, 12.000
 [node name="Content" parent="AuthoredAssets/a3_suncoil_Temple Sanctum 1 1" instance=ExtResource("a3_temple_sanctum_1")]
 metadata/map_asset_id = "lf_biomes:kit-temple-sanctum-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-temple-sanctum-1.glb"
+
+[node name="dp_suncoil_Descent Temple 1 1" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("bn_asset_script")
+asset_id = "lf_biomes-kit-descent-temple-1-suncoil-0001"
+node_name = "Authored_lf_biomes_kit_descent_temple_1_suncoil_0001"
+catalog_asset_id = "lf_biomes:kit-descent-temple-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-descent-temple-1.glb"
+collision_role = "solid"
+metadata = {
+"descent": "The Serpent Deep temple (owner 2026-11-09); server object 59480 on its front tile (280, 747)",
+"footprintTiles": [272, 744, 279, 751]
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-1.79105e-16, 0, -0.975, 0, 0.975, 0, 0.975, 0, -1.79105e-16, -198.000, 54.9000, 46.000)
+
+[node name="Content" parent="AuthoredAssets/dp_suncoil_Descent Temple 1 1" instance=ExtResource("dp_descent_temple_1")]
+metadata/map_asset_id = "lf_biomes:kit-descent-temple-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-descent-temple-1.glb"
 
 [node name="a3_suncoil_Serpent Incense Brazier 1 1" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("bn_asset_script")
@@ -50570,25 +50591,6 @@ transform = Transform3D(-0.535891, 0, 1.14929, 0, 1.26809, 0, -1.14929, 0, -0.53
 metadata/map_asset_id = "lf_biomes:kit-jungle-undergrowth-2"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-jungle-undergrowth-2.glb"
 
-[node name="a3_suncoil_Jungle Undergrowth 1 85" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("bn_asset_script")
-asset_id = "lf_biomes-kit-jungle-undergrowth-1-suncoil-0085"
-node_name = "Authored_lf_biomes_kit_jungle_undergrowth_1_suncoil_0085"
-catalog_asset_id = "lf_biomes:kit-jungle-undergrowth-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-jungle-undergrowth-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "suncoil",
-"biomePass": "a3-2026-10-20",
-"biomeRule": "jungle undergrowth"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.838547, 0, -0.633483, 0, 1.05093, 0, 0.633483, 0, -0.838547, -194.282, 54.9486, 43.643)
-
-[node name="Content" parent="AuthoredAssets/a3_suncoil_Jungle Undergrowth 1 85" instance=ExtResource("a3_jungle_undergrowth_1")]
-metadata/map_asset_id = "lf_biomes:kit-jungle-undergrowth-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-jungle-undergrowth-1.glb"
-
 [node name="a3_suncoil_Jungle Undergrowth 3 87" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("bn_asset_script")
 asset_id = "lf_biomes-kit-jungle-undergrowth-3-suncoil-0087"
@@ -53094,25 +53096,6 @@ metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(1.05671, 0, -0.726002, 0, 1.28208, 0, 0.726002, 0, 1.05671, -379.799, 35.2686, 21.266)
 
 [node name="Content" parent="AuthoredAssets/a3_suncoil_Jungle Undergrowth 1 113" instance=ExtResource("a3_jungle_undergrowth_1")]
-metadata/map_asset_id = "lf_biomes:kit-jungle-undergrowth-1"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-jungle-undergrowth-1.glb"
-
-[node name="a3_suncoil_Jungle Undergrowth 1 114" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("bn_asset_script")
-asset_id = "lf_biomes-kit-jungle-undergrowth-1-suncoil-0114"
-node_name = "Authored_lf_biomes_kit_jungle_undergrowth_1_suncoil_0114"
-catalog_asset_id = "lf_biomes:kit-jungle-undergrowth-1"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-jungle-undergrowth-1.glb"
-collision_role = "none"
-metadata = {
-"biomeMap": "suncoil",
-"biomePass": "a3-2026-10-20",
-"biomeRule": "jungle undergrowth"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-1.19496, 0, 0.240004, 0, 1.21883, 0, -0.240004, 0, -1.19496, -193.514, 54.9500, 48.625)
-
-[node name="Content" parent="AuthoredAssets/a3_suncoil_Jungle Undergrowth 1 114" instance=ExtResource("a3_jungle_undergrowth_1")]
 metadata/map_asset_id = "lf_biomes:kit-jungle-undergrowth-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-jungle-undergrowth-1.glb"
 

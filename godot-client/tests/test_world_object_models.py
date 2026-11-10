@@ -283,28 +283,33 @@ class WorldObjectModelTest(unittest.TestCase):
     def test_descent_art_matches_its_provenance(self) -> None:
         """The Serpent Deep's own Meshy art (2026-11-09): the temple on Suncoil and the boss floor's way out.
 
-        Both are drawn from authoredObjects (a scene with its yaw and offset), not from a role's model, so the
-        imported band does not reach them; each file is held instead to its provenance record (the Meshy task, the
-        concept, the measured model), self-contained and standing on its base at the origin.
+        The temple is Suncoil's static scenery, a kit prototype the scene places (solid, so the collision export
+        blocks it), and map object 59480 is only a click target on its front tile, so the temple is drawn once. The
+        way out is drawn from authoredObjects (a scene with its yaw), not from a role's model, so the imported band
+        does not reach it. Each file is held to its provenance record (the Meshy task, the concept, the measured
+        model).
         """
         record = json.loads((CLIENT.parent / "eloria-assets/source/world_objects/descent/provenance.json")
                             .read_text(encoding="utf-8"))
-        scenes = {entry["scene"]: object_id for object_id, entry in self.registry["authoredObjects"].items()
-                  if "scene" in entry}
-        self.assertEqual({asset["scene"] for asset in record["assets"]},
-                         {scene for scene in scenes if scene.startswith("res://assets/world/descent/")})
-        self.assertEqual({scenes[asset["scene"]] for asset in record["assets"]}, {"59480", "59491"})
+        assets = {asset["id"]: asset for asset in record["assets"]}
+        self.assertEqual(set(assets), {"kit-descent-temple-1", "descent_exit_portal"})
+        authored = self.registry["authoredObjects"]
+        temple = authored["59480"]
+        self.assertTrue(temple.get("pickOnly") and "scene" not in temple and not temple.get("entrance"))
+        self.assertEqual(temple["label"], "The Serpent Deep")
+        scene = (CLIENT / "world_authoring/regions/suncoil/suncoil.tscn").read_text(encoding="utf-8")
+        self.assertEqual(scene.count(f'scene_path = "{assets["kit-descent-temple-1"]["scene"]}"'), 1)
+        self.assertEqual(authored["59491"]["scene"], assets["descent_exit_portal"]["scene"])
+        self.assertEqual(authored["59491"]["visualHeight"], assets["descent_exit_portal"]["model"]["height"])
+        self.assertEqual(sorted(str(p.relative_to(CLIENT).as_posix())
+                                for p in (CLIENT / "assets/world/descent").glob("*.glb")),
+                         ["assets/world/descent/descent_exit_portal.glb"])
         for asset in record["assets"]:
             with self.subTest(model=asset["id"]):
                 path = CLIENT / asset["scene"].removeprefix("res://")
                 self.assertEqual(imported.measure_glb(path), asset["model"])
                 self.assertRegex(asset["meshy"]["taskId"], r"^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$")
                 self.assertRegex(asset["concept"]["sha256"], r"^[0-9a-f]{64}$")
-                document, _binary = imported._read_glb(path)
-                self.assertTrue(all("bufferView" in image for image in document.get("images", [])),
-                                "descent art textures must travel inside the GLB")
-                entry = self.registry["authoredObjects"][scenes[asset["scene"]]]
-                self.assertEqual(entry["visualHeight"], asset["model"]["height"])
 
     def test_a_swapped_label_keeps_the_model_it_replaced(self) -> None:
         """The procedural model a swap displaces stays registered and on disk.
