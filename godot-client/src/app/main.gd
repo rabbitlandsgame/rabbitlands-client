@@ -66,6 +66,7 @@ const CampaignWorksScript = preload("res://src/world/campaign_works.gd")
 const CampaignBankWorksScript = preload("res://src/world/campaign_bank_works.gd")
 const CampaignRoadWorksScript = preload("res://src/world/campaign_road_works.gd")
 const CampaignShelvesWorksScript = preload("res://src/world/campaign_shelves_works.gd")
+const CampaignFireWorksScript = preload("res://src/world/campaign_fire_works.gd")
 const CampaignLampsWorksScript = preload("res://src/world/campaign_lamps_works.gd")
 const CampaignGuidanceScript = preload("res://src/world/campaign_guidance.gd")
 const CampaignCrossingScript = preload("res://src/world/campaign_crossing.gd")
@@ -78,6 +79,7 @@ const CampaignCutawayScript = preload("res://src/world/campaign_cutaway.gd")
 @onready var campaign_bank_works := CampaignBankWorksScript.new()
 @onready var campaign_road_works := CampaignRoadWorksScript.new()
 @onready var campaign_shelves_works := CampaignShelvesWorksScript.new()
+@onready var campaign_fire_works := CampaignFireWorksScript.new()
 @onready var campaign_lamps_works := CampaignLampsWorksScript.new()
 @onready var campaign_guidance := CampaignGuidanceScript.new()
 @onready var campaign_crossing := CampaignCrossingScript.new()
@@ -480,6 +482,7 @@ var minimap_marker_overlay: Control
 ## Short-lived world effects the server announced. Kept only so a test can see
 ## what is on screen; each one frees itself when it finishes.
 var world_effects: Array = []
+var _boss_mechanic_cues: Dictionary = {}
 var _world_effects_compact_at := 32
 ## The glitter around the player while they harvest; null when they are not.
 var harvest_sparkle: HarvestSparkle3D
@@ -595,6 +598,8 @@ var models: Dictionary = {}
 var actor_type_models: Dictionary = {}
 var npc_looks: Dictionary = {}
 var npc_characters: Dictionary = {}
+var npc_human_faces: Dictionary = {}
+var npc_workstations: Dictionary = {}
 var creation_options: Array = []
 var selected_creation_class := 0
 var creation_class_gear_visible := true
@@ -1132,6 +1137,7 @@ var effect_budget = LiveEffectBudgetScript.new()
 var _selection_ring_actor := -1
 var _overhead_target_actor := -1
 var _shelves_health_actor := -1
+var _grower_health_actors: Array = []
 ## Built bodies (not deferred), recounted on every gate pass and kept up to
 ## date in between by the passes that build or remove one; the body cap reads it.
 var _built_bodies := 0
@@ -1647,6 +1653,7 @@ func _ready() -> void:
 	world_root.add_child(campaign_bank_works)
 	world_root.add_child(campaign_road_works)
 	world_root.add_child(campaign_shelves_works)
+	world_root.add_child(campaign_fire_works)
 	world_root.add_child(campaign_lamps_works)
 	world_root.add_child(campaign_guidance)
 	world_root.add_child(campaign_crossing)
@@ -1693,6 +1700,8 @@ func _ready() -> void:
 	actor_type_models = model_registry.get("actorTypes", {})
 	npc_looks = model_registry.get("npcLooks", {})
 	npc_characters = _json("res://data/actors/npc_characters.json")
+	npc_human_faces = _json("res://data/actors/npc_human_faces.json")
+	npc_workstations = _json("res://data/actors/workstations.json")
 	creation_options = PLAYER_CREATION.options(model_registry)
 	animation_config = _json("res://data/animations/luminous.json")
 	animation_configs["res://data/animations/luminous.json"] = animation_config
@@ -4988,7 +4997,7 @@ func _exit_tree() -> void:
 		# Explicit maintenance exits before these entry helpers acquire parents.
 		for helper: Variant in [remote_presentation, character_intro, campaign_scene,
 				campaign_guidance, campaign_crossing, campaign_cart, campaign_rescue, campaign_cutaway,
-				campaign_hud, campaign_works, campaign_bank_works, campaign_road_works, campaign_shelves_works,
+				campaign_hud, campaign_works, campaign_bank_works, campaign_road_works, campaign_shelves_works, campaign_fire_works,
 				campaign_lamps_works, arrival_curtain, quest_trail, mount_status]:
 			if is_instance_valid(helper) and helper is Node and helper.get_parent() == null:
 				helper.free()
@@ -5068,6 +5077,7 @@ func _on_connection_state_changed(value: String) -> void:
 		campaign_bank_works.clear()
 		campaign_road_works.clear()
 		campaign_shelves_works.clear()
+		campaign_fire_works.clear()
 		campaign_lamps_works.clear()
 		campaign_guidance.clear()
 		campaign_crossing.clear()
@@ -5156,6 +5166,7 @@ func _on_reconnect_progress(attempt: int, _total: int, delay_msec: int) -> void:
 	_sync_connection_banner()
 
 func _clear_world_presentation(retain_map_resources := false) -> void:
+	_clear_boss_mechanic_cues()
 	lantern_mine_lighting.clear()
 	_clear_descent_fog()
 	campaign_rescue.clear()
@@ -6019,6 +6030,8 @@ func _overhead_health_for(actor_id: int, dto: Dictionary,
 		return true
 	if _is_shelves_training_opponent(actor_id, dto):
 		return true
+	if _is_shelves_grower(actor_id, dto):
+		return true
 	return _minimap_actor_type(dto) != &"npc"
 
 ## Hands every actor its answer to those questions. A pass over the actors one
@@ -6836,6 +6849,7 @@ func _on_state_changed(path: StringName) -> void:
 			campaign_bank_works.clear()
 			campaign_road_works.clear()
 			campaign_shelves_works.clear()
+			campaign_fire_works.clear()
 			campaign_lamps_works.clear()
 			campaign_guidance.clear()
 			campaign_crossing.clear()
@@ -6995,6 +7009,11 @@ func _on_state_changed(path: StringName) -> void:
 				if str(AppState.campaign.get("kind", "")) == "shelves" else -1
 			_sync_overhead_health_for([_shelves_health_actor, mentor])
 			_shelves_health_actor = mentor
+			var workers: Array=((AppState.campaign.get("shelves",{}) as Dictionary).get("growers",(AppState.campaign.get("shelves",{}) as Dictionary).get("fire",{})) as Dictionary).get("workers",[])
+			var worker_ids: Array=[]
+			for worker: Dictionary in workers:worker_ids.append(int(worker.actor_id))
+			_sync_overhead_health_for(_grower_health_actors+worker_ids)
+			_grower_health_actors=worker_ids
 		&"npc_dialogue":
 			_sync_dialogue()
 		&"popup":
@@ -7111,6 +7130,7 @@ func _retry_browser_area_files() -> void:
 func _load_server_map() -> void:
 	if AppState.current_map.is_empty() or loaded_server_map == AppState.current_map:
 		return
+	_clear_boss_mechanic_cues()
 	camera_shader_warmup.cancel()
 	var normalized_map: String = MapRegistry.normalize_server_map_id(AppState.current_map)
 	if OS.has_feature("web") and not WebPrototype.ensure_map(AppState.current_map, "destination"):
@@ -9143,6 +9163,7 @@ func _update_campaign(delta: float) -> void:
 		campaign_bank_works.clear()
 		campaign_road_works.clear()
 		campaign_shelves_works.clear()
+		campaign_fire_works.clear()
 		campaign_lamps_works.clear()
 		campaign_guidance.clear()
 		campaign_crossing.clear()
@@ -9231,6 +9252,8 @@ func _apply_campaign_world() -> void:
 	campaign_road_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
 		_campaign_surface_height, campaign_scene.reduced_motion)
 	campaign_shelves_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map, _campaign_surface_height)
+	campaign_shelves_works.apply_workers(AppState.campaign, actor_nodes)
+	campaign_fire_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map, _campaign_surface_height, actor_nodes)
 	campaign_lamps_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
 		_campaign_surface_height, campaign_scene.reduced_motion)
 	campaign_crossing.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
@@ -17195,6 +17218,9 @@ func _cast_spell_by_id(spell_id: int) -> void:
 	_begin_prepared_cast(spell_id, power)
 
 func _on_magic_state(data: Dictionary) -> void:
+	if data.get("kind") == "boss_mechanic":
+		_on_boss_mechanic(data)
+		return
 	if data.get("kind") == "target_cast":
 		# Apply the preceding movement/turn actor snapshots first. A deferred
 		# turn must not replace the channel we are about to start.
@@ -17242,6 +17268,40 @@ func _present_target_cast(data: Dictionary) -> void:
 			caster.combat_presentation.set_spell_power(int(data.get("power", 1)))
 	elif data.get("phase") in ["approach", "cancelled"] and caster.current_action in [&"cast_channel_enter", &"cast_channel"]:
 		caster.play_action(&"cast_exit")
+
+func _on_boss_mechanic(data: Dictionary) -> void:
+	var script = preload("res://src/world/boss_mechanic_3d.gd")
+	if not script.accepts(data) or adapter == null: return
+	if MapRegistry.normalize_server_map_id(str(data.get("map_id", ""))) != MapRegistry.normalize_server_map_id(AppState.current_map): return
+	var key := str(data.get("id", ""))
+	var impact := str(data.get("phase", "")) == "impact"
+	if str(data.get("phase", "")) in ["clear", "impact"]:
+		var warning: Variant = _boss_mechanic_cues.get(key)
+		if is_instance_valid(warning): warning.queue_free()
+		_boss_mechanic_cues.erase(key)
+		if not impact: return
+	if impact: key += ":impact"
+	var effect: Variant = _boss_mechanic_cues.get(key)
+	if not is_instance_valid(effect):
+		for old_key: Variant in _boss_mechanic_cues.keys():
+			if not is_instance_valid(_boss_mechanic_cues[old_key]): _boss_mechanic_cues.erase(old_key)
+		if _boss_mechanic_cues.size() >= 32: return
+		effect = script.new()
+		world_root.add_child(effect)
+		effect.configure(data, adapter, actor_nodes, _campaign_surface_height)
+		_boss_mechanic_cues[key] = effect
+	else:
+		effect.apply_event(data)
+
+func _is_boss_objective(actor_id: int) -> bool:
+	for cue: Variant in _boss_mechanic_cues.values():
+		if is_instance_valid(cue) and cue.friendly_actor(actor_id): return true
+	return false
+
+func _clear_boss_mechanic_cues() -> void:
+	for node: Variant in _boss_mechanic_cues.values():
+		if is_instance_valid(node): node.queue_free()
+	_boss_mechanic_cues.clear()
 
 func _on_technique_effect(data: Dictionary) -> void:
 	var key := str(data.get("key", ""))
@@ -17380,6 +17440,8 @@ func _spell_target_candidate(spell_id: int, actor_id: int) -> bool:
 	if not bool(actor.get("alive", int(actor.get("health", 0)) > 0)):
 		return actor_id != AppState.local_actor_id and (int(actor.get("kind", 0)) in [1, 4] or _is_rescue_companion(actor_id)) \
 			and spell.get("scope") == "target" and spell.get("effect") == "heal"
+	if _is_boss_objective(actor_id):
+		return not bool(spell.get("hostile", false)) and spell.get("effect") in ["heal", "regeneration", "dispel"]
 	if bool(spell.get("hostile", false)):
 		if spell.get("effect") == "mana_drain" and int(actor.get("kind", 0)) not in [1, 4]: return false
 		if spell.get("effect") == "disrupt" and not ReplicatedActor3D.is_summon(actor): return false
@@ -18853,7 +18915,17 @@ func _is_shelves_training_opponent(actor_id: int, dto: Dictionary) -> bool:
 		and bool(ledger.get("sparring",false)) and int((state.get("actors",{}) as Dictionary).get("mentor",-1))==actor_id \
 		and EloriaProtocol.map_id_from_reference(str(state.get("map","")))==EloriaProtocol.map_id_from_reference(AppState.current_map)
 
+func _is_shelves_grower(actor_id: int, dto: Dictionary) -> bool:
+	var state: Dictionary=AppState.campaign
+	if int(dto.get("kind",0))!=2 or str(state.get("kind",""))!="shelves" or not bool(state.get("active",false)) \
+			or EloriaProtocol.map_id_from_reference(str(state.get("map","")))!=EloriaProtocol.map_id_from_reference(AppState.current_map):return false
+	var growers: Dictionary=(state.get("shelves",{}) as Dictionary).get("growers",(state.get("shelves",{}) as Dictionary).get("fire",{}))
+	for worker: Dictionary in growers.get("workers",[]):
+		if int(worker.get("actor_id",-1))==actor_id:return true
+	return false
+
 func _is_attackable_actor(actor_id: int, dto: Dictionary) -> bool:
+	if _is_boss_objective(actor_id): return false
 	if actor_id < 0 or actor_id == AppState.local_actor_id or dto.is_empty():
 		return false
 	if _is_tutorial_companion(actor_id):
@@ -20517,6 +20589,9 @@ func _model_for_actor(dto: Dictionary) -> String:
 	var character := NpcCharacterLooks.find(dto, npc_characters)
 	if not character.is_empty():
 		return str(character["model"])
+	var face := NpcCharacterLooks.face(dto, npc_human_faces)
+	if not face.is_empty():
+		return str(face["model"])
 	var actor_type_value := int(dto.get("actor_type", 1))
 	var actor_type := str(actor_type_value)
 	var kind := int(dto.get("kind", 0))
@@ -20539,7 +20614,13 @@ func _presentation_dto(dto: Dictionary) -> Dictionary:
 	# Keep the actor record shallow. Named NPCs get a separate appearance
 	# dictionary; other actors share their unchanged appearance with the state.
 	var character := NpcCharacterLooks.find(dto, npc_characters)
-	var result: Dictionary = NpcCharacterLooks.present(dto, character)
+	var result: Dictionary = NpcCharacterLooks.present(dto, character,
+		NpcCharacterLooks.face(dto, npc_human_faces))
+	var station: Dictionary = npc_workstations.get(str(dto.get("name", "")).to_lower(), {})
+	var station_tile: Array = station.get("tile", [-1, -1])
+	if int(dto.get("kind", 0)) == 2 and int(dto.get("actor_type", -1)) == int(station.get("actorType", -2)) \
+			and int(dto.get("x", -1)) == int(station_tile[0]) and int(dto.get("y", -1)) == int(station_tile[1]):
+		result["workstation"] = station
 	# Creation bytes (skin, hair, shirt, pants, boots, head, eyes) select skinned
 	# surfaces already authored into each actor GLB, so they are deliberately
 	# never reinterpreted as rigid BoneAttachment3D equipment and contribute

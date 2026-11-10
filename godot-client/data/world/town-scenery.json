@@ -1,9 +1,10 @@
 {
   "schemaVersion": 1,
   "map": "landfall_town",
-  "sourcePlanSha256": "2f7d30ed84e9552137e30b42282dc329884cf928a4e040e90fa073dc2e3f165e",
+  "sourcePlanSha256": "969f07401d06643b396fb71332cfd10e84211c4714fec857da80f336b8974896",
   "assets": {
     "crystal_cluster": "res://assets/world/underground/crystal_cluster.glb",
+    "split_geode": "res://assets/world/underground/split_geode.glb",
     "supply_crate": "res://assets/world/underground/supply_crate.glb",
     "crate_stack": "res://assets/world/underground/crate_stack.glb",
     "barrel_stack": "res://assets/world/underground/barrel_stack.glb",
@@ -23,6 +24,11 @@
     "lens_tripod": "res://assets/world/underground/lens_tripod.glb",
     "lens_grinder": "res://assets/world/underground/lens_grinder.glb",
     "lens_crate": "res://assets/world/underground/lens_crate.glb",
+    "tailor_cape_rail": "res://assets/world/underground/tailor_cape_rail.glb",
+    "tailor_fabric_cabinet": "res://assets/world/underground/tailor_fabric_cabinet.glb",
+    "tailor_tunic_form": "res://assets/world/underground/tailor_tunic_form.glb",
+    "tailor_sewing_tray": "res://assets/world/underground/tailor_sewing_tray.glb",
+    "sewing_machine": "res://assets/world/underground/sewing_machine.glb",
     "flower_planter": "res://assets/world/underground/flower_planter.glb",
     "citrus_planter": "res://assets/world/underground/citrus_planter.glb",
     "potted_cypress": "res://assets/world/underground/potted_cypress.glb",
@@ -650,6 +656,86 @@
       "yaw": 0
     },
     {
+      "asset": "dresser_crockery",
+      "position": [
+        29.9,
+        0,
+        291.9
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_tavern_ground_north_lime_plaster"
+    },
+    {
+      "asset": "cask_cradle_tap",
+      "position": [
+        23.1,
+        0,
+        292.2
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_tavern_ground_north_lime_plaster"
+    },
+    {
+      "asset": "harvest_baskets",
+      "position": [
+        29.1,
+        0.61,
+        301.95
+      ],
+      "yaw": 0,
+      "scale": 0.7
+    },
+    {
+      "asset": "mushroom_basket",
+      "position": [
+        30.2,
+        0.61,
+        301.95
+      ],
+      "yaw": 20,
+      "scale": 0.65
+    },
+    {
+      "asset": "herb_drying_rack",
+      "position": [
+        36.5,
+        0,
+        298.0
+      ],
+      "yaw": 0,
+      "scale": 0.65,
+      "cutawayWall": "Part_tavern_ground_2_soot_brick"
+    },
+    {
+      "asset": "clay_jars",
+      "position": [
+        39.04,
+        0.61,
+        301.5
+      ],
+      "yaw": 0,
+      "scale": 0.35
+    },
+    {
+      "asset": "wooden_pail",
+      "position": [
+        35.55,
+        0,
+        299.0
+      ],
+      "yaw": 0
+    },
+    {
       "asset": "shop_counter",
       "position": [
         135.5,
@@ -765,21 +851,6 @@
         0.0
       ],
       "cutawayWall": "Build_market_east_lime_plaster"
-    },
-    {
-      "asset": "crate_stack",
-      "position": [
-        139.5,
-        0,
-        293.46
-      ],
-      "yaw": 0,
-      "outward": [
-        0.0,
-        0,
-        -1.0
-      ],
-      "cutawayWall": "Build_market_north_lime_plaster"
     },
     {
       "asset": "apple_cart",
@@ -995,15 +1066,6 @@
       "yaw": 90
     },
     {
-      "asset": "mushroom_basket",
-      "position": [
-        132.75,
-        0.61,
-        300.05
-      ],
-      "yaw": 0
-    },
-    {
       "asset": "barrel_stack",
       "position": [
         138.9,
@@ -1011,6 +1073,130 @@
         302.55
       ],
       "yaw": 90
+    },
+    {
+      "asset": "tailor_fabric_cabinet",
+      "position": [
+        139.55,
+        0,
+        293.0
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_market_north_lime_plaster"
+    },
+    {
+      "asset": "tailor_sewing_tray",
+      "position": [
+        132.75,
+        0.61,
+        300.05
+      ],
+      "yaw": 90,
+      "scale": 0.85
+    },
+    {
+      "asset": "wall_shelf_jars_bottles",
+      "position": [
+        130.72,
+        1.35,
+        302.35
+      ],
+      "yaw": 90,
+      "cutawayWall": "Part_market_0_lime_plaster"
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        132.75,
+        0.61,
+        300.53
+      ],
+      "yaw": 80,
+      "scale": 0.7
+    },
+    {
+      "asset": "feed_sacks",
+      "position": [
+        131.15,
+        0,
+        301.8
+      ],
+      "yaw": 90,
+      "scale": 0.75,
+      "cutawayWall": "Part_market_0_lime_plaster"
+    },
+    {
+      "asset": "clay_jars",
+      "position": [
+        137.7,
+        0,
+        294.45
+      ],
+      "yaw": 0,
+      "scale": 0.5
+    },
+    {
+      "asset": "flower_buckets",
+      "position": [
+        123.4,
+        0.61,
+        297.45
+      ],
+      "yaw": 0,
+      "scale": 0.72
+    },
+    {
+      "asset": "tailor_sewing_tray",
+      "position": [
+        124.1,
+        0.61,
+        297.45
+      ],
+      "yaw": 0,
+      "scale": 0.6
+    },
+    {
+      "asset": "tiered_flower_stand",
+      "position": [
+        122.8,
+        0,
+        302.7
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "flower_buckets",
+      "position": [
+        122.0,
+        0,
+        298.6
+      ],
+      "yaw": 35,
+      "scale": 0.85
+    },
+    {
+      "asset": "clay_jars",
+      "position": [
+        129.7,
+        0,
+        302.0
+      ],
+      "yaw": 20,
+      "scale": 0.5
+    },
+    {
+      "asset": "wooden_pail",
+      "position": [
+        122.15,
+        0,
+        297.35
+      ],
+      "yaw": 0
     },
     {
       "asset": "shop_counter",
@@ -1208,6 +1394,105 @@
       "yaw": 0
     },
     {
+      "asset": "trestle_table",
+      "position": [
+        179.4,
+        0,
+        302.5
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "split_geode",
+      "position": [
+        178.85,
+        0.61,
+        302.5
+      ],
+      "yaw": 20,
+      "scale": 0.25
+    },
+    {
+      "asset": "crystal_ball_stand",
+      "position": [
+        179.8,
+        0.61,
+        302.5
+      ],
+      "yaw": 0,
+      "scale": 0.55
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        180.25,
+        0.61,
+        302.5
+      ],
+      "yaw": 60,
+      "scale": 0.85
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        176.65,
+        0.61,
+        293.35
+      ],
+      "yaw": 35
+    },
+    {
+      "asset": "clay_jars",
+      "position": [
+        177.5,
+        0.61,
+        293.35
+      ],
+      "yaw": 0,
+      "scale": 0.32
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        178.0,
+        0.61,
+        293.35
+      ],
+      "yaw": 110,
+      "scale": 0.8
+    },
+    {
+      "asset": "herb_drying_rack",
+      "position": [
+        180.9,
+        0,
+        292.2
+      ],
+      "yaw": 270,
+      "scale": 0.65,
+      "outward": [
+        1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_magic_shop_east_lime_plaster"
+    },
+    {
+      "asset": "wall_shelf_jars_bottles",
+      "position": [
+        173.4,
+        1.65,
+        290.68
+      ],
+      "yaw": 0,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_magic_shop_north_lime_plaster"
+    },
+    {
       "asset": "forge_hearth",
       "position": [
         218.9,
@@ -1262,21 +1547,6 @@
         222.05,
         0,
         296.4
-      ],
-      "yaw": 270,
-      "outward": [
-        1.0,
-        0,
-        0.0
-      ],
-      "cutawayWall": "Build_smithy_east_soot_brick"
-    },
-    {
-      "asset": "crate_stack",
-      "position": [
-        221.55,
-        0,
-        302.55
       ],
       "yaw": 270,
       "outward": [
@@ -1523,6 +1793,77 @@
       ],
       "yaw": 270,
       "cutawayWall": "Part_smithy_2_lime_plaster"
+    },
+    {
+      "asset": "weapon_rack_with_weapons",
+      "position": [
+        220.9,
+        0,
+        302.85
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "armour_stand",
+      "position": [
+        219.5,
+        0,
+        302.85
+      ],
+      "yaw": 10
+    },
+    {
+      "asset": "trestle_table",
+      "position": [
+        213.9,
+        0,
+        302.8
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "tailor_sewing_tray",
+      "position": [
+        213.5,
+        0.61,
+        302.8
+      ],
+      "yaw": 10,
+      "scale": 0.8
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        214.65,
+        0.61,
+        302.8
+      ],
+      "yaw": 285,
+      "scale": 0.9
+    },
+    {
+      "asset": "wooden_pail",
+      "position": [
+        214.2,
+        0,
+        296.6
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "wall_shelf_jars_bottles",
+      "position": [
+        210.72,
+        1.7,
+        301.1
+      ],
+      "yaw": 90,
+      "outward": [
+        -1.0,
+        0,
+        0.0
+      ],
+      "cutawayWall": "Build_smithy_west_soot_brick"
     },
     {
       "asset": "writing_desk_ledgers",
@@ -1881,64 +2222,6 @@
       "yaw": 180
     },
     {
-      "asset": "harvest_baskets",
-      "position": [
-        67.45,
-        0,
-        232.81
-      ],
-      "yaw": 0,
-      "outward": [
-        0.0,
-        0,
-        -1.0
-      ],
-      "cutawayWall": "Build_weaver_house_north_lime_plaster"
-    },
-    {
-      "asset": "harvest_baskets",
-      "position": [
-        68.35,
-        0,
-        232.81
-      ],
-      "yaw": 0,
-      "outward": [
-        0.0,
-        0,
-        -1.0
-      ],
-      "cutawayWall": "Build_weaver_house_north_lime_plaster"
-    },
-    {
-      "asset": "goods_shelf_stocked",
-      "position": [
-        61.06,
-        0,
-        233.85
-      ],
-      "yaw": 90,
-      "cutawayWall": "Part_weaver_house_0_lime_plaster"
-    },
-    {
-      "asset": "trestle_table",
-      "position": [
-        64.6,
-        0,
-        238.45
-      ],
-      "yaw": 0
-    },
-    {
-      "asset": "crate_stack",
-      "position": [
-        69.0,
-        0,
-        238.6
-      ],
-      "yaw": 0
-    },
-    {
       "asset": "wall_sconce",
       "position": [
         70.28,
@@ -2106,6 +2389,206 @@
         0.0
       ],
       "cutawayWall": "Build_weaver_house_east_lime_plaster"
+    },
+    {
+      "asset": "trestle_table",
+      "position": [
+        57,
+        0,
+        243.4
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "stool",
+      "position": [
+        57.5,
+        0,
+        244.2
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "trestle_table",
+      "position": [
+        56.5,
+        0,
+        248.5
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "shop_counter",
+      "position": [
+        66,
+        0,
+        243.5
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "sewing_machine",
+      "position": [
+        57.5,
+        0.78,
+        243.4
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "tailor_fabric_cabinet",
+      "position": [
+        61.06,
+        0,
+        233.85
+      ],
+      "yaw": 90,
+      "cutawayWall": "Part_weaver_house_0_lime_plaster"
+    },
+    {
+      "asset": "tailor_fabric_cabinet",
+      "position": [
+        68.8,
+        0,
+        233.05
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "tailor_cape_rail",
+      "position": [
+        68.4,
+        0,
+        238.75
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "tailor_tunic_form",
+      "position": [
+        62,
+        0,
+        238.2
+      ],
+      "yaw": 15
+    },
+    {
+      "asset": "tailor_fabric_cabinet",
+      "position": [
+        54.3,
+        0,
+        241.2
+      ],
+      "yaw": 90
+    },
+    {
+      "asset": "tailor_fabric_cabinet",
+      "position": [
+        59.5,
+        0,
+        248.2
+      ],
+      "yaw": 270
+    },
+    {
+      "asset": "tailor_cape_rail",
+      "position": [
+        54.2,
+        0,
+        246.5
+      ],
+      "yaw": 90
+    },
+    {
+      "asset": "tailor_tunic_form",
+      "position": [
+        59.15,
+        0,
+        241.15
+      ],
+      "yaw": 340
+    },
+    {
+      "asset": "tailor_sewing_tray",
+      "position": [
+        56.35,
+        0.75,
+        243.4
+      ],
+      "yaw": 10,
+      "scale": 0.8
+    },
+    {
+      "asset": "tailor_sewing_tray",
+      "position": [
+        56.35,
+        0.75,
+        248.5
+      ],
+      "yaw": 350
+    },
+    {
+      "asset": "tailor_cape_rail",
+      "position": [
+        69.5,
+        0,
+        246.65
+      ],
+      "yaw": 270
+    },
+    {
+      "asset": "tailor_cape_rail",
+      "position": [
+        63.25,
+        0,
+        248.6
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "tailor_fabric_cabinet",
+      "position": [
+        69.1,
+        0,
+        240.35
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "tailor_tunic_form",
+      "position": [
+        62,
+        0,
+        246.7
+      ],
+      "yaw": 20
+    },
+    {
+      "asset": "tailor_tunic_form",
+      "position": [
+        67,
+        0,
+        248.4
+      ],
+      "yaw": 345
+    },
+    {
+      "asset": "trestle_table",
+      "position": [
+        62.2,
+        0,
+        241.5
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "tailor_sewing_tray",
+      "position": [
+        62.2,
+        0.75,
+        241.5
+      ],
+      "yaw": 5
     },
     {
       "asset": "stone_fireplace",
@@ -4928,6 +5411,89 @@
       ],
       "yaw": 215,
       "scale": 0.95
+    },
+    {
+      "asset": "trestle_table",
+      "position": [
+        194.8,
+        0,
+        239.4
+      ],
+      "yaw": 0
+    },
+    {
+      "asset": "tailor_sewing_tray",
+      "position": [
+        194.3,
+        0.61,
+        239.4
+      ],
+      "yaw": 0,
+      "scale": 0.85
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        195.15,
+        0.61,
+        239.4
+      ],
+      "yaw": 20,
+      "scale": 1.05
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        195.15,
+        0.738,
+        239.4
+      ],
+      "yaw": 65,
+      "scale": 0.9
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        195.6,
+        0.61,
+        239.4
+      ],
+      "yaw": 150,
+      "scale": 0.85
+    },
+    {
+      "asset": "stool",
+      "position": [
+        190.3,
+        0,
+        230.2
+      ],
+      "yaw": 10,
+      "outward": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "cutawayWall": "Build_library_north_lime_plaster"
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        190.3,
+        0.5,
+        230.2
+      ],
+      "yaw": 75
+    },
+    {
+      "asset": "book_stack",
+      "position": [
+        190.3,
+        0.622,
+        230.2
+      ],
+      "yaw": 110,
+      "scale": 0.9
     },
     {
       "asset": "bench",

@@ -427,7 +427,10 @@ def attach_one(ctx, pub, spec, reader, path, design, error, fields, door_tiles):
         x,y=person['tile']
         if not collision.walkable(x,y): raise error(f'{where}: post {[x,y]} is not open ground')
         unreached=[[x+dx,y+dy] for dx,dy in EIGHT if (x+dx,y+dy) not in reach]
-        if unreached: raise error(f'{where}: post {[x,y]} has unreached neighbours {unreached}')
+        if person.get('seatedWork', False):
+            if sum((x+dx,y+dy) in reach for dx,dy in ((1,0),(-1,0),(0,1),(0,-1))) < 3:
+                raise error(f'{where}: seated post needs three reached approaches')
+        elif unreached: raise error(f'{where}: post {[x,y]} has unreached neighbours {unreached}')
         clash=ways.get((x,y)) or taken.get((x,y)) or ('a spawn' if (x,y) in spawn_tiles else None)
         if clash: raise error(f'{where}: stands on {clash}')
         actor=person.get('actorType')

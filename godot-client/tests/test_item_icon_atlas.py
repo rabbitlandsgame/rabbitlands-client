@@ -145,7 +145,8 @@ class ItemIconAtlasTest(unittest.TestCase):
         self.assertEqual(expected, {row["imageId"] for row in records})
         self.assertEqual(155, len(records))
         self.assertTrue(all(row["verdict"] == "pass" for row in records))
-        with patch("build_item_icon_atlases.STYLE_REFRESHES", []):
+        with patch("build_item_icon_atlases.STYLE_REFRESHES", []), \
+                patch("build_item_icon_atlases.MATERIAL_REPLACEMENTS", []):
             before = [image for _, image in planned_atlases()]
         after = [image for _, image in planned_atlases()]
         changed = set()

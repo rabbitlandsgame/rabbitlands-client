@@ -312,6 +312,8 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"campaign_shelves_v1",
 	"campaign_shelves_travel_v1",
 	"campaign_shelves_basics_v1",
+	"campaign_shelves_patrol_v1",
+	"campaign_shelves_fire_v1",
 	"campaign_bank_v1",
 	"campaign_road_v1",
 	"campaign_lamps_v1",
@@ -406,6 +408,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	# ELORIA_MAGIC_STATE kind "techniques".
 	"techniques_v1",
 	"technique_effects_v1",
+	"boss_mechanics_v1",
 	# Repeat casting: whether it is on and running, ELORIA_MAGIC_STATE kind
 	# "autocast"; switched with magic_request {"op": "autocast"}.
 	"magic_autocast_v1",
@@ -3379,7 +3382,9 @@ static func decode_actor(payload: PackedByteArray, enhanced: bool, extended := f
 		var name_end: int = payload.find(0, 28)
 		if name_end < 0:
 			name_end = min(payload.size(), 58)
-		actor.merge(decode_actor_name(payload.slice(28, name_end)))
+		# Enhanced NPC spawns carry full names too. A space separates an
+		# uncoloured guild tag only on players, never on Elen Reed or a crew hand.
+		actor.merge(decode_actor_name(payload.slice(28, name_end), int(actor["kind"]) in [1,4]))
 		# The enhanced-actor trailer follows the variable-length name: model
 		# scale, the attachment sentinel, eye style, and neck visual. Preserve
 		# eye choices across the real server round trip instead of silently
@@ -3947,7 +3952,8 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 		var choice_id:=str((scene.get("choice",{}) as Dictionary).get("id",""))
 		var expected_scene: Dictionary={"shelves_route":"measure.shelves.brief","shelves_lesson":"measure.shelves.lesson",
 			"shelves_cape":"measure.shelves.review","shelves_gear":"measure.shelves.gear","shelves_enriched":"measure.shelves.enriched",
-			"shelves_basics":"measure.shelves.basics.offer"}
+			"shelves_basics":"measure.shelves.basics.offer","shelves_patrol_retry":"measure.shelves.growers.retry",
+			"shelves_fire_quarry":"measure.shelves.fire.entry_quarry","shelves_fire_coal":"measure.shelves.fire.entry_coal","shelves_fire_retry":"measure.shelves.fire.retry"}
 		if not choice_id.is_empty() and (not expected_scene.has(choice_id) or str(scene.get("id",""))!=str(expected_scene[choice_id])):
 			return {"type":"invalid","error":"campaign_shelves_choice"}
 	elif str((scene.get("choice",{}) as Dictionary).get("id","")).begins_with("shelves_") or not (value.get("shelves",{}) as Dictionary).is_empty():
@@ -3986,7 +3992,7 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 static func campaign_shelves_valid(value: Variant) -> bool:
 	if not value is Dictionary:return false
 	if value.is_empty():return true
-	if value.get("chapter") not in ["intro","life","fire","water","earth","school","wind","magic","death","frost","finale"] \
+	if value.get("chapter") not in ["intro","life","life_raid","fire","fire_coal","fire_sapper","water","earth","school","wind","magic","death","frost","finale"] \
 			or value.get("phase") not in ["contact","brief","travel","arrival","work","lesson","report","review","complete"]:
 		return false
 	var objectives: Variant=value.get("objectives")
@@ -4010,10 +4016,59 @@ static func campaign_shelves_valid(value: Variant) -> bool:
 	if value.has("sparring") and not value.sparring is bool:return false
 	if value.has("lesson_window") and value.lesson_window not in ["spells","mixing"]:return false
 	if value.has("preload"):
-		if not value.preload is Dictionary or value.preload.get("map")!="landfall_town" or not _campaign_navigation_tile(value.preload.get("tile")):return false
+		if not value.preload is Dictionary or value.preload.get("map") not in ["landfall_town","landfall_insides"] or not _campaign_navigation_tile(value.preload.get("tile")):return false
+	if value.has("growers") and not campaign_growers_valid(value.growers):return false
+	if value.has("fire") and not campaign_fire_valid(value.fire):return false
 	if value.has("start_label") and (not value.start_label is String or str(value.start_label).length()>200):return false
 	return (not value.has("arrival_tile") or _campaign_tile(value.arrival_tile)) and _campaign_tile(value.get("cart_tile")) and _campaign_integer(value.get("cart_integrity"),0,100) \
 		and _campaign_integer(value.get("samples"),0,12) and value.get("can_complete") is bool
+
+static func campaign_growers_valid(value: Variant) -> bool:
+	if not value is Dictionary or value.get("field") not in ["sage","root"] or not value.get("raid") is bool:return false
+	if not _campaign_integer(value.get("wave"),0,1000000) or not _campaign_integer(value.get("carried"),0,1000):return false
+	var stored: Variant=value.get("stored")
+	if not stored is Dictionary or not _campaign_integer(stored.get("sage"),0,10000) or not _campaign_integer(stored.get("root"),0,5000):return false
+	var workers: Variant=value.get("workers")
+	if not workers is Array or workers.size()>4:return false
+	var seen: Array=[]
+	for worker: Variant in workers:
+		if not worker is Dictionary or not _campaign_integer(worker.get("actor_id"),1,65535) or worker.actor_id in seen \
+				or not worker.get("name") is String or str(worker.name).length()>64 \
+				or not _campaign_integer(worker.get("max_health"),1,10000) or not _campaign_integer(worker.get("health"),0,float(worker.max_health)) \
+				or not worker.get("downed") is bool or not _campaign_integer(worker.get("cargo"),0,250) \
+				or not worker.get("harvesting") is bool or worker.get("activity") not in ["harvest","return"]:return false
+		seen.append(worker.actor_id)
+	return true
+
+static func campaign_fire_valid(value: Variant) -> bool:
+	if not value is Dictionary or value.get("stage") not in ["fire","fire_coal","fire_sapper"] \
+			or value.get("route") not in ["","assault","silence","lift","haul"] or value.get("step") not in ["route","extract"]:return false
+	for key: String in ["recovered","mined","recovered_goal","mined_goal"]:
+		if not _campaign_integer(value.get(key),0,10000):return false
+	if float(value.recovered)>float(value.recovered_goal) or float(value.mined)>float(value.mined_goal):return false
+	if not _campaign_integer(value.get("carried"),0,1000) or not _campaign_integer(value.get("repair"),0,3) \
+			or not _campaign_integer(value.get("passages"),0,3) or not _campaign_integer(value.get("wave"),0,1000000) or not _campaign_tile(value.get("cart_tile")):return false
+	for key: String in ["signal","water","powder"]:
+		if not value.get(key) is bool:return false
+	var workers: Variant=value.get("workers")
+	# Reuse the worker bounds used by the Life crew; only shipment totals differ.
+	if not campaign_growers_valid({"field":"sage","raid":false,"wave":value.wave,"carried":value.carried,"stored":{"sage":0,"root":0},"workers":workers}):return false
+	var carts: Variant=value.get("carts")
+	if not carts is Array or carts.size()>2:return false
+	var owners:Array=[]
+	for cart: Variant in carts:
+		if not cart is Dictionary or not _campaign_integer(cart.get("actor_id"),1,65535) or cart.actor_id in owners \
+				or not (workers as Array).any(func(row:Dictionary)->bool:return int(row.actor_id)==int(cart.actor_id)) \
+				or not _campaign_tile(cart.get("tile")) or typeof(cart.get("height")) not in [TYPE_FLOAT,TYPE_INT] \
+				or not is_finite(float(cart.height)) or float(cart.height)<0 or float(cart.height)>1.5:return false
+		owners.append(cart.actor_id)
+	var hazards: Variant=value.get("hazards")
+	if not hazards is Array or hazards.size()>2:return false
+	for hazard: Variant in hazards:
+		if not hazard is Dictionary or hazard.get("kind") not in ["warning","explosion"] or not _campaign_tile(hazard.get("tile")) \
+				or not _campaign_integer(hazard.get("radius"),1,3) or typeof(hazard.get("seconds")) not in [TYPE_INT,TYPE_FLOAT] \
+				or not is_finite(float(hazard.seconds)) or float(hazard.seconds)<0 or float(hazard.seconds)>4:return false
+	return true
 
 static func campaign_corpse_template_valid(value: Variant) -> bool:
 	if not value is Dictionary or value.is_empty() or JSON.stringify(value).to_utf8_buffer().size() > 4096:
@@ -4273,6 +4328,8 @@ static func campaign_scene_choice_valid(choice: Variant) -> bool:
 		"rescue_reward": ["sword", "bow", "wand"],
 		"shelves_route": ["direct", "careful"], "shelves_lesson": ["ingredients", "food", "tool"],
 		"shelves_basics": ["basics_accept", "basics_defer"],
+		"shelves_patrol_retry": ["retry", "cancel"],
+		"shelves_fire_quarry": ["assault", "silence"], "shelves_fire_coal": ["lift", "haul"], "shelves_fire_retry": ["retry", "cancel"],
 		"shelves_gear": ["wand", "charm", "robe"],
 		"shelves_cape": ["keeper", "artificer"],
 		"shelves_enriched": ["life", "fire", "water", "earth", "wind", "magic", "death", "frost"]}.get(str(choice.get("id", "")), [])

@@ -75,7 +75,14 @@
         {"asset": "wall_sconce", "at": [39.3,27.6], "yaw": 270, "height": 1.75, "light": true},
         {"asset": "bench", "at": [23.3,21.0], "yaw": 180, "blockBox": [0.88,0.22]},
         {"asset": "weapon_rack_with_weapons", "at": [31.95,21.62], "yaw": 270, "blockBox": [0.62,0.36]},
-        {"asset": "potted_cypress", "at": [21.05,21.05], "yaw": 0, "blockBox": [0.48,0.44]}
+        {"asset": "potted_cypress", "at": [21.05,21.05], "yaw": 0, "blockBox": [0.48,0.44]},
+        {"asset": "dresser_crockery", "at": [29.9,32.1], "yaw": 0, "wall": "north", "blockBox": [0.66,0.36]},
+        {"asset": "cask_cradle_tap", "at": [23.1,31.8], "yaw": 0, "wall": "north", "blockBox": [0.81,0.66]},
+        {"asset": "harvest_baskets", "at": [29.1,22.05], "yaw": 0, "height": 0.61, "scale": 0.7},
+        {"asset": "mushroom_basket", "at": [30.2,22.05], "yaw": 20, "height": 0.61, "scale": 0.65},
+        {"asset": "herb_drying_rack", "at": [36.5,26.0], "yaw": 0, "scale": 0.65, "blockBox": [0.72,0.37]},
+        {"asset": "clay_jars", "at": [39.04,22.5], "yaw": 0, "height": 0.61, "scale": 0.35},
+        {"asset": "wooden_pail", "at": [35.55,25.0], "yaw": 0, "blockBox": [0.16,0.14]}
       ],
       "lights": [
         {"at": [21.75,26.5], "height": 0.7, "colour": [1.0,0.6,0.3], "energy": 2.0, "range": 9},
@@ -133,7 +140,6 @@
         {"asset": "feed_sacks", "at": [140.1,24.46], "yaw": 270, "blockBox": [0.63,0.34], "wall": "east"},
         {"asset": "barrel_stack", "at": [139.83,26.4], "yaw": 270, "blockBox": [0.82,0.61], "wall": "east"},
         {"asset": "rope_coils", "at": [139.66,28.35], "yaw": 270, "blockBox": [0.75,0.78], "wall": "east"},
-        {"asset": "crate_stack", "at": [139.5,30.54], "yaw": 0, "blockBox": [0.9,0.89], "wall": "north"},
         {"asset": "apple_cart", "at": [131.45,29.55], "yaw": 90, "blockBox": [1.18,0.77]},
         {"asset": "wooden_pail", "at": [131.35,21.3], "yaw": 0, "blockBox": [0.16,0.14]},
         {"asset": "wall_sconce", "at": [130.84,27.95], "yaw": 90, "height": 1.9, "light": true},
@@ -152,8 +158,19 @@
         {"asset": "wall_sconce", "at": [120.72,24.75], "yaw": 90, "height": 1.9, "wall": "west", "light": true},
         {"asset": "trestle_table", "at": [132.75,23.4], "yaw": 90, "blockBox": [1.04,0.36]},
         {"asset": "harvest_baskets", "at": [132.75,22.85], "yaw": 90, "height": 0.61},
-        {"asset": "mushroom_basket", "at": [132.75,23.95], "yaw": 0, "height": 0.61},
-        {"asset": "barrel_stack", "at": [138.9,21.45], "yaw": 90, "blockBox": [0.8,0.6]}
+        {"asset": "barrel_stack", "at": [138.9,21.45], "yaw": 90, "blockBox": [0.8,0.6]},
+        {"asset": "tailor_fabric_cabinet", "at": [139.55,31.0], "yaw": 0, "wall": "north", "blockBox": [0.9,0.34]},
+        {"asset": "tailor_sewing_tray", "at": [132.75,23.95], "yaw": 90, "height": 0.61, "scale": 0.85},
+        {"asset": "wall_shelf_jars_bottles", "at": [130.72,21.65], "yaw": 90, "height": 1.35},
+        {"asset": "book_stack", "at": [132.75,23.47], "yaw": 80, "height": 0.61, "scale": 0.7},
+        {"asset": "feed_sacks", "at": [131.15,22.2], "yaw": 90, "scale": 0.75, "blockBox": [0.46,0.26]},
+        {"asset": "clay_jars", "at": [137.7,29.55], "yaw": 0, "scale": 0.5, "blockBox": [0.31,0.28]},
+        {"asset": "flower_buckets", "at": [123.4,26.55], "yaw": 0, "height": 0.61, "scale": 0.72},
+        {"asset": "tailor_sewing_tray", "at": [124.1,26.55], "yaw": 0, "height": 0.61, "scale": 0.6},
+        {"asset": "tiered_flower_stand", "at": [122.8,21.3], "yaw": 0, "blockBox": [0.69,0.52]},
+        {"asset": "flower_buckets", "at": [122.0,25.4], "yaw": 35, "scale": 0.85, "blockBox": [0.43,0.29]},
+        {"asset": "clay_jars", "at": [129.7,22.0], "yaw": 20, "scale": 0.5, "blockBox": [0.31,0.28]},
+        {"asset": "wooden_pail", "at": [122.15,26.65], "yaw": 0, "blockBox": [0.16,0.14]}
       ],
       "lights": [
         {"at": [135.5,28.0], "height": 2.9, "colour": [1.0,0.82,0.6], "energy": 1.2, "range": 8},
@@ -208,7 +225,16 @@
         {"asset": "lens_grinder", "at": [171.21,31.0], "yaw": 90, "blockBox": [0.65,0.65], "wall": "west"},
         {"asset": "lens_crate", "at": [180.75,30.1], "yaw": 0, "scale": 0.7, "blockBox": [0.4,0.4]},
         {"asset": "trestle_table", "at": [177.3,30.65], "yaw": 0, "blockBox": [1.04,0.36]},
-        {"asset": "stool", "at": [177.3,29.75], "yaw": 0, "blockBox": [0.22,0.22]}
+        {"asset": "stool", "at": [177.3,29.75], "yaw": 0, "blockBox": [0.22,0.22]},
+        {"asset": "trestle_table", "at": [179.4,21.5], "yaw": 0, "blockBox": [1.1,0.43]},
+        {"asset": "split_geode", "at": [178.85,21.5], "yaw": 20, "height": 0.61, "scale": 0.25},
+        {"asset": "crystal_ball_stand", "at": [179.8,21.5], "yaw": 0, "height": 0.61, "scale": 0.55},
+        {"asset": "book_stack", "at": [180.25,21.5], "yaw": 60, "height": 0.61, "scale": 0.85},
+        {"asset": "book_stack", "at": [176.65,30.65], "yaw": 35, "height": 0.61},
+        {"asset": "clay_jars", "at": [177.5,30.65], "yaw": 0, "height": 0.61, "scale": 0.32},
+        {"asset": "book_stack", "at": [178.0,30.65], "yaw": 110, "height": 0.61, "scale": 0.8},
+        {"asset": "herb_drying_rack", "at": [180.9,31.8], "yaw": 270, "scale": 0.65, "wall": "east", "blockBox": [0.72,0.37]},
+        {"asset": "wall_shelf_jars_bottles", "at": [173.4,33.32], "yaw": 0, "height": 1.65, "wall": "north"}
       ],
       "lights": [
         {"at": [178.5,26.2], "height": 2.9, "colour": [0.82,0.78,1.0], "energy": 1.2, "range": 8},
@@ -255,7 +281,6 @@
         {"asset": "weapon_rack_with_weapons", "at": [222.06,26.2], "yaw": 270, "blockBox": [0.65,0.38], "wall": "east"},
         {"asset": "armour_stand", "at": [222.05,23.0], "yaw": 270, "blockBox": [0.47,0.39], "wall": "east"},
         {"asset": "armour_stand", "at": [222.05,27.6], "yaw": 270, "blockBox": [0.47,0.39], "wall": "east"},
-        {"asset": "crate_stack", "at": [221.55,21.45], "yaw": 270, "blockBox": [0.9,0.89], "wall": "east"},
         {"asset": "tool_rack", "at": [211.08,24.0], "yaw": 90, "blockBox": [0.92,0.52], "wall": "west"},
         {"asset": "barrel_stack", "at": [211.4,27.71], "yaw": 0, "blockBox": [0.82,0.61]},
         {"asset": "woodcutter_block", "at": [211.45,21.35], "yaw": 0, "blockBox": [0.7,0.58]},
@@ -275,7 +300,14 @@
         {"asset": "harvest_baskets", "at": [213.7,34.1], "yaw": 0, "blockBox": [0.43,0.26], "wall": "north"},
         {"asset": "mushroom_basket", "at": [214.4,31.5], "yaw": 0, "height": 0.61},
         {"asset": "wooden_pail", "at": [212.3,33.9], "yaw": 0, "blockBox": [0.16,0.14]},
-        {"asset": "wall_sconce", "at": [217.28,33.6], "yaw": 270, "height": 1.7, "light": true}
+        {"asset": "wall_sconce", "at": [217.28,33.6], "yaw": 270, "height": 1.7, "light": true},
+        {"asset": "weapon_rack_with_weapons", "at": [220.9,21.15], "yaw": 0, "blockBox": [0.68,0.41]},
+        {"asset": "armour_stand", "at": [219.5,21.15], "yaw": 10, "blockBox": [0.5,0.42]},
+        {"asset": "trestle_table", "at": [213.9,21.2], "yaw": 0, "blockBox": [1.1,0.43]},
+        {"asset": "tailor_sewing_tray", "at": [213.5,21.2], "yaw": 10, "height": 0.61, "scale": 0.8},
+        {"asset": "book_stack", "at": [214.65,21.2], "yaw": 285, "height": 0.61, "scale": 0.9},
+        {"asset": "wooden_pail", "at": [214.2,27.4], "yaw": 0, "blockBox": [0.16,0.14]},
+        {"asset": "wall_shelf_jars_bottles", "at": [210.72,22.9], "yaw": 90, "height": 1.7, "wall": "west"}
       ],
       "lights": [
         {"at": [218.9,26.7], "height": 1.0, "colour": [1.0,0.5,0.2], "energy": 2.2, "range": 10},
@@ -374,39 +406,37 @@
       "spawns": []
     },
     {
-      "id": "weaver_house", "name": "The weaver's house", "style": "house", "danger": "A private home, open by day",
-      "about": "The weaver's house in #27 on the avenue's south side (door H, facing north: the north wall): the loom workroom in the middle, the street door in its north wall, where Wynn weaves the cloth for her daughter Mara's capes; the kitchen to the west and the bedroom to the east.",
-      "rooms": [[65.5,88,5,3.5],[57.5,88,3,3.5],[73.5,88,3,3.5]],
-      "roomNames": ["Loom workroom","Weaver's kitchen","Weaver's bedroom"],
-      "links": [[0,1,3.6,[[60.5,87.5]]],[0,2,3.6,[[70.5,87.5]]]],
-      "floors": ["oak_planks","oak_planks","oak_planks"],
+      "id": "weaver_house", "name": "The weaver's house", "style": "house", "danger": "Home, workshop and cape shop; open by day",
+      "about": "Wynn and Mara's home and tailor shop on the avenue: finished capes hang from oak rails, tunics stand ready for fitting, and shelves of coloured cloth connect the original loom room to Wynn's sewing workshop and Mara's showroom. Thread, shears and measuring ribbons wait on the worktables.",
+      "rooms": [[65.5,88,5,3.5],[57.5,88,3,3.5],[73.5,88,3,3.5],[57,79.5,3.5,5],[65.5,79.5,5,5]],
+      "roomNames": ["Loom workroom","Weaver's kitchen","Weaver's bedroom","Wynn's sewing workshop","Mara's cape shop"],
+      "links": [[0,1,3.6,[[60.5,87.5]]],[0,2,3.6,[[70.5,87.5]]],[1,3,3.6,[[57,84.5]]],[0,4,3.6,[[65,84.5]]],[3,4,3.6,[[60.5,79.5]]]],
+      "floors": ["oak_planks","oak_planks","oak_planks","oak_planks","oak_planks"],
       "walls": "lime_plaster",
       "windows": [
         {"room": 0, "side": "north", "at": 0.87, "width": 1.0},
-        {"room": 0, "side": "south", "at": 0.3, "width": 1.0},
-        {"room": 0, "side": "south", "at": 0.55, "width": 1.0},
         {"room": 1, "side": "west", "at": 0.35, "width": 1.0},
-        {"room": 1, "side": "south", "at": 0.5, "width": 1.0},
         {"room": 2, "side": "east", "at": 0.3, "width": 1.0},
-        {"room": 2, "side": "north", "at": 0.5, "width": 1.0}
+        {"room": 2, "side": "north", "at": 0.5, "width": 1.0},
+        {"room": 3, "side": "west", "at": 0.65, "width": 1.4},
+        {"room": 3, "side": "south", "at": 0.5, "width": 1.4},
+        {"room": 4, "side": "south", "at": 0.25, "width": 1.6},
+        {"room": 4, "side": "south", "at": 0.75, "width": 1.6},
+        {"room": 4, "side": "east", "at": 0.65, "width": 1.2}
       ],
       "decals": [
         {"image": "rug_runner", "room": 0, "side": "floor", "at": [0.3,0.45], "size": [1.0,3.0]},
         {"image": "rug_home", "room": 2, "side": "floor", "at": [0.45,0.4], "size": [2.1,1.4]},
         {"image": "botanical_prints", "room": 2, "side": "west", "at": [0.82,0.6], "size": [1.4,0.7]},
-        {"image": "rug_home", "room": 1, "side": "floor", "at": [0.5,0.42], "size": [2.1,1.4]}
+        {"image": "rug_home", "room": 1, "side": "floor", "at": [0.5,0.42], "size": [2.1,1.4]},
+        {"image": "rug_runner", "room": 4, "side": "floor", "at": [0.5,0.36], "size": [1,3]}
       ],
       "entrances": [
-        {"map": "landfall", "kind": "building", "object": 59207, "tile": [152,252], "position": [-129.7,121.49,-3.4], "returnTile": [149,255], "arrival": [63,88], "exit": [63,90], "exitFacing": [0,1], "label": "The weaver's house", "exitLabel": "The avenue"}
+        {"map": "landfall", "kind": "building", "object": 59207, "tile": [152,252], "position": [-129.7,121.49,-3.4], "returnTile": [149,255], "arrival": [63,88], "exit": [63,90], "exitFacing": [0,1], "label": "Mara's Capes / The weaver's house", "exitLabel": "The avenue", "category": "general_store"}
       ],
       "props": [
         {"asset": "loom", "at": [66.0,90.42], "yaw": 0, "blockBox": [0.93,0.99], "wall": "north"},
         {"asset": "stool", "at": [66.0,89.1], "yaw": 180, "blockBox": [0.2,0.2]},
-        {"asset": "harvest_baskets", "at": [67.45,91.19], "yaw": 0, "blockBox": [0.39,0.22], "wall": "north"},
-        {"asset": "harvest_baskets", "at": [68.35,91.19], "yaw": 0, "blockBox": [0.39,0.22], "wall": "north"},
-        {"asset": "goods_shelf_stocked", "at": [61.06,90.15], "yaw": 90, "blockBox": [0.85,0.37]},
-        {"asset": "trestle_table", "at": [64.6,85.55], "yaw": 0, "blockBox": [1.04,0.36]},
-        {"asset": "crate_stack", "at": [69.0,85.4], "yaw": 0, "blockBox": [0.86,0.85]},
         {"asset": "wall_sconce", "at": [70.28,90.3], "yaw": 270, "height": 1.5},
         {"asset": "kitchen_hearth_pot_spit", "at": [57.4,90.9], "yaw": 0, "blockBox": [0.9,0.5], "wall": "north"},
         {"asset": "dressed_round_table", "at": [57.4,87.6], "yaw": 0, "blockBox": [0.55,0.55]},
@@ -420,7 +450,29 @@
         {"asset": "supply_chest", "at": [74.1,89.6], "yaw": 270, "blockBox": [0.5,0.3]},
         {"asset": "wardrobe", "at": [72.2,91.17], "yaw": 0, "blockBox": [0.6,0.26], "wall": "north"},
         {"asset": "stool", "at": [75.6,87.4], "yaw": 0, "blockBox": [0.2,0.2]},
-        {"asset": "wall_sconce", "at": [76.29,88.3], "yaw": 270, "wall": "east", "height": 1.5}
+        {"asset": "wall_sconce", "at": [76.29,88.3], "yaw": 270, "wall": "east", "height": 1.5},
+        {"asset": "trestle_table", "at": [57,80.6], "yaw": 0, "blockBox": [1.04,0.36]},
+        {"asset": "stool", "at": [57.5,79.8], "yaw": 0},
+        {"asset": "trestle_table", "at": [56.5,75.5], "yaw": 0, "blockBox": [1.04,0.36]},
+        {"asset": "shop_counter", "at": [66,80.5], "yaw": 0, "blockBox": [1.08,0.42]},
+        {"asset": "sewing_machine", "at": [57.5,80.6], "yaw": 0, "height": 0.78},
+        {"asset": "tailor_fabric_cabinet", "at": [61.06,90.15], "yaw": 90, "blockBox": [0.9,0.34]},
+        {"asset": "tailor_fabric_cabinet", "at": [68.8,90.95], "yaw": 0, "blockBox": [0.9,0.34]},
+        {"asset": "tailor_cape_rail", "at": [68.4,85.25], "yaw": 0, "blockBox": [1.57,0.29]},
+        {"asset": "tailor_tunic_form", "at": [62,85.8], "yaw": 15, "blockBox": [0.43,0.34]},
+        {"asset": "tailor_fabric_cabinet", "at": [54.3,82.8], "yaw": 90, "blockBox": [0.9,0.34]},
+        {"asset": "tailor_fabric_cabinet", "at": [59.5,75.8], "yaw": 270, "blockBox": [0.9,0.34]},
+        {"asset": "tailor_cape_rail", "at": [54.2,77.5], "yaw": 90, "blockBox": [1.57,0.29]},
+        {"asset": "tailor_tunic_form", "at": [59.15,82.85], "yaw": 340, "blockBox": [0.43,0.34]},
+        {"asset": "tailor_sewing_tray", "at": [56.35,80.6], "yaw": 10, "height": 0.75, "scale": 0.8},
+        {"asset": "tailor_sewing_tray", "at": [56.35,75.5], "yaw": 350, "height": 0.75},
+        {"asset": "tailor_cape_rail", "at": [69.5,77.35], "yaw": 270, "blockBox": [1.57,0.29]},
+        {"asset": "tailor_cape_rail", "at": [63.25,75.4], "yaw": 0, "blockBox": [1.57,0.29]},
+        {"asset": "tailor_fabric_cabinet", "at": [69.1,83.65], "yaw": 0, "blockBox": [0.9,0.34]},
+        {"asset": "tailor_tunic_form", "at": [62,77.3], "yaw": 20, "blockBox": [0.43,0.34]},
+        {"asset": "tailor_tunic_form", "at": [67,75.6], "yaw": 345, "blockBox": [0.43,0.34]},
+        {"asset": "trestle_table", "at": [62.2,82.5], "yaw": 0, "blockBox": [1.04,0.36]},
+        {"asset": "tailor_sewing_tray", "at": [62.2,82.5], "yaw": 5, "height": 0.75}
       ],
       "lights": [
         {"at": [66.0,88.0], "height": 2.6, "colour": [1.0,0.82,0.6], "energy": 0.9, "range": 7},
@@ -432,13 +484,18 @@
         {"at": [55.0,87.0], "height": 2.0, "colour": [0.74,0.82,1.0], "energy": 0.3, "range": 4},
         {"at": [73.5,88.0], "height": 2.6, "colour": [1.0,0.82,0.6], "energy": 0.6, "range": 6},
         {"at": [76.2,88.3], "height": 1.9, "colour": [1.0,0.74,0.46], "energy": 0.5, "range": 4},
-        {"at": [76.2,86.6], "height": 2.0, "colour": [0.74,0.82,1.0], "energy": 0.25, "range": 4}
+        {"at": [76.2,86.6], "height": 2.0, "colour": [0.74,0.82,1.0], "energy": 0.25, "range": 4},
+        {"at": [57,79.5], "height": 2.7, "colour": [1,0.82,0.6], "energy": 1.1, "range": 8},
+        {"at": [65.5,79.5], "height": 2.7, "colour": [1,0.82,0.6], "energy": 1.2, "range": 8}
       ],
       "npcs": [
-        {"name": "Wynn Vell", "role": "dialogue", "occupation": "Weaver", "actorType": 306, "facing": "W", "tile": [68,88], "greeting": "Mind the warp; it is longer than the room. Mara sells the capes. I make them, and I make them slowly."}
+        {"name": "Wynn Vell", "role": "dialogue", "occupation": "Weaver", "actorType": 306, "facing": "N", "tile": [57,79], "greeting": "Mind the warp; it is longer than the room. Mara sells the capes. I make them, and I make them slowly.", "seatedWork": true},
+        {"name": "Mara Vell", "role": "shop", "occupation": "Cape Seller", "actorType": 305, "facing": "S", "tile": [66,82], "greeting": "A cape for your calling. Each adds one perk tier, up to that perk's limit.", "mapCategory": "general_store", "mapLabel": "Mara's Capes"}
       ],
       "interactives": [
-        {"object": 59282, "tile": [66,88], "role": "information", "text": "Wynn's loom, strung with cape cloth in cobalt and cream. Mara sells what comes off it on the plaza; the hem stitch is her mother's.", "label": "Wynn's loom", "at": [66.0,90.42]}
+        {"object": 59282, "tile": [66,88], "role": "information", "text": "Wynn's loom, strung with cape cloth in cobalt and cream. Mara sells the finished capes in the adjoining shop; the hem stitch is her mother's.", "label": "Wynn's loom", "at": [66.0,90.42]},
+        {"object": 59291, "tile": [57,81], "role": "information", "label": "Wynn's sewing machine", "text": "Wynn's hand-cranked sewing machine. A cobalt hem waits beneath the needle, ready for the next slow seam.", "at": [57,80.6], "height": 1.2},
+        {"object": 59292, "tile": [56,77], "role": "information", "label": "Wynn's cutting workbench", "text": "Wynn's cutting workbench, laid with thread spools, shears and a measuring ribbon. Coloured cloth waits on the nearby shelves before becoming capes for Mara's shop.", "at": [56.5,75.5]}
       ],
       "nodes": [],
       "spawns": []
@@ -951,7 +1008,15 @@
         {"asset": "chair", "at": [196.3,92.75], "yaw": 180, "blockBox": [0.25,0.25]},
         {"asset": "bookcase", "at": [191.3,94.1], "yaw": 0, "scale": 0.97, "blockBox": [0.669,0.233], "wall": "north"},
         {"asset": "stool", "at": [197.55,89.9], "yaw": 340, "blockBox": [0.2,0.2]},
-        {"asset": "book_stack", "at": [197.55,89.9], "yaw": 215, "scale": 0.95, "height": 0.5}
+        {"asset": "book_stack", "at": [197.55,89.9], "yaw": 215, "scale": 0.95, "height": 0.5},
+        {"asset": "trestle_table", "at": [194.8,84.6], "yaw": 0, "blockBox": [1.1,0.43]},
+        {"asset": "tailor_sewing_tray", "at": [194.3,84.6], "yaw": 0, "height": 0.61, "scale": 0.85},
+        {"asset": "book_stack", "at": [195.15,84.6], "yaw": 20, "height": 0.61, "scale": 1.05},
+        {"asset": "book_stack", "at": [195.15,84.6], "yaw": 65, "height": 0.738, "scale": 0.9},
+        {"asset": "book_stack", "at": [195.6,84.6], "yaw": 150, "height": 0.61, "scale": 0.85},
+        {"asset": "stool", "at": [190.3,93.8], "yaw": 10, "wall": "north", "blockBox": [0.22,0.22]},
+        {"asset": "book_stack", "at": [190.3,93.8], "yaw": 75, "height": 0.5},
+        {"asset": "book_stack", "at": [190.3,93.8], "yaw": 110, "height": 0.622, "scale": 0.9}
       ],
       "lights": [
         {"at": [186.9,91.8], "height": 2.7, "colour": [1.0,0.82,0.6], "energy": 0.9, "range": 5},

@@ -13,6 +13,31 @@ var _sample:Callable
 var _cart_from:=Vector3.ZERO
 var _cart_to:=Vector3.ZERO
 var _cart_elapsed:=1.0
+var _worker_nodes: Dictionary={}
+
+func apply_workers(snapshot:Dictionary,actors:Dictionary)->void:
+	_worker_nodes.clear()
+	var rows:Array=((snapshot.get("shelves",{}) as Dictionary).get("growers",(snapshot.get("shelves",{}) as Dictionary).get("fire",{})) as Dictionary).get("workers",[])
+	var wanted:Dictionary={}
+	for worker:Dictionary in rows:
+		var actor:=actors.get(int(worker.actor_id)) as ReplicatedActor3D
+		if not is_instance_valid(actor):continue
+		var key:="bag_"+str(worker.actor_id)
+		var fire:Dictionary=(snapshot.get("shelves",{}) as Dictionary).get("fire",{})
+		var hauls_cart:bool=(fire.get("carts",[]) as Array).any(func(cart:Dictionary)->bool:return int(cart.actor_id)==int(worker.actor_id))
+		if int(worker.cargo)>0 and not bool(worker.downed) and not hauls_cart:
+			wanted[key]=true;_worker_nodes[key]=actor
+			if not is_instance_valid(props.get(key)):
+				var bag:=_asset(SACK)
+				if bag!=null:bag.scale=Vector3.ONE*0.22;add_child(bag);props[key]=bag
+		if bool(worker.downed):continue
+		if bool(worker.harvesting) and not actor.is_model_deferred():
+			actor.play_action(&"harvest",actor.animation_player!=null and not actor.animation_player.is_playing())
+		elif actor.current_action==&"harvest":actor.play_action(&"idle")
+	for key:String in props.keys():
+		if key.begins_with("bag_") and not wanted.has(key):
+			if is_instance_valid(props[key]):props[key].queue_free()
+			props.erase(key)
 
 func apply_snapshot(snapshot:Dictionary,adapter:CoordinateAdapter,current_map:String,sample:Callable)->void:
 	var here:=EloriaProtocol.map_id_from_reference(current_map)
@@ -25,7 +50,7 @@ func apply_snapshot(snapshot:Dictionary,adapter:CoordinateAdapter,current_map:St
 	_adapter=adapter;_sample=sample
 	var identity:=str(snapshot.get("run_id",""))+":"+here+":"+str(ledger.get("chapter",""))
 	if identity!=_identity:clear();_identity=identity
-	var anchors:Dictionary=snapshot.get("anchors",{})
+	var anchors:Dictionary={} if ledger.has("fire") else snapshot.get("anchors",{})
 	if anchors.has("stock_display"):
 		for index:int in (ledger.get("unlocked",[]) as Array).size():
 			var key:="shelf_"+str(index)
@@ -58,6 +83,10 @@ func apply_snapshot(snapshot:Dictionary,adapter:CoordinateAdapter,current_map:St
 			_cart_from=(props.cart as Node3D).global_position;_cart_to=point;_cart_elapsed=0.0
 
 func _process(delta:float)->void:
+	for key:String in _worker_nodes:
+		var actor:=_worker_nodes[key] as Node3D
+		if is_instance_valid(actor) and is_instance_valid(props.get(key)):
+			(props[key] as Node3D).global_transform=actor.global_transform.translated_local(Vector3(-0.3,0.85,0.15)).scaled_local(Vector3.ONE*0.22)
 	if not props.has("cart") or _cart_elapsed>=1.0:return
 	_cart_elapsed=minf(1.0,_cart_elapsed+delta)
 	var point:=_ground(_cart_from.lerp(_cart_to,_cart_elapsed))
@@ -76,5 +105,7 @@ func _asset(path:String)->Node3D:
 	return wrapper
 
 func clear()->void:
-	for body:Node3D in props.values():body.queue_free()
+	for body:Node3D in props.values():
+		if is_instance_valid(body):body.queue_free()
 	props.clear();_identity="";_cart_elapsed=1.0
+	_worker_nodes.clear()

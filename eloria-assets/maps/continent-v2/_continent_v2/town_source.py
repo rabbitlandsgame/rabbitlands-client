@@ -377,7 +377,7 @@ def npcs(item):
         if missing:
             raise SourceError(f"{where} lacks {missing}")
         extra = sorted(set(npc) - {"name", "role", "occupation", "actorType", "facing", "tile", "greeting",
-                                   "mapCategory", "mapLabel"})
+                                   "mapCategory", "mapLabel", "seatedWork"})
         if extra:
             raise SourceError(f"{where}: unknown keys {extra}")
         for key in ("name", "role", "occupation", "greeting"):
@@ -387,6 +387,8 @@ def npcs(item):
                               f"{ACTOR_TYPES.stop - 1})")
         if npc["facing"] not in FACINGS:
             raise SourceError(f"{where}: facing {npc['facing']!r} is not one of {FACINGS}")
+        if "seatedWork" in npc and type(npc["seatedWork"]) is not bool:
+            raise SourceError(f"{where}: seatedWork must be a boolean")
         _pair(npc["tile"], f"{where} tile")
         if "mapCategory" in npc and npc["mapCategory"] not in categories():
             raise SourceError(f"{where}: map category {npc['mapCategory']!r} is not one of {list(categories())}")

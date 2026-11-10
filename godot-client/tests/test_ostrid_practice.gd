@@ -27,6 +27,7 @@ func run() -> void:
 			"appearance":{"skin":2,"hair":6,"shirt":3,"pants":0,"boots":3,"head":0,"eyes":0}}}
 	var evidence := OS.get_environment("RL_OSTRID_EVIDENCE")
 	if not evidence.is_empty():raw = json(evidence)
+	for actor:Dictionary in raw.values():actor.merge({"x":0,"y":0,"rotation":0},false)
 	var original := raw.duplicate(true)
 	var actors: Array[ReplicatedActor3D] = []
 	var presented: Array[Dictionary] = []
