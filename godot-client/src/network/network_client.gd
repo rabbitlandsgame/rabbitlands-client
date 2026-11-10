@@ -803,8 +803,10 @@ func get_knowledge_info(index: int) -> Error:
 func manufacture(ingredients: Array[Dictionary], wanted: int = 1) -> Error:
 	return send_frame(EloriaProtocol.manufacture(ingredients, wanted))
 
-func mix_request(recipe_index: int, wanted: int, from_storage: bool) -> Error:
-	return send_frame(EloriaProtocol.mix_request(recipe_index, wanted, from_storage))
+func mix_request(recipe_index: int, wanted: int, from_storage: bool,
+		recipe: Dictionary = {}) -> Error:
+	return send_frame(EloriaProtocol.mix_request(recipe_index, wanted,
+		from_storage, recipe))
 
 func tool_request(name: String) -> Error:
 	return send_frame(EloriaProtocol.tool_request(name))

@@ -16,6 +16,7 @@ var failures := 0
 var main: Control
 var app_state: Node
 var receiver: StreamPeerTCP
+var sent_claims: Array = []
 
 func _init() -> void:
 	call_deferred("_run")
@@ -38,6 +39,7 @@ func _run() -> void:
 		receiver = fixture["receiver"] as StreamPeerTCP
 		_check_open_windows()
 		_check_queue()
+		_check_recipe_claim()
 		_check_mix_feedback()
 		_close_fixture(fixture)
 	main.queue_free()
@@ -217,6 +219,52 @@ func _check_queue() -> void:
 			+ str(main.get("manufacturing_server_status")))
 	main.call("_on_manufacturing_queue_clear_pressed")
 
+## A batch says which recipe it means, not only where that recipe sits in the
+## list. A server reading another release's list - the 2026-11-10 incident,
+## where the lists parted at index 51 - refuses it: the batch ends unmade and
+## interrupted, then the reason follows. The queue has to stop there with the
+## reason showing, rather than wait for good or send its next batch into the
+## same refusal.
+func _check_recipe_claim() -> void:
+	var catalog: ManufacturingCatalog = main.get("manufacturing_catalog")
+	var definition: Dictionary = catalog.recipe(0)
+	var output: String = str(definition.get("output", ""))
+	var parts := PackedStringArray()
+	for ingredient: Dictionary in definition.get("ingredients", []):
+		parts.append("%s*%d" % [str(ingredient.get("name", "")),
+			int(ingredient.get("quantity", 0))])
+	if not _expect(not output.is_empty() and not parts.is_empty(),
+			"the first served recipe has an output and ingredients"):
+		return
+	if not (main.get("manufacturing_panel") as Control).visible:
+		main.call("_on_manufacturing_button_pressed")
+	_queue(0, 2)
+	main.call("_on_manufacturing_queue_start_pressed")
+	_expect(_take_requests() == [[0, 2]], "Start asks for the queued batch")
+	_expect(sent_claims == [[output, ";".join(parts)]],
+		"the request names the catalog's recipe and its ingredients: %s"
+			% [sent_claims])
+
+	_serve(false, 0, 0, output, true)
+	var reason := ("Nothing was mixed: your game's recipe list does not match"
+		+ " the server's (you chose %s; the server's recipe there makes"
+		+ " Something Else). Restart the game to update it.") % output
+	app_state.call("_on_packet", EloriaProtocol.ServerMessage.INVENTORY_ITEM_TEXT,
+		PackedByteArray([127]) + reason.to_utf8_buffer())
+	var queue: Array = main.get("manufacturing_queue") as Array
+	_expect(not bool(main.get("manufacturing_queue_running"))
+		and _take_requests().is_empty(),
+		"a refused batch stops the queue instead of sending the next one")
+	_expect((main.get("_mix_pending") as Array).is_empty(),
+		"and settles the batch the window was waiting on")
+	_expect(int((queue[0] as Dictionary).get("made", 0)) == 0
+		and int(main.get("manufacturing_queue_index")) == 0,
+		"the refused entry is credited nothing and keeps its place")
+	_expect(str(main.get("manufacturing_server_status")) == reason,
+		"the window is left showing the server's reason: "
+			+ str(main.get("manufacturing_server_status")))
+	main.call("_on_manufacturing_queue_clear_pressed")
+
 func _check_mix_feedback() -> void:
 	var catalog: ManufacturingCatalog = main.get("manufacturing_catalog")
 	var output: String = str(catalog.recipe(0).get("output", ""))
@@ -277,16 +325,28 @@ func _serve(running: bool, remaining: int, made: int, output: String,
 	app_state.call("_on_packet", EloriaProtocol.ServerMessage.ELORIA_MIX_STATE,
 		payload)
 
-## The mix requests sent since the last call, each as [recipe, wanted].
+## The mix requests sent since the last call, each as [recipe, wanted]. What
+## each said it meant by the index - [output, ingredients] from after the five
+## index bytes, or [] when nothing followed them - goes to `sent_claims`, in
+## the same order.
 func _take_requests() -> Array:
 	var bytes: PackedByteArray = _take()
 	var found: Array = []
+	sent_claims = []
 	var offset := 0
 	while offset + 3 <= bytes.size():
 		var length: int = bytes.decode_u16(offset + 1)
 		if bytes[offset] == EloriaProtocol.ClientMessage.ELORIA_MIX_REQUEST:
 			found.append([bytes.decode_u16(offset + 3),
 				bytes.decode_u16(offset + 5)])
+			var rest: PackedByteArray = bytes.slice(offset + 8, offset + 2 + length)
+			var claim: Array = []
+			var name_end: int = rest.find(0)
+			if name_end >= 0:
+				var tail: PackedByteArray = rest.slice(name_end + 1)
+				claim = [rest.slice(0, name_end).get_string_from_utf8(),
+					tail.slice(0, maxi(0, tail.find(0))).get_string_from_utf8()]
+			sent_claims.append(claim)
 		offset += 2 + length
 	return found
 

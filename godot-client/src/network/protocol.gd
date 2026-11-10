@@ -681,13 +681,34 @@ static func get_knowledge_info(index: int) -> PackedByteArray:
 ## Mix by recipe rather than by the inventory positions the ingredients sit
 ## in. `MANUFACTURE_THIS` can only name positions, which makes mixing out of
 ## storage unsayable in it: the materials are not in any inventory position.
+##
+## The recipe goes by its index in the list both sides load, which is only
+## right while they load the same list. `recipe`, the catalog entry the index
+## came from, follows the five index bytes as what the window means by it: the
+## output name, NUL, then the ingredients the way recipes.txt writes them
+## (`Wood Plank*1;Cloth Roll*1`), NUL. A server whose recipe at that index is
+## something else refuses rather than making it - on 2026-11-10 a server and
+## the published clients parted at index 51 and players got the wrong items.
+## A server that predates this reads the five bytes and ignores the rest.
 static func mix_request(recipe_index: int, wanted: int,
-		from_storage: bool) -> PackedByteArray:
+		from_storage: bool, recipe: Dictionary = {}) -> PackedByteArray:
 	var payload := PackedByteArray()
 	payload.resize(5)
 	payload.encode_u16(0, maxi(0, recipe_index))
 	payload.encode_u16(2, clampi(wanted, 1, 65535))
 	payload[4] = 1 if from_storage else 0
+	if not recipe.is_empty():
+		payload.append_array(str(recipe.get("output", "")).to_utf8_buffer())
+		payload.append(0)
+		var parts := PackedStringArray()
+		var ingredients: Variant = recipe.get("ingredients", [])
+		if ingredients is Array:
+			for ingredient: Variant in ingredients as Array:
+				if ingredient is Dictionary:
+					parts.append("%s*%d" % [str(ingredient.get("name", "")),
+						int(ingredient.get("quantity", 0))])
+		payload.append_array(";".join(parts).to_utf8_buffer())
+		payload.append(0)
 	return encode(ClientMessage.ELORIA_MIX_REQUEST, payload)
 
 ## Take one of a recipe's tools out of storage. Named rather than pointed at,

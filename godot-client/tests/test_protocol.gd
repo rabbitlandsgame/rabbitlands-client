@@ -358,6 +358,20 @@ func _init() -> void:
 	_expect_bytes("mix request from inventory fixture",
 		EloriaProtocol.mix_request(0, 1, false),
 		PackedByteArray([200, 6, 0, 0, 0, 1, 0, 0]))
+	# The window also says which recipe it means by the index: the output
+	# name, NUL, the ingredients as recipes.txt writes them, NUL - the shape
+	# eloria/protocol.py decode_mix_request reads. The five index bytes keep
+	# their places, so a server that reads only those reads the same request.
+	var claimed := PackedByteArray([200, 38, 0, 7, 0, 5, 0, 1])
+	claimed.append_array("Torch".to_utf8_buffer())
+	claimed.append(0)
+	claimed.append_array("Wood Plank*1;Cloth Roll*1".to_utf8_buffer())
+	claimed.append(0)
+	_expect_bytes("mix request naming its recipe fixture",
+		EloriaProtocol.mix_request(7, 5, true, {"output": "Torch",
+			"ingredients": [{"name": "Wood Plank", "quantity": 1},
+				{"name": "Cloth Roll", "quantity": 1}]}),
+		claimed)
 	# The end of a run, from the server's own builder in eloria/protocol.py:
 	# one torch made before a harvest stopped it. The byte after the name's
 	# terminator says so; a client that stops at the terminator reads the

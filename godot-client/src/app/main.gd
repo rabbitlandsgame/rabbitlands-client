@@ -4257,7 +4257,10 @@ func _start_mix(recipe_index: int, wanted: int, position: int) -> void:
 	if definition.is_empty():
 		return
 	var from_storage: bool = _manufacturing_from_storage()
-	var error: Error = Network.mix_request(recipe_index, wanted, from_storage)
+	# The catalog entry rides along so a server reading a different recipe
+	# list refuses the batch instead of making whatever its index names.
+	var error: Error = Network.mix_request(recipe_index, wanted, from_storage,
+		definition)
 	if error != OK:
 		manufacturing_server_status = "Mix request failed: " + error_string(error)
 		manufacturing_status.text = manufacturing_server_status
