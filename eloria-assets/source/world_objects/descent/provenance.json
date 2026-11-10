@@ -1,0 +1,59 @@
+{
+  "schema": "rabbitlands-world-object-provenance-v1",
+  "purpose": "The Serpent Deep descent: the temple on Suncoil (map object 59480, 'Descent Temple') and the boss floor's way out (map object 59491, 'Descent Exit')",
+  "request": "owner, 2026-11-09 chat: new Meshy art for the descent temple and its exit",
+  "stage": ".local/asset-authoring/workspace/work-output/descent-temple-exit-2026-11-09 (concepts, Meshy inputs, raw models, QA renders; ignored, private)",
+  "preparation": "Blender (background) prepare_prop.py: uniform scale to the target height, base centre on the origin (+Y up, min y = 0), Meshy's front (+Z) kept, transforms applied, geometry otherwise as generated; self-contained GLB with a JPEG base colour",
+  "assets": [
+    {
+      "id": "descent_temple",
+      "scene": "res://assets/world/descent/descent_temple.glb",
+      "concept": {
+        "slug": "descent-temple-1",
+        "generator": "gpt-image-bridge (gpt-image-2)",
+        "sha256": "be29e92a1fd3c79913ac4068d0e59e8f6c9aee448ed302ae725d7772ccaaf3b1",
+        "notes": "stepped jade temple, serpent-jaw doorway, mouth solid black; front three-quarter"
+      },
+      "meshy": {
+        "generator": "Meshy Image to 3D",
+        "taskId": "01a1c2ed-a209-7066-b690-bf75f3102d0e",
+        "consumedCredits": 15,
+        "rawModelSha256": "f8988f0d6c7b1010f9dc2ee20148a5ac8db31406aeba1ada7f7e1ee972060806"
+      },
+      "targetHeightMetres": 8.5,
+      "sizeMetres": [7.752, 8.5, 8.139],
+      "model": {
+        "vertices": 6072,
+        "triangles": 6129,
+        "alphaTested": false,
+        "height": 8.5,
+        "sha256": "9b2266d4240c4ff70e066993a7aa46b3d6428ed8690a6dba15146a43768f93c0"
+      }
+    },
+    {
+      "id": "descent_exit_portal",
+      "scene": "res://assets/world/descent/descent_exit_portal.glb",
+      "concept": {
+        "slug": "descent-exit-portal-1",
+        "generator": "gpt-image-bridge (gpt-image-2)",
+        "sha256": "854645b98cbe2c1ff02d7ef6f0d4a8c2abe5cadaacc6234e7f253c0c354277bc",
+        "notes": "ouroboros stone ring on a two-step plinth, opaque jade swirl disc; near-front view"
+      },
+      "meshy": {
+        "generator": "Meshy Image to 3D",
+        "taskId": "01a1c2ed-a1f1-708c-92ab-cd0e7ad1bdf0",
+        "consumedCredits": 15,
+        "rawModelSha256": "ef04f72ae91e45db82f88b6c759be9516b7b4a2c398a81ec08c6f34b426546dc"
+      },
+      "targetHeightMetres": 3.4,
+      "sizeMetres": [2.652, 3.4, 2.546],
+      "model": {
+        "vertices": 4605,
+        "triangles": 3736,
+        "alphaTested": false,
+        "height": 3.4,
+        "sha256": "87cc4970f5ba40a74fe7fc3c6761a7fdda9c1f6fdde2532d2cb498c6df19e242"
+      }
+    }
+  ]
+}

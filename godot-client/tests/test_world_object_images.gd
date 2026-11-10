@@ -14,11 +14,20 @@ func _init() -> void:
 		if extension._import_preflight(state, PackedStringArray()) != ERR_SKIP:
 			push_error("Unselected imports must keep their ordinary image decoder")
 			failures += 1
-	for name in ["crystal_arch", "cave_mouth", "mine_rail"]:
+	# An ordinary GLB with embedded images (no tagged scenery images, so no
+	# external pass) finishes its post-parse quietly too.
+	var untagged := GLTFState.new()
+	untagged.set_additional_data(Images.ENABLED, true)
+	if extension._import_post_parse(untagged) != OK:
+		push_error("An untagged import's post-parse must be a quiet no-op")
+		failures += 1
+	# The Serpent Deep's temple and way out embed their images (2026-11-09).
+	for name in ["underground/crystal_arch", "underground/cave_mouth", "underground/mine_rail",
+			"descent/descent_temple", "descent/descent_exit_portal"]:
 		var document := GLTFDocument.new()
 		var state := GLTFState.new()
 		state.set_additional_data(Images.ENABLED, true)
-		if document.append_from_file(ProjectSettings.globalize_path("res://assets/world/underground/"+name+".glb"),state) != OK:
+		if document.append_from_file(ProjectSettings.globalize_path("res://assets/world/"+name+".glb"),state) != OK:
 			push_error(name+" failed to import")
 			failures += 1
 			continue

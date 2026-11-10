@@ -78,7 +78,9 @@ func _parse_image_data(state: GLTFState, bytes: PackedByteArray, _mime: String, 
 	return OK
 
 func _import_post_parse(state: GLTFState) -> Error:
-	if not bool(state.get_additional_data(EXTERNAL_ACTIVE)): return OK
+	# Unset (null) for an ordinary GLB whose images are embedded, not tagged
+	# scenery images: bool(null) is a script error, so compare instead.
+	if state.get_additional_data(EXTERNAL_ACTIVE) != true: return OK
 	var result := MapImages.new()._import_post_parse(state)
 	if result != OK: return result
 	var verified: Dictionary = state.get_additional_data(VERIFIED_KEY)
