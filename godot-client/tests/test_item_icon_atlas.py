@@ -131,8 +131,32 @@ class ItemIconAtlasTest(unittest.TestCase):
             cell = self.cell_for(image_id)
             with self.subTest(image_id=image_id):
                 colours = len(np.unique(cell.reshape(-1, 4), axis=0))
-                self.assertGreater(colours, 600,
+                # Broad painted facets need fewer tones than the former haze.
+                # Hundreds of distinct pixels still reject a flat placeholder.
+                self.assertGreater(colours, 500,
                                    f"image {image_id} is still flat art")
+
+    def test_style_refresh_changes_only_the_old_art_slots(self) -> None:
+        from unittest.mock import patch
+        from build_item_icon_atlases import planned_atlases, STYLE_REFRESHES
+        expected = (set(range(118)) - {74}) | set(range(474, 506)) | set(range(570, 576))
+        records = [row for folder in STYLE_REFRESHES
+                   for row in json.loads((folder / "manifest.json").read_text())["items"]]
+        self.assertEqual(expected, {row["imageId"] for row in records})
+        self.assertEqual(155, len(records))
+        self.assertTrue(all(row["verdict"] == "pass" for row in records))
+        with patch("build_item_icon_atlases.STYLE_REFRESHES", []), \
+                patch("build_item_icon_atlases.MATERIAL_REPLACEMENTS", []):
+            before = [image for _, image in planned_atlases()]
+        after = [image for _, image in planned_atlases()]
+        changed = set()
+        for image_id in range(self.config["imageCount"]):
+            atlas, local = divmod(image_id, self.per_atlas)
+            x, y = local % self.columns * self.cell, local // self.columns * self.cell
+            bounds = (x, y, x + self.cell, y + self.cell)
+            if before[atlas].crop(bounds).tobytes() != after[atlas].crop(bounds).tobytes():
+                changed.add(image_id)
+        self.assertEqual(expected, changed)
 
     def test_every_declared_atlas_ships(self) -> None:
         """The PNGs are the atlas source; nothing authors them elsewhere.

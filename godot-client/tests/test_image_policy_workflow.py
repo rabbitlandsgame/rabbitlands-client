@@ -65,6 +65,33 @@ class PublishingPolicy(unittest.TestCase):
   with self.assertRaisesRegex(ValueError,'original texture policy differs'):S.apply_to_file(source,{identity:{}},index,True)
   # Both legacy sides retain their historical identity/sharing behavior.
   prototype['images'][0]['extras'].pop(S.POLICY_DIRECTORY_EXTRA);target.write_bytes(S.write_glb(prototype,packed));self.assertEqual(S.apply_to_file(source,{identity:{}},index,True)['moved'],1)
+ def test_prototype_the_committed_package_already_places_keeps_its_published_policy(self):
+  # A fresh export (no policy extras) of a mesh whose prototype the package
+  # already placed before policy tracking: reuse delivers what ships today.
+  source=self.maps/'region/world.glb';source.parent.mkdir();incoming=self.document(source);incoming['nodes']=[{'mesh':0}];body=self.body();identity=S.mesh_identity(incoming,body,0,source,{})[0]
+  target=self.pool/(identity+'.glb');published=self.document(target);self.assertEqual(S.mesh_identity(published,body,0,target,{})[0],identity);target.write_bytes(S.write_glb(published,body));index={identity:S._index_entry(published,target.read_bytes())};before=target.read_bytes()
+  fresh=self.maps/'fresh-pool';fresh.mkdir();moved=fresh/'pixel.png';moved.write_bytes(self.image.read_bytes());incoming['images']=[{'uri':relative(moved,source.parent)}];source.write_bytes(S.write_glb(incoming,body))
+  with self.assertRaisesRegex(ValueError,'original texture policy differs'):S.apply_to_file(source,{identity:{}},index,True)
+  with self.assertRaisesRegex(ValueError,'original texture policy differs'):S.apply_to_file(source,{identity:{}},index,True,frozenset({'some-other-prototype'}))
+  self.assertEqual(S.apply_to_file(source,{identity:{}},index,True,frozenset({identity}))['moved'],1);self.assertEqual(target.read_bytes(),before)
+  # An explicit incoming policy is a statement about this use: still checked.
+  other=self.maps/'different-policy';other.mkdir();incoming['images'][0]['extras']={S.POLICY_DIRECTORY_EXTRA:relative(other,source.parent)};source.write_bytes(S.write_glb(incoming,body))
+  with self.assertRaisesRegex(ValueError,'original texture policy differs'):S.apply_to_file(source,{identity:{}},index,True,frozenset({identity}))
+ def test_committed_publication_names_its_prototypes_from_git_head(self):
+  import shutil,subprocess
+  if shutil.which('git') is None:self.skipTest('git not available')
+  import publish_finish as PF
+  repo=self.root;package=self.maps/'continent-v2/region/client';(package/'chunks/00_00').mkdir(parents=True);(package/'chunks/00_00/deeper/x').mkdir(parents=True)
+  def manifest(*ids):return json.dumps({'externalMeshes':{f'../../../../_shared/meshes/{i}.glb':'0'*64 for i in ids}})
+  (package/'world.json').write_text(manifest('aa'));(package/'chunks/00_00/world.json').write_text(manifest('bb','cc'));(package/'chunks/00_00/deeper/x/world.json').write_text(manifest('not-a-cell'))
+  git=lambda *a:subprocess.run(['git','-C',str(repo),'-c','user.name=t','-c','user.email=t@example.invalid',*a],check=True,capture_output=True)
+  git('init','-q');git('add','-A');git('commit','-qm','publication')
+  # The tree is rewritten by a publisher before its space passes: HEAD speaks.
+  (package/'world.json').write_text('{}');(package/'chunks/00_00/world.json').write_text(manifest('dd'))
+  with mock.patch.object(PF,'REPO',repo):
+   self.assertEqual(PF.published_prototypes(package),frozenset({'aa','bb','cc'}))
+   self.assertEqual(PF.published_prototypes(self.maps/'continent-v2/never-published'),frozenset())
+  self.assertEqual(PF.prototypes_named({'externalMeshes':{'../x/_shared/meshes/ee.glb':'0','../other/ff.glb':'0'}}),{'ee'})
  def test_embedded_incoming_reuses_matching_annotated_published_policy(self):
   source=self.maps/'region/world.glb';source.parent.mkdir();incoming=self.document(source);pixels=self.image.read_bytes();body=self.body()+pixels;incoming['nodes']=[{'mesh':0}];incoming['buffers'][0]['byteLength']=len(body);incoming['bufferViews'].append({'buffer':0,'byteOffset':36,'byteLength':len(pixels)});incoming['images']=[{'bufferView':1,'mimeType':'image/png'}]
   identity=S.mesh_identity(incoming,body,0,source,{})[0];target=self.pool/(identity+'.glb');published=self.document(target);published['images'][0]['extras'][S.POLICY_DIRECTORY_EXTRA]=relative(self.image.parent,target.parent);self.assertEqual(S.mesh_identity(published,self.body(),0,target,{})[0],identity);target.write_bytes(S.write_glb(published,self.body()));source.write_bytes(S.write_glb(incoming,body));index={identity:S._index_entry(published,target.read_bytes())};before_source=source.read_bytes();before_target=target.read_bytes()

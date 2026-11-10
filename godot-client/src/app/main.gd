@@ -66,6 +66,8 @@ const CampaignWorksScript = preload("res://src/world/campaign_works.gd")
 const CampaignBankWorksScript = preload("res://src/world/campaign_bank_works.gd")
 const CampaignRoadWorksScript = preload("res://src/world/campaign_road_works.gd")
 const CampaignShelvesWorksScript = preload("res://src/world/campaign_shelves_works.gd")
+const CampaignFireWorksScript = preload("res://src/world/campaign_fire_works.gd")
+const CampaignWaterWorksScript = preload("res://src/world/campaign_water_works.gd")
 const CampaignLampsWorksScript = preload("res://src/world/campaign_lamps_works.gd")
 const CampaignGuidanceScript = preload("res://src/world/campaign_guidance.gd")
 const CampaignCrossingScript = preload("res://src/world/campaign_crossing.gd")
@@ -78,6 +80,8 @@ const CampaignCutawayScript = preload("res://src/world/campaign_cutaway.gd")
 @onready var campaign_bank_works := CampaignBankWorksScript.new()
 @onready var campaign_road_works := CampaignRoadWorksScript.new()
 @onready var campaign_shelves_works := CampaignShelvesWorksScript.new()
+@onready var campaign_fire_works := CampaignFireWorksScript.new()
+@onready var campaign_water_works := CampaignWaterWorksScript.new()
 @onready var campaign_lamps_works := CampaignLampsWorksScript.new()
 @onready var campaign_guidance := CampaignGuidanceScript.new()
 @onready var campaign_crossing := CampaignCrossingScript.new()
@@ -161,6 +165,7 @@ const InteriorCutawayScript := preload("res://src/world/interior_cutaway.gd")
 const LanternMineLightingScript := preload("res://src/world/lantern_mine_lighting.gd")
 const LightMarkerBudgetScript := preload("res://src/world/light_marker_budget.gd")
 const SecretSectionsScript := preload("res://src/world/secret_sections.gd")
+const DescentFogScript := preload("res://src/world/descent_fog.gd")
 const OccluderFadeScript := preload("res://src/world/occluder_fade_manager.gd")
 const WorldDistanceScript := preload("res://src/world/world_distance.gd")
 const CameraShaderWarmup := preload("res://src/world/camera_shader_warmup.gd")
@@ -479,6 +484,7 @@ var minimap_marker_overlay: Control
 ## Short-lived world effects the server announced. Kept only so a test can see
 ## what is on screen; each one frees itself when it finishes.
 var world_effects: Array = []
+var _boss_mechanic_cues: Dictionary = {}
 var _world_effects_compact_at := 32
 ## The glitter around the player while they harvest; null when they are not.
 var harvest_sparkle: HarvestSparkle3D
@@ -594,6 +600,8 @@ var models: Dictionary = {}
 var actor_type_models: Dictionary = {}
 var npc_looks: Dictionary = {}
 var npc_characters: Dictionary = {}
+var npc_human_faces: Dictionary = {}
+var npc_workstations: Dictionary = {}
 var creation_options: Array = []
 var selected_creation_class := 0
 var creation_class_gear_visible := true
@@ -933,6 +941,17 @@ var _outdoors := false
 ## Map objects stand still once placed, so on a sectioned map they are culled
 ## when the player's section changes or the objects change, not every frame.
 var _section_objects_dirty := true
+## A descent floor's fog of war (descent_fog.gd, server message 188): the
+## floor grid while the fog applies to the loaded map (else empty), the black
+## volume over its unrevealed cells, the picture laid over its rectangle on
+## both maps, and the key they were last built for (`_sync_descent_fog`).
+var _descent_fog_grid: Dictionary = {}
+var _descent_fog_node: MeshInstance3D
+var _descent_fog_picture: Dictionary = {}
+var _descent_fog_key := ""
+## The party's other members by name, refreshed each culling pass: the fog
+## never hides a party member (bots included).
+var _descent_party_names: Dictionary = {}
 ## True once every cooldown shade is hidden and no cooldown is running, for
 ## as long as AppState.inventory_cooldowns still hashes to `_cooldown_idle_hash`.
 ## The shade and seconds label per slot button, by the button's instance id.
@@ -1120,6 +1139,7 @@ var effect_budget = LiveEffectBudgetScript.new()
 var _selection_ring_actor := -1
 var _overhead_target_actor := -1
 var _shelves_health_actor := -1
+var _grower_health_actors: Array = []
 ## Built bodies (not deferred), recounted on every gate pass and kept up to
 ## date in between by the passes that build or remove one; the body cap reads it.
 var _built_bodies := 0
@@ -1635,6 +1655,8 @@ func _ready() -> void:
 	world_root.add_child(campaign_bank_works)
 	world_root.add_child(campaign_road_works)
 	world_root.add_child(campaign_shelves_works)
+	world_root.add_child(campaign_fire_works)
+	world_root.add_child(campaign_water_works)
 	world_root.add_child(campaign_lamps_works)
 	world_root.add_child(campaign_guidance)
 	world_root.add_child(campaign_crossing)
@@ -1681,6 +1703,8 @@ func _ready() -> void:
 	actor_type_models = model_registry.get("actorTypes", {})
 	npc_looks = model_registry.get("npcLooks", {})
 	npc_characters = _json("res://data/actors/npc_characters.json")
+	npc_human_faces = _json("res://data/actors/npc_human_faces.json")
+	npc_workstations = _json("res://data/actors/workstations.json")
 	creation_options = PLAYER_CREATION.options(model_registry)
 	animation_config = _json("res://data/animations/luminous.json")
 	animation_configs["res://data/animations/luminous.json"] = animation_config
@@ -4968,6 +4992,7 @@ func _exit_tree() -> void:
 	NativeAnimationImporter.clear()
 	# Released here, before the rendering server goes: otherwise the picture's
 	# and the cached tab-map textures are reported leaked at exit.
+	_descent_fog_picture = {}
 	_remove_map_picture()
 	_tab_map_textures.clear()
 	_tab_map_detail_textures.clear()
@@ -4975,7 +5000,7 @@ func _exit_tree() -> void:
 		# Explicit maintenance exits before these entry helpers acquire parents.
 		for helper: Variant in [remote_presentation, character_intro, campaign_scene,
 				campaign_guidance, campaign_crossing, campaign_cart, campaign_rescue, campaign_cutaway,
-				campaign_hud, campaign_works, campaign_bank_works, campaign_road_works, campaign_shelves_works,
+				campaign_hud, campaign_works, campaign_bank_works, campaign_road_works, campaign_shelves_works, campaign_fire_works, campaign_water_works,
 				campaign_lamps_works, arrival_curtain, quest_trail, mount_status]:
 			if is_instance_valid(helper) and helper is Node and helper.get_parent() == null:
 				helper.free()
@@ -5055,6 +5080,8 @@ func _on_connection_state_changed(value: String) -> void:
 		campaign_bank_works.clear()
 		campaign_road_works.clear()
 		campaign_shelves_works.clear()
+		campaign_fire_works.clear()
+		campaign_water_works.clear()
 		campaign_lamps_works.clear()
 		campaign_guidance.clear()
 		campaign_crossing.clear()
@@ -5143,7 +5170,9 @@ func _on_reconnect_progress(attempt: int, _total: int, delay_msec: int) -> void:
 	_sync_connection_banner()
 
 func _clear_world_presentation(retain_map_resources := false) -> void:
+	_clear_boss_mechanic_cues()
 	lantern_mine_lighting.clear()
+	_clear_descent_fog()
 	campaign_rescue.clear()
 	_campaign_world_key = []
 	# The disconnect console still belongs to this session. Keep its terrain,
@@ -6005,6 +6034,8 @@ func _overhead_health_for(actor_id: int, dto: Dictionary,
 		return true
 	if _is_shelves_training_opponent(actor_id, dto):
 		return true
+	if _is_shelves_grower(actor_id, dto):
+		return true
 	return _minimap_actor_type(dto) != &"npc"
 
 ## Hands every actor its answer to those questions. A pass over the actors one
@@ -6804,6 +6835,8 @@ func _on_state_changed(path: StringName) -> void:
 	match path:
 		&"adjacent_maps":
 			_queue_map_picture_warmup()
+		&"descent":
+			_sync_descent_fog()
 		&"lantern_tutorial":
 			quest_trail.apply_state(AppState.lantern_tutorial, adapter, AppState.current_map)
 			if AppState.lantern_tutorial.get("active", false) and AppState.lantern_tutorial.get("ring_training", false):
@@ -6820,6 +6853,8 @@ func _on_state_changed(path: StringName) -> void:
 			campaign_bank_works.clear()
 			campaign_road_works.clear()
 			campaign_shelves_works.clear()
+			campaign_fire_works.clear()
+			campaign_water_works.clear()
 			campaign_lamps_works.clear()
 			campaign_guidance.clear()
 			campaign_crossing.clear()
@@ -6979,6 +7014,11 @@ func _on_state_changed(path: StringName) -> void:
 				if str(AppState.campaign.get("kind", "")) == "shelves" else -1
 			_sync_overhead_health_for([_shelves_health_actor, mentor])
 			_shelves_health_actor = mentor
+			var workers: Array=((AppState.campaign.get("shelves",{}) as Dictionary).get("growers",(AppState.campaign.get("shelves",{}) as Dictionary).get("fire",(AppState.campaign.get("shelves",{}) as Dictionary).get("water",{}))) as Dictionary).get("workers",[])
+			var worker_ids: Array=[]
+			for worker: Dictionary in workers:worker_ids.append(int(worker.actor_id))
+			_sync_overhead_health_for(_grower_health_actors+worker_ids)
+			_grower_health_actors=worker_ids
 		&"npc_dialogue":
 			_sync_dialogue()
 		&"popup":
@@ -7095,6 +7135,7 @@ func _retry_browser_area_files() -> void:
 func _load_server_map() -> void:
 	if AppState.current_map.is_empty() or loaded_server_map == AppState.current_map:
 		return
+	_clear_boss_mechanic_cues()
 	camera_shader_warmup.cancel()
 	var normalized_map: String = MapRegistry.normalize_server_map_id(AppState.current_map)
 	if OS.has_feature("web") and not WebPrototype.ensure_map(AppState.current_map, "destination"):
@@ -7497,6 +7538,7 @@ func _on_world_loaded(manifest: WorldManifest) -> void:
 	binding_steps["full_map"] = (Time.get_ticks_usec() - step_started) / 1000.0; step_started = Time.get_ticks_usec()
 	_install_map_picture(manifest)
 	binding_steps["map_picture"] = (Time.get_ticks_usec() - step_started) / 1000.0; step_started = Time.get_ticks_usec()
+	_sync_descent_fog()
 	_queue_map_picture_warmup()
 	binding_steps["map_picture_warmup"] = (Time.get_ticks_usec() - step_started) / 1000.0; step_started = Time.get_ticks_usec()
 	_request_map_redraw()
@@ -9126,6 +9168,8 @@ func _update_campaign(delta: float) -> void:
 		campaign_bank_works.clear()
 		campaign_road_works.clear()
 		campaign_shelves_works.clear()
+		campaign_fire_works.clear()
+		campaign_water_works.clear()
 		campaign_lamps_works.clear()
 		campaign_guidance.clear()
 		campaign_crossing.clear()
@@ -9192,6 +9236,9 @@ func _update_campaign(delta: float) -> void:
 	campaign_guidance.apply_snapshot(AppState.campaign, map_object_nodes, actor_nodes,
 		AppState.current_map, tile if tile is Vector2i else Vector2i.ZERO,
 		lantern_guide.using_campaign(), not ready or campaign_scene.is_active())
+	if campaign_water_works.apply_controls(AppState.campaign, adapter, AppState.current_map,
+			_campaign_surface_height, map_object_nodes, not ready or campaign_scene.is_active()):
+		_section_objects_dirty = true
 	extension_windows.sync_campaign_replay()
 
 ## The campaign's scenery (works, carts, the rescue's cage) follows the
@@ -9214,6 +9261,9 @@ func _apply_campaign_world() -> void:
 	campaign_road_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
 		_campaign_surface_height, campaign_scene.reduced_motion)
 	campaign_shelves_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map, _campaign_surface_height)
+	campaign_shelves_works.apply_workers(AppState.campaign, actor_nodes)
+	campaign_fire_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map, _campaign_surface_height, actor_nodes)
+	campaign_water_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map, _campaign_surface_height, campaign_scene.reduced_motion)
 	campaign_lamps_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
 		_campaign_surface_height, campaign_scene.reduced_motion)
 	campaign_crossing.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
@@ -9939,6 +9989,10 @@ func _sync_map_background_pictures() -> void:
 			< ((b.transform as Transform3D) * Vector3(0, float(b.height), 0)).y)
 	if not _map_picture.is_empty():
 		pictures.append(_map_picture)
+	# A descent floor's fog lies over the ground and under every mark: the
+	# marker overlays are later siblings of these backgrounds.
+	if not _descent_fog_picture.is_empty():
+		pictures.append(_descent_fog_picture)
 	if minimap_background != null:
 		minimap_background.set_pictures(pictures)
 	if full_map_background != null:
@@ -11415,31 +11469,146 @@ func _configure_secret_sections(manifest: WorldManifest) -> void:
 
 
 func _update_secret_sections(force: bool = false) -> void:
-	if not bool(secret_sections.call("is_active")):
+	var sectioned: bool = bool(secret_sections.call("is_active"))
+	# A descent's fog hides by the same writer, on a map with or without
+	# sections (secret_sections.gd `fog_hides`).
+	if not sectioned and _descent_fog_grid.is_empty():
 		_apply_lantern_mine_lighting()
 		return
 	var local_actor_node: Node3D = actor_nodes.get(AppState.local_actor_id) as Node3D
 	if local_actor_node == null:
 		_apply_lantern_mine_lighting()
 		return
-	var previous_section: String = secret_sections.current_section()
-	secret_sections.call("update", local_actor_node.global_position, force)
-	if secret_sections.current_section() != previous_section:
-		_section_objects_dirty = true
-		_full_map_panned = false
-		_configure_full_map(world_loader.manifest)
-		_install_map_picture(world_loader.manifest)
-		_request_map_redraw()
-		_apply_day_night()
+	if sectioned:
+		var previous_section: String = secret_sections.current_section()
+		secret_sections.call("update", local_actor_node.global_position, force)
+		if secret_sections.current_section() != previous_section:
+			_section_objects_dirty = true
+			_full_map_panned = false
+			_configure_full_map(world_loader.manifest)
+			_install_map_picture(world_loader.manifest)
+			_request_map_redraw()
+			_apply_day_night()
+	if not _descent_fog_grid.is_empty():
+		_descent_party_names = _overhead_cap_party_names()
 	# whoever and whatever stands in another secret stays unseen
 	secret_sections.call("cull_dynamic", actor_nodes.values(), local_actor_node)
 	# Map objects keep the ground position they were placed at (only their
 	# height follows the surface), so they are judged again only when the
-	# section or the set of objects changes (`_sync_map_objects`).
+	# section, the fog or the set of objects changes (`_sync_map_objects`).
 	if _section_objects_dirty or force:
 		secret_sections.call("cull_dynamic", map_object_nodes.values())
-		_section_objects_dirty = secret_sections.current_section().is_empty()
+		_section_objects_dirty = sectioned and secret_sections.current_section().is_empty()
 	_apply_lantern_mine_lighting()
+
+
+## Builds, refreshes or removes a descent floor's fog from AppState.descent:
+## the black volume over its unrevealed cells under world_root, the picture
+## over its rectangle on the minimap and the full map, and the culling test
+## that hides creatures and objects standing in it. The fog applies only while
+## the loaded map declares the floor's section (the pool map the server's grid
+## is measured on), so a state that outlives the map, or arrives before it,
+## draws nothing on another map. Rebuilt only when the floor, its explored
+## cells or the map change; the clock alone changes nothing here.
+func _sync_descent_fog() -> void:
+	var manifest: WorldManifest = world_loader.manifest if world_loader != null else null
+	var grid: Dictionary = DescentFogScript.view(AppState.descent)
+	if grid.is_empty() or manifest == null or adapter == null \
+			or not DescentFogScript.applies_to(manifest.data, str(grid.section)):
+		grid = {}
+	var key := "" if grid.is_empty() else "%d|%s" % [manifest.get_instance_id(),
+		DescentFogScript.signature(grid)]
+	if key == _descent_fog_key:
+		return
+	_descent_fog_key = key
+	_descent_fog_grid = grid
+	if grid.is_empty():
+		_remove_descent_fog_presentation()
+	else:
+		var mesh: ArrayMesh = DescentFogScript.build_mesh(grid, adapter, adapter.walking_height)
+		if not is_instance_valid(_descent_fog_node):
+			_descent_fog_node = MeshInstance3D.new()
+			_descent_fog_node.name = "DescentFog"
+			# Shown and hidden here, never sorted into a section.
+			_descent_fog_node.add_to_group(SecretSectionsScript.EXEMPT_GROUP)
+			_descent_fog_node.material_override = DescentFogScript.material()
+			_descent_fog_node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			world_root.add_child(_descent_fog_node)
+		_descent_fog_node.mesh = mesh
+		_descent_fog_node.visible = mesh != null
+		var image: Image = DescentFogScript.image(grid, adapter)
+		var texture: ImageTexture = _descent_fog_picture.get("texture") as ImageTexture
+		if texture != null and texture.get_size() == Vector2(image.get_size()):
+			texture.update(image)
+		else:
+			texture = ImageTexture.create_from_image(image)
+		_descent_fog_picture = {"texture": texture, "extent": DescentFogScript.extent(grid, adapter),
+			"height": _map_picture_height, "transform": world_root.global_transform}
+	secret_sections.set("fog_hides", Callable(self, "_descent_fog_hides") if not grid.is_empty() else Callable())
+	if grid.is_empty() and not bool(secret_sections.call("is_active")):
+		# Nothing else hides actors on a map without sections.
+		secret_sections.call("restore_dynamic")
+	_section_objects_dirty = true
+	_sync_map_background_pictures()
+
+
+func _remove_descent_fog_presentation() -> void:
+	if is_instance_valid(_descent_fog_node):
+		_descent_fog_node.queue_free()
+	_descent_fog_node = null
+	_descent_fog_picture = {}
+
+
+## Forgets the fog with the session (or the client): the next state rebuilds it.
+func _clear_descent_fog() -> void:
+	_descent_fog_key = ""
+	_descent_fog_grid = {}
+	_descent_party_names = {}
+	_remove_descent_fog_presentation()
+	secret_sections.set("fog_hides", Callable())
+
+
+## The fog's culling test (SecretSections.fog_hides): a map object, or an actor
+## other than a player or a party member, whose server tile lies on an
+## unrevealed cell of the floor. Actors are judged by the server's tile for
+## them, not by where their body is drawn on its way there.
+func _descent_fog_hides(node: Node3D) -> bool:
+	if _descent_fog_grid.is_empty():
+		return false
+	if node is MapObject3D:
+		var tile: Vector2i = (node as MapObject3D).server_tile
+		return DescentFogScript.tile_hidden(_descent_fog_grid, tile.x, tile.y)
+	if node is ReplicatedActor3D:
+		var actor_id: int = (node as ReplicatedActor3D).actor_id
+		if actor_id == AppState.local_actor_id:
+			return false
+		var dto: Dictionary = AppState.actors.get(actor_id, {}) as Dictionary
+		if dto.is_empty() or _minimap_actor_type(dto) == &"player" \
+				or _descent_party_names.has(str(dto.get("name", "")).to_lower()):
+			return false
+		return DescentFogScript.tile_hidden(_descent_fog_grid, int(dto.get("x", 0)), int(dto.get("y", 0)))
+	return false
+
+
+## The marks of `marks` that do not stand in a descent's fog: the minimap and
+## full map hide presence, service, entrance and quest marks on unrevealed
+## cells (actors and objects there are hidden nodes, which are never marked).
+func _without_fogged_marks(marks: Array) -> Array[Dictionary]:
+	var kept: Array[Dictionary] = []
+	if _descent_fog_grid.is_empty():
+		kept.assign(marks)
+		return kept
+	# Marks stand in Main's world; the grid is measured in the map's frame.
+	var frame := world_root.global_transform.affine_inverse()
+	for value: Variant in marks:
+		var mark: Dictionary = value as Dictionary
+		var position: Variant = mark.get("position")
+		if position is Vector3:
+			var tile: Vector2i = adapter.godot_to_server(frame * (position as Vector3))
+			if DescentFogScript.tile_hidden(_descent_fog_grid, tile.x, tile.y):
+				continue
+		kept.append(mark)
+	return kept
 
 
 func _configure_interior_cutaway(manifest: WorldManifest) -> void:
@@ -12723,7 +12892,7 @@ func _apply_minimap_shape() -> void:
 ## switch is read in one place rather than in five.
 func _collect_minimap_marks() -> Array[Dictionary]:
 	var marks: Array[Dictionary] = []
-	marks.append_array(_campaign_destination_marks())
+	marks.append_array(_without_fogged_marks(_campaign_destination_marks()))
 	_map_actor_marker_cache.retain(actor_nodes)
 	var service_names := {}
 	for service: Dictionary in _current_service_records():
@@ -12794,11 +12963,11 @@ func _collect_minimap_marks() -> Array[Dictionary]:
 		marks.append({"position": marker.global_position, "type": &"marker",
 			"colour": MapMarker3D.MARKER_COLOUR,
 			"radius": MinimapMarkerOverlayScript.PIN_RADIUS})
-	marks.append_array(_current_entrance_marks())
-	marks.append_array(_current_service_marks())
-	marks.append_array(_harvest_grouping_marks())
-	marks.append_array(quest_trail.map_marks())
-	marks.append_array(_presence_marks())
+	marks.append_array(_without_fogged_marks(_current_entrance_marks()))
+	marks.append_array(_without_fogged_marks(_current_service_marks()))
+	marks.append_array(_without_fogged_marks(_harvest_grouping_marks()))
+	marks.append_array(_without_fogged_marks(quest_trail.map_marks()))
+	marks.append_array(_without_fogged_marks(_presence_marks()))
 	return marks
 
 ## Players beyond the area of interest, from the server's once-a-second
@@ -12938,7 +13107,7 @@ func _campaign_destination_marks() -> Array[Dictionary]:
 
 func _collect_map_waypoints() -> Array[Dictionary]:
 	var waypoints: Array[Dictionary] = []
-	waypoints.append_array(_campaign_destination_marks())
+	waypoints.append_array(_without_fogged_marks(_campaign_destination_marks()))
 	var entrance_ids := _current_entrance_ids()
 	var border_labels := _current_border_exit_labels()
 	for raw_object: Variant in map_object_nodes.values():
@@ -12957,10 +13126,10 @@ func _collect_map_waypoints() -> Array[Dictionary]:
 		waypoints.append({"position": map_object.global_position, "glyph": glyph,
 			"colour": map_object.map_dot_colour(),
 			"label": map_object.label if map_object.is_storage() else map_object.destination()})
-	waypoints.append_array(_current_entrance_marks())
-	waypoints.append_array(_current_service_marks())
+	waypoints.append_array(_without_fogged_marks(_current_entrance_marks()))
+	waypoints.append_array(_without_fogged_marks(_current_service_marks()))
 	# A grouping has no glyph: its dot is a live mark, and this names it on hover.
-	for mark: Dictionary in _harvest_grouping_marks():
+	for mark: Dictionary in _without_fogged_marks(_harvest_grouping_marks()):
 		waypoints.append({"position": mark.position, "glyph": "", "colour": mark.colour,
 			"label": mark.label})
 	return waypoints
@@ -17059,6 +17228,9 @@ func _cast_spell_by_id(spell_id: int) -> void:
 	_begin_prepared_cast(spell_id, power)
 
 func _on_magic_state(data: Dictionary) -> void:
+	if data.get("kind") == "boss_mechanic":
+		_on_boss_mechanic(data)
+		return
 	if data.get("kind") == "target_cast":
 		# Apply the preceding movement/turn actor snapshots first. A deferred
 		# turn must not replace the channel we are about to start.
@@ -17106,6 +17278,40 @@ func _present_target_cast(data: Dictionary) -> void:
 			caster.combat_presentation.set_spell_power(int(data.get("power", 1)))
 	elif data.get("phase") in ["approach", "cancelled"] and caster.current_action in [&"cast_channel_enter", &"cast_channel"]:
 		caster.play_action(&"cast_exit")
+
+func _on_boss_mechanic(data: Dictionary) -> void:
+	var script = preload("res://src/world/boss_mechanic_3d.gd")
+	if not script.accepts(data) or adapter == null: return
+	if MapRegistry.normalize_server_map_id(str(data.get("map_id", ""))) != MapRegistry.normalize_server_map_id(AppState.current_map): return
+	var key := str(data.get("id", ""))
+	var impact := str(data.get("phase", "")) == "impact"
+	if str(data.get("phase", "")) in ["clear", "impact"]:
+		var warning: Variant = _boss_mechanic_cues.get(key)
+		if is_instance_valid(warning): warning.queue_free()
+		_boss_mechanic_cues.erase(key)
+		if not impact: return
+	if impact: key += ":impact"
+	var effect: Variant = _boss_mechanic_cues.get(key)
+	if not is_instance_valid(effect):
+		for old_key: Variant in _boss_mechanic_cues.keys():
+			if not is_instance_valid(_boss_mechanic_cues[old_key]): _boss_mechanic_cues.erase(old_key)
+		if _boss_mechanic_cues.size() >= 32: return
+		effect = script.new()
+		world_root.add_child(effect)
+		effect.configure(data, adapter, actor_nodes, _campaign_surface_height)
+		_boss_mechanic_cues[key] = effect
+	else:
+		effect.apply_event(data)
+
+func _is_boss_objective(actor_id: int) -> bool:
+	for cue: Variant in _boss_mechanic_cues.values():
+		if is_instance_valid(cue) and cue.friendly_actor(actor_id): return true
+	return false
+
+func _clear_boss_mechanic_cues() -> void:
+	for node: Variant in _boss_mechanic_cues.values():
+		if is_instance_valid(node): node.queue_free()
+	_boss_mechanic_cues.clear()
 
 func _on_technique_effect(data: Dictionary) -> void:
 	var key := str(data.get("key", ""))
@@ -17244,6 +17450,8 @@ func _spell_target_candidate(spell_id: int, actor_id: int) -> bool:
 	if not bool(actor.get("alive", int(actor.get("health", 0)) > 0)):
 		return actor_id != AppState.local_actor_id and (int(actor.get("kind", 0)) in [1, 4] or _is_rescue_companion(actor_id)) \
 			and spell.get("scope") == "target" and spell.get("effect") == "heal"
+	if _is_boss_objective(actor_id):
+		return not bool(spell.get("hostile", false)) and spell.get("effect") in ["heal", "regeneration", "dispel"]
 	if bool(spell.get("hostile", false)):
 		if spell.get("effect") == "mana_drain" and int(actor.get("kind", 0)) not in [1, 4]: return false
 		if spell.get("effect") == "disrupt" and not ReplicatedActor3D.is_summon(actor): return false
@@ -18717,7 +18925,17 @@ func _is_shelves_training_opponent(actor_id: int, dto: Dictionary) -> bool:
 		and bool(ledger.get("sparring",false)) and int((state.get("actors",{}) as Dictionary).get("mentor",-1))==actor_id \
 		and EloriaProtocol.map_id_from_reference(str(state.get("map","")))==EloriaProtocol.map_id_from_reference(AppState.current_map)
 
+func _is_shelves_grower(actor_id: int, dto: Dictionary) -> bool:
+	var state: Dictionary=AppState.campaign
+	if int(dto.get("kind",0))!=2 or str(state.get("kind",""))!="shelves" or not bool(state.get("active",false)) \
+			or EloriaProtocol.map_id_from_reference(str(state.get("map","")))!=EloriaProtocol.map_id_from_reference(AppState.current_map):return false
+	var growers: Dictionary=(state.get("shelves",{}) as Dictionary).get("growers",(state.get("shelves",{}) as Dictionary).get("fire",(state.get("shelves",{}) as Dictionary).get("water",{})))
+	for worker: Dictionary in growers.get("workers",[]):
+		if int(worker.get("actor_id",-1))==actor_id:return true
+	return false
+
 func _is_attackable_actor(actor_id: int, dto: Dictionary) -> bool:
+	if _is_boss_objective(actor_id): return false
 	if actor_id < 0 or actor_id == AppState.local_actor_id or dto.is_empty():
 		return false
 	if _is_tutorial_companion(actor_id):
@@ -18939,6 +19157,9 @@ func _local_viewport_position(local_position: Vector2) -> Vector2:
 		return local_position
 	return local_position * Vector2(main_viewport.size) / viewport_container.size
 
+## How many fog-hidden actors or objects one pick looks past.
+const PICK_PAST_HIDDEN_LIMIT := 8
+
 func _pick_actor(viewport_position: Vector2) -> int:
 	if gameplay_world == null:
 		push_warning("world_input actor_pick skipped: World3D unavailable")
@@ -18946,10 +19167,19 @@ func _pick_actor(viewport_position: Vector2) -> int:
 	var origin: Vector3 = camera_rig.ray_origin(viewport_position)
 	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
 		origin, origin + camera_rig.ray_direction(viewport_position) * 2000.0, 2)
-	var hit: Dictionary = gameplay_world.direct_space_state.intersect_ray(query)
-	var collider_value: Variant = hit.get("collider")
-	if collider_value is ReplicatedActor3D:
-		return (collider_value as ReplicatedActor3D).actor_id
+	# An actor hidden in a descent's fog is not there to click: the ray looks
+	# past it to whoever stands behind.
+	var passed: Array[RID] = []
+	for _attempt: int in range(PICK_PAST_HIDDEN_LIMIT):
+		var hit: Dictionary = gameplay_world.direct_space_state.intersect_ray(query)
+		var collider_value: Variant = hit.get("collider")
+		if not collider_value is ReplicatedActor3D:
+			return -1
+		var actor := collider_value as ReplicatedActor3D
+		if not _descent_fog_hides(actor):
+			return actor.actor_id
+		passed.append(actor.get_rid())
+		query.exclude = passed
 	return -1
 
 ## World objects the server declared for this map. This is the pick layer the
@@ -18979,9 +19209,17 @@ func _pick_map_object(viewport_position: Vector2) -> MapObject3D:
 	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
 		origin, origin + camera_rig.ray_direction(viewport_position) * 2000.0,
 		MapObject3D.PICK_LAYER)
-	var hit: Dictionary = gameplay_world.direct_space_state.intersect_ray(query)
-	var collider_value: Variant = hit.get("collider")
-	return MapObject3D.from_pick_collider(collider_value)
+	# Nor is an object in the fog (`_pick_actor`).
+	var passed: Array[RID] = []
+	for _attempt: int in range(PICK_PAST_HIDDEN_LIMIT):
+		var hit: Dictionary = gameplay_world.direct_space_state.intersect_ray(query)
+		var collider_value: Variant = hit.get("collider")
+		var picked := MapObject3D.from_pick_collider(collider_value)
+		if picked == null or not _descent_fog_hides(picked):
+			return picked
+		passed.append((collider_value as CollisionObject3D).get_rid())
+		query.exclude = passed
+	return null
 
 ## A plain click acts on the object; Alt inspects it instead. Every outcome is
 ## a request: the server decides range, tools, level and whether anything
@@ -20361,6 +20599,9 @@ func _model_for_actor(dto: Dictionary) -> String:
 	var character := NpcCharacterLooks.find(dto, npc_characters)
 	if not character.is_empty():
 		return str(character["model"])
+	var face := NpcCharacterLooks.face(dto, npc_human_faces)
+	if not face.is_empty():
+		return str(face["model"])
 	var actor_type_value := int(dto.get("actor_type", 1))
 	var actor_type := str(actor_type_value)
 	var kind := int(dto.get("kind", 0))
@@ -20383,7 +20624,13 @@ func _presentation_dto(dto: Dictionary) -> Dictionary:
 	# Keep the actor record shallow. Named NPCs get a separate appearance
 	# dictionary; other actors share their unchanged appearance with the state.
 	var character := NpcCharacterLooks.find(dto, npc_characters)
-	var result: Dictionary = NpcCharacterLooks.present(dto, character)
+	var result: Dictionary = NpcCharacterLooks.present(dto, character,
+		NpcCharacterLooks.face(dto, npc_human_faces))
+	var station: Dictionary = npc_workstations.get(str(dto.get("name", "")).to_lower(), {})
+	var station_tile: Array = station.get("tile", [-1, -1])
+	if int(dto.get("kind", 0)) == 2 and int(dto.get("actor_type", -1)) == int(station.get("actorType", -2)) \
+			and int(dto.get("x", -1)) == int(station_tile[0]) and int(dto.get("y", -1)) == int(station_tile[1]):
+		result["workstation"] = station
 	# Creation bytes (skin, hair, shirt, pants, boots, head, eyes) select skinned
 	# surfaces already authored into each actor GLB, so they are deliberately
 	# never reinterpreted as rigid BoneAttachment3D equipment and contribute
@@ -20413,6 +20660,10 @@ func _presentation_dto(dto: Dictionary) -> Dictionary:
 	# it drew them before.
 	result["footprint"] = AppState.footprint_for_actor_type(
 		int(dto.get("actor_type", -1)))
+	if int(dto.get("kind",0)) in [3,5] and int(dto.get("actor_type",-1)) in [792,793]:
+		result=result.duplicate()
+		result["appearance"]={"skin":2,"hair":205 if int(dto.actor_type)==792 else 107,"eyes":1,"shirt":4,"pants":6,"boots":1,"head":0}
+		result["equipment_visuals"]={0:114,5:209,4:220,6:249} if int(dto.actor_type)==792 else {0:114}
 	return result
 
 ## Starts parsing every animation library that more than one model shares -

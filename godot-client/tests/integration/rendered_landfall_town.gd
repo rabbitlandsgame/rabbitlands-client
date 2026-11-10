@@ -124,6 +124,8 @@ func _section(section: Dictionary) -> void:
 		rig.set("pitch_degrees", float(block.get("pitchDegrees", -50.0)))
 		rig.set("distance", CLOSE_DISTANCE)
 		await _settle(60)
+		if id == "weaver_house" and index == 3:
+			_check_wynn_workstation()
 		var slug := _slug(str(names[index]) if index < names.size() else "room")
 		await _capture("rooms/%s-b%d-%s.png" % [id, index, slug], id, index, tile, false)
 	await _place(main_tile)
@@ -269,6 +271,26 @@ func _enter(map_id: String, tile: Vector2i) -> bool:
 	_expect(not bool(curtain.call("is_showing")), map_id + ": the arrival curtain lifts")
 	await _settle(30)
 	return true
+
+func _check_wynn_workstation() -> void:
+	var found := false
+	for person: Dictionary in (state.get("actors") as Dictionary).values():
+		if str(person.get("name", "")) != "Wynn Vell":
+			continue
+		found = true
+		var presented: Dictionary = main.call("_presentation_dto", person)
+		var body: Node = (main.get("actor_nodes") as Dictionary).get(int(person.actor_id))
+		var pose: Node = body.find_child("SeatedWorkPose", true, false)
+		_expect(presented.has("workstation") and pose != null, "Wynn has her seated workstation pose")
+		if pose != null:
+			_expect(float(pose.get("elapsed")) > 0.0, "Wynn's sewing loop advances")
+			var solver: RefCounted = pose.get("solver")
+			var errors: Dictionary = solver.get("last_errors")
+			print("WYNN_CONTACT_ERRORS ", errors)
+			_expect(float(errors.get("seat", 1.0)) < 0.02, "Wynn sits on the stool")
+			for hand: String in ["hand_l", "hand_r"]:
+				_expect(float(errors.get(hand, 1.0)) < 0.08, "Wynn reaches the sewing worktop: " + hand)
+	_expect(found, "Wynn is present in the workshop")
 
 func _actor(id: int, name: String, tile: Vector2i, actor_type: int, kind: int, facing: int) -> Dictionary:
 	var rotation := maxi(0, facing) * 8192

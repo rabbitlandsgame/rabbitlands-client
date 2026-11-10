@@ -2,37 +2,17 @@
  "region": "landfall",
  "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
  "snapshot": {
-  "sha256": "67b317ded219082f8de34c294b511a6b75fa58c8cd2ef8984eb71fe1e1bb2d2e",
-  "sceneSha256": "6af8fca4347f8a724c8ca7e9a773cfe2d65f4ab036073af7f63878b24de67cce",
+  "sha256": "49e6a46cd4df0513917b6ab3b45fccff8ddb055dcb2226237d492a1b9e26efe4",
+  "sceneSha256": "dd59ce43b5b2ac133181af988c0170857aece08a4cfa27e2009b8a6049cc6d71",
   "recipe": "region_bake_cli.gd --scene godot-client/world_authoring/regions/landfall/landfall.tscn --output <bake>/continent-authoring.json"
  },
  "collision": {
-  "sidecarSha256": "2de6c0c629d9d6eb72a5faa52192ac3f13c01e7fe5f9b778f8458b13cb40e4ca",
+  "sidecarSha256": "3629735fffbd81f595d42f48759b96e118045a8670df27ef38661122cd78b40a",
   "collisionSha256": "eaed57c1df3470ac7b4935657fd0ca5c163784145711a3bbddd3e009dd14a9c6",
   "servedGridSha256": "e9b2c6e9a31f5c6f8463b8182c1ace4425c11ef2103c57686aabf16bf7d7672a",
   "walkableCells": 725819,
   "openTiles": 176035,
-  "sourceSnapshotSha256": "67b317ded219082f8de34c294b511a6b75fa58c8cd2ef8984eb71fe1e1bb2d2e",
-  "npcMetadataAmendments": [
-   {
-    "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_npc_metadata.py",
-    "region": "landfall",
-    "baseSnapshotSha256": "f8b229797e132c0716e422dd4b154bc2e89c579286952f360e595960837d4998",
-    "snapshotSha256": "67b317ded219082f8de34c294b511a6b75fa58c8cd2ef8984eb71fe1e1bb2d2e",
-    "sceneSha256": "6af8fca4347f8a724c8ca7e9a773cfe2d65f4ab036073af7f63878b24de67cce",
-    "unchangedContentSha256": "131cffcd5d55ef3d4e54ed1b532d39d3b373381e0de7dde8c43d7aaa2006aa4c",
-    "addedNpcMarkers": [
-     "landfall--npc-cape-seller-mara-vell"
-    ],
-    "preserved": [
-     "geometry",
-     "terrain",
-     "paths",
-     "collision.bin",
-     "served-grid.escg.gz"
-    ]
-   }
-  ]
+  "sourceSnapshotSha256": "49e6a46cd4df0513917b6ab3b45fccff8ddb055dcb2226237d492a1b9e26efe4"
  },
  "chunks": 34,
  "kitPlacementsOutsideWindow": 0,
@@ -56,7 +36,7 @@
   "08_13": 37.6,
   "09_08": 199.1,
   "09_09": 337.2,
-  "09_10": 279.2,
+  "09_10": 279.3,
   "09_11": 376.0,
   "09_12": 196.5,
   "09_13": 63.3,
@@ -69,7 +49,7 @@
   "11_08": 161.6,
   "11_09": 270.6,
   "11_10": 353.6,
-  "11_11": 201.1,
+  "11_11": 201.2,
   "11_12": 173.1,
   "11_13": 49.8,
   "12_08": 75.6,
@@ -79,19 +59,19 @@
   "13_09": 10.8
  },
  "timings": {
-  "snapshot_s": 2.0,
+  "snapshot_s": 1.7,
   "terrain_s": 0.1,
   "water_s": 0.0,
-  "overlays_s": 0.8,
+  "overlays_s": 0.9,
   "bridges_s": 0.0,
   "surface_glb_bytes": 153776612,
   "walk_kit_nodes": 11,
   "library_s": 0.5,
   "harvest_nodes": 80,
-  "chunks_s": 2.6,
-  "space_passes_s": 4.6
+  "chunks_s": 2.1,
+  "space_passes_s": 21.1
  },
- "seconds": 23.9,
+ "seconds": 39.2,
  "imagePolicy": {
   "surface": {
    "imagesResampled": 7,

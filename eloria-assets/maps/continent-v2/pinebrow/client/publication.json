@@ -7,32 +7,12 @@
   "recipe": "region_bake_cli.gd --scene godot-client/world_authoring/regions/pinebrow/pinebrow.tscn --output <bake>/continent-authoring.json"
  },
  "collision": {
-  "sidecarSha256": "3f40b965705e17ea9b3ebff83a0350a9b73abb56e0322584c029cfde51830554",
+  "sidecarSha256": "87d4e78e19716fe7d9e457e419fe7133e042be865fe5c3a8718ffdcdc634dde9",
   "collisionSha256": "17d4bf16a2005146f443718e6a29dd65630ce72c8361645952d69e139aa8afb6",
   "servedGridSha256": "f97685610c32caa09200ea2716d9de7603cfb3fea7a235b43f764da64a3f06a1",
   "walkableCells": 586920,
   "openTiles": 144122,
-  "sourceSnapshotSha256": "a76de858d7daa10e32cd6159bf157cc5f4680f7966fc441b874e18bd0f9e35f6",
-  "npcMetadataAmendments": [
-   {
-    "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_npc_metadata.py",
-    "region": "landfall",
-    "baseSnapshotSha256": "f8b229797e132c0716e422dd4b154bc2e89c579286952f360e595960837d4998",
-    "snapshotSha256": "67b317ded219082f8de34c294b511a6b75fa58c8cd2ef8984eb71fe1e1bb2d2e",
-    "sceneSha256": "6af8fca4347f8a724c8ca7e9a773cfe2d65f4ab036073af7f63878b24de67cce",
-    "unchangedContentSha256": "131cffcd5d55ef3d4e54ed1b532d39d3b373381e0de7dde8c43d7aaa2006aa4c",
-    "addedNpcMarkers": [
-     "landfall--npc-cape-seller-mara-vell"
-    ],
-    "preserved": [
-     "geometry",
-     "terrain",
-     "paths",
-     "collision.bin",
-     "served-grid.escg.gz"
-    ]
-   }
-  ]
+  "sourceSnapshotSha256": "a76de858d7daa10e32cd6159bf157cc5f4680f7966fc441b874e18bd0f9e35f6"
  },
  "chunks": 75,
  "kitPlacementsOutsideWindow": 0,
@@ -121,18 +101,18 @@
  },
  "timings": {
   "snapshot_s": 0.9,
-  "terrain_s": 0.2,
+  "terrain_s": 0.1,
   "water_s": 0.0,
-  "overlays_s": 0.9,
+  "overlays_s": 0.6,
   "bridges_s": 0.0,
   "surface_glb_bytes": 215830016,
   "walk_kit_nodes": 0,
-  "library_s": 0.3,
+  "library_s": 0.2,
   "harvest_nodes": 12,
-  "chunks_s": 2.6,
-  "space_passes_s": 4.8
+  "chunks_s": 1.7,
+  "space_passes_s": 10.2
  },
- "seconds": 18.3,
+ "seconds": 20.3,
  "imagePolicy": {
   "surface": {
    "imagesResampled": 37,

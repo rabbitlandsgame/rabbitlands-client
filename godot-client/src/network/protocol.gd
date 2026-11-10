@@ -14,6 +14,7 @@ const MAP_STORAGE_COORDS_CAPABILITY := "map_storage_coords_v1"
 const CoordinateTransport = preload("res://src/network/coordinate_transport.gd")
 const InterestProtocol := preload("res://src/network/interest_protocol.gd")
 const GauntletProgressProtocol := preload("res://src/network/gauntlet_progress_protocol.gd")
+const DescentFog := preload("res://src/world/descent_fog.gd")
 
 ## The guild packet's permissions field: what the server says this reader may
 ## do. They live here, with the packet they arrive in, and the rank each power
@@ -145,6 +146,9 @@ enum ServerMessage {
 	ELORIA_CAMPAIGN_STATE = 191,
 	ELORIA_APPEARANCE_PROTOCOL = 190,
 	ELORIA_GAUNTLET_PROGRESS_STATE = 189,
+	## A party descent (descent_v1): the floor, its fog of war and the clock,
+	## or the boss reward's three-way pick. JSON, `kind` "state" or "reward".
+	ELORIA_DESCENT_STATE = 188,
 	# Which map package the server was built against. Continues the same
 	# downward run below 211.
 	ELORIA_MAP_DIGEST = 209,
@@ -308,6 +312,9 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"campaign_shelves_v1",
 	"campaign_shelves_travel_v1",
 	"campaign_shelves_basics_v1",
+	"campaign_shelves_patrol_v1",
+	"campaign_shelves_fire_v1",
+	"campaign_shelves_water_v1",
 	"campaign_bank_v1",
 	"campaign_road_v1",
 	"campaign_lamps_v1",
@@ -342,6 +349,9 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"gauntlet_ready_v1",
 	"gauntlet_loot_v1",
 	"gauntlet_progress_v1",
+	# ELORIA_DESCENT_STATE: a descent's floor, fog of war, clock and reward
+	# pick. The server admits nobody to a descent without it.
+	"descent_v1",
 	"perk_catalog_v3",
 	"player_info_v1",
 	"achievements_window_v1",
@@ -399,6 +409,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	# ELORIA_MAGIC_STATE kind "techniques".
 	"techniques_v1",
 	"technique_effects_v1",
+	"boss_mechanics_v1",
 	# Repeat casting: whether it is on and running, ELORIA_MAGIC_STATE kind
 	# "autocast"; switched with magic_request {"op": "autocast"}.
 	"magic_autocast_v1",
@@ -1263,6 +1274,8 @@ static func decode_server(command: int, payload: PackedByteArray, logical_coordi
 			return decode_gauntlet_loot(payload)
 		ServerMessage.ELORIA_GAUNTLET_PROGRESS_STATE:
 			return GauntletProgressProtocol.decode(payload)
+		ServerMessage.ELORIA_DESCENT_STATE:
+			return decode_descent(payload)
 		ServerMessage.ELORIA_CAMPAIGN_STATE:
 			return decode_campaign(payload)
 		ServerMessage.ELORIA_LANTERN_STATE:
@@ -1849,6 +1862,80 @@ static func decode_gauntlet_ready(payload: PackedByteArray) -> Dictionary:
 						or int(member.class_id) < 0 or int(member.class_id) > 3):
 					return {"type": "invalid", "error": "gauntlet_ready_bot"}
 	return {"type": "gauntlet_ready", "data": state}
+
+## Command 188 (descent_v1). `kind` "state": the floor the player is on in a
+## descent, its grid and explored cells (decoded into `mask`, the bits as
+## sent), the clock and the boss; `open` false when the player left. `kind`
+## "reward": the boss reward's offer of three, answered with
+## `#descent pick <offer> <index>`; `open` false closes it.
+static func decode_descent(payload: PackedByteArray) -> Dictionary:
+	var state: Variant = JSON.parse_string(payload.get_string_from_utf8())
+	if not state is Dictionary or state.get("version") != 1.0 or not state.get("open") is bool \
+			or not (state.get("kind") in ["state", "reward"]):
+		return {"type": "invalid", "error": "descent_shape"}
+	var kind: String = state.kind
+	var type := "descent_state" if kind == "state" else "descent_reward"
+	if not state.open:
+		return {"type": type, "data": {"version": 1, "kind": kind, "open": false}}
+	if kind == "reward":
+		return _decode_descent_reward(state)
+	for key: String in ["run", "section", "explored"]:
+		if not state.get(key) is String or str(state[key]).is_empty():
+			return {"type": "invalid", "error": "descent_text"}
+	for key: String in ["dungeon", "name", "difficulty", "floor_name", "boss"]:
+		if state.has(key) and not state[key] is String:
+			return {"type": "invalid", "error": "descent_text"}
+	if state.has("boss") and not (state.boss in ["", "waiting", "fighting", "defeated"]):
+		return {"type": "invalid", "error": "descent_boss"}
+	for key: String in ["floor", "floors", "cell_tiles", "width", "height", "time_left"]:
+		if not _whole_number(state.get(key)) or float(state[key]) < (0.0 if key == "time_left" else 1.0):
+			return {"type": "invalid", "error": "descent_number"}
+	if int(state.floor) > int(state.floors):
+		return {"type": "invalid", "error": "descent_floor"}
+	var origin: Variant = state.get("origin")
+	if not origin is Array or (origin as Array).size() != 2 or not _whole_number(origin[0]) \
+			or not _whole_number(origin[1]) or float(origin[0]) < 0.0 or float(origin[1]) < 0.0:
+		return {"type": "invalid", "error": "descent_origin"}
+	var mask := DescentFog.decode_mask(str(state.explored), int(state.width), int(state.height))
+	if mask.is_empty():
+		return {"type": "invalid", "error": "descent_explored"}
+	var data: Dictionary = {"version": 1, "kind": "state", "open": true,
+		"run": state.run, "dungeon": str(state.get("dungeon", "")),
+		"name": str(state.get("name", "")), "difficulty": str(state.get("difficulty", "")),
+		"floor": int(state.floor), "floors": int(state.floors),
+		"floor_name": str(state.get("floor_name", "")), "section": state.section,
+		"origin": [int(origin[0]), int(origin[1])], "cell_tiles": int(state.cell_tiles),
+		"width": int(state.width), "height": int(state.height),
+		"explored": state.explored, "mask": mask,
+		"time_left": int(state.time_left), "boss": str(state.get("boss", ""))}
+	return {"type": "descent_state", "data": data}
+
+static func _decode_descent_reward(state: Dictionary) -> Dictionary:
+	if not state.get("offer") is String or str(state.offer).is_empty():
+		return {"type": "invalid", "error": "descent_reward_offer"}
+	if state.has("title") and not state.title is String:
+		return {"type": "invalid", "error": "descent_reward_title"}
+	if not state.get("items") is Array or state.items.is_empty() or state.items.size() > 6:
+		return {"type": "invalid", "error": "descent_reward_items"}
+	var items: Array[Dictionary] = []
+	for raw: Variant in state.items:
+		if not raw is Dictionary or not raw.get("item") is String or str(raw.item).is_empty() \
+				or not _whole_number(raw.get("index")) or float(raw.index) < 0.0 \
+				or not _whole_number(raw.get("quantity")) or float(raw.quantity) < 1.0 \
+				or not _whole_number(raw.get("image_id")) or float(raw.image_id) < 0.0 \
+				or (raw.has("rare") and not raw.rare is bool):
+			return {"type": "invalid", "error": "descent_reward_item"}
+		items.append({"index": int(raw.index), "item": raw.item, "quantity": int(raw.quantity),
+			"image_id": int(raw.image_id), "rare": bool(raw.get("rare", false))})
+	var title: String = str(state.get("title", ""))
+	return {"type": "descent_reward", "data": {"version": 1, "kind": "reward", "open": true,
+		"offer": state.offer, "title": title if not title.is_empty() else "Choose your reward",
+		"items": items}}
+
+## A JSON number holding a whole value (JSON numbers decode as floats).
+static func _whole_number(value: Variant) -> bool:
+	return (value is float or value is int) and is_finite(float(value)) \
+		and float(value) == floorf(float(value)) and absf(float(value)) <= 2147483647.0
 
 ## A bounded page of the authoritative escrow ledger; quantities are integers.
 static func decode_gauntlet_loot(payload: PackedByteArray) -> Dictionary:
@@ -3296,7 +3383,9 @@ static func decode_actor(payload: PackedByteArray, enhanced: bool, extended := f
 		var name_end: int = payload.find(0, 28)
 		if name_end < 0:
 			name_end = min(payload.size(), 58)
-		actor.merge(decode_actor_name(payload.slice(28, name_end)))
+		# Enhanced NPC spawns carry full names too. A space separates an
+		# uncoloured guild tag only on players, never on Elen Reed or a crew hand.
+		actor.merge(decode_actor_name(payload.slice(28, name_end), int(actor["kind"]) in [1,4]))
 		# The enhanced-actor trailer follows the variable-length name: model
 		# scale, the attachment sentinel, eye style, and neck visual. Preserve
 		# eye choices across the real server round trip instead of silently
@@ -3864,7 +3953,9 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 		var choice_id:=str((scene.get("choice",{}) as Dictionary).get("id",""))
 		var expected_scene: Dictionary={"shelves_route":"measure.shelves.brief","shelves_lesson":"measure.shelves.lesson",
 			"shelves_cape":"measure.shelves.review","shelves_gear":"measure.shelves.gear","shelves_enriched":"measure.shelves.enriched",
-			"shelves_basics":"measure.shelves.basics.offer"}
+			"shelves_basics":"measure.shelves.basics.offer","shelves_patrol_retry":"measure.shelves.growers.retry",
+			"shelves_fire_quarry":"measure.shelves.fire.entry_quarry","shelves_fire_coal":"measure.shelves.fire.entry_coal","shelves_fire_retry":"measure.shelves.fire.retry",
+			"shelves_water_gates":"measure.shelves.water.entry_water","shelves_water_route":"measure.shelves.water.entry_water_barge","shelves_water_retry":"measure.shelves.water.retry"}
 		if not choice_id.is_empty() and (not expected_scene.has(choice_id) or str(scene.get("id",""))!=str(expected_scene[choice_id])):
 			return {"type":"invalid","error":"campaign_shelves_choice"}
 	elif str((scene.get("choice",{}) as Dictionary).get("id","")).begins_with("shelves_") or not (value.get("shelves",{}) as Dictionary).is_empty():
@@ -3903,7 +3994,7 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 static func campaign_shelves_valid(value: Variant) -> bool:
 	if not value is Dictionary:return false
 	if value.is_empty():return true
-	if value.get("chapter") not in ["intro","life","fire","water","earth","school","wind","magic","death","frost","finale"] \
+	if value.get("chapter") not in ["intro","life","life_raid","fire","fire_coal","fire_sapper","water","water_cutters","water_barge","water_keeper","earth","school","wind","magic","death","frost","finale"] \
 			or value.get("phase") not in ["contact","brief","travel","arrival","work","lesson","report","review","complete"]:
 		return false
 	var objectives: Variant=value.get("objectives")
@@ -3927,10 +4018,86 @@ static func campaign_shelves_valid(value: Variant) -> bool:
 	if value.has("sparring") and not value.sparring is bool:return false
 	if value.has("lesson_window") and value.lesson_window not in ["spells","mixing"]:return false
 	if value.has("preload"):
-		if not value.preload is Dictionary or value.preload.get("map")!="landfall_town" or not _campaign_navigation_tile(value.preload.get("tile")):return false
+		if not value.preload is Dictionary or value.preload.get("map") not in ["landfall_town","landfall_insides"] or not _campaign_navigation_tile(value.preload.get("tile")):return false
+	if value.has("growers") and not campaign_growers_valid(value.growers):return false
+	if value.has("fire") and not campaign_fire_valid(value.fire):return false
+	if value.has("water") and not campaign_water_valid(value.water):return false
 	if value.has("start_label") and (not value.start_label is String or str(value.start_label).length()>200):return false
 	return (not value.has("arrival_tile") or _campaign_tile(value.arrival_tile)) and _campaign_tile(value.get("cart_tile")) and _campaign_integer(value.get("cart_integrity"),0,100) \
 		and _campaign_integer(value.get("samples"),0,12) and value.get("can_complete") is bool
+
+static func campaign_growers_valid(value: Variant) -> bool:
+	if not value is Dictionary or value.get("field") not in ["sage","root"] or not value.get("raid") is bool:return false
+	if not _campaign_integer(value.get("wave"),0,1000000) or not _campaign_integer(value.get("carried"),0,1000):return false
+	var stored: Variant=value.get("stored")
+	if not stored is Dictionary or not _campaign_integer(stored.get("sage"),0,10000) or not _campaign_integer(stored.get("root"),0,5000):return false
+	var workers: Variant=value.get("workers")
+	if not workers is Array or workers.size()>4:return false
+	var seen: Array=[]
+	for worker: Variant in workers:
+		if not worker is Dictionary or not _campaign_integer(worker.get("actor_id"),1,65535) or worker.actor_id in seen \
+				or not worker.get("name") is String or str(worker.name).length()>64 \
+				or not _campaign_integer(worker.get("max_health"),1,10000) or not _campaign_integer(worker.get("health"),0,float(worker.max_health)) \
+				or not worker.get("downed") is bool or not _campaign_integer(worker.get("cargo"),0,250) \
+				or not worker.get("harvesting") is bool or worker.get("activity") not in ["harvest","return"]:return false
+		seen.append(worker.actor_id)
+	return true
+
+static func campaign_water_valid(value: Variant) -> bool:
+	if not value is Dictionary or value.get("stage") not in ["water","water_cutters","water_barge","water_keeper"] \
+			or value.get("route") not in ["","repair","breach","sheltered","coastal"] or value.get("command") not in ["work","regroup","wait"]:return false
+	for key:String in ["channels","sailing","north","south","boss_defeated"]:
+		if not value.get(key) is bool:return false
+	if not value.get("flow") is Array or value.flow.size()!=3:return false
+	for level:Variant in value.flow:
+		if not _campaign_integer(level,0,2):return false
+	for key:String in ["stored","bins","cut","goals"]:
+		if not value.get(key) is Dictionary:return false
+		for crop:String in ["kelp","cress"]:
+			if not _campaign_integer(value[key].get(crop),0,10000):return false
+	for crop:String in ["kelp","cress"]:
+		if value.stored[crop]>value.cut[crop] or value.bins[crop]+value.stored[crop]>value.cut[crop] or value.cut[crop]>value.goals[crop]:return false
+	if not _campaign_integer(value.get("bed"),0,1) or not _campaign_integer(value.get("hull"),0,100) or not _campaign_integer(value.get("landing"),0,3) \
+			or not _campaign_integer(value.get("wave"),0,1000000) or not _campaign_tile(value.get("boat_tile")):return false
+	if not campaign_growers_valid({"field":"sage","raid":false,"wave":value.wave,"carried":0,"stored":{"sage":0,"root":0},"workers":value.get("workers")}):return false
+	if not value.get("path") is Array or value.path.is_empty() or value.path.size()>512:return false
+	for tile:Variant in value.path:
+		if not _campaign_tile(tile):return false
+	if not value.get("hazards") is Array or value.hazards.size()>2:return false
+	for hazard:Variant in value.hazards:
+		if not hazard is Dictionary or hazard.get("kind") not in ["warning","impact"] or not _campaign_tile(hazard.get("tile")) or not _campaign_integer(hazard.get("radius"),1,2) \
+				or typeof(hazard.get("seconds")) not in [TYPE_FLOAT,TYPE_INT] or not is_finite(float(hazard.seconds)) or float(hazard.seconds)<0 or float(hazard.seconds)>4:return false
+	return true
+
+static func campaign_fire_valid(value: Variant) -> bool:
+	if not value is Dictionary or value.get("stage") not in ["fire","fire_coal","fire_sapper"] \
+			or value.get("route") not in ["","assault","silence","lift","haul"] or value.get("step") not in ["route","extract"]:return false
+	for key: String in ["recovered","mined","recovered_goal","mined_goal"]:
+		if not _campaign_integer(value.get(key),0,10000):return false
+	if float(value.recovered)>float(value.recovered_goal) or float(value.mined)>float(value.mined_goal):return false
+	if not _campaign_integer(value.get("carried"),0,1000) or not _campaign_integer(value.get("repair"),0,3) \
+			or not _campaign_integer(value.get("passages"),0,3) or not _campaign_integer(value.get("wave"),0,1000000) or not _campaign_tile(value.get("cart_tile")):return false
+	for key: String in ["signal","water","powder"]:
+		if not value.get(key) is bool:return false
+	var workers: Variant=value.get("workers")
+	# Reuse the worker bounds used by the Life crew; only shipment totals differ.
+	if not campaign_growers_valid({"field":"sage","raid":false,"wave":value.wave,"carried":value.carried,"stored":{"sage":0,"root":0},"workers":workers}):return false
+	var carts: Variant=value.get("carts")
+	if not carts is Array or carts.size()>2:return false
+	var owners:Array=[]
+	for cart: Variant in carts:
+		if not cart is Dictionary or not _campaign_integer(cart.get("actor_id"),1,65535) or cart.actor_id in owners \
+				or not (workers as Array).any(func(row:Dictionary)->bool:return int(row.actor_id)==int(cart.actor_id)) \
+				or not _campaign_tile(cart.get("tile")) or typeof(cart.get("height")) not in [TYPE_FLOAT,TYPE_INT] \
+				or not is_finite(float(cart.height)) or float(cart.height)<0 or float(cart.height)>1.5:return false
+		owners.append(cart.actor_id)
+	var hazards: Variant=value.get("hazards")
+	if not hazards is Array or hazards.size()>2:return false
+	for hazard: Variant in hazards:
+		if not hazard is Dictionary or hazard.get("kind") not in ["warning","explosion"] or not _campaign_tile(hazard.get("tile")) \
+				or not _campaign_integer(hazard.get("radius"),1,3) or typeof(hazard.get("seconds")) not in [TYPE_INT,TYPE_FLOAT] \
+				or not is_finite(float(hazard.seconds)) or float(hazard.seconds)<0 or float(hazard.seconds)>4:return false
+	return true
 
 static func campaign_corpse_template_valid(value: Variant) -> bool:
 	if not value is Dictionary or value.is_empty() or JSON.stringify(value).to_utf8_buffer().size() > 4096:
@@ -4190,6 +4357,9 @@ static func campaign_scene_choice_valid(choice: Variant) -> bool:
 		"rescue_reward": ["sword", "bow", "wand"],
 		"shelves_route": ["direct", "careful"], "shelves_lesson": ["ingredients", "food", "tool"],
 		"shelves_basics": ["basics_accept", "basics_defer"],
+		"shelves_patrol_retry": ["retry", "cancel"],
+		"shelves_fire_quarry": ["assault", "silence"], "shelves_fire_coal": ["lift", "haul"], "shelves_fire_retry": ["retry", "cancel"],
+		"shelves_water_gates": ["repair", "breach"], "shelves_water_route": ["sheltered", "coastal"], "shelves_water_retry": ["retry", "cancel"],
 		"shelves_gear": ["wand", "charm", "robe"],
 		"shelves_cape": ["keeper", "artificer"],
 		"shelves_enriched": ["life", "fire", "water", "earth", "wind", "magic", "death", "frost"]}.get(str(choice.get("id", "")), [])

@@ -4,7 +4,7 @@
   "chunk": "13_09",
   "pixels_per_metre": 4,
   "source_glb_sha256": "91de252102c50549ef84c00a76dcc9c3a237eab033d9983b5535ef80831bf0fa",
-  "source_manifest_sha256": "ca996f906a11dadd2d40b04fbae2550447549903c82e381e03b442646ad9a29b",
+  "source_manifest_sha256": "c947b8e8abfc9cc5db535adbbf1465523e69735bd861994c31f917ce15e4bd73",
   "authoring_scene_sha256": "08753659cfeccf944ae8873cc1409fc411f69bd546f75f2e3778b9b7586f3812",
   "mask_space": "gltf_scene_world_xz",
   "source_frame_node": "AuthoredGround_twinbrookBase_twinbrook_13_09",
@@ -123,6 +123,106 @@
   "styles": [
     {
       "id": 0,
+      "identity_sha256": "4d1cde4765a88bf0e35bd0c312163ec98e9d806e6b174a59e89177300fda09cc",
+      "material_document": {
+        "asset": {
+          "version": "2.0"
+        },
+        "materials": [
+          {
+            "name": "authored_twinbrook_twinbrook--lv-north-road--0",
+            "pbrMetallicRoughness": {
+              "baseColorFactor": [
+                0.3185468059531732,
+                0.1959941698684143,
+                0.07828832086604431,
+                1.0
+              ],
+              "metallicFactor": 0.0,
+              "roughnessFactor": 1.0,
+              "baseColorTexture": {
+                "index": 0
+              },
+              "metallicRoughnessTexture": {
+                "index": 1
+              }
+            },
+            "occlusionTexture": {
+              "index": 1
+            },
+            "normalTexture": {
+              "index": 2,
+              "scale": 0.72
+            },
+            "alphaMode": "BLEND",
+            "doubleSided": true
+          }
+        ],
+        "textures": [
+          {
+            "sampler": 0,
+            "source": 0
+          },
+          {
+            "sampler": 0,
+            "source": 1
+          },
+          {
+            "sampler": 0,
+            "source": 2
+          }
+        ],
+        "images": [
+          {
+            "uri": "../../../../../nymara-regions/_continent/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png",
+            "name": "twinbrook_twinbrook--a3-trail-06_albedoTexture",
+            "extras": {
+              "rl_texture_policy_directory": "../../../../_continent_v2/shared-assets"
+            }
+          },
+          {
+            "uri": "../../../../../nymara-regions/_continent/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png",
+            "name": "twinbrook_forest-13_ormTexture",
+            "extras": {
+              "rl_texture_policy_directory": "../../../../_continent_v2/shared-assets"
+            }
+          },
+          {
+            "uri": "../../../../../nymara-regions/_continent/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png",
+            "name": "twinbrook_forest-13_normalTexture",
+            "extras": {
+              "rl_texture_policy_directory": "../../../../_continent_v2/shared-assets"
+            }
+          }
+        ],
+        "samplers": [
+          {
+            "magFilter": 9729,
+            "minFilter": 9987,
+            "wrapS": 10497,
+            "wrapT": 10497
+          }
+        ]
+      },
+      "externalResources": {
+        "../../../../../nymara-regions/_continent/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+        "../../../../../nymara-regions/_continent/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
+        "../../../../../nymara-regions/_continent/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7"
+      },
+      "original_material_names": [
+        "authored_twinbrook_twinbrook--lv-north-road--0",
+        "authored_twinbrook_twinbrook--r27-1--1",
+        "authored_twinbrook_twinbrook--r28-1--0"
+      ],
+      "vertex_rgb": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "footstep_class": "dirt"
+    },
+    {
+      "id": 1,
       "identity_sha256": "8f43db2059c92618ddca006136b0bed9be463a5b84e755726cc850b2ec5c9bbf",
       "material_document": {
         "asset": {
@@ -222,106 +322,6 @@
         "authored_twinbrook_twinbrook--a3-trail-10",
         "authored_twinbrook_twinbrook--a3-trail-11",
         "authored_twinbrook_twinbrook--a3-trail-12"
-      ],
-      "vertex_rgb": [
-        1.0,
-        1.0,
-        1.0
-      ],
-      "footstep_class": "dirt"
-    },
-    {
-      "id": 1,
-      "identity_sha256": "4d1cde4765a88bf0e35bd0c312163ec98e9d806e6b174a59e89177300fda09cc",
-      "material_document": {
-        "asset": {
-          "version": "2.0"
-        },
-        "materials": [
-          {
-            "name": "authored_twinbrook_twinbrook--lv-north-road--0",
-            "pbrMetallicRoughness": {
-              "baseColorFactor": [
-                0.3185468059531732,
-                0.1959941698684143,
-                0.07828832086604431,
-                1.0
-              ],
-              "metallicFactor": 0.0,
-              "roughnessFactor": 1.0,
-              "baseColorTexture": {
-                "index": 0
-              },
-              "metallicRoughnessTexture": {
-                "index": 1
-              }
-            },
-            "occlusionTexture": {
-              "index": 1
-            },
-            "normalTexture": {
-              "index": 2,
-              "scale": 0.72
-            },
-            "alphaMode": "BLEND",
-            "doubleSided": true
-          }
-        ],
-        "textures": [
-          {
-            "sampler": 0,
-            "source": 0
-          },
-          {
-            "sampler": 0,
-            "source": 1
-          },
-          {
-            "sampler": 0,
-            "source": 2
-          }
-        ],
-        "images": [
-          {
-            "uri": "../../../../../nymara-regions/_continent/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png",
-            "name": "twinbrook_twinbrook--a3-trail-06_albedoTexture",
-            "extras": {
-              "rl_texture_policy_directory": "../../../../_continent_v2/shared-assets"
-            }
-          },
-          {
-            "uri": "../../../../../nymara-regions/_continent/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png",
-            "name": "twinbrook_forest-13_ormTexture",
-            "extras": {
-              "rl_texture_policy_directory": "../../../../_continent_v2/shared-assets"
-            }
-          },
-          {
-            "uri": "../../../../../nymara-regions/_continent/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png",
-            "name": "twinbrook_forest-13_normalTexture",
-            "extras": {
-              "rl_texture_policy_directory": "../../../../_continent_v2/shared-assets"
-            }
-          }
-        ],
-        "samplers": [
-          {
-            "magFilter": 9729,
-            "minFilter": 9987,
-            "wrapS": 10497,
-            "wrapT": 10497
-          }
-        ]
-      },
-      "externalResources": {
-        "../../../../../nymara-regions/_continent/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
-        "../../../../../nymara-regions/_continent/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
-        "../../../../../nymara-regions/_continent/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7"
-      },
-      "original_material_names": [
-        "authored_twinbrook_twinbrook--lv-north-road--0",
-        "authored_twinbrook_twinbrook--r27-1--1",
-        "authored_twinbrook_twinbrook--r28-1--0"
       ],
       "vertex_rgb": [
         1.0,
@@ -437,8 +437,8 @@
       "file": "affine-coefficients.rgba32f.zst",
       "compression": "zstd",
       "uncompressed_bytes": 163840,
-      "sha256": "2080347e950b0b19d85109b356dc114cbdae749c5ae7b37f20e8328b2f95c5da",
-      "file_sha256": "0957a5b27697d84b0a6bd0de132620a22070b11eaf3e5131866a836a184c67fa",
+      "sha256": "2803dc8a474302f9e62d50be7721c11a8f527ad547d211f38233aeacf6bf60fa",
+      "file_sha256": "b44e09a49c922c00d9e0f6042054d73cf7e967d57e93371942be43d1ca456a0a",
       "codec_roundtrip_byte_identical": true,
       "format": "RGBA32F",
       "byte_order": "little",
@@ -477,21 +477,21 @@
     "maximum_source_fragments_per_pixel": 3
   },
   "active_style_ids": [
-    1
+    0
   ],
   "appearance_limit": "Dominant UV and maximum raw alpha collapse independent overlapping road samples at four pixels per metre.",
   "resources": {
-    "coverage-mip7.png": "e5928b1ac901dbea735db708e9b16cf39db31d39667cf9ca333bc897ca460ee5",
+    "affine-coefficients.rgba32f.zst": "b44e09a49c922c00d9e0f6042054d73cf7e967d57e93371942be43d1ca456a0a",
+    "coverage-mip0.png": "2f3adcdafdd2f73bdb60218435ecf832a735668017b4db3c977d0af569eb4319",
     "coverage-mip1.png": "d237c55213cd9dd3fb82ea12875a9b3b9c3f9d77bbe513da46827f4966a51660",
+    "coverage-mip2.png": "dc32e010c84d9cdb69d1fb0076cfc69ef271921e3f18d0dd11304847595102fc",
+    "coverage-mip3.png": "bb7231107da3954003e66838de75a44cd2db6e10a52c5281dd61ed1ef9e40b3b",
+    "coverage-mip4.png": "6aa67bccd2adf194ee2d5c919d227eb407e7331b43491b88839ad9c7d2180ce2",
+    "coverage-mip5.png": "78de74ee703576e9c417cc3cf07c30f2f386469e34af36648ab6400c5ad32652",
+    "coverage-mip6.png": "2bbef0c5c17485fa4af818799a554d053ca236da45695c96bcf6cfb109fa83df",
+    "coverage-mip7.png": "e5928b1ac901dbea735db708e9b16cf39db31d39667cf9ca333bc897ca460ee5",
     "coverage-mip8.png": "2a8be12cb07aa91b2f91a27a292ee397f043589e2a3b687d059d49d239b14834",
     "triangle-ids.bin.zst": "ff4ffbb3915ca1cdc5964baa2024ffb997d597c34d27f24f37dfb1b380f237fd",
-    "coverage-mip2.png": "dc32e010c84d9cdb69d1fb0076cfc69ef271921e3f18d0dd11304847595102fc",
-    "coverage-mip4.png": "6aa67bccd2adf194ee2d5c919d227eb407e7331b43491b88839ad9c7d2180ce2",
-    "coverage-mip6.png": "2bbef0c5c17485fa4af818799a554d053ca236da45695c96bcf6cfb109fa83df",
-    "coverage-mip0.png": "2f3adcdafdd2f73bdb60218435ecf832a735668017b4db3c977d0af569eb4319",
-    "affine-coefficients.rgba32f.zst": "0957a5b27697d84b0a6bd0de132620a22070b11eaf3e5131866a836a184c67fa",
-    "coverage-mip3.png": "bb7231107da3954003e66838de75a44cd2db6e10a52c5281dd61ed1ef9e40b3b",
-    "coverage-mip5.png": "78de74ee703576e9c417cc3cf07c30f2f386469e34af36648ab6400c5ad32652",
     "../../../../../nymara-regions/_continent/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
     "../../../../../nymara-regions/_continent/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
     "../../../../../nymara-regions/_continent/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7"

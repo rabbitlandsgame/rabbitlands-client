@@ -13,6 +13,18 @@ extends RefCounted
 ## Any interior made of disjoint sections can ask for the same treatment with
 ## `sectioned: true` instead: Landfall's shared underground, whose four caves
 ## stand apart in one void, shows only the cave the player is in.
+##
+## A descent's fog of war (descent_fog.gd) hides more of the same nodes: Main
+## sets `fog_hides` while a descent floor is fogged, and `cull_dynamic` also
+## hides whatever it answers true for, in the same pass, so the two never
+## fight over a node's visibility. It works on a map without sections too.
+
+## Nodes in this group (Main's descent fog volume) are never sorted into a
+## section: they are shown and hidden by their owner.
+const EXEMPT_GROUP := &"secret_sections_exempt"
+## `func(node: Node3D) -> bool`: true hides a dynamic node however its section
+## stands. Invalid (the default) when no fog applies.
+var fog_hides: Callable = Callable()
 
 var _sections: Array[Dictionary] = []
 var _members: Dictionary = {}          # section id -> Array[Node3D]
@@ -136,9 +148,12 @@ func update(player_position: Vector3, force: bool = false) -> void:
 
 ## Actors and server map objects arrive after the scene was sorted and move
 ## about, so they are judged by where they stand, every frame: only those in
-## the player's section are drawn. `keep` (the local player) is never hidden.
+## the player's section are drawn, and none the fog hides (`fog_hides`).
+## `keep` (the local player) is never hidden.
 func cull_dynamic(nodes: Array, keep: Node3D = null) -> void:
-	if _sections.is_empty() or _current.is_empty():
+	var sectioned := not _sections.is_empty()
+	var fogged := fog_hides.is_valid()
+	if (sectioned and _current.is_empty()) or (not sectioned and not fogged):
 		return
 	if _placed.size() > PLACED_LIMIT:
 		_placed.clear()
@@ -150,12 +165,25 @@ func cull_dynamic(nodes: Array, keep: Node3D = null) -> void:
 			continue
 		if not node.is_inside_tree():
 			continue
-		var position := node.global_position
-		var index := _placed_index(node.get_instance_id(), Vector2(position.x, position.z))
-		var shown := index >= 0 and _ids[index] == _current
+		var shown := true
+		if sectioned:
+			var position := node.global_position
+			var index := _placed_index(node.get_instance_id(), Vector2(position.x, position.z))
+			shown = index >= 0 and _ids[index] == _current
+		if shown and fogged and bool(fog_hides.call(node)):
+			shown = false
 		node.visible = shown
 		if not shown and not _culled.has(node):
 			_culled[node] = true
+
+
+## Shows again every dynamic node a cull hid. For a map without sections,
+## once its fog is lifted: nothing else hides those nodes there.
+func restore_dynamic() -> void:
+	for value: Variant in _culled:
+		if is_instance_valid(value):
+			(value as Node3D).visible = true
+	_culled.clear()
 
 
 ## The section index holding a dynamic node's point, as `_index_at` finds it,
@@ -254,7 +282,7 @@ static func _spatial_nodes(root: Node) -> Array[Node3D]:
 		var node: Node = stack.pop_back()
 		# Old imports and lights may still share the root until the frame ends.
 		# Skip the whole retiring subtree, including its unmarked children.
-		if node.is_queued_for_deletion():
+		if node.is_queued_for_deletion() or node.is_in_group(EXEMPT_GROUP):
 			continue
 		# A retained avatar is still under Main's world root at its departure
 		# position while the new map is configured. Actors belong to the

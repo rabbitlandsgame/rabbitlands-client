@@ -120,7 +120,7 @@ def test_the_town_furniture_kit_is_packaged_at_its_own_size():
     from video_motion.asset import read_glb
     rows = {name: spec for name, spec in P.TOWN_SELECTION.items()
             if spec[0] == "lf-interiors" and name not in P.FACE_SELECTIONS and name not in P.DERIVED_SELECTIONS}
-    assert len(rows) == 35 and P.KITS["lf-interiors"].endswith("kits/lf-interiors/prototypes")
+    assert len(rows) == 40 and P.KITS["lf-interiors"].endswith("kits/lf-interiors/prototypes")
     for name, (_region, slug, measure, size) in rows.items():
         assert slug == name.replace("_", "-") + "-1"
         document, blob = read_glb(CHECKOUT / P.KITS["lf-interiors"] / f"kit-{slug}.glb")

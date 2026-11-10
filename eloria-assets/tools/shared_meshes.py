@@ -819,16 +819,34 @@ def _mesh_image_policies(document: dict, mesh_index: int, source: Path) -> tuple
     return annotated, rows
 
 
-def _check_prototype_policy(document: dict, mesh_index: int, source: Path, prototype: dict, target: Path) -> None:
+def _check_prototype_policy(document: dict, mesh_index: int, source: Path, prototype: dict, target: Path,
+                            inherited: bool = False) -> None:
+    """Refuse to pool a mesh onto a prototype whose textures follow another policy.
+
+    `inherited`: the committed publication of the package being republished
+    already places this prototype. A fresh export carries no policy extras of
+    its own (its images land in its own pool), so its implied directory differs
+    whenever that placement predates policy tracking (continent-v2 cells have
+    placed prototypes pooled from Nymara territories since 2026-10-16).
+    Reusing it again delivers exactly what ships now; an explicit incoming
+    policy, or a prototype the package did not place before, is still checked.
+    """
     incoming_explicit, incoming = _mesh_image_policies(document, mesh_index, source)
+    if inherited and not incoming_explicit:
+        return
     existing_explicit, existing = _mesh_image_policies(prototype, 0, target)
     if (incoming_explicit or existing_explicit) and incoming != existing:
         raise ValueError(f"cannot reuse {target.name}: original texture policy differs from {source}; "
                          "restore matching per-slot policy provenance before sharing this prototype")
 
 
-def apply_to_file(glb: Path, shared: dict, index: dict, dry_run: bool) -> dict:
-    """Move this file's shared meshes into the pool and leave placements behind."""
+def apply_to_file(glb: Path, shared: dict, index: dict, dry_run: bool,
+                  inherited: frozenset = frozenset()) -> dict:
+    """Move this file's shared meshes into the pool and leave placements behind.
+
+    `inherited` holds the prototype identities this file's package already
+    places in its committed publication (publish_finish.published_prototypes).
+    """
     document, binary = read_glb(glb)
     cache: dict = {}
     identities = {i: mesh_identity(document, binary, i, glb, cache)[0]
@@ -850,7 +868,8 @@ def apply_to_file(glb: Path, shared: dict, index: dict, dry_run: bool) -> dict:
             index[identity] = _index_entry(prototype, data)
         else:
             existing, _ = read_glb(target)
-            _check_prototype_policy(document, mesh_index, glb, existing, target)
+            _check_prototype_policy(document, mesh_index, glb, existing, target,
+                                    inherited=identity in inherited)
             if identity not in index:
                 data = target.read_bytes()
                 index[identity] = _index_entry(existing, data)

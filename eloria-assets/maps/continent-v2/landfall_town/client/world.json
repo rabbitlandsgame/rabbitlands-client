@@ -447,6 +447,28 @@
       "name": "Weaver's bedroom"
     },
     {
+      "id": "weaver_house-3",
+      "section": "weaver_house",
+      "position": [
+        57,
+        0,
+        244.5
+      ],
+      "radius": 4,
+      "name": "Wynn's sewing workshop"
+    },
+    {
+      "id": "weaver_house-4",
+      "section": "weaver_house",
+      "position": [
+        65.5,
+        0,
+        244.5
+      ],
+      "radius": 4,
+      "name": "Mara's cape shop"
+    },
+    {
       "id": "watch_house-0",
       "section": "watch_house",
       "position": [
@@ -817,6 +839,22 @@
       "z1": 239.5,
       "section": "weaver_house",
       "room": 2
+    },
+    "Wynn's sewing workshop": {
+      "x0": 53.5,
+      "x1": 60.5,
+      "z0": 239.5,
+      "z1": 249.5,
+      "section": "weaver_house",
+      "room": 3
+    },
+    "Mara's cape shop": {
+      "x0": 60.5,
+      "x1": 70.5,
+      "z0": 239.5,
+      "z1": 249.5,
+      "section": "weaver_house",
+      "room": 4
     },
     "Watch mess": {
       "x0": 100.5,
@@ -1761,7 +1799,39 @@
         88
       ],
       "section": "weaver_house",
-      "label": "Wynn's loom, strung with cape cloth in cobalt and cream. Mara sells what comes off it on the plaza; the hem stitch is her mother's."
+      "label": "Wynn's loom, strung with cape cloth in cobalt and cream. Mara sells the finished capes in the adjoining shop; the hem stitch is her mother's."
+    },
+    {
+      "id": "weaver_house-interactive1",
+      "objectId": 59291,
+      "role": "information",
+      "position": [
+        57,
+        0,
+        243
+      ],
+      "serverTile": [
+        57,
+        81
+      ],
+      "section": "weaver_house",
+      "label": "Wynn's hand-cranked sewing machine. A cobalt hem waits beneath the needle, ready for the next slow seam."
+    },
+    {
+      "id": "weaver_house-interactive2",
+      "objectId": 59292,
+      "role": "information",
+      "position": [
+        56,
+        0,
+        247
+      ],
+      "serverTile": [
+        56,
+        77
+      ],
+      "section": "weaver_house",
+      "label": "Wynn's cutting workbench, laid with thread spools, shears and a measuring ribbon. Coloured cloth waits on the nearby shelves before becoming capes for Mara's shop."
     },
     {
       "id": "watch_house-interactive0",
@@ -2037,7 +2107,7 @@
     },
     {
       "id": "potion_shop-interactive0",
-      "objectId": 59291,
+      "objectId": 59293,
       "role": "information",
       "position": [
         108,
@@ -2074,7 +2144,7 @@
       "step": 0.1
     },
     "gridAlignment": "tile-centres-v1",
-    "sha256": "f3955bbeb58011acc5d3b3260c523cc1782ba24eb8829d7cf9fc0d2a6493f08a",
+    "sha256": "94041dabe969f9282c5146b60221808be5b16f5c13591d18123088aa95713faa",
     "nodeNames": [
       "Build_castle_east_ashlar_wall",
       "Build_castle_east_decal_banner_glasswarden",
@@ -2442,6 +2512,15 @@
       "Part_weaver_house_1_lime_plaster",
       "Part_weaver_house_1_timber_band",
       "Part_weaver_house_1_wall_cap",
+      "Part_weaver_house_2_lime_plaster",
+      "Part_weaver_house_2_timber_band",
+      "Part_weaver_house_2_wall_cap",
+      "Part_weaver_house_3_lime_plaster",
+      "Part_weaver_house_3_timber_band",
+      "Part_weaver_house_3_wall_cap",
+      "Part_weaver_house_4_lime_plaster",
+      "Part_weaver_house_4_timber_band",
+      "Part_weaver_house_4_wall_cap",
       "Stair_tavern_upper_0_lime_plaster_shade",
       "Stair_tavern_upper_0_oak_planks",
       "Stair_tavern_upper_0_oak_planks_dusk",
@@ -2452,7 +2531,7 @@
     "servedGrid": {
       "binary": "served-grid.escg.gz",
       "format": "ESCG-v2",
-      "sha256": "0b4b490e8ca0531ed77c0b4cbec9723fb20ecf4a7cd40fabd56febd056937e80",
+      "sha256": "6978d786c5e2b6503b0dfb386bf60350da67f7c0d38c1ff71105359fd15ea73b",
       "unitMetres": 0.05,
       "climbMetres": 1.0,
       "originMetres": -100.0,
@@ -3324,6 +3403,38 @@
         ],
         "energyHint": 0.25,
         "rangeHint": 4,
+        "section": "weaver_house"
+      },
+      {
+        "id": "weaver_house-light-10",
+        "position": [
+          57,
+          2.7,
+          244.5
+        ],
+        "color": [
+          1,
+          0.82,
+          0.6
+        ],
+        "energyHint": 1.1,
+        "rangeHint": 8,
+        "section": "weaver_house"
+      },
+      {
+        "id": "weaver_house-light-11",
+        "position": [
+          65.5,
+          2.7,
+          244.5
+        ],
+        "color": [
+          1,
+          0.82,
+          0.6
+        ],
+        "energyHint": 1.2,
+        "rangeHint": 8,
         "section": "weaver_house"
       },
       {
@@ -9276,6 +9387,204 @@
           0,
           -0.0
         ]
+      },
+      {
+        "node": "Part_weaver_house_2_lime_plaster",
+        "section": "weaver_house",
+        "rooms": [
+          0,
+          4
+        ],
+        "centre": [
+          65.5,
+          239.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_weaver_house_2_timber_band",
+        "section": "weaver_house",
+        "rooms": [
+          0,
+          4
+        ],
+        "centre": [
+          65.5,
+          239.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_weaver_house_2_wall_cap",
+        "section": "weaver_house",
+        "rooms": [
+          0,
+          4
+        ],
+        "centre": [
+          65.5,
+          239.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_weaver_house_3_lime_plaster",
+        "section": "weaver_house",
+        "rooms": [
+          1,
+          3
+        ],
+        "centre": [
+          57.5,
+          239.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_weaver_house_3_timber_band",
+        "section": "weaver_house",
+        "rooms": [
+          1,
+          3
+        ],
+        "centre": [
+          57.5,
+          239.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_weaver_house_3_wall_cap",
+        "section": "weaver_house",
+        "rooms": [
+          1,
+          3
+        ],
+        "centre": [
+          57.5,
+          239.5
+        ],
+        "along": [
+          1.0,
+          0,
+          -0.0
+        ],
+        "normal": [
+          -0.0,
+          0,
+          -1.0
+        ]
+      },
+      {
+        "node": "Part_weaver_house_4_lime_plaster",
+        "section": "weaver_house",
+        "rooms": [
+          3,
+          4
+        ],
+        "centre": [
+          60.5,
+          244.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_weaver_house_4_timber_band",
+        "section": "weaver_house",
+        "rooms": [
+          3,
+          4
+        ],
+        "centre": [
+          60.5,
+          244.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "node": "Part_weaver_house_4_wall_cap",
+        "section": "weaver_house",
+        "rooms": [
+          3,
+          4
+        ],
+        "centre": [
+          60.5,
+          244.5
+        ],
+        "along": [
+          0.0,
+          0,
+          -1.0
+        ],
+        "normal": [
+          -1.0,
+          0,
+          -0.0
+        ]
       }
     ],
     "reason": "Building interiors: roofs hidden, outer walls cut away by facing, partitions faded where they cover the player"
@@ -9357,12 +9666,12 @@
       "name": "The weaver's house",
       "bounds": {
         "min": [
-          52.5,
+          51.5,
           230.5
         ],
         "max": [
           78.5,
-          241.5
+          251.5
         ]
       }
     },
@@ -9485,12 +9794,12 @@
   },
   "provenance": {
     "source": "_continent_v2/content/landfall_town.json",
-    "sourceSha256": "d48fd368fdf8195e359cb24d9034d3c969aefc6430c4fd44ebc85bc211650565",
+    "sourceSha256": "ff696f9eecdf1dda6d9d28fd74b213b73825a9e1ee6948bcf45895514207b7ea",
     "builder": "_continent_v2/build_town_interiors.py",
-    "builderSha256": "efc1ad30222572a77ae78d83d6ed9fff8c733880ce0183462aae7c1940a338c2",
+    "builderSha256": "c46a968a406aa36ce5b057bc12c76fd3066b39012d1477917d23c425e0aaa084",
     "imports": {
       "_continent_v2/build_underground.py": "d4ad29b2b55f51752aea4478d782915cd1b774cf59611e689b84d868468e2845",
-      "_continent_v2/town_source.py": "c9197bea79d016881288dcb670b378392e6130c45cf7f91cb9286e28762c2f61",
+      "_continent_v2/town_source.py": "b04b485392e2ecff8315a328116984eea6b66411edf26279ae84749dd2d013f4",
       "_continent_v2/underground_source.py": "1c96af628d148d491d1a5b021470bdbdbf35885ef53d605c953ce97e03f26981"
     },
     "surfaces": {
@@ -9602,7 +9911,7 @@
         "sha256": "7c6a93fb1d841d589941c3a70fb74cda92747d503cf60c52803c89e091e1ef38"
       }
     },
-    "ownerApproved": "Owner 2026-11-09: add a new potion shop NPC and insides building, and redistribute Landfall shop stock"
+    "ownerApproved": "Owner, 2026-11-10: integrate requested potion shop and magical shelf changes into develop, preserving newer shops."
   },
   "externalResources": {
     "../../../_shared/images/051bdd722e50093d9fe4a642e056c12db638bc003c01fe9e0f42373c64afc0cd.png": "051bdd722e50093d9fe4a642e056c12db638bc003c01fe9e0f42373c64afc0cd",

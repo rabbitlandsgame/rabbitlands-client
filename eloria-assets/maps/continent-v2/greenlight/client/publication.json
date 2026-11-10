@@ -7,32 +7,12 @@
   "recipe": "region_bake_cli.gd --scene godot-client/world_authoring/regions/greenlight/greenlight.tscn --output <bake>/continent-authoring.json"
  },
  "collision": {
-  "sidecarSha256": "f6fa7b1bd2b32ab4d170b661f2f1933b01769c23fe34df2e6d195906218987d6",
+  "sidecarSha256": "44dd1cd6b2a1a6783b21888bdd1611b4573ce9afa9f8c92e5df00d6e57ec2d45",
   "collisionSha256": "14f9b3307113e4ce14fec07b8a660371fa850a2d90f0241f6b50d3a639e0e298",
   "servedGridSha256": "1fbe20e79fa39d3ab9bd83bd5054c41034187afbd02b47704c5fdf4597533e04",
   "walkableCells": 426188,
   "openTiles": 104838,
-  "sourceSnapshotSha256": "384d1a80afe15faa82048e683f407345292b9fe45da137a2f79e63a63d8e8535",
-  "npcMetadataAmendments": [
-   {
-    "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_npc_metadata.py",
-    "region": "landfall",
-    "baseSnapshotSha256": "f8b229797e132c0716e422dd4b154bc2e89c579286952f360e595960837d4998",
-    "snapshotSha256": "67b317ded219082f8de34c294b511a6b75fa58c8cd2ef8984eb71fe1e1bb2d2e",
-    "sceneSha256": "6af8fca4347f8a724c8ca7e9a773cfe2d65f4ab036073af7f63878b24de67cce",
-    "unchangedContentSha256": "131cffcd5d55ef3d4e54ed1b532d39d3b373381e0de7dde8c43d7aaa2006aa4c",
-    "addedNpcMarkers": [
-     "landfall--npc-cape-seller-mara-vell"
-    ],
-    "preserved": [
-     "geometry",
-     "terrain",
-     "paths",
-     "collision.bin",
-     "served-grid.escg.gz"
-    ]
-   }
-  ]
+  "sourceSnapshotSha256": "384d1a80afe15faa82048e683f407345292b9fe45da137a2f79e63a63d8e8535"
  },
  "chunks": 67,
  "kitPlacementsOutsideWindow": 0,
@@ -112,19 +92,19 @@
   "13_14": 19.1
  },
  "timings": {
-  "snapshot_s": 1.7,
-  "terrain_s": 0.1,
+  "snapshot_s": 1.0,
+  "terrain_s": 0.2,
   "water_s": 0.0,
-  "overlays_s": 0.7,
+  "overlays_s": 0.8,
   "bridges_s": 0.0,
   "surface_glb_bytes": 116981984,
   "walk_kit_nodes": 29,
   "library_s": 0.2,
   "harvest_nodes": 37,
-  "chunks_s": 1.7,
-  "space_passes_s": 4.4
+  "chunks_s": 1.5,
+  "space_passes_s": 21.8
  },
- "seconds": 15.8,
+ "seconds": 32.6,
  "imagePolicy": {
   "surface": {
    "imagesResampled": 0,

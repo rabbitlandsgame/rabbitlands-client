@@ -6,6 +6,10 @@ render_mode cull_disabled;
 uniform mat4 water_to_continent;
 uniform sampler2D wave_texture : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform bool has_wave_texture = false;
+// Quest channels use the same water appearance with an authoritative flow.
+// Defaults preserve the continent sea's animation.
+uniform float flow_strength = 1.0;
+uniform bool reduced_motion = false;
 // Look pass (LookGround sets it in Forward+ on a copy; never with
 // ELORIA_LOOK=0): the colours below were picked in the compatibility
 // renderer, which lights display-encoded albedo. Forward+ lights the same
@@ -25,19 +29,20 @@ void vertex() {
 }
 
 void fragment() {
+	float water_time = reduced_motion ? 0.0 : TIME * flow_strength;
 	vec2 p = continent_position;
 	float broad = sin(dot(p, vec2(.019, -.013))) * .5 + .5;
-	float ripple = sin(dot(p, vec2(.43, .19)) + TIME * .45);
-	float crossing = sin(dot(p, vec2(-.16, .37)) - TIME * .31);
+	float ripple = sin(dot(p, vec2(.43, .19)) + water_time * .45);
+	float crossing = sin(dot(p, vec2(-.16, .37)) - water_time * .31);
 	// Broad, low-contrast variation belongs to the water body, not a map tile.
 	float curl = sin(dot(p, vec2(.13, -.29))) * 3.0 + sin(dot(p, vec2(.15, .37))) * 2.0;
-	float crest = sin(dot(p, vec2(1.8, .92)) + curl + TIME * .3);
+	float crest = sin(dot(p, vec2(1.8, .92)) + curl + water_time * .3);
 	float broken = smoothstep(.05, .75, sin(dot(p, vec2(-.6, .44)) + crossing));
 	ALBEDO = mix(vec3(.045, .14, .17), vec3(.058, .18, .19), broad);
 	ALBEDO += vec3(.006, .014, .016) * (ripple * crossing);
 	if (has_wave_texture) {
-		vec3 first = texture(wave_texture, p * .075 + vec2(TIME * .002, 0.0)).rgb;
-		vec3 second = texture(wave_texture, p.yx * .043 + vec2(0.0, TIME * .0015)).rgb;
+		vec3 first = texture(wave_texture, p * .075 + vec2(water_time * .002, 0.0)).rgb;
+		vec3 second = texture(wave_texture, p.yx * .043 + vec2(0.0, water_time * .0015)).rgb;
 		float detail = dot(mix(first, second, .35), vec3(.2126, .7152, .0722));
 		ALBEDO *= .7 + detail * 1.6;
 	} else {

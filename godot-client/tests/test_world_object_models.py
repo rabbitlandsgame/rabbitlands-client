@@ -132,7 +132,7 @@ class WorldObjectModelTest(unittest.TestCase):
             for model_id, entry in section["models"].items():
                 with self.subTest(model=model_id):
                     wide = (model_id in listed[0 if section is self.harvestables else 1]
-                            or (section is self.harvestables and entry.get("reusedScenery")))
+                            or entry.get("reusedScenery"))
                     low, high = (imported.IMPORTED_TRIANGLE_BAND if wide
                                  else imported.PROCEDURAL_TRIANGLE_BAND)
                     self.assertGreaterEqual(entry["triangles"], low)
@@ -205,6 +205,41 @@ class WorldObjectModelTest(unittest.TestCase):
                 self.assertTrue(models[entry["replaces"]].get("retired"))
                 self.assertEqual(models[entry["replaces"]]["tier"], entry["tier"])
 
+    def test_reused_scenery_interactives_match_their_record(self) -> None:
+        """The descent's chests and reward dais draw packaged underground scenery.
+
+        Like the reused minerals, they are not rows of the imported table: the
+        chest tiers share one GLB (told apart by the entry's `scale` and
+        `tint`), and each entry is held to the file the reuse record names,
+        measured as an imported model is, inside the imported band.
+        """
+        record = json.loads((CLIENT.parent / "eloria-assets/source/world_objects/underground/"
+                             "reused-scenery.json").read_text(encoding="utf-8"))
+        packaged = {asset["output"]: asset["sha256"] for asset in record["assets"]}
+        models = self.interactives["models"]
+        reused = {model_id: entry for model_id, entry in models.items()
+                  if entry.get("reusedScenery")}
+        self.assertEqual({entry["label"] for entry in reused.values()},
+                         {"Descent Chest", "Descent Fine Chest", "Descent Ornate Chest",
+                          "Descent Dais"})
+        low, high = imported.IMPORTED_TRIANGLE_BAND
+        for model_id, entry in reused.items():
+            with self.subTest(model=model_id):
+                self.assertNotIn("imported", entry)
+                self.assertEqual(self.interactives["roles"][entry["label"]], model_id)
+                # Not the storage chest: is_storage() would give it the storage glow.
+                self.assertNotEqual(model_id, "storage")
+                output = "godot-client/" + entry["scene"].removeprefix("res://")
+                self.assertIn(output, packaged)
+                measured = imported.measure_glb(CLIENT.parent / output)
+                self.assertEqual(measured["sha256"], packaged[output])
+                for key, value in measured.items():
+                    self.assertEqual(entry[key], value, key)
+                self.assertTrue(low <= entry["triangles"] <= high)
+                self.assertGreater(entry.get("scale", 1.0), 0.0)
+                if "tint" in entry:
+                    self.assertRegex(entry["tint"], r"^#[0-9a-f]{6}$")
+
     def test_imported_interactives_match_the_reviewed_files(self) -> None:
         models = self.interactives["models"]
         rows = {row.model_id: row for row in imported.IMPORTED_INTERACTIVES}
@@ -244,6 +279,37 @@ class WorldObjectModelTest(unittest.TestCase):
                         material["normalTexture"]):
             image = document["images"][document["textures"][texture["index"]]["source"]]
             self.assertIn("bufferView", image, "storage textures must travel inside the GLB")
+
+    def test_descent_art_matches_its_provenance(self) -> None:
+        """The Serpent Deep's own Meshy art (2026-11-09): the temple on Suncoil and the boss floor's way out.
+
+        The temple is Suncoil's static scenery, a kit prototype the scene places (solid, so the collision export
+        blocks it), and map object 59480 is only a click target on its front tile, so the temple is drawn once. The
+        way out is drawn from authoredObjects (a scene with its yaw), not from a role's model, so the imported band
+        does not reach it. Each file is held to its provenance record (the Meshy task, the concept, the measured
+        model).
+        """
+        record = json.loads((CLIENT.parent / "eloria-assets/source/world_objects/descent/provenance.json")
+                            .read_text(encoding="utf-8"))
+        assets = {asset["id"]: asset for asset in record["assets"]}
+        self.assertEqual(set(assets), {"kit-descent-temple-1", "descent_exit_portal"})
+        authored = self.registry["authoredObjects"]
+        temple = authored["59480"]
+        self.assertTrue(temple.get("pickOnly") and "scene" not in temple and not temple.get("entrance"))
+        self.assertEqual(temple["label"], "The Serpent Deep")
+        scene = (CLIENT / "world_authoring/regions/suncoil/suncoil.tscn").read_text(encoding="utf-8")
+        self.assertEqual(scene.count(f'scene_path = "{assets["kit-descent-temple-1"]["scene"]}"'), 1)
+        self.assertEqual(authored["59491"]["scene"], assets["descent_exit_portal"]["scene"])
+        self.assertEqual(authored["59491"]["visualHeight"], assets["descent_exit_portal"]["model"]["height"])
+        self.assertEqual(sorted(str(p.relative_to(CLIENT).as_posix())
+                                for p in (CLIENT / "assets/world/descent").glob("*.glb")),
+                         ["assets/world/descent/descent_exit_portal.glb"])
+        for asset in record["assets"]:
+            with self.subTest(model=asset["id"]):
+                path = CLIENT / asset["scene"].removeprefix("res://")
+                self.assertEqual(imported.measure_glb(path), asset["model"])
+                self.assertRegex(asset["meshy"]["taskId"], r"^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$")
+                self.assertRegex(asset["concept"]["sha256"], r"^[0-9a-f]{64}$")
 
     def test_a_swapped_label_keeps_the_model_it_replaced(self) -> None:
         """The procedural model a swap displaces stays registered and on disk.

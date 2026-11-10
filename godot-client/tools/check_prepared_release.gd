@@ -1,16 +1,33 @@
 extends SceneTree
 ## External build-source tool. Every res:// dependency must resolve from the
 ## final normal PCK mounted by --main-pack; no benchmark workload is exported.
-const Prepared := preload("res://src/world/prepared_content.gd")
-const Lifecycle := preload("res://src/world/prepared_scene_lifecycle.gd")
-const Placements := preload("res://src/world/prepared_placements.gd")
-const Manifest := preload("res://src/world/world_manifest.gd")
-const MapCache := preload("res://src/world/map_scene_cache.gd")
-const Vram := preload("res://src/world/vram_textures.gd")
-const Graphics := preload("res://src/world/graphics_options.gd")
-const MeshPool := preload("res://src/world/external_mesh_pool.gd")
-const Scenes := preload("res://src/actors/glb_scene_cache.gd")
-const Ownership := preload("res://src/world/prepared_material_ownership.gd")
+## A --script tool compiles before any autoload runs, and a split release's
+## content packs are mounted only by the first autoload (ContentPacks), so this
+## script preloads no project script: their closure can name a texture that a
+## content pack holds. _load_project_scripts() loads them once the packs are in.
+const CONTENT_PACKS := "res://src/boot/content_packs.gd"
+const PROJECT_SCRIPTS := {
+	"Prepared": "res://src/world/prepared_content.gd",
+	"Lifecycle": "res://src/world/prepared_scene_lifecycle.gd",
+	"Placements": "res://src/world/prepared_placements.gd",
+	"Manifest": "res://src/world/world_manifest.gd",
+	"MapCache": "res://src/world/map_scene_cache.gd",
+	"Vram": "res://src/world/vram_textures.gd",
+	"Graphics": "res://src/world/graphics_options.gd",
+	"MeshPool": "res://src/world/external_mesh_pool.gd",
+	"Scenes": "res://src/actors/glb_scene_cache.gd",
+	"Ownership": "res://src/world/prepared_material_ownership.gd",
+}
+var Prepared: Variant
+var Lifecycle: Variant
+var Placements: Variant
+var Manifest: Variant
+var MapCache: Variant
+var Vram: Variant
+var Graphics: Variant
+var MeshPool: Variant
+var Scenes: Variant
+var Ownership: Variant
 var _failures: Array[String] = []
 var _report: Dictionary = {"schema_version": 1, "status": "incomplete", "entries": [],
 	"limits": ["exact final-PCK acquisition and resource sanity; does not replace visual/gameplay parity or hardware qualification"]}
@@ -22,6 +39,21 @@ var _counts := {"mesh_surfaces": 0, "multimesh_instances": 0, "textures": 0,
 
 func _init() -> void:
 	_run.call_deferred()
+
+## Mounts the content packs (a no-op when the ContentPacks autoload already did,
+## or for a monolithic PCK), then loads the project scripts this check calls.
+func _load_project_scripts() -> bool:
+	var content_packs: Variant = load(CONTENT_PACKS)
+	var packs: Dictionary = content_packs.mount() if content_packs is GDScript else {}
+	_report["content_packs"] = str(packs.get("state", "unavailable"))
+	if not _check(packs.get("state") in ["mounted", "none"], "content packs did not mount: " + JSON.stringify(packs)):
+		return false
+	for property: String in PROJECT_SCRIPTS:
+		var loaded: Variant = load(PROJECT_SCRIPTS[property])
+		if not _check(loaded is GDScript and (loaded as GDScript).can_instantiate(), "cannot load " + PROJECT_SCRIPTS[property]):
+			return false
+		set(property, loaded)
+	return true
 
 func _check(value: bool, reason: String) -> bool:
 	if not value:
@@ -146,14 +178,14 @@ func _tree_resources(root_node: Node3D) -> void:
 
 func _identity(row: Dictionary) -> Dictionary:
 	var kind := str(row.get("kind", ""))
-	var source := Prepared.source_path(str(row.get("source", "")))
+	var source: String = Prepared.source_path(str(row.get("source", "")))
 	if source.is_empty():
 		return {}
 	var digest := ""
 	var token := ""
 	var manifest: RefCounted
 	if kind == "world":
-		var world := Manifest.load_file(source)
+		var world: Variant = Manifest.load_file(source)
 		if not _check(world.is_valid() and not world.has_streaming_chunks() and world.verify_external_resources().is_empty(), "final staged world manifest/external identity is invalid"):
 			return {}
 		manifest = world
@@ -177,7 +209,7 @@ func _entry(row: Dictionary) -> Dictionary:
 	if not _check(not identity.is_empty() and identity.get("digest") == row.get("source_digest") \
 		and identity.get("token") == row.get("texture_token"), "actual final source/texture identity differs from expected entry"):
 		return {}
-	var record := Prepared.acquire(str(row.kind), str(identity.source), str(identity.digest), str(identity.token), "require-pilot")
+	var record: Dictionary = Prepared.acquire(str(row.kind), str(identity.source), str(identity.digest), str(identity.token), "require-pilot")
 	if not _check(str(record.get("status", "")) == "hit" and record.get("entry_id") == row.get("entry_id"), "final package did not acquire its exact required prepared entry: " + str(record.get("reason", ""))):
 		return {}
 	var detail := {"entry_id": row.entry_id, "kind": row.kind, "source": row.source,
@@ -185,7 +217,7 @@ func _entry(row: Dictionary) -> Dictionary:
 	if str(row.kind) == "mesh":
 		_mesh(record.get("resource") as Mesh, {})
 	else:
-		var instance := Lifecycle.instantiate(record)
+		var instance: Node3D = Lifecycle.instantiate(record)
 		if not _check(instance != null, "verified PackedScene failed actual data-only/private-material instantiation"):
 			return {}
 		get_root().add_child(instance)
@@ -195,12 +227,12 @@ func _entry(row: Dictionary) -> Dictionary:
 			Placements.install(instance, identity.manifest, record.entry)
 		_tree_resources(instance)
 		if str(row.node_policy) == Placements.POLICY:
-			var before := Placements.snapshot(instance)
+			var before: Dictionary = Placements.snapshot(instance)
 			_check(int(before.initial_removed_sources) > 0 and int(before.remaining_node_reduction) > 0, "lazy final package has no actual reduction handles")
-			var handles := Placements.handles(instance)
+			var handles: Array = Placements.handles(instance)
 			if not handles.is_empty():
 				var restored: MeshInstance3D = handles[0].restore(false)
-				var after := Placements.snapshot(instance)
+				var after: Dictionary = Placements.snapshot(instance)
 				_check(restored != null and int(after.reified_sources) == int(before.reified_sources) + 1 \
 					and int(after.remaining_node_reduction) == int(before.remaining_node_reduction) - 1, "lazy actual final-PCK leaf restoration did not publish exactly once")
 				_check(handles[0].restore(false) == restored, "lazy leaf second restoration is not idempotent")
@@ -217,6 +249,11 @@ func _entry(row: Dictionary) -> Dictionary:
 	return detail
 
 func _run() -> void:
+	if not _load_project_scripts():
+		if _failures.is_empty():
+			_failures.append("project scripts did not load")
+		_finish()
+		return
 	var arguments := OS.get_cmdline_user_args()
 	if not _check(arguments.size() == 1, "one external job JSON is required"):
 		_finish()
@@ -307,7 +344,7 @@ func _run() -> void:
 		var fields_match := true
 		for key: String in ["kind", "source", "node_policy", "source_digest", "texture_token"]:
 			fields_match = fields_match and row.get(key) == actual.get(key, "retain" if key == "node_policy" else null)
-		var quality_matches := int(actual.get("texture_skip", -1)) == Graphics.TEXTURE_QUALITIES.find(quality) \
+		var quality_matches: bool = int(actual.get("texture_skip", -1)) == Graphics.TEXTURE_QUALITIES.find(quality) \
 			or _full_mip_world_scene(actual)
 		if not _check(fields_match and quality_matches, "required identity or quality differs from final catalog"):
 			break
@@ -321,7 +358,7 @@ func _run() -> void:
 	Scenes.clear()
 	await process_frame
 	await process_frame
-	var actual_snapshot := Prepared.snapshot()
+	var actual_snapshot: Dictionary = Prepared.snapshot()
 	var consumed: Dictionary = {}
 	for row: Dictionary in actual_snapshot.consumed_entries:
 		consumed[str(row.entry_id)] = true

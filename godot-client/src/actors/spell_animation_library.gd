@@ -58,6 +58,9 @@ static func presentation_clip(player: AnimationPlayer, skeleton: Skeleton3D,
 		base_name: String, seat_name: String, high: bool) -> String:
 	if seat_name.is_empty() and not high:
 		return base_name
+	# Actors without a skeleton (or a missing source clip) keep the plain clip.
+	if skeleton == null or not player.has_animation(base_name):
+		return base_name
 	var key := base_name.replace("/", "_") + ("_seated" if not seat_name.is_empty() else "") + ("_high" if high else "")
 	if not player.has_animation_library("spell_poses"):
 		player.add_animation_library("spell_poses", AnimationLibrary.new())

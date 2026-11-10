@@ -1487,7 +1487,12 @@ def protect(design, coarse):
                 raise SystemExit(f'{sid}: {npc["name"]} stands on a way in or out or on '
                                  f'{posts.get(tile, "a door or stair tile")} {list(tile)}')
             around = [(tile[0]+dx, tile[1]+dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1)]
-            if not all(reached(t) for t in around):
+            # A seated craftsperson faces a blocking worktop. Keep the post
+            # itself and three cardinal approaches open for conversation.
+            seated = npc.get('seatedWork', False)
+            accessible = (reached(tile) and sum(reached((tile[0]+dx, tile[1]+dy))
+                          for dx, dy in ((1,0),(-1,0),(0,1),(0,-1))) >= 3)
+            if not (accessible if seated else all(reached(t) for t in around)):
                 raise SystemExit(f'{sid}: {npc["name"]}\'s post {list(tile)} needs its tile and all eight neighbours '
                                  'open and reached (a counter or prop closes one)')
             posts[tile] = npc['name']

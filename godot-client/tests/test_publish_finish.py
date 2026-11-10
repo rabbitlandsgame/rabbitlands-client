@@ -124,6 +124,22 @@ class PublishFinishTest(unittest.TestCase):
 
     # --- the properties ------------------------------------------------------
 
+    def test_interior_shell_finishes_without_an_outdoor_authoring_scene(self):
+        package = self.root / 'continent-v2' / 'landfall_town' / 'client'
+        package.mkdir(parents=True)
+        document, binary = prop()
+        (package / 'world.glb').write_bytes(SM.write_glb(document, binary))
+        (package / 'world.json').write_text(json.dumps({
+            'asset': {'id': 'landfall_town', 'glb': 'world.glb', 'interiorClass': 'insides'},
+            'performance': {'glbBytes': 1},
+        }), encoding='utf-8')
+        self.finish(package)
+        manifest = json.loads((package / 'world.json').read_text())
+        self.assertEqual(manifest['performance']['glbBytes'], (package / 'world.glb').stat().st_size)
+        before = (package / 'world.glb').read_bytes()
+        self.finish(package)
+        self.assertEqual(before, (package / 'world.glb').read_bytes())
+
     def test_it_pools_what_the_publisher_repeated(self):
         package = self.package("town")
         self.finish(package)

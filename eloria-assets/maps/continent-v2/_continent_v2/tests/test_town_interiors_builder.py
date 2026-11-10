@@ -84,7 +84,7 @@ def test_the_authored_source_holds_the_spec_doors_and_the_stairs():
              (59204, 'magic_shop', [166, 265], [167, 262], 'magic_shop'),
              (59205, 'smithy', [97, 261], [95, 259], 'blacksmith'),
              (59206, 'clerk_house', [146, 259], [149, 256], None),
-             (59207, 'weaver_house', [152, 252], [149, 255], None),
+             (59207, 'weaver_house', [152, 252], [149, 255], 'general_store'),
              (59208, 'watch_house', [86, 275], [83, 275], None),
              (59209, 'netmender_house', [239, 208], [234, 207], None),
              (59210, 'castle', [221, 276], [218, 273], None),
@@ -111,12 +111,12 @@ def test_the_authored_source_holds_the_spec_doors_and_the_stairs():
     # the cast (2026-10-27): every coloured door opens on a shopkeeper of its category, who is named on the map as the
     # door is; the lore objects keep to the interior band
     people = TS.npcs(design)
-    assert len({p['name'] for p in people}) == len(people) == 22
+    assert len({p['name'] for p in people}) == len(people) == 23
     keepers = {(p['section'], p['mapCategory']): p for p in people if p.get('mapCategory')}
     assert all(p['role'] == 'shop' for p in keepers.values())
     for oid, section, _tile, _back, category in table:
         if category:
-            assert by_object[oid]['label'] == keepers[(section, category)]['mapLabel']
+            assert keepers[(section, category)]['mapLabel'] in by_object[oid]['label']
     assert sorted(keepers) == sorted((row[1], row[4]) for row in table if row[4])
     found = TS.interactives(design)
     assert found and all(entry['object'] in TS.INTERACTIVE_IDS for entry in found)

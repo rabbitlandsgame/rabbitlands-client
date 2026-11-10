@@ -50,6 +50,7 @@ import argparse
 import json
 import math
 import struct
+import subprocess
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -113,10 +114,60 @@ def _document(path: Path) -> dict:
         return json.loads(handle.read(length))
 
 
+def prototypes_named(manifest: dict) -> set[str]:
+    """The pooled prototype identities a package manifest places."""
+    return {Path(uri).stem for uri in (manifest.get("externalMeshes") or {})
+            if "_shared/meshes/" in uri.replace("\\", "/")}
+
+
+def published_prototypes(package: Path) -> frozenset:
+    """Every prototype the COMMITTED publication of this package places.
+
+    Read from git HEAD, not the tree: a publisher rewrites the package's
+    manifests before its space passes run, and a run that stopped part-way
+    leaves them without their externalMeshes. A package outside the checkout,
+    or one never committed, has none (a first publish inherits nothing).
+    """
+    package = Path(package).resolve()
+    try:
+        relative = package.relative_to(REPO.resolve()).as_posix()
+    except ValueError:
+        return frozenset()
+    listing = subprocess.run(["git", "-C", str(REPO), "ls-tree", "-r", "--name-only", "HEAD", "--", relative],
+                             capture_output=True, text=True, encoding="utf-8")
+    if listing.returncode:
+        return frozenset()
+    names = [name for name in listing.stdout.splitlines()
+             if name == f"{relative}/world.json"
+             or (name.startswith(f"{relative}/chunks/") and name.endswith("/world.json")
+                 and name.count("/") == relative.count("/") + 3)]
+    if not names:
+        return frozenset()
+    batch = subprocess.run(["git", "-C", str(REPO), "cat-file", "--batch"], capture_output=True,
+                           input="".join(f"HEAD:{name}\n" for name in names).encode("utf-8"))
+    if batch.returncode:
+        raise RuntimeError(f"git cat-file failed for {relative}: {batch.stderr.decode(errors='replace')}")
+    found: set[str] = set()
+    data, at = batch.stdout, 0
+    for name in names:
+        end = data.index(b"\n", at)
+        header = data[at:end].split()
+        if len(header) != 3 or header[1] != b"blob":
+            raise RuntimeError(f"git cat-file: unexpected answer for {name}: {data[at:end]!r}")
+        size = int(header[2])
+        found |= prototypes_named(json.loads(data[end + 1:end + 1 + size]))
+        at = end + 1 + size + 1
+    return frozenset(found)
+
+
 # --- the three passes --------------------------------------------------------
 
-def share(files: list[Path], index: dict, dry_run: bool) -> dict:
-    """Point these files at the pool, and pool what they repeat between them."""
+def share(files: list[Path], index: dict, dry_run: bool, inherited: frozenset = frozenset()) -> dict:
+    """Point these files at the pool, and pool what they repeat between them.
+
+    `inherited`: prototypes the committed publication already places
+    (published_prototypes); their texture policy is what ships today.
+    """
     where: dict[str, set] = defaultdict(set)
     sizes: dict[str, int] = {}
     for glb in files:
@@ -130,7 +181,7 @@ def share(files: list[Path], index: dict, dry_run: bool) -> dict:
               if identity in index or (len(where[identity]) > 1 and sizes[identity] >= SM.MIN_BYTES)}
     moved = saved = touched = 0
     for glb in files:
-        result = SM.apply_to_file(glb, shared, index, dry_run)
+        result = SM.apply_to_file(glb, shared, index, dry_run, inherited)
         if result["moved"]:
             touched += 1
             moved += result["moved"]
@@ -444,11 +495,15 @@ def package_manifests(files: list[Path]) -> list[Path]:
 # --- what a publisher calls --------------------------------------------------
 
 def finish(paths, *, dry_run: bool = False, quantise_pass: bool = True,
-           factor: float | None = None, log=print) -> dict:
+           factor: float | None = None, inherited_prototypes=None, log=print) -> dict:
     """Finish sharing, images, precision and exact vertices, then restate figures.
 
     `factor` is the resident bytes a byte of GLB is taken to cost, for a
     publisher whose publication record is not on disk yet.
+
+    `inherited_prototypes`: the prototypes the packages' committed publication
+    already places; by default read from git HEAD for every package directory
+    given (published_prototypes). Pass a set to state it explicitly.
     """
     files = glbs(paths)
     if not files:
@@ -456,7 +511,10 @@ def finish(paths, *, dry_run: bool = False, quantise_pass: bool = True,
         return {}
     index = _index()
     before = set(POOL.glob("*.glb"))
-    shared = share(files, index, dry_run)
+    if inherited_prototypes is None:
+        inherited_prototypes = frozenset().union(*(published_prototypes(Path(p)) for p in paths
+                                                   if Path(p).is_dir()))
+    shared = share(files, index, dry_run, frozenset(inherited_prototypes))
     fresh = sorted(set(POOL.glob("*.glb")) - before)
     images = externalise(files + fresh, index, dry_run)
     if not dry_run:
@@ -478,6 +536,12 @@ def finish(paths, *, dry_run: bool = False, quantise_pass: bool = True,
     if regions:
         import apply_road_terrain_blend as road_publish
         for region in sorted(regions):
+            manifest = MAPS / 'continent-v2' / region / 'client' / 'world.json'
+            if manifest.is_file() and json.loads(manifest.read_text(encoding='utf-8')).get(
+                    'asset', {}).get('interiorClass') == 'insides':
+                # Room-shell packages share the map pipeline, but have no
+                # outdoor authoring scene or road terrain to convert.
+                continue
             road_reports.append(road_publish.finish_region(REPO, region, apply=not dry_run))
     manifests = package_manifests(files)
     reconciled = SM.reconcile(dry_run, prototypes={path.stem for path in fresh}, manifests=manifests)

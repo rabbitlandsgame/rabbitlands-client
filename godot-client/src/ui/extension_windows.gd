@@ -192,6 +192,10 @@ var party_panel: PanelContainer
 var gauntlet_ready_window: Control
 var gauntlet_loot_window: Control
 var gauntlet_progress_hud: Control
+## A descent's floor and clock, and its boss reward's pick of three
+## (descent_v1, server message 188).
+var descent_status_hud: Control
+var descent_reward_window: Control
 var party_header: Label
 var party_rows: VBoxContainer
 var party_invite_row: HBoxContainer
@@ -253,8 +257,14 @@ func _ready() -> void:
 	gauntlet_progress_hud.configure(func() -> Rect2: return combat_panel.get_global_rect(),
 		func() -> bool: return combat_hud_enabled)
 	add_child(gauntlet_progress_hud)
+	descent_status_hud = preload("res://src/ui/descent_status_hud.gd").new()
+	descent_status_hud.configure(func() -> Rect2: return combat_panel.get_global_rect())
+	add_child(descent_status_hud)
+	descent_reward_window = preload("res://src/ui/descent_reward_window.gd").new()
+	add_child(descent_reward_window)
 	gauntlet_loot_window.item_inspection_requested.connect(func() -> void: detail_popup_allowed = true)
 	if item_atlas != null: gauntlet_loot_window.configure(item_atlas)
+	if item_atlas != null: descent_reward_window.configure_atlas(item_atlas)
 	gauntlet_loot_window.call("_style_dialog", market_price_dialog)
 	AppState.state_changed.connect(_on_state_changed)
 	TextColors.events().changed.connect(_on_text_colors_changed)
@@ -264,6 +274,7 @@ func _ready() -> void:
 func configure(atlas: ItemAtlas, guide: Control = null) -> void:
 	item_atlas = atlas
 	if gauntlet_loot_window != null: gauntlet_loot_window.configure(atlas)
+	if descent_reward_window != null: descent_reward_window.configure_atlas(atlas)
 	quest_guide = guide
 	if quest_guide != null:
 		quest_guide.tracking_changed.connect(_on_quest_guide_tracking_changed)
@@ -292,6 +303,9 @@ func close_top(include_party := false) -> bool:
 			continue
 		if panel == gauntlet_loot_window.panel:
 			gauntlet_loot_window.close()
+		elif panel == descent_reward_window.panel:
+			# The offer stays open on the server; the dais offers it again.
+			descent_reward_window.close()
 		elif panel == gauntlet_ready_window.panel:
 			gauntlet_ready_window.cancel()
 			panel.hide()
@@ -325,15 +339,16 @@ func toggle_achievements() -> void:
 func _cascade() -> Array[PanelContainer]:
 	# The tracked-quest readout is deliberately absent: it is a HUD element the
 	# player pinned, not a window covering the screen, so cancel leaves it be.
-	return [gauntlet_loot_window.panel, gauntlet_ready_window.panel, merchant_panel, market_panel, detail_panel, mail_panel,
-		quest_panel, party_panel, achievements_panel]
+	return [gauntlet_loot_window.panel, descent_reward_window.panel, gauntlet_ready_window.panel, merchant_panel,
+		market_panel, detail_panel, mail_panel, quest_panel, party_panel, achievements_panel]
 
 func _toggle(panel: PanelContainer) -> void:
 	if panel.visible:
 		panel.hide()
 		return
 	for other: PanelContainer in _cascade():
-		if other != panel and other != party_panel and other != gauntlet_ready_window.panel:
+		if other != panel and other != party_panel and other != gauntlet_ready_window.panel \
+				and other != descent_reward_window.panel:
 			other.hide()
 	panel.show()
 	panel.move_to_front()
@@ -374,7 +389,7 @@ func _on_state_changed(path: StringName) -> void:
 		&"party":
 			_sync_party()
 		&"campaign":
-			var signature := JSON.stringify(_rescue_party_member())
+			var signature := JSON.stringify(_quest_party_members())
 			if signature != _party_rescue_signature:
 				_sync_party()
 		&"map":
@@ -1898,8 +1913,8 @@ func _market_number(value: int) -> String:
 func _sync_party(open_requested: bool = false) -> void:
 	var state: Dictionary = AppState.party
 	var members: Array = state.get("members", []) as Array
-	var companion := _rescue_party_member()
-	_party_rescue_signature = JSON.stringify(companion)
+	var companions := _quest_party_members()
+	_party_rescue_signature = JSON.stringify(companions)
 	var invited_by: String = str(state.get("invited_by", ""))
 	var in_party: bool = bool(state.get("in_party", false))
 	var can_manage := not in_party
@@ -1912,10 +1927,10 @@ func _sync_party(open_requested: bool = false) -> void:
 	# window the player dismissed. Joining or a new invitation can open it.
 	var open_for_change: bool = ((in_party and not _party_was_joined)
 		or (not invited_by.is_empty() and invited_by != _party_last_inviter)
-		or (not companion.is_empty() and not _party_rescue_present))
+		or (not companions.is_empty() and not _party_rescue_present))
 	_party_was_joined = in_party
 	_party_last_inviter = invited_by
-	_party_rescue_present = not companion.is_empty()
+	_party_rescue_present = not companions.is_empty()
 
 	party_invite_label.text = "%s invited you. Accept?" % invited_by
 	party_invite_row.visible = not invited_by.is_empty()
@@ -1923,7 +1938,7 @@ func _sync_party(open_requested: bool = false) -> void:
 		party_rows.remove_child(child)
 		child.queue_free()
 
-	if not in_party and invited_by.is_empty() and companion.is_empty():
+	if not in_party and invited_by.is_empty() and companions.is_empty():
 		party_header.tooltip_text = "No party"
 		_layout_party()
 		party_panel.hide()
@@ -1935,12 +1950,12 @@ func _sync_party(open_requested: bool = false) -> void:
 		if bool(member.get("online", false)):
 			online_count += 1
 		party_rows.add_child(_party_row(member))
-	if not companion.is_empty():
+	for companion: Dictionary in companions:
 		party_rows.add_child(_party_row(companion))
 	party_header.tooltip_text = ("Party - %d of %d online" % [online_count, members.size()]
 		if not members.is_empty() else "No party")
-	if not companion.is_empty():
-		party_header.tooltip_text = (party_header.tooltip_text + " · companion" if not members.is_empty() else "Quest companion")
+	if not companions.is_empty():
+		party_header.tooltip_text = (party_header.tooltip_text + " · quest crew" if not members.is_empty() else "Quest crew")
 	party_leave_button.disabled = members.is_empty()
 	_layout_party()
 	if open_requested or open_for_change:
@@ -1968,6 +1983,22 @@ func _rescue_party_member() -> Dictionary:
 		"x":int(actor.get("x", 0)), "y":int(actor.get("y", 0)), "level":10,
 		"revives_spent":int(mother.get("revives_spent", 0))}
 
+func _quest_party_members() -> Array[Dictionary]:
+	var result: Array[Dictionary]=[]
+	var mother:=_rescue_party_member()
+	if not mother.is_empty():result.append(mother)
+	var snapshot: Dictionary=AppState.campaign
+	if not AppState.authenticated or str(snapshot.get("kind",""))!="shelves" or not bool(snapshot.get("active",false)) \
+			or EloriaProtocol.map_id_from_reference(str(snapshot.get("map","")))!=EloriaProtocol.map_id_from_reference(AppState.current_map):return result
+	var growers: Dictionary=(snapshot.get("shelves",{}) as Dictionary).get("growers",(snapshot.get("shelves",{}) as Dictionary).get("fire",(snapshot.get("shelves",{}) as Dictionary).get("water",{})))
+	for worker: Dictionary in growers.get("workers",[]):
+		var actor: Dictionary=AppState.actors.get(int(worker.actor_id),{})
+		if int(actor.get("kind",0))!=2:continue
+		result.append({"name":worker.name,"narrative_companion":true,"gathering_worker":true,"online":true,
+			"health":0 if bool(worker.downed) else int(worker.health),"max_health":int(worker.max_health),
+			"ether":0,"max_ether":0,"map_id":AppState.current_map,"x":int(actor.get("x",0)),"y":int(actor.get("y",0)),"level":10})
+	return result
+
 func _party_row(member: Dictionary) -> Control:
 	var row := HBoxContainer.new()
 	row.name = "Member" + str(member.get("name", ""))
@@ -1988,6 +2019,8 @@ func _party_row(member: Dictionary) -> Control:
 	if bool(member.get("narrative_companion", false)):
 		row.tooltip_text = row.tooltip_text.replace("Ether:", "Mana:") \
 			+ "\nLevel 10 quest companion · finite mana\nRevival casts used: %d\nSeparate from the eight player slots." % int(member.get("revives_spent", 0))
+	if bool(member.get("gathering_worker",false)):
+		row.tooltip_text="%s · Harvesting level 10\nHealth %d/%d\nProtect this worker. Use Heal Target if she falls.\nCrew cargo is shown in the quest window." % [str(member.name),int(member.health),int(member.max_health)]
 	var portrait: Control = PARTY_MEDALLION.new()
 	portrait.name = "Portrait"
 	portrait.configure(member)

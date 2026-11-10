@@ -17,7 +17,7 @@ tile. Entry requires a client declaring `landfall_town_v1`.
 | `magic_shop` The True Note | #24, door D (magic shop) | Shop, workshop | cobalt tile / plaster |
 | `smithy` The forge | #12, door E Hild's Forge (blacksmith) | Forge, the smith's kitchen and bedroom | packed earth and oak / soot brick and plaster |
 | `clerk_house` Hemmen's house | #22, door G | Study, kitchen, bedroom | oak / plaster |
-| `weaver_house` The weaver's house | #27, door H (north wall) | Loom workroom, kitchen, bedroom | oak / plaster |
+| `weaver_house` The weaver's house and Mara's Capes | #27, door H (north wall) | Loom workroom, kitchen, bedroom, sewing workshop, cape shop | oak / plaster |
 | `watch_house` The watch house | #11, door I (west wall) | Mess, bunk room | oak / plaster |
 | `netmender_house` The net-mender's house | #56, door J (west wall) | Hearth kitchen, net loft | oak / plaster |
 | `castle` The keep | #1, door K (west wall) | Gate Hall, Hall of Eight Seats, Register Archive, Palace Chancery, the sealed-stair alcove | limestone flagstone / ashlar |
@@ -41,22 +41,22 @@ Each street door stands in the interior wall matching its facade's direction
 serves both ends), the tavern stairs 59221/59222; the keep's sealed stair is art only,
 with no portal. A coloured door is named as its shopkeeper is on the map.
 
-The rooms are furnished with 426 placed pieces: the 35-piece `lf-interiors`
+The rooms are furnished with 483 placed pieces: the original 35-piece `lf-interiors`
 furniture kit (beds, tables, benches, counters, shelves, hearths, the forge, the
 anvil, the loom, the eight high seats and the council map table; Meshy pieces
 prepared at real size), its writing desk's own two closed books packaged on their
 own as a book pile (`book_stack`, selected by face as the wall lantern's head is) and
-reused kit scenery (barrels, milk churns, crates, sacks, pots, planters, carts). 144
-of them stand against an outer wall and 59 against a partition; each is cut away
+reused kit scenery (barrels, milk churns, crates, sacks, pots, planters, carts),
+plus the newer sewing and tailor displays. 219 pieces have a wall binding; each is cut away
 with its wall (`cutawayWall`). Four are tinted through the prop palette (`palette`,
 drawn by the client's MineralAppearance shader): the three lichen crusts on the
 Mycelari seat and the Stoneborn standing stone in the Hall of Eight Seats. The
 library's 36 bookcases keep their coloured spines (a tint recolours the books too)
 and none is drawn mirrored (a mirrored case lit darker): cases side by side in a row
-alternate in size (0.95-1.05), so their tops step. Twenty-two people stand at their posts (seven shopkeepers: Hob
+alternate in size (0.95-1.05), so their tops step. Twenty-three people stand at their posts (eight shopkeepers: Hob
 Tennant, Hanne Ashby, Bryony Larch, Ilka Tarn, Hild Ashlar and the bookseller Ennis
-Calloway, plus the apothecary Nella Fenwick), and 23 interior interactives (59251-59254, 59271-59278, 59281-59284,
-59285-59291) hold the lore objects and the smithy's anvil, a crafting station that publishes as `smithing`. A lore object is
+Calloway, Mara Vell and the apothecary Nella Fenwick), and 25 interior interactives (59251-59254, 59271-59278, 59281-59284,
+59285-59293) hold the lore objects and the smithy's anvil, a crafting station that publishes as `smithing`. A lore object is
 a pick-only record in `objects.json` (`pickOnly`): a click shape and a hover name
 on the prop it describes (the source's `at`), with no ring or stand-in model.
 
@@ -96,6 +96,7 @@ that is missing, and the package's `provenance.surfaces` says which was used.
 
 ```powershell
 python -B eloria-assets/maps/continent-v2/_continent_v2/build_town_interiors.py --server ../rabbitlands-server --owner-approved "<who, when, what>"
+python -B eloria-assets/tools/publish_finish.py eloria-assets/maps/continent-v2/landfall_town/client
 python -B tools/prepare_underground_scenery.py --map landfall_town
 python -B eloria-assets/maps/continent-v2/_continent_v2/retarget_underground.py --map landfall_town --server ../rabbitlands-server
 python -B eloria-assets/tools/sync_music_program.py --server ../rabbitlands-server --map landfall_town
@@ -120,9 +121,9 @@ pocket of floor larger than six tiles cut off from a section's arrival.
 
 ## Package
 
-13 sections, 38 rooms, 2,724 walkable tiles (789 in the temple; tavern 130 + upstairs 133, shops 142,
-magic shop 86, smithy 96, houses 77-114, keep 668, library 196), 123 light markers
-(including the apothecary's shop and workshop lights). `world.glb` is 1,098,360 bytes with its 27 images in the shared
+13 sections, 40 rooms, 2,806 walkable tiles and 125 light markers
+(including the apothecary's shop and workshop lights). After scoped shared-asset
+finishing, `world.glb` is 923,116 bytes with its 27 images in the shared
 pool (decals clamp to their edge, surfaces repeat); `collision.bin` (EWCG-v2),
 `served-grid.escg.gz` (ESCG-v2) and `minimap.webp` beside it. The manifest's
 `minimap.liveSpanMetres` (40) frames the live minimap at a room's scale, so a room

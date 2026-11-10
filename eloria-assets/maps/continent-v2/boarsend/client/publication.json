@@ -7,32 +7,12 @@
   "recipe": "region_bake_cli.gd --scene godot-client/world_authoring/regions/boarsend/boarsend.tscn --output <bake>/continent-authoring.json"
  },
  "collision": {
-  "sidecarSha256": "84d2f4695cd98b3a9c29c84aca0d08ce44531462a9744a1cfee8a8bbf29c70b5",
+  "sidecarSha256": "f1f9fdf0c480cd49c543643a4b00204aafdb8542c7f714c7b2b0ee641b5e7b5e",
   "collisionSha256": "34168caa7e13787d1a6eaee233e32855b06b7e166507546260373a113cc26421",
   "servedGridSha256": "9c098f07e88537bef24854c44b07edf17fe95c4fb3a1fa07dc4936152884cbcb",
   "walkableCells": 713894,
   "openTiles": 173974,
-  "sourceSnapshotSha256": "3b50d0209ab9a882b9309cbbb720ab1d9d8cfaf69ea508d4a2a7107c57237aad",
-  "npcMetadataAmendments": [
-   {
-    "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_npc_metadata.py",
-    "region": "landfall",
-    "baseSnapshotSha256": "f8b229797e132c0716e422dd4b154bc2e89c579286952f360e595960837d4998",
-    "snapshotSha256": "67b317ded219082f8de34c294b511a6b75fa58c8cd2ef8984eb71fe1e1bb2d2e",
-    "sceneSha256": "6af8fca4347f8a724c8ca7e9a773cfe2d65f4ab036073af7f63878b24de67cce",
-    "unchangedContentSha256": "131cffcd5d55ef3d4e54ed1b532d39d3b373381e0de7dde8c43d7aaa2006aa4c",
-    "addedNpcMarkers": [
-     "landfall--npc-cape-seller-mara-vell"
-    ],
-    "preserved": [
-     "geometry",
-     "terrain",
-     "paths",
-     "collision.bin",
-     "served-grid.escg.gz"
-    ]
-   }
-  ]
+  "sourceSnapshotSha256": "3b50d0209ab9a882b9309cbbb720ab1d9d8cfaf69ea508d4a2a7107c57237aad"
  },
  "chunks": 106,
  "kitPlacementsOutsideWindow": 0,
@@ -95,7 +75,7 @@
   "09_14": 10.9,
   "10_05": 27.0,
   "10_06": 84.2,
-  "10_07": 117.6,
+  "10_07": 117.7,
   "10_08": 150.8,
   "10_09": 105.4,
   "10_10": 179.1,
@@ -151,19 +131,19 @@
   "16_10": 10.9
  },
  "timings": {
-  "snapshot_s": 3.4,
+  "snapshot_s": 1.9,
   "terrain_s": 0.2,
   "water_s": 0.0,
-  "overlays_s": 1.2,
+  "overlays_s": 1.0,
   "bridges_s": 0.0,
   "surface_glb_bytes": 387647720,
   "walk_kit_nodes": 3,
-  "library_s": 0.5,
+  "library_s": 0.4,
   "harvest_nodes": 48,
-  "chunks_s": 7.0,
-  "space_passes_s": 7.7
+  "chunks_s": 3.6,
+  "space_passes_s": 14.7
  },
- "seconds": 38.1,
+ "seconds": 34.0,
  "imagePolicy": {
   "surface": {
    "imagesResampled": 63,

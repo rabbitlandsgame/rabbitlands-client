@@ -2,37 +2,17 @@
  "region": "reedfall",
  "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
  "snapshot": {
-  "sha256": "986537a2b3a38947707b72d80b980bff1320668499efd5fe0bac197eb0aa4e62",
-  "sceneSha256": "3186c3fa7c22312e672fa6355e50f8415aeeeb5ae190cddf8ec824cf65e0c50b",
+  "sha256": "b560f7749a8f81c2b53c8d7129cde44327088c630bcd2a0c1e2731b0dae8832d",
+  "sceneSha256": "c2f851405c022976f6022e3b257ae466e48da61431e56941b99deb157e46b017",
   "recipe": "region_bake_cli.gd --scene godot-client/world_authoring/regions/reedfall/reedfall.tscn --output <bake>/continent-authoring.json"
  },
  "collision": {
-  "sidecarSha256": "ba26296184ce702017b2f08932fa7dd4ffc543353816fba51dd9d8fb47aa0faa",
+  "sidecarSha256": "1d7f1c3eb2d23c621268f14dee89602ff61bc365bd11b819b93c54080127c6d4",
   "collisionSha256": "17c1a7135047c44f3f934c98aa9f0acd1620a39b80e3c728031106a176e22076",
   "servedGridSha256": "a17740ad028c6f397dce66cac3544e256b1401ae6ec48dc8d718ca603467dd20",
   "walkableCells": 481597,
   "openTiles": 118399,
-  "sourceSnapshotSha256": "986537a2b3a38947707b72d80b980bff1320668499efd5fe0bac197eb0aa4e62",
-  "npcMetadataAmendments": [
-   {
-    "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_npc_metadata.py",
-    "region": "landfall",
-    "baseSnapshotSha256": "f8b229797e132c0716e422dd4b154bc2e89c579286952f360e595960837d4998",
-    "snapshotSha256": "67b317ded219082f8de34c294b511a6b75fa58c8cd2ef8984eb71fe1e1bb2d2e",
-    "sceneSha256": "6af8fca4347f8a724c8ca7e9a773cfe2d65f4ab036073af7f63878b24de67cce",
-    "unchangedContentSha256": "131cffcd5d55ef3d4e54ed1b532d39d3b373381e0de7dde8c43d7aaa2006aa4c",
-    "addedNpcMarkers": [
-     "landfall--npc-cape-seller-mara-vell"
-    ],
-    "preserved": [
-     "geometry",
-     "terrain",
-     "paths",
-     "collision.bin",
-     "served-grid.escg.gz"
-    ]
-   }
-  ]
+  "sourceSnapshotSha256": "b560f7749a8f81c2b53c8d7129cde44327088c630bcd2a0c1e2731b0dae8832d"
  },
  "chunks": 38,
  "kitPlacementsOutsideWindow": 0,
@@ -48,7 +28,7 @@
   "06_11": 47.6,
   "06_12": 21.4,
   "07_07": 43.1,
-  "07_08": 79.4,
+  "07_08": 79.5,
   "07_09": 55.6,
   "07_10": 70.6,
   "07_11": 44.4,
@@ -80,22 +60,22 @@
   "12_09": 11.0,
   "12_10": 10.8,
   "13_07": 10.8,
-  "13_08": 91.6
+  "13_08": 91.7
  },
  "timings": {
-  "snapshot_s": 0.8,
-  "terrain_s": 0.1,
+  "snapshot_s": 0.5,
+  "terrain_s": 0.0,
   "water_s": 0.0,
-  "overlays_s": 0.6,
+  "overlays_s": 0.4,
   "bridges_s": 0.0,
   "surface_glb_bytes": 91620704,
   "walk_kit_nodes": 10,
-  "library_s": 0.2,
-  "harvest_nodes": 57,
-  "chunks_s": 1.6,
-  "space_passes_s": 3.6
+  "library_s": 0.1,
+  "harvest_nodes": 64,
+  "chunks_s": 0.9,
+  "space_passes_s": 16.4
  },
- "seconds": 15.3,
+ "seconds": 23.9,
  "imagePolicy": {
   "surface": {
    "imagesResampled": 7,
@@ -134,70 +114,5 @@
   "placementLimit": 240,
   "triangleLimit": 450000,
   "cellMetres": 96
- },
- "shoreResourceAmendments": [
-  {
-   "plan": "eloria-assets/maps/continent-v2/_continent_v2/content/reedfall-lakehead-resources.json",
-   "planSha256": "b2b14707a76abfda9a736e0239f3cb8915e447e6af1ffc7a6533d11f07eeb4af",
-   "baseSceneSha256": "3186c3fa7c22312e672fa6355e50f8415aeeeb5ae190cddf8ec824cf65e0c50b",
-   "sourceSceneSha256": "c2f851405c022976f6022e3b257ae466e48da61431e56941b99deb157e46b017",
-   "baseSnapshotSha256": "986537a2b3a38947707b72d80b980bff1320668499efd5fe0bac197eb0aa4e62",
-   "addedNodes": [
-    [
-     2140,
-     "Kelp",
-     279,
-     182
-    ],
-    [
-     2141,
-     "Kelp",
-     280,
-     185
-    ],
-    [
-     2142,
-     "Kelp",
-     281,
-     188
-    ],
-    [
-     2143,
-     "Kelp",
-     282,
-     191
-    ],
-    [
-     2144,
-     "Watercress",
-     283,
-     194
-    ],
-    [
-     2145,
-     "Watercress",
-     281,
-     197
-    ],
-    [
-     2146,
-     "Watercress",
-     279,
-     200
-    ]
-   ],
-   "geometry": "unchanged",
-   "collision": "unchanged; nodes occupy existing closed shoreline cells",
-   "validation": {
-    "client": {
-     "servedGridSha256": "a17740ad028c6f397dce66cac3544e256b1401ae6ec48dc8d718ca603467dd20",
-     "approach": "production reach-side checks passed"
-    },
-    "server": {
-     "servedGridSha256": "efebc54ec1c68f8ee0c2a3a163840de222d2399bfe0f41c0c66e543c0d3cc362",
-     "approach": "production reach-side checks passed"
-    }
-   }
-  }
- ]
+ }
 }

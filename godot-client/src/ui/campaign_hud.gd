@@ -456,6 +456,36 @@ func _apply_shelves(ledger: Dictionary) -> void:
 	lines.append("Restored stock: " + (", ".join(ledger.get("unlocked", [])) if not (ledger.get("unlocked", []) as Array).is_empty() else "None yet"))
 	if str(ledger.get("chapter", "")) == "magic":lines.append("Spider specimens examined: %d/12" % int(ledger.get("samples",0)))
 	if str(ledger.get("chapter", "")) == "earth":lines.append("Cart integrity: %d%%. Stay near the cart; clear each ambush before moving on." % int(ledger.get("cart_integrity",100)))
+	var growers: Dictionary=ledger.get("growers",{})
+	if not growers.is_empty() and not bool(growers.get("raid",false)):
+		var field:=str(growers.get("field","sage"))
+		var crop:="Sage" if field=="sage" else "Hearthroot"
+		var stored:=int((growers.get("stored",{}) as Dictionary).get(field,0))
+		var carried:=int(growers.get("carried",0))
+		lines.append("%s gathered: %s · In bags: %s · In crew storage: %s" % [crop,str(stored+carried),str(carried),str(stored)])
+		lines.append("Four level-10 harvesters · 250 per bag · Raiding waves: %d" % int(growers.get("wave",0)))
+		for worker: Dictionary in growers.get("workers",[]):
+			lines.append("%s · %d/%d health · %d carried · %s" % [worker.name,int(worker.health),int(worker.max_health),int(worker.cargo),"DOWNED — use Heal Target" if bool(worker.downed) else "Carrying to storage" if str(worker.activity)=="return" else "Harvesting"])
+	var fire: Dictionary=ledger.get("fire",{})
+	if not fire.is_empty():
+		if str(fire.stage)!="fire_sapper":
+			lines.append("Recovered stock secured: %d/%d · Newly mined secured: %d/%d\nCarried: %d · Total secured: %d" % [int(fire.recovered),int(fire.recovered_goal),int(fire.mined),int(fire.mined_goal),int(fire.carried),int(fire.recovered)+int(fire.mined)])
+			if str(fire.stage)=="fire_coal":lines.append("Lift repairs: %d/3 · Passage supports: %d/3" % [int(fire.repair),int(fire.passages)])
+		else:
+			lines.append("Signal silenced: %s · Water channels open: %s · Powder ignited: %s" % ["Yes" if fire.signal else "No","Yes" if fire.water else "No","Yes" if fire.powder else "No"])
+			if not (fire.hazards as Array).is_empty():lines.append("MOVE OUT OF THE MARKED BLAST AREA")
+		for worker: Dictionary in fire.get("workers",[]):
+			lines.append("%s · %d/%d health · %d carried · %s" % [worker.name,int(worker.health),int(worker.max_health),int(worker.cargo),"DOWNED — use Heal Target" if bool(worker.downed) else "Hauling" if str(worker.activity)=="return" else "Working"])
+	var water:Dictionary=ledger.get("water",{})
+	if not water.is_empty():
+		if str(water.stage)=="water":lines.append("Channel settings · Fresh %d/2 · Tide %d/2 · Drain %d/2\nKeeper’s marks: Fresh 2, Tide 1, Drain 0" % [int(water.flow[0]),int(water.flow[1]),int(water.flow[2])])
+		elif str(water.stage)=="water_cutters":
+			lines.append("Crew: %s · Gathering beds %d/2" % [str(water.command).capitalize(),int(water.bed)+1])
+			for crop:String in ["kelp","cress"]:lines.append("%s · Cut %d/%d · At loading point %d · Secured %d/%d" % ["Kelp" if crop=="kelp" else "Watercress",int(water.cut[crop]),int(water.goals[crop]),int(water.bins[crop]),int(water.stored[crop]),int(water.goals[crop])])
+		elif str(water.stage)=="water_barge":lines.append("Barge hull: %d/100 · Landings: %d/3 · %s\nStay close and drive attackers away. Heal the crew; repair the boat with Wood Planks." % [int(water.hull),int(water.landing),"Departure ordered" if water.sailing else "Waiting for your departure order"])
+		else:lines.append("North guards isolated: %s · South guards isolated: %s" % ["Yes" if water.north else "No","Yes" if water.south else "No"])
+		if not (water.hazards as Array).is_empty():lines.append("MOVE OUT OF THE MARKED SURGE")
+		for worker:Dictionary in water.workers:lines.append("%s · %d/%d health · %d carried · %s" % [worker.name,int(worker.health),int(worker.max_health),int(worker.cargo),"DOWNED — use Heal Target" if worker.downed else "Hauling" if str(worker.activity)=="return" else "Cutting" if worker.harvesting else "Ready"])
 	_shelves.text = "\n".join(lines)
 
 func _rescue_local() -> bool:
