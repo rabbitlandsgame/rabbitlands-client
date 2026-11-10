@@ -164,10 +164,11 @@ func _finish_magic_selection(selection: Dictionary) -> Error:
 const PROTOCOL_MAJOR := 10
 const PROTOCOL_MINOR := 31
 const ClientRelease = preload("res://src/updates/release.gd")
+const SourceIdentity = preload("res://src/network/source_identity.gd")
 static var client_version: PackedByteArray = PackedByteArray([1, 9, 7, 0])
 
 func _send_release_identity() -> void:
-	var identity := ClientRelease.read_json("res://data/client_release.json")
+	var identity := SourceIdentity.declared(ClientRelease.read_json("res://data/client_release.json"))
 	var history: Array = identity.get("ancestors", [])
 	var offset := 0
 	while true:
