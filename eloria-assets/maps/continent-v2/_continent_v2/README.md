@@ -272,6 +272,66 @@ recorded commit differs, and notes it as `provenanceOnly`. After a merge, regene
 (crossings, publication records, each package's `world.json`, `collision.bin` and served grid) from the merged
 sources instead of hand-merging them.
 
+### Republishing every territory
+
+A change that alters one map's collision (a new solid building, a moved prop) still republishes the whole group:
+the collision export reads all bakes together and the shared steps read every package. Recorded run: the Serpent
+Deep temple in Suncoil (client f5d79954/45f38672, server a418433, 2026-11-10). Work in a task worktree of each
+repository. Keep bakes, logs and work folders in an ignored stage, and expect 3-4 GB of publish work and about two and a half hours.
+
+Before baking:
+- Put every placement in the source scene (`godot-client/world_authoring/regions/<map>/<map>.tscn`). A building that
+  players walk around is scenery: a kit prototype under `world_authoring/continent-v2/kits/<kit>/prototypes/` with
+  `collision_role` solid. Remove
+  flora that clips into its footprint. The served grid then closes the footprint, and no server code is needed.
+  Run the Godot import for a new kit GLB (see above).
+- A scenery prop that also needs a click target keeps a pick-only `objects.json` record without
+  `"interactive": true`. `retarget_underground.py --apply` owns every record that is both `pickOnly` and
+  `interactive` and deletes any it did not generate.
+- `regions/<map>/region-authoring-spec.json` `runtimePointCount` must equal the scene's runtime points, or
+  `export_collision.py` refuses the whole group.
+- Hand amendments made after the last full publication survive only if their content is in the source scenes and
+  content files: Reedfall's Lakehead resources (`shoreResourceAmendments`), `publish_npc_metadata.py`'s
+  `npcMetadataAmendments`, Landfall's `merchantRelocations`, building extensions and interior resources. Compare
+  each receipt's `sourceSceneSha256` (or `sceneSha`) with the scene file before republishing. The fresh packages do
+  not carry the per-package receipts; the content does.
+- Text typed by hand into the server's generated `continent-v2/*.txt` is overwritten. Change the client
+  content source instead (for example `content/landfall_town.json` for interior labels).
+
+Order (the local driver `.local/asset-authoring/workspace/work-output/landfall-a3-build/tools/publish_all.sh`
+runs steps 2-4 and takes `A3_CLI`, `A3_SRV` and `A3_OUT`):
+1. Bake every catalog map from the committed scenes (`region_bake_cli.gd`). Re-bake a map whenever its scene or
+   region spec changed since its bake.
+2. `export_collision.py --server <server> --bake MAP=DIR ... --out <work>/collision`, then `publish_client.py`
+   for each map with `--snapshot`, `--collision`, `--shared _continent_v2/shared-assets` and its own `--work`.
+3. `publish_registry.py`, `render_minimap.py --apply`, `crossings_v2.py --server <server>`, `publish_links.py`,
+   `publish_cartography.py`, `render_region_map_details.py --apply`.
+4. Image canonicalization. Plan it with `eloria-assets/tools/canonicalize_map_images.py --plan <plan>
+   --images-from <selection>` limited to the images this run wrote. Then `--apply <plan> --recovery <dir>`.
+   A whole-tree plan is refused while any older GLB names an unsafe policy directory. It would also rewrite thousands
+   of unrelated files. Canonicalizing changes chunk GLB URIs, so repeat step 3's minimap, cartography and details
+   steps after it.
+5. `eloria-assets/tools/render_map_backgrounds.py --apply`, then `--check`. The renderer is not bit-exact: when a
+   map's inputs did not change, restore its images and catalog row from HEAD instead of committing pixel noise.
+6. Checks: each step's `--check`, `publish_look.py --check`, `retarget_underground.py --check --server <server>`
+   (it needs the server for door tiles; without it the check exits 1) and `continent_v2_territories.py`.
+7. Commit the client. Then `publish_server.py --apply` with every `--bake`, commit the record, apply again and
+   `--check` (above).
+
+After the run:
+- `publish_server.py` rewrites `_continent_v2/publication.json` without the top-level `shoreResourceAmendments`,
+  `interiorResourceAmendments` and `buildingExtensions` blocks. Carry them over from HEAD unchanged before
+  committing.
+- `_shared/meshes/index.json` comes back with CRLF line endings on Windows (`core.autocrlf=false`), an
+  80,000-line diff with identical content. Restore LF.
+- Compare every map's served grid with HEAD: walkable and reach-from-arrival counts, plus the closed tiles. Only
+  the changed footprint should close. Check that its door, NPC posts and paths stay reached.
+- Review the server table diff row by row. Most of it is generated reordering. Look for labels and rows that differ.
+- `publish_client.py` reuses a shared-mesh prototype that the package's committed manifests already place, even
+  when its texture-policy annotation is implicit. A prototype new to the package must still match the pool's
+  texture policy.
+- The republish commit is large (about 35 MB packed for all 17 maps). Push it in batches.
+
 ## Harvest presentation
 
 Owner-approved 2026-10-14 (`work-output/landfall-audit-2026-10-14/harvest/FINDINGS.md` 5.1-5.6): inside a harvest
