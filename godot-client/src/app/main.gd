@@ -479,6 +479,7 @@ var minimap_marker_overlay: Control
 ## Short-lived world effects the server announced. Kept only so a test can see
 ## what is on screen; each one frees itself when it finishes.
 var world_effects: Array = []
+var _boss_mechanic_cues: Dictionary = {}
 var _world_effects_compact_at := 32
 ## The glitter around the player while they harvest; null when they are not.
 var harvest_sparkle: HarvestSparkle3D
@@ -594,6 +595,7 @@ var models: Dictionary = {}
 var actor_type_models: Dictionary = {}
 var npc_looks: Dictionary = {}
 var npc_characters: Dictionary = {}
+var npc_human_faces: Dictionary = {}
 var npc_workstations: Dictionary = {}
 var creation_options: Array = []
 var selected_creation_class := 0
@@ -1683,6 +1685,7 @@ func _ready() -> void:
 	actor_type_models = model_registry.get("actorTypes", {})
 	npc_looks = model_registry.get("npcLooks", {})
 	npc_characters = _json("res://data/actors/npc_characters.json")
+	npc_human_faces = _json("res://data/actors/npc_human_faces.json")
 	npc_workstations = _json("res://data/actors/workstations.json")
 	creation_options = PLAYER_CREATION.options(model_registry)
 	animation_config = _json("res://data/animations/luminous.json")
@@ -5146,6 +5149,7 @@ func _on_reconnect_progress(attempt: int, _total: int, delay_msec: int) -> void:
 	_sync_connection_banner()
 
 func _clear_world_presentation(retain_map_resources := false) -> void:
+	_clear_boss_mechanic_cues()
 	lantern_mine_lighting.clear()
 	campaign_rescue.clear()
 	_campaign_world_key = []
@@ -7105,6 +7109,7 @@ func _retry_browser_area_files() -> void:
 func _load_server_map() -> void:
 	if AppState.current_map.is_empty() or loaded_server_map == AppState.current_map:
 		return
+	_clear_boss_mechanic_cues()
 	camera_shader_warmup.cancel()
 	var normalized_map: String = MapRegistry.normalize_server_map_id(AppState.current_map)
 	if OS.has_feature("web") and not WebPrototype.ensure_map(AppState.current_map, "destination"):
@@ -17070,6 +17075,9 @@ func _cast_spell_by_id(spell_id: int) -> void:
 	_begin_prepared_cast(spell_id, power)
 
 func _on_magic_state(data: Dictionary) -> void:
+	if data.get("kind") == "boss_mechanic":
+		_on_boss_mechanic(data)
+		return
 	if data.get("kind") == "target_cast":
 		# Apply the preceding movement/turn actor snapshots first. A deferred
 		# turn must not replace the channel we are about to start.
@@ -17117,6 +17125,40 @@ func _present_target_cast(data: Dictionary) -> void:
 			caster.combat_presentation.set_spell_power(int(data.get("power", 1)))
 	elif data.get("phase") in ["approach", "cancelled"] and caster.current_action in [&"cast_channel_enter", &"cast_channel"]:
 		caster.play_action(&"cast_exit")
+
+func _on_boss_mechanic(data: Dictionary) -> void:
+	var script = preload("res://src/world/boss_mechanic_3d.gd")
+	if not script.accepts(data) or adapter == null: return
+	if MapRegistry.normalize_server_map_id(str(data.get("map_id", ""))) != MapRegistry.normalize_server_map_id(AppState.current_map): return
+	var key := str(data.get("id", ""))
+	var impact := str(data.get("phase", "")) == "impact"
+	if str(data.get("phase", "")) in ["clear", "impact"]:
+		var warning: Variant = _boss_mechanic_cues.get(key)
+		if is_instance_valid(warning): warning.queue_free()
+		_boss_mechanic_cues.erase(key)
+		if not impact: return
+	if impact: key += ":impact"
+	var effect: Variant = _boss_mechanic_cues.get(key)
+	if not is_instance_valid(effect):
+		for old_key: Variant in _boss_mechanic_cues.keys():
+			if not is_instance_valid(_boss_mechanic_cues[old_key]): _boss_mechanic_cues.erase(old_key)
+		if _boss_mechanic_cues.size() >= 32: return
+		effect = script.new()
+		world_root.add_child(effect)
+		effect.configure(data, adapter, actor_nodes, _campaign_surface_height)
+		_boss_mechanic_cues[key] = effect
+	else:
+		effect.apply_event(data)
+
+func _is_boss_objective(actor_id: int) -> bool:
+	for cue: Variant in _boss_mechanic_cues.values():
+		if is_instance_valid(cue) and cue.friendly_actor(actor_id): return true
+	return false
+
+func _clear_boss_mechanic_cues() -> void:
+	for node: Variant in _boss_mechanic_cues.values():
+		if is_instance_valid(node): node.queue_free()
+	_boss_mechanic_cues.clear()
 
 func _on_technique_effect(data: Dictionary) -> void:
 	var key := str(data.get("key", ""))
@@ -17255,6 +17297,8 @@ func _spell_target_candidate(spell_id: int, actor_id: int) -> bool:
 	if not bool(actor.get("alive", int(actor.get("health", 0)) > 0)):
 		return actor_id != AppState.local_actor_id and (int(actor.get("kind", 0)) in [1, 4] or _is_rescue_companion(actor_id)) \
 			and spell.get("scope") == "target" and spell.get("effect") == "heal"
+	if _is_boss_objective(actor_id):
+		return not bool(spell.get("hostile", false)) and spell.get("effect") in ["heal", "regeneration", "dispel"]
 	if bool(spell.get("hostile", false)):
 		if spell.get("effect") == "mana_drain" and int(actor.get("kind", 0)) not in [1, 4]: return false
 		if spell.get("effect") == "disrupt" and not ReplicatedActor3D.is_summon(actor): return false
@@ -18738,6 +18782,7 @@ func _is_shelves_grower(actor_id: int, dto: Dictionary) -> bool:
 	return false
 
 func _is_attackable_actor(actor_id: int, dto: Dictionary) -> bool:
+	if _is_boss_objective(actor_id): return false
 	if actor_id < 0 or actor_id == AppState.local_actor_id or dto.is_empty():
 		return false
 	if _is_tutorial_companion(actor_id):
@@ -20381,6 +20426,9 @@ func _model_for_actor(dto: Dictionary) -> String:
 	var character := NpcCharacterLooks.find(dto, npc_characters)
 	if not character.is_empty():
 		return str(character["model"])
+	var face := NpcCharacterLooks.face(dto, npc_human_faces)
+	if not face.is_empty():
+		return str(face["model"])
 	var actor_type_value := int(dto.get("actor_type", 1))
 	var actor_type := str(actor_type_value)
 	var kind := int(dto.get("kind", 0))
@@ -20403,7 +20451,8 @@ func _presentation_dto(dto: Dictionary) -> Dictionary:
 	# Keep the actor record shallow. Named NPCs get a separate appearance
 	# dictionary; other actors share their unchanged appearance with the state.
 	var character := NpcCharacterLooks.find(dto, npc_characters)
-	var result: Dictionary = NpcCharacterLooks.present(dto, character)
+	var result: Dictionary = NpcCharacterLooks.present(dto, character,
+		NpcCharacterLooks.face(dto, npc_human_faces))
 	var station: Dictionary = npc_workstations.get(str(dto.get("name", "")).to_lower(), {})
 	var station_tile: Array = station.get("tile", [-1, -1])
 	if int(dto.get("kind", 0)) == 2 and int(dto.get("actor_type", -1)) == int(station.get("actorType", -2)) \
