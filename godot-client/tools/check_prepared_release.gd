@@ -50,7 +50,7 @@ func _load_project_scripts() -> bool:
 		return false
 	for property: String in PROJECT_SCRIPTS:
 		var loaded: Variant = load(PROJECT_SCRIPTS[property])
-		if not _check(loaded is GDScript, "cannot load " + PROJECT_SCRIPTS[property]):
+		if not _check(loaded is GDScript and (loaded as GDScript).can_instantiate(), "cannot load " + PROJECT_SCRIPTS[property]):
 			return false
 		set(property, loaded)
 	return true
@@ -250,6 +250,8 @@ func _entry(row: Dictionary) -> Dictionary:
 
 func _run() -> void:
 	if not _load_project_scripts():
+		if _failures.is_empty():
+			_failures.append("project scripts did not load")
 		_finish()
 		return
 	var arguments := OS.get_cmdline_user_args()
