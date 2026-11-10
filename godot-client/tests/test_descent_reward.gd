@@ -137,6 +137,22 @@ func _check_status(app: Node, windows: Control) -> void:
 		"the status counts the time left (%s)" % hud.clock.text)
 	_expect(hud.clock_text(3725) == "1:02:05" and hud.clock_text(65) == "1:05" and hud.clock_text(-3) == "0:00",
 		"the clock reads minutes and seconds")
+	# A combat HUD dragged to the right edge: the status stays left of the rail.
+	var rail := Panel.new()
+	hud.add_child(rail)
+	rail.position = Vector2(hud.size.x - 96.0, 0)
+	rail.size = Vector2(96.0, hud.size.y)
+	hud.dock_rail = rail
+	hud.configure(func() -> Rect2: return Rect2(hud.global_position + Vector2(hud.size.x - 140.0, 40), Vector2(220, 60)))
+	hud._layout()
+	_expect(hud.panel.position.x + hud.panel.size.x <= hud.size.x - 96.0 - 8.0 + 0.5,
+		"the status keeps left of the right rail (ends at %.0f, rail at %.0f)" % [hud.panel.position.x + hud.panel.size.x, hud.size.x - 96.0])
+	rail.hide()
+	hud._layout()
+	_expect(hud.panel.position.x + hud.panel.size.x > hud.size.x - 96.0 - 8.0,
+		"without a rail the status may use the whole width")
+	hud.dock_rail = null
+	rail.queue_free()
 	_packet(app, {"version": 1, "kind": "state", "open": false})
 	await process_frame
 	_expect(not hud.panel.visible, "leaving the descent hides the status")

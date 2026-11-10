@@ -271,6 +271,11 @@ func _ready() -> void:
 	_bind_party_labels(party_panel)
 	sync_all()
 
+## Main's right rail: the readouts under the combat HUD keep left of it.
+func set_dock_rail(rail: Control) -> void:
+	gauntlet_progress_hud.dock_rail = rail
+	descent_status_hud.dock_rail = rail
+
 func configure(atlas: ItemAtlas, guide: Control = null) -> void:
 	item_atlas = atlas
 	if gauntlet_loot_window != null: gauntlet_loot_window.configure(atlas)

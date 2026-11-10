@@ -1,7 +1,7 @@
 extends SceneTree
 ## A descent's fog of war (descent_v1, server message 188): the state as
 ## AppState keeps it, the explored bits in the contract's order, the tile to
-## cell lookup, the black volume and the map picture built from them, the
+## cell lookup, the fog shader's cells and frame and the map picture built from them, the
 ## culling that hides creatures and objects in the fog, and what a closed
 ## state leaves behind - in the pure helper and through Main.
 
@@ -64,7 +64,7 @@ func _run() -> void:
 	_check_state(app)
 	var grid := DescentFog.view(app.descent)
 	_check_lookup(grid)
-	_check_mesh(grid)
+	_check_shader(grid)
 	_check_image(grid)
 	_check_sections_cull(grid)
 	app._on_packet(EloriaProtocol.ServerMessage.ELORIA_DESCENT_STATE,
@@ -72,7 +72,7 @@ func _run() -> void:
 	_expect(app.descent.is_empty() and DescentFog.view(app.descent).is_empty(),
 		"open false clears the descent state")
 	_expect(not DescentFog.tile_hidden(DescentFog.view(app.descent), 106, 200)
-		and DescentFog.build_mesh(DescentFog.view(app.descent), _adapter(), 0.0) == null,
+		and DescentFog.cells_image(DescentFog.view(app.descent)) == null,
 		"a closed descent hides no tile and builds no fog")
 	await _check_main(app)
 	print("descent fog checks: %d, failures: %d" % [checks, failures])
@@ -160,115 +160,52 @@ func _check_lookup(grid: Dictionary) -> void:
 func _grid_point(adapter: CoordinateAdapter, cell: Vector2) -> Vector3:
 	return adapter.server_to_godot(ORIGIN.x + cell.x * 2.0, ORIGIN.y + cell.y * 2.0, 0.0)
 
-func _check_mesh(grid: Dictionary) -> void:
+func _check_shader(grid: Dictionary) -> void:
 	var adapter := _adapter()
-	var mesh: ArrayMesh = DescentFog.build_mesh(grid, adapter, 0.5)
-	_expect(mesh != null and mesh.get_surface_count() == 1, "the fog is one surface: one draw call")
-	if mesh == null:
-		return
-	var arrays := mesh.surface_get_arrays(0)
-	var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-	var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
-	var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
-	_expect(vertices.size() % 4 == 0 and indices.size() == vertices.size() / 4 * 6, "the fog is built of quads")
-	var tops: Array[Rect2] = []
-	var sides: Dictionary = {}
-	var heights_ok := true
-	var facing_ok := true
-	for quad: int in range(vertices.size() / 4):
-		var corners := vertices.slice(quad * 4, quad * 4 + 4)
-		var normal := normals[quad * 4]
-		# Normals come back octahedral-compressed: near, not exactly, up.
-		if normal.y > 0.9:
-			var rect := Rect2(Vector2(corners[0].x, corners[0].z), Vector2.ZERO)
-			for corner: Vector3 in corners:
-				rect = rect.expand(Vector2(corner.x, corner.z))
-				heights_ok = heights_ok and is_equal_approx(corner.y, 0.5 + DescentFog.TOP_METRES)
-			tops.append(rect)
-			continue
-		var low := INF
-		var high := -INF
-		var ends: Dictionary = {}
-		for corner: Vector3 in corners:
-			low = minf(low, corner.y)
-			high = maxf(high, corner.y)
-			ends["%.2f,%.2f" % [corner.x, corner.z]] = Vector2(corner.x, corner.z)
-		heights_ok = heights_ok and is_equal_approx(low, 0.5 - DescentFog.BELOW_METRES) \
-			and is_equal_approx(high, 0.5 + DescentFog.TOP_METRES)
-		var keys: Array = ends.keys()
-		keys.sort()
-		var key := "|".join(PackedStringArray(keys))
-		sides[key] = true
-		# A side faces the revealed cell it bounds.
-		var middle: Vector2 = (ends[keys[0]] + ends[keys[1]]) * 0.5
-		var into := Vector2(normal.x, normal.z) * 0.5
-		var inside: Vector2i = adapter.godot_to_server(Vector3(middle.x + into.x, 0, middle.y + into.y))
-		facing_ok = facing_ok and DescentFog.tile_revealed(grid, inside.x, inside.y)
-	_expect(DescentFog.TOP_METRES == 5.5 and DescentFog.BELOW_METRES == 1.0,
-		"the volume's top is 5.5 m (over the 5.0 m Serpent walls) and its sides reach 1 m below the floor")
-	_expect(heights_ok, "tops stand at 5.5 m over the floor and sides reach from 1 m below it to the top")
-	_expect(facing_ok, "every side faces the revealed cell beside it")
-	var covered_wrong := 0
+	var cells := DescentFog.cells_image(grid)
+	var cells_wrong := 0
 	for cy: int in range(HEIGHT):
 		for cx: int in range(WIDTH):
-			var centre := _grid_point(adapter, Vector2(cx + 0.5, cy + 0.5))
-			var covered := false
-			for rect: Rect2 in tops:
-				covered = covered or rect.has_point(Vector2(centre.x, centre.z))
-			if covered == (Vector2i(cx, cy) in REVEALED_CELLS):
-				covered_wrong += 1
-	_expect(covered_wrong == 0, "a top face lies over every unrevealed cell and over no revealed one")
-	var outside := _grid_point(adapter, Vector2(-0.5, 0.5))
-	var past := false
-	for rect: Rect2 in tops:
-		past = past or rect.has_point(Vector2(outside.x, outside.z))
-	_expect(not past, "no top face reaches off the grid")
-	# Expected sides: every cell edge with a revealed cell on exactly one side,
-	# the grid's own edge counting as unrevealed.
-	var expected: Dictionary = {}
-	var is_open := func(cell: Vector2i) -> bool: return cell in REVEALED_CELLS
-	for cy: int in range(HEIGHT):
-		for cx: int in range(WIDTH + 1):
-			if is_open.call(Vector2i(cx - 1, cy)) != is_open.call(Vector2i(cx, cy)):
-				expected[_edge_key(adapter, Vector2(cx, cy), Vector2(cx, cy + 1))] = true
-	for cy: int in range(HEIGHT + 1):
-		for cx: int in range(WIDTH):
-			if is_open.call(Vector2i(cx, cy - 1)) != is_open.call(Vector2i(cx, cy)):
-				expected[_edge_key(adapter, Vector2(cx, cy), Vector2(cx + 1, cy))] = true
-	_expect(sides.size() == expected.size() and sides.keys().all(func(key: String) -> bool: return expected.has(key)),
-		"side faces stand exactly on the revealed boundaries, the grid's edge included (%d sides)" % expected.size())
-	# The (5, 4) corner cell: walls on its west and north, and on the grid's
-	# east and south edges beside it.
-	_expect(sides.has(_edge_key(adapter, Vector2(6, 4), Vector2(6, 5)))
-		and sides.has(_edge_key(adapter, Vector2(5, 5), Vector2(6, 5))),
-		"a revealed cell at the grid's edge is walled on that edge")
-	var all_open := grid.duplicate()
-	all_open["mask"] = PackedByteArray([0xff, 0xff, 0xff, 0xff])
-	var walls: ArrayMesh = DescentFog.build_mesh(all_open, adapter, 0.0)
-	var wall_normals: PackedVector3Array = walls.surface_get_arrays(0)[Mesh.ARRAY_NORMAL] if walls != null else PackedVector3Array()
-	_expect(walls != null and wall_normals.size() == (WIDTH + HEIGHT) * 2 * 4
-		and Array(wall_normals).all(func(normal: Vector3) -> bool: return absf(normal.y) < 0.1),
-		"a fully explored floor has no top, only the walls round the grid's edge")
-	var none_open := grid.duplicate()
-	none_open["mask"] = PackedByteArray([0, 0, 0, 0])
-	var dark: ArrayMesh = DescentFog.build_mesh(none_open, adapter, 0.0)
-	var dark_vertices: PackedVector3Array = dark.surface_get_arrays(0)[Mesh.ARRAY_VERTEX] if dark != null else PackedVector3Array()
-	_expect(dark != null and dark_vertices.size() == HEIGHT * 4,
-		"an unexplored floor is one top quad a row and no sides")
-	var black := DescentFog.material()
-	_expect(black.shading_mode == BaseMaterial3D.SHADING_MODE_UNSHADED and black.albedo_color == Color.BLACK
-		and black.cull_mode == BaseMaterial3D.CULL_DISABLED
-		and black.transparency == BaseMaterial3D.TRANSPARENCY_DISABLED,
-		"the fog is plain opaque unshaded black, seen from either side")
-
-func _edge_key(adapter: CoordinateAdapter, a: Vector2, b: Vector2) -> String:
-	var keys: Array[String] = []
-	for cell: Vector2 in [a, b]:
-		var point := _grid_point(adapter, cell)
-		keys.append("%.2f,%.2f" % [point.x, point.z])
-	keys.sort()
-	return "|".join(PackedStringArray(keys))
-
+			var lit := cells.get_pixel(cx, cy).r > 0.5
+			if lit != (Vector2i(cx, cy) in REVEALED_CELLS):
+				cells_wrong += 1
+	_expect(cells != null and cells.get_format() == Image.FORMAT_L8 and cells.get_size() == Vector2i(WIDTH, HEIGHT)
+		and cells_wrong == 0, "the shader's cells are one L8 texel a cell in grid order, lit where revealed")
+	# Every cell centre maps back to its own cell, with the map at identity and
+	# with world_root moved and turned.
+	var moved := Transform3D(Basis(Vector3.UP, 0.5), Vector3(7, 2, -3))
+	for to_world: Transform3D in [Transform3D.IDENTITY, moved]:
+		var values := DescentFog.frame(grid, adapter, to_world)
+		var mapped_wrong := 0
+		for cy: int in range(HEIGHT):
+			for cx: int in range(WIDTH):
+				var point: Vector3 = to_world * _grid_point(adapter, Vector2(cx + 0.5, cy + 0.5))
+				var d := Vector2(point.x, point.z) - (values.grid_origin as Vector2)
+				var g := Vector2((values.to_cell_x as Vector2).dot(d), (values.to_cell_y as Vector2).dot(d))
+				# Single-precision metres a few hundred out: compare to a thousandth of a cell.
+				if g.distance_to(Vector2(cx + 0.5, cy + 0.5)) > 0.001:
+					mapped_wrong += 1
+		_expect(values.get("grid_cells") == Vector2i(WIDTH, HEIGHT) and mapped_wrong == 0,
+			"the shader frame maps every cell centre to its cell (%s)" % ("moved" if to_world != Transform3D.IDENTITY else "identity"))
+	_expect(DescentFog.frame({}, adapter).is_empty() and DescentFog.frame(grid, null).is_empty(),
+		"no grid or no adapter gives no frame")
+	var fog := DescentFog.material()
+	_expect(fog.shader == DescentFog.SHADER and fog.render_priority == Material.RENDER_PRIORITY_MAX
+		and is_equal_approx(float(fog.get_shader_parameter("soft_cells")), DescentFog.SOFT_CELLS)
+		and is_equal_approx(float(fog.get_shader_parameter("strength")), DescentFog.STRENGTH),
+		"the fog is the shader at its softness and strength, drawn after the other transparent surfaces")
+	_expect(DescentFog.SOFT_CELLS > 0.0 and DescentFog.SOFT_CELLS <= 2.0 and DescentFog.STRENGTH > 0.8 and DescentFog.STRENGTH <= 1.0,
+		"the fog thickens within the two cells the shader searches and stays dark")
+	var quad := DescentFog.screen_quad()
+	_expect(quad.mesh is QuadMesh and (quad.mesh as QuadMesh).size == Vector2(2, 2) and quad.extra_cull_margin >= 16384.0
+		and quad.material_override is ShaderMaterial and quad.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF,
+		"the fog is one screen quad that is never culled and casts no shadow")
+	var texture := ImageTexture.create_from_image(cells)
+	_expect(DescentFog.apply(quad.material_override as ShaderMaterial, grid, adapter, texture)
+		and (quad.material_override as ShaderMaterial).get_shader_parameter("revealed_cells") == texture
+		and not DescentFog.apply(quad.material_override as ShaderMaterial, {}, adapter, texture),
+		"applying a grid sets the frame and the cells; an empty grid is refused")
+	quad.free()
 func _check_image(grid: Dictionary) -> void:
 	var adapter := _adapter()
 	var picture := DescentFog.image(grid, adapter)
@@ -337,7 +274,7 @@ func _check_sections_cull(grid: Dictionary) -> void:
 	_expect(fog_volume.visible, "the culling never touches the fog volume")
 	world.queue_free()
 
-## Main: the state builds the volume, the picture and the culling test, and a
+## Main: the state builds the screen quad, the picture and the culling test, and a
 ## closed state takes all three away.
 func _check_main(app: Node) -> void:
 	var main: Control = load("res://src/app/main.tscn").instantiate()
@@ -353,9 +290,10 @@ func _check_main(app: Node) -> void:
 	app.authenticated = true
 	app._on_packet(EloriaProtocol.ServerMessage.ELORIA_DESCENT_STATE, _bytes(_state()))
 	var volume: MeshInstance3D = main._descent_fog_node
-	_expect(is_instance_valid(volume) and volume.get_parent() == main.world_root and volume.mesh != null
-		and volume.visible and volume.is_in_group(SectionsScript.EXEMPT_GROUP),
-		"a descent state stands the fog volume under the world root")
+	_expect(is_instance_valid(volume) and volume.get_parent() == main.world_root and volume.mesh is QuadMesh
+		and volume.visible and volume.is_in_group(SectionsScript.EXEMPT_GROUP)
+		and (volume.material_override as ShaderMaterial).get_shader_parameter("revealed_cells") == main._descent_fog_cells,
+		"a descent state stands the fog's screen quad under the world root, reading the floor's cells")
 	_expect(not main._descent_fog_picture.is_empty()
 		and main.minimap_background._pictures.any(func(row: Dictionary) -> bool:
 			return row.texture == main._descent_fog_picture.texture)
@@ -363,10 +301,12 @@ func _check_main(app: Node) -> void:
 			return row.texture == main._descent_fog_picture.texture),
 		"the fog picture lies on the minimap and the full map")
 	_expect(main.secret_sections.fog_hides.is_valid(), "the culling pass hides by the fog")
-	var built_mesh: Mesh = volume.mesh if is_instance_valid(volume) else null
+	var built_cells: ImageTexture = main._descent_fog_cells
+	var built_key: String = main._descent_fog_key
 	app._on_packet(EloriaProtocol.ServerMessage.ELORIA_DESCENT_STATE,
 		_bytes(_state(EXPLORED, {"time_left": 2344})))
-	_expect(is_instance_valid(volume) and volume.mesh == built_mesh, "a clock tick does not rebuild the fog")
+	_expect(is_instance_valid(volume) and main._descent_fog_node == volume and main._descent_fog_cells == built_cells
+		and main._descent_fog_key == built_key, "a clock tick does not rebuild the fog")
 	# Objects and creatures in the fog: hidden, not marked and not clicked.
 	var chest := MapObject3D.new()
 	chest.server_tile = Vector2i(106, 200)

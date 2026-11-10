@@ -942,11 +942,13 @@ var _outdoors := false
 ## when the player's section changes or the objects change, not every frame.
 var _section_objects_dirty := true
 ## A descent floor's fog of war (descent_fog.gd, server message 188): the
-## floor grid while the fog applies to the loaded map (else empty), the black
-## volume over its unrevealed cells, the picture laid over its rectangle on
-## both maps, and the key they were last built for (`_sync_descent_fog`).
+## floor grid while the fog applies to the loaded map (else empty), the screen
+## quad that darkens its unrevealed cells and the texture of its revealed ones,
+## the picture laid over its rectangle on both maps, and the key they were last
+## built for (`_sync_descent_fog`).
 var _descent_fog_grid: Dictionary = {}
 var _descent_fog_node: MeshInstance3D
+var _descent_fog_cells: ImageTexture
 var _descent_fog_picture: Dictionary = {}
 var _descent_fog_key := ""
 ## The party's other members by name, refreshed each culling pass: the fog
@@ -1834,6 +1836,7 @@ func _ready() -> void:
 	extension_windows = ExtensionWindowsScript.new()
 	game_view.add_child(extension_windows)
 	extension_windows.configure(item_atlas, lantern_guide)
+	extension_windows.set_dock_rail(right_rail)
 	_configure_service_buttons()
 	extension_windows.gauntlet_loot_window.configure(item_atlas, model_registry, equipment_config)
 	extension_windows.gauntlet_loot_window.configure_completion_wait(_gauntlet_creature_deaths_pending)
@@ -11506,7 +11509,7 @@ func _update_secret_sections(force: bool = false) -> void:
 
 
 ## Builds, refreshes or removes a descent floor's fog from AppState.descent:
-## the black volume over its unrevealed cells under world_root, the picture
+## the screen quad darkening its unrevealed cells under world_root, the picture
 ## over its rectangle on the minimap and the full map, and the culling test
 ## that hides creatures and objects standing in it. The fog applies only while
 ## the loaded map declares the floor's section (the pool map the server's grid
@@ -11528,17 +11531,19 @@ func _sync_descent_fog() -> void:
 	if grid.is_empty():
 		_remove_descent_fog_presentation()
 	else:
-		var mesh: ArrayMesh = DescentFogScript.build_mesh(grid, adapter, adapter.walking_height)
 		if not is_instance_valid(_descent_fog_node):
-			_descent_fog_node = MeshInstance3D.new()
+			_descent_fog_node = DescentFogScript.screen_quad()
 			_descent_fog_node.name = "DescentFog"
 			# Shown and hidden here, never sorted into a section.
 			_descent_fog_node.add_to_group(SecretSectionsScript.EXEMPT_GROUP)
-			_descent_fog_node.material_override = DescentFogScript.material()
-			_descent_fog_node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			world_root.add_child(_descent_fog_node)
-		_descent_fog_node.mesh = mesh
-		_descent_fog_node.visible = mesh != null
+		var cells: Image = DescentFogScript.cells_image(grid)
+		if _descent_fog_cells != null and _descent_fog_cells.get_size() == Vector2(cells.get_size()):
+			_descent_fog_cells.update(cells)
+		else:
+			_descent_fog_cells = ImageTexture.create_from_image(cells)
+		_descent_fog_node.visible = DescentFogScript.apply(_descent_fog_node.material_override as ShaderMaterial,
+			grid, adapter, _descent_fog_cells, world_root.global_transform)
 		var image: Image = DescentFogScript.image(grid, adapter)
 		var texture: ImageTexture = _descent_fog_picture.get("texture") as ImageTexture
 		if texture != null and texture.get_size() == Vector2(image.get_size()):
@@ -11559,6 +11564,7 @@ func _remove_descent_fog_presentation() -> void:
 	if is_instance_valid(_descent_fog_node):
 		_descent_fog_node.queue_free()
 	_descent_fog_node = null
+	_descent_fog_cells = null
 	_descent_fog_picture = {}
 
 

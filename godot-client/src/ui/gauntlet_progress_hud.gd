@@ -2,6 +2,7 @@ extends Control
 ## A read-only companion to the movable combat HUD. No client clock advances
 ## encounters: only a new server pulse serial announces an arrival.
 const ARRIVAL_HOLD_MSEC := 2500
+const DescentStatusHud := preload("res://src/ui/descent_status_hud.gd")
 var panel: PanelContainer
 var heading: Label
 var counts: Label
@@ -16,6 +17,8 @@ var _refresh_at := 0
 var _anchor: Callable
 var _enabled: Callable
 var _app: Node
+## Main's right rail: the readout keeps left of it (descent_status_hud.gd clear_right).
+var dock_rail: Control
 
 func _ready() -> void:
 	name = "GauntletProgressHud"
@@ -133,11 +136,12 @@ func _layout() -> void:
 	if panel == null or not panel.visible:
 		return
 	var bounds := size
-	var width := minf(380.0, maxf(120.0, bounds.x - 16.0))
+	var right: float = DescentStatusHud.clear_right(self, dock_rail)
+	var width := minf(380.0, maxf(120.0, right - 16.0))
 	panel.custom_minimum_size.x = width
 	panel.size.x = width
 	panel.reset_size()
-	var anchor := Rect2(Vector2(bounds.x * 0.5 - width * 0.5, 64), Vector2(width, 60))
+	var anchor := Rect2(Vector2(right * 0.5 - width * 0.5, 64), Vector2(width, 60))
 	if _anchor.is_valid():
 		var value: Variant = _anchor.call()
 		if value is Rect2:
@@ -145,5 +149,5 @@ func _layout() -> void:
 	var y := anchor.end.y + 6
 	if y + panel.size.y > bounds.y - 8:
 		y = anchor.position.y - panel.size.y - 6
-	panel.position = Vector2(clampf(anchor.get_center().x - panel.size.x * 0.5, 8, maxf(8, bounds.x - panel.size.x - 8)),
+	panel.position = Vector2(clampf(anchor.get_center().x - panel.size.x * 0.5, 8, maxf(8, right - panel.size.x - 8)),
 		clampf(y, 8, maxf(8, bounds.y - panel.size.y - 8)))

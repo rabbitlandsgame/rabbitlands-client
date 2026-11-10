@@ -15,6 +15,9 @@ var _anchor_msec := 0
 var _refresh_at := 0
 var _anchor: Callable
 var _app: Node
+## Main's right rail: the readout keeps left of it while it shows, so a combat
+## HUD dragged to the right edge does not push the readout under the rail.
+var dock_rail: Control
 
 func _ready() -> void:
 	name = "DescentStatusHud"
@@ -125,10 +128,11 @@ func _layout() -> void:
 	if panel == null or not panel.visible:
 		return
 	var bounds := size
+	var right := clear_right(self, dock_rail)
 	panel.reset_size()
-	var width := minf(panel.get_combined_minimum_size().x, maxf(120.0, bounds.x - 16.0))
+	var width := minf(panel.get_combined_minimum_size().x, maxf(120.0, right - 16.0))
 	panel.size.x = width
-	var anchor := Rect2(Vector2(bounds.x * 0.5 - width * 0.5, 64), Vector2(width, 60))
+	var anchor := Rect2(Vector2(right * 0.5 - width * 0.5, 64), Vector2(width, 60))
 	if _anchor.is_valid():
 		var value: Variant = _anchor.call()
 		if value is Rect2 and (value as Rect2).size != Vector2.ZERO:
@@ -136,5 +140,15 @@ func _layout() -> void:
 	var y := anchor.end.y + 6
 	if y + panel.size.y > bounds.y - 8:
 		y = anchor.position.y - panel.size.y - 6
-	panel.position = Vector2(clampf(anchor.get_center().x - panel.size.x * 0.5, 8, maxf(8, bounds.x - panel.size.x - 8)),
+	panel.position = Vector2(clampf(anchor.get_center().x - panel.size.x * 0.5, 8, maxf(8, right - panel.size.x - 8)),
 		clampf(y, 8, maxf(8, bounds.y - panel.size.y - 8)))
+
+## The right edge a readout in `owner_control` may reach: its own width, or
+## the left edge of `rail` when that shows and lies inside it.
+static func clear_right(owner_control: Control, rail: Control) -> float:
+	var right := owner_control.size.x
+	if is_instance_valid(rail) and rail.is_visible_in_tree():
+		var left := (owner_control.get_global_transform().affine_inverse() * rail.global_position).x
+		if left > 0.0:
+			right = minf(right, left)
+	return right

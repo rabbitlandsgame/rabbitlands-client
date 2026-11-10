@@ -10,24 +10,22 @@ extends RefCounted
 ## game scene (tests/test_descent_fog.gd).
 ##
 ## Main draws three things from it:
-## - a black, unshaded volume over every unrevealed cell (`build_mesh`): a top
-##   face TOP_METRES above the floor, higher than any wall, and side faces where
-##   a revealed cell meets an unrevealed one or the edge of the grid, so the
-##   tilted camera cannot look under the edge of the black;
+## - a screen quad (`screen_quad`, descent_fog.gdshader) that darkens each pixel
+##   by the floor cell the surface it shows stands on: clear over revealed
+##   cells, thickening over SOFT_CELLS beyond them, then STRENGTH dark. It reads
+##   the depth buffer, so unrevealed ground near the camera never covers
+##   revealed ground behind it (a volume over the unrevealed cells did);
 ## - a picture over the floor's rectangle for the minimap and the full map
 ##   (`image`, `extent`), opaque where unrevealed;
 ## - the test that hides creatures and objects on unrevealed cells
 ##   (`tile_hidden`).
 
-## The top of the volume above the floor: just above the tallest Serpent
-## theme wall (5.0 m), so the black lies over the walls, not in them, and low
-## enough that the 60 degree camera sees revealed floor past it (5.5 / tan 60
-## = 3.2 m, inside the two cells of rock the server reveals beside revealed
-## floor). The contract's 5.5 m.
-const TOP_METRES := 5.5
-## The side faces reach this far below the floor, so no seam of light shows
-## where they meet uneven ground.
-const BELOW_METRES := 1.0
+const SHADER := preload("res://src/world/descent_fog.gdshader")
+## Beyond the revealed cells the fog thickens over this many cells (the two
+## cells of rock the server reveals beside revealed floor keep the walls clear)
+## and then holds at STRENGTH: unexplored ground stays a dark hint, not a void.
+const SOFT_CELLS := 1.5
+const STRENGTH := 0.94
 ## A grid no larger than this many cells a side is accepted (840 tiles at the
 ## smallest cell is 840 cells).
 const MAX_CELLS := 1024
@@ -204,87 +202,81 @@ static func image(grid: Dictionary, adapter: CoordinateAdapter) -> Image:
 	return Image.create_from_data(width, height, false, Image.FORMAT_RGBA8, pixels)
 
 
-## The volume over the unrevealed cells, one surface, or null when there is
-## nothing to draw. `floor_height` is the walking height of the map. Top faces
-## are merged along each row; a side face stands on every cell edge with a
-## revealed cell on one side and an unrevealed cell or the grid's edge on the
-## other (outside the grid is void: nothing is seen past the floor's edge).
-static func build_mesh(grid: Dictionary, adapter: CoordinateAdapter, floor_height: float) -> ArrayMesh:
-	if grid.is_empty() or adapter == null:
+## The revealed cells as the fog shader reads them: one L8 texel a cell,
+## x = cell column, y = cell row (grid order, not map-picture order), 255 where
+## revealed.
+static func cells_image(grid: Dictionary) -> Image:
+	if grid.is_empty():
 		return null
 	var width := int(grid.width)
 	var height := int(grid.height)
 	var mask: PackedByteArray = grid.mask
-	var frame := _corners(grid, adapter)
-	var start: Vector3 = frame[0]
-	var step_x: Vector3 = frame[1]
-	var step_y: Vector3 = frame[2]
-	var top := Vector3.UP * (floor_height + TOP_METRES)
-	var bottom := Vector3.UP * (floor_height - BELOW_METRES)
-	var vertices := PackedVector3Array()
-	var normals := PackedVector3Array()
-	var indices := PackedInt32Array()
+	var pixels := PackedByteArray()
+	pixels.resize(width * height)
 	for cy: int in range(height):
-		var cx := 0
-		while cx < width:
-			if revealed(mask, width, cx, cy):
-				cx += 1
-				continue
-			var first := cx
-			while cx < width and not revealed(mask, width, cx, cy):
-				cx += 1
-			var a := start + step_x * first + step_y * cy
-			var b := start + step_x * cx + step_y * cy
-			_quad(vertices, normals, indices, a + top, b + top,
-				b + step_y + top, a + step_y + top, Vector3.UP)
-	# Edges between columns cx - 1 and cx (x = 0..width), then between rows.
-	# Each side faces the revealed cell it bounds.
-	for cy: int in range(height):
-		for cx: int in range(width + 1):
-			var west := revealed(mask, width, cx - 1, cy) if cx > 0 else false
-			var east := revealed(mask, width, cx, cy) if cx < width else false
-			if west == east:
-				continue
-			var a := start + step_x * cx + step_y * cy
-			_quad(vertices, normals, indices, a + bottom, a + step_y + bottom,
-				a + step_y + top, a + top, (-step_x if west else step_x).normalized())
-	for cy: int in range(height + 1):
 		for cx: int in range(width):
-			var near := revealed(mask, width, cx, cy - 1) if cy > 0 else false
-			var far := revealed(mask, width, cx, cy) if cy < height else false
-			if near == far:
-				continue
-			var a := start + step_x * cx + step_y * cy
-			_quad(vertices, normals, indices, a + bottom, a + step_x + bottom,
-				a + step_x + top, a + top, (-step_y if near else step_y).normalized())
-	if indices.is_empty():
-		return null
-	var arrays := []
-	arrays.resize(Mesh.ARRAY_MAX)
-	arrays[Mesh.ARRAY_VERTEX] = vertices
-	arrays[Mesh.ARRAY_NORMAL] = normals
-	arrays[Mesh.ARRAY_INDEX] = indices
-	var mesh := ArrayMesh.new()
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-	return mesh
+			if revealed(mask, width, cx, cy):
+				pixels[cy * width + cx] = 255
+	return Image.create_from_data(width, height, false, Image.FORMAT_L8, pixels)
 
 
-## Black, unshaded and two-sided: the same on Forward+ and Compatibility, with
-## no depth tricks, and untouched by the environment's distance fog, which
-## would grey the far edge of the black.
-static func material() -> StandardMaterial3D:
-	var black := StandardMaterial3D.new()
-	black.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	black.albedo_color = Color.BLACK
-	black.cull_mode = BaseMaterial3D.CULL_DISABLED
-	black.disable_fog = true
-	return black
+## The shader's frame for the grid: {grid_origin, to_cell_x, to_cell_y,
+## grid_cells}. A global point p lies in cell floor((dot(to_cell_x, d),
+## dot(to_cell_y, d))) for d = p.xz - grid_origin. `to_world` places the map's
+## coordinates (world_root's) in the scene. Empty when the frame is degenerate.
+static func frame(grid: Dictionary, adapter: CoordinateAdapter,
+		to_world: Transform3D = Transform3D.IDENTITY) -> Dictionary:
+	if grid.is_empty() or adapter == null:
+		return {}
+	var corners := _corners(grid, adapter)
+	var origin: Vector3 = to_world * corners[0]
+	var axis_x: Vector3 = to_world.basis * corners[1]
+	var axis_y: Vector3 = to_world.basis * corners[2]
+	var step_x := Vector2(axis_x.x, axis_x.z)
+	var step_y := Vector2(axis_y.x, axis_y.z)
+	var det := step_x.x * step_y.y - step_y.x * step_x.y
+	if is_zero_approx(det):
+		return {}
+	return {"grid_origin": Vector2(origin.x, origin.z),
+		"to_cell_x": Vector2(step_y.y, -step_y.x) / det,
+		"to_cell_y": Vector2(-step_x.y, step_x.x) / det,
+		"grid_cells": Vector2i(int(grid.width), int(grid.height))}
 
 
-static func _quad(vertices: PackedVector3Array, normals: PackedVector3Array,
-		indices: PackedInt32Array, a: Vector3, b: Vector3, c: Vector3, d: Vector3,
-		normal: Vector3) -> void:
-	var base := vertices.size()
-	vertices.append_array(PackedVector3Array([a, b, c, d]))
-	normals.append_array(PackedVector3Array([normal, normal, normal, normal]))
-	indices.append_array(PackedInt32Array([base, base + 1, base + 2, base, base + 2, base + 3]))
+## The fog's material: the shader at SOFT_CELLS and STRENGTH, drawn after the
+## other transparent surfaces so a flame or a ring in an unrevealed room is
+## darkened too.
+static func material() -> ShaderMaterial:
+	var fog := ShaderMaterial.new()
+	fog.shader = SHADER
+	fog.set_shader_parameter("soft_cells", SOFT_CELLS)
+	fog.set_shader_parameter("strength", STRENGTH)
+	fog.render_priority = Material.RENDER_PRIORITY_MAX
+	return fog
+
+
+## A full-screen quad carrying `material()`: the shader places its corners on
+## the screen, and the cull margin keeps the engine from culling it by its
+## (unused) position.
+static func screen_quad() -> MeshInstance3D:
+	var quad := QuadMesh.new()
+	quad.size = Vector2(2.0, 2.0)
+	var node := MeshInstance3D.new()
+	node.mesh = quad
+	node.material_override = material()
+	node.extra_cull_margin = 16384.0
+	node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return node
+
+
+## Points the fog's material at the grid: its frame and the texture of its
+## revealed cells. False when the grid cannot be drawn.
+static func apply(fog: ShaderMaterial, grid: Dictionary, adapter: CoordinateAdapter, cells: Texture2D,
+		to_world: Transform3D = Transform3D.IDENTITY) -> bool:
+	var values := frame(grid, adapter, to_world)
+	if fog == null or values.is_empty() or cells == null:
+		return false
+	for key: String in values:
+		fog.set_shader_parameter(key, values[key])
+	fog.set_shader_parameter("revealed_cells", cells)
+	return true
