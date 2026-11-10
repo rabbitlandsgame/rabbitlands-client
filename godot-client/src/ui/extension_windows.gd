@@ -1975,7 +1975,7 @@ func _quest_party_members() -> Array[Dictionary]:
 	var snapshot: Dictionary=AppState.campaign
 	if not AppState.authenticated or str(snapshot.get("kind",""))!="shelves" or not bool(snapshot.get("active",false)) \
 			or EloriaProtocol.map_id_from_reference(str(snapshot.get("map","")))!=EloriaProtocol.map_id_from_reference(AppState.current_map):return result
-	var growers: Dictionary=(snapshot.get("shelves",{}) as Dictionary).get("growers",{})
+	var growers: Dictionary=(snapshot.get("shelves",{}) as Dictionary).get("growers",(snapshot.get("shelves",{}) as Dictionary).get("fire",{}))
 	for worker: Dictionary in growers.get("workers",[]):
 		var actor: Dictionary=AppState.actors.get(int(worker.actor_id),{})
 		if int(actor.get("kind",0))!=2:continue

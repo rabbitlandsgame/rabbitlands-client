@@ -1,6 +1,6 @@
 # The Empty Shelves of Landfall
 
-Ilka Tarn's shop, The True Note, has tools and empty essence shelves. The player learns to gather, mix and use magic, then protects the people who supply the shop. Practice batches do not open merchant stock. Life Essence becomes available after the Old Warren raid; Fire and Water remain out of stock until their protection quests are developed.
+Ilka Tarn's shop, The True Note, has tools and empty essence shelves. The player learns to gather, mix and use magic, then protects the people who supply the shop. Practice batches do not open merchant stock. Life Essence becomes available after the Old Warren raid. The Price of a Spark restores Fire through quarry recovery, Coal extraction and a sapper confrontation. Water remains out of stock until its protection quests are developed.
 
 ## The chapters
 
@@ -13,13 +13,30 @@ Experience below is the chapter bonus. Ordinary combat, gathering and mixing als
 | **A Harvest Worth Defending** | Protect four level-10 villagers while they gather and store 10,000 Sage, then 5,000 Hearthroot. Intercept goblins coming from the Old Warren. Heal Target revives fallen workers. | 2,000 Harvesting, 1,500 Magic, 1,000 Defense | 1,500 gold, 100 Life and 100 Water Essences. Life stock remains locked until the raid. |
 | **The Hand Behind the Raids** | Enter the Old Warren with your party. Fight goblins and small wolves and find Grask, the orc directing the raids, in a deeper western cave. | 1,500 Attack, 1,500 Defense, 2,000 Magic | 2,500 gold, 150 Life Essences and Life Essence shop stock. |
 
+### The Price of a Spark
+
+| Chapter | What the player does | Bonus experience | Other reward |
+| --- | --- | --- | --- |
+| **The Toll at Blackcut** | Meet Brenna at the Flint workings. Choose nine guards head-on, or silence the signal and clear six. Release four workers; protect them recovering 4,000 Flint and mining 1,000 more. | 1,500 Harvesting, 500 Defense | 750 gold, 75 Fire Essences; assault adds 500 Attack and 250 Defense XP; the quiet approach adds 500 Alchemy XP and 25 Fire Essences. |
+| **A Load Worth Lifting** | Meet the crew at the Lantern Mine Coal workings. Protect three lift repairs or clear three supports in the old haul passage. Secure 8,000 existing Coal and 2,000 newly mined Coal. | 1,000 Magic, 1,000 Defense | 1,000 gold, 20 minor healing potions and 100 Water Essences; the lift adds 500 Defense XP; the haul passage adds 500 Attack XP and 25 Fire Essences. |
+| **Cut the Fuse** | Confront Krek Cinderhook in the Blackcut service yard. Optional signal, water and powder preparations change the fight. Avoid marked blast areas. | 2,000 Magic, 1,500 Alchemy | 2,000 gold, one Enriched Fire Essence, and Fire Essence shop stock. Signal/water/powder preparations add 250 Alchemy/Defense/Magic XP respectively. |
+
+Ilka gives a once-only allowance of 350 Fire, 150 Life and 250 Water Essences, plus 20 minor healing potions, when assigning Blackcut. Overflow goes to personal storage. Shop stock remains locked until the final report. The four level-10 workers recover sealed merchant stock and mine the remaining resources using native harvesting rates. Their shipment never enters the player's inventory. The quest window distinguishes recovered and newly mined secured loads, carried goods and worker health.
+
+Workers walk between the resource patches, stock bay and shipment store. The lift route needs a living mechanic and three protected repairs; the old passage uses a longer cart route. Heal Target revives downed workers during setup as well as extraction. Pausing preserves worker health, cargo, secured loads and finished preparations. Defeat drops unsecured bags and offers Retry/Cancel while retaining secured loads. No offline yields are produced.
+
+Krek and his guards are present from the start. The signal stops reinforcement waves; water reduces blast size and damage; the powder fuse or a paid Fire Bolt on its native barrel target damages Krek once. Four-second ground warnings match the actual circular blast areas. Ordinary combat experience remains normal. Fire stays locked through the first two reports and opens only after Krek is defeated and Ilka hears the report. Water remains locked.
+
+Assignments mark the real worksites; players walk there and choose when to begin. Party helpers keep their own unfinished quests and receive no duplicate allowances or rewards. Portrait conversations combine consecutive lines from the same speaker, retain one camera framing, and show the recorded choice on replay. Reports hand directly into the next briefing. The final report closes on Continue. Public-world restoration keeps the player's current position rather than sending them back to the worksite entrance.
+
+The target is roughly 50–75 minutes including travel and combat, subject to a full-length pacing playtest. Native automated journeys accelerate quantities and clocks while retaining real movement, spell costs, creature deaths and reward validation.
+
 ### Retained later designs
 
-Fire and Water are being held for new protection quests following the Life raid. The older designs below remain as reference and support for advanced saves; the first two are unavailable as new assignments until redesigned.
+Water is being held for its protection quests after the Fire supply series. The older designs below remain as reference and support for advanced saves; Water is unavailable as a new assignment until redesigned.
 
 | Chapter | Retained design | Bonus experience | Other reward |
 | --- | --- | --- | --- |
-| **The Toll at Blackcut** | Defeat three barricade crews, or disable their signal and fight a smaller force. Release the miners' shipment. | 1,200 Magic, 600 Alchemy | Fire Essence stock, 30 Fire Essences and 400 gold. |
 | **Water Behind the Gates** | Restore the sluices in order or clear a temporary bypass. Gather Kelp and Watercress, make ten Water Essences and load the cutters' shipment. | 1,000 Alchemy, 800 Magic, 500 Harvesting | Water Essence stock and 40 Water Essences. |
 | **The Road Must Hold** | Load the potters' cart and escort it through road ambushes. Keep the party together, drive attackers away, repair damage with planks and unload the shipment. | 1,500 Magic, 800 Alchemy | Earth Essence stock, 700 gold, and each player's choice of a Focus Wand, Woven Charm or Seawrap Robe. |
 | **Many Hands at the Mortar** | Diagnose three apprentices' actual problems: wrong ingredients, no food and an unsuitable tool. Demonstrate fifteen successful Life Essence mixes. | 2,500 Alchemy | Gatherer's Cape and the ability to buy ten-mix ingredient bundles for restored essences. |
@@ -29,7 +46,7 @@ Fire and Water are being held for new protection quests following the Life raid.
 | **Keeping the Cold** | Restore intake and seals, then defend the workers or repair a protected circulation loop. The trained villagers handle Frost production. | 1,500 Alchemy, 800 Magic | Frost Essence stock, ten Frost Essences, 600 gold and an optional advanced mixing assignment. |
 | **The True Note** | Deploy the trained crew, defend the receiving yard and defeat the quartermaster. Recover his orders. | 4,000 Magic, 2,500 Alchemy | 2,000 gold; each player's choice of an Essence Keeper's or Artificer's Cape, plus one enriched essence of their choice. Daily supply contracts become available. |
 
-Fire and Water can be restored in either order. After the teaching chapter, Wind and Magic can be restored in either order; Death and Frost then form another pair. Both members of each pair are required before the next major chapter.
+The Fire supply series follows Life; Water will follow Fire. After the teaching chapter, Wind and Magic can be restored in either order; Death and Frost then form another pair. Both members of each pair are required before the next major chapter.
 
 The retained route-choice chapters show their extra experience and item rewards before the player chooses. The new crew-defense task and Old Warren raid follow their own sequence.
 

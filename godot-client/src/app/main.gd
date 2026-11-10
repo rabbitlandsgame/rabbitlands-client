@@ -66,6 +66,7 @@ const CampaignWorksScript = preload("res://src/world/campaign_works.gd")
 const CampaignBankWorksScript = preload("res://src/world/campaign_bank_works.gd")
 const CampaignRoadWorksScript = preload("res://src/world/campaign_road_works.gd")
 const CampaignShelvesWorksScript = preload("res://src/world/campaign_shelves_works.gd")
+const CampaignFireWorksScript = preload("res://src/world/campaign_fire_works.gd")
 const CampaignLampsWorksScript = preload("res://src/world/campaign_lamps_works.gd")
 const CampaignGuidanceScript = preload("res://src/world/campaign_guidance.gd")
 const CampaignCrossingScript = preload("res://src/world/campaign_crossing.gd")
@@ -78,6 +79,7 @@ const CampaignCutawayScript = preload("res://src/world/campaign_cutaway.gd")
 @onready var campaign_bank_works := CampaignBankWorksScript.new()
 @onready var campaign_road_works := CampaignRoadWorksScript.new()
 @onready var campaign_shelves_works := CampaignShelvesWorksScript.new()
+@onready var campaign_fire_works := CampaignFireWorksScript.new()
 @onready var campaign_lamps_works := CampaignLampsWorksScript.new()
 @onready var campaign_guidance := CampaignGuidanceScript.new()
 @onready var campaign_crossing := CampaignCrossingScript.new()
@@ -1637,6 +1639,7 @@ func _ready() -> void:
 	world_root.add_child(campaign_bank_works)
 	world_root.add_child(campaign_road_works)
 	world_root.add_child(campaign_shelves_works)
+	world_root.add_child(campaign_fire_works)
 	world_root.add_child(campaign_lamps_works)
 	world_root.add_child(campaign_guidance)
 	world_root.add_child(campaign_crossing)
@@ -4978,7 +4981,7 @@ func _exit_tree() -> void:
 		# Explicit maintenance exits before these entry helpers acquire parents.
 		for helper: Variant in [remote_presentation, character_intro, campaign_scene,
 				campaign_guidance, campaign_crossing, campaign_cart, campaign_rescue, campaign_cutaway,
-				campaign_hud, campaign_works, campaign_bank_works, campaign_road_works, campaign_shelves_works,
+				campaign_hud, campaign_works, campaign_bank_works, campaign_road_works, campaign_shelves_works, campaign_fire_works,
 				campaign_lamps_works, arrival_curtain, quest_trail, mount_status]:
 			if is_instance_valid(helper) and helper is Node and helper.get_parent() == null:
 				helper.free()
@@ -5058,6 +5061,7 @@ func _on_connection_state_changed(value: String) -> void:
 		campaign_bank_works.clear()
 		campaign_road_works.clear()
 		campaign_shelves_works.clear()
+		campaign_fire_works.clear()
 		campaign_lamps_works.clear()
 		campaign_guidance.clear()
 		campaign_crossing.clear()
@@ -6825,6 +6829,7 @@ func _on_state_changed(path: StringName) -> void:
 			campaign_bank_works.clear()
 			campaign_road_works.clear()
 			campaign_shelves_works.clear()
+			campaign_fire_works.clear()
 			campaign_lamps_works.clear()
 			campaign_guidance.clear()
 			campaign_crossing.clear()
@@ -6984,7 +6989,7 @@ func _on_state_changed(path: StringName) -> void:
 				if str(AppState.campaign.get("kind", "")) == "shelves" else -1
 			_sync_overhead_health_for([_shelves_health_actor, mentor])
 			_shelves_health_actor = mentor
-			var workers: Array=((AppState.campaign.get("shelves",{}) as Dictionary).get("growers",{}) as Dictionary).get("workers",[])
+			var workers: Array=((AppState.campaign.get("shelves",{}) as Dictionary).get("growers",(AppState.campaign.get("shelves",{}) as Dictionary).get("fire",{})) as Dictionary).get("workers",[])
 			var worker_ids: Array=[]
 			for worker: Dictionary in workers:worker_ids.append(int(worker.actor_id))
 			_sync_overhead_health_for(_grower_health_actors+worker_ids)
@@ -9136,6 +9141,7 @@ func _update_campaign(delta: float) -> void:
 		campaign_bank_works.clear()
 		campaign_road_works.clear()
 		campaign_shelves_works.clear()
+		campaign_fire_works.clear()
 		campaign_lamps_works.clear()
 		campaign_guidance.clear()
 		campaign_crossing.clear()
@@ -9225,6 +9231,7 @@ func _apply_campaign_world() -> void:
 		_campaign_surface_height, campaign_scene.reduced_motion)
 	campaign_shelves_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map, _campaign_surface_height)
 	campaign_shelves_works.apply_workers(AppState.campaign, actor_nodes)
+	campaign_fire_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map, _campaign_surface_height, actor_nodes)
 	campaign_lamps_works.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
 		_campaign_surface_height, campaign_scene.reduced_motion)
 	campaign_crossing.apply_snapshot(AppState.campaign, adapter, AppState.current_map,
@@ -18732,7 +18739,7 @@ func _is_shelves_grower(actor_id: int, dto: Dictionary) -> bool:
 	var state: Dictionary=AppState.campaign
 	if int(dto.get("kind",0))!=2 or str(state.get("kind",""))!="shelves" or not bool(state.get("active",false)) \
 			or EloriaProtocol.map_id_from_reference(str(state.get("map","")))!=EloriaProtocol.map_id_from_reference(AppState.current_map):return false
-	var growers: Dictionary=(state.get("shelves",{}) as Dictionary).get("growers",{})
+	var growers: Dictionary=(state.get("shelves",{}) as Dictionary).get("growers",(state.get("shelves",{}) as Dictionary).get("fire",{}))
 	for worker: Dictionary in growers.get("workers",[]):
 		if int(worker.get("actor_id",-1))==actor_id:return true
 	return false

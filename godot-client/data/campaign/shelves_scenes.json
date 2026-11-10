@@ -1664,6 +1664,451 @@
       "choice_response_until": 20,
       "response_actor": "protagonist",
       "response_speaker": "You"
+    },
+    "measure.shelves.fire.brief": {
+      "title": "The Price of a Spark",
+      "duration": 20,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "dialogue_holds": [
+        20
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "variants": {
+            "fire": "Brenna’s quarry at Blackcut has been seized. Our Flint is sitting behind a barricade, and the crew cannot finish the next shipment. Will you help her reopen the workings?\n\nWalk to the marked quarry west of town. Brenna will explain the approaches. I have set aside a guard allowance in your pack or personal storage. It is paid once; Fire stock stays reserved until the whole route is safe.",
+            "fire_coal": "The Flint is secured. Brenna still has eight thousand Coal stranded below Lantern Mine. Her miners need another two thousand, and a safe way to bring the loads out.\n\nEnter Lantern Mine and follow the marked route to the Coal workings. Meet Brenna there and choose a hauling plan. You can go when ready; the assignment stays in your quest log.",
+            "fire_sapper": "The cut ropes and powder marks tell the same story. Krek Cinderhook is preparing another attack from a service yard beside Blackcut. Stop him before the crew takes the road again.\n\nMeet Brenna at the marked yard near Blackcut. The signal, water channels and powder store will change the fight. Your party can help, and you can untrack this until you are ready."
+          },
+          "text": "Brenna’s quarry at Blackcut has been seized. Our Flint is sitting behind a barricade, and the crew cannot finish the next shipment. Will you help her reopen the workings?\n\nWalk to the marked quarry west of town. Brenna will explain the approaches. I have set aside a guard allowance in your pack or personal storage. It is paid once; Fire stock stays reserved until the whole route is safe."
+        }
+      ],
+      "live_camera": "gameplay"
+    },
+    "measure.shelves.fire.entry_quarry": {
+      "title": "The Price of a Spark",
+      "duration": 40,
+      "entry_seconds": 1.5,
+      "exit_seconds": 1.2,
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "dialogue_holds": [
+        20,
+        40
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Brenna Flint",
+          "speaker_actor": "mentor",
+          "text": "Four thousand Flint is already cut. We need one thousand more. Two of us will mine while two recover the old stock and haul it to the shipment store.\n\nWe can break their barricade, or take the side approach and cut the signal rope. Pick our approach. After the guards are cleared, release the crew at the marked gate. Keep an eye on both hauling paths, and use Heal Target if someone falls."
+        }
+      ],
+      "shots": [
+        {
+          "t": 0,
+          "anchor_actor": "mentor",
+          "position": [
+            -9,
+            7,
+            11
+          ],
+          "target": [
+            0,
+            1,
+            0
+          ]
+        }
+      ],
+      "choice_id": "shelves_fire_quarry",
+      "choice_at": 20,
+      "choice_response_until": 40,
+      "response_actor": "mentor",
+      "response_speaker": "Brenna Flint"
+    },
+    "measure.shelves.fire.entry_coal": {
+      "title": "The Price of a Spark",
+      "duration": 40,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "dialogue_holds": [
+        20,
+        40
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Brenna Flint",
+          "speaker_actor": "mentor",
+          "text": "Eight thousand Coal is waiting in the old stock bay. The miners will finish another two thousand while we recover it. None of it counts until the loads reach the shipment store.\n\nThe lift needs three repair steps. Keep the mechanic safe and use the lift station to begin each one. Or we can clear three supports and take the old haul passage. That route is longer, with spiders in the side tunnels. Which plan shall we use?"
+        }
+      ],
+      "live_camera": "gameplay",
+      "choice_id": "shelves_fire_coal",
+      "choice_at": 20,
+      "choice_response_until": 40,
+      "response_actor": "mentor",
+      "response_speaker": "Brenna Flint"
+    },
+    "measure.shelves.fire.entry_sapper": {
+      "title": "The Price of a Spark",
+      "duration": 20,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "dialogue_holds": [
+        20
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Brenna Flint",
+          "speaker_actor": "mentor",
+          "text": "Krek is already in the yard. We can confront him now, or deal with his equipment first. Cut the signal to stop reinforcements. Open the water channels to weaken his blasts.\n\nThe powder has a marked fuse. Anyone can light it from close by, or you can cast Fire Bolt on the barrels from a distance. Stay out of the marked blast circles. We will hold this staging area while your party moves ahead."
+        }
+      ],
+      "live_camera": "gameplay"
+    },
+    "measure.shelves.fire.boss": {
+      "title": "The Price of a Spark",
+      "duration": 40,
+      "entry_seconds": 1.5,
+      "exit_seconds": 1.2,
+      "anchor": "boss",
+      "required_actors": [
+        "boss"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "dialogue_holds": [
+        20,
+        40
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Krek Cinderhook",
+          "speaker_actor": "boss",
+          "text": "A quarry, a mine, and a shop full of little sparks. You think you can keep them all? I only need one good fire."
+        },
+        {
+          "at": 20,
+          "speaker": "You",
+          "speaker_actor": "protagonist",
+          "text": "Your next load of powder ends here."
+        }
+      ],
+      "shots": [
+        {
+          "t": 0,
+          "anchor_actor": "boss",
+          "position": [
+            -9,
+            7,
+            11
+          ],
+          "target": [
+            0,
+            1,
+            0
+          ]
+        }
+      ]
+    },
+    "measure.shelves.fire.done": {
+      "title": "The Price of a Spark",
+      "duration": 20,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "mentor",
+      "required_actors": [
+        "protagonist"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "dialogue_holds": [
+        20
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "You",
+          "speaker_actor": "protagonist",
+          "variants": {
+            "fire": "The Flint shipment is secured. The crew can finish loading in peace. Ilka needs to hear about the stranded Coal next.",
+            "fire_coal": "That is the last Coal load secured. The cut ropes and powder traces point back toward Blackcut. We should report what the miners found.",
+            "fire_sapper": "Krek is finished. The quarry and mine can supply the shop again. We should return to Ilka with the news."
+          },
+          "text": "The Flint shipment is secured. The crew can finish loading in peace. Ilka needs to hear about the stranded Coal next."
+        }
+      ],
+      "live_camera": "gameplay"
+    },
+    "measure.shelves.fire.report": {
+      "title": "The Price of a Spark",
+      "duration": 20,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "dialogue_holds": [
+        20
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "variants": {
+            "fire": "Five thousand Flint, safely secured. You have earned your pay, and the crew has its quarry back. Brenna’s Coal miners still need help below Lantern Mine.",
+            "fire_coal": "Ten thousand Coal and five thousand Flint. Enough ingredients for five thousand Fire Essences. But these attacks were organized. We need to stop the sapper preparing the next one."
+          },
+          "text": "Five thousand Flint, safely secured. You have earned your pay, and the crew has its quarry back. Brenna’s Coal miners still need help below Lantern Mine."
+        }
+      ],
+      "live_camera": "gameplay",
+      "handoff": {
+        "to": [
+          "measure.shelves.fire.brief"
+        ],
+        "gameplay_map": "landfall_town",
+        "keep_dialogue": true
+      }
+    },
+    "measure.shelves.fire.report_final": {
+      "title": "The Price of a Spark",
+      "duration": 20,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "dialogue_holds": [
+        20
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Ilka Tarn",
+          "speaker_actor": "mentor",
+          "text": "Krek is gone, the miners can work, and the hauling route is open. That is a supply I can promise. Fire Essence is now available here. This enriched essence is for you. Water will wait until we secure its own gathering crews."
+        }
+      ],
+      "live_camera": "gameplay"
+    },
+    "measure.shelves.fire.resume": {
+      "title": "The Price of a Spark",
+      "duration": 20,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "mentor",
+      "required_actors": [
+        "protagonist"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "dialogue_holds": [
+        20
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Brenna Flint",
+          "speaker_actor": "mentor",
+          "text": "Your secured loads and finished preparations are still here. We will pick up where we left off. Check the quest instructions for the next station, and Heal Target any worker who needs it."
+        }
+      ],
+      "live_camera": "gameplay"
+    },
+    "measure.shelves.fire.retry": {
+      "title": "The Price of a Spark",
+      "duration": 20,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "anchor": "mentor",
+      "required_actors": [
+        "protagonist"
+      ],
+      "cast_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "native_roles": [
+        "mentor",
+        "worker",
+        "protagonist",
+        "recipient",
+        "boss"
+      ],
+      "stage_protagonist": false,
+      "dialogue_holds": [
+        20
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "You",
+          "speaker_actor": "protagonist",
+          "text": "We were overwhelmed. We can regroup at the last secured load or leave for now. Which shall we do?"
+        }
+      ],
+      "live_camera": "gameplay",
+      "choice_id": "shelves_fire_retry",
+      "choice_at": 0,
+      "choice_response_until": 20,
+      "response_actor": "protagonist",
+      "response_speaker": "You"
     }
   }
 }
