@@ -29,6 +29,8 @@ godot-client/Godot_v*
 # in a fresh checkout, so none of them belong in the tree.
 godot-client/.godot/
 *.import
+# Effect glyphs retain authored 96 px import limits and lossless mipmaps.
+!godot-client/assets/ui/item-effects/*.png.import
 # Shared ground-class textures ship their full lossless mip chains.
 !godot-client/src/world/look/textures/beach-sand.png.import
 !godot-client/src/world/look/textures/coastal-gravel.png.import

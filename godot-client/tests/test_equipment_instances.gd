@@ -1,6 +1,7 @@
 extends SceneTree
 const Protocol := preload("res://src/network/protocol.gd")
 const Tiers := preload("res://src/state/item_instance_tiers.gd")
+const Icons := preload("res://src/ui/item_effect_icons.gd")
 var failures := 0
 
 func _init() -> void:
@@ -14,6 +15,15 @@ func _expect(ok: bool, message: String) -> void:
 func _run() -> void:
 	OS.set_environment("ELORIA_NO_MAP_CACHE", "1")
 	root.size = Vector2i(1280, 800)
+	_expect(Icons.PATHS.size() == 32, "all 32 modifiers have unique artwork")
+	for effect_name: String in Icons.PATHS:
+		var icon := Icons.texture(effect_name)
+		_expect(icon != null, effect_name + " artwork loads")
+		if icon != null: _expect(icon.get_width() <= 128, effect_name + " imports at a small UI texture size")
+	var proc := Icons.presentation("Renewal: 20% chance when hit to restore up to 10 health.")
+	_expect(proc.roll == "20%" and proc.body == "When hit: restore up to 10 health.", "proc presentation retains the roll, trigger and strength")
+	var stat := Icons.presentation("Vital: +50 maximum health.")
+	_expect(stat.roll == "+50" and stat.body == "Maximum health.", "stat rolls are emphasized without losing their meaning")
 	var state := root.get_node("AppState")
 	var payload := PackedByteArray([2, 1, 0])
 	# One structured storage row and a capability-gated enchanted-position tail.
@@ -74,23 +84,63 @@ func _run() -> void:
 	await process_frame
 	_expect((ledger.get("rows") as VBoxContainer).get_child_count() == 3, "the ledger shows each individual copy")
 	_expect((ledger.get("withdraw") as Button).disabled, "withdrawal requires an explicit selection")
-	ledger.set("selected_id", 502)
-	ledger.call("_update_selection")
+	var selected_row := (ledger.get("rows") as VBoxContainer).get_child(1)
+	(selected_row.find_child("SelectCopy", true, false) as Button).pressed.emit()
+	_expect(int(ledger.get("selected_id")) == 502, "the portrait button selects that exact copy")
 	_expect(not (ledger.get("withdraw") as Button).disabled, "selecting a specific copy enables withdrawal")
 	_expect((ledger.get("summary") as Label).text.contains("4 saved effects"), "a rare copy displays all four effects")
-	var name_label: Label = (ledger.get("rows") as VBoxContainer).get_child(1).get_child(0).get_child(0).get_child(0)
+	var name_label: Label = selected_row.find_child("ItemName", true, false)
+	_expect(selected_row.find_child("Effects", true, false).get_child_count() == 4, "all four effects receive their own icon and text cell")
+	var effect_cell: Control = selected_row.find_child("Effects", true, false).get_child(0)
+	_expect(effect_cell.tooltip_text == copies[1].effects[0] and effect_cell.mouse_filter != Control.MOUSE_FILTER_IGNORE, "hovering an effect reveals its complete authoritative description")
 	_expect(name_label.text == "Phoenix Helm", "the viewer retains the item name without a Magic or Rare prefix")
 	_expect(name_label.get_theme_color("font_color") == Tiers.color("rare"), "the selected tier is conveyed by name color")
 	var request: PackedByteArray = Protocol.storage_instance_request("Phoenix Helm", 0, 502)
 	var command: Dictionary = JSON.parse_string(request.slice(3).get_string_from_utf8())
 	_expect(command.instance_id == 502 and command.op == "withdraw", "the request addresses the selected object")
 	for _frame: int in range(4): await process_frame
+	var before_drag := ledger.position
+	var grab_point := before_drag + Vector2(300, 36)
+	var press := InputEventMouseButton.new()
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.pressed = true
+	press.position = grab_point
+	press.global_position = grab_point
+	root.push_input(press)
+	var motion := InputEventMouseMotion.new()
+	motion.position = grab_point - Vector2(20, 20)
+	motion.global_position = motion.position
+	motion.relative = Vector2(-20, -20)
+	root.push_input(motion)
+	press.pressed = false
+	press.position = motion.position
+	press.global_position = motion.position
+	root.push_input(press)
+	_expect(ledger.position.distance_to(before_drag - Vector2(20, 20)) < 1, "dragging the title content moves the ledger")
+	ledger.set("_placed", false)
+	ledger.call("_fit")
+	for _frame: int in range(3): await process_frame
 	print("Ledger layout: ", ledger.position, " ", ledger.size, " minimum ", ledger.get_combined_minimum_size())
 	_expect(ledger.size.x <= 940 and ledger.size.y < 780, "the compact ledger stays inside the playable view")
+	_expect(ledger.position.x >= 200, "the initial ledger leaves the storage stacks visible")
 	if "--capture" in OS.get_cmdline_user_args():
 		await RenderingServer.frame_post_draw
 		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://test-artifacts/equipment-instances"))
 		root.get_texture().get_image().save_png("res://test-artifacts/equipment-instances/ledger-implemented.png")
+	root.size = Vector2i(1024, 720)
+	root.content_scale_size = Vector2i(1024, 720)
+	for _frame: int in range(8): await process_frame
+	print("Small ledger layout: ", ledger.get_viewport_rect().size, " ", ledger.position, " ", ledger.size)
+	_expect(ledger.get_rect().end.x <= 1024 - 96 and ledger.get_rect().end.y <= 720 - 88, "the smaller layout stays clear of the fixed HUD")
+	_expect((selected_row.find_child("Effects", true, false) as GridContainer).columns == 1, "smaller windows stack effect cells for readable text")
+	var bar := (ledger.get("scroll") as ScrollContainer).get_v_scroll_bar()
+	_expect(bar.max_value > bar.page, "a smaller window can scroll to every stored copy")
+	if "--capture" in OS.get_cmdline_user_args():
+		await RenderingServer.frame_post_draw
+		root.get_texture().get_image().save_png("res://test-artifacts/equipment-instances/ledger-small.png")
+	root.size = Vector2i(1280, 800)
+	root.content_scale_size = Vector2i(1280, 800)
+	for _frame: int in range(5): await process_frame
 	snapshot.read_only = true
 	state.call("_on_packet", 187, JSON.stringify(snapshot).to_utf8_buffer())
 	_expect((ledger.get("withdraw") as Button).disabled, "preview storage cannot withdraw")
