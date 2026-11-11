@@ -311,7 +311,7 @@ def r2_inputs(env=None) -> dict:
         if source == "ci" and digest:
             raise ValueError(f"{platform}_set_sha256 must be empty for a ci source.")
         platforms[platform] = {"source": source, "set_sha256": digest}
-    if all(item["source"] == "none" for item in platforms.values()):
+    if all(item["source"] == "none" for item in platforms.values()):  # defensive: only Windows takes none today
         raise ValueError("At least one platform needs a content source.")
     commit = env.get("COMMIT", "")
     if commit and not _COMMIT.fullmatch(commit):

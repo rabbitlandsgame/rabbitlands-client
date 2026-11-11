@@ -268,8 +268,9 @@ key = fx.key
 other_key = fx.other_key
 COMMIT = fx.COMMIT
 TARGET = fx.PARENT
+# COMMIT is part of every dispatch's env, so a COMMIT in the shell running the tests cannot leak in.
 INPUTS = {"WINDOWS_SOURCE": "r2", "WINDOWS_SET_SHA256": "1" * 64, "LINUX_SOURCE": "r2",
-          "LINUX_SET_SHA256": "2" * 64, "DRY_RUN": "false"}
+          "LINUX_SET_SHA256": "2" * 64, "DRY_RUN": "false", "COMMIT": ""}
 CAPS_R2 = rm.ReaderCapabilities(schema3=True, r2_rows=True, package_limit=2000)
 CAPS_B8 = rm.ReaderCapabilities(schema3=True, r2_rows=False, package_limit=850)
 REAL_COMMIT_CAPABILITIES = rm.commit_capabilities
@@ -466,13 +467,14 @@ def test_r2_inputs_take_a_linux_only_dry_run():
                                    "linux": {"source": "ci", "set_sha256": ""}}, "dry_run": True, "commit": ""}
 
 
-@pytest.mark.parametrize("change", [
-    {"WINDOWS_SOURCE": "none", "WINDOWS_SET_SHA256": "1" * 64},  # none takes no set
-    {"WINDOWS_SOURCE": "none", "WINDOWS_SET_SHA256": "", "LINUX_SOURCE": "none", "LINUX_SET_SHA256": ""},
-    {"LINUX_SOURCE": "none", "LINUX_SET_SHA256": ""},  # only Windows can be left out
+@pytest.mark.parametrize(("change", "message"), [
+    ({"WINDOWS_SOURCE": "none", "WINDOWS_SET_SHA256": "1" * 64}, "empty for a none source"),
+    ({"WINDOWS_SOURCE": "none", "WINDOWS_SET_SHA256": "", "LINUX_SOURCE": "none", "LINUX_SET_SHA256": ""},
+     "only Windows"),
+    ({"LINUX_SOURCE": "none", "LINUX_SET_SHA256": ""}, "only Windows"),
 ])
-def test_r2_inputs_refuse_a_dry_run_none_with_a_set_or_without_any_platform(change):
-    with pytest.raises(ValueError):
+def test_r2_inputs_refuse_a_dry_run_none_with_a_set_or_for_linux(change, message):
+    with pytest.raises(ValueError, match=message):
         actions.r2_inputs({**INPUTS, "DRY_RUN": "true", **change})
 
 

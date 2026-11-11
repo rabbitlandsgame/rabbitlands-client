@@ -687,9 +687,11 @@ as a path, and never print, copy or commit it.
      installs the Linux installer tools, so it can start at the beginning, on
      `develop`, beside the Windows build. `none` is refused outside a dry run, and for
      Linux: a release always has both platforms. It does not check the Windows content
-     set, the Windows executables or the Inno toolchain; the real run checks those
-     first, before `desktop-sign`, and a failure there leaves the draft for a
-     redispatch.
+     set, the Windows executables or the Inno toolchain. The real run checks the first
+     two before `desktop-sign` and installs Inno in `Installer windows` right after it;
+     a failure in either leaves the draft (nothing published) for a redispatch. The dry
+     run holds the release workflows' concurrency group while it runs, so a rollback
+     (`desktop-repoint.yml`) dispatched meanwhile waits for it: cancel the dry run first.
    - Dispatch the real run from `develop` too while `develop` still names X: its
      `Content linux (ci)` then restores the exact-key cache the dry run saved (a run on
      `master` cannot read caches saved on `develop`). Fast-forward `master` to X after
@@ -793,6 +795,7 @@ new.
 | `content`: `conflict` | a different object already holds that key | stop and investigate; never overwrite or delete it |
 | prepare or finalize: "Another client draft exists (client-<Y>)" | an earlier real run stopped after prepare and left its draft, for example after a failed job | delete that draft (`gh release delete client-<Y> --repo rabbitlandsgame/rabbitlands-client --yes`), then dispatch again. Its pool parts stay, and the new run reuses the unchanged ones |
 | `content` job refuses the set | wrong commit (the branch moved), platform, key, URL form, CI path, or native code | fix the cause; if the branch moved, build and upload content for its new head, then dispatch again |
+| prepare: "The run is at <Y>, but the dispatch asked for <X>" | the branch head moved on between choosing X and dispatching | nothing was written; dispatch again from a branch whose head is X, or build and upload for the new head |
 | `publish` (local): `pointer-stale` | the signed pointer is not newer than the live one, for example after a repoint | re-run the workflow's publish job, which signs fresh pointers, then run the local publish again |
 | `publish` (local): `live-pointer-unverifiable` or `live-pointer-rolled-back` | the live pointer is not ours, or is older than the receipt | stop and report. R2-aware clients that refuse the live pointer use the GitHub alias meanwhile. Recovery is an owner decision; the tool has no override |
 | `publish` (local): `release-already-latest` | GitHub `latest` already names the release | a forward pointer cannot follow GitHub. Realign through the repoint workflow (see the [emergency path](#when-r2-is-down-the-ci-emergency-path)) |

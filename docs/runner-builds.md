@@ -66,6 +66,7 @@ The **prepare** job refuses, before anything is written:
 - the signing key in its environment;
 - invalid or inconsistent inputs. Each input is regex-validated, and the same set
   hash may not be given for both platforms;
+- a head other than the `commit` input, when one is given;
 - a tree without whole-release retention (`RETENTION_SCHEMA` below 2);
 - an `r2` source when the commit's updater cannot read R2 rows. Its
   `src/updates/release.gd` must declare `const CODEC_SCHEMA := 3` and exactly
@@ -104,9 +105,9 @@ Windows is `none`.
 jobs, `Executables` and `Installer`. In a dry run:
 
 - the installer job only installs the tools and measures the disk;
-- with `windows_source: none`, only `prepare`, `Content linux (ci)`, `Executables
-  linux` and `Installer linux` run: nothing that needs Windows content, so it can start
-  before that content exists;
+- with `windows_source: none`, only `prepare`, the Linux content leg (`Content linux
+  (ci)` or `(r2)`), `Executables linux` and `Installer linux` run: nothing that needs
+  Windows content, so it can start before that content exists;
 - a `ci` content leg builds, qualifies and packs, but uploads nothing and opens no
   upload sink. Its caches may still be saved.
 
