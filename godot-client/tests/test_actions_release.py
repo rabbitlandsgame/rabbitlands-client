@@ -463,12 +463,13 @@ def test_r2_inputs_take_a_linux_only_dry_run():
     value = actions.r2_inputs({**INPUTS, "WINDOWS_SOURCE": "none", "WINDOWS_SET_SHA256": "",
                                "LINUX_SOURCE": "ci", "LINUX_SET_SHA256": "", "DRY_RUN": "true"})
     assert value == {"platforms": {"windows": {"source": "none", "set_sha256": ""},
-                                   "linux": {"source": "ci", "set_sha256": ""}}, "dry_run": True}
+                                   "linux": {"source": "ci", "set_sha256": ""}}, "dry_run": True, "commit": ""}
 
 
 @pytest.mark.parametrize("change", [
     {"WINDOWS_SOURCE": "none", "WINDOWS_SET_SHA256": "1" * 64},  # none takes no set
     {"WINDOWS_SOURCE": "none", "WINDOWS_SET_SHA256": "", "LINUX_SOURCE": "none", "LINUX_SET_SHA256": ""},
+    {"LINUX_SOURCE": "none", "LINUX_SET_SHA256": ""},  # only Windows can be left out
 ])
 def test_r2_inputs_refuse_a_dry_run_none_with_a_set_or_without_any_platform(change):
     with pytest.raises(ValueError):
@@ -478,7 +479,29 @@ def test_r2_inputs_refuse_a_dry_run_none_with_a_set_or_without_any_platform(chan
 def test_r2_inputs_take_ci_sources_without_a_set_hash():
     value = actions.r2_inputs({**INPUTS, "LINUX_SOURCE": "ci", "LINUX_SET_SHA256": "", "DRY_RUN": "true"})
     assert value == {"platforms": {"windows": {"source": "r2", "set_sha256": "1" * 64},
-                                   "linux": {"source": "ci", "set_sha256": ""}}, "dry_run": True}
+                                   "linux": {"source": "ci", "set_sha256": ""}}, "dry_run": True, "commit": ""}
+
+
+@pytest.mark.parametrize("commit", ["a" * 39, "A" * 40, "a" * 40 + "\n", "main", "$(id)"])
+def test_r2_inputs_take_only_an_empty_or_full_commit(commit):
+    assert actions.r2_inputs({**INPUTS, "COMMIT": "c" * 40})["commit"] == "c" * 40
+    with pytest.raises(ValueError):
+        actions.r2_inputs({**INPUTS, "COMMIT": commit})
+
+
+def test_r2_prepare_refuses_a_run_at_another_commit_before_writing_anything(tmp_path, monkeypatch):
+    dispatch(tmp_path, monkeypatch, inputs={**INPUTS, "COMMIT": "c" * 40})
+    no_github(monkeypatch)
+    with pytest.raises(ValueError, match="branch moved on"):
+        actions.r2_prepare()
+    assert not (tmp_path / "outputs").exists()
+
+
+def test_r2_prepare_takes_a_run_at_the_named_commit(tmp_path, monkeypatch):
+    dispatch(tmp_path, monkeypatch, inputs={**INPUTS, "COMMIT": SHA, "DRY_RUN": "true"})
+    no_github(monkeypatch)
+    actions.r2_prepare()
+    assert outputs(tmp_path)["commit"] == SHA
 
 
 @pytest.mark.parametrize("schema", [None, 1, True, "2", 2.0])

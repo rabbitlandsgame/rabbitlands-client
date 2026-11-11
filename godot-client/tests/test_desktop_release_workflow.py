@@ -159,7 +159,7 @@ def test_desktop_release_workflows_are_dispatch_only(name):
 def test_r2_inputs_reach_only_the_prepare_validation_step_through_env():
     workflow = load(R2_FILE)
     inputs = triggers(workflow)["workflow_dispatch"]["inputs"]
-    assert set(inputs) == {"windows_source", "windows_set_sha256", "linux_source", "linux_set_sha256", "dry_run"}
+    assert set(inputs) == {"windows_source", "windows_set_sha256", "linux_source", "linux_set_sha256", "dry_run", "commit"}
     assert inputs["windows_source"]["options"] == ["r2", "ci", "none"]  # none: a dry run of Linux only
     assert inputs["linux_source"]["options"] == ["r2", "ci"]
     assert inputs["dry_run"]["type"] == "boolean" and inputs["dry_run"]["default"] is False

@@ -278,9 +278,13 @@ def dispatch_commit(workflow: str) -> str:
 def r2_inputs(env=None) -> dict:
     """The dispatch inputs, as the prepare step receives them through `env:`.
 
-    `none` leaves a platform out entirely, and only a dry run may do that: the
-    release script starts a dry run of Linux alone while its own Windows build is
-    still running, so a CI failure shows early. A real release always has both.
+    `none` leaves Windows out entirely, and only a dry run may do that: a dry run
+    of Linux alone can start while the Windows content is still being built, so a
+    CI failure shows early. A real release always has both platforms.
+
+    `commit`, when given, is the full commit the dispatcher meant: the branch head
+    can move between choosing it and dispatching, and prepare refuses the run
+    before it writes anything (r2_prepare).
     """
     env = os.environ if env is None else env
     dry_run = env.get("DRY_RUN", "")
@@ -291,6 +295,8 @@ def r2_inputs(env=None) -> dict:
         source = env.get(f"{platform.upper()}_SOURCE", "")
         digest = env.get(f"{platform.upper()}_SET_SHA256", "")
         if source == "none":
+            if platform != "windows":
+                raise ValueError(f"{platform}_source must be r2 or ci; only Windows can be left out of a dry run.")
             if dry_run != "true":
                 raise ValueError(f"{platform}_source none is only for a dry run; a release needs both platforms.")
             if digest:
@@ -307,10 +313,13 @@ def r2_inputs(env=None) -> dict:
         platforms[platform] = {"source": source, "set_sha256": digest}
     if all(item["source"] == "none" for item in platforms.values()):
         raise ValueError("At least one platform needs a content source.")
+    commit = env.get("COMMIT", "")
+    if commit and not _COMMIT.fullmatch(commit):
+        raise ValueError("commit must be empty or a full 40-character lowercase commit.")
     hashes = [item["set_sha256"] for item in platforms.values() if item["source"] == "r2"]
     if len(set(hashes)) != len(hashes):
         raise ValueError("The Windows and Linux content sets cannot be the same object.")
-    return {"platforms": platforms, "dry_run": dry_run == "true"}
+    return {"platforms": platforms, "dry_run": dry_run == "true", "commit": commit}
 
 
 def retention_guard() -> int:
@@ -390,6 +399,9 @@ def r2_prepare() -> dict:
     sha = dispatch_commit(R2_WORKFLOW)
     no_signing_key()
     inputs = r2_inputs()
+    if inputs["commit"] and inputs["commit"] != sha:
+        raise ValueError(f"The run is at {sha}, but the dispatch asked for {inputs['commit']}: the branch moved on "
+                         "between the two. Nothing was written; dispatch again from a branch at that commit.")
     retention_guard()
     platforms = inputs["platforms"]
     sources = {platform: item["source"] for platform, item in platforms.items()}

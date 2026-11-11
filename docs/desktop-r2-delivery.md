@@ -680,16 +680,21 @@ as a path, and never print, copy or commit it.
    - `windows_set_sha256` and `linux_set_sha256`: the printed hashes for `r2`;
      empty for `ci`.
    - `dry_run`: off.
+   - `commit` (optional): X in full. Prepare refuses the run, before it writes
+     anything, if the branch head has moved on from X between choosing and dispatching.
    - A **dry run of Linux only** sets `windows_source: none` (empty Windows hash),
-     `linux_source: ci` and `dry_run` on. It builds and checks only Linux content,
-     executables and installer, so it can start before the Windows content exists.
-     `none` is refused outside a dry run: a release always has both platforms. The
-     owner's release script starts this dry run at the beginning, beside its own
-     Windows build, on `develop`. When `develop` still names X at dispatch, the real
-     run starts from `develop` as well, so its `Content linux (ci)` restores the cache
-     the dry run saved (a run on `master` cannot read caches saved on `develop`), and
-     `master` moves to X only after promote. If `develop` has moved, the script
-     moves `master` to X first and releases from there, with a cold Linux build.
+     `linux_source: ci` and `dry_run` on. It builds Linux content and executables and
+     installs the Linux installer tools, so it can start at the beginning, on
+     `develop`, beside the Windows build. `none` is refused outside a dry run, and for
+     Linux: a release always has both platforms. It does not check the Windows content
+     set, the Windows executables or the Inno toolchain; the real run checks those
+     first, before `desktop-sign`, and a failure there leaves the draft for a
+     redispatch.
+   - Dispatch the real run from `develop` too while `develop` still names X: its
+     `Content linux (ci)` then restores the exact-key cache the dry run saved (a run on
+     `master` cannot read caches saved on `develop`). Fast-forward `master` to X after
+     promote and the policy check. If `develop` has moved on, fast-forward `master` to
+     X first and dispatch from `master`, without the cache of a dry run on `develop`.
 7. **Approval 1: `desktop-sign`.**
    - Before approving, read each `Content <platform>` job summary: added, changed
      and removed packages; whether the core `client` package changed; new file

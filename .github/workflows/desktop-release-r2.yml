@@ -19,7 +19,7 @@ on:
         options: [r2, ci, none]
         default: r2
       windows_set_sha256:
-        description: SHA-256 of the Windows content set on R2 (64 hex; empty for ci)
+        description: SHA-256 of the Windows content set on R2 (64 hex; empty for ci or none)
         type: string
         default: ''
       linux_source:
@@ -35,6 +35,10 @@ on:
         description: Build and check only (no draft, no signing, no uploads)
         type: boolean
         default: false
+      commit:
+        description: Optional full commit the run must be at (40 hex); prepare refuses a branch head that moved on
+        type: string
+        default: ''
 
 # One release operation at a time across desktop-release.yml, this workflow,
 # desktop-repoint.yml and published-client-cleanup.yml.
@@ -104,6 +108,7 @@ jobs:
           LINUX_SOURCE: ${{ inputs.linux_source }}
           LINUX_SET_SHA256: ${{ inputs.linux_set_sha256 }}
           DRY_RUN: ${{ inputs.dry_run }}
+          COMMIT: ${{ inputs.commit }}
         run: python godot-client/tools/actions_release.py r2-prepare
 
   content:
