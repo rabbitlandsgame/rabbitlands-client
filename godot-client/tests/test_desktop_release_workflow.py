@@ -160,7 +160,8 @@ def test_r2_inputs_reach_only_the_prepare_validation_step_through_env():
     workflow = load(R2_FILE)
     inputs = triggers(workflow)["workflow_dispatch"]["inputs"]
     assert set(inputs) == {"windows_source", "windows_set_sha256", "linux_source", "linux_set_sha256", "dry_run"}
-    assert inputs["windows_source"]["options"] == inputs["linux_source"]["options"] == ["r2", "ci"]
+    assert inputs["windows_source"]["options"] == ["r2", "ci", "none"]  # none: a dry run of Linux only
+    assert inputs["linux_source"]["options"] == ["r2", "ci"]
     assert inputs["dry_run"]["type"] == "boolean" and inputs["dry_run"]["default"] is False
     step = next(step for step in steps(workflow["jobs"]["prepare"]) if step.get("id") == "prepare")
     assert step["env"] == {"GH_TOKEN": "${{ github.token }}",
@@ -425,7 +426,8 @@ def test_jobs_have_timeouts_and_pinned_runner_images(name):
             if isinstance(include, dict):
                 assert {row["runner"] for row in include["include"]} <= RUNNERS, job_name
             else:
-                assert include == "${{ fromJSON(needs.prepare.outputs.ci_matrix) }}", job_name
+                assert include in ("${{ fromJSON(needs.prepare.outputs.ci_matrix) }}",
+                                   "${{ fromJSON(needs.prepare.outputs.build_matrix) }}"), job_name
                 assert set(actions_release.RUNNERS.values()) <= RUNNERS
         else:
             assert runner in RUNNERS, job_name
@@ -635,10 +637,26 @@ def test_matrix_legs_come_from_validated_prepare_outputs():
     workflow = jobs(R2_FILE)
     assert workflow["content"]["strategy"]["matrix"] == "${{ fromJSON(needs.prepare.outputs.r2_matrix) }}"
     assert workflow["content-ci"]["strategy"]["matrix"] == "${{ fromJSON(needs.prepare.outputs.ci_matrix) }}"
-    for job_name in ("build", "installers", "e2e"):
-        assert workflow[job_name]["strategy"]["matrix"]["include"] == [
-            {"platform": "windows", "runner": "windows-2025"}, {"platform": "linux", "runner": "ubuntu-24.04"}]
+    # Executables and installers run for every platform with a source: both, except in a dry
+    # run of Linux only (windows_source none, actions_release.r2_inputs). e2e runs only in a
+    # real release, which always has both.
+    for job_name in ("build", "installers"):
+        assert workflow[job_name]["strategy"]["matrix"] == "${{ fromJSON(needs.prepare.outputs.build_matrix) }}"
         assert workflow[job_name]["strategy"]["fail-fast"] is False
+    assert workflow["e2e"]["strategy"]["matrix"]["include"] == [
+        {"platform": "windows", "runner": "windows-2025"}, {"platform": "linux", "runner": "ubuntu-24.04"}]
+    assert workflow["e2e"]["strategy"]["fail-fast"] is False
+    for job_name in ("sign", "stage", "e2e"):
+        assert "needs.prepare.outputs.dry_run == 'false'" in workflow[job_name]["if"], job_name
+
+
+def test_windows_source_offers_none_for_a_linux_only_dry_run():
+    inputs = triggers(load(R2_FILE))["workflow_dispatch"]["inputs"]
+    assert inputs["windows_source"]["default"] == "r2"
+    none = {"WINDOWS_SOURCE": "none", "WINDOWS_SET_SHA256": "", "LINUX_SOURCE": "ci", "LINUX_SET_SHA256": ""}
+    assert actions_release.r2_inputs({**none, "DRY_RUN": "true"})["platforms"]["windows"]["source"] == "none"
+    with pytest.raises(ValueError):
+        actions_release.r2_inputs({**none, "DRY_RUN": "false"})
 
 
 def test_shared_concurrency_group():

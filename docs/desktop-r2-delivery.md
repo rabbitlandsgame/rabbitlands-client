@@ -680,6 +680,16 @@ as a path, and never print, copy or commit it.
    - `windows_set_sha256` and `linux_set_sha256`: the printed hashes for `r2`;
      empty for `ci`.
    - `dry_run`: off.
+   - A **dry run of Linux only** sets `windows_source: none` (empty Windows hash),
+     `linux_source: ci` and `dry_run` on. It builds and checks only Linux content,
+     executables and installer, so it can start before the Windows content exists.
+     `none` is refused outside a dry run: a release always has both platforms. The
+     owner's release script starts this dry run at the beginning, beside its own
+     Windows build, on `develop`. When `develop` still names X at dispatch, the real
+     run starts from `develop` as well, so its `Content linux (ci)` restores the cache
+     the dry run saved (a run on `master` cannot read caches saved on `develop`), and
+     `master` moves to X only after promote. If `develop` has moved, the script
+     moves `master` to X first and releases from there, with a cold Linux build.
 7. **Approval 1: `desktop-sign`.**
    - Before approving, read each `Content <platform>` job summary: added, changed
      and removed packages; whether the core `client` package changed; new file
