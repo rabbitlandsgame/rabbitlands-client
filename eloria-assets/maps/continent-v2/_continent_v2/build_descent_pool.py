@@ -141,13 +141,90 @@ def frame(cells):
         B.CELLS = previous
 
 
+# THE WAY BACK UP. build_underground draws every 'stairs' mouth as treads down into a well, so a party arriving on a
+# floor stood beside the same way down it had just taken. The server's generator marks the lower end of each stair
+# passage `"flight": "up"`; for those ends this script draws stone steps rising from the floor into the rock under a
+# taller opening instead. The well is kept as it was (the steps fill it, and its footprint stays closed on the walk
+# grid), so the served grid does not change. The end's art stays 'stairs' in the source, which underground_source
+# (never edited either) checks.
+UP = 'stairs_up'
+UP_MOUTH = {'width': 2.4, 'top': 3.2, 'pit': 1.6, 'bottom': -1.6}
+UP_STEPS = 5
+UP_RISE = .27   # metres a step: the fifth stands 1.35 m up at the face, under the 3.2 m lintel
+
+
+def up_ends(design):
+    """{(passage index, end index)} of the ends the design marks `"flight": "up"`."""
+    return {(index, end_index) for index, passage in enumerate(design.get('passages', []))
+            for end_index, end in enumerate(passage.get('ends', [])) if end.get('flight') == 'up'}
+
+
+def up_flight(section, add, k, mouth):
+    """Stone steps up the well in front of an 'up' mouth's face, in its bucket `Build_<section>_mouth<k>`: each step a
+    tread, a riser facing the room and its two sides, from the well's lip (floor height) to the face."""
+    theme = B.theme_of(section)
+    (cx, cy), (ux, uy) = mouth['centre'], mouth['facing']
+    vx, vy = -uy, ux
+    w = UP_MOUTH['width']/2
+    bucket = f"Build_{section['id']}_mouth{k}"
+
+    def at(a, b, h):
+        return B.world(cx+ux*a+vx*b, cy+uy*a+vy*b, h)
+    room = (-ux, 0, uy)
+    side = (-uy, 0, -ux)
+    a0 = mouth['distance']-mouth['depth']
+    face = mouth['distance']-.12
+    run = (face-a0)/UP_STEPS
+    for i in range(UP_STEPS):
+        a, b, low, high = a0+i*run, a0+(i+1)*run, i*UP_RISE, (i+1)*UP_RISE
+        stone = theme['bank']
+        add(B._face([at(a, -w, high), at(b, -w, high), at(b, w, high), at(a, w, high)], (0, 1, 0), stone), bucket)
+        add(B._face([at(a, -w, low), at(a, w, low), at(a, w, high), at(a, -w, high)], room, stone), bucket)
+        for sign in (-1, 1):
+            add(B._face([at(a, sign*w, -.05), at(b, sign*w, -.05), at(b, sign*w, high), at(a, sign*w, high)],
+                        tuple(sign*c for c in side), theme['rock']), bucket)
+
+
+@contextmanager
+def up_flights(design):
+    """build_underground set to draw the design's `"flight": "up"` ends (up_flight()) for the duration: mouths()
+    gives those ends the art UP (its opening UP_MOUTH, no treads down), stairwells() keeps their wells (the walk grid
+    is closed there as before) and mouth_geometry() adds the steps. Restored afterwards."""
+    ups = up_ends(design)
+    original_mouths, original_wells, original_geometry = B.mouths, B.stairwells, B.mouth_geometry
+
+    def mouths(section):
+        return [{**mouth, 'art': UP} if mouth['art'] == 'stairs'
+                and (mouth['end']['passage'], mouth['end']['end']) in ups else mouth
+                for mouth in original_mouths(section)]
+
+    def stairwells(section):
+        return [mouth['pit'] for mouth in mouths(section) if mouth['art'] in ('stairs', UP)]
+
+    def mouth_geometry(section, add, mouth_walls):
+        original_geometry(section, add, mouth_walls)
+        for k, mouth in enumerate(mouths(section)):
+            if mouth['art'] == UP:
+                up_flight(section, add, k, mouth)
+
+    had = UP in B.MOUTHS
+    B.MOUTHS[UP] = dict(UP_MOUTH)
+    B.mouths, B.stairwells, B.mouth_geometry = mouths, stairwells, mouth_geometry
+    try:
+        yield ups
+    finally:
+        B.mouths, B.stairwells, B.mouth_geometry = original_mouths, original_wells, original_geometry
+        if not had:
+            del B.MOUTHS[UP]
+
+
 def build(server, out=None):
     """Build the package from content/serpent_deep_descent.json with build_underground.build(), then state the map's
     own parent region and provenance in world.json (the cave builder writes landfall_insides')."""
     design = json.loads(SOURCE.read_text(encoding='utf-8'))
     ident, cells = design['map']['id'], design['map']['cells']
     out = Path(out or HERE.parent/ident/'client')
-    with frame(cells):
+    with frame(cells), up_flights(design):
         summary = B.build(Path(server).resolve(), source=SOURCE, out=out, registry=out == HERE.parent/ident/'client')
     manifest_path = out/'world.json'
     manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
