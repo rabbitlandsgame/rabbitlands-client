@@ -76,7 +76,7 @@ bone name.
   The pipeline deletes the seam chords and caps each side separately.
 - **Clearance:** displacing per vertex in 3D shreds the mesh. Push along the
   body-facing axis only, against the old cape's inner line.
-- **Dark slits on the back** have had three separate causes, and the red-lining
+- **Dark slits on the back** have had four separate causes, and the red-lining
   check finds all of them: tint the `Detail` slot pure red in a scratch
   `--equipment` registry and render the back with `canonical_equipment_preview.gd`.
   1. Fold triangles faced against their smooth normal, so Godot lit them from
@@ -93,6 +93,12 @@ bone name.
      because the two layers' vertices are 2-5 cm apart and skin differently.
      The lining is therefore single-sided and faces the body, so it is culled
      wherever it comes through. Do not make it double-sided again.
+  4. The approved fits (`eloria-assets/source/capes/approved-v100`), which the
+     game draws instead of this mesh on the Human rig, kept their authoring
+     winding: causes 1 and 3 again, on about 4 % of the cloth and trim and
+     about 200 lining triangles. `CapeApprovedData.fit_mesh` winds them by
+     the rules above when it builds the mesh;
+     `godot-client/tests/test_cape_approved_winding.gd` checks it.
 - **Runtime drape (`godot-client/src/actors/cape_drape.gd`):** its fade bands
   are tuned to this cape's shape (30/45 degrees of bearing, y 1.38/1.46). It
   also caps how fast the push may change across the cloth (`SLOPE`).

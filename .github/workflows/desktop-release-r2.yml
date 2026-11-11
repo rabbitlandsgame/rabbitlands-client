@@ -14,12 +14,12 @@ on:
   workflow_dispatch:
     inputs:
       windows_source:
-        description: Windows content source (r2 = the set uploaded from the build machine; ci = built on the runner)
+        description: Windows content source (r2 = the set uploaded from the build machine; ci = built on the runner; none = a dry run of Linux only)
         type: choice
-        options: [r2, ci]
+        options: [r2, ci, none]
         default: r2
       windows_set_sha256:
-        description: SHA-256 of the Windows content set on R2 (64 hex; empty for ci)
+        description: SHA-256 of the Windows content set on R2 (64 hex; empty for ci or none)
         type: string
         default: ''
       linux_source:
@@ -35,6 +35,10 @@ on:
         description: Build and check only (no draft, no signing, no uploads)
         type: boolean
         default: false
+      commit:
+        description: Optional full commit the run must be at (40 hex); prepare refuses a branch head that moved on
+        type: string
+        default: ''
 
 # One release operation at a time across desktop-release.yml, this workflow,
 # desktop-repoint.yml and published-client-cleanup.yml.
@@ -74,6 +78,7 @@ jobs:
       ci_any: ${{ steps.prepare.outputs.ci_any }}
       r2_matrix: ${{ steps.prepare.outputs.r2_matrix }}
       ci_matrix: ${{ steps.prepare.outputs.ci_matrix }}
+      build_matrix: ${{ steps.prepare.outputs.build_matrix }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -103,6 +108,7 @@ jobs:
           LINUX_SOURCE: ${{ inputs.linux_source }}
           LINUX_SET_SHA256: ${{ inputs.linux_set_sha256 }}
           DRY_RUN: ${{ inputs.dry_run }}
+          COMMIT: ${{ inputs.commit }}
         run: python godot-client/tools/actions_release.py r2-prepare
 
   content:
@@ -313,12 +319,8 @@ jobs:
       && (needs.content-ci.result == 'success' || needs.content-ci.result == 'skipped') }}
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - platform: windows
-            runner: windows-2025
-          - platform: linux
-            runner: ubuntu-24.04
+      # Both platforms, except a dry run of Linux only (windows_source none).
+      matrix: ${{ fromJSON(needs.prepare.outputs.build_matrix) }}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 150
     permissions:
@@ -493,12 +495,7 @@ jobs:
       || (needs.prepare.outputs.dry_run == 'true' && needs.sign.result == 'skipped')) }}
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - platform: windows
-            runner: windows-2025
-          - platform: linux
-            runner: ubuntu-24.04
+      matrix: ${{ fromJSON(needs.prepare.outputs.build_matrix) }}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
     permissions:

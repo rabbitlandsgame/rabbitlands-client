@@ -268,8 +268,9 @@ key = fx.key
 other_key = fx.other_key
 COMMIT = fx.COMMIT
 TARGET = fx.PARENT
+# COMMIT is part of every dispatch's env, so a COMMIT in the shell running the tests cannot leak in.
 INPUTS = {"WINDOWS_SOURCE": "r2", "WINDOWS_SET_SHA256": "1" * 64, "LINUX_SOURCE": "r2",
-          "LINUX_SET_SHA256": "2" * 64, "DRY_RUN": "false"}
+          "LINUX_SET_SHA256": "2" * 64, "DRY_RUN": "false", "COMMIT": ""}
 CAPS_R2 = rm.ReaderCapabilities(schema3=True, r2_rows=True, package_limit=2000)
 CAPS_B8 = rm.ReaderCapabilities(schema3=True, r2_rows=False, package_limit=850)
 REAL_COMMIT_CAPABILITIES = rm.commit_capabilities
@@ -449,6 +450,9 @@ def test_every_release_job_entry_proves_its_checkout_holds_exact_bytes(tmp_path,
     {"LINUX_SET_SHA256": ""}, {"LINUX_SET_SHA256": "2" * 64 + " "}, {"LINUX_SET_SHA256": "$(id)" + "2" * 59},
     {"LINUX_SOURCE": "ci"}, {"DRY_RUN": "yes"}, {"DRY_RUN": ""}, {"DRY_RUN": "True"},
     {"LINUX_SET_SHA256": "1" * 64},
+    # none is a dry run's only: a real release always has both platforms.
+    {"WINDOWS_SOURCE": "none", "WINDOWS_SET_SHA256": ""}, {"WINDOWS_SOURCE": "none"},
+    {"WINDOWS_SOURCE": "None", "WINDOWS_SET_SHA256": ""},
 ])
 def test_r2_inputs_are_regex_validated(change):
     assert actions.r2_inputs(INPUTS)["platforms"]["windows"] == {"source": "r2", "set_sha256": "1" * 64}
@@ -456,10 +460,50 @@ def test_r2_inputs_are_regex_validated(change):
         actions.r2_inputs({**INPUTS, **change})
 
 
+def test_r2_inputs_take_a_linux_only_dry_run():
+    value = actions.r2_inputs({**INPUTS, "WINDOWS_SOURCE": "none", "WINDOWS_SET_SHA256": "",
+                               "LINUX_SOURCE": "ci", "LINUX_SET_SHA256": "", "DRY_RUN": "true"})
+    assert value == {"platforms": {"windows": {"source": "none", "set_sha256": ""},
+                                   "linux": {"source": "ci", "set_sha256": ""}}, "dry_run": True, "commit": ""}
+
+
+@pytest.mark.parametrize(("change", "message"), [
+    ({"WINDOWS_SOURCE": "none", "WINDOWS_SET_SHA256": "1" * 64}, "empty for a none source"),
+    ({"WINDOWS_SOURCE": "none", "WINDOWS_SET_SHA256": "", "LINUX_SOURCE": "none", "LINUX_SET_SHA256": ""},
+     "only Windows"),
+    ({"LINUX_SOURCE": "none", "LINUX_SET_SHA256": ""}, "only Windows"),
+])
+def test_r2_inputs_refuse_a_dry_run_none_with_a_set_or_for_linux(change, message):
+    with pytest.raises(ValueError, match=message):
+        actions.r2_inputs({**INPUTS, "DRY_RUN": "true", **change})
+
+
 def test_r2_inputs_take_ci_sources_without_a_set_hash():
     value = actions.r2_inputs({**INPUTS, "LINUX_SOURCE": "ci", "LINUX_SET_SHA256": "", "DRY_RUN": "true"})
     assert value == {"platforms": {"windows": {"source": "r2", "set_sha256": "1" * 64},
-                                   "linux": {"source": "ci", "set_sha256": ""}}, "dry_run": True}
+                                   "linux": {"source": "ci", "set_sha256": ""}}, "dry_run": True, "commit": ""}
+
+
+@pytest.mark.parametrize("commit", ["a" * 39, "A" * 40, "a" * 40 + "\n", "main", "$(id)"])
+def test_r2_inputs_take_only_an_empty_or_full_commit(commit):
+    assert actions.r2_inputs({**INPUTS, "COMMIT": "c" * 40})["commit"] == "c" * 40
+    with pytest.raises(ValueError):
+        actions.r2_inputs({**INPUTS, "COMMIT": commit})
+
+
+def test_r2_prepare_refuses_a_run_at_another_commit_before_writing_anything(tmp_path, monkeypatch):
+    dispatch(tmp_path, monkeypatch, inputs={**INPUTS, "COMMIT": "c" * 40})
+    no_github(monkeypatch)
+    with pytest.raises(ValueError, match="branch moved on"):
+        actions.r2_prepare()
+    assert not (tmp_path / "outputs").exists()
+
+
+def test_r2_prepare_takes_a_run_at_the_named_commit(tmp_path, monkeypatch):
+    dispatch(tmp_path, monkeypatch, inputs={**INPUTS, "COMMIT": SHA, "DRY_RUN": "true"})
+    no_github(monkeypatch)
+    actions.r2_prepare()
+    assert outputs(tmp_path)["commit"] == SHA
 
 
 @pytest.mark.parametrize("schema", [None, 1, True, "2", 2.0])
@@ -571,8 +615,25 @@ def test_r2_prepare_dry_run_makes_no_github_call_and_emits_validated_matrices(tm
     assert json.loads(values["r2_matrix"]) == {"include": [{"platform": "windows", "set_sha256": "1" * 64},
                                                            {"platform": "linux", "set_sha256": "2" * 64}]}
     assert json.loads(values["ci_matrix"]) == {"include": []}
+    assert json.loads(values["build_matrix"]) == {"include": [{"platform": "windows", "runner": "windows-2025"},
+                                                              {"platform": "linux", "runner": "ubuntu-24.04"}]}
     assert (values["r2_any"], values["ci_any"]) == ("true", "false")
     assert "Dry run" in (tmp_path / "summary.md").read_text()
+
+
+def test_r2_prepare_linux_only_dry_run_builds_and_checks_linux_alone(tmp_path, monkeypatch):
+    dispatch(tmp_path, monkeypatch, inputs={**INPUTS, "WINDOWS_SOURCE": "none", "WINDOWS_SET_SHA256": "",
+                                            "LINUX_SOURCE": "ci", "LINUX_SET_SHA256": "", "DRY_RUN": "true"})
+    monkeypatch.setattr(actions, "ci_tool_commands", lambda: {"verify-content", actions.CI_CONTENT_COMMAND})
+    no_github(monkeypatch)
+    actions.r2_prepare()
+    values = outputs(tmp_path)
+    assert values["release_id"] == "0" and values["dry_run"] == "true"
+    assert (values["windows_source"], values["windows_set_sha256"]) == ("none", "")
+    assert (values["r2_any"], values["ci_any"]) == ("false", "true")
+    assert json.loads(values["r2_matrix"]) == {"include": []}
+    assert json.loads(values["ci_matrix"]) == {"include": [{"platform": "linux", "runner": "ubuntu-24.04"}]}
+    assert json.loads(values["build_matrix"]) == {"include": [{"platform": "linux", "runner": "ubuntu-24.04"}]}
 
 
 def test_r2_prepare_creates_this_commits_draft_and_a_ci_leg_when_available(tmp_path, monkeypatch):

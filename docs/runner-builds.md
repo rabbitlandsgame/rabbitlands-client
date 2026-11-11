@@ -46,11 +46,14 @@ advances during the run.
 2. Open Actions -> **Build desktop release (R2 content)** -> **Run workflow**. Choose
    the branch whose head is the release commit, and fill in:
    - `windows_source`, `linux_source`: `r2` (content uploaded from the build
-     machine) or `ci` (content built on the runner);
+     machine) or `ci` (content built on the runner). `windows_source` also takes
+     `none`, in a dry run only: a dry run of Linux alone;
    - `windows_set_sha256`, `linux_set_sha256`: the content set hashes that
      `desktop_content.py pack` printed (64 lowercase hex), for `r2` sources only;
-     leave them empty for `ci`;
-   - `dry_run`: build and check only.
+     leave them empty for `ci` and `none`;
+   - `dry_run`: build and check only;
+   - `commit` (optional): the release commit in full. Prepare refuses the run if the
+     branch head is anything else.
 3. Approve the three environments in order:
    - `desktop-sign`, after reading the content summaries;
    - `desktop-publish`, after the end-to-end tests and finalize;
@@ -63,6 +66,7 @@ The **prepare** job refuses, before anything is written:
 - the signing key in its environment;
 - invalid or inconsistent inputs. Each input is regex-validated, and the same set
   hash may not be given for both platforms;
+- a head other than the `commit` input, when one is given;
 - a tree without whole-release retention (`RETENTION_SCHEMA` below 2);
 - an `r2` source when the commit's updater cannot read R2 rows. Its
   `src/updates/release.gd` must declare `const CODEC_SCHEMA := 3` and exactly
@@ -92,7 +96,8 @@ Otherwise it finds or creates the draft `client-<commit>` (none in a dry run).
 | `Promote to GitHub latest` | Ubuntu 24.04 | write | **`desktop-promote`** | confirms the live R2 pointers, flips `latest`, prunes |
 
 Each later job names the result of every job it needs. A skipped content leg is
-accepted only where that platform used the other source.
+accepted only where that platform used the other source or, in a dry run, where
+Windows is `none`.
 
 ### Dry run
 
@@ -100,6 +105,9 @@ accepted only where that platform used the other source.
 jobs, `Executables` and `Installer`. In a dry run:
 
 - the installer job only installs the tools and measures the disk;
+- with `windows_source: none`, only `prepare`, the Linux content leg (`Content linux
+  (ci)` or `(r2)`), `Executables linux` and `Installer linux` run: nothing that needs
+  Windows content, so it can start before that content exists;
 - a `ci` content leg builds, qualifies and packs, but uploads nothing and opens no
   upload sink. Its caches may still be saved.
 

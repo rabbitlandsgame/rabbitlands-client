@@ -276,27 +276,50 @@ def dispatch_commit(workflow: str) -> str:
 
 
 def r2_inputs(env=None) -> dict:
-    """The dispatch inputs, as the prepare step receives them through `env:`."""
+    """The dispatch inputs, as the prepare step receives them through `env:`.
+
+    `none` leaves Windows out entirely, and only a dry run may do that: a dry run
+    of Linux alone can start while the Windows content is still being built, so a
+    CI failure shows early. A real release always has both platforms.
+
+    `commit`, when given, is the full commit the dispatcher meant: the branch head
+    can move between choosing it and dispatching, and prepare refuses the run
+    before it writes anything (r2_prepare).
+    """
     env = os.environ if env is None else env
+    dry_run = env.get("DRY_RUN", "")
+    if dry_run not in ("true", "false"):
+        raise ValueError("dry_run must be true or false.")
     platforms = {}
     for platform in PLATFORMS:
         source = env.get(f"{platform.upper()}_SOURCE", "")
         digest = env.get(f"{platform.upper()}_SET_SHA256", "")
+        if source == "none":
+            if platform != "windows":
+                raise ValueError(f"{platform}_source must be r2 or ci; only Windows can be left out of a dry run.")
+            if dry_run != "true":
+                raise ValueError(f"{platform}_source none is only for a dry run; a release needs both platforms.")
+            if digest:
+                raise ValueError(f"{platform}_set_sha256 must be empty for a none source.")
+            platforms[platform] = {"source": source, "set_sha256": ""}
+            continue
         if not _SOURCE.fullmatch(source):
-            raise ValueError(f"{platform}_source must be r2 or ci.")
+            raise ValueError(f"{platform}_source must be r2 or ci (or none, in a dry run).")
         if source == "r2" and not _SHA256.fullmatch(digest):
             raise ValueError(f"{platform}_set_sha256 must be the 64 lowercase hex SHA-256 of the {platform} "
                              "content set on R2.")
         if source == "ci" and digest:
             raise ValueError(f"{platform}_set_sha256 must be empty for a ci source.")
         platforms[platform] = {"source": source, "set_sha256": digest}
-    dry_run = env.get("DRY_RUN", "")
-    if dry_run not in ("true", "false"):
-        raise ValueError("dry_run must be true or false.")
+    if all(item["source"] == "none" for item in platforms.values()):  # defensive: only Windows takes none today
+        raise ValueError("At least one platform needs a content source.")
+    commit = env.get("COMMIT", "")
+    if commit and not _COMMIT.fullmatch(commit):
+        raise ValueError("commit must be empty or a full 40-character lowercase commit.")
     hashes = [item["set_sha256"] for item in platforms.values() if item["source"] == "r2"]
     if len(set(hashes)) != len(hashes):
         raise ValueError("The Windows and Linux content sets cannot be the same object.")
-    return {"platforms": platforms, "dry_run": dry_run == "true"}
+    return {"platforms": platforms, "dry_run": dry_run == "true", "commit": commit}
 
 
 def retention_guard() -> int:
@@ -376,6 +399,9 @@ def r2_prepare() -> dict:
     sha = dispatch_commit(R2_WORKFLOW)
     no_signing_key()
     inputs = r2_inputs()
+    if inputs["commit"] and inputs["commit"] != sha:
+        raise ValueError(f"The run is at {sha}, but the dispatch asked for {inputs['commit']}: the branch moved on "
+                         "between the two. Nothing was written; dispatch again from a branch at that commit.")
     retention_guard()
     platforms = inputs["platforms"]
     sources = {platform: item["source"] for platform, item in platforms.items()}
@@ -400,12 +426,14 @@ def r2_prepare() -> dict:
         shared_release_assets.ensure(sha)
     r2_rows = [{"platform": p, "set_sha256": platforms[p]["set_sha256"]} for p in PLATFORMS if sources[p] == "r2"]
     ci_rows = [{"platform": p, "runner": RUNNERS[p]} for p in PLATFORMS if sources[p] == "ci"]
+    build_rows = [{"platform": p, "runner": RUNNERS[p]} for p in PLATFORMS if sources[p] != "none"]
     values = {"commit": sha, "release_id": release_id, "dry_run": str(inputs["dry_run"]).lower(),
               **{f"{p}_source": sources[p] for p in PLATFORMS},
               **{f"{p}_set_sha256": platforms[p]["set_sha256"] for p in PLATFORMS},
               "r2_any": str(bool(r2_rows)).lower(), "ci_any": str(bool(ci_rows)).lower(),
               "r2_matrix": json.dumps({"include": r2_rows}, separators=(",", ":"), sort_keys=True),
-              "ci_matrix": json.dumps({"include": ci_rows}, separators=(",", ":"), sort_keys=True)}
+              "ci_matrix": json.dumps({"include": ci_rows}, separators=(",", ":"), sort_keys=True),
+              "build_matrix": json.dumps({"include": build_rows}, separators=(",", ":"), sort_keys=True)}
     _write_outputs(values)
     rows = "".join(f"| {p} | {sources[p]} | `{platforms[p]['set_sha256'] or '-'}` |\n" for p in PLATFORMS)
     _summary(f"## Desktop release from `{sha}`\n\n"

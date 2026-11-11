@@ -68,6 +68,48 @@ static func _vectors2(values: PackedFloat32Array) -> PackedVector2Array:
 		out[i] = Vector2(values[i * 2], values[i * 2 + 1])
 	return out
 
+## The lining surface: single-sided, wound toward the body.
+static func is_lining(surface: Dictionary) -> bool:
+	return str(surface.get("name", "")).ends_with("Detail")
+
+## The fit's triangles, each wound the way the shared cape's build winds them
+## (eloria-assets/tools/build_shared_cape.py). The approved fits were exported
+## with their authoring winding, which that build corrects but the export did
+## not: about 4 % of the cloth and trim triangles faced against the shading
+## normal their corners carry, and about 200 lining triangles faced away from
+## the body. The cloth and trim are double-sided and Godot turns a back face's
+## normal round, so such a triangle in a fold was lit from inside the cape: a
+## dark slit across the cloth. The lining is single-sided so that it is culled
+## wherever it comes through the outer layer; facing out, it showed there.
+## - Cloth and trim: a triangle faces the way its corners' normals point.
+## - Lining: a triangle faces the trunk axis (native model space, Y up).
+## Only the order within a triangle changes; vertices, the triangle set and the
+## surface sizes stay exactly the approved ones. Godot's front faces are
+## clockwise, so a triangle (a, b, c) faces along (c - a) x (b - a).
+static func wound(indices: PackedInt32Array, vertices: PackedVector3Array,
+		normals: PackedVector3Array, lining: bool) -> PackedInt32Array:
+	var out := indices.duplicate()
+	var count := vertices.size()
+	for at: int in range(0, out.size() - 2, 3):
+		var a := out[at]
+		var b := out[at + 1]
+		var c := out[at + 2]
+		if a < 0 or b < 0 or c < 0 or a >= count or b >= count or c >= count:
+			continue
+		var facing := (vertices[c] - vertices[a]).cross(vertices[b] - vertices[a])
+		var wanted: Vector3
+		if lining:
+			var centre := (vertices[a] + vertices[b] + vertices[c]) / 3.0
+			wanted = Vector3(-centre.x, 0.0, -centre.z)
+		elif normals.size() == count:
+			wanted = normals[a] + normals[b] + normals[c]
+		else:
+			continue
+		if facing.dot(wanted) < 0.0:
+			out[at + 1] = c
+			out[at + 2] = b
+	return out
+
 static func fit_mesh(profile: String, template: Mesh) -> ArrayMesh:
 	var key := "%s|%s" % [profile, template.get_instance_id()]
 	if _meshes.has(key):
@@ -93,6 +135,9 @@ static func fit_mesh(profile: String, template: Mesh) -> ArrayMesh:
 		if count == 0 or (arrays[Mesh.ARRAY_BONES] as PackedInt32Array).size() != count * 8 \
 				or (arrays[Mesh.ARRAY_WEIGHTS] as PackedFloat32Array).size() != count * 8:
 			return null
+		if int(surface.get("primitive", Mesh.PRIMITIVE_TRIANGLES)) == Mesh.PRIMITIVE_TRIANGLES:
+			arrays[Mesh.ARRAY_INDEX] = wound(arrays[Mesh.ARRAY_INDEX], arrays[Mesh.ARRAY_VERTEX],
+				arrays[Mesh.ARRAY_NORMAL], is_lining(surface))
 		mesh.add_surface_from_arrays(int(surface.get("primitive", Mesh.PRIMITIVE_TRIANGLES)),
 			arrays, [], {}, Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
 		mesh.surface_set_material(i, template.surface_get_material(i))
