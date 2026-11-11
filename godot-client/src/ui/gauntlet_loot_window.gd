@@ -638,7 +638,7 @@ func apply_snapshot(state: Dictionary) -> void:
 			if state.has(key): _state[key] = state[key].duplicate(true) if state[key] is Array else state[key]
 		_state["other_pending"] = true
 		_render_exchange()
-		if _pending_since == 0: status.text = "Another gauntlet ledger was updated. Choose its run above to review loot or votes."
+		if _pending_since == 0: status.text = "Another loot ledger was updated. Choose its run above to review loot or votes."
 		return
 	var completed: bool = state.phase == "complete" and (changed_run or _state.get("phase", "") != "complete")
 	if changed_run:
@@ -668,7 +668,7 @@ func apply_snapshot(state: Dictionary) -> void:
 	if _browse_dirty: _browse_timer.start(0.05)
 	set_process(_completion_open_pending)
 	if just_exited: close()
-	reopen.text = "Party exchange (%d)" % int(state.exchange_total) if int(state.get("exchange_total", 0)) > 0 and state.phase == "sent" else ("More reserved loot" if state.phase == "sent" else "Gauntlet loot (%d)" % int(state.total))
+	reopen.text = "Party exchange (%d)" % int(state.exchange_total) if int(state.get("exchange_total", 0)) > 0 and state.phase == "sent" else ("More reserved loot" if state.phase == "sent" else "%s loot (%d)" % [_run_word(state).capitalize(), int(state.total)])
 	if not str(state.announcement).is_empty():
 		var key := "%s:%d" % [state.run_id, int(state.announcement_id)]
 		_announcement_message = "RARE FOUND: %s   ·   Party notified · Held for distribution" % state.announcement
@@ -703,6 +703,17 @@ func _clear(parent: Node) -> void:
 func _editable() -> bool:
 	return bool(_state.get("is_leader", false)) and _state.get("phase", "") in ["complete", "ended"] and _pending_since == 0
 
+## A descent's ledger (kind "descent"; the server's descent runs share this
+## escrow) reads as the descent's, and its party goes out to the temple.
+static func _is_descent(state: Dictionary) -> bool:
+	return str(state.get("kind", "gauntlet")) == "descent"
+
+static func _run_word(state: Dictionary) -> String:
+	return "descent" if _is_descent(state) else "gauntlet"
+
+static func _exit_place(state: Dictionary) -> String:
+	return "the temple" if _is_descent(state) else "the beam"
+
 func _render() -> void:
 	if not bool(_state.get("exchange_enabled", false)): _show_exchange = false
 	_tabs.visible = bool(_state.get("exchange_enabled", false))
@@ -713,7 +724,8 @@ func _render() -> void:
 	hint.visible = not _compact_view
 	heading.tooltip_text = "Personal cache rewards stay with their owner. Click item icons to inspect."
 	_exchange_heading.visible = not _compact_view
-	heading.text = "GAUNTLET COMPLETE" if _state.phase == "complete" else ("LOOT DELIVERED" if _state.phase == "sent" else ("GAUNTLET IN PROGRESS" if _state.phase == "active" else "GAUNTLET ENDED"))
+	var run_word := _run_word(_state).to_upper()
+	heading.text = run_word + " COMPLETE" if _state.phase == "complete" else ("LOOT DELIVERED" if _state.phase == "sent" else (run_word + " IN PROGRESS" if _state.phase == "active" else run_word + " ENDED"))
 	heading.text += " • " + str(_state.route)
 	route.text = str(_state.route)
 	route.hide()
@@ -738,7 +750,8 @@ func _render() -> void:
 	sell_all_button.disabled = not _editable()
 	sell_unassigned_button.disabled = not _editable()
 	send_button.disabled = (not bool(_state.is_leader) or _pending_since > 0 or bool(_state.get("exited", false))) if _state.phase == "sent" else (not _editable() or not bool(_state.can_send))
-	send_button.text = "RETURN PARTY TO BEAM" if _state.phase == "sent" else "REVIEW & SEND…"
+	send_button.text = ("RETURN PARTY TO " + _exit_place(_state).to_upper()) if _state.phase == "sent" else "REVIEW & SEND…"
+	_exchange_heading.text = "Owned by the original %s team" % _run_word(_state)
 	send_button.visible = not _show_exchange
 	approve_button.hide()
 	for member: Dictionary in _state.members:
@@ -755,7 +768,7 @@ func _render() -> void:
 	next_button.visible = int(_state.pages) > 1
 	status.text = str(_state.reason)
 	if _state.phase == "sent": status.text = "Every assigned share was delivered directly to personal storage."
-	elif _state.phase == "active": status.text = "Loot is reserved. Finish the run to distribute it."
+	elif _state.phase == "active": status.text = "Loot is reserved for the party. It opens for sharing when the boss falls." if _is_descent(_state) else "Loot is reserved. Finish the run to distribute it."
 	elif not bool(_state.is_leader): status.text = "The party leader is assigning loot. Your storage preview updates with every change."
 	elif status.text.is_empty(): status.text = "Review recipients and quantities, then confirm delivery. Remainders go in roster order."
 	for member: Dictionary in _state.members:
@@ -769,7 +782,7 @@ func _render() -> void:
 		status.text = "Exchange listings are staged. Visit an Exchange NPC within four tiles to confirm distribution and post them."
 	if _show_exchange:
 		heading.text = "PARTY EXCHANGE"
-		hint.text = "The original gauntlet team keeps ownership, even after the party changes."
+		hint.text = "The original %s team keeps ownership, even after the party changes." % _run_word(_state)
 		status.text = "Listings stay available at their current price during a vote. Approved changes apply to unsold items."
 		approve_button.hide()
 
@@ -1245,11 +1258,14 @@ func _confirm_send() -> void:
 	if send_button.disabled: return
 	_confirm_revision = int(_state.revision)
 	_confirmation_run = str(_state.run_id)
+	var place := _exit_place(_state)
+	confirmation.title = "Save %s loot and return to %s" % [_run_word(_state), place]
+	confirmation.ok_button_text = "Save & exit to " + place.trim_prefix("the ")
 	if _state.phase == "sent":
-		confirmation.dialog_text = "Loot is saved in storage. Close the party's loot windows and return everyone still in this instance to the beam?"
+		confirmation.dialog_text = "Loot is saved in storage. Close the party's loot windows and return everyone still in this instance to %s?" % place
 		confirmation.popup_centered(Vector2i(480, 180))
 		return
-	confirmation.dialog_text = "Save all %d allocated item types to the %d party members' personal storage, then close the loot windows and return everyone still in this instance to the beam?\n\nReview the storage preview before confirming. This delivery can only happen once." % [int(_state.total), _state.members.size()]
+	confirmation.dialog_text = "Save all %d allocated item types to the %d party members' personal storage, then close the loot windows and return everyone still in this instance to %s?\n\nReview the storage preview before confirming. This delivery can only happen once." % [int(_state.total), _state.members.size(), place]
 	for member: Dictionary in _state.members:
 		if int(member.charge_gold) > 0:
 			confirmation.dialog_text += "\n%s pays %d GC from storage and receives %d GC back." % [member.name, int(member.charge_gold), int(member.rebate_gold)]
@@ -1336,7 +1352,7 @@ func _render_exchange() -> void:
 	_distribution_tab.add_theme_stylebox_override("normal", style(BRONZE if _show_exchange else CYAN, Color("0b191b") if _show_exchange else Color("123137"), 9))
 	_exchange_tab.add_theme_stylebox_override("normal", style(CYAN if _show_exchange else BRONZE, Color("123137") if _show_exchange else Color("0b191b"), 9))
 	_run_picker.clear()
-	_run_picker.add_item("Choose a gauntlet run…")
+	_run_picker.add_item("Choose a run…")
 	_run_picker.set_item_disabled(0, true)
 	var ledgers: Array = _state.get("ledgers", [])
 	for entry: Dictionary in ledgers:

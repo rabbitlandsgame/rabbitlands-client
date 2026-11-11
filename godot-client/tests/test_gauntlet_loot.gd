@@ -328,6 +328,31 @@ func run() -> void:
 	expect(ui.table.get_child(5).get_global_rect().end.y <= ui.pager.get_global_rect().position.y,
 		"six compact item rows fit without pushing out the global summary")
 	await check_browse_close_lifecycle(ui, full_view)
+	# A descent's ledger (kind "descent") reads as the descent's and goes out to the temple.
+	var descent := sample()
+	descent["kind"] = "descent"
+	descent["route"] = "The Serpent Deep"
+	expect(protocol.decode_gauntlet_loot(JSON.stringify(descent).to_utf8_buffer()).type == "gauntlet_loot",
+		"a descent's ledger decodes")
+	var odd := descent.duplicate(true)
+	odd["kind"] = "raid"
+	expect(protocol.decode_gauntlet_loot(JSON.stringify(odd).to_utf8_buffer()).type == "invalid",
+		"an unknown ledger kind is refused")
+	ui.apply_snapshot(descent)
+	expect(ui.heading.text.begins_with("DESCENT ") and ui.reopen.text.begins_with("Descent loot"),
+		"the descent's ledger is headed as the descent's (%s)" % ui.heading.text)
+	if not ui.send_button.disabled:
+		ui.send_button.pressed.emit()
+		expect(ui.confirmation.dialog_text.contains("the temple") and not ui.confirmation.dialog_text.contains("beam")
+			and ui.confirmation.ok_button_text == "Save & exit to temple",
+			"a descent's save and exit returns the party to the temple")
+		ui.confirmation.hide()
+	descent.phase = "sent"
+	ui.apply_snapshot(descent)
+	expect(ui.send_button.text == "RETURN PARTY TO THE TEMPLE", "a delivered descent returns the party to the temple")
+	descent.phase = "active"
+	ui.apply_snapshot(descent)
+	expect(ui.status.text.contains("when the boss falls"), "an active descent's loot waits for the boss")
 	ui.queue_free()
 	background.queue_free()
 	await process_frame

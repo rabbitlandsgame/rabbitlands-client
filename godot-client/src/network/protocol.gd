@@ -1977,6 +1977,9 @@ static func decode_gauntlet_loot(payload: PackedByteArray) -> Dictionary:
 			return {"type": "invalid", "error": "gauntlet_loot_text"}
 	if state.phase not in ["active", "complete", "ended", "sent"]:
 		return {"type": "invalid", "error": "gauntlet_loot_phase"}
+	# A descent's ledger (the server's descent runs share the escrow); absent on a gauntlet's.
+	if state.get("kind", "gauntlet") not in ["gauntlet", "descent"]:
+		return {"type": "invalid", "error": "gauntlet_loot_kind"}
 	for key: String in ["open", "is_leader", "can_send"]:
 		if not state.get(key) is bool:
 			return {"type": "invalid", "error": "gauntlet_loot_flag"}
