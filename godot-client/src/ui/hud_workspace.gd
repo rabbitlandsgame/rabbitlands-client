@@ -2,6 +2,7 @@ extends Control
 ## Shared live controls, editable presentation. The editor never replaces a
 ## chat feed, slot button, command handler or spell loadout with a preview copy.
 const Presets := preload("res://src/ui/hud_presets.gd")
+const DescentStatusHud := preload("res://src/ui/descent_status_hud.gd")
 const Medallion := preload("res://src/ui/hud_medallion.gd")
 const Compass := preload("res://src/ui/hud_compass.gd")
 const ResourceStrip := preload("res://src/ui/hud_resource_strip.gd")
@@ -129,8 +130,9 @@ func configure(owner_main: Control) -> void:
 		"objectives": main.extension_windows.get("tracked_quest"), "target": main.selected_target,
 		"nameplate": main.actor_resource_overlay,
 		"gauntlet_loot": main.extension_windows.gauntlet_loot_window.reopen,
-		"rare_drops": main.extension_windows.gauntlet_loot_window.announcement}
-	for key: String in ["gauntlet_loot", "rare_drops"]:
+		"rare_drops": main.extension_windows.gauntlet_loot_window.announcement,
+		"descent_status": main.extension_windows.descent_status_hud.panel}
+	for key: String in ["gauntlet_loot", "rare_drops", "descent_status"]:
 		parts[key].reparent(main.game_view, false)
 	for key: String in parts:
 		var control: Control = parts[key]
@@ -226,6 +228,7 @@ func configure(owner_main: Control) -> void:
 	_build_editor()
 	panel.visibility_changed.connect(_sync_gauntlet_hud)
 	main.extension_windows.gauntlet_loot_window.hud_layout_requested.connect(queue_layout)
+	main.extension_windows.descent_status_hud.hud_layout_requested.connect(queue_layout)
 	main.window_stack.register(panel, true)
 	_build_settings()
 	ready_to_layout = true
@@ -273,6 +276,7 @@ func _sync_gauntlet_hud() -> void:
 	if parts.has("jukebox"): parts.jukebox.set_editor_preview(is_open())
 	main.extension_windows.gauntlet_loot_window.configure_hud(
 		model.working.parts.gauntlet_loot.enabled, model.working.parts.rare_drops.enabled, is_open())
+	main.extension_windows.descent_status_hud.configure_hud(model.working.parts.descent_status.enabled, is_open())
 	queue_layout()
 
 func _process(_delta: float) -> void:
@@ -1583,7 +1587,7 @@ func apply_layout() -> void:
 		(parts.medallion as Control).configure(_text_config("medallion", "hud_detail"))
 	main._request_map_redraw()
 	for key: String in Presets.PARTS:
-		if key in ["chat", "system_chat", "spells", "resources", "compass", "objectives", "gauntlet_loot", "rare_drops"]: continue
+		if key in ["chat", "system_chat", "spells", "resources", "compass", "objectives", "gauntlet_loot", "rare_drops", "descent_status"]: continue
 		_root(key).visible = bool(model.working.parts[key].enabled) \
 			or (key == "party" and not str(AppState.party.get("invited_by", "")).is_empty())
 	main.extension_windows._sync_tracked_quest()
@@ -2227,6 +2231,8 @@ func _position_for(key: String, dimensions: Vector2) -> Vector2:
 		_:
 			if key in ["gauntlet_loot", "rare_drops"]:
 				where = main.extension_windows.gauntlet_loot_window.default_hud_rect(key, bounds).position
+			elif key == "descent_status":
+				where = DescentStatusHud.default_hud_rect(bounds, dimensions).position
 			elif original.has(key): where = original[key].rect.position / _initial_size * bounds
 	where += config.offset
 	return where.clamp(Vector2(6, 6), (bounds - dimensions - Vector2(6, 6)).max(Vector2(6, 6)))

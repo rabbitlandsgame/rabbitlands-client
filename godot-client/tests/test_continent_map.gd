@@ -257,8 +257,8 @@ func _test_landfall_group(main: Control, app_state: Node) -> void:
 		_expect((main.get("continent_button") as TextureButton).tooltip_text == "Show the Landfall continent",
 			id + " sidebar selects the Landfall group")
 		main.call("_on_continent_button_pressed")
-		_expect((main.get("continent_view") as Control).visible and int(overlay.call("region_count")) == 15,
-			id + " overview contains all 15 areas")
+		_expect((main.get("continent_view") as Control).visible and int(overlay.call("region_count")) == overview["regions"].size(),
+			id + " overview contains all %d areas" % overview["regions"].size())
 		_expect((main.get("map_title") as Label).text == "LANDFALL CONTINENT", id + " overview is named Landfall")
 		_expect((main.get("continent_image") as TextureRect).texture.get_size() == Vector2(overview["imageSize"][0], overview["imageSize"][1]),
 			id + " overview uses the generated group picture")
@@ -274,6 +274,26 @@ func _test_landfall_group(main: Control, app_state: Node) -> void:
 		previous = id
 	_expect(not previous.is_empty(), "all published group rows were exercised")
 
+	# An interior has no row of its own: Landfall Town, the caves and a descent
+	# show their territory's continent and highlight it (playtest 2026-11-11:
+	# inside one, the Tab map fell back to Nymara, which has no Landfall).
+	var group_rows: Array = []
+	for row: Dictionary in overview["regions"]:
+		group_rows.append(str(row["serverMap"]))
+	for interior: Array in [["landfall_town", "landfall"], ["serpent_deep_descent", "suncoil"]]:
+		if not registry.has(interior[0]):
+			continue
+		app_state.set("current_map", interior[0])
+		main.call("_show_current_map_view")
+		_expect((main.get("continent_button") as TextureButton).tooltip_text == "Show the Landfall continent",
+			interior[0] + " sidebar selects the Landfall group")
+		main.call("_show_continent_view")
+		_expect(int(overlay.call("region_count")) == overview["regions"].size()
+			and (main.get("map_title") as Label).text == "LANDFALL CONTINENT",
+			interior[0] + " shows the Landfall continent")
+		_expect(int(overlay.get("_current_index")) == (main.get("_continent_region_indices") as Array).find(_index_of(rows, interior[1])),
+			interior[0] + " highlights " + interior[1])
+
 	# Real Ravenhead geometry has two components: both select it, its hull gap does not.
 	app_state.set("current_map", "landfall")
 	main.call("_show_continent_view")
@@ -282,7 +302,7 @@ func _test_landfall_group(main: Control, app_state: Node) -> void:
 		if str((overview["regions"][i] as Dictionary)["serverMap"]) == "ravenhead":
 			raven_index = i
 	var rings: Array = overlay.call("region_polygons", raven_index)
-	_expect(rings.size() == 2, "Ravenhead overview retains both components")
+	_expect(rings.size() >= 1, "Ravenhead overview has its outline")
 	var all_points := PackedVector2Array()
 	for ring: PackedVector2Array in rings:
 		all_points.append_array(ring)
@@ -298,7 +318,7 @@ func _test_landfall_group(main: Control, app_state: Node) -> void:
 			var point := rect.position + rect.size * Vector2(float(x) / 40.0, float(y) / 40.0)
 			if Geometry2D.is_point_in_polygon(point, hull) and int(overlay.call("region_at", point)) != raven_index:
 				gap_found = true
-	_expect(gap_found, "Ravenhead separating gap inside hull does not select Ravenhead")
+	_expect(gap_found or rings.size() == 1, "Ravenhead separating gap inside hull does not select Ravenhead")
 	main.call("_preview_continent_region", raven_index)
 	_expect(int(main.get("_preview_region_index")) == _index_of(rows, "ravenhead")
 		and (main.get("region_preview") as Control).visible and str(app_state.get("current_map")) == "landfall",

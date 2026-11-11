@@ -1,10 +1,20 @@
 extends Control
 ## A small read-only line of where the party stands in a descent: the
 ## dungeon, the floor (number and name) and the time left, from the server's
-## descent state (AppState.descent, server message 188). It sits where the
-## gauntlet's wave readout does, under the combat HUD. The clock counts down
+## descent state (AppState.descent, server message 188). The clock counts down
 ## locally between states from when the last one arrived; the server's next
 ## state restates it.
+##
+## In the game the HUD workspace places it: it is the editor part
+## "descent_status" (hud_presets.gd), by default MANAGED_WIDTH wide under the
+## combat HUD's default spot, clear of every preset's parts, and the player can
+## move or hide it in the HUD editor (`configure_hud`). Unmanaged (ExtensionWindows
+## on its own) it sits under the combat HUD as before.
+
+signal hud_layout_requested
+
+## The readout's width when the workspace places it: its lines wrap to it.
+const MANAGED_WIDTH := 240.0
 
 var panel: PanelContainer
 var heading: Label
@@ -18,6 +28,11 @@ var _app: Node
 ## Main's right rail: the readout keeps left of it while it shows, so a combat
 ## HUD dragged to the right edge does not push the readout under the rail.
 var dock_rail: Control
+var _hud_managed := false
+var _hud_enabled := true
+var _hud_preview := false
+var _laid_out := Vector2(-1, -1)
+var _laid_visible := false
 
 func _ready() -> void:
 	name = "DescentStatusHud"
@@ -66,6 +81,18 @@ func configure(anchor: Callable) -> void:
 	_anchor = anchor
 	_refresh_at = 0
 
+## The HUD workspace places the readout from now on: shown while a descent is
+## open and the part is enabled, or as a sample while the HUD editor is open.
+func configure_hud(enabled: bool, preview: bool) -> void:
+	_hud_managed = true
+	_hud_enabled = enabled
+	_hud_preview = preview
+	panel.custom_minimum_size.x = MANAGED_WIDTH
+	for label: Label in [heading, floor_line, clock]:
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_refresh_at = 0
+	_refresh()
+
 func _now_msec() -> int:
 	return Time.get_ticks_msec()
 
@@ -108,8 +135,16 @@ func _refresh() -> void:
 	if panel == null:
 		return
 	_refresh_at = _now_msec() + 250
-	panel.visible = bool(_app.authenticated) and bool(_state.get("open", false))
+	var live := bool(_app.authenticated) and bool(_state.get("open", false))
+	panel.visible = (_hud_enabled and (live or _hud_preview)) if _hud_managed else live
 	if not panel.visible:
+		_request_layout()
+		return
+	if not live:
+		heading.text = "The Serpent Deep · Normal"
+		floor_line.text = "Floor 1 of 6 · Descent status"
+		clock.text = "Time left 60:00"
+		_layout()
 		return
 	var title := str(_state.get("name", ""))
 	if title.is_empty():
@@ -124,8 +159,28 @@ func _refresh() -> void:
 	clock.text = line + (" · " + boss if not boss.is_empty() else "")
 	_layout()
 
+## Managed: the workspace lays the readout out again only when its size or
+## visibility changed (the clock ticks four times a second).
+func _request_layout() -> void:
+	if not _hud_managed:
+		return
+	var size_now := panel.get_combined_minimum_size()
+	if size_now == _laid_out and panel.visible == _laid_visible:
+		return
+	_laid_out = size_now
+	_laid_visible = panel.visible
+	hud_layout_requested.emit()
+
+## The default spot: centred, under the combat HUD's default rect (y 64-140 at
+## 1280 x 720), where no preset puts a part.
+static func default_hud_rect(viewport: Vector2, size_now: Vector2) -> Rect2:
+	return Rect2(Vector2((viewport.x - size_now.x) / 2.0, 146.0), size_now)
+
 func _layout() -> void:
 	if panel == null or not panel.visible:
+		return
+	if _hud_managed:
+		_request_layout()
 		return
 	var bounds := size
 	var right := clear_right(self, dock_rail)

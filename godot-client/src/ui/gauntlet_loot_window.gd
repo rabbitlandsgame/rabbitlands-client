@@ -711,6 +711,10 @@ static func _is_descent(state: Dictionary) -> bool:
 static func _run_word(state: Dictionary) -> String:
 	return "descent" if _is_descent(state) else "gauntlet"
 
+## What a run's locked rows are: a descent's chest shares, a gauntlet's cache.
+static func _personal_words(state: Dictionary) -> String:
+	return "chest shares" if _is_descent(state) else "cache rewards"
+
 static func _exit_place(state: Dictionary) -> String:
 	return "the temple" if _is_descent(state) else "the beam"
 
@@ -722,14 +726,14 @@ func _render() -> void:
 	_columns.visible = not _show_exchange
 	_exchange_view.visible = _show_exchange
 	hint.visible = not _compact_view
-	heading.tooltip_text = "Personal cache rewards stay with their owner. Click item icons to inspect."
+	heading.tooltip_text = "Personal %s stay with their owner. Click item icons to inspect." % _personal_words(_state)
 	_exchange_heading.visible = not _compact_view
 	var run_word := _run_word(_state).to_upper()
 	heading.text = run_word + " COMPLETE" if _state.phase == "complete" else ("LOOT DELIVERED" if _state.phase == "sent" else (run_word + " IN PROGRESS" if _state.phase == "active" else run_word + " ENDED"))
 	heading.text += " • " + str(_state.route)
 	route.text = str(_state.route)
 	route.hide()
-	hint.text = "Click an item icon to inspect it. Personal cache rewards stay with their owner."
+	hint.text = "Click an item icon to inspect it. Personal %s stay with their owner." % _personal_words(_state)
 	_portrait_nodes.clear()
 	_row_panels.clear()
 	portraits.begin_batch()
@@ -888,7 +892,7 @@ func _item_row(row: Dictionary) -> void:
 		rare_badge.add_theme_stylebox_override("panel", style(BRONZE, Color("11170f"), 2))
 		item_text.add_child(rare_badge)
 		_label(rare_badge, "RARE", 9, GOLD)
-	if not str(row.owner).is_empty(): _label(item_text, "Personal cache", 10, MUTED)
+	if not str(row.owner).is_empty(): _label(item_text, "Personal chest share" if _is_descent(_state) else "Personal cache", 10, MUTED)
 	if row.source == "compensation": _label(item_text, "Gold Coins · shared equally", 10, MUTED)
 	if int(row.sell_quantity) > 0: _label(item_text, "NPC: %d → %d GC" % [int(row.sell_quantity), int(row.sale_proceeds)], 10, GREEN)
 	if int(row.get("exchange_quantity", 0)) > 0: _label(item_text, "Exchange: %d × %d GC" % [int(row.exchange_quantity), int(row.exchange_price)], 10, CYAN)

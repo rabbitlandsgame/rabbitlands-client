@@ -18,7 +18,7 @@ const PARTS := {"rail_panel": "Blank HUD panel", "utilities": "Menu icons", "res
 	"objectives": "Tracked objectives", "target": "Selected target", "nameplate": "Character banner",
 	"gauntlet_loot": "Gauntlet loot", "rare_drops": "Rare drop announcements",
 	"player_card": "Player card", "food_meter": "Food meter", "load_meter": "Load meter", "xp_meter": "Experience meter",
-	"jukebox": "Music player"}
+	"jukebox": "Music player", "descent_status": "Descent status"}
 const ANCHORS := ["original", "top_left", "top_center", "top_right", "left",
 	"right", "bottom_left", "bottom_center", "bottom_right", "free"]
 const STYLES := ["heritage", "classic", "modular", "adventure", "minimal"]
@@ -270,6 +270,8 @@ static func _preset_recipe(id: String) -> Dictionary:
 	value.parts.jukebox.background_color = Color("0d1824f5")
 	value.parts.jukebox.border_color = Color("526a7e")
 	_place(value, "jukebox", "bottom_center", Vector2(0, -150))
+	# Under the combat HUD's default rect, clear of every preset's parts.
+	_place(value, "descent_status", "top_center", Vector2(0, 138))
 	value.parts.objectives.enabled = true
 	value.parts.target.enabled = true
 	value.parts.items.slots = 8
@@ -675,7 +677,7 @@ static func normalise(raw: Variant) -> Dictionary:
 	var parts: Variant = raw.get("parts", {})
 	if parts is Dictionary:
 		for key: String in PARTS:
-			if key == "jukebox" and not parts.has(key): continue
+			if key in ["jukebox", "descent_status"] and not parts.has(key): continue
 			var input: Variant = parts.get(key, {})
 			if not input is Dictionary: continue
 			var part: Dictionary = result.parts[key]

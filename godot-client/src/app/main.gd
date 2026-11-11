@@ -11702,8 +11702,19 @@ func _configure_cartography() -> void:
 	continent_map.mouse_exited.connect(_set_hovered_dock.bind(-1))
 	_configure_continent_overlay(_active_continent_data())
 
-func _active_continent_data() -> Dictionary:
+## The cartography row of the map you are on or, inside an interior
+## (Landfall Town, the caves, a descent) that has none, of the territory it
+## belongs to (world_park.parent_of); -1 when neither has one.
+func _current_region_index() -> int:
 	var index := _region_index_for_map(AppState.current_map)
+	if index < 0 and world_park != null:
+		var parent: String = world_park.parent_of(str(AppState.current_map))
+		if not parent.is_empty():
+			index = _region_index_for_map(parent)
+	return index
+
+func _active_continent_data() -> Dictionary:
+	var index := _current_region_index()
 	if index >= 0 and _cartography_frame(index) == "continent-v2":
 		var overview: Dictionary = _v2_cartography.get("overview", {}) as Dictionary
 		if not overview.is_empty():
@@ -12009,7 +12020,7 @@ func _show_continent_view() -> void:
 	_sync_map_viewport_activity()
 	continent_view.show()
 	_boat_continent_overlay.set_hovered_dock(-1)
-	continent_map.set_current_region(_continent_region_indices.find(_region_index_for_map(AppState.current_map)))
+	continent_map.set_current_region(_continent_region_indices.find(_current_region_index()))
 	# The live render keeps its last frame while its viewport idles.
 	continent_button.texture_normal = _map_picture.get("texture") as Texture2D
 	continent_button.tooltip_text = "Return to your current map"
@@ -12029,7 +12040,7 @@ func _on_continent_region_hovered(region_index: int) -> void:
 		return
 	var region: Dictionary = cartography_regions[region_index] as Dictionary
 	map_coordinates.text = "Click to see " + str(region.get("name", "the region"))
-	if region_index == _region_index_for_map(AppState.current_map):
+	if region_index == _current_region_index():
 		map_coordinates.text += " (where you are)"
 
 ## Shows a region's tab map without leaving the map you are on. The map you
