@@ -176,6 +176,9 @@ func run() -> void:
 	main.manufacturing_panel.show()
 	await frames()
 	await screenshot("02-level-sort-and-ingredient-toggle.png")
+	# Measure the widest header: Refine shows once the server can disenchant.
+	root.get_node("AppState").call("_offer_enchanting_recovery")
+	expect(workspace.refine.visible, "Refine shows once the server can answer it")
 	for preset: String in workspace.model.BUILT_INS:
 		workspace.choose_preset(preset, true)
 		for available: bool in [true, false]:

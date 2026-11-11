@@ -32,6 +32,7 @@ var source_row: HBoxContainer
 var quantity_row: HBoxContainer
 var quantity_controls: Array[Control] = []
 var pin: Button
+var refine: Button
 var _pinned := false
 var editor: Control
 var dragger: WindowDrag
@@ -51,6 +52,10 @@ var _drag_mouse := Vector2.ZERO
 var _drag_origin := Vector2.ZERO
 var _drag_dimensions := Vector2.ZERO
 var _resizing := false
+
+func _offer_refine(part: StringName) -> void:
+	if part in [&"enchanting_recovery_available", &"connection"]:
+		refine.visible = AppState.enchanting_recovery_available
 
 func configure(owner_main: Control) -> void:
 	main = owner_main
@@ -77,9 +82,14 @@ func configure(owner_main: Control) -> void:
 	title.name = "Title"
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title)
-	var recovery := _button("Refine", func() -> void: main.inventory_workspace.recovery_window.open(1))
-	recovery.tooltip_text = "Refine enriched essences or disenchant an equipment copy"
-	header.add_child(recovery)
+	refine = _button("Refine", func() -> void: main.inventory_workspace.recovery_window.open(1))
+	refine.name = "MixingRefine"
+	refine.tooltip_text = "Refine enriched essences or disenchant an equipment copy"
+	# Only once this connection's server has shown it can answer: an older
+	# one never replies (see AppState.enchanting_recovery_available).
+	refine.visible = AppState.enchanting_recovery_available
+	AppState.state_changed.connect(_offer_refine)
+	header.add_child(refine)
 	pin = _button("◇", func() -> void:
 		_pinned = not _pinned
 		pin.text = "◆" if _pinned else "◇")

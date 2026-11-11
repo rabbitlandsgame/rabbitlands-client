@@ -31,6 +31,12 @@ var _rendering := false
 var _stale := false
 var _preferred_slot := -1
 var _placed := false
+## How long a request may go unanswered. A server whose copies predate
+## recovery, or a practice world (which refuses it with a chat line), never
+## replies, and the window must not say "Loading" for ever.
+var reply_seconds := 10.0
+## Sends a request; returns whether it went out. Tests stand in for the link.
+var send_request: Callable = func(request: Dictionary) -> Error: return Network.enchanting_recovery_request(request)
 var _font: SystemFont
 
 func configure(owner_main: Node) -> void:
@@ -151,6 +157,10 @@ func configure(owner_main: Node) -> void:
 	hide()
 
 func open(tab: int = 0, preferred_slot: int = -1) -> void:
+	# Every way in is offered only then; this keeps a stale one from asking a
+	# server that never answers.
+	if not AppState.enchanting_recovery_available:
+		return
 	snapshot = {}
 	selected_id = 0
 	_preferred_slot = preferred_slot
@@ -180,10 +190,31 @@ func _send(request: Dictionary) -> void:
 	_pending_op = str(request.op)
 	preview_button.disabled = true
 	confirm_button.disabled = true
-	var error: Error = Network.enchanting_recovery_request(request)
+	var error: Error = send_request.call(request)
 	if error != OK:
 		_busy = false
 		status.text = "Could not contact the server: " + error_string(error)
+	else:
+		_await_reply()
+
+func _await_reply() -> void:
+	if is_inside_tree():
+		get_tree().create_timer(reply_seconds).timeout.connect(_reply_overdue.bind(_serial))
+
+func _reply_overdue(serial: int) -> void:
+	if serial != _serial or not _busy:
+		return
+	_busy = false
+	# A late answer still lands: it carries this request's id. A confirmation
+	# stays pending, so the inventory packets the server sends ahead of its
+	# receipt do not cancel it, and Preview stays locked until it comes.
+	if _pending_op == "confirm":
+		status.text = "No answer from the server yet. Refresh to see whether it went through."
+		return
+	_pending_op = ""
+	status.text = ("The server did not answer. Disenchanting and refining are not available here." if snapshot.is_empty()
+		else "The server has not answered yet. Try again.")
+	_update_details()
 
 func _refresh() -> void:
 	_invalidate()

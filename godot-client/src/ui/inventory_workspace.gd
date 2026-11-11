@@ -318,13 +318,13 @@ func _build_menu() -> void:
 		main._on_quantity_box_pressed(index)
 		quantity_value.text = _quantity_text())
 	popup.add_item("Customize inventory…", 21)
-	popup.add_item("Disenchant & refine…", 23)
 	popup.add_separator()
 	for pair: Array in [["Store all", 0], ["Get all", 1], ["Drop all", 2], ["Mix all", 3], ["Item lists…", 4],
 		["Store protection…", 5], ["Drop protection…", 6]]: popup.add_item(pair[0], pair[1])
+	popup.about_to_popup.connect(_offer_recovery.bind(popup))
 	popup.id_pressed.connect(func(id: int) -> void:
 		if id == 21: open_editor()
-		elif id == 23: recovery_window.open(0)
+		elif id == 23 and AppState.enchanting_recovery_available: recovery_window.open(0)
 		elif id in [5, 6]:
 			var menu: PopupMenu = main._store_options_menu if id == 5 else main._drop_options_menu
 			menu.position = Vector2i(more.global_position)
@@ -334,6 +334,17 @@ func _build_menu() -> void:
 			(buttons[id] as Button).pressed.emit())
 	preset_menu.id_pressed.connect(func(index: int) -> void: choose_preset(str(preset_menu.get_item_metadata(index))))
 	_refresh_pickers()
+
+## "Disenchant & refine…" sits under "Customize inventory…" only while this
+## connection's server has shown it can answer (see
+## `AppState.enchanting_recovery_available`); an older one never replies.
+func _offer_recovery(popup: PopupMenu) -> void:
+	var index := popup.get_item_index(23)
+	if AppState.enchanting_recovery_available and index < 0:
+		popup.add_item("Disenchant & refine…", 23)
+		popup.set_item_index(popup.get_item_index(23), popup.get_item_index(21) + 1)
+	elif not AppState.enchanting_recovery_available and index >= 0:
+		popup.remove_item(index)
 
 func _build_settings() -> void:
 	for page: String in ["HUD", "Inventory"]:
@@ -860,7 +871,9 @@ func refresh_actions() -> void:
 			or (button.name == "drop" and (_detail_slot < 24 or _detail_slot >= 127)) or (button.name == "equip" and _detail_slot < 36 and str(_detail.get("equip_type", "")) not in ["", "none"])
 			or (button.name == "unequip" and _detail_slot >= 36 and _detail_slot < 44))
 		if button.name == "disenchant":
-			button.visible = matches and _detail_slot >= 0 and _detail_slot < 24 and str(_detail.get("instance_tier", "normal")) in ["magic", "rare"]
+			# A detail kept across a reconnect may describe the last server's copy.
+			button.visible = matches and _detail_slot >= 0 and _detail_slot < 24 and str(_detail.get("instance_tier", "normal")) in ["magic", "rare"] \
+				and AppState.enchanting_recovery_available
 		button.disabled = not matches or (button.name == "use" and main._inventory_cooldown_remaining(_detail_slot) > 0)
 
 func _item_action(action: String) -> void:

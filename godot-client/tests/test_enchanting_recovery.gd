@@ -26,6 +26,17 @@ func sample() -> Dictionary:
 		"recipes": [{"normal": "Life Essence", "result": "Enriched Life Essence", "image_id": 617, "normal_cost": 100, "shard_cost": 20, "gold_fee": 100, "normal_available": 240, "result_available": 0}],
 		"quote": null, "error": "", "message": ""}
 
+## An item detail as each kind of server sends it: an older one ends at the
+## last text, one that keeps enchanted copies adds the tier byte (0 = plain).
+func item_detail(tier_byte: int = -1) -> PackedByteArray:
+	var detail := PackedByteArray([182, 0, 1, 0, 0, 0, 0])
+	for text: String in ["Phoenix Helm", "Armor", "head", "Plain helm", "Armor 5", "", ""]:
+		detail.append_array(text.to_utf8_buffer())
+		detail.append(0)
+	if tier_byte >= 0:
+		detail.append(tier_byte)
+	return detail
+
 func receive(value: Dictionary) -> void:
 	value["request_id"] = window.get("_serial")
 	state.call("_on_packet", 186, JSON.stringify(value).to_utf8_buffer())
@@ -61,6 +72,27 @@ func run() -> void:
 	main.get_node("LoginBackground").hide()
 	main.game_view.show()
 	state.set("authenticated", true)
+	# A server that predates enchanted copies never answers the window, so
+	# nothing offers it until the server shows it keeps them.
+	var more_menu: PopupMenu = main.inventory_workspace.more.get_popup()
+	var refine: Button = main.mixing_workspace.refine
+	more_menu.about_to_popup.emit()
+	expect(not state.enchanting_recovery_available and more_menu.get_item_index(23) < 0 and not refine.visible,
+		"no Disenchant & refine entries before the server shows it can answer")
+	main.inventory_workspace.recovery_window.open(0)
+	expect(not main.inventory_workspace.recovery_window.visible, "the window itself will not ask a server that cannot answer")
+	state.call("_on_packet", 225, item_detail())
+	more_menu.about_to_popup.emit()
+	expect(not state.enchanting_recovery_available and more_menu.get_item_index(23) < 0 and not refine.visible,
+		"an item detail without the tier byte offers nothing")
+	state.call("_on_packet", 225, item_detail(0))
+	more_menu.about_to_popup.emit()
+	expect(state.enchanting_recovery_available and more_menu.get_item_index(23) == more_menu.get_item_index(21) + 1
+		and refine.visible, "a plain item's tier byte offers both entries, the menu one under Customize")
+	var offered_count := more_menu.item_count
+	more_menu.about_to_popup.emit()
+	expect(more_menu.get_item_index(23) == more_menu.get_item_index(21) + 1 and more_menu.item_count == offered_count,
+		"reopening the menu does not add the entry twice")
 	window = main.inventory_workspace.recovery_window
 	window.open(0, 4)
 	receive(sample())
@@ -109,6 +141,40 @@ func run() -> void:
 	receive(data)
 	expect(window.status.text == data.message, "committed receipt is displayed")
 	receive(sample())
+	# A server whose copies predate recovery, or a practice world, never answers.
+	# The preview has no link, so stand in for one that sends but never hears back.
+	var real_send: Callable = window.send_request
+	window.send_request = func(_request: Dictionary) -> Error: return OK
+	window.reply_seconds = 0.2
+	window.snapshot = {}
+	window.call("_refresh")
+	var asked: int = window.get("_serial")
+	await create_timer(0.5).timeout
+	expect(not bool(window.get("_busy")) and window.status.text.contains("not available here"),
+		"a request nothing ever answered stops waiting and says the feature is not here")
+	var late := sample()
+	late.request_id = asked
+	state.call("_on_packet", 186, JSON.stringify(late).to_utf8_buffer())
+	await frames()
+	expect(int(window.get("_serial")) == asked and window.copies.item_count == 2, "a late answer to that request still lands")
+	window.call("_send", {"op": "quote", "action": "disenchant", "instance_id": window.selected_id})
+	await create_timer(0.5).timeout
+	expect(window.status.text.contains("has not answered yet") and not window.preview_button.disabled,
+		"a slow quote on a server that has answered asks for a retry and unlocks Preview")
+	window.call("_send", {"op": "confirm", "token": "slow-token"})
+	asked = window.get("_serial")
+	await create_timer(0.5).timeout
+	expect(window.status.text.contains("Refresh to see") and str(window.get("_pending_op")) == "confirm",
+		"a slow confirmation says to refresh and stays pending")
+	state.state_changed.emit(&"inventory")
+	var receipt := sample()
+	receipt.request_id = asked
+	receipt.message = "Copy disenchanted."
+	state.call("_on_packet", 186, JSON.stringify(receipt).to_utf8_buffer())
+	expect(int(window.get("_serial")) == asked and window.status.text == receipt.message,
+		"the inventory sent ahead of a late receipt does not cancel it")
+	window.send_request = real_send
+	window.reply_seconds = 10.0
 	root.size = Vector2i(900, 680)
 	root.content_scale_size = Vector2i(900, 680)
 	await frames()
@@ -121,6 +187,12 @@ func run() -> void:
 	state.set("authenticated", false)
 	state.state_changed.emit(&"connection")
 	expect(not window.visible and window.quote.is_empty(), "disconnect closes destructive flow")
+	state.call("_on_connection_state_changed", "disconnected")
+	more_menu.about_to_popup.emit()
+	expect(not state.enchanting_recovery_available and more_menu.get_item_index(23) < 0 and not refine.visible,
+		"a dropped connection forgets the offer: the next server may be an older one")
+	state.call("_on_packet", 186, JSON.stringify(sample()).to_utf8_buffer())
+	expect(state.enchanting_recovery_available and refine.visible, "a recovery reply itself also shows the server can answer")
 	print("Enchanting recovery: %d checks, %d failures" % [checks, failures])
 	main.queue_free()
 	await frames(2)

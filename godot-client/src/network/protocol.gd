@@ -2523,8 +2523,12 @@ static func decode_item_detail(payload: PackedByteArray) -> Dictionary:
 		return {"type": "invalid", "error": "item_detail_text"}
 	var tail: int = int(text.offset)
 	var tier := "normal"
+	# A server that keeps enchanted copies sends the tier byte on every backpack
+	# or worn item, plain ones included; an older server never sends it.
+	var tier_sent := false
 	if tail + 1 == payload.size() and payload[tail] <= 2:
 		tier = ["normal", "magic", "rare"][payload[tail]]
+		tier_sent = true
 	elif tail != payload.size():
 		return {"type": "invalid", "error": "item_detail_trailing"}
 	var values: Array = text.values
@@ -2532,7 +2536,8 @@ static func decode_item_detail(payload: PackedByteArray) -> Dictionary:
 		"quantity": u32(payload, 2), "equipped": int(payload[6]) != 0,
 		"name": values[0], "category": values[1], "equip_type": values[2],
 		"description": values[3], "stats": values[4],
-		"comparison_name": values[5], "comparison": values[6], "instance_tier": tier}
+		"comparison_name": values[5], "comparison": values[6], "instance_tier": tier,
+		"instance_tier_sent": tier_sent}
 
 ## Command 226. The server's own view of the backpack, with the item names,
 ## categories and per-item weight the ordinary inventory packet cannot carry.
@@ -3195,6 +3200,9 @@ static func decode_storage_state(payload: PackedByteArray) -> Dictionary:
 			return {"type": "invalid", "error": "storage_state_trailing"}
 		read_only = payload[offset] == 1
 		offset += 1
+	# The enchanted-position list, even an empty one, comes only from a server
+	# that keeps enchanted copies.
+	var enchanted_sent := false
 	if offset < payload.size():
 		if offset + 2 > payload.size():
 			return {"type": "invalid", "error": "storage_state_effects"}
@@ -3207,7 +3215,9 @@ static func decode_storage_state(payload: PackedByteArray) -> Dictionary:
 			enchanted[u16(payload, offset + index * 2)] = true
 		for row: Dictionary in rows:
 			row["enchanted"] = enchanted.has(int(row.position))
-	return {"type": "storage_state", "category_id": int(payload[0]), "rows": rows, "read_only": read_only}
+		enchanted_sent = true
+	return {"type": "storage_state", "category_id": int(payload[0]), "rows": rows, "read_only": read_only,
+		"enchanted_sent": enchanted_sent}
 
 static func decode_enchanting_recovery(payload: PackedByteArray) -> Dictionary:
 	var value: Variant = JSON.parse_string(payload.get_string_from_utf8())

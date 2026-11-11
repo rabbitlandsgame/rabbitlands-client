@@ -153,6 +153,17 @@ var changed_actors: Dictionary = {}
 var actor_roster_generation := 0
 var inventory: Dictionary = {}
 var enchanting_recovery: Dictionary = {}
+## Whether the server on this connection has shown that it keeps exact
+## enchanted equipment copies, which is what disenchanting and refining work
+## on. No server says so up front, and one that predates them ignores the
+## recovery request outright, so the window would wait forever. They show
+## themselves on packets players get all the time: the tier byte on every
+## backpack or worn item's detail (any click on a slot asks for one), the
+## enchanted list on a storage category, or a recovery or stored-copy reply.
+## Cleared with the connection: the next server may differ. Copies came a
+## commit before recovery on the server, and practice worlds refuse recovery,
+## so the window still has its own reply deadline.
+var enchanting_recovery_available := false
 ## Slot to the name the server calls what is in it, for the same positions
 ## `inventory` uses. Kept apart from the entries rather than merged into
 ## them because the two arrive on their own packets and either may land
@@ -912,6 +923,7 @@ func _on_connection_state_changed(value: String) -> void:
 		actor_roster_generation += 1
 		inventory.clear()
 		enchanting_recovery.clear()
+		enchanting_recovery_available = false
 		inventory_text = ""
 		inventory_cooldowns.clear()
 		_item_cooldowns.clear()
@@ -1477,12 +1489,16 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			storage["described"] = described
 			storage["described_category_id"] = int(event.category_id)
 			storage["category_id"] = int(event.category_id)
+			if bool(event.get("enchanted_sent", false)):
+				_offer_enchanting_recovery()
 			state_changed.emit(&"storage")
 		"storage_instances":
+			_offer_enchanting_recovery()
 			if bool(storage.get("open", false)):
 				storage["instances"] = (event.state as Dictionary).duplicate(true)
 				state_changed.emit(&"storage_instances")
 		"enchanting_recovery":
+			_offer_enchanting_recovery()
 			enchanting_recovery = (event.state as Dictionary).duplicate(true)
 			state_changed.emit(&"enchanting_recovery")
 		"storage_text":
@@ -1923,6 +1939,8 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			item_detail = (event as Dictionary).duplicate(true)
 			item_detail["open"] = true
 			item_detail.erase("type")
+			if bool(event.get("instance_tier_sent", false)):
+				_offer_enchanting_recovery()
 			state_changed.emit(&"item_detail")
 		"inventory_names":
 			inventory_names = (event.names as Dictionary).duplicate()
@@ -2233,6 +2251,14 @@ func _expire_inventory_text(generation: int) -> void:
 func close_item_detail() -> void:
 	item_detail = {"open": false}
 	state_changed.emit(&"item_detail")
+
+## See `enchanting_recovery_available`. Said once per connection, before the
+## packet's own part, so whatever that part redraws already sees it.
+func _offer_enchanting_recovery() -> void:
+	if enchanting_recovery_available:
+		return
+	enchanting_recovery_available = true
+	state_changed.emit(&"enchanting_recovery_available")
 
 func close_player_info() -> void:
 	player_info = _empty_player_info()
