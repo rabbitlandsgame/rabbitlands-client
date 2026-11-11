@@ -13,6 +13,8 @@ The generator requires NumPy and reads only this source package. No Blender proj
 
 The fit buffers store the approved surfaces in native model coordinates (right handed, Y up). Their scalar arrays are little endian: float32 positions, normals, tangents, UV and weights; int32 indices and bone slots. Each render vertex retains eight slots and refers to the17 names in the catalog: the12 cape controls plus spine_03, clavicle_l/r, neck_01 and Head. Material slots0â€“2 borrow the existing generic cape's Base, Trim and Detail resources. Existing colours and perk emblems continue to use the original material and UV paths; no texture is duplicated here.
 
+The fit buffers keep their authoring triangle winding. Godot needs the winding the shared cape's build gives (`eloria-assets/tools/shared_cape/README.md`, dark slits): cloth and trim triangles facing the way their corners' normals point, and lining triangles facing the body. The runtime (`CapeApprovedData.fit_mesh`) changes only the corner order within each triangle when it builds the mesh. Vertices, normals, skin and the triangle set stay exactly as approved, so the buffers and their hashes here are unchanged.
+
 The cape was authored through a scene containing differently rebound skins. Therefore the five body-owned named binds include a measured joint-frame correction. Do not replace them with inverse skeleton rests or run the legacy geometry fit over the approved arrays again. Native reference poses combined with the corrected skin reproduce the approved cape to0.091mm maximum /0.028mm RMS in the independent numerical witnesses; see `native-adapter-validation.json`.
 
 For control i, the runtime cape-only writer uses native skeleton-global transforms:
