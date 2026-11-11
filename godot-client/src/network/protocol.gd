@@ -150,6 +150,7 @@ enum ServerMessage {
 	## or the boss reward's three-way pick. JSON, `kind` "state" or "reward".
 	ELORIA_DESCENT_STATE = 188,
 	ELORIA_STORAGE_INSTANCES = 187,
+	ELORIA_ENCHANTING_RECOVERY = 186,
 	# Which map package the server was built against. Continues the same
 	# downward run below 211.
 	ELORIA_MAP_DIGEST = 209,
@@ -335,6 +336,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"item_detail_v1",
 	"item_instance_tiers_v1",
 	"storage_instances_v1",
+	"enchanting_recovery_v1",
 	"mail_window_v1",
 	"map_digest_v1",
 	"mix_window_v1",
@@ -669,6 +671,11 @@ static func storage_instance_request(item_name: String, offset: int = 0, identit
 		"version": 1, "op": "withdraw" if identity > 0 else "list",
 		"name": item_name, "offset": offset, "instance_id": identity}).to_utf8_buffer())
 
+static func enchanting_recovery_request(request: Dictionary) -> PackedByteArray:
+	var body := request.duplicate(true)
+	body["version"] = 1
+	return encode(ServerMessage.ELORIA_ENCHANTING_RECOVERY, JSON.stringify(body).to_utf8_buffer())
+
 static func close_bag() -> PackedByteArray:
 	return encode(ClientMessage.CLOSE_BAG)
 
@@ -953,6 +960,8 @@ static func decode_server(command: int, payload: PackedByteArray, logical_coordi
 			return decode_storage_state(payload)
 		ServerMessage.ELORIA_STORAGE_INSTANCES:
 			return decode_storage_instances(payload)
+		ServerMessage.ELORIA_ENCHANTING_RECOVERY:
+			return decode_enchanting_recovery(payload)
 		ServerMessage.STORAGE_TEXT:
 			if payload.is_empty():
 				return {"type": "invalid", "error": "storage_text_length"}
@@ -3199,6 +3208,58 @@ static func decode_storage_state(payload: PackedByteArray) -> Dictionary:
 		for row: Dictionary in rows:
 			row["enchanted"] = enchanted.has(int(row.position))
 	return {"type": "storage_state", "category_id": int(payload[0]), "rows": rows, "read_only": read_only}
+
+static func decode_enchanting_recovery(payload: PackedByteArray) -> Dictionary:
+	var value: Variant = JSON.parse_string(payload.get_string_from_utf8())
+	if not value is Dictionary or value.get("version") != 1 or not value.get("enabled") is bool:
+		return {"type": "invalid", "error": "recovery_version"}
+	if not value.get("items") is Array or value.items.size() > 24 or not value.get("recipes") is Array or value.recipes.size() > 16:
+		return {"type": "invalid", "error": "recovery_rows"}
+	if value.enabled:
+		for key: String in ["max_batch", "shard_available", "gold_available"]:
+			if not _recovery_integer(value.get(key), 1 if key == "max_batch" else 0, 1000 if key == "max_batch" else 4294967295):
+				return {"type": "invalid", "error": "recovery_balance"}
+		if not value.get("shard_item") is String: return {"type": "invalid", "error": "recovery_shards"}
+	for raw: Variant in value.items:
+		if not raw is Dictionary or not raw.get("name") is String or not raw.get("effects") is Array or raw.effects.size() > 4:
+			return {"type": "invalid", "error": "recovery_copy"}
+		if not _recovery_integer(raw.get("instance_id"), 1, 9007199254740991):
+			return {"type": "invalid", "error": "recovery_identity"}
+		for key: String in ["slot", "image_id", "quality", "durability", "max_durability"]:
+			if not _recovery_integer(raw.get(key), 0, 23 if key == "slot" else 65535):
+				return {"type": "invalid", "error": "recovery_copy_stats"}
+		if raw.get("tier") not in ["magic", "rare"] or not _recovery_materials(raw.get("outputs")):
+			return {"type": "invalid", "error": "recovery_copy"}
+		for effect: Variant in raw.effects:
+			if not effect is String: return {"type": "invalid", "error": "recovery_effect"}
+	for raw: Variant in value.recipes:
+		if not raw is Dictionary or not raw.get("normal") is String or not raw.get("result") is String:
+			return {"type": "invalid", "error": "recovery_recipe"}
+		for key: String in ["image_id", "normal_cost", "shard_cost", "gold_fee", "normal_available", "result_available"]:
+			if not _recovery_integer(raw.get(key), 1 if key in ["normal_cost", "shard_cost"] else 0, 4294967295):
+				return {"type": "invalid", "error": "recovery_recipe_cost"}
+	var preview: Variant = value.get("quote")
+	if preview != null:
+		if not preview is Dictionary or not preview.get("token") is String or preview.token.length() > 128:
+			return {"type": "invalid", "error": "recovery_quote"}
+		if preview.get("action") not in ["disenchant", "refine"] or not _recovery_materials(preview.get("inputs")) or not _recovery_materials(preview.get("outputs")) or not preview.get("name") is String or not _recovery_integer(preview.get("gold_fee"), 0, 4294967295000):
+			return {"type": "invalid", "error": "recovery_quote"}
+		if preview.action == "disenchant":
+			if not preview.get("effects") is Array or preview.effects.size() > 4: return {"type": "invalid", "error": "recovery_quote_effects"}
+			for effect: Variant in preview.effects:
+				if not effect is String: return {"type": "invalid", "error": "recovery_quote_effects"}
+	return {"type": "enchanting_recovery", "state": value}
+
+static func _recovery_integer(value: Variant, minimum: int, maximum: int) -> bool:
+	if typeof(value) not in [TYPE_INT, TYPE_FLOAT]: return false
+	var number := float(value)
+	return is_finite(number) and number == floor(number) and number >= minimum and number <= maximum
+
+static func _recovery_materials(value: Variant) -> bool:
+	if not value is Array or value.size() > 8: return false
+	for row: Variant in value:
+		if not row is Dictionary or not row.get("name") is String or not _recovery_integer(row.get("quantity"), 1, 4294967295000): return false
+	return true
 
 static func decode_storage_instances(payload: PackedByteArray) -> Dictionary:
 	var value: Variant = JSON.parse_string(payload.get_string_from_utf8())

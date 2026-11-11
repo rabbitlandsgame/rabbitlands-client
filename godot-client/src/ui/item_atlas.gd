@@ -13,6 +13,7 @@ const WORN_MARK_COLOUR := Color(0.98, 0.55, 0.11)
 const WORN_MARK_OUTLINE := Color(0.06, 0.04, 0.02, 0.92)
 
 var _atlas_paths: Array[String] = []
+var _custom_paths: Dictionary = {}
 var _textures: Dictionary = {}
 var _aliases: Dictionary = {}
 var _worn_icons: Dictionary = {}
@@ -28,6 +29,11 @@ var _image_count := -1
 var _fallback_image_id := -1
 
 func configure(config: Dictionary) -> void:
+	_custom_paths.clear()
+	var custom: Variant = config.get("customIcons", {})
+	if custom is Dictionary:
+		for key: Variant in custom:
+			_custom_paths[int(str(key))] = str(custom[key])
 	_atlas_paths.clear()
 	_textures.clear()
 	_aliases.clear()
@@ -61,8 +67,12 @@ func icon_for(image_id: int) -> Texture2D:
 	if resolved_image_id < 0:
 		return null
 	var cached: Variant = _icons.get(resolved_image_id)
-	if cached is AtlasTexture:
-		return cached as AtlasTexture
+	if cached is Texture2D:
+		return cached as Texture2D
+	if _custom_paths.has(resolved_image_id):
+		var texture := load(str(_custom_paths[resolved_image_id])) as Texture2D
+		_icons[resolved_image_id] = texture
+		return texture
 	var atlas_index: int = floori(float(resolved_image_id) / float(_images_per_atlas))
 	if atlas_index < 0 or atlas_index >= _atlas_paths.size():
 		return null
@@ -175,6 +185,9 @@ func icon_source(image_id: int) -> Dictionary:
 	var resolved_image_id: int = _resolved_image_id(image_id)
 	if resolved_image_id < 0:
 		return {}
+	if _custom_paths.has(resolved_image_id):
+		var texture := icon_for(resolved_image_id)
+		return {"path": _custom_paths[resolved_image_id], "region": Rect2(Vector2.ZERO, texture.get_size())} if texture != null else {}
 	var atlas_index: int = floori(float(resolved_image_id) / float(_images_per_atlas))
 	if atlas_index < 0 or atlas_index >= _atlas_paths.size():
 		return {}
@@ -185,6 +198,7 @@ func icon_source(image_id: int) -> Dictionary:
 		_cell_size.x, _cell_size.y)}
 
 func supports(image_id: int) -> bool:
+	if _custom_paths.has(image_id): return true
 	var capacity: int = _atlas_paths.size() * _images_per_atlas
 	var painted: int = capacity if _image_count < 0 else mini(_image_count, capacity)
 	return image_id >= 0 and image_id < painted

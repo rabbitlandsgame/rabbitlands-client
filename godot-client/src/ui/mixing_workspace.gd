@@ -77,6 +77,9 @@ func configure(owner_main: Control) -> void:
 	title.name = "Title"
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title)
+	var recovery := _button("Refine", func() -> void: main.inventory_workspace.recovery_window.open(1))
+	recovery.tooltip_text = "Refine enriched essences or disenchant an equipment copy"
+	header.add_child(recovery)
 	pin = _button("◇", func() -> void:
 		_pinned = not _pinned
 		pin.text = "◆" if _pinned else "◇")

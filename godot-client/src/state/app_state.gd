@@ -152,6 +152,7 @@ var changed_actors: Dictionary = {}
 ## has to walk every node to find the ones left over.
 var actor_roster_generation := 0
 var inventory: Dictionary = {}
+var enchanting_recovery: Dictionary = {}
 ## Slot to the name the server calls what is in it, for the same positions
 ## `inventory` uses. Kept apart from the entries rather than merged into
 ## them because the two arrive on their own packets and either may land
@@ -910,6 +911,7 @@ func _on_connection_state_changed(value: String) -> void:
 		actors.clear()
 		actor_roster_generation += 1
 		inventory.clear()
+		enchanting_recovery.clear()
 		inventory_text = ""
 		inventory_cooldowns.clear()
 		_item_cooldowns.clear()
@@ -1480,6 +1482,9 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			if bool(storage.get("open", false)):
 				storage["instances"] = (event.state as Dictionary).duplicate(true)
 				state_changed.emit(&"storage_instances")
+		"enchanting_recovery":
+			enchanting_recovery = (event.state as Dictionary).duplicate(true)
+			state_changed.emit(&"enchanting_recovery")
 		"storage_text":
 			storage["text"] = str(event.text)
 			state_changed.emit(&"storage")

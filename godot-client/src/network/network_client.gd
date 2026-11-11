@@ -790,6 +790,9 @@ func storage_instance_request(item_name: String, offset: int = 0, identity: int 
 	if identity > 0 and bool(AppState.storage.get("read_only", false)): return ERR_UNAUTHORIZED
 	return send_frame(EloriaProtocol.storage_instance_request(item_name, offset, identity))
 
+func enchanting_recovery_request(request: Dictionary) -> Error:
+	return send_frame(EloriaProtocol.enchanting_recovery_request(request))
+
 func inspect_bag(bag_id: int) -> Error:
 	return send_frame(EloriaProtocol.inspect_bag(bag_id))
 

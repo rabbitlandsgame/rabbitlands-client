@@ -57,6 +57,7 @@ func _init() -> void:
 		"item_detail_v1": EloriaProtocol.ServerMessage.ELORIA_ITEM_DETAIL,
 		"item_instance_tiers_v1": EloriaProtocol.ServerMessage.ELORIA_ITEM_DETAIL,
 		"storage_instances_v1": EloriaProtocol.ServerMessage.ELORIA_STORAGE_INSTANCES,
+		"enchanting_recovery_v1": EloriaProtocol.ServerMessage.ELORIA_ENCHANTING_RECOVERY,
 		"mail_window_v1": EloriaProtocol.ServerMessage.ELORIA_MAIL_STATE,
 		"map_digest_v1": EloriaProtocol.ServerMessage.ELORIA_MAP_DIGEST,
 		"mix_window_v1": EloriaProtocol.ServerMessage.ELORIA_MIX_STATE,
@@ -230,6 +231,7 @@ func _init() -> void:
 	var capability_specific_probes: Dictionary = {
 		"item_instance_tiers_v1": str(capability_probes[EloriaProtocol.ServerMessage.ELORIA_ITEM_DETAIL]) + "02",
 		"storage_instances_v1": '{"version":1,"name":"Phoenix Helm","rows":[{"instance_id":502,"tier":"rare","effects":["Plated: +20 armor."]}]}'.to_utf8_buffer().hex_encode(),
+		"enchanting_recovery_v1": '{"version":1,"enabled":false,"items":[],"recipes":[],"quote":null}'.to_utf8_buffer().hex_encode(),
 		"magic_autocast_v1": '{"kind":"autocast","enabled":true,"active":false,"spell_id":-1,"target_id":-1}'.to_utf8_buffer().hex_encode(),
 		"techniques_v1": '{"kind":"techniques","action_points":12,"max_action_points":200,"queued":"","stance":"","round":2.0,"techniques":[]}'.to_utf8_buffer().hex_encode(),
 		"spell_impacts_v1": '{"kind":"spell_impact","effect":83,"actor_id":1,"target_id":2,"power":1,"release_delay":0.45,"flight_duration":0.3}'.to_utf8_buffer().hex_encode(),
@@ -1611,9 +1613,11 @@ func _init() -> void:
 				"first legacy item icon resolves at native aspect")
 			_expect(last_icon is AtlasTexture and last_icon.get_size() == Vector2(50, 50),
 				"the last declared icon resolves at native aspect")
-			_expect(not atlas.supports(image_count)
-				and atlas.icon_for(image_count) != null
-				and atlas.uses_substitute(image_count),
+			var unsupported_id := image_count
+			while atlas.supports(unsupported_id): unsupported_id += 1
+			_expect(not atlas.supports(unsupported_id)
+				and atlas.icon_for(unsupported_id) != null
+				and atlas.uses_substitute(unsupported_id),
 				"unsupported legacy item image receives the configured visible fallback")
 			_expect(atlas.icon_for(397) != null and atlas.uses_substitute(397),
 				"known legacy item image receives its data-driven Eloria substitute")
