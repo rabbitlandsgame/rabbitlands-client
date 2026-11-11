@@ -434,6 +434,14 @@ The game server names the **client Git commit packaged for that server**. This
 is independent of the server repository's own commit. Client builds contain
 their full commit ID and complete ancestor list, generated from Git at package
 time. The connection declares that history before login, in bounded packets.
+A game run with the editor binary from a source checkout has only the unstamped
+descriptor, so it declares the commit and history `git rev-list HEAD` reports for
+that checkout (`src/network/source_identity.gd`). An enforcing server therefore
+admits a checkout whose history contains its required commit and refuses any
+other, as it would a packaged build. Without `git` on `PATH`, or from a copy of
+the project that is not its checkout's tracked project, the run declares the
+empty descriptor; a shallow clone declares a history that lacks the required
+commit. Both are refused.
 
 | Installed client history | Behavior |
 | --- | --- |
