@@ -1,6 +1,7 @@
 class_name ClassicStorageWorkspace
 extends Node
 const TextColors := preload("res://src/ui/text_colors.gd")
+const InstanceLedger := preload("res://src/ui/storage_instance_ledger.gd")
 ## Classic storage and named favorite sets share the existing server state.
 ## Docking temporarily groups the real inventory, preserving its tools.
 
@@ -54,11 +55,19 @@ var _lit_cell: StyleBoxFlat
 ## The storage cell showing each stored position, so a selection restyles two
 ## cells instead of refreshing the grid.
 var _storage_cells: Dictionary = {}
+var instance_ledger: InstanceLedger
+var _enchanted_cell: StyleBoxFlat
+var _enchanted_selected: StyleBoxFlat
 
 func configure(owner_main: Node) -> void:
 	main = owner_main
 	_plain_cell = style_box(AMBER, 0)
 	_lit_cell = style_box(Color("7cc6d4"), 0)
+	_enchanted_cell = style_box(Color("e9b65b"), 0)
+	_enchanted_cell.shadow_color = Color(0.86, 0.54, 0.97, 0.55)
+	_enchanted_cell.shadow_size = 5
+	_enchanted_selected = _enchanted_cell.duplicate() as StyleBoxFlat
+	_enchanted_selected.border_color = Color("7cc6d4")
 	bank = main.get("storage_panel") as PanelContainer
 	inventory = main.get("inventory_panel") as Control
 	lists = main.get("item_lists_panel") as PanelContainer
@@ -68,6 +77,9 @@ func configure(owner_main: Node) -> void:
 		docked = bool(config.get_value("storage", "docked", false))
 		active_list = str(config.get_value("storage", "active_list", ""))
 	_build_bank()
+	instance_ledger = InstanceLedger.new()
+	main.get_node("GameView").add_child(instance_ledger)
+	instance_ledger.configure(main, classic_theme())
 	_build_lists()
 	_style_inventory()
 	if config.has_section_key("storage", "position"):
@@ -425,10 +437,17 @@ func _fill_cell(cell: Button, entry: Dictionary, item_name: String, tooltip: Str
 			cell.add_theme_stylebox_override(state, _lit_cell if filled else _plain_cell)
 
 func _light_cell(cell: Button, lit: bool) -> void:
-	if bool(cell.get_meta("lit", false)) == lit:
+	var enchanted: bool = bool(cell.get_meta("enchanted", false))
+	var appearance: Array = [lit, enchanted]
+	if cell.get_meta("appearance", []) == appearance:
 		return
+	cell.set_meta("appearance", appearance)
 	cell.set_meta("lit", lit)
-	cell.add_theme_stylebox_override("normal", _lit_cell if lit else _plain_cell)
+	cell.add_theme_stylebox_override("normal", (_enchanted_selected if lit else _enchanted_cell)
+		if enchanted else (_lit_cell if lit else _plain_cell))
+	for state: String in ["hover", "pressed", "hover_pressed", "focus"]:
+		cell.add_theme_stylebox_override(state, _enchanted_selected if enchanted else
+			(_lit_cell if bool(cell.get_meta("filled", false)) else _plain_cell))
 
 func _hide_cells_from(grid: GridContainer, first: int) -> void:
 	for index: int in range(first, grid.get_child_count()):
@@ -453,6 +472,7 @@ func _refresh_grid() -> void:
 			var position: int = int(adapter.get_item_metadata(index))
 			var entry: Dictionary = items.get(position, {}) as Dictionary
 			var row: Variant = described.get(position)
+			var enchanted: bool = bool((row as Dictionary).get("enchanted", false)) if row is Dictionary else false
 			var name: String = str((row as Dictionary).get("name", "")) if row is Dictionary else ""
 			if name.is_empty():
 				name = "Item #%d" % int(entry.get("image_id", 0))
@@ -461,20 +481,23 @@ func _refresh_grid() -> void:
 			var cell: Button = _grid_cell(storage_grid, used, _on_storage_cell_pressed, _storage_cell_input)
 			used += 1
 			cell.set_meta("storage_position", position)
+			cell.set_meta("enchanted", enchanted)
 			# A reply usually changes one stack; the rest are left as drawn.
 			var shown: Array = [int(entry.get("image_id", 0)), int(entry.get("quantity", 0)),
-				name, AppState.is_degraded_item(name)]
+				name, AppState.is_degraded_item(name), enchanted]
 			if cell.get_meta("shown", []) != shown:
 				cell.set_meta("shown", shown)
 				_fill_cell(cell, entry, name,
-					"%s ×%d\nClick: carry to the backpack · Double-click: withdraw · Right-click: select"
-					% [name, int(entry.get("quantity", 0))])
+					"%s ×%d\n%s" % [name, int(entry.get("quantity", 0)),
+					"Enchanted copies · Click to compare saved effects" if enchanted else
+					"Click: carry to the backpack · Double-click: withdraw · Right-click: select"])
 			_light_cell(cell, position == _selected_position)
 			_storage_cells[position] = cell
 	var total: int = maxi(36, ceili(used / 6.0) * 6)
 	for index: int in range(used, total):
 		var empty: Button = _grid_cell(storage_grid, index, _on_storage_cell_pressed, _storage_cell_input)
 		empty.set_meta("storage_position", -1)
+		empty.set_meta("enchanted", false)
 		if not (empty.get_meta("shown", []) as Array).is_empty():
 			empty.set_meta("shown", [])
 			_fill_cell(empty, {}, "", "Empty slot")
@@ -523,6 +546,10 @@ func _select_storage(position: int) -> void:
 ## backpack.
 func _on_storage_cell_pressed(cell_index: int) -> void:
 	var position: int = int(storage_grid.get_child(cell_index).get_meta("storage_position", -1))
+	if position >= 0 and _is_enchanted(position) and int(main.get("_carried_slot")) < 0:
+		_select_storage(position)
+		_open_instances(position)
+		return
 	if bool(AppState.storage.get("read_only", false)):
 		if position >= 0: _select_storage(position)
 		return
@@ -562,6 +589,9 @@ func _storage_cell_input(event: InputEvent, cell_index: int) -> void:
 func withdraw_selected() -> void:
 	if not _stock_ready():
 		return
+	if _is_enchanted(_selected_position):
+		_open_instances(_selected_position)
+		return
 	var item: Dictionary = (AppState.storage.get("items", {}) as Dictionary).get(_selected_position, {}) as Dictionary
 	if item.is_empty():
 		description.text = "Select a stored item first."
@@ -586,9 +616,21 @@ func inspect_selected() -> void:
 	if not _stock_ready() or _selected_position < 0:
 		description.text = "Select a stored item first."
 		return
+	if _is_enchanted(_selected_position):
+		_open_instances(_selected_position)
+		return
 	var error: Error = Network.look_at_storage_item(_selected_position)
 	if error != OK:
 		description.text = "Could not inspect: " + error_string(error)
+
+func _is_enchanted(position: int) -> bool:
+	var row: Dictionary = (AppState.storage.get("described", {}) as Dictionary).get(position, {})
+	return bool(row.get("enchanted", false))
+
+func _open_instances(position: int) -> void:
+	main.call("_cancel_carry")
+	var row: Dictionary = (AppState.storage.get("described", {}) as Dictionary).get(position, {})
+	instance_ledger.open(str(row.get("name", "")))
 
 func show_lists() -> void:
 	refresh_favorites()

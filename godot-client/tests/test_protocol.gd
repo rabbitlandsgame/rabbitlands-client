@@ -55,6 +55,8 @@ func _init() -> void:
 		"inventory_names_v1": EloriaProtocol.ServerMessage.ELORIA_INVENTORY_NAMES,
 		"inventory_window_v1": EloriaProtocol.ServerMessage.ELORIA_INVENTORY_STATE,
 		"item_detail_v1": EloriaProtocol.ServerMessage.ELORIA_ITEM_DETAIL,
+		"item_instance_tiers_v1": EloriaProtocol.ServerMessage.ELORIA_ITEM_DETAIL,
+		"storage_instances_v1": EloriaProtocol.ServerMessage.ELORIA_STORAGE_INSTANCES,
 		"mail_window_v1": EloriaProtocol.ServerMessage.ELORIA_MAIL_STATE,
 		"map_digest_v1": EloriaProtocol.ServerMessage.ELORIA_MAP_DIGEST,
 		"mix_window_v1": EloriaProtocol.ServerMessage.ELORIA_MIX_STATE,
@@ -226,6 +228,8 @@ func _init() -> void:
 	# chapter's shape. Signed Ashore's is its first card, live, carrying the
 	# four countersigns in place of the Lantern's flags.
 	var capability_specific_probes: Dictionary = {
+		"item_instance_tiers_v1": str(capability_probes[EloriaProtocol.ServerMessage.ELORIA_ITEM_DETAIL]) + "02",
+		"storage_instances_v1": '{"version":1,"name":"Phoenix Helm","rows":[{"instance_id":502,"tier":"rare","effects":["Plated: +20 armor."]}]}'.to_utf8_buffer().hex_encode(),
 		"magic_autocast_v1": '{"kind":"autocast","enabled":true,"active":false,"spell_id":-1,"target_id":-1}'.to_utf8_buffer().hex_encode(),
 		"techniques_v1": '{"kind":"techniques","action_points":12,"max_action_points":200,"queued":"","stance":"","round":2.0,"techniques":[]}'.to_utf8_buffer().hex_encode(),
 		"spell_impacts_v1": '{"kind":"spell_impact","effect":83,"actor_id":1,"target_id":2,"power":1,"release_delay":0.45,"flight_duration":0.3}'.to_utf8_buffer().hex_encode(),

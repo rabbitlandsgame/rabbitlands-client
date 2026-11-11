@@ -149,6 +149,7 @@ enum ServerMessage {
 	## A party descent (descent_v1): the floor, its fog of war and the clock,
 	## or the boss reward's three-way pick. JSON, `kind` "state" or "reward".
 	ELORIA_DESCENT_STATE = 188,
+	ELORIA_STORAGE_INSTANCES = 187,
 	# Which map package the server was built against. Continues the same
 	# downward run below 211.
 	ELORIA_MAP_DIGEST = 209,
@@ -332,6 +333,8 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"inventory_names_v1",
 	"inventory_window_v1",
 	"item_detail_v1",
+	"item_instance_tiers_v1",
+	"storage_instances_v1",
 	"mail_window_v1",
 	"map_digest_v1",
 	"mix_window_v1",
@@ -661,6 +664,11 @@ static func inspect_bag(bag_id: int) -> PackedByteArray:
 	return encode(ClientMessage.INSPECT_BAG,
 		PackedByteArray([clampi(bag_id, 0, 255)]))
 
+static func storage_instance_request(item_name: String, offset: int = 0, identity: int = 0) -> PackedByteArray:
+	return encode(ServerMessage.ELORIA_STORAGE_INSTANCES, JSON.stringify({
+		"version": 1, "op": "withdraw" if identity > 0 else "list",
+		"name": item_name, "offset": offset, "instance_id": identity}).to_utf8_buffer())
+
 static func close_bag() -> PackedByteArray:
 	return encode(ClientMessage.CLOSE_BAG)
 
@@ -943,6 +951,8 @@ static func decode_server(command: int, payload: PackedByteArray, logical_coordi
 			return decode_storage_items(payload)
 		ServerMessage.ELORIA_STORAGE_STATE:
 			return decode_storage_state(payload)
+		ServerMessage.ELORIA_STORAGE_INSTANCES:
+			return decode_storage_instances(payload)
 		ServerMessage.STORAGE_TEXT:
 			if payload.is_empty():
 				return {"type": "invalid", "error": "storage_text_length"}
@@ -2502,14 +2512,18 @@ static func decode_item_detail(payload: PackedByteArray) -> Dictionary:
 	var text: Dictionary = _nul_run(payload, 7, 7)
 	if text.is_empty():
 		return {"type": "invalid", "error": "item_detail_text"}
-	if int(text.offset) != payload.size():
+	var tail: int = int(text.offset)
+	var tier := "normal"
+	if tail + 1 == payload.size() and payload[tail] <= 2:
+		tier = ["normal", "magic", "rare"][payload[tail]]
+	elif tail != payload.size():
 		return {"type": "invalid", "error": "item_detail_trailing"}
 	var values: Array = text.values
 	return {"type": "item_detail", "image_id": u16(payload),
 		"quantity": u32(payload, 2), "equipped": int(payload[6]) != 0,
 		"name": values[0], "category": values[1], "equip_type": values[2],
 		"description": values[3], "stats": values[4],
-		"comparison_name": values[5], "comparison": values[6]}
+		"comparison_name": values[5], "comparison": values[6], "instance_tier": tier}
 
 ## Command 226. The server's own view of the backpack, with the item names,
 ## categories and per-item weight the ordinary inventory packet cannot carry.
@@ -3168,10 +3182,39 @@ static func decode_storage_state(payload: PackedByteArray) -> Dictionary:
 		rows.append(row)
 	var read_only := false
 	if offset < payload.size():
-		if payload.size() != offset + 1 or payload[offset] > 1:
+		if payload[offset] > 1:
 			return {"type": "invalid", "error": "storage_state_trailing"}
 		read_only = payload[offset] == 1
+		offset += 1
+	if offset < payload.size():
+		if offset + 2 > payload.size():
+			return {"type": "invalid", "error": "storage_state_effects"}
+		var enchanted_count: int = u16(payload, offset)
+		offset += 2
+		if offset + enchanted_count * 2 != payload.size():
+			return {"type": "invalid", "error": "storage_state_effects"}
+		var enchanted: Dictionary = {}
+		for index: int in range(enchanted_count):
+			enchanted[u16(payload, offset + index * 2)] = true
+		for row: Dictionary in rows:
+			row["enchanted"] = enchanted.has(int(row.position))
 	return {"type": "storage_state", "category_id": int(payload[0]), "rows": rows, "read_only": read_only}
+
+static func decode_storage_instances(payload: PackedByteArray) -> Dictionary:
+	var value: Variant = JSON.parse_string(payload.get_string_from_utf8())
+	if not value is Dictionary or value.get("version", 0) != 1:
+		return {"type": "invalid", "error": "storage_instances_version"}
+	if not value.get("name") is String or not value.get("rows") is Array or value.rows.size() > 20:
+		return {"type": "invalid", "error": "storage_instances_rows"}
+	for raw_row: Variant in value.rows:
+		if not raw_row is Dictionary or not raw_row.get("effects") is Array or raw_row.effects.size() > 4:
+			return {"type": "invalid", "error": "storage_instances_effects"}
+		if str(raw_row.get("tier", "magic")) not in ["magic", "rare"] or int(raw_row.get("instance_id", 0)) <= 0:
+			return {"type": "invalid", "error": "storage_instances_identity"}
+		for effect: Variant in raw_row.effects:
+			if not effect is String:
+				return {"type": "invalid", "error": "storage_instances_effects"}
+	return {"type": "storage_instances", "state": value}
 
 ## Where the full statistics packet keeps each thing, in its own word offsets.
 ## Constants for the same reason `STAT_SLOT_KEYS` is one: they never change,

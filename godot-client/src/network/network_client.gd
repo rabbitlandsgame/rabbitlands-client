@@ -786,6 +786,10 @@ func withdraw_storage(position: int, quantity: int) -> Error:
 func look_at_storage_item(position: int) -> Error:
 	return send_frame(EloriaProtocol.look_at_storage_item(position))
 
+func storage_instance_request(item_name: String, offset: int = 0, identity: int = 0) -> Error:
+	if identity > 0 and bool(AppState.storage.get("read_only", false)): return ERR_UNAUTHORIZED
+	return send_frame(EloriaProtocol.storage_instance_request(item_name, offset, identity))
+
 func inspect_bag(bag_id: int) -> Error:
 	return send_frame(EloriaProtocol.inspect_bag(bag_id))
 

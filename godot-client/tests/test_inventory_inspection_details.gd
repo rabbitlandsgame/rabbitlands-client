@@ -19,7 +19,7 @@ func frames(count := 5) -> void:
 
 func detail_packet() -> Dictionary:
 	var fields: Array[String] = ["Phoenix Helm", "Armor", "head",
-		"A phoenix-forged helm.\nObject #9856; Durability 79/100; Quality 93; Bound to Fixture; Created by Smith\nLegendary effects:\nMindfire: 20% chance on a landed hit to burn up to 12 mana and deal that much bonus damage.\nStoneward: 20% chance when hit to gain 5 temporary evasion, up to 15.",
+		"A phoenix-forged helm.\nObject #9856; Durability 79/100; Quality 93; Bound to Fixture; Created by Smith\nInstance effects:\nMindfire: 20% chance on a landed hit to burn up to 12 mana and deal that much bonus damage.\nStoneward: 20% chance when hit to gain 5 temporary evasion, up to 15.\nSiphoning: 25% chance on a landed hit to steal up to 12 mana from the target.\nFrostbind: 15% chance on a landed hit to paralyze the target for 3 seconds.",
 		"Armor 8-12, Accuracy +2, Defense +3, Weight 4 EMU, Durability 79/100, Quality 93",
 		"Iron Helm", "Armor +3/+5, Accuracy +2, Defense +1, Weight +1 EMU"]
 	var payload := PackedByteArray()
@@ -66,7 +66,7 @@ func run() -> void:
 			var text: RichTextLabel = workspace.inspection_text
 			expect(workspace.groups.inspection.is_visible_in_tree(), label + " exposes the inspection surface")
 			expect(text.text.contains(str(detail.stats)), label + " retains all equipment stats, durability and quality")
-			expect(text.text.contains(str(detail.description)), label + " retains object identity and both complete legendary effects")
+			expect(text.text.contains(str(detail.description)), label + " retains object identity and all four complete effects")
 			expect(text.text.contains(str(detail.comparison)), label + " retains the equipped-item comparison")
 			expect(text.scroll_active and text.size.x > 0 and text.size.y > 0, label + " gives overflowing details a usable scrolling region")
 			var bar := text.get_v_scroll_bar()

@@ -913,7 +913,10 @@ func _sync_detail() -> void:
 	if not bool(AppState.item_detail.get("open", false)) or not detail_popup_allowed:
 		detail_panel.hide()
 		return
-	var lines: Array[String] = ["[b]%s[/b]" % str(AppState.item_detail.get("name", ""))]
+	var tiers := preload("res://src/state/item_instance_tiers.gd")
+	var tier: String = str(AppState.item_detail.get("instance_tier", "normal"))
+	var lines: Array[String] = ["[color=#%s][b]%s[/b][/color]" % [tiers.color(tier).to_html(false),
+		tiers.display_name(str(AppState.item_detail.get("name", "")), tier)]]
 	var category: String = str(AppState.item_detail.get("category", ""))
 	if not category.is_empty():
 		lines.append(category)

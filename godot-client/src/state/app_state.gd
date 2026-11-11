@@ -1476,6 +1476,10 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			storage["described_category_id"] = int(event.category_id)
 			storage["category_id"] = int(event.category_id)
 			state_changed.emit(&"storage")
+		"storage_instances":
+			if bool(storage.get("open", false)):
+				storage["instances"] = (event.state as Dictionary).duplicate(true)
+				state_changed.emit(&"storage_instances")
 		"storage_text":
 			storage["text"] = str(event.text)
 			state_changed.emit(&"storage")

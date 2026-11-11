@@ -5,6 +5,7 @@ const Presets := preload("res://src/ui/inventory_presets.gd")
 const Chrome := preload("res://src/ui/compact_hud_style.gd")
 const Frame := preload("res://src/ui/hud_panel_chrome.gd")
 const ItemNames := preload("res://src/state/item_names.gd")
+const InstanceTiers := preload("res://src/state/item_instance_tiers.gd")
 var model := Presets.new()
 var main: Control
 var preferences_path := WindowPreferences.SETTINGS_PATH
@@ -740,6 +741,9 @@ func _quantity_all() -> void:
 	quantity_value.text = _quantity_text()
 
 func request_inspection(slot: int, full: bool) -> void:
+	# Two equipment copies can share artwork while having different saved rolls.
+	if not bool(AppState.inventory.get(slot, {}).get("stackable", false)):
+		_detail_cache.erase(slot)
 	_pending_slot = slot
 	_pending_image = int(AppState.inventory.get(slot, {}).get("image_id", -1))
 	_pending_full = full
@@ -819,7 +823,9 @@ func _render_detail() -> void:
 		return
 	inspection_text.add_theme_color_override("default_color", model.working.text)
 	inspection_text.tooltip_text = ""
-	inspection_title.text = ItemNames.display(str(_detail.get("name", "Item details")))
+	var tier: String = str(_detail.get("instance_tier", "normal"))
+	inspection_title.text = InstanceTiers.display_name(ItemNames.display(str(_detail.get("name", "Item details"))), tier)
+	inspection_title.add_theme_color_override("font_color", InstanceTiers.color(tier))
 	inspection_title.tooltip_text = ItemNames.tooltip(str(_detail.get("name", "Item details")))
 	var current: Dictionary = AppState.inventory.get(_detail_slot, {})
 	var bound: bool = _detail_slot >= 0 and int(current.get("image_id", -1)) == int(_detail.get("image_id", -2))
