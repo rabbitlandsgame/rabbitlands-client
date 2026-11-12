@@ -2054,6 +2054,14 @@ static func decode_gauntlet_loot(payload: PackedByteArray) -> Dictionary:
 			return {"type": "invalid", "error": "gauntlet_loot_row"}
 		if row.has("category") and not row.category is String:
 			return {"type": "invalid", "error": "gauntlet_loot_category"}
+		if row.has("tier") or row.has("effects"):
+			if row.get("tier") not in ["normal", "magic", "rare"] or not row.get("effects") is Array or row.effects.size() > 4:
+				return {"type": "invalid", "error": "gauntlet_loot_effects"}
+			if (row.tier == "normal") != row.effects.is_empty() or row.tier == "magic" and row.effects.size() > 2:
+				return {"type": "invalid", "error": "gauntlet_loot_effect_tier"}
+			for effect: Variant in row.effects:
+				if not effect is String or effect.is_empty() or effect.length() > 2048:
+					return {"type": "invalid", "error": "gauntlet_loot_effect_text"}
 		ids.append(row.id)
 		if not _loot_integer(row.get("price_gold")) or not row.get("locked") is bool or row.get("source") not in ["creature", "cache", "compensation", "npc_sales"]:
 			return {"type": "invalid", "error": "gauntlet_loot_price"}

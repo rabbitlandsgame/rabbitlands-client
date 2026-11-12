@@ -36,6 +36,21 @@ crafting stays plain. If a recipe consumes equipment, **Mix Now** asks you to
 select the exact copies for one attempt. Check their effects before confirming;
 automatic queues cannot choose copies for you.
 
+In gauntlets and the Serpent Deep raid, each equipment copy dropped by a
+miniboss or final boss independently rolls its name color and effects:
+
+| Enemy | Plain | Blue (1–2 effects) | Yellow (3–4 effects) |
+| --- | --- | --- | --- |
+| Miniboss | 60% | 30% | 10% |
+| Final boss | 25% | 50% | 25% |
+
+These chances apply after the enemy's normal item drop roll; they do not
+guarantee equipment. Chests, caches and completion-choice rewards retain their
+existing rules. Each enchanted copy appears separately in party loot, with a
+colored name, effect icons and descriptions. Click its icon to inspect it before
+allocating it. The leader assigns these copies individually; their saved effects
+follow them through storage delivery and party exchange sales or withdrawals.
+
 Unwanted enchanted equipment can be reclaimed through **Break Down & Refine…**.
 **Break Down** shows the chosen copy's effects and exact returns, then destroys
 that copy for Enchanting Shards and normal essences after confirmation.

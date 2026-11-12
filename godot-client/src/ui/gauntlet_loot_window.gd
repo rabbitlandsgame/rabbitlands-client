@@ -6,6 +6,8 @@ signal item_inspection_requested
 signal hud_layout_requested
 
 const Art := preload("res://src/ui/leaderboard_art.gd")
+const InstanceTiers := preload("res://src/state/item_instance_tiers.gd")
+const EffectIcons := preload("res://src/ui/item_effect_icons.gd")
 const LedgerArt := preload("res://src/ui/gauntlet_loot_art.gd")
 const Portraits := preload("res://src/ui/leaderboard_portraits.gd")
 const GOLD := Color("e9bd83")
@@ -332,7 +334,7 @@ func _build() -> void:
 	_sort.item_selected.connect(_browse_changed)
 	_browse_bar.add_child(_sort)
 	_rare_only = CheckBox.new()
-	_rare_only.text = "Rare only"
+	_rare_only.text = "Special drops"
 	_rare_only.toggled.connect(_browse_changed)
 	_browse_bar.add_child(_rare_only)
 	_browse_timer = Timer.new()
@@ -881,12 +883,32 @@ func _item_row(row: Dictionary) -> void:
 	item_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	item.add_child(item_text)
 	var item_title := "Item payments" if row.source == "compensation" else ("NPC sale proceeds" if row.source == "npc_sales" else str(row.name))
-	if row.rare and _compact_view: item_title += " ◆"
-	var item_name := _label(item_text, item_title, 13, CYAN if row.rare else GOLD)
+	var effect_tier := str(row.get("tier", "normal"))
+	var enchanted := effect_tier in ["magic", "rare"]
+	if row.rare and _compact_view and not enchanted: item_title += " ◆"
+	var item_name := _label(item_text, item_title, 13, InstanceTiers.color(effect_tier) if enchanted else CYAN if row.rare else GOLD)
+	if enchanted:
+		TextColors.unbind(item_name)
+		item_name.add_theme_color_override("font_color", InstanceTiers.color(effect_tier))
+	item_name.name = "ItemName"
 	item_name.add_theme_font_override("font", Art.title_font())
 	item_name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	item_name.tooltip_text = str(row.name) + (" • Rare" if row.rare else "")
-	if row.rare and not _compact_view:
+	item_name.tooltip_text = str(row.name) + ("\n" + "\n".join(row.get("effects", [])) if enchanted else " • Rare" if row.rare else "")
+	if enchanted:
+		var effects := HBoxContainer.new()
+		effects.name = "InstanceEffects"
+		effects.add_theme_constant_override("separation", 4)
+		item_text.add_child(effects)
+		for description: String in row.effects:
+			var icon := TextureRect.new()
+			icon.texture = EffectIcons.texture(str(EffectIcons.presentation(description).name))
+			icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			icon.custom_minimum_size = Vector2(18, 18)
+			icon.tooltip_text = description
+			effects.add_child(icon)
+		_label(effects, "1 effect" if row.effects.size() == 1 else "%d effects" % row.effects.size(), 10, MUTED)
+	if row.rare and not _compact_view and not enchanted:
 		var rare_badge := PanelContainer.new()
 		rare_badge.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		rare_badge.add_theme_stylebox_override("panel", style(BRONZE, Color("11170f"), 2))

@@ -1,4 +1,5 @@
 extends SceneTree
+const Tiers := preload("res://src/state/item_instance_tiers.gd")
 
 var checks := 0
 var failures := 0
@@ -72,6 +73,15 @@ func run() -> void:
 	var protocol := load("res://src/network/protocol.gd")
 	var decoded: Dictionary = protocol.decode_gauntlet_loot(JSON.stringify(state).to_utf8_buffer())
 	expect(decoded.type == "gauntlet_loot", "valid ledger packet decodes")
+	state.rows[5].tier = "rare"
+	state.rows[5].effects = ["Plated: +20 armor.","Vital: +50 maximum health.","Spellguard: +25% less incoming spell damage.","Restorative: +10 mana per normal regeneration tick."]
+	expect(protocol.decode_gauntlet_loot(JSON.stringify(state).to_utf8_buffer()).type == "gauntlet_loot", "enchanted copies decode alongside ordinary loot")
+	var invalid_effects := state.duplicate(true)
+	invalid_effects.rows[5].effects.append("fifth")
+	expect(protocol.decode_gauntlet_loot(JSON.stringify(invalid_effects).to_utf8_buffer()).type == "invalid", "more than four loot effects are rejected")
+	invalid_effects = state.duplicate(true)
+	invalid_effects.rows[5].tier = "magic"
+	expect(protocol.decode_gauntlet_loot(JSON.stringify(invalid_effects).to_utf8_buffer()).type == "invalid", "blue loot cannot exceed two effects")
 	var bad := state.duplicate(true)
 	bad.rows[0].allocations["outsider"] = 2
 	expect(protocol.decode_gauntlet_loot(JSON.stringify(bad).to_utf8_buffer()).type == "invalid", "unadmitted recipients are rejected")
@@ -96,6 +106,9 @@ func run() -> void:
 		quit(1)
 		return
 	expect(not ui.send_button.disabled, "complete allocations enable confirmation")
+	var enchanted_name: Label = ui.table.get_child(5).find_child("ItemName",true,false)
+	expect(enchanted_name.get_theme_color("font_color") == Tiers.color("rare") and enchanted_name.text == "Slouch Boots", "yellow copies use name color without a rarity prefix")
+	expect(enchanted_name.tooltip_text.contains("Spellguard") and ui.table.get_child(5).find_child("InstanceEffects",true,false) != null, "saved effect icons and descriptions are available before allocation")
 	var inspect_button: Button = ui.table.get_child(4).find_child("InspectItem", true, false)
 	expect(inspect_button != null and not inspect_button.disabled, "loot item icons offer inspection")
 	inspect_button.pressed.emit()
@@ -353,6 +366,25 @@ func run() -> void:
 	descent.phase = "active"
 	ui.apply_snapshot(descent)
 	expect(ui.status.text.contains("when the boss falls"), "an active descent's loot waits for the boss")
+	var enchanted := sample()
+	enchanted.rows = [enchanted.rows[5].duplicate(true), enchanted.rows[5].duplicate(true), enchanted.rows[5].duplicate(true)]
+	enchanted.total = 3
+	enchanted.assigned = 3
+	for i: int in range(3):
+		enchanted.rows[i].id = str(i)
+		enchanted.rows[i].rare = i < 2
+	enchanted.rows[0].tier = "magic"
+	enchanted.rows[0].effects = ["Plated: +20 armor.", "Vital: +50 maximum health."]
+	enchanted.rows[1].tier = "rare"
+	enchanted.rows[1].effects = ["Plated: +20 armor.", "Vital: +50 maximum health.", "Spellguard: +25% less incoming spell damage.", "Restorative: +10 mana per normal regeneration tick."]
+	ui.apply_snapshot(enchanted)
+	var blue_name: Label = ui.table.get_child(0).find_child("ItemName", true, false)
+	expect(blue_name.get_theme_color("font_color") == Tiers.color("magic") and blue_name.text == "Slouch Boots", "blue copies use their name color without a rarity prefix")
+	var colors := load("res://src/ui/text_colors.gd")
+	colors.set_color("loot_text", Color.RED)
+	expect(blue_name.get_theme_color("font_color") == Tiers.color("magic"), "general text preferences preserve equipment tier colors")
+	colors.reset("loot_text")
+	await capture("enchanted-boss-loot.png")
 	ui.queue_free()
 	background.queue_free()
 	await process_frame
