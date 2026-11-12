@@ -66,6 +66,18 @@ func run() -> void:
 	var invalid := sample()
 	invalid.items[0].effects.append("fifth")
 	expect(Protocol.decode_enchanting_recovery(JSON.stringify(invalid).to_utf8_buffer()).type == "invalid", "overfull effects refused")
+	# A copy with no recorded durability (null, e.g. a migrated auction copy)
+	# must not void the whole reply: the window would time out instead.
+	var unrecorded := sample()
+	unrecorded.items[0].durability = null
+	unrecorded.items[1].max_durability = null
+	var decoded := Protocol.decode_enchanting_recovery(JSON.stringify(unrecorded).to_utf8_buffer())
+	expect(decoded.type == "enchanting_recovery", "null durability decodes")
+	expect(decoded.get("state", {}).get("items", []).size() == 2 and decoded.state.items[0].durability == null, "null durability kept as unknown")
+	for bad: Variant in ["96", -1, 70000, 1.5, true]:
+		var broken := sample()
+		broken.items[0].durability = bad
+		expect(Protocol.decode_enchanting_recovery(JSON.stringify(broken).to_utf8_buffer()).type == "invalid", "durability %s refused" % str(bad))
 	var atlas := Atlas.new()
 	atlas.configure(JSON.parse_string(FileAccess.get_file_as_string("res://data/items/atlases.json")))
 	expect(atlas.supports(633) and not atlas.uses_substitute(633), "shards have a registered icon")
@@ -109,6 +121,17 @@ func run() -> void:
 	expect(window.selected_id == 502 and window.copies.item_count == 2, "inspection preselects the exact backpack copy")
 	expect(window.selected_title.text == "Phoenix Helm", "tier labels stay out of item names")
 	expect(window.selected_title.get_theme_color("font_color") == Tiers.color("rare"), "yellow name conveys tier")
+	var hero_condition: Label = (window.get("_hero") as Dictionary).condition
+	expect(hero_condition.text.contains("Durability 96/100"), "recorded durability is shown")
+	var unrecorded_reply := sample()
+	unrecorded_reply.items[0].durability = null
+	unrecorded_reply.items[0].max_durability = null
+	receive(unrecorded_reply)
+	await frames()
+	expect(window.selected_id == 502 and window.copies.item_count == 2 and hero_condition.text.contains("Quality 110%")
+		and not hero_condition.text.contains("Durability"), "a copy with no recorded durability is listed without a durability figure")
+	receive(sample())
+	await frames()
 	expect(text_of(window.details).contains("Spellguard") and text_of(window.details).contains("You receive") and text_of(window.details).contains("This copy will be destroyed"), "effects, returns and destruction warning are visible")
 	expect(not window.confirm_button.disabled and window.quote.is_empty(), "Review is available without allowing an unquoted spend")
 	window.call("_review")

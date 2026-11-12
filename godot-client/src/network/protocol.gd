@@ -3288,6 +3288,9 @@ static func decode_enchanting_recovery(payload: PackedByteArray) -> Dictionary:
 		if not _recovery_integer(raw.get("instance_id"), 1, 9007199254740991):
 			return {"type": "invalid", "error": "recovery_identity"}
 		for key: String in ["slot", "image_id", "quality", "durability", "max_durability"]:
+			# A copy may have no recorded durability (the server's null), as in
+			# decode_enchanting; the window then shows no durability for it.
+			if key in ["durability", "max_durability"] and raw.get(key) == null: continue
 			if not _recovery_integer(raw.get(key), 0, 23 if key == "slot" else 65535):
 				return {"type": "invalid", "error": "recovery_copy_stats"}
 		if raw.get("tier") not in ["magic", "rare"] or not _recovery_materials(raw.get("outputs")):
