@@ -714,7 +714,7 @@ func refresh() -> void:
 		var target_label := str(SCOPE_BADGES.get(scope, ""))
 		if scope == "target":
 			target_label += ": click the recipient"
-		button.tooltip_text = "%s · %s · Power %d\n%s\nUses the last cast target type and power for this family.\nRight click to edit; drag a spell here." % [definition.get("name", "Empty slot"), target_label, effective_power, shortcut]
+		button.tooltip_text = "%s · %s · Power %d\n%s\nThis slot keeps its own target type and power.\nRight click to edit; drag a spell here." % [definition.get("name", "Empty slot"), target_label, effective_power, shortcut]
 		if effective_power != int(slot.power): button.tooltip_text += "\nSaved P%d; currently limited to P%d." % [int(slot.power), effective_power]
 		var reasons: Array[String] = []
 		if int(slot.id) >= 0:

@@ -145,7 +145,6 @@ func _ready() -> void:
 	selector.z_index = 10
 	add_child(selector)
 	selector.status_changed.connect(record)
-	selector.cast_submitted.connect(loadout.remember_cast)
 	loadout.changed.connect(func(): selector.target_mode = loadout.targeting_mode())
 	book = preload("res://src/ui/spells_window.gd").new()
 	book.z_index = 7

@@ -131,9 +131,15 @@ preview followed by a click. Switching to another spell replaces targeting;
 Escape or right clicking the world cancels. Selecting a recipient retains it
 for subsequent casts. Changing mode never casts by itself.
 
-All versions provide twelve editable slots with last-cast target and power,
-the effect/target comparison grid, and feedback beside the cursor. The
-spellbook closes when a spell is launched, exposing the world.
+All versions provide twelve editable slots with independently saved target
+types and powers, the effect/target comparison grid, and feedback beside the
+cursor. The spellbook closes when a spell is launched, exposing the world.
+
+The same spell family can occupy several slots, including copies of the same
+target variant at different powers. Right click a slot to edit its spell and
+power, or drag a spell from the book or another slot. Casting from the bar,
+book or ring leaves all slot assignments unchanged. Current power limits cap
+the cast and displayed power while preserving the saved power for later.
 
 The book's Magic and Techniques tabs share a compact browser with a side
 inspector. Selecting an icon inspects it; **Cast** or **Use** launches the
@@ -276,7 +282,7 @@ are written under `godot-client/test-artifacts/magic-casting/`.
 The comparison launchers with `-Check` also run `test_magic_wheel_trials.gd`.
 `render_magic_wheel_trials.gd` captures Quick and Orbit for visual inspection.
 The trial checks cover Left/Right Shift input, Alt quickbar routing, saved
-last-cast target/power, class hover, whole-sector clicks,
+independent quick-slot target/power settings, class hover, whole-sector clicks,
 right-click target cycling and unavailable target options,
 remembered target type and power, repeat casting at a different recipient,
 ground confirmation, cancellation, pins, More access, and power limits.

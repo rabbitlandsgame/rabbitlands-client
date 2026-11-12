@@ -3,6 +3,8 @@ extends RefCounted
 signal changed
 const SLOT_COUNT := 12
 var catalog: SpellCatalog
+## Each slot keeps its own spell variant (target type) and requested power.
+## Casting from any interface must leave these assignments unchanged.
 var slots: Array[Dictionary] = []
 var powers: Dictionary = {}
 var wheel_power := 1
@@ -107,20 +109,6 @@ func remember_power(spell_id: int, power: int) -> void:
 	powers[spell_id] = clampi(power, 1, 10)
 	_save()
 	changed.emit()
-
-func remember_cast(spell_id: int, power: int) -> void:
-	if spell_id not in catalog.spell_ids(): return
-	var family := catalog.effect_for(spell_id)
-	var updated := false
-	for index in range(slots.size()):
-		if int(slots[index].id) < 0 or catalog.effect_for(int(slots[index].id)) != family: continue
-		var last_cast := {"id": spell_id, "power": clampi(power, 1, 10)}
-		if slots[index] != last_cast:
-			slots[index] = last_cast
-			updated = true
-	if updated:
-		_save()
-		changed.emit()
 
 func set_wheel_power(power: int) -> void:
 	power = clampi(power, 1, 10)

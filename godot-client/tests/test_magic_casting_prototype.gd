@@ -50,11 +50,11 @@ func run() -> void:
 	check(model.slots[1].id == -1, "slots can be cleared")
 	model.assign_slot(2, 21, 5)
 	model.assign_slot(3, 3, 2)
-	model.remember_cast(22, 6)
-	check(model.slots[0] == {"id": 22, "power": 6} and model.slots[2] == model.slots[0], "last cast updates every assigned slot for the same family")
-	check(model.slots[1].id == -1 and model.slots[3] == {"id": 3, "power": 2}, "last cast leaves empty slots and other families intact")
+	model.assign_slot(4, 22, 6)
+	check(model.slots[0] == {"id": 1, "power": 4} and model.slots[2] == {"id": 21, "power": 5}, "assigning another target type preserves existing family slots")
+	check(model.slots[1].id == -1 and model.slots[3] == {"id": 3, "power": 2}, "assignment leaves empty slots and other families intact")
 	model.load_profile("server-one/alice")
-	check(model.slots[0] == {"id": 22, "power": 6}, "last cast target type and power survive a profile reload")
+	check(model.slots[0] == {"id": 1, "power": 4} and model.slots[2] == {"id": 21, "power": 5} and model.slots[4] == {"id": 22, "power": 6}, "independent target types and powers survive a profile reload")
 	DirAccess.remove_absolute(model.path)
 	var selection = load("res://src/ui/magic_selection.gd").new()
 	selection.catalog = catalog
@@ -119,6 +119,7 @@ func run() -> void:
 		requests.append(data.duplicate(true))
 		return OK
 	var app_state := root.get_node("AppState")
+	app_state.stats = {"magic": 200, "magic_nexus": 10, "ether": 1000}
 	app_state.actors[77] = {"name": "Wild creature", "kind": 3, "alive": true, "health": 100}
 	check(not main.call("_spell_target_candidate", 1, 77), "a healing shortcut does not automatically select hostile wildlife")
 	check(main.call("_spell_target_candidate", 6, 77), "a damage shortcut accepts a living selected creature")
@@ -126,9 +127,11 @@ func run() -> void:
 	app_state.select_actor(-1)
 	main.spell_loadout.assign_slot(0, 0, 4)
 	root.get_node("AppState").spell_power["heal"] = {"limit": 3}
+	app_state.state_changed.emit(&"spell_power")
+	await process_frame
 	main.call("_cast_spell_slot", 0)
 	check(requests.back().id == 0 and requests.back().power == 3, "the live bar uses saved power capped to the server limit")
-	check(main.spell_loadout.slots[0].power == 3, "the quickbar remembers the actual capped cast power")
+	check(main.spell_loadout.slots[0].power == 4, "a capped cast preserves the slot's requested power")
 	check(main.casting_bar.buttons[0].get_node("Target").text == "S" and main.casting_bar.buttons[0].get_node("Power").text == "3", "the live icon shows saved target and power in its corners")
 	main.spells_window.call("_on_spell_pressed", 1)
 	main.spells_window.power_picker.value = 2
@@ -236,6 +239,7 @@ func run() -> void:
 	main.call("_input", quick_key)
 	main.call("_unhandled_input", quick_key)
 	check(not main.spell_wheel.visible and requests.size() == before + 1 and requests.back().id == 0, "Alt+1 casts the live quickbar in wheel mode")
+	test_quick_slot_variants(main)
 	# Let deferred HUD layout finish before freeing the application.
 	for frame in range(3): await process_frame
 	main.free()
@@ -247,6 +251,58 @@ func run() -> void:
 	GlbSceneCache.clear()
 	print("magic casting prototype: ", "PASS" if failures == 0 else "FAIL (%d)" % failures)
 	quit(failures)
+
+func test_quick_slot_variants(main) -> void:
+	var state := root.get_node("AppState")
+	state.stats = {"magic": 200, "magic_nexus": 10, "ether": 1000}
+	state.spell_power["heal"] = {"limit": 10}
+	var model = main.spell_loadout
+	model.path = "res://test-artifacts/magic-casting/variants-%d.cfg" % Time.get_ticks_usec()
+	model.load_profile("server-one/variants")
+	var bar = main.casting_bar
+	var variants := [{"id": 0, "power": 4}, {"id": 1, "power": 2},
+		{"id": 1, "power": 5}, {"id": 22, "power": 3}, {"id": 21, "power": 6}]
+	for index in range(variants.size()):
+		bar.buttons[index].spell_dropped.emit(variants[index].id, variants[index].power)
+	model.assign_slot(6, 3, 2)
+	model.assign_technique(10, "charge")
+	model.assign_slot(11, -1, 1)
+	var saved: Array = model.slots.duplicate(true)
+	for index in range(variants.size()):
+		var entry: Dictionary = variants[index]
+		bar.buttons[index].pressed.emit()
+		if entry.id == 1:
+			check(main.magic_selection.pending.get("power") == entry.power, "each Target slot arms its own power")
+			main.magic_selection.confirm_actor(42)
+		elif entry.id == 21:
+			main.magic_selection.confirm_location(Vector2i(8, 9))
+		check(requests.back().id == entry.id and requests.back().power == entry.power, "slot %d casts its own target type and power" % index)
+		check(model.slots == saved, "casting slot %d preserves every saved assignment" % index)
+		check(bar.buttons[index].get_node("Target").text == ["S", "T", "T", "A", "B"][index]
+			and bar.buttons[index].get_node("Power").text == str(entry.power), "each slot displays its own badges after casting")
+	# Ring and book casts must leave the whole bar alone too.
+	main.spell_wheel.spell_chosen.emit(22, 7)
+	check(requests.back().id == 22 and requests.back().power == 7 and model.slots == saved, "a ring cast preserves duplicate quick spells")
+	model.remember_power(0, 8)
+	main.call("_cast_spell_by_id", 0)
+	check(requests.back().id == 0 and requests.back().power == 8 and model.slots == saved, "a book cast preserves duplicate quick spells")
+	state.spell_power["heal"] = {"limit": 2}
+	bar.refresh()
+	bar.buttons[0].pressed.emit()
+	check(requests.back().power == 2 and model.slots == saved, "a temporary cap changes the cast without overwriting any slot")
+	state.spell_power["heal"] = {"limit": 10}
+	bar.refresh()
+	check(bar.buttons[0].get_node("Power").text == "4" and bar.buttons[2].get_node("Power").text == "5", "lifting a cap restores each slot's own saved power")
+	model.load_profile("server-one/variants")
+	check(model.slots == saved, "all spell variants, empty slots and techniques survive reload after casting")
+	main.spells_window.edit_prepared_slot(2)
+	check(main.spells_window.selected_spell_id == 1 and main.spells_window.power_picker.value == 5, "editing a duplicate restores that slot's own power")
+	main.spells_window.power_picker.value = 3
+	main.spells_window._assign_button.pressed.emit()
+	saved[2] = {"id": 1, "power": 3}
+	check(model.slots == saved, "editing and assigning a duplicate changes only the chosen slot")
+	main.spells_window.close()
+	DirAccess.remove_absolute(model.path)
 
 func key_event(code: Key, pressed := true, echo := false) -> InputEventKey:
 	var event := InputEventKey.new()

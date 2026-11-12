@@ -1881,7 +1881,6 @@ func _ready() -> void:
 	death_panel.actor_for_player = func() -> Variant: return actor_nodes.get(AppState.local_actor_id)
 	game_view.add_child(death_panel)
 	spell_loadout.configure(spell_catalog)
-	magic_selection.cast_submitted.connect(spell_loadout.remember_cast)
 	magic_selection.target_validator = _spell_target_candidate
 	spells_window.set_loadout(spell_loadout)
 	casting_bar = preload("res://src/ui/casting_bar.gd").new()

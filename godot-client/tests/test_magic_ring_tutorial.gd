@@ -92,7 +92,7 @@ func run() -> void:
 	main.spell_wheel.open_wheel()
 	main.spell_wheel.enter_class("Healing")
 	for control in ["ring_target","ring_power"]:
-		show_lesson(control, "Choose your cast", "Hold Left Shift, open Healing and hover Heal. Right click cycles Self, Target, Allies and Burst. Scroll to Power 2, then choose Heal. The quickbar saves the last cast target type and power in the icon corners.")
+		show_lesson(control, "Choose your cast", "Hold Left Shift, open Healing and hover Heal. Right click cycles Self, Target, Allies and Burst. Scroll to Power 2, then choose Heal. Each quickbar slot keeps its own target type and power in the icon corners.")
 		await capture(control)
 		check(main.lantern_guide.control_for_step() == (main.spell_wheel._scope_bar if control == "ring_target" else main.spell_wheel._power_label), "lesson highlights " + control + " visible=" + str(main.spell_wheel.visible) + " actual=" + str(main.lantern_guide.control_for_step()))
 	for percent in [75,125]:
