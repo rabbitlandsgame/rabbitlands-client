@@ -10,7 +10,7 @@ Experience below is the chapter bonus. Ordinary combat, gathering and mixing als
 | --- | --- | --- | --- |
 | **Restocking the Basics** | Gather the marked ingredients and make 25 Life, Fire and Water Essences in turn. Return each practice batch to Ilka. | 500 / 1,000 / 1,500 Harvesting and Alchemy for the three batches | 500 gold per delivered batch, tools and food; merchant essence stock stays locked. |
 | **Practicing the Basics** | Learn Heal, Fire Bolt and Gain Ether in the temple, then spar with Ostrid in the arena. | 1,500 Magic | 25 Life, Fire and Water Essences. Ostrid has 200 health and uses gentle, nonlethal training spells. |
-| **A Harvest Worth Defending** | Protect four level-10 villagers while they gather and store 10,000 Sage, then 5,000 Hearthroot. Intercept goblins coming from the Old Warren. Heal Target revives fallen workers. | 2,000 Harvesting, 1,500 Magic, 1,000 Defense | 1,500 gold, 100 Life and 100 Water Essences. Life stock remains locked until the raid. |
+| **A Harvest Worth Defending** | Protect four villagers with Harvesting 40 while they gather and store 10,000 Sage, then 5,000 Hearthroot. Intercept goblins coming from the Old Warren. Heal Target revives fallen workers. | 2,000 Harvesting, 1,500 Magic, 1,000 Defense | 1,500 gold, 100 Life and 100 Water Essences. Life stock remains locked until the raid. |
 | **The Hand Behind the Raids** | Enter the Old Warren with your party. Fight goblins and small wolves and find Grask, the orc directing the raids, in a deeper western cave. | 1,500 Attack, 1,500 Defense, 2,000 Magic | 2,500 gold, 150 Life Essences and Life Essence shop stock. |
 
 ### The Price of a Spark
@@ -70,9 +70,9 @@ The retained route-choice chapters show their extra experience and item rewards 
 
 ### Protecting the crew
 
-Fenna, Sela, Nell and Ada harvest at the game's normal level-10 rate, carrying 250 items per trip. The quest window separately shows gathered items, items in bags and items delivered to the crew store. Only deliveries complete a shipment. The cargo belongs to Ilka and never enters the player's tradable inventory. Personal storage remains separate.
+Fenna, Sela, Nell and Ada have Harvesting 40 and gather Sage and Hearthroot once every 0.25 seconds per worker, carrying 250 items per trip. The quest window separately shows gathered items, items in bags and items delivered to the crew store. Only deliveries complete a shipment. The cargo belongs to Ilka and never enters the player's tradable inventory. Personal storage remains separate.
 
-The four workers have visible health bars and companion rows beside the human party. Downed workers stop working until a successful Heal Target cast revives them. A story-owner defeat resets the current field and offers Retry or Cancel; a completed Sage shipment survives a later Hearthroot defeat. Pausing or disconnecting saves progress and worker health without offline production. At current rates, the two shipments take roughly an hour before travel and combat interruptions.
+The four workers have visible health bars and companion rows beside the human party. Downed workers stop working until a successful Heal Target cast revives them. A story-owner defeat resets the current field and offers Retry or Cancel; a completed Sage shipment survives a later Hearthroot defeat. Pausing or disconnecting saves progress and worker health without offline production. Gathering swings are four times faster than at level 10; hauling and combat still add to completion time.
 
 Ilka provides one guard allowance: 1,500 Fire, 250 Life and 500 Water Essences, plus 20 minor healing potions. Items that do not fit go to personal storage. Restarting or canceling does not issue another allowance.
 
@@ -104,4 +104,4 @@ After restoring Frost stock, players with Potion level 16 can practise three Fro
 
 The finale opens one standing supply contract per day: deliver 100 basic essences for 600 gold (4,200 for Frost), 250 Alchemy XP and 100 Magic XP. Ingredient bundles remain available for the restored families.
 
-Native automated checks cover both deliveries, worker revival, party joins, pause/resume, retry choices, the cave entrance, raid combat and the Life unlock. Delivery counts and clocks are accelerated in progression tests; the production goals and level-10 rate are checked separately. Full-length combat pacing remains a playtest tuning task.
+Native automated checks cover both deliveries, worker revival, party joins, pause/resume, retry choices, the cave entrance, raid combat and the Life unlock. Delivery counts and clocks are accelerated in progression tests; the production goals and actual level-40 swing timing are checked separately. Full-length combat pacing remains a playtest tuning task.

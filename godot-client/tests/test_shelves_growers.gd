@@ -12,7 +12,7 @@ func fixture()->Dictionary:
 	var s:=Supplies.snapshot()
 	s.scene={};s.key="life";s.title="A Harvest Worth Defending";s.stage="work";s.targets=[]
 	s.shelves.chapter="life";s.shelves.phase="work";s.shelves.unlocked=[]
-	s.shelves.growers={"field":"sage","stored":{"sage":1000,"root":0},"carried":200,"wave":4,"raid":false,"workers":[]}
+	s.shelves.growers={"field":"sage","harvesting_level":40,"stored":{"sage":1000,"root":0},"carried":200,"wave":4,"raid":false,"workers":[]}
 	for i:int in range(4):
 		s.shelves.growers.workers.append({"actor_id":100+i,"name":"Worker "+str(i),"health":80,"max_health":80,
 			"downed":false,"cargo":50,"activity":"return","harvesting":false})
@@ -21,6 +21,10 @@ func fixture()->Dictionary:
 func run()->void:
 	var s:=fixture()
 	expect(EloriaProtocol.decode_campaign(JSON.stringify(s).to_utf8_buffer()).type=="campaign","new crew ledger passes production validation")
+	var legacy:=s.duplicate(true);legacy.shelves.growers.erase("harvesting_level")
+	expect(EloriaProtocol.decode_campaign(JSON.stringify(legacy).to_utf8_buffer()).type=="campaign","older crew ledgers remain readable")
+	var invalid_level:=s.duplicate(true);invalid_level.shelves.growers.harvesting_level="40"
+	expect(EloriaProtocol.decode_campaign(JSON.stringify(invalid_level).to_utf8_buffer()).type=="invalid","harvesting level must be a bounded integer")
 	var path:=OS.get_environment("RL_GROWERS_EVIDENCE")
 	if not path.is_empty():
 		var evidence:Variant=JSON.parse_string(FileAccess.get_file_as_string(path))
@@ -44,11 +48,16 @@ func run()->void:
 	var extension=(load("res://src/ui/extension_windows.gd") as Script).new()
 	var crew:Array=extension._quest_party_members()
 	expect(crew.size()==4 and crew.all(func(row:Dictionary)->bool:return bool(row.gathering_worker)),"four native villagers appear beside the human party")
+	expect(crew.all(func(row:Dictionary)->bool:return int(row.level)==40),"companion levels follow the server's harvesting level")
+	var worker_row:Control=extension._party_row(crew[0])
+	expect(worker_row.tooltip_text.contains("Harvesting level 40"),"worker tooltips show the current harvesting level")
+	worker_row.free()
 	s.shelves.growers.workers[0].downed=true
 	crew=extension._quest_party_members()
 	expect(crew[0].health==0,"a downed worker is clearly shown as down in the party roster")
 	var hud:Control=load("res://src/ui/campaign_hud.gd").new();root.add_child(hud)
 	hud.apply_state(s,Vector2i(64,249),"landfall")
+	expect(hud._shelves.text.contains("Four level-40 harvesters"),"the supply ledger shows level 40")
 	expect(hud._shelves.text.contains("gathered: 1200") and hud._shelves.text.contains("In bags: 200") and hud._shelves.text.contains("In crew storage: 1000"),"the quest window distinguishes gathered, carried and deposited stock")
 	expect(hud._shelves.text.contains("DOWNED") and hud._shelves.text.contains("Heal Target"),"the ledger explains how to revive a worker")
 	app.current_map="landfall_town"

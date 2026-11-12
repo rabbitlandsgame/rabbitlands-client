@@ -4218,6 +4218,7 @@ static func campaign_shelves_valid(value: Variant) -> bool:
 
 static func campaign_growers_valid(value: Variant) -> bool:
 	if not value is Dictionary or value.get("field") not in ["sage","root"] or not value.get("raid") is bool:return false
+	if value.has("harvesting_level") and not _campaign_integer(value.harvesting_level,0,255):return false
 	if not _campaign_integer(value.get("wave"),0,1000000) or not _campaign_integer(value.get("carried"),0,1000):return false
 	var stored: Variant=value.get("stored")
 	if not stored is Dictionary or not _campaign_integer(stored.get("sage"),0,10000) or not _campaign_integer(stored.get("root"),0,5000):return false

@@ -2004,7 +2004,7 @@ func _quest_party_members() -> Array[Dictionary]:
 		if int(actor.get("kind",0))!=2:continue
 		result.append({"name":worker.name,"narrative_companion":true,"gathering_worker":true,"online":true,
 			"health":0 if bool(worker.downed) else int(worker.health),"max_health":int(worker.max_health),
-			"ether":0,"max_ether":0,"map_id":AppState.current_map,"x":int(actor.get("x",0)),"y":int(actor.get("y",0)),"level":10})
+			"ether":0,"max_ether":0,"map_id":AppState.current_map,"x":int(actor.get("x",0)),"y":int(actor.get("y",0)),"level":int(growers.get("harvesting_level",10))})
 	return result
 
 func _party_row(member: Dictionary) -> Control:
@@ -2028,7 +2028,7 @@ func _party_row(member: Dictionary) -> Control:
 		row.tooltip_text = row.tooltip_text.replace("Ether:", "Mana:") \
 			+ "\nLevel 10 quest companion · finite mana\nRevival casts used: %d\nSeparate from the eight player slots." % int(member.get("revives_spent", 0))
 	if bool(member.get("gathering_worker",false)):
-		row.tooltip_text="%s · Harvesting level 10\nHealth %d/%d\nProtect this worker. Use Heal Target if she falls.\nCrew cargo is shown in the quest window." % [str(member.name),int(member.health),int(member.max_health)]
+		row.tooltip_text="%s · Harvesting level %d\nHealth %d/%d\nProtect this worker. Use Heal Target if she falls.\nCrew cargo is shown in the quest window." % [str(member.name),int(member.get("level",10)),int(member.health),int(member.max_health)]
 	var portrait: Control = PARTY_MEDALLION.new()
 	portrait.name = "Portrait"
 	portrait.configure(member)

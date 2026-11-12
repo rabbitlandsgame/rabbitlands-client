@@ -463,7 +463,7 @@ func _apply_shelves(ledger: Dictionary) -> void:
 		var stored:=int((growers.get("stored",{}) as Dictionary).get(field,0))
 		var carried:=int(growers.get("carried",0))
 		lines.append("%s gathered: %s · In bags: %s · In crew storage: %s" % [crop,str(stored+carried),str(carried),str(stored)])
-		lines.append("Four level-10 harvesters · 250 per bag · Raiding waves: %d" % int(growers.get("wave",0)))
+		lines.append("Four level-%d harvesters · 250 per bag · Raiding waves: %d" % [int(growers.get("harvesting_level",10)),int(growers.get("wave",0))])
 		for worker: Dictionary in growers.get("workers",[]):
 			lines.append("%s · %d/%d health · %d carried · %s" % [worker.name,int(worker.health),int(worker.max_health),int(worker.cargo),"DOWNED — use Heal Target" if bool(worker.downed) else "Carrying to storage" if str(worker.activity)=="return" else "Harvesting"])
 	var fire: Dictionary=ledger.get("fire",{})
