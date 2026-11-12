@@ -2487,7 +2487,12 @@
           "id": "storage",
           "title": "Storage",
           "summary": "What a storage keeper holds for you",
-          "body": "Each character has storage held by the server. A storage keeper allows deposits and withdrawals. Use #storage view for a view-only preview from anywhere.\n\nWithdrawals are checked against carrying capacity. The mixing window can draw materials from nearby storage; required tools must still be carried or equipped. Loot delivery and player payments can also involve storage, with the required approvals."
+          "body": "Each character has storage held by the server. A storage keeper allows deposits and withdrawals. Use #storage view for a view-only preview from anywhere.\n\nWithdrawals are checked against carrying capacity. The mixing window can draw materials from nearby storage; required tools must still be carried or equipped. Loot delivery and player payments can also involve storage, with the required approvals.\n\nEnchanted equipment appears in a separate glowing stack. Open its item ledger to inspect the individual copies and effects. Enchanting, breaking down and recipes that consume equipment use exact backpack copies; withdraw the item and required materials first. See Equipment & Enchanting for the steps.",
+          "related": [
+            "equipment-copies",
+            "crafting-equipment",
+            "essence-creation"
+          ]
         },
         {
           "id": "harvesting-todo",
@@ -2518,10 +2523,469 @@
       ]
     },
     {
+      "id": "equipment",
+      "title": "Equipment & Enchanting",
+      "summary": "Individual copies, effect crafting, breakdown and essence refining",
+      "intro": "Craft an individual copy, enchant it with enriched essences, or break it down into materials for your next item. These guides describe the default rules; the live Review window checks your exact copy and current costs.",
+      "entries": [
+        {
+          "id": "equipment-copies",
+          "title": "Equipment copies and effects",
+          "summary": "Instanced equipment, blue and yellow names, and choosing the right copy",
+          "sections": [
+            {
+              "title": "Your individual equipment",
+              "kind": "prose",
+              "text": "Every equippable item is an individual copy. Copies of the same item can have different effects, rolled values, quality, durability and creators. Plain copies may appear together in a stack; an enchanted copy keeps its own saved effects.\n\nBlue names support up to two effects. Yellow names support up to four. Both stat bonuses and triggered effects count toward this limit. The windows show name color and effect slots rather than adding a rarity word to the item name."
+            },
+            {
+              "title": "Find the exact copy",
+              "kind": "prose",
+              "text": "The crafting windows list each backpack copy with its slot and effect count. Select a row to inspect its effects and condition. Enchanted items in storage have their own glowing stack; open the item ledger to inspect the individual copies. Withdraw a stored copy and unequip it before enchanting or breaking it down."
+            },
+            {
+              "title": "Open the windows",
+              "kind": "prose",
+              "text": "Use Inventory → ••• → Enchant equipment… or Break Down & Refine…, or the Enchant and Break Down actions on an equipment inspection card. Mixing offers Enchant equipment… in its ••• menu and a Refine button. The Break Down, Refine and Enchant tabs move between the windows. These entries appear when the connected server supports them."
+            },
+            {
+              "title": "Review before spending",
+              "kind": "prose",
+              "text": "Select the copy and materials, then press the operation’s Review button. The server checks the exact copy, cost and room for the result before opening confirmation. Nothing is spent until you confirm. Changing a selection requires a new review.\n\nThe amounts and odds in these guides describe the current default rules. Use the live window’s review for your world’s current costs, chances and returns."
+            }
+          ],
+          "related": [
+            "crafting-equipment",
+            "enchanting-equipment",
+            "breaking-down-equipment"
+          ],
+          "body": "Every equippable item is an individual copy. Copies of the same item can have different effects, rolled values, quality, durability and creators. Plain copies may appear together in a stack; an enchanted copy keeps its own saved effects.\n\nBlue names support up to two effects. Yellow names support up to four. Both stat bonuses and triggered effects count toward this limit. The windows show name color and effect slots rather than adding a rarity word to the item name."
+        },
+        {
+          "id": "crafting-equipment",
+          "title": "Crafting individual equipment",
+          "summary": "Rare crafting results, plain tutorial recipes and exact-copy ingredients",
+          "sections": [
+            {
+              "title": "Craft equipment in Mixing",
+              "kind": "prose",
+              "text": "Choose the item’s recipe in Mixing, gather its materials and meet the usual knowledge, skill and tool requirements. A successful eligible equipment recipe can create an enchanted copy with randomly chosen effects. Each result rolls its own effects.\n\nThese are the default chances for a successful eligible craft before Artificer and other rare-mix bonuses. The effect roll is separate from the chance that the recipe succeeds."
+            },
+            {
+              "title": "Default equipment crafting results",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Plain copy",
+                  "95%"
+                ],
+                [
+                  "Blue name · one or two effects",
+                  "4.5% total"
+                ],
+                [
+                  "Yellow name · three or four effects",
+                  "0.5% total"
+                ]
+              ]
+            },
+            {
+              "title": "Tutorial crafting",
+              "kind": "prose",
+              "text": "Tutorial crafting and recipes marked plain stay plain. Basic Quiver is also a plain result under the default rules. Complete the tutorial and use an eligible recipe or the Enchant window to obtain equipment with effects."
+            },
+            {
+              "title": "Recipes that consume equipment",
+              "kind": "prose",
+              "text": "Withdraw the equipment and all recipe materials into your backpack first. Press Mix Now and select the exact equipment copies for one attempt. Check their slots, effects and condition before confirming. Automatic queues cannot choose equipment copies for you.\n\nSuccess normally consumes the selected copies and other ingredients; ordinary failure keeps them. Critical failure can consume them. Recycler and loss-prevention perks follow the usual mixing rules. The exact copies selected are the ones at stake."
+            },
+            {
+              "title": "Enchant an existing item",
+              "kind": "prose",
+              "text": "To add effects to equipment you already own, open Enchant and choose that plain copy. This spends enriched essences on the selected item instead of creating a new item from a recipe."
+            }
+          ],
+          "related": [
+            "equipment-copies",
+            "enchanting-equipment",
+            "essence-creation"
+          ],
+          "body": "Choose the item’s recipe in Mixing, gather its materials and meet the usual knowledge, skill and tool requirements. A successful eligible equipment recipe can create an enchanted copy with randomly chosen effects. Each result rolls its own effects.\n\nThese are the default chances for a successful eligible craft before Artificer and other rare-mix bonuses. The effect roll is separate from the chance that the recipe succeeds."
+        },
+        {
+          "id": "enchanting-equipment",
+          "title": "Enchanting plain equipment",
+          "summary": "Spend enriched essences to give a chosen plain copy one to four effects",
+          "sections": [
+            {
+              "title": "Choose a copy and an essence",
+              "kind": "prose",
+              "text": "Unequip the item and place it in your backpack. Open Enchant, select the plain copy, then choose an enriched essence theme and quantity. More options lets you combine essence themes. Spend one to five enriched essences in total.\n\nThe selected themes favor matching effects that are eligible for that item. The item keeps its identity, creator, quality and condition. Press Review enchantment, read the material cost and possible results, then confirm. The effects and their numbers are rolled after confirmation."
+            },
+            {
+              "title": "One enriched essence",
+              "kind": "facts",
+              "rows": [
+                [
+                  "One effect · blue name",
+                  "70%"
+                ],
+                [
+                  "Two effects · blue name",
+                  "25%"
+                ],
+                [
+                  "Three effects · yellow name",
+                  "4%"
+                ],
+                [
+                  "Four effects · yellow name",
+                  "1%"
+                ]
+              ]
+            },
+            {
+              "title": "Using more enriched essences",
+              "kind": "prose",
+              "text": "Each enriched essence rolls the effect count once; the highest count wins. All selected essences are spent. More essences improve the chance of extra effects while keeping the same possible range for each effect’s numbers. The window updates the odds as you change the selection."
+            },
+            {
+              "title": "Effect-count odds by total essences",
+              "kind": "facts",
+              "rows": [
+                [
+                  "1 essence",
+                  "1 effect: 70% · 2: 25% · 3: 4% · 4: 1%"
+                ],
+                [
+                  "2 essences",
+                  "1 effect: 49% · 2: 41.25% · 3: 7.76% · 4: 1.99%"
+                ],
+                [
+                  "3 essences",
+                  "1 effect: 34.30% · 2: 51.44% · 3: 11.29% · 4: 2.97%"
+                ],
+                [
+                  "4 essences",
+                  "1 effect: 24.01% · 2: 57.44% · 3: 14.61% · 4: 3.94%"
+                ],
+                [
+                  "5 essences",
+                  "1 effect: 16.81% · 2: 60.57% · 3: 17.72% · 4: 4.90%"
+                ]
+              ]
+            }
+          ],
+          "related": [
+            "changing-equipment-effects",
+            "essence-themes",
+            "essence-creation"
+          ],
+          "body": "Unequip the item and place it in your backpack. Open Enchant, select the plain copy, then choose an enriched essence theme and quantity. More options lets you combine essence themes. Spend one to five enriched essences in total.\n\nThe selected themes favor matching effects that are eligible for that item. The item keeps its identity, creator, quality and condition. Press Review enchantment, read the material cost and possible results, then confirm. The effects and their numbers are rolled after confirmation."
+        },
+        {
+          "id": "changing-equipment-effects",
+          "title": "Promoting, adding, removing and rerolling effects",
+          "summary": "Choose an operation for an already enchanted copy",
+          "sections": [
+            {
+              "title": "Work on the selected copy",
+              "kind": "prose",
+              "text": "Open Enchant and select an unequipped backpack copy. The Operation selector offers the actions available for its current effects. Select an action, set its materials and any effect choices, then use Review to check the cost before confirming. These operations keep the copy’s quality, durability and creator."
+            },
+            {
+              "title": "Promotion and additional effects",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Promote",
+                  "A blue copy with exactly two effects costs 10 Enriched Magic Essence + 10 Enriched Life Essence. Both existing effects and their values stay, a third distinct effect is added, and the name becomes yellow."
+                ],
+                [
+                  "Add effects · Enriched Life",
+                  "A blue copy can fill its second slot for 1 Enriched Life Essence. On yellow copies, filling the second or third slot costs 1 each; filling the fourth costs 2. Existing rolls stay. Promote a full blue copy before adding more effects."
+                ]
+              ]
+            },
+            {
+              "title": "Remove or reroll",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Remove an effect · Enriched Death",
+                  "Spend 1 to remove a random effect, or 3 to remove the saved effect you choose. Other rolls stay. Removing the final effect makes the copy plain."
+                ],
+                [
+                  "Reroll numbers · Enriched Water",
+                  "Spend 1–5 to keep the effect names and reroll their numbers. Each number keeps the best new roll from that many attempts. Existing values can decrease; name color and effect count stay."
+                ],
+                [
+                  "Reroll effects · Enriched Magic",
+                  "Spend 1 to reroll all effects and numbers. Spend 3 to preserve up to one chosen effect, or 5 to preserve up to two. Preserved effects keep their numbers. Leave at least one effect unlocked. Name color and effect count stay."
+                ]
+              ]
+            },
+            {
+              "title": "Optional effect themes",
+              "kind": "prose",
+              "text": "When promoting, adding effects or rerolling effect types, More options offers enriched Fire, Frost, Earth and Wind as optional themed catalysts. Spend up to five catalysts in total alongside the operation’s main cost. They favor eligible effects of their themes; the result is still random. Life additions and Magic effect rerolls also favor their own essence themes.\n\nThe default enchanting operations have no extra gold fee. The live review shows any fee configured for your world."
+            }
+          ],
+          "related": [
+            "enchanting-equipment",
+            "essence-themes",
+            "breaking-down-equipment"
+          ],
+          "body": "Open Enchant and select an unequipped backpack copy. The Operation selector offers the actions available for its current effects. Select an action, set its materials and any effect choices, then use Review to check the cost before confirming. These operations keep the copy’s quality, durability and creator."
+        },
+        {
+          "id": "breaking-down-equipment",
+          "title": "Breaking down enchanted equipment",
+          "summary": "Salvage or disenchant one copy for universal Enchanting Shards and normal essences",
+          "sections": [
+            {
+              "title": "Choose the equipment to destroy",
+              "kind": "prose",
+              "text": "Unequip and withdraw the enchanted copy into your backpack. Open Break Down & Refine… and use the Break Down tab, or choose Break Down on its inspection card. Select the exact copy by backpack slot and inspect its current effects.\n\nThe window shows its exact returns and states that this individual copy will be destroyed. Press Review breakdown and confirm only when the selected copy and returns are the ones you want."
+            },
+            {
+              "title": "Default returns per copy",
+              "kind": "facts",
+              "rows": [
+                [
+                  "1 effect",
+                  "2 Enchanting Shards + 5 normal essences in total"
+                ],
+                [
+                  "2 effects",
+                  "5 Enchanting Shards + 10 normal essences in total"
+                ],
+                [
+                  "3 effects",
+                  "10 Enchanting Shards + 20 normal essences in total"
+                ],
+                [
+                  "4 effects",
+                  "15 Enchanting Shards + 30 normal essences in total"
+                ]
+              ]
+            },
+            {
+              "title": "Which normal essences you receive",
+              "kind": "prose",
+              "text": "The normal-essence total is divided between the copy’s effects, and each effect supplies its assigned essence family. Shares assigned to the same family are combined. For example, a two-effect copy with Brutal and Flamebound returns 5 Earth Essence, 5 Fire Essence and 5 Enchanting Shards.\n\nReturns use the number and families of the saved effects. The exact per-copy preview shows how whole essences are divided when the total does not divide evenly."
+            },
+            {
+              "title": "Using the recovered materials",
+              "kind": "prose",
+              "text": "Enchanting Shards are universal: they work with any supported normal essence in Refine. Build up shards and normal essences, then refine the family you want for enchanting. Plain equipment has no recoverable effects, and quest items cannot be broken down through this window. Make room to carry the returns before confirming."
+            }
+          ],
+          "related": [
+            "essence-creation",
+            "essence-themes",
+            "equipment-copies"
+          ],
+          "body": "Unequip and withdraw the enchanted copy into your backpack. Open Break Down & Refine… and use the Break Down tab, or choose Break Down on its inspection card. Select the exact copy by backpack slot and inspect its current effects.\n\nThe window shows its exact returns and states that this individual copy will be destroyed. Press Review breakdown and confirm only when the selected copy and returns are the ones you want."
+        },
+        {
+          "id": "essence-creation",
+          "title": "Creating normal and enriched essences",
+          "summary": "Alchemy and Potion recipes, rare enriched results and guaranteed refining",
+          "sections": [
+            {
+              "title": "Make normal essences",
+              "kind": "prose",
+              "text": "Find Life, Death, Water, Magic, Fire, Earth and Wind Essence recipes in Alchemy. Frost Essence recipes are in Potions and use the Potion skill. Search the essence name to see all its recipe alternatives.\n\nThe generated recipe page lists ingredients, tools, knowledge and the recommended skill level. Gather those materials and use the recipe in Mixing. Normal recipe success and failure rules apply. Breaking down enchanted equipment also returns normal essences. These normal essences are the matching-family material used by Refine."
+            },
+            {
+              "title": "Two sources of enriched essences",
+              "kind": "prose",
+              "text": "Successful normal-essence mixes can produce an enriched essence as a rare result. The default base chance is 1 in 10,000 successful mixes before Artificer and other rare-mix bonuses. Tutorial mixes keep the normal result.\n\nRefining is the guaranteed route: combine universal Enchanting Shards, normal essences of one family and a gold fee. Open Mixing → Refine or Inventory → ••• → Break Down & Refine… → Refine. Choose a recipe and quantity, check the Need and Owned columns, then press Refine to review and confirm."
+            },
+            {
+              "title": "Default cost for one enriched essence",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Enchanting Shards",
+                  "20"
+                ],
+                [
+                  "Matching normal essence",
+                  "100"
+                ],
+                [
+                  "Gold Coins",
+                  "100"
+                ],
+                [
+                  "You receive",
+                  "1 enriched essence of the same family"
+                ],
+                [
+                  "Result",
+                  "Guaranteed after confirmation; no manufacturing failure roll"
+                ]
+              ]
+            },
+            {
+              "title": "Refining families",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Life Essence",
+                  "Enriched Life Essence"
+                ],
+                [
+                  "Death Essence",
+                  "Enriched Death Essence"
+                ],
+                [
+                  "Water Essence",
+                  "Enriched Water Essence"
+                ],
+                [
+                  "Magic Essence",
+                  "Enriched Magic Essence"
+                ],
+                [
+                  "Fire Essence",
+                  "Enriched Fire Essence"
+                ],
+                [
+                  "Frost Essence",
+                  "Enriched Frost Essence"
+                ],
+                [
+                  "Earth Essence",
+                  "Enriched Earth Essence"
+                ],
+                [
+                  "Wind Essence",
+                  "Enriched Wind Essence"
+                ]
+              ]
+            },
+            {
+              "title": "Refine more at once",
+              "kind": "prose",
+              "text": "The default batch limit is 100. Every cost and the result scale with quantity: refining two costs 40 Enchanting Shards, 200 matching normal essences and 200 Gold Coins, and produces two enriched essences. Use materials from your backpack and leave room for the result. The live review shows your world’s configured costs, batch limit and gold fee."
+            }
+          ],
+          "related": [
+            "breaking-down-equipment",
+            "enchanting-equipment",
+            "essence-themes"
+          ],
+          "body": "Find Life, Death, Water, Magic, Fire, Earth and Wind Essence recipes in Alchemy. Frost Essence recipes are in Potions and use the Potion skill. Search the essence name to see all its recipe alternatives.\n\nThe generated recipe page lists ingredients, tools, knowledge and the recommended skill level. Gather those materials and use the recipe in Mixing. Normal recipe success and failure rules apply. Breaking down enchanted equipment also returns normal essences. These normal essences are the matching-family material used by Refine."
+        },
+        {
+          "id": "essence-themes",
+          "title": "Essence themes and recovered materials",
+          "summary": "What each enriched family favors and which normal essences effects return",
+          "sections": [
+            {
+              "title": "Choose a theme for enchanting",
+              "kind": "prose",
+              "text": "Enriched essences favor effects that suit their family. An item can only receive effects eligible for its equipment type, and each new effect is distinct from effects already kept on that copy. Themes change the chances of eligible effects; they do not guarantee a named effect or increase its possible numeric range."
+            },
+            {
+              "title": "Favored effects while enchanting",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Life",
+                  "Vital, Renewal, Restorative"
+                ],
+                [
+                  "Death",
+                  "Soulreave, Siphoning, Mindfire, Irradiated, Shielded"
+                ],
+                [
+                  "Water",
+                  "Attuned, Restorative, Siphoning"
+                ],
+                [
+                  "Magic",
+                  "Runebound, Channeling, Penetrating, Warded, Spellguard"
+                ],
+                [
+                  "Fire",
+                  "Flamebound, Emberstrike, Insulated, Mindfire"
+                ],
+                [
+                  "Frost",
+                  "Frostbound, Frostbind, Winterbound"
+                ],
+                [
+                  "Earth",
+                  "Brutal, Sundering, Bodkin, Reinforced, Plated, Stoneward, Arrowguard"
+                ],
+                [
+                  "Wind",
+                  "Balanced, Trueflight, Elusive, Lightweight, Second Wind"
+                ]
+              ]
+            },
+            {
+              "title": "Themes when breaking down",
+              "kind": "prose",
+              "text": "Breaking down assigns each saved effect to one normal-essence family. This is a separate assignment from enchanting preferences: an effect can be favored by several enriched themes but return one normal family. For example, Siphoning returns Water Essence and Restorative returns Life Essence."
+            },
+            {
+              "title": "Normal essence supplied by each effect",
+              "kind": "facts",
+              "rows": [
+                [
+                  "Life Essence",
+                  "Vital, Renewal, Restorative"
+                ],
+                [
+                  "Death Essence",
+                  "Soulreave, Mindfire, Irradiated, Shielded"
+                ],
+                [
+                  "Water Essence",
+                  "Attuned, Siphoning"
+                ],
+                [
+                  "Magic Essence",
+                  "Runebound, Channeling, Penetrating, Warded, Spellguard"
+                ],
+                [
+                  "Fire Essence",
+                  "Flamebound, Emberstrike, Insulated"
+                ],
+                [
+                  "Frost Essence",
+                  "Frostbound, Frostbind, Winterbound"
+                ],
+                [
+                  "Earth Essence",
+                  "Brutal, Sundering, Bodkin, Reinforced, Plated, Stoneward, Arrowguard"
+                ],
+                [
+                  "Wind Essence",
+                  "Balanced, Trueflight, Elusive, Lightweight, Second Wind"
+                ]
+              ]
+            }
+          ],
+          "related": [
+            "changing-equipment-effects",
+            "breaking-down-equipment",
+            "essence-creation"
+          ],
+          "body": "Enriched essences favor effects that suit their family. An item can only receive effects eligible for its equipment type, and each new effect is distinct from effects already kept on that copy. Themes change the chances of eligible effects; they do not guarantee a named effect or increase its possible numeric range."
+        }
+      ]
+    },
+    {
       "id": "alchemy",
       "title": "Alchemy",
       "summary": "Essences, bars and raw materials",
-      "intro": "Alchemy turns what is harvested into the essences and bars the other trades consume.",
+      "intro": "Alchemy turns what is harvested into the essences and bars the other trades consume. For enriched essence creation, Enchanting Shards and refining, see Equipment & Enchanting → Creating normal and enriched essences.",
       "generate": "recipes:alchemy",
       "entries": []
     },
@@ -2529,7 +2993,7 @@
       "id": "manufacturing",
       "title": "Manufacturing",
       "summary": "Armour, weapons and metalwork",
-      "intro": "Metal work. Armour is made in pieces - helm, torso, legs, boots and shield - and the same bars go into the weapons that beat them.",
+      "intro": "Metal work. Armour is made in pieces - helm, torso, legs, boots and shield - and the same bars go into the weapons that beat them. Equipment results can carry individual effects; see Equipment & Enchanting → Crafting individual equipment for rare results and exact-copy ingredients.",
       "generate": "recipes:manufacturing",
       "entries": []
     },
@@ -2537,7 +3001,7 @@
       "id": "crafting",
       "title": "Crafting",
       "summary": "Rings, medallions and worked goods",
-      "intro": "Crafting wants a mould more often than it wants a fire.",
+      "intro": "Crafting wants a mould more often than it wants a fire. Equipment results can carry individual effects; see Equipment & Enchanting → Crafting individual equipment for rare results and exact-copy ingredients.",
       "generate": "recipes:crafting",
       "entries": []
     },
@@ -2561,7 +3025,7 @@
       "id": "tailoring",
       "title": "Tailoring",
       "summary": "Thread, cloth, dye and clothing",
-      "intro": "The longest recipe list in the client, and the one that most often wants a book first.",
+      "intro": "The longest recipe list in the client, and the one that most often wants a book first. Equipment results can carry individual effects; see Equipment & Enchanting → Crafting individual equipment for rare results and exact-copy ingredients.",
       "generate": "recipes:tailoring",
       "entries": []
     },
