@@ -95,10 +95,13 @@ bone name.
      wherever it comes through. Do not make it double-sided again.
   4. The approved fits (`eloria-assets/source/capes/approved-v100`), which the
      game draws instead of this mesh on the Human rig, kept their authoring
-     winding: causes 1 and 3 again, on about 4 % of the cloth and trim and
-     about 200 lining triangles. `CapeApprovedData.fit_mesh` winds them by
-     the rules above when it builds the mesh;
-     `godot-client/tests/test_cape_approved_winding.gd` checks it.
+     winding and split normals: causes 1 and 3 again, on about 4 % of the
+     cloth and trim and about 200 lining triangles, and the copies of a
+     vertex on either side of a UV seam pointing a median 60 degrees apart,
+     so each of the ~1000 small UV islands shaded on its own (a faceted,
+     sharp-looking cape). `CapeApprovedData.fit_mesh` gives them this
+     build's welded smooth normals and winding when it builds the mesh;
+     `godot-client/tests/test_cape_approved_shading.gd` checks it.
 - **Runtime drape (`godot-client/src/actors/cape_drape.gd`):** its fade bands
   are tuned to this cape's shape (30/45 degrees of bearing, y 1.38/1.46). It
   also caps how fast the push may change across the cloth (`SLOPE`).

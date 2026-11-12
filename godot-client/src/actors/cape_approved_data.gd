@@ -10,6 +10,10 @@ static var _loaded := false
 static var _buffers: Dictionary = {}
 static var _meshes: Dictionary = {}
 static var _skins: Dictionary = {}
+## shade(): rounds of turning shell triangles against their smooth normal, and
+## the weld quantum (positions rounded to 0.01 mm).
+const SHADE_PASSES := 2
+const WELD_SCALE := 100000.0
 
 static func catalog() -> Dictionary:
 	if not _loaded:
@@ -110,6 +114,111 @@ static func wound(indices: PackedInt32Array, vertices: PackedVector3Array,
 			out[at + 2] = b
 	return out
 
+## Smooth shading for the approved fits, as the shared cape's build gives the
+## shipped cape. The fits carry split normals from their authoring: the copies
+## of one vertex on either side of a UV seam point up to 180 degrees apart
+## (median 60), so each of the decimated cloth's ~1000 small UV islands was lit
+## on its own and the cape looked faceted and sharp. Here each layer gets
+## normals welded by position and summed from its triangles (area-weighted):
+## the cloth and trim together, as one shell, and the lining on its own (where
+## it meets the cloth their normals point opposite ways and would cancel).
+## Twice, a shell triangle facing against its corners' smooth normal is turned
+## and the normals are summed again; the lining is first turned toward the
+## trunk. Tangents keep their UV direction, made perpendicular to the new
+## normal. Vertices, UVs, skin and the triangle set are untouched, so the
+## approved fit files, and the hashes that certify them, stay as they are.
+## `surfaces` holds mesh arrays (edited in place); `linings` flags each one.
+static func shade(surfaces: Array, linings: Array[bool]) -> void:
+	var shell: Array = []
+	var lining: Array = []
+	for i: int in surfaces.size():
+		var arrays: Array = surfaces[i]
+		if linings[i]:
+			arrays[Mesh.ARRAY_INDEX] = wound(arrays[Mesh.ARRAY_INDEX],
+				arrays[Mesh.ARRAY_VERTEX], PackedVector3Array(), true)
+			lining.append(arrays)
+		else:
+			shell.append(arrays)
+	_shade_layer(shell, SHADE_PASSES)
+	_shade_layer(lining, 0)
+
+## One layer: weld by position (0.01 mm, as the shared cape's build does),
+## `passes` rounds of turning triangles against their smooth normal, then the
+## final normals and tangents.
+static func _shade_layer(layer: Array, passes: int) -> void:
+	if layer.is_empty():
+		return
+	var ids := {}
+	var welds: Array[PackedInt32Array] = []
+	for arrays: Array in layer:
+		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var weld := PackedInt32Array()
+		weld.resize(vertices.size())
+		for v: int in vertices.size():
+			var point := vertices[v]
+			var cell := Vector3i(roundi(point.x * WELD_SCALE), roundi(point.y * WELD_SCALE),
+				roundi(point.z * WELD_SCALE))
+			var id: int = ids.get(cell, -1)
+			if id < 0:
+				id = ids.size()
+				ids[cell] = id
+			weld[v] = id
+		welds.append(weld)
+	var smooth := PackedVector3Array()
+	for round_index: int in passes + 1:
+		smooth = PackedVector3Array()
+		smooth.resize(ids.size())
+		for s: int in layer.size():
+			var vertices: PackedVector3Array = layer[s][Mesh.ARRAY_VERTEX]
+			var indices: PackedInt32Array = layer[s][Mesh.ARRAY_INDEX]
+			var weld := welds[s]
+			for at: int in range(0, indices.size() - 2, 3):
+				var a := indices[at]
+				var b := indices[at + 1]
+				var c := indices[at + 2]
+				var face := (vertices[c] - vertices[a]).cross(vertices[b] - vertices[a])
+				smooth[weld[a]] += face
+				smooth[weld[b]] += face
+				smooth[weld[c]] += face
+		for id: int in smooth.size():
+			smooth[id] = smooth[id].normalized()
+		if round_index == passes:
+			break
+		for s: int in layer.size():
+			var vertices: PackedVector3Array = layer[s][Mesh.ARRAY_VERTEX]
+			var indices: PackedInt32Array = layer[s][Mesh.ARRAY_INDEX]
+			var weld := welds[s]
+			for at: int in range(0, indices.size() - 2, 3):
+				var a := indices[at]
+				var b := indices[at + 1]
+				var c := indices[at + 2]
+				var face := (vertices[c] - vertices[a]).cross(vertices[b] - vertices[a])
+				if face.dot(smooth[weld[a]] + smooth[weld[b]] + smooth[weld[c]]) < 0.0:
+					indices[at + 1] = c
+					indices[at + 2] = b
+			layer[s][Mesh.ARRAY_INDEX] = indices
+	for s: int in layer.size():
+		var stored: PackedVector3Array = layer[s][Mesh.ARRAY_NORMAL]
+		var tangents: PackedFloat32Array = layer[s][Mesh.ARRAY_TANGENT]
+		var weld := welds[s]
+		var normals := PackedVector3Array()
+		normals.resize(weld.size())
+		for v: int in weld.size():
+			var normal := smooth[weld[v]]
+			if normal.length_squared() < 0.5:
+				normal = stored[v].normalized()
+			normals[v] = normal
+			var tangent := Vector3(tangents[v * 4], tangents[v * 4 + 1], tangents[v * 4 + 2])
+			tangent -= normal * normal.dot(tangent)
+			if tangent.length_squared() < 1e-12:
+				tangent = normal.cross(Vector3.UP if absf(normal.y) < 0.9 else Vector3.RIGHT)
+			tangent = tangent.normalized()
+			tangents[v * 4] = tangent.x
+			tangents[v * 4 + 1] = tangent.y
+			tangents[v * 4 + 2] = tangent.z
+		layer[s][Mesh.ARRAY_NORMAL] = normals
+		layer[s][Mesh.ARRAY_TANGENT] = tangents
+
 static func fit_mesh(profile: String, template: Mesh) -> ArrayMesh:
 	var key := "%s|%s" % [profile, template.get_instance_id()]
 	if _meshes.has(key):
@@ -120,6 +229,8 @@ static func fit_mesh(profile: String, template: Mesh) -> ArrayMesh:
 		return null
 	var mesh := ArrayMesh.new()
 	var file := str(fit.get("file", ""))
+	var built: Array = []
+	var linings: Array[bool] = []
 	for i: int in surfaces.size():
 		var surface: Dictionary = surfaces[i]
 		var arrays := []
@@ -133,13 +244,22 @@ static func fit_mesh(profile: String, template: Mesh) -> ArrayMesh:
 		arrays[Mesh.ARRAY_WEIGHTS] = _floats(file, surface.get("weights", {}))
 		var count: int = (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
 		if count == 0 or (arrays[Mesh.ARRAY_BONES] as PackedInt32Array).size() != count * 8 \
-				or (arrays[Mesh.ARRAY_WEIGHTS] as PackedFloat32Array).size() != count * 8:
+				or (arrays[Mesh.ARRAY_WEIGHTS] as PackedFloat32Array).size() != count * 8 \
+				or (arrays[Mesh.ARRAY_NORMAL] as PackedVector3Array).size() != count \
+				or (arrays[Mesh.ARRAY_TANGENT] as PackedFloat32Array).size() != count * 4 \
+				or int(surface.get("primitive", Mesh.PRIMITIVE_TRIANGLES)) != Mesh.PRIMITIVE_TRIANGLES:
 			return null
-		if int(surface.get("primitive", Mesh.PRIMITIVE_TRIANGLES)) == Mesh.PRIMITIVE_TRIANGLES:
-			arrays[Mesh.ARRAY_INDEX] = wound(arrays[Mesh.ARRAY_INDEX], arrays[Mesh.ARRAY_VERTEX],
-				arrays[Mesh.ARRAY_NORMAL], is_lining(surface))
-		mesh.add_surface_from_arrays(int(surface.get("primitive", Mesh.PRIMITIVE_TRIANGLES)),
-			arrays, [], {}, Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
+		built.append(arrays)
+		linings.append(is_lining(surface))
+	shade(built, linings)
+	for i: int in built.size():
+		var arrays: Array = built[i]
+		# After the welded shading this turns only the few triangles a fold
+		# still leaves facing against their corners.
+		arrays[Mesh.ARRAY_INDEX] = wound(arrays[Mesh.ARRAY_INDEX], arrays[Mesh.ARRAY_VERTEX],
+			arrays[Mesh.ARRAY_NORMAL], linings[i])
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], {},
+			Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
 		mesh.surface_set_material(i, template.surface_get_material(i))
 		mesh.surface_set_name(i, template.surface_get_name(i))
 	_meshes[key] = mesh
