@@ -286,7 +286,7 @@ func _build_inspection() -> void:
 	inspection_text.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	inspection_actions = HBoxContainer.new()
 	body.add_child(inspection_actions)
-	for pair: Array in [["Use", "use"], ["Equip", "equip"], ["Unequip", "unequip"], ["Drop", "drop"], ["Disenchant", "disenchant"], ["Enchant", "enchant"]]:
+	for pair: Array in [["Use", "use"], ["Equip", "equip"], ["Unequip", "unequip"], ["Drop", "drop"], ["Break Down", "disenchant"], ["Enchant", "enchant"]]:
 		var button := _button(pair[0], _item_action.bind(pair[1]))
 		button.name = pair[1]
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -341,13 +341,13 @@ func _build_menu() -> void:
 	preset_menu.id_pressed.connect(func(index: int) -> void: choose_preset(str(preset_menu.get_item_metadata(index))))
 	_refresh_pickers()
 
-## "Disenchant & refine…" sits under "Customize inventory…" only while this
+## "Break Down & Refine…" sits under "Customize inventory…" only while this
 ## connection's server has shown it can answer (see
 ## `AppState.enchanting_recovery_available`); an older one never replies.
 func _offer_recovery(popup: PopupMenu) -> void:
 	var index := popup.get_item_index(23)
 	if AppState.enchanting_recovery_available and index < 0:
-		popup.add_item("Disenchant & refine…", 23)
+		popup.add_item("Break Down & Refine…", 23)
 		popup.set_item_index(popup.get_item_index(23), popup.get_item_index(21) + 1)
 	elif not AppState.enchanting_recovery_available and index >= 0:
 		popup.remove_item(index)

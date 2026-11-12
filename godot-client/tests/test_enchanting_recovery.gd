@@ -7,6 +7,7 @@ var checks := 0
 var main: Control
 var window: PanelContainer
 var state: Node
+var requests: Array[Dictionary] = []
 
 func _init() -> void: call_deferred("run")
 func expect(value: bool, label: String) -> void:
@@ -16,6 +17,11 @@ func expect(value: bool, label: String) -> void:
 		push_error(label)
 func frames(count: int = 5) -> void:
 	for _index: int in count: await process_frame
+
+func text_of(node: Node) -> String:
+	var text: String = (node as Label).text + "\n" if node is Label else ""
+	for child: Node in node.get_children(): text += text_of(child)
+	return text
 
 func sample() -> Dictionary:
 	return {"version": 1, "enabled": true, "max_batch": 100, "shard_item": "Enchanting Shards", "shard_available": 45, "gold_available": 500,
@@ -94,17 +100,23 @@ func run() -> void:
 	expect(more_menu.get_item_index(23) == more_menu.get_item_index(21) + 1 and more_menu.item_count == offered_count,
 		"reopening the menu does not add the entry twice")
 	window = main.inventory_workspace.recovery_window
+	window.send_request = func(request: Dictionary) -> Error:
+		requests.append(request.duplicate(true))
+		return OK
 	window.open(0, 4)
 	receive(sample())
 	await frames()
 	expect(window.selected_id == 502 and window.copies.item_count == 2, "inspection preselects the exact backpack copy")
 	expect(window.selected_title.text == "Phoenix Helm", "tier labels stay out of item names")
 	expect(window.selected_title.get_theme_color("font_color") == Tiers.color("rare"), "yellow name conveys tier")
-	expect(window.details.get_child_count() == 7, "four effects, returns and condition shown")
-	expect(window.confirm_button.disabled, "confirmation requires authoritative preview")
+	expect(text_of(window.details).contains("Spellguard") and text_of(window.details).contains("You receive") and text_of(window.details).contains("This copy will be destroyed"), "effects, returns and destruction warning are visible")
+	expect(not window.confirm_button.disabled and window.quote.is_empty(), "Review is available without allowing an unquoted spend")
+	window.call("_review")
+	expect(requests[-1].op == "quote" and requests[-1].instance_id == 502, "Review checks the exact copy with the server")
 	var data := sample()
 	data.quote = {"token": "one-use-token", "action": "disenchant", "name": data.items[0].name, "effects": data.items[0].effects, "inputs": [{"name": "Phoenix Helm", "quantity": 1}], "outputs": data.items[0].outputs, "gold_fee": 0}
 	receive(data)
+	expect(window.confirmation.visible, "matching server quote automatically opens breakdown review")
 	expect(not window.confirm_button.disabled, "valid server quote enables confirmation")
 	window.call("_ask_confirmation")
 	expect(window.confirmation.visible and window.confirmation.dialog_text.contains("Permanently") and window.confirmation.dialog_text.contains("15 Enchanting Shards"), "destructive confirmation shows effects and exact returns")
@@ -113,21 +125,23 @@ func run() -> void:
 		await capture("disenchant")
 	window.copies.select(1)
 	window.copies.item_selected.emit(1)
-	expect(window.selected_id == 503 and window.confirm_button.disabled, "changing exact copy invalidates quote")
+	expect(window.selected_id == 503 and window.quote.is_empty(), "changing exact copy invalidates quote")
 	data.request_id = int(window.get("_serial")) - 1
 	state.call("_on_packet", 186, JSON.stringify(data).to_utf8_buffer())
-	expect(window.confirm_button.disabled and window.selected_id == 503, "stale quote response is ignored")
+	expect(window.quote.is_empty() and window.selected_id == 503, "stale quote response is ignored")
 	window.tabs.current_tab = 1
-	expect(window.confirm_button.disabled and window.refining_text.text.contains("20 Enchanting Shards") and window.refining_text.text.contains("100 Life Essence") and window.refining_text.text.contains("100 gold fee"), "refining shows all configured per-unit costs")
+	var costs := text_of(window.get("_refine_details"))
+	expect(window.quote.is_empty() and costs.contains("Enchanting Shards\n20\n45") and costs.contains("Life Essence\n100\n240") and costs.contains("Gold Coins\n100\n500"), "refining shows required and owned quantities for all configured costs")
 	window.quantity.value = 2
-	expect(window.refining_text.text.contains("40 Enchanting Shards") and window.refining_text.text.contains("200 gold fee"), "batch costs scale exactly")
+	costs = text_of(window.get("_refine_details"))
+	expect(costs.contains("Enchanting Shards\n40\n45") and costs.contains("Gold Coins\n200\n500"), "batch cost cards scale exactly")
 	data = sample()
 	data.quote = {"token": "refine-token", "action": "refine", "name": "Enriched Life Essence", "inputs": [{"name": "Life Essence", "quantity": 200}, {"name": "Enchanting Shards", "quantity": 40}], "outputs": [{"name": "Enriched Life Essence", "quantity": 2}], "gold_fee": 200}
 	receive(data)
 	if OS.get_cmdline_user_args().has("--capture"):
 		await capture("refine")
 	window.quantity.value = 3
-	expect(window.confirm_button.disabled, "batch change invalidates quote")
+	expect(window.quote.is_empty() and not window.confirmation.visible, "batch change invalidates quote")
 	receive(data)
 	var inventory_before: Dictionary = state.inventory.duplicate(true)
 	window.call("_confirm")
@@ -142,6 +156,7 @@ func run() -> void:
 	expect(window.status.text == data.message, "committed receipt is displayed")
 	receive(sample())
 	# A server whose copies predate recovery, or a practice world, never answers.
+	window.quantity.value = 1
 	# The preview has no link, so stand in for one that sends but never hears back.
 	var real_send: Callable = window.send_request
 	window.send_request = func(_request: Dictionary) -> Error: return OK
@@ -184,6 +199,10 @@ func run() -> void:
 	await frames()
 	print("Recovery narrow salvage bounds: ", window.get_global_rect(), " minimum: ", window.get_combined_minimum_size())
 	expect(Rect2(Vector2.ZERO, Vector2(804, 592)).encloses(window.get_global_rect()), "salvage fits narrow viewport outside HUD")
+	state.set("enchanting_available", true)
+	window.tabs.set_tab_disabled(2, false)
+	window.tabs.current_tab = 2
+	expect(not window.visible and main.inventory_workspace.enchanting_window.visible, "shared Enchant tab opens the enchanting window")
 	state.set("authenticated", false)
 	state.state_changed.emit(&"connection")
 	expect(not window.visible and window.quote.is_empty(), "disconnect closes destructive flow")

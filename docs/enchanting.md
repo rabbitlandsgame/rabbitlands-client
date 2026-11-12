@@ -5,10 +5,17 @@ inspection card, or use **Mixing → ••• → Enchant equipment…**. These
 appear when the connected server supports enchanting.
 
 Put the item in your backpack and unequip it first. Choose the individual copy,
-pick an operation and materials, then click **Preview costs**. Review the cost
-and possible outcome before confirming. Your item keeps its identity, condition,
+pick an operation and materials, then click **Review enchantment** (or the
+operation's Review button). The server checks the selection and opens a
+confirmation with the exact cost. Nothing is spent until you confirm.
+Your item keeps its identity, condition,
 quality and creator. Blue names support up to two effects; yellow names support
 up to four.
+
+The copy list shows backpack slots and effect counts, so identical items stay
+distinct. Pick an essence theme and quantity for plain equipment; **More options**
+lets you combine themes. Current odds and total costs stay beside the main action.
+Use the **Break Down**, **Refine** and **Enchant** tabs to move between windows.
 
 | What you want | What to use |
 | --- | --- |
@@ -29,6 +36,9 @@ crafting stays plain. If a recipe consumes equipment, **Mix Now** asks you to
 select the exact copies for one attempt. Check their effects before confirming;
 automatic queues cannot choose copies for you.
 
-Unwanted enchanted equipment can be reclaimed through **Disenchant & refine…**.
-Disenchanting destroys the chosen copy for Enchanting Shards and normal essences.
-Refining combines shards, normal essences and a gold fee into an enriched essence.
+Unwanted enchanted equipment can be reclaimed through **Break Down & Refine…**.
+**Break Down** shows the chosen copy's effects and exact returns, then destroys
+that copy for Enchanting Shards and normal essences after confirmation.
+**Refine** lists the essence recipes and shows required and owned materials.
+Choose a quantity, then use **Refine** to review the shards, normal essences and
+gold fee for the guaranteed enriched-essence result.
