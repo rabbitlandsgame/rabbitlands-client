@@ -153,6 +153,9 @@ var changed_actors: Dictionary = {}
 var actor_roster_generation := 0
 var inventory: Dictionary = {}
 var enchanting_recovery: Dictionary = {}
+var enchanting: Dictionary = {}
+var enchanting_available := false
+var equipment_mixing_available := false
 ## Whether the server on this connection has shown that it keeps exact
 ## enchanted equipment copies, which is what disenchanting and refining work
 ## on. No server says so up front, and one that predates them ignores the
@@ -923,6 +926,9 @@ func _on_connection_state_changed(value: String) -> void:
 		actor_roster_generation += 1
 		inventory.clear()
 		enchanting_recovery.clear()
+		enchanting.clear()
+		enchanting_available = false
+		equipment_mixing_available = false
 		enchanting_recovery_available = false
 		inventory_text = ""
 		inventory_cooldowns.clear()
@@ -1501,6 +1507,11 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			_offer_enchanting_recovery()
 			enchanting_recovery = (event.state as Dictionary).duplicate(true)
 			state_changed.emit(&"enchanting_recovery")
+		"enchanting":
+			enchanting = (event.state as Dictionary).duplicate(true)
+			enchanting_available = bool(enchanting.enabled)
+			equipment_mixing_available = bool(enchanting.crafting_supported)
+			state_changed.emit(&"enchanting")
 		"storage_text":
 			storage["text"] = str(event.text)
 			state_changed.emit(&"storage")

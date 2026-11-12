@@ -49,6 +49,7 @@ def main() -> int:
     from eloria.items import (  # pylint: disable=import-outside-toplevel
         ITEMS,
         configure_items,
+        tracks_instances,
     )
     from eloria.knowledge import (  # pylint: disable=import-outside-toplevel
         infer_recipe_knowledge,
@@ -118,6 +119,15 @@ def main() -> int:
                 "tools": [item_definition(name) for name in recipe.tools],
             }
         )
+
+        equipment_inputs = [item_definition(name, quantity) for name, quantity in recipe.ingredients if tracks_instances(name)]
+        if equipment_inputs:
+            entries[-1]["equipmentIngredients"] = equipment_inputs
+        if tracks_instances(recipe.output):
+            entries[-1]["equipmentOutput"] = True
+        modifier_profile = getattr(recipe, "modifier_profile", "")
+        if modifier_profile:
+            entries[-1]["modifierProfile"] = modifier_profile
 
     sources = {
         "profile": args.profile,

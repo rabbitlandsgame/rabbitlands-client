@@ -4255,15 +4255,29 @@ func _on_manufacturing_take_tool_pressed(tool_name: String) -> void:
 ## mixing out of storage unsayable in it: the materials are in no position.
 ##
 ## `position` is the queue entry the batch belongs to, or -1 for Mix Now.
-func _start_mix(recipe_index: int, wanted: int, position: int) -> void:
+func _start_mix(recipe_index: int, wanted: int, position: int, instance_ids: Array = []) -> void:
 	var definition: Dictionary = manufacturing_catalog.recipe(recipe_index)
 	if definition.is_empty():
 		return
 	var from_storage: bool = _manufacturing_from_storage()
+	if not (definition.get("equipmentIngredients", []) as Array).is_empty() and instance_ids.is_empty():
+		if position >= 0:
+			manufacturing_queue_running = false
+			manufacturing_server_status = "Equipment recipes require manual copy selection. Use Mix Now for one attempt."
+		elif from_storage:
+			manufacturing_server_status = "Withdraw this recipe's equipment and materials first, then select their backpack copies."
+		elif not AppState.equipment_mixing_available:
+			manufacturing_server_status = "This server does not support exact-copy equipment crafting."
+		else:
+			_set_manufacturing_quantity(1)
+			inventory_workspace.enchanting_window.choose_ingredients(definition, func(ids: Array) -> void: _start_mix(recipe_index, 1, -1, ids))
+			manufacturing_server_status = "Choose the exact equipment copies for one crafting attempt."
+		manufacturing_status.text = manufacturing_server_status
+		return
 	# The catalog entry rides along so a server reading a different recipe
 	# list refuses the batch instead of making whatever its index names.
 	var error: Error = Network.mix_request(recipe_index, wanted, from_storage,
-		definition)
+		definition, instance_ids)
 	if error != OK:
 		manufacturing_server_status = "Mix request failed: " + error_string(error)
 		manufacturing_status.text = manufacturing_server_status

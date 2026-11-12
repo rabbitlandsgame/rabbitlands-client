@@ -56,6 +56,7 @@ var _resizing := false
 func _offer_refine(part: StringName) -> void:
 	if part in [&"enchanting_recovery_available", &"connection"]:
 		refine.visible = AppState.enchanting_recovery_available
+	if part == &"enchanting": queue_sync()
 
 func configure(owner_main: Control) -> void:
 	main = owner_main
@@ -328,6 +329,9 @@ func _build_menu() -> void:
 	popup.add_check_item("Full recipe requirements", 13)
 	popup.add_item("Clear production queue", 14)
 	popup.about_to_popup.connect(func() -> void:
+		var enchanting_index := popup.get_item_index(15)
+		if AppState.enchanting_available and enchanting_index < 0: popup.add_item("Enchant equipment…", 15)
+		elif not AppState.enchanting_available and enchanting_index >= 0: popup.remove_item(enchanting_index)
 		popup.set_item_checked(popup.get_item_index(12), main.manufacturing_ready_only.button_pressed)
 		popup.set_item_disabled(popup.get_item_index(12), main.manufacturing_ready_only.disabled)
 		popup.set_item_checked(popup.get_item_index(13), model.working.show_requirements))
@@ -337,7 +341,8 @@ func _build_menu() -> void:
 		elif id == 13:
 			change_option("show_requirements", not model.working.show_requirements)
 			queue_sync()
-		elif id == 14: main._on_manufacturing_queue_clear_pressed())
+		elif id == 14: main._on_manufacturing_queue_clear_pressed()
+		elif id == 15 and AppState.enchanting_available: main.inventory_workspace.enchanting_window.open())
 	preset_menu.id_pressed.connect(func(index: int) -> void: choose_preset(str(preset_menu.get_item_metadata(index))))
 
 func _build_settings() -> void:
@@ -537,6 +542,18 @@ func _render_detail() -> void:
 			main._sync_manufacturing())
 		details.add_child(variant_selector)
 	var meta := _label("%s %d · %d XP · Food %d" % [str(definition.get("skill", "")).capitalize(), int(definition.get("level", 0)), int(definition.get("experience", 0)), int(definition.get("food", 0))])
+	if bool(definition.get("equipmentOutput", false)) and AppState.enchanting_available:
+		var rules: Dictionary = AppState.enchanting.get("rules", {})
+		var crafting: Dictionary = rules.get("crafting", {})
+		if bool(crafting.get("enabled", false)):
+			var weights: Array = crafting.get("weights", [])
+			if weights.size() == 5:
+				var total := float(weights[0]) + float(weights[1]) + float(weights[2]) + float(weights[3]) + float(weights[4])
+				var note := _label("Base results outside tutorials: %.1f%% plain · %.1f%% blue · %.1f%% yellow. Perks and events may improve these chances." % [100 * float(weights[0]) / total, 100 * (float(weights[1]) + float(weights[2])) / total, 100 * (float(weights[3]) + float(weights[4])) / total])
+				if str(definition.get("modifierProfile", "")) == "plain" or str(definition.get("output", "")) in crafting.get("plain_outputs", []): note.text = "This teaching recipe produces plain equipment."
+				note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+				note.add_theme_font_size_override("font_size", 11)
+				details.add_child(note)
 	meta.clip_text = true
 	meta.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	meta.tooltip_text = meta.text

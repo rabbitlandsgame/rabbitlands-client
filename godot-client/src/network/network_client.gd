@@ -793,6 +793,9 @@ func storage_instance_request(item_name: String, offset: int = 0, identity: int 
 func enchanting_recovery_request(request: Dictionary) -> Error:
 	return send_frame(EloriaProtocol.enchanting_recovery_request(request))
 
+func enchanting_request(request: Dictionary) -> Error:
+	return send_frame(EloriaProtocol.enchanting_request(request))
+
 func inspect_bag(bag_id: int) -> Error:
 	return send_frame(EloriaProtocol.inspect_bag(bag_id))
 
@@ -812,9 +815,9 @@ func manufacture(ingredients: Array[Dictionary], wanted: int = 1) -> Error:
 	return send_frame(EloriaProtocol.manufacture(ingredients, wanted))
 
 func mix_request(recipe_index: int, wanted: int, from_storage: bool,
-		recipe: Dictionary = {}) -> Error:
+		recipe: Dictionary = {}, instance_ids: Array = []) -> Error:
 	return send_frame(EloriaProtocol.mix_request(recipe_index, wanted,
-		from_storage, recipe))
+		from_storage, recipe, instance_ids))
 
 func tool_request(name: String) -> Error:
 	return send_frame(EloriaProtocol.tool_request(name))

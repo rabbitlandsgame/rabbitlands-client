@@ -151,6 +151,7 @@ enum ServerMessage {
 	ELORIA_DESCENT_STATE = 188,
 	ELORIA_STORAGE_INSTANCES = 187,
 	ELORIA_ENCHANTING_RECOVERY = 186,
+	ELORIA_ENCHANTING = 185,
 	# Which map package the server was built against. Continues the same
 	# downward run below 211.
 	ELORIA_MAP_DIGEST = 209,
@@ -337,6 +338,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"item_instance_tiers_v1",
 	"storage_instances_v1",
 	"enchanting_recovery_v1",
+	"equipment_enchanting_v1",
 	"mail_window_v1",
 	"map_digest_v1",
 	"mix_window_v1",
@@ -676,6 +678,11 @@ static func enchanting_recovery_request(request: Dictionary) -> PackedByteArray:
 	body["version"] = 1
 	return encode(ServerMessage.ELORIA_ENCHANTING_RECOVERY, JSON.stringify(body).to_utf8_buffer())
 
+static func enchanting_request(request: Dictionary) -> PackedByteArray:
+	var body := request.duplicate(true)
+	body["version"] = 1
+	return encode(ServerMessage.ELORIA_ENCHANTING, JSON.stringify(body).to_utf8_buffer())
+
 static func close_bag() -> PackedByteArray:
 	return encode(ClientMessage.CLOSE_BAG)
 
@@ -706,7 +713,7 @@ static func get_knowledge_info(index: int) -> PackedByteArray:
 ## the published clients parted at index 51 and players got the wrong items.
 ## A server that predates this reads the five bytes and ignores the rest.
 static func mix_request(recipe_index: int, wanted: int,
-		from_storage: bool, recipe: Dictionary = {}) -> PackedByteArray:
+		from_storage: bool, recipe: Dictionary = {}, instance_ids: Array = []) -> PackedByteArray:
 	var payload := PackedByteArray()
 	payload.resize(5)
 	payload.encode_u16(0, maxi(0, recipe_index))
@@ -724,6 +731,9 @@ static func mix_request(recipe_index: int, wanted: int,
 						int(ingredient.get("quantity", 0))])
 		payload.append_array(";".join(parts).to_utf8_buffer())
 		payload.append(0)
+		if not instance_ids.is_empty():
+			payload.append_array(JSON.stringify(instance_ids).to_utf8_buffer())
+			payload.append(0)
 	return encode(ClientMessage.ELORIA_MIX_REQUEST, payload)
 
 ## Take one of a recipe's tools out of storage. Named rather than pointed at,
@@ -962,6 +972,8 @@ static func decode_server(command: int, payload: PackedByteArray, logical_coordi
 			return decode_storage_instances(payload)
 		ServerMessage.ELORIA_ENCHANTING_RECOVERY:
 			return decode_enchanting_recovery(payload)
+		ServerMessage.ELORIA_ENCHANTING:
+			return decode_enchanting(payload)
 		ServerMessage.STORAGE_TEXT:
 			if payload.is_empty():
 				return {"type": "invalid", "error": "storage_text_length"}
@@ -3218,6 +3230,38 @@ static func decode_storage_state(payload: PackedByteArray) -> Dictionary:
 		enchanted_sent = true
 	return {"type": "storage_state", "category_id": int(payload[0]), "rows": rows, "read_only": read_only,
 		"enchanted_sent": enchanted_sent}
+
+static func decode_enchanting(payload: PackedByteArray) -> Dictionary:
+	var value: Variant = JSON.parse_string(payload.get_string_from_utf8())
+	if not value is Dictionary or value.get("version") != 1 or not value.get("enabled") is bool or value.get("crafting_supported") != true:
+		return {"type": "invalid", "error": "enchanting_version"}
+	if not value.get("items") is Array or value.items.size() > 24 or not value.get("available") is Dictionary:
+		return {"type": "invalid", "error": "enchanting_items"}
+	if value.enabled:
+		var settings: Variant = value.get("rules")
+		if not settings is Dictionary or not settings.get("essences") is Dictionary or settings.essences.size() != 8 or not settings.get("initial") is Dictionary:
+			return {"type": "invalid", "error": "enchanting_rules"}
+	for row: Variant in value.items:
+		if not row is Dictionary or not row.get("name") is String or row.get("tier") not in ["normal", "magic", "rare"] or not row.get("effects") is Array or not row.get("effect_names") is Array or row.effects.size() > 4 or row.effects.size() != row.effect_names.size():
+			return {"type": "invalid", "error": "enchanting_copy"}
+		for key: String in ["instance_id", "slot", "image_id", "quality", "durability", "max_durability"]:
+			if key in ["durability", "max_durability"] and row.get(key) == null: continue
+			if not _recovery_integer(row.get(key), 1 if key == "instance_id" else 0, 23 if key == "slot" else 9007199254740991):
+				return {"type": "invalid", "error": "enchanting_copy_number"}
+		for effect: Variant in row.effects + row.effect_names:
+			if not effect is String: return {"type": "invalid", "error": "enchanting_effect"}
+		if (row.tier == "normal") != row.effects.is_empty() or row.tier == "magic" and row.effects.size() > 2:
+			return {"type": "invalid", "error": "enchanting_tier"}
+	var preview: Variant = value.get("quote")
+	if preview != null:
+		if not preview is Dictionary or not preview.get("token") is String or preview.get("action") not in ["enchant", "promote", "add", "remove", "values", "reroll"] or not preview.get("summary") is String or not _recovery_materials(preview.get("inputs")) or not preview.get("chances") is Array or not _recovery_integer(preview.get("gold_fee"), 0, 4294967295):
+			return {"type": "invalid", "error": "enchanting_quote"}
+		if not preview.get("name") is String or preview.token.is_empty() or preview.token.length() > 128:
+			return {"type": "invalid", "error": "enchanting_quote_name"}
+		for chance: Variant in preview.chances:
+			if not chance is Dictionary or not _recovery_integer(chance.get("count"), 1, 4) or typeof(chance.get("chance")) not in [TYPE_INT, TYPE_FLOAT]: return {"type": "invalid", "error": "enchanting_chance"}
+			if not is_finite(float(chance.chance)) or float(chance.chance) < 0 or float(chance.chance) > 1: return {"type": "invalid", "error": "enchanting_chance"}
+	return {"type": "enchanting", "state": value}
 
 static func decode_enchanting_recovery(payload: PackedByteArray) -> Dictionary:
 	var value: Variant = JSON.parse_string(payload.get_string_from_utf8())

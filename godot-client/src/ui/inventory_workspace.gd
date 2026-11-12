@@ -7,7 +7,9 @@ const Frame := preload("res://src/ui/hud_panel_chrome.gd")
 const ItemNames := preload("res://src/state/item_names.gd")
 const InstanceTiers := preload("res://src/state/item_instance_tiers.gd")
 const RecoveryWindow := preload("res://src/ui/enchanting_recovery_window.gd")
+const EnchantingWindow := preload("res://src/ui/equipment_enchanting_window.gd")
 var recovery_window: PanelContainer
+var enchanting_window: PanelContainer
 var model := Presets.new()
 var main: Control
 var preferences_path := WindowPreferences.SETTINGS_PATH
@@ -210,6 +212,9 @@ func configure(owner_main: Control) -> void:
 	recovery_window = RecoveryWindow.new()
 	main.game_view.add_child(recovery_window)
 	recovery_window.configure(main)
+	enchanting_window = EnchantingWindow.new()
+	main.game_view.add_child(enchanting_window)
+	enchanting_window.configure(main)
 	main.extension_windows.item_detail_presenter = present_detail
 	# Dividers and editor outlines are drawn here in screen space, outside the
 	# moving panel. Invalidate their cached draw commands when its rect changes.
@@ -281,7 +286,7 @@ func _build_inspection() -> void:
 	inspection_text.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	inspection_actions = HBoxContainer.new()
 	body.add_child(inspection_actions)
-	for pair: Array in [["Use", "use"], ["Equip", "equip"], ["Unequip", "unequip"], ["Drop", "drop"], ["Disenchant", "disenchant"]]:
+	for pair: Array in [["Use", "use"], ["Equip", "equip"], ["Unequip", "unequip"], ["Drop", "drop"], ["Disenchant", "disenchant"], ["Enchant", "enchant"]]:
 		var button := _button(pair[0], _item_action.bind(pair[1]))
 		button.name = pair[1]
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -325,6 +330,7 @@ func _build_menu() -> void:
 	popup.id_pressed.connect(func(id: int) -> void:
 		if id == 21: open_editor()
 		elif id == 23 and AppState.enchanting_recovery_available: recovery_window.open(0)
+		elif id == 24 and AppState.enchanting_available: enchanting_window.open()
 		elif id in [5, 6]:
 			var menu: PopupMenu = main._store_options_menu if id == 5 else main._drop_options_menu
 			menu.position = Vector2i(more.global_position)
@@ -344,6 +350,11 @@ func _offer_recovery(popup: PopupMenu) -> void:
 		popup.add_item("Disenchant & refine…", 23)
 		popup.set_item_index(popup.get_item_index(23), popup.get_item_index(21) + 1)
 	elif not AppState.enchanting_recovery_available and index >= 0:
+		popup.remove_item(index)
+	index = popup.get_item_index(24)
+	if AppState.enchanting_available and index < 0:
+		popup.add_item("Enchant equipment…", 24)
+	elif not AppState.enchanting_available and index >= 0:
 		popup.remove_item(index)
 
 func _build_settings() -> void:
@@ -874,6 +885,8 @@ func refresh_actions() -> void:
 			# A detail kept across a reconnect may describe the last server's copy.
 			button.visible = matches and _detail_slot >= 0 and _detail_slot < 24 and str(_detail.get("instance_tier", "normal")) in ["magic", "rare"] \
 				and AppState.enchanting_recovery_available
+		if button.name == "enchant":
+			button.visible = matches and _detail_slot >= 0 and _detail_slot < 24 and str(_detail.get("equip_type", "")) not in ["", "none"] and AppState.enchanting_available
 		button.disabled = not matches or (button.name == "use" and main._inventory_cooldown_remaining(_detail_slot) > 0)
 
 func _item_action(action: String) -> void:
@@ -881,6 +894,7 @@ func _item_action(action: String) -> void:
 	if _detail_slot < 0 or int(item.get("image_id", -1)) != int(_detail.get("image_id", -2)): return
 	match action:
 		"disenchant": recovery_window.open(0, _detail_slot)
+		"enchant": enchanting_window.open(_detail_slot)
 		"use": main._use_inventory_slot(_detail_slot)
 		"equip": main._equip_inventory_slot(_detail_slot)
 		"unequip": main._unequip_inventory_slot(_detail_slot)
