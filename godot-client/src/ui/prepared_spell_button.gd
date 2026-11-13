@@ -6,6 +6,7 @@ var spell_id := -1
 ## A quick slot holding a combat technique instead of a spell.
 var technique := ""
 var power := 1
+var single_level := false
 var accepts_spells := false
 var power_provider: Callable
 
@@ -20,7 +21,7 @@ func _get_drag_data(_position: Vector2) -> Variant:
 	if spell_id < 0: return null
 	var drag_power := int(power_provider.call()) if power_provider.is_valid() else power
 	var preview := Label.new()
-	preview.text = tooltip_text.get_slice("\n", 0) + " · P%d" % drag_power
+	preview.text = tooltip_text.get_slice("\n", 0) + ("" if single_level else " · P%d" % drag_power)
 	set_drag_preview(preview)
 	return {"kind": "prepared_spell", "id": spell_id, "power": drag_power}
 

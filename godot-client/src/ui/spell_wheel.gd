@@ -186,7 +186,9 @@ func change_page(delta: int) -> void:
 
 func _power_limit(family: String) -> int:
 	var stated: Dictionary = AppState.spell_power.get(family, {})
-	return clampi(int(stated.get("limit", 1)), 1, 10)
+	var variants := variants_for(family)
+	var maximum: int = loadout.catalog.max_power(variants[0]) if not variants.is_empty() else 10
+	return clampi(int(stated.get("limit", 1)), 1, maximum)
 
 func power_for(id: int) -> int:
 	return mini(int(loadout.wheel_power), _power_limit(loadout.catalog.effect_for(id)))
@@ -215,6 +217,7 @@ func _rebuild() -> void:
 			var family := families[index]
 			var id := variants_for(family)[0]
 			entries.append({"label": Book.EFFECT_LABELS.get(family, family.capitalize()), "value": family, "icon_id": id, "power": power_for(id)})
+			if loadout.catalog.max_power(id) == 1: entries.back().erase("power")
 	else:
 		var variants := variants_for(effect)
 		for scope in SCOPES:
@@ -226,6 +229,7 @@ func _rebuild() -> void:
 				if target != scope: continue
 				var power := power_for(id)
 				entry = {"label": "%s · P%d" % [scope.capitalize(), power], "id": id, "icon_id": id}
+				if loadout.catalog.max_power(id) == 1: entry.label = scope.capitalize()
 			entries.append(entry)
 	for index in range(entries.size()):
 		var entry := entries[index]
@@ -245,6 +249,7 @@ func _rebuild() -> void:
 		if entry.has("icon_id"): button.icon = loadout.catalog.icon_for(int(entry.icon_id))
 		if entry.has("id"):
 			button.tooltip_text = "%s\nPower %d · scroll up/down to adjust." % [loadout.catalog.spell(int(entry.id)).name, power_for(int(entry.id))]
+			if loadout.catalog.max_power(int(entry.id)) == 1: button.tooltip_text = "Recall · Choose a destination."
 			var reasons: Array[String] = loadout.catalog.unavailable_reasons(int(entry.id), AppState.known_knowledge, AppState.stats, AppState.inventory)
 			if not reasons.is_empty():
 				button.modulate.a = 0.6
@@ -256,6 +261,7 @@ func _rebuild() -> void:
 	if stage == "targets": _heading.text = str(Book.EFFECT_LABELS.get(effect, effect.capitalize()))
 	var limit := _power_limit(effect) if stage == "targets" else 10
 	_power_label.text = "Power %d / %d · Scroll" % [mini(int(loadout.wheel_power), limit), limit]
+	_power_label.visible = stage != "targets" or loadout.catalog.max_power(variants_for(effect)[0]) > 1
 	_hint.text = "1–%d or click\nRelease Left Shift to close" % entries.size() if _ring_held else "1–%d or click\nEsc to close" % entries.size()
 	_back.visible = stage != "classes"
 	var paged := stage == "effects" and effects_for(category).size() > PAGE_SIZE

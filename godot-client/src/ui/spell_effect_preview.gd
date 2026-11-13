@@ -51,6 +51,7 @@ func set_spell(spell: Dictionary, power: int) -> void:
 	_view.visible = not definition.is_empty()
 	_caption.text = "Effect preview" if definition.is_empty() else "%s · Power %d" % [
 		str(definition.get("scope", "self")).capitalize(), power_level]
+	if int(definition.get("max_power", 10)) == 1: _caption.text = "Choose destination"
 	_update_visibility()
 
 func _update_visibility() -> void:

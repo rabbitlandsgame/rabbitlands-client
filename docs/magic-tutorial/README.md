@@ -353,12 +353,12 @@ becomes a quiet star field. A normal Recall cast begins the journey home.
 
 **Sera:** “That strength was borrowed. What you learned is yours.”
 
-**Play:** Cast Recall at P1 to return to actual Four Gates. Settle practice state
+**Play:** Cast Recall and choose the home destination. Settle practice state
 atomically at the map transition. Open the book and Statistics with the real
 character, inspect one attainable next spell and its named requirements, then
 leave the optional experiment invitation in the journal.
 
-**Learn:** Low-power Recall goes to Four Gates. Practice access differs from
+**Learn:** Recall has one casting level and offers home alongside portal destinations. Practice access differs from
 permanent progression. Magic governs practice/unlocks; Magic nexus constrains
 power; Magic Offense/Defense affect hostile/support strength; Ethereality supports
 ether capacity. No forced permanent stat allocation or purchase.
@@ -380,7 +380,7 @@ main rescue. The player operates the same native client against eligible actors.
 | A · Living equations | Compare Heal with Regeneration ticks; use Life Drain while wounded; drain ether from a consenting practice rival that actually has ether, then try an empty rival | Health gained cannot exceed damage actually stolen; ether transfer is limited by target supply and caster capacity. Ether Drain currently targets player characters, not arbitrary monsters or batteries |
 | B · A prism has four faces | Rotate magic/heat/cold/radiation opponents; use corresponding bolts, wards and Weaken spells. Compare a prepared weapon hit with Accuracy, Cripple and Elemental Weapon. Try Elemental Ward against mixed elemental damage | All four damage/protection families demonstrated across replays. Cripple reduces physical defense/evasion; do not teach it as a movement slow. Accuracy is not guaranteed hits; Elemental Weapon adds typed damage. Use resolved outcomes, not visual color alone |
 | C · The unbroken circle | Cast Magic Immunity before a hostile spell; observe expiry and retry. Use Disrupt on an enemy's actual summon, then test an ineligible ordinary creature. Revisit Target/Allies/Burst with changed membership and spacing | Immunity blocks eligible hostile spells while active; not every environmental or physical hazard. Disrupt damages hostile summons rather than universally deleting pets. A friendly summon is not a valid hostile target |
-| D · Roads beyond the lens | Use Recall at P5 to select a real configured portal entrance and travel there, then use P1 to Four Gates. Inspect an item at each Transmute rarity/power boundary in a practice inventory. Try a matching and mismatched charged focus | P1–4 versus P5–10 Recall; multiple entrances are distinct destinations. Common/Uncommon/Rare/Epic/Legendary need P1/3/5/7/9. Quote and exact item identity survive confirmation. Wrong focus does not replace the anchor |
+| D · Roads beyond the lens | Use Recall to select a real configured portal entrance and travel there, then choose home to return. Inspect an item at each Transmute rarity/power boundary in a practice inventory. Try a matching and mismatched charged focus | Single-level Recall destination selection; multiple entrances are distinct destinations. Common/Uncommon/Rare/Epic/Legendary need P1/3/5/7/9. Quote and exact item identity survive confirmation. Wrong focus does not replace the anchor |
 
 Travel experiments require a small **private destination map with an actual
 configured portal entry** and instance-aware arrival resolution. This is new
@@ -533,7 +533,7 @@ Variants reuse a learned targeting mode and appear in replay, not an 86-cast che
 | Blink (`blink`) | 1 | Core 08, 11 | Valid ground landing, range, cancellation and repositioning |
 | Magic Bolt (`harm`) | 2 | Core 06, 11 | Magic Bolt and Magic Burst; recipients, resistance and actual defeat |
 | Transmute (`transmute`) | 1 | Core 10; D | Item, quantity, quote, cancellation and rarity/power boundaries |
-| Recall (`recall`) | 1 | Core 12; D | P1 Four Gates; P5 chosen configured portal entrance |
+| Recall (`recall`) | 1 | Core 12; D | Choose home or a configured portal entrance |
 | Life Drain Target (`life_drain`) | 2 | Experiment A | Damage an eligible target while wounded; compare actual health transfer |
 | Magic Immunity (`magic_immunity`) | 4 | Experiment C | Block an eligible hostile spell while active; retry after expiry |
 | Dispel (`dispel`) | 4 | Core 07; A, B | Clear poison, negative combat modifiers and drained stats |

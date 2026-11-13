@@ -96,10 +96,10 @@ func begin(spell_id: int, power: int, selected_target_id := -1) -> void:
 	cancel()
 	var spell: Dictionary = catalog.spell(spell_id)
 	if spell.is_empty(): return
-	pending = {"op": "cast", "id": spell_id, "power": maxi(1, power)}
+	pending = {"op": "cast", "id": spell_id, "power": catalog.normalized_power(spell_id, power)}
 	_coordinate_token = Network.coordinates.token()
 	var scope := str(spell.get("scope", "self"))
-	if scope == "inventory" or (spell.get("effect") == "recall" and power >= 5):
+	if scope in ["inventory", "destination"]:
 		_send({"op": "options", "id": spell_id})
 	elif scope in ["target", "burst", "location"]:
 		Network.begin_magic_selection(pending, scope)
@@ -202,8 +202,8 @@ func _update_quote() -> void:
 			entry.rarity, required, int(pending.get("power", 1)), int(quantity.value),
 			entry.name, int(quantity.value) * int(entry.unit_gold)]
 	else:
-		description.text = "Recall to the portal entrance of %s at (%d, %d).\nPower %d; your items travel with you." % [
-			entry.name, entry.x, entry.y, int(pending.get("power", 1))]
+		description.text = "Recall to %s at (%d, %d).\nYour items travel with you." % [
+			entry.name, entry.x, entry.y]
 
 func _confirm() -> void:
 	if entries.is_empty() or pending.is_empty(): return

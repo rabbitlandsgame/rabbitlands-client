@@ -41,10 +41,15 @@ func book_cast(spell_name: String, power: int=1, target: int=-1, tile:=Vector2i(
 		main.magic_selection.quantity.value=1
 		main.magic_selection._update_quote()
 		main.magic_selection._confirm()
-	elif spell_name=="Recall" and power>=5:
+	elif spell_name=="Recall":
 		await wait_until(func():return main.magic_selection.popup.visible,"Recall destination chooser")
 		await capture("experiment-recall-chooser")
-		main.magic_selection.choices.select(0);main.magic_selection._confirm()
+		for i in range(main.magic_selection.entries.size()):
+			var same_map: bool = str(main.magic_selection.entries[i].map).begins_with("stillglass")
+			if same_map == (key()=="d_recall"):
+				main.magic_selection.choices.select(i)
+				break
+		main.magic_selection._confirm()
 	elif target>=0:net.touch_actor(target)
 	elif tile.x>=0:net.move_to(tile)
 	await create_timer(.5).timeout
@@ -183,7 +188,7 @@ func experiments() -> void:
 		for _iteration in range(35):
 			if not state.lantern_tutorial.get("active",false):break
 			var old:=key();print("STILLGLASS EXPERIMENT: ",old)
-			if old=="d_recall":await book_cast("Recall",5)
+			if old=="d_recall":await book_cast("Recall")
 			elif old=="d_return":await book_cast("Blink",1,-1,Vector2i(44,12))
 			elif old=="d_focus":
 				await use_target("bench")
