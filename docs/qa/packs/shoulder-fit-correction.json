@@ -1,0 +1,291 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-13",
+  "product": "Rabbit Lands",
+  "issue": "Small pack straps were hidden by the male Human shoulders while standing.",
+  "correction": "Repose the imported upper shoulder loops along a continuous triangle-measured route. Keep the lower strap fit; bind the shoulder bridge consistently to spine_03.",
+  "sourceMeshUnchanged": true,
+  "largePackAndIconsUnchanged": true,
+  "newProviderTasks": 0,
+  "validation": {
+    "originalFailure": {
+      "case": "luminous_male-0-idle-0.3",
+      "samples": 961,
+      "samplesBelowShoulderRoofOver1mm": 3,
+      "maximumRoofIntrusionMetres": 0.024431994820737435,
+      "worstPoints": [
+        [
+          0.181226,
+          1.470585,
+          -0.072584
+        ],
+        [
+          0.181654,
+          1.462035,
+          -0.062176
+        ],
+        [
+          0.183384,
+          1.400685,
+          0.027332
+        ],
+        [
+          0.184951,
+          1.474916,
+          -0.062785
+        ],
+        [
+          -0.20564,
+          1.391814,
+          0.01257
+        ],
+        [
+          0.182415,
+          1.473852,
+          -0.073288
+        ],
+        [
+          0.182468,
+          1.472029,
+          -0.069318
+        ],
+        [
+          -0.211092,
+          1.445039,
+          -0.065127
+        ]
+      ]
+    },
+    "correctedPosedShoulderChecks": [
+      {
+        "case": "luminous_male-0-idle-0.0",
+        "samples": 1189,
+        "samplesBelowShoulderRoofOver1mm": 0,
+        "maximumRoofIntrusionMetres": 0.0,
+        "worstPoints": []
+      },
+      {
+        "case": "luminous_male-0-idle-0.3",
+        "samples": 1189,
+        "samplesBelowShoulderRoofOver1mm": 0,
+        "maximumRoofIntrusionMetres": 0.0,
+        "worstPoints": []
+      },
+      {
+        "case": "luminous_male-0-idle-0.6",
+        "samples": 1189,
+        "samplesBelowShoulderRoofOver1mm": 0,
+        "maximumRoofIntrusionMetres": 0.0,
+        "worstPoints": []
+      },
+      {
+        "case": "luminous_male-0-walk-0.25",
+        "samples": 1241,
+        "samplesBelowShoulderRoofOver1mm": 0,
+        "maximumRoofIntrusionMetres": 0.0,
+        "worstPoints": []
+      },
+      {
+        "case": "luminous_male-0-run-0.25",
+        "samples": 1952,
+        "samplesBelowShoulderRoofOver1mm": 0,
+        "maximumRoofIntrusionMetres": 0.0,
+        "worstPoints": []
+      },
+      {
+        "case": "luminous_female-0-idle-0.0",
+        "samples": 1225,
+        "samplesBelowShoulderRoofOver1mm": 0,
+        "maximumRoofIntrusionMetres": 0.0,
+        "worstPoints": []
+      },
+      {
+        "case": "luminous_female-0-idle-0.3",
+        "samples": 1225,
+        "samplesBelowShoulderRoofOver1mm": 0,
+        "maximumRoofIntrusionMetres": 0.0,
+        "worstPoints": []
+      },
+      {
+        "case": "luminous_female-0-idle-0.6",
+        "samples": 1225,
+        "samplesBelowShoulderRoofOver1mm": 0,
+        "maximumRoofIntrusionMetres": 0.0,
+        "worstPoints": []
+      },
+      {
+        "case": "luminous_female-0-walk-0.25",
+        "samples": 1278,
+        "samplesBelowShoulderRoofOver1mm": 0,
+        "maximumRoofIntrusionMetres": 0.0,
+        "worstPoints": []
+      },
+      {
+        "case": "luminous_female-0-run-0.25",
+        "samples": 1820,
+        "samplesBelowShoulderRoofOver1mm": 0,
+        "maximumRoofIntrusionMetres": 0.0,
+        "worstPoints": []
+      }
+    ],
+    "toleranceMetres": 0.001,
+    "equipmentRegression": {
+      "checks": 18992,
+      "failures": 0,
+      "fits": 32
+    },
+    "renderedViews": [
+      "male Human default shirt, idle, front and side",
+      "female Human default shirt, idle, front and side",
+      "male Human torso visuals 200 and 225, idle, front and side"
+    ],
+    "limits": "The numeric roof check covers Human default-shirt shoulders; armor overhangs receive rendered review. This is not a global cloth/body collision proof.",
+    "ownerVisualAcceptance": false
+  },
+  "fits": [
+    {
+      "body": "glasswarden_female",
+      "path": "godot-client/assets/actors/native/equipment/variants/glasswarden_female/rl-small-pack.glb",
+      "previousSha256": "e3d57a009603d17e0fa56962330ccd783ba9909cf23ae0b5f9b493cb00a94a57",
+      "sha256": "fed2fc3e2f4465a9fdc2194010bc94d280eb18cf35cc9437ca9ab0406976eb55",
+      "vertices": 3613,
+      "triangles": 4192,
+      "UVsIndicesSkeletonAndTextureReferencesPreserved": true
+    },
+    {
+      "body": "glasswarden_male",
+      "path": "godot-client/assets/actors/native/equipment/variants/glasswarden_male/rl-small-pack.glb",
+      "previousSha256": "d4660dd47445277605e9aef5618960917554b18ce1ba86d43cde1516f2cf8c26",
+      "sha256": "74888c9386a68384c3a1b0e47223377c1d86ebf61f9a32f9411cb5247f8150d7",
+      "vertices": 3613,
+      "triangles": 4192,
+      "UVsIndicesSkeletonAndTextureReferencesPreserved": true
+    },
+    {
+      "body": "greyhaven_female",
+      "path": "godot-client/assets/actors/native/equipment/variants/greyhaven_female/rl-small-pack.glb",
+      "previousSha256": "e3d57a009603d17e0fa56962330ccd783ba9909cf23ae0b5f9b493cb00a94a57",
+      "sha256": "fed2fc3e2f4465a9fdc2194010bc94d280eb18cf35cc9437ca9ab0406976eb55",
+      "vertices": 3613,
+      "triangles": 4192,
+      "UVsIndicesSkeletonAndTextureReferencesPreserved": true
+    },
+    {
+      "body": "greyhaven_male",
+      "path": "godot-client/assets/actors/native/equipment/variants/greyhaven_male/rl-small-pack.glb",
+      "previousSha256": "d4660dd47445277605e9aef5618960917554b18ce1ba86d43cde1516f2cf8c26",
+      "sha256": "74888c9386a68384c3a1b0e47223377c1d86ebf61f9a32f9411cb5247f8150d7",
+      "vertices": 3613,
+      "triangles": 4192,
+      "UVsIndicesSkeletonAndTextureReferencesPreserved": true
+    },
+    {
+      "body": "luminous_female",
+      "path": "godot-client/assets/actors/native/equipment/variants/luminous_female/rl-small-pack.glb",
+      "previousSha256": "7f84611e6dcb6fdb594aaeb5cd65cda7893255aa843a63460f03e776ceeb46dd",
+      "sha256": "30dc5e3290b11a28bea81b8bb89a34342674e9fe0f036646e257c208739db470",
+      "vertices": 3613,
+      "triangles": 4192,
+      "UVsIndicesSkeletonAndTextureReferencesPreserved": true
+    },
+    {
+      "body": "luminous_male",
+      "path": "godot-client/assets/actors/native/equipment/variants/luminous_male/rl-small-pack.glb",
+      "previousSha256": "9b7b8db35abe1efb37a40b4dc9688140e434a4456cfaf7478c671f6c67732119",
+      "sha256": "8f2fca013de2ae748a2f7b8b9698512b5165aef97e14e8d6cf5c22d71799a42c",
+      "vertices": 3613,
+      "triangles": 4192,
+      "UVsIndicesSkeletonAndTextureReferencesPreserved": true
+    },
+    {
+      "body": "mycelari_female",
+      "path": "godot-client/assets/actors/native/equipment/variants/mycelari_female/rl-small-pack.glb",
+      "previousSha256": "e3d57a009603d17e0fa56962330ccd783ba9909cf23ae0b5f9b493cb00a94a57",
+      "sha256": "fed2fc3e2f4465a9fdc2194010bc94d280eb18cf35cc9437ca9ab0406976eb55",
+      "vertices": 3613,
+      "triangles": 4192,
+      "UVsIndicesSkeletonAndTextureReferencesPreserved": true
+    },
+    {
+      "body": "mycelari_male",
+      "path": "godot-client/assets/actors/native/equipment/variants/mycelari_male/rl-small-pack.glb",
+      "previousSha256": "d4660dd47445277605e9aef5618960917554b18ce1ba86d43cde1516f2cf8c26",
+      "sha256": "74888c9386a68384c3a1b0e47223377c1d86ebf61f9a32f9411cb5247f8150d7",
+      "vertices": 3613,
+      "triangles": 4192,
+      "UVsIndicesSkeletonAndTextureReferencesPreserved": true
+    },
+    {
+      "body": "orun_female",
+      "path": "godot-client/assets/actors/native/equipment/variants/orun_female/rl-small-pack.glb",
+      "previousSha256": "e3d57a009603d17e0fa56962330ccd783ba9909cf23ae0b5f9b493cb00a94a57",
+      "sha256": "fed2fc3e2f4465a9fdc2194010bc94d280eb18cf35cc9437ca9ab0406976eb55",
+      "vertices": 3613,
+      "triangles": 4192,
+      "UVsIndicesSkeletonAndTextureReferencesPreserved": true
+    },
+    {
+      "body": "orun_male",
+      "path": "godot-client/assets/actors/native/equipment/variants/orun_male/rl-small-pack.glb",
+      "previousSha256": "d4660dd47445277605e9aef5618960917554b18ce1ba86d43cde1516f2cf8c26",
+      "sha256": "74888c9386a68384c3a1b0e47223377c1d86ebf61f9a32f9411cb5247f8150d7",
+      "vertices": 3613,
+      "triangles": 4192,
+      "UVsIndicesSkeletonAndTextureReferencesPreserved": true
+    },
+    {
+      "body": "ssarathi_female",
+      "path": "godot-client/assets/actors/native/equipment/variants/ssarathi_female/rl-small-pack.glb",
+      "previousSha256": "5e77808db13515a9dd0cc8be3d0100fde4b084134840e4048f52cb3e92c15fb3",
+      "sha256": "77d40ccaf2b9f7bb6210dc75734451399af2cb3427324877073c1464c7090cab",
+      "vertices": 3613,
+      "triangles": 4192,
+      "UVsIndicesSkeletonAndTextureReferencesPreserved": true
+    },
+    {
+      "body": "ssarathi_male",
+      "path": "godot-client/assets/actors/native/equipment/variants/ssarathi_male/rl-small-pack.glb",
+      "previousSha256": "48331d4fd51f88cd6ce05cb4d10ee249080b2f96c71263f0346cc6143fc0a6f9",
+      "sha256": "fcdd1e6d236a0e101b0e3ba046f1c248c89ab17456e5ead161d20969cc2f4d20",
+      "vertices": 3613,
+      "triangles": 4192,
+      "UVsIndicesSkeletonAndTextureReferencesPreserved": true
+    },
+    {
+      "body": "stoneborn_female",
+      "path": "godot-client/assets/actors/native/equipment/variants/stoneborn_female/rl-small-pack.glb",
+      "previousSha256": "e3d57a009603d17e0fa56962330ccd783ba9909cf23ae0b5f9b493cb00a94a57",
+      "sha256": "fed2fc3e2f4465a9fdc2194010bc94d280eb18cf35cc9437ca9ab0406976eb55",
+      "vertices": 3613,
+      "triangles": 4192,
+      "UVsIndicesSkeletonAndTextureReferencesPreserved": true
+    },
+    {
+      "body": "stoneborn_male",
+      "path": "godot-client/assets/actors/native/equipment/variants/stoneborn_male/rl-small-pack.glb",
+      "previousSha256": "d4660dd47445277605e9aef5618960917554b18ce1ba86d43cde1516f2cf8c26",
+      "sha256": "74888c9386a68384c3a1b0e47223377c1d86ebf61f9a32f9411cb5247f8150d7",
+      "vertices": 3613,
+      "triangles": 4192,
+      "UVsIndicesSkeletonAndTextureReferencesPreserved": true
+    },
+    {
+      "body": "votary_female",
+      "path": "godot-client/assets/actors/native/equipment/variants/votary_female/rl-small-pack.glb",
+      "previousSha256": "e3d57a009603d17e0fa56962330ccd783ba9909cf23ae0b5f9b493cb00a94a57",
+      "sha256": "fed2fc3e2f4465a9fdc2194010bc94d280eb18cf35cc9437ca9ab0406976eb55",
+      "vertices": 3613,
+      "triangles": 4192,
+      "UVsIndicesSkeletonAndTextureReferencesPreserved": true
+    },
+    {
+      "body": "votary_male",
+      "path": "godot-client/assets/actors/native/equipment/variants/votary_male/rl-small-pack.glb",
+      "previousSha256": "d4660dd47445277605e9aef5618960917554b18ce1ba86d43cde1516f2cf8c26",
+      "sha256": "74888c9386a68384c3a1b0e47223377c1d86ebf61f9a32f9411cb5247f8150d7",
+      "vertices": 3613,
+      "triangles": 4192,
+      "UVsIndicesSkeletonAndTextureReferencesPreserved": true
+    }
+  ]
+}
