@@ -761,7 +761,11 @@ func _render() -> void:
 	var state := _browse_state()
 	var kind := str(_page.get("kind", PAGE_INDEX))
 	var full := kind == "entry"
-	search_edit.text = str(state.get("query", ""))
+	var query := str(state.get("query", ""))
+	# Reassigning LineEdit.text resets its caret and selection, even for the
+	# same text. Leave live typing alone when refreshing the search results.
+	if search_edit.text != query:
+		search_edit.text = query
 	type_filter.select(maxi(0, TYPE_IDS.find(str(state.get("type", "")))))
 	sort_filter.select(maxi(0, SORT_IDS.find(str(state.get("sort", "name")))))
 	book_filter.select(int(state.get("book_filter", 0)))
