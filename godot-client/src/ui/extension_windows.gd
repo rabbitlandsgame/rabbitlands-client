@@ -3,6 +3,7 @@ const MerchantQuantities := preload("res://src/ui/merchant_quantities.gd")
 const MerchantCatalog := preload("res://src/ui/merchant_catalog.gd")
 const MerchantNames := preload("res://src/state/item_names.gd")
 const TextColors := preload("res://src/ui/text_colors.gd")
+const InstanceTiers := preload("res://src/state/item_instance_tiers.gd")
 ## The nine Eloria extension windows, built here rather than in main.gd.
 ##
 ## Each is driven by one server-push state packet and renders that snapshot and
@@ -168,6 +169,8 @@ var market_returns_box: VBoxContainer
 var market_returns: ItemList
 var market_selected_icon: TextureRect
 var market_selection: Label
+## Which copies the selected equipment listing holds (market_instance_tiers_v1).
+var market_copies: Label
 var market_quantity_box: VBoxContainer
 var market_quantity: LineEdit
 var market_price_box: VBoxContainer
@@ -1407,20 +1410,67 @@ func _add_market_row(listing: Dictionary) -> void:
 	var price: int = int(listing.get("unit_price", 0))
 	var seconds: int = int(listing.get("seconds_left", 0))
 	var own: bool = bool(listing.get("own", false))
-	var parts: Array[String] = ["%s  ×%d" % [item_name, quantity], "%s gc each" % _market_number(price)]
+	# Plain and enchanted copies share a name and an icon; the tier is the
+	# only thing on the row that tells them apart.
+	var tier: String = str(listing.get("instance_tier", ""))
+	var enchanted: bool = tier == "magic" or tier == "rare"
+	var label: String = InstanceTiers.display_name(item_name, tier)
+	if enchanted:
+		label += " (%s)" % tier.capitalize()
+	var parts: Array[String] = ["%s  ×%d" % [label, quantity], "%s gc each" % _market_number(price)]
 	if _market_tab == "browse":
 		parts.append("your listing" if own else str(listing.get("seller", "")))
 	parts.append(_market_time_left(seconds))
 	var row: int = market_list.item_count
 	market_list.add_item("    ·    ".join(PackedStringArray(parts)), _named_icon(int(listing.get("image_id", 0)), item_name))
 	market_list.set_item_metadata(row, int(listing.get("listing_id", -1)))
-	market_list.set_item_tooltip(row, "Listing #%d\n%s ×%d at %s gc each (%s gc for all)\nSeller: %s\nExpires: %s" % [
+	var copies: String = _market_copy_text(listing)
+	market_list.set_item_tooltip(row, "Listing #%d\n%s ×%d at %s gc each (%s gc for all)\nSeller: %s\nExpires: %s%s" % [
 		int(listing.get("listing_id", -1)), item_name, quantity, _market_number(price),
-		_market_number(price * quantity), str(listing.get("seller", "")), _market_time_left(seconds)])
-	if seconds < MARKET_EXPIRING_SECONDS:
+		_market_number(price * quantity), str(listing.get("seller", "")), _market_time_left(seconds),
+		"" if copies.is_empty() else "\n" + copies])
+	if enchanted:
+		market_list.set_item_custom_fg_color(row, InstanceTiers.color(tier))
+	elif seconds < MARKET_EXPIRING_SECONDS:
 		market_list.set_item_custom_fg_color(row, TextColors.color("market_expiring"))
 	elif own and _market_tab == "browse":
 		market_list.set_item_custom_fg_color(row, TextColors.color("ui_disabled"))
+
+## What an equipment listing holds, or "" when the server did not say
+## (stackables, or a server without market_instance_tiers_v1).
+func _market_copy_text(listing: Dictionary) -> String:
+	if not listing.has("copies"):
+		return ""
+	var runs: Array = listing.get("copies", []) as Array
+	var more: int = int(listing.get("more_copies", 0))
+	if runs.size() == 1 and more == 0 and int((runs[0] as Dictionary).get("quantity", 0)) == 1:
+		var only: Dictionary = runs[0] as Dictionary
+		var effects: Array = only.get("effects", []) as Array
+		if str(only.get("tier", "normal")) == "normal" or effects.is_empty():
+			return "Plain copy: no enchantments."
+		# One wrapped line, so the list keeps its rows.
+		return "%s copy: %s" % [str(only.tier).capitalize(), "  ·  ".join(PackedStringArray(effects))]
+	var lines: Array[String] = ["Copies, in the order a purchase takes them:"]
+	for raw: Variant in runs:
+		var run: Dictionary = raw as Dictionary
+		var tier: String = str(run.get("tier", "normal"))
+		var effects: Array = run.get("effects", []) as Array
+		if tier == "normal" or effects.is_empty():
+			lines.append("%d plain" % int(run.get("quantity", 0)))
+		else:
+			lines.append("%d %s: %s" % [int(run.get("quantity", 0)), tier,
+				" ".join(PackedStringArray(effects))])
+	if more > 0:
+		lines.append("…and %d more." % more)
+	return "\n".join(PackedStringArray(lines))
+
+func _show_market_copies(listing: Dictionary) -> void:
+	var text: String = _market_copy_text(listing)
+	market_copies.text = text
+	market_copies.visible = not text.is_empty()
+	var tier: String = str(listing.get("instance_tier", "normal"))
+	market_copies.add_theme_color_override("font_color", InstanceTiers.color(tier)
+		if tier == "magic" or tier == "rare" else TextColors.color("ui_label"))
 
 func _render_market_sales(sales: Array) -> void:
 	var selected: TreeItem = market_history.get_selected()
@@ -1613,6 +1663,7 @@ func _sync_market_footer(_text: String = "") -> void:
 	market_buy.text = "Buy"
 	market_sell.text = "List for sale"
 	market_totals.text = ""
+	market_copies.visible = false
 	var waiting: bool = _market_waiting()
 	var entry: Dictionary = _market_entry()
 	var can_trade := bool(AppState.marketplace.get("can_trade", false))
@@ -1634,6 +1685,8 @@ func _sync_market_footer(_text: String = "") -> void:
 	var item_name: String = str(entry.get("name" if selling else "item_name", ""))
 	market_selected_icon.texture = _named_icon(int(entry.get("image_id", 0)), item_name)
 	var quantity_limit: int = int(entry.get("quantity", 0))
+	if not selling:
+		_show_market_copies(entry)
 	if managing:
 		market_reprice.text = "Propose price…" if bool(entry.get("party_owned", false)) else "Edit price…"
 		market_reprice.disabled = waiting
@@ -3298,6 +3351,15 @@ func _build_market_window() -> void:
 	TextColors.bind(market_returns, "ui_label", "font_color")
 	market_returns.add_theme_stylebox_override("panel", _quest_box(Color("151310"), Color("76603b"), 1, 2, 4.0))
 	market_returns_box.add_child(market_returns)
+	market_copies = Label.new()
+	market_copies.name = "MarketplaceCopies"
+	market_copies.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	market_copies.add_theme_font_size_override("font_size", 13)
+	market_copies.visible = false
+	# A hidden label is never laid out. Shown at zero width, autowrap would
+	# measure one character per line and grow the window, which never shrinks.
+	market_copies.size.x = MARKET_SIZE.x - 24.0
+	body.add_child(market_copies)
 	var footer := HBoxContainer.new()
 	footer.name = "MarketplaceFooter"
 	footer.add_theme_constant_override("separation", 12)

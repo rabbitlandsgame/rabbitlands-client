@@ -345,6 +345,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"market_window_v1",
 	"market_window_v2",
 	"market_window_v3",
+	"market_instance_tiers_v1",
 	"market_remote_v1",
 	"merchant_window_v1",
 	"merchant_weights_v1",
@@ -2436,7 +2437,53 @@ static func decode_marketplace(payload: PackedByteArray) -> Dictionary:
 				return {"type": "invalid", "error": "marketplace_party_run"}
 		state["can_trade"] = details.get("can_trade", false)
 		state["party_runs"] = details.get("party_runs", {})
+		if details.has("copies"):
+			var copies: Dictionary = decode_market_copies(details.copies)
+			if copies.has("error"):
+				return {"type": "invalid", "error": str(copies.error)}
+			for listing: Dictionary in listings:
+				var held: Variant = copies.get(str(int(listing.listing_id)))
+				if held is Dictionary:
+					listing["instance_tier"] = held.tier
+					listing["copies"] = held.copies
+					listing["more_copies"] = held.more
 	return state
+
+const MARKET_COPY_TIERS: Array[String] = ["normal", "magic", "rare"]
+
+## `market_instance_tiers_v1`: which equipment copies each listing holds, by
+## listing id. Plain and enchanted copies share a name and image, so this is
+## how a buyer tells them apart. `tier` is the best copy's; `copies` are runs
+## of identical copies in the order a purchase takes them, each with its
+## tier, quantity and effect lines; `more` counts copies past those runs.
+## Returns the entries keyed by id text, or `{"error": ...}`.
+static func decode_market_copies(raw: Variant) -> Dictionary:
+	if not raw is Dictionary:
+		return {"error": "marketplace_copies"}
+	var result: Dictionary = {}
+	for key: Variant in raw:
+		var entry: Variant = raw[key]
+		if not str(key).is_valid_int() or not entry is Dictionary \
+				or str(entry.get("tier", "")) not in MARKET_COPY_TIERS \
+				or not entry.get("copies") is Array \
+				or not _whole(entry.get("more", 0), 0):
+			return {"error": "marketplace_copies"}
+		var runs: Array[Dictionary] = []
+		for run: Variant in entry.copies:
+			if not run is Dictionary or str(run.get("tier", "")) not in MARKET_COPY_TIERS \
+					or not _whole(run.get("quantity"), 1) or not run.get("effects") is Array:
+				return {"error": "marketplace_copy"}
+			var effects: Array[String] = []
+			for line: Variant in run.effects:
+				if not line is String:
+					return {"error": "marketplace_copy"}
+				effects.append(line)
+			runs.append({"tier": str(run.tier), "quantity": int(run.quantity), "effects": effects})
+		result[str(key)] = {"tier": str(entry.tier), "copies": runs, "more": int(entry.get("more", 0))}
+	return result
+
+static func _whole(value: Variant, minimum: int) -> bool:
+	return _whole_number(value) and float(value) >= minimum
 
 ## Command 223. One NPC merchant's stock, with the prices in both directions
 ## and how many of each the player already carries.

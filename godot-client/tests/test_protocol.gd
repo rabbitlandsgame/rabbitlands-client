@@ -65,6 +65,7 @@ func _init() -> void:
 		"market_window_v1": EloriaProtocol.ServerMessage.ELORIA_MARKETPLACE_STATE,
 		"market_window_v2": EloriaProtocol.ServerMessage.ELORIA_MARKETPLACE_STATE,
 		"market_window_v3": EloriaProtocol.ServerMessage.ELORIA_MARKETPLACE_STATE,
+		"market_instance_tiers_v1": EloriaProtocol.ServerMessage.ELORIA_MARKETPLACE_STATE,
 		"merchant_window_v1": EloriaProtocol.ServerMessage.ELORIA_MERCHANT_STATE,
 		"merchant_weights_v1": EloriaProtocol.ServerMessage.ELORIA_MERCHANT_STATE,
 		"merchant_descriptions_v1": EloriaProtocol.ServerMessage.ELORIA_MERCHANT_STATE,
@@ -239,6 +240,8 @@ func _init() -> void:
 		"spell_impacts_v1": '{"kind":"spell_impact","effect":83,"actor_id":1,"target_id":2,"power":1,"release_delay":0.45,"flight_duration":0.3}'.to_utf8_buffer().hex_encode(),
 		"market_window_v3": str((JSON.parse_string(FileAccess.get_file_as_string(
 			"res://tests/fixtures/marketplace_v3.json")) as Dictionary).browse),
+		"market_instance_tiers_v1": str((JSON.parse_string(FileAccess.get_file_as_string(
+			"res://tests/fixtures/marketplace_instances.json")) as Dictionary).browse),
 		"tutorial_rewards_v1": '{"version":1,"event":"experience","permanent":true,"rewards":[{"skill":"magic","amount":60},{"skill":"overall","amount":210}]}'.to_utf8_buffer().hex_encode(),
 		"spell_ring_v1": '{"version":1,"active":false,"ring_training":true}'.to_utf8_buffer().hex_encode(),
 		"signed_ashore_v1": ('{"version":1,"active":true,"tutorial":"signed_ashore",'
