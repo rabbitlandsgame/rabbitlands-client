@@ -4,7 +4,10 @@ Open **Inventory → ••• → Enchant equipment…**, click **Enchant** on 
 inspection card, or use **Mixing → ••• → Enchant equipment…**. These controls
 appear when the connected server supports enchanting.
 
-Put the item in your backpack and unequip it first. Choose the individual copy,
+Choose **Backpack** or **Storage** at the top of the window. Storage requires
+opening your own storage at a nearby keeper or chest. Equipment, materials and
+gold fees all come from the selected location, and results stay there. Backpack
+equipment must be unequipped first. Choose the individual copy,
 pick an operation and materials, then click **Review enchantment** (or the
 operation's Review button). The server checks the selection and opens a
 confirmation with the exact cost. Nothing is spent until you confirm.
@@ -12,8 +15,9 @@ Your item keeps its identity, condition,
 quality and creator. Blue names support up to two effects; yellow names support
 up to four.
 
-The copy list shows backpack slots and effect counts, so identical items stay
-distinct. Pick an essence theme and quantity for plain equipment; **More options**
+The copy list shows backpack slots or storage copy numbers and effect counts,
+so identical items stay distinct. Use the arrows to page through stored copies.
+Pick an essence theme and quantity for plain equipment; **More options**
 lets you combine themes. Current odds and total costs stay beside the main action.
 Use the **Break Down**, **Refine** and **Enchant** tabs to move between windows.
 
@@ -57,3 +61,4 @@ that copy for Enchanting Shards and normal essences after confirmation.
 **Refine** lists the essence recipes and shows required and owned materials.
 Choose a quantity, then use **Refine** to review the shards, normal essences and
 gold fee for the guaranteed enriched-essence result.
+Both tools use the same **Backpack** or **Storage** choice as enchanting.

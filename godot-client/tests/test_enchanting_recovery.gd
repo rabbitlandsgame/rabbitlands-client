@@ -24,7 +24,7 @@ func text_of(node: Node) -> String:
 	return text
 
 func sample() -> Dictionary:
-	return {"version": 1, "enabled": true, "max_batch": 100, "shard_item": "Enchanting Shards", "shard_available": 45, "gold_available": 500,
+	return {"version": 1, "enabled": true, "source": "backpack", "storage_supported": true, "storage_available": true, "total": 2, "offset": 0, "max_batch": 100, "shard_item": "Enchanting Shards", "shard_available": 45, "gold_available": 500,
 		"items": [{"instance_id": 502, "slot": 4, "name": "Phoenix Helm", "image_id": 182, "tier": "rare", "quality": 110, "durability": 96, "max_durability": 100,
 			"effects": ["Plated: +20 armor.", "Vital: +50 maximum health.", "Spellguard: +25% less incoming spell damage.", "Restorative: +10 mana per normal regeneration tick."],
 			"outputs": [{"name": "Earth Essence", "quantity": 8, "image_id": 0}, {"name": "Life Essence", "quantity": 15, "image_id": 0}, {"name": "Magic Essence", "quantity": 7, "image_id": 0}, {"name": "Enchanting Shards", "quantity": 15, "image_id": 633}]},
@@ -235,6 +235,39 @@ func run() -> void:
 		"a dropped connection forgets the offer: the next server may be an older one")
 	state.call("_on_packet", 186, JSON.stringify(sample()).to_utf8_buffer())
 	expect(state.enchanting_recovery_available and refine.visible, "a recovery reply itself also shows the server can answer")
+	state.set("authenticated", true)
+	window.open(0)
+	receive(sample())
+	var locations: HBoxContainer = window.location_controls
+	locations.picker.select(1)
+	locations.picker.item_selected.emit(1)
+	expect(requests[-1].op == "list" and requests[-1].source == "storage" and window.quote.is_empty(), "changing to storage requests fresh options and clears quote")
+	var stored := sample()
+	stored.source = "storage"
+	stored.total = 30
+	for row: Dictionary in stored.items: row.source = "storage"
+	expect(Protocol.decode_enchanting_recovery(JSON.stringify(stored).to_utf8_buffer()).type == "enchanting_recovery", "storage recovery packet decodes")
+	receive(stored)
+	window.copies.select(0)
+	window.copies.item_selected.emit(0)
+	expect((window.get("_hero") as Dictionary).condition.text.contains("Storage copy #502"), "storage copy identified without a backpack slot")
+	window.call("_review")
+	expect(requests[-1].source == "storage" and requests[-1].instance_id == 502, "breakdown quotes selected stored identity")
+	receive(stored)
+	locations.next.pressed.emit()
+	expect(requests[-1].offset == 24 and requests[-1].source == "storage", "more stored copies can be requested")
+	stored.offset = 24
+	receive(stored)
+	window.tabs.current_tab = 1
+	window.call("_preview")
+	expect(requests[-1].source == "storage" and requests[-1].action == "refine", "refining retains the chosen source")
+	receive(stored)
+	await frames()
+	expect(Rect2(Vector2.ZERO, Vector2(804, 592)).encloses(window.get_global_rect()), "storage selector and paging fit narrow viewport")
+	state.set("enchanting_available", true)
+	window.tabs.set_tab_disabled(2, false)
+	window.tabs.current_tab = 2
+	expect(main.inventory_workspace.enchanting_window.get("_source") == "storage", "navigation keeps storage selected")
 	print("Enchanting recovery: %d checks, %d failures" % [checks, failures])
 	main.queue_free()
 	await frames(2)

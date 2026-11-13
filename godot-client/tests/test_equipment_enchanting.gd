@@ -21,7 +21,7 @@ func sample() -> Dictionary:
 	var essences := {}
 	for family: String in ["Life","Death","Water","Magic","Fire","Frost","Earth","Wind"]:
 		essences[family] = {"item": "Enriched " + family + " Essence", "favored_effects": []}
-	return {"version":1,"enabled":true,"crafting_supported":true,"available":{"Life":100,"Death":100,"Water":100,"Magic":100,"Fire":100,"Frost":100,"Earth":100,"Wind":100},
+	return {"version":1,"enabled":true,"source":"backpack","storage_supported":true,"storage_available":true,"total":3,"offset":0,"crafting_supported":true,"available":{"Life":100,"Death":100,"Water":100,"Magic":100,"Fire":100,"Frost":100,"Earth":100,"Wind":100},
 		"rules":{"essences":essences,"initial":{"weights":[70,25,4,1],"max_essences":5},"promotion":{"costs":{"Enriched Magic Essence":10,"Enriched Life Essence":10}},"catalysts":["Fire","Frost","Earth","Wind"]},
 		"items":[{"instance_id":501,"slot":0,"name":"Militia Arming Sword","image_id":374,"tier":"normal","quality":100,"durability":90,"max_durability":100,"effects":[],"effect_names":[]},
 		{"instance_id":502,"slot":1,"name":"Militia Arming Sword","image_id":374,"tier":"magic","quality":100,"durability":96,"max_durability":100,"effects":["Brutal: +20 physical damage.","Flamebound: +10 heat damage."],"effect_names":["Brutal","Flamebound"]},
@@ -194,6 +194,33 @@ func run() -> void:
 	window.open(0)
 	receive(sample())
 	expect(window.tabs.current_tab == 2 and window.visible,"returning to enchanting restores the active tab")
+	var locations: HBoxContainer = window.location_controls
+	locations.picker.select(1)
+	locations.picker.item_selected.emit(1)
+	expect(requests[-1].source == "storage" and requests[-1].op == "list" and window.selected_id == 0, "location change reloads copies without retaining backpack selection")
+	var stored := sample()
+	stored.source = "storage"
+	stored.total = 30
+	for row: Dictionary in stored.items: row.source = "storage"
+	expect(Protocol.decode_enchanting(JSON.stringify(stored).to_utf8_buffer()).type == "enchanting", "stored equipment packet decodes")
+	receive(stored)
+	window.copies.select(0)
+	window.copies.item_selected.emit(0)
+	window.call("_preview")
+	expect(requests[-1].source == "storage" and requests[-1].instance_id == 501, "enchant preview uses stored copy and materials")
+	receive(stored)
+	expect((window.get("_hero") as Dictionary).condition.text.contains("Storage copy #501"), "stored hero shows identity instead of slot")
+	locations.next.pressed.emit()
+	expect(requests[-1].offset == 24 and requests[-1].source == "storage", "enchanting pages through storage copies")
+	stored.offset = 24
+	receive(stored)
+	await frames()
+	expect(Rect2(Vector2.ZERO,Vector2(928,632)).encloses(window.get_global_rect()), "storage controls fit smaller enchanting viewport")
+	window.tabs.current_tab = 1
+	expect(main.inventory_workspace.recovery_window.get("_source") == "storage", "Refine tab keeps storage selected")
+	main.inventory_workspace.recovery_window.hide()
+	window.open()
+	receive(sample())
 	state.set("authenticated",false)
 	state.state_changed.emit(&"connection")
 	expect(not window.visible and window.quote.is_empty(),"disconnect closes and invalidates enchanting")

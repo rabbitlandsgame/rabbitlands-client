@@ -340,6 +340,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"storage_instances_v1",
 	"enchanting_recovery_v1",
 	"equipment_enchanting_v1",
+	"crafting_storage_v1",
 	"mail_window_v1",
 	"map_digest_v1",
 	"mix_window_v1",
@@ -3364,6 +3365,7 @@ static func decode_enchanting(payload: PackedByteArray) -> Dictionary:
 		return {"type": "invalid", "error": "enchanting_version"}
 	if not value.get("items") is Array or value.items.size() > 24 or not value.get("available") is Dictionary:
 		return {"type": "invalid", "error": "enchanting_items"}
+	if not _crafting_location(value): return {"type": "invalid", "error": "enchanting_location"}
 	if value.enabled:
 		var settings: Variant = value.get("rules")
 		if not settings is Dictionary or not settings.get("essences") is Dictionary or settings.essences.size() != 8 or not settings.get("initial") is Dictionary:
@@ -3371,6 +3373,7 @@ static func decode_enchanting(payload: PackedByteArray) -> Dictionary:
 	for row: Variant in value.items:
 		if not row is Dictionary or not row.get("name") is String or row.get("tier") not in ["normal", "magic", "rare"] or not row.get("effects") is Array or not row.get("effect_names") is Array or row.effects.size() > 4 or row.effects.size() != row.effect_names.size():
 			return {"type": "invalid", "error": "enchanting_copy"}
+		if row.get("source", "backpack") != value.get("source", "backpack"): return {"type": "invalid", "error": "enchanting_copy_location"}
 		for key: String in ["instance_id", "slot", "image_id", "quality", "durability", "max_durability"]:
 			if key in ["durability", "max_durability"] and row.get(key) == null: continue
 			if not _recovery_integer(row.get(key), 1 if key == "instance_id" else 0, 23 if key == "slot" else 9007199254740991):
@@ -3396,6 +3399,7 @@ static func decode_enchanting_recovery(payload: PackedByteArray) -> Dictionary:
 		return {"type": "invalid", "error": "recovery_version"}
 	if not value.get("items") is Array or value.items.size() > 24 or not value.get("recipes") is Array or value.recipes.size() > 16:
 		return {"type": "invalid", "error": "recovery_rows"}
+	if not _crafting_location(value): return {"type": "invalid", "error": "recovery_location"}
 	if value.enabled:
 		for key: String in ["max_batch", "shard_available", "gold_available"]:
 			if not _recovery_integer(value.get(key), 1 if key == "max_batch" else 0, 1000 if key == "max_batch" else 4294967295):
@@ -3404,6 +3408,7 @@ static func decode_enchanting_recovery(payload: PackedByteArray) -> Dictionary:
 	for raw: Variant in value.items:
 		if not raw is Dictionary or not raw.get("name") is String or not raw.get("effects") is Array or raw.effects.size() > 4:
 			return {"type": "invalid", "error": "recovery_copy"}
+		if raw.get("source", "backpack") != value.get("source", "backpack"): return {"type": "invalid", "error": "recovery_copy_location"}
 		if not _recovery_integer(raw.get("instance_id"), 1, 9007199254740991):
 			return {"type": "invalid", "error": "recovery_identity"}
 		for key: String in ["slot", "image_id", "quality", "durability", "max_durability"]:
@@ -3433,6 +3438,14 @@ static func decode_enchanting_recovery(payload: PackedByteArray) -> Dictionary:
 			for effect: Variant in preview.effects:
 				if not effect is String: return {"type": "invalid", "error": "recovery_quote_effects"}
 	return {"type": "enchanting_recovery", "state": value}
+
+static func _crafting_location(value: Dictionary) -> bool:
+	if value.get("source", "backpack") not in ["backpack", "storage"]: return false
+	for key: String in ["storage_supported", "storage_available"]:
+		if value.has(key) and not value[key] is bool: return false
+	for key: String in ["offset", "total"]:
+		if value.has(key) and not _recovery_integer(value[key], 0, 2147483647): return false
+	return true
 
 static func _recovery_integer(value: Variant, minimum: int, maximum: int) -> bool:
 	if typeof(value) not in [TYPE_INT, TYPE_FLOAT]: return false

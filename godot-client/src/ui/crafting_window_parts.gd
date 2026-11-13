@@ -97,7 +97,8 @@ static func copy_text(row: Dictionary) -> String:
 static func copy_note(list: ItemList, row: Dictionary) -> void:
 	var notes: Dictionary = list.get_meta("copy_notes", {})
 	var count: int = row.get("effects", []).size()
-	notes[int(row.instance_id)] = "Slot %d · %d effect%s" % [int(row.slot) + 1, count, "" if count == 1 else "s"]
+	var location := "Storage · #%d" % int(row.instance_id) if row.get("source") == "storage" else "Slot %d" % (int(row.slot) + 1)
+	notes[int(row.instance_id)] = "%s · %d effect%s" % [location, count, "" if count == 1 else "s"]
 	list.set_meta("copy_notes", notes)
 	list.queue_redraw()
 
@@ -118,7 +119,8 @@ static func show_hero(hero_parts: Dictionary, owner_main: Node, row: Dictionary)
 	(hero_parts.title as Label).add_theme_color_override("font_color", Tiers.color(str(row.get("tier", "normal"))))
 	var condition := ""
 	if not row.is_empty():
-		condition = "Backpack slot %d · Quality %d%%" % [int(row.slot) + 1, int(row.quality)]
+		var location := "Storage copy #%d" % int(row.instance_id) if row.get("source") == "storage" else "Backpack slot %d" % (int(row.slot) + 1)
+		condition = "%s · Quality %d%%" % [location, int(row.quality)]
 		if row.get("durability") != null and row.get("max_durability") != null:
 			condition += " · Durability %d/%d" % [int(row.durability), int(row.max_durability)]
 	(hero_parts.condition as Label).text = condition

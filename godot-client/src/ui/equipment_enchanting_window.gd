@@ -54,6 +54,11 @@ var _family_rows: Dictionary = {}
 var _combine_toggle: CheckButton
 var _combined: VBoxContainer
 var _last_params: Dictionary = {}
+var location_controls: HBoxContainer
+var _source := "backpack"
+var _offset := 0
+var _preferred_id := 0
+var _copies_heading: Label
 
 func configure(owner_main: Node) -> void:
 	main = owner_main
@@ -71,13 +76,28 @@ func configure(owner_main: Node) -> void:
 	var serif := SystemFont.new()
 	serif.font_names = PackedStringArray(["Georgia", "Noto Serif", "serif"])
 	heading.add_theme_font_override("font", serif)
+	location_controls = preload("res://src/ui/crafting_location_controls.gd").new()
+	header.add_child(location_controls)
+	location_controls.location_changed.connect(func(location: String) -> void:
+		_source = location
+		_offset = 0
+		selected_id = 0
+		_preferred_slot = -1
+		_locks = {}
+		snapshot = {}
+		_render()
+		_refresh())
+	location_controls.page_changed.connect(func(offset: int) -> void:
+		_offset = offset
+		selected_id = 0
+		_refresh())
 	Parts.button(header, "Refresh", _refresh)
 	Parts.button(header, "×", hide).tooltip_text = "Close crafting window"
 	var dragger := WindowDrag.attach(self, header)
 	dragger.reserved_bottom = 88
 	dragger.moved.connect(func(_to: Vector2) -> void: _placed = true)
 	tabs = Parts.navigation(body, 2, _navigate)
-	_purpose = Parts.label(body, "Imbue an individual copy with effects. Backpack only · unequip or withdraw items first.", 14)
+	_purpose = Parts.label(body, "", 14)
 	_purpose.modulate = Parts.MUTED
 	columns = HBoxContainer.new()
 	columns.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -86,7 +106,7 @@ func configure(owner_main: Node) -> void:
 	var left := VBoxContainer.new()
 	left.custom_minimum_size.x = 220
 	columns.add_child(left)
-	Parts.label(left, "Backpack copies", 17)
+	_copies_heading = Parts.label(left, "Backpack copies", 17)
 	copies = Parts.ledger(left)
 	copies.name = "EquipmentCopies"
 	copies.item_selected.connect(_selection_changed)
@@ -152,11 +172,14 @@ func configure(owner_main: Node) -> void:
 		if not visible: _invalidate())
 	hide()
 
-func open(preferred_slot: int = -1) -> void:
+func open(preferred_slot: int = -1, location: String = "backpack", preferred_id: int = 0) -> void:
 	if not AppState.enchanting_available: return
 	_craft_recipe = {}
 	_craft_callback = Callable()
 	_preferred_slot = preferred_slot
+	_source = location
+	_offset = 0
+	_preferred_id = preferred_id
 	_begin()
 
 func choose_ingredients(recipe: Dictionary, callback: Callable) -> void:
@@ -164,6 +187,9 @@ func choose_ingredients(recipe: Dictionary, callback: Callable) -> void:
 	_craft_recipe = recipe.duplicate(true)
 	_craft_callback = callback
 	_preferred_slot = -1
+	_source = "backpack"
+	_offset = 0
+	_preferred_id = 0
 	_begin()
 
 func _begin() -> void:
@@ -186,6 +212,9 @@ func _begin() -> void:
 	_clear(options)
 	explanation.text = "Select an equipment copy to inspect its saved effects and available operations."
 	heading.text = "Enchant" if _craft_recipe.is_empty() else "Choose copies · " + str(_craft_recipe.output)
+	location_controls.visible = _craft_recipe.is_empty()
+	location_controls.render(snapshot, _source, true)
+	_purpose.text = "Imbue an individual copy with effects. Equipment, materials and gold use your %s." % _source if _craft_recipe.is_empty() else "Choose unequipped backpack copies for this recipe."
 	copies.select_mode = ItemList.SELECT_SINGLE if _craft_recipe.is_empty() else ItemList.SELECT_MULTI
 	preview_button.visible = _craft_recipe.is_empty()
 	confirm_button.text = "Review enchantment" if _craft_recipe.is_empty() else "Craft one…"
@@ -208,6 +237,10 @@ func _invalidate(cancel_pending: bool = true) -> void:
 func _send(request: Dictionary) -> void:
 	_serial += 1
 	request["request_id"] = _serial
+	request["source"] = _source
+	request["offset"] = _offset
+	if request.op == "list" and _preferred_id > 0: request["focus"] = _preferred_id
+	location_controls.render(snapshot, _source, true)
 	_pending = str(request.op)
 	_busy = true
 	preview_button.disabled = true
@@ -238,14 +271,15 @@ func _state_changed(part: StringName) -> void:
 	if part == &"connection" and not AppState.authenticated:
 		hide()
 		snapshot = {}
-	elif visible and part == &"inventory":
+	elif visible and (part == &"inventory" or part == &"storage"):
 		_stale = true
 		_invalidate(_pending != "confirm")
-		status.text = "Your backpack changed. Refresh before choosing an equipment operation."
+		status.text = "Your belongings changed. Refresh before choosing an equipment operation."
 		_update_buttons()
 	elif visible and part == &"enchanting":
 		var incoming: Dictionary = AppState.enchanting
 		if int(incoming.get("request_id", -1)) != _serial: return
+		if str(incoming.get("source", "backpack")) != _source: return
 		snapshot = incoming
 		quote = incoming.quote if incoming.get("quote") is Dictionary else {}
 		_stale = false
@@ -276,6 +310,10 @@ func _selection_changed(index: int) -> void:
 
 func _render() -> void:
 	_reading = true
+	_offset = int(snapshot.get("offset", _offset))
+	location_controls.render(snapshot, _source, _pending == "confirm")
+	_copies_heading.text = "Storage copies" if _source == "storage" else "Backpack copies"
+	if _craft_recipe.is_empty(): _purpose.text = "Imbue an individual copy with effects. Equipment, materials and gold use your %s." % _source
 	copies.clear()
 	var found := false
 	copies.set_meta("copy_notes", {})
@@ -287,12 +325,13 @@ func _render() -> void:
 		Parts.copy_note(copies, row)
 		copies.set_item_custom_fg_color(index, Tiers.color(str(row.tier)))
 		copies.set_item_tooltip(index, str(row.name) + "\n" + "\n".join(row.effects))
-		if int(row.instance_id) == selected_id or (_preferred_slot >= 0 and int(row.slot) == _preferred_slot):
+		if int(row.instance_id) == selected_id or int(row.instance_id) == _preferred_id or (_source == "backpack" and _preferred_slot >= 0 and int(row.slot) == _preferred_slot):
 			copies.select(index)
 			selected_id = int(row.instance_id)
 			found = true
 	if not found: selected_id = 0
 	_preferred_slot = -1
+	_preferred_id = 0
 	_reading = false
 	status.text = str(snapshot.get("error", ""))
 	if status.text.is_empty(): status.text = str(snapshot.get("message", ""))
@@ -531,6 +570,7 @@ func _local_explanation() -> void:
 	_update_summary()
 
 func _update_buttons() -> void:
+	location_controls.render(snapshot, _source, _busy or _pending == "confirm")
 	var blocked := _busy or _stale or _pending == "confirm" or _copy().is_empty() or not bool(snapshot.get("enabled", false))
 	var issue := _selection_issue() if _craft_recipe.is_empty() and not _copy().is_empty() else ""
 	blocked = blocked or not issue.is_empty()
@@ -562,6 +602,7 @@ func _ask_confirmation() -> void:
 		confirmation.dialog_text = text + "Success consumes selected equipment unless Recycler retains the inputs. A critical failure consumes them; an ordinary failure keeps them."
 	else:
 		confirmation.dialog_text = "%s\n\nChange the selected %s?\nExisting effects:\n%s\n\nCost:\n%s\nGold fee: %d\n\nRandom results are rolled after confirmation." % [quote.summary, quote.name, "\n".join(_copy().effects), _materials(quote.inputs), int(quote.gold_fee)]
+		confirmation.dialog_text += "\nLocation: " + _source.capitalize()
 	confirmation.popup_centered(Vector2i(520, 0))
 
 func _confirm() -> void:
@@ -623,7 +664,7 @@ func _navigate(index: int) -> void:
 	if index == 2: return
 	var row := _copy()
 	hide()
-	main.inventory_workspace.recovery_window.open(index, int(row.get("slot", -1)))
+	main.inventory_workspace.recovery_window.open(index, int(row.get("slot", -1)), _source, int(row.get("instance_id", 0)))
 
 func _update_summary() -> void:
 	_clear(_summary)
