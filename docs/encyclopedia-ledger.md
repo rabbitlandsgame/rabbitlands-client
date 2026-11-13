@@ -4,7 +4,17 @@ The Encyclopedia tab uses a dense reference table above a resizable article prev
 
 Search covers titles, summaries, article text, structured sections, ingredients, tools, required books and facts. Words match without regard to case or order. Topic and entry-type filters combine with search. Sorting and filtering cover the complete installed catalogue before pagination, including entries on other pages.
 
-The level column means a recipe's **recommended** level or a spell's **unlock** level. Maximum-level and book-requirement filters apply only where that information exists. A missing level is placed after numbered levels when sorting. Bookmark controls keep article keys in the existing player settings; earlier article, category and search bookmarks still work. Saved filtered views also restore their filters. The other Reference tabs keep their compact size.
+The level column means a recipe's or harvesting resource's **recommended** level or a spell's **unlock** level. Maximum-level and book-requirement filters apply only where that information exists. A missing level is placed after numbered levels when sorting. Bookmark controls keep article keys in the existing player settings; earlier article, category and search bookmarks still work. Saved filtered views also restore their filters. The other Reference tabs keep their compact size.
+
+The Harvesting topic includes one **Resource** entry per installed resource, alongside the existing guides. Resource previews show recommended Harvesting level, knowledge and tools; full articles include base experience and links to recipes that use the resource. Recipe ingredient links lead back to the resource page. Harvesting currently requires no research books, so the book column and knowledge facts explicitly say **None**. Manufacturing knowledge is kept on the recipe pages. Recommended harvesting levels affect gathering speed; they do not prevent an attempt below that level.
+
+Rebuild the harvesting catalogue from current server sources (including the continent overlay):
+
+```
+python tools/generate_harvesting_catalog.py --server-root <server-checkout> --output godot-client/data/harvesting/catalog.json
+```
+
+Add `--check` to compare without writing. The encyclopedia source audit includes this check. The catalogue omits the legacy configured interval, since the server uses its level-based `harvest_interval` calculation instead.
 
 ## Content review: 8 November 2026
 

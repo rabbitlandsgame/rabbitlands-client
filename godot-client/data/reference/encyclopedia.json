@@ -2458,8 +2458,9 @@
     {
       "id": "gathering",
       "title": "Harvesting",
-      "summary": "Taking things out of the ground",
-      "intro": "Everything the trades below are made from starts here.",
+      "summary": "Resources, recommended levels, knowledge and tools",
+      "intro": "Browse resources for their recommended Harvesting level, knowledge and tool requirements. Levels affect gathering speed; they are not minimum unlock levels. Harvesting currently requires no research books.",
+      "generate": "harvesting",
       "entries": [
         {
           "id": "harvesting",
@@ -2498,7 +2499,7 @@
           "id": "harvesting-todo",
           "title": "Resource requirements",
           "summary": "Levels, tools and yields",
-          "body": "Resource definitions include a recommended Harvesting level, experience, a base gathering interval and, for some resources, a required tool. The live server controls the nodes and whether harvesting can start or continue.\n\nHarvesting success and timing depend on the resource and your character. Some resources are ingredients in recipes; search their name across the encyclopedia to find uses. This client does not ship a complete per-resource location directory."
+          "body": "Browse the Harvesting topic for a page per resource with its recommended level, knowledge and tool requirements, and base experience. Use the Resources type filter to hide general guides, or sort by Level to plan what to gather.\n\nThe listed Harvesting level is a recommendation used for gathering speed, not a minimum level to start. Harvesting currently requires no research books. Any knowledge needed to make an item from a resource is shown on the recipe page instead. Required tools must be carried or equipped.\n\nThe live server controls resource nodes, gathering speed, rewards and interruptions. Each resource page links to recipes that use it. This client does not ship a complete per-resource location directory."
         }
       ]
     },
