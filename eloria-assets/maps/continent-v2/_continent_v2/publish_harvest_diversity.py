@@ -123,7 +123,11 @@ def prepare(server):
         resources=[r['name'] for r in plan['resources']])
     manifest_relative = 'config/eloria/client_content_manifest.json'
     record_relative = V2+'/_continent_v2/publication.json'
-    manifest = document(server,manifest_relative)
+    pinned_manifest = document(server,manifest_relative)
+    # This amendment owns only continentV2 metadata. Catalogue updates, map
+    # registrations and other independent top-level records must survive it.
+    manifest = json.loads(watched[server/manifest_relative])
+    manifest['continentV2'] = copy.deepcopy(pinned_manifest['continentV2'])
     record = document(ROOT,record_relative)
     catalog_relative = 'godot-client/data/maps/map-backgrounds.json'
     catalog = document(ROOT,catalog_relative)
@@ -190,13 +194,34 @@ def prepare(server):
     tables_relative=V2+'/_continent_v2/content/server-tables.json'
     tables=document(ROOT,tables_relative)
     require(not {r['name'] for r in tables['resources']} & {r['name'] for r in plan['resources']},'Resource already defined')
-    tables['resources'].extend(plan['resources']);write(ROOT,tables_relative,tables)
+    tables['resources'].extend(copy.deepcopy(plan['resources']))
+    policy_path = server/'config/eloria/harvest_levels.json'
+    if policy_path.exists():
+        watched[policy_path] = policy_path.read_bytes()
+        policy = json.loads(watched[policy_path])
+        require(policy.get('schema') == 'rabbitlands-harvest-levels-v1', 'Unknown harvest level policy')
+        levels = policy['levels']
+        base_path = server/'config/eloria/harvesting.txt'
+        watched[base_path] = base_path.read_bytes()
+        base_levels = {row.split('|')[1].strip():int(row.split('|')[2])
+                       for row in watched[base_path].decode().splitlines() if row.startswith('resource |')}
+        require(set(levels) == set(base_levels) | {r['name'] for r in tables['resources']}, 'Harvest policy must cover every resource exactly')
+        require(all(type(v) is int and 0 <= v <= 179 for v in levels.values()), 'Invalid recommended level')
+        require(all(levels[n] == v for n,v in base_levels.items()), 'Apply the approved base harvest levels first')
+        for resource in tables['resources']: resource['level'] = levels[resource['name']]
+        policy_record = dict(path=policy_path.relative_to(server).as_posix(),sha256=sha(watched[policy_path]))
+        manifest['continentV2']['harvestLevelPolicy'] = record['harvestLevelPolicy'] = policy_record
+    write(ROOT,tables_relative,tables)
     # Keep the publisher input digest current; geometry bake identities are retained.
     record['inputs']['contentTables'][tables_relative]=sha(updates[ROOT/tables_relative])
     harvest_relative='config/eloria/continent-v2/harvesting.txt'
     harvest=old(server,harvest_relative).decode();newline='\r\n' if '\r\n' in harvest else '\n'
     resources=''.join(f'resource | {r["name"]} | {r["level"]} | {r["experience"]} | {r["seconds"]} | {r["tool"]}{newline}' for r in plan['resources'])
     where=harvest.index('node |');harvest=harvest[:where]+resources+harvest[where:]
+    table_levels = {r['name']:r['level'] for r in tables['resources']}
+    def level_row(match):
+        return match[1] + str(table_levels[match[2].strip()])
+    harvest = re.sub(r'(?m)^(resource\s*\|\s*([^|]+)\|\s*)\d+(?=\s*\|)', level_row, harvest)
     for group in plan['groups']:
         for node in group['nodes']:
             prefix=f'node | {group["map"]} | {node["objectId"]} | {node["tile"][0]} | {node["tile"][1]} | '
@@ -214,6 +239,12 @@ def prepare(server):
     write(ROOT,catalog_relative,catalog);write(ROOT,record_relative,record);write(server,manifest_relative,manifest)
     # Do all preparation before writes. Only the baseline or this exact result is accepted.
     for path,data in updates.items():
+        if path == server/manifest_relative:
+            # Independent manifest authors may update unowned catalogue fields.
+            # A baseline continentV2 block or this exact result is still required.
+            require(json.loads(watched[path])['continentV2'] in
+                    (pinned_manifest['continentV2'],json.loads(data)['continentV2']),f'Unrelated continent publication change: {path}')
+            continue
         require(watched[path] in (old(ROOT if path.is_relative_to(ROOT) else server,
             path.relative_to(ROOT if path.is_relative_to(ROOT) else server).as_posix()),data),f'Unrelated change: {path}')
     return updates,watched

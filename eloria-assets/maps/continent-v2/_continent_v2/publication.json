@@ -671,7 +671,7 @@
   "crossingsSha256": "c51e3e11c010b09d46f818b9e4cdd6f9a994fe576354eb14bd640d845cd3130c",
   "contentTables": {
    "eloria-assets/maps/continent-v2/_continent_v2/content/server-rows.json": "57d54a1c5d95079c0d0185941d93959a7ed280ff4e95e546b7230f5cdcbbd57b",
-   "eloria-assets/maps/continent-v2/_continent_v2/content/server-tables.json": "56825a8a4b599e07f0d488bf36d6e95e02b23bea5ba76f011191635aa5053bc9",
+   "eloria-assets/maps/continent-v2/_continent_v2/content/server-tables.json": "25da567cb3e095d535a097a4272ec252eb96afefd17dc299b2adcb42932b892a",
    "eloria-assets/maps/continent-v2/_continent_v2/content/questlines.txt": "a739e3c0558914ef54c3d41413b675658578466e3a2830e08e4229eab4795efd",
    "eloria-assets/maps/continent-v2/boarsend/content/spawns.json": "a71b73d9ce005c8ef29e513e4af87f418a8bebb0ad56d4e3e81fd8d624946086",
    "eloria-assets/maps/continent-v2/brambleshaw/content/spawns.json": "7c472fdbe95d782c3d05d723f542e4634495612c8eeeb5285353043e5240881c",
@@ -1076,7 +1076,7 @@
    "README": "3370dec01f13023720b6294d8e9a3ae661e4fe38ea4fbb9e069c09a32da62ba2",
    "maps.txt": "2564063e2f01aa6be2af7ad82af8359a358116f2e2fd16d475e2849f554a241f",
    "spawns.txt": "581c74940a5250287cd4be7b3f3ee58dcb7ee1e63f2dce902d5175ee06f3242c",
-   "harvesting.txt": "a51d0e01bf52c28fefa1780669ea6fe966054281a1032cad62fe1d2251ea8bf0",
+   "harvesting.txt": "45b16a90c310412b024f60b31ceab2cd6054719d4fd22ebc636eb3d4a6475740",
    "npcs.txt": "93ab9ce2feb9ee13f3bfe1ee1bc64bcf1edd19a328ee7439be95a5104305c46e",
    "interactives.txt": "c7c5edbbac6cc9fd355c93fc9d680bc2f07625fa31ac963e7b4cf73e8d72b680",
    "exterior_connections.json": "eb668b3139d413175f87efe1c213e4205fbfb07f3784ad68b1f2ea65eb1de031",
@@ -1101,7 +1101,7 @@
      "home_npcs.txt",
      "special_areas.txt"
     ],
-    "manifestBlockSha256": "8754250638e7aae5ab571364d573ca31b03453ad7f455371c71c4ad555b0db2e"
+    "manifestBlockSha256": "544e6a3b16e9903ec84416eabe4791d723ef6afd09dac807572916878649fbc5"
    },
    "m2": {
     "files": [
@@ -1118,7 +1118,7 @@
      "home_npcs.txt",
      "special_areas.txt"
     ],
-    "manifestBlockSha256": "e8f5b8b569620c8d05b7dd73b45d4abd841ab2976d3d6f038aaec74eb2192aa5"
+    "manifestBlockSha256": "7ff90fa05889116aa86b287709f1301c8bffb5b4fa70a09c0b87983672dd94c0"
    },
    "m3": {
     "files": [
@@ -1135,7 +1135,7 @@
      "home_npcs.txt",
      "special_areas.txt"
     ],
-    "manifestBlockSha256": "18b0d4fe551d26cd7d310d136683f901776108185aca683ee096faaba01997f7"
+    "manifestBlockSha256": "e5f8eb99530df0db99f252663550cb2cb412b069205f3150e0af3acead9e925b"
    },
    "m4": {
     "files": [
@@ -1152,7 +1152,7 @@
      "home_npcs.txt",
      "special_areas.txt"
     ],
-    "manifestBlockSha256": "a17ee2715b3a68c72619138b4e8d7003263f03df5d3b1fb5ee57d2365b9a531c"
+    "manifestBlockSha256": "c4a7389e8bacd688ee134aab2ad991034068421a828750592cf6cee3be6e143f"
    }
   },
   "manifestEntriesSha256": "f758c35871f172cfe0a7c48cdb83e8aa1be22cc768cd005f967734935170237c",
@@ -2617,6 +2617,10 @@
    "validation": "Exactly two furniture asset references changed. Room shells, transforms, collision boxes, NPCs, walk grids, portals, other sections and apothecary potion shelves retained. 2D shell pictures retain certified bytes; their source metadata follows the provenance-only manifest update."
   }
  ],
+ "harvestLevelPolicy": {
+  "path": "config/eloria/harvest_levels.json",
+  "sha256": "06d46a55b0fa74a398e5098c70319dbaf57b89f10af63654bb8077eb05902833"
+ },
  "harvestDiversityAmendments": [
   {
    "plan": "eloria-assets/maps/continent-v2/_continent_v2/content/harvest-diversity.json",
