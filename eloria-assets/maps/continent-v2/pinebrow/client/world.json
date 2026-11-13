@@ -342,7 +342,7 @@
   {
    "id": "pinebrow--harvest-247-bramble",
    "objectId": 247,
-   "resource": "Bramble",
+   "resource": "Blue Berries",
    "serverTile": [
     579,
     505
@@ -351,7 +351,8 @@
     170.5,
     140.572,
     -111.5
-   ]
+   ],
+   "grouping": "pinebrow-blue-berries-20261113"
   },
   {
    "id": "pinebrow--harvest-2100-flint",
@@ -581,6 +582,25 @@
   }
  ],
  "harvestGroupings": [
+  {
+   "id": "pinebrow-blue-berries-20261113",
+   "name": "Pinebrow Blueberries",
+   "resources": [
+    "Blue Berries"
+   ],
+   "centre": [
+    170.5,
+    -111.5
+   ],
+   "centreTile": [
+    579,
+    505
+   ],
+   "nodeCount": 1,
+   "objectIds": [
+    247
+   ]
+  },
   {
    "id": "pinebrow-flint-mine",
    "name": "Mine Flint",
@@ -941,7 +961,27 @@
  "provenance": {
   "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
   "snapshotSha256": "a76de858d7daa10e32cd6159bf157cc5f4680f7966fc441b874e18bd0f9e35f6",
-  "sceneSha256": "a4cd267a212155148b962f6de14fa265b83428e409a02785c9a0b031d47cef38"
+  "sceneSha256": "a4cd267a212155148b962f6de14fa265b83428e409a02785c9a0b031d47cef38",
+  "harvestDiversityAmendments": [
+   {
+    "plan": "eloria-assets/maps/continent-v2/_continent_v2/content/harvest-diversity.json",
+    "planSha256": "1bfd8a0fa8a7d27e4c8894ea0e11ebbc108b2b811498e68e2dfa9a4255ab02a0",
+    "nodes": 84,
+    "geometry": "unchanged",
+    "collision": "unchanged",
+    "operation": "resource labels and gathering art only; stable IDs, positions and routes",
+    "resources": [
+     "Berries",
+     "Mushroom",
+     "Blue Berries",
+     "Silver Ore",
+     "Gold Ore",
+     "Titanium Ore"
+    ],
+    "sourceSceneSha256": "8524d11466643b7b643209e5f9d74e1e116d7a0d81c24889e81fedbc50772df2",
+    "baseSceneSha256": "a4cd267a212155148b962f6de14fa265b83428e409a02785c9a0b031d47cef38"
+   }
+  ]
  },
  "externalResources": {
   "../../../nymara-regions/_continent/shared-assets/0124bfa5b5c25908af99e832239ad2804211846a585b225946ec0cd2331d6630.png": "0124bfa5b5c25908af99e832239ad2804211846a585b225946ec0cd2331d6630",

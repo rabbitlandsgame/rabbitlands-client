@@ -456,7 +456,7 @@
   {
    "id": "whitepeak--harvest-2106-quartz",
    "objectId": 2106,
-   "resource": "Quartz",
+   "resource": "Silverleaf",
    "serverTile": [
     877,
     456
@@ -471,12 +471,12 @@
     2.4,
     1.2
    ],
-   "grouping": "whitepeak-quartz"
+   "grouping": "whitepeak-silverleaf-20261113"
   },
   {
    "id": "whitepeak--harvest-2107-quartz",
    "objectId": 2107,
-   "resource": "Quartz",
+   "resource": "Silverleaf",
    "serverTile": [
     887,
     450
@@ -491,12 +491,12 @@
     2.4,
     1.2
    ],
-   "grouping": "whitepeak-quartz"
+   "grouping": "whitepeak-silverleaf-20261113"
   },
   {
    "id": "whitepeak--harvest-2108-quartz",
    "objectId": 2108,
-   "resource": "Quartz",
+   "resource": "Silverleaf",
    "serverTile": [
     870,
     453
@@ -511,7 +511,7 @@
     2.4,
     1.2
    ],
-   "grouping": "whitepeak-quartz"
+   "grouping": "whitepeak-silverleaf-20261113"
   },
   {
    "id": "whitepeak--harvest-2109-quartz",
@@ -726,18 +726,15 @@
     "Quartz"
    ],
    "centre": [
-    126.667,
-    146.667
+    128.833,
+    142.833
    ],
    "centreTile": [
-    880,
-    457
+    882,
+    461
    ],
-   "nodeCount": 6,
+   "nodeCount": 3,
    "objectIds": [
-    2106,
-    2107,
-    2108,
     2109,
     2110,
     2111
@@ -765,6 +762,27 @@
     2103,
     2104,
     2105
+   ]
+  },
+  {
+   "id": "whitepeak-silverleaf-20261113",
+   "name": "Snowline Silverleaf",
+   "resources": [
+    "Silverleaf"
+   ],
+   "centre": [
+    124.5,
+    150.5
+   ],
+   "centreTile": [
+    878,
+    453
+   ],
+   "nodeCount": 3,
+   "objectIds": [
+    2106,
+    2107,
+    2108
    ]
   }
  ],
@@ -1021,7 +1039,27 @@
  "provenance": {
   "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
   "snapshotSha256": "78051ea0a3d9e9581773541e44c8085b311a5ab5474828c73fc682af05ac8189",
-  "sceneSha256": "c4857bb0f8e97b7dcb51694f2abae92c56e1defe767b4ce88cc97550a19ec2a3"
+  "sceneSha256": "c4857bb0f8e97b7dcb51694f2abae92c56e1defe767b4ce88cc97550a19ec2a3",
+  "harvestDiversityAmendments": [
+   {
+    "plan": "eloria-assets/maps/continent-v2/_continent_v2/content/harvest-diversity.json",
+    "planSha256": "1bfd8a0fa8a7d27e4c8894ea0e11ebbc108b2b811498e68e2dfa9a4255ab02a0",
+    "nodes": 84,
+    "geometry": "unchanged",
+    "collision": "unchanged",
+    "operation": "resource labels and gathering art only; stable IDs, positions and routes",
+    "resources": [
+     "Berries",
+     "Mushroom",
+     "Blue Berries",
+     "Silver Ore",
+     "Gold Ore",
+     "Titanium Ore"
+    ],
+    "sourceSceneSha256": "d629796d47aaf705d0c473074d5d46180bd4d2e580bb96de96cb04bddba74039",
+    "baseSceneSha256": "c4857bb0f8e97b7dcb51694f2abae92c56e1defe767b4ce88cc97550a19ec2a3"
+   }
+  ]
  },
  "externalResources": {
   "../../../nymara-regions/_continent/shared-assets/000002784bb5a6959e856fbf60df18bf1dd3b58e2bf3fbf04bf27516e3a46d8e.jpg": "000002784bb5a6959e856fbf60df18bf1dd3b58e2bf3fbf04bf27516e3a46d8e",

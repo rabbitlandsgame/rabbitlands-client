@@ -1896,7 +1896,7 @@
   {
    "id": "hearthcroft--harvest-2332-wheat",
    "objectId": 2332,
-   "resource": "Wheat",
+   "resource": "Seed",
    "serverTile": [
     287,
     50
@@ -1906,7 +1906,7 @@
     75.874,
     218.817
    ],
-   "grouping": "hearthcroft-wheat-upper",
+   "grouping": "hearthcroft-seed-20261113",
    "bind": {
     "node": "Authored_sw_isle_kit_wheat_stooks_1_lvwheat_hearthcroft_072",
     "assetId": "sw-isle-kit-wheat-stooks-1-lvwheat-hearthcroft-072",
@@ -1917,7 +1917,7 @@
   {
    "id": "hearthcroft--harvest-2333-wheat",
    "objectId": 2333,
-   "resource": "Wheat",
+   "resource": "Seed",
    "serverTile": [
     284,
     51
@@ -1927,7 +1927,7 @@
     75.913,
     217.317
    ],
-   "grouping": "hearthcroft-wheat-upper",
+   "grouping": "hearthcroft-seed-20261113",
    "bind": {
     "node": "Authored_sw_isle_kit_wheat_stooks_1_lvwheat_hearthcroft_073",
     "assetId": "sw-isle-kit-wheat-stooks-1-lvwheat-hearthcroft-073",
@@ -1938,7 +1938,7 @@
   {
    "id": "hearthcroft--harvest-2334-wheat",
    "objectId": 2334,
-   "resource": "Wheat",
+   "resource": "Seed",
    "serverTile": [
     285,
     47
@@ -1948,7 +1948,7 @@
     75.73,
     221.415
    ],
-   "grouping": "hearthcroft-wheat-upper",
+   "grouping": "hearthcroft-seed-20261113",
    "bind": {
     "node": "Authored_sw_isle_kit_wheat_stooks_1_lvwheat_hearthcroft_064",
     "assetId": "sw-isle-kit-wheat-stooks-1-lvwheat-hearthcroft-064",
@@ -1959,7 +1959,7 @@
   {
    "id": "hearthcroft--harvest-2335-wheat",
    "objectId": 2335,
-   "resource": "Wheat",
+   "resource": "Seed",
    "serverTile": [
     282,
     49
@@ -1969,7 +1969,7 @@
     75.706,
     219.915
    ],
-   "grouping": "hearthcroft-wheat-upper",
+   "grouping": "hearthcroft-seed-20261113",
    "bind": {
     "node": "Authored_sw_isle_kit_wheat_stooks_1_lvwheat_hearthcroft_065",
     "assetId": "sw-isle-kit-wheat-stooks-1-lvwheat-hearthcroft-065",
@@ -1980,7 +1980,7 @@
   {
    "id": "hearthcroft--harvest-2336-wheat",
    "objectId": 2336,
-   "resource": "Wheat",
+   "resource": "Seed",
    "serverTile": [
     288,
     52
@@ -1990,7 +1990,7 @@
     75.914,
     216.219
    ],
-   "grouping": "hearthcroft-wheat-upper",
+   "grouping": "hearthcroft-seed-20261113",
    "bind": {
     "node": "Authored_sw_isle_kit_wheat_stooks_1_lvwheat_hearthcroft_080",
     "assetId": "sw-isle-kit-wheat-stooks-1-lvwheat-hearthcroft-080",
@@ -2001,7 +2001,7 @@
   {
    "id": "hearthcroft--harvest-2337-wheat",
    "objectId": 2337,
-   "resource": "Wheat",
+   "resource": "Seed",
    "serverTile": [
     285,
     54
@@ -2011,7 +2011,7 @@
     75.824,
     214.719
    ],
-   "grouping": "hearthcroft-wheat-upper",
+   "grouping": "hearthcroft-seed-20261113",
    "bind": {
     "node": "Authored_sw_isle_kit_wheat_stooks_1_lvwheat_hearthcroft_081",
     "assetId": "sw-isle-kit-wheat-stooks-1-lvwheat-hearthcroft-081",
@@ -2022,7 +2022,7 @@
   {
    "id": "hearthcroft--harvest-2338-wheat",
    "objectId": 2338,
-   "resource": "Wheat",
+   "resource": "Seed",
    "serverTile": [
     281,
     53
@@ -2032,7 +2032,7 @@
     75.973,
     215.817
    ],
-   "grouping": "hearthcroft-wheat-upper",
+   "grouping": "hearthcroft-seed-20261113",
    "bind": {
     "node": "Authored_sw_isle_kit_wheat_stooks_1_lvwheat_hearthcroft_074",
     "assetId": "sw-isle-kit-wheat-stooks-1-lvwheat-hearthcroft-074",
@@ -2043,7 +2043,7 @@
   {
    "id": "hearthcroft--harvest-2339-wheat",
    "objectId": 2339,
-   "resource": "Wheat",
+   "resource": "Seed",
    "serverTile": [
     289,
     48
@@ -2053,7 +2053,7 @@
     75.816,
     220.317
    ],
-   "grouping": "hearthcroft-wheat-upper",
+   "grouping": "hearthcroft-seed-20261113",
    "bind": {
     "node": "Authored_sw_isle_kit_wheat_stooks_1_lvwheat_hearthcroft_071",
     "assetId": "sw-isle-kit-wheat-stooks-1-lvwheat-hearthcroft-071",
@@ -3199,6 +3199,32 @@
    ]
   },
   {
+   "id": "hearthcroft-seed-20261113",
+   "name": "Croft Seed Heads",
+   "resources": [
+    "Seed"
+   ],
+   "centre": [
+    -139.25,
+    218.067
+   ],
+   "centreTile": [
+    285,
+    50
+   ],
+   "nodeCount": 8,
+   "objectIds": [
+    2332,
+    2333,
+    2334,
+    2335,
+    2336,
+    2337,
+    2338,
+    2339
+   ]
+  },
+  {
    "id": "hearthcroft-wheat-croft",
    "name": "Croft Wheat Strip",
    "resources": [
@@ -3255,23 +3281,15 @@
     "Wheat"
    ],
    "centre": [
-    -140.0,
-    219.366
+    -140.25,
+    219.799
    ],
    "centreTile": [
-    285,
+    284,
     49
    ],
-   "nodeCount": 32,
+   "nodeCount": 24,
    "objectIds": [
-    2332,
-    2333,
-    2334,
-    2335,
-    2336,
-    2337,
-    2338,
-    2339,
     2340,
     2341,
     2342,
@@ -3749,7 +3767,27 @@
  "provenance": {
   "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
   "snapshotSha256": "164601b5b4cac6f145fd8e91f36593cefacff8abb619c5bd4e099026f29db6b2",
-  "sceneSha256": "1fa1c3bfb0c743fbf795c39b3a48be3d8d69d605ac2dbe2d8dd266197a490f72"
+  "sceneSha256": "1fa1c3bfb0c743fbf795c39b3a48be3d8d69d605ac2dbe2d8dd266197a490f72",
+  "harvestDiversityAmendments": [
+   {
+    "plan": "eloria-assets/maps/continent-v2/_continent_v2/content/harvest-diversity.json",
+    "planSha256": "1bfd8a0fa8a7d27e4c8894ea0e11ebbc108b2b811498e68e2dfa9a4255ab02a0",
+    "nodes": 84,
+    "geometry": "unchanged",
+    "collision": "unchanged",
+    "operation": "resource labels and gathering art only; stable IDs, positions and routes",
+    "resources": [
+     "Berries",
+     "Mushroom",
+     "Blue Berries",
+     "Silver Ore",
+     "Gold Ore",
+     "Titanium Ore"
+    ],
+    "sourceSceneSha256": "5f2a00a1621f98a42b32c3d04abd182feb4437fccfb14b3b71a2f380d3687df0",
+    "baseSceneSha256": "1fa1c3bfb0c743fbf795c39b3a48be3d8d69d605ac2dbe2d8dd266197a490f72"
+   }
+  ]
  },
  "externalResources": {
   "../../../nymara-regions/_continent/shared-assets/0124bfa5b5c25908af99e832239ad2804211846a585b225946ec0cd2331d6630.png": "0124bfa5b5c25908af99e832239ad2804211846a585b225946ec0cd2331d6630",

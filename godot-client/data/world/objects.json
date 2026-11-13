@@ -1829,28 +1829,425 @@
         "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
         "placement": "wall",
         "standsAlone": false
+      },
+      "rl_isle_sunleaf": {
+        "label": "Sunleaf",
+        "kind": "flora",
+        "tier": "common",
+        "imported": true,
+        "standsAlone": true,
+        "scene": "res://assets/world/harvestables/rl_isle_sunleaf.glb",
+        "vertices": 1499,
+        "triangles": 614,
+        "alphaTested": false,
+        "height": 0.65,
+        "sha256": "3329efda7134f7cd2e0300be38c974a6b7399b8918cbfcebc8c515f7407289a0",
+        "source": "eloria-assets/source/world_objects/isle-harvest-reuse.json"
+      },
+      "rl_isle_seed": {
+        "label": "Seed",
+        "kind": "crop",
+        "tier": "common",
+        "imported": true,
+        "standsAlone": true,
+        "scene": "res://assets/world/harvestables/rl_isle_seed.glb",
+        "vertices": 459,
+        "triangles": 188,
+        "alphaTested": false,
+        "height": 0.85,
+        "sha256": "e64a5c2ae2ded0c17634c139eed18b018fa1ba44ef827f90a02707175ddfaa56",
+        "source": "eloria-assets/source/world_objects/isle-harvest-reuse.json"
+      },
+      "rl_isle_riverflax": {
+        "label": "Riverflax",
+        "kind": "fibre",
+        "tier": "common",
+        "imported": true,
+        "standsAlone": true,
+        "scene": "res://assets/world/harvestables/rl_isle_riverflax.glb",
+        "vertices": 2783,
+        "triangles": 1526,
+        "alphaTested": false,
+        "height": 0.554,
+        "sha256": "70e1a956664d51fcabd02ac0bdd9300202a8ba8a566cc97fd5902a8fb9ad09e5",
+        "source": "eloria-assets/source/world_objects/isle-harvest-reuse.json"
+      },
+      "rl_isle_lotus": {
+        "label": "Lotus",
+        "kind": "aquatic",
+        "tier": "common",
+        "imported": true,
+        "standsAlone": true,
+        "scene": "res://assets/world/harvestables/rl_isle_lotus.glb",
+        "vertices": 2746,
+        "triangles": 1882,
+        "alphaTested": false,
+        "height": 0.172,
+        "sha256": "eba5d480fc8b22de8df50b94b03465b0254860bdcc417d4ae880aa5e138ebe9d",
+        "source": "eloria-assets/source/world_objects/isle-harvest-reuse.json"
+      },
+      "rl_isle_orchid": {
+        "label": "Orchid",
+        "kind": "flora",
+        "tier": "common",
+        "imported": true,
+        "standsAlone": true,
+        "scene": "res://assets/world/harvestables/rl_isle_orchid.glb",
+        "vertices": 1354,
+        "triangles": 639,
+        "alphaTested": false,
+        "height": 0.65,
+        "sha256": "6ffbbe77f1b0772d1c67f9f4a600116917defb7f3f51f850367c3f69e82993ac",
+        "source": "eloria-assets/source/world_objects/isle-harvest-reuse.json"
+      },
+      "rl_isle_silverleaf": {
+        "label": "Silverleaf",
+        "kind": "herb",
+        "tier": "common",
+        "imported": true,
+        "standsAlone": true,
+        "scene": "res://assets/world/harvestables/rl_isle_silverleaf.glb",
+        "vertices": 2227,
+        "triangles": 1114,
+        "alphaTested": false,
+        "height": 0.65,
+        "sha256": "e6386a5152328eb0c5e2a71c6ffebe737c3b93ca4668c9afc0b8d4e1b0ca5d1a",
+        "source": "eloria-assets/source/world_objects/isle-harvest-reuse.json"
+      },
+      "rl_isle_thistle": {
+        "label": "Thistle",
+        "kind": "herb",
+        "tier": "common",
+        "imported": true,
+        "standsAlone": true,
+        "scene": "res://assets/world/harvestables/rl_isle_thistle.glb",
+        "vertices": 952,
+        "triangles": 370,
+        "alphaTested": false,
+        "height": 0.7,
+        "sha256": "c212d82b2b12f6b5274ea6ac94982300079400ccddd884533054fea272923690",
+        "source": "eloria-assets/source/world_objects/isle-harvest-reuse.json"
+      },
+      "rl_isle_peat": {
+        "label": "Peat",
+        "kind": "fuel",
+        "tier": "common",
+        "imported": true,
+        "standsAlone": true,
+        "scene": "res://assets/world/harvestables/rl_isle_peat.glb",
+        "vertices": 4402,
+        "triangles": 2393,
+        "alphaTested": false,
+        "height": 0.72,
+        "sha256": "b4308f5e487fde197dc4401771058ea58f59306c55ad9eca25e2b0f4667783e7",
+        "source": "eloria-assets/source/world_objects/isle-harvest-reuse.json"
+      },
+      "rl_isle_berries": {
+        "label": "Berries",
+        "kind": "crop",
+        "tier": "common",
+        "imported": true,
+        "standsAlone": true,
+        "scene": "res://assets/world/harvestables/rl_isle_berries.glb",
+        "vertices": 3066,
+        "triangles": 1234,
+        "alphaTested": false,
+        "height": 1.05,
+        "sha256": "fcdaf5c8eb361bdd096cd68294d1e8d1ce7ce10cab2cddf45a3b05c83dc4513a",
+        "source": "eloria-assets/source/world_objects/isle-harvest-reuse.json"
+      },
+      "rl_isle_blue_berries": {
+        "label": "Blue Berries",
+        "kind": "crop",
+        "tier": "common",
+        "imported": true,
+        "standsAlone": true,
+        "scene": "res://assets/world/harvestables/rl_isle_blue_berries.glb",
+        "vertices": 3191,
+        "triangles": 1484,
+        "alphaTested": false,
+        "height": 0.85,
+        "sha256": "afdf392520ad68e3acf75e7ebb7bf405be00609331e6ec4d297d4092b643f7c7",
+        "source": "eloria-assets/source/world_objects/isle-harvest-reuse.json"
+      },
+      "rl_isle_mushroom": {
+        "label": "Mushroom",
+        "kind": "fungus",
+        "tier": "common",
+        "imported": true,
+        "standsAlone": true,
+        "scene": "res://assets/world/harvestables/rl_isle_mushroom.glb",
+        "vertices": 3222,
+        "triangles": 2164,
+        "alphaTested": false,
+        "height": 0.2,
+        "sha256": "5164addc740440b25544b521da29601a1637ac472d314345e42bdf48eef1c2c1",
+        "source": "eloria-assets/source/world_objects/isle-harvest-reuse.json"
+      },
+      "rl_isle_bog_iron": {
+        "label": "Bog Iron",
+        "kind": "mineral",
+        "tier": "uncommon",
+        "reusedScenery": true,
+        "scene": "res://assets/world/underground/resource_rock_2.glb",
+        "vertices": 2969,
+        "triangles": 2211,
+        "alphaTested": false,
+        "height": 0.8,
+        "sha256": "11318927bac8ad7b8297ab602af158aeeb7432a4d59bf169c0b322a756e3a982",
+        "resourcePalette": {
+          "stone": "#756451",
+          "mineral": "#a2693f"
+        },
+        "source": "eloria-assets/source/world_objects/isle-harvest-reuse.json",
+        "standsAlone": true
+      },
+      "rl_isle_silver_ore": {
+        "label": "Silver Ore",
+        "kind": "mineral",
+        "tier": "uncommon",
+        "reusedScenery": true,
+        "scene": "res://assets/world/underground/resource_rock_2.glb",
+        "vertices": 2969,
+        "triangles": 2211,
+        "alphaTested": false,
+        "height": 0.8,
+        "sha256": "11318927bac8ad7b8297ab602af158aeeb7432a4d59bf169c0b322a756e3a982",
+        "resourcePalette": {
+          "stone": "#56525c",
+          "mineral": "#d4d8e0"
+        },
+        "source": "eloria-assets/source/world_objects/isle-harvest-reuse.json",
+        "standsAlone": true
+      },
+      "rl_isle_gold_ore": {
+        "label": "Gold Ore",
+        "kind": "mineral",
+        "tier": "uncommon",
+        "reusedScenery": true,
+        "scene": "res://assets/world/underground/resource_rock_2.glb",
+        "vertices": 2969,
+        "triangles": 2211,
+        "alphaTested": false,
+        "height": 0.8,
+        "sha256": "11318927bac8ad7b8297ab602af158aeeb7432a4d59bf169c0b322a756e3a982",
+        "resourcePalette": {
+          "stone": "#665345",
+          "mineral": "#e3b54d"
+        },
+        "source": "eloria-assets/source/world_objects/isle-harvest-reuse.json",
+        "standsAlone": true
+      },
+      "rl_isle_titanium_ore": {
+        "label": "Titanium Ore",
+        "kind": "mineral",
+        "tier": "uncommon",
+        "reusedScenery": true,
+        "scene": "res://assets/world/underground/resource_rock_2.glb",
+        "vertices": 2969,
+        "triangles": 2211,
+        "alphaTested": false,
+        "height": 0.8,
+        "sha256": "11318927bac8ad7b8297ab602af158aeeb7432a4d59bf169c0b322a756e3a982",
+        "resourcePalette": {
+          "stone": "#443e52",
+          "mineral": "#a697bd"
+        },
+        "source": "eloria-assets/source/world_objects/isle-harvest-reuse.json",
+        "standsAlone": true
+      },
+      "rl_silver_ore_wall_1": {
+        "label": "Silver Ore",
+        "kind": "mineral",
+        "tier": "uncommon",
+        "reusedScenery": true,
+        "scene": "res://assets/world/underground/seam_boulder_5.glb",
+        "vertices": 2260,
+        "triangles": 2500,
+        "alphaTested": false,
+        "height": 1.15,
+        "sha256": "24588946d5fb7f92a6387d3cc36c57bc0fa5ed0fd77f725f931d08cbcc2dc386",
+        "resourcePalette": {
+          "stone": "#56525c",
+          "mineral": "#d4d8e0"
+        },
+        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
+        "placement": "wall",
+        "standsAlone": false
+      },
+      "rl_silver_ore_wall_2": {
+        "label": "Silver Ore",
+        "kind": "mineral",
+        "tier": "uncommon",
+        "reusedScenery": true,
+        "scene": "res://assets/world/underground/seam_boulder_3.glb",
+        "vertices": 2817,
+        "triangles": 2499,
+        "alphaTested": false,
+        "height": 1.15,
+        "sha256": "020bc91dae267b5430e2e573d9887a8b4264bd825fffbf4444aacf4686073ead",
+        "resourcePalette": {
+          "stone": "#56525c",
+          "mineral": "#d4d8e0"
+        },
+        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
+        "placement": "wall",
+        "standsAlone": false
+      },
+      "rl_silver_ore_wall_3": {
+        "label": "Silver Ore",
+        "kind": "mineral",
+        "tier": "uncommon",
+        "reusedScenery": true,
+        "scene": "res://assets/world/underground/seam_boulder_4.glb",
+        "vertices": 2597,
+        "triangles": 2159,
+        "alphaTested": false,
+        "height": 1.15,
+        "sha256": "b98adbfe2b9f2dba8a994ab63cdff02b358a894fae3eb622413c78757c9eb17a",
+        "resourcePalette": {
+          "stone": "#56525c",
+          "mineral": "#d4d8e0"
+        },
+        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
+        "placement": "wall",
+        "standsAlone": false
+      },
+      "rl_gold_ore_wall_1": {
+        "label": "Gold Ore",
+        "kind": "mineral",
+        "tier": "uncommon",
+        "reusedScenery": true,
+        "scene": "res://assets/world/underground/seam_boulder_5.glb",
+        "vertices": 2260,
+        "triangles": 2500,
+        "alphaTested": false,
+        "height": 1.15,
+        "sha256": "24588946d5fb7f92a6387d3cc36c57bc0fa5ed0fd77f725f931d08cbcc2dc386",
+        "resourcePalette": {
+          "stone": "#665345",
+          "mineral": "#e3b54d"
+        },
+        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
+        "placement": "wall",
+        "standsAlone": false
+      },
+      "rl_gold_ore_wall_2": {
+        "label": "Gold Ore",
+        "kind": "mineral",
+        "tier": "uncommon",
+        "reusedScenery": true,
+        "scene": "res://assets/world/underground/seam_boulder_3.glb",
+        "vertices": 2817,
+        "triangles": 2499,
+        "alphaTested": false,
+        "height": 1.15,
+        "sha256": "020bc91dae267b5430e2e573d9887a8b4264bd825fffbf4444aacf4686073ead",
+        "resourcePalette": {
+          "stone": "#665345",
+          "mineral": "#e3b54d"
+        },
+        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
+        "placement": "wall",
+        "standsAlone": false
+      },
+      "rl_gold_ore_wall_3": {
+        "label": "Gold Ore",
+        "kind": "mineral",
+        "tier": "uncommon",
+        "reusedScenery": true,
+        "scene": "res://assets/world/underground/seam_boulder_4.glb",
+        "vertices": 2597,
+        "triangles": 2159,
+        "alphaTested": false,
+        "height": 1.15,
+        "sha256": "b98adbfe2b9f2dba8a994ab63cdff02b358a894fae3eb622413c78757c9eb17a",
+        "resourcePalette": {
+          "stone": "#665345",
+          "mineral": "#e3b54d"
+        },
+        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
+        "placement": "wall",
+        "standsAlone": false
+      },
+      "rl_titanium_ore_wall_1": {
+        "label": "Titanium Ore",
+        "kind": "mineral",
+        "tier": "uncommon",
+        "reusedScenery": true,
+        "scene": "res://assets/world/underground/seam_boulder_5.glb",
+        "vertices": 2260,
+        "triangles": 2500,
+        "alphaTested": false,
+        "height": 1.15,
+        "sha256": "24588946d5fb7f92a6387d3cc36c57bc0fa5ed0fd77f725f931d08cbcc2dc386",
+        "resourcePalette": {
+          "stone": "#443e52",
+          "mineral": "#a697bd"
+        },
+        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
+        "placement": "wall",
+        "standsAlone": false
+      },
+      "rl_titanium_ore_wall_2": {
+        "label": "Titanium Ore",
+        "kind": "mineral",
+        "tier": "uncommon",
+        "reusedScenery": true,
+        "scene": "res://assets/world/underground/seam_boulder_3.glb",
+        "vertices": 2817,
+        "triangles": 2499,
+        "alphaTested": false,
+        "height": 1.15,
+        "sha256": "020bc91dae267b5430e2e573d9887a8b4264bd825fffbf4444aacf4686073ead",
+        "resourcePalette": {
+          "stone": "#443e52",
+          "mineral": "#a697bd"
+        },
+        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
+        "placement": "wall",
+        "standsAlone": false
+      },
+      "rl_titanium_ore_wall_3": {
+        "label": "Titanium Ore",
+        "kind": "mineral",
+        "tier": "uncommon",
+        "reusedScenery": true,
+        "scene": "res://assets/world/underground/seam_boulder_4.glb",
+        "vertices": 2597,
+        "triangles": 2159,
+        "alphaTested": false,
+        "height": 1.15,
+        "sha256": "b98adbfe2b9f2dba8a994ab63cdff02b358a894fae3eb622413c78757c9eb17a",
+        "resourcePalette": {
+          "stone": "#443e52",
+          "mineral": "#a697bd"
+        },
+        "source": "eloria-assets/source/world_objects/underground/reused-scenery.json",
+        "placement": "wall",
+        "standsAlone": false
       }
     },
     "resources": {
       "Reed": "mirror_reed",
       "Pearl": "crownwater_pearl",
       "Clay": "deep_lake_clay",
-      "Lotus": "delta_lotus",
-      "Orchid": "ghost_orchid",
+      "Lotus": "rl_isle_lotus",
+      "Orchid": "rl_isle_orchid",
       "Salt": "glacier_salt",
       "Sap": "mangrove_sap",
-      "Peat": "moor_peat",
+      "Peat": "rl_isle_peat",
       "Crystal": "rl_crystal_v1",
       "Lichen": "ssarathi_scale_moss",
       "Stormglass": "stormglass_shard",
-      "Seed": "sunmane_seed",
+      "Seed": "rl_isle_seed",
       "Venom Bulb": "verdant_venom_bulb",
       "Geode": "rl_geode_v1",
-      "Silverleaf": "whitehorn_silverleaf",
+      "Silverleaf": "rl_isle_silverleaf",
       "Resin": "isle_resin",
       "Sage": "isle_sage",
       "Wheat": "steppe_wheat",
-      "Riverflax": "riverflax",
+      "Riverflax": "rl_isle_riverflax",
       "Cotton": "moorcotton",
       "Hearthroot": "hearthroot",
       "Bramble": "barrow_bramble",
@@ -1858,19 +2255,19 @@
       "Kelp": "tidewrack_kelp",
       "Shell": "shorebank_shell",
       "Verdigris": "verdigris_bloom",
-      "Bog Iron": "bogiron_nodule",
+      "Bog Iron": "rl_isle_bog_iron",
       "Coal": "rl_coal_v1",
       "Quartz": "pale_quartz",
       "Flint": "isle_flint",
-      "Thistle": "indigo_thistle",
+      "Thistle": "rl_isle_thistle",
       "Watercress": "cenote_watercress",
-      "Sunleaf": "sunleaf",
+      "Sunleaf": "rl_isle_sunleaf",
       "Copper": "rl_copper_v1",
       "Ember Crystal": "ember_crystal",
       "Slate": "rl_slate_v1",
       "Lavender": "lavender",
       "Rosemary": "rosemary",
-      "Mushroom": "mushroom",
+      "Mushroom": "rl_isle_mushroom",
       "Moss": "grave_moss",
       "Blueberries": "blueberries",
       "Iron Ore": "rl_iron_ore_v1",
@@ -1878,7 +2275,12 @@
       "Grapes": "grapevine",
       "Cabbage": "cabbage",
       "Olive": "isle_olive",
-      "Lemon": "isle_lemon"
+      "Lemon": "isle_lemon",
+      "Berries": "rl_isle_berries",
+      "Blue Berries": "rl_isle_blue_berries",
+      "Silver Ore": "rl_isle_silver_ore",
+      "Gold Ore": "rl_isle_gold_ore",
+      "Titanium Ore": "rl_isle_titanium_ore"
     },
     "variants": {
       "Bramble": [
@@ -1965,6 +2367,51 @@
       "Watercress": [
         "watercress_mat_a",
         "watercress_mat_b"
+      ],
+      "Sunleaf": [
+        "rl_isle_sunleaf"
+      ],
+      "Seed": [
+        "rl_isle_seed"
+      ],
+      "Riverflax": [
+        "rl_isle_riverflax"
+      ],
+      "Lotus": [
+        "rl_isle_lotus"
+      ],
+      "Orchid": [
+        "rl_isle_orchid"
+      ],
+      "Silverleaf": [
+        "rl_isle_silverleaf"
+      ],
+      "Thistle": [
+        "rl_isle_thistle"
+      ],
+      "Peat": [
+        "rl_isle_peat"
+      ],
+      "Berries": [
+        "rl_isle_berries"
+      ],
+      "Blue Berries": [
+        "rl_isle_blue_berries"
+      ],
+      "Mushroom": [
+        "rl_isle_mushroom"
+      ],
+      "Bog Iron": [
+        "rl_isle_bog_iron"
+      ],
+      "Silver Ore": [
+        "rl_isle_silver_ore"
+      ],
+      "Gold Ore": [
+        "rl_isle_gold_ore"
+      ],
+      "Titanium Ore": [
+        "rl_isle_titanium_ore"
       ]
     },
     "wallVariants": {
@@ -2032,6 +2479,21 @@
         "rl_verdigris_wall_1",
         "rl_verdigris_wall_2",
         "rl_verdigris_wall_3"
+      ],
+      "Silver Ore": [
+        "rl_silver_ore_wall_1",
+        "rl_silver_ore_wall_2",
+        "rl_silver_ore_wall_3"
+      ],
+      "Gold Ore": [
+        "rl_gold_ore_wall_1",
+        "rl_gold_ore_wall_2",
+        "rl_gold_ore_wall_3"
+      ],
+      "Titanium Ore": [
+        "rl_titanium_ore_wall_1",
+        "rl_titanium_ore_wall_2",
+        "rl_titanium_ore_wall_3"
       ]
     }
   },

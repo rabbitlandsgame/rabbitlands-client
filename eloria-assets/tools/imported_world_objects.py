@@ -311,6 +311,22 @@ class ImportedInteractive:
 #: its seeded yaw, and the bare ring when the label has none: a hedge, a seam
 #: or a drift at a random yaw reads wrong (2026-10-19 playtest map review,
 #: finding 6).
+# Resource diversity (2026-11-13): reused, imported kit clumps, processed by
+# tools/prepare_isle_harvestables.py. Keep them in the maintained imported table
+# so an unlisted file cannot claim the imported model band.
+ISLE_HARVEST_REUSE = (
+    ('Sunleaf', 'flora', 'sunleaf'), ('Seed', 'crop', 'sunmane_seed'),
+    ('Riverflax', 'fibre', 'riverflax'), ('Lotus', 'aquatic', 'delta_lotus'),
+    ('Orchid', 'flora', 'ghost_orchid'), ('Silverleaf', 'herb', 'whitehorn_silverleaf'),
+    ('Thistle', 'herb', 'indigo_thistle'), ('Peat', 'fuel', 'moor_peat'),
+    ('Berries', 'crop', 'blueberries'), ('Blue Berries', 'crop', 'blueberries'),
+    ('Mushroom', 'fungus', 'mushroom'),
+)
+IMPORTED_HARVESTABLES += tuple(ImportedHarvestable(
+    'rl_isle_' + label.lower().replace(' ', '_'), label, kind, 'common', True, graded,
+    'eloria-assets/source/world_objects/isle-harvest-reuse.json', stands_alone=True)
+    for label, kind, graded in ISLE_HARVEST_REUSE)
+
 HARVEST_VARIANTS: dict[str, tuple[str, ...]] = {
     "Cotton": ("cotton_row",),
     "Hearthroot": ("hearthroot_row",),
@@ -328,6 +344,7 @@ HARVEST_VARIANTS: dict[str, tuple[str, ...]] = {
     "Salt": ("salt_pan_a", "salt_pan_b"),
     "Shell": ("shell_drift_a", "shell_drift_b"),
     "Watercress": ("watercress_mat_a", "watercress_mat_b"),
+    **{label: ('rl_isle_' + label.lower().replace(' ', '_'),) for label, _kind, _graded in ISLE_HARVEST_REUSE},
 }
 
 

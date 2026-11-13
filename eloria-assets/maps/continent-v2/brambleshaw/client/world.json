@@ -689,7 +689,7 @@
   {
    "id": "brambleshaw--harvest-2116-sage",
    "objectId": 2116,
-   "resource": "Sage",
+   "resource": "Orchid",
    "serverTile": [
     153,
     129
@@ -703,12 +703,12 @@
     1.6,
     1.6
    ],
-   "grouping": "brambleshaw-sage-glade"
+   "grouping": "brambleshaw-orchid-20261113"
   },
   {
    "id": "brambleshaw--harvest-2117-sage",
    "objectId": 2117,
-   "resource": "Sage",
+   "resource": "Orchid",
    "serverTile": [
     158,
     124
@@ -722,12 +722,12 @@
     1.6,
     1.6
    ],
-   "grouping": "brambleshaw-sage-glade"
+   "grouping": "brambleshaw-orchid-20261113"
   },
   {
    "id": "brambleshaw--harvest-2118-sage",
    "objectId": 2118,
-   "resource": "Sage",
+   "resource": "Orchid",
    "serverTile": [
     147,
     134
@@ -741,12 +741,12 @@
     1.6,
     1.6
    ],
-   "grouping": "brambleshaw-sage-glade"
+   "grouping": "brambleshaw-orchid-20261113"
   },
   {
    "id": "brambleshaw--harvest-2119-sage",
    "objectId": 2119,
-   "resource": "Sage",
+   "resource": "Orchid",
    "serverTile": [
     144,
     130
@@ -760,7 +760,7 @@
     1.6,
     1.6
    ],
-   "grouping": "brambleshaw-sage-glade"
+   "grouping": "brambleshaw-orchid-20261113"
   },
   {
    "id": "brambleshaw--harvest-2120-sage",
@@ -3871,25 +3871,43 @@
    ]
   },
   {
+   "id": "brambleshaw-orchid-20261113",
+   "name": "Woodland Orchids",
+   "resources": [
+    "Orchid"
+   ],
+   "centre": [
+    -126.0,
+    47.25
+   ],
+   "centreTile": [
+    151,
+    129
+   ],
+   "nodeCount": 4,
+   "objectIds": [
+    2116,
+    2117,
+    2118,
+    2119
+   ]
+  },
+  {
    "id": "brambleshaw-sage-glade",
    "name": "Glade Sage",
    "resources": [
     "Sage"
    ],
    "centre": [
-    -123.1,
-    49.3
+    -121.167,
+    50.667
    ],
    "centreTile": [
-    153,
-    127
+    155,
+    126
    ],
-   "nodeCount": 10,
+   "nodeCount": 6,
    "objectIds": [
-    2116,
-    2117,
-    2118,
-    2119,
     2120,
     2121,
     2122,
@@ -4647,7 +4665,27 @@
  "provenance": {
   "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
   "snapshotSha256": "edf599257fede0d4d414d1aa94613f36c04127bd44d2123376f810736725cfbc",
-  "sceneSha256": "d8606cb748efd5d1074425abb18bd8b5c7d10f344e16215ae04bd4f356176346"
+  "sceneSha256": "d8606cb748efd5d1074425abb18bd8b5c7d10f344e16215ae04bd4f356176346",
+  "harvestDiversityAmendments": [
+   {
+    "plan": "eloria-assets/maps/continent-v2/_continent_v2/content/harvest-diversity.json",
+    "planSha256": "1bfd8a0fa8a7d27e4c8894ea0e11ebbc108b2b811498e68e2dfa9a4255ab02a0",
+    "nodes": 84,
+    "geometry": "unchanged",
+    "collision": "unchanged",
+    "operation": "resource labels and gathering art only; stable IDs, positions and routes",
+    "resources": [
+     "Berries",
+     "Mushroom",
+     "Blue Berries",
+     "Silver Ore",
+     "Gold Ore",
+     "Titanium Ore"
+    ],
+    "sourceSceneSha256": "2e30600f121b100edf25bbbb64e7ea7853db3689fe1c37cf3955d28be01ce75a",
+    "baseSceneSha256": "d8606cb748efd5d1074425abb18bd8b5c7d10f344e16215ae04bd4f356176346"
+   }
+  ]
  },
  "externalResources": {
   "../../../nymara-regions/_continent/shared-assets/0124bfa5b5c25908af99e832239ad2804211846a585b225946ec0cd2331d6630.png": "0124bfa5b5c25908af99e832239ad2804211846a585b225946ec0cd2331d6630",
