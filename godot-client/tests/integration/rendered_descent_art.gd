@@ -4,9 +4,11 @@ extends SceneTree
 ## prototype kit-descent-temple-1; map object 59480, "Descent Temple", is only a
 ## pick-only click target on its front tile, so the temple is drawn once)
 ## beside Warden Sethra and the Serpent Catacombs door, and the boss floor's
-## reward dais (59490) and way out (59491, "Descent Exit") on the real
-## serpent_deep_descent package. The objects arrive as the server would send
-## them (map objects through AppState, the keeper as an NPC actor).
+## reward dais (59490) and way out (59491, "Descent Exit") on a procedural boss
+## floor built on the serpent_deep_descent frame from a server-generated layout
+## (tests/fixtures/descent_layouts.json, its `_test` dais and way out tiles).
+## The objects arrive as the server would send them (map objects and the
+## floor's layout through AppState, the keeper as an NPC actor).
 ##
 ## Saves under <out>/ (ELORIA_ARTIFACT_DIR, default res://test-artifacts/descent-art):
 ##   art-temple-game.png    the default game view beside the keeper (window)
@@ -30,6 +32,7 @@ const CATACOMBS := 59013
 ## The temple's footprint the server blocks, and its front tile.
 const FOOTPRINT := Rect2i(272, 744, 8, 8)
 const FRONT := Vector2i(280, 747)
+const LAYOUTS := "res://tests/fixtures/descent_layouts.json"
 
 var main: Control
 var state: Node
@@ -102,13 +105,21 @@ func _temple() -> void:
 	outline.queue_free()
 
 func _boss() -> void:
+	var layouts: Array = (JSON.parse_string(FileAccess.get_file_as_string(LAYOUTS)) as Dictionary).layouts
+	var boss: Dictionary = layouts.filter(func(layout: Dictionary) -> bool: return int(layout.floor) == 6)[0]
+	var dais_tile := Vector2i(int(boss._test.dais[0]), int(boss._test.dais[1]))
+	var exit_tile := Vector2i(int(boss._test.portal[0]), int(boss._test.portal[1]))
 	var objects := {
-		DAIS: _object(DAIS, Vector2i(677, 459), "Descent Dais", "Claim your reward"),
-		EXIT: _object(EXIT, Vector2i(683, 461), "Descent Exit", "Return to the temple"),
+		DAIS: _object(DAIS, dais_tile, "Descent Dais", "Claim your reward"),
+		EXIT: _object(EXIT, exit_tile, "Descent Exit", "Return to the temple"),
 	}
-	if not await _enter("serpent_deep_descent", Vector2i(680, 468), objects, {}):
+	if not await _enter("serpent_deep_descent", dais_tile + Vector2i(0, 9), objects, {}):
 		return
+	# The boss floor's layout arrives: DescentFloors builds the arena.
+	state.call("_on_packet", 188, JSON.stringify(boss).to_utf8_buffer())
 	await _settle(60)
+	var floors: Node = (main.get("world_loader") as WorldLoader).world_root.get_node_or_null("DescentFloors")
+	_expect(floors != null and floors.has_node("Section_serpent_deep_f6_floor"), "the boss floor is built")
 	var nodes: Dictionary = main.get("map_object_nodes")
 	var exit: Node3D = nodes.get(EXIT)
 	var dais: Node3D = nodes.get(DAIS)
@@ -124,7 +135,7 @@ func _boss() -> void:
 	await _capture("art-boss-landing.png", false)
 	rig.set("yaw_degrees", 0.0)
 	await _settle(10)
-	await _top("art-boss-top.png", Vector2(680.0, 462.0), 26.0)
+	await _top("art-boss-top.png", Vector2(dais_tile.x + 0.5, dais_tile.y + 3.0), 26.0)
 
 ## Turns the camera rig until the camera looks along `toward` (world, flat).
 func _face(toward: Vector3) -> void:

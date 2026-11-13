@@ -3,9 +3,9 @@ extends RefCounted
 ## it outside the packed map also lets an older map cache receive updated art.
 ##
 ## One config per interior map (tools/prepare_underground_scenery.py writes
-## them all in the same schema): the Landfall underground's caves, the
-## Landfall town's rooms and the Serpent Deep's descent floors. A map with no
-## row here has no placed scenery.
+## them all in the same schema): the Landfall underground's caves and the
+## Landfall town's rooms. A map with no row here has no placed scenery (a
+## procedural descent's floors are dressed as they are built: DescentFloors).
 const CONFIGS := {
 	"landfall_insides": {"config": "res://data/world/underground-scenery.json",
 		# Every cave names its floor; a Walk_ mesh no section claims is earth.
@@ -14,10 +14,6 @@ const CONFIGS := {
 		# A room's floor is the shell's own textured planks, flags or tiles:
 		# a section the config does not style keeps them.
 		"floorDefault": "authored"},
-	"serpent_deep_descent": {"config": "res://data/world/descent-scenery.json",
-		# The Serpent Deep's baked floors (build_descent_pool.py): every floor
-		# names its Serpent theme's flagstones; an unclaimed Walk_ is flagstone.
-		"floorDefault": "flagstone"},
 }
 ## The underground's config, as it was before the table. Kept for callers that
 ## read the file directly (tests/integration/landfall_underground.gd).

@@ -66,6 +66,23 @@ without `--owner-approved`, and draws only the floors' rock shells in the
 existing Serpent themes; the walls' set pieces are the reviewed Meshy kit
 pieces those themes already use (`godot-client/data/world/descent-scenery.json`).
 
+On 2026-11-13 the owner asked for truly procedural dungeons (chat: "add
+support for truly procedural dungeons and implement"), which replaced that
+pool: the bake tool, its source, the 840-tile package and its scenery config
+were removed (recoverable from git history). Every run of The Serpent Deep
+now has floors generated for it by the server, and the client builds each one
+at runtime from the layout the server sends
+(`godot-client/src/world/descent_floor_builder.gd`, managed by
+`descent_floors.gd`; contract in the server handbook's Descent-Runs.md). Like
+the bake, it makes only the floor's shell - a flagstone walk floor, low rock
+faces, stair wells and flights - textured with the Serpent themes' existing
+rock and tread textures (`godot-client/assets/world/descent/shell/`), and every
+piece standing on it is a reviewed Meshy kit piece
+(`godot-client/data/world/descent-themes.json`). The map it is built on is an
+empty frame package written from the server's plan by
+`_continent_v2/build_descent_frame.py`, which draws nothing. Neither restarts
+procedural model generation for any other asset.
+
 Procedural actor and equipment definitions are removed, including 158 actor
 model entries, 163 actor-type mappings, four equipment visuals and 710 obsolete
 authoring-catalog records. Historical identifiers remain reserved in the

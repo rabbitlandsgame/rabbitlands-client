@@ -97,6 +97,7 @@ func _init() -> void:
 		"party_window_v1": EloriaProtocol.ServerMessage.ELORIA_PARTY_STATE,
 		"gauntlet_ready_v1": EloriaProtocol.ServerMessage.ELORIA_GAUNTLET_READY_STATE,
 		"descent_v1": EloriaProtocol.ServerMessage.ELORIA_DESCENT_STATE,
+		"descent_layout_v1": EloriaProtocol.ServerMessage.ELORIA_DESCENT_STATE,
 		"perk_catalog_v3": EloriaProtocol.ServerMessage.ELORIA_PERK_CATALOG,
 		"quest_archive_v1":
 			EloriaProtocol.ServerMessage.ELORIA_QUEST_ARCHIVE_STATE,

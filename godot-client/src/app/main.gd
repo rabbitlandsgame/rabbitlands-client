@@ -166,6 +166,7 @@ const LanternMineLightingScript := preload("res://src/world/lantern_mine_lightin
 const LightMarkerBudgetScript := preload("res://src/world/light_marker_budget.gd")
 const SecretSectionsScript := preload("res://src/world/secret_sections.gd")
 const DescentFogScript := preload("res://src/world/descent_fog.gd")
+const DescentFloorsScript := preload("res://src/world/descent_floors.gd")
 const OccluderFadeScript := preload("res://src/world/occluder_fade_manager.gd")
 const WorldDistanceScript := preload("res://src/world/world_distance.gd")
 const CameraShaderWarmup := preload("res://src/world/camera_shader_warmup.gd")
@@ -951,6 +952,13 @@ var _descent_fog_node: MeshInstance3D
 var _descent_fog_cells: ImageTexture
 var _descent_fog_picture: Dictionary = {}
 var _descent_fog_key := ""
+## A procedural descent's floors, built from their layouts on its frame map
+## (descent_layout_v1; `_sync_descent_floors`).
+var descent_floors: RefCounted = DescentFloorsScript.new()
+var _descent_floors_snap_queued := false
+## The manifest the last finished map load bound: layouts arriving while a map
+## is still loading wait for `_on_world_loaded` to build them.
+var _descent_bound_manifest: WorldManifest
 ## The party's other members by name, refreshed each culling pass: the fog
 ## never hides a party member (bots included).
 var _descent_party_names: Dictionary = {}
@@ -5192,6 +5200,7 @@ func _clear_world_presentation(retain_map_resources := false) -> void:
 	_clear_boss_mechanic_cues()
 	lantern_mine_lighting.clear()
 	_clear_descent_fog()
+	descent_floors.call("clear")
 	campaign_rescue.clear()
 	_campaign_world_key = []
 	# The disconnect console still belongs to this session. Keep its terrain,
@@ -6856,6 +6865,8 @@ func _on_state_changed(path: StringName) -> void:
 			_queue_map_picture_warmup()
 		&"descent":
 			_sync_descent_fog()
+		&"descent_layout":
+			_sync_descent_floors()
 		&"lantern_tutorial":
 			quest_trail.apply_state(AppState.lantern_tutorial, adapter, AppState.current_map)
 			if AppState.lantern_tutorial.get("active", false) and AppState.lantern_tutorial.get("ring_training", false):
@@ -7530,6 +7541,11 @@ func _on_world_loaded(manifest: WorldManifest) -> void:
 		LookSky.install(manifest, world_environment)
 	if not _continuous_map_handoff:
 		WorldEnvironmentBinder.apply_camera(manifest, camera_rig)
+	# A procedural descent's frame: its floors are built before the lights,
+	# cutaway, sections and pictures below read them from the manifest.
+	_descent_bound_manifest = manifest
+	if _build_descent_floors(manifest):
+		_queue_descent_floor_snap()
 	_bind_light_markers(manifest)
 	if presentation_effects != null:
 		presentation_effects.bind(manifest)
@@ -9976,8 +9992,13 @@ func _install_map_picture(manifest: WorldManifest) -> void:
 	var extent: Rect2 = MapPicture.extent(minimap, tab_map) if texture != null else Rect2()
 	_map_picture_height = MapPicture.height_below(manifest.data)
 	if texture == null or extent.size.x <= 0.0 or extent.size.y <= 0.0:
-		_map_picture = _map_background_catalog.picture(AppState.current_map,
-			secret_sections.current_section(), _map_picture_height)
+		# A procedural descent floor has no baked picture: its builder drew one.
+		_map_picture = descent_floors.call("picture", secret_sections.current_section())
+		if _map_picture.is_empty():
+			_map_picture = _map_background_catalog.picture(AppState.current_map,
+				secret_sections.current_section(), _map_picture_height)
+		else:
+			_map_picture["height"] = _map_picture_height
 	else:
 		_map_picture = {"texture": texture, "extent": extent, "height": _map_picture_height,
 			"transform": world_root.global_transform}
@@ -11579,6 +11600,67 @@ func _remove_descent_fog_presentation() -> void:
 	_descent_fog_node = null
 	_descent_fog_cells = null
 	_descent_fog_picture = {}
+
+
+## Builds the procedural descent floors whose layouts have arrived on the
+## loaded frame (and drops another run's); true when what is drawn changed.
+## The floors stand under the frame's own scene root, so they go with it when
+## the map is parked or freed.
+func _build_descent_floors(manifest: WorldManifest) -> bool:
+	if manifest == null or world_loader.world_root == null or not DescentFloorsScript.applies(manifest):
+		return false
+	var changed: bool = descent_floors.call("sync", world_loader.world_root, manifest, adapter,
+		AppState.descent_layouts, AppState.descent_layout_run)
+	var built := world_loader.world_root.get_node_or_null(DescentFloorsScript.NODE_NAME) as Node3D
+	if built != null:
+		# Laid out in Main's world frame, as the adapter places everything.
+		built.global_transform = world_root.global_transform
+	return changed
+
+
+## A layout arrived (or the run closed) while the frame was already loaded:
+## build it, then show the floor as a loaded map is shown - its lights,
+## cutaway, sections, fade, map pictures and fog - and settle whatever stands
+## on it once its walk surface is in the physics space.
+func _sync_descent_floors() -> void:
+	var manifest: WorldManifest = world_loader.manifest if world_loader != null else null
+	if manifest == null or manifest != _descent_bound_manifest:
+		return
+	if loaded_server_map != AppState.current_map or not _build_descent_floors(manifest):
+		return
+	_bind_light_markers(manifest)
+	_configure_interior_cutaway(manifest)
+	_configure_secret_sections(manifest)
+	occluder_fade.reset()
+	_configure_occluder_fade(manifest)
+	_configure_full_map(manifest)
+	_install_map_picture(manifest)
+	_descent_fog_key = ""
+	_sync_descent_fog()
+	_queue_descent_floor_snap()
+
+
+## Whatever stands on a floor just built is grounded on it again once its walk
+## collider is in the physics space (the next physics step): the local player
+## counts as arrived only on a surface (`_grounded_actors`).
+func _queue_descent_floor_snap() -> void:
+	if not _descent_floors_snap_queued:
+		_descent_floors_snap_queued = true
+		_snap_onto_descent_floors.call_deferred()
+
+
+func _snap_onto_descent_floors() -> void:
+	if not is_inside_tree():
+		_descent_floors_snap_queued = false
+		return
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	_descent_floors_snap_queued = false
+	if not is_inside_tree():
+		return
+	_snap_all_actors_to_surface()
+	_snap_all_ground_bags_to_surface()
+	_snap_all_map_objects_to_surface()
 
 
 ## Forgets the fog with the session (or the client): the next state rebuilds it.

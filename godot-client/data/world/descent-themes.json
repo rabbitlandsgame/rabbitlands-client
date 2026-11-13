@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "_about": "How src/world/descent_floor_builder.gd draws a procedural descent floor (descent_layout_v1) in each underground theme the server's generator names (eloria/descent.py DRESSING). The shell - floor, low rock faces, stair wells and flights - is built at runtime from the server's layout; everything standing on it is a reviewed Meshy kit piece from `assets`. Values follow the baked Serpent themes of build_underground.py THEMES (catacomb, undercity, sunken) and its KIT_LIGHTS, which drew The Serpent Deep's pool until 2026-11-13. Floor textures are LookProfile class textures; minimap colours are RGB.",
+  "assets": {
+    "incense_brazier": "res://assets/world/underground/incense_brazier.glb",
+    "serpent_pillar": "res://assets/world/underground/serpent_pillar.glb",
+    "serpent_obelisk": "res://assets/world/underground/serpent_obelisk.glb",
+    "serpent_frieze": "res://assets/world/underground/serpent_frieze.glb",
+    "crate_stack": "res://assets/world/underground/crate_stack.glb",
+    "grave_markers": "res://assets/world/underground/grave_markers.glb",
+    "candle_stake": "res://assets/world/underground/candle_stake.glb",
+    "stone_windbreak": "res://assets/world/underground/stone_windbreak.glb",
+    "terracotta_pots": "res://assets/world/underground/terracotta_pots.glb",
+    "weed_rocks": "res://assets/world/underground/weed_rocks.glb",
+    "serpent_rubble": "res://assets/world/underground/serpent_rubble.glb",
+    "serpent_column_ruin": "res://assets/world/underground/serpent_column_ruin.glb",
+    "sun_stela": "res://assets/world/underground/sun_stela.glb",
+    "clay_jars": "res://assets/world/underground/clay_jars.glb"
+  },
+  "textures": {
+    "rock": "res://assets/world/descent/shell/serpent_rock_albedo.png",
+    "tread": "res://assets/world/descent/shell/serpent_tread_albedo.png"
+  },
+  "lamps": {
+    "candle_stake": {"color": [1, 0.66, 0.34], "energy": 0.9, "range": 7, "height": 1.35},
+    "incense_brazier": {"color": [1, 0.58, 0.28], "energy": 2.0, "range": 11, "height": 1.4}
+  },
+  "themes": {
+    "catacomb": {
+      "wallHeight": 3.6, "spacing": 3.0,
+      "floor": {"texture": "flagstone", "tint": [0.60, 0.64, 0.54]},
+      "rockLift": [1.35, 1.45, 1.3],
+      "wallRocks": [{"asset": "serpent_frieze", "proud": 0.5, "align": true}, {"asset": "serpent_obelisk", "proud": 1.1},
+                    {"asset": "serpent_frieze", "proud": 0.5, "align": true}, {"asset": "serpent_pillar", "proud": 1.2},
+                    {"asset": "serpent_frieze", "proud": 0.5, "align": true}, {"asset": "serpent_rubble", "proud": 1.6}],
+      "pillar": "serpent_pillar",
+      "minimap": {"floor": [84, 78, 60], "edge": [170, 160, 120], "rock": [16, 15, 13], "well": [8, 8, 9]}
+    },
+    "undercity": {
+      "wallHeight": 4.4, "spacing": 3.2,
+      "floor": {"texture": "flagstone", "tint": [0.56, 0.60, 0.50]},
+      "rockLift": [1.3, 1.4, 1.25],
+      "wallRocks": [{"asset": "serpent_frieze", "proud": 0.5, "align": true}, {"asset": "serpent_rubble", "proud": 1.6},
+                    {"asset": "serpent_column_ruin", "proud": 1.0}, {"asset": "stone_windbreak", "proud": 0.5, "align": true},
+                    {"asset": "serpent_obelisk", "proud": 1.1}, {"asset": "serpent_pillar", "proud": 1.2}],
+      "pillar": "serpent_pillar",
+      "minimap": {"floor": [80, 80, 60], "edge": [164, 158, 118], "rock": [16, 15, 13], "well": [8, 8, 9]}
+    },
+    "sunken": {
+      "wallHeight": 5.0, "spacing": 3.0,
+      "floor": {"texture": "flagstone", "tint": [0.50, 0.58, 0.52]},
+      "rockLift": [1.2, 1.4, 1.3],
+      "lampColour": [0.5, 1, 0.8],
+      "wallRocks": [{"asset": "serpent_frieze", "proud": 0.5, "align": true}, {"asset": "weed_rocks", "proud": 1.5},
+                    {"asset": "serpent_pillar", "proud": 1.2}, {"asset": "serpent_frieze", "proud": 0.5, "align": true},
+                    {"asset": "serpent_obelisk", "proud": 1.1}, {"asset": "weed_rocks", "proud": 1.5}],
+      "pillar": "serpent_pillar",
+      "minimap": {"floor": [66, 80, 72], "edge": [140, 162, 142], "rock": [12, 15, 14], "well": [6, 8, 8]}
+    }
+  }
+}

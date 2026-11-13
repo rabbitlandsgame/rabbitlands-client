@@ -4,7 +4,9 @@
 Existing certified regional detail images are reused. Other maps are rendered
 from their current published GLBs with the maintained cartography chunk reader
 and native CPU rasterizer. Sectioned maps publish only separately filtered
-section images, never an aggregate image that could reveal other rooms.
+section images, never an aggregate image that could reveal other rooms. A
+procedural descent's frame has nothing to render: the client draws each floor's
+picture from its layout, and its row says so (map_background_package.runtime_row).
 
 This adds pictures and an independent catalog; it changes no world geometry,
 materials, collision, map manifests, or geometry-cache policy.
@@ -281,6 +283,10 @@ def main(argv=None):
             continue
         started = time.monotonic()
         inputs = Contract.source_inputs(ROOT, definition["manifest"])
+        if Contract.runtime_pictures(definition["document"]):
+            catalog["maps"][identity] = Contract.runtime_row(definition["document"], inputs)
+            print(f"{identity}: drawn at runtime ({Contract.runtime_pictures(definition['document'])})", flush=True)
+            continue
         if not args.force and previous.get("renderSettings") == settings and _current(
                 catalog["maps"].get(identity), definition, inputs, ROOT,
                 previous.get("rendererInputs"), current_renderer):

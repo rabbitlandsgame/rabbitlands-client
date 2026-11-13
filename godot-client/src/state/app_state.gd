@@ -270,6 +270,12 @@ var descent: Dictionary = {}
 var descent_anchor_msec := 0
 ## The boss reward's open offer of three, empty when none is open.
 var descent_reward: Dictionary = {}
+## A procedural descent's floor layouts (descent_layout_v1), section ->
+## decoded layout, all of one run (`descent_layout_run`): DescentFloors draws
+## them. A layout of another run replaces them all; leaving the descent
+## clears them.
+var descent_layouts: Dictionary = {}
+var descent_layout_run := ""
 ## What each player on this map is calling themselves, {actor_id: title}. Kept
 ## apart from the actor's display name, which carries a colour byte, the name
 ## and the guild tag in one string that every client unpicks by hand.
@@ -985,6 +991,8 @@ func _on_connection_state_changed(value: String) -> void:
 		descent.clear()
 		descent_anchor_msec = 0
 		descent_reward.clear()
+		descent_layouts.clear()
+		descent_layout_run = ""
 		actor_titles.clear()
 		actor_occupations.clear()
 		actor_mounts.clear()
@@ -1888,7 +1896,18 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			var floor_state: Dictionary = event.data
 			descent = floor_state.duplicate(true) if bool(floor_state.get("open", false)) else {}
 			descent_anchor_msec = Time.get_ticks_msec() if not descent.is_empty() else 0
+			if descent.is_empty() and not descent_layouts.is_empty():
+				descent_layouts = {}
+				descent_layout_run = ""
+				state_changed.emit(&"descent_layout")
 			state_changed.emit(&"descent")
+		"descent_layout":
+			var layout: Dictionary = event.data
+			if str(layout.run) != descent_layout_run:
+				descent_layouts = {}
+				descent_layout_run = str(layout.run)
+			descent_layouts[str(layout.section)] = layout
+			state_changed.emit(&"descent_layout")
 		"descent_reward":
 			var offer: Dictionary = event.data
 			descent_reward = offer.duplicate(true) if bool(offer.get("open", false)) else {}

@@ -21,10 +21,29 @@ GENERATOR = "eloria-assets/tools/render_map_backgrounds.py"
 RENDERER_REQUIRED_INPUTS = {GENERATOR, "godot-client/tools/map_background_package.py",
                             "godot-client/data/assets/retired_procedural_models.json"}
 HASH = re.compile(r"[0-9a-f]{64}\Z")
+# A map whose pictures the client draws at runtime: a procedural descent's
+# frame (its world.json states `descentFrame`) has no geometry to render, and
+# the client draws each floor's picture from the layout the server sends
+# (godot-client/src/world/descent_floor_builder.gd). Its catalog row says so
+# and carries no image.
+RUNTIME_PICTURES = "descent-layout"
 
 
 class BackgroundError(ValueError):
     pass
+
+
+def runtime_pictures(manifest: dict) -> str:
+    """RUNTIME_PICTURES for a map the client draws its own pictures of, else ''."""
+    return RUNTIME_PICTURES if isinstance(manifest.get("descentFrame"), dict) else ""
+
+
+def runtime_row(manifest: dict, inputs: dict) -> dict:
+    """The catalog row of a map whose pictures are drawn at runtime: its frame and
+    source closure, no image."""
+    low, high = frame_for(manifest)
+    return {"worldMin": low, "worldMax": high, "rendererPolicy": POLICY,
+            "runtime": runtime_pictures(manifest), "sourceInputs": inputs}
 
 
 def read_json(path: Path) -> dict:
@@ -240,6 +259,22 @@ def validate_catalog(root: Path, catalog=None, verify_sources=True, verify_image
             errors.append(f"{identity}: Missing background")
             continue
         manifest = definition["document"]
+        if runtime_pictures(manifest):
+            try:
+                if row.get("runtime") != runtime_pictures(manifest) or row.get("path") or row.get("sections"):
+                    raise BackgroundError("A map drawn at runtime carries no prerendered image")
+                if row.get("rendererPolicy") != POLICY:
+                    raise BackgroundError("Background renderer policy differs")
+                if not _frame_matches(row, frame_for(manifest)):
+                    raise BackgroundError("Background frame differs from MapView")
+                if verify_sources and row.get("sourceInputs") != source_inputs(root, definition["manifest"]):
+                    raise BackgroundError("Background source closure is stale")
+            except (BackgroundError, OSError, KeyError, TypeError) as error:
+                errors.append(f"{identity}: {error}")
+            continue
+        if row.get("runtime"):
+            errors.append(f"{identity}: only a procedural descent frame is drawn at runtime")
+            continue
         sectioned = bool(manifest.get("secret") or manifest.get("sectioned"))
         sections = {s["id"] for s in manifest.get("sections", []) if isinstance(s, dict) and s.get("id")} if sectioned else set()
         try:

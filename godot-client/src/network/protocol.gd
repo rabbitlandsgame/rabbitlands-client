@@ -147,7 +147,8 @@ enum ServerMessage {
 	ELORIA_APPEARANCE_PROTOCOL = 190,
 	ELORIA_GAUNTLET_PROGRESS_STATE = 189,
 	## A party descent (descent_v1): the floor, its fog of war and the clock,
-	## or the boss reward's three-way pick. JSON, `kind` "state" or "reward".
+	## or the boss reward's three-way pick. JSON, `kind` "state" or "reward";
+	## "layout" (descent_layout_v1) is a procedural floor's shell to draw.
 	ELORIA_DESCENT_STATE = 188,
 	ELORIA_STORAGE_INSTANCES = 187,
 	ELORIA_ENCHANTING_RECOVERY = 186,
@@ -360,6 +361,10 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	# ELORIA_DESCENT_STATE: a descent's floor, fog of war, clock and reward
 	# pick. The server admits nobody to a descent without it.
 	"descent_v1",
+	# ELORIA_DESCENT_STATE `kind` "layout": the client draws a procedural
+	# descent's floors from their layouts (DescentFloors). A procedural
+	# descent admits nobody without it.
+	"descent_layout_v1",
 	"perk_catalog_v3",
 	"player_info_v1",
 	"achievements_window_v1",
@@ -1920,9 +1925,12 @@ static func decode_gauntlet_ready(payload: PackedByteArray) -> Dictionary:
 ## descent, its grid and explored cells (decoded into `mask`, the bits as
 ## sent), the clock and the boss; `open` false when the player left. `kind`
 ## "reward": the boss reward's offer of three, answered with
-## `#descent pick <offer> <index>`; `open` false closes it.
+## `#descent pick <offer> <index>`; `open` false closes it. `kind` "layout"
+## (descent_layout_v1): a procedural floor's shell (`_decode_descent_layout`).
 static func decode_descent(payload: PackedByteArray) -> Dictionary:
 	var state: Variant = JSON.parse_string(payload.get_string_from_utf8())
+	if state is Dictionary and state.get("kind") == "layout" and state.get("version") == 1.0:
+		return _decode_descent_layout(state)
 	if not state is Dictionary or state.get("version") != 1.0 or not state.get("open") is bool \
 			or not (state.get("kind") in ["state", "reward"]):
 		return {"type": "invalid", "error": "descent_shape"}
@@ -1962,6 +1970,70 @@ static func decode_descent(payload: PackedByteArray) -> Dictionary:
 		"explored": state.explored, "mask": mask,
 		"time_left": int(state.time_left), "boss": str(state.get("boss", ""))}
 	return {"type": "descent_state", "data": data}
+
+## A procedural descent floor's layout (descent_layout_v1; the server's
+## `DescentFloor.client_layout` and Descent-Runs.md): where it stands on the
+## map (`origin`, the server tile of its top-left cell), its grid of `width` x
+## `height` cells of `cell_tiles` tiles, one code a cell (0 rock, 1 room,
+## 2 corridor, 3 doorway, 4 pillar, 5 chasm; zlib, base64), the stairs set into
+## its walls and the kit pieces dressing it. `cells` comes back decoded.
+static func _decode_descent_layout(state: Dictionary) -> Dictionary:
+	for key: String in ["run", "section", "cells", "theme"]:
+		if not state.get(key) is String or str(state[key]).is_empty():
+			return {"type": "invalid", "error": "descent_layout_text"}
+	if state.has("style") and not state.style is String:
+		return {"type": "invalid", "error": "descent_layout_text"}
+	for key: String in ["floor", "cell_tiles", "width", "height"]:
+		if not _whole_number(state.get(key)) or float(state[key]) < 1.0:
+			return {"type": "invalid", "error": "descent_layout_number"}
+	var width := int(state.width)
+	var height := int(state.height)
+	if width > DescentFog.MAX_CELLS or height > DescentFog.MAX_CELLS or int(state.cell_tiles) > 8:
+		return {"type": "invalid", "error": "descent_layout_number"}
+	var origin: Variant = state.get("origin")
+	if not origin is Array or (origin as Array).size() != 2 or not _whole_number(origin[0]) \
+			or not _whole_number(origin[1]) or float(origin[0]) < 0.0 or float(origin[1]) < 0.0:
+		return {"type": "invalid", "error": "descent_layout_origin"}
+	var text := str(state.cells)
+	if text.length() % 4 != 0:
+		return {"type": "invalid", "error": "descent_layout_cells"}
+	for index: int in range(text.length()):
+		if not DescentFog.BASE64_ALPHABET.contains(text[index]) and text[index] != "=":
+			return {"type": "invalid", "error": "descent_layout_cells"}
+	var packed := Marshalls.base64_to_raw(text)
+	var cells := packed.decompress_dynamic(width * height + 1, FileAccess.COMPRESSION_DEFLATE) \
+		if not packed.is_empty() else PackedByteArray()
+	if cells.size() != width * height:
+		return {"type": "invalid", "error": "descent_layout_cells"}
+	for code: int in cells:
+		if code > 5:
+			return {"type": "invalid", "error": "descent_layout_cells"}
+	var stairs: Array[Dictionary] = []
+	for raw: Variant in state.get("stairs", []) if state.get("stairs", []) is Array else [null]:
+		if not raw is Dictionary or not (raw.get("way") in ["up", "down"]) \
+				or not _whole_number(raw.get("x")) or not _whole_number(raw.get("y")) \
+				or not raw.get("facing") is Array or (raw.facing as Array).size() != 2 \
+				or not _whole_number(raw.facing[0]) or not _whole_number(raw.facing[1]) \
+				or absi(int(raw.facing[0])) + absi(int(raw.facing[1])) != 1:
+			return {"type": "invalid", "error": "descent_layout_stair"}
+		stairs.append({"way": str(raw.way), "x": int(raw.x), "y": int(raw.y),
+			"facing": [int(raw.facing[0]), int(raw.facing[1])]})
+	var props: Array[Dictionary] = []
+	for raw: Variant in state.get("props", []) if state.get("props", []) is Array else [null]:
+		if not raw is Dictionary or not raw.get("asset") is String \
+				or not (raw.get("x") is float or raw.get("x") is int) \
+				or not (raw.get("y") is float or raw.get("y") is int) \
+				or not (raw.get("yaw", 0) is float or raw.get("yaw", 0) is int):
+			return {"type": "invalid", "error": "descent_layout_prop"}
+		props.append({"asset": str(raw.asset), "x": float(raw.x), "y": float(raw.y),
+			"yaw": float(raw.get("yaw", 0))})
+	return {"type": "descent_layout", "data": {"version": 1, "kind": "layout",
+		"run": str(state.run), "dungeon": str(state.get("dungeon", "")), "floor": int(state.floor),
+		"section": str(state.section), "origin": [int(origin[0]), int(origin[1])],
+		"cell_tiles": int(state.cell_tiles), "width": width, "height": height,
+		"theme": str(state.theme), "style": str(state.get("style", "")), "cells": cells,
+		"stairs": stairs, "props": props, "dressing_seed": int(state.get("dressing_seed", 0))
+		if _whole_number(state.get("dressing_seed", 0)) else 0}}
 
 static func _decode_descent_reward(state: Dictionary) -> Dictionary:
 	if not state.get("offer") is String or str(state.offer).is_empty():

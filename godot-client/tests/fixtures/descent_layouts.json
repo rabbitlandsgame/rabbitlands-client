@@ -1,0 +1,807 @@
+{
+ "_about": "Three floors of one procedural Serpent Deep run (server eloria/descent.py procedural_run, run seed 20261113) as the server sends them (message 188, kind layout): floor 1 (catacomb), floor 5 (sunken halls) and the boss floor. `_test` (not part of the message; the protocol ignores it) holds map tiles from the server's own features for render fixtures: the landing, stairs, the boss floor's dais and way out, and the largest room's centre. Regenerate from the server when the layout contract changes.",
+ "layouts": [
+  {
+   "version": 1,
+   "kind": "layout",
+   "run": "f1x7",
+   "dungeon": "serpent_deep",
+   "floor": 1,
+   "section": "serpent_deep_f1",
+   "origin": [
+    24,
+    24
+   ],
+   "layout_version": 1,
+   "theme": "catacomb",
+   "style": "crypt",
+   "cell_tiles": 2,
+   "width": 52,
+   "height": 52,
+   "cells": "eNrllNsKwCAMQ13z//+8DQRvsbYibmDfhh6NTdYQjqwr1sdMsyoi2MPMaNvH2NrqYkIAkH+aGCl3zTDlrRbGmDPJKiYAa5jq/vwFJqay3MUginvdgriYt6hFiraurUoPurYOUsldVVPZiYKayg4zc0/ZqxkGXoZEhT8neQ8WL+ZPYkCFsBwgaVvK1AtjphUt0JtEGWmZeo86Xp8fk52rRrQYOEbGOAxN49V14gnMX+sGFDsDOQ==",
+   "stairs": [
+    {
+     "way": "up",
+     "x": 15,
+     "y": 95,
+     "facing": [
+      0,
+      1
+     ]
+    },
+    {
+     "way": "down",
+     "x": 93,
+     "y": 77,
+     "facing": [
+      1,
+      0
+     ]
+    }
+   ],
+   "props": [
+    {
+     "asset": "candle_stake",
+     "x": 45.4,
+     "y": 75.4,
+     "yaw": 0,
+     "block": 0.4
+    },
+    {
+     "asset": "candle_stake",
+     "x": 12.6,
+     "y": 40.6,
+     "yaw": 0,
+     "block": 0.4
+    },
+    {
+     "asset": "candle_stake",
+     "x": 21.4,
+     "y": 40.6,
+     "yaw": 0,
+     "block": 0.4
+    },
+    {
+     "asset": "candle_stake",
+     "x": 21.4,
+     "y": 53.4,
+     "yaw": 0,
+     "block": 0.4
+    },
+    {
+     "asset": "grave_markers",
+     "x": 12.55,
+     "y": 45.0,
+     "yaw": 90,
+     "block": 1.0
+    },
+    {
+     "asset": "grave_markers",
+     "x": 21.45,
+     "y": 45.0,
+     "yaw": 270,
+     "block": 1.0
+    },
+    {
+     "asset": "candle_stake",
+     "x": 36.6,
+     "y": 42.6,
+     "yaw": 0,
+     "block": 0.4
+    },
+    {
+     "asset": "candle_stake",
+     "x": 36.6,
+     "y": 14.6,
+     "yaw": 0,
+     "block": 0.4
+    },
+    {
+     "asset": "candle_stake",
+     "x": 49.4,
+     "y": 14.6,
+     "yaw": 0,
+     "block": 0.4
+    },
+    {
+     "asset": "candle_stake",
+     "x": 36.6,
+     "y": 27.4,
+     "yaw": 0,
+     "block": 0.4
+    },
+    {
+     "asset": "candle_stake",
+     "x": 49.4,
+     "y": 27.4,
+     "yaw": 0,
+     "block": 0.4
+    },
+    {
+     "asset": "grave_markers",
+     "x": 36.55,
+     "y": 19.0,
+     "yaw": 90,
+     "block": 1.0
+    },
+    {
+     "asset": "grave_markers",
+     "x": 49.45,
+     "y": 19.0,
+     "yaw": 270,
+     "block": 1.0
+    },
+    {
+     "asset": "clay_jars",
+     "x": 41.0,
+     "y": 15.0,
+     "yaw": 180,
+     "block": 0.6
+    },
+    {
+     "asset": "terracotta_pots",
+     "x": 37.0,
+     "y": 21.0,
+     "yaw": 0,
+     "block": 0.6
+    },
+    {
+     "asset": "candle_stake",
+     "x": 78.6,
+     "y": 8.6,
+     "yaw": 0,
+     "block": 0.4
+    },
+    {
+     "asset": "candle_stake",
+     "x": 93.4,
+     "y": 8.6,
+     "yaw": 0,
+     "block": 0.4
+    },
+    {
+     "asset": "candle_stake",
+     "x": 78.6,
+     "y": 23.4,
+     "yaw": 0,
+     "block": 0.4
+    },
+    {
+     "asset": "candle_stake",
+     "x": 93.4,
+     "y": 23.4,
+     "yaw": 0,
+     "block": 0.4
+    },
+    {
+     "asset": "grave_markers",
+     "x": 93.45,
+     "y": 13.0,
+     "yaw": 270,
+     "block": 1.0
+    },
+    {
+     "asset": "grave_markers",
+     "x": 93.45,
+     "y": 19.0,
+     "yaw": 270,
+     "block": 1.0
+    },
+    {
+     "asset": "terracotta_pots",
+     "x": 81.0,
+     "y": 23.0,
+     "yaw": 0,
+     "block": 0.6
+    },
+    {
+     "asset": "terracotta_pots",
+     "x": 91.0,
+     "y": 9.0,
+     "yaw": 270,
+     "block": 0.6
+    },
+    {
+     "asset": "candle_stake",
+     "x": 27.4,
+     "y": 60.6,
+     "yaw": 0,
+     "block": 0.4
+    },
+    {
+     "asset": "candle_stake",
+     "x": 27.4,
+     "y": 75.4,
+     "yaw": 0,
+     "block": 0.4
+    },
+    {
+     "asset": "candle_stake",
+     "x": 63.4,
+     "y": 85.4,
+     "yaw": 0,
+     "block": 0.4
+    },
+    {
+     "asset": "candle_stake",
+     "x": 72.6,
+     "y": 54.6,
+     "yaw": 0,
+     "block": 0.4
+    },
+    {
+     "asset": "candle_stake",
+     "x": 83.4,
+     "y": 54.6,
+     "yaw": 0,
+     "block": 0.4
+    },
+    {
+     "asset": "candle_stake",
+     "x": 72.6,
+     "y": 63.4,
+     "yaw": 0,
+     "block": 0.4
+    },
+    {
+     "asset": "candle_stake",
+     "x": 83.4,
+     "y": 63.4,
+     "yaw": 0,
+     "block": 0.4
+    },
+    {
+     "asset": "grave_markers",
+     "x": 72.55,
+     "y": 59.0,
+     "yaw": 90,
+     "block": 1.0
+    },
+    {
+     "asset": "grave_markers",
+     "x": 83.45,
+     "y": 59.0,
+     "yaw": 270,
+     "block": 1.0
+    },
+    {
+     "asset": "candle_stake",
+     "x": 8.6,
+     "y": 88.6,
+     "yaw": 0,
+     "block": 0.4
+    },
+    {
+     "asset": "candle_stake",
+     "x": 19.4,
+     "y": 88.6,
+     "yaw": 0,
+     "block": 0.4
+    },
+    {
+     "asset": "candle_stake",
+     "x": 8.6,
+     "y": 97.4,
+     "yaw": 0,
+     "block": 0.4
+    },
+    {
+     "asset": "candle_stake",
+     "x": 19.4,
+     "y": 97.4,
+     "yaw": 0,
+     "block": 0.4
+    }
+   ],
+   "dressing_seed": 1117008501,
+   "_test": {
+    "landing": [
+     39,
+     115
+    ],
+    "upstair": [
+     39,
+     119
+    ],
+    "exit": [
+     117,
+     101
+    ],
+    "largest_room": [
+     111,
+     41
+    ]
+   }
+  },
+  {
+   "version": 1,
+   "kind": "layout",
+   "run": "f1x7",
+   "dungeon": "serpent_deep",
+   "floor": 5,
+   "section": "serpent_deep_f5",
+   "origin": [
+    168,
+    168
+   ],
+   "layout_version": 1,
+   "theme": "sunken",
+   "style": "halls",
+   "cell_tiles": 2,
+   "width": 64,
+   "height": 64,
+   "cells": "eNrtllsOhCAMRaF1/2seNAoj9No2RJmM3PgFHCx9QQhTU69XPKSvGsbnNUz0Rj6Lfo9PYrYmm8yLg7fwLJpq5ZGfbuGpET/MywcIA3lP/JBT/pAXnQI8RZbOHFFTaHlxnYtf9saYEnRVSVTP/wvGV3zaHtuft0L8Nqvy6PzApDJ2nufDG6V6l+3TbhlQ/6z2+V7+nEooUtHc6q3tw8yD9oH5Oo5kv2m6+Drke32Qn/96eDj4tg5dfF0RnrDpdeTgu17Ew/jQiU+Z9AHHAwRh",
+   "stairs": [
+    {
+     "way": "up",
+     "x": 109,
+     "y": 53,
+     "facing": [
+      1,
+      0
+     ]
+    },
+    {
+     "way": "down",
+     "x": 29,
+     "y": 27,
+     "facing": [
+      1,
+      0
+     ]
+    }
+   ],
+   "props": [
+    {
+     "asset": "incense_brazier",
+     "x": 50.6,
+     "y": 108.6,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 63.4,
+     "y": 115.4,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "serpent_rubble",
+     "x": 63.0,
+     "y": 111.0,
+     "yaw": 180,
+     "block": 0.8
+    },
+    {
+     "asset": "serpent_rubble",
+     "x": 53.0,
+     "y": 109.0,
+     "yaw": 0,
+     "block": 0.8
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 12.6,
+     "y": 74.6,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 12.6,
+     "y": 83.4,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 25.4,
+     "y": 83.4,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "serpent_obelisk",
+     "x": 12.55,
+     "y": 79.0,
+     "yaw": 90,
+     "block": 1.2
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 14.6,
+     "y": 24.6,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 14.6,
+     "y": 41.4,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 31.4,
+     "y": 41.4,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "serpent_obelisk",
+     "x": 14.55,
+     "y": 29.0,
+     "yaw": 90,
+     "block": 1.2
+    },
+    {
+     "asset": "serpent_obelisk",
+     "x": 14.55,
+     "y": 37.0,
+     "yaw": 90,
+     "block": 1.2
+    },
+    {
+     "asset": "serpent_obelisk",
+     "x": 31.45,
+     "y": 37.0,
+     "yaw": 270,
+     "block": 1.2
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 54.6,
+     "y": 72.6,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 73.4,
+     "y": 72.6,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "serpent_obelisk",
+     "x": 73.45,
+     "y": 77.0,
+     "yaw": 270,
+     "block": 1.2
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 111.4,
+     "y": 91.4,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "serpent_obelisk",
+     "x": 111.45,
+     "y": 87.0,
+     "yaw": 270,
+     "block": 1.2
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 34.6,
+     "y": 89.4,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 47.4,
+     "y": 89.4,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "serpent_obelisk",
+     "x": 34.55,
+     "y": 85.0,
+     "yaw": 90,
+     "block": 1.2
+    },
+    {
+     "asset": "serpent_obelisk",
+     "x": 47.45,
+     "y": 85.0,
+     "yaw": 270,
+     "block": 1.2
+    },
+    {
+     "asset": "serpent_rubble",
+     "x": 43.0,
+     "y": 91.0,
+     "yaw": 270,
+     "block": 0.8
+    },
+    {
+     "asset": "serpent_rubble",
+     "x": 45.0,
+     "y": 91.0,
+     "yaw": 180,
+     "block": 0.8
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 100.6,
+     "y": 48.6,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 86.6,
+     "y": 28.6,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 70.6,
+     "y": 96.6,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 89.4,
+     "y": 96.6,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 70.6,
+     "y": 109.4,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 89.4,
+     "y": 109.4,
+     "yaw": 0,
+     "block": 0.5
+    }
+   ],
+   "dressing_seed": 2621559669,
+   "_test": {
+    "landing": [
+     273,
+     221
+    ],
+    "upstair": [
+     277,
+     221
+    ],
+    "exit": [
+     197,
+     195
+    ],
+    "largest_room": [
+     191,
+     201
+    ]
+   }
+  },
+  {
+   "version": 1,
+   "kind": "layout",
+   "run": "f1x7",
+   "dungeon": "serpent_deep",
+   "floor": 6,
+   "section": "serpent_deep_f6",
+   "origin": [
+    320,
+    168
+   ],
+   "layout_version": 1,
+   "theme": "sunken",
+   "style": "boss",
+   "cell_tiles": 2,
+   "width": 44,
+   "height": 76,
+   "cells": "eNrtlFEKgDAMQ7u1uf+V/RIdm6NxCgrJ96NkyVqzbwml1xVqBEvMNbvpIXYW07lxngvGL/I5APm5Uzba5zH5gsgXWO+4YWPeMUpfhq37Hf8dLGfG9HbI3dOLV2t9hc15SC6m2EG+RvQmVqxYsWKfuKnMqRb7C23h0QOG",
+   "stairs": [
+    {
+     "way": "up",
+     "x": 45,
+     "y": 141,
+     "facing": [
+      0,
+      1
+     ]
+    }
+   ],
+   "props": [
+    {
+     "asset": "incense_brazier",
+     "x": 26.6,
+     "y": 6.6,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 63.4,
+     "y": 6.6,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 26.6,
+     "y": 43.4,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 63.4,
+     "y": 43.4,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "serpent_obelisk",
+     "x": 26.55,
+     "y": 11.0,
+     "yaw": 90,
+     "block": 1.2
+    },
+    {
+     "asset": "serpent_obelisk",
+     "x": 26.55,
+     "y": 19.0,
+     "yaw": 90,
+     "block": 1.2
+    },
+    {
+     "asset": "serpent_obelisk",
+     "x": 26.55,
+     "y": 27.0,
+     "yaw": 90,
+     "block": 1.2
+    },
+    {
+     "asset": "serpent_obelisk",
+     "x": 26.55,
+     "y": 35.0,
+     "yaw": 90,
+     "block": 1.2
+    },
+    {
+     "asset": "serpent_obelisk",
+     "x": 63.45,
+     "y": 11.0,
+     "yaw": 270,
+     "block": 1.2
+    },
+    {
+     "asset": "serpent_obelisk",
+     "x": 63.45,
+     "y": 19.0,
+     "yaw": 270,
+     "block": 1.2
+    },
+    {
+     "asset": "serpent_obelisk",
+     "x": 63.45,
+     "y": 27.0,
+     "yaw": 270,
+     "block": 1.2
+    },
+    {
+     "asset": "serpent_obelisk",
+     "x": 63.45,
+     "y": 35.0,
+     "yaw": 270,
+     "block": 1.2
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 30.6,
+     "y": 52.6,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 57.4,
+     "y": 52.6,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 30.6,
+     "y": 65.4,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 57.4,
+     "y": 65.4,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "serpent_obelisk",
+     "x": 30.55,
+     "y": 57.0,
+     "yaw": 90,
+     "block": 1.2
+    },
+    {
+     "asset": "serpent_obelisk",
+     "x": 57.45,
+     "y": 57.0,
+     "yaw": 270,
+     "block": 1.2
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 34.6,
+     "y": 130.6,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 55.4,
+     "y": 130.6,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 34.6,
+     "y": 143.4,
+     "yaw": 0,
+     "block": 0.5
+    },
+    {
+     "asset": "incense_brazier",
+     "x": 55.4,
+     "y": 143.4,
+     "yaw": 0,
+     "block": 0.5
+    }
+   ],
+   "dressing_seed": 3949603362,
+   "_test": {
+    "landing": [
+     365,
+     305
+    ],
+    "upstair": [
+     365,
+     309
+    ],
+    "dais": [
+     365,
+     179
+    ],
+    "portal": [
+     371,
+     181
+    ],
+    "boss": [
+     365,
+     189
+    ],
+    "largest_room": [
+     365,
+     193
+    ]
+   }
+  }
+ ]
+}
