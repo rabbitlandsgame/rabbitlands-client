@@ -59,17 +59,17 @@ func load_profile(key: String) -> void:
 						continue
 					var id := int(saved[index].get("id", -1))
 					if id == -1 or id in catalog.spell_ids():
-						slots[index] = {"id": id, "power": clampi(int(saved[index].get("power", 1)), 1, 10)}
+						slots[index] = {"id": id, "power": catalog.normalized_power(id, int(saved[index].get("power", 1)))}
 		var saved_powers: Variant = config.get_value(profile, "powers", {})
 		if saved_powers is Dictionary:
 			for id in catalog.spell_ids():
-				powers[id] = clampi(int(saved_powers.get(id, 1)), 1, 10)
+				powers[id] = catalog.normalized_power(id, int(saved_powers.get(id, 1)))
 	changed.emit()
 
 func assign_slot(index: int, spell_id: int, power: int) -> void:
 	if index < 0 or index >= SLOT_COUNT or (spell_id != -1 and spell_id not in catalog.spell_ids()):
 		return
-	slots[index] = {"id": spell_id, "power": clampi(power, 1, 10)}
+	slots[index] = {"id": spell_id, "power": catalog.normalized_power(spell_id, power)}
 	_save()
 	changed.emit()
 
@@ -103,10 +103,10 @@ static func _technique_key(key: String) -> bool:
 	return true
 
 func power_for(spell_id: int) -> int:
-	return int(powers.get(spell_id, 1))
+	return catalog.normalized_power(spell_id, int(powers.get(spell_id, 1)))
 
 func remember_power(spell_id: int, power: int) -> void:
-	powers[spell_id] = clampi(power, 1, 10)
+	powers[spell_id] = catalog.normalized_power(spell_id, power)
 	_save()
 	changed.emit()
 

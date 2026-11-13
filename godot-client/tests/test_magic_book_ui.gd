@@ -49,10 +49,12 @@ func run() -> void:
 	check(not selector.popup.get_ok_button().disabled and selector.description.text.contains("72 Gold Coins"), "Transmute previews selected quantity and exact gold")
 	await capture_ui("transmute.png")
 	selector.cancel()
-	selector.pending = {"op":"cast","id":9,"power":5}
+	selector.begin(9, 1)
+	check(selector.pending.get("power") == 1, "Recall arms its destination chooser at its only level")
 	root.get_node("AppState").call("_on_packet", 212, JSON.stringify({"kind":"recall","id":9,
 		"entries":[{"key":"forest:20:21","name":"Amberwood","map":"forest","x":20,"y":21}]}).to_utf8_buffer())
 	check(selector.choices.get_item_text(0).contains("Amberwood") and not selector.quantity.visible, "Recall shows portal entrance choices")
+	check(not selector.description.text.contains("Power"), "Recall confirmation does not advertise power tiers")
 	await capture_ui("recall.png")
 	selector.cancel()
 	var window: Control = main.get("spells_window")

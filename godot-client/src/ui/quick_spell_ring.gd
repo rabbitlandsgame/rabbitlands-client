@@ -163,7 +163,7 @@ func resolve_spell(family: String) -> int:
 
 func power_for(id: int) -> int:
 	var family: String = loadout.catalog.effect_for(id)
-	return clampi(int(preferences.powers.get(family, loadout.wheel_power)), 1, _power_limit(family))
+	return loadout.catalog.normalized_power(id, clampi(int(preferences.powers.get(family, loadout.wheel_power)), 1, _power_limit(family)))
 
 func change_power(delta: int) -> void:
 	if not visible: return
@@ -172,6 +172,7 @@ func change_power(delta: int) -> void:
 		return
 	var id := resolve_spell(effect)
 	if id < 0: return
+	if loadout.catalog.max_power(id) == 1: return
 	preferences.powers[effect] = clampi(power_for(id) + delta, 1, _power_limit(effect))
 	preferences_changed.emit()
 	_update_details()
@@ -222,7 +223,7 @@ func choose(index: int) -> void:
 
 func _cast(id: int, power: int) -> void:
 	last_spell = id
-	last_power = clampi(power, 1, _power_limit(loadout.catalog.effect_for(id)))
+	last_power = loadout.catalog.normalized_power(id, clampi(power, 1, _power_limit(loadout.catalog.effect_for(id))))
 	preferences.scopes[loadout.catalog.effect_for(id)] = str(loadout.catalog.spell(id).scope)
 	preferences.powers[loadout.catalog.effect_for(id)] = last_power
 	preferences_changed.emit()
@@ -333,6 +334,7 @@ func _update_details() -> void:
 	var id := resolve_spell(effect) if not effect.is_empty() else -1
 	_preview.text = "Left Shift+Space · repeat" if last_spell >= 0 else "Choose a spell"
 	_power_label.text = "Power %d · Scroll" % int(loadout.wheel_power)
+	_power_label.visible = id < 0 or loadout.catalog.max_power(id) > 1
 	if id >= 0:
 		var definition: Dictionary = loadout.catalog.spell(id)
 		var scope := str(definition.scope)
@@ -356,6 +358,8 @@ func _update_details() -> void:
 		if stage == "effects" and entry.has("value"):
 			var spell_id := resolve_spell(str(entry.value))
 			buttons[index].tooltip_text = "%s · P%d\nClick or %d casts; right click cycles target type." % [loadout.catalog.spell(spell_id).name, power_for(spell_id), index + 1]
+			if loadout.catalog.max_power(spell_id) == 1:
+				buttons[index].tooltip_text = "%s\nClick or %d chooses a destination." % [loadout.catalog.spell(spell_id).name, index + 1]
 
 func _process(_delta: float) -> void:
 	if not visible: return
