@@ -78,9 +78,45 @@ func run() -> void:
 	main.spell_loadout.assign_slot(0, -1, 1)
 	book._assign_button.pressed.emit()
 	check(main.spell_loadout.slots[0].id == -1, "a disabled assignment cannot save a nonexistent tier")
+	# Recall's former high tier must not survive in any saved casting surface.
+	state.stats = {"magic": 30, "magic_nexus": 2, "ether": 30}
+	state.spell_power["recall"] = {"limit": 10, "preferred": 5}
+	main.spell_loadout.powers[9] = 5
+	main.spell_loadout.assign_slot(0, 9, 10)
+	check(main.spell_loadout.slots[0].power == 1 and main.spell_loadout.power_for(9) == 1, "Recall normalizes old slot and book tiers")
+	check(main.spell_catalog.cast_power_limit(9, state.spell_power, state.stats) == 1, "Recall stays single-level even with stale server power state")
+	state.state_changed.emit(&"stats")
+	await process_frame
+	check(not bar.buttons[0].get_node("Power").visible and not bar.buttons[0].tooltip_text.contains("Power"), "Recall quickbar has no tier badge or power tooltip")
+	book._on_spell_pressed(9)
+	check(book.requested_power == 1 and not book.power_picker.visible, "Recall book hides the power control")
+	book._quote_state({"kind":"preview", "id":9, "requested":1, "power":1, "limit":1,
+		"mana":30, "ready":true, "unlock_level":30, "reagents":[]})
+	check(not book.numbers_label.text.contains("Power") and book.numbers_label.text.contains("30"), "Recall quote shows its fixed cost")
+	await capture_recall(output, "recall-book.png")
+	book.close()
+	var requests: Array[Dictionary] = []
+	main.magic_selection.request_sender = func(data: Dictionary) -> Error:
+		requests.append(data.duplicate(true))
+		return OK
+	main.magic_selection.begin(9, 10)
+	check(requests.back() == {"op":"options", "id":9} and main.magic_selection.pending.power == 1, "Recall always requests destinations, including an old high-tier cast")
+	main.magic_selection._receive({"kind":"recall", "id":9, "entries":[
+		{"key":"forest:20:21", "map":"forest", "name":"Forest", "x":20, "y":21}]})
+	check(main.magic_selection.popup.visible and not main.magic_selection.description.text.contains("Power"), "Recall presents its destination without tiers")
+	await capture_recall(output, "recall-destination.png")
+	main.magic_selection._confirm()
+	check(requests.back() == {"op":"cast", "id":9, "power":1, "entry":"forest:20:21"}, "Recall confirmation submits the chosen destination at its only level")
 	main.free()
 	await process_frame
 	NativeAnimationImporter.clear()
 	GlbSceneCache.clear()
 	print("spell power consistency: ", "PASS" if failures == 0 else "FAIL (%d)" % failures)
 	quit(failures)
+
+func capture_recall(output: String, filename: String) -> void:
+	if output.is_empty() or DisplayServer.get_name() == "headless": return
+	for frame in range(4): await process_frame
+	await RenderingServer.frame_post_draw
+	DirAccess.make_dir_recursive_absolute(output)
+	check(root.get_texture().get_image().save_png(output.path_join(filename)) == OK, "captured " + filename)

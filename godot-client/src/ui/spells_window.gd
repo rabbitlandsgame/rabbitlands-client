@@ -392,8 +392,12 @@ func _refresh_details() -> void:
 	favorite_button.set_pressed_no_signal(selected_spell_id in _favorites)
 	favorite_button.text = "★" if selected_spell_id in _favorites else "☆"
 	favorite_button.tooltip_text = "Remove favorite" if selected_spell_id in _favorites else "Add favorite"
+	requested_power = catalog.normalized_power(selected_spell_id, requested_power)
 	effect_preview.set_spell(definition, requested_power)
-	power_picker.max_value = 10
+	power_picker.max_value = catalog.max_power(selected_spell_id)
+	power_picker.set_value_no_signal(requested_power)
+	power_picker.visible = catalog.max_power(selected_spell_id) > 1
+	_power_row.get_child(0).visible = power_picker.visible
 	power_picker.tooltip_text = "The server checks the selected tier's Magic and Nexus requirements."
 	numbers_label.text = "%s · Base ether %d" % [str(definition.get("scope", "self")).capitalize(), int(definition.get("mana", 0))]
 	var magic := int(AppState.stats.get("magic", 0))
@@ -459,6 +463,8 @@ func _quote_state(data: Dictionary) -> void:
 		if loadout != null: loadout.remember_power(selected_spell_id, effective)
 	effect_preview.set_spell(catalog.spell(selected_spell_id), int(data.get("power", 1)))
 	numbers_label.text = "%s · Power %d / %d · Ether %d" % [str(catalog.spell(selected_spell_id).get("scope", "self")).capitalize(), int(data.get("power", 1)), int(data.get("limit", 1)), int(data.get("mana", 0))]
+	if catalog.max_power(selected_spell_id) == 1:
+		numbers_label.text = "Choose destination · Ether %d" % int(data.get("mana", 0))
 	var quality: Dictionary = data.get("potency", {})
 	if data.has("casts_remaining"):
 		casts_label.text = "Casts now: %s · Supplies: %s" % [preload("res://src/ui/reagent_pouch.gd").grouped(int(data.casts_remaining)) if data.casts_remaining != null else "Unlimited", preload("res://src/ui/reagent_pouch.gd").grouped(int(data.get("reagent_casts"))) if data.get("reagent_casts") != null else "Unlimited"]
@@ -467,6 +473,9 @@ func _quote_state(data: Dictionary) -> void:
 		var label := "Duration" if str(data.get("potency_applies_to", "amount")) == "duration" else "Potency"
 		potency_label.text = "Unlock %d · Recommended %d\n%s %.0f%% average (%.0f–%.0f%%)" % [int(data.get("unlock_level", 0)), int(data.get("recommended_level", 0)), label, float(quality.get("mean", 100)), float(quality.get("minimum", 100)), float(quality.get("maximum", 100))]
 		potency_label.tooltip_text = "Eligible spells do not fizzle. Average potency reaches 100% at the recommended level and 200% at twice that level. Utility outcomes stay fixed. Selected power controls ether and material costs."
+	if catalog.max_power(selected_spell_id) == 1:
+		potency_label.text = "Unlock %d · One casting level" % int(data.get("unlock_level", 0))
+		potency_label.tooltip_text = "Recall always uses the same casting level and lets you choose a destination."
 	UI.clear(reagents_rows)
 	for reagent: Dictionary in data.get("reagents", []):
 		if int(reagent.get("quantity", 0)) > 0:
@@ -501,6 +510,8 @@ func _refresh_preparation() -> void:
 		_preparation_label.text = ""
 		return
 	_preparation_label.text = "Slot %d · %s · Power %d" % [slot_picker.selected + 1, catalog.spell(selected_spell_id).name, requested_power]
+	if catalog.max_power(selected_spell_id) == 1:
+		_preparation_label.text = "Slot %d · %s" % [slot_picker.selected + 1, catalog.spell(selected_spell_id).name]
 	_preparation_label.tooltip_text = _preparation_label.text
 
 func _make_effect_row(effect: String, heading := false) -> HBoxContainer:
@@ -560,6 +571,7 @@ func _populate() -> void:
 		button.icon = catalog.icon_for(id)
 		UI.icon_button(button)
 		button.power_provider = func() -> int: return requested_power if selected_spell_id == id else loadout.power_for(id) if loadout != null else 1
+		button.single_level = catalog.max_power(id) == 1
 		button.pressed.connect(_on_spell_pressed.bind(id))
 		cell.add_child(button)
 		_buttons[id] = button

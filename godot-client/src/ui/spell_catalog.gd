@@ -112,13 +112,19 @@ func spell(spell_id: int) -> Dictionary:
 
 ## The server states the effect ceiling; delivery variants also carry their
 ## own Nexus gate. Reuse those two facts for badges, drags and actual casts.
+func max_power(spell_id: int) -> int:
+	return int(spell(spell_id).get("max_power", 10))
+
+func normalized_power(spell_id: int, requested: int) -> int:
+	return clampi(requested, 1, max_power(spell_id))
+
 func cast_power_limit(spell_id: int, power_state: Dictionary, stats: Dictionary) -> int:
 	var definition := spell(spell_id)
 	if definition.is_empty(): return 0
 	var stated: Dictionary = power_state.get(effect_for(spell_id), {})
 	if stated.is_empty(): return 1 # Preserve the existing quick-cast fallback for older servers.
 	if int(stats.get("magic", 0)) < int(definition.get("level", 0)): return 0
-	return mini(int(stated.get("limit", 1)), maxi(0, 1 + int(stats.get("magic_nexus", 0)) - int(definition.get("nexus", 0))))
+	return mini(max_power(spell_id), mini(int(stated.get("limit", 1)), maxi(0, 1 + int(stats.get("magic_nexus", 0)) - int(definition.get("nexus", 0)))))
 
 func icon_for(spell_id: int) -> Texture2D:
 	var definition: Dictionary = spell(spell_id)

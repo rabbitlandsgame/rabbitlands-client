@@ -697,10 +697,11 @@ func refresh() -> void:
 		var ceiling: int = loadout.catalog.cast_power_limit(int(slot.id), AppState.spell_power, AppState.stats)
 		var effective_power := mini(int(slot.power), maxi(1, ceiling))
 		button.power = effective_power
+		button.single_level = loadout.catalog.max_power(int(slot.id)) == 1
 		button.get_node("Target").text = str(CORNER_BADGES.get(scope, ""))
 		button.get_node("Power").text = str(effective_power) if int(slot.id) >= 0 else ""
 		button.get_node("Target").visible = int(slot.id) >= 0
-		button.get_node("Power").visible = int(slot.id) >= 0
+		button.get_node("Power").visible = int(slot.id) >= 0 and loadout.catalog.max_power(int(slot.id)) > 1
 		if not workspace_layout.is_empty() and not workspace_layout.get("show_badges", true):
 			button.get_node("Target").hide()
 			button.get_node("Power").hide()
@@ -715,7 +716,9 @@ func refresh() -> void:
 		if scope == "target":
 			target_label += ": click the recipient"
 		button.tooltip_text = "%s · %s · Power %d\n%s\nThis slot keeps its own target type and power.\nRight click to edit; drag a spell here." % [definition.get("name", "Empty slot"), target_label, effective_power, shortcut]
-		if effective_power != int(slot.power): button.tooltip_text += "\nSaved P%d; currently limited to P%d." % [int(slot.power), effective_power]
+		if loadout.catalog.max_power(int(slot.id)) == 1:
+			button.tooltip_text = "%s · Choose destination\n%s\nRight click to edit; drag a spell here." % [definition.name, shortcut]
+		if not button.single_level and effective_power != int(slot.power): button.tooltip_text += "\nSaved P%d; currently limited to P%d." % [int(slot.power), effective_power]
 		var reasons: Array[String] = []
 		if int(slot.id) >= 0:
 			reasons = loadout.catalog.unavailable_reasons(int(slot.id), AppState.known_knowledge, AppState.stats, AppState.inventory)

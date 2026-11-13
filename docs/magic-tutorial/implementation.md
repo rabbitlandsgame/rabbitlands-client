@@ -65,7 +65,7 @@ starting another experiment. Completed experiments are replayable.
 | Hidden garden | Conceal before approaching the patrol; find Oren with Reveal Burst; talk to him and choose Return to Sera | Reveal must find Oren, who then lowers his own concealment; nearby dialogue explicitly asks Sera to recall him to Lens Court. Waiting leaves him in the garden. |
 | The fitting | Cancel a Transmute quote; convert one Bones; buy and install a Wood Plank | Inventory slot/item validation, actual gold, normal merchant transaction and nearby object use |
 | The last crossing | Choose spells and equipment, defeat the West guardians, heal and escort all three apprentices | Living enemies prevent escort; insufficient health prevents movement; all three must reach the rally |
-| The borrowed sky | Align the lens; Recall at P1 | Nearby lens interaction, all companions visibly home, restored permanent profile and one-time completion |
+| The borrowed sky | Align the lens; Recall to the home destination | Nearby lens interaction, all companions visibly home, restored permanent profile and one-time completion |
 
 There is no global failure timer. The final rescue provides fewer mechanical
 prompts, with contextual help available. Sera explicitly recharges practice
@@ -108,7 +108,7 @@ at the selected power; quoted costs and charged-focus substitution are unchanged
 | A — Living equations | Regeneration's real tick; Life Drain's actual damage/healing; Ether Drain against a consenting non-ally inside the private PK arena; an empty target; three low-Magic Heal casts to compare potency and quoted spending |
 | B — Prism and steel | Four damage types; separate borrowed Magic Offense and Defense changes; Cold, Radiation and Elemental Wards; each weakening spell followed by its matching bolt; Cripple, Accuracy and Elemental Weapon followed by real equipped weapon hits |
 | C — The unbroken circle | Magic Immunity rejects the prism's hostile cast; Disrupt damages a hostile summon; Shield Burst applies around the apprentices |
-| D — Fold and value | P5 Recall's actual portal chooser; Blink out of the annex; charged Hearthstone Focus; deposit it and compare a mismatched Riftglass Focus; common Transmute; inspect an Uncommon vessel's P3 requirement, then convert it at P3 |
+| D — Fold and value | Recall's actual portal chooser; Blink out of the annex; charged Hearthstone Focus; deposit it and compare a mismatched Riftglass Focus; common Transmute; inspect an Uncommon vessel's P3 requirement, then convert it at P3 |
 
 Together these routes exercise all **31 spell families** in the current
 86-variant book. They do not require casting every scope variant. The potency
@@ -127,7 +127,7 @@ XP stays private; fixed lesson bonuses advance the permanent character separatel
 
 Each account owns a separate map, companions, guardians and private practice PK
 zone. Borrowed items cannot be traded or taken to another map. Recall destinations
-are restricted to the practice annex until P1 Recall restores the permanent
+offer the practice annex and home; choosing home restores the permanent
 profile. Death returns the player safely to Lens Court; the encounter remains.
 Leaving clears practice effects and actors. Completion retires practice item
 instances and grants **25 gold in permanent Storage once**; labs grant no repeat
