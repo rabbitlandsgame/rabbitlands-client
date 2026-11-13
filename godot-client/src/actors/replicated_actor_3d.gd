@@ -31,6 +31,7 @@ const WARDROBE_DYE_CACHE := preload("res://src/actors/wardrobe_dye_cache.gd")
 const ACTOR_RENDER_QUALITY := preload("res://src/actors/actor_render_quality.gd")
 const OLDCRAFT_ACTOR_STYLE := preload("res://src/actors/oldcraft_actor_style.gd")
 const CapeEmblems := preload("res://src/actors/cape_emblems.gd")
+const PACK_FIT := preload("res://src/actors/pack_fit.gd")
 const CapeApprovedData := preload("res://src/actors/cape_approved_data.gd")
 const GLB_MESH_EXTRAS := preload("res://src/actors/glb_mesh_extras.gd")
 const WARDROBE_SHIRT_FIT := preload("res://src/actors/wardrobe_shirt_fit.gd")
@@ -642,6 +643,7 @@ static func clear_static_caches() -> void:
 	_rebound_skins.clear()
 	_drape_envelopes.clear()
 	_draped_capes.clear()
+	PACK_FIT.clear()
 	_torso_reaches.clear()
 	_fabric_lines.clear()
 	_shin_reaches.clear()
@@ -4099,6 +4101,14 @@ func apply_equipment_visuals(visuals: Dictionary, fallback_parts: Array = []) ->
 ## The quiver carries authored cape-on and cape-off fits on the same skin.
 ## Changing one actor's morph weight leaves shared meshes and other wearers alone.
 func _refresh_quiver_cape_fit() -> void:
+	var pack_worn := str(_equipment_model_config(CAPE_PART,
+		int(_equipment_visuals.get(CAPE_PART, 0))).get("kind", "")) == "pack"
+	if pack_worn:
+		for node: Node in _equipment_nodes.get(CAPE_PART, []):
+			if node is MeshInstance3D:
+				QUIVER_STRAP_FIT.apply(node as MeshInstance3D,
+					_equipment_nodes.get(BODY_PART, []), _native_skeleton,
+					"pack|%s|%s" % [str(_model_config.get("scene", "")), _worn_torso_scene()])
 	var cape_worn := false
 	var layers: Array = []
 	layers.append_array(_equipment_nodes.get(BODY_PART, []))
@@ -4117,6 +4127,8 @@ func _refresh_quiver_cape_fit() -> void:
 		var shape := quiver.find_blend_shape_by_name("Cape_Clearance")
 		if shape >= 0:
 			quiver.set_blend_shape_value(shape, 1.0 if cape_worn else 0.0)
+		if pack_worn:
+			PACK_FIT.fit_quiver(quiver, _equipment_nodes.get(CAPE_PART, []), outfit_key)
 
 func _configure_human_animation_mapping() -> void:
 	if not HUMAN_LOCOMOTION.supports(_model_config) or animation_player == null:
@@ -4342,7 +4354,7 @@ func _create_equipment_part(part: int, visual_id: int, allow_fallback: bool) -> 
 		for node: Node in created:
 			if node is MeshInstance3D:
 				CapeEmblems.apply(node as MeshInstance3D, str(model_config.get("emblem", "")))
-		_set_cape_cloth_active(not created.is_empty())
+		_set_cape_cloth_active(not created.is_empty() and str(model_config.get("kind", "")) != "pack")
 
 ## The scene of the torso piece this actor is wearing, or "" when the chest is
 ## bare. A bare chest needs no drape: the capes were conformed against the bare
@@ -5120,7 +5132,7 @@ func _attach_skinned_equipment(scene_path: String, part: int, visual_id: int,
 		var clone: MeshInstance3D = MeshInstance3D.new()
 		clone.name = "EquipmentSkin_%d_Visual_%d_%s" % [part, visual_id,
 			str(piece.get("name", "Mesh"))]
-		clone.mesh = approved_mesh if approved_mesh != null else (_draped_over(worn, scene_path, piece) if part == CAPE_PART
+		clone.mesh = approved_mesh if approved_mesh != null else (_draped_over(worn, scene_path, piece) if part == CAPE_PART and skin_region != "pack"
 			else piece.get("mesh") as Mesh)
 		clone.skin = rebound
 		clone.transform = Transform3D.IDENTITY if approved_mesh != null else piece.get("transform", Transform3D.IDENTITY)

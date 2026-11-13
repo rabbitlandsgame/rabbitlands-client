@@ -1,0 +1,969 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-13",
+  "product": "Rabbit Lands",
+  "provider": {
+    "service": "Meshy",
+    "route": "volume/direct",
+    "modelType": "smart-topology",
+    "targetFaces": 4000,
+    "textureResolution": "2k",
+    "pbr": false,
+    "providerRigging": false,
+    "consumedCredits": 30,
+    "paidTasks": 2,
+    "retries": 0
+  },
+  "concepts": {
+    "tool": "built-in image_gen",
+    "selected": 2,
+    "fullResolutionSources": "Retained in ignored local authoring storage with exact prompts and immutable provider downloads."
+  },
+  "validation": {
+    "technicalCompletion": true,
+    "agentVisualReview": true,
+    "ownerVisualAcceptance": false,
+    "godotProbe": {
+      "checks": 18992,
+      "failures": 0,
+      "bodyFits": 32,
+      "armorTransitions": [
+        0,
+        225,
+        200,
+        225,
+        0
+      ],
+      "actions": [
+        "idle",
+        "walk",
+        "run",
+        "ranged_attack",
+        "attack_primary"
+      ]
+    },
+    "serverFocusedTests": {
+      "passed": 15
+    },
+    "atlasCheck": {
+      "atlases": 26,
+      "stale": 0
+    },
+    "freshBlenderImportViews": [
+      "front",
+      "side",
+      "back"
+    ],
+    "gameplayCapture": {
+      "renderer": "gl_compatibility",
+      "clip": "Walk",
+      "timeSeconds": 0.25,
+      "bodies": [
+        "luminous_male",
+        "luminous_female"
+      ],
+      "torsoVisual": 225,
+      "quiverVisual": 1
+    },
+    "editorImport": {
+      "exitCode": 0,
+      "scriptResourceImportErrors": 0,
+      "projectConfigurationRestored": true,
+      "notes": "Isolated task editor profile; native equipment and map authoring sources excluded. Pre-existing scene UID fallback warnings remain."
+    },
+    "broaderServerCheck": {
+      "passed": 50,
+      "preExistingFailures": [
+        "test_carry_is_its_own_attribute_rather_than_a_share_of_might",
+        "test_carrying_capacity_is_twenty_a_point"
+      ],
+      "baselineVerified": "Both legacy assertions exclude the existing 80 EMU level allowance. The unchanged baseline and new code both return 160 for Carry 4 and 580 for Carry 25 at overall level 20 without packs."
+    }
+  },
+  "delivery": {
+    "capePart": 2,
+    "small": {
+      "itemId": 1966,
+      "visual": 151,
+      "imageId": 634,
+      "priceGold": 1000,
+      "capacityEMU": 200
+    },
+    "large": {
+      "itemId": 1967,
+      "visual": 152,
+      "imageId": 635,
+      "priceGold": 10000,
+      "capacityEMU": 500
+    },
+    "merchant": "Mara Vell",
+    "pushed": false,
+    "released": false
+  },
+  "fits": [
+    {
+      "bounds": [
+        [
+          -0.22557155821354513,
+          0.9564289567281657,
+          -0.4092435383486954
+        ],
+        [
+          0.22557155821354513,
+          1.484055560602608,
+          0.14078495767741633
+        ]
+      ],
+      "rigidVertices": 2251,
+      "strapVertices": 1362,
+      "triangles": 4192,
+      "backPlane": -0.15835947340912587,
+      "bodySha256": "75dd22e93defb16470686ab0f51c711a5b6a06c79362bdf33be965da111bc365",
+      "sourceSha256": "a5ee67249980a280358b438cea166e0d7b319d23337530d30134ecd02cce7f21",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "glasswarden_female",
+      "id": "rl-small-pack",
+      "sha256": "24d85d284948cf74b640cd8b6a6e81b16ac66c1857f7a51738a101df73ddd3be",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/glasswarden_female/rl-small-pack.glb",
+      "runtimeSha256": "e3d57a009603d17e0fa56962330ccd783ba9909cf23ae0b5f9b493cb00a94a57"
+    },
+    {
+      "bounds": [
+        [
+          -0.21192137031270544,
+          0.9539804080867399,
+          -0.355090628150996
+        ],
+        [
+          0.21221905833955704,
+          1.5356851005254688,
+          0.11701934704878492
+        ]
+      ],
+      "rigidVertices": 3095,
+      "strapVertices": 937,
+      "triangles": 4121,
+      "backPlane": -0.15835947340912587,
+      "bodySha256": "75dd22e93defb16470686ab0f51c711a5b6a06c79362bdf33be965da111bc365",
+      "sourceSha256": "199f07f5fa2b01e90e0b48e6e15aeb9de705640d0ab2ecc7976d0ffaae6eef95",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "glasswarden_female",
+      "id": "rl-large-pack",
+      "sha256": "fee00f0aef2a0e1df673d5046270d53ad54d92596e5afc57bb29080f29fc37db",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/glasswarden_female/rl-large-pack.glb",
+      "runtimeSha256": "e39ebc8947719e7e6bc0dbef8bd6dad4f2b2788652ff03aca377dbc06ad9a779"
+    },
+    {
+      "bounds": [
+        [
+          -0.22557155821354513,
+          0.9564289567281657,
+          -0.4231416752624718
+        ],
+        [
+          0.22557155821354513,
+          1.5073724388630936,
+          0.1085532615085057
+        ]
+      ],
+      "rigidVertices": 2251,
+      "strapVertices": 1362,
+      "triangles": 4192,
+      "backPlane": -0.17225761032290227,
+      "bodySha256": "0238325cf20a8b34d84f53b72d9ccd94ed9ee6c3cbe3ee386d9f181e01cbaa25",
+      "sourceSha256": "a5ee67249980a280358b438cea166e0d7b319d23337530d30134ecd02cce7f21",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "glasswarden_male",
+      "id": "rl-small-pack",
+      "sha256": "9422bcda5e184e255c13272a505752cb876090b4f4befb5691887f950f5dbe4c",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/glasswarden_male/rl-small-pack.glb",
+      "runtimeSha256": "d4660dd47445277605e9aef5618960917554b18ce1ba86d43cde1516f2cf8c26"
+    },
+    {
+      "bounds": [
+        [
+          -0.21192137031270544,
+          0.9539804080867399,
+          -0.3689887650647724
+        ],
+        [
+          0.21221905833955704,
+          1.5356851005254688,
+          0.10312121013500852
+        ]
+      ],
+      "rigidVertices": 3095,
+      "strapVertices": 937,
+      "triangles": 4121,
+      "backPlane": -0.17225761032290227,
+      "bodySha256": "0238325cf20a8b34d84f53b72d9ccd94ed9ee6c3cbe3ee386d9f181e01cbaa25",
+      "sourceSha256": "199f07f5fa2b01e90e0b48e6e15aeb9de705640d0ab2ecc7976d0ffaae6eef95",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "glasswarden_male",
+      "id": "rl-large-pack",
+      "sha256": "b970f90c46d27ffcb3190f361110cff5d765a073369d547ecdcf512afe9cc706",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/glasswarden_male/rl-large-pack.glb",
+      "runtimeSha256": "07b8e3e7e1be94119242025c0e85d0d41d7ca52c5952f028d24a8812b84be6a2"
+    },
+    {
+      "bounds": [
+        [
+          -0.22557155821354513,
+          0.9564289567281657,
+          -0.4092435383486954
+        ],
+        [
+          0.22557155821354513,
+          1.484055560602608,
+          0.14078495767741633
+        ]
+      ],
+      "rigidVertices": 2251,
+      "strapVertices": 1362,
+      "triangles": 4192,
+      "backPlane": -0.15835947340912587,
+      "bodySha256": "46680d3b613d4738f57d950cf423e218898b51a934af74892d35e20580a41b83",
+      "sourceSha256": "a5ee67249980a280358b438cea166e0d7b319d23337530d30134ecd02cce7f21",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "greyhaven_female",
+      "id": "rl-small-pack",
+      "sha256": "24d85d284948cf74b640cd8b6a6e81b16ac66c1857f7a51738a101df73ddd3be",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/greyhaven_female/rl-small-pack.glb",
+      "runtimeSha256": "e3d57a009603d17e0fa56962330ccd783ba9909cf23ae0b5f9b493cb00a94a57"
+    },
+    {
+      "bounds": [
+        [
+          -0.21192137031270544,
+          0.9539804080867399,
+          -0.355090628150996
+        ],
+        [
+          0.21221905833955704,
+          1.5356851005254688,
+          0.11701934704878492
+        ]
+      ],
+      "rigidVertices": 3095,
+      "strapVertices": 937,
+      "triangles": 4121,
+      "backPlane": -0.15835947340912587,
+      "bodySha256": "46680d3b613d4738f57d950cf423e218898b51a934af74892d35e20580a41b83",
+      "sourceSha256": "199f07f5fa2b01e90e0b48e6e15aeb9de705640d0ab2ecc7976d0ffaae6eef95",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "greyhaven_female",
+      "id": "rl-large-pack",
+      "sha256": "fee00f0aef2a0e1df673d5046270d53ad54d92596e5afc57bb29080f29fc37db",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/greyhaven_female/rl-large-pack.glb",
+      "runtimeSha256": "e39ebc8947719e7e6bc0dbef8bd6dad4f2b2788652ff03aca377dbc06ad9a779"
+    },
+    {
+      "bounds": [
+        [
+          -0.22557155821354513,
+          0.9564289567281657,
+          -0.4231416752624718
+        ],
+        [
+          0.22557155821354513,
+          1.5073724388630936,
+          0.1085532615085057
+        ]
+      ],
+      "rigidVertices": 2251,
+      "strapVertices": 1362,
+      "triangles": 4192,
+      "backPlane": -0.17225761032290227,
+      "bodySha256": "9b7815846f2a04c7888cdca991818c5a61728136255813849e4cfbdf78015ee1",
+      "sourceSha256": "a5ee67249980a280358b438cea166e0d7b319d23337530d30134ecd02cce7f21",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "greyhaven_male",
+      "id": "rl-small-pack",
+      "sha256": "9422bcda5e184e255c13272a505752cb876090b4f4befb5691887f950f5dbe4c",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/greyhaven_male/rl-small-pack.glb",
+      "runtimeSha256": "d4660dd47445277605e9aef5618960917554b18ce1ba86d43cde1516f2cf8c26"
+    },
+    {
+      "bounds": [
+        [
+          -0.21192137031270544,
+          0.9539804080867399,
+          -0.3689887650647724
+        ],
+        [
+          0.21221905833955704,
+          1.5356851005254688,
+          0.10312121013500852
+        ]
+      ],
+      "rigidVertices": 3095,
+      "strapVertices": 937,
+      "triangles": 4121,
+      "backPlane": -0.17225761032290227,
+      "bodySha256": "9b7815846f2a04c7888cdca991818c5a61728136255813849e4cfbdf78015ee1",
+      "sourceSha256": "199f07f5fa2b01e90e0b48e6e15aeb9de705640d0ab2ecc7976d0ffaae6eef95",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "greyhaven_male",
+      "id": "rl-large-pack",
+      "sha256": "b970f90c46d27ffcb3190f361110cff5d765a073369d547ecdcf512afe9cc706",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/greyhaven_male/rl-large-pack.glb",
+      "runtimeSha256": "07b8e3e7e1be94119242025c0e85d0d41d7ca52c5952f028d24a8812b84be6a2"
+    },
+    {
+      "bounds": [
+        [
+          -0.22557152550504478,
+          0.9564292079829926,
+          -0.4098052304385861
+        ],
+        [
+          0.22557152550504478,
+          1.4840673244024905,
+          0.14078496485516115
+        ]
+      ],
+      "rigidVertices": 2251,
+      "strapVertices": 1362,
+      "triangles": 4192,
+      "backPlane": -0.15892120187790046,
+      "bodySha256": "3a8ff81e9f152102ee1e57d892759c0a8e69ab49064ab8e473f5cb9ed3e8fc94",
+      "sourceSha256": "a5ee67249980a280358b438cea166e0d7b319d23337530d30134ecd02cce7f21",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "luminous_female",
+      "id": "rl-small-pack",
+      "sha256": "df0e61dbb4d217ac4048daedf62792832425c7b85f03275942181999dffbad1a",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/luminous_female/rl-small-pack.glb",
+      "runtimeSha256": "7f84611e6dcb6fdb594aaeb5cd65cda7893255aa843a63460f03e776ceeb46dd"
+    },
+    {
+      "bounds": [
+        [
+          -0.21192133958352014,
+          0.953980659696613,
+          -0.35565232809320857
+        ],
+        [
+          0.21221902756720612,
+          1.5356852677865516,
+          0.11645757864931908
+        ]
+      ],
+      "rigidVertices": 3095,
+      "strapVertices": 937,
+      "triangles": 4121,
+      "backPlane": -0.15892120187790046,
+      "bodySha256": "3a8ff81e9f152102ee1e57d892759c0a8e69ab49064ab8e473f5cb9ed3e8fc94",
+      "sourceSha256": "199f07f5fa2b01e90e0b48e6e15aeb9de705640d0ab2ecc7976d0ffaae6eef95",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "luminous_female",
+      "id": "rl-large-pack",
+      "sha256": "3cd622093772de9d9eb4d7f9ce5a975c867fcd861f13bf670e3237f4d8b3cf1c",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/luminous_female/rl-large-pack.glb",
+      "runtimeSha256": "d1cd05a597fbbbeb306c146f250029e18a2f90e7d3e052d1f0c8d81f6e8b90ae"
+    },
+    {
+      "bounds": [
+        [
+          -0.22557152550504478,
+          0.9564292079829926,
+          -0.42434204632031525
+        ],
+        [
+          0.22557152550504478,
+          1.5070343495385208,
+          0.1077875075451576
+        ]
+      ],
+      "rigidVertices": 2251,
+      "strapVertices": 1362,
+      "triangles": 4192,
+      "backPlane": -0.1734580177596296,
+      "bodySha256": "1cc5bd8cd2761e71f711dc33aabd500ea88cb918c0806223991cb5bd87bb2d75",
+      "sourceSha256": "a5ee67249980a280358b438cea166e0d7b319d23337530d30134ecd02cce7f21",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "luminous_male",
+      "id": "rl-small-pack",
+      "sha256": "11509f8dc12b2112278c4c89aa8f76b0f1262af5dd7b012ae05d9bfacaa4ed9b",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/luminous_male/rl-small-pack.glb",
+      "runtimeSha256": "9b7b8db35abe1efb37a40b4dc9688140e434a4456cfaf7478c671f6c67732119"
+    },
+    {
+      "bounds": [
+        [
+          -0.21192133958352014,
+          0.953980659696613,
+          -0.37018914397493774
+        ],
+        [
+          0.21221902756720612,
+          1.5356852677865516,
+          0.10192076276758993
+        ]
+      ],
+      "rigidVertices": 3095,
+      "strapVertices": 937,
+      "triangles": 4121,
+      "backPlane": -0.1734580177596296,
+      "bodySha256": "1cc5bd8cd2761e71f711dc33aabd500ea88cb918c0806223991cb5bd87bb2d75",
+      "sourceSha256": "199f07f5fa2b01e90e0b48e6e15aeb9de705640d0ab2ecc7976d0ffaae6eef95",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "luminous_male",
+      "id": "rl-large-pack",
+      "sha256": "07fd1a6bf7b6830fd225ae2178b6d1f12c91ac8fbee8e48c55461cbe7cd6caaa",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/luminous_male/rl-large-pack.glb",
+      "runtimeSha256": "5ff1d5aaa92c4a977e232f6cc49da0a1a87f26e067fde6590ba3cc8d9e8bb42e"
+    },
+    {
+      "bounds": [
+        [
+          -0.22557155821354513,
+          0.9564289567281657,
+          -0.4092435383486954
+        ],
+        [
+          0.22557155821354513,
+          1.484055560602608,
+          0.14078495767741633
+        ]
+      ],
+      "rigidVertices": 2251,
+      "strapVertices": 1362,
+      "triangles": 4192,
+      "backPlane": -0.15835947340912587,
+      "bodySha256": "665f6211131e62e5a0f950e783d5c9a62e80b68e4d97d3826d0e8324dc41fcaa",
+      "sourceSha256": "a5ee67249980a280358b438cea166e0d7b319d23337530d30134ecd02cce7f21",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "mycelari_female",
+      "id": "rl-small-pack",
+      "sha256": "24d85d284948cf74b640cd8b6a6e81b16ac66c1857f7a51738a101df73ddd3be",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/mycelari_female/rl-small-pack.glb",
+      "runtimeSha256": "e3d57a009603d17e0fa56962330ccd783ba9909cf23ae0b5f9b493cb00a94a57"
+    },
+    {
+      "bounds": [
+        [
+          -0.21192137031270544,
+          0.9539804080867399,
+          -0.355090628150996
+        ],
+        [
+          0.21221905833955704,
+          1.5356851005254688,
+          0.11701934704878492
+        ]
+      ],
+      "rigidVertices": 3095,
+      "strapVertices": 937,
+      "triangles": 4121,
+      "backPlane": -0.15835947340912587,
+      "bodySha256": "665f6211131e62e5a0f950e783d5c9a62e80b68e4d97d3826d0e8324dc41fcaa",
+      "sourceSha256": "199f07f5fa2b01e90e0b48e6e15aeb9de705640d0ab2ecc7976d0ffaae6eef95",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "mycelari_female",
+      "id": "rl-large-pack",
+      "sha256": "fee00f0aef2a0e1df673d5046270d53ad54d92596e5afc57bb29080f29fc37db",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/mycelari_female/rl-large-pack.glb",
+      "runtimeSha256": "e39ebc8947719e7e6bc0dbef8bd6dad4f2b2788652ff03aca377dbc06ad9a779"
+    },
+    {
+      "bounds": [
+        [
+          -0.22557155821354513,
+          0.9564289567281657,
+          -0.4231416752624718
+        ],
+        [
+          0.22557155821354513,
+          1.5073724388630936,
+          0.1085532615085057
+        ]
+      ],
+      "rigidVertices": 2251,
+      "strapVertices": 1362,
+      "triangles": 4192,
+      "backPlane": -0.17225761032290227,
+      "bodySha256": "4bcc4445ef8f3dfa6d79334e15de901076294daff6b832c4c2c664299d16bf3c",
+      "sourceSha256": "a5ee67249980a280358b438cea166e0d7b319d23337530d30134ecd02cce7f21",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "mycelari_male",
+      "id": "rl-small-pack",
+      "sha256": "9422bcda5e184e255c13272a505752cb876090b4f4befb5691887f950f5dbe4c",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/mycelari_male/rl-small-pack.glb",
+      "runtimeSha256": "d4660dd47445277605e9aef5618960917554b18ce1ba86d43cde1516f2cf8c26"
+    },
+    {
+      "bounds": [
+        [
+          -0.21192137031270544,
+          0.9539804080867399,
+          -0.3689887650647724
+        ],
+        [
+          0.21221905833955704,
+          1.5356851005254688,
+          0.10312121013500852
+        ]
+      ],
+      "rigidVertices": 3095,
+      "strapVertices": 937,
+      "triangles": 4121,
+      "backPlane": -0.17225761032290227,
+      "bodySha256": "4bcc4445ef8f3dfa6d79334e15de901076294daff6b832c4c2c664299d16bf3c",
+      "sourceSha256": "199f07f5fa2b01e90e0b48e6e15aeb9de705640d0ab2ecc7976d0ffaae6eef95",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "mycelari_male",
+      "id": "rl-large-pack",
+      "sha256": "b970f90c46d27ffcb3190f361110cff5d765a073369d547ecdcf512afe9cc706",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/mycelari_male/rl-large-pack.glb",
+      "runtimeSha256": "07b8e3e7e1be94119242025c0e85d0d41d7ca52c5952f028d24a8812b84be6a2"
+    },
+    {
+      "bounds": [
+        [
+          -0.22557155821354513,
+          0.9564289567281657,
+          -0.4092435383486954
+        ],
+        [
+          0.22557155821354513,
+          1.484055560602608,
+          0.14078495767741633
+        ]
+      ],
+      "rigidVertices": 2251,
+      "strapVertices": 1362,
+      "triangles": 4192,
+      "backPlane": -0.15835947340912587,
+      "bodySha256": "ff64d832b1e16427026f9b8dbdcb13e65d3f74ec633ed9bb96e20ee3baaed98f",
+      "sourceSha256": "a5ee67249980a280358b438cea166e0d7b319d23337530d30134ecd02cce7f21",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "orun_female",
+      "id": "rl-small-pack",
+      "sha256": "24d85d284948cf74b640cd8b6a6e81b16ac66c1857f7a51738a101df73ddd3be",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/orun_female/rl-small-pack.glb",
+      "runtimeSha256": "e3d57a009603d17e0fa56962330ccd783ba9909cf23ae0b5f9b493cb00a94a57"
+    },
+    {
+      "bounds": [
+        [
+          -0.21192137031270544,
+          0.9539804080867399,
+          -0.355090628150996
+        ],
+        [
+          0.21221905833955704,
+          1.5356851005254688,
+          0.11701934704878492
+        ]
+      ],
+      "rigidVertices": 3095,
+      "strapVertices": 937,
+      "triangles": 4121,
+      "backPlane": -0.15835947340912587,
+      "bodySha256": "ff64d832b1e16427026f9b8dbdcb13e65d3f74ec633ed9bb96e20ee3baaed98f",
+      "sourceSha256": "199f07f5fa2b01e90e0b48e6e15aeb9de705640d0ab2ecc7976d0ffaae6eef95",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "orun_female",
+      "id": "rl-large-pack",
+      "sha256": "fee00f0aef2a0e1df673d5046270d53ad54d92596e5afc57bb29080f29fc37db",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/orun_female/rl-large-pack.glb",
+      "runtimeSha256": "e39ebc8947719e7e6bc0dbef8bd6dad4f2b2788652ff03aca377dbc06ad9a779"
+    },
+    {
+      "bounds": [
+        [
+          -0.22557155821354513,
+          0.9564289567281657,
+          -0.4231416752624718
+        ],
+        [
+          0.22557155821354513,
+          1.5073724388630936,
+          0.1085532615085057
+        ]
+      ],
+      "rigidVertices": 2251,
+      "strapVertices": 1362,
+      "triangles": 4192,
+      "backPlane": -0.17225761032290227,
+      "bodySha256": "6967fbd556040496807a7fd29a89f7940b3957cbf4a4015589033eeb1829581d",
+      "sourceSha256": "a5ee67249980a280358b438cea166e0d7b319d23337530d30134ecd02cce7f21",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "orun_male",
+      "id": "rl-small-pack",
+      "sha256": "9422bcda5e184e255c13272a505752cb876090b4f4befb5691887f950f5dbe4c",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/orun_male/rl-small-pack.glb",
+      "runtimeSha256": "d4660dd47445277605e9aef5618960917554b18ce1ba86d43cde1516f2cf8c26"
+    },
+    {
+      "bounds": [
+        [
+          -0.21192137031270544,
+          0.9539804080867399,
+          -0.3689887650647724
+        ],
+        [
+          0.21221905833955704,
+          1.5356851005254688,
+          0.10312121013500852
+        ]
+      ],
+      "rigidVertices": 3095,
+      "strapVertices": 937,
+      "triangles": 4121,
+      "backPlane": -0.17225761032290227,
+      "bodySha256": "6967fbd556040496807a7fd29a89f7940b3957cbf4a4015589033eeb1829581d",
+      "sourceSha256": "199f07f5fa2b01e90e0b48e6e15aeb9de705640d0ab2ecc7976d0ffaae6eef95",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "orun_male",
+      "id": "rl-large-pack",
+      "sha256": "b970f90c46d27ffcb3190f361110cff5d765a073369d547ecdcf512afe9cc706",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/orun_male/rl-large-pack.glb",
+      "runtimeSha256": "07b8e3e7e1be94119242025c0e85d0d41d7ca52c5952f028d24a8812b84be6a2"
+    },
+    {
+      "bounds": [
+        [
+          -0.22557155821354513,
+          0.9564289567281657,
+          -0.4092435383486954
+        ],
+        [
+          0.22557155821354513,
+          1.484055560602608,
+          0.14078495767741633
+        ]
+      ],
+      "rigidVertices": 2251,
+      "strapVertices": 1362,
+      "triangles": 4192,
+      "backPlane": -0.15835947340912587,
+      "bodySha256": "d85705efc549b52c7eb7e2d18220d61dc82dcb1d4e6052efd8b77db84d88ec5b",
+      "sourceSha256": "a5ee67249980a280358b438cea166e0d7b319d23337530d30134ecd02cce7f21",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "ssarathi_female",
+      "id": "rl-small-pack",
+      "sha256": "d8cd0180b6f8e9750594a82f5d1a1c0ebc27f14e179e3dc2befa30f4c075a0b9",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/ssarathi_female/rl-small-pack.glb",
+      "runtimeSha256": "5e77808db13515a9dd0cc8be3d0100fde4b084134840e4048f52cb3e92c15fb3"
+    },
+    {
+      "bounds": [
+        [
+          -0.21192137031270544,
+          0.9539804080867399,
+          -0.355090628150996
+        ],
+        [
+          0.21221905833955704,
+          1.5356851005254688,
+          0.11701934704878492
+        ]
+      ],
+      "rigidVertices": 3095,
+      "strapVertices": 937,
+      "triangles": 4121,
+      "backPlane": -0.15835947340912587,
+      "bodySha256": "d85705efc549b52c7eb7e2d18220d61dc82dcb1d4e6052efd8b77db84d88ec5b",
+      "sourceSha256": "199f07f5fa2b01e90e0b48e6e15aeb9de705640d0ab2ecc7976d0ffaae6eef95",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "ssarathi_female",
+      "id": "rl-large-pack",
+      "sha256": "62eb811dee6bab50715ff4692e1bc55728d4d289974b6960ac984cd94a0c8bba",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/ssarathi_female/rl-large-pack.glb",
+      "runtimeSha256": "a4da8bea9261e8b49503cd529b48bc5b7a77315b6bfbf6fd534e8eb285928a90"
+    },
+    {
+      "bounds": [
+        [
+          -0.22557155821354513,
+          0.9564289567281657,
+          -0.4231416752624718
+        ],
+        [
+          0.22557155821354513,
+          1.5073724388630936,
+          0.1085532615085057
+        ]
+      ],
+      "rigidVertices": 2251,
+      "strapVertices": 1362,
+      "triangles": 4192,
+      "backPlane": -0.17225761032290227,
+      "bodySha256": "610576dee80412d7b102de26dbec5a76fd4f0913f9fbb07414a2e3c5b5fa1d49",
+      "sourceSha256": "a5ee67249980a280358b438cea166e0d7b319d23337530d30134ecd02cce7f21",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "ssarathi_male",
+      "id": "rl-small-pack",
+      "sha256": "c4f5a969fab4a6c0eb28d588a22fbc18e817f15e6d157de659800d232b4de1b9",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/ssarathi_male/rl-small-pack.glb",
+      "runtimeSha256": "48331d4fd51f88cd6ce05cb4d10ee249080b2f96c71263f0346cc6143fc0a6f9"
+    },
+    {
+      "bounds": [
+        [
+          -0.21192137031270544,
+          0.9539804080867399,
+          -0.3689887650647724
+        ],
+        [
+          0.21221905833955704,
+          1.5356851005254688,
+          0.10312121013500852
+        ]
+      ],
+      "rigidVertices": 3095,
+      "strapVertices": 937,
+      "triangles": 4121,
+      "backPlane": -0.17225761032290227,
+      "bodySha256": "610576dee80412d7b102de26dbec5a76fd4f0913f9fbb07414a2e3c5b5fa1d49",
+      "sourceSha256": "199f07f5fa2b01e90e0b48e6e15aeb9de705640d0ab2ecc7976d0ffaae6eef95",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "ssarathi_male",
+      "id": "rl-large-pack",
+      "sha256": "a713feb72b0d70bb93322b4d43e661a99b4fe430874123b9f4d16073d22a703e",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/ssarathi_male/rl-large-pack.glb",
+      "runtimeSha256": "dba39cd3bb8ce180d5c3080f9e8b7b54bc3f5db15ecc087de003aebcf0f6d502"
+    },
+    {
+      "bounds": [
+        [
+          -0.22557155821354513,
+          0.9564289567281657,
+          -0.4092435383486954
+        ],
+        [
+          0.22557155821354513,
+          1.484055560602608,
+          0.14078495767741633
+        ]
+      ],
+      "rigidVertices": 2251,
+      "strapVertices": 1362,
+      "triangles": 4192,
+      "backPlane": -0.15835947340912587,
+      "bodySha256": "de84d7200a5a184d68ef2fc96c247fe364bb83953ad6c293e73a73ea18aab22e",
+      "sourceSha256": "a5ee67249980a280358b438cea166e0d7b319d23337530d30134ecd02cce7f21",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "stoneborn_female",
+      "id": "rl-small-pack",
+      "sha256": "24d85d284948cf74b640cd8b6a6e81b16ac66c1857f7a51738a101df73ddd3be",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/stoneborn_female/rl-small-pack.glb",
+      "runtimeSha256": "e3d57a009603d17e0fa56962330ccd783ba9909cf23ae0b5f9b493cb00a94a57"
+    },
+    {
+      "bounds": [
+        [
+          -0.21192137031270544,
+          0.9539804080867399,
+          -0.355090628150996
+        ],
+        [
+          0.21221905833955704,
+          1.5356851005254688,
+          0.11701934704878492
+        ]
+      ],
+      "rigidVertices": 3095,
+      "strapVertices": 937,
+      "triangles": 4121,
+      "backPlane": -0.15835947340912587,
+      "bodySha256": "de84d7200a5a184d68ef2fc96c247fe364bb83953ad6c293e73a73ea18aab22e",
+      "sourceSha256": "199f07f5fa2b01e90e0b48e6e15aeb9de705640d0ab2ecc7976d0ffaae6eef95",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "stoneborn_female",
+      "id": "rl-large-pack",
+      "sha256": "fee00f0aef2a0e1df673d5046270d53ad54d92596e5afc57bb29080f29fc37db",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/stoneborn_female/rl-large-pack.glb",
+      "runtimeSha256": "e39ebc8947719e7e6bc0dbef8bd6dad4f2b2788652ff03aca377dbc06ad9a779"
+    },
+    {
+      "bounds": [
+        [
+          -0.22557155821354513,
+          0.9564289567281657,
+          -0.4231416752624718
+        ],
+        [
+          0.22557155821354513,
+          1.5073724388630936,
+          0.1085532615085057
+        ]
+      ],
+      "rigidVertices": 2251,
+      "strapVertices": 1362,
+      "triangles": 4192,
+      "backPlane": -0.17225761032290227,
+      "bodySha256": "4f5337290c5cee7865756c6a0f760e8b191b44cc1961e7fe24955130eda708ee",
+      "sourceSha256": "a5ee67249980a280358b438cea166e0d7b319d23337530d30134ecd02cce7f21",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "stoneborn_male",
+      "id": "rl-small-pack",
+      "sha256": "9422bcda5e184e255c13272a505752cb876090b4f4befb5691887f950f5dbe4c",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/stoneborn_male/rl-small-pack.glb",
+      "runtimeSha256": "d4660dd47445277605e9aef5618960917554b18ce1ba86d43cde1516f2cf8c26"
+    },
+    {
+      "bounds": [
+        [
+          -0.21192137031270544,
+          0.9539804080867399,
+          -0.3689887650647724
+        ],
+        [
+          0.21221905833955704,
+          1.5356851005254688,
+          0.10312121013500852
+        ]
+      ],
+      "rigidVertices": 3095,
+      "strapVertices": 937,
+      "triangles": 4121,
+      "backPlane": -0.17225761032290227,
+      "bodySha256": "4f5337290c5cee7865756c6a0f760e8b191b44cc1961e7fe24955130eda708ee",
+      "sourceSha256": "199f07f5fa2b01e90e0b48e6e15aeb9de705640d0ab2ecc7976d0ffaae6eef95",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "stoneborn_male",
+      "id": "rl-large-pack",
+      "sha256": "b970f90c46d27ffcb3190f361110cff5d765a073369d547ecdcf512afe9cc706",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/stoneborn_male/rl-large-pack.glb",
+      "runtimeSha256": "07b8e3e7e1be94119242025c0e85d0d41d7ca52c5952f028d24a8812b84be6a2"
+    },
+    {
+      "bounds": [
+        [
+          -0.22557155821354513,
+          0.9564289567281657,
+          -0.4092435383486954
+        ],
+        [
+          0.22557155821354513,
+          1.484055560602608,
+          0.14078495767741633
+        ]
+      ],
+      "rigidVertices": 2251,
+      "strapVertices": 1362,
+      "triangles": 4192,
+      "backPlane": -0.15835947340912587,
+      "bodySha256": "b18678b68ab758eda25e6df6856ac9389a4a1eb1a3614e6f3fdef341ecb46ee2",
+      "sourceSha256": "a5ee67249980a280358b438cea166e0d7b319d23337530d30134ecd02cce7f21",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "votary_female",
+      "id": "rl-small-pack",
+      "sha256": "24d85d284948cf74b640cd8b6a6e81b16ac66c1857f7a51738a101df73ddd3be",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/votary_female/rl-small-pack.glb",
+      "runtimeSha256": "e3d57a009603d17e0fa56962330ccd783ba9909cf23ae0b5f9b493cb00a94a57"
+    },
+    {
+      "bounds": [
+        [
+          -0.21192137031270544,
+          0.9539804080867399,
+          -0.355090628150996
+        ],
+        [
+          0.21221905833955704,
+          1.5356851005254688,
+          0.11701934704878492
+        ]
+      ],
+      "rigidVertices": 3095,
+      "strapVertices": 937,
+      "triangles": 4121,
+      "backPlane": -0.15835947340912587,
+      "bodySha256": "b18678b68ab758eda25e6df6856ac9389a4a1eb1a3614e6f3fdef341ecb46ee2",
+      "sourceSha256": "199f07f5fa2b01e90e0b48e6e15aeb9de705640d0ab2ecc7976d0ffaae6eef95",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "votary_female",
+      "id": "rl-large-pack",
+      "sha256": "fee00f0aef2a0e1df673d5046270d53ad54d92596e5afc57bb29080f29fc37db",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/votary_female/rl-large-pack.glb",
+      "runtimeSha256": "e39ebc8947719e7e6bc0dbef8bd6dad4f2b2788652ff03aca377dbc06ad9a779"
+    },
+    {
+      "bounds": [
+        [
+          -0.22557155821354513,
+          0.9564289567281657,
+          -0.4231416752624718
+        ],
+        [
+          0.22557155821354513,
+          1.5073724388630936,
+          0.1085532615085057
+        ]
+      ],
+      "rigidVertices": 2251,
+      "strapVertices": 1362,
+      "triangles": 4192,
+      "backPlane": -0.17225761032290227,
+      "bodySha256": "bc8887155f180338fed836d6a249b14826423be985edd1499f68797e514cf497",
+      "sourceSha256": "a5ee67249980a280358b438cea166e0d7b319d23337530d30134ecd02cce7f21",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "votary_male",
+      "id": "rl-small-pack",
+      "sha256": "9422bcda5e184e255c13272a505752cb876090b4f4befb5691887f950f5dbe4c",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/votary_male/rl-small-pack.glb",
+      "runtimeSha256": "d4660dd47445277605e9aef5618960917554b18ce1ba86d43cde1516f2cf8c26"
+    },
+    {
+      "bounds": [
+        [
+          -0.21192137031270544,
+          0.9539804080867399,
+          -0.3689887650647724
+        ],
+        [
+          0.21221905833955704,
+          1.5356851005254688,
+          0.10312121013500852
+        ]
+      ],
+      "rigidVertices": 3095,
+      "strapVertices": 937,
+      "triangles": 4121,
+      "backPlane": -0.17225761032290227,
+      "bodySha256": "bc8887155f180338fed836d6a249b14826423be985edd1499f68797e514cf497",
+      "sourceSha256": "199f07f5fa2b01e90e0b48e6e15aeb9de705640d0ab2ecc7976d0ffaae6eef95",
+      "uvAndIndicesPreserved": true,
+      "rigidBone": "spine_03",
+      "race": "votary_male",
+      "id": "rl-large-pack",
+      "sha256": "b970f90c46d27ffcb3190f361110cff5d765a073369d547ecdcf512afe9cc706",
+      "runtimePath": "godot-client/assets/actors/native/equipment/variants/votary_male/rl-large-pack.glb",
+      "runtimeSha256": "07b8e3e7e1be94119242025c0e85d0d41d7ca52c5952f028d24a8812b84be6a2"
+    }
+  ]
+}

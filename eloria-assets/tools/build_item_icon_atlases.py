@@ -24,6 +24,7 @@ SUPPLEMENTS = [
     ROOT / 'eloria-assets/source/item-icons/enriched-essences-2026-10-30',
     ROOT / 'eloria-assets/source/item-icons/essence-keeper-2026-11-07',
     ROOT / 'eloria-assets/source/item-icons/metals-2026-11-09',
+    ROOT / 'eloria-assets/source/item-icons/packs-2026-11-13',
 ]
 REPLACEMENTS = [
     ROOT / 'eloria-assets/source/item-icons/essences-2026-10-29',
@@ -80,6 +81,14 @@ def planned_atlases() -> list[tuple[Path, Image.Image]]:
             if cell.size != (50, 50):
                 raise ValueError(f'Supplement must contain a 50px cell: {path.name}')
             cells.append((int(record['imageId']), cell))
+    # Direct custom icons bypass the atlas. Keep their unused cells at the
+    # ordinary fallback so later atlas supplements can follow those IDs.
+    occupied = {image_id for image_id, _ in cells}
+    fallback = cells[int(config['fallbackImageId'])][1]
+    for image_id in map(int, config.get('customIcons', {})):
+        if image_id not in occupied:
+            cells.append((image_id, fallback.copy()))
+    cells.sort(key=lambda pair: pair[0])
     if [image_id for image_id, _ in cells] != list(range(count)):
         raise ValueError('Base paintings and supplements must cover every image ID exactly once')
     # A later material correction may supersede a refreshed painting. Every

@@ -52,9 +52,9 @@ def surface_normals(points, faces):
 
 
 def write_mesh(path, surface, texture, rig=None, joints=None, weights=None,
-               cape_surface=None):
-    glb = ea.EquipmentGLB(generator='Rabbit Lands imported Meshy quiver fitting')
-    material = ce.textured_material(glb, 'Quiver painted base', texture,
+               cape_surface=None, name='Quiver'):
+    glb = ea.EquipmentGLB(generator=f'Rabbit Lands imported Meshy {name.lower()} fitting')
+    material = ce.textured_material(glb, name + ' painted base', texture,
                                     double_sided=True)
     if texture and texture.startswith(b'\xff\xd8'):
         glb.doc['images'][0]['mimeType'] = 'image/jpeg'
@@ -72,7 +72,7 @@ def write_mesh(path, surface, texture, rig=None, joints=None, weights=None,
                 cape_surface.normals-surface.normals, dtype='float32'),
                 'VEC3', target=34962),
         }]
-    glb.mesh('Quiver', [primitive], skin=0 if rig is not None else None)
+    glb.mesh(name, [primitive], skin=0 if rig is not None else None)
     if cape_surface is not None:
         glb.doc['meshes'][-1].update(
             weights=[0.0], extras={'targetNames': ['Cape_Clearance']})
