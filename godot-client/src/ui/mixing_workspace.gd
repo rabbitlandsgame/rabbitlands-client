@@ -401,6 +401,8 @@ func sync() -> void:
 		for index: int in alternatives:
 			if main._manufacturing_recipe_matches(index): level = mini(level, int(main.manufacturing_catalog.recipe(index).get("level", 0)))
 		main.manufacturing_list.set_item_text(row, ("%d · " % level if main.manufacturing_sort_mode == "level" else "") + ItemNames.display(output))
+		if int(definition.get("outputQuantity", 1)) > 1:
+			main.manufacturing_list.set_item_text(row, main.manufacturing_list.get_item_text(row) + " ×%d" % int(definition.outputQuantity))
 		main.manufacturing_list.set_item_icon(row, main._slot_icon(int(definition.get("outputImageId", 0)), -1))
 		main.manufacturing_list.set_item_tooltip(row, ItemNames.tooltip(output) + "\n%s level %d\n%s" % [str(definition.get("skill", "")).capitalize(), int(definition.get("level", 0)), str(main._manufacturing_availability(int(main.manufacturing_list.get_item_metadata(row))).reasons)])
 		if alternatives.size() > 1:
@@ -491,6 +493,8 @@ func _render_detail() -> void:
 	selector.tooltip_text = ItemNames.tooltip(str(definition.get("output", "Choose a recipe…")))
 	selector.resized.connect(_fit_selector)
 	selector.add_item(ItemNames.display(str(definition.get("output", "Choose a recipe…"))))
+	if int(definition.get("outputQuantity", 1)) > 1:
+		selector.set_item_text(0, selector.get_item_text(0) + " ×%d" % int(definition.outputQuantity))
 	selector.set_item_metadata(0, main.selected_manufacturing_recipe)
 	for row: int in main.manufacturing_list.item_count:
 		var index := int(main.manufacturing_list.get_item_metadata(row))
@@ -542,6 +546,11 @@ func _render_detail() -> void:
 			main._sync_manufacturing())
 		details.add_child(variant_selector)
 	var meta := _label("%s %d · %d XP · Food %d" % [str(definition.get("skill", "")).capitalize(), int(definition.get("level", 0)), int(definition.get("experience", 0)), int(definition.get("food", 0))])
+	if int(definition.get("outputQuantity", 1)) > 1:
+		meta.text += " · Makes %d per batch" % int(definition.outputQuantity)
+		main.manufacturing_quantity.tooltip_text = "Number of batches; each successful batch makes %d items." % int(definition.outputQuantity)
+	else:
+		main.manufacturing_quantity.tooltip_text = "Number of mixing attempts."
 	if bool(definition.get("equipmentOutput", false)) and AppState.enchanting_available:
 		var rules: Dictionary = AppState.enchanting.get("rules", {})
 		var crafting: Dictionary = rules.get("crafting", {})
@@ -575,7 +584,7 @@ func _render_detail() -> void:
 		var caption := _label("%s ×%d" % [ItemNames.display(str(ingredient.name)), int(ingredient.quantity)])
 		caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		caption.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		caption.tooltip_text = "%s ×%d per item" % [ingredient.name, int(ingredient.quantity)]
+		caption.tooltip_text = "%s ×%d per batch" % [ingredient.name, int(ingredient.quantity)]
 		row.add_child(caption)
 		var have: int = main._carried_count(str(ingredient.name))
 		var need: int = int(ingredient.quantity) * main._manufacturing_quantity_value()
@@ -631,12 +640,13 @@ func _render_queue() -> void:
 		var row := HBoxContainer.new()
 		queue_body.add_child(row)
 		_icon(int(recipe.get("outputImageId", 0)), row, 20)
-		var caption := _label("%s ×%d" % [ItemNames.display(str(recipe.get("output", "Unknown"))), int(batch.wanted)])
+		var yield_count := int(recipe.get("outputQuantity", 1))
+		var caption := _label("%s ×%d" % [ItemNames.display(str(recipe.get("output", "Unknown"))), int(batch.wanted) * yield_count])
 		caption.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		caption.tooltip_text = caption.text
 		row.add_child(caption)
-		row.add_child(_label("%d/%d" % [int(batch.made), int(batch.wanted)]))
+		row.add_child(_label("%d/%d" % [int(batch.made) * yield_count, int(batch.wanted) * yield_count]))
 		var remove := _button("×", main._on_manufacturing_queue_remove_pressed.bind(index))
 		remove.tooltip_text = "Remove this batch"
 		remove.disabled = main.manufacturing_queue_running and main.manufacturing_queue_index == index

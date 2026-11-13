@@ -120,6 +120,8 @@ def main() -> int:
             }
         )
 
+        if recipe.output_quantity != 1:
+            entries[-1]["outputQuantity"] = recipe.output_quantity
         equipment_inputs = [item_definition(name, quantity) for name, quantity in recipe.ingredients if tracks_instances(name)]
         if equipment_inputs:
             entries[-1]["equipmentIngredients"] = equipment_inputs

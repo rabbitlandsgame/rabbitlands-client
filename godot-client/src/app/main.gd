@@ -10771,6 +10771,8 @@ func _sync_manufacturing_detail() -> void:
 			int(definition.get("level", 0)), int(definition.get("experience", 0)),
 			int(definition.get("food", 0)), int(definition.get("mana", 0))],
 		"", "Ingredients:"]
+	if int(definition.get("outputQuantity", 1)) > 1:
+		lines.insert(1, "Makes %d per successful batch" % int(definition.outputQuantity))
 	var ingredients_value: Variant = definition.get("ingredients", [])
 	if ingredients_value is Array:
 		for ingredient_value: Variant in ingredients_value as Array:
@@ -10917,6 +10919,7 @@ func _manufacturing_queue_row(position: int) -> Control:
 	var entry: Dictionary = manufacturing_queue[position]
 	var made: int = int(entry.get("made", 0))
 	var wanted: int = maxi(1, int(entry.get("wanted", 1)))
+	var yield_count: int = int(manufacturing_catalog.recipe(int(entry.get("recipe", -1))).get("outputQuantity", 1))
 	var working: bool = (manufacturing_queue_running
 		and position == manufacturing_queue_index)
 	var row := HBoxContainer.new()
@@ -10927,14 +10930,14 @@ func _manufacturing_queue_row(position: int) -> Control:
 	label.name = "Name"
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.text = "%d. %s ×%d" % [position + 1, str(manufacturing_catalog.recipe(
-		int(entry.get("recipe", -1))).get("output", "Unknown")), wanted]
+		int(entry.get("recipe", -1))).get("output", "Unknown")), wanted * yield_count]
 	row.add_child(label)
 	var bar := ProgressBar.new()
 	bar.name = "Progress"
 	bar.custom_minimum_size = Vector2(120, 0)
 	bar.max_value = wanted
 	bar.value = made
-	bar.tooltip_text = "%d of %d made" % [made, wanted]
+	bar.tooltip_text = "%d of %d made" % [made * yield_count, wanted * yield_count]
 	row.add_child(bar)
 	var state := Label.new()
 	state.name = "State"
