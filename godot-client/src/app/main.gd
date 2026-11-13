@@ -17844,11 +17844,14 @@ func _experience_text(skill: String, stats: Dictionary) -> String:
 ## picture alone cannot answer the question - which is exactly why Eternal
 ## Lands drew the worn one mirrored instead of giving it a second icon.
 func _slot_icon(image_id: int, slot: int) -> Texture2D:
+	var icon: Texture2D = item_atlas.icon_for(image_id)
 	if AppState.is_worn_slot(slot):
 		var worn: Texture2D = item_atlas.worn_icon_for(image_id)
 		if worn != null:
-			return worn
-	return item_atlas.icon_for(image_id)
+			icon = worn
+	var glow: Dictionary = AppState.item_glows.get(str(slot), {})
+	if int(glow.get("image_id", -1)) != image_id: return icon
+	return preload("res://src/ui/item_glow.gd").icon(icon, glow)
 
 ## The same decision for a window that knows the item's name instead of a slot.
 func _named_icon(image_id: int, name: String) -> Texture2D:

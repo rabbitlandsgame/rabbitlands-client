@@ -407,6 +407,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"spell_impacts_v1",
 	"creature_status_v1",
 	"actor_status_v1",
+	"item_glows_v1",
 	"special_events_v1",
 	"storage_window_v1",
 	"storage_remote_v1",

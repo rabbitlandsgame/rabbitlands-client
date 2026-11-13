@@ -154,6 +154,7 @@ var actor_roster_generation := 0
 var inventory: Dictionary = {}
 var enchanting_recovery: Dictionary = {}
 var enchanting: Dictionary = {}
+var item_glows: Dictionary = {}
 var enchanting_available := false
 var equipment_mixing_available := false
 ## Whether the server on this connection has shown that it keeps exact
@@ -933,6 +934,7 @@ func _on_connection_state_changed(value: String) -> void:
 		inventory.clear()
 		enchanting_recovery.clear()
 		enchanting.clear()
+		item_glows.clear()
 		enchanting_available = false
 		equipment_mixing_available = false
 		enchanting_recovery_available = false
@@ -2019,7 +2021,10 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			state_changed.emit(&"special_events")
 		"magic_state":
 			var magic: Dictionary = event.data
-			if magic.get("kind") == "death":
+			if magic.get("kind") == "item_glows":
+				item_glows = preload("res://src/ui/item_glow.gd").validated(magic.get("slots"), 43)
+				state_changed.emit(&"inventory")
+			elif magic.get("kind") == "death":
 				death = magic.duplicate(true)
 				death["received_msec"] = Time.get_ticks_msec()
 				state_changed.emit(&"death")
@@ -2044,6 +2049,8 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 					status_actor["negative_statuses"] = (magic.effects as Array).filter(
 						func(effect: Variant) -> bool: return effect in NEGATIVE_STATUSES)
 					status_actor["status_effects"] = (magic.effects as Array).duplicate()
+					if magic.has("equipment_glows"):
+						status_actor["equipment_glows"] = preload("res://src/ui/item_glow.gd").validated(magic.equipment_glows, 12)
 					mark_actor_changed(status_actor_id)
 					state_changed.emit(&"actors")
 			else:
