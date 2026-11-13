@@ -1956,6 +1956,7 @@ func _ready() -> void:
 	# book, region or skill the client does not have cannot appear on a page.
 	reference_window.call("configure_catalogues", {
 		"manufacturing": manufacturing_catalog, "spells": spell_catalog,
+		"harvesting": _json("res://data/harvesting/catalog.json").get("resources", []),
 		"books": knowledge_catalog, "regions": cartography_regions,
 		"items": item_atlas, "skills": EXPERIENCE_SKILLS})
 	Diagnostics.startup_stage("world_bindings")

@@ -35,6 +35,12 @@ def main() -> int:
         '--knowledge-output', str(out / 'knowledge.json'),
     ], check=True)
     checks = {}
+    harvesting = subprocess.run([
+        sys.executable, str(ROOT / 'tools/generate_harvesting_catalog.py'),
+        '--server-root', str(server), '--output',
+        str(CLIENT / 'data/harvesting/catalog.json'), '--check',
+    ], check=False)
+    checks['harvesting'] = harvesting.returncode == 0
     for generated, shipped in [('recipes.json', 'manufacturing/recipes.json'),
                                ('knowledge.json', 'knowledge/catalog.json')]:
         checks[shipped] = read(out / generated) == read(CLIENT / 'data' / shipped)

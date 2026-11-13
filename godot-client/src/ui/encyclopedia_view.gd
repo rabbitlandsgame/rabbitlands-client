@@ -84,8 +84,8 @@ var menu: PopupMenu
 ## that exercises the paging controls, can say otherwise.
 var entries_per_page := 24
 
-const ENTRY_TYPES := ["All types", "Guides", "Recipes", "Spells", "Books", "Maps", "Skills", "Perks"]
-const TYPE_IDS := ["", "guide", "recipe", "spell", "book", "map", "skill", "perk"]
+const ENTRY_TYPES := ["All types", "Guides", "Recipes", "Spells", "Books", "Maps", "Skills", "Perks", "Resources"]
+const TYPE_IDS := ["", "guide", "recipe", "spell", "book", "map", "skill", "perk", "resource"]
 const SORT_IDS := ["name", "name_desc", "level", "level_desc", "topic", "book"]
 var type_filter: OptionButton
 var sort_filter: OptionButton
@@ -356,6 +356,8 @@ func _rebuild_content() -> void:
 			entries.append_array(_map_entries(category_id))
 		elif generate == "skills":
 			entries.append_array(_skill_entries(category_id))
+		elif generate == "harvesting":
+			entries.append_array(_harvesting_entries(category_id))
 		_categories.append({"id": category_id, "title": str(raw.get("title", "")),
 			"summary": str(raw.get("summary", "")), "intro": str(raw.get("intro", "")),
 			"entries": entries})
@@ -376,6 +378,18 @@ func _rebuild_content() -> void:
 					pair[1] = _ingredient_lines(entry.get("materials", []))
 				elif str(pair[0]) == "Tools required to have":
 					pair[1] = _ingredient_lines(entry.get("tools", []))
+		elif str(entry.get("type", "")) == "resource":
+			var uses: Array[String] = []
+			for recipe_entry: Dictionary in _flat:
+				if str(recipe_entry.get("type", "")) != "recipe": continue
+				var catalogue: ManufacturingCatalog = _catalogues.get("manufacturing") as ManufacturingCatalog
+				var used := false
+				for variant: Dictionary in recipe_entry.variants:
+					for ingredient: Dictionary in catalogue.recipe(int(variant.index)).get("ingredients", []):
+						if str(ingredient.get("name", "")) == str(entry.title): used = true
+				if used:
+					uses.append(_link(_key_for(recipe_entry), str(recipe_entry.title)))
+			if not uses.is_empty(): (entry.facts as Array).append(["Used in", "\n".join(uses)])
 		var searchable := "%s %s %s %s %s" % [entry.get("title", ""),
 			entry.get("summary", ""), entry.get("body", ""),
 			_category(str(entry.get("category", ""))).get("title", ""), entry.get("book", "")]
@@ -512,6 +526,30 @@ func _recipe_facts(recipe: Dictionary) -> Array[Array]:
 	facts.append(["Food subtracted", str(int(recipe.get("food", 0)))])
 	if int(recipe.get("mana", 0)) > 0: facts.append(["Ether required", str(int(recipe.mana))])
 	return facts
+
+func _harvesting_entries(category_id: String) -> Array[Dictionary]:
+	var entries: Array[Dictionary] = []
+	for resource: Dictionary in _catalogues.get("harvesting", []):
+		var title := str(resource.get("name", ""))
+		var book := str(resource.get("knowledge", ""))
+		var tool := str(resource.get("tool", ""))
+		var facts: Array[Array] = [
+			["Recommended Harvesting level", str(int(resource.get("level", 0)))],
+			["Knowledge needed", "None" if book.is_empty() else _link("entry:%s:%s" % [_books_category, _slug(book)], book)],
+			["Tools required to have", "None" if tool.is_empty() else _escape(tool)],
+			["Harvesting experience given", str(int(resource.get("experience", 0)))]]
+		var body := ("Click a resource node to gather this item. The recommended Harvesting level affects gathering speed;"
+			+ " it is not a minimum level needed to start. Carry or equip any required tool and leave room in your backpack."
+			+ "\n\nHarvesting currently requires no research books. Knowledge needed to make items from this resource is listed"
+			+ " on their recipe pages. Experience is normally awarded for the first 120 harvests each game hour;"
+			+ " server bonuses and events can change the reward. The live server controls resource nodes and interruptions.")
+		var entry := _entry_record(_slug(title), title, "Harvesting levels, knowledge and tools.", body,
+			facts, _item_image(int(resource.get("imageId", -1))), category_id)
+		entry.merge({"type": "resource", "level": int(resource.get("level", 0)), "book": book,
+			"output": title, "related": ["harvesting", "harvesting-todo"]}, true)
+		entries.append(entry)
+	entries.sort_custom(_title_before)
+	return entries
 
 ## The three names a recipe could be filed under, narrowest last. Counting all
 ## three in one pass is what lets the next pass tell which of them is enough.
@@ -764,7 +802,7 @@ func _render() -> void:
 		row.set_text(2, str(entry.get("type", "guide")).capitalize())
 		row.set_text(3, str(entry.level) if int(entry.get("level", -1)) >= 0 else "—")
 		var book := str(entry.get("book", ""))
-		row.set_text(4, book if not book.is_empty() else ("None" if str(entry.get("type", "")) in ["recipe", "spell"] else "—"))
+		row.set_text(4, book if not book.is_empty() else ("None" if str(entry.get("type", "")) in ["recipe", "spell", "resource"] else "—"))
 		row.set_cell_mode(5, TreeItem.CELL_MODE_CHECK)
 		row.set_editable(5, true)
 		row.set_checked(5, _bookmark_index(key) >= 0)
@@ -930,12 +968,12 @@ func _build() -> void:
 	sort_filter = _option(filters, "SortFilter", ["Name A–Z", "Name Z–A", "Level ↑", "Level ↓", "Topic", "Book"])
 	sort_filter.item_selected.connect(func(index: int): _filter_changed("sort", SORT_IDS[index]))
 	book_filter = _option(filters, "BookFilter", ["Any book requirement", "Book required", "No book required"])
-	book_filter.tooltip_text = "Applies to recipes and spells with explicit knowledge requirements"
+	book_filter.tooltip_text = "Applies to recipes, spells and harvesting resources with explicit knowledge requirements"
 	book_filter.item_selected.connect(func(index: int): _filter_changed("book_filter", index))
 	level_enabled = CheckBox.new()
 	level_enabled.name = "LimitLevel"
 	level_enabled.text = "Max level"
-	level_enabled.tooltip_text = "Recipe recommended level or spell unlock level; entries without levels are excluded"
+	level_enabled.tooltip_text = "Recipe or harvesting recommended level, or spell unlock level; entries without levels are excluded"
 	filters.add_child(level_enabled)
 	level_enabled.toggled.connect(func(enabled: bool): _filter_changed("limit_level", enabled))
 	level_filter = SpinBox.new()
@@ -990,10 +1028,10 @@ func _build() -> void:
 	ledger.set_column_title(1, "Topic")
 	ledger.set_column_title(2, "Type")
 	ledger.set_column_title(3, "Level")
-	ledger.set_column_title_tooltip_text(3, "Recipe recommended level or spell unlock level")
+	ledger.set_column_title_tooltip_text(3, "Recipe or harvesting recommended level, or spell unlock level")
 	ledger.set_column_title(4, "Book required")
 	ledger.set_column_title(5, "☆")
-	var widths := [190, 100, 64, 48, 160, 30]
+	var widths := [190, 100, 78, 48, 160, 30]
 	for column: int in range(6):
 		ledger.set_column_custom_minimum_width(column, widths[column])
 		ledger.set_column_expand(column, column == 0 or column == 4)
@@ -1515,7 +1553,7 @@ func filtered_entries() -> Array[Dictionary]:
 			continue
 		var requirement := int(state.get("book_filter", 0))
 		if variants.is_empty() and requirement > 0:
-			if str(entry.get("type", "")) not in ["recipe", "spell"]:
+			if str(entry.get("type", "")) not in ["recipe", "spell", "resource"]:
 				continue
 			if (not str(entry.get("book", "")).is_empty()) != (requirement == 1):
 				continue

@@ -44,6 +44,7 @@ func run() -> void:
 	var atlas := ItemAtlas.new()
 	atlas.configure(data("res://data/items/atlases.json"))
 	view.configure_catalogues({"manufacturing": recipes, "spells": spells, "items": atlas,
+		"harvesting": data("res://data/harvesting/catalog.json").get("resources", []),
 		"books": data("res://data/knowledge/catalog.json").get("entries", []),
 		"regions": data("res://data/maps/cartography.json").get("regions", []),
 		"skills": ["attack", "defense", "harvesting", "alchemy", "magic", "potion", "summoning",
@@ -146,6 +147,58 @@ func run() -> void:
 	await capture("04-empty-results")
 	view.show_index()
 	view.entries_per_page = 24
+	view.open_category("gathering", 0)
+	view.call("_filter_changed", "type", "resource")
+	var resources: Array = data("res://data/harvesting/catalog.json").resources
+	expect(view.filtered_entries().size() == resources.size(), "one harvesting row per installed resource")
+	for resource: Dictionary in resources:
+		var matched := false
+		for entry: Dictionary in view.filtered_entries():
+			if str(entry.title) != str(resource.name): continue
+			matched = true
+			expect(int(entry.level) == int(resource.level) and str(entry.book) == str(resource.knowledge),
+				"harvesting metadata matches the installed resource: " + str(resource.name))
+		expect(matched, "resource is reachable: " + str(resource.name))
+	view.call("_filter_changed", "book_filter", 1)
+	expect(view.filtered_entries().is_empty(), "harvesting does not invent research prerequisites")
+	view.call("_filter_changed", "book_filter", 2)
+	expect(view.filtered_entries().size() == resources.size(), "no-book filter includes harvesting resources")
+	view.call("_filter_changed", "limit_level", true)
+	view.call("_filter_changed", "max_level", 0)
+	expect(view.filtered_entries().size() == 1 and str(view.filtered_entries()[0].title) == "Sunleaf",
+		"level-zero resources remain available through the recommended-level filter")
+	view.call("_filter_changed", "max_level", 18)
+	view.call("_filter_changed", "sort", "level")
+	view.call("_filter_changed", "query", "iron ore")
+	var harvest_row := view.ledger.get_root().get_first_child()
+	while harvest_row != null and str(harvest_row.get_metadata(0)) != "entry:gathering:iron-ore":
+		harvest_row = harvest_row.get_next()
+	if harvest_row != null:
+		harvest_row.select(0)
+		view.ledger.item_selected.emit()
+	expect(harvest_row != null and harvest_row.get_text(3) == "18" and harvest_row.get_text(4) == "None",
+		"harvesting ledger shows the recommended level and explicit no-book requirement")
+	expect(page_text(view.entry_page).contains("Recommended Harvesting level")
+		and page_text(view.entry_page).contains("Knowledge needed")
+		and page_text(view.entry_page).contains("Pickaxe"), "resource preview shows level, knowledge and tool")
+	await capture("06-harvesting-ledger")
+	var harvesting_key := view.page_key()
+	view.full_article_button.pressed.emit()
+	expect(view.page_key() == "entry:gathering:iron-ore", "resource full articles have stable page keys")
+	var harvest_text := page_text(view.entry_page)
+	expect(harvest_text.contains("not a minimum level") and harvest_text.contains("Iron Bar"),
+		"resource article explains recommended levels and links to recipe uses")
+	await capture("07-harvesting-article")
+	view.go_back()
+	expect(view.page_key() == harvesting_key, "Back restores harvesting filters and selection")
+	view.search("iron bar")
+	view.open_entry("alchemy", "iron-bar")
+	var materials_link := false
+	for pair: Array in (view.call("_entry", "alchemy", "iron-bar") as Dictionary).facts:
+		if str(pair[0]) == "Required materials":
+			materials_link = str(pair[1]).contains("entry:gathering:iron-ore")
+	expect(materials_link, "recipe ingredient links resolve to harvesting resources")
+	view.show_index()
 	view.open_entry("perks", "perk-standard-bearer")
 	expect(page_text(view.entry_page).contains("Tier"), "authored structured perk sections are preserved")
 	expect(not view.matches("Mortar and Pestle").is_empty(), "tools are searchable")
