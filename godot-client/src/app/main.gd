@@ -1150,6 +1150,7 @@ var _selection_ring_actor := -1
 var _overhead_target_actor := -1
 var _shelves_health_actor := -1
 var _grower_health_actors: Array = []
+var _rescue_health_actor := -1
 ## Built bodies (not deferred), recounted on every gate pass and kept up to
 ## date in between by the passes that build or remove one; the body cap reads it.
 var _built_bodies := 0
@@ -6051,11 +6052,8 @@ func _combat_target_actor_id() -> int:
 ## Scenery does not. The server gives a shopkeeper or a gate warden 20 of 20
 ## health like everybody else (`NPCActor` in the server's world.py), so the
 ## client used to hang a full bar over every trader in a market - a row of
-## bars that never move and say nothing. They keep a bare name, unless you
-## have actually picked a fight with one, which the combat packets say.
-##
-## The three answers are the minimap's own, so the map and the field agree
-## about which of them each actor is.
+## bars that never move and say nothing. They keep a bare name, unless they
+## are a quest companion, a training opponent or the combat target.
 func _overhead_health_for(actor_id: int, dto: Dictionary,
 		target_id: int) -> bool:
 	if actor_id == target_id:
@@ -6063,6 +6061,8 @@ func _overhead_health_for(actor_id: int, dto: Dictionary,
 	if _is_shelves_training_opponent(actor_id, dto):
 		return true
 	if _is_shelves_grower(actor_id, dto):
+		return true
+	if _is_rescue_companion(actor_id):
 		return true
 	return _minimap_actor_type(dto) != &"npc"
 
@@ -7049,6 +7049,10 @@ func _on_state_changed(path: StringName) -> void:
 			for worker: Dictionary in workers:worker_ids.append(int(worker.actor_id))
 			_sync_overhead_health_for(_grower_health_actors+worker_ids)
 			_grower_health_actors=worker_ids
+			var mother := int((AppState.campaign.get("actors", {}) as Dictionary).get("mother", -1)) \
+				if str(AppState.campaign.get("kind", "")) == "rescue" else -1
+			_sync_overhead_health_for([_rescue_health_actor, mother])
+			_rescue_health_actor = mother
 		&"npc_dialogue":
 			_sync_dialogue()
 		&"popup":

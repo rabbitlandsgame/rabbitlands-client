@@ -495,6 +495,7 @@ vram_texture_compression/for_desktop=true
 vram_texture_compression/for_mobile=false
 html/canvas_resize_policy=2
 html/focus_canvas_on_start=true
+html/experimental_virtual_keyboard=true
 progressive_web_app/enabled=false
 '''
     (project / "export_presets.cfg").write_text(preset, encoding="utf-8")
