@@ -165,7 +165,11 @@ func run() -> void:
 	expect(view.filtered_entries().size() == resources.size(), "no-book filter includes harvesting resources")
 	view.call("_filter_changed", "limit_level", true)
 	view.call("_filter_changed", "max_level", 0)
-	expect(view.filtered_entries().size() == 1 and str(view.filtered_entries()[0].title) == "Sunleaf",
+	var level_zero_titles: Array[String] = []
+	for entry: Dictionary in view.filtered_entries():
+		level_zero_titles.append(str(entry.title))
+	level_zero_titles.sort()
+	expect(level_zero_titles == ["Berries", "Sage", "Sunleaf"],
 		"level-zero resources remain available through the recommended-level filter")
 	view.call("_filter_changed", "max_level", 18)
 	view.call("_filter_changed", "sort", "level")
