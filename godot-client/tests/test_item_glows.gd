@@ -1,5 +1,5 @@
 extends SceneTree
-## Saved-copy state, icon silhouettes, and the equipment secondary pass.
+## Saved-copy state, icon silhouettes, and the equipment particle pass.
 const Glow := preload("res://src/ui/item_glow.gd")
 const EquipmentGlow := preload("res://src/actors/equipment_glow.gd")
 const EffectIcons := preload("res://src/ui/item_effect_icons.gd")
@@ -85,18 +85,34 @@ func _run() -> void:
 	mesh.material_overlay = overlay
 	var controller := EquipmentGlow.new()
 	controller.sync({0: [mesh]}, {"0": fire}, null)
-	expect(mesh.get_child_count() == 1, "a saved effect adds one secondary draw per mesh")
-	var clone := mesh.get_child(0) as MeshInstance3D
-	expect(clone.layers == 2 and clone.mesh == mesh.mesh, "the glow reuses geometry only on the gameplay layer")
+	expect(mesh.get_child_count() == 1, "a saved effect adds one particle draw per item")
+	var emitter := mesh.get_child(0) as MultiMeshInstance3D
+	expect(emitter != null and emitter.layers == 2 and emitter.multimesh.instance_count == 4,
+		"magic gear has only four gameplay-layer motes, not a duplicate item mesh")
+	# The headless dummy renderer does not retain per-instance color readback.
+	# The rendered run verifies the actual uploaded particle alpha as well.
+	if DisplayServer.get_name() != "headless":
+		mesh.scale = Vector3(3, 2, 4)
+		emitter.call("_process", 0.0)
+		for index: int in emitter.multimesh.instance_count:
+			expect(emitter.multimesh.get_instance_color(index).a <= 0.421, "particle opacity stays restrained")
+			var size_basis := emitter.global_basis * emitter.multimesh.get_instance_transform(index).basis
+			expect(size_basis.x.length() <= 0.051 and size_basis.y.length() <= 0.051, "imported equipment scale cannot enlarge the particles")
+	mesh.hide()
+	emitter.call("_process", 0.0)
+	expect(emitter.multimesh.visible_instance_count == 0, "hidden equipment stops drawing particles")
+	mesh.show()
 	expect(mesh.material_override == authored and mesh.material_overlay == overlay, "the glow preserves materials and the visibility silhouette")
 	controller.sync({0: [mesh]}, {"0": fire}, null)
-	expect(mesh.get_child_count() == 1, "a movement refresh does not duplicate glow meshes")
+	expect(mesh.get_child_count() == 1, "a movement refresh does not duplicate particle emitters")
 	controller.sync({0: [mesh]}, {"0": frost}, null)
 	await process_frame
-	expect(mesh.get_child_count() == 1, "swapping same-artwork copies replaces their glow")
+	expect(mesh.get_child_count() == 1, "swapping same-artwork copies replaces their particles")
+	var rare_emitter := mesh.get_child(0) as MultiMeshInstance3D
+	expect(rare_emitter.multimesh.instance_count == 6, "mixed rare effects share a six-mote budget")
 	controller.sync({0: [mesh]}, {}, null)
 	await process_frame
-	expect(mesh.get_child_count() == 0, "a plain replacement removes the secondary pass")
+	expect(mesh.get_child_count() == 0, "a plain replacement removes its particles")
 	stage.queue_free()
 	await process_frame
 	print("Item glows: %d checks, %d failures" % [checks, failures])
