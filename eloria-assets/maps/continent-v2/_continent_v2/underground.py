@@ -376,6 +376,11 @@ def attach_one(ctx, pub, spec, reader, path, design, error, fields, door_tiles):
             ways[tuple(end['arrival'])]=f'passage end {end["object"]}\'s arrival'
     ids=set()
     spawn_tiles=set()
+    # An interior node may name a base resource or one the overlay itself adds (content/server-tables.json
+    # resources: the isle diversity amendment's Mushroom and metal ores stand in the caves); a caller without the
+    # content tables keeps the base-only rule.
+    overlay_resources={r['name'] for r in getattr(getattr(ctx,'tables',None),'tables',{}).get('resources',[])}
+    known_resources=set(ctx.server.base_resources)|overlay_resources
     for section in design['sections']:
         sid=section['id']; reach=reach_of[sid]
         safe=[tuple(a) for _,_,a in reader.arrivals(design,section)]
@@ -383,7 +388,7 @@ def attach_one(ctx, pub, spec, reader, path, design, error, fields, door_tiles):
             if oid in ids: raise error(f'duplicate {spec.label} object id')
             ids.add(oid)
             nodes.append(checked_node_row(region,sid,(oid,res,nx,ny),walk_codes,reach,
-                                          ctx.server.base_resources,error,spec.label))
+                                          known_resources,error,spec.label))
         for creature,sx,sy,leash in section['spawns']:
             definition=ctx.server.creatures.get(creature)
             if definition is None or definition.raw.get('model')!='final': raise error(f'{creature}: no reviewed model')

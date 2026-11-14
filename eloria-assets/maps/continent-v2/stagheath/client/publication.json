@@ -2,17 +2,17 @@
  "region": "stagheath",
  "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
  "snapshot": {
-  "sha256": "ad068d0804800281cd8c9d67d5201ecb6d4940318205354151eaada26969d611",
-  "sceneSha256": "70365a449d99ef5a6913097080456ce3b2bea203568490e3b6a18e69782c8c0a",
+  "sha256": "d3acae7234552e229158dfe563dbd2922275af2f6018017a44a3528913476bd0",
+  "sceneSha256": "3394c3704054b40a094313075d62cd5c7a0adbe80c161f7cda78a8622b1b8929",
   "recipe": "region_bake_cli.gd --scene godot-client/world_authoring/regions/stagheath/stagheath.tscn --output <bake>/continent-authoring.json"
  },
  "collision": {
-  "sidecarSha256": "7c3bc4a31e0b7544f58e63c3d3bee73b92edd5cae6638ad65cfbc4f243814eb2",
-  "collisionSha256": "c1c9d6b78abcaeb519a4d2ea3d0136040f8c4dca9107bc585992839c15ea04df",
-  "servedGridSha256": "26b8f7ecda57238531f0a8d0aa6f9ed0948f8d612a13bf765c4d2c10f1e03ff2",
-  "walkableCells": 930299,
-  "openTiles": 230347,
-  "sourceSnapshotSha256": "ad068d0804800281cd8c9d67d5201ecb6d4940318205354151eaada26969d611"
+  "sidecarSha256": "b6b97253ede94cb5c6b47f71129e5f20c089e842f90da8166875b9e656d68c26",
+  "collisionSha256": "7402153142c16f6ff8044d063d2a9328b349c572b2c434d45a1bfcf035f5a951",
+  "servedGridSha256": "4b4acf9ea41734edb1888db791b0ca2fea154ec0226bfcf6565d2e1c7165f78a",
+  "walkableCells": 928823,
+  "openTiles": 229978,
+  "sourceSnapshotSha256": "d3acae7234552e229158dfe563dbd2922275af2f6018017a44a3528913476bd0"
  },
  "chunks": 87,
  "kitPlacementsOutsideWindow": 0,
@@ -112,19 +112,19 @@
   "15_12": 62.5
  },
  "timings": {
-  "snapshot_s": 2.2,
-  "terrain_s": 0.1,
+  "snapshot_s": 1.9,
+  "terrain_s": 0.2,
   "water_s": 0.0,
-  "overlays_s": 0.9,
+  "overlays_s": 1.0,
   "bridges_s": 0.0,
   "surface_glb_bytes": 151032768,
   "walk_kit_nodes": 4,
-  "library_s": 0.5,
-  "harvest_nodes": 51,
-  "chunks_s": 2.6,
-  "space_passes_s": 13.9
+  "library_s": 0.6,
+  "harvest_nodes": 420,
+  "chunks_s": 2.8,
+  "space_passes_s": 13.2
  },
- "seconds": 27.7,
+ "seconds": 28.2,
  "imagePolicy": {
   "surface": {
    "imagesResampled": 10,
@@ -166,25 +166,5 @@
   "placementLimit": 240,
   "triangleLimit": 450000,
   "cellMetres": 96
- },
- "harvestDiversityAmendments": [
-  {
-   "plan": "eloria-assets/maps/continent-v2/_continent_v2/content/harvest-diversity.json",
-   "planSha256": "1bfd8a0fa8a7d27e4c8894ea0e11ebbc108b2b811498e68e2dfa9a4255ab02a0",
-   "nodes": 84,
-   "geometry": "unchanged",
-   "collision": "unchanged",
-   "operation": "resource labels and gathering art only; stable IDs, positions and routes",
-   "resources": [
-    "Berries",
-    "Mushroom",
-    "Blue Berries",
-    "Silver Ore",
-    "Gold Ore",
-    "Titanium Ore"
-   ],
-   "sourceSceneSha256": "08fb9f04a29353caed59a45c3ace41ba7cb7e082846e9a75a449a2d752916b08",
-   "baseSceneSha256": "70365a449d99ef5a6913097080456ce3b2bea203568490e3b6a18e69782c8c0a"
-  }
- ]
+ }
 }

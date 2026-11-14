@@ -64,6 +64,10 @@ def test_resource_only_amendment_keeps_all_static_world_fields():
         relative=f'{P.V2}/{region}/client/world.json'
         old=json.loads(subprocess.check_output(['git','-C',str(ROOT),'show',PLAN['clientBase']+':'+relative]))
         new=read(relative)
+        # The amendment's promise holds while the package is still the one it amended; a later full republication
+        # (a new bake of the scene, e.g. the 2026-11-14 harvest coverage pass) rewrites provenance and collision.
+        if new['provenance'].get('snapshotSha256')!=old['provenance'].get('snapshotSha256'):
+            continue
         for document in (old,new):
             document.pop('harvestables');document.pop('harvestGroupings',None)
             document['provenance'].pop(P.KEY,None)
