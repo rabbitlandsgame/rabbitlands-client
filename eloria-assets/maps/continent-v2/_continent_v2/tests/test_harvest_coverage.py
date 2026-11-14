@@ -50,6 +50,32 @@ def test_landfall_scene_reads_markers_roads_and_scenery():
     assert {"olive-tree", "lemon-tree"} <= kits
 
 
+def test_trails_without_a_transform_are_read():
+    # Regression: Godot omits an identity transform, and the A3 trails carry none; they were once skipped, so D11
+    # was judged with no roads at all on the isles.
+    for region, least in (("suncoil", 15), ("hornmere", 11), ("whitepeak", 12)):
+        scene = H.read_scene(region, H.ROOT, RULES["pass"])
+        assert len(scene["paths"]) >= least, (region, len(scene["paths"]))
+
+
+def test_server_rows_are_protected():
+    """Spawns, landing targets, cast posts and homes are rows publish_server.py ring-checks; the generator keeps clear
+    of them (a node in a spawn's ring once refused the publication)."""
+    if not SERVER:
+        pytest.skip("set ELORIA_SERVER_ROOT to read the server's rows")
+    srv = H.server_inputs(Path(SERVER))
+    assert len(srv["spawns"]) > 1000 and srv["targets"] and srv["posts"]
+    if PLAN is None:
+        return
+    for region, entry in PLAN["maps"].items():
+        rows = [(x, y) for m, x, y in srv["spawns"] + srv["posts"] if m == region]
+        for site in entry["groupings"]:
+            for node in site["nodes"]:
+                x, y = node["tile"]
+                near = [(a, b) for a, b in rows if max(abs(x - a), abs(y - b)) <= RULES["placement"]["protectChebyshev"]]
+                assert not near, (region, node["objectId"], near[:3])
+
+
 def test_landfall_road_band_lies_on_walkable_ground():
     """The road reader agrees with the ground: a road's band is overwhelmingly walkable on the served grid."""
     scene = H.read_scene("landfall", H.ROOT, RULES["pass"])
@@ -152,7 +178,10 @@ def test_scene_writer_is_idempotent_and_restores_the_count(tmp_path):
         shutil.copy2(source / name, regions / name)
     plan = copy.deepcopy(PLAN)
     plan["maps"] = {region: plan["maps"][region]}
-    base_count = json.loads((regions / "region-authoring-spec.json").read_bytes())["gameplay"]["authoredMarkerCount"]
+    base_count = json.loads((regions / "region-authoring-spec.json").read_bytes())["gameplay"].get("authoredMarkerCount")
+    already = len(H.read_scene(region, tmp_path, RULES["pass"])["generated"])
+    if base_count is not None:
+        base_count -= already               # the scene may carry the applied pass already
     first = H.apply_scenes(tmp_path, plan, log=lambda *a: None)
     once = {p: p.read_bytes() for p in first}
     H.apply_scenes(tmp_path, plan, log=lambda *a: None)
@@ -162,10 +191,19 @@ def test_scene_writer_is_idempotent_and_restores_the_count(tmp_path):
     assert len(scene["generated"]) == added
     assert H.sha(scene["base"].encode("utf-8")) == plan["maps"][region]["inputs"]["sceneSha256"]
     spec = json.loads((regions / "region-authoring-spec.json").read_bytes())
-    assert spec["gameplay"]["authoredMarkerCount"] == base_count + added
+    assert spec["gameplay"].get("authoredMarkerCount") == (None if base_count is None else base_count + added)
     for m in scene["generated"]:
         HP.marker_hints({"id": m["name"], **m["extras"]})
         assert m["extras"]["pass"] == RULES["pass"] and m["extras"]["authority"] == "server"
+        # the scene's own marker script id: scenes name it differently (s0_marker, lv_marker, s2_marker, marker)
+        assert m["script"] == scene["markerScript"] and scene["markerScript"]
+
+
+def test_every_applied_scene_uses_its_own_marker_script():
+    for region in H.EXTERIOR:
+        scene = H.read_scene(region, H.ROOT, RULES["pass"])
+        scripts = {m["script"] for m in scene["generated"]}
+        assert scripts <= {scene["markerScript"]}, (region, scripts, scene["markerScript"])
 
 
 @pytest.mark.skipif(not SERVER, reason="set ELORIA_SERVER_ROOT to a server checkout to regenerate the plan")

@@ -145,7 +145,7 @@ def read_scene(region: str, checkout: Path, pass_name: str):
             m = re.search(r'"points": PackedVector3Array\(([^)]*)\)', body)
             if m:
                 v = np.array([float(x) for x in FLOATS.findall(m.group(1))]).reshape(-1, 3)
-                curves[attrs["id"]] = v[2::3]       # (in, out, position) per point
+                curves[attrs["id"]] = v.reshape(-1, 3, 3)       # (in, out, position) per point
             continue
         if kind != "node":
             continue
@@ -155,14 +155,16 @@ def read_scene(region: str, checkout: Path, pass_name: str):
             tr = _transform(body)
             if extras is not None and tr is not None:
                 marker = {"name": attrs.get("name"), "parent": parent, "extras": extras,
-                          "position": tr[1].tolist(), "kind": (_field(body, "kind") or "").strip('"')}
+                          "position": tr[1].tolist(), "kind": (_field(body, "kind") or "").strip('"'),
+                          "script": _field(body, "script")}
                 if parent == HARVEST_PARENT and extras.get("pass") == pass_name:
                     generated.append((start, end, marker))
                 else:
                     markers.append(marker)
         elif parent == "Roads" and attrs.get("type") == "Path3D":
             curve = re.search(r'curve = SubResource\("([^"]+)"\)', body)
-            tr = _transform(body)
+            # Godot omits an identity transform: the A3 trails (Suncoil, Hornmere, Whitepeak...) carry none.
+            tr = _transform(body) or (np.eye(3), np.zeros(3))
             widths = _field(body, "point_widths")
             default = float(_field(body, "default_width") or 8.0)
             pid = (_field(body, "path_id") or attrs.get("name", "road")).strip('"')
@@ -179,20 +181,46 @@ def read_scene(region: str, checkout: Path, pass_name: str):
     paths = []
     for road in roads:
         points = curves.get(road["curve"])
-        if points is None or road["transform"] is None:
-            continue
+        if points is None:
+            raise CoverageError(f"{region}: road {road['id']} names no readable Curve3D; D11 would be judged blind")
         basis, origin = road["transform"]
-        world = points @ basis + origin
-        widths = road["widths"] if len(road["widths"]) == len(world) else [road["default"]] * len(world)
+        widths = road["widths"] if len(road["widths"]) == len(points) else [road["default"]] * len(points)
+        sampled, sampled_widths = bezier_samples(points, widths)
+        world = sampled @ basis + origin
         paths.append({"kind": "road", "id": road["id"],
-                      "points": [{"position": p.tolist(), "width": w} for p, w in zip(world, widths)]})
+                      "points": [{"position": p.tolist(), "width": w} for p, w in zip(world, sampled_widths)]})
     base = text
     for start, end, _ in sorted(generated, reverse=True):
         base = base[:start] + base[end:]
     # A generated block is appended as "\n[node ...]...\n": removing the blocks leaves the base's own ending.
     base = base.rstrip("\r\n") + text[len(text.rstrip("\r\n")):] if generated else base
+    # The marker script's ExtResource id is the scene's own ("s0_marker", "lv_marker", "s2_marker", "marker"...):
+    # a generated marker uses the one the scene's harvest markers already use.
+    scripts = [m["script"] for m in markers if m["parent"] == HARVEST_PARENT and m.get("script")]
+    scripts = scripts or [m["script"] for m in markers if m.get("script")]
+    marker_script = max(set(scripts), key=scripts.count) if scripts else None
     return {"path": path, "raw": raw, "text": text, "base": base, "markers": markers, "paths": paths,
-            "placements": placements, "generated": [g[2] for g in generated]}
+            "placements": placements, "generated": [g[2] for g in generated], "markerScript": marker_script}
+
+
+def bezier_samples(points, widths, step_metres=1.0):
+    """A Curve3D's points (in, out, position) as a polyline: each segment the cubic Bezier its handles describe
+    (position, position + out, next position + next in, next position), sampled about every step_metres, widths
+    interpolated along it, as the bake's tessellated road paths are."""
+    out_pts, out_w = [], []
+    for i in range(len(points) - 1):
+        p0 = points[i][2]; p1 = p0 + points[i][1]
+        p3 = points[i + 1][2]; p2 = p3 + points[i + 1][0]
+        length = np.linalg.norm(p1 - p0) + np.linalg.norm(p2 - p1) + np.linalg.norm(p3 - p2)
+        n = max(1, int(np.ceil(length / step_metres)))
+        t = np.linspace(0.0, 1.0, n, endpoint=False)[:, None]
+        seg = ((1 - t) ** 3) * p0 + 3 * ((1 - t) ** 2) * t * p1 + 3 * (1 - t) * t * t * p2 + (t ** 3) * p3
+        out_pts.append(seg)
+        out_w += list(widths[i] + (widths[i + 1] - widths[i]) * t[:, 0])
+    if len(points):
+        out_pts.append(points[-1][2][None, :])
+        out_w.append(widths[-1])
+    return (np.concatenate(out_pts) if out_pts else np.zeros((0, 3))), out_w
 
 
 # --- server inputs ---------------------------------------------------------------------------------------------------
@@ -222,8 +250,21 @@ def server_inputs(server: Path):
         parts = [p.strip() for p in line.split("|")]
         if len(parts) == 7 and parts[0] == "portal" and parts[1] in names and parts[4] in names:
             lanes.append((parts[1], int(parts[2]), int(parts[3]), parts[4], int(parts[5]), int(parts[6])))
+    # The other rows publish_server.py ring-checks (every row's tile and its eight neighbours open): spawns, landing
+    # targets (walked to an approach found within APPROACH_SEARCH), cast posts and home points.
+    spawns = []
+    for line in (profile / "continent-v2/spawns.txt").read_text(encoding="utf-8").splitlines():
+        parts = [p.strip() for p in line.split("|")]
+        if len(parts) >= 5 and parts[0] == "spawn":
+            spawns.append((parts[1], int(parts[3]), int(parts[4])))
+    landing = read_json(profile / "continent-v2/landing.json")
+    targets = [(t["map"], *t["tile"]) for t in landing.get("targets", {}).values()]
+    posts = [(c["map"], *c["tile"]) for c in landing.get("cast", [])]
+    homes = [(region, *tile) for region, points in read_json(profile / "continent-v2/homes.json")["homes"].items()
+             for tile in points.values()]
     return {"decode": decode_file, "manifest": manifest, "resources": resources, "nodes": nodes,
-            "interactives": interactives, "people": people, "lanes": lanes,
+            "interactives": interactives, "people": people, "lanes": lanes, "spawns": spawns,
+            "targets": targets, "posts": posts + homes,
             "harvestSha256": sha((profile / "continent-v2/harvesting.txt").read_bytes())}
 
 
@@ -270,7 +311,9 @@ class Ground:
                 pass
         self.protected += [(p.x, p.y) for p in srv["people"] if p.map_id == region]
         self.protected += [(i.x, i.y) for i in srv["interactives"].values() if i.map_id == region]
+        self.protected += [(x, y) for m, x, y in srv["spawns"] + srv["posts"] if m == region]
         self.protected.append(self.arrival)
+        self.targets = [(x, y) for m, x, y in srv["targets"] if m == region]
         self.lane_tiles = [(x, y) for s, x, y, d, ax, ay in srv["lanes"] if s == region] + \
                           [(ax, ay) for s, x, y, d, ax, ay in srv["lanes"] if d == region]
         self.used_ids = {n.object_id for n in self.nodes} | {i.object_id for i in srv["interactives"].values()
@@ -370,6 +413,8 @@ def candidate_mask(g, reached, rules):
     edge[m:-m, m:-m] = True
     blocked = road_band(g, pl["roadMarginMetres"])
     blocked |= chebyshev_mask(g.shape, g.protected, pl["protectChebyshev"])
+    # a landing target is walked to an approach tile the publisher searches for within APPROACH_SEARCH
+    blocked |= chebyshev_mask(g.shape, g.targets, max(pl["protectChebyshev"], P.APPROACH_SEARCH))
     blocked |= chebyshev_mask(g.shape, g.lane_tiles, pl["laneProtectChebyshev"])
     blocked |= chebyshev_mask(g.shape, [(n.x, n.y) for n in g.nodes], rules["clumps"]["minSpacingToExisting"])
     allow = inside & edge & ~blocked
@@ -774,6 +819,11 @@ def verify(grounds, srv, plans, log=print):
             road = HP.road_offenders(g.scene["paths"], [{"id": n["objectId"], "tile": n["tile"]}
                                                         for s in plans.get(r, []) for n in s["nodes"]], g.frame.local)
             offenders[r] |= {o["id"] for o in road}
+            # the scene's curves are the bake's at its control points; the margin covers its tessellation (2026-11-14:
+            # every bake road tile of all 17 maps lies inside the scene band widened by 1 m)
+            band = road_band(g, read_json(RULES)["placement"]["roadMarginMetres"])
+            offenders[r] |= {n["objectId"] for s in plans.get(r, []) for n in s["nodes"]
+                             if band[n["tile"][1], n["tile"][0]]}
         # an existing node that fails now but passes with nothing closed is a new neighbour's fault
         if any(old_failures.values()):
             base_checker = P.Checker({r: g.codes for r, g in grounds.items()}, before, frames_, polys,
@@ -950,7 +1000,7 @@ def encode(plan) -> bytes:
 
 # --- scenes ----------------------------------------------------------------------------------------------------------
 
-def marker_block(region, site, node, pass_name, newline):
+def marker_block(region, site, node, pass_name, newline, script):
     identity = f"{region}--harvest-{node['objectId']}-{node['resource'].lower().replace(' ', '-')}"
     extras = {"authority": "server", "cluster": site["id"], "grouping": site["id"], "groupingName": site["name"],
               "objectId": node["objectId"], "pass": pass_name, "resource": node["resource"], "yaw": node["yaw"],
@@ -960,7 +1010,7 @@ def marker_block(region, site, node, pass_name, newline):
     HP.marker_hints({"id": identity, **extras})           # refuse anything the presentation schema refuses
     x, y, z = node["position"]
     lines = [f'[node name="{identity}" type="Marker3D" parent="{HARVEST_PARENT}"]', "gizmo_extents = 0.8",
-             'script = ExtResource("s0_marker")', f'record_id = "{identity}"', 'kind = "harvestable"',
+             f"script = {script}", f'record_id = "{identity}"', 'kind = "harvestable"',
              f'label = "{node["resource"]}"', "extras = " + json.dumps(extras, indent=0, ensure_ascii=False),
              f"transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {x}, {y}, {z})", ""]
     return newline + newline.join("\n".join(lines).split("\n"))
@@ -974,7 +1024,11 @@ def apply_scenes(checkout: Path, plan, log=print):
         if sha(scene["base"].encode("utf-8")) != entry["inputs"]["sceneSha256"]:
             raise CoverageError(f"{region}: the scene changed since the plan was made; run --plan again")
         newline = "\r\n" if "\r\n" in scene["base"] else "\n"
-        body = "".join(marker_block(region, s, n, plan["pass"], newline) for s in entry["groupings"]
+        script = scene["markerScript"]
+        if not script or not re.fullmatch(r'ExtResource\("[A-Za-z0-9_]+"\)', script) or \
+                f'id="{script[13:-2]}"' not in scene["base"]:
+            raise CoverageError(f"{region}: no marker script ExtResource found in the scene ({script})")
+        body = "".join(marker_block(region, s, n, plan["pass"], newline, script) for s in entry["groupings"]
                        for n in s["nodes"])
         text = scene["base"].rstrip("\r\n") + newline + body.rstrip("\r\n") + newline
         spec_path = checkout / f"godot-client/world_authoring/regions/{region}/region-authoring-spec.json"
@@ -982,7 +1036,10 @@ def apply_scenes(checkout: Path, plan, log=print):
         spec = json.loads(spec_raw)
         previous = len(scene["generated"])
         count = sum(len(s["nodes"]) for s in entry["groupings"])
-        spec["gameplay"]["authoredMarkerCount"] = spec["gameplay"]["authoredMarkerCount"] - previous + count
+        # As author_continent_v2_boats.py does: a spec that counts its authored markers follows the scene; the A3
+        # isles' specs (hornmere, suncoil, whitepeak) count none.
+        if "authoredMarkerCount" in spec["gameplay"]:
+            spec["gameplay"]["authoredMarkerCount"] = spec["gameplay"]["authoredMarkerCount"] - previous + count
         spec_text = json.dumps(spec, indent=_indent(spec_raw), ensure_ascii=False) + "\n"
         if b"\r\n" in spec_raw:
             spec_text = spec_text.replace("\n", "\r\n")

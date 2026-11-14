@@ -27577,3 +27577,3447 @@ kind = "runtime_point"
 label = "Brambleshaw Undercroft"
 extras = {"role": "underground_entrance", "objectId": 59007, "section": "brambleshaw_undercroft", "authority": "server"}
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33.5, 78.3, 44.5)
+
+[node name="brambleshaw--harvest-3000-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3000-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0001",
+"grouping": "brambleshaw-wild-0001",
+"groupingName": "Berries and Sage",
+"objectId": 3000,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 84,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 213.5, 1.65, 153.5)
+
+[node name="brambleshaw--harvest-3006-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3006-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0001",
+"grouping": "brambleshaw-wild-0001",
+"groupingName": "Berries and Sage",
+"objectId": 3006,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 168,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 215.5, 1.0, 157.5)
+
+[node name="brambleshaw--harvest-3007-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3007-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0002",
+"grouping": "brambleshaw-wild-0002",
+"groupingName": "Wild Berries",
+"objectId": 3007,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 347,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -243.5, 124.5, 68.5)
+
+[node name="brambleshaw--harvest-3008-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3008-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0003",
+"grouping": "brambleshaw-wild-0003",
+"groupingName": "Lavender and Mushroom",
+"objectId": 3008,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 231,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -226.5, 94.7, -135.5)
+
+[node name="brambleshaw--harvest-3009-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3009-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0003",
+"grouping": "brambleshaw-wild-0003",
+"groupingName": "Lavender and Mushroom",
+"objectId": 3009,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 11,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -222.5, 95.85, -130.5)
+
+[node name="brambleshaw--harvest-3010-lemon" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3010-lemon"
+kind = "harvestable"
+label = "Lemon"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0004",
+"grouping": "brambleshaw-wild-0004",
+"groupingName": "Lemon and Mushroom",
+"objectId": 3010,
+"pass": "harvest-coverage-1",
+"resource": "Lemon",
+"yaw": 44,
+"zone": "coverage",
+"bindPlacement": "tollholms-kit-lemon-tree-1-006"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64.5, 115.31, 103.5)
+
+[node name="brambleshaw--harvest-3026-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3026-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0004",
+"grouping": "brambleshaw-wild-0004",
+"groupingName": "Lemon and Mushroom",
+"objectId": 3026,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 347,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -66.5, 116.45, 102.5)
+
+[node name="brambleshaw--harvest-3027-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3027-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0005",
+"grouping": "brambleshaw-wild-0005",
+"groupingName": "Berries, Bramble, Sage and Sunleaf",
+"objectId": 3027,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 322,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -250.5, 100.5, -104.5)
+
+[node name="brambleshaw--harvest-3028-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3028-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0005",
+"grouping": "brambleshaw-wild-0005",
+"groupingName": "Berries, Bramble, Sage and Sunleaf",
+"objectId": 3028,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 214,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -250.5, 100.9, -102.5)
+
+[node name="brambleshaw--harvest-3029-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3029-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0005",
+"grouping": "brambleshaw-wild-0005",
+"groupingName": "Berries, Bramble, Sage and Sunleaf",
+"objectId": 3029,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 318,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -257.5, 100.5, -103.5)
+
+[node name="brambleshaw--harvest-3037-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3037-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0005",
+"grouping": "brambleshaw-wild-0005",
+"groupingName": "Berries, Bramble, Sage and Sunleaf",
+"objectId": 3037,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 244,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -253.5, 101.45, -100.5)
+
+[node name="brambleshaw--harvest-3038-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3038-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0006",
+"grouping": "brambleshaw-wild-0006",
+"groupingName": "Bramble, Sage and Sunleaf",
+"objectId": 3038,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 86,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120.5, 60.55, -24.5)
+
+[node name="brambleshaw--harvest-3039-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3039-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0006",
+"grouping": "brambleshaw-wild-0006",
+"groupingName": "Bramble, Sage and Sunleaf",
+"objectId": 3039,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 273,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 121.5, 60.05, -22.5)
+
+[node name="brambleshaw--harvest-3040-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3040-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0006",
+"grouping": "brambleshaw-wild-0006",
+"groupingName": "Bramble, Sage and Sunleaf",
+"objectId": 3040,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 173,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 124.5, 59.2, -24.5)
+
+[node name="brambleshaw--harvest-3041-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3041-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0006",
+"grouping": "brambleshaw-wild-0006",
+"groupingName": "Bramble, Sage and Sunleaf",
+"objectId": 3041,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 276,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 126.5, 58.4, -23.5)
+
+[node name="brambleshaw--harvest-3042-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3042-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0007",
+"grouping": "brambleshaw-wild-0007",
+"groupingName": "Bramble, Lavender, Seed and Sunleaf",
+"objectId": 3042,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 249,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 117.95, 143.5)
+
+[node name="brambleshaw--harvest-3043-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3043-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0007",
+"grouping": "brambleshaw-wild-0007",
+"groupingName": "Bramble, Lavender, Seed and Sunleaf",
+"objectId": 3043,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 120,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5, 115.85, 136.5)
+
+[node name="brambleshaw--harvest-3044-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3044-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0007",
+"grouping": "brambleshaw-wild-0007",
+"groupingName": "Bramble, Lavender, Seed and Sunleaf",
+"objectId": 3044,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 26,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 116.15, 137.5)
+
+[node name="brambleshaw--harvest-3045-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3045-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0007",
+"grouping": "brambleshaw-wild-0007",
+"groupingName": "Bramble, Lavender, Seed and Sunleaf",
+"objectId": 3045,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 16,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, 118.9, 146.5)
+
+[node name="brambleshaw--harvest-3046-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3046-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0007",
+"grouping": "brambleshaw-wild-0007",
+"groupingName": "Bramble, Lavender, Seed and Sunleaf",
+"objectId": 3046,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 190,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, 119.5, 148.5)
+
+[node name="brambleshaw--harvest-3047-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3047-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0008",
+"grouping": "brambleshaw-wild-0008",
+"groupingName": "Berries, Lavender and Mushroom",
+"objectId": 3047,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 33,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.5, 69.2, 59.5)
+
+[node name="brambleshaw--harvest-3048-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3048-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0008",
+"grouping": "brambleshaw-wild-0008",
+"groupingName": "Berries, Lavender and Mushroom",
+"objectId": 3048,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 349,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 84.5, 69.75, 62.5)
+
+[node name="brambleshaw--harvest-3049-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3049-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0008",
+"grouping": "brambleshaw-wild-0008",
+"groupingName": "Berries, Lavender and Mushroom",
+"objectId": 3049,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 176,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 94.5, 68.6, 61.5)
+
+[node name="brambleshaw--harvest-3050-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3050-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0009",
+"grouping": "brambleshaw-wild-0009",
+"groupingName": "Wild Seed",
+"objectId": 3050,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 321,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 201.5, 0.9, 50.5)
+
+[node name="brambleshaw--harvest-3051-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3051-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0010",
+"grouping": "brambleshaw-wild-0010",
+"groupingName": "Berries and Seed",
+"objectId": 3051,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 28,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -112.5, 125.95, 111.5)
+
+[node name="brambleshaw--harvest-3052-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3052-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0010",
+"grouping": "brambleshaw-wild-0010",
+"groupingName": "Berries and Seed",
+"objectId": 3052,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 78,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -113.5, 126.55, 113.5)
+
+[node name="brambleshaw--harvest-3053-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3053-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0010",
+"grouping": "brambleshaw-wild-0010",
+"groupingName": "Berries and Seed",
+"objectId": 3053,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 171,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -116.5, 126.65, 110.5)
+
+[node name="brambleshaw--harvest-3054-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3054-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0011",
+"grouping": "brambleshaw-wild-0011",
+"groupingName": "Bramble and Lavender",
+"objectId": 3054,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 152,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -199.5, 140.6, 117.5)
+
+[node name="brambleshaw--harvest-3055-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3055-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0011",
+"grouping": "brambleshaw-wild-0011",
+"groupingName": "Bramble and Lavender",
+"objectId": 3055,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 285,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -203.5, 140.35, 115.5)
+
+[node name="brambleshaw--harvest-3056-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3056-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0012",
+"grouping": "brambleshaw-wild-0012",
+"groupingName": "Berries and Lavender",
+"objectId": 3056,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 7,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 66.5, 73.1, -97.5)
+
+[node name="brambleshaw--harvest-3057-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3057-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0012",
+"grouping": "brambleshaw-wild-0012",
+"groupingName": "Berries and Lavender",
+"objectId": 3057,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 209,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 67.5, 73.4, -93.5)
+
+[node name="brambleshaw--harvest-3058-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3058-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0013",
+"grouping": "brambleshaw-wild-0013",
+"groupingName": "Mushroom, Seed and Sunleaf",
+"objectId": 3058,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 150,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -236.5, 113.65, 16.5)
+
+[node name="brambleshaw--harvest-3059-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3059-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0013",
+"grouping": "brambleshaw-wild-0013",
+"groupingName": "Mushroom, Seed and Sunleaf",
+"objectId": 3059,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 324,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -234.5, 113.65, 24.5)
+
+[node name="brambleshaw--harvest-3060-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3060-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0013",
+"grouping": "brambleshaw-wild-0013",
+"groupingName": "Mushroom, Seed and Sunleaf",
+"objectId": 3060,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 40,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -236.5, 113.9, 12.5)
+
+[node name="brambleshaw--harvest-3061-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3061-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0014",
+"grouping": "brambleshaw-wild-0014",
+"groupingName": "Wild Sage",
+"objectId": 3061,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 90,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 136.5, 52.6, 31.5)
+
+[node name="brambleshaw--harvest-3062-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3062-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0015",
+"grouping": "brambleshaw-wild-0015",
+"groupingName": "Bramble, Mushroom, Sage, Seed and Sunleaf",
+"objectId": 3062,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 286,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -201.5, 101.5, -102.5)
+
+[node name="brambleshaw--harvest-3063-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3063-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0015",
+"grouping": "brambleshaw-wild-0015",
+"groupingName": "Bramble, Mushroom, Sage, Seed and Sunleaf",
+"objectId": 3063,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 239,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -200.5, 101.85, -100.5)
+
+[node name="brambleshaw--harvest-3064-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3064-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0015",
+"grouping": "brambleshaw-wild-0015",
+"groupingName": "Bramble, Mushroom, Sage, Seed and Sunleaf",
+"objectId": 3064,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 112,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -203.5, 101.5, -102.5)
+
+[node name="brambleshaw--harvest-3065-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3065-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0015",
+"grouping": "brambleshaw-wild-0015",
+"groupingName": "Bramble, Mushroom, Sage, Seed and Sunleaf",
+"objectId": 3065,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 249,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -208.5, 101.85, -102.5)
+
+[node name="brambleshaw--harvest-3066-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3066-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0015",
+"grouping": "brambleshaw-wild-0015",
+"groupingName": "Bramble, Mushroom, Sage, Seed and Sunleaf",
+"objectId": 3066,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 57,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -207.5, 101.35, -104.5)
+
+[node name="brambleshaw--harvest-3067-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3067-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0015",
+"grouping": "brambleshaw-wild-0015",
+"groupingName": "Bramble, Mushroom, Sage, Seed and Sunleaf",
+"objectId": 3067,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 348,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -205.5, 102.25, -99.5)
+
+[node name="brambleshaw--harvest-3068-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3068-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0015",
+"grouping": "brambleshaw-wild-0015",
+"groupingName": "Bramble, Mushroom, Sage, Seed and Sunleaf",
+"objectId": 3068,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 42,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -205.5, 101.8, -101.5)
+
+[node name="brambleshaw--harvest-3069-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3069-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0016",
+"grouping": "brambleshaw-wild-0016",
+"groupingName": "Bramble, Sage and Sunleaf",
+"objectId": 3069,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 202,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 221.5, 3.4, 119.5)
+
+[node name="brambleshaw--harvest-3070-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3070-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0016",
+"grouping": "brambleshaw-wild-0016",
+"groupingName": "Bramble, Sage and Sunleaf",
+"objectId": 3070,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 334,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 220.5, 3.35, 117.5)
+
+[node name="brambleshaw--harvest-3071-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3071-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0016",
+"grouping": "brambleshaw-wild-0016",
+"groupingName": "Bramble, Sage and Sunleaf",
+"objectId": 3071,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 76,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 214.5, 3.75, 119.5)
+
+[node name="brambleshaw--harvest-3072-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3072-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0016",
+"grouping": "brambleshaw-wild-0016",
+"groupingName": "Bramble, Sage and Sunleaf",
+"objectId": 3072,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 312,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 218.5, 3.9, 128.5)
+
+[node name="brambleshaw--harvest-3073-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3073-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0017",
+"grouping": "brambleshaw-wild-0017",
+"groupingName": "Wild Sunleaf",
+"objectId": 3073,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 86,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -202.5, 119.7, 64.5)
+
+[node name="brambleshaw--harvest-3074-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3074-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0017",
+"grouping": "brambleshaw-wild-0017",
+"groupingName": "Wild Sunleaf",
+"objectId": 3074,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 168,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -203.5, 117.1, 58.5)
+
+[node name="brambleshaw--harvest-3075-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3075-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0018",
+"grouping": "brambleshaw-wild-0018",
+"groupingName": "Berries, Sage and Seed",
+"objectId": 3075,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 324,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -185.5, 91.4, -148.5)
+
+[node name="brambleshaw--harvest-3076-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3076-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0018",
+"grouping": "brambleshaw-wild-0018",
+"groupingName": "Berries, Sage and Seed",
+"objectId": 3076,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 339,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -178.5, 91.15, -149.5)
+
+[node name="brambleshaw--harvest-3077-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3077-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0018",
+"grouping": "brambleshaw-wild-0018",
+"groupingName": "Berries, Sage and Seed",
+"objectId": 3077,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 344,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -179.5, 91.5, -147.5)
+
+[node name="brambleshaw--harvest-3078-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3078-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0019",
+"grouping": "brambleshaw-wild-0019",
+"groupingName": "Wild Berries",
+"objectId": 3078,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 143,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 210.5, 1.9, -31.5)
+
+[node name="brambleshaw--harvest-3079-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3079-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0020",
+"grouping": "brambleshaw-wild-0020",
+"groupingName": "Berries, Lavender and Seed",
+"objectId": 3079,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 306,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -152.5, 136.25, 134.5)
+
+[node name="brambleshaw--harvest-3080-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3080-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0020",
+"grouping": "brambleshaw-wild-0020",
+"groupingName": "Berries, Lavender and Seed",
+"objectId": 3080,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 136,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -150.5, 135.7, 133.5)
+
+[node name="brambleshaw--harvest-3081-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3081-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0020",
+"grouping": "brambleshaw-wild-0020",
+"groupingName": "Berries, Lavender and Seed",
+"objectId": 3081,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 48,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -157.5, 138.4, 139.5)
+
+[node name="brambleshaw--harvest-3082-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3082-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0020",
+"grouping": "brambleshaw-wild-0020",
+"groupingName": "Berries, Lavender and Seed",
+"objectId": 3082,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 333,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -159.5, 138.85, 139.5)
+
+[node name="brambleshaw--harvest-3083-lemon" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3083-lemon"
+kind = "harvestable"
+label = "Lemon"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0021",
+"grouping": "brambleshaw-wild-0021",
+"groupingName": "Bramble, Lemon, Seed and Sunleaf",
+"objectId": 3083,
+"pass": "harvest-coverage-1",
+"resource": "Lemon",
+"yaw": 1,
+"zone": "coverage",
+"bindPlacement": "tollholms-kit-lemon-tree-1-022"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.5, 107.799, 104.5)
+
+[node name="brambleshaw--harvest-3084-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3084-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0021",
+"grouping": "brambleshaw-wild-0021",
+"groupingName": "Bramble, Lemon, Seed and Sunleaf",
+"objectId": 3084,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 201,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.5, 109.0, 109.5)
+
+[node name="brambleshaw--harvest-3085-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3085-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0021",
+"grouping": "brambleshaw-wild-0021",
+"groupingName": "Bramble, Lemon, Seed and Sunleaf",
+"objectId": 3085,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 317,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.5, 110.5, 112.5)
+
+[node name="brambleshaw--harvest-3086-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3086-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0021",
+"grouping": "brambleshaw-wild-0021",
+"groupingName": "Bramble, Lemon, Seed and Sunleaf",
+"objectId": 3086,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 219,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.5, 111.15, 114.5)
+
+[node name="brambleshaw--harvest-3087-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3087-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0022",
+"grouping": "brambleshaw-wild-0022",
+"groupingName": "Mushroom and Seed",
+"objectId": 3087,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 287,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 116.5, 72.05, -79.5)
+
+[node name="brambleshaw--harvest-3088-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3088-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0022",
+"grouping": "brambleshaw-wild-0022",
+"groupingName": "Mushroom and Seed",
+"objectId": 3088,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 309,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 128.5, 69.8, -81.5)
+
+[node name="brambleshaw--harvest-3089-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3089-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0023",
+"grouping": "brambleshaw-wild-0023",
+"groupingName": "Lavender, Sage and Sunleaf",
+"objectId": 3089,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 239,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.5, 88.2, 79.5)
+
+[node name="brambleshaw--harvest-3090-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3090-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0023",
+"grouping": "brambleshaw-wild-0023",
+"groupingName": "Lavender, Sage and Sunleaf",
+"objectId": 3090,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 119,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28.5, 88.85, 80.5)
+
+[node name="brambleshaw--harvest-3091-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3091-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0023",
+"grouping": "brambleshaw-wild-0023",
+"groupingName": "Lavender, Sage and Sunleaf",
+"objectId": 3091,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 345,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 84.8, 71.5)
+
+[node name="brambleshaw--harvest-3092-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3092-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0023",
+"grouping": "brambleshaw-wild-0023",
+"groupingName": "Lavender, Sage and Sunleaf",
+"objectId": 3092,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 27,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29.5, 84.65, 70.5)
+
+[node name="brambleshaw--harvest-3093-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3093-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0024",
+"grouping": "brambleshaw-wild-0024",
+"groupingName": "Berries, Lavender, Mushroom and Sunleaf",
+"objectId": 3093,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 101,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -174.5, 120.75, 64.5)
+
+[node name="brambleshaw--harvest-3094-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3094-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0024",
+"grouping": "brambleshaw-wild-0024",
+"groupingName": "Berries, Lavender, Mushroom and Sunleaf",
+"objectId": 3094,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 238,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -176.5, 120.55, 64.5)
+
+[node name="brambleshaw--harvest-3095-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3095-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0024",
+"grouping": "brambleshaw-wild-0024",
+"groupingName": "Berries, Lavender, Mushroom and Sunleaf",
+"objectId": 3095,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 191,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -170.5, 121.1, 64.5)
+
+[node name="brambleshaw--harvest-3096-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3096-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0024",
+"grouping": "brambleshaw-wild-0024",
+"groupingName": "Berries, Lavender, Mushroom and Sunleaf",
+"objectId": 3096,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 2,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -179.5, 121.3, 67.5)
+
+[node name="brambleshaw--harvest-3097-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3097-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0025",
+"grouping": "brambleshaw-wild-0025",
+"groupingName": "Lavender, Mushroom, Sage and Sunleaf",
+"objectId": 3097,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 241,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -249.5, 140.65, 110.5)
+
+[node name="brambleshaw--harvest-3098-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3098-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0025",
+"grouping": "brambleshaw-wild-0025",
+"groupingName": "Lavender, Mushroom, Sage and Sunleaf",
+"objectId": 3098,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 301,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -247.5, 140.4, 109.5)
+
+[node name="brambleshaw--harvest-3099-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3099-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0025",
+"grouping": "brambleshaw-wild-0025",
+"groupingName": "Lavender, Mushroom, Sage and Sunleaf",
+"objectId": 3099,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 321,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -250.5, 139.75, 108.5)
+
+[node name="brambleshaw--harvest-3100-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3100-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0025",
+"grouping": "brambleshaw-wild-0025",
+"groupingName": "Lavender, Mushroom, Sage and Sunleaf",
+"objectId": 3100,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 18,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -243.5, 139.65, 107.5)
+
+[node name="brambleshaw--harvest-3183-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3183-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0025",
+"grouping": "brambleshaw-wild-0025",
+"groupingName": "Lavender, Mushroom, Sage and Sunleaf",
+"objectId": 3183,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 141,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -241.5, 139.7, 107.5)
+
+[node name="brambleshaw--harvest-3184-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3184-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0025",
+"grouping": "brambleshaw-wild-0025",
+"groupingName": "Lavender, Mushroom, Sage and Sunleaf",
+"objectId": 3184,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 282,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -248.5, 138.15, 104.5)
+
+[node name="brambleshaw--harvest-3185-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3185-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0026",
+"grouping": "brambleshaw-wild-0026",
+"groupingName": "Lavender, Mushroom and Sage",
+"objectId": 3185,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 58,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 193.5, 3.35, 89.5)
+
+[node name="brambleshaw--harvest-3186-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3186-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0026",
+"grouping": "brambleshaw-wild-0026",
+"groupingName": "Lavender, Mushroom and Sage",
+"objectId": 3186,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 330,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 199.5, 2.95, 90.5)
+
+[node name="brambleshaw--harvest-3187-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3187-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0026",
+"grouping": "brambleshaw-wild-0026",
+"groupingName": "Lavender, Mushroom and Sage",
+"objectId": 3187,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 314,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 192.5, 3.7, 96.5)
+
+[node name="brambleshaw--harvest-3188-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3188-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0027",
+"grouping": "brambleshaw-wild-0027",
+"groupingName": "Wild Mushroom",
+"objectId": 3188,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 274,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 86.5, 72.05, -39.5)
+
+[node name="brambleshaw--harvest-3189-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3189-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0028",
+"grouping": "brambleshaw-wild-0028",
+"groupingName": "Berries and Sunleaf",
+"objectId": 3189,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 114,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 76.5, 72.15, 0.5)
+
+[node name="brambleshaw--harvest-3190-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3190-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0028",
+"grouping": "brambleshaw-wild-0028",
+"groupingName": "Berries and Sunleaf",
+"objectId": 3190,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 62,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 74.5, 72.5, -4.5)
+
+[node name="brambleshaw--harvest-3191-olive" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3191-olive"
+kind = "harvestable"
+label = "Olive"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0029",
+"grouping": "brambleshaw-wild-0029",
+"groupingName": "Wild Olive",
+"objectId": 3191,
+"pass": "harvest-coverage-1",
+"resource": "Olive",
+"yaw": 227,
+"zone": "coverage",
+"bindPlacement": "tollholms-kit-olive-tree-1-016"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.5, 99.576, 49.5)
+
+[node name="brambleshaw--harvest-3192-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3192-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0030",
+"grouping": "brambleshaw-wild-0030",
+"groupingName": "Berries, Lavender, Sage and Sunleaf",
+"objectId": 3192,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 173,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 225.5, 2.0, 0.5)
+
+[node name="brambleshaw--harvest-3193-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3193-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0030",
+"grouping": "brambleshaw-wild-0030",
+"groupingName": "Berries, Lavender, Sage and Sunleaf",
+"objectId": 3193,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 80,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 230.5, 1.55, 0.5)
+
+[node name="brambleshaw--harvest-3194-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3194-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0030",
+"grouping": "brambleshaw-wild-0030",
+"groupingName": "Berries, Lavender, Sage and Sunleaf",
+"objectId": 3194,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 343,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 227.5, 2.0, -4.5)
+
+[node name="brambleshaw--harvest-3195-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3195-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0030",
+"grouping": "brambleshaw-wild-0030",
+"groupingName": "Berries, Lavender, Sage and Sunleaf",
+"objectId": 3195,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 273,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 229.5, 1.8, -4.5)
+
+[node name="brambleshaw--harvest-3196-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3196-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0031",
+"grouping": "brambleshaw-wild-0031",
+"groupingName": "Wild Mushroom",
+"objectId": 3196,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 73,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.5, 81.25, -107.5)
+
+[node name="brambleshaw--harvest-3197-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3197-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0032",
+"grouping": "brambleshaw-wild-0032",
+"groupingName": "Sage and Sunleaf",
+"objectId": 3197,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 243,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -81.5, 87.1, -129.5)
+
+[node name="brambleshaw--harvest-3198-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3198-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0032",
+"grouping": "brambleshaw-wild-0032",
+"groupingName": "Sage and Sunleaf",
+"objectId": 3198,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 0,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -83.5, 87.45, -128.5)
+
+[node name="brambleshaw--harvest-3199-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3199-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0033",
+"grouping": "brambleshaw-wild-0033",
+"groupingName": "Wild Sage",
+"objectId": 3199,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 324,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -243.5, 112.85, -35.5)
+
+[node name="brambleshaw--harvest-3200-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3200-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0034",
+"grouping": "brambleshaw-wild-0034",
+"groupingName": "Sage and Sunleaf",
+"objectId": 3200,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 347,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 126.5, 65.45, 95.5)
+
+[node name="brambleshaw--harvest-3201-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3201-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0034",
+"grouping": "brambleshaw-wild-0034",
+"groupingName": "Sage and Sunleaf",
+"objectId": 3201,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 161,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 124.5, 65.7, 94.5)
+
+[node name="brambleshaw--harvest-3202-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3202-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0035",
+"grouping": "brambleshaw-wild-0035",
+"groupingName": "Berries and Sunleaf",
+"objectId": 3202,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 190,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 203.5, 13.1, -70.5)
+
+[node name="brambleshaw--harvest-3203-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3203-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0035",
+"grouping": "brambleshaw-wild-0035",
+"groupingName": "Berries and Sunleaf",
+"objectId": 3203,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 236,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 205.5, 12.85, -71.5)
+
+[node name="brambleshaw--harvest-3204-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3204-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0035",
+"grouping": "brambleshaw-wild-0035",
+"groupingName": "Berries and Sunleaf",
+"objectId": 3204,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 302,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 204.5, 12.45, -68.5)
+
+[node name="brambleshaw--harvest-3205-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3205-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0036",
+"grouping": "brambleshaw-wild-0036",
+"groupingName": "Berries, Lavender, Seed and Sunleaf",
+"objectId": 3205,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 273,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.5, 125.7, 149.5)
+
+[node name="brambleshaw--harvest-3206-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3206-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0036",
+"grouping": "brambleshaw-wild-0036",
+"groupingName": "Berries, Lavender, Seed and Sunleaf",
+"objectId": 3206,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 195,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -58.5, 124.35, 145.5)
+
+[node name="brambleshaw--harvest-3207-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3207-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0036",
+"grouping": "brambleshaw-wild-0036",
+"groupingName": "Berries, Lavender, Seed and Sunleaf",
+"objectId": 3207,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 219,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -60.5, 124.55, 145.5)
+
+[node name="brambleshaw--harvest-3208-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3208-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0036",
+"grouping": "brambleshaw-wild-0036",
+"groupingName": "Berries, Lavender, Seed and Sunleaf",
+"objectId": 3208,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 300,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -67.5, 126.2, 148.5)
+
+[node name="brambleshaw--harvest-3209-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3209-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0037",
+"grouping": "brambleshaw-wild-0037",
+"groupingName": "Mushroom, Sage and Sunleaf",
+"objectId": 3209,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 118,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.5, 113.4, 135.5)
+
+[node name="brambleshaw--harvest-3210-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3210-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0037",
+"grouping": "brambleshaw-wild-0037",
+"groupingName": "Mushroom, Sage and Sunleaf",
+"objectId": 3210,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 46,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.5, 115.5, 139.5)
+
+[node name="brambleshaw--harvest-3211-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3211-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0037",
+"grouping": "brambleshaw-wild-0037",
+"groupingName": "Mushroom, Sage and Sunleaf",
+"objectId": 3211,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 281,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.5, 115.55, 140.5)
+
+[node name="brambleshaw--harvest-3212-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3212-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0037",
+"grouping": "brambleshaw-wild-0037",
+"groupingName": "Mushroom, Sage and Sunleaf",
+"objectId": 3212,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 34,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.5, 114.65, 138.5)
+
+[node name="brambleshaw--harvest-3213-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3213-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0037",
+"grouping": "brambleshaw-wild-0037",
+"groupingName": "Mushroom, Sage and Sunleaf",
+"objectId": 3213,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 182,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.5, 115.9, 141.5)
+
+[node name="brambleshaw--harvest-3214-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3214-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0038",
+"grouping": "brambleshaw-wild-0038",
+"groupingName": "Berries and Bramble",
+"objectId": 3214,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 38,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -206.5, 112.85, 4.5)
+
+[node name="brambleshaw--harvest-3215-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3215-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0038",
+"grouping": "brambleshaw-wild-0038",
+"groupingName": "Berries and Bramble",
+"objectId": 3215,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 143,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -204.5, 112.65, 4.5)
+
+[node name="brambleshaw--harvest-3216-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3216-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0038",
+"grouping": "brambleshaw-wild-0038",
+"groupingName": "Berries and Bramble",
+"objectId": 3216,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 139,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -207.5, 113.05, 2.5)
+
+[node name="brambleshaw--harvest-3217-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3217-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0038",
+"grouping": "brambleshaw-wild-0038",
+"groupingName": "Berries and Bramble",
+"objectId": 3217,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 243,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -207.5, 112.75, 6.5)
+
+[node name="brambleshaw--harvest-3218-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3218-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0038",
+"grouping": "brambleshaw-wild-0038",
+"groupingName": "Berries and Bramble",
+"objectId": 3218,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 237,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -208.5, 112.65, 8.5)
+
+[node name="brambleshaw--harvest-3219-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3219-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0039",
+"grouping": "brambleshaw-wild-0039",
+"groupingName": "Wild Sunleaf",
+"objectId": 3219,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 35,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -53.5, 86.1, -109.5)
+
+[node name="brambleshaw--harvest-3220-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3220-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0040",
+"grouping": "brambleshaw-wild-0040",
+"groupingName": "Bramble, Mushroom and Sunleaf",
+"objectId": 3220,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 118,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -154.5, 126.3, 12.5)
+
+[node name="brambleshaw--harvest-3221-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3221-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0040",
+"grouping": "brambleshaw-wild-0040",
+"groupingName": "Bramble, Mushroom and Sunleaf",
+"objectId": 3221,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 148,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -153.5, 123.4, 19.5)
+
+[node name="brambleshaw--harvest-3222-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3222-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0040",
+"grouping": "brambleshaw-wild-0040",
+"groupingName": "Bramble, Mushroom and Sunleaf",
+"objectId": 3222,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 238,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -147.5, 125.65, 13.5)
+
+[node name="brambleshaw--harvest-3223-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3223-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0041",
+"grouping": "brambleshaw-wild-0041",
+"groupingName": "Berries, Sage and Sunleaf",
+"objectId": 3223,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 21,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.5, 77.3, -49.5)
+
+[node name="brambleshaw--harvest-3224-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3224-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0041",
+"grouping": "brambleshaw-wild-0041",
+"groupingName": "Berries, Sage and Sunleaf",
+"objectId": 3224,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 30,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 51.5, 76.9, -39.5)
+
+[node name="brambleshaw--harvest-3225-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3225-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0041",
+"grouping": "brambleshaw-wild-0041",
+"groupingName": "Berries, Sage and Sunleaf",
+"objectId": 3225,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 269,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 53.5, 76.7, -39.5)
+
+[node name="brambleshaw--harvest-3226-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3226-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0041",
+"grouping": "brambleshaw-wild-0041",
+"groupingName": "Berries, Sage and Sunleaf",
+"objectId": 3226,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 214,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 51.5, 76.95, -41.5)
+
+[node name="brambleshaw--harvest-3227-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3227-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0042",
+"grouping": "brambleshaw-wild-0042",
+"groupingName": "Lavender and Sunleaf",
+"objectId": 3227,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 229,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 86.5, 69.95, 30.5)
+
+[node name="brambleshaw--harvest-3228-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3228-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0042",
+"grouping": "brambleshaw-wild-0042",
+"groupingName": "Lavender and Sunleaf",
+"objectId": 3228,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 171,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 94.5, 68.3, 34.5)
+
+[node name="brambleshaw--harvest-3229-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3229-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0043",
+"grouping": "brambleshaw-wild-0043",
+"groupingName": "Lavender and Sage",
+"objectId": 3229,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 136,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -255.5, 94.9, -164.5)
+
+[node name="brambleshaw--harvest-3230-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3230-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0043",
+"grouping": "brambleshaw-wild-0043",
+"groupingName": "Lavender and Sage",
+"objectId": 3230,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 344,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -257.5, 95.35, -160.5)
+
+[node name="brambleshaw--harvest-3231-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3231-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0043",
+"grouping": "brambleshaw-wild-0043",
+"groupingName": "Lavender and Sage",
+"objectId": 3231,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 349,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -256.5, 95.1, -162.5)
+
+[node name="brambleshaw--harvest-3232-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3232-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0043",
+"grouping": "brambleshaw-wild-0043",
+"groupingName": "Lavender and Sage",
+"objectId": 3232,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 84,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -251.5, 94.5, -161.5)
+
+[node name="brambleshaw--harvest-3233-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3233-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0044",
+"grouping": "brambleshaw-wild-0044",
+"groupingName": "Berries, Bramble, Sage and Seed",
+"objectId": 3233,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 209,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 158.5, 44.45, -17.5)
+
+[node name="brambleshaw--harvest-3234-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3234-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0044",
+"grouping": "brambleshaw-wild-0044",
+"groupingName": "Berries, Bramble, Sage and Seed",
+"objectId": 3234,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 214,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 158.5, 44.45, -19.5)
+
+[node name="brambleshaw--harvest-3235-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3235-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0044",
+"grouping": "brambleshaw-wild-0044",
+"groupingName": "Berries, Bramble, Sage and Seed",
+"objectId": 3235,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 111,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 158.5, 44.35, -15.5)
+
+[node name="brambleshaw--harvest-3236-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3236-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0044",
+"grouping": "brambleshaw-wild-0044",
+"groupingName": "Berries, Bramble, Sage and Seed",
+"objectId": 3236,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 239,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 153.5, 46.5, -20.5)
+
+[node name="brambleshaw--harvest-3237-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3237-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0044",
+"grouping": "brambleshaw-wild-0044",
+"groupingName": "Berries, Bramble, Sage and Seed",
+"objectId": 3237,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 50,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 163.5, 42.5, -18.5)
+
+[node name="brambleshaw--harvest-3238-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3238-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0045",
+"grouping": "brambleshaw-wild-0045",
+"groupingName": "Wild Bramble",
+"objectId": 3238,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 315,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -253.5, 108.75, -61.5)
+
+[node name="brambleshaw--harvest-3239-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3239-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0046",
+"grouping": "brambleshaw-wild-0046",
+"groupingName": "Mushroom and Sunleaf",
+"objectId": 3239,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 236,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.5, 78.2, -93.5)
+
+[node name="brambleshaw--harvest-3240-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3240-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0046",
+"grouping": "brambleshaw-wild-0046",
+"groupingName": "Mushroom and Sunleaf",
+"objectId": 3240,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 187,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.5, 77.55, -104.5)
+
+[node name="brambleshaw--harvest-3241-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3241-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0047",
+"grouping": "brambleshaw-wild-0047",
+"groupingName": "Berries, Mushroom, Sage and Sunleaf",
+"objectId": 3241,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 333,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -152.5, 97.05, -118.5)
+
+[node name="brambleshaw--harvest-3242-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3242-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0047",
+"grouping": "brambleshaw-wild-0047",
+"groupingName": "Berries, Mushroom, Sage and Sunleaf",
+"objectId": 3242,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 35,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -151.5, 96.5, -120.5)
+
+[node name="brambleshaw--harvest-3243-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3243-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0047",
+"grouping": "brambleshaw-wild-0047",
+"groupingName": "Berries, Mushroom, Sage and Sunleaf",
+"objectId": 3243,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 119,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -154.5, 97.3, -119.5)
+
+[node name="brambleshaw--harvest-3244-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3244-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0047",
+"grouping": "brambleshaw-wild-0047",
+"groupingName": "Berries, Mushroom, Sage and Sunleaf",
+"objectId": 3244,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 79,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -150.5, 97.0, -117.5)
+
+[node name="brambleshaw--harvest-3245-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3245-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0047",
+"grouping": "brambleshaw-wild-0047",
+"groupingName": "Berries, Mushroom, Sage and Sunleaf",
+"objectId": 3245,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 165,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -154.5, 97.55, -117.5)
+
+[node name="brambleshaw--harvest-3246-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3246-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0047",
+"grouping": "brambleshaw-wild-0047",
+"groupingName": "Berries, Mushroom, Sage and Sunleaf",
+"objectId": 3246,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 164,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -145.5, 96.9, -115.5)
+
+[node name="brambleshaw--harvest-3247-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3247-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0047",
+"grouping": "brambleshaw-wild-0047",
+"groupingName": "Berries, Mushroom, Sage and Sunleaf",
+"objectId": 3247,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 315,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -158.5, 97.6, -117.5)
+
+[node name="brambleshaw--harvest-3248-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3248-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0048",
+"grouping": "brambleshaw-wild-0048",
+"groupingName": "Lavender, Sage and Sunleaf",
+"objectId": 3248,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 278,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -159.5, 129.0, 96.5)
+
+[node name="brambleshaw--harvest-3249-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3249-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0048",
+"grouping": "brambleshaw-wild-0048",
+"groupingName": "Lavender, Sage and Sunleaf",
+"objectId": 3249,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 140,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -154.5, 127.6, 92.5)
+
+[node name="brambleshaw--harvest-3250-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3250-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0048",
+"grouping": "brambleshaw-wild-0048",
+"groupingName": "Lavender, Sage and Sunleaf",
+"objectId": 3250,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 212,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -152.5, 127.8, 93.5)
+
+[node name="brambleshaw--harvest-3251-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3251-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0049",
+"grouping": "brambleshaw-wild-0049",
+"groupingName": "Lavender, Seed and Sunleaf",
+"objectId": 3251,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 61,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 172.5, 4.7, 162.5)
+
+[node name="brambleshaw--harvest-3252-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3252-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0049",
+"grouping": "brambleshaw-wild-0049",
+"groupingName": "Lavender, Seed and Sunleaf",
+"objectId": 3252,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 163,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 184.5, 3.8, 160.5)
+
+[node name="brambleshaw--harvest-3253-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3253-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0049",
+"grouping": "brambleshaw-wild-0049",
+"groupingName": "Lavender, Seed and Sunleaf",
+"objectId": 3253,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 195,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 186.5, 3.6, 160.5)
+
+[node name="brambleshaw--harvest-3254-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3254-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0050",
+"grouping": "brambleshaw-wild-0050",
+"groupingName": "Bramble, Mushroom and Sage",
+"objectId": 3254,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 270,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 149.5, 63.0, -100.5)
+
+[node name="brambleshaw--harvest-3255-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3255-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0050",
+"grouping": "brambleshaw-wild-0050",
+"groupingName": "Bramble, Mushroom and Sage",
+"objectId": 3255,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 183,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 137.5, 66.75, -97.5)
+
+[node name="brambleshaw--harvest-3256-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3256-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0050",
+"grouping": "brambleshaw-wild-0050",
+"groupingName": "Bramble, Mushroom and Sage",
+"objectId": 3256,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 145,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 135.5, 67.1, -97.5)
+
+[node name="brambleshaw--harvest-3257-lemon" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3257-lemon"
+kind = "harvestable"
+label = "Lemon"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0051",
+"grouping": "brambleshaw-wild-0051",
+"groupingName": "Lavender, Lemon, Mushroom and Seed",
+"objectId": 3257,
+"pass": "harvest-coverage-1",
+"resource": "Lemon",
+"yaw": 79,
+"zone": "coverage",
+"bindPlacement": "tollholms-kit-lemon-tree-1-007"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -98.5, 115.929, 70.5)
+
+[node name="brambleshaw--harvest-3258-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3258-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0051",
+"grouping": "brambleshaw-wild-0051",
+"groupingName": "Lavender, Lemon, Mushroom and Seed",
+"objectId": 3258,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 241,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -99.5, 116.7, 68.5)
+
+[node name="brambleshaw--harvest-3259-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3259-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0051",
+"grouping": "brambleshaw-wild-0051",
+"groupingName": "Lavender, Lemon, Mushroom and Seed",
+"objectId": 3259,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 284,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -103.5, 118.85, 75.5)
+
+[node name="brambleshaw--harvest-3260-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3260-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0051",
+"grouping": "brambleshaw-wild-0051",
+"groupingName": "Lavender, Lemon, Mushroom and Seed",
+"objectId": 3260,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 46,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -100.5, 116.6, 66.5)
+
+[node name="brambleshaw--harvest-3261-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3261-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0052",
+"grouping": "brambleshaw-wild-0052",
+"groupingName": "Sage, Seed and Sunleaf",
+"objectId": 3261,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 327,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 192.5, 2.0, 13.5)
+
+[node name="brambleshaw--harvest-3262-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3262-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0052",
+"grouping": "brambleshaw-wild-0052",
+"groupingName": "Sage, Seed and Sunleaf",
+"objectId": 3262,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 357,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 188.5, 2.95, 15.5)
+
+[node name="brambleshaw--harvest-3263-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3263-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0052",
+"grouping": "brambleshaw-wild-0052",
+"groupingName": "Sage, Seed and Sunleaf",
+"objectId": 3263,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 294,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 189.5, 2.55, 13.5)
+
+[node name="brambleshaw--harvest-3264-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3264-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0053",
+"grouping": "brambleshaw-wild-0053",
+"groupingName": "Lavender and Sunleaf",
+"objectId": 3264,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 236,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -266.5, 119.55, 44.5)
+
+[node name="brambleshaw--harvest-3265-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3265-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0053",
+"grouping": "brambleshaw-wild-0053",
+"groupingName": "Lavender and Sunleaf",
+"objectId": 3265,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 326,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -259.5, 118.8, 46.5)
+
+[node name="brambleshaw--harvest-3266-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3266-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0054",
+"grouping": "brambleshaw-wild-0054",
+"groupingName": "Bramble, Mushroom, Sage and Sunleaf",
+"objectId": 3266,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 77,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -107.5, 129.55, 136.5)
+
+[node name="brambleshaw--harvest-3267-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3267-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0054",
+"grouping": "brambleshaw-wild-0054",
+"groupingName": "Bramble, Mushroom, Sage and Sunleaf",
+"objectId": 3267,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 216,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -106.5, 128.65, 130.5)
+
+[node name="brambleshaw--harvest-3268-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3268-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0054",
+"grouping": "brambleshaw-wild-0054",
+"groupingName": "Bramble, Mushroom, Sage and Sunleaf",
+"objectId": 3268,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 295,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -107.5, 128.95, 132.5)
+
+[node name="brambleshaw--harvest-3269-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3269-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0054",
+"grouping": "brambleshaw-wild-0054",
+"groupingName": "Bramble, Mushroom, Sage and Sunleaf",
+"objectId": 3269,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 178,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -111.5, 130.15, 137.5)
+
+[node name="brambleshaw--harvest-3270-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3270-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0054",
+"grouping": "brambleshaw-wild-0054",
+"groupingName": "Bramble, Mushroom, Sage and Sunleaf",
+"objectId": 3270,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 310,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -110.5, 130.4, 139.5)
+
+[node name="brambleshaw--harvest-3271-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3271-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0055",
+"grouping": "brambleshaw-wild-0055",
+"groupingName": "Berries and Sunleaf",
+"objectId": 3271,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 50,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 240.5, 1.6, 130.5)
+
+[node name="brambleshaw--harvest-3272-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3272-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0055",
+"grouping": "brambleshaw-wild-0055",
+"groupingName": "Berries and Sunleaf",
+"objectId": 3272,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 177,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 238.5, 1.9, 129.5)
+
+[node name="brambleshaw--harvest-3273-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3273-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0056",
+"grouping": "brambleshaw-wild-0056",
+"groupingName": "Berries and Sunleaf",
+"objectId": 3273,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 40,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -190.5, 110.2, 41.5)
+
+[node name="brambleshaw--harvest-3274-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3274-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0056",
+"grouping": "brambleshaw-wild-0056",
+"groupingName": "Berries and Sunleaf",
+"objectId": 3274,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 238,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -188.5, 110.05, 41.5)
+
+[node name="brambleshaw--harvest-3275-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3275-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0057",
+"grouping": "brambleshaw-wild-0057",
+"groupingName": "Lavender and Sunleaf",
+"objectId": 3275,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 56,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -232.5, 108.8, -66.5)
+
+[node name="brambleshaw--harvest-3276-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3276-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0057",
+"grouping": "brambleshaw-wild-0057",
+"groupingName": "Lavender and Sunleaf",
+"objectId": 3276,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 52,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -231.5, 109.2, -64.5)
+
+[node name="brambleshaw--harvest-3277-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3277-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0057",
+"grouping": "brambleshaw-wild-0057",
+"groupingName": "Lavender and Sunleaf",
+"objectId": 3277,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 307,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -233.5, 108.3, -68.5)
+
+[node name="brambleshaw--harvest-3278-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3278-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0057",
+"grouping": "brambleshaw-wild-0057",
+"groupingName": "Lavender and Sunleaf",
+"objectId": 3278,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 335,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -240.5, 108.9, -62.5)
+
+[node name="brambleshaw--harvest-3279-lemon" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3279-lemon"
+kind = "harvestable"
+label = "Lemon"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0058",
+"grouping": "brambleshaw-wild-0058",
+"groupingName": "Bramble, Lemon and Sage",
+"objectId": 3279,
+"pass": "harvest-coverage-1",
+"resource": "Lemon",
+"yaw": 308,
+"zone": "coverage",
+"bindPlacement": "tollholms-kit-lemon-tree-1-020"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.5, 88.168, 69.5)
+
+[node name="brambleshaw--harvest-3280-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3280-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0058",
+"grouping": "brambleshaw-wild-0058",
+"groupingName": "Bramble, Lemon and Sage",
+"objectId": 3280,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 91,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 83.4, 58.5)
+
+[node name="brambleshaw--harvest-3281-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3281-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0058",
+"grouping": "brambleshaw-wild-0058",
+"groupingName": "Bramble, Lemon and Sage",
+"objectId": 3281,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 239,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.5, 84.5, 56.5)
+
+[node name="brambleshaw--harvest-3282-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3282-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0059",
+"grouping": "brambleshaw-wild-0059",
+"groupingName": "Wild Lavender",
+"objectId": 3282,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 117,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -155.5, 90.65, -153.5)
+
+[node name="brambleshaw--harvest-3283-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3283-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0060",
+"grouping": "brambleshaw-wild-0060",
+"groupingName": "Lavender and Sage",
+"objectId": 3283,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 350,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -262.5, 114.35, 2.5)
+
+[node name="brambleshaw--harvest-3284-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3284-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0060",
+"grouping": "brambleshaw-wild-0060",
+"groupingName": "Lavender and Sage",
+"objectId": 3284,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 300,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -260.5, 114.65, 6.5)
+
+[node name="brambleshaw--harvest-3285-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3285-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0061",
+"grouping": "brambleshaw-wild-0061",
+"groupingName": "Sage and Sunleaf",
+"objectId": 3285,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 33,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -219.5, 91.85, -162.5)
+
+[node name="brambleshaw--harvest-3286-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3286-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0061",
+"grouping": "brambleshaw-wild-0061",
+"groupingName": "Sage and Sunleaf",
+"objectId": 3286,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 162,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -210.5, 91.4, -163.5)
+
+[node name="brambleshaw--harvest-3287-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3287-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0062",
+"grouping": "brambleshaw-wild-0062",
+"groupingName": "Bramble, Mushroom and Seed",
+"objectId": 3287,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 328,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 86.5, 72.0, 74.5)
+
+[node name="brambleshaw--harvest-3288-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3288-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0062",
+"grouping": "brambleshaw-wild-0062",
+"groupingName": "Bramble, Mushroom and Seed",
+"objectId": 3288,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 170,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95.5, 70.45, 73.5)
+
+[node name="brambleshaw--harvest-3289-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("lv_marker")
+record_id = "brambleshaw--harvest-3289-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "brambleshaw-wild-0062",
+"grouping": "brambleshaw-wild-0062",
+"groupingName": "Bramble, Mushroom and Seed",
+"objectId": 3289,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 121,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 94.5, 70.0, 71.5)
