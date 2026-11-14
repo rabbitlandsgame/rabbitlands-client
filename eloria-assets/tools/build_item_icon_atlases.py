@@ -81,12 +81,12 @@ def planned_atlases() -> list[tuple[Path, Image.Image]]:
             if cell.size != (50, 50):
                 raise ValueError(f'Supplement must contain a 50px cell: {path.name}')
             cells.append((int(record['imageId']), cell))
-    # Direct custom icons bypass the atlas. Keep their unused cells at the
-    # ordinary fallback so later atlas supplements can follow those IDs.
+    # Direct custom icons bypass the atlas. Only reserve fallback cells for
+    # IDs inside the painted range; book skins above it have no atlas cell.
     occupied = {image_id for image_id, _ in cells}
     fallback = cells[int(config['fallbackImageId'])][1]
     for image_id in map(int, config.get('customIcons', {})):
-        if image_id not in occupied:
+        if 0 <= image_id < count and image_id not in occupied:
             cells.append((image_id, fallback.copy()))
     cells.sort(key=lambda pair: pair[0])
     if [image_id for image_id, _ in cells] != list(range(count)):
