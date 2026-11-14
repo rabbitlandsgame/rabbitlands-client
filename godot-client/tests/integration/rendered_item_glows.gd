@@ -1,5 +1,5 @@
 extends SceneTree
-## Render the production icon palette and secondary pass on the native sword.
+## Render the production icon palette and subtle particles on the native sword.
 const Glow := preload("res://src/ui/item_glow.gd")
 const EquipmentGlow := preload("res://src/actors/equipment_glow.gd")
 const ARTIFACTS := "res://test-artifacts/item-glows"
@@ -43,12 +43,12 @@ func _run() -> void:
 	var canvas := CanvasLayer.new()
 	root.add_child(canvas)
 	var title := Label.new()
-	title.text = "ITEM EFFECT GLOWS"
+	title.text = "SUBTLE ITEM PARTICLES"
 	title.position = Vector2(28, 18)
 	title.add_theme_font_size_override("font_size", 25)
 	canvas.add_child(title)
 	var subtitle := Label.new()
-	subtitle.text = "Inventory: normal / magic / rare                 Equipped: rare effects on the native arming sword"
+	subtitle.text = "Inventory: normal / magic / rare                 Equipped: sparse rare particles on the native arming sword"
 	subtitle.position = Vector2(28, 54)
 	canvas.add_child(subtitle)
 	var atlas := ItemAtlas.new()
@@ -78,20 +78,23 @@ func _run() -> void:
 		controller.sync({0: [model]}, {"0": {"tier": "rare", "effects": [EFFECTS[index]]}}, null)
 		controllers.append(controller)
 	var footer := Label.new()
-	footer.text = "Fire shimmer  /  Ice facets  /  Arcane bands  /  Life pulse  /  Soul pulse  /  Radiation  /  Wind ribbons  /  Metallic sheen"
+	footer.text = "Fire embers  /  Ice flecks  /  Arcane motes  /  Life sparks  /  Soul wisps  /  Radiation  /  Wind streaks  /  Metallic glints"
 	footer.position = Vector2(28, 755)
 	canvas.add_child(footer)
 	for frame: int in 12: await process_frame
-	var clones := stage.find_children("ItemGlow", "MeshInstance3D", true, false)
-	expect(clones.size() >= 8, "each sword has its effect attached")
+	var clones := stage.find_children("ItemMotes", "MultiMeshInstance3D", true, false)
+	expect(clones.size() >= 8, "each sword has its particle emitter attached")
 	for clone: Node3D in clones: clone.hide()
 	var plain := await capture("plain")
 	for clone: Node3D in clones: clone.show()
 	var lit := await capture("effects")
 	await create_timer(0.7).timeout
 	var animated := await capture("animated")
-	expect(changed(plain, lit) > 250, "the glow is visible without bloom")
-	expect(changed(lit, animated) > 150, "the equipped glow animates")
+	var visible_pixels := changed(plain, lit)
+	var moving_pixels := changed(lit, animated)
+	print("Particle pixels: ", visible_pixels, " visible; ", moving_pixels, " animated")
+	expect(visible_pixels > 8 and visible_pixels < 900, "particles are visible but leave almost all equipment pixels untouched")
+	expect(moving_pixels > 8, "the sparse motes animate")
 	print("Rendered item glows: %d failures" % failures)
 	quit(failures)
 

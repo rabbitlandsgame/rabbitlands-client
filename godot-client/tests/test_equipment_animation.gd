@@ -109,17 +109,22 @@ func run() -> void:
 	glowing.equipment_glows = {"0": {"tier": "rare", "effects": ["Frostbind", "Renewal"]},
 		"6": {"tier": "magic", "effects": ["Stoneward"]}}
 	actor.apply_server_state(glowing, adapter)
-	var skinned_glows := 0
-	for clone: Node in actor.find_children("ItemGlow", "MeshInstance3D", true, false):
-		if (clone as MeshInstance3D).skin != null:
-			skinned_glows += 1
-			expect(clone.get_node((clone as MeshInstance3D).skeleton) == actor.get("_native_skeleton"),
-				"the skinned glow deforms with the production actor skeleton")
-	expect(skinned_glows > 0, "worn native boots receive a skinned glow")
+	var skinned_motes := 0
+	for emitter: Node in actor.find_children("ItemMotes", "MultiMeshInstance3D", true, false):
+		for sample: Dictionary in emitter.get("_surfaces"):
+			var source: MeshInstance3D = sample.source
+			if source.skin != null:
+				skinned_motes += 1
+				expect(sample.skeleton == actor.get("_native_skeleton"),
+					"particle samples use the production actor skeleton")
+				var at: Vector3 = emitter.call("_posed_point", sample)
+				expect(at.is_finite(), "a skinned particle sample has a valid posed position")
+				expect(at.distance_to(actor.global_position) < 3.0, "skinned motes stay near the worn piece")
+	expect(skinned_motes > 0, "worn native boots receive particles that follow their skin")
 	glowing.equipment_glows = {}
 	actor.apply_server_state(glowing, adapter)
-	for clone: Node3D in actor.find_children("ItemGlow", "MeshInstance3D", true, false):
-		expect(not clone.visible, "clearing a saved effect hides its retiring glow immediately")
+	for emitter: Node3D in actor.find_children("ItemMotes", "MultiMeshInstance3D", true, false):
+		expect(not emitter.visible and not emitter.is_processing(), "clearing effects immediately hides and stops retiring particles")
 
 	actor.free()
 	NativeAnimationImporter.clear()
