@@ -538,13 +538,16 @@ func _check_main(catalog: Dictionary) -> void:
 	_kit_tree(cell, "Authored_landfall_kit_olive_tree_1_017", Vector3(40, 0, -40))
 	chunks.cells["08_10"] = {"root": cell}
 	chunks.cell_ready.emit("08_10", cell)
-	await process_frame
+	# The surface refresh binds on the physics frame after the chunk is ready
+	# (main._flush_surface_refresh). Headless, process frames are not locked to
+	# physics ticks, so a fixed count of process frames may pass before one.
+	await physics_frame
 	await process_frame
 	_expect(olive.placement_bound(), "and binds to the placed tree when the chunk is ready")
 	chunks.cell_retiring.emit("08_10", cell)
 	_expect(not olive.placement_bound(), "a retiring chunk takes the binding with it")
 	chunks.cell_ready.emit("08_10", cell)
-	await process_frame
+	await physics_frame
 	await process_frame
 	_expect(olive.placement_bound(), "and it binds again when the chunk is back")
 	chunks.cells.erase("08_10")
