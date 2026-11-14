@@ -218,6 +218,7 @@ func _begin() -> void:
 	copies.select_mode = ItemList.SELECT_SINGLE if _craft_recipe.is_empty() else ItemList.SELECT_MULTI
 	preview_button.visible = _craft_recipe.is_empty()
 	confirm_button.text = "Review enchantment" if _craft_recipe.is_empty() else "Craft one…"
+	_update_tabs()
 	show()
 	main.window_stack.register(self)
 	WindowStack.activate(self)
@@ -271,6 +272,8 @@ func _state_changed(part: StringName) -> void:
 	if part == &"connection" and not AppState.authenticated:
 		hide()
 		snapshot = {}
+	elif visible and part == &"enchanting_recovery_available":
+		_update_tabs()
 	elif visible and (part == &"inventory" or part == &"storage"):
 		_stale = true
 		_invalidate(_pending != "confirm")
@@ -340,13 +343,17 @@ func _render() -> void:
 		_restore_options()
 		explanation.text = str(quote.summary)
 		status.text = "Costs checked. The random result is rolled only after confirmation."
-	tabs.visible = _craft_recipe.is_empty()
-	tabs.set_tab_disabled(2, false)
-	tabs.set_tab_disabled(0, not AppState.enchanting_recovery_available)
-	tabs.set_tab_disabled(1, not AppState.enchanting_recovery_available)
+	_update_tabs()
 	_update_summary()
 	_update_buttons()
 	_fit.call_deferred()
+
+func _update_tabs() -> void:
+	tabs.visible = _craft_recipe.is_empty()
+	var confirming := _pending == "confirm"
+	tabs.set_tab_disabled(2, confirming)
+	tabs.set_tab_disabled(0, confirming or not AppState.enchanting_recovery_available)
+	tabs.set_tab_disabled(1, confirming or not AppState.enchanting_recovery_available)
 
 func _show_copy() -> void:
 	_clear(effects)

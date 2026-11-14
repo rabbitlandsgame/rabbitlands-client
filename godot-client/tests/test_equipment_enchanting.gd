@@ -17,6 +17,20 @@ func expect(value: bool, label: String) -> void:
 func frames(count: int = 5) -> void:
 	for _index: int in count: await process_frame
 
+func click_tab(bar: TabBar, index: int) -> void:
+	await frames()
+	var point := bar.get_global_transform() * bar.get_tab_rect(index).get_center()
+	var motion := InputEventMouseMotion.new()
+	motion.position = point
+	root.push_input(motion, true)
+	for pressed: bool in [true, false]:
+		var click := InputEventMouseButton.new()
+		click.position = point
+		click.button_index = MOUSE_BUTTON_LEFT
+		click.pressed = pressed
+		root.push_input(click, true)
+	await frames()
+
 func sample() -> Dictionary:
 	var essences := {}
 	for family: String in ["Life","Death","Water","Magic","Fire","Frost","Earth","Wind"]:
@@ -71,7 +85,23 @@ func run() -> void:
 		return OK
 	window.open(0)
 	expect(not window.visible,"no entry to unsupported server")
-	state.call("_on_packet",185,JSON.stringify(sample()).to_utf8_buffer())
+	var announcement := sample()
+	announcement.items = []
+	announcement.total = 0
+	state.call("_on_packet",185,JSON.stringify(announcement).to_utf8_buffer())
+	expect(state.enchanting_recovery_available,"enchanting announcement offers recovery even before any equipment is inspected")
+	expect(main.mixing_workspace.refine.visible,"enchanting announcement offers the Mixing Refine entry")
+	var recovery: PanelContainer = main.inventory_workspace.recovery_window
+	var recovery_requests: Array[Dictionary] = []
+	recovery.send_request = func(request: Dictionary) -> Error:
+		recovery_requests.append(request.duplicate(true))
+		return OK
+	window.open(0)
+	expect(not window.tabs.is_tab_disabled(0) and not window.tabs.is_tab_disabled(1),"recovery tabs are enabled before the equipment list returns")
+	await click_tab(window.tabs, 0)
+	expect(not window.visible and recovery.visible and recovery.salvage_body.visible,"clicking Break Down opens its panel from a fresh enchanting announcement")
+	expect(not recovery_requests.is_empty() and recovery_requests[-1].op == "list","Break Down requests recovery options")
+	recovery.hide()
 	window.open(0)
 	receive(sample())
 	await frames()
@@ -149,6 +179,8 @@ func run() -> void:
 	window.call("_confirm")
 	expect(requests[-1].op == "confirm" and requests[-1].token == "reroll-token" and not requests[-1].has("effects"),"confirm sends only server token")
 	expect(state.inventory == inventory_before,"client never optimistically changes materials or equipment")
+	state.state_changed.emit(&"enchanting_recovery_available")
+	expect(window.tabs.is_tab_disabled(0) and window.tabs.is_tab_disabled(1) and window.tabs.is_tab_disabled(2),"availability updates do not unlock navigation during confirmation")
 	var serial: int = window.get("_serial")
 	state.state_changed.emit(&"inventory")
 	expect(int(window.get("_serial")) == serial,"inventory preceding receipt preserves pending request")
@@ -186,10 +218,14 @@ func run() -> void:
 	await frames()
 	expect(Rect2(Vector2.ZERO,Vector2(928,632)).encloses(window.get_global_rect()),"plain enchanting including its pinned odds fits the smaller viewport")
 	if OS.get_cmdline_user_args().has("--capture"): await capture("enchant-narrow")
-	state.set("enchanting_recovery_available",true)
-	window.tabs.set_tab_disabled(1,false)
-	window.tabs.current_tab = 1
+	state.set("enchanting_recovery_available",false)
+	window.call("_render")
+	expect(window.tabs.is_tab_disabled(0) and window.tabs.is_tab_disabled(1),"recovery tabs wait for evidence of server support")
+	state.call("_on_packet",186,JSON.stringify({"version":1,"enabled":false,"items":[],"recipes":[],"quote":null,"error":"","message":""}).to_utf8_buffer())
+	expect(not window.tabs.is_tab_disabled(0) and not window.tabs.is_tab_disabled(1),"late recovery availability updates an already open enchanting window")
+	await click_tab(window.tabs, 1)
 	expect(not window.visible and main.inventory_workspace.recovery_window.visible and main.inventory_workspace.recovery_window.tabs.current_tab == 1,"shared Refine tab opens the refining window")
+	expect(recovery.refine_body.visible and recovery_requests[-1].focus == 501 and recovery_requests[-1].source == "backpack","Refine shows its panel and keeps the selected equipment copy")
 	main.inventory_workspace.recovery_window.hide()
 	window.open(0)
 	receive(sample())
@@ -216,7 +252,7 @@ func run() -> void:
 	receive(stored)
 	await frames()
 	expect(Rect2(Vector2.ZERO,Vector2(928,632)).encloses(window.get_global_rect()), "storage controls fit smaller enchanting viewport")
-	window.tabs.current_tab = 1
+	await click_tab(window.tabs, 1)
 	expect(main.inventory_workspace.recovery_window.get("_source") == "storage", "Refine tab keeps storage selected")
 	main.inventory_workspace.recovery_window.hide()
 	window.open()
@@ -224,6 +260,12 @@ func run() -> void:
 	state.set("authenticated",false)
 	state.state_changed.emit(&"connection")
 	expect(not window.visible and window.quote.is_empty(),"disconnect closes and invalidates enchanting")
+	state.call("_on_connection_state_changed", "disconnected")
+	expect(not state.enchanting_recovery_available,"disconnect forgets recovery support for the next server")
+	announcement.enabled = false
+	announcement.rules = null
+	state.call("_on_packet",185,JSON.stringify(announcement).to_utf8_buffer())
+	expect(state.enchanting_recovery_available and not state.enchanting_available,"disabled enchanting still proves recovery protocol support independently of world settings")
 	print("Equipment enchanting: %d checks, %d failures" % [checks,failures])
 	main.queue_free()
 	await frames(2)

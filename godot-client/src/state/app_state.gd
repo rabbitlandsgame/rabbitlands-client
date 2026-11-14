@@ -159,11 +159,12 @@ var enchanting_available := false
 var equipment_mixing_available := false
 ## Whether the server on this connection has shown that it keeps exact
 ## enchanted equipment copies, which is what disenchanting and refining work
-## on. No server says so up front, and one that predates them ignores the
-## recovery request outright, so the window would wait forever. They show
+## on. A server that predates them ignores the recovery request outright,
+## so the window would wait forever. Supported servers show
 ## themselves on packets players get all the time: the tier byte on every
 ## backpack or worn item's detail (any click on a slot asks for one), the
-## enchanted list on a storage category, or a recovery or stored-copy reply.
+## enchanted list on a storage category, the enchanting announcement at login,
+## or a recovery or stored-copy reply.
 ## Cleared with the connection: the next server may differ. Copies came a
 ## commit before recovery on the server, and practice worlds refuse recovery,
 ## so the window still has its own reply deadline.
@@ -1518,6 +1519,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			enchanting_recovery = (event.state as Dictionary).duplicate(true)
 			state_changed.emit(&"enchanting_recovery")
 		"enchanting":
+			_offer_enchanting_recovery()
 			enchanting = (event.state as Dictionary).duplicate(true)
 			enchanting_available = bool(enchanting.enabled)
 			equipment_mixing_available = bool(enchanting.crafting_supported)
