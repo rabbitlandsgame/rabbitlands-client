@@ -344,3 +344,49 @@ harvest marker into the territory manifest's `harvestables` (with `harvestablesS
 `publish_server.py` refuses a node whose tile centre lies within a road's half-width (D11) and judges harvest nodes
 by the reach-side approach rule (D4: three ring tiles open and reached, or a reached tile within Chebyshev 2, and
 the server's walk-to tile reached); `HARVEST_APPROACH_RULE = "ring"` restores the eight-neighbour rule.
+
+## Harvest coverage pass
+
+The 2026-11-14 distribution audit measured Eternal Lands' own map files against this continent with grid stencils
+(the client's ignored `.local/asset-authoring/workspace/work-output/harvest-distribution-2026-11-14/FINDINGS.md`).
+Most walkable ground here was far from any harvestable (90th percentile 29-168 s of running, EL 6.7 s), the patches
+were single-kind lattices and the maps carried 1-10 kinds (EL 12-23). `harvest_coverage.py` generates the missing
+sites; `content/harvest-coverage-rules.json` holds every number it uses, its seed and the EL targets.
+
+Per map it reads the committed scene (markers, `Roads/*` curves, `AuthoredAssets` placements) and the package's
+served grid (its digest must equal the server manifest's), erodes and closes it as `publish_server.py` does, and
+takes `publish_server.union_reach` over all maps from every arrival across the land crossings. It throws sites at the
+ground farther than `coverage.cutSeconds` from any node, weighted by coverage gain and by nearby scenery. A site is a
+patch of one to three sub-clumps of one to six nodes in one or two kinds each, kinds chosen from the scenery around
+it (trees, undergrowth, shrubs, meadow plants, rock, shore wrack, reeds, farm kit; `kindsByFeature`), the map's
+level cap and a novelty bias towards kinds missing within 30 s. A placement whose kit is a harvest resource
+(`promote`: olive and lemon trees, wheat stooks, cabbage and vineyard rows, lavender and rosemary, kelp wrack, shell
+scree, salt pans, reeds, lotus) becomes the node's art through `bindPlacement`; `promoteOnly` kinds (tree and field
+crops) appear only that way, never as a bush-sized patch prop. Patch props stay off settled ground (at least
+`settledMinBuilt` built placements - walls, houses, lanterns, benches, stalls, piers; `built` - within
+`settledRadiusTiles`), so streets, plazas and quays get none; real scenery there may still be promoted. New ids start at `objectIdBase` (3000), apart from
+every id the scene, the server tables and the interiors use; groupings are `<map>-wild-NNNN`.
+
+Every node then passes `publish_server.py`'s own rules with all of the pass's bodies closed: the reach-side approach
+(`Checker.node`), D11 roads (`harvest_presentation.road_offenders`), ownership and ids. The union reach is
+recomputed with the new bodies shut; a node whose body would cut off any tile, an existing node's approach or a
+protected point is dropped, and the check repeats until nothing fails. The tool refuses to run if any existing node
+reads as on a road (the scene's roads would be misread).
+
+`content/harvest-coverage.json` is the plan: every site and node, the scene and grid digests it was made from, and
+the audit's stencil metrics before and after (`before`, `after`, `newOnly`) judged against the rules' targets
+(`targetsAfter`, `targetsNewOnly`). Coverage (90th-percentile reach, empty ground) is the gate the tests hold; the
+variety and shape targets are reported per map. Existing lattices (North Wall Farm, the older fields) keep their
+spacing, so whole-map grid and spacing figures can stay outside EL's range where those fields are large.
+
+    python harvest_coverage.py --server <server checkout> --plan [--report summary.json]
+    python harvest_coverage.py --server <server checkout> --check
+    python harvest_coverage.py --server <server checkout> --apply-scenes
+
+`--maps a,b` makes a trial run on a subset and writes nothing. `--apply-scenes` appends the plan's markers to the
+scenes (`Gameplay/Harvestables`, extras `pass` = the rules' pass, `zone` "coverage") and raises each map's
+`gameplay.authoredMarkerCount`; it replaces its own earlier blocks and refuses a scene that changed since the plan.
+Applied markers close their tiles at the next collision export, so applying is a map publication: it needs the
+owner's approval and the full republication above (README "Republishing every territory"). Nothing here writes
+packages or server rows. Each grouping draws one map marker (`harvestGroupings`); a pass of this size adds one per
+site, so decide the map-marker presentation before publishing.
