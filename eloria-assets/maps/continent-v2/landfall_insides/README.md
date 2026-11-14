@@ -65,9 +65,15 @@ enemy names and map dots use invasion red, without invasion scaling or loot.
 Creatures in the other areas remain deep beyond the safe entry chambers, with
 short leashes. They use the existing reviewed models and combat balance: kobolds
 and spiders start around attack 17–25; moss golems use 28 and skeletons 33.
-Mining uses the existing Pickaxe and resource rules. Coal, Quartz, and Salt have
-recommended harvesting level 4; Sulfur 8; Slate 12; Copper 15; Iron Ore 18;
-Crystal and Geode 24. Lower-level harvesting retains the existing success rules.
+Mining uses the existing Pickaxe and resource rules. Recommended harvesting
+levels are Salt 4, Coal 8, Quartz 10, Sulfur 14, Copper 16, Iron Ore and Crystal
+18, Slate 20, Silver Ore 24, Geode 26, Gold Ore 36 and Titanium Ore 42.
+The Old Seam holds silver; the remote Deep Workings cut holds gold; the inner
+Frozen Deep vein holds titanium. The beginner Coal and Iron routes remain.
+These are recommendations that affect gathering speed, not unlock gates.
+The approved policy lives in the served server profile's `harvest_levels.json`;
+the resource-only publisher applies it to the isle definitions without rebuilding
+geometry or changing XP awards.
 
 ## Sources and rebuilding
 

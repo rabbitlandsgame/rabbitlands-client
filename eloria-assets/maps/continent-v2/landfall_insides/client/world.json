@@ -5578,7 +5578,7 @@
     {
       "id": "old_warren-1407",
       "objectId": 1407,
-      "resource": "Toadstool",
+      "resource": "Mushroom",
       "serverTile": [
         81,
         421
@@ -5594,7 +5594,7 @@
     {
       "id": "old_warren-1408",
       "objectId": 1408,
-      "resource": "Toadstool",
+      "resource": "Mushroom",
       "serverTile": [
         123,
         419
@@ -5610,7 +5610,7 @@
     {
       "id": "old_warren-1409",
       "objectId": 1409,
-      "resource": "Toadstool",
+      "resource": "Mushroom",
       "serverTile": [
         120,
         458
@@ -9322,7 +9322,7 @@
     {
       "id": "old_seam-3011",
       "objectId": 3011,
-      "resource": "Coal",
+      "resource": "Silver Ore",
       "serverTile": [
         215,
         366
@@ -9338,7 +9338,7 @@
     {
       "id": "old_seam-3012",
       "objectId": 3012,
-      "resource": "Coal",
+      "resource": "Silver Ore",
       "serverTile": [
         216,
         364
@@ -9354,7 +9354,7 @@
     {
       "id": "old_seam-3013",
       "objectId": 3013,
-      "resource": "Coal",
+      "resource": "Silver Ore",
       "serverTile": [
         216,
         365
@@ -9370,7 +9370,7 @@
     {
       "id": "old_seam-3014",
       "objectId": 3014,
-      "resource": "Coal",
+      "resource": "Silver Ore",
       "serverTile": [
         217,
         363
@@ -10266,7 +10266,7 @@
     {
       "id": "deep_workings-3145",
       "objectId": 3145,
-      "resource": "Copper",
+      "resource": "Gold Ore",
       "serverTile": [
         212,
         651
@@ -10282,7 +10282,7 @@
     {
       "id": "deep_workings-3146",
       "objectId": 3146,
-      "resource": "Copper",
+      "resource": "Gold Ore",
       "serverTile": [
         212,
         652
@@ -10298,7 +10298,7 @@
     {
       "id": "deep_workings-3147",
       "objectId": 3147,
-      "resource": "Copper",
+      "resource": "Gold Ore",
       "serverTile": [
         212,
         653
@@ -10314,7 +10314,7 @@
     {
       "id": "deep_workings-3148",
       "objectId": 3148,
-      "resource": "Copper",
+      "resource": "Gold Ore",
       "serverTile": [
         212,
         654
@@ -15338,7 +15338,7 @@
     {
       "id": "frozen_deep-5232",
       "objectId": 5232,
-      "resource": "Stormglass",
+      "resource": "Titanium Ore",
       "serverTile": [
         587,
         36
@@ -15354,7 +15354,7 @@
     {
       "id": "frozen_deep-5233",
       "objectId": 5233,
-      "resource": "Stormglass",
+      "resource": "Titanium Ore",
       "serverTile": [
         588,
         35
@@ -15370,7 +15370,7 @@
     {
       "id": "frozen_deep-5234",
       "objectId": 5234,
-      "resource": "Stormglass",
+      "resource": "Titanium Ore",
       "serverTile": [
         589,
         34
@@ -15386,7 +15386,7 @@
     {
       "id": "frozen_deep-5235",
       "objectId": 5235,
-      "resource": "Stormglass",
+      "resource": "Titanium Ore",
       "serverTile": [
         590,
         33
@@ -15402,7 +15402,7 @@
     {
       "id": "frozen_deep-5236",
       "objectId": 5236,
-      "resource": "Stormglass",
+      "resource": "Titanium Ore",
       "serverTile": [
         591,
         33
@@ -15418,7 +15418,7 @@
     {
       "id": "frozen_deep-5237",
       "objectId": 5237,
-      "resource": "Stormglass",
+      "resource": "Titanium Ore",
       "serverTile": [
         592,
         33
@@ -46700,7 +46700,7 @@
   },
   "provenance": {
     "source": "_continent_v2/content/underground.json",
-    "sourceSha256": "705904c3220d4774f16097d8dedc01522b0c7aedfc291f77bf2834551e8609e4",
+    "sourceSha256": "0108c121a1ad778159f707dd1ffebc8cf3a7b3e42746fb3b67901a42f1a33456",
     "builder": "_continent_v2/build_underground.py",
     "builderSha256": "d4ad29b2b55f51752aea4478d782915cd1b774cf59611e689b84d868468e2845",
     "interiorResourceAmendments": [
@@ -46800,6 +46800,25 @@
           "imageRowsSha256": "2cbdd6b7a7dc83de183721daf3bb2c83273604e54613e64e7e48035c48680565",
           "contract": "exact renderer inputs/image bytes retained; only non-render manifest fields change"
         }
+      }
+    ],
+    "harvestDiversityAmendments": [
+      {
+        "plan": "eloria-assets/maps/continent-v2/_continent_v2/content/harvest-diversity.json",
+        "planSha256": "1bfd8a0fa8a7d27e4c8894ea0e11ebbc108b2b811498e68e2dfa9a4255ab02a0",
+        "nodes": 84,
+        "geometry": "unchanged",
+        "collision": "unchanged",
+        "operation": "resource labels and gathering art only; stable IDs, positions and routes",
+        "resources": [
+          "Berries",
+          "Mushroom",
+          "Blue Berries",
+          "Silver Ore",
+          "Gold Ore",
+          "Titanium Ore"
+        ],
+        "sourceSha256": "0108c121a1ad778159f707dd1ffebc8cf3a7b3e42746fb3b67901a42f1a33456"
       }
     ]
   },

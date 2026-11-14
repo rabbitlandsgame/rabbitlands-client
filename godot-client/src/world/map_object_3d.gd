@@ -22,16 +22,18 @@ const SPELL_MATERIALS := preload("res://src/world/spell_visual_material.gd")
 ## object the registry does not describe, and as the mark on a node the player
 ## is currently harvesting.
 ##
-## The map cameras keep their coloured discs. A whole map at once is too small a
-## scale for a prop to read at, and the legend names the colours.
+## The map cameras keep their coloured discs for interactives. A whole map at
+## once is too small a scale for a prop to read at, and the legend names the
+## colours. Harvest nodes have no map marker at all (owner 2026-11-14, with the
+## harvest coverage pass): as in Eternal Lands, harvestables are found by looking
+## at the world, not by reading the map.
 ##
 ## A continent-v2 package may present its harvest nodes (the harvest
 ## presentation, owner-approved 2026-10-14; `presentation`): a node is then a
 ## whole natural unit - a crop-row segment at the row's exact yaw, picked over
 ## its footprint, one of its label's model variants - or promoted scenery, a
 ## kit tree already standing in its chunk whose mesh is bound as its pick
-## (`bind_placement`). A grouped node leaves its map marker to its grouping,
-## which main marks once.
+## (`bind_placement`).
 
 const PICK_LAYER := 32
 ## The disc's radius in metres. The full map frames 1600 metres at once, so
@@ -669,7 +671,8 @@ func _build_visual(catalog: Dictionary) -> void:
 		height = 0.0 if _map_authored else _add_model(entry)
 	if not authored.is_empty():
 		model_id = "map_authored_" + str(object_id)
-		# Harvest seams retain their active ring and resource map marker.
+		# Harvest seams retain their active ring (and, like every harvest
+		# node, no map marker).
 		_map_authored = _map_authored or not is_harvestable()
 	# A passage end inside an interior map: its record names where it leads
 	# (`destination()`, the maps' hover name for its P), and may point at the
@@ -717,8 +720,8 @@ func _build_visual(catalog: Dictionary) -> void:
 	if not _map_authored and not building_door:
 		_add_ring()
 	# A waygate is drawn on the maps as its glyph, not as a disc under it, and
-	# a grouped node by its grouping's one mark.
-	if map_glyph().is_empty() and not grouped:
+	# a harvest node is not drawn on the maps at all.
+	if map_glyph().is_empty() and not is_harvestable():
 		_add_map_marker()
 	if building_door or building_exit:
 		# One pick from the tile to the painted door, so a click on the door

@@ -13,6 +13,13 @@ names and categories, and combines with the selected type. Sorting offers name
 in both directions, price in both directions, or item type. Sale-price sorting
 compares the price per item, including fractional bundle prices.
 
+Books have subject filters: **Melee**, **Ranging**, **Magic**,
+**Manufacturing**, **Alchemy**, **Potion**, **Crafting**, **Tailoring**,
+**Engineering**, and **General Books**. Each subject has a matching leather
+cover colour and embossed symbol. The subject follows what the book teaches:
+Bowyery is Engineering; spell tomes, including Transmute, are Magic.
+These filters also work when selling books and searching by subject.
+
 Quantity shortcuts default to **1**, **5**, **10**, **100** and **1000** beside
 the quantity controls. Right-click a shortcut to put the cursor directly in that
 box. Edit with numbers and Backspace, then press Enter or click elsewhere to
@@ -35,9 +42,13 @@ the served catalogue's public name/category metadata in
 python tools/generate_item_categories.py --server-root C:/path/to/rabbitlands-server
 ```
 
-The export includes only item names, normalized storage categories and a source
-checksum. Prices, quantities and transaction identities always come from the
-live merchant packet.
+The export includes only item names, normalized storage categories, book subjects
+and a source checksum. Prices, quantities and transaction identities always come
+from the live merchant packet.
+
+Book artwork IDs are shared with the server's `eloria/book_types.py`.
+`python tools/generate_book_icons.py` rebuilds the vector cover skins.
+Publish the corresponding client artwork and server item data together.
 
 Focused checks use the supported local Godot executable:
 

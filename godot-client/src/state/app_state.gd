@@ -154,15 +154,17 @@ var actor_roster_generation := 0
 var inventory: Dictionary = {}
 var enchanting_recovery: Dictionary = {}
 var enchanting: Dictionary = {}
+var item_glows: Dictionary = {}
 var enchanting_available := false
 var equipment_mixing_available := false
 ## Whether the server on this connection has shown that it keeps exact
 ## enchanted equipment copies, which is what disenchanting and refining work
-## on. No server says so up front, and one that predates them ignores the
-## recovery request outright, so the window would wait forever. They show
+## on. A server that predates them ignores the recovery request outright,
+## so the window would wait forever. Supported servers show
 ## themselves on packets players get all the time: the tier byte on every
 ## backpack or worn item's detail (any click on a slot asks for one), the
-## enchanted list on a storage category, or a recovery or stored-copy reply.
+## enchanted list on a storage category, the enchanting announcement at login,
+## or a recovery or stored-copy reply.
 ## Cleared with the connection: the next server may differ. Copies came a
 ## commit before recovery on the server, and practice worlds refuse recovery,
 ## so the window still has its own reply deadline.
@@ -933,6 +935,7 @@ func _on_connection_state_changed(value: String) -> void:
 		inventory.clear()
 		enchanting_recovery.clear()
 		enchanting.clear()
+		item_glows.clear()
 		enchanting_available = false
 		equipment_mixing_available = false
 		enchanting_recovery_available = false
@@ -1516,6 +1519,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			enchanting_recovery = (event.state as Dictionary).duplicate(true)
 			state_changed.emit(&"enchanting_recovery")
 		"enchanting":
+			_offer_enchanting_recovery()
 			enchanting = (event.state as Dictionary).duplicate(true)
 			enchanting_available = bool(enchanting.enabled)
 			equipment_mixing_available = bool(enchanting.crafting_supported)
@@ -2019,7 +2023,10 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			state_changed.emit(&"special_events")
 		"magic_state":
 			var magic: Dictionary = event.data
-			if magic.get("kind") == "death":
+			if magic.get("kind") == "item_glows":
+				item_glows = preload("res://src/ui/item_glow.gd").validated(magic.get("slots"), 43)
+				state_changed.emit(&"inventory")
+			elif magic.get("kind") == "death":
 				death = magic.duplicate(true)
 				death["received_msec"] = Time.get_ticks_msec()
 				state_changed.emit(&"death")
@@ -2044,6 +2051,8 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 					status_actor["negative_statuses"] = (magic.effects as Array).filter(
 						func(effect: Variant) -> bool: return effect in NEGATIVE_STATUSES)
 					status_actor["status_effects"] = (magic.effects as Array).duplicate()
+					if magic.has("equipment_glows"):
+						status_actor["equipment_glows"] = preload("res://src/ui/item_glow.gd").validated(magic.equipment_glows, 12)
 					mark_actor_changed(status_actor_id)
 					state_changed.emit(&"actors")
 			else:

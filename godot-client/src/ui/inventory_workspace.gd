@@ -862,6 +862,8 @@ func _render_detail() -> void:
 		main._grouped(int(current.get("quantity", 0) if bound else _detail.get("quantity", 0))), " · Equipped" if _detail.get("equipped", false) else ""]
 	inspection_category.tooltip_text = inspection_category.text
 	inspection_icon.texture = main.item_atlas.icon_for(int(_detail.get("image_id", 0))) if not _detail.is_empty() else null
+	if _detail_slot >= 0 and not _detail.is_empty():
+		inspection_icon.texture = main._slot_icon(int(_detail.get("image_id", 0)), _detail_slot)
 	var lines: Array[String] = []
 	if _detail.is_empty(): lines.append("Select an item, then choose Look to inspect it.")
 	if model.working.show_stats and not str(_detail.get("stats", "")).is_empty(): lines.append(str(_detail.stats))

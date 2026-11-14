@@ -530,6 +530,8 @@ SEAM_PALETTES = {  # MineralAppearance {stone, mineral}: the floor ores' palette
     'Clay': ('#7a6a58', '#b5835a'), 'Salt': ('#8c8a84', '#f2efe6'), 'Verdigris': ('#6b6258', '#3fae8a'),
     'Crystal': ('#77748a', '#9b74d5'), 'Quartz': ('#8a8a8e', '#efeaf6'), 'Stormglass': ('#56606a', '#86c4e4'),
     'Ember Crystal': ('#3e3836', '#ff7a2c'), 'Geode': ('#666572', '#b093d0'),
+    'Silver Ore': ('#56525c', '#d4d8e0'), 'Gold Ore': ('#665345', '#e3b54d'),
+    'Titanium Ore': ('#443e52', '#a697bd'),
 }
 WALL_SEAMS = {label: [(asset, {'stone': stone, 'mineral': mineral})
                       for asset in (('seam_geode_3', 'seam_crystal_5') if label == 'Geode' else

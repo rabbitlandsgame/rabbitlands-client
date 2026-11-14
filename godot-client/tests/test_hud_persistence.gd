@@ -114,7 +114,7 @@ func _run() -> void:
 	# and size the window is. Each is written by the menu that changes it, so
 	# they are proved through the file rather than through a live variable.
 	second.call("_on_minimap_marker_type_toggled",
-		(second.get("MINIMAP_MARKER_TYPES") as Array).find(&"harvest"))
+		(second.get("MINIMAP_MARKER_TYPES") as Array).find(&"interactive"))
 	second.call("_on_minimap_marker_scale_selected", 4)
 	# Shape and border are moved off their defaults, or an unwritten file
 	# would pass too.
@@ -173,12 +173,12 @@ func _run() -> void:
 			float(border_steps[-1])),
 		"a new session comes back with the remembered minimap appearance")
 	_expect(third_overlay != null
-		and not bool(third_overlay.call("type_enabled", &"harvest"))
+		and not bool(third_overlay.call("type_enabled", &"interactive"))
 		and bool(third_overlay.call("type_enabled", &"creature")),
 		"the remembered marker switches reach the overlay that draws them")
 	var third_menu: PopupMenu = third.get("_minimap_marker_type_menu") as PopupMenu
-	var harvest_index: int = (third.get("MINIMAP_MARKER_TYPES") as Array).find(&"harvest")
-	_expect(third_menu != null and not third_menu.is_item_checked(harvest_index)
+	var toggled_index: int = (third.get("MINIMAP_MARKER_TYPES") as Array).find(&"interactive")
+	_expect(third_menu != null and not third_menu.is_item_checked(toggled_index)
 		and third_menu.is_item_checked(0),
 		"the menu opens ticked to what was remembered rather than to the defaults")
 	third.queue_free()

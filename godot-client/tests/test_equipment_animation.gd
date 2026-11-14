@@ -38,7 +38,8 @@ func run() -> void:
 		"res://data/actors/equipment.json"))
 	var dto := {"actor_id": 901, "x": 0, "y": 0, "rotation": 0,
 		"appearance": {}, "equipment_visuals": {0: 64}, "in_combat": false,
-		"command": 7, "command_sequence": 1}
+		"command": 7, "command_sequence": 1,
+		"equipment_glows": {"0": {"tier": "magic", "image_id": 182, "effects": ["Emberstrike"]}}}
 	state = root.get_node("AppState")
 	state.set("actors", {901: dto})
 	actor = ReplicatedActor3D.new()
@@ -101,6 +102,29 @@ func run() -> void:
 	actor.play_action(&"heal", true)
 	actor.apply_server_state(legacy, adapter)
 	expect(actor.current_action == &"heal", "legacy snapshots preserve an active cast")
+
+	# A real socketed weapon and skinned boots exercise both attachment routes.
+	var glowing: Dictionary = state.get("actors")[901].duplicate(true)
+	glowing.equipment_visuals = {0: 114, 6: 192}
+	glowing.equipment_glows = {"0": {"tier": "rare", "effects": ["Frostbind", "Renewal"]},
+		"6": {"tier": "magic", "effects": ["Stoneward"]}}
+	actor.apply_server_state(glowing, adapter)
+	var skinned_motes := 0
+	for emitter: Node in actor.find_children("ItemMotes", "MultiMeshInstance3D", true, false):
+		for sample: Dictionary in emitter.get("_surfaces"):
+			var source: MeshInstance3D = sample.source
+			if source.skin != null:
+				skinned_motes += 1
+				expect(sample.skeleton == actor.get("_native_skeleton"),
+					"particle samples use the production actor skeleton")
+				var at: Vector3 = emitter.call("_posed_point", sample)
+				expect(at.is_finite(), "a skinned particle sample has a valid posed position")
+				expect(at.distance_to(actor.global_position) < 3.0, "skinned motes stay near the worn piece")
+	expect(skinned_motes > 0, "worn native boots receive particles that follow their skin")
+	glowing.equipment_glows = {}
+	actor.apply_server_state(glowing, adapter)
+	for emitter: Node3D in actor.find_children("ItemMotes", "MultiMeshInstance3D", true, false):
+		expect(not emitter.visible and not emitter.is_processing(), "clearing effects immediately hides and stops retiring particles")
 
 	actor.free()
 	NativeAnimationImporter.clear()

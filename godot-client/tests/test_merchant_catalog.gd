@@ -27,6 +27,19 @@ func _init() -> void:
 	rows = Catalog.browse(items, false, "All", "", 1)
 	_expect(rows[0].index == 42 and rows[2].index == 7, "descending display names")
 	_expect(items[0].index == 7 and items[1].index == 42, "browsing leaves the server snapshot unchanged")
+	var books: Array = [
+		{"index": 101, "name": "Manual of Charge", "image_id": 640, "buy_price": 20, "sell_price": 5, "owned": 1},
+		{"index": 205, "name": "Manual of Aimed Shot", "image_id": 641, "buy_price": 10, "sell_price": 3, "owned": 0},
+		{"index": 309, "name": "Tome of Blink", "image_id": 642, "buy_price": 30, "sell_price": 8, "owned": 2}]
+	_expect(Catalog.category(books[0]) == "Melee Books", "combat manuals have a subject filter")
+	_expect(Catalog.category({"name": "Book of Beginnings"}) == "General Books", "introductory book is included")
+	_expect(Catalog.category({"name": "Book of Bowyery"}) == "Engineering Books", "book subject follows the skill taught")
+	_expect(Catalog.category({"name": "Book of Fine Brewing"}) == "Potion Books", "brewing books have their own subject")
+	rows = Catalog.browse(books, false, "Ranging Books", "ranging", 0)
+	_expect(rows.size() == 1 and rows[0].index == 205, "subject filters and search preserve the trade ID")
+	_expect(Catalog.browse(books, true, "Ranging Books", "", 0).is_empty(), "subject sell view excludes unowned books")
+	rows = Catalog.browse(books, true, "Magic Books", "blink", 0)
+	_expect(rows.size() == 1 and rows[0].index == 309, "subject filtering works when selling owned tomes")
 	print("merchant catalog checks: ", "PASS" if failures == 0 else "FAIL")
 	quit(failures)
 

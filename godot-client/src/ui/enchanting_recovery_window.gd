@@ -45,6 +45,11 @@ var _purpose: Label
 var _totals: Label
 var _review_requested := false
 var _quantity_buttons: Array[Button] = []
+var location_controls: HBoxContainer
+var _source := "backpack"
+var _offset := 0
+var _preferred_id := 0
+var _copies_heading: Label
 
 func configure(owner_main: Node) -> void:
 	main = owner_main
@@ -62,6 +67,20 @@ func configure(owner_main: Node) -> void:
 	_font = SystemFont.new()
 	_font.font_names = PackedStringArray(["Georgia", "Noto Serif", "serif"])
 	_heading.add_theme_font_override("font", _font)
+	location_controls = preload("res://src/ui/crafting_location_controls.gd").new()
+	header.add_child(location_controls)
+	location_controls.location_changed.connect(func(location: String) -> void:
+		_source = location
+		_offset = 0
+		selected_id = 0
+		_preferred_slot = -1
+		snapshot = {}
+		_render()
+		_refresh())
+	location_controls.page_changed.connect(func(offset: int) -> void:
+		_offset = offset
+		selected_id = 0
+		_refresh())
 	Parts.button(header, "Refresh", _refresh)
 	Parts.button(header, "×", hide).tooltip_text = "Close crafting window"
 	var dragger := WindowDrag.attach(self, header)
@@ -77,7 +96,7 @@ func configure(owner_main: Node) -> void:
 	var selection := VBoxContainer.new()
 	selection.custom_minimum_size.x = 220
 	salvage_body.add_child(selection)
-	Parts.label(selection, "Backpack copies", 17)
+	_copies_heading = Parts.label(selection, "Backpack copies", 17)
 	copies = Parts.ledger(selection)
 	copies.name = "Copies"
 	copies.item_selected.connect(func(index: int) -> void:
@@ -166,7 +185,7 @@ func configure(owner_main: Node) -> void:
 		if not visible: _invalidate())
 	hide()
 
-func open(tab: int = 0, preferred_slot: int = -1) -> void:
+func open(tab: int = 0, preferred_slot: int = -1, location: String = "backpack", preferred_id: int = 0) -> void:
 	# Every way in is offered only then; this keeps a stale one from asking a
 	# server that never answers.
 	if not AppState.enchanting_recovery_available:
@@ -174,6 +193,9 @@ func open(tab: int = 0, preferred_slot: int = -1) -> void:
 	main.inventory_workspace.close_inspection()
 	snapshot = {}
 	selected_id = 0
+	_source = location
+	_offset = 0
+	_preferred_id = preferred_id
 	_preferred_slot = preferred_slot
 	_placed = false
 	tabs.current_tab = clampi(tab, 0, 1)
@@ -198,6 +220,10 @@ func _invalidate(cancel_pending: bool = true) -> void:
 func _send(request: Dictionary) -> void:
 	_serial += 1
 	request["request_id"] = _serial
+	request["source"] = _source
+	request["offset"] = _offset
+	if request.op == "list" and _preferred_id > 0: request["focus"] = _preferred_id
+	location_controls.render(snapshot, _source, true, tabs.current_tab == 0)
 	_busy = true
 	_pending_op = str(request.op)
 	preview_button.disabled = true
@@ -243,7 +269,7 @@ func _state_changed(part: StringName) -> void:
 	if part == &"connection" and not AppState.authenticated:
 		hide()
 		snapshot = {}
-	elif visible and part == &"inventory":
+	elif visible and (part == &"inventory" or part == &"storage"):
 		# A confirmation sends inventory updates before its final receipt.
 		_stale = true
 		_invalidate(_pending_op != "confirm")
@@ -252,6 +278,7 @@ func _state_changed(part: StringName) -> void:
 	elif visible and part == &"enchanting_recovery":
 		var incoming: Dictionary = AppState.enchanting_recovery
 		if int(incoming.get("request_id", -1)) != _serial: return
+		if str(incoming.get("source", "backpack")) != _source: return
 		snapshot = incoming
 		_stale = false
 		quote = snapshot.get("quote", {}) if snapshot.get("quote") is Dictionary else {}
@@ -264,6 +291,9 @@ func _state_changed(part: StringName) -> void:
 
 func _render() -> void:
 	_rendering = true
+	_offset = int(snapshot.get("offset", _offset))
+	location_controls.render(snapshot, _source, _pending_op == "confirm", tabs.current_tab == 0)
+	_copies_heading.text = "Storage copies" if _source == "storage" else "Backpack copies"
 	copies.clear()
 	var found := false
 	copies.set_meta("copy_notes", {})
@@ -273,12 +303,14 @@ func _render() -> void:
 		Parts.copy_note(copies, raw)
 		copies.set_item_custom_fg_color(index, Tiers.color(str(raw.tier)))
 		copies.set_item_tooltip(index, str(raw.name) + "\n" + "\n".join(raw.effects))
-		if int(raw.instance_id) == selected_id or (_preferred_slot >= 0 and int(raw.slot) == _preferred_slot):
+		if int(raw.instance_id) == selected_id or int(raw.instance_id) == _preferred_id or (_source == "backpack" and _preferred_slot >= 0 and int(raw.slot) == _preferred_slot):
 			copies.select(index)
 			selected_id = int(raw.instance_id)
 			found = true
 	if not found: selected_id = 0
-	if snapshot.has("items"): _preferred_slot = -1
+	if snapshot.has("items"):
+		_preferred_slot = -1
+		_preferred_id = 0
 	var selected := recipes.get_selected_items()
 	var chosen := recipes.get_item_text(selected[0]) if not selected.is_empty() else ""
 	recipes.clear()
@@ -312,10 +344,11 @@ func _recipe() -> Dictionary:
 	return rows[selected[0]] if not selected.is_empty() and selected[0] < rows.size() else {}
 
 func _update_details() -> void:
+	location_controls.render(snapshot, _source, _busy or _pending_op == "confirm", tabs.current_tab == 0)
 	salvage_body.visible = tabs.current_tab == 0
 	refine_body.visible = tabs.current_tab == 1
 	_heading.text = "Break Down" if tabs.current_tab == 0 else "Refine"
-	_purpose.text = "Recover materials from one enchanted copy. Backpack only · unequip or withdraw items first." if tabs.current_tab == 0 else "Combine shards and normal essences into enriched essence. Uses materials in your backpack."
+	_purpose.text = ("Recover materials from one enchanted copy. Results go to your %s." if tabs.current_tab == 0 else "Combine shards and normal essences. Materials, gold and results use your %s.") % _source
 	_purpose.modulate = MUTED
 	preview_button.text = "Check returns" if tabs.current_tab == 0 else "Check costs"
 	confirm_button.text = "Review breakdown" if tabs.current_tab == 0 else "Refine %d…" % int(quantity.value)
@@ -330,7 +363,7 @@ func _update_details() -> void:
 			Parts.label(details, "Select an individual copy to see its effects and exact returns.")
 			_totals.text = "No copy selected"
 		else:
-			_purpose.text = "Backpack slot %d · This individual copy will be destroyed." % (int(chosen.slot) + 1)
+			_purpose.text = ("Storage copy #%d" % int(chosen.instance_id) if _source == "storage" else "Backpack slot %d" % (int(chosen.slot) + 1)) + " · This individual copy will be destroyed."
 			_purpose.modulate = Parts.AMBER
 			Parts.label(details, "Current effects", 18)
 			var grid := GridContainer.new()
@@ -390,7 +423,7 @@ func _preview() -> void:
 func _ask_confirmation() -> void:
 	if quote.is_empty() or _busy: return
 	var warning := "Permanently consume this individual %s?\n\n%s\n\n" % [quote.name, "\n".join(quote.get("effects", []))] if quote.action == "disenchant" else "Spend these materials?\n\n"
-	confirmation.dialog_text = warning + "Consumed:\n" + _materials(quote.inputs) + "\nGold fee: %d\n\nYou receive:\n" % int(quote.gold_fee) + _materials(quote.outputs)
+	confirmation.dialog_text = warning + "Location: %s\n\nConsumed:\n" % _source.capitalize() + _materials(quote.inputs) + "\nGold fee: %d\n\nYou receive:\n" % int(quote.gold_fee) + _materials(quote.outputs)
 	confirmation.title = "Review breakdown" if quote.action == "disenchant" else "Review refining"
 	confirmation.ok_button_text = "Break down this copy" if quote.action == "disenchant" else "Refine"
 	confirmation.popup_centered(Vector2i(470, 0))
@@ -427,7 +460,7 @@ func _navigate(index: int) -> void:
 	if index == 2:
 		var selected := _copy()
 		hide()
-		main.inventory_workspace.enchanting_window.open(int(selected.get("slot", -1)))
+		main.inventory_workspace.enchanting_window.open(int(selected.get("slot", -1)), _source, int(selected.get("instance_id", 0)))
 		return
 	_invalidate()
 	_update_details()

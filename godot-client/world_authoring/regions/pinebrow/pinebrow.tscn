@@ -8487,13 +8487,15 @@ gizmo_extents = 0.8
 script = ExtResource("s0_marker")
 record_id = "pinebrow--harvest-247-bramble"
 kind = "harvestable"
-label = "Bramble"
+label = "Blue Berries"
 extras = {
+"groupingName": "Pinebrow Blueberries",
+"grouping": "pinebrow-blue-berries-20261113",
 "authority": "server",
 "cluster": "bramble-sw",
 "objectId": 247,
 "plan": "harvest_plan.json",
-"resource": "Bramble",
+"resource": "Blue Berries",
 "status": "planned (island content plan A4, owner-accepted 2026-10-02); served from the v2 publish path (B2) and the home migration",
 "zone": "sw"
 }
@@ -26934,3 +26936,4829 @@ kind = "runtime_point"
 label = "Pinebrow Deep Workings"
 extras = {"role": "underground_entrance", "objectId": 59002, "section": "pinebrow_workings", "authority": "server"}
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 128.5, 155.95, -96.5)
+
+[node name="pinebrow--harvest-3000-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3000-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0001",
+"grouping": "pinebrow-wild-0001",
+"groupingName": "Lavender, Seed and Sunleaf",
+"objectId": 3000,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 21,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 377.5, 122.2, -107.5)
+
+[node name="pinebrow--harvest-3006-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3006-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0001",
+"grouping": "pinebrow-wild-0001",
+"groupingName": "Lavender, Seed and Sunleaf",
+"objectId": 3006,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 263,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 369.5, 121.3, -110.5)
+
+[node name="pinebrow--harvest-3007-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3007-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0001",
+"grouping": "pinebrow-wild-0001",
+"groupingName": "Lavender, Seed and Sunleaf",
+"objectId": 3007,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 186,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 370.5, 121.1, -112.5)
+
+[node name="pinebrow--harvest-3008-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3008-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0002",
+"grouping": "pinebrow-wild-0002",
+"groupingName": "Wild Lavender",
+"objectId": 3008,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 175,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 144.5, 138.8, -329.5)
+
+[node name="pinebrow--harvest-3009-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3009-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0003",
+"grouping": "pinebrow-wild-0003",
+"groupingName": "Wild Sage",
+"objectId": 3009,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 159,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 386.5, 108.4, -220.5)
+
+[node name="pinebrow--harvest-3010-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3010-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0004",
+"grouping": "pinebrow-wild-0004",
+"groupingName": "Lavender and Seed",
+"objectId": 3010,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 312,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 205.5, 129.0, -274.5)
+
+[node name="pinebrow--harvest-3026-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3026-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0004",
+"grouping": "pinebrow-wild-0004",
+"groupingName": "Lavender and Seed",
+"objectId": 3026,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 31,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 205.5, 129.05, -276.5)
+
+[node name="pinebrow--harvest-3027-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3027-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0004",
+"grouping": "pinebrow-wild-0004",
+"groupingName": "Lavender and Seed",
+"objectId": 3027,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 239,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 207.5, 129.65, -265.5)
+
+[node name="pinebrow--harvest-3028-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3028-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0005",
+"grouping": "pinebrow-wild-0005",
+"groupingName": "Berries, Bramble, Mushroom, Sage and Sunleaf",
+"objectId": 3028,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 151,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 152.5, 132.15, -376.5)
+
+[node name="pinebrow--harvest-3029-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3029-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0005",
+"grouping": "pinebrow-wild-0005",
+"groupingName": "Berries, Bramble, Mushroom, Sage and Sunleaf",
+"objectId": 3029,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 315,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 153.5, 131.5, -378.5)
+
+[node name="pinebrow--harvest-3037-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3037-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0005",
+"grouping": "pinebrow-wild-0005",
+"groupingName": "Berries, Bramble, Mushroom, Sage and Sunleaf",
+"objectId": 3037,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 305,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 160.5, 130.7, -378.5)
+
+[node name="pinebrow--harvest-3038-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3038-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0005",
+"grouping": "pinebrow-wild-0005",
+"groupingName": "Berries, Bramble, Mushroom, Sage and Sunleaf",
+"objectId": 3038,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 56,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 162.5, 130.5, -378.5)
+
+[node name="pinebrow--harvest-3039-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3039-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0005",
+"grouping": "pinebrow-wild-0005",
+"groupingName": "Berries, Bramble, Mushroom, Sage and Sunleaf",
+"objectId": 3039,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 109,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 147.5, 134.1, -369.5)
+
+[node name="pinebrow--harvest-3040-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3040-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0006",
+"grouping": "pinebrow-wild-0006",
+"groupingName": "Berries and Sunleaf",
+"objectId": 3040,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 188,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 239.5, 168.55, -159.5)
+
+[node name="pinebrow--harvest-3041-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3041-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0006",
+"grouping": "pinebrow-wild-0006",
+"groupingName": "Berries and Sunleaf",
+"objectId": 3041,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 96,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 237.5, 168.15, -163.5)
+
+[node name="pinebrow--harvest-3042-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3042-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0007",
+"grouping": "pinebrow-wild-0007",
+"groupingName": "Seed and Sunleaf",
+"objectId": 3042,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 275,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.5, 146.15, 12.5)
+
+[node name="pinebrow--harvest-3043-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3043-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0007",
+"grouping": "pinebrow-wild-0007",
+"groupingName": "Seed and Sunleaf",
+"objectId": 3043,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 217,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26.5, 146.95, 20.5)
+
+[node name="pinebrow--harvest-3044-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3044-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0008",
+"grouping": "pinebrow-wild-0008",
+"groupingName": "Berries, Bramble, Sage and Sunleaf",
+"objectId": 3044,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 217,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 276.5, 128.1, -311.5)
+
+[node name="pinebrow--harvest-3045-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3045-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0008",
+"grouping": "pinebrow-wild-0008",
+"groupingName": "Berries, Bramble, Sage and Sunleaf",
+"objectId": 3045,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 312,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 268.5, 128.35, -306.5)
+
+[node name="pinebrow--harvest-3046-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3046-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0008",
+"grouping": "pinebrow-wild-0008",
+"groupingName": "Berries, Bramble, Sage and Sunleaf",
+"objectId": 3046,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 178,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 266.5, 128.3, -306.5)
+
+[node name="pinebrow--harvest-3047-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3047-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0008",
+"grouping": "pinebrow-wild-0008",
+"groupingName": "Berries, Bramble, Sage and Sunleaf",
+"objectId": 3047,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 316,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 286.5, 127.7, -305.5)
+
+[node name="pinebrow--harvest-3048-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3048-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0008",
+"grouping": "pinebrow-wild-0008",
+"groupingName": "Berries, Bramble, Sage and Sunleaf",
+"objectId": 3048,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 355,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 288.5, 127.55, -305.5)
+
+[node name="pinebrow--harvest-3049-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3049-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0009",
+"grouping": "pinebrow-wild-0009",
+"groupingName": "Berries, Bramble and Lavender",
+"objectId": 3049,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 211,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.5, 149.85, -138.5)
+
+[node name="pinebrow--harvest-3050-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3050-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0009",
+"grouping": "pinebrow-wild-0009",
+"groupingName": "Berries, Bramble and Lavender",
+"objectId": 3050,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 283,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.5, 150.25, -140.5)
+
+[node name="pinebrow--harvest-3051-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3051-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0009",
+"grouping": "pinebrow-wild-0009",
+"groupingName": "Berries, Bramble and Lavender",
+"objectId": 3051,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 256,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.5, 151.1, -142.5)
+
+[node name="pinebrow--harvest-3052-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3052-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0010",
+"grouping": "pinebrow-wild-0010",
+"groupingName": "Lavender, Mushroom, Sage and Sunleaf",
+"objectId": 3052,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 280,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -41.5, 149.8, -207.5)
+
+[node name="pinebrow--harvest-3053-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3053-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0010",
+"grouping": "pinebrow-wild-0010",
+"groupingName": "Lavender, Mushroom, Sage and Sunleaf",
+"objectId": 3053,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 82,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38.5, 152.45, -197.5)
+
+[node name="pinebrow--harvest-3054-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3054-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0010",
+"grouping": "pinebrow-wild-0010",
+"groupingName": "Lavender, Mushroom, Sage and Sunleaf",
+"objectId": 3054,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 205,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -49.5, 149.85, -203.5)
+
+[node name="pinebrow--harvest-3055-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3055-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0010",
+"grouping": "pinebrow-wild-0010",
+"groupingName": "Lavender, Mushroom, Sage and Sunleaf",
+"objectId": 3055,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 274,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -51.5, 149.6, -202.5)
+
+[node name="pinebrow--harvest-3056-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3056-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0011",
+"grouping": "pinebrow-wild-0011",
+"groupingName": "Berries, Mushroom and Sunleaf",
+"objectId": 3056,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 89,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 389.5, 113.65, -175.5)
+
+[node name="pinebrow--harvest-3057-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3057-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0011",
+"grouping": "pinebrow-wild-0011",
+"groupingName": "Berries, Mushroom and Sunleaf",
+"objectId": 3057,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 317,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 390.5, 113.4, -177.5)
+
+[node name="pinebrow--harvest-3058-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3058-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0011",
+"grouping": "pinebrow-wild-0011",
+"groupingName": "Berries, Mushroom and Sunleaf",
+"objectId": 3058,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 345,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 390.5, 113.65, -173.5)
+
+[node name="pinebrow--harvest-3059-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3059-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0011",
+"grouping": "pinebrow-wild-0011",
+"groupingName": "Berries, Mushroom and Sunleaf",
+"objectId": 3059,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 241,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 394.5, 112.6, -185.5)
+
+[node name="pinebrow--harvest-3060-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3060-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0011",
+"grouping": "pinebrow-wild-0011",
+"groupingName": "Berries, Mushroom and Sunleaf",
+"objectId": 3060,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 78,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 378.5, 114.15, -175.5)
+
+[node name="pinebrow--harvest-3061-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3061-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0012",
+"grouping": "pinebrow-wild-0012",
+"groupingName": "Sage and Sunleaf",
+"objectId": 3061,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 60,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 352.5, 112.0, -205.5)
+
+[node name="pinebrow--harvest-3062-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3062-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0012",
+"grouping": "pinebrow-wild-0012",
+"groupingName": "Sage and Sunleaf",
+"objectId": 3062,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 7,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 353.5, 111.05, -209.5)
+
+[node name="pinebrow--harvest-3063-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3063-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0012",
+"grouping": "pinebrow-wild-0012",
+"groupingName": "Sage and Sunleaf",
+"objectId": 3063,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 295,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 346.5, 112.6, -207.5)
+
+[node name="pinebrow--harvest-3064-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3064-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0013",
+"grouping": "pinebrow-wild-0013",
+"groupingName": "Lavender, Sage, Seed and Sunleaf",
+"objectId": 3064,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 245,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.5, 148.35, -251.5)
+
+[node name="pinebrow--harvest-3065-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3065-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0013",
+"grouping": "pinebrow-wild-0013",
+"groupingName": "Lavender, Sage, Seed and Sunleaf",
+"objectId": 3065,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 8,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.5, 147.75, -252.5)
+
+[node name="pinebrow--harvest-3066-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3066-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0013",
+"grouping": "pinebrow-wild-0013",
+"groupingName": "Lavender, Sage, Seed and Sunleaf",
+"objectId": 3066,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 83,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.5, 147.75, -251.5)
+
+[node name="pinebrow--harvest-3067-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3067-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0013",
+"grouping": "pinebrow-wild-0013",
+"groupingName": "Lavender, Sage, Seed and Sunleaf",
+"objectId": 3067,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 272,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.5, 149.25, -247.5)
+
+[node name="pinebrow--harvest-3068-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3068-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0014",
+"grouping": "pinebrow-wild-0014",
+"groupingName": "Bramble, Mushroom, Sage and Seed",
+"objectId": 3068,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 255,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 91.5, 145.45, -300.5)
+
+[node name="pinebrow--harvest-3069-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3069-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0014",
+"grouping": "pinebrow-wild-0014",
+"groupingName": "Bramble, Mushroom, Sage and Seed",
+"objectId": 3069,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 304,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 89.5, 145.65, -301.5)
+
+[node name="pinebrow--harvest-3070-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3070-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0014",
+"grouping": "pinebrow-wild-0014",
+"groupingName": "Bramble, Mushroom, Sage and Seed",
+"objectId": 3070,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 198,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 98.5, 144.55, -292.5)
+
+[node name="pinebrow--harvest-3071-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3071-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0014",
+"grouping": "pinebrow-wild-0014",
+"groupingName": "Bramble, Mushroom, Sage and Seed",
+"objectId": 3071,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 67,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 86.5, 146.15, -302.5)
+
+[node name="pinebrow--harvest-3072-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3072-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0015",
+"grouping": "pinebrow-wild-0015",
+"groupingName": "Wild Lavender",
+"objectId": 3072,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 152,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 143.5, 138.75, -13.5)
+
+[node name="pinebrow--harvest-3073-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3073-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0016",
+"grouping": "pinebrow-wild-0016",
+"groupingName": "Wild Sage",
+"objectId": 3073,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 234,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36.5, 152.7, 57.5)
+
+[node name="pinebrow--harvest-3074-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3074-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0017",
+"grouping": "pinebrow-wild-0017",
+"groupingName": "Mushroom and Sage",
+"objectId": 3074,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 23,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 56.5, 155.2, -177.5)
+
+[node name="pinebrow--harvest-3075-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3075-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0017",
+"grouping": "pinebrow-wild-0017",
+"groupingName": "Mushroom and Sage",
+"objectId": 3075,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 201,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 58.5, 155.5, -178.5)
+
+[node name="pinebrow--harvest-3076-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3076-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0018",
+"grouping": "pinebrow-wild-0018",
+"groupingName": "Mushroom and Sage",
+"objectId": 3076,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 75,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 137.5, 156.4, -233.5)
+
+[node name="pinebrow--harvest-3077-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3077-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0018",
+"grouping": "pinebrow-wild-0018",
+"groupingName": "Mushroom and Sage",
+"objectId": 3077,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 78,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 141.5, 155.05, -238.5)
+
+[node name="pinebrow--harvest-3078-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3078-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0019",
+"grouping": "pinebrow-wild-0019",
+"groupingName": "Berries and Lavender",
+"objectId": 3078,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 31,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.5, 141.7, -298.5)
+
+[node name="pinebrow--harvest-3079-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3079-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0019",
+"grouping": "pinebrow-wild-0019",
+"groupingName": "Berries and Lavender",
+"objectId": 3079,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 178,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.5, 141.6, -300.5)
+
+[node name="pinebrow--harvest-3080-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3080-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0019",
+"grouping": "pinebrow-wild-0019",
+"groupingName": "Berries and Lavender",
+"objectId": 3080,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 126,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.5, 141.5, -297.5)
+
+[node name="pinebrow--harvest-3081-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3081-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0019",
+"grouping": "pinebrow-wild-0019",
+"groupingName": "Berries and Lavender",
+"objectId": 3081,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 71,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.5, 142.4, -296.5)
+
+[node name="pinebrow--harvest-3082-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3082-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0019",
+"grouping": "pinebrow-wild-0019",
+"groupingName": "Berries and Lavender",
+"objectId": 3082,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 227,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.5, 141.2, -303.5)
+
+[node name="pinebrow--harvest-3083-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3083-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0020",
+"grouping": "pinebrow-wild-0020",
+"groupingName": "Wild Mushroom",
+"objectId": 3083,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 87,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29.5, 155.7, -96.5)
+
+[node name="pinebrow--harvest-3084-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3084-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0020",
+"grouping": "pinebrow-wild-0020",
+"groupingName": "Wild Mushroom",
+"objectId": 3084,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 275,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.5, 155.65, -95.5)
+
+[node name="pinebrow--harvest-3085-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3085-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0020",
+"grouping": "pinebrow-wild-0020",
+"groupingName": "Wild Mushroom",
+"objectId": 3085,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 239,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.5, 155.7, -98.5)
+
+[node name="pinebrow--harvest-3086-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3086-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0021",
+"grouping": "pinebrow-wild-0021",
+"groupingName": "Wild Bramble",
+"objectId": 3086,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 8,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -51.5, 142.05, -105.5)
+
+[node name="pinebrow--harvest-3087-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3087-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0022",
+"grouping": "pinebrow-wild-0022",
+"groupingName": "Bramble, Lavender and Sunleaf",
+"objectId": 3087,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 42,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 251.5, 123.3, -264.5)
+
+[node name="pinebrow--harvest-3088-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3088-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0022",
+"grouping": "pinebrow-wild-0022",
+"groupingName": "Bramble, Lavender and Sunleaf",
+"objectId": 3088,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 131,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 247.5, 123.55, -267.5)
+
+[node name="pinebrow--harvest-3089-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3089-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0022",
+"grouping": "pinebrow-wild-0022",
+"groupingName": "Bramble, Lavender and Sunleaf",
+"objectId": 3089,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 182,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 258.5, 122.85, -258.5)
+
+[node name="pinebrow--harvest-3090-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3090-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0023",
+"grouping": "pinebrow-wild-0023",
+"groupingName": "Bramble, Lavender and Sunleaf",
+"objectId": 3090,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 57,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 96.5, 157.3, -165.5)
+
+[node name="pinebrow--harvest-3091-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3091-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0023",
+"grouping": "pinebrow-wild-0023",
+"groupingName": "Bramble, Lavender and Sunleaf",
+"objectId": 3091,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 270,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 84.5, 156.85, -169.5)
+
+[node name="pinebrow--harvest-3092-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3092-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0023",
+"grouping": "pinebrow-wild-0023",
+"groupingName": "Bramble, Lavender and Sunleaf",
+"objectId": 3092,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 341,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 107.5, 157.5, -163.5)
+
+[node name="pinebrow--harvest-3093-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3093-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0024",
+"grouping": "pinebrow-wild-0024",
+"groupingName": "Berries, Sage and Sunleaf",
+"objectId": 3093,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 36,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 381.5, 131.25, -69.5)
+
+[node name="pinebrow--harvest-3094-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3094-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0024",
+"grouping": "pinebrow-wild-0024",
+"groupingName": "Berries, Sage and Sunleaf",
+"objectId": 3094,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 118,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 378.5, 131.4, -65.5)
+
+[node name="pinebrow--harvest-3095-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3095-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0024",
+"grouping": "pinebrow-wild-0024",
+"groupingName": "Berries, Sage and Sunleaf",
+"objectId": 3095,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 232,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 381.5, 130.8, -74.5)
+
+[node name="pinebrow--harvest-3096-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3096-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0025",
+"grouping": "pinebrow-wild-0025",
+"groupingName": "Seed and Sunleaf",
+"objectId": 3096,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 279,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 220.5, 127.15, -303.5)
+
+[node name="pinebrow--harvest-3097-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3097-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0025",
+"grouping": "pinebrow-wild-0025",
+"groupingName": "Seed and Sunleaf",
+"objectId": 3097,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 68,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 228.5, 126.65, -302.5)
+
+[node name="pinebrow--harvest-3098-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3098-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0026",
+"grouping": "pinebrow-wild-0026",
+"groupingName": "Bramble, Mushroom, Sage and Sunleaf",
+"objectId": 3098,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 213,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.5, 148.5, 41.5)
+
+[node name="pinebrow--harvest-3099-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3099-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0026",
+"grouping": "pinebrow-wild-0026",
+"groupingName": "Bramble, Mushroom, Sage and Sunleaf",
+"objectId": 3099,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 229,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34.5, 150.8, 35.5)
+
+[node name="pinebrow--harvest-3100-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3100-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0026",
+"grouping": "pinebrow-wild-0026",
+"groupingName": "Bramble, Mushroom, Sage and Sunleaf",
+"objectId": 3100,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 12,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33.5, 150.15, 37.5)
+
+[node name="pinebrow--harvest-3183-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3183-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0026",
+"grouping": "pinebrow-wild-0026",
+"groupingName": "Bramble, Mushroom, Sage and Sunleaf",
+"objectId": 3183,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 211,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33.5, 151.5, 33.5)
+
+[node name="pinebrow--harvest-3184-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3184-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0026",
+"grouping": "pinebrow-wild-0026",
+"groupingName": "Bramble, Mushroom, Sage and Sunleaf",
+"objectId": 3184,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 240,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36.5, 151.15, 34.5)
+
+[node name="pinebrow--harvest-3185-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3185-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0026",
+"grouping": "pinebrow-wild-0026",
+"groupingName": "Bramble, Mushroom, Sage and Sunleaf",
+"objectId": 3185,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 241,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.5, 151.9, 32.5)
+
+[node name="pinebrow--harvest-3186-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3186-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0026",
+"grouping": "pinebrow-wild-0026",
+"groupingName": "Bramble, Mushroom, Sage and Sunleaf",
+"objectId": 3186,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 28,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38.5, 152.9, 30.5)
+
+[node name="pinebrow--harvest-3187-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3187-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0027",
+"grouping": "pinebrow-wild-0027",
+"groupingName": "Lavender, Seed and Sunleaf",
+"objectId": 3187,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 164,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 93.5, 156.95, -90.5)
+
+[node name="pinebrow--harvest-3188-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3188-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0027",
+"grouping": "pinebrow-wild-0027",
+"groupingName": "Lavender, Seed and Sunleaf",
+"objectId": 3188,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 296,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 99.5, 156.75, -91.5)
+
+[node name="pinebrow--harvest-3189-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3189-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0027",
+"grouping": "pinebrow-wild-0027",
+"groupingName": "Lavender, Seed and Sunleaf",
+"objectId": 3189,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 105,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100.5, 156.7, -89.5)
+
+[node name="pinebrow--harvest-3190-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3190-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0028",
+"grouping": "pinebrow-wild-0028",
+"groupingName": "Berries, Flint, Lavender and Sage",
+"objectId": 3190,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 123,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.5, 152.2, 91.5)
+
+[node name="pinebrow--harvest-3191-flint" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3191-flint"
+kind = "harvestable"
+label = "Flint"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0028",
+"grouping": "pinebrow-wild-0028",
+"groupingName": "Berries, Flint, Lavender and Sage",
+"objectId": 3191,
+"pass": "harvest-coverage-1",
+"resource": "Flint",
+"yaw": 91,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.5, 152.2, 89.5)
+
+[node name="pinebrow--harvest-3192-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3192-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0028",
+"grouping": "pinebrow-wild-0028",
+"groupingName": "Berries, Flint, Lavender and Sage",
+"objectId": 3192,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 85,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 151.3, 91.5)
+
+[node name="pinebrow--harvest-3193-flint" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3193-flint"
+kind = "harvestable"
+label = "Flint"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0028",
+"grouping": "pinebrow-wild-0028",
+"groupingName": "Berries, Flint, Lavender and Sage",
+"objectId": 3193,
+"pass": "harvest-coverage-1",
+"resource": "Flint",
+"yaw": 79,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 153.1, 90.5)
+
+[node name="pinebrow--harvest-3194-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3194-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0028",
+"grouping": "pinebrow-wild-0028",
+"groupingName": "Berries, Flint, Lavender and Sage",
+"objectId": 3194,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 145,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, 154.8, 82.5)
+
+[node name="pinebrow--harvest-3195-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3195-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0028",
+"grouping": "pinebrow-wild-0028",
+"groupingName": "Berries, Flint, Lavender and Sage",
+"objectId": 3195,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 13,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 150.75, 82.5)
+
+[node name="pinebrow--harvest-3196-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3196-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0028",
+"grouping": "pinebrow-wild-0028",
+"groupingName": "Berries, Flint, Lavender and Sage",
+"objectId": 3196,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 84,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 150.55, 80.5)
+
+[node name="pinebrow--harvest-3197-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3197-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0029",
+"grouping": "pinebrow-wild-0029",
+"groupingName": "Lavender, Sage, Seed and Sunleaf",
+"objectId": 3197,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 317,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.5, 145.65, -365.5)
+
+[node name="pinebrow--harvest-3198-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3198-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0029",
+"grouping": "pinebrow-wild-0029",
+"groupingName": "Lavender, Sage, Seed and Sunleaf",
+"objectId": 3198,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 160,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.5, 145.5, -364.5)
+
+[node name="pinebrow--harvest-3199-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3199-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0029",
+"grouping": "pinebrow-wild-0029",
+"groupingName": "Lavender, Sage, Seed and Sunleaf",
+"objectId": 3199,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 106,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.5, 145.15, -363.5)
+
+[node name="pinebrow--harvest-3200-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3200-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0029",
+"grouping": "pinebrow-wild-0029",
+"groupingName": "Lavender, Sage, Seed and Sunleaf",
+"objectId": 3200,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 261,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.5, 143.05, -363.5)
+
+[node name="pinebrow--harvest-3201-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3201-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0029",
+"grouping": "pinebrow-wild-0029",
+"groupingName": "Lavender, Sage, Seed and Sunleaf",
+"objectId": 3201,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 90,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.5, 143.65, -362.5)
+
+[node name="pinebrow--harvest-3202-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3202-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0029",
+"grouping": "pinebrow-wild-0029",
+"groupingName": "Lavender, Sage, Seed and Sunleaf",
+"objectId": 3202,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 281,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.5, 143.75, -365.5)
+
+[node name="pinebrow--harvest-3203-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3203-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0030",
+"grouping": "pinebrow-wild-0030",
+"groupingName": "Lavender and Seed",
+"objectId": 3203,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 231,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.5, 152.4, -199.5)
+
+[node name="pinebrow--harvest-3204-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3204-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0030",
+"grouping": "pinebrow-wild-0030",
+"groupingName": "Lavender and Seed",
+"objectId": 3204,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 110,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.5, 152.5, -197.5)
+
+[node name="pinebrow--harvest-3205-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3205-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0030",
+"grouping": "pinebrow-wild-0030",
+"groupingName": "Lavender and Seed",
+"objectId": 3205,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 289,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5, 151.6, -204.5)
+
+[node name="pinebrow--harvest-3206-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3206-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0031",
+"grouping": "pinebrow-wild-0031",
+"groupingName": "Berries, Lavender, Mushroom and Sage",
+"objectId": 3206,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 319,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.5, 152.65, -56.5)
+
+[node name="pinebrow--harvest-3207-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3207-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0031",
+"grouping": "pinebrow-wild-0031",
+"groupingName": "Berries, Lavender, Mushroom and Sage",
+"objectId": 3207,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 37,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.5, 152.5, -51.5)
+
+[node name="pinebrow--harvest-3208-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3208-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0031",
+"grouping": "pinebrow-wild-0031",
+"groupingName": "Berries, Lavender, Mushroom and Sage",
+"objectId": 3208,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 223,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.5, 153.0, -49.5)
+
+[node name="pinebrow--harvest-3209-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3209-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0031",
+"grouping": "pinebrow-wild-0031",
+"groupingName": "Berries, Lavender, Mushroom and Sage",
+"objectId": 3209,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 283,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.5, 152.6, -61.5)
+
+[node name="pinebrow--harvest-3210-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3210-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0032",
+"grouping": "pinebrow-wild-0032",
+"groupingName": "Berries and Seed",
+"objectId": 3210,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 103,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 330.5, 119.0, -151.5)
+
+[node name="pinebrow--harvest-3211-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3211-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0032",
+"grouping": "pinebrow-wild-0032",
+"groupingName": "Berries and Seed",
+"objectId": 3211,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 281,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 331.5, 120.1, -145.5)
+
+[node name="pinebrow--harvest-3212-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3212-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0033",
+"grouping": "pinebrow-wild-0033",
+"groupingName": "Wild Sage",
+"objectId": 3212,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 126,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 79.5, 155.65, -59.5)
+
+[node name="pinebrow--harvest-3213-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3213-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0034",
+"grouping": "pinebrow-wild-0034",
+"groupingName": "Wild Mushroom",
+"objectId": 3213,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 259,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 69.5, 150.5, -264.5)
+
+[node name="pinebrow--harvest-3214-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3214-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0035",
+"grouping": "pinebrow-wild-0035",
+"groupingName": "Berries and Mushroom",
+"objectId": 3214,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 22,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 74.5, 142.35, -355.5)
+
+[node name="pinebrow--harvest-3215-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3215-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0035",
+"grouping": "pinebrow-wild-0035",
+"groupingName": "Berries and Mushroom",
+"objectId": 3215,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 329,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 74.5, 142.35, -353.5)
+
+[node name="pinebrow--harvest-3216-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3216-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0036",
+"grouping": "pinebrow-wild-0036",
+"groupingName": "Wild Sunleaf",
+"objectId": 3216,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 321,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 54.5, 164.1, -29.5)
+
+[node name="pinebrow--harvest-3217-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3217-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0036",
+"grouping": "pinebrow-wild-0036",
+"groupingName": "Wild Sunleaf",
+"objectId": 3217,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 332,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.5, 164.8, -30.5)
+
+[node name="pinebrow--harvest-3218-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3218-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0036",
+"grouping": "pinebrow-wild-0036",
+"groupingName": "Wild Sunleaf",
+"objectId": 3218,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 152,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 51.5, 165.65, -25.5)
+
+[node name="pinebrow--harvest-3219-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3219-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0037",
+"grouping": "pinebrow-wild-0037",
+"groupingName": "Lavender and Sage",
+"objectId": 3219,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 164,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 121.5, 141.1, 7.5)
+
+[node name="pinebrow--harvest-3220-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3220-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0037",
+"grouping": "pinebrow-wild-0037",
+"groupingName": "Lavender and Sage",
+"objectId": 3220,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 285,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 123.5, 140.45, 8.5)
+
+[node name="pinebrow--harvest-3221-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3221-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0037",
+"grouping": "pinebrow-wild-0037",
+"groupingName": "Lavender and Sage",
+"objectId": 3221,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 250,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120.5, 141.65, 5.5)
+
+[node name="pinebrow--harvest-3222-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3222-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0037",
+"grouping": "pinebrow-wild-0037",
+"groupingName": "Lavender and Sage",
+"objectId": 3222,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 293,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 119.5, 141.35, 8.5)
+
+[node name="pinebrow--harvest-3223-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3223-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0037",
+"grouping": "pinebrow-wild-0037",
+"groupingName": "Lavender and Sage",
+"objectId": 3223,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 211,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 122.5, 141.9, 1.5)
+
+[node name="pinebrow--harvest-3224-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3224-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0038",
+"grouping": "pinebrow-wild-0038",
+"groupingName": "Mushroom, Sage and Sunleaf",
+"objectId": 3224,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 195,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.5, 154.1, -164.5)
+
+[node name="pinebrow--harvest-3225-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3225-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0038",
+"grouping": "pinebrow-wild-0038",
+"groupingName": "Mushroom, Sage and Sunleaf",
+"objectId": 3225,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 102,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.5, 153.7, -170.5)
+
+[node name="pinebrow--harvest-3226-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3226-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0038",
+"grouping": "pinebrow-wild-0038",
+"groupingName": "Mushroom, Sage and Sunleaf",
+"objectId": 3226,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 237,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.5, 154.05, -160.5)
+
+[node name="pinebrow--harvest-3227-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3227-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0039",
+"grouping": "pinebrow-wild-0039",
+"groupingName": "Berries, Lavender and Sunleaf",
+"objectId": 3227,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 296,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 192.5, 157.2, -187.5)
+
+[node name="pinebrow--harvest-3228-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3228-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0039",
+"grouping": "pinebrow-wild-0039",
+"groupingName": "Berries, Lavender and Sunleaf",
+"objectId": 3228,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 257,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 190.5, 156.4, -186.5)
+
+[node name="pinebrow--harvest-3229-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3229-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0039",
+"grouping": "pinebrow-wild-0039",
+"groupingName": "Berries, Lavender and Sunleaf",
+"objectId": 3229,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 304,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 195.5, 158.35, -181.5)
+
+[node name="pinebrow--harvest-3230-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3230-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0039",
+"grouping": "pinebrow-wild-0039",
+"groupingName": "Berries, Lavender and Sunleaf",
+"objectId": 3230,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 222,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 202.5, 156.6, -188.5)
+
+[node name="pinebrow--harvest-3231-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3231-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0040",
+"grouping": "pinebrow-wild-0040",
+"groupingName": "Mushroom and Sage",
+"objectId": 3231,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 265,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 99.5, 149.0, -28.5)
+
+[node name="pinebrow--harvest-3232-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3232-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0040",
+"grouping": "pinebrow-wild-0040",
+"groupingName": "Mushroom and Sage",
+"objectId": 3232,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 170,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 99.5, 148.95, -23.5)
+
+[node name="pinebrow--harvest-3233-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3233-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0041",
+"grouping": "pinebrow-wild-0041",
+"groupingName": "Berries, Sage and Seed",
+"objectId": 3233,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 14,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23.5, 139.7, -275.5)
+
+[node name="pinebrow--harvest-3234-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3234-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0041",
+"grouping": "pinebrow-wild-0041",
+"groupingName": "Berries, Sage and Seed",
+"objectId": 3234,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 283,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.5, 140.75, -271.5)
+
+[node name="pinebrow--harvest-3235-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3235-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0041",
+"grouping": "pinebrow-wild-0041",
+"groupingName": "Berries, Sage and Seed",
+"objectId": 3235,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 209,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.5, 139.85, -272.5)
+
+[node name="pinebrow--harvest-3236-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3236-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0042",
+"grouping": "pinebrow-wild-0042",
+"groupingName": "Lavender, Sage and Sunleaf",
+"objectId": 3236,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 54,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 180.5, 134.9, -210.5)
+
+[node name="pinebrow--harvest-3237-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3237-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0042",
+"grouping": "pinebrow-wild-0042",
+"groupingName": "Lavender, Sage and Sunleaf",
+"objectId": 3237,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 299,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 178.5, 135.3, -211.5)
+
+[node name="pinebrow--harvest-3238-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3238-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0042",
+"grouping": "pinebrow-wild-0042",
+"groupingName": "Lavender, Sage and Sunleaf",
+"objectId": 3238,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 275,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 170.5, 137.55, -208.5)
+
+[node name="pinebrow--harvest-3239-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3239-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0043",
+"grouping": "pinebrow-wild-0043",
+"groupingName": "Lavender and Sage",
+"objectId": 3239,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 272,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 305.5, 130.8, -254.5)
+
+[node name="pinebrow--harvest-3240-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3240-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0043",
+"grouping": "pinebrow-wild-0043",
+"groupingName": "Lavender and Sage",
+"objectId": 3240,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 45,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 309.5, 128.7, -261.5)
+
+[node name="pinebrow--harvest-3241-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3241-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0044",
+"grouping": "pinebrow-wild-0044",
+"groupingName": "Mushroom and Sunleaf",
+"objectId": 3241,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 47,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 223.5, 129.9, -341.5)
+
+[node name="pinebrow--harvest-3242-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3242-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0044",
+"grouping": "pinebrow-wild-0044",
+"groupingName": "Mushroom and Sunleaf",
+"objectId": 3242,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 200,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 222.5, 129.75, -343.5)
+
+[node name="pinebrow--harvest-3243-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3243-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0044",
+"grouping": "pinebrow-wild-0044",
+"groupingName": "Mushroom and Sunleaf",
+"objectId": 3243,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 152,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 223.5, 129.15, -347.5)
+
+[node name="pinebrow--harvest-3244-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3244-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0045",
+"grouping": "pinebrow-wild-0045",
+"groupingName": "Berries, Sage and Sunleaf",
+"objectId": 3244,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 185,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 83.5, 156.75, -120.5)
+
+[node name="pinebrow--harvest-3245-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3245-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0045",
+"grouping": "pinebrow-wild-0045",
+"groupingName": "Berries, Sage and Sunleaf",
+"objectId": 3245,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 325,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85.5, 156.75, -127.5)
+
+[node name="pinebrow--harvest-3246-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3246-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0045",
+"grouping": "pinebrow-wild-0045",
+"groupingName": "Berries, Sage and Sunleaf",
+"objectId": 3246,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 253,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 87.5, 156.85, -115.5)
+
+[node name="pinebrow--harvest-3247-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3247-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0046",
+"grouping": "pinebrow-wild-0046",
+"groupingName": "Wild Sage",
+"objectId": 3247,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 126,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 142.5, 153.25, -74.5)
+
+[node name="pinebrow--harvest-3248-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3248-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0047",
+"grouping": "pinebrow-wild-0047",
+"groupingName": "Sage and Sunleaf",
+"objectId": 3248,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 287,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 331.5, 121.9, -322.5)
+
+[node name="pinebrow--harvest-3249-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3249-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0047",
+"grouping": "pinebrow-wild-0047",
+"groupingName": "Sage and Sunleaf",
+"objectId": 3249,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 18,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 333.5, 122.65, -317.5)
+
+[node name="pinebrow--harvest-3250-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3250-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0048",
+"grouping": "pinebrow-wild-0048",
+"groupingName": "Sage and Seed",
+"objectId": 3250,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 277,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 174.5, 133.3, -308.5)
+
+[node name="pinebrow--harvest-3251-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3251-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0048",
+"grouping": "pinebrow-wild-0048",
+"groupingName": "Sage and Seed",
+"objectId": 3251,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 28,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 172.5, 133.45, -313.5)
+
+[node name="pinebrow--harvest-3252-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3252-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0049",
+"grouping": "pinebrow-wild-0049",
+"groupingName": "Lavender, Mushroom and Sunleaf",
+"objectId": 3252,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 59,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 72.5, 156.6, -211.5)
+
+[node name="pinebrow--harvest-3253-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3253-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0049",
+"grouping": "pinebrow-wild-0049",
+"groupingName": "Lavender, Mushroom and Sunleaf",
+"objectId": 3253,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 251,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 71.5, 156.45, -200.5)
+
+[node name="pinebrow--harvest-3254-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3254-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0049",
+"grouping": "pinebrow-wild-0049",
+"groupingName": "Lavender, Mushroom and Sunleaf",
+"objectId": 3254,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 203,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 67.5, 155.85, -212.5)
+
+[node name="pinebrow--harvest-3255-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3255-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0049",
+"grouping": "pinebrow-wild-0049",
+"groupingName": "Lavender, Mushroom and Sunleaf",
+"objectId": 3255,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 165,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 65.5, 155.55, -212.5)
+
+[node name="pinebrow--harvest-3256-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3256-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0050",
+"grouping": "pinebrow-wild-0050",
+"groupingName": "Bramble, Lavender, Mushroom and Sage",
+"objectId": 3256,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 220,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 51.5, 146.1, -337.5)
+
+[node name="pinebrow--harvest-3257-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3257-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0050",
+"grouping": "pinebrow-wild-0050",
+"groupingName": "Bramble, Lavender, Mushroom and Sage",
+"objectId": 3257,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 203,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50.5, 146.35, -335.5)
+
+[node name="pinebrow--harvest-3258-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3258-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0050",
+"grouping": "pinebrow-wild-0050",
+"groupingName": "Bramble, Lavender, Mushroom and Sage",
+"objectId": 3258,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 291,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50.5, 146.65, -332.5)
+
+[node name="pinebrow--harvest-3259-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3259-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0050",
+"grouping": "pinebrow-wild-0050",
+"groupingName": "Bramble, Lavender, Mushroom and Sage",
+"objectId": 3259,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 306,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 55.5, 145.95, -336.5)
+
+[node name="pinebrow--harvest-3260-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3260-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0051",
+"grouping": "pinebrow-wild-0051",
+"groupingName": "Sage and Seed",
+"objectId": 3260,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 249,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 213.5, 166.05, -134.5)
+
+[node name="pinebrow--harvest-3261-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3261-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0051",
+"grouping": "pinebrow-wild-0051",
+"groupingName": "Sage and Seed",
+"objectId": 3261,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 335,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 211.5, 165.8, -134.5)
+
+[node name="pinebrow--harvest-3262-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3262-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0052",
+"grouping": "pinebrow-wild-0052",
+"groupingName": "Berries, Lavender, Sage and Sunleaf",
+"objectId": 3262,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 188,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.5, 153.55, -119.5)
+
+[node name="pinebrow--harvest-3263-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3263-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0052",
+"grouping": "pinebrow-wild-0052",
+"groupingName": "Berries, Lavender, Sage and Sunleaf",
+"objectId": 3263,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 10,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.5, 153.65, -117.5)
+
+[node name="pinebrow--harvest-3264-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3264-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0052",
+"grouping": "pinebrow-wild-0052",
+"groupingName": "Berries, Lavender, Sage and Sunleaf",
+"objectId": 3264,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 311,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.5, 153.0, -115.5)
+
+[node name="pinebrow--harvest-3265-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3265-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0052",
+"grouping": "pinebrow-wild-0052",
+"groupingName": "Berries, Lavender, Sage and Sunleaf",
+"objectId": 3265,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 20,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.5, 153.0, -117.5)
+
+[node name="pinebrow--harvest-3266-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3266-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0053",
+"grouping": "pinebrow-wild-0053",
+"groupingName": "Wild Lavender",
+"objectId": 3266,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 1,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 115.5, 157.65, -200.5)
+
+[node name="pinebrow--harvest-3267-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3267-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0053",
+"grouping": "pinebrow-wild-0053",
+"groupingName": "Wild Lavender",
+"objectId": 3267,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 158,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 113.5, 157.4, -201.5)
+
+[node name="pinebrow--harvest-3268-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3268-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0054",
+"grouping": "pinebrow-wild-0054",
+"groupingName": "Lavender and Sunleaf",
+"objectId": 3268,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 169,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 160.35, -27.5)
+
+[node name="pinebrow--harvest-3269-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3269-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0054",
+"grouping": "pinebrow-wild-0054",
+"groupingName": "Lavender and Sunleaf",
+"objectId": 3269,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 219,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.5, 159.95, -25.5)
+
+[node name="pinebrow--harvest-3270-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3270-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0055",
+"grouping": "pinebrow-wild-0055",
+"groupingName": "Bramble, Lavender, Mushroom, Sage and Sunleaf",
+"objectId": 3270,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 288,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 214.5, 130.6, -226.5)
+
+[node name="pinebrow--harvest-3271-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3271-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0055",
+"grouping": "pinebrow-wild-0055",
+"groupingName": "Bramble, Lavender, Mushroom, Sage and Sunleaf",
+"objectId": 3271,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 176,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 216.5, 130.4, -225.5)
+
+[node name="pinebrow--harvest-3272-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3272-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0055",
+"grouping": "pinebrow-wild-0055",
+"groupingName": "Bramble, Lavender, Mushroom, Sage and Sunleaf",
+"objectId": 3272,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 198,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 212.5, 130.8, -227.5)
+
+[node name="pinebrow--harvest-3273-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3273-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0055",
+"grouping": "pinebrow-wild-0055",
+"groupingName": "Bramble, Lavender, Mushroom, Sage and Sunleaf",
+"objectId": 3273,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 58,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 215.5, 130.55, -228.5)
+
+[node name="pinebrow--harvest-3274-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3274-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0055",
+"grouping": "pinebrow-wild-0055",
+"groupingName": "Bramble, Lavender, Mushroom, Sage and Sunleaf",
+"objectId": 3274,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 86,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 207.5, 131.5, -223.5)
+
+[node name="pinebrow--harvest-3275-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3275-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0055",
+"grouping": "pinebrow-wild-0055",
+"groupingName": "Bramble, Lavender, Mushroom, Sage and Sunleaf",
+"objectId": 3275,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 162,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 214.5, 130.6, -231.5)
+
+[node name="pinebrow--harvest-3276-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3276-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0055",
+"grouping": "pinebrow-wild-0055",
+"groupingName": "Bramble, Lavender, Mushroom, Sage and Sunleaf",
+"objectId": 3276,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 14,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 215.5, 130.45, -233.5)
+
+[node name="pinebrow--harvest-3277-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3277-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0056",
+"grouping": "pinebrow-wild-0056",
+"groupingName": "Wild Bramble",
+"objectId": 3277,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 158,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 82.5, 149.85, 16.5)
+
+[node name="pinebrow--harvest-3278-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3278-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0057",
+"grouping": "pinebrow-wild-0057",
+"groupingName": "Sage and Sunleaf",
+"objectId": 3278,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 43,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 390.5, 102.95, -253.5)
+
+[node name="pinebrow--harvest-3279-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3279-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0057",
+"grouping": "pinebrow-wild-0057",
+"groupingName": "Sage and Sunleaf",
+"objectId": 3279,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 276,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 390.5, 102.6, -255.5)
+
+[node name="pinebrow--harvest-3280-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3280-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0058",
+"grouping": "pinebrow-wild-0058",
+"groupingName": "Berries, Mushroom, Sage, Seed and Sunleaf",
+"objectId": 3280,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 240,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 306.5, 122.4, -190.5)
+
+[node name="pinebrow--harvest-3281-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3281-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0058",
+"grouping": "pinebrow-wild-0058",
+"groupingName": "Berries, Mushroom, Sage, Seed and Sunleaf",
+"objectId": 3281,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 48,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 307.5, 122.35, -188.5)
+
+[node name="pinebrow--harvest-3282-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3282-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0058",
+"grouping": "pinebrow-wild-0058",
+"groupingName": "Berries, Mushroom, Sage, Seed and Sunleaf",
+"objectId": 3282,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 319,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 304.5, 122.6, -194.5)
+
+[node name="pinebrow--harvest-3283-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3283-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0058",
+"grouping": "pinebrow-wild-0058",
+"groupingName": "Berries, Mushroom, Sage, Seed and Sunleaf",
+"objectId": 3283,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 275,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 305.5, 122.45, -192.5)
+
+[node name="pinebrow--harvest-3284-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3284-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0058",
+"grouping": "pinebrow-wild-0058",
+"groupingName": "Berries, Mushroom, Sage, Seed and Sunleaf",
+"objectId": 3284,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 349,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 312.5, 121.45, -184.5)
+
+[node name="pinebrow--harvest-3285-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3285-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0059",
+"grouping": "pinebrow-wild-0059",
+"groupingName": "Lavender, Sage and Sunleaf",
+"objectId": 3285,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 261,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 165.5, 137.95, -285.5)
+
+[node name="pinebrow--harvest-3286-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3286-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0059",
+"grouping": "pinebrow-wild-0059",
+"groupingName": "Lavender, Sage and Sunleaf",
+"objectId": 3286,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 69,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 173.5, 135.15, -290.5)
+
+[node name="pinebrow--harvest-3287-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3287-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0059",
+"grouping": "pinebrow-wild-0059",
+"groupingName": "Lavender, Sage and Sunleaf",
+"objectId": 3287,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 97,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 172.5, 135.65, -288.5)
+
+[node name="pinebrow--harvest-3288-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3288-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0059",
+"grouping": "pinebrow-wild-0059",
+"groupingName": "Lavender, Sage and Sunleaf",
+"objectId": 3288,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 65,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 172.5, 135.1, -292.5)
+
+[node name="pinebrow--harvest-3289-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3289-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0059",
+"grouping": "pinebrow-wild-0059",
+"groupingName": "Lavender, Sage and Sunleaf",
+"objectId": 3289,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 129,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 175.5, 134.65, -291.5)
+
+[node name="pinebrow--harvest-3290-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3290-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0059",
+"grouping": "pinebrow-wild-0059",
+"groupingName": "Lavender, Sage and Sunleaf",
+"objectId": 3290,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 310,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 175.5, 134.85, -289.5)
+
+[node name="pinebrow--harvest-3291-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3291-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0059",
+"grouping": "pinebrow-wild-0059",
+"groupingName": "Lavender, Sage and Sunleaf",
+"objectId": 3291,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 207,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 170.5, 135.05, -293.5)
+
+[node name="pinebrow--harvest-3292-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3292-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0059",
+"grouping": "pinebrow-wild-0059",
+"groupingName": "Lavender, Sage and Sunleaf",
+"objectId": 3292,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 274,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 171.5, 134.75, -295.5)
+
+[node name="pinebrow--harvest-3293-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3293-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0060",
+"grouping": "pinebrow-wild-0060",
+"groupingName": "Lavender, Sage and Seed",
+"objectId": 3293,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 308,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 150.5, 157.45, -164.5)
+
+[node name="pinebrow--harvest-3294-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3294-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0060",
+"grouping": "pinebrow-wild-0060",
+"groupingName": "Lavender, Sage and Seed",
+"objectId": 3294,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 12,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 139.5, 157.65, -163.5)
+
+[node name="pinebrow--harvest-3295-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3295-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0060",
+"grouping": "pinebrow-wild-0060",
+"groupingName": "Lavender, Sage and Seed",
+"objectId": 3295,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 48,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 154.5, 157.9, -174.5)
+
+[node name="pinebrow--harvest-3296-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3296-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0061",
+"grouping": "pinebrow-wild-0061",
+"groupingName": "Mushroom and Sunleaf",
+"objectId": 3296,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 237,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 268.5, 172.0, -185.5)
+
+[node name="pinebrow--harvest-3297-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3297-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0061",
+"grouping": "pinebrow-wild-0061",
+"groupingName": "Mushroom and Sunleaf",
+"objectId": 3297,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 21,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 267.5, 172.6, -183.5)
+
+[node name="pinebrow--harvest-3298-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3298-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0062",
+"grouping": "pinebrow-wild-0062",
+"groupingName": "Berries, Lavender, Mushroom and Sunleaf",
+"objectId": 3298,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 103,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 396.5, 98.1, -302.5)
+
+[node name="pinebrow--harvest-3299-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3299-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0062",
+"grouping": "pinebrow-wild-0062",
+"groupingName": "Berries, Lavender, Mushroom and Sunleaf",
+"objectId": 3299,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 293,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 390.5, 98.8, -309.5)
+
+[node name="pinebrow--harvest-3300-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3300-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0062",
+"grouping": "pinebrow-wild-0062",
+"groupingName": "Berries, Lavender, Mushroom and Sunleaf",
+"objectId": 3300,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 11,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 388.5, 99.15, -303.5)
+
+[node name="pinebrow--harvest-3317-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3317-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0062",
+"grouping": "pinebrow-wild-0062",
+"groupingName": "Berries, Lavender, Mushroom and Sunleaf",
+"objectId": 3317,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 142,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 390.5, 98.75, -303.5)
+
+[node name="pinebrow--harvest-3318-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3318-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0063",
+"grouping": "pinebrow-wild-0063",
+"groupingName": "Bramble, Sage and Sunleaf",
+"objectId": 3318,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 1,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28.5, 135.45, 79.5)
+
+[node name="pinebrow--harvest-3319-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3319-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0063",
+"grouping": "pinebrow-wild-0063",
+"groupingName": "Bramble, Sage and Sunleaf",
+"objectId": 3319,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 257,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28.5, 136.0, 73.5)
+
+[node name="pinebrow--harvest-3320-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3320-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0063",
+"grouping": "pinebrow-wild-0063",
+"groupingName": "Bramble, Sage and Sunleaf",
+"objectId": 3320,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 133,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.5, 138.0, 70.5)
+
+[node name="pinebrow--harvest-3321-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3321-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0064",
+"grouping": "pinebrow-wild-0064",
+"groupingName": "Lavender and Sunleaf",
+"objectId": 3321,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 191,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 123.5, 137.8, -354.5)
+
+[node name="pinebrow--harvest-3322-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3322-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0064",
+"grouping": "pinebrow-wild-0064",
+"groupingName": "Lavender and Sunleaf",
+"objectId": 3322,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 51,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 125.5, 137.55, -355.5)
+
+[node name="pinebrow--harvest-3323-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3323-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0065",
+"grouping": "pinebrow-wild-0065",
+"groupingName": "Lavender and Sage",
+"objectId": 3323,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 350,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.5, 155.85, 124.5)
+
+[node name="pinebrow--harvest-3324-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3324-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0065",
+"grouping": "pinebrow-wild-0065",
+"groupingName": "Lavender and Sage",
+"objectId": 3324,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 70,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.5, 155.55, 122.5)
+
+[node name="pinebrow--harvest-3325-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3325-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0066",
+"grouping": "pinebrow-wild-0066",
+"groupingName": "Lavender, Sage and Sunleaf",
+"objectId": 3325,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 38,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38.5, 159.75, -57.5)
+
+[node name="pinebrow--harvest-3326-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3326-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0066",
+"grouping": "pinebrow-wild-0066",
+"groupingName": "Lavender, Sage and Sunleaf",
+"objectId": 3326,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 193,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.5, 158.8, -66.5)
+
+[node name="pinebrow--harvest-3327-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3327-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0066",
+"grouping": "pinebrow-wild-0066",
+"groupingName": "Lavender, Sage and Sunleaf",
+"objectId": 3327,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 53,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.5, 158.55, -66.5)
+
+[node name="pinebrow--harvest-3328-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3328-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0067",
+"grouping": "pinebrow-wild-0067",
+"groupingName": "Bramble, Lavender, Mushroom and Seed",
+"objectId": 3328,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 230,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.5, 146.1, -237.5)
+
+[node name="pinebrow--harvest-3329-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3329-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0067",
+"grouping": "pinebrow-wild-0067",
+"groupingName": "Bramble, Lavender, Mushroom and Seed",
+"objectId": 3329,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 194,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.5, 145.85, -239.5)
+
+[node name="pinebrow--harvest-3330-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3330-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0067",
+"grouping": "pinebrow-wild-0067",
+"groupingName": "Bramble, Lavender, Mushroom and Seed",
+"objectId": 3330,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 327,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.5, 145.85, -239.5)
+
+[node name="pinebrow--harvest-3331-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3331-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0067",
+"grouping": "pinebrow-wild-0067",
+"groupingName": "Bramble, Lavender, Mushroom and Seed",
+"objectId": 3331,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 32,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.5, 145.5, -240.5)
+
+[node name="pinebrow--harvest-3332-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3332-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0067",
+"grouping": "pinebrow-wild-0067",
+"groupingName": "Bramble, Lavender, Mushroom and Seed",
+"objectId": 3332,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 241,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24.5, 145.6, -241.5)
+
+[node name="pinebrow--harvest-3333-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3333-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0067",
+"grouping": "pinebrow-wild-0067",
+"groupingName": "Bramble, Lavender, Mushroom and Seed",
+"objectId": 3333,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 109,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24.5, 147.0, -231.5)
+
+[node name="pinebrow--harvest-3334-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3334-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0068",
+"grouping": "pinebrow-wild-0068",
+"groupingName": "Lavender, Mushroom and Sage",
+"objectId": 3334,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 240,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23.5, 129.9, -311.5)
+
+[node name="pinebrow--harvest-3335-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3335-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0068",
+"grouping": "pinebrow-wild-0068",
+"groupingName": "Lavender, Mushroom and Sage",
+"objectId": 3335,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 174,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23.5, 131.25, -306.5)
+
+[node name="pinebrow--harvest-3336-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3336-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0068",
+"grouping": "pinebrow-wild-0068",
+"groupingName": "Lavender, Mushroom and Sage",
+"objectId": 3336,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 308,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.5, 130.55, -307.5)
+
+[node name="pinebrow--harvest-3337-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3337-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0069",
+"grouping": "pinebrow-wild-0069",
+"groupingName": "Lavender, Mushroom and Sage",
+"objectId": 3337,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 211,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 196.5, 131.6, -356.5)
+
+[node name="pinebrow--harvest-3338-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3338-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0069",
+"grouping": "pinebrow-wild-0069",
+"groupingName": "Lavender, Mushroom and Sage",
+"objectId": 3338,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 197,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 190.5, 132.25, -355.5)
+
+[node name="pinebrow--harvest-3339-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3339-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0069",
+"grouping": "pinebrow-wild-0069",
+"groupingName": "Lavender, Mushroom and Sage",
+"objectId": 3339,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 245,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 207.5, 130.6, -349.5)
+
+[node name="pinebrow--harvest-3340-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3340-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0070",
+"grouping": "pinebrow-wild-0070",
+"groupingName": "Wild Sage",
+"objectId": 3340,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 23,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 121.5, 166.55, -254.5)
+
+[node name="pinebrow--harvest-3341-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3341-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0071",
+"grouping": "pinebrow-wild-0071",
+"groupingName": "Bramble, Mushroom, Sage and Sunleaf",
+"objectId": 3341,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 305,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 54.5, 155.75, -140.5)
+
+[node name="pinebrow--harvest-3342-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3342-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0071",
+"grouping": "pinebrow-wild-0071",
+"groupingName": "Bramble, Mushroom, Sage and Sunleaf",
+"objectId": 3342,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 271,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 56.5, 155.7, -139.5)
+
+[node name="pinebrow--harvest-3343-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3343-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0071",
+"grouping": "pinebrow-wild-0071",
+"groupingName": "Bramble, Mushroom, Sage and Sunleaf",
+"objectId": 3343,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 268,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 55.5, 155.8, -144.5)
+
+[node name="pinebrow--harvest-3344-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3344-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0071",
+"grouping": "pinebrow-wild-0071",
+"groupingName": "Bramble, Mushroom, Sage and Sunleaf",
+"objectId": 3344,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 318,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 58.5, 155.7, -136.5)
+
+[node name="pinebrow--harvest-3345-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3345-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0071",
+"grouping": "pinebrow-wild-0071",
+"groupingName": "Bramble, Mushroom, Sage and Sunleaf",
+"objectId": 3345,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 101,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 56.5, 155.65, -137.5)
+
+[node name="pinebrow--harvest-3346-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3346-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0071",
+"grouping": "pinebrow-wild-0071",
+"groupingName": "Bramble, Mushroom, Sage and Sunleaf",
+"objectId": 3346,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 242,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 58.5, 155.75, -138.5)
+
+[node name="pinebrow--harvest-3347-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3347-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0072",
+"grouping": "pinebrow-wild-0072",
+"groupingName": "Wild Sage",
+"objectId": 3347,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 123,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.5, 128.4, 35.5)
+
+[node name="pinebrow--harvest-3348-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3348-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0073",
+"grouping": "pinebrow-wild-0073",
+"groupingName": "Bramble, Mushroom and Sage",
+"objectId": 3348,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 324,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 382.5, 116.2, -148.5)
+
+[node name="pinebrow--harvest-3349-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3349-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0073",
+"grouping": "pinebrow-wild-0073",
+"groupingName": "Bramble, Mushroom and Sage",
+"objectId": 3349,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 343,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 383.5, 115.95, -150.5)
+
+[node name="pinebrow--harvest-3350-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3350-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0073",
+"grouping": "pinebrow-wild-0073",
+"groupingName": "Bramble, Mushroom and Sage",
+"objectId": 3350,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 356,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 378.5, 115.9, -153.5)
+
+[node name="pinebrow--harvest-3351-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3351-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0074",
+"grouping": "pinebrow-wild-0074",
+"groupingName": "Berries, Bramble, Sage and Seed",
+"objectId": 3351,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 117,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 342.5, 124.8, -101.5)
+
+[node name="pinebrow--harvest-3352-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3352-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0074",
+"grouping": "pinebrow-wild-0074",
+"groupingName": "Berries, Bramble, Sage and Seed",
+"objectId": 3352,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 350,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 344.5, 124.75, -101.5)
+
+[node name="pinebrow--harvest-3353-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3353-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0074",
+"grouping": "pinebrow-wild-0074",
+"groupingName": "Berries, Bramble, Sage and Seed",
+"objectId": 3353,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 168,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 345.5, 125.1, -98.5)
+
+[node name="pinebrow--harvest-3354-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3354-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0074",
+"grouping": "pinebrow-wild-0074",
+"groupingName": "Berries, Bramble, Sage and Seed",
+"objectId": 3354,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 56,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 343.5, 123.85, -108.5)
+
+[node name="pinebrow--harvest-3355-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3355-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0074",
+"grouping": "pinebrow-wild-0074",
+"groupingName": "Berries, Bramble, Sage and Seed",
+"objectId": 3355,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 246,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 344.5, 124.05, -106.5)
+
+[node name="pinebrow--harvest-3356-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3356-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0075",
+"grouping": "pinebrow-wild-0075",
+"groupingName": "Bramble, Lavender, Seed and Sunleaf",
+"objectId": 3356,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 183,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 256.5, 166.15, -141.5)
+
+[node name="pinebrow--harvest-3357-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3357-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0075",
+"grouping": "pinebrow-wild-0075",
+"groupingName": "Bramble, Lavender, Seed and Sunleaf",
+"objectId": 3357,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 190,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 250.5, 166.65, -139.5)
+
+[node name="pinebrow--harvest-3358-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3358-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0075",
+"grouping": "pinebrow-wild-0075",
+"groupingName": "Bramble, Lavender, Seed and Sunleaf",
+"objectId": 3358,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 192,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 252.5, 166.3, -138.5)
+
+[node name="pinebrow--harvest-3359-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3359-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0075",
+"grouping": "pinebrow-wild-0075",
+"groupingName": "Bramble, Lavender, Seed and Sunleaf",
+"objectId": 3359,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 167,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 260.5, 166.1, -143.5)
+
+[node name="pinebrow--harvest-3368-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3368-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0076",
+"grouping": "pinebrow-wild-0076",
+"groupingName": "Wild Seed",
+"objectId": 3368,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 119,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.5, 178.65, 2.5)
+
+[node name="pinebrow--harvest-3369-clay" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3369-clay"
+kind = "harvestable"
+label = "Clay"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0077",
+"grouping": "pinebrow-wild-0077",
+"groupingName": "Clay and Sage",
+"objectId": 3369,
+"pass": "harvest-coverage-1",
+"resource": "Clay",
+"yaw": 91,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 284.5, 139.45, -240.5)
+
+[node name="pinebrow--harvest-3370-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3370-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0077",
+"grouping": "pinebrow-wild-0077",
+"groupingName": "Clay and Sage",
+"objectId": 3370,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 95,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 287.5, 138.25, -243.5)
+
+[node name="pinebrow--harvest-3371-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3371-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0078",
+"grouping": "pinebrow-wild-0078",
+"groupingName": "Bramble, Lavender and Sunleaf",
+"objectId": 3371,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 251,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 132.5, 157.2, -109.5)
+
+[node name="pinebrow--harvest-3372-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3372-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0078",
+"grouping": "pinebrow-wild-0078",
+"groupingName": "Bramble, Lavender and Sunleaf",
+"objectId": 3372,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 176,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133.5, 157.65, -114.5)
+
+[node name="pinebrow--harvest-3373-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3373-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0078",
+"grouping": "pinebrow-wild-0078",
+"groupingName": "Bramble, Lavender and Sunleaf",
+"objectId": 3373,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 163,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 139.5, 157.55, -109.5)
+
+[node name="pinebrow--harvest-3374-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3374-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0079",
+"grouping": "pinebrow-wild-0079",
+"groupingName": "Bramble, Sage and Sunleaf",
+"objectId": 3374,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 313,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 159.5, 133.7, 16.5)
+
+[node name="pinebrow--harvest-3375-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3375-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0079",
+"grouping": "pinebrow-wild-0079",
+"groupingName": "Bramble, Sage and Sunleaf",
+"objectId": 3375,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 288,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 155.5, 134.8, 11.5)
+
+[node name="pinebrow--harvest-3376-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3376-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0079",
+"grouping": "pinebrow-wild-0079",
+"groupingName": "Bramble, Sage and Sunleaf",
+"objectId": 3376,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 320,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 152.5, 133.65, 15.5)
+
+[node name="pinebrow--harvest-3377-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3377-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0080",
+"grouping": "pinebrow-wild-0080",
+"groupingName": "Lavender, Mushroom and Seed",
+"objectId": 3377,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 190,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 286.5, 124.3, -333.5)
+
+[node name="pinebrow--harvest-3378-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3378-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0080",
+"grouping": "pinebrow-wild-0080",
+"groupingName": "Lavender, Mushroom and Seed",
+"objectId": 3378,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 285,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 284.5, 124.6, -332.5)
+
+[node name="pinebrow--harvest-3379-seed" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3379-seed"
+kind = "harvestable"
+label = "Seed"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0080",
+"grouping": "pinebrow-wild-0080",
+"groupingName": "Lavender, Mushroom and Seed",
+"objectId": 3379,
+"pass": "harvest-coverage-1",
+"resource": "Seed",
+"yaw": 302,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 292.5, 124.0, -330.5)
+
+[node name="pinebrow--harvest-3380-berries" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3380-berries"
+kind = "harvestable"
+label = "Berries"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0081",
+"grouping": "pinebrow-wild-0081",
+"groupingName": "Berries, Bramble and Lavender",
+"objectId": 3380,
+"pass": "harvest-coverage-1",
+"resource": "Berries",
+"yaw": 87,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 144.4, 56.5)
+
+[node name="pinebrow--harvest-3381-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3381-bramble"
+kind = "harvestable"
+label = "Bramble"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0081",
+"grouping": "pinebrow-wild-0081",
+"groupingName": "Berries, Bramble and Lavender",
+"objectId": 3381,
+"pass": "harvest-coverage-1",
+"resource": "Bramble",
+"yaw": 194,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 144.9, 56.5)
+
+[node name="pinebrow--harvest-3382-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3382-lavender"
+kind = "harvestable"
+label = "Lavender"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0081",
+"grouping": "pinebrow-wild-0081",
+"groupingName": "Berries, Bramble and Lavender",
+"objectId": 3382,
+"pass": "harvest-coverage-1",
+"resource": "Lavender",
+"yaw": 237,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 144.85, 49.5)
+
+[node name="pinebrow--harvest-3383-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3383-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0082",
+"grouping": "pinebrow-wild-0082",
+"groupingName": "Mushroom, Sage and Sunleaf",
+"objectId": 3383,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 60,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 290.5, 127.05, -140.5)
+
+[node name="pinebrow--harvest-3384-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3384-mushroom"
+kind = "harvestable"
+label = "Mushroom"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0082",
+"grouping": "pinebrow-wild-0082",
+"groupingName": "Mushroom, Sage and Sunleaf",
+"objectId": 3384,
+"pass": "harvest-coverage-1",
+"resource": "Mushroom",
+"yaw": 4,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 294.5, 126.15, -138.5)
+
+[node name="pinebrow--harvest-3385-sage" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3385-sage"
+kind = "harvestable"
+label = "Sage"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0082",
+"grouping": "pinebrow-wild-0082",
+"groupingName": "Mushroom, Sage and Sunleaf",
+"objectId": 3385,
+"pass": "harvest-coverage-1",
+"resource": "Sage",
+"yaw": 339,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 289.5, 127.3, -133.5)
+
+[node name="pinebrow--harvest-3386-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
+gizmo_extents = 0.8
+script = ExtResource("s0_marker")
+record_id = "pinebrow--harvest-3386-sunleaf"
+kind = "harvestable"
+label = "Sunleaf"
+extras = {
+"authority": "server",
+"cluster": "pinebrow-wild-0082",
+"grouping": "pinebrow-wild-0082",
+"groupingName": "Mushroom, Sage and Sunleaf",
+"objectId": 3386,
+"pass": "harvest-coverage-1",
+"resource": "Sunleaf",
+"yaw": 359,
+"zone": "coverage"
+}
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 289.5, 127.35, -135.5)

@@ -2,8 +2,8 @@ extends SceneTree
 ## The harvest presentation (owner-approved 2026-10-14): a continent-v2
 ## package's harvestables entries present each node - its model variant, its
 ## exact yaw, a pick shaped to its footprint, its grouping, and promoted
-## scenery bound to a kit placement already standing in its chunk - and its
-## harvestGroupings are marked once each on the maps. A package from before
+## scenery bound to a kit placement already standing in its chunk. No
+## harvestable is marked on the maps (owner 2026-11-14). A package from before
 ## (no harvestablesSchema) presents every node as it always did, except that a
 ## node whose label's own model is retired stands a variant marked
 ## `standsAlone`, or the ring when the label has none; the underground's seams
@@ -64,8 +64,8 @@ func _check_node_presentation(adapter: CoordinateAdapter, catalog: Dictionary) -
 	_expect(plain.get_node("PickShape").shape is CylinderShape3D
 		and is_equal_approx((plain.get_node("PickShape").shape as CylinderShape3D).radius, 0.9),
 		"and the 0.9 m pick cylinder")
-	_expect(plain.get_node_or_null("MapMarker") != null and not plain.grouped,
-		"and its own map marker")
+	_expect(plain.get_node_or_null("MapMarker") == null and not plain.grouped,
+		"and no map marker: harvestables are not drawn on the maps (owner 2026-11-14)")
 
 	# A row segment: its yaw is exact, its footprint is its pick, and it stands
 	# at scale 1 so butted segments meet.
@@ -90,8 +90,8 @@ func _check_node_presentation(adapter: CoordinateAdapter, catalog: Dictionary) -
 		(thin.get_node("Model") as Node3D).rotation.y),
 		"and without a yaw its box turns with the seeded model")
 	var named_only := _object(adapter, catalog, label, 44, {"grouping": "unlisted"})
-	_expect(not named_only.grouped and named_only.get_node_or_null("MapMarker") != null,
-		"a grouping the package does not list is not marked in place of the node")
+	_expect(not named_only.grouped and named_only.get_node_or_null("MapMarker") == null,
+		"a grouping the package does not list does not group the node, which is unmarked too")
 
 	# Variants: the registry's list for the label, chosen by the package or by
 	# the object id, the same on every client. Live models only: a retired one
@@ -516,23 +516,16 @@ func _check_main(catalog: Dictionary) -> void:
 	_expect(sage != early and sage.grouped and is_equal_approx(
 		(sage.get_node("Model") as Node3D).rotation.y, deg_to_rad(90.0)),
 		"the map's binding builds it again with its package's presentation")
+	# Harvestables are found in the world, not read off the map (owner
+	# 2026-11-14): neither a grouping nor a single node is marked or named.
 	var marks: Array[Dictionary] = main._collect_minimap_marks()
-	var harvest := marks.filter(func(mark: Dictionary) -> bool: return mark.get("type") == &"harvest")
-	var grouping := harvest.filter(func(mark: Dictionary) -> bool: return mark.has("grouping"))
-	_expect(harvest.size() == 3 and grouping.size() == 1,
-		"the maps mark the grouping once and the two ungrouped nodes each (%d harvest marks)" % harvest.size())
-	if grouping.size() == 1:
-		var mark: Dictionary = grouping[0]
-		var centre: Vector3 = main.adapter.tile_center(13, 10)
-		_expect(str(mark.label) == "North Wall farm" and is_equal_approx(float(mark.radius),
-			main.HARVEST_GROUPING_RADIUS) and is_equal_approx((mark.position as Vector3).x, centre.x)
-			and is_equal_approx((mark.position as Vector3).z, centre.z),
-			"at its centre tile, named, a little larger than a node's dot")
+	var harvest := marks.filter(func(mark: Dictionary) -> bool:
+		return mark.get("type") == &"harvest" or mark.has("grouping"))
+	_expect(harvest.is_empty(), "the maps mark no harvestable (%d harvest marks)" % harvest.size())
 	var named := false
 	for point: Dictionary in main._collect_map_waypoints():
-		named = named or (str(point.get("label", "")) == "North Wall farm"
-			and str(point.get("glyph", "x")).is_empty())
-	_expect(named, "and the full map names it on hover")
+		named = named or str(point.get("label", "")) == "North Wall farm"
+	_expect(not named, "and the full map names no harvest grouping")
 
 	# Promoted scenery binds to its placement as its chunk arrives, lets go as
 	# it streams out and binds again when it is back.
@@ -545,18 +538,21 @@ func _check_main(catalog: Dictionary) -> void:
 	_kit_tree(cell, "Authored_landfall_kit_olive_tree_1_017", Vector3(40, 0, -40))
 	chunks.cells["08_10"] = {"root": cell}
 	chunks.cell_ready.emit("08_10", cell)
-	await process_frame
+	# The surface refresh binds on the physics frame after the chunk is ready
+	# (main._flush_surface_refresh). Headless, process frames are not locked to
+	# physics ticks, so a fixed count of process frames may pass before one.
+	await physics_frame
 	await process_frame
 	_expect(olive.placement_bound(), "and binds to the placed tree when the chunk is ready")
 	chunks.cell_retiring.emit("08_10", cell)
 	_expect(not olive.placement_bound(), "a retiring chunk takes the binding with it")
 	chunks.cell_ready.emit("08_10", cell)
-	await process_frame
+	await physics_frame
 	await process_frame
 	_expect(olive.placement_bound(), "and it binds again when the chunk is back")
 	chunks.cells.erase("08_10")
 
-	# A package from before: every node is its own mark again.
+	# A package from before: its nodes are unmarked too.
 	var old := WorldManifest.new()
 	old.data = {"asset": {"id": "landfall"}, "continentGeography": {"translation": [0.0, 0.0, 0.0]},
 		"harvestables": []}
@@ -567,12 +563,12 @@ func _check_main(catalog: Dictionary) -> void:
 	main._sync_map_objects()
 	await process_frame
 	marks = main._collect_minimap_marks()
-	harvest = marks.filter(func(mark: Dictionary) -> bool: return mark.get("type") == &"harvest")
-	var grouped_marks := harvest.filter(func(mark: Dictionary) -> bool: return mark.has("grouping"))
-	_expect(harvest.size() == 5 and grouped_marks.is_empty(),
-		"a package without the presentation marks every node itself")
-	_expect((main.map_object_nodes[100] as MapObject3D).get_node_or_null("MapMarker") != null,
-		"and keeps its per-node marker")
+	harvest = marks.filter(func(mark: Dictionary) -> bool:
+		return mark.get("type") == &"harvest" or mark.has("grouping"))
+	_expect(harvest.is_empty() and main.map_object_nodes.size() == 5,
+		"a package without the presentation marks none of its five nodes")
+	_expect((main.map_object_nodes[100] as MapObject3D).get_node_or_null("MapMarker") == null,
+		"and stands no per-node marker")
 
 	# The lantern island's authored pick shapes are the same presentation,
 	# read for their own map only.

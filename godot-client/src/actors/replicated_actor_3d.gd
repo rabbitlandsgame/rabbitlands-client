@@ -366,6 +366,8 @@ var _skin_colour := Color.WHITE
 var _equipment_config: Dictionary = {}
 var _equipment_visuals: Dictionary = {}
 var _equipment_nodes: Dictionary = {}
+var _equipment_glow := preload("res://src/actors/equipment_glow.gd").new()
+var _equipment_glow_descriptors: Dictionary = {}
 ## Whether the main-hand model uses the separate two-hand bow presentation.
 ## Resolving a fitted equipment variant can clone a nested model dictionary, so
 ## retain this one boolean until the weapon, registry or wearer rig changes.
@@ -862,8 +864,10 @@ func configure(dto: Dictionary, adapter: CoordinateAdapter,
 			_configuration_phases_us["rl_head"] = Time.get_ticks_usec() - phase_started
 	phase_started = Time.get_ticks_usec()
 	_configuration_profile_scope = "equipment" if profile_build else ""
+	_equipment_glow_descriptors = dto.get("equipment_glows", {}) as Dictionary
 	apply_equipment_visuals(dto.get("equipment_visuals", {}) as Dictionary,
 		dto.get("equipment_fallback_parts", []) as Array)
+	_equipment_glow.sync(_equipment_nodes, _equipment_glow_descriptors, _native_skeleton)
 	_configuration_profile_scope = ""
 	_configuration_phases_us["equipment"] = Time.get_ticks_usec() - phase_started
 	_lift_overhead(server_scale)
@@ -3566,8 +3570,10 @@ func apply_server_state(dto: Dictionary, adapter: CoordinateAdapter, teleport :=
 		_travel_yaw_active = true
 	_wake()
 	# Loadout changes in this packet must choose the right strike immediately.
+	_equipment_glow_descriptors = dto.get("equipment_glows", {}) as Dictionary
 	apply_equipment_visuals(dto.get("equipment_visuals", {}) as Dictionary,
 		dto.get("equipment_fallback_parts", []) as Array)
+	_equipment_glow.sync(_equipment_nodes, _equipment_glow_descriptors, _native_skeleton)
 	if dto.has("command") and resolver != null:
 		var action := _movement_aware_action(
 			_paced_travel_action(resolver.action_for_command(actor_command, _in_combat)), target_changed)
@@ -3631,8 +3637,10 @@ func _apply_server_state_native(dto: Dictionary, adapter: CoordinateAdapter, tel
 	var fresh_command: bool = motion.fresh_command
 	var command_sequence: int = motion.command_sequence
 	# Loadout changes in this packet must choose the right strike immediately.
+	_equipment_glow_descriptors = dto.get("equipment_glows", {}) as Dictionary
 	apply_equipment_visuals(dto.get("equipment_visuals", {}) as Dictionary,
 		dto.get("equipment_fallback_parts", []) as Array)
+	_equipment_glow.sync(_equipment_nodes, _equipment_glow_descriptors, _native_skeleton)
 	if dto.has("command") and resolver != null:
 		var service = RemotePresentationService.current()
 		var native_handled := false
@@ -4097,6 +4105,7 @@ func apply_equipment_visuals(visuals: Dictionary, fallback_parts: Array = []) ->
 	if is_instance_valid(_native_model):
 		OLDCRAFT_ACTOR_STYLE.apply_surface_finish(_native_model)
 	_configuration_profile_step("surface_finish", profile_started)
+	_equipment_glow.sync(_equipment_nodes, _equipment_glow_descriptors, _native_skeleton)
 
 ## The quiver carries authored cape-on and cape-off fits on the same skin.
 ## Changing one actor's morph weight leaves shared meshes and other wearers alone.

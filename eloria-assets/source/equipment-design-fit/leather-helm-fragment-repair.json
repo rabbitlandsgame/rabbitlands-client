@@ -1,0 +1,84 @@
+{
+  "item": "Leather Helm",
+  "visualKey": "3:134",
+  "cause": "Orphaned leather strap fragment below the Human helm; other strap surfaces were collapsed by the existing Human fit.",
+  "repair": "Remove only the listed zero-based triangle rows from the index accessor; preserve every vertex attribute, material, texture reference, node and socket. Race variants retain their intact strap geometry.",
+  "removedTriangleRows": [
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    249,
+    250,
+    251,
+    252,
+    407,
+    408,
+    409,
+    532,
+    533,
+    534,
+    553,
+    554,
+    555,
+    763,
+    764,
+    765,
+    766,
+    851,
+    898,
+    928,
+    929,
+    1027,
+    1115,
+    1116
+  ],
+  "files": [
+    {
+      "path": "godot-client/assets/actors/native/equipment/variants/human_male/militia_helmet_02.glb",
+      "sourceSHA256": "a01ebd698e1c313be6e9f7f811f41287de4994fe7ddbee15ee438b11c766d209",
+      "sha256": "39809c422f35029ca99ede5119a7570450bc5079a4b146fbf28247498b451acb",
+      "vertices": 1813,
+      "trianglesBefore": 1152,
+      "trianglesAfter": 1116,
+      "preservedVertexAttributes": [
+        "POSITION",
+        "NORMAL",
+        "TEXCOORD_0"
+      ],
+      "preservedOtherBinaryBytes": 58016,
+      "unreferencedFragmentVertices": 45
+    },
+    {
+      "path": "godot-client/assets/actors/native/equipment/variants/human_female/militia_helmet_02.glb",
+      "sourceSHA256": "1d40b09ddec6f6afcea85f901dfb0904d2f1c60ebe715afc1e9498f493592b09",
+      "sha256": "d098bad16b3a34da5ef839e35a663a3c11c27658995d4f8b3504bd06cf213ab9",
+      "vertices": 1813,
+      "trianglesBefore": 1152,
+      "trianglesAfter": 1116,
+      "preservedVertexAttributes": [
+        "POSITION",
+        "NORMAL",
+        "TEXCOORD_0"
+      ],
+      "preservedOtherBinaryBytes": 58016,
+      "unreferencedFragmentVertices": 45
+    }
+  ],
+  "validation": {
+    "geometry": "All retained triangle indices and all POSITION, NORMAL and TEXCOORD_0 records are byte-identical. No change to shared textures, materials, nodes, sockets, other player rigs or animation data.",
+    "packedAssetValidation": "Both repaired files pass pack_canonical_equipment.validate with 1813 stored vertices and 1116 triangles.",
+    "freshBlenderImport": "Both repaired variants imported and reviewed from front, three-quarter, side and rear.",
+    "godotVersion": "4.7.2.stable.official.ed1daf0bf",
+    "godotProbe": "Both variants load with the shared texture and attach to Head on their shipped Human bodies. Five head rotations per body stay finite; 2786 checks, zero failures.",
+    "scope": "Focused asset import and rigid attachment checks; no full client/server session or owner visual approval is claimed."
+  }
+}
