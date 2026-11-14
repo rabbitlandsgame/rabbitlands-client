@@ -1,5 +1,6 @@
 extends RefCounted
 ## Stable artwork for each saved effect. Full descriptions stay on hover.
+const Perks := preload("res://src/ui/perk_icons.gd")
 const PATHS := {
 	"Emberstrike": "res://assets/ui/item-effects/emberstrike.png",
 	"Frostbind": "res://assets/ui/item-effects/frostbind.png",
@@ -37,7 +38,7 @@ const PATHS := {
 static var _textures: Dictionary = {}
 
 static func texture(effect_name: String) -> Texture2D:
-	if not PATHS.has(effect_name): return null
+	if not PATHS.has(effect_name): return Perks.icon_for(effect_name)
 	if not _textures.has(effect_name):
 		_textures[effect_name] = load(PATHS[effect_name]) as Texture2D
 	return _textures[effect_name] as Texture2D
