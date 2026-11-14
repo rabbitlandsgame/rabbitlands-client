@@ -73,6 +73,10 @@ def test_plan_covers_every_exterior_map_with_its_inputs():
     assert PLAN["schema"] == H.SCHEMA and PLAN["pass"] == RULES["pass"]
     assert set(PLAN["maps"]) == set(H.EXTERIOR)
     assert PLAN["rulesSha256"] == H.sha(H.RULES.read_bytes())
+    if H.applied_maps(H.ROOT, PLAN):
+        # Applied and published: the grids now hold the pass's own bodies, so prove the applied state instead.
+        assert not H.verify_applied(H.ROOT, PLAN)
+        return
     stale = []
     for region, entry in PLAN["maps"].items():
         scene = H.read_scene(region, H.ROOT, RULES["pass"])

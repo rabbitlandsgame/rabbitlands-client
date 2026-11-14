@@ -383,7 +383,10 @@ spacing, so whole-map grid and spacing figures can stay outside EL's range where
     python harvest_coverage.py --server <server checkout> --check
     python harvest_coverage.py --server <server checkout> --apply-scenes
 
-`--maps a,b` makes a trial run on a subset and writes nothing. `--apply-scenes` appends the plan's markers to the
+`--maps a,b` makes a trial run on a subset and writes nothing. Once the plan is applied (and published) it can no
+longer be regenerated, as its own bodies are then in the served grids and tables: `--check` then proves the
+applied state instead (each scene carries exactly the plan's markers on the base it was made from, and the
+server's overlay table serves every plan node), and `--plan` refuses until the rules name a new `pass`. `--apply-scenes` appends the plan's markers to the
 scenes (`Gameplay/Harvestables`, extras `pass` = the rules' pass, `zone` "coverage") and raises each map's
 `gameplay.authoredMarkerCount`; it replaces its own earlier blocks and refuses a scene that changed since the plan.
 Applied markers close their tiles at the next collision export, so applying is a map publication: it needs the

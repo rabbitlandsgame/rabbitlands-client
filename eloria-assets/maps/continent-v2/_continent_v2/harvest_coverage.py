@@ -994,6 +994,47 @@ def apply_scenes(checkout: Path, plan, log=print):
     return writes
 
 
+def applied_maps(checkout: Path, plan) -> list:
+    """The maps whose scenes already carry this plan's pass."""
+    return [r for r in plan["maps"] if read_scene(r, checkout, plan["pass"])["generated"]]
+
+
+def verify_applied(checkout: Path, plan, server: Path | None = None) -> list:
+    """Once applied (and published) the plan cannot be regenerated - its own nodes are then part of the served
+    grids and tables - so --check proves the applied state instead: every map's scene carries exactly the plan's
+    markers on the base the plan was made from, and the server's overlay table serves exactly the plan's rows."""
+    problems = []
+    served = None
+    if server is not None:
+        rows = set()
+        for line in (server / "config/eloria/continent-v2/harvesting.txt").read_text(encoding="utf-8").splitlines():
+            parts = [p.strip() for p in line.split("|")]
+            if len(parts) == 6 and parts[0] == "node":
+                rows.add((parts[1], int(parts[2]), int(parts[3]), int(parts[4]), parts[5]))
+        served = rows
+    for region, entry in plan["maps"].items():
+        scene = read_scene(region, checkout, plan["pass"])
+        if sha(scene["base"].encode("utf-8")) != entry["inputs"]["sceneSha256"]:
+            problems.append(f"{region}: the scene outside this pass's markers changed since the plan was made")
+        frame = frames.load(region, checkout)
+        want = {n["objectId"]: (tuple(n["tile"]), n["resource"], n.get("bindPlacement"))
+                for s in entry["groupings"] for n in s["nodes"]}
+        have = {}
+        for m in scene["generated"]:
+            e = m["extras"]
+            have[e["objectId"]] = (frame.tile(m["position"][0], m["position"][2]), e["resource"],
+                                   e.get("bindPlacement"))
+        if have != want:
+            problems.append(f"{region}: {len(set(want) ^ set(have))} markers missing or extra, "
+                            f"{sum(1 for k in set(want) & set(have) if want[k] != have[k])} differ")
+        if served is not None:
+            missing = [oid for oid, (tile, res, _) in want.items()
+                       if (region, oid, tile[0], tile[1], res) not in served]
+            if missing:
+                problems.append(f"{region}: {len(missing)} plan nodes are not served (first {missing[:3]})")
+    return problems
+
+
 def _indent(raw: bytes) -> int:
     m = re.search(rb'\n( +)"', raw)
     return len(m.group(1)) if m else 2
@@ -1031,6 +1072,16 @@ def main(argv=None):
     if a.apply_scenes:
         apply_scenes(a.checkout, read_json(PLAN))
         return 0
+    if a.plan and applied_maps(a.checkout, read_json(PLAN)):
+        print("the plan is applied to the scenes; a new pass needs a new rules 'pass' name", file=sys.stderr)
+        return 1
+    if a.check and applied_maps(a.checkout, read_json(PLAN)):
+        problems = verify_applied(a.checkout, read_json(PLAN), a.server)
+        for problem in problems:
+            print(problem, file=sys.stderr)
+        print("harvest coverage plan is applied" + (" with problems" if problems else " and matches the scenes "
+                                                    "and the server table"))
+        return 1 if problems else 0
     maps = set(a.maps.split(",")) if a.maps else None
     plan = build(a.checkout, a.server, maps)
     data = encode(plan)

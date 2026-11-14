@@ -14,7 +14,7 @@ func _run() -> void:
 	var overlay: Control = MinimapOverlay.new() as Control
 	var own := {"type": &"self", "colour": Color.WHITE}
 	var npc := {"type": &"npc", "colour": Color.YELLOW}
-	var harvest := {"type": &"harvest", "colour": Color.GREEN}
+	var harvest := {"type": &"interactive", "colour": Color.GREEN}
 	var creature := {"type": &"creature", "colour": Color.RED}
 	# main.gd hands the player's mark over first, which drew it underneath.
 	var marks: Array[Dictionary] = [own, npc, harvest, creature]

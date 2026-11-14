@@ -1367,14 +1367,15 @@ const MINIMAP_MARKER_SCALE_LABELS: Array[String] = [
 ## Every kind of mark the minimap draws, in the order the marker-types menu
 ## lists them, with the label each is switched on and off by. The keys are also
 ## the settings-file keys, so a type added here is remembered without anything
-## else being taught about it.
+## else being taught about it. Harvest nodes are not marked (owner 2026-11-14),
+## so they have no switch; a saved "harvest" key is ignored.
 const MINIMAP_MARKER_TYPES: Array[StringName] = [&"self", &"player", &"npc",
-	&"creature", &"invasion", &"harvest", &"interactive", &"portal",
+	&"creature", &"invasion", &"interactive", &"portal",
 	&"entrance", &"exit", &"marker"]
 const MINIMAP_MARKER_TYPE_LABELS := {
 	&"self": "Your position", &"player": "Players", &"npc": "NPCs",
 	&"creature": "Creatures", &"invasion": "Invasion creatures",
-	&"harvest": "Harvest nodes", &"interactive": "Interactives",
+	&"interactive": "Interactives",
 	&"portal": "Portals", &"exit": "Map exits",
 	&"entrance": "Insides entrances",
 	&"marker": "Map markers",
@@ -13083,8 +13084,9 @@ func _collect_minimap_marks() -> Array[Dictionary]:
 			continue
 		if map_object.is_exit() and border_labels.has(map_object.destination().to_lower()):
 			continue
-		# A grouped harvest node is marked by its grouping, once.
-		if map_object.grouped:
+		# Harvestables are not marked on either map (owner 2026-11-14): as in
+		# Eternal Lands they are found in the world, not read off the map.
+		if map_object.is_harvestable():
 			continue
 		var mark: Dictionary = {"position": map_object.global_position,
 			"type": _minimap_object_type(map_object),
@@ -13107,7 +13109,6 @@ func _collect_minimap_marks() -> Array[Dictionary]:
 			"radius": MinimapMarkerOverlayScript.PIN_RADIUS})
 	marks.append_array(_without_fogged_marks(_current_entrance_marks()))
 	marks.append_array(_without_fogged_marks(_current_service_marks()))
-	marks.append_array(_without_fogged_marks(_harvest_grouping_marks()))
 	marks.append_array(_without_fogged_marks(quest_trail.map_marks()))
 	marks.append_array(_without_fogged_marks(_presence_marks()))
 	return marks
@@ -13229,13 +13230,13 @@ func _current_entrance_marks() -> Array[Dictionary]:
 		marks.append(mark)
 	return marks
 
-## Which switch a world object's mark answers to.
+## Which switch a world object's mark answers to. Harvestables have no mark.
 static func _minimap_object_type(map_object: MapObject3D) -> StringName:
 	if map_object.is_exit():
 		return &"exit"
 	if map_object.is_portal():
 		return &"portal"
-	return &"harvest" if map_object.is_harvestable() else &"interactive"
+	return &"interactive"
 
 ## Waygates and exits use glyphs on the full map, with names on hover.
 func _campaign_destination_marks() -> Array[Dictionary]:
@@ -13270,10 +13271,6 @@ func _collect_map_waypoints() -> Array[Dictionary]:
 			"label": map_object.label if map_object.is_storage() else map_object.destination()})
 	waypoints.append_array(_without_fogged_marks(_current_entrance_marks()))
 	waypoints.append_array(_without_fogged_marks(_current_service_marks()))
-	# A grouping has no glyph: its dot is a live mark, and this names it on hover.
-	for mark: Dictionary in _without_fogged_marks(_harvest_grouping_marks()):
-		waypoints.append({"position": mark.position, "glyph": "", "colour": mark.colour,
-			"label": mark.label})
 	return waypoints
 
 ## Which switch an actor's dot answers to. What colour that dot is drawn in is
@@ -19633,9 +19630,6 @@ const LANTERN_PICK_SHAPE_MAPS := ["cinderbank", "reedway"]
 ## harvest_presentation.py). A package naming another is read as one that
 ## states no presentation.
 const HARVEST_PRESENTATION_SCHEMA := "eloria-harvest-presentation-v1"
-## A harvest grouping's map mark, in pixels: a little larger than one node's
-## dot (the overlays' BASE_RADIUS, 4), as it stands for a whole field.
-const HARVEST_GROUPING_RADIUS := 6.0
 
 ## Reads how the map just bound presents its world objects
 ## (`map_presentation_of`), for this map only. Objects the server listed
@@ -19841,43 +19835,6 @@ func _on_chunk_cell_retiring(identity: String, imported: Node3D) -> void:
 		if map_object != null and not map_object.bound_node_name.is_empty() and str(
 				(map_object.presentation.get("bind", {}) as Dictionary).get("chunk", "")) == identity:
 			map_object.release_placement()
-
-## One map mark per harvest grouping the current map's package names, at its
-## centre (`centreTile`), in the harvest colour and a little larger than one
-## node's dot, named on hover. A grouping none of whose nodes the server
-## lists, or none visible, is not marked.
-func _harvest_grouping_marks() -> Array[Dictionary]:
-	var marks: Array[Dictionary] = []
-	if str(_map_presentation.get("map", "")) != EloriaProtocol.map_id_from_reference(
-			AppState.current_map):
-		return marks
-	var members := {}
-	for raw_object: Variant in map_object_nodes.values():
-		if not is_instance_valid(raw_object):
-			continue
-		var map_object := raw_object as MapObject3D
-		if map_object == null or not map_object.grouped or not map_object.is_visible_in_tree():
-			continue
-		if not members.has(map_object.grouping):
-			members[map_object.grouping] = []
-		(members[map_object.grouping] as Array).append(map_object.global_position)
-	for grouping: Dictionary in (_map_presentation.get("groupings", []) as Array):
-		var identity := str(grouping.get("id", ""))
-		if not members.has(identity):
-			continue
-		var mean := Vector3.ZERO
-		for at: Vector3 in members[identity]:
-			mean += at
-		mean /= float((members[identity] as Array).size())
-		var tile: Variant = grouping.get("centreTile")
-		var position := mean
-		if tile is Array and (tile as Array).size() == 2 and adapter != null:
-			position = adapter.tile_center(int(tile[0]), int(tile[1]))
-			position.y = mean.y
-		marks.append({"position": position, "type": &"harvest",
-			"colour": MapObject3D.HARVEST_COLOUR, "radius": HARVEST_GROUPING_RADIUS,
-			"label": str(grouping.get("name", identity)), "grouping": identity})
-	return marks
 
 func _fit_lantern_map_marker(node: Node3D, marker_name: String) -> void:
 	# The standard discs span 12–14 metres on the large regional maps.
