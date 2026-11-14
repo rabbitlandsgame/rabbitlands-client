@@ -2,6 +2,7 @@ extends RefCounted
 ## Presentation metadata only; prices, quantities and trade IDs remain server-owned.
 const ItemNames := preload("res://src/state/item_names.gd")
 static var _categories: Dictionary = {}
+static var _book_types: Dictionary = {}
 static var _loaded := false
 
 static func category(entry: Dictionary) -> String:
@@ -10,6 +11,10 @@ static func category(entry: Dictionary) -> String:
 		var data: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/items/categories.json"))
 		if data is Dictionary:
 			_categories = data.get("categories", {})
+			_book_types = data.get("bookTypes", {})
+	var subject := str(_book_types.get(str(entry.get("name", "")), ""))
+	if not subject.is_empty():
+		return ("Potion" if subject == "Potions" else subject) + " Books"
 	var value := str(entry.get("category", _categories.get(str(entry.get("name", "")), "Other"))).strip_edges()
 	return value if not value.is_empty() else "Other"
 

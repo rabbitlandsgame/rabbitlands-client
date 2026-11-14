@@ -1,4 +1,4 @@
-"""Export public item names and storage categories for the shop browser."""
+"""Export public item names, storage categories and book subjects for shops."""
 from __future__ import annotations
 
 import argparse
@@ -15,6 +15,7 @@ def main() -> None:
     args = parser.parse_args()
     sys.path.insert(0, str(args.server_root.resolve()))
     from eloria.items import load_items
+    from eloria.book_types import book_type
 
     source = args.server_root / "config/eloria/items.txt"
     items = load_items(source)
@@ -22,6 +23,7 @@ def main() -> None:
         "schemaVersion": 1,
         "itemsSha256": hashlib.sha256(source.read_bytes().replace(b"\r\n", b"\n")).hexdigest(),
         "categories": {name: item.category for name, item in sorted(items.items())},
+        "bookTypes": {name: book_type(name) for name in sorted(items) if book_type(name)},
     }
     args.output.write_text(json.dumps(document, indent=2) + "\n", encoding="utf-8")
 
