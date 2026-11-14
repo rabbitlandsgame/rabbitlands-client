@@ -11627,22 +11627,44 @@ func _build_descent_floors(manifest: WorldManifest) -> bool:
 ## build it, then show the floor as a loaded map is shown - its lights,
 ## cutaway, sections, fade, map pictures and fog - and settle whatever stands
 ## on it once its walk surface is in the physics space.
+##
+## Each step is named in the log before it runs (`descent_floors step=`): a
+## floor change once stopped a player's game between the cutaway and the fade
+## (2026-11-13, not reproduced), and the log could not say in which step.
 func _sync_descent_floors() -> void:
 	var manifest: WorldManifest = world_loader.manifest if world_loader != null else null
 	if manifest == null or manifest != _descent_bound_manifest:
 		return
-	if loaded_server_map != AppState.current_map or not _build_descent_floors(manifest):
+	if loaded_server_map != AppState.current_map:
 		return
+	var began := Time.get_ticks_usec()
+	if not _build_descent_floors(manifest):
+		return
+	_descent_floor_step("lights", began)
 	_bind_light_markers(manifest)
+	_descent_floor_step("cutaway", began)
 	_configure_interior_cutaway(manifest)
+	_descent_floor_step("sections", began)
 	_configure_secret_sections(manifest)
+	_descent_floor_step("fade_reset", began)
 	occluder_fade.reset()
+	_descent_floor_step("fade_index", began)
 	_configure_occluder_fade(manifest)
+	_descent_floor_step("full_map", began)
 	_configure_full_map(manifest)
+	_descent_floor_step("picture", began)
 	_install_map_picture(manifest)
+	_descent_floor_step("fog", began)
 	_descent_fog_key = ""
 	_sync_descent_fog()
 	_queue_descent_floor_snap()
+	_descent_floor_step("done", began)
+
+## One log line before each step of a descent floor change, with the
+## milliseconds since the floors began building.
+func _descent_floor_step(step: String, began_usec: int) -> void:
+	print("descent_floors step=%s map=%s section=%s at_ms=%.1f" % [step, AppState.current_map,
+		secret_sections.current_section(), (Time.get_ticks_usec() - began_usec) / 1000.0])
 
 
 ## Whatever stands on a floor just built is grounded on it again once its walk
