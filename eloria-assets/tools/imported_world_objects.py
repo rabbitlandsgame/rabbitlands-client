@@ -327,6 +327,48 @@ IMPORTED_HARVESTABLES += tuple(ImportedHarvestable(
     'eloria-assets/source/world_objects/isle-harvest-reuse.json', stands_alone=True)
     for label, kind, graded in ISLE_HARVEST_REUSE)
 
+# Stand-alone harvest nodes (owner request 2026-11-15): the harvest coverage pass serves Bramble, Hearthroot, Kelp,
+# Shell, Salt, Quartz and Clay nodes no package lays out, and each label's own model is retired while its variants
+# (hedge, row, strand, drift, pan, seam, bank) need a stated footprint, so those nodes drew a bare ring. Each new
+# Meshy model is one whole round unit that reads at any yaw, and it ANSWERS its label: an undescribed node stands it,
+# while a laid-out node keeps its patch variant. They are deliberately not added to HARVEST_VARIANTS: a longer list
+# would move the object-id pick of every laid-out node that states a footprint and no variant (about 260 hedges,
+# seams and drifts would turn into single clumps). Each is graded zone by zone to its label's accepted patch sibling
+# (named in its source); `graded_against` stays the label's retired procedural model, as for those siblings.
+# Provenance (concepts, Meshy tasks, measured files): eloria-assets/source/world_objects/harvest-standalones/;
+# tools/register_harvest_standalones.py writes their registry entries.
+HARVEST_STANDALONES = "eloria-assets/source/world_objects/harvest-standalones/provenance.json"
+IMPORTED_HARVESTABLES += (
+    ImportedHarvestable(
+        "bramble_bush_a", "Bramble", "flora", "common", True, "barrow_bramble",
+        "Meshy harvest-standalones (task 01a1df8d-1300-71a4-9140-b14e3602d0b6): a 1.4 m round bramble bush, "
+        "blackberry and red unripe clusters all round; 1496 tris; zones graded to bramble_hedge_a; 512 px; 2026-11-15"),
+    ImportedHarvestable(
+        "hearthroot_clump_a", "Hearthroot", "crop", "common", True, "hearthroot",
+        "Meshy harvest-standalones (task 01a1df91-d0c2-700c-8ea7-cec1b10bb32c): three ruddy hearthroots under leaf "
+        "rosettes on a 1.0 m round mound; 1496 tris; zones graded to hearthroot_row; 512 px; 2026-11-15"),
+    ImportedHarvestable(
+        "kelp_heap_a", "Kelp", "aquatic", "common", True, "tidewrack_kelp",
+        "Meshy harvest-standalones (task 01a1df91-d0b7-7252-a6f0-3a0274c0b9b3): a 1.4 m round heap of washed-up "
+        "kelp with bladders and holdfasts on damp sand; 995 tris; zones graded to kelp_strand_a; 512 px; 2026-11-15"),
+    ImportedHarvestable(
+        "shell_heap_a", "Shell", "mineral", "common", True, "shorebank_shell",
+        "Meshy harvest-standalones (task 01a1df91-dab9-7594-8b92-a816563c0e9d): a 1.1 m round heap of scallops, "
+        "cockles, conchs and mussels on sand; 996 tris; zones graded to shell_drift_b; 512 px; 2026-11-15"),
+    ImportedHarvestable(
+        "salt_mound_a", "Salt", "mineral", "common", True, "glacier_salt",
+        "Meshy harvest-standalones (task 01a1df91-d5fd-7151-a733-aaa9f81d257d): a 1.2 m heaped salt mound on a "
+        "cracked crust in a mud lip; 996 tris; zones graded to salt_pan_b; 512 px; 2026-11-15"),
+    ImportedHarvestable(
+        "quartz_boulder_a", "Quartz", "crystal", "common", True, "pale_quartz",
+        "Meshy harvest-standalones (task 01a1df91-d6f1-77f3-88ed-42ffe5bdd158): a 1.3 m granite boulder split on a "
+        "milky quartz crystal cluster; 2496 tris; zones graded to quartz_seam_a; 512 px; 2026-11-15"),
+    ImportedHarvestable(
+        "clay_mound_a", "Clay", "mineral", "common", True, "deep_lake_clay",
+        "Meshy harvest-standalones (task 01a1df91-d0c1-720e-99a3-41f59005c89e): a 1.3 m banded clay mound with a "
+        "blue-grey dug scoop and clay lumps; 2495 tris; zones graded to clay_bank_a; 512 px; 2026-11-15"),
+)
+
 HARVEST_VARIANTS: dict[str, tuple[str, ...]] = {
     "Cotton": ("cotton_row",),
     "Hearthroot": ("hearthroot_row",),

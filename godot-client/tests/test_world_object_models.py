@@ -19,6 +19,7 @@ a message rather than failing when it is not checked out beside the client.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -310,6 +311,53 @@ class WorldObjectModelTest(unittest.TestCase):
                 self.assertEqual(imported.measure_glb(path), asset["model"])
                 self.assertRegex(asset["meshy"]["taskId"], r"^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$")
                 self.assertRegex(asset["concept"]["sha256"], r"^[0-9a-f]{64}$")
+
+    def test_harvest_standalones_match_their_provenance(self) -> None:
+        """The stand-alone harvest nodes (owner request 2026-11-15) answer their labels.
+
+        Bramble, Hearthroot, Kelp, Shell, Salt, Quartz and Clay had only a retired model and patch variants that need
+        a package footprint, so the coverage pass's undescribed nodes drew a bare ring. Each label now resolves to one
+        whole round Meshy model, registered as tools/register_harvest_standalones.py writes it, and held to its
+        provenance record (the Meshy task, the concept, the measured file and its external image). None is a patch
+        variant, so the object-id pick of every laid-out node is unchanged.
+        """
+        record = json.loads((CLIENT.parent / imported.HARVEST_STANDALONES).read_text(encoding="utf-8"))
+        models, resources = self.harvestables["models"], self.harvestables["resources"]
+        rows = {row.model_id: row for row in imported.IMPORTED_HARVESTABLES}
+        labels = {asset["label"] for asset in record["assets"]}
+        self.assertEqual(labels, {"Bramble", "Hearthroot", "Kelp", "Shell", "Salt", "Quartz", "Clay"})
+        for asset in record["assets"]:
+            with self.subTest(model=asset["id"]):
+                model_id, label = asset["id"], asset["label"]
+                entry = models[model_id]
+                path = CLIENT / entry["scene"].removeprefix("res://")
+                self.assertEqual(entry["scene"], asset["scene"])
+                self.assertEqual(imported.measure_glb(path), asset["model"])
+                for key, value in asset["model"].items():
+                    self.assertEqual(entry[key], value, key)
+                self.assertTrue(entry.get("imported") and rows[model_id].answers_label)
+                self.assertEqual(resources[label], model_id)
+                self.assertEqual(entry["replaces"], asset["replacesRetired"])
+                self.assertTrue(models[asset["replacesRetired"]].get("retired"))
+                self.assertNotIn(model_id, imported.variant_ids())
+                self.assertNotIn(model_id, self.harvestables.get("variants", {}).get(label, []))
+                self.assertNotIn("standsAlone", entry)
+                self.assertLessEqual(entry["triangles"], 2600)
+                width, height, depth = asset["sizeMetres"]
+                self.assertLessEqual(max(width, depth), 1.5, "one whole node on its tile, not a patch")
+                self.assertTrue(0.3 <= height <= 1.1)
+                document, _binary = imported._read_glb(path)
+                images = document["images"]
+                self.assertEqual(len(images), 1)
+                image = (path.parent / images[0]["uri"]).resolve()
+                self.assertEqual(hashlib.sha256(image.read_bytes()).hexdigest(), asset["image"]["sha256"])
+                self.assertEqual(image.name, asset["image"]["sha256"] + ".jpg")
+                self.assertRegex(asset["meshy"]["taskId"], r"^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$")
+                self.assertIn(asset["meshy"]["taskId"], rows[model_id].source)
+                self.assertRegex(asset["concept"]["sha256"], r"^[0-9a-f]{64}$")
+        script = CLIENT.parent / "tools/register_harvest_standalones.py"
+        result = subprocess.run([sys.executable, str(script), "--check"], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_a_swapped_label_keeps_the_model_it_replaced(self) -> None:
         """The procedural model a swap displaces stays registered and on disk.

@@ -1,0 +1,514 @@
+{
+  "schema": "rabbitlands-world-object-provenance-v1",
+  "purpose": "Stand-alone harvest-node models for the labels whose own model was retired and whose patch variants need a package footprint (Bramble, Hearthroot, Kelp, Shell, Salt, Quartz, Clay): each answers its label, so a node no package lays out stands it instead of a bare ring; laid-out nodes keep their hedge, row, strand, drift, pan, seam or bank variant",
+  "request": "owner, 2026-11-15: generate models for the harvestables drawn only as a ring (Codex images, paid Meshy)",
+  "stage": ".local/asset-authoring/workspace/work-output/harvest-standalones-20261115 (spec, concepts and gate verdicts, Meshy inputs and ledgers, raw models, kits, grades, review renders; ignored, private)",
+  "route": "A volume/direct Smart Topology, as the 2026-10-14 harvest patch nodes (patches2)",
+  "credits": {
+    "spent": 105
+  },
+  "assets": [
+    {
+      "id": "bramble_bush_a",
+      "label": "Bramble",
+      "scene": "res://assets/world/harvestables/bramble_bush_a.glb",
+      "answersLabel": true,
+      "replacesRetired": "barrow_bramble",
+      "sibling": "bramble_hedge_a",
+      "concept": {
+        "slug": "bramble_bush_a",
+        "attempt": 1,
+        "verdict": "pass",
+        "notes": "one round dome bush, canes rooted in a low earth mound, berry clusters bold, flat grey background",
+        "generator": "gpt-image-bridge (Codex image_generation)",
+        "sha256": "c34cd5363cc9d63eb829c6b1669c286b7bc547f06605ae8fab62c0c4fbca86ca",
+        "references": [
+          "sage_clump_a_attempt2.png",
+          "bramble_hedge_a_attempt1.png"
+        ]
+      },
+      "meshy": {
+        "generator": "Meshy Image to 3D",
+        "taskId": "01a1df8d-1300-71a4-9140-b14e3602d0b6",
+        "consumedCredits": 15,
+        "settings": {
+          "model_type": "smart-topology",
+          "topology": "triangle",
+          "target_polycount": 2200,
+          "texture_resolution": "2k",
+          "enable_pbr": false,
+          "pose": "none"
+        },
+        "rawModelSha256": "066818470324039b92d8e1f527cd037f7c3e05fda39b83481df905b582093167",
+        "rawTriangles": 2018
+      },
+      "preparation": {
+        "normalize": "plan-aligned (long side on +X, Meshy front +Z kept), uniform scale to 1.40 m across, plan centre on the origin, lowest point 0.05 m below it; collapse decimate to 1500 triangles",
+        "kitSha256": "24b31720a5734d92af8b70dab3275b0dee3e8e725743bd460e7bc05a8d228116",
+        "grade": {
+          "method": "per-zone linear multiplier to the sibling's zone albedo",
+          "sibling": "bramble_hedge_a",
+          "siblingWholeAlbedo": 0.0539,
+          "wholeAlbedo": 0.0519,
+          "linearMultipliers": {
+            "berries": 1.4931,
+            "bed": 1.245,
+            "leaves": 0.4158,
+            "_unclaimed": 0.6513
+          },
+          "texturePx": 512,
+          "gradedSha256": "4021e51cb1fcb4691924388cd934402c114389bce5f03cdaa497be4eaf84b27f"
+        },
+        "storage": "optimize_static_glb_storage.py (16-bit indices), then the scenery image externalizer's transform (image to eloria-assets/world/_shared/images)"
+      },
+      "sizeMetres": [
+        1.4,
+        0.976,
+        1.309
+      ],
+      "image": {
+        "uri": "../../../../eloria-assets/world/_shared/images/752e3f7b78959fc04c0d2edd4a4e1e78b956c88b7f1d0104d63851f502cdfff5.jpg",
+        "sha256": "752e3f7b78959fc04c0d2edd4a4e1e78b956c88b7f1d0104d63851f502cdfff5",
+        "bytes": 85481
+      },
+      "model": {
+        "vertices": 2531,
+        "triangles": 1496,
+        "alphaTested": false,
+        "height": 0.926,
+        "sha256": "0da363d73ff9b3fb44180f224ba72da09be6e292a194d3066af1ff8afe4bf281"
+      },
+      "review": "accept: round dome of leaves with blackberry and red unripe clusters on every side; 17 small leaf islands float within 1-3 cm of the bush (kept, unseen at the game camera)"
+    },
+    {
+      "id": "hearthroot_clump_a",
+      "label": "Hearthroot",
+      "scene": "res://assets/world/harvestables/hearthroot_clump_a.glb",
+      "answersLabel": true,
+      "replacesRetired": "hearthroot",
+      "sibling": "hearthroot_row",
+      "concept": {
+        "slug": "hearthroot_clump_a",
+        "attempt": 1,
+        "verdict": "pass",
+        "notes": "three ruddy roots on one round mound, leaf rosettes thick, one pulled root lying on the mound",
+        "generator": "gpt-image-bridge (Codex image_generation)",
+        "sha256": "2427ffb69ad70d4f16e058180f869315ec13718d16a8b3bd3c209e386fe29fb1",
+        "references": [
+          "sage_clump_a_attempt2.png",
+          "hearthroot_row_attempt1.png"
+        ]
+      },
+      "meshy": {
+        "generator": "Meshy Image to 3D",
+        "taskId": "01a1df91-d0c2-700c-8ea7-cec1b10bb32c",
+        "consumedCredits": 15,
+        "settings": {
+          "model_type": "smart-topology",
+          "topology": "triangle",
+          "target_polycount": 2200,
+          "texture_resolution": "2k",
+          "enable_pbr": false,
+          "pose": "none"
+        },
+        "rawModelSha256": "f5b0abc852f85d55572c68fb3873c1360cde900dc6a22f3e3916969e66ac7d3e",
+        "rawTriangles": 1501
+      },
+      "preparation": {
+        "normalize": "plan-aligned (long side on +X, Meshy front +Z kept), uniform scale to 1.00 m across, plan centre on the origin, lowest point 0.05 m below it; collapse decimate to 1500 triangles",
+        "kitSha256": "83480a6a7ea441c1a0832440357c9c31ff1f03769de4c8e048ee5144e8beacec",
+        "grade": {
+          "method": "per-zone linear multiplier to the sibling's zone albedo",
+          "sibling": "hearthroot_row",
+          "siblingWholeAlbedo": 0.0835,
+          "wholeAlbedo": 0.096,
+          "linearMultipliers": {
+            "root": 0.9468,
+            "stems": 0.9175,
+            "soil": 1.6238,
+            "leaves": 0.7495,
+            "_unclaimed": 1.5127
+          },
+          "texturePx": 512,
+          "gradedSha256": "7f74ed03948e578bae4307ec92ed8e780232d70bfed6fdfca51030a25de490ea"
+        },
+        "storage": "optimize_static_glb_storage.py (16-bit indices), then the scenery image externalizer's transform (image to eloria-assets/world/_shared/images)"
+      },
+      "sizeMetres": [
+        1.0,
+        0.57,
+        0.94
+      ],
+      "image": {
+        "uri": "../../../../eloria-assets/world/_shared/images/f2691220331e977eeb0c1ee3d3421f2c0c92d95d8851aa9a79954946b9f3bf63.jpg",
+        "sha256": "f2691220331e977eeb0c1ee3d3421f2c0c92d95d8851aa9a79954946b9f3bf63",
+        "bytes": 82113
+      },
+      "model": {
+        "vertices": 1854,
+        "triangles": 1496,
+        "alphaTested": false,
+        "height": 0.52,
+        "sha256": "ab7a69c1de2b2e0865f2c7db81f733de0f049a795c58a12986ef5d91c1b3b87b"
+      },
+      "review": "accept: three ruddy roots under leaf rosettes on one round mound, a pulled root beside them"
+    },
+    {
+      "id": "kelp_heap_a",
+      "label": "Kelp",
+      "scene": "res://assets/world/harvestables/kelp_heap_a.glb",
+      "answersLabel": true,
+      "replacesRetired": "tidewrack_kelp",
+      "sibling": "kelp_strand_a",
+      "concept": {
+        "slug": "kelp_heap_a",
+        "attempt": 1,
+        "verdict": "pass",
+        "notes": "round domed tangle of broad fronds, bladders and three holdfasts on a damp sand patch",
+        "generator": "gpt-image-bridge (Codex image_generation)",
+        "sha256": "5bb26ae524980e92c655c9d375d80a5dc1082e1508029f3cc84b47ad329cd591",
+        "references": [
+          "sage_clump_a_attempt2.png",
+          "kelp_strand_a_attempt1.png"
+        ]
+      },
+      "meshy": {
+        "generator": "Meshy Image to 3D",
+        "taskId": "01a1df91-d0b7-7252-a6f0-3a0274c0b9b3",
+        "consumedCredits": 15,
+        "settings": {
+          "model_type": "smart-topology",
+          "topology": "triangle",
+          "target_polycount": 1600,
+          "texture_resolution": "2k",
+          "enable_pbr": false,
+          "pose": "none"
+        },
+        "rawModelSha256": "19b9d48b35b1aef6901f5c1ab31fc0d796dd4039545e73529d3341da5f11851d",
+        "rawTriangles": 1253
+      },
+      "preparation": {
+        "normalize": "plan-aligned (long side on +X, Meshy front +Z kept), uniform scale to 1.40 m across, plan centre on the origin, lowest point 0.05 m below it; collapse decimate to 1000 triangles",
+        "kitSha256": "430f0a5a232f43963f857b28089094a834e33ad83b85a7a518f0c6809349a11e",
+        "grade": {
+          "method": "per-zone linear multiplier to the sibling's zone albedo",
+          "sibling": "kelp_strand_a",
+          "siblingWholeAlbedo": 0.0491,
+          "wholeAlbedo": 0.0492,
+          "linearMultipliers": {
+            "bladders": 0.3493,
+            "bed": 0.424,
+            "blades": 0.3249,
+            "_unclaimed": 0.6842
+          },
+          "texturePx": 512,
+          "gradedSha256": "5b0b8310f7be81e1d20d9f86b9504fc7c852926fc75bb10e910bbcf3ebe897ad"
+        },
+        "storage": "optimize_static_glb_storage.py (16-bit indices), then the scenery image externalizer's transform (image to eloria-assets/world/_shared/images)"
+      },
+      "sizeMetres": [
+        1.4,
+        0.499,
+        1.4
+      ],
+      "image": {
+        "uri": "../../../../eloria-assets/world/_shared/images/0635c325198b5d426863676e2d30374404a766acc6959f544070a3eaae0a1496.jpg",
+        "sha256": "0635c325198b5d426863676e2d30374404a766acc6959f544070a3eaae0a1496",
+        "bytes": 61601
+      },
+      "model": {
+        "vertices": 1827,
+        "triangles": 995,
+        "alphaTested": false,
+        "height": 0.449,
+        "sha256": "18997e14fb3fab588f14b78241c5ca72d597c0ffff76fca550af3170e6f80364"
+      },
+      "review": "accept: domed tangle of fronds with bladders and three holdfasts on damp sand"
+    },
+    {
+      "id": "shell_heap_a",
+      "label": "Shell",
+      "scene": "res://assets/world/harvestables/shell_heap_a.glb",
+      "answersLabel": true,
+      "replacesRetired": "shorebank_shell",
+      "sibling": "shell_drift_b",
+      "concept": {
+        "slug": "shell_heap_a",
+        "attempt": 1,
+        "verdict": "pass",
+        "notes": "round low heap: scallops, cockles, mussels, two conchs on sand; peach to be toned by the grade",
+        "generator": "gpt-image-bridge (Codex image_generation)",
+        "sha256": "f67a491c3d257df03a8aaacaf23c8ddec9f59d465fad3338819b07fc05f4ff05",
+        "references": [
+          "sage_clump_a_attempt2.png",
+          "shell_drift_b_attempt1.png"
+        ]
+      },
+      "meshy": {
+        "generator": "Meshy Image to 3D",
+        "taskId": "01a1df91-dab9-7594-8b92-a816563c0e9d",
+        "consumedCredits": 15,
+        "settings": {
+          "model_type": "smart-topology",
+          "topology": "triangle",
+          "target_polycount": 1600,
+          "texture_resolution": "2k",
+          "enable_pbr": false,
+          "pose": "none"
+        },
+        "rawModelSha256": "e9339369e484391fa0b0265eb9c41f2d3cfe09aba09c9713d4f6e62e01e06f91",
+        "rawTriangles": 1568
+      },
+      "preparation": {
+        "normalize": "plan-aligned (long side on +X, Meshy front +Z kept), uniform scale to 1.10 m across, plan centre on the origin, lowest point 0.06 m below it; collapse decimate to 1000 triangles",
+        "kitSha256": "9f0e292e487199ce41e2df341ff82885ce8174267a1f1a532f5d5c40714f0de2",
+        "grade": {
+          "method": "per-zone linear multiplier to the sibling's zone albedo",
+          "sibling": "shell_drift_b",
+          "siblingWholeAlbedo": 0.3365,
+          "wholeAlbedo": 0.3112,
+          "linearMultipliers": {
+            "bed": 0.9373,
+            "rest": 1.8,
+            "shells": 0.9108,
+            "_unclaimed": 1.0
+          },
+          "texturePx": 512,
+          "gradedSha256": "cc647773860c0c6cfdaca554cde2ecdec34ad3b0bbd26bd10e974d7a5f22fc5a"
+        },
+        "storage": "optimize_static_glb_storage.py (16-bit indices), then the scenery image externalizer's transform (image to eloria-assets/world/_shared/images)"
+      },
+      "sizeMetres": [
+        1.1,
+        0.401,
+        1.053
+      ],
+      "image": {
+        "uri": "../../../../eloria-assets/world/_shared/images/841a12763744e2a93b630a035e16bf8bb2da4ea9d5fbd6facc329585e1128c0a.jpg",
+        "sha256": "841a12763744e2a93b630a035e16bf8bb2da4ea9d5fbd6facc329585e1128c0a",
+        "bytes": 90745
+      },
+      "model": {
+        "vertices": 1613,
+        "triangles": 996,
+        "alphaTested": false,
+        "height": 0.341,
+        "sha256": "4be1c1136b1ffec507fc9073c7cf32cb0d0f546c11baa80e433b8be38f3a903f"
+      },
+      "review": "accept: low heap of scallops, cockles, conchs and dark mussels on sand; toned to the drift's shells"
+    },
+    {
+      "id": "salt_mound_a",
+      "label": "Salt",
+      "scene": "res://assets/world/harvestables/salt_mound_a.glb",
+      "answersLabel": true,
+      "replacesRetired": "glacier_salt",
+      "sibling": "salt_pan_b",
+      "concept": {
+        "slug": "salt_mound_a",
+        "attempt": 1,
+        "verdict": "pass",
+        "notes": "heaped cone of chunky salt on cracked crust with a mud lip and pebbles",
+        "generator": "gpt-image-bridge (Codex image_generation)",
+        "sha256": "dc9fd17afbe688e6ea97df297d94a0e04dfbf62041787354568e12b28f168922",
+        "references": [
+          "flint_boulder_a_attempt1.png",
+          "salt_pan_b_attempt1.png"
+        ]
+      },
+      "meshy": {
+        "generator": "Meshy Image to 3D",
+        "taskId": "01a1df91-d5fd-7151-a733-aaa9f81d257d",
+        "consumedCredits": 15,
+        "settings": {
+          "model_type": "smart-topology",
+          "topology": "triangle",
+          "target_polycount": 1600,
+          "texture_resolution": "2k",
+          "enable_pbr": false,
+          "pose": "none"
+        },
+        "rawModelSha256": "92ab5bc2839a8a62f93cafbccfcb537740ff04b0eeb7fb2182d586369f1bda05",
+        "rawTriangles": 1700
+      },
+      "preparation": {
+        "normalize": "plan-aligned (long side on +X, Meshy front +Z kept), uniform scale to 1.20 m across, plan centre on the origin, lowest point 0.06 m below it; collapse decimate to 1000 triangles",
+        "kitSha256": "45d4f558d4139635d20c34c47b7e88b07e9c8b60179b3fa7928cef007ec4cd03",
+        "grade": {
+          "method": "per-zone linear multiplier to the sibling's zone albedo",
+          "sibling": "salt_pan_b",
+          "siblingWholeAlbedo": 0.5343,
+          "wholeAlbedo": 0.4389,
+          "linearMultipliers": {
+            "crust": 1.2708,
+            "bed": 0.7208,
+            "_unclaimed": 1.0843
+          },
+          "texturePx": 512,
+          "gradedSha256": "bdbd6a6b36c551f5548085b0d5a7f291754b71b67343cdd8b67abc123ee78f25"
+        },
+        "storage": "optimize_static_glb_storage.py (16-bit indices), then the scenery image externalizer's transform (image to eloria-assets/world/_shared/images)"
+      },
+      "sizeMetres": [
+        1.2,
+        0.526,
+        1.185
+      ],
+      "image": {
+        "uri": "../../../../eloria-assets/world/_shared/images/0c6d4e489d86a102581bffc26f14fb1bd53a877985f02c5204001d3d47319971.jpg",
+        "sha256": "0c6d4e489d86a102581bffc26f14fb1bd53a877985f02c5204001d3d47319971",
+        "bytes": 78713
+      },
+      "model": {
+        "vertices": 1433,
+        "triangles": 996,
+        "alphaTested": false,
+        "height": 0.466,
+        "sha256": "4bd83c79c5352980ba2a5de96fff4d83a67c1405d9844d83b6905e25beb011bd"
+      },
+      "review": "accept: heaped salt on a cracked crust inside a mud lip; crust as white as the pan's"
+    },
+    {
+      "id": "quartz_boulder_a",
+      "label": "Quartz",
+      "scene": "res://assets/world/harvestables/quartz_boulder_a.glb",
+      "answersLabel": true,
+      "replacesRetired": "pale_quartz",
+      "sibling": "quartz_seam_a",
+      "concept": {
+        "slug": "quartz_boulder_a",
+        "attempt": 1,
+        "verdict": "pass",
+        "notes": "rounded granite boulder, bold milky-lilac crystal cluster on the front and two side clusters, chips at foot",
+        "generator": "gpt-image-bridge (Codex image_generation)",
+        "sha256": "48aadf93af2ea396913c3ad087da67a8f912fa9f25c2b33217e5f9fc7cb1b60a",
+        "references": [
+          "flint_boulder_a_attempt1.png",
+          "quartz_seam_a_attempt1.png"
+        ]
+      },
+      "meshy": {
+        "generator": "Meshy Image to 3D",
+        "taskId": "01a1df91-d6f1-77f3-88ed-42ffe5bdd158",
+        "consumedCredits": 15,
+        "settings": {
+          "model_type": "smart-topology",
+          "topology": "triangle",
+          "target_polycount": 3500,
+          "texture_resolution": "2k",
+          "enable_pbr": false,
+          "pose": "none"
+        },
+        "rawModelSha256": "828714686db6ec5e776c966e8be5ac2c7c9b5bb3405f6bc2e506ea1e315228ca",
+        "rawTriangles": 3468
+      },
+      "preparation": {
+        "normalize": "plan-aligned (long side on +X, Meshy front +Z kept), uniform scale to 1.30 m across, plan centre on the origin, lowest point 0.06 m below it; collapse decimate to 2500 triangles",
+        "kitSha256": "b6809babc926c86ff559448100d0b65700a688e23519464aa119418b03ed49cd",
+        "grade": {
+          "method": "per-zone linear multiplier to the sibling's zone albedo",
+          "sibling": "quartz_seam_a",
+          "siblingWholeAlbedo": 0.248,
+          "wholeAlbedo": 0.2938,
+          "linearMultipliers": {
+            "crystals": 1.0841,
+            "rock": 1.0565,
+            "_unclaimed": 0.8284
+          },
+          "texturePx": 512,
+          "gradedSha256": "ddab31ad9920433a19740aa43882b73f59553703cf7ce1408c520c7066d1aad2"
+        },
+        "storage": "optimize_static_glb_storage.py (16-bit indices), then the scenery image externalizer's transform (image to eloria-assets/world/_shared/images)"
+      },
+      "sizeMetres": [
+        1.3,
+        0.748,
+        1.171
+      ],
+      "image": {
+        "uri": "../../../../eloria-assets/world/_shared/images/9ded9c914bfe5e820094fe33b60b1ddb201325868a9391bf1cd81a61da638307.jpg",
+        "sha256": "9ded9c914bfe5e820094fe33b60b1ddb201325868a9391bf1cd81a61da638307",
+        "bytes": 78359
+      },
+      "model": {
+        "vertices": 2789,
+        "triangles": 2496,
+        "alphaTested": false,
+        "height": 0.688,
+        "sha256": "ad47a03a461590290f8b8c73edbe252100f5ca74f103e6c4c0ca612e2ca7fa34"
+      },
+      "review": "accept: granite boulder with a milky crystal cluster on its front/top and two side clusters; its back is plain rock"
+    },
+    {
+      "id": "clay_mound_a",
+      "label": "Clay",
+      "scene": "res://assets/world/harvestables/clay_mound_a.glb",
+      "answersLabel": true,
+      "replacesRetired": "deep_lake_clay",
+      "sibling": "clay_bank_a",
+      "concept": {
+        "slug": "clay_mound_a",
+        "attempt": 2,
+        "verdict": "pass",
+        "notes": "attempt 1 soft_fail (grey faceted stone blocks in a cave cut read as a quarry); attempt 2: shallow smooth blue-grey scoop, soft clay lumps, banded red-brown mound",
+        "generator": "gpt-image-bridge (Codex image_generation)",
+        "sha256": "b25ed95f5a9d376582dac879bbbc9ff902ec7048c6f0ece81d1a5f5af569e1a5",
+        "references": [
+          "flint_boulder_a_attempt1.png",
+          "clay_bank_a_attempt1.png"
+        ]
+      },
+      "meshy": {
+        "generator": "Meshy Image to 3D",
+        "taskId": "01a1df91-d0c1-720e-99a3-41f59005c89e",
+        "consumedCredits": 15,
+        "settings": {
+          "model_type": "smart-topology",
+          "topology": "triangle",
+          "target_polycount": 3500,
+          "texture_resolution": "2k",
+          "enable_pbr": false,
+          "pose": "none"
+        },
+        "rawModelSha256": "140e95617cc6e0398547eb063c719c823105658c4e8fecddedd545fc376f695d",
+        "rawTriangles": 3626
+      },
+      "preparation": {
+        "normalize": "plan-aligned (long side on +X, Meshy front +Z kept), uniform scale to 1.30 m across, plan centre on the origin, lowest point 0.06 m below it; collapse decimate to 2500 triangles",
+        "kitSha256": "520920c8ece3a27e85aa2416b76e93bc4ee42837064fecd2b2d1ad499ae6268e",
+        "grade": {
+          "method": "per-zone linear multiplier to the sibling's zone albedo",
+          "sibling": "clay_bank_a",
+          "siblingWholeAlbedo": 0.0649,
+          "wholeAlbedo": 0.0654,
+          "linearMultipliers": {
+            "turf": 0.2963,
+            "clay": 0.4885,
+            "_unclaimed": 1.0
+          },
+          "texturePx": 512,
+          "gradedSha256": "efd609d624c75413846920876cfc2e401ca709d85c6c85655c8f457076a5acc3"
+        },
+        "storage": "optimize_static_glb_storage.py (16-bit indices), then the scenery image externalizer's transform (image to eloria-assets/world/_shared/images)"
+      },
+      "sizeMetres": [
+        1.3,
+        0.608,
+        1.266
+      ],
+      "image": {
+        "uri": "../../../../eloria-assets/world/_shared/images/48873d8e688881b7c64ad618c29d689f410bf334af1e75768b1c8a21920e6f51.jpg",
+        "sha256": "48873d8e688881b7c64ad618c29d689f410bf334af1e75768b1c8a21920e6f51",
+        "bytes": 43569
+      },
+      "model": {
+        "vertices": 2857,
+        "triangles": 2495,
+        "alphaTested": false,
+        "height": 0.548,
+        "sha256": "48a820b9c2481aea8e7ac0101a417ab030947bfef0a319932345415b54ea6b7c"
+      },
+      "review": "accept: banded red-brown mound with a smooth blue-grey scoop and clay lumps (concept attempt 2)"
+    }
+  ]
+}
