@@ -1,5 +1,15 @@
 class_name SpellCatalog
 extends RefCounted
+const GROUP_ORDER: Array[String] = ["Healing", "Defense", "Offense", "Support", "Utility"]
+const EFFECT_GROUPS := {
+	"heal":"Healing", "regeneration":"Healing", "dispel":"Healing", "mana_restore":"Healing",
+	"heat_bolt":"Offense", "cold_bolt":"Offense", "radiation_bolt":"Offense",
+	"disrupt":"Offense", "cripple":"Offense", "expose_magic":"Offense",
+	"expose_heat":"Offense", "expose_cold":"Offense", "expose_radiation":"Offense",
+	"poison":"Offense", "harm":"Offense", "life_drain":"Offense", "mana_drain":"Offense",
+	"shield":"Defense", "magic_protection":"Defense", "magic_immunity":"Defense",
+	"heat_protection":"Defense", "cold_protection":"Defense", "radiation_protection":"Defense", "element_ward":"Defense",
+}
 
 var default_quick_slots: Array[int] = []
 var _spells: Dictionary = {}
@@ -98,6 +108,11 @@ func buff_icon(buff_id: int) -> Texture2D:
 ## stated per effect rather than per spell, because several spells share one.
 func effect_for(spell_id: int) -> String:
 	return str(spell(spell_id).get("effect", ""))
+
+func group_of(spell_id: int) -> String:
+	var effect := effect_for(spell_id)
+	if effect in ["blink", "transmute", "recall"]: return "Utility"
+	return str(EFFECT_GROUPS.get(effect, "Support"))
 
 ## Every catalogued spell id, in catalog order.
 func spell_ids() -> Array[int]:

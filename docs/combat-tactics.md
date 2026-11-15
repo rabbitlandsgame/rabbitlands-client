@@ -15,8 +15,14 @@ fall through to lower rules. **Save** saves the current preset.
 **More → Restore preset** restores that preset's default rules.
 
 The subject picker switches between **My combat actions** and companions.
-The three preset buttons switch between saved plans. Save or Refresh a draft
-before switching subjects or presets.
+The three preset buttons switch between saved plans. Switching with unsaved
+edits offers **Save & switch**, **Discard & switch**, or **Cancel**.
+
+The **Action** menu groups **Standard actions**, **Spells** and **Techniques**.
+Spell submenus use the same Healing, Defense, Offense and Support categories
+as the spell book; techniques separate Attacks from Support & stances.
+Actions are alphabetical within each category. Type while a menu is open
+to jump to a matching action. The current action has a checkmark.
 
 Your own rules can use weapon attacks, combat spells and combat techniques.
 Normal knowledge, equipment, range, ether, reagent, action-point and cooldown

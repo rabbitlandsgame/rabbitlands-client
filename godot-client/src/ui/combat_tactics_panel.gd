@@ -3,11 +3,14 @@ extends VBoxContainer
 const UI := preload("res://src/ui/action_book_ui.gd")
 const Style := preload("res://src/ui/combat_tactics_style.gd")
 const RuleRow := preload("res://src/ui/combat_tactics_rule_row.gd")
+const ActionPicker := preload("res://src/ui/combat_tactics_action_picker.gd")
+const Protocol := preload("res://src/network/combat_tactics_protocol.gd")
 const TARGETS := ["self", "ally", "leader_target", "current_target", "party_attacker", "lowest_enemy", "nearest_enemy"]
-const TARGET_LABELS := ["Self", "Ally: lowest health", "Leader's opponent", "Current opponent", "Party's opponents", "Enemy: lowest health", "Enemy: nearest"]
+const TARGET_LABELS := ["Self", "Ally: lowest health", "Leader's opponent", "Current opponent", "Opponent attacking party", "Engaged foe: lowest health", "Nearest engaged foe"]
 const CONDITIONS := ["always", "health_below", "ether_below", "has_status", "missing_status"]
 const CONDITION_LABELS := ["Always", "Health below %", "Ether below %", "Has status", "Missing status"]
 const STATUSES := ["poison", "shield", "regeneration", "magic_protection", "magic_immunity", "haste", "accuracy"]
+const STATUS_LABELS := ["Poisoned", "Shield", "Regeneration", "Magic ward", "Magic immunity", "Haste", "Accuracy"]
 const REFRESH := 0
 const RESTORE := 1
 var _state: Dictionary = {}
@@ -36,7 +39,7 @@ var _help: Label
 var _hint: Label
 var _target_picker: OptionButton
 var _condition_picker: OptionButton
-var _action_picker: OptionButton
+var _action_picker: MenuButton
 var _value_picker: SpinBox
 var _status_picker: OptionButton
 var _power_picker: SpinBox
@@ -45,6 +48,9 @@ var _down: Button
 var _delete: Button
 var _request: Callable
 var _short := false
+var _switch_dialog: ConfirmationDialog
+var _switch_target: Dictionary = {}
+var _after_ack_switch: Dictionary = {}
 
 func _ready() -> void:
 	name = "CombatTactics"
@@ -167,6 +173,15 @@ func _ready() -> void:
 		_saving = true
 		_send({"op":"save", "rules":_rules.duplicate(true)}))
 	footer.add_child(_save)
+	_switch_dialog = ConfirmationDialog.new()
+	_switch_dialog.title = "Unsaved tactics"
+	_switch_dialog.ok_button_text = "Save & switch"
+	_switch_dialog.add_button("Discard & switch", false, "discard")
+	_switch_dialog.confirmed.connect(_save_and_switch)
+	_switch_dialog.custom_action.connect(func(action: StringName) -> void:
+		if action == &"discard": _discard_and_switch())
+	_switch_dialog.canceled.connect(func() -> void: _switch_target.clear())
+	add_child(_switch_dialog)
 	AppState.state_changed.connect(_on_state)
 	AppState.combat_tactics_received.connect(set_state)
 	_render()
@@ -176,23 +191,47 @@ func refresh() -> void:
 	_send({"op":"get"})
 
 func _send(data: Dictionary) -> void:
-	if not _state.is_empty():
-		data.merge({"subject":_state.subject, "revision":_state.plan.revision, "context":_state.context}, false)
-	_request.call(data)
+	_request.call(Protocol.request_payload(data, _state))
 
 func _choose_subject(index: int) -> void:
+	var request := {"op":"get", "subject":str(_subjects.get_item_metadata(index))}
 	if _dirty:
-		_notice("Save or Refresh before switching.")
+		_offer_switch(request, _subjects.get_item_text(index))
 		_select(_subjects, str(_state.get("subject", "self")))
 		return
-	_send({"op":"get", "subject":str(_subjects.get_item_metadata(index))})
+	_send(request)
 
 func _choose_profile(index: int) -> void:
 	_sync_profiles()
+	if _state.is_empty() or index == int(_state.plan.selected): return
 	if _dirty:
-		_notice("Save or Refresh before switching.")
+		_offer_switch({"op":"select", "selected":index}, str(_state.plan.profiles[index].name))
 		return
+	_notice("Loading %s…" % _state.plan.profiles[index].name)
 	_send({"op":"select", "selected":index})
+
+func _offer_switch(request: Dictionary, destination: String) -> void:
+	_switch_target = request.duplicate(true)
+	_switch_dialog.dialog_text = "Save changes to %s before switching to %s?" % [_state.plan.profiles[int(_state.plan.selected)].name, destination]
+	_switch_dialog.get_ok_button().disabled = _conflicted
+	_switch_dialog.popup_centered(Vector2i(460, 140))
+
+func _save_and_switch() -> void:
+	if _switch_target.is_empty() or _conflicted: return
+	_after_ack_switch = _switch_target.duplicate(true)
+	_switch_target.clear()
+	_saving = true
+	_send({"op":"save", "rules":_rules.duplicate(true)})
+
+func _discard_and_switch() -> void:
+	if _switch_target.is_empty(): return
+	_after_ack_switch = _switch_target.duplicate(true)
+	_switch_target.clear()
+	_switch_dialog.hide()
+	_saving = true
+	# Refresh first, so a conflict can still be discarded using the latest
+	# authoritative revision. Keep the draft if that request fails.
+	_send({"op":"get"})
 
 func _sync_profiles() -> void:
 	for index: int in _profile_buttons.size():
@@ -213,6 +252,7 @@ func _more_action(id: int) -> void:
 func _on_state(path: StringName) -> void:
 	if path == &"connection" and AppState.connection_state == "disconnected":
 		_state.clear(); _rules.clear(); _dirty = false; _saving = false; _conflicted = false
+		_switch_target.clear(); _after_ack_switch.clear(); _switch_dialog.hide()
 		_selected = -1
 		_subjects.clear()
 		_render()
@@ -238,6 +278,7 @@ func set_state(value: Dictionary) -> void:
 		return
 	if _saving and not str(value.notice).is_empty():
 		_saving = false
+		_after_ack_switch.clear()
 		_notice(str(value.notice))
 		return
 	var preserve_selection := same and int(value.plan.selected) == int(_state.plan.selected)
@@ -256,6 +297,10 @@ func set_state(value: Dictionary) -> void:
 	for index: int in _profile_buttons.size(): _profile_buttons[index].text = str(value.plan.profiles[index].name)
 	_notice(str(value.notice))
 	_render()
+	if not _after_ack_switch.is_empty():
+		var request := _after_ack_switch.duplicate(true)
+		_after_ack_switch.clear()
+		_send(request)
 
 func _sync_runtime(value: Dictionary) -> void:
 	var own: bool = value.subject == "self"
@@ -381,14 +426,11 @@ func _render_editor() -> void:
 		_value_picker.value_changed.connect(func(amount: float) -> void: entry.value = int(amount); _changed(); _render_rows())
 		_field("Value", _value_picker)
 	elif entry.condition in ["has_status", "missing_status"]:
-		var labels: Array = []
-		for status: String in STATUSES: labels.append(status.replace("_", " ").capitalize())
-		_status_picker = _picker(STATUSES, labels, str(entry.status), func(key: String) -> void: entry.status = key; _changed(); _render_rows())
+		_status_picker = _picker(STATUSES, STATUS_LABELS, str(entry.status), func(key: String) -> void: entry.status = key; _changed(); _render_rows())
 		_field("Status", _status_picker)
-	var ids: Array = []; var labels: Array = []
-	for action: Dictionary in _state.actions:
-		ids.append(str(action.id)); labels.append(str(action.name))
-	_action_picker = _picker(ids, labels, str(entry.action), func(key: String) -> void:
+	_action_picker = ActionPicker.new()
+	_action_picker.configure(_state.actions, str(entry.action))
+	_action_picker.action_selected.connect(func(key: String) -> void:
 		entry.action = key
 		for action: Dictionary in _state.actions:
 			if action.id != key: continue

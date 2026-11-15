@@ -8,25 +8,7 @@ const TacticsStyle := preload("res://src/ui/combat_tactics_style.gd")
 const PANEL_SIZE := Vector2(716, 636)
 const TACTICS_SIZE := Vector2(908, 480)
 const RESERVED_RIGHT_RAIL := 96.0
-const GROUP_ORDER: Array[String] = ["Healing", "Defense", "Offense", "Support", "Utility"]
-const EFFECT_GROUPS := {
-	"heal": "Health", "regeneration": "Health", "dispel": "Health",
-	"mana_restore": "Health",
-	"heat_bolt": "Attack", "cold_bolt": "Attack", "radiation_bolt": "Attack",
-	"disrupt": "Attack", "cripple": "Attack", "expose_magic": "Attack",
-	"expose_heat": "Attack", "expose_cold": "Attack", "expose_radiation": "Attack",
-	"poison": "Attack",
-	"harm": "Attack",
-	"life_drain": "Attack",
-	"mana_drain": "Attack",
-	"shield": "Defense",
-	"magic_protection": "Defense",
-	"magic_immunity": "Defense",
-	"heat_protection": "Defense",
-	"cold_protection": "Defense",
-	"radiation_protection": "Defense",
-	"element_ward": "Defense",
-}
+const GROUP_ORDER: Array[String] = SpellCatalog.GROUP_ORDER
 
 ## EL dims what you cannot cast rather than hiding it, so it can still be
 ## clicked and read.
@@ -254,10 +236,7 @@ func edit_prepared_slot(index: int) -> void:
 		_refresh_details()
 
 func group_of(spell_id: int) -> String:
-	if catalog == null: return "Utility"
-	var effect := catalog.effect_for(spell_id)
-	if effect in ["blink", "transmute", "recall"]: return "Utility"
-	return str({"Health": "Healing", "Defense": "Defense", "Attack": "Offense"}.get(EFFECT_GROUPS.get(effect, "General"), "Support"))
+	return catalog.group_of(spell_id) if catalog != null else "Utility"
 
 ## Library placement never changes the spell's real scope or targeting.
 func column_for(spell_id: int) -> String:

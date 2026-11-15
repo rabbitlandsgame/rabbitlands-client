@@ -49,15 +49,32 @@ func run() -> void:
 	panel._request = func(data: Dictionary) -> void: requests.append(data.duplicate(true))
 	panel.set_state(state)
 	check(panel._rules == state.plan.profiles[0].rules, "editor uses authoritative ordered rules")
-	var first_action: OptionButton = panel._action_picker
-	check(first_action.get_item_metadata(first_action.selected) == panel._rules[0].action, "the displayed action matches the saved spell identity")
+	check(panel._action_picker.selected_id == panel._rules[0].action, "the displayed action matches the saved spell identity")
+	panel._profile_buttons[1].pressed.emit()
+	check(requests[-1].revision is int and requests[-1].selected == 1, "preset requests serialize an integer revision after loading JSON")
+	var response: Dictionary = state.duplicate(true)
+	for index: int in [1, 2, 0]:
+		panel._profile_buttons[index].pressed.emit()
+		response.plan.selected = index
+		response.plan.revision += 1
+		app._on_packet(EloriaProtocol.ServerMessage.ELORIA_MAGIC_STATE, JSON.stringify(response).to_utf8_buffer())
+		check(panel._profile_buttons[index].button_pressed and panel._rules == JSON.parse_string(JSON.stringify(response.plan.profiles[index].rules)), "preset acknowledgment updates both the selected button and displayed rules")
+	panel.set_state(state)
+	var menu_actions: Array[String] = []
+	for menu: PopupMenu in panel._action_picker.menus.values():
+		for index: int in menu.item_count:
+			var key: Variant = menu.get_item_metadata(index)
+			if key is String: menu_actions.append(key)
+	for action: Dictionary in state.actions:
+		check(menu_actions.count(str(action.id)) == 1, "every authoritative action appears in exactly one submenu")
+	check(panel._action_picker.menus.has("Standard actions") and panel._action_picker.menus.has("Spells/Healing"), "standard actions and categorized spells have separate menus")
+	requests.clear()
 	panel._condition_picker.select(3)
 	panel._condition_picker.item_selected.emit(3)
 	panel._status_picker.select(1)
 	panel._status_picker.item_selected.emit(1)
 	check(panel._rules[0].condition == "has_status" and panel._rules[0].status == "shield", "the shared condition and status controls edit the selected rule")
-	panel._action_picker.select(0)
-	panel._action_picker.item_selected.emit(0)
+	panel._action_picker.action_selected.emit("attack")
 	check(panel._rules[0].action == "attack" and panel._rules[0].target == "current_target", "changing an action normalizes its target")
 	check(panel._editor.find_children("*", "SpinBox", true, false).is_empty(), "weapon attacks do not expose spell Power")
 	check(requests.is_empty(), "shared form controls only edit the local draft")
@@ -73,7 +90,9 @@ func run() -> void:
 	panel.set_state(live)
 	check(panel._rules == draft, "live status preserves unsaved edits")
 	panel._save.pressed.emit()
-	check(requests[-1].op == "save" and requests[-1].revision == state.plan.revision and requests[-1].rules == draft, "Save includes complete rules and the authoritative revision")
+	check(requests[-1].op == "save" and requests[-1].revision is int and JSON.parse_string(JSON.stringify(requests[-1].rules)) == JSON.parse_string(JSON.stringify(draft)), "Save includes complete rules and an integer authoritative revision")
+	for entry: Dictionary in requests[-1].rules:
+		check(entry.value is int and entry.power is int, "Save serializes every rule's threshold and power as integers")
 	live.plan.profiles[0].rules = draft
 	live.plan.revision += 1
 	panel.set_state(live)
@@ -95,6 +114,9 @@ func run() -> void:
 	var dirty_copy: Array = panel._rules.duplicate(true)
 	panel._choose_profile(1)
 	check(panel._rules == dirty_copy and not panel._profile_buttons[1].button_pressed, "preset switching preserves a dirty draft and authoritative selection")
+	check(panel._switch_dialog.visible, "switching a dirty preset offers Save, Discard or Cancel")
+	panel._switch_dialog.canceled.emit()
+	panel._switch_dialog.hide()
 	var conflict: Dictionary = live.duplicate(true)
 	conflict.plan.revision += 1
 	panel.set_state(conflict)
@@ -141,6 +163,30 @@ func run() -> void:
 	check(root.get_visible_rect().encloses(book.panel.get_global_rect()), "Tactics fits at 150 percent UI scale")
 	check(book.panel.get_global_rect().encloses(book.tactics_panel._delete.get_global_rect()), "shared editor actions fit at 150 percent UI scale")
 	root.content_scale_factor = 1.0
+	var view = book.tactics_panel
+	view._rows.get_child(0).enabled_toggle.button_pressed = not view._rules[0].enabled
+	view._choose_profile(1)
+	view._switch_dialog.hide()
+	view._save_and_switch()
+	check(requests[-1].op == "save", "Save and switch saves the current draft first")
+	var saved_response: Dictionary = live.duplicate(true)
+	saved_response.plan.profiles[0].rules = requests[-1].rules.duplicate(true)
+	saved_response.plan.revision += 1
+	view.set_state(saved_response)
+	check(requests[-1].op == "select" and requests[-1].selected == 1 and requests[-1].revision == saved_response.plan.revision, "Save acknowledgment switches using the new revision")
+	saved_response.plan.selected = 1
+	saved_response.plan.revision += 1
+	view.set_state(saved_response)
+	check(view._state.plan.selected == 1 and not view._dirty, "Save and switch shows the acknowledged destination preset")
+	view._changed()
+	view._choose_profile(0)
+	view._discard_and_switch()
+	check(requests[-1].op == "get", "Discard and switch refreshes the authoritative revision first")
+	view.set_state(saved_response)
+	check(requests[-1].op == "select" and requests[-1].selected == 0, "Discard acknowledgment proceeds to the chosen preset")
+	saved_response.plan.selected = 0
+	saved_response.plan.revision += 1
+	view.set_state(saved_response)
 	var companion: Dictionary = live.duplicate(true)
 	companion.subject = "2"; companion.role = "warden"; companion.context = "companion-fixture"; companion.active = true
 	companion.subjects.append({"id":"2", "name":"Warden 2"})

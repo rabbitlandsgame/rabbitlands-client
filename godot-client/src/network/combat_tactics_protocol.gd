@@ -1,5 +1,19 @@
 extends RefCounted
 ## Reject malformed editor state before constructing controls from it.
+static func request_payload(data: Dictionary, state: Dictionary) -> Dictionary:
+	var result := data.duplicate(true)
+	if not state.is_empty():
+		result.merge({"subject":state.subject, "revision":int(state.plan.revision), "context":state.context}, false)
+	# Godot parses JSON numbers as floats. Python's tactics contract requires
+	# actual integer JSON tokens for revisions, presets and rule values.
+	if result.has("revision"): result.revision = int(result.revision)
+	if result.has("selected"): result.selected = int(result.selected)
+	if result.has("rules"):
+		for entry: Dictionary in result.rules:
+			entry.value = int(entry.value)
+			entry.power = int(entry.power)
+	return result
+
 static func valid(state: Dictionary) -> bool:
 	if state.get("version") != 1 or not state.get("subject") is String or not state.get("role") is String:
 		return false
