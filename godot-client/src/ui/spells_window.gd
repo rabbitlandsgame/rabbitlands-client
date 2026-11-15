@@ -4,7 +4,9 @@ const UI := preload("res://src/ui/action_book_ui.gd")
 const TextColors := preload("res://src/ui/text_colors.gd")
 const TechniquesPanel := preload("res://src/ui/techniques_panel.gd")
 const TacticsPanel := preload("res://src/ui/combat_tactics_panel.gd")
+const TacticsStyle := preload("res://src/ui/combat_tactics_style.gd")
 const PANEL_SIZE := Vector2(716, 636)
+const TACTICS_SIZE := Vector2(908, 480)
 const RESERVED_RIGHT_RAIL := 96.0
 const GROUP_ORDER: Array[String] = ["Healing", "Defense", "Offense", "Support", "Utility"]
 const EFFECT_GROUPS := {
@@ -80,6 +82,7 @@ var _groups: Dictionary = {}
 var _buttons: Dictionary = {}
 var _reasons: Dictionary = {}
 var _tab_buttons: Dictionary = {}
+var _tabs: HBoxContainer
 var _filter_buttons: Dictionary = {}
 var _favorites: Array = []
 var _filter := "learned"
@@ -187,11 +190,47 @@ func set_tab(tab: String) -> void:
 	_magic_page.visible = current_tab == "magic"
 	techniques_panel.visible = current_tab == "techniques"
 	tactics_panel.visible = current_tab == "tactics"
+	_style_tactics_chrome(current_tab == "tactics")
 	for key in _tab_buttons:
 		(_tab_buttons[key] as Button).set_pressed_no_signal(key == current_tab)
 	if current_tab == "techniques": techniques_panel.sync()
 	elif current_tab == "tactics": tactics_panel.refresh()
 	else: sync()
+	_fit_panel.call_deferred()
+
+func _style_tactics_chrome(active: bool) -> void:
+	var title := panel.get_node("SpellsBody/SpellsHeader/SpellsTitle") as Label
+	var header := title.get_parent()
+	var column := panel.get_node("SpellsBody")
+	var destination: Node = header if active else column
+	if _tabs.get_parent() != destination:
+		_tabs.reparent(destination)
+		destination.move_child(_tabs, 1)
+	_tabs.size_flags_horizontal = Control.SIZE_SHRINK_END if active else Control.SIZE_FILL
+	title.text = "Tactics" if active else "Spells & Techniques"
+	title.add_theme_font_size_override("font_size", 23 if active else 18)
+	if active:
+		title.add_theme_color_override("font_color", TacticsStyle.INK)
+		title.add_theme_font_override("font", TacticsStyle.heading_font())
+	else:
+		TextColors.bind(title, "book_text")
+		title.remove_theme_font_override("font")
+	panel.add_theme_stylebox_override("panel", TacticsStyle.box(TacticsStyle.SURFACE, TacticsStyle.BRASS, 10) if active else UI.box(UI.SURFACE, Color("987542"), 10))
+	# Keep navigation to Magic and Techniques, but let the Tactics page own its
+	# palette. All overrides are restored when another page is selected.
+	for button: Button in _tab_buttons.values():
+		button.add_theme_font_size_override("font_size", 12 if active else 13)
+		button.custom_minimum_size.y = 24 if active else 28
+		if active:
+			button.add_theme_color_override("font_color", TacticsStyle.MUTED)
+			button.add_theme_color_override("font_pressed_color", TacticsStyle.INK)
+			button.add_theme_stylebox_override("normal", TacticsStyle.box(Color("1c1b15"), TacticsStyle.EDGE, 4))
+			button.add_theme_stylebox_override("pressed", TacticsStyle.box(TacticsStyle.MOSS, TacticsStyle.BRASS, 4))
+		else:
+			TextColors.bind(button, "book_text")
+			TextColors.bind(button, "ui_pressed", "font_pressed_color")
+			button.add_theme_stylebox_override("normal", UI.box(Color("17120d"), Color("80623b")))
+			button.add_theme_stylebox_override("pressed", UI.box(Color("45331f"), UI.GOLD))
 
 func edit_prepared_slot(index: int) -> void:
 	if loadout == null or index < 0 or index >= loadout.slots.size(): return
@@ -610,6 +649,7 @@ func _build() -> void:
 	header.add_child(close_button)
 	_dragger = WindowDrag.attach(panel, header)
 	var tabs := HBoxContainer.new()
+	_tabs = tabs
 	column.add_child(tabs)
 	for key: String in ["magic", "techniques", "tactics"]:
 		var button := UI.button(key.capitalize())
@@ -824,6 +864,7 @@ func _fit_panel() -> void:
 	(headings.get_node("EffectLabel") as Label).custom_minimum_size.x = 110 if _compact else EFFECT_COLUMN_WIDTH
 	techniques_panel.set_compact(_compact)
 	techniques_panel.set_short(short)
-	panel.custom_minimum_size = PANEL_SIZE.min(available)
+	tactics_panel.set_short(short)
+	panel.custom_minimum_size = (TACTICS_SIZE if current_tab == "tactics" else PANEL_SIZE).min(available)
 	panel.size = panel.custom_minimum_size
 	_dragger.clamp_into_view()

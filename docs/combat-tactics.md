@@ -5,11 +5,18 @@ companion in your current gauntlet. Only the current party leader can edit a
 companion. Follow, Hold and Assist orders continue to work.
 
 Each subject has three saved presets: Balanced, Defensive and Offensive. A
-preset holds up to six rules. Enable or disable a row, choose its target,
-condition and action, then use the arrows to change its priority. Rules are
+preset holds up to six rules. Select a summary on the left to edit its target,
+condition, action and spell power in the shared editor on the right. Enable
+or disable rules with their checkboxes. Drag a row or use **Up** and **Down**
+to change its priority. **Delete** removes the selected rule. Rules are
 read from top to bottom. The first usable action wins; unavailable actions
-fall through to lower rules. **Save tactics** saves the current preset.
-**Refresh** discards unsaved edits and loads the server's current plan.
+fall through to lower rules. **Save** saves the current preset.
+**More → Refresh** discards unsaved edits and loads the server's current plan.
+**More → Restore preset** restores that preset's default rules.
+
+The subject picker switches between **My combat actions** and companions.
+The three preset buttons switch between saved plans. Save or Refresh a draft
+before switching subjects or presets.
 
 Your own rules can use weapon attacks, combat spells and combat techniques.
 Normal knowledge, equipment, range, ether, reagent, action-point and cooldown
@@ -18,10 +25,11 @@ conditions check the selected actor. Ally selectors choose the lowest health
 percentage first; enemy selectors choose among opponents already engaged by
 you or your party. They do not search for unrelated creatures to pull.
 
-Your rules begin paused. **Start / Resume my tactics** explicitly enables
+Your rules begin paused. **Start** explicitly enables
 them for this session and map. They act only while you or your party have an
-eligible opponent. Manual movement, attacks, casting, techniques, item use,
-fleeing and Escape pause your tactics. Changing maps, defeat or disconnect
+eligible opponent. **Pause** stops them. Manual movement, attacks, casting,
+techniques, item use, fleeing and Escape pause your tactics. Changing maps,
+defeat or disconnect
 also stops execution. Saved presets remain available, but execution never
 starts automatically after reconnecting. Your ordinary combat round is
 shared with automated actions, so tactics do not grant extra weapon attacks.

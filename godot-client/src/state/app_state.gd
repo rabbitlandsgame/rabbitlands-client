@@ -188,6 +188,7 @@ var active_spells: Dictionary = {}
 var last_spell_result: Dictionary = {}
 var death: Dictionary = {}
 signal magic_state_received(data: Dictionary)
+signal combat_tactics_received(data: Dictionary)
 var pending_spell_target := ""
 var stats: Dictionary = {}
 var game_minute := 0
@@ -2048,6 +2049,7 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			elif magic.get("kind") == "combat_tactics":
 				combat_tactics = magic.duplicate(true)
 				player_tactics_active = bool(magic.get("player_active", false))
+				combat_tactics_received.emit(combat_tactics)
 				state_changed.emit(&"combat_tactics")
 			elif magic.get("kind") == "combat_tactics_status":
 				player_tactics_active = bool(magic.get("player_active", false))
