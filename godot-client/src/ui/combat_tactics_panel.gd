@@ -9,8 +9,9 @@ const TARGETS := ["self", "ally", "leader_target", "current_target", "party_atta
 const TARGET_LABELS := ["Self", "Ally: lowest health", "Leader's opponent", "Current opponent", "Opponent attacking party", "Engaged foe: lowest health", "Nearest engaged foe", "Ally's opponent"]
 const COMBAT_STATES := ["any", "in_combat", "out_of_combat"]
 const COMBAT_LABELS := ["Any state", "In combat", "Out of combat"]
-const CONDITIONS := ["always", "health_below", "ether_below", "has_status", "missing_status", "missing_buff", "missing_debuff"]
-const CONDITION_LABELS := ["Always", "Health below %", "Ether below %", "Has status", "Missing status", "Missing buff", "Missing debuff"]
+const CONDITIONS := ["always", "health_below", "ether_below", "has_status", "missing_status", "missing_buff", "missing_debuff", "action_points_below", "action_points_at_least", "opponents_below", "opponents_at_least", "focused_on_ally"]
+const CONDITION_LABELS := ["Always", "Health below %", "Ether below %", "Has status", "Missing status", "Missing buff", "Missing debuff", "Action points below", "Action points at least", "Opponents fewer than", "Opponents at least", "Enemy focused on ally"]
+const OPPONENT_CONDITIONS := ["opponents_below", "opponents_at_least"]
 const STATUSES := ["poison", "shield", "regeneration", "magic_protection", "magic_immunity", "haste", "accuracy"]
 const STATUS_LABELS := ["Poisoned", "Shield", "Regeneration", "Magic ward", "Magic immunity", "Haste", "Accuracy"]
 const REFRESH := 0
@@ -447,18 +448,29 @@ func _render_editor() -> void:
 		entry.target = key; _changed(); _render_rows())
 	_field("Target", _target_picker)
 	_condition_picker = _picker(CONDITIONS, CONDITION_LABELS, str(entry.condition), func(key: String) -> void:
+		if key in OPPONENT_CONDITIONS and entry.condition not in OPPONENT_CONDITIONS: entry.value = 2
 		entry.condition = key
+		entry.value = clampi(int(entry.value), 1, Protocol.value_maximum(key))
+		if key == "focused_on_ally" and entry.target in ["self", "ally"]: entry.target = "current_target"
 		var choices := _status_choices(key)
 		if key in ["missing_buff", "missing_debuff"]:
 			var ids: Array = choices.map(func(status: Dictionary): return str(status.id))
 			if entry.status not in ids and not ids.is_empty(): entry.status = ids[0]
 		_changed(); _render_rows(); _render_editor())
 	_field("Condition", _condition_picker)
-	if entry.condition in ["health_below", "ether_below"]:
-		_value_picker = _spin(int(entry.value), 100)
-		_value_picker.suffix = "%"
+	if entry.condition == "focused_on_ally":
+		_condition_picker.tooltip_text = "Checks whether the selected enemy is attacking another party member. Stops matching when its focus turns to this character."
+	if entry.condition in ["health_below", "ether_below"] or entry.condition in Protocol.AP_CONDITIONS or entry.condition in OPPONENT_CONDITIONS:
+		_value_picker = _spin(int(entry.value), Protocol.value_maximum(str(entry.condition)))
+		var point_check: bool = entry.condition in Protocol.AP_CONDITIONS
+		var opponent_check: bool = entry.condition in OPPONENT_CONDITIONS
+		_value_picker.suffix = " AP" if point_check else "" if opponent_check else "%"
+		if point_check:
+			_condition_picker.tooltip_text = "Checks this character's current action points, regardless of the action target."
+		elif opponent_check:
+			_condition_picker.tooltip_text = "Counts distinct eligible opponents already fighting you or your party within tactics range. Nearby unengaged creatures do not count."
 		_value_picker.value_changed.connect(func(amount: float) -> void: entry.value = int(amount); _changed(); _render_rows())
-		_field("Value", _value_picker)
+		_field("Points" if point_check else "Count" if opponent_check else "Value", _value_picker)
 	elif entry.condition in ["has_status", "missing_status", "missing_buff", "missing_debuff"]:
 		var choices := _status_choices(str(entry.condition))
 		var ids: Array = choices.map(func(status: Dictionary): return str(status.id))
@@ -528,6 +540,11 @@ func _summary(entry: Dictionary) -> String:
 	match str(entry.condition):
 		"health_below": condition = "Health < %d%%" % int(entry.value)
 		"ether_below": condition = "Ether < %d%%" % int(entry.value)
+		"action_points_below": condition = "AP < %d" % int(entry.value)
+		"action_points_at_least": condition = "AP ≥ %d" % int(entry.value)
+		"opponents_below": condition = "Opponents < %d" % int(entry.value)
+		"opponents_at_least": condition = "Opponents ≥ %d" % int(entry.value)
+		"focused_on_ally": condition = "Focused on another ally"
 		"has_status", "missing_status", "missing_buff", "missing_debuff":
 			condition = str(entry.status).replace("_", " ").capitalize()
 			for status: Dictionary in _status_choices("has_status"):

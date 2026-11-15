@@ -1,5 +1,10 @@
 extends RefCounted
 const MAX_RULES := 20
+const AP_CONDITIONS := ["action_points_below", "action_points_at_least"]
+
+static func value_maximum(condition: String) -> int:
+	return 65535 if condition in AP_CONDITIONS else 100
+
 ## Reject malformed editor state before constructing controls from it.
 static func request_payload(data: Dictionary, state: Dictionary) -> Dictionary:
 	var result := data.duplicate(true)
@@ -41,7 +46,7 @@ static func valid(state: Dictionary) -> bool:
 			if entry.get("combat", "any") not in ["any", "in_combat", "out_of_combat"]: return false
 			for key: String in ["target", "condition", "status", "action"]:
 				if not entry.get(key) is String or str(entry[key]).length() > 64: return false
-			if not _integer(entry.get("power"), 1, 10) or not _integer(entry.get("value"), 1, 100): return false
+			if not _integer(entry.get("power"), 1, 10) or not _integer(entry.get("value"), 1, value_maximum(entry.condition)): return false
 	return true
 
 static func _integer(value: Variant, low: int, high: int) -> bool:

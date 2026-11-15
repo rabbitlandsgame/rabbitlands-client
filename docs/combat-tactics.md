@@ -38,6 +38,20 @@ percentage first; enemy selectors choose among opponents already engaged by
 you or your party. They do not search for unrelated creatures to pull.
 **Ally's opponent** selects an opponent of another party member who is in combat.
 
+**Action points below** and **Action points at least** compare the acting
+character's current AP with a number of points. They work with any action
+target: an enemy-targeted technique still checks your own AP. **Opponents fewer
+than** and **Opponents at least** count distinct eligible enemies already fighting
+you or your party within tactics range, including a foe targeted by another
+party member. Duplicate targets count once; dead, hidden, unrelated, out-of-range
+or retreat-protected foes do not count.
+
+**Enemy focused on ally** checks whether the selected enemy's current attack
+focus is another party member. For a tank, use **Opponent attacking party →
+Enemy focused on ally → Provoke**. It stops matching as soon as the enemy focuses
+on you, including during Provoke's native focus lock. Idle enemies and enemies
+focused on someone outside your party do not satisfy this condition.
+
 The combat selector beside **Edit Rule** checks the acting character's state:
 **Any state**, **In combat** or **Out of combat**. It combines with the target's
 condition. For example:
@@ -48,6 +62,9 @@ condition. For example:
 - Out of combat → Self → Ether below 50% → Use Potion of Mana restores ether
   after retreat. Put it below the Flee rule.
 - Out of combat → Ally → Missing buff: Shield → Shield Target prepares an ally.
+- Self → Action points below 50 → Use Potion of Action Points restores your AP.
+- Current opponent → Action points at least 10 → Provoke checks your AP first.
+- Current opponent → Opponents at least 2 → Cleave reserves Cleave for a group.
 
 Items always affect the character whose rules are running. Your character and
 companions consume stock from your inventory. Each character has independent

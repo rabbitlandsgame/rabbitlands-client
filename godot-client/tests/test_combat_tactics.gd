@@ -74,6 +74,9 @@ func run() -> void:
 	check_expanded_controls(panel, state)
 	panel._saving = true
 	panel.set_state(state)
+	check_encounter_controls(panel, state)
+	panel._saving = true
+	panel.set_state(state)
 	requests.clear()
 	panel._condition_picker.select(3)
 	panel._condition_picker.item_selected.emit(3)
@@ -266,3 +269,44 @@ func check_expanded_controls(panel: Control, state: Dictionary) -> void:
 	panel._more_action(panel.REFRESH)
 	panel.set_state(response)
 	check(panel._action_picker.selected_id == chosen and panel._combat_picker.get_item_metadata(panel._combat_picker.selected) == "out_of_combat" and panel._rules == response.plan.profiles[0].rules, "a save acknowledgment and Refresh preserve all expanded rule fields")
+
+func check_encounter_controls(panel: Control, state: Dictionary) -> void:
+	for condition: String in Protocol.AP_CONDITIONS:
+		panel._select(panel._condition_picker, condition)
+		panel._condition_picker.item_selected.emit(panel._condition_picker.selected)
+		check(panel._value_picker.suffix == " AP" and panel._value_picker.max_value == 65535, "action-point thresholds use point counts")
+		panel._value_picker.value = 500
+		check(panel._rules[0].value == 500 and "AP" in panel._summary(panel._rules[0]), "AP thresholds above 100 retain their integer point value")
+		panel._save.pressed.emit()
+		var response: Dictionary = state.duplicate(true)
+		response.plan.profiles[0].rules = requests[-1].rules.duplicate(true)
+		response.plan.revision += 1
+		check(Protocol.valid(response), "server snapshots accept raw AP thresholds above 100")
+		panel.set_state(response)
+		panel._more_action(panel.REFRESH)
+		panel.set_state(response)
+		check(panel._rules[0].condition == condition and panel._rules[0].value == 500, "AP comparisons survive Save and Refresh")
+	panel._select(panel._condition_picker, "health_below")
+	panel._condition_picker.item_selected.emit(panel._condition_picker.selected)
+	check(panel._rules[0].value == 100 and panel._value_picker.suffix == "%", "switching from AP to percentages clamps the old point value")
+	for condition: String in panel.OPPONENT_CONDITIONS:
+		panel._select(panel._condition_picker, condition)
+		panel._condition_picker.item_selected.emit(panel._condition_picker.selected)
+		check(panel._rules[0].value == 2 and panel._value_picker.suffix.is_empty(), "opponent comparisons start with two opponents and use a count")
+		check("Opponents" in panel._summary(panel._rules[0]), "summaries identify the encounter count")
+	panel._select(panel._condition_picker, "focused_on_ally")
+	panel._condition_picker.item_selected.emit(panel._condition_picker.selected)
+	check(panel._rules[0].target == "current_target" and "Focused on another ally" in panel._summary(panel._rules[0]), "focus conditions choose an enemy selector")
+	check(panel._editor.find_children("*", "SpinBox", true, false).size() <= 1, "focus conditions do not expose a threshold")
+	for action: Dictionary in state.actions:
+		if action.id != "technique:provoke": continue
+		panel._action_picker.action_selected.emit("technique:provoke")
+		check(panel._rules[0].condition == "focused_on_ally" and panel._rules[0].target == "current_target", "Provoke preserves the enemy-focus condition")
+	panel._save.pressed.emit()
+	var response: Dictionary = state.duplicate(true)
+	response.plan.profiles[0].rules = requests[-1].rules.duplicate(true)
+	response.plan.revision += 1
+	panel.set_state(response)
+	panel._more_action(panel.REFRESH)
+	panel.set_state(response)
+	check(panel._rules[0].condition == "focused_on_ally", "focus conditions survive Save and Refresh")
