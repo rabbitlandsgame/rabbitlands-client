@@ -5670,7 +5670,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed("cancel"):
-		if popup_panel.visible:
+		if AppState.player_tactics_active:
+			Network.send_chat('#tactics {"op":"run","subject":"self","active":false}')
+		elif popup_panel.visible:
 			# The popup is modal: it takes the cancel before anything under it.
 			_on_popup_dismiss_pressed()
 		elif not magic_selection.pending.is_empty() or not magic_selection.active_target_cast.is_empty():

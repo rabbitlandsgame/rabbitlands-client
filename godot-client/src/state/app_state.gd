@@ -212,6 +212,8 @@ var techniques: Dictionary = {}
 ## Repeat casting as the server states it (kind "autocast"): `enabled` is the
 ## player's switch, `active` whether a spell is repeating now and which.
 var autocast: Dictionary = {}
+var combat_tactics: Dictionary = {}
+var player_tactics_active := false
 ## Debuffs shown under a creature's name. Keep in step with
 ## status_effect_icons.gd NEGATIVE (that script preloads art; this one must not).
 const NEGATIVE_STATUSES := ["poison", "cripple", "expose_heat", "expose_cold",
@@ -966,6 +968,8 @@ func _on_connection_state_changed(value: String) -> void:
 		selected_actor_id = -1
 		techniques.clear()
 		autocast.clear()
+		combat_tactics.clear()
+		player_tactics_active = false
 		npc_dialogue = {"open": false, "name": "", "text": "", "options": [],
 			"quest": false, "quest_id": 0}
 		trade = _empty_trade_state()
@@ -2041,6 +2045,16 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 				techniques = magic.duplicate(true)
 				techniques["received_msec"] = Time.get_ticks_msec()
 				state_changed.emit(&"techniques")
+			elif magic.get("kind") == "combat_tactics":
+				combat_tactics = magic.duplicate(true)
+				player_tactics_active = bool(magic.get("player_active", false))
+				state_changed.emit(&"combat_tactics")
+			elif magic.get("kind") == "combat_tactics_status":
+				player_tactics_active = bool(magic.get("player_active", false))
+				if magic.get("subject") == combat_tactics.get("subject"):
+					combat_tactics.status = magic.status
+					combat_tactics.active = magic.active
+					state_changed.emit(&"combat_tactics")
 			elif magic.get("kind") == "autocast":
 				autocast = magic.duplicate(true)
 				state_changed.emit(&"autocast")

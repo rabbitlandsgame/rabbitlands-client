@@ -3,6 +3,7 @@ extends Control
 const UI := preload("res://src/ui/action_book_ui.gd")
 const TextColors := preload("res://src/ui/text_colors.gd")
 const TechniquesPanel := preload("res://src/ui/techniques_panel.gd")
+const TacticsPanel := preload("res://src/ui/combat_tactics_panel.gd")
 const PANEL_SIZE := Vector2(716, 636)
 const RESERVED_RIGHT_RAIL := 96.0
 const GROUP_ORDER: Array[String] = ["Healing", "Defense", "Offense", "Support", "Utility"]
@@ -72,6 +73,7 @@ var loadout
 var requested_power := 1
 var current_tab := "magic"
 var techniques_panel: VBoxContainer
+var tactics_panel: VBoxContainer
 var _cast: Callable
 var _rows: Dictionary = {}
 var _groups: Dictionary = {}
@@ -181,12 +183,14 @@ func open_tab(tab: String) -> void:
 	else: panel.move_to_front()
 
 func set_tab(tab: String) -> void:
-	current_tab = "techniques" if tab == "techniques" else "magic"
+	current_tab = tab if tab in ["magic", "techniques", "tactics"] else "magic"
 	_magic_page.visible = current_tab == "magic"
 	techniques_panel.visible = current_tab == "techniques"
+	tactics_panel.visible = current_tab == "tactics"
 	for key in _tab_buttons:
 		(_tab_buttons[key] as Button).set_pressed_no_signal(key == current_tab)
 	if current_tab == "techniques": techniques_panel.sync()
+	elif current_tab == "tactics": tactics_panel.refresh()
 	else: sync()
 
 func edit_prepared_slot(index: int) -> void:
@@ -607,7 +611,7 @@ func _build() -> void:
 	_dragger = WindowDrag.attach(panel, header)
 	var tabs := HBoxContainer.new()
 	column.add_child(tabs)
-	for key: String in ["magic", "techniques"]:
+	for key: String in ["magic", "techniques", "tactics"]:
 		var button := UI.button(key.capitalize())
 		button.name = key.capitalize() + "Tab"
 		button.toggle_mode = true
@@ -678,6 +682,8 @@ func _build() -> void:
 	techniques_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(techniques_panel)
 	techniques_panel.close_requested.connect(close)
+	tactics_panel = TacticsPanel.new()
+	column.add_child(tactics_panel)
 	set_tab("magic")
 	_fit_panel()
 

@@ -299,6 +299,7 @@ static func turn(left: bool) -> PackedByteArray:
 ## Grow this list in the same commit that lands the window which decodes the
 ## packet, never before.
 const CLIENT_CAPABILITIES: Array[String] = [
+	"combat_tactics_v1",
 	"death_state_v1",
 	"music_program_v1",
 	"lantern_tutorial_v1",
@@ -1266,6 +1267,10 @@ static func decode_server(command: int, payload: PackedByteArray, logical_coordi
 		ServerMessage.ELORIA_MAGIC_STATE:
 			var magic: Variant = JSON.parse_string(payload.get_string_from_utf8())
 			if magic is Dictionary:
+				if magic.get("kind") == "combat_tactics_status" and (not magic.get("subject") is String or not magic.get("status") is String or not magic.get("active") is bool or not magic.get("player_active") is bool):
+					return {"type":"invalid", "error":"combat_tactics_status"}
+				if magic.get("kind") == "combat_tactics" and not preload("res://src/network/combat_tactics_protocol.gd").valid(magic):
+					return {"type":"invalid", "error":"combat_tactics_shape"}
 				if magic.get("kind") == "actor_death" and magic.has("hold_for_scene") and not magic.hold_for_scene is bool:
 					return {"type":"invalid", "error":"actor_death_hold"}
 				return {"type": "magic_state", "data": magic}

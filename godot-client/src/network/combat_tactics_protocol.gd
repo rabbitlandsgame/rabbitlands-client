@@ -1,0 +1,28 @@
+extends RefCounted
+## Reject malformed editor state before constructing controls from it.
+static func valid(state: Dictionary) -> bool:
+	if state.get("version") != 1 or not state.get("subject") is String or not state.get("role") is String:
+		return false
+	if not state.get("context") is String or state.context.length() > 64: return false
+	if not state.get("active") is bool or not state.get("player_active") is bool or not state.get("status") is String or not state.get("notice") is String:
+		return false
+	if not state.get("subjects") is Array or state.subjects.size() > 8 or not state.get("actions") is Array or state.actions.size() > 160:
+		return false
+	for subject: Variant in state.subjects:
+		if not subject is Dictionary or not subject.get("id") is String or not subject.get("name") is String: return false
+	for action: Variant in state.actions:
+		if not action is Dictionary or not action.get("id") is String or not action.get("name") is String: return false
+	var plan: Variant = state.get("plan")
+	if not plan is Dictionary or not _integer(plan.get("revision"), 0, 2147483647) or not _integer(plan.get("selected"), 0, 2): return false
+	if not plan.get("profiles") is Array or plan.profiles.size() != 3 or state.get("max_rules") != 6: return false
+	for profile: Variant in plan.profiles:
+		if not profile is Dictionary or not profile.get("name") is String or not profile.get("rules") is Array or profile.rules.size() > 6: return false
+		for entry: Variant in profile.rules:
+			if not entry is Dictionary or not entry.get("enabled") is bool: return false
+			for key: String in ["target", "condition", "status", "action"]:
+				if not entry.get(key) is String or str(entry[key]).length() > 64: return false
+			if not _integer(entry.get("power"), 1, 10) or not _integer(entry.get("value"), 1, 100): return false
+	return true
+
+static func _integer(value: Variant, low: int, high: int) -> bool:
+	return (value is int or value is float) and is_finite(float(value)) and float(value) == float(int(value)) and value >= low and value <= high
