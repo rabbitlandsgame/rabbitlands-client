@@ -129,8 +129,7 @@ func handle_event(event: InputEvent) -> bool:
 	return false
 
 func category_for(value: String) -> String:
-	if value in ["blink", "transmute", "recall"]: return "Utility"
-	return str({"Health": "Healing", "Defense": "Defense", "Attack": "Offense"}.get(Book.EFFECT_GROUPS.get(value, "General"), "Support"))
+	return SpellCatalog.group_for_effect(value)
 
 func effects_for(value: String) -> Array[String]:
 	var result: Array[String] = []

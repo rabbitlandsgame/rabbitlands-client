@@ -110,7 +110,9 @@ func effect_for(spell_id: int) -> String:
 	return str(spell(spell_id).get("effect", ""))
 
 func group_of(spell_id: int) -> String:
-	var effect := effect_for(spell_id)
+	return group_for_effect(effect_for(spell_id))
+
+static func group_for_effect(effect: String) -> String:
 	if effect in ["blink", "transmute", "recall"]: return "Utility"
 	return str(EFFECT_GROUPS.get(effect, "Support"))
 

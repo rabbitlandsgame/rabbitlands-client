@@ -19,6 +19,10 @@ func run() -> void:
 	state.inventory = {0: {"image_id": 584, "quantity": 12}, 1: {"image_id": 586, "quantity": 0}}
 	var catalog := SpellCatalog.new()
 	catalog.configure(JSON.parse_string(FileAccess.get_file_as_string("res://data/spells/catalog.json")))
+	var ring = load("res://src/ui/quick_spell_ring.gd").new()
+	for example: Array in [["heal", "Healing"], ["magic_protection", "Defense"], ["harm", "Offense"], ["haste", "Support"], ["blink", "Utility"]]:
+		check(ring.category_for(example[0]) == example[1], "the production ring retains the %s category" % example[1])
+	ring.free()
 	var book = load("res://src/ui/spells_window.gd").new()
 	root.add_child(book)
 	book.configure(catalog, func(id: int): cast_ids.append(id))
