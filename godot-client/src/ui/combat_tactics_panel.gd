@@ -11,6 +11,7 @@ const COMBAT_STATES := ["any", "in_combat", "out_of_combat"]
 const COMBAT_LABELS := ["Any state", "In combat", "Out of combat"]
 const CONDITIONS := ["always", "health_below", "ether_below", "has_status", "missing_status", "missing_buff", "missing_debuff", "action_points_below", "action_points_at_least", "opponents_below", "opponents_at_least", "focused_on_ally"]
 const CONDITION_LABELS := ["Always", "Health below %", "Ether below %", "Has status", "Missing status", "Missing buff", "Missing debuff", "Action points below", "Action points at least", "Opponents fewer than", "Opponents at least", "Enemy focused on ally"]
+const CONDITION_SHORT_LABELS := ["Always", "Health <", "Ether <", "Has status", "Missing status", "Missing buff", "Missing debuff", "AP below", "AP at least", "Opponents <", "Opponents ≥", "Focus on ally"]
 const OPPONENT_CONDITIONS := ["opponents_below", "opponents_at_least"]
 const STATUSES := ["poison", "shield", "regeneration", "magic_protection", "magic_immunity", "haste", "accuracy"]
 const STATUS_LABELS := ["Poisoned", "Shield", "Regeneration", "Magic ward", "Magic immunity", "Haste", "Accuracy"]
@@ -44,6 +45,13 @@ var _help: Label
 var _hint: Label
 var _target_picker: OptionButton
 var _condition_picker: OptionButton
+var _condition_pickers: Array[OptionButton] = []
+var _condition_inputs: Array[Control] = []
+var _condition_remove_buttons: Array[Button] = []
+var _condition_scroll: ScrollContainer
+var _condition_list: VBoxContainer
+var _condition_focus := 0
+var _add_if: Button
 var _combat_picker: OptionButton
 var _action_picker: MenuButton
 var _value_picker: SpinBox
@@ -401,6 +409,7 @@ func _follow_selection() -> void:
 func _select_rule(index: int) -> void:
 	if index < 0 or index >= _rules.size(): return
 	_selected = index
+	_condition_focus = 0
 	for item: Node in _rows.get_children():
 		if item is Button: item.set_pressed_no_signal(item.get_index() == index)
 	_render_editor()
@@ -447,36 +456,6 @@ func _render_editor() -> void:
 	_target_picker = _picker(TARGETS, TARGET_LABELS, str(entry.target), func(key: String) -> void:
 		entry.target = key; _changed(); _render_rows())
 	_field("Target", _target_picker)
-	_condition_picker = _picker(CONDITIONS, CONDITION_LABELS, str(entry.condition), func(key: String) -> void:
-		if key in OPPONENT_CONDITIONS and entry.condition not in OPPONENT_CONDITIONS: entry.value = 2
-		entry.condition = key
-		entry.value = clampi(int(entry.value), 1, Protocol.value_maximum(key))
-		if key == "focused_on_ally" and entry.target in ["self", "ally"]: entry.target = "current_target"
-		var choices := _status_choices(key)
-		if key in ["missing_buff", "missing_debuff"]:
-			var ids: Array = choices.map(func(status: Dictionary): return str(status.id))
-			if entry.status not in ids and not ids.is_empty(): entry.status = ids[0]
-		_changed(); _render_rows(); _render_editor())
-	_field("Condition", _condition_picker)
-	if entry.condition == "focused_on_ally":
-		_condition_picker.tooltip_text = "Checks whether the selected enemy is attacking another party member. Stops matching when its focus turns to this character."
-	if entry.condition in ["health_below", "ether_below"] or entry.condition in Protocol.AP_CONDITIONS or entry.condition in OPPONENT_CONDITIONS:
-		_value_picker = _spin(int(entry.value), Protocol.value_maximum(str(entry.condition)))
-		var point_check: bool = entry.condition in Protocol.AP_CONDITIONS
-		var opponent_check: bool = entry.condition in OPPONENT_CONDITIONS
-		_value_picker.suffix = " AP" if point_check else "" if opponent_check else "%"
-		if point_check:
-			_condition_picker.tooltip_text = "Checks this character's current action points, regardless of the action target."
-		elif opponent_check:
-			_condition_picker.tooltip_text = "Counts distinct eligible opponents already fighting you or your party within tactics range. Nearby unengaged creatures do not count."
-		_value_picker.value_changed.connect(func(amount: float) -> void: entry.value = int(amount); _changed(); _render_rows())
-		_field("Points" if point_check else "Count" if opponent_check else "Value", _value_picker)
-	elif entry.condition in ["has_status", "missing_status", "missing_buff", "missing_debuff"]:
-		var choices := _status_choices(str(entry.condition))
-		var ids: Array = choices.map(func(status: Dictionary): return str(status.id))
-		var labels: Array = choices.map(func(status: Dictionary): return str(status.name))
-		_status_picker = _picker(ids, labels, str(entry.status), func(key: String) -> void: entry.status = key; _changed(); _render_rows())
-		_field("Buff" if entry.condition == "missing_buff" else "Debuff" if entry.condition == "missing_debuff" else "Status", _status_picker)
 	_action_picker = ActionPicker.new()
 	_action_picker.configure(_state.actions, str(entry.action))
 	_action_picker.action_selected.connect(func(key: String) -> void:
@@ -494,9 +473,7 @@ func _render_editor() -> void:
 		_power_picker = _spin(int(entry.power), 10)
 		_power_picker.value_changed.connect(func(amount: float) -> void: entry.power = int(amount); _changed())
 		_field("Power", _power_picker)
-	var space := Control.new()
-	space.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_editor.add_child(space)
+	_render_conditions(entry)
 	var tools := HBoxContainer.new()
 	tools.add_theme_constant_override("separation", 6)
 	_editor.add_child(tools)
@@ -517,6 +494,115 @@ func _render_editor() -> void:
 	tools.add_child(_delete)
 	_apply_density()
 
+func _conditions(entry: Dictionary) -> Array[Dictionary]:
+	var result: Array[Dictionary] = [entry]
+	for check: Dictionary in entry.get("and_conditions", []): result.append(check)
+	return result
+
+func _add_condition() -> void:
+	if _selected < 0 or _selected >= _rules.size(): return
+	var entry: Dictionary = _rules[_selected]
+	if _conditions(entry).size() >= int(_state.get("max_conditions", 1)): return
+	if not entry.has("and_conditions"): entry.and_conditions = []
+	entry.and_conditions.append({"condition":"always", "value":50, "status":"poison"})
+	_condition_focus = entry.and_conditions.size()
+	_changed(); _render_rows(); _render_editor()
+
+func _remove_condition(index: int) -> void:
+	if _selected < 0 or _selected >= _rules.size(): return
+	var entry: Dictionary = _rules[_selected]
+	var checks := _conditions(entry)
+	if checks.size() <= 1 or index < 0 or index >= checks.size(): return
+	if index == 0:
+		var first: Dictionary = entry.and_conditions.pop_front()
+		for key: String in ["condition", "value", "status"]: entry[key] = first[key]
+	else: entry.and_conditions.remove_at(index - 1)
+	if entry.and_conditions.is_empty(): entry.erase("and_conditions")
+	_condition_focus = maxi(0, index - 1)
+	_changed(); _render_rows(); _render_editor()
+
+func _render_conditions(entry: Dictionary) -> void:
+	_condition_pickers.clear(); _condition_inputs.clear(); _condition_remove_buttons.clear()
+	var checks := _conditions(entry)
+	var limit := int(_state.get("max_conditions", 1))
+	var heading := HBoxContainer.new()
+	var label := Style.label("All conditions (%d/%d)" % [checks.size(), limit], 13)
+	label.tooltip_text = "All conditions must pass before this action runs."
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	heading.add_child(label)
+	_add_if = Style.button("＋ If")
+	_add_if.tooltip_text = "Add another condition. All conditions must match (AND)."
+	_add_if.disabled = checks.size() >= limit
+	_add_if.pressed.connect(_add_condition)
+	heading.add_child(_add_if)
+	_editor.add_child(heading)
+	_condition_scroll = UI.scroll("ActionConditions")
+	_condition_scroll.follow_focus = true
+	_condition_scroll.custom_minimum_size.y = 32
+	_editor.add_child(_condition_scroll)
+	_condition_list = VBoxContainer.new()
+	_condition_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_condition_list.add_theme_constant_override("separation", 4)
+	_condition_scroll.add_child(_condition_list)
+	for index: int in checks.size():
+		var check: Dictionary = checks[index]
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 3)
+		row.add_child(Style.label("IF" if index == 0 else "AND", 11, true))
+		var picker := _picker(CONDITIONS, CONDITION_SHORT_LABELS, str(check.condition), func(key: String) -> void:
+			if key in OPPONENT_CONDITIONS and check.condition not in OPPONENT_CONDITIONS: check.value = 2
+			check.condition = key
+			check.value = clampi(int(check.value), 1, Protocol.value_maximum(key))
+			if key == "focused_on_ally" and entry.target in ["self", "ally"]: entry.target = "current_target"
+			if key in ["missing_buff", "missing_debuff"]:
+				var ids: Array = _status_choices(key).map(func(status: Dictionary): return str(status.id))
+				if check.status not in ids and not ids.is_empty(): check.status = ids[0]
+			_condition_focus = index
+			_changed(); _render_rows(); _render_editor())
+		var title_index := CONDITIONS.find(str(check.condition))
+		picker.custom_minimum_size.x = 80
+		picker.tooltip_text = CONDITION_LABELS[title_index] if title_index >= 0 else str(check.condition)
+		if check.condition in Protocol.AP_CONDITIONS: picker.tooltip_text += "\nChecks this character's current action points."
+		if check.condition in OPPONENT_CONDITIONS: picker.tooltip_text += "\nCounts distinct engaged party opponents within tactics range."
+		if check.condition == "focused_on_ally": picker.tooltip_text += "\nThe selected enemy is attacking another party member."
+		row.add_child(picker)
+		_condition_pickers.append(picker)
+		if index == 0: _condition_picker = picker
+		var input: Control = null
+		if check.condition in ["health_below", "ether_below"] or check.condition in Protocol.AP_CONDITIONS or check.condition in OPPONENT_CONDITIONS:
+			var value := _spin(int(check.value), Protocol.value_maximum(str(check.condition)))
+			value.custom_minimum_size.x = 84
+			value.suffix = " AP" if check.condition in Protocol.AP_CONDITIONS else "" if check.condition in OPPONENT_CONDITIONS else "%"
+			value.value_changed.connect(func(amount: float) -> void: check.value = int(amount); _changed(); _render_rows())
+			input = value
+			if index == 0: _value_picker = value
+		elif check.condition in ["has_status", "missing_status", "missing_buff", "missing_debuff"]:
+			var choices := _status_choices(str(check.condition))
+			var ids: Array = choices.map(func(status: Dictionary): return str(status.id))
+			var labels: Array = choices.map(func(status: Dictionary): return str(status.name))
+			var status := _picker(ids, labels, str(check.status), func(key: String) -> void: check.status = key; _changed(); _render_rows())
+			status.size_flags_horizontal = Control.SIZE_SHRINK_END
+			status.custom_minimum_size.x = 84
+			input = status
+			if index == 0: _status_picker = status
+		if input != null: row.add_child(input)
+		_condition_inputs.append(input)
+		var remove := Style.button("×")
+		remove.custom_minimum_size.x = 22
+		remove.tooltip_text = "Remove this condition"
+		remove.disabled = checks.size() == 1
+		remove.pressed.connect(_remove_condition.bind(index))
+		row.add_child(remove)
+		_condition_remove_buttons.append(remove)
+		_condition_list.add_child(row)
+	_reveal_condition.call_deferred()
+
+func _reveal_condition() -> void:
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if is_instance_valid(_condition_scroll) and _condition_focus < _condition_list.get_child_count():
+		_condition_scroll.ensure_control_visible(_condition_list.get_child(_condition_focus))
+
 func _action_name(entry: Dictionary) -> String:
 	for action: Dictionary in _state.get("actions", []):
 		if action.id == entry.action: return str(action.name)
@@ -531,11 +617,7 @@ func _status_choices(condition: String) -> Array:
 	if condition == "missing_debuff": return choices.filter(func(status: Dictionary): return status.kind == "debuff")
 	return choices
 
-func _summary(entry: Dictionary) -> String:
-	var target_index := TARGETS.find(str(entry.target))
-	var target: String = TARGET_LABELS[target_index] if target_index >= 0 else str(entry.target)
-	if entry.target == "ally": target = "Ally"
-	elif entry.target == "nearest_enemy": target = "Nearest engaged foe"
+func _condition_summary(entry: Dictionary) -> String:
 	var condition := ""
 	match str(entry.condition):
 		"health_below": condition = "Health < %d%%" % int(entry.value)
@@ -550,6 +632,18 @@ func _summary(entry: Dictionary) -> String:
 			for status: Dictionary in _status_choices("has_status"):
 				if status.id == entry.status: condition = str(status.name)
 			if entry.condition != "has_status": condition += " missing"
+	return condition
+
+func _summary(entry: Dictionary) -> String:
+	var target_index := TARGETS.find(str(entry.target))
+	var target: String = TARGET_LABELS[target_index] if target_index >= 0 else str(entry.target)
+	if entry.target == "ally": target = "Ally"
+	elif entry.target == "nearest_enemy": target = "Nearest engaged foe"
+	var descriptions: PackedStringArray = []
+	for check: Dictionary in _conditions(entry):
+		var description := _condition_summary(check)
+		if not description.is_empty(): descriptions.append(description)
+	var condition := " AND ".join(descriptions)
 	var combat := str(entry.get("combat", "any"))
 	var prefix := ("In combat · " if combat == "in_combat" else "Out of combat · ") if combat != "any" else ""
 	return prefix + target + (" · " + condition if not condition.is_empty() else "") + " → " + _action_name(entry)

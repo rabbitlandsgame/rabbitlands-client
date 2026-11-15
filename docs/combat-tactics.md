@@ -14,6 +14,19 @@ fall through to lower rules. **Save** saves the current preset.
 **More → Refresh** discards unsaved edits and loads the server's current plan.
 **More → Restore preset** restores that preset's default rules.
 
+Each action can have up to **eight conditions**. Use **＋ If** in **All conditions**
+to add a check; every IF/AND row must pass before the action runs. Use **×** to
+remove a check. The condition list scrolls inside the compact editor. A rule
+always retains at least one condition; **Always** leaves it unrestricted.
+Existing saved rules keep their original condition.
+
+For example, one Provoke action can require **AP at least 10 AND Opponents at
+least 2 AND Enemy focused on ally**. The combat-state selector is another
+requirement for that action. Health, ether and status checks all inspect the
+same selected target. AP checks inspect the acting character, and opponent
+counts inspect its party's current fight. A failed check lets evaluation
+continue to lower-priority rules without spending resources.
+
 The subject picker switches between **My combat actions** and companions.
 The three preset buttons switch between saved plans. Switching with unsaved
 edits offers **Save & switch**, **Discard & switch**, or **Cancel**.

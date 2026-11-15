@@ -6,7 +6,7 @@ const TechniquesPanel := preload("res://src/ui/techniques_panel.gd")
 const TacticsPanel := preload("res://src/ui/combat_tactics_panel.gd")
 const TacticsStyle := preload("res://src/ui/combat_tactics_style.gd")
 const PANEL_SIZE := Vector2(716, 636)
-const TACTICS_SIZE := Vector2(908, 480)
+const TACTICS_SIZE := Vector2(908, 568)
 const RESERVED_RIGHT_RAIL := 96.0
 const GROUP_ORDER: Array[String] = SpellCatalog.GROUP_ORDER
 

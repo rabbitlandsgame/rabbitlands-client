@@ -14,7 +14,7 @@ func fixture() -> Dictionary:
 	var path := OS.get_environment("RL_TACTICS_FIXTURE")
 	if not path.is_empty(): return JSON.parse_string(FileAccess.get_file_as_string(path))
 	var entry := {"enabled":true,"target":"self","condition":"health_below","value":40,"status":"poison","action":"spell:7","power":1}
-	return {"kind":"combat_tactics","version":1,"subject":"self","context":"fixture","role":"self","active":false,"player_active":false,"status":"Paused","notice":"","max_rules":20,
+	return {"kind":"combat_tactics","version":1,"subject":"self","context":"fixture","role":"self","active":false,"player_active":false,"status":"Paused","notice":"","max_rules":20,"max_conditions":8,
 		"subjects":[{"id":"self","name":"My combat actions"}],"actions":[{"id":"attack","name":"Weapon attack"},{"id":"spell:7","name":"Heal","scope":"self","hostile":false},{"id":"item:1653","name":"Use Potion of Mana","scope":"self","item_group":"Ether"}],
 		"statuses":[{"id":"shield","name":"Shield","kind":"buff"},{"id":"magic_protection","name":"Magic ward","kind":"buff"},{"id":"poison","name":"Poisoned","kind":"debuff"}],
 		"plan":{"revision":0,"selected":0,"profiles":[{"name":"Balanced","rules":[entry]},{"name":"Defensive","rules":[]},{"name":"Offensive","rules":[]}]}}
@@ -75,6 +75,9 @@ func run() -> void:
 	panel._saving = true
 	panel.set_state(state)
 	check_encounter_controls(panel, state)
+	panel._saving = true
+	panel.set_state(state)
+	check_compound_controls(panel, state)
 	panel._saving = true
 	panel.set_state(state)
 	requests.clear()
@@ -141,8 +144,11 @@ func run() -> void:
 	app._on_packet(EloriaProtocol.ServerMessage.ELORIA_MAGIC_STATE, JSON.stringify(conflict).to_utf8_buffer())
 	check(not panel._dirty and not panel._conflicted, "Refresh replaces the draft and clears the conflict")
 	while panel._rules.size() < int(state.max_rules): panel._add_rule()
+	panel._rules[-1].and_conditions = []
+	for index: int in range(Protocol.MAX_CONDITIONS - 1):
+		panel._rules[-1].and_conditions.append({"condition":"missing_buff", "value":50, "status":"radiation_protection"})
 	var full_request := Protocol.request_payload({"op":"save", "rules":panel._rules}, state)
-	check(JSON.stringify(full_request).to_utf8_buffer().size() <= 8192, "all twenty rules fit the server request budget")
+	check(JSON.stringify(full_request).to_utf8_buffer().size() <= Protocol.MAX_REQUEST_BYTES, "all twenty rules fit the server request budget")
 	live.plan.profiles[0].rules = panel._rules.duplicate(true)
 	for frame in range(8): await process_frame
 	check(root.get_visible_rect().encloses(panel._save.get_global_rect()), "Save remains inside the supported viewport")
@@ -162,6 +168,8 @@ func run() -> void:
 		root.size = dimensions
 		book._fit_panel()
 		book.tactics_panel._select_rule(int(state.max_rules) - 1)
+		book.tactics_panel._condition_focus = Protocol.MAX_CONDITIONS - 1
+		book.tactics_panel._reveal_condition.call_deferred()
 		for frame in range(8): await process_frame
 		check(root.get_visible_rect().encloses(book.panel.get_global_rect()), "Tactics fits the real action book at %s" % dimensions)
 		check(book.panel.get_global_rect().encloses(book.tactics_panel._save.get_global_rect()), "Save stays inside the real action book at %s" % dimensions)
@@ -170,6 +178,8 @@ func run() -> void:
 		var selected_row: Control = book.tactics_panel._rows.get_child(int(state.max_rules) - 1)
 		check(book.tactics_panel._rules_scroll.get_global_rect().encloses(selected_row.get_global_rect()), "the last rule scrolls into view at %s: row %s in %s" % [dimensions, selected_row.get_global_rect(), book.tactics_panel._rules_scroll.get_global_rect()])
 		check(book.tactics_panel._rules_scroll.scroll_vertical > 0, "twenty rules scroll within the compact window")
+		var condition_row: Control = book.tactics_panel._condition_list.get_child(Protocol.MAX_CONDITIONS - 1)
+		check(book.tactics_panel._condition_scroll.get_global_rect().encloses(condition_row.get_global_rect()), "all eight conditions remain reachable inside the compact editor at %s" % dimensions)
 	root.size = Vector2i(1280, 720)
 	root.content_scale_factor = 1.5
 	book._fit_panel()
@@ -310,3 +320,64 @@ func check_encounter_controls(panel: Control, state: Dictionary) -> void:
 	panel._more_action(panel.REFRESH)
 	panel.set_state(response)
 	check(panel._rules[0].condition == "focused_on_ally", "focus conditions survive Save and Refresh")
+
+func check_compound_controls(panel: Control, state: Dictionary) -> void:
+	panel._select(panel._condition_picker, "action_points_at_least")
+	panel._condition_picker.item_selected.emit(panel._condition_picker.selected)
+	panel._value_picker.value = 500
+	panel._add_if.pressed.emit()
+	check(panel._condition_pickers.size() == 2, "Add If creates another editable condition on the same action")
+	panel._select(panel._condition_pickers[1], "opponents_at_least")
+	panel._condition_pickers[1].item_selected.emit(panel._condition_pickers[1].selected)
+	panel._condition_inputs[1].value = 3
+	panel._add_if.pressed.emit()
+	panel._select(panel._condition_pickers[2], "focused_on_ally")
+	panel._condition_pickers[2].item_selected.emit(panel._condition_pickers[2].selected)
+	check(panel._rules[0].target == "current_target" and panel._condition_inputs[2] == null, "additional focus conditions normalize the target and omit an unused value")
+	check("AP ≥ 500 AND Opponents ≥ 3 AND Focused on another ally" in panel._summary(panel._rules[0]), "summaries show every condition joined with AND")
+	var draft: Array = panel._rules.duplicate(true)
+	panel.set_state(state)
+	check(panel._rules == draft, "runtime updates preserve the complete unsaved condition list")
+	panel._save.pressed.emit()
+	var payload: Dictionary = requests[-1]
+	for entry: Dictionary in payload.rules:
+		for condition: Dictionary in entry.get("and_conditions", []):
+			check(condition.value is int, "additional thresholds are serialized as integer JSON tokens")
+	var response: Dictionary = state.duplicate(true)
+	response.plan.profiles[0].rules = JSON.parse_string(JSON.stringify(payload.rules))
+	response.plan.revision += 1
+	check(Protocol.valid(response), "compound conditions pass the real client state contract")
+	panel.set_state(response)
+	panel._more_action(panel.REFRESH)
+	panel.set_state(response)
+	check(panel._rules == response.plan.profiles[0].rules and panel._condition_pickers.size() == 3, "Save acknowledgment and Refresh preserve all conditions")
+	panel._condition_remove_buttons[0].pressed.emit()
+	check(panel._rules[0].condition == "opponents_at_least" and panel._rules[0].value == 3 and panel._condition_pickers.size() == 2, "removing the first condition promotes the next condition without losing its threshold")
+	panel._condition_remove_buttons[1].pressed.emit()
+	check(not panel._rules[0].has("and_conditions") and panel._condition_remove_buttons[0].disabled, "removing extras restores a single legacy condition and retains at least one")
+	for index: int in range(Protocol.MAX_CONDITIONS + 2): panel._add_condition()
+	check(panel._condition_pickers.size() == Protocol.MAX_CONDITIONS and panel._add_if.disabled, "the editor bounds each action to eight conditions")
+	var invalid: Dictionary = response.duplicate(true)
+	invalid.plan.profiles[0].rules[0].and_conditions.append({"condition":"always", "value":true, "status":"poison"})
+	check(not Protocol.valid(invalid), "nested condition values remain typed")
+	invalid = response.duplicate(true)
+	invalid.plan.profiles[0].rules[0].and_conditions[0].and_conditions = []
+	check(not Protocol.valid(invalid), "conditions cannot recursively contain condition lists")
+	var legacy: Dictionary = state.duplicate(true)
+	legacy.erase("max_conditions")
+	panel._saving = true
+	panel.set_state(legacy)
+	check(Protocol.valid(legacy) and panel._add_if.disabled, "older server snapshots preserve their original single-condition editor")
+	var full: Array = []
+	for index: int in Protocol.MAX_RULES:
+		var entry: Dictionary = state.plan.profiles[0].rules[0].duplicate(true)
+		entry.condition = "action_points_at_least"; entry.value = 65535
+		entry.and_conditions = []
+		for extra: int in range(Protocol.MAX_CONDITIONS - 1):
+			entry.and_conditions.append({"condition":"action_points_at_least", "value":65535, "status":"radiation_protection"})
+		full.append(entry)
+	var request := Protocol.request_payload({"op":"save", "rules":full}, state)
+	var text := "#tactics " + JSON.stringify(request)
+	var frame := EloriaProtocol.chat(text)
+	check(text.to_utf8_buffer().size() > 8192 and text.to_utf8_buffer().size() <= Protocol.MAX_REQUEST_BYTES, "a fully populated profile fits the expanded request budget")
+	check(frame.slice(3, frame.size() - 1).get_string_from_utf8() == text, "the normal chat transport preserves the entire compound-rule request")
