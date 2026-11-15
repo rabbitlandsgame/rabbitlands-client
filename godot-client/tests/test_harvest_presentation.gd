@@ -179,16 +179,51 @@ func _check_retired_label_fallback(adapter: CoordinateAdapter, catalog: Dictiona
 			"an undescribed Lavender node always stands the clump (%d): %s" % [identity, lavender.model_id])
 		lavender.free()
 
-	# Bramble's variants are all hedge segments: no hedge at a random yaw.
-	_expect(bool((models.get(str(harvest.resources.get("Bramble", "")), {}) as Dictionary).get("retired", false)),
-		"Bramble's own model is retired")
-	var bramble := _object(adapter, catalog, "Bramble", 4102)
-	_expect(bramble.model_id.is_empty() and bramble.get_node_or_null("Model") == null,
-		"an undescribed Bramble node stands no hedge: " + bramble.model_id)
-	_expect((bramble.get_node("Ring") as MeshInstance3D).visible
-		and (bramble.get_node("ResourceLabel") as Label3D).text == "Bramble",
+	# Cotton's own model is retired and its only variant is a crop row: no row at
+	# a random yaw.
+	_expect(bool((models.get(str(harvest.resources.get("Cotton", "")), {}) as Dictionary).get("retired", false)),
+		"Cotton's own model is retired")
+	var cotton := _object(adapter, catalog, "Cotton", 4102)
+	_expect(cotton.model_id.is_empty() and cotton.get_node_or_null("Model") == null,
+		"an undescribed Cotton node stands no row: " + cotton.model_id)
+	_expect((cotton.get_node("Ring") as MeshInstance3D).visible
+		and (cotton.get_node("ResourceLabel") as Label3D).text == "Cotton",
 		"it keeps the bare ring and its resource name")
+	cotton.free()
+	# The stand-alone nodes (2026-11-15): seven labels whose variants all need a
+	# stated footprint answer with one whole round model of their own, so the
+	# coverage pass's undescribed nodes stand it at their seeded yaw and scale,
+	# with no idle ring, instead of a bare ring.
+	var standalones := {"Bramble": "bramble_bush_a", "Hearthroot": "hearthroot_clump_a", "Kelp": "kelp_heap_a",
+		"Shell": "shell_heap_a", "Salt": "salt_mound_a", "Quartz": "quartz_boulder_a", "Clay": "clay_mound_a"}
+	for standalone_label: String in standalones:
+		var own: Dictionary = models.get(str(harvest.resources.get(standalone_label, "")), {})
+		_expect(str(harvest.resources.get(standalone_label, "")) == standalones[standalone_label]
+			and bool(own.get("imported", false)) and not bool(own.get("retired", false))
+			and not own.has("standsAlone")
+			and bool((models.get(str(own.get("replaces", "")), {}) as Dictionary).get("retired", false)),
+			"%s answers with its stand-alone model, which is no patch variant" % standalone_label)
+		_expect(not (variants.get(standalone_label, []) as Array).has(standalones[standalone_label]),
+			"and its patch variants are unchanged: " + standalone_label)
+	var bramble := _object(adapter, catalog, "Bramble", 4102)
+	var bramble_model := bramble.get_node_or_null("Model") as Node3D
+	rng.seed = 4102
+	var bramble_yaw := rng.randf() * TAU
+	var bramble_scale := rng.randf_range(0.92, 1.08)
+	_expect(bramble.model_id == "bramble_bush_a" and bramble_model != null
+		and is_equal_approx(bramble_model.rotation.y, bramble_yaw)
+		and is_equal_approx(bramble_model.scale.x, bramble_scale),
+		"an undescribed Bramble node stands the bush at its seeded yaw and scale: " + bramble.model_id)
+	_expect(not (bramble.get_node("Ring") as MeshInstance3D).visible,
+		"with no idle ring")
 	bramble.free()
+	# A package yaw still turns it (the coverage pass states one on every node).
+	var shell := _object(adapter, catalog, "Shell", 4104, {"yaw": 75.0, "grouping": "beach"})
+	var shell_model := shell.get_node_or_null("Model") as Node3D
+	_expect(shell.model_id == "shell_heap_a" and shell_model != null
+		and is_equal_approx(shell_model.rotation.y, deg_to_rad(75.0)),
+		"an undescribed Shell node stands the heap at its package's yaw")
+	shell.free()
 	# Laid out by its package, the same label stands its hedge where it is told.
 	var hedges: Array = variants.get("Bramble", [])
 	var hedge := _object(adapter, catalog, "Bramble", 4103,
@@ -200,9 +235,10 @@ func _check_retired_label_fallback(adapter: CoordinateAdapter, catalog: Dictiona
 	hedge.free()
 
 # --- the underground's seams and pans ----------------------------------------------
-# The underground package (landfall_insides) states no harvest presentation, and its
-# Quartz and Salt labels have retired models and no variant that stands alone. The
-# client's own table (underground-scenery.json harvestPresentation) lays them out.
+# The underground package (landfall_insides) states no harvest presentation. The
+# client's own table (underground-scenery.json harvestPresentation) lays out its
+# Quartz, Salt, Kelp and Shell seams, pans, strands and drifts (whose labels had
+# only a retired model until their stand-alone models of 2026-11-15).
 
 func _check_underground_presentation(catalog: Dictionary) -> void:
 	var scenery := preload("res://src/world/underground_scenery.gd")
@@ -212,6 +248,7 @@ func _check_underground_presentation(catalog: Dictionary) -> void:
 	var harvest: Dictionary = catalog.harvestables
 	var variants: Dictionary = harvest.get("variants", {})
 	var needed := 0
+	var laid := 0
 	var stated := 0
 	for value: Variant in package.get("harvestables", []):
 		var node := value as Dictionary
@@ -240,10 +277,14 @@ func _check_underground_presentation(catalog: Dictionary) -> void:
 			and int(hint.variant) >= 0 and int(hint.variant) < listed.size() and hint.get("yaw") is float,
 			"underground %s node %d states its variant and yaw" % [resource, int(node.objectId)])
 		needed += 1 if must else 0
+		laid += 1
 		stated += 1
-	_expect(needed >= 7 and stated == table.size(),
-		"the table presents every underground node that needs it and names no other (%d needed, %d of %d stated)"
-		% [needed, stated, table.size()])
+	# Since 2026-11-15 Kelp, Shell, Quartz and Salt answer with a stand-alone
+	# model, so none of these needs the table any longer; it still lays out the
+	# shore and seam nodes it always did.
+	_expect(laid >= 7 and stated == table.size(),
+		"the table lays out the underground's shore and seam nodes and names no other (%d laid out, %d needing it, %d of %d stated)"
+		% [laid, needed, stated, table.size()])
 
 # --- wall nodes (pass 2) ----------------------------------------------------------
 # A vein node (the underground's `veins`) is presented {placement: "wall", variant, yaw, inset}: it stands its
