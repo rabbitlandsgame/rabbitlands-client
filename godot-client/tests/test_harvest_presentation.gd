@@ -279,10 +279,10 @@ func _check_underground_presentation(catalog: Dictionary) -> void:
 		needed += 1 if must else 0
 		laid += 1
 		stated += 1
-	# Since 2026-11-15 Kelp, Shell, Quartz and Salt answer with a stand-alone
-	# model, so none of these needs the table any longer; it still lays out the
-	# shore and seam nodes it always did.
-	_expect(laid >= 7 and stated == table.size(),
+	# Since 2026-11-15 Kelp, Shell, Quartz and Salt also answer with a stand-alone
+	# model; the table still lays out the shore and seam nodes it always did, and
+	# the other labels' nodes still need it.
+	_expect(needed >= 7 and laid >= 7 and stated == table.size(),
 		"the table lays out the underground's shore and seam nodes and names no other (%d laid out, %d needing it, %d of %d stated)"
 		% [laid, needed, stated, table.size()])
 

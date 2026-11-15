@@ -66,7 +66,8 @@ func check_crafting_and_bar(main: Control) -> void:
 	main.world_root.add_child(bramble)
 	bramble.configure({"object_id": 8123, "kind": EloriaProtocol.MAP_OBJECT_HARVEST, "x": 0, "y": 0, "label": "Bramble"}, CoordinateAdapter.new({}), catalog)
 	# A hedge segment needs the footprint and yaw a package states (playtest map review, finding 6).
-	expect(bramble.get_node_or_null("Model") == null and bramble.get_node("Ring").visible and bramble.get_node("ResourceLabel").text == "Bramble", "older Bramble nodes keep the named ring, not a hedge at a random yaw")
+	# Since 2026-11-15 an undescribed node stands Bramble's round stand-alone bush instead of a bare ring.
+	expect(bramble.model_id == "bramble_bush_a" and bramble.get_node_or_null("Model") != null and not bramble.get_node("Ring").visible, "older Bramble nodes stand the stand-alone bush, not a hedge at a random yaw")
 	var reed := MapObject3D.new()
 	main.world_root.add_child(reed)
 	reed.configure({"object_id": 8125, "kind": EloriaProtocol.MAP_OBJECT_HARVEST, "x": 0, "y": 0, "label": "Reed"}, CoordinateAdapter.new({}), catalog)
