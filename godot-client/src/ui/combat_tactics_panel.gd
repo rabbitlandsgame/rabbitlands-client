@@ -5,10 +5,12 @@ const Style := preload("res://src/ui/combat_tactics_style.gd")
 const RuleRow := preload("res://src/ui/combat_tactics_rule_row.gd")
 const ActionPicker := preload("res://src/ui/combat_tactics_action_picker.gd")
 const Protocol := preload("res://src/network/combat_tactics_protocol.gd")
-const TARGETS := ["self", "ally", "leader_target", "current_target", "party_attacker", "lowest_enemy", "nearest_enemy"]
-const TARGET_LABELS := ["Self", "Ally: lowest health", "Leader's opponent", "Current opponent", "Opponent attacking party", "Engaged foe: lowest health", "Nearest engaged foe"]
-const CONDITIONS := ["always", "health_below", "ether_below", "has_status", "missing_status"]
-const CONDITION_LABELS := ["Always", "Health below %", "Ether below %", "Has status", "Missing status"]
+const TARGETS := ["self", "ally", "leader_target", "current_target", "party_attacker", "lowest_enemy", "nearest_enemy", "ally_target"]
+const TARGET_LABELS := ["Self", "Ally: lowest health", "Leader's opponent", "Current opponent", "Opponent attacking party", "Engaged foe: lowest health", "Nearest engaged foe", "Ally's opponent"]
+const COMBAT_STATES := ["any", "in_combat", "out_of_combat"]
+const COMBAT_LABELS := ["Any state", "In combat", "Out of combat"]
+const CONDITIONS := ["always", "health_below", "ether_below", "has_status", "missing_status", "missing_buff", "missing_debuff"]
+const CONDITION_LABELS := ["Always", "Health below %", "Ether below %", "Has status", "Missing status", "Missing buff", "Missing debuff"]
 const STATUSES := ["poison", "shield", "regeneration", "magic_protection", "magic_immunity", "haste", "accuracy"]
 const STATUS_LABELS := ["Poisoned", "Shield", "Regeneration", "Magic ward", "Magic immunity", "Haste", "Accuracy"]
 const REFRESH := 0
@@ -26,6 +28,8 @@ var _pause: Button
 var _status: Label
 var _message: Label
 var _rows: VBoxContainer
+var _rules_scroll: ScrollContainer
+var _follow_pending := false
 var _save: Button
 var _add: Button
 var _more: MenuButton
@@ -39,6 +43,7 @@ var _help: Label
 var _hint: Label
 var _target_picker: OptionButton
 var _condition_picker: OptionButton
+var _combat_picker: OptionButton
 var _action_picker: MenuButton
 var _value_picker: SpinBox
 var _status_picker: OptionButton
@@ -123,6 +128,7 @@ func _ready() -> void:
 	_browser.add_theme_constant_override("separation", 7)
 	_panes.add_child(_browser)
 	var scroll := UI.scroll("TacticsRules")
+	_rules_scroll = scroll
 	_browser.add_child(scroll)
 	_rows = VBoxContainer.new()
 	_rows.name = "RuleSummaries"
@@ -153,7 +159,7 @@ func _ready() -> void:
 	footer.name = "TacticsFooter"
 	footer.add_theme_constant_override("separation", 10)
 	add_child(footer)
-	_count = Style.label("0 / 6 rules")
+	_count = Style.label("0 / %d rules" % Protocol.MAX_RULES)
 	_count.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	footer.add_child(_count)
 	_more = MenuButton.new()
@@ -352,9 +358,10 @@ func _render() -> void:
 	_render_editor()
 	_sync_profiles()
 	_save.disabled = not _dirty or _conflicted or _state.is_empty()
-	_add.disabled = _state.is_empty() or _rules.size() >= int(_state.get("max_rules", 6))
-	_add.text = "＋ Add rule (6/6)" if _rules.size() >= 6 else "＋ Add rule"
-	_count.text = "%d / %d rules" % [_rules.size(), int(_state.get("max_rules", 6))]
+	var limit := int(_state.get("max_rules", Protocol.MAX_RULES))
+	_add.disabled = _state.is_empty() or _rules.size() >= limit
+	_add.text = "＋ Add rule (%d/%d)" % [_rules.size(), limit] if _rules.size() >= limit else "＋ Add rule"
+	_count.text = "%d / %d rules" % [_rules.size(), limit]
 	_more.disabled = _state.is_empty()
 	if _state.is_empty():
 		_run.hide(); _pause.hide()
@@ -377,6 +384,18 @@ func _render_rows() -> void:
 		var empty := Style.label("No rules yet.\nAdd a rule to get started.", 14, true)
 		empty.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		_rows.add_child(empty)
+	_follow_selection.call_deferred()
+
+func _follow_selection() -> void:
+	if _follow_pending: return
+	_follow_pending = true
+	# The new rows and a resized inspector need their final container layout
+	# before the scroll position can be calculated reliably.
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_follow_pending = false
+	if _selected >= 0 and _selected < _rows.get_child_count():
+		_rules_scroll.ensure_control_visible(_rows.get_child(_selected))
 
 func _select_rule(index: int) -> void:
 	if index < 0 or index >= _rules.size(): return
@@ -384,6 +403,7 @@ func _select_rule(index: int) -> void:
 	for item: Node in _rows.get_children():
 		if item is Button: item.set_pressed_no_signal(item.get_index() == index)
 	_render_editor()
+	_follow_selection.call_deferred()
 
 func _field(title: String, control: Control) -> void:
 	var row := HBoxContainer.new()
@@ -404,9 +424,12 @@ func _spin(value: int, maximum: int) -> SpinBox:
 
 func _render_editor() -> void:
 	UI.clear(_editor)
+	var heading := HBoxContainer.new()
+	_editor.add_child(heading)
 	_editor_title = Style.label("Edit Rule %d" % (_selected + 1) if _selected >= 0 else "Rule editor", 19)
 	_editor_title.add_theme_font_override("font", Style.heading_font())
-	_editor.add_child(_editor_title)
+	_editor_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	heading.add_child(_editor_title)
 	_editor.add_child(Style.line())
 	if _selected < 0 or _selected >= _rules.size():
 		var empty := Style.label("Select a rule to edit its target, condition and action.", 14, true)
@@ -414,29 +437,45 @@ func _render_editor() -> void:
 		_editor.add_child(empty)
 		return
 	var entry: Dictionary = _rules[_selected]
+	_combat_picker = _picker(COMBAT_STATES, COMBAT_LABELS, str(entry.get("combat", "any")), func(key: String) -> void:
+		entry.combat = key; _changed(); _render_rows())
+	_combat_picker.custom_minimum_size.x = 128
+	_combat_picker.size_flags_horizontal = Control.SIZE_SHRINK_END
+	_combat_picker.tooltip_text = "Only run this rule when this character is in combat, out of combat, or either."
+	heading.add_child(_combat_picker)
 	_target_picker = _picker(TARGETS, TARGET_LABELS, str(entry.target), func(key: String) -> void:
 		entry.target = key; _changed(); _render_rows())
 	_field("Target", _target_picker)
 	_condition_picker = _picker(CONDITIONS, CONDITION_LABELS, str(entry.condition), func(key: String) -> void:
-		entry.condition = key; _changed(); _render_rows(); _render_editor())
+		entry.condition = key
+		var choices := _status_choices(key)
+		if key in ["missing_buff", "missing_debuff"]:
+			var ids: Array = choices.map(func(status: Dictionary): return str(status.id))
+			if entry.status not in ids and not ids.is_empty(): entry.status = ids[0]
+		_changed(); _render_rows(); _render_editor())
 	_field("Condition", _condition_picker)
 	if entry.condition in ["health_below", "ether_below"]:
 		_value_picker = _spin(int(entry.value), 100)
 		_value_picker.suffix = "%"
 		_value_picker.value_changed.connect(func(amount: float) -> void: entry.value = int(amount); _changed(); _render_rows())
 		_field("Value", _value_picker)
-	elif entry.condition in ["has_status", "missing_status"]:
-		_status_picker = _picker(STATUSES, STATUS_LABELS, str(entry.status), func(key: String) -> void: entry.status = key; _changed(); _render_rows())
-		_field("Status", _status_picker)
+	elif entry.condition in ["has_status", "missing_status", "missing_buff", "missing_debuff"]:
+		var choices := _status_choices(str(entry.condition))
+		var ids: Array = choices.map(func(status: Dictionary): return str(status.id))
+		var labels: Array = choices.map(func(status: Dictionary): return str(status.name))
+		_status_picker = _picker(ids, labels, str(entry.status), func(key: String) -> void: entry.status = key; _changed(); _render_rows())
+		_field("Buff" if entry.condition == "missing_buff" else "Debuff" if entry.condition == "missing_debuff" else "Status", _status_picker)
 	_action_picker = ActionPicker.new()
 	_action_picker.configure(_state.actions, str(entry.action))
 	_action_picker.action_selected.connect(func(key: String) -> void:
 		entry.action = key
 		for action: Dictionary in _state.actions:
 			if action.id != key: continue
-			if action.get("scope", "") == "self": entry.target = "self"
-			elif action.get("hostile", false) or key in ["attack", "guard"]: entry.target = "current_target"
-			else: entry.target = "ally"
+			if key == "technique:intercept": entry.target = "ally"
+			elif action.get("scope", "") == "self": entry.target = "self"
+			elif action.get("hostile", false) or key in ["attack", "guard"]:
+				if entry.target in ["self", "ally"]: entry.target = "current_target"
+			elif entry.target not in ["self", "ally"]: entry.target = "ally"
 		_changed(); _render_rows(); _render_editor())
 	_field("Action", _action_picker)
 	if str(entry.action).begins_with("spell:"):
@@ -471,6 +510,15 @@ func _action_name(entry: Dictionary) -> String:
 		if action.id == entry.action: return str(action.name)
 	return "Unavailable: " + str(entry.action)
 
+func _status_choices(condition: String) -> Array:
+	var choices: Array = _state.get("statuses", [])
+	if choices.is_empty():
+		for index: int in STATUSES.size():
+			choices.append({"id":STATUSES[index], "name":STATUS_LABELS[index], "kind":"debuff" if STATUSES[index] == "poison" else "buff"})
+	if condition == "missing_buff": return choices.filter(func(status: Dictionary): return status.kind == "buff")
+	if condition == "missing_debuff": return choices.filter(func(status: Dictionary): return status.kind == "debuff")
+	return choices
+
 func _summary(entry: Dictionary) -> String:
 	var target_index := TARGETS.find(str(entry.target))
 	var target: String = TARGET_LABELS[target_index] if target_index >= 0 else str(entry.target)
@@ -480,9 +528,14 @@ func _summary(entry: Dictionary) -> String:
 	match str(entry.condition):
 		"health_below": condition = "Health < %d%%" % int(entry.value)
 		"ether_below": condition = "Ether < %d%%" % int(entry.value)
-		"has_status": condition = "Poisoned" if entry.status == "poison" else str(entry.status).replace("_", " ").capitalize()
-		"missing_status": condition = str(entry.status).replace("_", " ").capitalize() + " missing"
-	return target + (" · " + condition if not condition.is_empty() else "") + " → " + _action_name(entry)
+		"has_status", "missing_status", "missing_buff", "missing_debuff":
+			condition = str(entry.status).replace("_", " ").capitalize()
+			for status: Dictionary in _status_choices("has_status"):
+				if status.id == entry.status: condition = str(status.name)
+			if entry.condition != "has_status": condition += " missing"
+	var combat := str(entry.get("combat", "any"))
+	var prefix := ("In combat · " if combat == "in_combat" else "Out of combat · ") if combat != "any" else ""
+	return prefix + target + (" · " + condition if not condition.is_empty() else "") + " → " + _action_name(entry)
 
 func _glyph(entry: Dictionary) -> String:
 	var action := _action_name(entry).to_lower()
@@ -505,9 +558,9 @@ func _delete_rule() -> void:
 	_changed(); _render()
 
 func _add_rule() -> void:
-	if _state.is_empty() or _rules.size() >= int(_state.get("max_rules", 6)): return
+	if _state.is_empty() or _rules.size() >= int(_state.get("max_rules", Protocol.MAX_RULES)): return
 	_rules.append({"enabled":true, "target":"current_target", "condition":"always", "value":50,
-		"status":"poison", "action":"attack", "power":1})
+		"status":"poison", "action":"attack", "power":1, "combat":"any"})
 	_selected = _rules.size() - 1
 	_changed(); _render()
 

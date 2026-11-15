@@ -14,8 +14,9 @@ func fixture() -> Dictionary:
 	var path := OS.get_environment("RL_TACTICS_FIXTURE")
 	if not path.is_empty(): return JSON.parse_string(FileAccess.get_file_as_string(path))
 	var entry := {"enabled":true,"target":"self","condition":"health_below","value":40,"status":"poison","action":"spell:7","power":1}
-	return {"kind":"combat_tactics","version":1,"subject":"self","context":"fixture","role":"self","active":false,"player_active":false,"status":"Paused","notice":"","max_rules":6,
-		"subjects":[{"id":"self","name":"My combat actions"}],"actions":[{"id":"attack","name":"Weapon attack"},{"id":"spell:7","name":"Heal","scope":"self","hostile":false}],
+	return {"kind":"combat_tactics","version":1,"subject":"self","context":"fixture","role":"self","active":false,"player_active":false,"status":"Paused","notice":"","max_rules":20,
+		"subjects":[{"id":"self","name":"My combat actions"}],"actions":[{"id":"attack","name":"Weapon attack"},{"id":"spell:7","name":"Heal","scope":"self","hostile":false},{"id":"item:1653","name":"Use Potion of Mana","scope":"self","item_group":"Ether"}],
+		"statuses":[{"id":"shield","name":"Shield","kind":"buff"},{"id":"magic_protection","name":"Magic ward","kind":"buff"},{"id":"poison","name":"Poisoned","kind":"debuff"}],
 		"plan":{"revision":0,"selected":0,"profiles":[{"name":"Balanced","rules":[entry]},{"name":"Defensive","rules":[]},{"name":"Offensive","rules":[]}]}}
 
 func run() -> void:
@@ -34,8 +35,10 @@ func run() -> void:
 	check(not Protocol.valid(invalid), "fractional preset is rejected")
 	invalid = state.duplicate(true); invalid.plan.profiles[0].rules[0].enabled = "yes"
 	check(not Protocol.valid(invalid), "untyped rule enable is rejected")
-	invalid = state.duplicate(true); invalid.plan.profiles[0].rules.resize(7)
+	invalid = state.duplicate(true); invalid.plan.profiles[0].rules.resize(21)
 	check(not Protocol.valid(invalid), "oversized rule lists are rejected")
+	invalid = state.duplicate(true); invalid.plan.profiles[0].rules[0].combat = "unknown"
+	check(not Protocol.valid(invalid), "unknown combat filters are rejected")
 	var background := ColorRect.new()
 	background.color = Color("100d09")
 	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -68,11 +71,14 @@ func run() -> void:
 	for action: Dictionary in state.actions:
 		check(menu_actions.count(str(action.id)) == 1, "every authoritative action appears in exactly one submenu")
 	check(panel._action_picker.menus.has("Standard actions") and panel._action_picker.menus.has("Spells/Healing"), "standard actions and categorized spells have separate menus")
+	check_expanded_controls(panel, state)
+	panel._saving = true
+	panel.set_state(state)
 	requests.clear()
 	panel._condition_picker.select(3)
 	panel._condition_picker.item_selected.emit(3)
-	panel._status_picker.select(1)
-	panel._status_picker.item_selected.emit(1)
+	panel._select(panel._status_picker, "shield")
+	panel._status_picker.item_selected.emit(panel._status_picker.selected)
 	check(panel._rules[0].condition == "has_status" and panel._rules[0].status == "shield", "the shared condition and status controls edit the selected rule")
 	panel._action_picker.action_selected.emit("attack")
 	check(panel._rules[0].action == "attack" and panel._rules[0].target == "current_target", "changing an action normalizes its target")
@@ -97,8 +103,8 @@ func run() -> void:
 	live.plan.revision += 1
 	panel.set_state(live)
 	check(not panel._dirty and panel._save.disabled, "acknowledged save clears dirty state")
-	for index in range(8): panel._add_rule()
-	check(panel._rules.size() == 6 and panel._add.disabled, "editor bounds the rule list to six")
+	for index in range(25): panel._add_rule()
+	check(panel._rules.size() == int(state.max_rules) and panel._add.disabled, "editor bounds the rule list to the server's rule limit")
 	panel._select_rule(1)
 	check(panel._selected == 1 and panel._editor_title.text == "Edit Rule 2", "summary selection changes the single shared editor")
 	var selected: Dictionary = panel._rules[1].duplicate(true)
@@ -108,9 +114,9 @@ func run() -> void:
 	check(not panel._rows.get_child(0)._can_drop_data(Vector2.ZERO, {"tactics_editor":-1, "index":1}), "a rule rejects another editor's drag")
 	panel._select_rule(1)
 	panel._delete_rule()
-	check(panel._rules.size() == 5 and not panel._add.disabled and panel._dirty, "Delete updates the shared editor and frees a rule slot")
+	check(panel._rules.size() == int(state.max_rules) - 1 and not panel._add.disabled and panel._dirty, "Delete updates the shared editor and frees a rule slot")
 	panel._add_rule()
-	check(panel._selected == 5 and panel._down.disabled, "Add selects the new rule at the lowest priority")
+	check(panel._selected == int(state.max_rules) - 1 and panel._down.disabled, "Add selects the new rule at the lowest priority")
 	var dirty_copy: Array = panel._rules.duplicate(true)
 	panel._choose_profile(1)
 	check(panel._rules == dirty_copy and not panel._profile_buttons[1].button_pressed, "preset switching preserves a dirty draft and authoritative selection")
@@ -131,6 +137,9 @@ func run() -> void:
 	check(panel._run.disabled and not panel._pause.disabled, "runtime ticks update the explicit Start and Pause controls")
 	app._on_packet(EloriaProtocol.ServerMessage.ELORIA_MAGIC_STATE, JSON.stringify(conflict).to_utf8_buffer())
 	check(not panel._dirty and not panel._conflicted, "Refresh replaces the draft and clears the conflict")
+	while panel._rules.size() < int(state.max_rules): panel._add_rule()
+	var full_request := Protocol.request_payload({"op":"save", "rules":panel._rules}, state)
+	check(JSON.stringify(full_request).to_utf8_buffer().size() <= 8192, "all twenty rules fit the server request budget")
 	live.plan.profiles[0].rules = panel._rules.duplicate(true)
 	for frame in range(8): await process_frame
 	check(root.get_visible_rect().encloses(panel._save.get_global_rect()), "Save remains inside the supported viewport")
@@ -149,13 +158,15 @@ func run() -> void:
 	for dimensions: Vector2i in [Vector2i(1024, 720), Vector2i(960, 540), Vector2i(800, 450)]:
 		root.size = dimensions
 		book._fit_panel()
+		book.tactics_panel._select_rule(int(state.max_rules) - 1)
 		for frame in range(8): await process_frame
 		check(root.get_visible_rect().encloses(book.panel.get_global_rect()), "Tactics fits the real action book at %s" % dimensions)
 		check(book.panel.get_global_rect().encloses(book.tactics_panel._save.get_global_rect()), "Save stays inside the real action book at %s" % dimensions)
 		check(book.tactics_panel._inspector.global_position.x >= book.tactics_panel._browser.get_global_rect().end.x, "the shared editor stays beside the list at %s" % dimensions)
 		check(book.panel.get_global_rect().encloses(book.tactics_panel._delete.get_global_rect()), "editor actions remain visible at %s" % dimensions)
-		for row: Node in book.tactics_panel._rows.get_children():
-			check(book.panel.get_global_rect().encloses(row.get_global_rect()), "all six summary rows fit at %s" % dimensions)
+		var selected_row: Control = book.tactics_panel._rows.get_child(int(state.max_rules) - 1)
+		check(book.tactics_panel._rules_scroll.get_global_rect().encloses(selected_row.get_global_rect()), "the last rule scrolls into view at %s: row %s in %s" % [dimensions, selected_row.get_global_rect(), book.tactics_panel._rules_scroll.get_global_rect()])
+		check(book.tactics_panel._rules_scroll.scroll_vertical > 0, "twenty rules scroll within the compact window")
 	root.size = Vector2i(1280, 720)
 	root.content_scale_factor = 1.5
 	book._fit_panel()
@@ -207,3 +218,51 @@ func run() -> void:
 	await process_frame
 	print("Combat tactics editor: %d failures" % failures)
 	quit(1 if failures else 0)
+
+func check_expanded_controls(panel: Control, state: Dictionary) -> void:
+	panel._select(panel._condition_picker, "missing_buff")
+	panel._condition_picker.item_selected.emit(panel._condition_picker.selected)
+	check(panel._rules[0].condition == "missing_buff" and panel._rules[0].status != "poison", "Missing buff normalizes a previously selected debuff")
+	for index: int in panel._status_picker.item_count:
+		check(panel._status_picker.get_item_metadata(index) != "poison", "the buff picker excludes harmful effects")
+	panel._select(panel._status_picker, "shield")
+	panel._status_picker.item_selected.emit(panel._status_picker.selected)
+	panel._select(panel._target_picker, "ally")
+	panel._target_picker.item_selected.emit(panel._target_picker.selected)
+	check("Shield missing" in panel._summary(panel._rules[0]) and panel._rules[0].target == "ally", "missing buffs summarize the selected ally and named effect")
+	panel._select(panel._condition_picker, "missing_debuff")
+	panel._condition_picker.item_selected.emit(panel._condition_picker.selected)
+	check(panel._rules[0].status == "poison", "Missing debuff selects a harmful effect")
+	for index: int in panel._status_picker.item_count:
+		check(panel._status_picker.get_item_metadata(index) != "shield", "the debuff picker excludes beneficial effects")
+	panel._select(panel._target_picker, "ally_target")
+	panel._target_picker.item_selected.emit(panel._target_picker.selected)
+	panel._action_picker.action_selected.emit("attack")
+	check(panel._rules[0].target == "ally_target", "choosing another hostile action preserves the ally's opponent selector")
+	for action: Dictionary in state.actions:
+		if action.id != "technique:intercept": continue
+		panel._select(panel._target_picker, "self")
+		panel._target_picker.item_selected.emit(panel._target_picker.selected)
+		panel._action_picker.action_selected.emit("technique:intercept")
+		check(panel._rules[0].target == "ally", "Intercept always selects an ally")
+	panel._select(panel._combat_picker, "out_of_combat")
+	panel._combat_picker.item_selected.emit(panel._combat_picker.selected)
+	check(panel._rules[0].combat == "out_of_combat", "the caster's combat filter is independent of the target condition")
+	check(panel._action_picker.menus.has("Items/Ether"), "ether consumables have an Items submenu")
+	var menu: PopupMenu = panel._action_picker.menus["Items/Ether"]
+	var chosen := str(menu.get_item_metadata(0))
+	menu.id_pressed.emit(menu.get_item_id(0))
+	check(panel._rules[0].action == chosen and panel._rules[0].target == "self", "item selection uses stable item identity and normalizes to the consumer")
+	panel._select(panel._condition_picker, "ether_below")
+	panel._condition_picker.item_selected.emit(panel._condition_picker.selected)
+	panel._value_picker.value = 25
+	panel._save.pressed.emit()
+	var saved_request: Dictionary = requests[-1]
+	check(saved_request.rules[0].action == chosen and saved_request.rules[0].combat == "out_of_combat" and saved_request.rules[0].value == 25, "Save includes the item, combat filter and threshold")
+	var response: Dictionary = state.duplicate(true)
+	response.plan.profiles[0].rules = JSON.parse_string(JSON.stringify(saved_request.rules))
+	response.plan.revision += 1
+	panel.set_state(response)
+	panel._more_action(panel.REFRESH)
+	panel.set_state(response)
+	check(panel._action_picker.selected_id == chosen and panel._combat_picker.get_item_metadata(panel._combat_picker.selected) == "out_of_combat" and panel._rules == response.plan.profiles[0].rules, "a save acknowledgment and Refresh preserve all expanded rule fields")

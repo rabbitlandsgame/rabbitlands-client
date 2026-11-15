@@ -17,12 +17,15 @@ func configure(actions: Array, current: String) -> void:
 	var ordered := actions.duplicate()
 	ordered.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return str(a.name).naturalnocasecmp_to(str(b.name)) < 0)
 	# Build top-level groups in a stable order, without empty role categories.
-	for group: String in ["Standard actions", "Spells", "Techniques"]:
+	for group: String in ["Standard actions", "Spells", "Techniques", "Items"]:
 		for action: Dictionary in ordered:
 			if _path(action)[0] == group: _menu([group]); break
 	for category: String in SpellCatalog.GROUP_ORDER:
 		for action: Dictionary in ordered:
 			if _path(action) == ["Spells", category]: _menu(["Spells", category]); break
+	for category: String in ["Healing", "Ether", "Cleansing", "Action points", "Buffs", "Food"]:
+		for action: Dictionary in ordered:
+			if _path(action) == ["Items", category]: _menu(["Items", category]); break
 	for action: Dictionary in ordered:
 		var popup := _menu(_path(action))
 		var index := popup.item_count
@@ -32,11 +35,12 @@ func configure(actions: Array, current: String) -> void:
 		var scope: String = {"self":"You", "target":"Selected target", "allies":"Party allies"}.get(action.get("scope", ""), "")
 		popup.set_item_tooltip(index, str(action.name) + ("\nAffects: " + scope if not scope.is_empty() else ""))
 		if action.id == current: text = str(action.name) + " ▾"
-	tooltip_text = text.trim_suffix(" ▾") + "\nChoose Standard actions, Spells or Techniques. Type a name while a menu is open to jump to it."
+	tooltip_text = text.trim_suffix(" ▾") + "\nChoose Standard actions, Spells, Techniques or Items. Items use your inventory, including when a bot consumes them."
 	disabled = actions.is_empty()
 
 func _path(action: Dictionary) -> Array[String]:
 	var id := str(action.id)
+	if id.begins_with("item:"): return ["Items", str(action.get("item_group", "Consumables"))]
 	if id.begins_with("spell:"):
 		if _catalog == null:
 			_catalog = SpellCatalog.new()
