@@ -16661,6 +16661,12 @@ func _apply_look_switch() -> void:
 ## it) and the server is told the new cap.
 func _apply_graphics_quality() -> void:
 	LookSwitch.apply_shadow_quality(world_sun)
+	# The painted ground's steep-face rock layer follows the quality on every
+	# loaded root (LookGround.apply_quality; a root still loading paints with it).
+	if world_loader != null and exterior_stream != null:
+		for world: Dictionary in LookSwitch.worlds(world_loader.world_root,
+				world_loader.manifest, exterior_stream.residents):
+			LookGround.apply_quality(world.root as Node)
 	if world_distance != null:
 		world_distance.set_quality(LookProfile.quality())
 	crowd.set_quality(LookProfile.quality())

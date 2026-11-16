@@ -91,14 +91,17 @@ const QUALITY_TRIM_VARIABLE := "ELORIA_LOOK_QUALITY_TRIM"
 ## time, a fifth of the draw calls, a quarter of the primitives. LOW keeps the
 ## grade, the painted ground and crowns and the painted sky, and gives up
 ## every screen-space pass, the glow and the grass, and draws the shadows into
-## a 2048 atlas with hard edges: cheaper than the look off at HIGH.
+## a 2048 atlas with hard edges: cheaper than the look off at HIGH. LOW also
+## gives up the steep-face rock layer (`rock_face`, ROCK_FACE_TEXTURE): two
+## more texture samples on every cliff pixel, where its planar ground streaks
+## as it always did.
 const QUALITY_PRESETS := {
 	Quality.LOW: {"shadow_splits": 2, "shadow_atlas": 2048, "shadow_filter": 0,
-		"ssao": false, "ssil": false, "glow": false, "grass": false},
+		"ssao": false, "ssil": false, "glow": false, "grass": false, "rock_face": false},
 	Quality.MEDIUM: {"shadow_splits": 2, "shadow_atlas": 4096, "shadow_filter": 2,
-		"ssao": true, "ssil": false, "glow": true, "grass": true},
+		"ssao": true, "ssil": false, "glow": true, "grass": true, "rock_face": true},
 	Quality.HIGH: {"shadow_splits": 4, "shadow_atlas": 4096, "shadow_filter": 2,
-		"ssao": true, "ssil": true, "glow": true, "grass": true},
+		"ssao": true, "ssil": true, "glow": true, "grass": true, "rock_face": true},
 }
 ## The shadow atlas's depth, which no quality changes (Godot's default).
 const SHADOW_ATLAS_16_BITS := true
@@ -573,7 +576,32 @@ const CLASS_TEXTURES := {
 	"beach_sand": {"path": "res://src/world/look/textures/beach-sand.png", "metres": 4.0},
 	"coastal_gravel": {"path": "res://src/world/look/textures/coastal-gravel.png", "metres": 4.0},
 	"tilled_soil": {"path": "res://src/world/look/textures/tilled-soil.png", "metres": 3.5},
+	"cliff_rock": {"path": "res://src/world/look/textures/cliff-rock-face.png", "metres": 8.0},
 }
+## The steep-face rock layer (painted_ground_surface.gdshaderinc). The ground
+## is mapped from above, so on a face steeper than about 50 degrees each texel
+## stretches down the slope into a vertical streak: Landfall's bailey cliff
+## and gully, Coilmere's Spindle Hill and knob, Boarsend's and Ravenhead's sea
+## cliffs (map quality sweeps 2026-11-15). `ground.verge_grain_steep` only
+## calmed the streaks. There the terrain and base ground give way to
+## ROCK_FACE_TEXTURE (a CLASS_TEXTURES name, its `metres` the repeat) mapped
+## from the side along x and z in continent metres, recoloured to the ground's
+## own mean colour as a class texture is, keeping ROCK_FACE_HUE of its own
+## hue, times ROCK_FACE_VALUE; the paint keeps ROCK_FACE_GRAIN of its grain
+## where a region calms the planar texture's. It begins at the world-up normal
+## component ROCK_FACE_UP.x (about 44 degrees, grade 0.96) and is whole at .y
+## (about 53 degrees, grade 1.33), the threshold moved up to ROCK_FACE_WOBBLE.x
+## by noise ROCK_FACE_WOBBLE.y metres across so its edge wanders over a bank.
+## Level ground never reaches it and takes no extra sample: it draws exactly as
+## before. Only opaque terrain and base ground take it (patches and decks lie
+## over them), never at LOW quality (QUALITY_PRESETS `rock_face`), and a region
+## may switch it off with `ground.rock_face` 0.
+const ROCK_FACE_TEXTURE := "cliff_rock"
+const ROCK_FACE_UP := Vector2(0.72, 0.6)
+const ROCK_FACE_WOBBLE := Vector2(0.05, 7.0)
+const ROCK_FACE_HUE := 0.5
+const ROCK_FACE_VALUE := 1.0
+const ROCK_FACE_GRAIN := 1.0
 ## The surfaces a class texture can cover: walk decks, pale paving, sand
 ## glazes, green meadows, bare rock and bare soil (LookGround.class_slot). A
 ## meadow keeps its own texture on the isles: a fine turf at a 4 m repeat
@@ -1650,7 +1678,8 @@ const REGION_SECTIONS := {
 		"verge_value_earth", "verge_saturation", "verge_green_red", "deck_path",
 		"deck_road_colour", "deck_tint", "deck_chroma", "deck_grain", "path_detail",
 		"path_fine", "rock_value", "meadow_value", "meadow_chroma", "meadow_tint", "keep_patches",
-		"paving_tint", "verge_grain", "verge_grain_steep", "class_textures", "kit_paving"],
+		"paving_tint", "verge_grain", "verge_grain_steep", "class_textures", "kit_paving",
+		"rock_face"],
 	"grass": ["root", "tip", "value", "layers", "open", "meadow", "open_green"],
 	"sky": ["top", "horizon", "paint", "clear", "haze_warmth"],
 	"water": ["decode_albedo", "inland_tint", "sea_value", "sea_chroma", "sea_tint"],

@@ -118,6 +118,9 @@ vec3 look_biome_reference(vec4 weights, vec4 secondary) {
 const PAINTED_META := &"look_painted_ground"
 ## Marks the copy of a kit paving deck's mesh that carries a coverage.
 const KIT_MESH_META := &"look_kit_paving_mesh"
+## Marks a painted material that carries the steep-face rock layer, with the
+## region it was painted for (`set_rock_face`, `apply_quality`).
+const ROCK_META := &"look_rock_face_region"
 ## Marks a painted material's Mobile depth pre-pass (`mobile_prepass`).
 const PREPASS_META := &"look_mobile_prepass"
 ## WorldLoader.BATCH_META: the node is hidden and a MultiMesh draws it.
@@ -855,6 +858,9 @@ static func painted_source_for(source: Material, kind: Kind, has_colour: bool,
 			painted.set_shader_parameter(&"look_class_metres",
 				float((LookProfile.CLASS_TEXTURES[texture_name] as Dictionary)["metres"]))
 			painted.set_shader_parameter(&"look_class_hue", LookProfile.CLASS_TEXTURE_HUE)
+	# The steep-face rock layer, on opaque terrain and base ground only.
+	if takes_rock_face(kind, blended):
+		set_rock_face(painted, region)
 	var opacity := 1.0
 	if meadow:
 		opacity = LookProfile.MEADOW_OPACITY
@@ -968,6 +974,63 @@ static func class_slot(material: BaseMaterial3D, kind: Kind, meadow: bool, kept:
 	if soil_tint(material.albedo_color) and not is_cobble(material):
 		return "soil"
 	return ""
+
+## Whether a painted surface of `kind` takes the steep-face rock layer
+## (LookProfile.ROCK_FACE_TEXTURE): the opaque terrain and an opaque authored
+## patch (the base ground the biome blend did not take over). Blended patches
+## and walk decks lie over them and keep their own textures.
+static func takes_rock_face(kind: Kind, blended: bool) -> bool:
+	return not blended and (kind == Kind.TERRAIN or kind == Kind.PATCH)
+
+## The rock face's repeat in metres for `region` at the quality in use, or 0
+## where it is off: at a quality whose `rock_face` is false (LOW), in a region
+## whose `ground.rock_face` is 0, or when its texture does not load.
+static func rock_face_metres(region: String) -> float:
+	if not bool(LookProfile.quality_value("rock_face")) \
+			or float(LookProfile.region_value(region, "ground", "rock_face", 1.0)) <= 0.0:
+		return 0.0
+	var entry: Variant = LookProfile.CLASS_TEXTURES.get(LookProfile.ROCK_FACE_TEXTURE)
+	return float((entry as Dictionary)["metres"]) if entry is Dictionary else 0.0
+
+## Gives a painted terrain material the rock layer's texture and constants,
+## and marks it (ROCK_META, the region) so a change of quality can switch it
+## (`apply_quality`). Off (look_rock_metres 0) where `rock_face_metres` is 0.
+static func set_rock_face(painted: ShaderMaterial, region: String) -> void:
+	painted.set_meta(ROCK_META, region)
+	var detail := class_texture(LookProfile.ROCK_FACE_TEXTURE)
+	painted.set_shader_parameter(&"look_rock_texture", detail)
+	painted.set_shader_parameter(&"look_rock_metres",
+		rock_face_metres(region) if detail != null else 0.0)
+	painted.set_shader_parameter(&"look_rock_up", LookProfile.ROCK_FACE_UP)
+	painted.set_shader_parameter(&"look_rock_wobble", LookProfile.ROCK_FACE_WOBBLE)
+	painted.set_shader_parameter(&"look_rock_hue", LookProfile.ROCK_FACE_HUE)
+	painted.set_shader_parameter(&"look_rock_value", LookProfile.ROCK_FACE_VALUE)
+	painted.set_shader_parameter(&"look_rock_grain", LookProfile.ROCK_FACE_GRAIN)
+
+## The graphics quality changed: switches the rock layer on or off on every
+## painted terrain material under `root` (each is shared by its meshes, and
+## the loader paints a chunk once). Returns the materials changed.
+static func apply_quality(root: Node) -> int:
+	if root == null:
+		return 0
+	var seen: Dictionary = {}
+	var changed := 0
+	for node: Node in root.find_children("*", "MeshInstance3D", true, false):
+		var mesh_instance := node as MeshInstance3D
+		if mesh_instance.mesh == null:
+			continue
+		for surface: int in mesh_instance.mesh.get_surface_count():
+			var painted := mesh_instance.get_surface_override_material(surface) as ShaderMaterial
+			if painted == null or not painted.has_meta(ROCK_META) \
+					or seen.has(painted.get_instance_id()):
+				continue
+			seen[painted.get_instance_id()] = true
+			var metres := rock_face_metres(str(painted.get_meta(ROCK_META))) \
+				if painted.get_shader_parameter(&"look_rock_texture") != null else 0.0
+			if float(painted.get_shader_parameter(&"look_rock_metres")) != metres:
+				painted.set_shader_parameter(&"look_rock_metres", metres)
+				changed += 1
+	return changed
 
 ## The class texture `texture_name` names (LookProfile.CLASS_TEXTURES), with
 ## mipmaps. Authored import settings provide the chain before play; older
