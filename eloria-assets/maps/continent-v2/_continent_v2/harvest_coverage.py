@@ -134,6 +134,14 @@ def kit_of(catalog_id: str) -> str:
     return re.sub(r"-\d+$", "", name)
 
 
+# Godot leaves a script property out of the .tscn while it equals the script's default, so an unwritten property is
+# that default: godot-client/src/dev/map_authoring_pilot/ground_region.gd and bridge_control.gd (the region scenes'
+# ground_region_control.gd and map_authoring_region/bridge_control.gd extend them and keep their defaults). A test
+# reads the scripts to keep these in step.
+GROUND_REGION_DEFAULTS = {"enabled": False, "shape": 0, "size": (10.0, 7.0), "blend_width": 1.25, "opacity": 1.0}
+BRIDGE_DEFAULTS = {"width": 3.0}
+
+
 def read_scene(region: str, checkout: Path, pass_name: str):
     """The scene's markers, road paths (bake shape: territory-local points with widths), scenery placements and the
     blocks a previous --apply-scenes of this pass wrote (returned separately, so the base scene is recoverable)."""
@@ -192,11 +200,11 @@ def read_scene(region: str, checkout: Path, pass_name: str):
         elif parent == "Bridges" and _field(body, "bridge_id"):
             tr = _transform(body) or (np.eye(3), np.zeros(3))
             bridges[attrs.get("name")] = {"id": _field(body, "bridge_id").strip('"'), "transform": tr,
-                                          "width": float(_field(body, "width") or 8.0)}
+                                          "width": float(_field(body, "width") or BRIDGE_DEFAULTS["width"])}
         elif parent.startswith("Bridges/") and attrs.get("name") in ("Start", "End"):
-            tr = _transform(body)
-            if tr is not None:
-                bridge_ends.setdefault(parent.split("/", 1)[1], {})[attrs["name"]] = tr[1]
+            # an unwritten transform is the identity: a landing at the bridge node's own origin
+            tr = _transform(body) or (np.eye(3), np.zeros(3))
+            bridge_ends.setdefault(parent.split("/", 1)[1], {})[attrs["name"]] = tr[1]
         elif parent == "Ground/Regions" and _field(body, "region_id"):
             tr = _transform(body) or (np.eye(3), np.zeros(3))
             surface = re.search(r'surface = SubResource\("([^"]+)"\)', body)
@@ -204,13 +212,17 @@ def read_scene(region: str, checkout: Path, pass_name: str):
             size = [float(v) for v in FLOATS.findall((_field(body, "size") or "()").split("(", 1)[-1])]
             clip = _field(body, "clip_polygon")
             clip = np.array([float(v) for v in FLOATS.findall(clip.split("(", 1)[1])]).reshape(-1, 2) if clip else None
+            d = GROUND_REGION_DEFAULTS
+            shape = _field(body, "shape")
+            enabled = _field(body, "enabled")
             ground_regions.append({
                 "id": _field(body, "region_id").strip('"'),
-                # shape 1 is a rectangle; an unwritten shape is the default ellipse (the bake reads them so)
-                "shape": "rectangle" if (_field(body, "shape") or "0") == "1" else "ellipse",
-                "size": size if len(size) == 2 else [0.0, 0.0], "basis": tr[0], "origin": tr[1],
-                "blend": float(_field(body, "blend_width") or 0.0), "opacity": float(_field(body, "opacity") or 1.0),
-                "enabled": (_field(body, "enabled") or "true") == "true",
+                # shape 1 is a rectangle, 0 the ellipse (the bake reads them so)
+                "shape": "rectangle" if (int(shape) if shape else d["shape"]) == 1 else "ellipse",
+                "size": size if len(size) == 2 else list(d["size"]), "basis": tr[0], "origin": tr[1],
+                "blend": float(_field(body, "blend_width") or d["blend_width"]),
+                "opacity": float(_field(body, "opacity") or d["opacity"]),
+                "enabled": enabled == "true" if enabled else d["enabled"],
                 "surfaceId": surface.group(1) if surface else None, "clip": clip})
     for region_ in ground_regions:
         region_["preset"] = presets.get(region_.pop("surfaceId"))
@@ -448,8 +460,10 @@ def chebyshev_mask(shape, tiles, radius):
 # The numbers live here, not in content/harvest-coverage-rules.json, so the applied plan's rulesSha256 stays valid; a
 # rules file may override any of them under an optional "exclusions" object.
 EXCLUSIONS = {
-    # Deck kits: the placed model's whole x/z hull, widened by the margin. Any other kit model with Walk_ faces (a
-    # gatehouse passage, a lighthouse gallery) excludes the hull of those faces. Saved bridges exclude their deck strip.
+    # Deck kits: the tiles under the placed model's faces (mark_triangles), widened by the margin. Not their hull: a
+    # garden paving chunk is a network of walks, and its hull would take the lawns between them. Any other kit model
+    # with Walk_ faces (a gatehouse passage, a lighthouse gallery) excludes the tiles under those faces. Saved bridges
+    # exclude their deck strip.
     "deckKitWords": ["pier", "causeway", "landing-stage", "quay", "jetty", "boardwalk", "bridge", "paving",
                      "plaza-rosette", "temple-stair", "stairhouse", "walk-", "mole-"],
     "deckMarginMetres": 1.0,
@@ -469,8 +483,10 @@ EXCLUSIONS = {
     # Trees: the trunk (export_collision's trunk prism, served closed already) widened by treeTrunkMarginMetres, and
     # the hull of the model's vertices within treeSkirtBandMetres of the served ground beneath them (a fir's skirt on
     # the ground, a tree fern's trunk base; standing_band) widened by treeSkirtMarginMetres. Prop-root trees keep
-    # only the trunk: plants stand between thin roots (the audit left those as they are).
-    "treeKitWords": ["tree", "pine", "-fir", "fir-", "larch", "cypress", "spruce", "palm"],
+    # only the trunk: plants stand between thin roots (the audit left those as they are). Tree words are whole words of
+    # the kit name (kit_words): short tree names hide inside other words ("pine" in alpine-flower-cushion, "tree" in
+    # obelisk-street-market), so the dead tree and the treehouse (both given a trunk by the bake) are named in full.
+    "treeKitWords": ["tree", "deadtree", "treehouse", "pine", "fir", "larch", "cypress", "spruce", "palm"],
     "openRootTreeWords": ["banyan", "mangrove"],
     "treeTrunkMarginMetres": 1.0,
     "treeSkirtBandMetres": 0.7,
@@ -521,8 +537,117 @@ def kit_geometry(checkout: Path, scene_path: str):
     return _KIT_GEOMETRY[key]
 
 
+_KIT_FACES = {}
+
+
+def kit_faces(checkout: Path, scene_path: str):
+    """A deck kit's faces in its own space (t, 3, 3), every mesh as export_collision.Prototype reads it: the deck's
+    footprint is where these lie (mark_triangles), not their hull."""
+    path = Path(checkout) / "godot-client" / scene_path.removeprefix("res://")
+    key = str(path)
+    if key not in _KIT_FACES:
+        _KIT_FACES[key] = np.asarray(X.Prototype(path).every, float).reshape(-1, 3, 3)
+    return _KIT_FACES[key]
+
+
 def _words(kit, words):
     return any(w in kit for w in words)
+
+
+def kit_words(kit, words):
+    """Whether the kit name holds one of `words` as whole hyphen-separated words: "pine" names scots-pine-tree, not
+    alpine-flower-cushion; "tree" names tree-fern, not obelisk-street-market. A word may span several ("tree-fern");
+    a leading or trailing hyphen is ignored ("-fir" and "fir-" both mean fir)."""
+    tokens = kit.split("-")
+    for word in words:
+        parts = [t for t in word.split("-") if t]
+        n = len(parts)
+        if n and any(tokens[i:i + n] == parts for i in range(len(tokens) - n + 1)):
+            return True
+    return False
+
+
+def scenery_class(kit, ex):
+    """The scenery exclusion a kit falls under: "deck", "dense", "tree" or None. Deck and dense words match anywhere in
+    the kit name ("boulder" in coastal-boulders); tree words only as whole words (kit_words)."""
+    if _words(kit, ex["deckKitWords"]):
+        return "deck"
+    if _words(kit, ex["denseKitWords"]):
+        return "dense"
+    if kit_words(kit, ex["treeKitWords"]):
+        return "tree"
+    return None
+
+
+_TRI_BUDGET = 1 << 20           # tile centres mark_triangles tests per batch
+
+
+def _near_triangles(X_, Z_, tri, margin):
+    """Whether points (X_, Z_) lie inside, or within `margin` metres of, the x/z triangles `tri` (n, 3, 2); X_ and Z_
+    broadcast against (n, 1, 1). A face seen edge-on (zero area: a wall, a post) counts only through its edges."""
+    ax, az = tri[:, 0, 0, None, None], tri[:, 0, 1, None, None]
+    bx, bz = tri[:, 1, 0, None, None], tri[:, 1, 1, None, None]
+    cx, cz = tri[:, 2, 0, None, None], tri[:, 2, 1, None, None]
+    e0 = (bx - ax) * (Z_ - az) - (bz - az) * (X_ - ax)
+    e1 = (cx - bx) * (Z_ - bz) - (cz - bz) * (X_ - bx)
+    e2 = (ax - cx) * (Z_ - cz) - (az - cz) * (X_ - cx)
+    area = (bx - ax) * (cz - az) - (bz - az) * (cx - ax)
+    near = (np.abs(area) > 1e-12) & (((e0 >= 0) & (e1 >= 0) & (e2 >= 0)) | ((e0 <= 0) & (e1 <= 0) & (e2 <= 0)))
+    m2 = margin * margin
+    for (px, pz), (qx, qz) in (((ax, az), (bx, bz)), ((bx, bz), (cx, cz)), ((cx, cz), (ax, az))):
+        dx, dz = qx - px, qz - pz
+        l2 = dx * dx + dz * dz
+        t = np.clip(((X_ - px) * dx + (Z_ - pz) * dz) / np.where(l2 > 1e-12, l2, 1.0), 0.0, 1.0)
+        near = near | ((X_ - px - t * dx) ** 2 + (Z_ - pz - t * dz) ** 2 <= m2)
+    return near
+
+
+def _mark_window(mask, tx, tz, tri, c0, c1, r0, r1, rows_n, cols_n, margin):
+    """Test each triangle against the rows_n x cols_n tile centres from its (r0, c0), up to its own (r1, c1)."""
+    cols = c0[:, None] + np.arange(cols_n)
+    rows = r0[:, None] + np.arange(rows_n)
+    hit = _near_triangles((tx[0] + cols)[:, None, :], (tz[0] - rows)[:, :, None], tri, margin)
+    hit &= (cols <= c1[:, None])[:, None, :] & (rows <= r1[:, None])[:, :, None]
+    n, a, b = np.nonzero(hit)
+    mask[rows[n, a], cols[n, b]] = True
+
+
+def mark_triangles(mask, tx, tz, triangles, margin):
+    """Mark the tiles whose centre lies inside, or within `margin` metres of, any of the x/z `triangles` (t, 3, 2):
+    the ground the faces themselves cover, widened by the margin (a garden's walks, not the lawns between them, which
+    a convex hull of the walk network would take). Tile centres are unit-spaced (tile_centres): tx[c] = tx[0] + c,
+    tz[r] = tz[0] - r. Triangles are tested in batches that share a window size."""
+    tri = np.asarray(triangles, float).reshape(-1, 3, 2)
+    if not len(tri):
+        return
+    h, w = mask.shape
+    lo, hi = tri.min(axis=1) - margin, tri.max(axis=1) + margin
+    c0 = np.maximum(np.ceil(lo[:, 0] - tx[0]), 0).astype(np.int64)
+    c1 = np.minimum(np.floor(hi[:, 0] - tx[0]), w - 1).astype(np.int64)
+    r0 = np.maximum(np.ceil(tz[0] - hi[:, 1]), 0).astype(np.int64)
+    r1 = np.minimum(np.floor(tz[0] - lo[:, 1]), h - 1).astype(np.int64)
+    keep = (c1 >= c0) & (r1 >= r0)
+    tri, c0, c1, r0, r1 = tri[keep], c0[keep], c1[keep], r0[keep], r1[keep]
+    if not len(tri):
+        return
+    span = np.maximum(c1 - c0, r1 - r0) + 1
+    side = np.left_shift(1, np.ceil(np.log2(span)).astype(np.int64))      # the window: a power of two
+    for k in np.unique(side).tolist():
+        idx = np.nonzero(side == k)[0]
+        if k * k <= _TRI_BUDGET:
+            step = _TRI_BUDGET // (k * k)
+            for s in range(0, len(idx), step):
+                i = idx[s:s + step]
+                _mark_window(mask, tx, tz, tri[i], c0[i], c1[i], r0[i], r1[i], k, k, margin)
+            continue
+        for j in idx.tolist():       # a face wider than a batch window: on its own, in stripes of rows
+            j_ = slice(j, j + 1)
+            cols_n = int(c1[j] - c0[j] + 1)
+            stripe = max(1, _TRI_BUDGET // cols_n)
+            for top in range(int(r0[j]), int(r1[j]) + 1, stripe):
+                bottom = min(top + stripe - 1, int(r1[j]))
+                _mark_window(mask, tx, tz, tri[j_], c0[j_], c1[j_], np.array([top]), np.array([bottom]),
+                             bottom - top + 1, cols_n, margin)
 
 
 def mark_convex(mask, tx, tz, points, margin):
@@ -660,29 +785,29 @@ def scenery_exclusions(g, rules):
     checkout = Path(getattr(g, "checkout", ROOT))
     tx, tz = tile_centres(g)
     layers = {name: np.zeros(g.shape, bool) for name in ("deck", "paving", "dense", "tree")}
+    deck_faces = []             # placed x/z triangles of deck kits and Walk_ faces: marked together below
     for p in g.scene["placements"]:
         kit, scene_path = p["kit"], p.get("scenePath")
         if not scene_path or "basis" not in p:
             continue
-        deck = _words(kit, ex["deckKitWords"])
-        dense = _words(kit, ex["denseKitWords"])
-        tree = _words(kit, ex["treeKitWords"]) and not dense
+        kind = scenery_class(kit, ex)
+        deck, dense, tree = kind == "deck", kind == "dense", kind == "tree"
         path = checkout / "godot-client" / scene_path.removeprefix("res://")
         walk = not deck and path.exists() and _glb_has_walk(path)
         if not (deck or dense or tree or walk) or not path.exists():
             continue
+        basis, origin = np.asarray(p["basis"], float), np.asarray(p["position"], float)
+        if deck:
+            faces = kit_faces(checkout, scene_path)
+            if len(faces):
+                deck_faces.append((faces.reshape(-1, 3) @ basis.T + origin)[:, [0, 2]].reshape(-1, 3, 2))
+            continue
         verts, walk_tris, trunk = kit_geometry(checkout, scene_path)
         if not len(verts):
             continue
-        basis, origin = np.asarray(p["basis"], float), np.asarray(p["position"], float)
-        if deck:
-            placed = verts @ basis.T + origin
-            mark_convex(layers["deck"], tx, tz, placed[:, [0, 2]], ex["deckMarginMetres"])
-            continue
         if walk:
             if len(walk_tris):
-                placed = walk_tris.reshape(-1, 3) @ basis.T + origin
-                mark_convex(layers["deck"], tx, tz, placed[:, [0, 2]], ex["deckMarginMetres"])
+                deck_faces.append((walk_tris.reshape(-1, 3) @ basis.T + origin)[:, [0, 2]].reshape(-1, 3, 2))
             continue
         placed = verts @ basis.T + origin
         if dense:
@@ -696,9 +821,11 @@ def scenery_exclusions(g, rules):
             disc = np.linspace(0, 2 * math.pi, 12, endpoint=False)
             ring = np.stack([centre[0] + r * scale * np.cos(disc), centre[2] + r * scale * np.sin(disc)], axis=1)
             mark_convex(layers["tree"], tx, tz, ring, ex["treeTrunkMarginMetres"])
-        if not _words(kit, ex["openRootTreeWords"]):
+        if not kit_words(kit, ex["openRootTreeWords"]):
             band = placed[standing_band(g, placed, origin, ex["treeSkirtBandMetres"])]
             mark_convex(layers["tree"], tx, tz, band[:, [0, 2]], ex["treeSkirtMarginMetres"])
+    if deck_faces:
+        mark_triangles(layers["deck"], tx, tz, np.concatenate(deck_faces), ex["deckMarginMetres"])
     for bridge in g.scene.get("bridges", ()):
         a, b = np.asarray(bridge["start"], float), np.asarray(bridge["end"], float)
         d = b[[0, 2]] - a[[0, 2]]

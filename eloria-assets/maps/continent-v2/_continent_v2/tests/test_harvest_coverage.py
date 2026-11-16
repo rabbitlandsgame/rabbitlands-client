@@ -8,8 +8,10 @@ import json
 import math
 import os
 from pathlib import Path
+import re
 import shutil
 import sys
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -264,6 +266,203 @@ def test_saved_bridge_decks_are_excluded():
     assert on(0.5, 0.5) and on(9.5, 2.5) and on(-9.5, -2.5)
     assert not on(0.5, 2.0 + margin + 1.5) and not on(10.0 + margin + 1.5, 0.5)
     assert deck.sum() < 2 * (20 + 2 * margin + 1) * (4 + 2 * margin + 1)
+
+
+def _strip(x0, z0, x1, z1):
+    return [[(x0, z0), (x1, z0), (x1, z1)], [(x0, z0), (x1, z1), (x0, z1)]]
+
+
+def _face_distance(tri, p):
+    """Brute force: metres from point p to the x/z triangle tri (0 inside)."""
+    def seg(a, b):
+        d = b - a
+        l2 = float(d @ d)
+        t = 0.0 if l2 <= 1e-12 else min(1.0, max(0.0, float((p - a) @ d) / l2))
+        return float(np.hypot(*(p - (a + t * d))))
+    a, b, c = tri
+    area = (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+    if abs(area) > 1e-12:
+        e = [(q[0] - o[0]) * (p[1] - o[1]) - (q[1] - o[1]) * (p[0] - o[0]) for o, q in ((a, b), (b, c), (c, a))]
+        if min(e) >= 0 or max(e) <= 0:
+            return 0.0
+    return min(seg(a, b), seg(b, c), seg(c, a))
+
+
+def test_deck_footprint_is_its_faces_not_their_hull():
+    """Regression: a deck kit was once excluded as the convex hull of all its vertices, plus the margin. A garden
+    paving chunk is a network of walks, so its hull took the lawns between them (about 7,000 open candidate tiles on
+    Landfall). mark_triangles marks exactly the tile centres within the margin of a face."""
+    g = SimpleNamespace(frame=SimpleNamespace(origin=(30, 30)), shape=(60, 60))
+    tx, tz = H.tile_centres(g)
+    margin = H.EXCLUSIONS["deckMarginMetres"]
+    # a U of 2 m walks (west, east, south) around a 16 m lawn
+    walks = np.array(_strip(-10, -10, -8, 10) + _strip(8, -10, 10, 10) + _strip(-10, -10, 10, -8), float)
+    deck = np.zeros(g.shape, bool)
+    H.mark_triangles(deck, tx, tz, walks, margin)
+    on = lambda m, x, z: m[int(np.argmin(abs(tz - z))), int(np.argmin(abs(tx - x)))]
+    assert on(deck, -9.5, 0.5) and on(deck, 9.5, 0.5) and on(deck, 0.5, -9.5)            # the walks
+    assert on(deck, -7.5, 0.5) and not on(deck, -6.5, 0.5)                                # widened by the margin only
+    assert not any(on(deck, x, z) for x, z in ((0.5, 0.5), (-5.5, 5.5), (5.5, 5.5), (0.5, -6.5)))   # the lawn
+    hull = np.zeros(g.shape, bool)
+    H.mark_convex(hull, tx, tz, walks.reshape(-1, 2), margin)
+    assert on(hull, 0.5, 0.5) and deck.sum() < 0.6 * hull.sum()
+    # exact against a brute-force distance, with a face seen edge-on (a wall) and a point among random faces, and with
+    # a batch budget small enough to send the larger faces through the row-stripe path
+    rng = np.random.default_rng(3)
+    tris = rng.uniform(-25, 25, (14, 1, 2)) + rng.normal(size=(14, 3, 2)) * rng.choice([0.3, 2.0, 12.0], (14, 1, 1))
+    tris[0, 2] = (tris[0, 0] + tris[0, 1]) / 2
+    tris[1, 1:] = tris[1, 0]
+    X_, Z_ = np.meshgrid(tx, tz)
+    dist = np.array([min(_face_distance(t, p) for t in tris)
+                     for p in np.stack([X_.ravel(), Z_.ravel()], 1)]).reshape(g.shape)
+    for budget in (H._TRI_BUDGET, 50):
+        got = np.zeros(g.shape, bool)
+        saved, H._TRI_BUDGET = H._TRI_BUDGET, budget
+        try:
+            H.mark_triangles(got, tx, tz, tris, margin)
+        finally:
+            H._TRI_BUDGET = saved
+        tie = np.abs(dist - margin) < 1e-6
+        assert ((got == (dist <= margin)) | tie).all(), budget
+
+
+# Landfall's garden paving chunks: the 2026-11-15 audit removed the two nodes standing on the paving itself and kept
+# the nodes on the lawns between the walks, 4-25 m from any paving face (served tiles).
+GARDEN_REMOVED = [(226, 349), (239, 365)]
+GARDEN_KEPT = [(286, 314), (314, 271), (281, 221), (295, 235), (271, 275)]
+
+
+def test_garden_lawns_between_paving_walks_stay_open():
+    g = bare_ground("landfall")
+    deck = H.scenery_exclusions(g, RULES)["deck"]
+    for x, y in GARDEN_REMOVED:
+        assert deck[y, x], ("removed", x, y)
+    for x, y in GARDEN_KEPT:
+        assert not deck[y, x], ("kept", x, y)
+    # no node of this pass the audit kept on Landfall is on a deck tile (16 stand inside the garden chunks' hulls)
+    kept = [g.frame.tile(m["position"][0], m["position"][2]) for m in g.scene["generated"]]
+    assert not [t for t in kept if deck[t[1], t[0]]]
+    # the chunks' hulls are mostly lawn: their paving faces, widened by the margin, take well under half of them
+    tx, tz = H.tile_centres(g)
+    hull = np.zeros(g.shape, bool)
+    for p in g.scene["placements"]:
+        if "garden-paving" in p["kit"]:
+            placed = H.kit_faces(H.ROOT, p["scenePath"]).reshape(-1, 3) @ np.asarray(p["basis"]).T + p["position"]
+            H.mark_convex(hull, tx, tz, placed[:, [0, 2]], H.EXCLUSIONS["deckMarginMetres"])
+    assert hull.sum() > 5000 and (deck & hull).sum() < 0.5 * hull.sum(), (int(hull.sum()), int((deck & hull).sum()))
+
+
+def test_tree_words_are_whole_kit_words():
+    """Regression: tree words once matched anywhere in a kit name, so "pine" made the alpine flower cushions (soft
+    meadow flora the meadow feature draws sites to) trees, and "tree" made Suncoil's street-market obelisks trees:
+    their footprints went into the tree layer."""
+    ex = H.exclusion_rules(RULES)
+    for kit in ("alpine-flower-cushion", "obelisk-street-market"):
+        assert H.scenery_class(kit, ex) is None, kit
+    for kit in ("scots-pine-tree", "alpine-fir-tree", "dark-fir", "golden-larch", "tree-fern", "beach-palm-tree-1-clear",
+                "landmark-deadtree", "treehouse", "banyan-tree", "resin-tapped-pine"):
+        assert H.scenery_class(kit, ex) == "tree", kit
+    assert H.scenery_class("coastal-boulders", ex) == "dense"          # dense words still match inside a name
+    assert H.kit_words("dark-fir", ["-fir"]) and not H.kit_words("fire-pit", ["fir-"])
+    assert H.kit_words("giant-tree-fern-2", ["tree-fern"]) and not H.kit_words("street-fern", ["tree-fern"])
+    # no meadow plant in any exterior scene is classed a tree or dense scenery
+    meadow = RULES["features"]["meadow"]
+    for region in H.EXTERIOR:
+        for p in H.read_scene(region, H.ROOT, RULES["pass"])["placements"]:
+            if any(w in p["kit"] for w in meadow):
+                assert H.scenery_class(p["kit"], ex) not in ("tree", "dense"), (region, p["kit"])
+    # the cushions and the obelisks exclude nothing
+    for region, kit in (("hornmere", "alpine-flower-cushion"), ("suncoil", "obelisk-street-market")):
+        g = bare_ground(region)
+        g.scene = {"placements": [p for p in g.scene["placements"] if p["kit"] == kit], "bridges": [],
+                   "groundRegions": []}
+        assert g.scene["placements"], (region, kit)
+        assert not any(layer.any() for layer in H.scenery_exclusions(g, RULES).values()), (region, kit)
+
+
+SPARSE_SCENE = """[gd_scene format=3]
+
+[sub_resource type="Resource" id="Resource_masonry"]
+texture_preset = "Weathered limestone masonry"
+
+[node name="Sample" type="Node3D"]
+
+[node name="Ground" type="Node3D" parent="."]
+
+[node name="Regions" type="Node3D" parent="Ground"]
+
+[node name="Plaza" type="Marker3D" parent="Ground/Regions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 20)
+region_id = "plaza"
+enabled = true
+surface = SubResource("Resource_masonry")
+
+[node name="Quiet" type="Marker3D" parent="Ground/Regions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, 20)
+region_id = "quiet"
+surface = SubResource("Resource_masonry")
+
+[node name="Bridges" type="Node3D" parent="."]
+
+[node name="Ford" type="Node3D" parent="Bridges"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, -20)
+bridge_id = "ford"
+
+[node name="Start" type="Marker3D" parent="Bridges/Ford"]
+
+[node name="End" type="Marker3D" parent="Bridges/Ford"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 0)
+"""
+
+
+def test_unwritten_region_and_bridge_properties_take_the_script_defaults(tmp_path):
+    """Godot leaves a property out of the .tscn while it equals the script default. read_scene once read an unwritten
+    enabled as true, size as 0 x 0 (the region was then dropped), blend_width as 0 and a bridge width as 8 m."""
+    pilot = H.ROOT / "godot-client/src/dev/map_authoring_pilot"
+    ground = (pilot / "ground_region.gd").read_text(encoding="utf-8")
+    bridge = (pilot / "bridge_control.gd").read_text(encoding="utf-8")
+    d = H.GROUND_REGION_DEFAULTS
+    assert re.search(r"^@export var enabled := (\w+)", ground, re.M).group(1) == str(d["enabled"]).lower()
+    shapes = [s.strip() for s in re.search(r"enum Shape \{([^}]*)\}", ground).group(1).split(",") if s.strip()]
+    assert shapes.index(re.search(r"var shape: int = Shape\.(\w+)", ground).group(1)) == d["shape"]
+    size = re.search(r"^@export var size := Vector2\(([^)]*)\)", ground, re.M).group(1)
+    assert tuple(float(v) for v in size.split(",")) == d["size"]
+    assert float(re.search(r"var blend_width := ([\d.]+)", ground).group(1)) == d["blend_width"]
+    assert float(re.search(r"var opacity := ([\d.]+)", ground).group(1)) == d["opacity"]
+    assert float(re.search(r"var width := ([\d.]+)", bridge).group(1)) == H.BRIDGE_DEFAULTS["width"]
+    # the region scenes' scripts extend these and declare none of the properties again
+    region_scripts = H.ROOT / "godot-client/src/dev/map_authoring_region"
+    for name, base, props in (("ground_region_control.gd", "ground_region.gd", ("enabled", "shape", "size",
+                                                                                "blend_width", "opacity")),
+                              ("bridge_control.gd", "bridge_control.gd", ("width",))):
+        text = (region_scripts / name).read_text(encoding="utf-8")
+        assert f'extends "res://src/dev/map_authoring_pilot/{base}"' in text, name
+        for prop in props:
+            assert not re.search(rf"^(?:@\w+(?:\([^)]*\))?\s+)*var {prop}\b", text, re.M), (name, prop)
+    # a scene that writes none of them
+    folder = tmp_path / "godot-client/world_authoring/regions/sample"
+    folder.mkdir(parents=True)
+    (folder / "sample.tscn").write_text(SPARSE_SCENE, encoding="utf-8", newline="\n")
+    scene = H.read_scene("sample", tmp_path, RULES["pass"])
+    regions = {r["id"]: r for r in scene["groundRegions"]}
+    for region in regions.values():
+        assert region["shape"] == "ellipse" and region["size"] == list(d["size"]), region
+        assert region["blend"] == d["blend_width"] and region["opacity"] == d["opacity"], region
+        assert region["preset"] == "Weathered limestone masonry"
+    assert regions["plaza"]["enabled"] and not regions["quiet"]["enabled"]
+    (deck,) = scene["bridges"]
+    assert deck["width"] == H.BRIDGE_DEFAULTS["width"]
+    assert deck["start"] == [-20.0, 0.0, -20.0] and deck["end"] == [-8.0, 0.0, -20.0]
+    # end to end: the enabled region at the default size paints paving, the default (disabled) one does not
+    g = SimpleNamespace(frame=SimpleNamespace(origin=(50, 50)), shape=(100, 100), checkout=tmp_path,
+                        scene={**scene, "placements": []})
+    layers = H.scenery_exclusions(g, RULES)
+    tx, tz = H.tile_centres(g)
+    on = lambda m, x, z: m[int(np.argmin(abs(tz - z))), int(np.argmin(abs(tx - x)))]
+    assert on(layers["paving"], 20.5, 20.5) and not on(layers["paving"], -19.5, 20.5)
+    assert 20 < layers["paving"].sum() < 60, int(layers["paving"].sum())
+    margin = H.EXCLUSIONS["deckMarginMetres"]
+    assert on(layers["deck"], -14.5, -20.5) and not on(layers["deck"], -14.5, -20.5 - 1.5 - margin - 1.0)
 
 
 def test_every_applied_scene_uses_its_own_marker_script():
