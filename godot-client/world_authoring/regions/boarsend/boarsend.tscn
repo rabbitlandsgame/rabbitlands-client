@@ -301,6 +301,10 @@
 
 [ext_resource type="PackedScene" path="res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-1.glb" id="bn_kit_harbour_banner_1"]
 
+[ext_resource type="PackedScene" path="res://world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-rock-3-noplate.glb" id="mq_1"]
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb" id="mq_2"]
+
 [sub_resource type="StandardMaterial3D" id="material"]
 cull_mode = 2
 vertex_color_use_as_albedo = true
@@ -9376,8 +9380,8 @@ metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototy
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-coastal-rock-3-006"
 node_name = "Authored_sw_isle_kit_coastal_rock_3_006"
-catalog_asset_id = "sw_isle:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+catalog_asset_id = "sw_isle:kit-coastal-rock-3-noplate"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 collision_role = "solid"
 metadata = {
 "natureDesign": "continent-v2 slice 2 nature design",
@@ -9390,9 +9394,9 @@ metadata = {
 metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(0.600088, 0.599069, 0.76795, -0.295194, 0.971449, -0.527147, -0.928165, 0.078356, 0.664158, -8.09, 139.9378, -277.79)
 
-[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 22" instance=ExtResource("s0_96_e14li")]
-metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 22" instance=ExtResource("mq_2")]
+metadata/map_asset_id = "sw_isle:kit-coastal-rock-3-noplate"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 
 [node name="s0_Coastal Rock 37" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -9420,8 +9424,8 @@ metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototy
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-coastal-rock-3-013"
 node_name = "Authored_sw_isle_kit_coastal_rock_3_013"
-catalog_asset_id = "sw_isle:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+catalog_asset_id = "sw_isle:kit-coastal-rock-3-noplate"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 collision_role = "solid"
 metadata = {
 "natureDesign": "continent-v2 slice 2 nature design",
@@ -9432,11 +9436,11 @@ metadata = {
 "natureZone": "earthworks-cut"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.261891, 0.5865, 0.930909, -0.464267, 0.926461, -0.453087, -0.997512, -0.277216, 0.455282, -19.32, 160.1951, -318.24)
+transform = Transform3D(0.261891, 0.5865, 0.930909, -0.464267, 0.926461, -0.453087, -0.997512, -0.277216, 0.455282, -19.32, 159.0641, -318.24)
 
-[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 40" instance=ExtResource("s0_96_e14li")]
-metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 40" instance=ExtResource("mq_2")]
+metadata/map_asset_id = "sw_isle:kit-coastal-rock-3-noplate"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 
 [node name="s0_Coastal Rock 48" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -10557,8 +10561,8 @@ metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototy
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-coastal-rock-3-140"
 node_name = "Authored_sw_isle_kit_coastal_rock_3_140"
-catalog_asset_id = "sw_isle:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+catalog_asset_id = "sw_isle:kit-coastal-rock-3-noplate"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 collision_role = "solid"
 metadata = {
 "polishLayer": "roadcut",
@@ -10568,16 +10572,16 @@ metadata = {
 metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(-0.348595, 0.343652, 0.524557, 0.336969, 0.608797, -0.174906, -0.528874, 0.161382, -0.45719, 16.0696, 161.0411, -388.3709)
 
-[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 420" instance=ExtResource("s0_96_e14li")]
-metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 420" instance=ExtResource("mq_2")]
+metadata/map_asset_id = "sw_isle:kit-coastal-rock-3-noplate"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 
 [node name="s0_Coastal Rock 421" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-coastal-rock-3-141"
 node_name = "Authored_sw_isle_kit_coastal_rock_3_141"
-catalog_asset_id = "sw_isle:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+catalog_asset_id = "sw_isle:kit-coastal-rock-3-noplate"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 collision_role = "solid"
 metadata = {
 "polishLayer": "roadcut",
@@ -10585,18 +10589,18 @@ metadata = {
 "polishStep": "d1-rock"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.588707, 0.233609, 0.018743, -0.196227, 0.519048, -0.305916, -0.128138, 0.278418, 0.554585, 11.7835, 160.4421, -380.6039)
+transform = Transform3D(0.588707, 0.233609, 0.018743, -0.196227, 0.519048, -0.305916, -0.128138, 0.278418, 0.554585, 11.7835, 160.0612, -380.6039)
 
-[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 421" instance=ExtResource("s0_96_e14li")]
-metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 421" instance=ExtResource("mq_2")]
+metadata/map_asset_id = "sw_isle:kit-coastal-rock-3-noplate"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 
 [node name="s0_Coastal Rock 431" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-coastal-rock-3-147"
 node_name = "Authored_sw_isle_kit_coastal_rock_3_147"
-catalog_asset_id = "sw_isle:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+catalog_asset_id = "sw_isle:kit-coastal-rock-3-noplate"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 collision_role = "solid"
 metadata = {
 "polishLayer": "roadcut",
@@ -10606,9 +10610,9 @@ metadata = {
 metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(1.085298, 0.075595, 0.777158, 0.394584, 1.095204, -0.657566, -0.67379, 0.763135, 0.866714, -20, 149.0784, -279)
 
-[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 431" instance=ExtResource("s0_96_e14li")]
-metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 431" instance=ExtResource("mq_2")]
+metadata/map_asset_id = "sw_isle:kit-coastal-rock-3-noplate"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 
 [node name="s0_Coastal Rock 432" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -10652,8 +10656,8 @@ metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototy
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-coastal-rock-3-159"
 node_name = "Authored_sw_isle_kit_coastal_rock_3_159"
-catalog_asset_id = "sw_isle:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+catalog_asset_id = "sw_isle:kit-coastal-rock-3-noplate"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 collision_role = "solid"
 metadata = {
 "polishLayer": "roadcut",
@@ -10661,18 +10665,18 @@ metadata = {
 "polishStep": "d1-rock"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.275094, 0.479509, 0.856903, 0.424784, 0.860432, -0.345114, -0.885308, 0.263849, -0.431859, -18, 162.4084, -293)
+transform = Transform3D(-0.275094, 0.479509, 0.856903, 0.424784, 0.860432, -0.345114, -0.885308, 0.263849, -0.431859, -18, 161.8946, -293)
 
-[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 467" instance=ExtResource("s0_96_e14li")]
-metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 467" instance=ExtResource("mq_2")]
+metadata/map_asset_id = "sw_isle:kit-coastal-rock-3-noplate"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 
 [node name="s0_Coastal Rock 490" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-coastal-rock-3-173"
 node_name = "Authored_sw_isle_kit_coastal_rock_3_173"
-catalog_asset_id = "sw_isle:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+catalog_asset_id = "sw_isle:kit-coastal-rock-3-noplate"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 collision_role = "solid"
 metadata = {
 "polishLayer": "roadcut",
@@ -10680,18 +10684,18 @@ metadata = {
 "polishStep": "d1-rock"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.723872, 0.576842, -0.530017, -0.476437, 0.897028, 0.325582, 0.62183, 0.015788, 0.866449, -18, 164.2255, -305)
+transform = Transform3D(0.723872, 0.576842, -0.530017, -0.476437, 0.897028, 0.325582, 0.62183, 0.015788, 0.866449, -18, 163.766, -305)
 
-[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 490" instance=ExtResource("s0_96_e14li")]
-metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 490" instance=ExtResource("mq_2")]
+metadata/map_asset_id = "sw_isle:kit-coastal-rock-3-noplate"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 
 [node name="s0_Coastal Rock 491" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-coastal-rock-3-174"
 node_name = "Authored_sw_isle_kit_coastal_rock_3_174"
-catalog_asset_id = "sw_isle:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+catalog_asset_id = "sw_isle:kit-coastal-rock-3-noplate"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 collision_role = "solid"
 metadata = {
 "polishLayer": "roadcut",
@@ -10699,11 +10703,11 @@ metadata = {
 "polishStep": "d1-rock"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.501383, 0.356929, 0.145574, -0.337817, 0.521893, -0.116116, -0.185662, 0.014296, 0.604401, -17.7857, 164.2595, -299.703)
+transform = Transform3D(0.501383, 0.356929, 0.145574, -0.337817, 0.521893, -0.116116, -0.185662, 0.014296, 0.604401, -17.7857, 163.9384, -299.703)
 
-[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 491" instance=ExtResource("s0_96_e14li")]
-metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 491" instance=ExtResource("mq_2")]
+metadata/map_asset_id = "sw_isle:kit-coastal-rock-3-noplate"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 
 [node name="s0_Flower Meadow 762" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -14696,8 +14700,8 @@ metadata/map_asset_scene = "res://world_authoring/regions/gull_skerries/assets/p
 script = ExtResource("s1_7_1urfv")
 asset_id = "gull_skerries-kit-coastal-rock-3-011"
 node_name = "Authored_gull_skerries_kit_coastal_rock_3_011"
-catalog_asset_id = "gull_skerries:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-rock-3.glb"
+catalog_asset_id = "gull_skerries:kit-coastal-rock-3-noplate"
+scene_path = "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 collision_role = "solid"
 metadata = {
 "a3bLayer": "coast",
@@ -14706,11 +14710,11 @@ metadata = {
 "polishStep": "a3b-coast"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.604785, 0, 0.656672, 0, 0.89274, 0, -0.656672, 0, 0.604785, 351.1026, 3.442, 112.281)
+transform = Transform3D(0.604785, 0, 0.656672, 0, 0.89274, 0, -0.656672, 0, 0.604785, 351.1026, 2.549261, 112.281)
 
-[node name="Content" parent="AuthoredAssets/s1_Coastal Rock 26" instance=ExtResource("s1_15_lnmqa")]
-metadata/map_asset_id = "gull_skerries:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-rock-3.glb"
+[node name="Content" parent="AuthoredAssets/s1_Coastal Rock 26" instance=ExtResource("mq_1")]
+metadata/map_asset_id = "gull_skerries:kit-coastal-rock-3-noplate"
+metadata/map_asset_scene = "res://world_authoring/regions/gull_skerries/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 
 [node name="s1_Coastal Rock 27" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s1_7_1urfv")

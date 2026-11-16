@@ -230,6 +230,8 @@
 
 [ext_resource type="PackedScene" path="res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-1.glb" id="bn_kit_harbour_banner_1"]
 
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb" id="mq_1"]
+
 [sub_resource type="StandardMaterial3D" id="material"]
 cull_mode = 2
 vertex_color_use_as_albedo = true
@@ -5444,8 +5446,8 @@ metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototy
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-coastal-rock-3-108"
 node_name = "Authored_sw_isle_kit_coastal_rock_3_108"
-catalog_asset_id = "sw_isle:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+catalog_asset_id = "sw_isle:kit-coastal-rock-3-noplate"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 collision_role = "solid"
 metadata = {
 "polishLayer": "gorge",
@@ -5453,11 +5455,11 @@ metadata = {
 "polishStep": "d1-rock"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.491376, 0.395401, -0.802388, -0.237428, 0.940292, 0.317959, 0.862436, 0.033581, 0.544697, 83, 36.6021, -33)
+transform = Transform3D(0.491376, 0.395401, -0.802388, -0.237428, 0.940292, 0.317959, 0.862436, 0.033581, 0.544697, 83, 36.48527, -33)
 
-[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 345" instance=ExtResource("s0_96_e14li")]
-metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 345" instance=ExtResource("mq_1")]
+metadata/map_asset_id = "sw_isle:kit-coastal-rock-3-noplate"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 
 [node name="s0_Coastal Rock 346" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")

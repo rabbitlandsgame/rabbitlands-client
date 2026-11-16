@@ -295,6 +295,8 @@
 
 [ext_resource type="PackedScene" path="res://world_authoring/regions/tollholms/assets/prototypes/kit-fishing-boat-2.glb" id="bn_kit_fishing_boat_2"]
 
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb" id="mq_1"]
+
 [sub_resource type="StandardMaterial3D" id="material"]
 cull_mode = 2
 vertex_color_use_as_albedo = true
@@ -5509,8 +5511,8 @@ metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototy
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-coastal-rock-3-012"
 node_name = "Authored_sw_isle_kit_coastal_rock_3_012"
-catalog_asset_id = "sw_isle:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+catalog_asset_id = "sw_isle:kit-coastal-rock-3-noplate"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 collision_role = "solid"
 metadata = {
 "natureDesign": "continent-v2 slice 2 nature design",
@@ -5523,9 +5525,9 @@ metadata = {
 metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(-0.656155, 0.384663, -0.46982, 0.50249, 0.732322, -0.102197, 0.340881, -0.33908, -0.753698, -155.05, 4.8578, 193.63)
 
-[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 34" instance=ExtResource("s0_96_e14li")]
-metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 34" instance=ExtResource("mq_1")]
+metadata/map_asset_id = "sw_isle:kit-coastal-rock-3-noplate"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 
 [node name="s0_Coastal Rock 38" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")

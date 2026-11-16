@@ -607,6 +607,10 @@
 
 [ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-beach-palm-tree-2-clear.glb" id="mq_2"]
 
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb" id="mq_3"]
+
+[ext_resource type="PackedScene" path="res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3-noplate.glb" id="mq_4"]
+
 [sub_resource type="StandardMaterial3D" id="material"]
 cull_mode = 2
 vertex_color_use_as_albedo = true
@@ -4435,8 +4439,8 @@ metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/proto
 script = ExtResource("s2_18_itflr")
 asset_id = "tollholms-kit-coastal-rock-3-011"
 node_name = "Authored_tollholms_kit_coastal_rock_3_011"
-catalog_asset_id = "tollholms:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3.glb"
+catalog_asset_id = "tollholms:kit-coastal-rock-3-noplate"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 collision_role = "solid"
 metadata = {
 "a3Layer": "coast",
@@ -4445,11 +4449,11 @@ metadata = {
 "polishStep": "a3-coast"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.117224, 0, 1.300322, 0, 1.305595, 0, -1.300322, 0, 0.117224, 182.6315, 2.2803, 81.2897)
+transform = Transform3D(0.117224, 0, 1.300322, 0, 1.305595, 0, -1.300322, 0, 0.117224, 182.6315, 1.0803, 81.2897)
 
-[node name="Content" parent="AuthoredAssets/s2_Coastal Rock 26" instance=ExtResource("s2_97_ndnly")]
-metadata/map_asset_id = "tollholms:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3.glb"
+[node name="Content" parent="AuthoredAssets/s2_Coastal Rock 26" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "tollholms:kit-coastal-rock-3-noplate"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 
 [node name="s2_Coastal Rock 28" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s2_18_itflr")
@@ -4835,8 +4839,8 @@ metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/proto
 script = ExtResource("s2_18_itflr")
 asset_id = "tollholms-kit-coastal-rock-3-020"
 node_name = "Authored_tollholms_kit_coastal_rock_3_020"
-catalog_asset_id = "tollholms:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3.glb"
+catalog_asset_id = "tollholms:kit-coastal-rock-3-noplate"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 collision_role = "solid"
 metadata = {
 "a3Layer": "coast",
@@ -4845,11 +4849,11 @@ metadata = {
 "polishStep": "a3-coast"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.985323, 0, -0.727008, 0, 1.2245, 0, 0.727008, 0, 0.985323, -47.9067, 0.9005, 213.0044)
+transform = Transform3D(0.985323, 0, -0.727008, 0, 1.2245, 0, 0.727008, 0, 0.985323, -47.9067, 0.32231, 213.0044)
 
-[node name="Content" parent="AuthoredAssets/s2_Coastal Rock 58" instance=ExtResource("s2_97_ndnly")]
-metadata/map_asset_id = "tollholms:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3.glb"
+[node name="Content" parent="AuthoredAssets/s2_Coastal Rock 58" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "tollholms:kit-coastal-rock-3-noplate"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 
 [node name="s2_Coastal Rock 59" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s2_18_itflr")
@@ -5175,8 +5179,8 @@ metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/proto
 script = ExtResource("s2_18_itflr")
 asset_id = "tollholms-kit-coastal-rock-3-025"
 node_name = "Authored_tollholms_kit_coastal_rock_3_025"
-catalog_asset_id = "tollholms:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3.glb"
+catalog_asset_id = "tollholms:kit-coastal-rock-3-noplate"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 collision_role = "solid"
 metadata = {
 "a3Layer": "coast",
@@ -5185,11 +5189,11 @@ metadata = {
 "polishStep": "a3-coast"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.288066, 0, 0.869591, 0, 0.916063, 0, -0.869591, 0, -0.288066, -168.6819, 2.3938, 99.5065)
+transform = Transform3D(-0.288066, 0, 0.869591, 0, 0.916063, 0, -0.869591, 0, -0.288066, -168.6819, 1.559256, 99.5065)
 
-[node name="Content" parent="AuthoredAssets/s2_Coastal Rock 73" instance=ExtResource("s2_97_ndnly")]
-metadata/map_asset_id = "tollholms:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3.glb"
+[node name="Content" parent="AuthoredAssets/s2_Coastal Rock 73" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "tollholms:kit-coastal-rock-3-noplate"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 
 [node name="s2_Coastal Boulders 54" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s2_18_itflr")
@@ -5295,8 +5299,8 @@ metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/proto
 script = ExtResource("s2_18_itflr")
 asset_id = "tollholms-kit-coastal-rock-3-026"
 node_name = "Authored_tollholms_kit_coastal_rock_3_026"
-catalog_asset_id = "tollholms:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3.glb"
+catalog_asset_id = "tollholms:kit-coastal-rock-3-noplate"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 collision_role = "solid"
 metadata = {
 "a3Layer": "coast",
@@ -5305,11 +5309,11 @@ metadata = {
 "polishStep": "a3-coast"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.458122, 0, 0.926091, 0, 1.033209, 0, -0.926091, 0, -0.458122, -148.928, 2.1496, 303.6895)
+transform = Transform3D(-0.458122, 0, 0.926091, 0, 1.033209, 0, -0.926091, 0, -0.458122, -148.928, 1.116391, 303.6895)
 
-[node name="Content" parent="AuthoredAssets/s2_Coastal Rock 80" instance=ExtResource("s2_97_ndnly")]
-metadata/map_asset_id = "tollholms:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3.glb"
+[node name="Content" parent="AuthoredAssets/s2_Coastal Rock 80" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "tollholms:kit-coastal-rock-3-noplate"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 
 [node name="s2_Coastal Boulders 61" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s2_18_itflr")
@@ -5955,8 +5959,8 @@ metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/proto
 script = ExtResource("s2_18_itflr")
 asset_id = "tollholms-kit-coastal-rock-3-033"
 node_name = "Authored_tollholms_kit_coastal_rock_3_033"
-catalog_asset_id = "tollholms:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3.glb"
+catalog_asset_id = "tollholms:kit-coastal-rock-3-noplate"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 collision_role = "solid"
 metadata = {
 "a3Layer": "coast",
@@ -5965,11 +5969,11 @@ metadata = {
 "polishStep": "a3-coast"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.913748, 0, 0.191906, 0, 0.933682, 0, -0.191906, 0, 0.913748, -85.3792, 1.754, 101.9762)
+transform = Transform3D(0.913748, 0, 0.191906, 0, 0.933682, 0, -0.191906, 0, 0.913748, -85.3792, 0.820318, 101.9762)
 
-[node name="Content" parent="AuthoredAssets/s2_Coastal Rock 107" instance=ExtResource("s2_97_ndnly")]
-metadata/map_asset_id = "tollholms:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3.glb"
+[node name="Content" parent="AuthoredAssets/s2_Coastal Rock 107" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "tollholms:kit-coastal-rock-3-noplate"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 
 [node name="s2_Coastal Rock 109" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s2_18_itflr")
@@ -6195,8 +6199,8 @@ metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/proto
 script = ExtResource("s2_18_itflr")
 asset_id = "tollholms-kit-coastal-rock-3-036"
 node_name = "Authored_tollholms_kit_coastal_rock_3_036"
-catalog_asset_id = "tollholms:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3.glb"
+catalog_asset_id = "tollholms:kit-coastal-rock-3-noplate"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 collision_role = "solid"
 metadata = {
 "a3Layer": "coast",
@@ -6205,11 +6209,11 @@ metadata = {
 "polishStep": "a3-coast"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-1.330029, 0, -0.370063, 0, 1.380552, 0, 0.370063, 0, -1.330029, -181.4492, 1.2073, 267.4202)
+transform = Transform3D(-1.330029, 0, -0.370063, 0, 1.380552, 0, 0.370063, 0, -1.330029, -181.4492, 0.0073, 267.4202)
 
-[node name="Content" parent="AuthoredAssets/s2_Coastal Rock 119" instance=ExtResource("s2_97_ndnly")]
-metadata/map_asset_id = "tollholms:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3.glb"
+[node name="Content" parent="AuthoredAssets/s2_Coastal Rock 119" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "tollholms:kit-coastal-rock-3-noplate"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 
 [node name="s2_Coastal Boulders 99" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s2_18_itflr")
@@ -6561,25 +6565,6 @@ transform = Transform3D(0.493529, 0.138869, -1.101917, 0.235, 1.165454, 0.252128
 metadata/map_asset_id = "tollholms:kit-kelp-wrack-1"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-kelp-wrack-1.glb"
 
-[node name="s2_Shell Scree 8" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s2_18_itflr")
-asset_id = "tollholms-kit-shell-scree-1-008"
-node_name = "Authored_tollholms_kit_shell_scree_1_008"
-catalog_asset_id = "tollholms:kit-shell-scree-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-shell-scree-1.glb"
-metadata = {
-"a3Layer": "coast",
-"a3Piece": "a3-coast-00265",
-"a3Zone": "beach",
-"polishStep": "a3-coast"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1.144781, 0.238649, 0.264886, -0.283955, 1.148972, 0.192027, -0.215609, -0.246072, 1.153517, 146.5206, 1.0932, 52.5166)
-
-[node name="Content" parent="AuthoredAssets/s2_Shell Scree 8" instance=ExtResource("s2_104_e1p32")]
-metadata/map_asset_id = "tollholms:kit-shell-scree-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-shell-scree-1.glb"
-
 [node name="s2_Kelp Wrack 14" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s2_18_itflr")
 asset_id = "tollholms-kit-kelp-wrack-1-014"
@@ -6750,25 +6735,6 @@ transform = Transform3D(-0.936891, 0.066349, 0.071537, 0.061968, 0.938095, -0.05
 [node name="Content" parent="AuthoredAssets/s2_Shell Scree 18" instance=ExtResource("s2_104_e1p32")]
 metadata/map_asset_id = "tollholms:kit-shell-scree-1"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-shell-scree-1.glb"
-
-[node name="s2_Driftwood 12" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s2_18_itflr")
-asset_id = "tollholms-kit-driftwood-1-006"
-node_name = "Authored_tollholms_kit_driftwood_1_006"
-catalog_asset_id = "tollholms:kit-driftwood-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-driftwood-1.glb"
-metadata = {
-"a3Layer": "coast",
-"a3Piece": "a3-coast-00303",
-"a3Zone": "beach",
-"polishStep": "a3-coast"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.171779, 0.13556, 0.915809, -0.155738, 0.913935, -0.164495, -0.912594, -0.181484, -0.144312, 129.5638, 0.6737, 40.5188)
-
-[node name="Content" parent="AuthoredAssets/s2_Driftwood 12" instance=ExtResource("s2_103_0q0j6")]
-metadata/map_asset_id = "tollholms:kit-driftwood-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-driftwood-1.glb"
 
 [node name="s2_Kelp Wrack 22" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s2_18_itflr")
@@ -10506,8 +10472,8 @@ metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/proto
 script = ExtResource("s2_18_itflr")
 asset_id = "tollholms-kit-coastal-rock-3-044"
 node_name = "Authored_tollholms_kit_coastal_rock_3_044"
-catalog_asset_id = "tollholms:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3.glb"
+catalog_asset_id = "tollholms:kit-coastal-rock-3-noplate"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 metadata = {
 "polishStep": "rf-th-l21",
 "rfLayer": "l21-rock",
@@ -10516,9 +10482,9 @@ metadata = {
 metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(1.511016, 0, 0.275524, 0, 1.535931, 0, -0.275524, 0, 1.511016, -68.7668, 1.4254, 129.9008)
 
-[node name="Content" parent="AuthoredAssets/s2_Coastal Rock 145" instance=ExtResource("s2_97_ndnly")]
-metadata/map_asset_id = "tollholms:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3.glb"
+[node name="Content" parent="AuthoredAssets/s2_Coastal Rock 145" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "tollholms:kit-coastal-rock-3-noplate"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 
 [node name="s2_Coastal Boulders 125" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s2_18_itflr")
@@ -14025,8 +13991,8 @@ metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototy
 script = ExtResource("a3_jadestair_a3_greenlight_s0_19_jaile")
 asset_id = "sw_isle-kit-coastal-rock-3-168"
 node_name = "Authored_sw_isle_kit_coastal_rock_3_168"
-catalog_asset_id = "sw_isle:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+catalog_asset_id = "sw_isle:kit-coastal-rock-3-noplate"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 collision_role = "solid"
 metadata = {
 "polishLayer": "roadcut",
@@ -14034,11 +14000,11 @@ metadata = {
 "polishStep": "d1-rock"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.624453, 0.369072, -0.025482, 0.341695, 0.594552, 0.23782, 0.141803, 0.192612, -0.685272, -493, 83.6625, -12)
+transform = Transform3D(-0.624453, 0.369072, -0.025482, 0.341695, 0.594552, 0.23782, 0.141803, 0.192612, -0.685272, -493, 83.48678, -12)
 
-[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 482" instance=ExtResource("a3_jadestair_a3_greenlight_s0_96_e14li")]
-metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 482" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "sw_isle:kit-coastal-rock-3-noplate"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 
 [node name="s0_Coastal Rock 63" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("a3_jadestair_a3_greenlight_s0_19_jaile")
@@ -16301,8 +16267,8 @@ metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/proto
 script = ExtResource("a3_jadestair_s2_18_itflr")
 asset_id = "tollholms-kit-coastal-rock-3-021"
 node_name = "Authored_tollholms_kit_coastal_rock_3_021"
-catalog_asset_id = "tollholms:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3.glb"
+catalog_asset_id = "tollholms:kit-coastal-rock-3-noplate"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 collision_role = "solid"
 metadata = {
 "a3Layer": "coast",
@@ -16311,11 +16277,11 @@ metadata = {
 "polishStep": "a3-coast"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-1.122431, 0, -0.316542, 0, 1.166212, 0, 0.316542, 0, -1.122431, -390.9264, 0.9811, 161.2058)
+transform = Transform3D(-1.122431, 0, -0.316542, 0, 1.166212, 0, 0.316542, 0, -1.122431, -390.9264, 0.220564, 161.2058)
 
-[node name="Content" parent="AuthoredAssets/s2_Coastal Rock 62" instance=ExtResource("a3_jadestair_s2_97_ndnly")]
-metadata/map_asset_id = "tollholms:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3.glb"
+[node name="Content" parent="AuthoredAssets/s2_Coastal Rock 62" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "tollholms:kit-coastal-rock-3-noplate"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 
 [node name="s2_Coastal Rock 7" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("a3_jadestair_s2_18_itflr")
@@ -102763,26 +102729,6 @@ extras = {
 }
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -66.5, 12.95, 439.5)
 
-[node name="coilmere--harvest-3066-kelp" type="Marker3D" parent="Gameplay/Harvestables"]
-gizmo_extents = 0.8
-script = ExtResource("s2_marker")
-record_id = "coilmere--harvest-3066-kelp"
-kind = "harvestable"
-label = "Kelp"
-extras = {
-"authority": "server",
-"cluster": "coilmere-wild-0015",
-"grouping": "coilmere-wild-0015",
-"groupingName": "Kelp, Mushroom, Sage and Shell",
-"objectId": 3066,
-"pass": "harvest-coverage-1",
-"resource": "Kelp",
-"yaw": 39,
-"zone": "coverage",
-"bindPlacement": "tollholms-kit-kelp-wrack-1-022"
-}
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 92.5, 0.683, -9.5)
-
 [node name="coilmere--harvest-3067-shell" type="Marker3D" parent="Gameplay/Harvestables"]
 gizmo_extents = 0.8
 script = ExtResource("s2_marker")
@@ -111166,63 +111112,6 @@ extras = {
 "zone": "coverage"
 }
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -255.5, 88.0, -57.5)
-
-[node name="coilmere--harvest-3657-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
-gizmo_extents = 0.8
-script = ExtResource("s2_marker")
-record_id = "coilmere--harvest-3657-lavender"
-kind = "harvestable"
-label = "Lavender"
-extras = {
-"authority": "server",
-"cluster": "coilmere-wild-0153",
-"grouping": "coilmere-wild-0153",
-"groupingName": "Berries, Lavender, Sage and Sunleaf",
-"objectId": 3657,
-"pass": "harvest-coverage-1",
-"resource": "Lavender",
-"yaw": 111,
-"zone": "coverage"
-}
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -511.5, 2.5, -78.5)
-
-[node name="coilmere--harvest-3658-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
-gizmo_extents = 0.8
-script = ExtResource("s2_marker")
-record_id = "coilmere--harvest-3658-sunleaf"
-kind = "harvestable"
-label = "Sunleaf"
-extras = {
-"authority": "server",
-"cluster": "coilmere-wild-0153",
-"grouping": "coilmere-wild-0153",
-"groupingName": "Berries, Lavender, Sage and Sunleaf",
-"objectId": 3658,
-"pass": "harvest-coverage-1",
-"resource": "Sunleaf",
-"yaw": 308,
-"zone": "coverage"
-}
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -511.5, 2.5, -76.5)
-
-[node name="coilmere--harvest-3659-sage" type="Marker3D" parent="Gameplay/Harvestables"]
-gizmo_extents = 0.8
-script = ExtResource("s2_marker")
-record_id = "coilmere--harvest-3659-sage"
-kind = "harvestable"
-label = "Sage"
-extras = {
-"authority": "server",
-"cluster": "coilmere-wild-0153",
-"grouping": "coilmere-wild-0153",
-"groupingName": "Berries, Lavender, Sage and Sunleaf",
-"objectId": 3659,
-"pass": "harvest-coverage-1",
-"resource": "Sage",
-"yaw": 286,
-"zone": "coverage"
-}
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -511.5, 2.5, -71.5)
 
 [node name="coilmere--harvest-3660-mushroom" type="Marker3D" parent="Gameplay/Harvestables"]
 gizmo_extents = 0.8

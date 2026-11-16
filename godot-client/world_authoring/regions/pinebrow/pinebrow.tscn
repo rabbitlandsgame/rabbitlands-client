@@ -165,6 +165,8 @@
 [ext_resource type="PackedScene" path="res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb" id="lv_lichen_stone_mat_1"]
 
 
+[ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb" id="mq_1"]
+
 [sub_resource type="StandardMaterial3D" id="material"]
 cull_mode = 2
 vertex_color_use_as_albedo = true
@@ -6769,8 +6771,8 @@ metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototy
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-coastal-rock-3-061"
 node_name = "Authored_sw_isle_kit_coastal_rock_3_061"
-catalog_asset_id = "sw_isle:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+catalog_asset_id = "sw_isle:kit-coastal-rock-3-noplate"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 collision_role = "solid"
 metadata = {
 "polishLayer": "shore",
@@ -6778,11 +6780,11 @@ metadata = {
 "polishStep": "d1-rock"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.52434, -0.026989, -0.944373, 0.530759, 0.885101, -0.319986, 0.781577, -0.619167, -0.416257, -184.9258, 3.6618, -4.3562)
+transform = Transform3D(-0.52434, -0.026989, -0.944373, 0.530759, 0.885101, -0.319986, 0.781577, -0.619167, -0.416257, -184.9258, 2.779342, -4.3562)
 
-[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 198" instance=ExtResource("s0_96_e14li")]
-metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
+[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 198" instance=ExtResource("mq_1")]
+metadata/map_asset_id = "sw_isle:kit-coastal-rock-3-noplate"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb"
 
 [node name="s0_Coastal Boulders 234" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
