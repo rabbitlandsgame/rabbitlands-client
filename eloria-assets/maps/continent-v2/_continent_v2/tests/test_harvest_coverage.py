@@ -206,6 +206,66 @@ def test_scene_writer_is_idempotent_and_restores_the_count(tmp_path):
         assert m["script"] == scene["markerScript"] and scene["markerScript"]
 
 
+# Generated nodes the 2026-11-15 map quality pass removed from raised pier, causeway and landing-stage decks (Walk_
+# surfaces 1.3-18.5 m above the terrain; .local/map-quality-20261115/fixes/harvest.md): served tiles per map.
+DECK_REGRESSION = {
+    "ravenhead": [(579, 416), (576, 411), (554, 250), (548, 464), (716, 346), (693, 345), (611, 320), (776, 350)],
+    "coilmere": [(428, 1041), (432, 1042), (62, 815), (55, 815), (147, 770)],
+    "reedfall": [(300, 358), (303, 353)],
+    "hornmere": [(591, 291), (590, 299), (592, 287)],
+}
+
+
+def bare_ground(region):
+    """A Ground stand-in without the server: the real frame, scene and kit models, every tile open, flat and reached,
+    no protected rows or existing nodes, so only the scene's own scenery can exclude a tile."""
+    from types import SimpleNamespace
+    frame = H.frames.load(region, H.ROOT)
+    world = H.read_json(H.ROOT / f"{H.V2}/{region}/client/world.json")
+    shape = (frame.cells[1], frame.cells[0])
+    codes = np.ones(shape, np.int64)
+    return SimpleNamespace(region=region, frame=frame, scene=H.read_scene(region, H.ROOT, RULES["pass"]),
+                           checkout=H.ROOT, shape=shape, codes=codes, ground=codes, heights=np.zeros(shape),
+                           polygon=world["continentGeography"], protected=[], targets=[], lane_tiles=[], nodes=[])
+
+
+def test_candidate_mask_keeps_off_decks_and_piers():
+    """Regression: the served grid is open and flat on a pier deck, so the mask once let the pass seed sites on the
+    trestle piers and causeways. Deck kits and Walk_ faces now exclude their footprint, for promotion too."""
+    for region, tiles in DECK_REGRESSION.items():
+        g = bare_ground(region)
+        cand, promotable_ok = H.candidate_mask(g, np.ones(g.shape, bool), RULES)
+        deck = H.scenery_exclusions(g, RULES)["deck"]
+        for x, y in tiles:
+            assert deck[y, x] and not cand[y, x] and not promotable_ok[y, x], (region, x, y)
+        # every pier and causeway span's own origin tile is a deck tile
+        for p in g.scene["placements"]:
+            if "trestle-pier-span" in p["kit"] or "causeway-arch" in p["kit"]:
+                try:
+                    x, y = g.frame.tile(p["position"][0], p["position"][2])
+                except H.frames.FrameError:
+                    continue
+                assert deck[y, x], (region, p["nodeName"])
+        # decks are a small part of a map: the mask still offers its open ground
+        assert deck.mean() < 0.05 and cand.sum() > 0.2 * cand.size, (region, deck.mean(), cand.mean())
+
+
+def test_saved_bridge_decks_are_excluded():
+    """A saved bridge (Bridges/<id> with Start and End markers) excludes its deck strip widened by the margin."""
+    from types import SimpleNamespace
+    g = SimpleNamespace(frame=SimpleNamespace(origin=(50, 50)), shape=(100, 100), checkout=H.ROOT,
+                        scene={"placements": [], "groundRegions": [],
+                               "bridges": [{"id": "b", "start": [-10.0, 3.0, 0.0], "end": [10.0, 3.0, 0.0],
+                                            "width": 4.0}]})
+    deck = H.scenery_exclusions(g, RULES)["deck"]
+    tx, tz = H.tile_centres(g)
+    on = lambda x, z: deck[int(np.argmin(abs(tz - z))), int(np.argmin(abs(tx - x)))]
+    margin = H.EXCLUSIONS["deckMarginMetres"]
+    assert on(0.5, 0.5) and on(9.5, 2.5) and on(-9.5, -2.5)
+    assert not on(0.5, 2.0 + margin + 1.5) and not on(10.0 + margin + 1.5, 0.5)
+    assert deck.sum() < 2 * (20 + 2 * margin + 1) * (4 + 2 * margin + 1)
+
+
 def test_every_applied_scene_uses_its_own_marker_script():
     for region in H.EXTERIOR:
         scene = H.read_scene(region, H.ROOT, RULES["pass"])

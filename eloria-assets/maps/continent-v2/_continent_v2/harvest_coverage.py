@@ -44,6 +44,7 @@ import json
 import math
 from pathlib import Path
 import re
+import struct
 import sys
 
 import numpy as np
@@ -140,12 +141,18 @@ def read_scene(region: str, checkout: Path, pass_name: str):
     raw = path.read_bytes()
     text = raw.decode("utf-8")
     curves, markers, roads, placements, generated = {}, [], [], [], []
+    presets, bridges, bridge_ends, ground_regions = {}, {}, {}, []
     for kind, attrs, body, start, end in blocks(text):
         if kind == "sub_resource" and attrs.get("type") == "Curve3D":
             m = re.search(r'"points": PackedVector3Array\(([^)]*)\)', body)
             if m:
                 v = np.array([float(x) for x in FLOATS.findall(m.group(1))]).reshape(-1, 3)
                 curves[attrs["id"]] = v.reshape(-1, 3, 3)       # (in, out, position) per point
+            continue
+        if kind == "sub_resource" and attrs.get("type") == "Resource":
+            preset = _field(body, "texture_preset")          # a ground region's surface (map_authoring_surface.gd)
+            if preset:
+                presets[attrs["id"]] = preset.strip('"')
             continue
         if kind != "node":
             continue
@@ -177,7 +184,43 @@ def read_scene(region: str, checkout: Path, pass_name: str):
             if asset and catalog and tr is not None:
                 placements.append({"assetId": asset.strip('"'), "nodeName": (_field(body, "node_name") or "").strip('"'),
                                    "kit": kit_of(catalog.strip('"')), "role": (_field(body, "collision_role") or "").strip('"'),
-                                   "position": tr[1].tolist()})
+                                   "position": tr[1].tolist(),
+                                   # the Transform3D's basis as written (its rows: placed = basis @ local + origin)
+                                   # and the kit model, for the scenery exclusions' footprints
+                                   "basis": tr[0].tolist(),
+                                   "scenePath": (_field(body, "scene_path") or "").strip('"')})
+        elif parent == "Bridges" and _field(body, "bridge_id"):
+            tr = _transform(body) or (np.eye(3), np.zeros(3))
+            bridges[attrs.get("name")] = {"id": _field(body, "bridge_id").strip('"'), "transform": tr,
+                                          "width": float(_field(body, "width") or 8.0)}
+        elif parent.startswith("Bridges/") and attrs.get("name") in ("Start", "End"):
+            tr = _transform(body)
+            if tr is not None:
+                bridge_ends.setdefault(parent.split("/", 1)[1], {})[attrs["name"]] = tr[1]
+        elif parent == "Ground/Regions" and _field(body, "region_id"):
+            tr = _transform(body) or (np.eye(3), np.zeros(3))
+            surface = re.search(r'surface = SubResource\("([^"]+)"\)', body)
+            # the numbers inside "Vector2(...)": the "2" of the constructor is not one of them
+            size = [float(v) for v in FLOATS.findall((_field(body, "size") or "()").split("(", 1)[-1])]
+            clip = _field(body, "clip_polygon")
+            clip = np.array([float(v) for v in FLOATS.findall(clip.split("(", 1)[1])]).reshape(-1, 2) if clip else None
+            ground_regions.append({
+                "id": _field(body, "region_id").strip('"'),
+                # shape 1 is a rectangle; an unwritten shape is the default ellipse (the bake reads them so)
+                "shape": "rectangle" if (_field(body, "shape") or "0") == "1" else "ellipse",
+                "size": size if len(size) == 2 else [0.0, 0.0], "basis": tr[0], "origin": tr[1],
+                "blend": float(_field(body, "blend_width") or 0.0), "opacity": float(_field(body, "opacity") or 1.0),
+                "enabled": (_field(body, "enabled") or "true") == "true",
+                "surfaceId": surface.group(1) if surface else None, "clip": clip})
+    for region_ in ground_regions:
+        region_["preset"] = presets.get(region_.pop("surfaceId"))
+    decks = []
+    for name, bridge in bridges.items():
+        ends = bridge_ends.get(name, {})
+        if "Start" in ends and "End" in ends:
+            basis, origin = bridge["transform"]
+            a, b = (basis @ ends[k] + origin for k in ("Start", "End"))
+            decks.append({"id": bridge["id"], "start": a.tolist(), "end": b.tolist(), "width": bridge["width"]})
     paths = []
     for road in roads:
         points = curves.get(road["curve"])
@@ -186,7 +229,9 @@ def read_scene(region: str, checkout: Path, pass_name: str):
         basis, origin = road["transform"]
         widths = road["widths"] if len(road["widths"]) == len(points) else [road["default"]] * len(points)
         sampled, sampled_widths = bezier_samples(points, widths)
-        world = sampled @ basis + origin
+        # basis is the Transform3D's rows (placed = basis @ local), so row vectors take its transpose. Every
+        # road on the 17 maps had an identity basis when this was corrected (2026-11-15), so no result changed.
+        world = sampled @ basis.T + origin
         paths.append({"kind": "road", "id": road["id"],
                       "points": [{"position": p.tolist(), "width": w} for p, w in zip(world, sampled_widths)]})
     base = text
@@ -200,7 +245,8 @@ def read_scene(region: str, checkout: Path, pass_name: str):
     scripts = scripts or [m["script"] for m in markers if m.get("script")]
     marker_script = max(set(scripts), key=scripts.count) if scripts else None
     return {"path": path, "raw": raw, "text": text, "base": base, "markers": markers, "paths": paths,
-            "placements": placements, "generated": [g[2] for g in generated], "markerScript": marker_script}
+            "placements": placements, "generated": [g[2] for g in generated], "markerScript": marker_script,
+            "bridges": decks, "groundRegions": ground_regions}
 
 
 def bezier_samples(points, widths, step_metres=1.0):
@@ -276,6 +322,7 @@ class Ground:
 
     def __init__(self, region, checkout, srv, scene):
         self.region = region
+        self.checkout = Path(checkout)
         self.frame = frames.load(region, checkout)
         package = checkout / f"{V2}/{region}/client"
         world = read_json(package / "world.json")
@@ -392,9 +439,291 @@ def chebyshev_mask(shape, tiles, radius):
     return m
 
 
+# --- scenery exclusions ----------------------------------------------------------------------------------------------
+# The 2026-11-15 map quality audit removed 97 of this pass's nodes that the mask above let through (rabbitlands-client
+# .local/map-quality-20261115/fixes/harvest.md): 48 on pier, causeway and landing-stage decks (Walk_ surfaces
+# 1.3-18.5 m above the terrain: the served grid is open and flat there), 22 inside dense shrubs, boulders, crops and
+# drifts, 15 on masonry paving (ground regions, paving kits, a temple stair), 2 in a fir skirt and a tree-fern trunk
+# base, and 10 Kelp promoted onto kelp wrack stranded 59-470 m from the sea. These layers keep a re-plan off them.
+# The numbers live here, not in content/harvest-coverage-rules.json, so the applied plan's rulesSha256 stays valid; a
+# rules file may override any of them under an optional "exclusions" object.
+EXCLUSIONS = {
+    # Deck kits: the placed model's whole x/z hull, widened by the margin. Any other kit model with Walk_ faces (a
+    # gatehouse passage, a lighthouse gallery) excludes the hull of those faces. Saved bridges exclude their deck strip.
+    "deckKitWords": ["pier", "causeway", "landing-stage", "quay", "jetty", "boardwalk", "bridge", "paving",
+                     "plaza-rosette", "temple-stair", "stairhouse", "walk-", "mole-"],
+    "deckMarginMetres": 1.0,
+    # Ground regions painted with a paving surface (texture preset name, lower case) at this weight or more.
+    "pavingPresetWords": ["masonry", "paving", "cobble", "flagstone"],
+    "pavingMinWeight": 0.25,
+    # Dense scenery a plant cannot share a tile with: the x/z hull of the model's vertices up to denseBandMetres above
+    # the served ground beneath them (a shrub's spread, a boulder's foot and any overhang a plant would stand in:
+    # standing_band), widened by the margin.
+    "denseKitWords": ["juniper", "gorse", "bougainvillea", "blackthorn", "dog-rose", "rock-rose", "autumn-shrub",
+                      "flower-shrub", "garden-hedge", "hedge-row", "coppice", "dead-thorn", "saxaul",
+                      "cabbage-rows", "wheat-stooks", "pumpkin-patch", "vineyard", "hay-stack",
+                      "boulder", "coastal-rock", "lichen-rock", "outcrop", "crag", "rockfall",
+                      "stump", "mossy-log", "driftwood", "snow-drift"],
+    "denseBandMetres": 2.0,
+    "denseMarginMetres": 0.5,
+    # Trees: the trunk (export_collision's trunk prism, served closed already) widened by treeTrunkMarginMetres, and
+    # the hull of the model's vertices within treeSkirtBandMetres of the served ground beneath them (a fir's skirt on
+    # the ground, a tree fern's trunk base; standing_band) widened by treeSkirtMarginMetres. Prop-root trees keep
+    # only the trunk: plants stand between thin roots (the audit left those as they are).
+    "treeKitWords": ["tree", "pine", "-fir", "fir-", "larch", "cypress", "spruce", "palm"],
+    "openRootTreeWords": ["banyan", "mangrove"],
+    "treeTrunkMarginMetres": 1.0,
+    "treeSkirtBandMetres": 0.7,
+    "treeSkirtMarginMetres": 0.5,
+    # Marine scenery (kelp wrack, shell scree) is promoted to its harvest kind, and lends its "shore" kinds to the
+    # sites around it, only within marineSeaMetres of the sea: a vertex of the published client terrain below sea
+    # level (the client draws the sea wherever its terrain is lower; sea_metres). Measured 2026-11-15 on all 362
+    # placements: 269 lie within 10 m of the sea, the stranded inland wrack 59-470 m from it.
+    "marineKitWords": ["kelp-wrack", "shell-scree"],
+    "marineSeaMetres": 10.0,
+}
+
+
+def exclusion_rules(rules):
+    return {**EXCLUSIONS, **(rules.get("exclusions") or {})}
+
+
+_KIT_GEOMETRY = {}
+_KIT_WALK = {}
+
+
+def _glb_has_walk(path: Path) -> bool:
+    """Whether a kit GLB names a Walk_ node (its JSON chunk only; the triangles are read when it does)."""
+    key = str(path)
+    if key not in _KIT_WALK:
+        with open(path, "rb") as f:
+            magic, _version, _length, size, kind = struct.unpack("<4sIIII", f.read(20))
+            doc = json.loads(f.read(size)) if magic == b"glTF" and kind == 0x4E4F534A else {}
+        _KIT_WALK[key] = any(str(n.get("name", "")).startswith("Walk_") for n in doc.get("nodes", []))
+    return _KIT_WALK[key]
+
+
+def kit_geometry(checkout: Path, scene_path: str):
+    """A kit model in its own space, read by export_collision.Prototype as the bake reads it: (vertices (n, 3),
+    Walk_ triangles (t, 3, 3), trunk (x, z, radius) or None)."""
+    path = Path(checkout) / "godot-client" / scene_path.removeprefix("res://")
+    key = str(path)
+    if key not in _KIT_GEOMETRY:
+        proto = X.Prototype(path)                     # not X.Prototype.load: keep only what the masks need
+        every = np.asarray(proto.every, float).reshape(-1, 3)
+        verts = np.unique(np.round(every, 2), axis=0) if len(every) else np.zeros((0, 3))
+        trunk = None
+        if proto.trunk:
+            ring = np.asarray(proto.trunk[0][0], float).reshape(-1, 3)
+            cx, cz = float(np.median(ring[:, 0])), float(np.median(ring[:, 2]))
+            trunk = (cx, cz, float(np.max(np.hypot(ring[:, 0] - cx, ring[:, 2] - cz))))
+        _KIT_GEOMETRY[key] = (verts, np.asarray(proto.walk, float), trunk)
+    return _KIT_GEOMETRY[key]
+
+
+def _words(kit, words):
+    return any(w in kit for w in words)
+
+
+def mark_convex(mask, tx, tz, points, margin):
+    """Mark the tiles whose centre lies within `margin` metres of the convex hull of x/z `points` (a mitred
+    widening: a hair more at sharp corners)."""
+    pts = np.unique(np.round(np.asarray(points, float).reshape(-1, 2), 3), axis=0)
+    if not len(pts):
+        return
+    x0, z0 = pts.min(axis=0) - margin
+    x1, z1 = pts.max(axis=0) + margin
+    cols = np.nonzero((tx >= x0) & (tx <= x1))[0]
+    rows = np.nonzero((tz >= z0) & (tz <= z1))[0]
+    if not len(cols) or not len(rows):
+        return
+    X_, Z_ = np.meshgrid(tx[cols], tz[rows])
+    hull = None
+    if len(pts) >= 3:
+        from scipy.spatial import ConvexHull, QhullError
+        try:
+            hull = pts[ConvexHull(pts).vertices]           # counter-clockwise
+        except QhullError:                                 # collinear: a segment
+            hull = None
+    if hull is None:
+        # a point or a segment: distance to the farthest-apart pair's segment
+        a, b = pts[np.argmin(pts[:, 0] + pts[:, 1])], pts[np.argmax(pts[:, 0] + pts[:, 1])]
+        d = b - a
+        l2 = float(d @ d)
+        t = np.zeros_like(X_) if l2 <= 1e-12 else np.clip(((X_ - a[0]) * d[0] + (Z_ - a[1]) * d[1]) / l2, 0, 1)
+        inside = np.hypot(X_ - (a[0] + t * d[0]), Z_ - (a[1] + t * d[1])) <= margin
+    else:
+        out = np.full(X_.shape, -np.inf)
+        for (ax, az), (bx, bz) in zip(hull, np.roll(hull, -1, axis=0)):
+            length = math.hypot(bx - ax, bz - az)
+            if length <= 1e-9:
+                continue
+            # outward normal of a counter-clockwise edge (x east, z as the second axis)
+            out = np.maximum(out, ((X_ - ax) * (bz - az) - (Z_ - az) * (bx - ax)) / length)
+        inside = out <= margin
+    mask[np.ix_(rows, cols)] |= inside
+
+
+def _in_polygon(x, z, poly):
+    """Crossing-number rule (ownership.contains's), for a clip polygon that need not be valid for shapely."""
+    inside = np.zeros(np.shape(x), bool)
+    for (x1, z1), (x2, z2) in zip(poly, np.roll(poly, -1, axis=0)):
+        inside ^= ((z1 > z) != (z2 > z)) & (x < (x2 - x1) * (z - z1) / (z2 - z1 if z2 != z1 else 1e-12) + x1)
+    return inside
+
+
+def paving_weight(g, region, tx, tz):
+    """A ground region's paint weight at the tile centres (terrain_export.ground_region_faces: the footprint's
+    inner distance through smoothstep(0, blend), times opacity, inside the clip polygon), or None when it misses."""
+    basis, origin = np.asarray(region["basis"], float), np.asarray(region["origin"], float)
+    half = np.asarray(region["size"], float) * 0.5
+    if (half <= 0).any():
+        return None
+    reach = float(np.hypot(*(half * np.abs(basis[[0, 2]][:, [0, 2]]).sum(axis=1)))) + 1.0
+    cols = np.nonzero(np.abs(tx - origin[0]) <= reach)[0]
+    rows = np.nonzero(np.abs(tz - origin[2]) <= reach)[0]
+    if not len(cols) or not len(rows):
+        return None
+    X_, Z_ = np.meshgrid(tx[cols], tz[rows])
+    inv = np.linalg.inv(basis)
+    rel = np.stack([X_ - origin[0], np.zeros_like(X_), Z_ - origin[2]], axis=-1) @ inv.T
+    px, pz = rel[..., 0], rel[..., 2]
+    if region["shape"] == "rectangle":
+        inside = np.minimum(half[0] - np.abs(px), half[1] - np.abs(pz))
+    else:
+        radius = np.hypot(px / half[0], pz / half[1])
+        gradient = np.hypot(px / half[0] ** 2, pz / half[1] ** 2)
+        inside = np.where(radius < 1e-5, half.min(), (1 - radius) * radius / np.maximum(gradient, 1e-5))
+    blend = region["blend"]
+    t = np.clip(inside / blend, 0, 1) if blend > 0 else (inside > 0).astype(float)
+    weight = np.where(inside > 0, t * t * (3 - 2 * t), 0.0) * region["opacity"]
+    if region.get("clip") is not None and len(region["clip"]) >= 3:
+        weight = np.where(_in_polygon(px, pz, np.asarray(region["clip"], float)), weight, 0.0)
+    return rows, cols, weight
+
+
+def standing_band(g, placed, origin, band):
+    """The placed vertices a plant on the ground beneath them would stand in: no higher than `band` metres above the
+    served height of the tile they are over (a boulder's overhang above a slope, a fir skirt on the ground), or, over
+    a closed tile or off the grid, above the placement's own foot (the higher of its origin and its lowest point)."""
+    foot = max(float(placed[:, 1].min()), float(origin[1]))
+    ref = np.full(len(placed), foot)
+    heights, open_ = getattr(g, "heights", None), getattr(g, "codes", None)      # heights are the codes' own
+    if heights is not None and open_ is not None:
+        cols = np.floor(placed[:, 0] + g.frame.origin[0]).astype(np.int64)
+        rows = np.floor(g.frame.origin[1] - placed[:, 2]).astype(np.int64)
+        h, w = g.shape
+        ok = (rows >= 0) & (rows < h) & (cols >= 0) & (cols < w)
+        ok[ok] &= open_[rows[ok], cols[ok]] != 0
+        ref[ok] = heights[rows[ok], cols[ok]]
+    return placed[:, 1] <= ref + band
+
+
+def sea_metres(g, points, reach):
+    """Metres from each territory-local (x, z) to the nearest vertex of the published client terrain below sea level
+    (the chunks' Terrain_ meshes, read only where a chunk below sea level lies within `reach` of a point); inf when
+    none is that close."""
+    pts = np.asarray(points, float).reshape(-1, 2)
+    out = np.full(len(pts), np.inf)
+    package = Path(getattr(g, "checkout", ROOT)) / V2 / g.region / "client"
+    world = read_json(package / "world.json")
+    level = float(world.get("asset", {}).get("seaLevel", 0.0))
+    sea = []
+    for chunk in world.get("streamingChunks", {}).get("chunks", []) if len(pts) else ():
+        lo, hi = chunk["bounds"]["min"], chunk["bounds"]["max"]
+        if lo[1] >= level:
+            continue
+        dx = np.maximum(0.0, np.maximum(lo[0] - pts[:, 0], pts[:, 0] - hi[0]))
+        dz = np.maximum(0.0, np.maximum(lo[2] - pts[:, 1], pts[:, 1] - hi[2]))
+        if not (np.hypot(dx, dz) <= reach).any():
+            continue
+        document, body = X.GR.load(package / Path(chunk["manifest"]).parent / "world.glb")
+        for index, node in enumerate(document["nodes"]):
+            if "mesh" in node and node.get("name", "").startswith("Terrain_"):
+                v = np.asarray(X.GR.triangles(document, body, [index]), float).reshape(-1, 3)
+                sea.append(v[v[:, 1] < level][:, [0, 2]])
+    sea = np.concatenate(sea) if sea else np.zeros((0, 2))
+    if len(sea):
+        from scipy.spatial import cKDTree
+        out = cKDTree(np.unique(np.round(sea, 2), axis=0)).query(pts)[0]
+    return out
+
+
+def scenery_exclusions(g, rules):
+    """{layer: tiles} a generated node may not take: "deck" (deck kits, Walk_ faces, saved bridges), "paving"
+    (paving ground regions), "dense" (dense shrub, rock, crop, stump and drift footprints) and "tree" (trunks and
+    skirts). Cached on the ground."""
+    cached = getattr(g, "_exclusions", None)
+    if cached is not None:
+        return cached
+    ex = exclusion_rules(rules)
+    checkout = Path(getattr(g, "checkout", ROOT))
+    tx, tz = tile_centres(g)
+    layers = {name: np.zeros(g.shape, bool) for name in ("deck", "paving", "dense", "tree")}
+    for p in g.scene["placements"]:
+        kit, scene_path = p["kit"], p.get("scenePath")
+        if not scene_path or "basis" not in p:
+            continue
+        deck = _words(kit, ex["deckKitWords"])
+        dense = _words(kit, ex["denseKitWords"])
+        tree = _words(kit, ex["treeKitWords"]) and not dense
+        path = checkout / "godot-client" / scene_path.removeprefix("res://")
+        walk = not deck and path.exists() and _glb_has_walk(path)
+        if not (deck or dense or tree or walk) or not path.exists():
+            continue
+        verts, walk_tris, trunk = kit_geometry(checkout, scene_path)
+        if not len(verts):
+            continue
+        basis, origin = np.asarray(p["basis"], float), np.asarray(p["position"], float)
+        if deck:
+            placed = verts @ basis.T + origin
+            mark_convex(layers["deck"], tx, tz, placed[:, [0, 2]], ex["deckMarginMetres"])
+            continue
+        if walk:
+            if len(walk_tris):
+                placed = walk_tris.reshape(-1, 3) @ basis.T + origin
+                mark_convex(layers["deck"], tx, tz, placed[:, [0, 2]], ex["deckMarginMetres"])
+            continue
+        placed = verts @ basis.T + origin
+        if dense:
+            band = placed[standing_band(g, placed, origin, ex["denseBandMetres"])]
+            mark_convex(layers["dense"], tx, tz, band[:, [0, 2]], ex["denseMarginMetres"])
+            continue
+        if trunk is not None:
+            cx, cz, r = trunk
+            centre = basis @ np.array([cx, 0.0, cz]) + origin
+            scale = float(np.mean(np.linalg.norm(basis[:, [0, 2]], axis=0)))
+            disc = np.linspace(0, 2 * math.pi, 12, endpoint=False)
+            ring = np.stack([centre[0] + r * scale * np.cos(disc), centre[2] + r * scale * np.sin(disc)], axis=1)
+            mark_convex(layers["tree"], tx, tz, ring, ex["treeTrunkMarginMetres"])
+        if not _words(kit, ex["openRootTreeWords"]):
+            band = placed[standing_band(g, placed, origin, ex["treeSkirtBandMetres"])]
+            mark_convex(layers["tree"], tx, tz, band[:, [0, 2]], ex["treeSkirtMarginMetres"])
+    for bridge in g.scene.get("bridges", ()):
+        a, b = np.asarray(bridge["start"], float), np.asarray(bridge["end"], float)
+        d = b[[0, 2]] - a[[0, 2]]
+        n = np.array([-d[1], d[0]]) / max(1e-9, float(np.hypot(*d))) * bridge["width"] / 2
+        corners = [a[[0, 2]] + n, a[[0, 2]] - n, b[[0, 2]] - n, b[[0, 2]] + n]
+        mark_convex(layers["deck"], tx, tz, corners, ex["deckMarginMetres"])
+    for region in g.scene.get("groundRegions", ()):
+        if not region["enabled"] or not _words((region.get("preset") or "").lower(), ex["pavingPresetWords"]):
+            continue
+        hit = paving_weight(g, region, tx, tz)
+        if hit is not None:
+            rows, cols, weight = hit
+            layers["paving"][np.ix_(rows, cols)] |= weight >= ex["pavingMinWeight"]
+    try:
+        g._exclusions = layers
+    except AttributeError:
+        pass
+    return layers
+
+
 def candidate_mask(g, reached, rules):
     """Open, reached tiles whose eight neighbours are open and reached (stricter than D4, so a new body never pinches
-    a path), on gentle ground, off roads, inside the map's own polygon and clear of protected points."""
+    a path), on gentle ground, off roads, inside the map's own polygon and clear of protected points, and off the
+    scenery exclusions (decks, paving, dense scenery, trees). A promotable placement's tile only has to keep off
+    decks: the placement itself presents the node (a town's citrus planter on paving, a juniper's own tile)."""
     pl = rules["placement"]
     open_ = (g.codes != 0) & reached
     ring = open_.copy()
@@ -427,7 +756,9 @@ def candidate_mask(g, reached, rules):
             if dx or dy:
                 ring_open += np.roll(np.roll(open_, dy, 0), dx, 1)
     promotable_ok = allow & (ring_open >= P.HARVEST_RING_MINIMUM)
-    return ring & gentle & allow & ~settled, promotable_ok
+    layers = scenery_exclusions(g, rules)
+    excluded = layers["deck"] | layers["paving"] | layers["dense"] | layers["tree"]
+    return ring & gentle & allow & ~settled & ~excluded, promotable_ok & ~layers["deck"]
 
 
 def settled_mask(g, rules):
@@ -455,12 +786,20 @@ def feature_fields(g, rules):
     classes = rules["features"]
     rasters = {name: np.zeros(g.shape, bool) for name in classes}
     promotable = []
+    ex = exclusion_rules(rules)
+    marine = [p for p in g.scene["placements"] if _words(p["kit"], ex["marineKitWords"])]
+    reach = ex["marineSeaMetres"]
+    stranded = {p["assetId"] for p, d in zip(marine, sea_metres(g, [(p["position"][0], p["position"][2])
+                                                                   for p in marine], reach)) if d > reach}
     for p in g.scene["placements"]:
         try:
             tx, ty = g.frame.tile(p["position"][0], p["position"][2])
         except frames.FrameError:
             continue
         kit = p["kit"]
+        if p["assetId"] in stranded:
+            # stranded inland wrack is scenery only: no Kelp or Shell promoted onto it, no shore kinds around it
+            continue
         for name, words in classes.items():
             if any(w in kit for w in words):
                 rasters[name][ty, tx] = True
