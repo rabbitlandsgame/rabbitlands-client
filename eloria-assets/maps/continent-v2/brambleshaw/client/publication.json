@@ -2,24 +2,24 @@
  "region": "brambleshaw",
  "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
  "snapshot": {
-  "sha256": "a9459d26eddcc6297d8f8e4ca0a78fe703492aef6cab59621464d805e4bd1536",
-  "sceneSha256": "07f278f5ae0bbbb502cff767f4f52b3f52d1882b53f542706e25544f3a861d0a",
+  "sha256": "00329ada310e03624daa7be4410e862940fb5769439cf0dea0a4324c39934f23",
+  "sceneSha256": "b011159eeee1fdce8f0602b04d4c1b3fa5b06e67814245517b4aa0d5b634b11a",
   "recipe": "region_bake_cli.gd --scene godot-client/world_authoring/regions/brambleshaw/brambleshaw.tscn --output <bake>/continent-authoring.json"
  },
  "collision": {
-  "sidecarSha256": "d7714251cb376778e8f60264c8e2fab08e7f9bb7c3069ad42322e0e2a68dbee1",
-  "collisionSha256": "e1f0e5b8f681069e5c1f72466ec5e99c29094f969d78d5dea3a5ddab70a18314",
-  "servedGridSha256": "40e4d1b0911d4392ef4d18961b4d5de7f79b5d179dd5f1f9fb68de59ac654298",
-  "walkableCells": 467503,
-  "openTiles": 114689,
-  "sourceSnapshotSha256": "a9459d26eddcc6297d8f8e4ca0a78fe703492aef6cab59621464d805e4bd1536"
+  "sidecarSha256": "998e331465f7e8ba14abe71817534993a8e4e695aec9cddcb94b9c428ca3ce41",
+  "collisionSha256": "9714133d5c3fa512f2952c68b2e19d2532ee7b8f8fed44325121059d2f97ca4f",
+  "servedGridSha256": "4142a239a29bcde522a7a13ce41b15532dcd4e38c07a5583fe5e3e0ee1902efd",
+  "walkableCells": 467497,
+  "openTiles": 114675,
+  "sourceSnapshotSha256": "00329ada310e03624daa7be4410e862940fb5769439cf0dea0a4324c39934f23"
  },
  "chunks": 25,
  "kitPlacementsOutsideWindow": 0,
  "lightingMarkers": 0,
  "chunkGlbBytes": {
-  "total": 14856556,
-  "max": 1267380,
+  "total": 15014020,
+  "max": 1408644,
   "over100MiB": []
  },
  "estimatedResidentMiB": {
@@ -29,12 +29,12 @@
   "07_11": 38.1,
   "08_08": 82.7,
   "08_09": 84.3,
-  "08_10": 161.2,
+  "08_10": 157.2,
   "08_11": 62.6,
   "09_08": 78.5,
   "09_09": 113.2,
-  "09_10": 246.5,
-  "09_11": 248.1,
+  "09_10": 246.6,
+  "09_11": 244.0,
   "10_08": 54.0,
   "10_09": 162.2,
   "10_10": 198.8,
@@ -50,19 +50,19 @@
   "13_11": 10.9
  },
  "timings": {
-  "snapshot_s": 0.7,
+  "snapshot_s": 1.0,
   "terrain_s": 0.0,
   "water_s": 0.0,
   "overlays_s": 0.3,
   "bridges_s": 0.0,
-  "surface_glb_bytes": 110928896,
+  "surface_glb_bytes": 118484404,
   "walk_kit_nodes": 0,
-  "library_s": 0.2,
-  "harvest_nodes": 347,
-  "chunks_s": 1.6,
-  "space_passes_s": 3.2
+  "library_s": 0.3,
+  "harvest_nodes": 343,
+  "chunks_s": 2.2,
+  "space_passes_s": 4.0
  },
- "seconds": 10.3,
+ "seconds": 14.0,
  "imagePolicy": {
   "surface": {
    "imagesResampled": 7,
@@ -97,7 +97,7 @@
    -961
   ],
   "maximumPlacements": 129,
-  "maximumTriangles": 326471,
+  "maximumTriangles": 326427,
   "placementLimit": 240,
   "triangleLimit": 450000,
   "cellMetres": 96

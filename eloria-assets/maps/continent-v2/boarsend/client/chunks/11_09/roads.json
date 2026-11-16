@@ -1,0 +1,360 @@
+{
+  "schema": "rabbitlands-road-terrain-blend-v1",
+  "region": "boarsend",
+  "chunk": "11_09",
+  "pixels_per_metre": 4,
+  "source_glb_sha256": "37a74e0ecd1f68449da6b80e09f944bca14a6573b419ccbf00aaa29cf452190e",
+  "source_manifest_sha256": "d2555ac2f3f4e69313730ae324641ad91dc208dccd6710a332a1091f9e953181",
+  "authoring_scene_sha256": "c8b5d74e99fb641b83e7d23517e83e66468a73fa543aa41d6e0acb7bf720190c",
+  "mask_space": "gltf_scene_world_xz",
+  "source_frame_node": "AuthoredGround_boarsendBase_boarsend_11_09",
+  "source_frame_matrix": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    -1007.0,
+    0.0,
+    -8226.0,
+    1.0
+  ],
+  "targets": [
+    {
+      "name": "AuthoredGround_boarsendBase_boarsend_11_09",
+      "world_matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        -1007.0,
+        0.0,
+        -8226.0,
+        1.0
+      ]
+    },
+    {
+      "name": "AuthoredGround_boarsend_forest-07_boarsend_11_09",
+      "world_matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        -1007.0,
+        0.0,
+        -8226.0,
+        1.0
+      ]
+    },
+    {
+      "name": "AuthoredGround_boarsend_forest-26_boarsend_11_09",
+      "world_matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        -1007.0,
+        0.0,
+        -8226.0,
+        1.0
+      ]
+    }
+  ],
+  "removed_road_node_names": [
+    "Walk_boarsend_boarsend--r41-1--2_boarsend_11_09"
+  ],
+  "source_road_ids": [
+    "boarsend--r41-1--2"
+  ],
+  "retained_walk_nodes": [],
+  "collision_policy": "retained_terrain_only_for_removed_road_ribbons;structural_walks_unchanged",
+  "styles": [
+    {
+      "id": 0,
+      "identity_sha256": "4d1cde4765a88bf0e35bd0c312163ec98e9d806e6b174a59e89177300fda09cc",
+      "material_document": {
+        "asset": {
+          "version": "2.0"
+        },
+        "materials": [
+          {
+            "name": "authored_boarsend_boarsend--r41-1--2",
+            "pbrMetallicRoughness": {
+              "baseColorFactor": [
+                0.3185468059531732,
+                0.1959941698684143,
+                0.07828832086604431,
+                1.0
+              ],
+              "metallicFactor": 0.0,
+              "roughnessFactor": 1.0,
+              "baseColorTexture": {
+                "index": 0
+              },
+              "metallicRoughnessTexture": {
+                "index": 1
+              }
+            },
+            "occlusionTexture": {
+              "index": 1
+            },
+            "normalTexture": {
+              "index": 2,
+              "scale": 0.72
+            },
+            "alphaMode": "BLEND",
+            "doubleSided": true
+          }
+        ],
+        "textures": [
+          {
+            "sampler": 0,
+            "source": 0
+          },
+          {
+            "sampler": 0,
+            "source": 1
+          },
+          {
+            "sampler": 0,
+            "source": 2
+          }
+        ],
+        "images": [
+          {
+            "uri": "../../../../../nymara-regions/_continent/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png",
+            "name": "boarsend_meadow-09_albedoTexture",
+            "extras": {
+              "rl_texture_policy_directory": "../../../../_continent_v2/shared-assets"
+            }
+          },
+          {
+            "uri": "../../../../../nymara-regions/_continent/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png",
+            "name": "boarsend_meadow-09_ormTexture",
+            "extras": {
+              "rl_texture_policy_directory": "../../../../_continent_v2/shared-assets"
+            }
+          },
+          {
+            "uri": "../../../../../nymara-regions/_continent/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png",
+            "name": "boarsend_meadow-09_normalTexture",
+            "extras": {
+              "rl_texture_policy_directory": "../../../../_continent_v2/shared-assets"
+            }
+          }
+        ],
+        "samplers": [
+          {
+            "magFilter": 9729,
+            "minFilter": 9987,
+            "wrapS": 10497,
+            "wrapT": 10497
+          }
+        ]
+      },
+      "externalResources": {
+        "../../../../../nymara-regions/_continent/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+        "../../../../../nymara-regions/_continent/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
+        "../../../../../nymara-regions/_continent/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7"
+      },
+      "original_material_names": [
+        "authored_boarsend_boarsend--r41-1--2"
+      ],
+      "vertex_rgb": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "footstep_class": "dirt"
+    }
+  ],
+  "field": {
+    "grid": {
+      "origin_xz": [
+        125.0,
+        -76.75
+      ],
+      "width": 66,
+      "height": 61,
+      "pixels_per_metre": 4,
+      "gutter_pixels": 2,
+      "axis_order": "row_increasing_z,column_increasing_x",
+      "sample": "pixel_centres"
+    },
+    "coverage_mips": [
+      {
+        "level": 0,
+        "width": 66,
+        "height": 61,
+        "file": "coverage-mip0.png",
+        "sha256": "707c12e797f7d098ea9bbf43555d89c251f0e757d2eae5fa55e2b3bdf5c7cbd3",
+        "decoded_sha256": "82d46b3a063050bf8fa05383670e71383aa5203f06915d40207f1a4775ae6100"
+      },
+      {
+        "level": 1,
+        "width": 33,
+        "height": 30,
+        "file": "coverage-mip1.png",
+        "sha256": "b8399fdbe1d801ab48394c947c7a9d1185f966d122c0761817fab3369192d584",
+        "decoded_sha256": "829df4131d7c241582ecdbd83fecc3b8a0bace889ba53b5fa35d3c235ca027d2"
+      },
+      {
+        "level": 2,
+        "width": 16,
+        "height": 15,
+        "file": "coverage-mip2.png",
+        "sha256": "8feea2aa007cfe10481c944be490a42879470ddb76f793142df46e417445d974",
+        "decoded_sha256": "9ecdec6f25c8f6498253a1eec33c0fbc66175aa87e105c709403bc5e19f0d320"
+      },
+      {
+        "level": 3,
+        "width": 8,
+        "height": 7,
+        "file": "coverage-mip3.png",
+        "sha256": "1be4c68e7644aa207b6a009c245eba098b8190ae4db3cfe05af61e8c49342f1e",
+        "decoded_sha256": "a6277e83628d83d938314ee2326ddca56558467020897cb0a5bc08bd9c2d63cb"
+      },
+      {
+        "level": 4,
+        "width": 4,
+        "height": 3,
+        "file": "coverage-mip4.png",
+        "sha256": "db46f5542edde55291212c7a3cac1d58d96670ceb75f7d3dabb6463322a8c9a7",
+        "decoded_sha256": "b76caa6926df56d1d0ab9b3873d4c08c77076d67a505125ad2299b72143caac2"
+      },
+      {
+        "level": 5,
+        "width": 2,
+        "height": 1,
+        "file": "coverage-mip5.png",
+        "sha256": "17fa039e89e406cdea0d385f41b39a2ef9dd0a3e36ed16caf54ab7f92e405d2b",
+        "decoded_sha256": "1f0644604a0e1e553f6c0375fc364c5f27abb2c4a7718decdba4583553101282"
+      },
+      {
+        "level": 6,
+        "width": 1,
+        "height": 1,
+        "file": "coverage-mip6.png",
+        "sha256": "9bd483dced09c08f874a81acb145e76549eca58958e005b2a05e9fd2bb3641c9",
+        "decoded_sha256": "6da43b944e494e885e69af021f93c6d9331c78aa228084711429160a5bbd15b5"
+      }
+    ],
+    "triangle_ids": {
+      "file": "triangle-ids.bin.zst",
+      "compression": "zstd",
+      "uncompressed_bytes": 8052,
+      "sha256": "dad338237b71fb38b6b2e3e23e055bd5f792febba59a7cb7f8167fca1eaab4f2",
+      "file_sha256": "52e320a31948d3a6dfdb334b77e92530b1bcc1a5acc819163e9bf3b6acba7929",
+      "codec_roundtrip_byte_identical": true,
+      "format": "RG8",
+      "byte_order": "little",
+      "width": 66,
+      "height": 61,
+      "mipmaps": false,
+      "id_zero": "reserved",
+      "id_base": 1
+    },
+    "affine_coefficients": {
+      "file": "affine-coefficients.rgba32f.zst",
+      "compression": "zstd",
+      "uncompressed_bytes": 26432,
+      "sha256": "586dcc627432ccaab99a8ec0a2a85107a64d14cd96ef441bdca13bedb38e4c36",
+      "file_sha256": "823ed31e26670d749ff0327132aad0c882f13c37e63d787eabb376f179b84b40",
+      "codec_roundtrip_byte_identical": true,
+      "format": "RGBA32F",
+      "byte_order": "little",
+      "width": 1652,
+      "height": 1,
+      "records_per_row": 826,
+      "record_count": 826,
+      "texels_per_record": 2,
+      "mipmaps": false,
+      "layout": [
+        "u_at_grid_origin",
+        "v_at_grid_origin",
+        "dU_dX",
+        "dU_dZ",
+        "dV_dX",
+        "dV_dZ",
+        "style_id",
+        "reserved"
+      ]
+    },
+    "validation": {
+      "maximum_covered_uv_abs_error": 6.103515625e-05,
+      "maximum_halo_uv_abs_error": 6.103515625e-05,
+      "source_jacobian_float32_byte_identical": true,
+      "selected_triangle_count": 826,
+      "maximum_triangle_id": 826,
+      "coverage_policy": "maximum_raw_interpolated_source_alpha",
+      "uv_policy": "highest_alpha_then_last_stable_authored_triangle",
+      "affine_halo_policy": "nearest_valid_selected_triangle_evaluated_at_fragment_position"
+    }
+  },
+  "overlap": {
+    "covered_pixels": 1597,
+    "multiply_covered_pixels": 23,
+    "different_uv_overlap_pixels": 0,
+    "maximum_source_fragments_per_pixel": 2
+  },
+  "active_style_ids": [
+    0
+  ],
+  "appearance_limit": "Dominant UV and maximum raw alpha collapse independent overlapping road samples at four pixels per metre.",
+  "resources": {
+    "affine-coefficients.rgba32f.zst": "823ed31e26670d749ff0327132aad0c882f13c37e63d787eabb376f179b84b40",
+    "coverage-mip0.png": "707c12e797f7d098ea9bbf43555d89c251f0e757d2eae5fa55e2b3bdf5c7cbd3",
+    "coverage-mip1.png": "b8399fdbe1d801ab48394c947c7a9d1185f966d122c0761817fab3369192d584",
+    "coverage-mip2.png": "8feea2aa007cfe10481c944be490a42879470ddb76f793142df46e417445d974",
+    "coverage-mip3.png": "1be4c68e7644aa207b6a009c245eba098b8190ae4db3cfe05af61e8c49342f1e",
+    "coverage-mip4.png": "db46f5542edde55291212c7a3cac1d58d96670ceb75f7d3dabb6463322a8c9a7",
+    "coverage-mip5.png": "17fa039e89e406cdea0d385f41b39a2ef9dd0a3e36ed16caf54ab7f92e405d2b",
+    "coverage-mip6.png": "9bd483dced09c08f874a81acb145e76549eca58958e005b2a05e9fd2bb3641c9",
+    "triangle-ids.bin.zst": "52e320a31948d3a6dfdb334b77e92530b1bcc1a5acc819163e9bf3b6acba7929",
+    "../../../../../nymara-regions/_continent/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+    "../../../../../nymara-regions/_continent/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
+    "../../../../../nymara-regions/_continent/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7"
+  },
+  "externalImagePolicies": {
+    "../../../../../nymara-regions/_continent/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": [
+      "../../../../_continent_v2/shared-assets"
+    ]
+  }
+}

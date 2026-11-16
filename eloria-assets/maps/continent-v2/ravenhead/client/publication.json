@@ -2,24 +2,24 @@
  "region": "ravenhead",
  "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
  "snapshot": {
-  "sha256": "c96c1cc4c0708237390d6c13ca15d282735b408881dd47764850943b66eb5df0",
-  "sceneSha256": "146ef1ce934380aa4e329517e0e493e4e04ec45730bf257e4cda1eeac8d6a007",
+  "sha256": "4a0f6d9e190a7803cedaa192744eb8340af2b1c1683c22427d99f4c75da834fa",
+  "sceneSha256": "921d5d0d0c6586af9475b40367351728e0df198ae4d236dcb5e84d86e9b0b346",
   "recipe": "region_bake_cli.gd --scene godot-client/world_authoring/regions/ravenhead/ravenhead.tscn --output <bake>/continent-authoring.json"
  },
  "collision": {
-  "sidecarSha256": "31b5be81d3266a18a4c7afb74c20a143f8908813fdd3c89dd91767ea0005fda6",
-  "collisionSha256": "3a2d0a80a9fd321a0268415fc87d34d52a6e9b397e2a5632e9f5dddcf0cbda3e",
-  "servedGridSha256": "7de1cc52f784da7288f2d42a34546b97a334a35a43628dd7c9a7f294a0048c1e",
-  "walkableCells": 442361,
-  "openTiles": 108595,
-  "sourceSnapshotSha256": "c96c1cc4c0708237390d6c13ca15d282735b408881dd47764850943b66eb5df0"
+  "sidecarSha256": "b64842c115f0fc52929619f5d7cc84ac973d9baf2e13094887e0c117930dbf62",
+  "collisionSha256": "bde4af72000405b244e2db9b5fac6aebbbb79dd477b16cd812cce55c2f3639a3",
+  "servedGridSha256": "70610f5698049e8fe4d6bba3bbcf086fa76ab12d3f253cf55b1dec713d59fea7",
+  "walkableCells": 442489,
+  "openTiles": 108627,
+  "sourceSnapshotSha256": "4a0f6d9e190a7803cedaa192744eb8340af2b1c1683c22427d99f4c75da834fa"
  },
  "chunks": 72,
  "kitPlacementsOutsideWindow": 0,
  "lightingMarkers": 0,
  "chunkGlbBytes": {
-  "total": 25238776,
-  "max": 1132448,
+  "total": 25300004,
+  "max": 1148984,
   "over100MiB": []
  },
  "estimatedResidentMiB": {
@@ -29,7 +29,7 @@
   "03_13": 11.0,
   "03_14": 11.0,
   "03_15": 10.8,
-  "04_08": 87.7,
+  "04_08": 71.6,
   "04_09": 120.9,
   "04_10": 76.5,
   "04_11": 125.1,
@@ -43,13 +43,13 @@
   "05_10": 84.5,
   "05_11": 95.1,
   "05_12": 152.0,
-  "05_13": 166.0,
+  "05_13": 166.1,
   "05_14": 165.4,
   "05_15": 11.1,
   "05_16": 10.9,
   "06_09": 140.5,
   "06_10": 112.7,
-  "06_11": 123.1,
+  "06_11": 123.2,
   "06_12": 95.0,
   "06_13": 113.4,
   "06_14": 153.3,
@@ -57,7 +57,7 @@
   "06_16": 10.9,
   "07_09": 10.8,
   "07_10": 100.7,
-  "07_11": 145.3,
+  "07_11": 129.2,
   "07_12": 141.2,
   "07_13": 193.8,
   "07_14": 79.8,
@@ -70,7 +70,7 @@
   "08_15": 11.1,
   "08_16": 10.9,
   "09_11": 11.1,
-  "09_12": 80.6,
+  "09_12": 72.4,
   "09_13": 11.1,
   "09_14": 11.1,
   "09_15": 11.0,
@@ -97,19 +97,19 @@
   "12_16": 10.9
  },
  "timings": {
-  "snapshot_s": 1.2,
+  "snapshot_s": 1.4,
   "terrain_s": 0.2,
   "water_s": 0.0,
   "overlays_s": 0.8,
   "bridges_s": 0.1,
-  "surface_glb_bytes": 225367960,
+  "surface_glb_bytes": 230925880,
   "walk_kit_nodes": 61,
-  "library_s": 0.4,
-  "harvest_nodes": 249,
-  "chunks_s": 2.0,
-  "space_passes_s": 11.6
+  "library_s": 0.8,
+  "harvest_nodes": 217,
+  "chunks_s": 3.0,
+  "space_passes_s": 20.2
  },
- "seconds": 23.5,
+ "seconds": 35.5,
  "imagePolicy": {
   "surface": {
    "imagesResampled": 33,
@@ -170,7 +170,7 @@
    -971
   ],
   "maximumPlacements": 118,
-  "maximumTriangles": 181095,
+  "maximumTriangles": 181544,
   "placementLimit": 240,
   "triangleLimit": 450000,
   "cellMetres": 96
