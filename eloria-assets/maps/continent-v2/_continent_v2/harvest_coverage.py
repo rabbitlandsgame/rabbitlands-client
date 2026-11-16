@@ -1059,7 +1059,12 @@ def applied_maps(checkout: Path, plan) -> list:
 def verify_applied(checkout: Path, plan, server: Path | None = None) -> list:
     """Once applied (and published) the plan cannot be regenerated - its own nodes are then part of the served
     grids and tables - so --check proves the applied state instead: every map's scene carries exactly the plan's
-    markers on the base the plan was made from, and the server's overlay table serves exactly the plan's rows."""
+    markers, and the server's overlay table serves exactly the plan's rows.
+
+    Later passes edit the rest of the scene (the 2026-11-15 map quality pass re-seated scenery and removed 97 of
+    this pass's nodes, from the scenes and this plan together), so a base that differs from the one the plan was
+    made from is not a problem here: publish_server.py re-checks every node against the scene it is published from
+    (the D4 approach ring, the D11 road band, the gameplay rings) and refuses one a later edit has blocked."""
     problems = []
     served = None
     if server is not None:
@@ -1071,8 +1076,6 @@ def verify_applied(checkout: Path, plan, server: Path | None = None) -> list:
         served = rows
     for region, entry in plan["maps"].items():
         scene = read_scene(region, checkout, plan["pass"])
-        if sha(scene["base"].encode("utf-8")) != entry["inputs"]["sceneSha256"]:
-            problems.append(f"{region}: the scene outside this pass's markers changed since the plan was made")
         frame = frames.load(region, checkout)
         want = {n["objectId"]: (tuple(n["tile"]), n["resource"], n.get("bindPlacement"))
                 for s in entry["groupings"] for n in s["nodes"]}

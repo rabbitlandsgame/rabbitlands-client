@@ -216,9 +216,6 @@
 [ext_resource type="PackedScene" path="res://world_authoring/regions/tollholms/assets/prototypes/kit-sw-blossom-tree.glb" id="tp_29"]
 
 
-[ext_resource type="PackedScene" path="res://world_authoring/regions/tollholms/assets/prototypes/kit-rope-coils-1.glb" id="tp_30"]
-
-
 [ext_resource type="PackedScene" path="res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-2.glb" id="tp_31"]
 
 
@@ -1444,17 +1441,69 @@ surface = SubResource("tp_s2_Resource_gqhto")
 transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, 9.124, 80.8397, -68.942)
 source_layer_ordinal = 75
 
-[node name="s2_th-village-lawn" type="Marker3D" parent="Ground/Regions"]
+[node name="s2_th-village-lawn-p1" type="Marker3D" parent="Ground/Regions"]
 gizmo_extents = 0.7
 script = ExtResource("s0_6_wgjx8")
-region_id = "th-village-lawn"
+region_id = "th-village-lawn-p1"
 enabled = true
-size = Vector2(86, 72)
-blend_width = 4.0
+size = Vector2(57.05, 39.3)
+blend_width = 8
 opacity = 0.85
 priority = 20
 surface = SubResource("tp_s2_Resource_sqij7")
-transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, -51.287, 103.4030, 71.694)
+transform = Transform3D(0.9568805, 0, -0.2904819, 0, 1, 0, 0.2904819, 0, 0.9568805, -59.898, 103.403, 55.594)
+source_layer_ordinal = 32
+
+[node name="s2_th-village-lawn-p2" type="Marker3D" parent="Ground/Regions"]
+gizmo_extents = 0.7
+script = ExtResource("s0_6_wgjx8")
+region_id = "th-village-lawn-p2"
+enabled = true
+size = Vector2(53.29, 36.22)
+blend_width = 8
+opacity = 0.85
+priority = 20
+surface = SubResource("tp_s2_Resource_sqij7")
+transform = Transform3D(0.4014674, 0, -0.9158733, 0, 1, 0, 0.9158733, 0, 0.4014674, -31.768, 103.403, 69.629)
+source_layer_ordinal = 32
+
+[node name="s2_th-village-lawn-p3" type="Marker3D" parent="Ground/Regions"]
+gizmo_extents = 0.7
+script = ExtResource("s0_6_wgjx8")
+region_id = "th-village-lawn-p3"
+enabled = true
+size = Vector2(53.03, 42.41)
+blend_width = 8
+opacity = 0.85
+priority = 20
+surface = SubResource("tp_s2_Resource_sqij7")
+transform = Transform3D(0.7878433, 0, 0.6158757, 0, 1, 0, -0.6158757, 0, 0.7878433, -61.319, 103.403, 86.484)
+source_layer_ordinal = 32
+
+[node name="s2_th-village-lawn-p4" type="Marker3D" parent="Ground/Regions"]
+gizmo_extents = 0.7
+script = ExtResource("s0_6_wgjx8")
+region_id = "th-village-lawn-p4"
+enabled = true
+size = Vector2(50.23, 38.41)
+blend_width = 8
+opacity = 0.85
+priority = 20
+surface = SubResource("tp_s2_Resource_sqij7")
+transform = Transform3D(0.4447222, 0, -0.8956685, 0, 1, 0, 0.8956685, 0, 0.4447222, -71.087, 103.403, 70.497)
+source_layer_ordinal = 32
+
+[node name="s2_th-village-lawn-p5" type="Marker3D" parent="Ground/Regions"]
+gizmo_extents = 0.7
+script = ExtResource("s0_6_wgjx8")
+region_id = "th-village-lawn-p5"
+enabled = true
+size = Vector2(43.24, 24.51)
+blend_width = 8
+opacity = 0.85
+priority = 20
+surface = SubResource("tp_s2_Resource_sqij7")
+transform = Transform3D(0.4958427, 0, -0.8684124, 0, 1, 0, 0.8684124, 0, 0.4958427, -36.535, 103.403, 95.817)
 source_layer_ordinal = 32
 
 [node name="s2_th-field-14" type="Marker3D" parent="Ground/Regions"]
@@ -5723,24 +5772,6 @@ transform = Transform3D(0.865115, 0, 0.298939, 0, 0.915308, 0, -0.298939, 0, 0.8
 metadata/map_asset_id = "sw_isle:kit-flower-meadow-1"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-1.glb"
 
-[node name="s0_Flower Meadow 833" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-flower-meadow-1-243"
-node_name = "Authored_sw_isle_kit_flower_meadow_1_243"
-catalog_asset_id = "sw_isle:kit-flower-meadow-1"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-1.glb"
-metadata = {
-"polishLayer": "glade",
-"polishPiece": "glade-a-2116-1",
-"polishStep": "d1-forest"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.697402, 0, -0.71963, 0, 1.002116, 0, 0.71963, 0, -0.697402, -240.8074, 95.9933, -126.273)
-
-[node name="Content" parent="AuthoredAssets/s0_Flower Meadow 833" instance=ExtResource("s0_60_7ox6l")]
-metadata/map_asset_id = "sw_isle:kit-flower-meadow-1"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-1.glb"
-
 [node name="s0_Flower Meadow 836" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-flower-meadow-1-244"
@@ -5882,24 +5913,6 @@ metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(-0.817494, 0, 0.815761, 0, 1.154886, 0, -0.815761, 0, -0.817494, -180.7294, 139.52, 126.6442)
 
 [node name="Content" parent="AuthoredAssets/s0_Flower Meadow 934" instance=ExtResource("s0_60_7ox6l")]
-metadata/map_asset_id = "sw_isle:kit-flower-meadow-1"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-1.glb"
-
-[node name="s0_Flower Meadow 935" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-flower-meadow-1-270"
-node_name = "Authored_sw_isle_kit_flower_meadow_1_270"
-catalog_asset_id = "sw_isle:kit-flower-meadow-1"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-1.glb"
-metadata = {
-"polishLayer": "glade",
-"polishPiece": "glade--b-666-1",
-"polishStep": "d1-forest"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.326699, 0, -0.947532, 0, 1.002272, 0, 0.947532, 0, 0.326699, -181.0492, 139.5511, 126.3287)
-
-[node name="Content" parent="AuthoredAssets/s0_Flower Meadow 935" instance=ExtResource("s0_60_7ox6l")]
 metadata/map_asset_id = "sw_isle:kit-flower-meadow-1"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-1.glb"
 
@@ -8544,7 +8557,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.00453761, 0, -0.999989, 0, 1, 0, 0.999989, 0, -0.00453761, -40.364, 104.9076, 95.494)
+transform = Transform3D(-0.00453761, 0, -0.999989, 0, 1, 0, 0.999989, 0, -0.00453761, -40.364, 105.6478, 95.494)
 
 [node name="Content" parent="AuthoredAssets/s2_Merchant House 1" instance=ExtResource("tp_0")]
 metadata/map_asset_id = "tollholms:kit-merchant-house-1"
@@ -8566,7 +8579,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.941117, 0, 0.338081, 0, 1, 0, -0.338081, 0, 0.941117, -61.978, 107.2288, 78.511)
+transform = Transform3D(0.941117, 0, 0.338081, 0, 1, 0, -0.338081, 0, 0.941117, -61.978, 107.552, 78.511)
 
 [node name="Content" parent="AuthoredAssets/s2_Haven Townhouse 2" instance=ExtResource("tp_1")]
 metadata/map_asset_id = "tollholms:kit-haven-townhouse-2"
@@ -8588,7 +8601,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.792077, 0, -0.610422, 0, 1, 0, 0.610422, 0, -0.792077, -45.503, 111.7455, 109.674)
+transform = Transform3D(-0.792077, 0, -0.610422, 0, 1, 0, 0.610422, 0, -0.792077, -45.503, 112.0024, 109.674)
 
 [node name="Content" parent="AuthoredAssets/s2_Haven Townhouse 3" instance=ExtResource("tp_2")]
 metadata/map_asset_id = "tollholms:kit-haven-townhouse-3"
@@ -8632,7 +8645,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.258819, 0, -0.965926, 0, 1, 0, 0.965926, 0, 0.258819, -29.405, 100.5463, 87.792)
+transform = Transform3D(0.258819, 0, -0.965926, 0, 1, 0, 0.965926, 0, 0.258819, -29.405, 101.1195, 87.792)
 
 [node name="Content" parent="AuthoredAssets/s2_Haven Townhouse 4" instance=ExtResource("tp_1")]
 metadata/map_asset_id = "tollholms:kit-haven-townhouse-2"
@@ -8654,7 +8667,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.998209, 0, -0.0598291, 0, 1, 0, 0.0598291, 0, 0.998209, -56.763, 101.3826, 66.777)
+transform = Transform3D(0.998209, 0, -0.0598291, 0, 1, 0, 0.0598291, 0, 0.998209, -56.763, 101.8713, 66.777)
 
 [node name="Content" parent="AuthoredAssets/s2_Haven Townhouse 5" instance=ExtResource("tp_2")]
 metadata/map_asset_id = "tollholms:kit-haven-townhouse-3"
@@ -8676,7 +8689,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.829526, 0, -0.55847, 0, 1, 0, 0.55847, 0, 0.829526, -37.094, 95.2930, 70.431)
+transform = Transform3D(0.829526, 0, -0.55847, 0, 1, 0, 0.55847, 0, 0.829526, -37.094, 95.6038, 70.431)
 
 [node name="Content" parent="AuthoredAssets/s2_Haven Townhouse 6" instance=ExtResource("tp_3")]
 metadata/map_asset_id = "tollholms:kit-haven-townhouse-1"
@@ -8698,7 +8711,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.931438, 0, 0.363902, 0, 1, 0, -0.363902, 0, 0.931438, -67.972, 105.5439, 64.832)
+transform = Transform3D(0.931438, 0, 0.363902, 0, 1, 0, -0.363902, 0, 0.931438, -67.972, 105.8212, 64.832)
 
 [node name="Content" parent="AuthoredAssets/s2_Haven Townhouse 7" instance=ExtResource("tp_1")]
 metadata/map_asset_id = "tollholms:kit-haven-townhouse-2"
@@ -8720,7 +8733,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.910467, 0, -0.413581, 0, 1, 0, 0.413581, 0, 0.910467, -37.371, 89.2920, 57.431)
+transform = Transform3D(0.910467, 0, -0.413581, 0, 1, 0, 0.413581, 0, 0.910467, -37.371, 89.9765, 57.431)
 
 [node name="Content" parent="AuthoredAssets/s2_Haven Townhouse 8" instance=ExtResource("tp_2")]
 metadata/map_asset_id = "tollholms:kit-haven-townhouse-3"
@@ -8742,7 +8755,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.356901, 0, -0.934142, 0, 1, 0, 0.934142, 0, 0.356901, -18.539, 93.8086, 80.913)
+transform = Transform3D(0.356901, 0, -0.934142, 0, 1, 0, 0.934142, 0, 0.356901, -18.539, 94.1374, 80.913)
 
 [node name="Content" parent="AuthoredAssets/s2_Haven Townhouse 9" instance=ExtResource("tp_3")]
 metadata/map_asset_id = "tollholms:kit-haven-townhouse-1"
@@ -8764,7 +8777,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.999296, 0, 0.037516, 0, 1, 0, -0.037516, 0, 0.999296, -58.278, 99.0778, 53.801)
+transform = Transform3D(0.999296, 0, 0.037516, 0, 1, 0, -0.037516, 0, 0.999296, -58.278, 99.4314, 53.801)
 
 [node name="Content" parent="AuthoredAssets/s2_Haven Townhouse 10" instance=ExtResource("tp_1")]
 metadata/map_asset_id = "tollholms:kit-haven-townhouse-2"
@@ -8808,7 +8821,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.942408, 0, 0.334465, 0, 1, 0, -0.334465, 0, 0.942408, -71.670, 103.6780, 52.997)
+transform = Transform3D(0.942408, 0, 0.334465, 0, 1, 0, -0.334465, 0, 0.942408, -71.670, 103.8971, 52.997)
 
 [node name="Content" parent="AuthoredAssets/s2_Haven Townhouse 12" instance=ExtResource("tp_3")]
 metadata/map_asset_id = "tollholms:kit-haven-townhouse-1"
@@ -8830,7 +8843,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.718855, 0, -0.69516, 0, 1, 0, 0.69516, 0, 0.718855, -25.199, 87.8722, 62.507)
+transform = Transform3D(0.718855, 0, -0.69516, 0, 1, 0, 0.69516, 0, 0.718855, -25.199, 88.5031, 62.507)
 
 [node name="Content" parent="AuthoredAssets/s2_Haven Townhouse 13" instance=ExtResource("tp_1")]
 metadata/map_asset_id = "tollholms:kit-haven-townhouse-2"
@@ -8874,7 +8887,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.995932, 0, 0.0901106, 0, 1, 0, -0.0901106, 0, 0.995932, -61.572, 97.0077, 41.507)
+transform = Transform3D(0.995932, 0, 0.0901106, 0, 1, 0, -0.0901106, 0, 0.995932, -61.572, 97.2448, 41.507)
 
 [node name="Content" parent="AuthoredAssets/s2_Haven Townhouse 15" instance=ExtResource("tp_3")]
 metadata/map_asset_id = "tollholms:kit-haven-townhouse-1"
@@ -8894,7 +8907,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, -96.981, 108.1373, 26.837)
+transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, -96.981, 108.7062, 26.837)
 
 [node name="Content" parent="AuthoredAssets/s2_Dovecote 1" instance=ExtResource("tp_4")]
 metadata/map_asset_id = "tollholms:kit-dovecote-1"
@@ -9233,7 +9246,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.00366223, 0, -0.999993, 0, 1, 0, 0.999993, 0, -0.00366223, -46.282, 110.1630, 99.467)
+transform = Transform3D(-0.00366223, 0, -0.999993, 0, 1, 0, 0.999993, 0, -0.00366223, -46.282, 110.2146, 99.467)
 
 [node name="Content" parent="AuthoredAssets/s2_Terracotta Pots 1" instance=ExtResource("tp_14")]
 metadata/map_asset_id = "tollholms:kit-terracotta-pots-1"
@@ -9253,7 +9266,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.774729, 0, -0.632294, 0, 1, 0, 0.632295, 0, -0.774728, -50.321, 113.2906, 107.985)
+transform = Transform3D(-0.774729, 0, -0.632294, 0, 1, 0, 0.632295, 0, -0.774728, -50.321, 113.3504, 107.985)
 
 [node name="Content" parent="AuthoredAssets/s2_Barrel Stack 1" instance=ExtResource("tp_15")]
 metadata/map_asset_id = "tollholms:kit-barrel-stack-1"
@@ -9293,7 +9306,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.25767, 0, -0.966234, 0, 1, 0, 0.966233, 0, 0.25767, -32.724, 103.4823, 90.164)
+transform = Transform3D(0.25767, 0, -0.966234, 0, 1, 0, 0.966233, 0, 0.25767, -32.724, 103.7716, 90.164)
 
 [node name="Content" parent="AuthoredAssets/s2_Crate Stack 1" instance=ExtResource("tp_17")]
 metadata/map_asset_id = "tollholms:kit-crate-stack-1"
@@ -9313,7 +9326,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.967681, 0, -0.252177, 0, 1, 0, 0.252177, 0, 0.967682, -54.239, 103.6557, 71.215)
+transform = Transform3D(0.967681, 0, -0.252177, 0, 1, 0, 0.252177, 0, 0.967682, -54.239, 103.7735, 71.215)
 
 [node name="Content" parent="AuthoredAssets/s2_Terracotta Pots 2" instance=ExtResource("tp_14")]
 metadata/map_asset_id = "tollholms:kit-terracotta-pots-1"
@@ -9333,7 +9346,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.960782, 0, 0.277303, 0, 1, 0, -0.277303, 0, 0.960783, -65.247, 106.2319, 67.869)
+transform = Transform3D(0.960782, 0, 0.277303, 0, 1, 0, -0.277303, 0, 0.960783, -65.247, 106.3173, 67.869)
 
 [node name="Content" parent="AuthoredAssets/s2_Barrel Stack 2" instance=ExtResource("tp_15")]
 metadata/map_asset_id = "tollholms:kit-barrel-stack-1"
@@ -9373,7 +9386,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.290818, 0, -0.956778, 0, 1, 0, 0.956778, 0, 0.290818, -22.870, 98.8385, 84.708)
+transform = Transform3D(0.290818, 0, -0.956778, 0, 1, 0, 0.956778, 0, 0.290818, -22.870, 99.1303, 84.708)
 
 [node name="Content" parent="AuthoredAssets/s2_Crate Stack 2" instance=ExtResource("tp_17")]
 metadata/map_asset_id = "tollholms:kit-crate-stack-1"
@@ -9393,7 +9406,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.999306, 0, 0.0372295, 0, 1, 0, -0.0372295, 0, 0.999307, -56.702, 100.6912, 57.565)
+transform = Transform3D(0.999306, 0, 0.0372295, 0, 1, 0, -0.0372295, 0, 0.999307, -56.702, 100.7894, 57.565)
 
 [node name="Content" parent="AuthoredAssets/s2_Terracotta Pots 3" instance=ExtResource("tp_14")]
 metadata/map_asset_id = "tollholms:kit-terracotta-pots-1"
@@ -9413,7 +9426,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.938625, 0, 0.344938, 0, 1, 0, -0.344938, 0, 0.938626, -67.979, 104.7292, 57.417)
+transform = Transform3D(0.938625, 0, 0.344938, 0, 1, 0, -0.344938, 0, 0.938626, -67.979, 104.7867, 57.417)
 
 [node name="Content" parent="AuthoredAssets/s2_Barrel Stack 3" instance=ExtResource("tp_15")]
 metadata/map_asset_id = "tollholms:kit-barrel-stack-1"
@@ -9453,7 +9466,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.847693, 0, -0.530487, 0, 1, 0, 0.530487, 0, 0.847693, -28.413, 86.3223, 55.318)
+transform = Transform3D(0.847693, 0, -0.530487, 0, 1, 0, 0.530487, 0, 0.847693, -28.413, 86.3915, 55.318)
 
 [node name="Content" parent="AuthoredAssets/s2_Crate Stack 3" instance=ExtResource("tp_17")]
 metadata/map_asset_id = "tollholms:kit-crate-stack-1"
@@ -9473,7 +9486,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.996002, 0, 0.0893284, 0, 1, 0, -0.0893284, 0, 0.996002, -59.093, 98.8668, 46.705)
+transform = Transform3D(0.996002, 0, 0.0893284, 0, 1, 0, -0.0893284, 0, 0.996002, -59.093, 98.9273, 46.705)
 
 [node name="Content" parent="AuthoredAssets/s2_Terracotta Pots 4" instance=ExtResource("tp_14")]
 metadata/map_asset_id = "tollholms:kit-terracotta-pots-1"
@@ -11761,7 +11774,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.999998, 0, -0.00165723, 0, 1, 0, 0.00165723, 0, 0.999999, -7.719, 83.6507, -60.769)
+transform = Transform3D(0.999998, 0, -0.00165723, 0, 1, 0, 0.00165723, 0, 0.999999, -7.719, 83.8583, -60.769)
 
 [node name="Content" parent="AuthoredAssets/s2_Beehive Skeps 5" instance=ExtResource("tp_22")]
 metadata/map_asset_id = "tollholms:kit-beehive-skeps-1"
@@ -12648,27 +12661,6 @@ transform = Transform3D(0.991173, 0, 0.879268, 0, 1.32497, 0, -0.879268, 0, 0.99
 metadata/map_asset_id = "tollholms:kit-umbrella-pine-tree-1"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-umbrella-pine-tree-1.glb"
 
-[node name="s2_Umbrella Pine Tree 146" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "tollholms-kit-umbrella-pine-tree-1-146"
-node_name = "Authored_tollholms_kit_umbrella_pine_tree_1_146"
-catalog_asset_id = "tollholms:kit-umbrella-pine-tree-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-umbrella-pine-tree-1.glb"
-collision_role = "solid"
-metadata = {
-"transplant": "coilmere (-214.6, -52.7), a3-2026-10-20",
-"a3Layer": "canopy",
-"a3Piece": "a3-nature-00702",
-"a3Zone": "forest",
-"polishStep": "a3-nature"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.871474, 0, -0.0871106, 0, 0.875817, 0, 0.0871106, 0, 0.871474, -110.675, 101.8377, -10.700)
-
-[node name="Content" parent="AuthoredAssets/s2_Umbrella Pine Tree 146" instance=ExtResource("tp_24")]
-metadata/map_asset_id = "tollholms:kit-umbrella-pine-tree-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-umbrella-pine-tree-1.glb"
-
 [node name="s2_Cypress Tree 49" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "tollholms-kit-cypress-tree-1-049"
@@ -12746,7 +12738,7 @@ metadata = {
 "rfWhy": "a pot or planter by the house's lane side"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.00989492, 0, 0.999951, 0, 1, 0, -0.999951, 0, 0.00989492, -32.665, 87.3329, 48.610)
+transform = Transform3D(0.00989492, 0, 0.999951, 0, 1, 0, -0.999951, 0, 0.00989492, -32.665, 87.4865, 48.610)
 
 [node name="Content" parent="AuthoredAssets/s2_Terracotta Pots 5" instance=ExtResource("tp_14")]
 metadata/map_asset_id = "tollholms:kit-terracotta-pots-1"
@@ -12827,7 +12819,7 @@ metadata = {
 "vdFix": "on the door approach of th-house-01; moved 3.00 m"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.934496, 0, -0.355972, 0, 1, 0, 0.355972, 0, -0.934497, -64.518, 109.5372, 80.740)
+transform = Transform3D(-0.934496, 0, -0.355972, 0, 1, 0, 0.355972, 0, -0.934497, -64.518, 109.6166, 80.740)
 
 [node name="Content" parent="AuthoredAssets/s2_Terracotta Pots 7" instance=ExtResource("tp_14")]
 metadata/map_asset_id = "tollholms:kit-terracotta-pots-1"
@@ -12868,7 +12860,7 @@ metadata = {
 "vdFix": "on the door approach of th-house-02; moved 3.25 m"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.136203, 0, -0.990681, 0, 1, 0, 0.990682, 0, 0.136203, -44.176, 111.2481, 104.212)
+transform = Transform3D(0.136203, 0, -0.990681, 0, 1, 0, 0.990682, 0, 0.136203, -44.176, 111.31, 104.212)
 
 [node name="Content" parent="AuthoredAssets/s2_Terracotta Pots 8" instance=ExtResource("tp_14")]
 metadata/map_asset_id = "tollholms:kit-terracotta-pots-1"
@@ -12888,7 +12880,7 @@ metadata = {
 "rfWhy": "square life"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.996195, 0, -0.0871561, 0, 1, 0, 0.0871561, 0, 0.996195, -57.370, 113.4250, 102.484)
+transform = Transform3D(0.996195, 0, -0.0871561, 0, 1, 0, 0.0871561, 0, 0.996195, -57.370, 113.5391, 102.484)
 
 [node name="Content" parent="AuthoredAssets/s2_Apple Cart 1" instance=ExtResource("tp_26")]
 metadata/map_asset_id = "tollholms:kit-apple-cart-1"
@@ -13083,7 +13075,7 @@ metadata = {
 "rfWhy": "skeps at a field edge"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.967742, 0, 0.251946, 0, 1, 0, -0.251946, 0, 0.967742, 33.909, 77.7683, 28.888)
+transform = Transform3D(0.967742, 0, 0.251946, 0, 1, 0, -0.251946, 0, 0.967742, 33.909, 77.9635, 28.888)
 
 [node name="Content" parent="AuthoredAssets/s2_Beehive Skeps 7" instance=ExtResource("tp_22")]
 metadata/map_asset_id = "tollholms:kit-beehive-skeps-1"
@@ -13141,7 +13133,7 @@ metadata = {
 "rfWhy": "skeps at a field edge"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.801968, 0, 0.597367, 0, 1, 0, -0.597367, 0, -0.801968, 18.819, 79.9114, -5.220)
+transform = Transform3D(-0.801968, 0, 0.597367, 0, 1, 0, -0.597367, 0, -0.801968, 18.819, 80.1086, -5.220)
 
 [node name="Content" parent="AuthoredAssets/s2_Beehive Skeps 8" instance=ExtResource("tp_22")]
 metadata/map_asset_id = "tollholms:kit-beehive-skeps-1"
@@ -13161,7 +13153,7 @@ metadata = {
 "rfWhy": "skeps at a field edge"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.793304, 0, 0.608826, 0, 1, 0, -0.608826, 0, 0.793304, -33.013, 88.1204, -34.958)
+transform = Transform3D(0.793304, 0, 0.608826, 0, 1, 0, -0.608826, 0, 0.793304, -33.013, 88.3254, -34.958)
 
 [node name="Content" parent="AuthoredAssets/s2_Beehive Skeps 9" instance=ExtResource("tp_22")]
 metadata/map_asset_id = "tollholms:kit-beehive-skeps-1"
@@ -14090,7 +14082,7 @@ metadata = {
 "vdWhy": "yard clutter at a back corner"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.258819, 0, -0.965926, 0, 1, 0, 0.965926, 0, 0.258819, -26.557, 100.0393, 85.398)
+transform = Transform3D(0.258819, 0, -0.965926, 0, 1, 0, 0.965926, 0, 0.258819, -26.557, 100.3125, 85.398)
 
 [node name="Content" parent="AuthoredAssets/s2_Crate Stack 7" instance=ExtResource("tp_17")]
 metadata/map_asset_id = "tollholms:kit-crate-stack-1"
@@ -14116,26 +14108,6 @@ transform = Transform3D(-0.823213, 0, -0.567732, 0, 1, 0, 0.567732, 0, -0.823213
 metadata/map_asset_id = "tollholms:kit-feed-sacks-1"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-feed-sacks-1.glb"
 
-[node name="s2_Rope Coils 7" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "tollholms-kit-rope-coils-1-007"
-node_name = "Authored_tollholms_kit_rope_coils_1_007"
-catalog_asset_id = "tollholms:kit-rope-coils-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-rope-coils-1.glb"
-metadata = {
-"transplant": "coilmere (-94.5, 7.6), a3-2026-10-20",
-"polishStep": "vd-th-density",
-"vdFix": "43 % of the mesh under the ground; overlapping bougainvillea-shrub-1-009 (17 %); moved 0.25 m, turned",
-"vdLayer": "village",
-"vdWhy": "yard clutter at a back corner"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.998594, 0, -0.0529972, 0, 1, 0, 0.0529971, 0, 0.998594, -36.799, 108.5035, 101.584)
-
-[node name="Content" parent="AuthoredAssets/s2_Rope Coils 7" instance=ExtResource("tp_30")]
-metadata/map_asset_id = "tollholms:kit-rope-coils-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-rope-coils-1.glb"
-
 [node name="s2_Barrel Stack 6" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "tollholms-kit-barrel-stack-1-006"
@@ -14151,7 +14123,7 @@ metadata = {
 "vdWhy": "yard clutter at a back corner"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.000405902, 0, -1, 0, 1, 0, 1, 0, 0.000405902, -83.590, 114.1972, 78.614)
+transform = Transform3D(0.000405902, 0, -1, 0, 1, 0, 1, 0, 0.000405902, -83.590, 114.2983, 78.614)
 
 [node name="Content" parent="AuthoredAssets/s2_Barrel Stack 6" instance=ExtResource("tp_15")]
 metadata/map_asset_id = "tollholms:kit-barrel-stack-1"
@@ -14172,7 +14144,7 @@ metadata = {
 "vdWhy": "yard clutter at a back corner"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.491546, 0, -0.870852, 0, 1, 0, 0.870852, 0, 0.491546, -45.847, 114.3236, 114.690)
+transform = Transform3D(0.491546, 0, -0.870852, 0, 1, 0, 0.870852, 0, 0.491546, -45.847, 114.5733, 114.690)
 
 [node name="Content" parent="AuthoredAssets/s2_Crate Stack 8" instance=ExtResource("tp_17")]
 metadata/map_asset_id = "tollholms:kit-crate-stack-1"
@@ -14534,7 +14506,7 @@ metadata = {
 "vdWhy": "th-field-02: harvest clutter by the open edge"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.991121, 0, -0.132951, 0, 1, 0, 0.132951, 0, 0.991122, 7.712, 80.8648, 23.534)
+transform = Transform3D(0.991121, 0, -0.132951, 0, 1, 0, 0.132951, 0, 0.991122, 7.712, 81.0616, 23.534)
 
 [node name="Content" parent="AuthoredAssets/s2_Barrel Stack 7" instance=ExtResource("tp_15")]
 metadata/map_asset_id = "tollholms:kit-barrel-stack-1"
@@ -14555,7 +14527,7 @@ metadata = {
 "vdWhy": "th-field-02: harvest clutter by the open edge"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.569079, 0, 0.822284, 0, 1, 0, -0.822284, 0, -0.569079, -0.350, 82.0381, 33.668)
+transform = Transform3D(-0.569079, 0, 0.822284, 0, 1, 0, -0.822284, 0, -0.569079, -0.350, 82.2509, 33.668)
 
 [node name="Content" parent="AuthoredAssets/s2_Crate Stack 9" instance=ExtResource("tp_17")]
 metadata/map_asset_id = "tollholms:kit-crate-stack-1"
@@ -14576,7 +14548,7 @@ metadata = {
 "vdWhy": "th-field-03: harvest clutter by the open edge"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.527326, 0, -0.849662, 0, 1, 0, 0.849662, 0, 0.527326, 14.794, 80.1437, 25.437)
+transform = Transform3D(0.527326, 0, -0.849662, 0, 1, 0, 0.849662, 0, 0.527326, 14.794, 80.3615, 25.437)
 
 [node name="Content" parent="AuthoredAssets/s2_Crate Stack 10" instance=ExtResource("tp_17")]
 metadata/map_asset_id = "tollholms:kit-crate-stack-1"
@@ -14637,7 +14609,7 @@ metadata = {
 "vdWhy": "th-field-06: harvest clutter by the open edge"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.18197, 0, -0.983304, 0, 1, 0, 0.983305, 0, 0.18197, -26.600, 87.0317, -23.865)
+transform = Transform3D(0.18197, 0, -0.983304, 0, 1, 0, 0.983305, 0, 0.18197, -26.600, 87.2872, -23.865)
 
 [node name="Content" parent="AuthoredAssets/s2_Crate Stack 12" instance=ExtResource("tp_17")]
 metadata/map_asset_id = "tollholms:kit-crate-stack-1"
@@ -14658,7 +14630,7 @@ metadata = {
 "vdWhy": "th-field-06: harvest clutter by the open edge"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.986909, 0, -0.16128, 0, 1, 0, 0.16128, 0, -0.986909, -12.977, 84.5339, -18.581)
+transform = Transform3D(-0.986909, 0, -0.16128, 0, 1, 0, 0.16128, 0, -0.986909, -12.977, 84.7155, -18.581)
 
 [node name="Content" parent="AuthoredAssets/s2_Barrel Stack 8" instance=ExtResource("tp_15")]
 metadata/map_asset_id = "tollholms:kit-barrel-stack-1"
@@ -14759,7 +14731,7 @@ metadata = {
 "vdWhy": "th-field-09: harvest clutter by the open edge"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.448398, 0, 0.893833, 0, 1, 0, -0.893834, 0, -0.448398, -15.600, 85.2398, -42.918)
+transform = Transform3D(-0.448398, 0, 0.893833, 0, 1, 0, -0.893834, 0, -0.448398, -15.600, 85.4187, -42.918)
 
 [node name="Content" parent="AuthoredAssets/s2_Barrel Stack 9" instance=ExtResource("tp_15")]
 metadata/map_asset_id = "tollholms:kit-barrel-stack-1"
@@ -14780,7 +14752,7 @@ metadata = {
 "vdWhy": "th-field-11: harvest clutter by the open edge"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.800877, 0, -0.598829, 0, 1, 0, 0.598829, 0, -0.800877, -41.581, 88.8318, -57.918)
+transform = Transform3D(-0.800877, 0, -0.598829, 0, 1, 0, 0.598829, 0, -0.800877, -41.581, 89.0676, -57.918)
 
 [node name="Content" parent="AuthoredAssets/s2_Crate Stack 14" instance=ExtResource("tp_17")]
 metadata/map_asset_id = "tollholms:kit-crate-stack-1"
@@ -14821,7 +14793,7 @@ metadata = {
 "vdWhy": "th-field-12: harvest clutter by the open edge"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.0100744, 0, -0.999949, 0, 1, 0, 0.999949, 0, -0.0100744, -4.600, 82.9596, -61.971)
+transform = Transform3D(-0.0100744, 0, -0.999949, 0, 1, 0, 0.999949, 0, -0.0100744, -4.600, 83.1978, -61.971)
 
 [node name="Content" parent="AuthoredAssets/s2_Crate Stack 15" instance=ExtResource("tp_17")]
 metadata/map_asset_id = "tollholms:kit-crate-stack-1"
@@ -14982,7 +14954,7 @@ metadata = {
 "vdWhy": "more yard clutter"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.667143, 0, 0.744929, 0, 1, 0, -0.74493, 0, -0.667143, -79.239, 112.6432, 75.860)
+transform = Transform3D(-0.667143, 0, 0.744929, 0, 1, 0, -0.74493, 0, -0.667143, -79.239, 112.7746, 75.860)
 
 [node name="Content" parent="AuthoredAssets/s2_Crate Stack 17" instance=ExtResource("tp_17")]
 metadata/map_asset_id = "tollholms:kit-crate-stack-1"
@@ -15125,7 +15097,7 @@ metadata = {
 "vdReplaces": "tollholms-kit-flower-planter-1-015"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.970726, 0, 0.240187, 0, 1, 0, -0.240186, 0, 0.970727, -33.416, 102.3315, 86.227)
+transform = Transform3D(0.970726, 0, 0.240187, 0, 1, 0, -0.240186, 0, 0.970727, -33.416, 102.422, 86.227)
 
 [node name="Content" parent="AuthoredAssets/s2_Terracotta Pots 10" instance=ExtResource("tp_14")]
 metadata/map_asset_id = "tollholms:kit-terracotta-pots-1"
@@ -15205,7 +15177,7 @@ metadata = {
 "vdWhy": "a pot by a side wall"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.999977, 0, 0.00685131, 0, 1, 0, -0.00685131, 0, 0.999977, -41.289, 109.6510, 101.122)
+transform = Transform3D(0.999977, 0, 0.00685131, 0, 1, 0, -0.00685131, 0, 0.999977, -41.289, 109.7446, 101.122)
 
 [node name="Content" parent="AuthoredAssets/s2_Terracotta Pots 11" instance=ExtResource("tp_14")]
 metadata/map_asset_id = "tollholms:kit-terracotta-pots-1"
@@ -16321,26 +16293,6 @@ transform = Transform3D(-1.07307, 0, -0.164814, 0, 1.08565, 0, 0.164814, 0, -1.0
 metadata/map_asset_id = "tollholms:kit-cypress-tree-1"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-cypress-tree-1.glb"
 
-[node name="s2_Umbrella Pine Tree 189" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "tollholms-kit-umbrella-pine-tree-1-189"
-node_name = "Authored_tollholms_kit_umbrella_pine_tree_1_189"
-catalog_asset_id = "tollholms:kit-umbrella-pine-tree-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-umbrella-pine-tree-1.glb"
-collision_role = "solid"
-metadata = {
-"transplant": "coilmere (-214.5, -60.5), a3-2026-10-20",
-"polishStep": "vd-th-lawn2",
-"vdLayer": "lawn",
-"vdWhy": "a lawn tree, crown clear of roofs, fields and other crowns (off the views)"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.318864, 0, 0.885691, 0, 0.941341, 0, -0.885691, 0, -0.318864, -106.645, 107.7901, -17.425)
-
-[node name="Content" parent="AuthoredAssets/s2_Umbrella Pine Tree 189" instance=ExtResource("tp_24")]
-metadata/map_asset_id = "tollholms:kit-umbrella-pine-tree-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-umbrella-pine-tree-1.glb"
-
 [node name="lv_tollholm_Olive Tree 1 12" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "lf_biomes-kit-olive-tree-1-coilmere-0012"
@@ -16635,7 +16587,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.581888, 0, -0.81327, 0, 1, 0, 0.81327, 0, 0.581888, -96.661, 94.6045, -86.716)
+transform = Transform3D(0.581888, 0, -0.81327, 0, 1, 0, 0.81327, 0, 0.581888, -96.661, 94.8056, -86.716)
 
 [node name="Content" parent="AuthoredAssets/s2_Beehive Skeps 6" instance=ExtResource("tp_22")]
 metadata/map_asset_id = "tollholms:kit-beehive-skeps-1"
@@ -16752,7 +16704,7 @@ metadata = {
 "vdWhy": "th-field-14: harvest clutter by the open edge"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.98012, 0, -0.198406, 0, 0.999999, 0, 0.198406, 0, -0.98012, -93.543, 93.8081, -87.918)
+transform = Transform3D(-0.98012, 0, -0.198406, 0, 0.999999, 0, 0.198406, 0, -0.98012, -93.543, 94.0481, -87.918)
 
 [node name="Content" parent="AuthoredAssets/s2_Crate Stack 16" instance=ExtResource("tp_17")]
 metadata/map_asset_id = "tollholms:kit-crate-stack-1"
@@ -17097,26 +17049,6 @@ transform = Transform3D(0.99885, 0, -0.0479567, 0, 1, 0, 0.0479567, 0, 0.998849,
 [node name="Content" parent="AuthoredAssets/s2_Flower Planter 3" instance=ExtResource("tp_37")]
 metadata/map_asset_id = "tollholms:kit-flower-planter-1"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-planter-1.glb"
-
-[node name="s2_Flower Shrub 22" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "tollholms-kit-flower-shrub-2-004"
-node_name = "Authored_tollholms_kit_flower_shrub_2_004"
-catalog_asset_id = "tollholms:kit-flower-shrub-2"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-2.glb"
-metadata = {
-"transplant": "coilmere (-220.5, -16.6), a3-2026-10-20",
-"a3Layer": "understorey",
-"a3Piece": "a3-nature-01010",
-"a3Zone": "forest-edge",
-"polishStep": "a3-nature"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1.15546, 0, 0.425196, 0, 1.23121, 0, -0.425196, 0, 1.15546, -133.834, 114.1910, 17.577)
-
-[node name="Content" parent="AuthoredAssets/s2_Flower Shrub 22" instance=ExtResource("tp_38")]
-metadata/map_asset_id = "tollholms:kit-flower-shrub-2"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-2.glb"
 
 [node name="s2_Flower Shrub 76" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -19164,7 +19096,7 @@ metadata = {
 "biomeRule": "hedgerow"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.936329, 0, 0.351123, 0, 1, 0, -0.351123, 0, 0.936329, -258.771, 115.8686, 33.277)
+transform = Transform3D(-0.780419, 0, -0.495613, 0, 0.924493, 0, 0.495613, 0, -0.780419, -258.5915, 115.8686, 33.5006)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Dog Rose Shrub 1 83" instance=ExtResource("lv_dog_rose_shrub_1")]
 metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
@@ -19183,7 +19115,7 @@ metadata = {
 "biomeRule": "hedgerow"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.936329, 0, 0.351123, 0, 1, 0, -0.351123, 0, 0.936329, -256.313, 116.0195, 39.831)
+transform = Transform3D(-0.766692, 0, -0.704738, 0, 1.04138, 0, 0.704738, 0, -0.766692, -256.1322, 115.9835, 39.43674)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Dog Rose Shrub 1 84" instance=ExtResource("lv_dog_rose_shrub_1")]
 metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
@@ -19202,7 +19134,7 @@ metadata = {
 "biomeRule": "hedgerow"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.936329, 0, 0.351123, 0, 1, 0, -0.351123, 0, 0.936329, -253.855, 118.0134, 46.386)
+transform = Transform3D(-0.069946, 0, -0.955548, 0, 0.958104, 0, 0.955548, 0, -0.069946, -253.5323, 117.8213, 45.90234)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Dog Rose Shrub 1 85" instance=ExtResource("lv_dog_rose_shrub_1")]
 metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
@@ -19221,7 +19153,7 @@ metadata = {
 "biomeRule": "hedgerow"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.936329, 0, 0.351123, 0, 1, 0, -0.351123, 0, 0.936329, -251.397, 119.9561, 52.940)
+transform = Transform3D(-0.110927, 0, 0.891485, 0, 0.89836, 0, -0.891485, 0, -0.110927, -251.0225, 119.7814, 52.57774)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Dog Rose Shrub 1 86" instance=ExtResource("lv_dog_rose_shrub_1")]
 metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
@@ -19240,7 +19172,7 @@ metadata = {
 "biomeRule": "hedgerow"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.936329, 0, 0.351123, 0, 1, 0, -0.351123, 0, 0.936329, -248.940, 121.5630, 59.494)
+transform = Transform3D(0.485737, 0, 0.922851, 0, 1.042878, 0, -0.922851, 0, 0.485737, -248.3673, 121.42, 59.12378)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Dog Rose Shrub 1 87" instance=ExtResource("lv_dog_rose_shrub_1")]
 metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
@@ -19259,7 +19191,7 @@ metadata = {
 "biomeRule": "hedgerow"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.936329, 0, 0.351123, 0, 1, 0, -0.351123, 0, 0.936329, -246.482, 123.6619, 66.049)
+transform = Transform3D(-0.252285, 0, 0.91383, 0, 0.948015, 0, -0.91383, 0, -0.252285, -246.4943, 123.4496, 65.52973)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Dog Rose Shrub 1 88" instance=ExtResource("lv_dog_rose_shrub_1")]
 metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
@@ -19278,7 +19210,7 @@ metadata = {
 "biomeRule": "hedgerow"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.936329, 0, 0.351123, 0, 1, 0, -0.351123, 0, 0.936329, -244.024, 125.9050, 72.603)
+transform = Transform3D(0.943785, 0, -0.404341, 0, 1.026753, 0, 0.404341, 0, 0.943785, -243.7703, 125.6989, 72.12198)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Dog Rose Shrub 1 89" instance=ExtResource("lv_dog_rose_shrub_1")]
 metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
@@ -19297,7 +19229,7 @@ metadata = {
 "biomeRule": "hedgerow"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.936329, 0, 0.351123, 0, 1, 0, -0.351123, 0, 0.936329, -241.566, 128.1154, 79.157)
+transform = Transform3D(-0.761863, 0, 0.694985, 0, 1.031232, 0, -0.694985, 0, -0.761863, -241.4591, 128.1897, 79.39882)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Dog Rose Shrub 1 90" instance=ExtResource("lv_dog_rose_shrub_1")]
 metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
@@ -19316,7 +19248,7 @@ metadata = {
 "biomeRule": "hedgerow"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.936329, 0, 0.351123, 0, 1, 0, -0.351123, 0, 0.936329, -239.108, 130.4472, 85.712)
+transform = Transform3D(-0.785898, 0, 0.573344, 0, 0.97281, 0, -0.573344, 0, -0.785898, -239.3057, 130.5716, 85.98872)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Dog Rose Shrub 1 91" instance=ExtResource("lv_dog_rose_shrub_1")]
 metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
@@ -19335,7 +19267,7 @@ metadata = {
 "biomeRule": "hedgerow"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.936329, 0, 0.351123, 0, 1, 0, -0.351123, 0, 0.936329, -236.650, 133.0358, 92.266)
+transform = Transform3D(0.631395, 0, 0.648023, 0, 0.904762, 0, -0.648023, 0, 0.631395, -236.9323, 133.2051, 92.68264)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Dog Rose Shrub 1 92" instance=ExtResource("lv_dog_rose_shrub_1")]
 metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
@@ -19354,7 +19286,7 @@ metadata = {
 "biomeRule": "hedgerow"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.936329, 0, 0.351123, 0, 1, 0, -0.351123, 0, 0.936329, -234.192, 135.6384, 98.820)
+transform = Transform3D(-0.553416, 0, -0.992766, 0, 1.136598, 0, 0.992766, 0, -0.553416, -233.8548, 135.6178, 98.80899)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Dog Rose Shrub 1 93" instance=ExtResource("lv_dog_rose_shrub_1")]
 metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
@@ -19373,7 +19305,7 @@ metadata = {
 "biomeRule": "hedgerow"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.936329, 0, 0.351123, 0, 1, 0, -0.351123, 0, 0.936329, -231.735, 138.5164, 105.374)
+transform = Transform3D(-0.785663, 0, -0.616847, 0, 0.998883, 0, 0.616847, 0, -0.785663, -231.5144, 138.4131, 105.1649)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Dog Rose Shrub 1 94" instance=ExtResource("lv_dog_rose_shrub_1")]
 metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
@@ -19392,7 +19324,7 @@ metadata = {
 "biomeRule": "hedgerow"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.857493, 0, 0.514496, 0, 1, 0, -0.514496, 0, 0.857493, -228.940, 141.2349, 111.766)
+transform = Transform3D(0.691243, 0, -0.636231, 0, 0.939471, 0, 0.636231, 0, 0.691243, -229.3801, 141.2065, 111.645)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Dog Rose Shrub 1 95" instance=ExtResource("lv_dog_rose_shrub_1")]
 metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
@@ -19715,7 +19647,7 @@ metadata = {
 "biomeRule": "hedgerow"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.998053, 0, -0.0623783, 0, 1, 0, 0.0623783, 0, 0.998053, 69.732, 74.7518, -75.719)
+transform = Transform3D(0.608073, 0, 0.888551, 0, 1.076696, 0, -0.888551, 0, 0.608073, 69.56896, 74.73976, -76.27441)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Blackthorn Shrub 1 132" instance=ExtResource("lv_blackthorn_shrub_1")]
 metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
@@ -19734,7 +19666,7 @@ metadata = {
 "biomeRule": "hedgerow"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.998053, 0, -0.0623783, 0, 1, 0, 0.0623783, 0, 0.998053, 69.358, 75.0154, -69.731)
+transform = Transform3D(0.249111, 0, 0.885429, 0, 0.919805, 0, -0.885429, 0, 0.249111, 69.80207, 75.00893, -69.44485)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Blackthorn Shrub 1 133" instance=ExtResource("lv_blackthorn_shrub_1")]
 metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
@@ -19753,7 +19685,7 @@ metadata = {
 "biomeRule": "hedgerow"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.998053, 0, -0.0623783, 0, 1, 0, 0.0623783, 0, 0.998053, 68.984, 75.2626, -63.742)
+transform = Transform3D(-0.408359, 0, 1.069289, 0, 1.144611, 0, -1.069289, 0, -0.408359, 69.07734, 75.25406, -64.24307)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Blackthorn Shrub 1 134" instance=ExtResource("lv_blackthorn_shrub_1")]
 metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
@@ -19772,7 +19704,7 @@ metadata = {
 "biomeRule": "hedgerow"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.998053, 0, -0.0623783, 0, 1, 0, 0.0623783, 0, 0.998053, 68.610, 75.2954, -57.754)
+transform = Transform3D(-0.453991, 0, -0.741832, 0, 0.869725, 0, 0.741832, 0, -0.453991, 68.529, 75.30141, -58.03872)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Blackthorn Shrub 1 135" instance=ExtResource("lv_blackthorn_shrub_1")]
 metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
@@ -19791,7 +19723,7 @@ metadata = {
 "biomeRule": "hedgerow"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.998053, 0, -0.0623783, 0, 1, 0, 0.0623783, 0, 0.998053, 68.235, 75.1236, -51.766)
+transform = Transform3D(-0.362503, 0, -0.809681, 0, 0.887125, 0, 0.809681, 0, -0.362503, 68.67806, 75.11237, -52.25381)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Blackthorn Shrub 1 136" instance=ExtResource("lv_blackthorn_shrub_1")]
 metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
@@ -19810,7 +19742,7 @@ metadata = {
 "biomeRule": "hedgerow"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.998053, 0, -0.0623783, 0, 1, 0, 0.0623783, 0, 0.998053, 67.861, 74.9518, -45.777)
+transform = Transform3D(-0.899278, 0, 0.173102, 0, 0.915786, 0, -0.173102, 0, -0.899278, 68.27981, 74.91557, -45.60395)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Blackthorn Shrub 1 137" instance=ExtResource("lv_blackthorn_shrub_1")]
 metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
@@ -19829,7 +19761,7 @@ metadata = {
 "biomeRule": "hedgerow"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.998053, 0, -0.0623783, 0, 1, 0, 0.0623783, 0, 0.998053, 67.487, 74.6362, -39.789)
+transform = Transform3D(-0.936514, 0, 0.270382, 0, 0.974763, 0, -0.270382, 0, -0.936514, 67.58673, 74.62198, -39.49245)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Blackthorn Shrub 1 138" instance=ExtResource("lv_blackthorn_shrub_1")]
 metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
@@ -19848,7 +19780,7 @@ metadata = {
 "biomeRule": "hedgerow"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.998053, 0, -0.0623783, 0, 1, 0, 0.0623783, 0, 0.998053, 67.113, 74.6054, -33.801)
+transform = Transform3D(-1.072458, 0, 0.243287, 0, 1.099706, 0, -0.243287, 0, -1.072458, 67.13583, 74.60244, -33.90088)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Blackthorn Shrub 1 139" instance=ExtResource("lv_blackthorn_shrub_1")]
 metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
@@ -19867,7 +19799,7 @@ metadata = {
 "biomeRule": "hedgerow"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.998053, 0, -0.0623783, 0, 1, 0, 0.0623783, 0, 0.998053, 66.738, 74.5511, -27.813)
+transform = Transform3D(-0.327301, 0, -0.932409, 0, 0.988186, 0, 0.932409, 0, -0.327301, 66.78959, 74.53578, -27.66461)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Blackthorn Shrub 1 140" instance=ExtResource("lv_blackthorn_shrub_1")]
 metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
@@ -19886,7 +19818,7 @@ metadata = {
 "biomeRule": "hedgerow"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.998053, 0, -0.0623783, 0, 1, 0, 0.0623783, 0, 0.998053, 66.364, 74.5571, -21.824)
+transform = Transform3D(0.894828, 0, 0.015817, 0, 0.894967, 0, -0.015817, 0, 0.894828, 66.32855, 74.56518, -21.90581)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Blackthorn Shrub 1 141" instance=ExtResource("lv_blackthorn_shrub_1")]
 metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
@@ -19905,7 +19837,7 @@ metadata = {
 "biomeRule": "hedgerow"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.998053, 0, -0.0623783, 0, 1, 0, 0.0623783, 0, 0.998053, 65.990, 74.6081, -15.836)
+transform = Transform3D(-0.917619, 0, -0.659739, 0, 1.130168, 0, 0.659739, 0, -0.917619, 65.48932, 74.75861, -16.14252)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Blackthorn Shrub 1 142" instance=ExtResource("lv_blackthorn_shrub_1")]
 metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
@@ -19924,7 +19856,7 @@ metadata = {
 "biomeRule": "hedgerow"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.998053, 0, -0.0623783, 0, 1, 0, 0.0623783, 0, 0.998053, 65.615, 74.5881, -9.848)
+transform = Transform3D(0.608624, 0, 0.613929, 0, 0.864483, 0, -0.613929, 0, 0.608624, 65.10299, 74.70317, -10.24508)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Blackthorn Shrub 1 143" instance=ExtResource("lv_blackthorn_shrub_1")]
 metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
@@ -19943,7 +19875,7 @@ metadata = {
 "biomeRule": "hedgerow"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.998053, 0, -0.0623783, 0, 1, 0, 0.0623783, 0, 0.998053, 65.241, 74.7654, -3.859)
+transform = Transform3D(-0.081505, 0, 1.088671, 0, 1.091717, 0, -1.088671, 0, -0.081505, 64.69711, 74.92684, -4.056026)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Blackthorn Shrub 1 144" instance=ExtResource("lv_blackthorn_shrub_1")]
 metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
@@ -20057,7 +19989,7 @@ metadata = {
 "biomeRule": "apple orchard"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 88.000, 70.2975, -37.500)
+transform = Transform3D(-1.027779, 0, -0.242096, 0, 1.055907, 0, 0.242096, 0, -1.027779, 88.000, 71.22742, -37.500)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Apple Tree 1 1" instance=ExtResource("a3_apple_tree_1")]
 metadata/map_asset_id = "lf_biomes:kit-apple-tree-1"
@@ -20076,7 +20008,7 @@ metadata = {
 "biomeRule": "apple orchard"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 88.000, 69.3751, -28.500)
+transform = Transform3D(0.708952, 0, -0.566539, 0, 0.907513, 0, 0.566539, 0, 0.708952, 88.000, 70.20295, -28.500)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Apple Tree 1 2" instance=ExtResource("a3_apple_tree_1")]
 metadata/map_asset_id = "lf_biomes:kit-apple-tree-1"
@@ -20095,7 +20027,7 @@ metadata = {
 "biomeRule": "apple orchard"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 88.000, 68.7131, -19.500)
+transform = Transform3D(-0.941976, 0, 0.289328, 0, 0.985408, 0, -0.289328, 0, -0.941976, 88.000, 69.38129, -19.500)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Apple Tree 1 3" instance=ExtResource("a3_apple_tree_1")]
 metadata/map_asset_id = "lf_biomes:kit-apple-tree-1"
@@ -20114,7 +20046,7 @@ metadata = {
 "biomeRule": "apple orchard"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 88.000, 68.3942, -10.500)
+transform = Transform3D(0.986989, 0, -0.32108, 0, 1.037901, 0, 0.32108, 0, 0.986989, 88.000, 69.23244, -10.500)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Apple Tree 1 4" instance=ExtResource("a3_apple_tree_1")]
 metadata/map_asset_id = "lf_biomes:kit-apple-tree-1"
@@ -20133,7 +20065,7 @@ metadata = {
 "biomeRule": "apple orchard"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 88.000, 68.2689, -1.500)
+transform = Transform3D(0.096592, 0, -0.919825, 0, 0.924883, 0, 0.919825, 0, 0.096592, 88.000, 68.93183, -1.500)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Apple Tree 1 5" instance=ExtResource("a3_apple_tree_1")]
 metadata/map_asset_id = "lf_biomes:kit-apple-tree-1"
@@ -20152,7 +20084,7 @@ metadata = {
 "biomeRule": "apple orchard"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 88.000, 68.0638, 7.500)
+transform = Transform3D(0.568278, 0, 0.910724, 0, 1.07348, 0, -0.910724, 0, 0.568278, 88.000, 68.86499, 7.500)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Apple Tree 1 6" instance=ExtResource("a3_apple_tree_1")]
 metadata/map_asset_id = "lf_biomes:kit-apple-tree-1"
@@ -20171,7 +20103,7 @@ metadata = {
 "biomeRule": "apple orchard"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 88.000, 68.2301, 16.500)
+transform = Transform3D(-0.130174, 0, -1.002036, 0, 1.010456, 0, 1.002036, 0, -0.130174, 88.000, 68.79618, 16.500)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Apple Tree 1 7" instance=ExtResource("a3_apple_tree_1")]
 metadata/map_asset_id = "lf_biomes:kit-apple-tree-1"
@@ -20190,7 +20122,7 @@ metadata = {
 "biomeRule": "apple orchard"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 98.000, 70.9850, -51.500)
+transform = Transform3D(0.907965, 0, -0.242804, 0, 0.93987, 0, 0.242804, 0, 0.907965, 98.000, 71.83929, -51.500)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Apple Tree 1 8" instance=ExtResource("a3_apple_tree_1")]
 metadata/map_asset_id = "lf_biomes:kit-apple-tree-1"
@@ -20209,7 +20141,7 @@ metadata = {
 "biomeRule": "apple orchard"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 98.000, 69.3367, -42.500)
+transform = Transform3D(-0.493177, 0, -0.894496, 0, 1.021443, 0, 0.894496, 0, -0.493177, 98.000, 70.3876, -42.500)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Apple Tree 1 9" instance=ExtResource("a3_apple_tree_1")]
 metadata/map_asset_id = "lf_biomes:kit-apple-tree-1"
@@ -20228,7 +20160,7 @@ metadata = {
 "biomeRule": "apple orchard"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 98.000, 67.7185, -33.500)
+transform = Transform3D(-0.91674, 0, -0.06204, 0, 0.918837, 0, 0.06204, 0, -0.91674, 98.000, 68.83185, -33.500)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Apple Tree 1 10" instance=ExtResource("a3_apple_tree_1")]
 metadata/map_asset_id = "lf_biomes:kit-apple-tree-1"
@@ -20247,7 +20179,7 @@ metadata = {
 "biomeRule": "apple orchard"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 98.000, 66.5624, -24.500)
+transform = Transform3D(-0.931005, 0, -0.524891, 0, 1.068776, 0, 0.524891, 0, -0.931005, 98.000, 67.24392, -24.500)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Apple Tree 1 11" instance=ExtResource("a3_apple_tree_1")]
 metadata/map_asset_id = "lf_biomes:kit-apple-tree-1"
@@ -20266,7 +20198,7 @@ metadata = {
 "biomeRule": "apple orchard"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 98.000, 65.3271, -6.500)
+transform = Transform3D(0.326272, 0, 0.926559, 0, 0.982326, 0, -0.926559, 0, 0.326272, 98.000, 66.14055, -6.500)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Apple Tree 1 12" instance=ExtResource("a3_apple_tree_1")]
 metadata/map_asset_id = "lf_biomes:kit-apple-tree-1"
@@ -20285,7 +20217,7 @@ metadata = {
 "biomeRule": "apple orchard"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 98.000, 64.9895, 2.500)
+transform = Transform3D(0.780372, 0, -0.763964, 0, 1.092072, 0, 0.763964, 0, 0.780372, 98.000, 65.84732, 2.500)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Apple Tree 1 13" instance=ExtResource("a3_apple_tree_1")]
 metadata/map_asset_id = "lf_biomes:kit-apple-tree-1"
@@ -20304,7 +20236,7 @@ metadata = {
 "biomeRule": "apple orchard"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 98.000, 65.2190, 11.500)
+transform = Transform3D(-0.709371, 0, -0.597982, 0, 0.927787, 0, 0.597982, 0, -0.709371, 98.000, 65.9634, 11.500)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Apple Tree 1 14" instance=ExtResource("a3_apple_tree_1")]
 metadata/map_asset_id = "lf_biomes:kit-apple-tree-1"
@@ -20323,7 +20255,7 @@ metadata = {
 "biomeRule": "apple orchard"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 98.000, 65.3379, 20.500)
+transform = Transform3D(-0.898004, 0, -0.482049, 0, 1.019207, 0, 0.482049, 0, -0.898004, 98.000, 66.09406, 20.500)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Apple Tree 1 15" instance=ExtResource("a3_apple_tree_1")]
 metadata/map_asset_id = "lf_biomes:kit-apple-tree-1"
@@ -20342,7 +20274,7 @@ metadata = {
 "biomeRule": "apple orchard"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 108.000, 70.2171, -55.500)
+transform = Transform3D(0.58353, 0, 0.787127, 0, 0.979835, 0, -0.787127, 0, 0.58353, 108.000, 71.43321, -55.500)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Apple Tree 1 16" instance=ExtResource("a3_apple_tree_1")]
 metadata/map_asset_id = "lf_biomes:kit-apple-tree-1"
@@ -20361,7 +20293,7 @@ metadata = {
 "biomeRule": "apple orchard"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 108.000, 65.8915, -37.500)
+transform = Transform3D(-0.644591, 0, -0.794407, 0, 1.023025, 0, 0.794407, 0, -0.644591, 108.000, 67.16009, -37.500)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Apple Tree 1 17" instance=ExtResource("a3_apple_tree_1")]
 metadata/map_asset_id = "lf_biomes:kit-apple-tree-1"
@@ -20380,7 +20312,7 @@ metadata = {
 "biomeRule": "apple orchard"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 108.000, 63.9290, -28.500)
+transform = Transform3D(0.56001, 0, -0.844824, 0, 1.013578, 0, 0.844824, 0, 0.56001, 108.000, 65.11348, -28.500)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Apple Tree 1 18" instance=ExtResource("a3_apple_tree_1")]
 metadata/map_asset_id = "lf_biomes:kit-apple-tree-1"
@@ -20399,7 +20331,7 @@ metadata = {
 "biomeRule": "apple orchard"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 108.000, 62.7219, -10.500)
+transform = Transform3D(-0.917289, 0, -0.214398, 0, 0.942012, 0, 0.214398, 0, -0.917289, 108.000, 63.52468, -10.500)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Apple Tree 1 19" instance=ExtResource("a3_apple_tree_1")]
 metadata/map_asset_id = "lf_biomes:kit-apple-tree-1"
@@ -20418,7 +20350,7 @@ metadata = {
 "biomeRule": "apple orchard"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 108.000, 62.0818, -1.500)
+transform = Transform3D(-0.192912, 0, -1.037757, 0, 1.055536, 0, 1.037757, 0, -0.192912, 108.000, 62.8674, -1.500)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Apple Tree 1 20" instance=ExtResource("a3_apple_tree_1")]
 metadata/map_asset_id = "lf_biomes:kit-apple-tree-1"
@@ -20437,7 +20369,7 @@ metadata = {
 "biomeRule": "apple orchard"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, -0, 0, 1, 108.000, 61.8918, 7.500)
+transform = Transform3D(-0.263813, 0, 1.054619, 0, 1.087114, 0, -1.054619, 0, -0.263813, 108.000, 62.70303, 7.500)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Apple Tree 1 21" instance=ExtResource("a3_apple_tree_1")]
 metadata/map_asset_id = "lf_biomes:kit-apple-tree-1"
@@ -24384,66 +24316,6 @@ extras = {
 }
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -117.5, 91.0690, -134.5)
 
-[node name="brambleshaw--harvest-2108-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
-gizmo_extents = 0.8
-script = ExtResource("lv_marker")
-record_id = "brambleshaw--harvest-2108-bramble"
-kind = "harvestable"
-label = "Bramble"
-extras = {
-"authority": "server",
-"cluster": "brambleshaw-bramble-c",
-"footprint": [2.6, 1.2],
-"grouping": "brambleshaw-bramble-c",
-"groupingName": "Bramble Thicket",
-"objectId": 2108,
-"pass": "lv-2026-10-14-harvest",
-"resource": "Bramble",
-"yaw": 0.0,
-"zone": "hedge"
-}
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -90.5, 96.6780, -69.5)
-
-[node name="brambleshaw--harvest-2109-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
-gizmo_extents = 0.8
-script = ExtResource("lv_marker")
-record_id = "brambleshaw--harvest-2109-bramble"
-kind = "harvestable"
-label = "Bramble"
-extras = {
-"authority": "server",
-"cluster": "brambleshaw-bramble-c",
-"footprint": [2.6, 1.2],
-"grouping": "brambleshaw-bramble-c",
-"groupingName": "Bramble Thicket",
-"objectId": 2109,
-"pass": "lv-2026-10-14-harvest",
-"resource": "Bramble",
-"yaw": 0.0,
-"zone": "hedge"
-}
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -87.5, 95.6180, -69.5)
-
-[node name="brambleshaw--harvest-2110-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
-gizmo_extents = 0.8
-script = ExtResource("lv_marker")
-record_id = "brambleshaw--harvest-2110-bramble"
-kind = "harvestable"
-label = "Bramble"
-extras = {
-"authority": "server",
-"cluster": "brambleshaw-bramble-c",
-"footprint": [2.6, 1.2],
-"grouping": "brambleshaw-bramble-c",
-"groupingName": "Bramble Thicket",
-"objectId": 2110,
-"pass": "lv-2026-10-14-harvest",
-"resource": "Bramble",
-"yaw": 9.5,
-"zone": "hedge"
-}
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -84.5, 95.0260, -69.5)
-
 [node name="brambleshaw--harvest-2111-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
 gizmo_extents = 0.8
 script = ExtResource("lv_marker")
@@ -28148,25 +28020,6 @@ extras = {
 "zone": "coverage"
 }
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 66.5, 73.1, -97.5)
-
-[node name="brambleshaw--harvest-3057-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
-gizmo_extents = 0.8
-script = ExtResource("lv_marker")
-record_id = "brambleshaw--harvest-3057-lavender"
-kind = "harvestable"
-label = "Lavender"
-extras = {
-"authority": "server",
-"cluster": "brambleshaw-wild-0012",
-"grouping": "brambleshaw-wild-0012",
-"groupingName": "Berries and Lavender",
-"objectId": 3057,
-"pass": "harvest-coverage-1",
-"resource": "Lavender",
-"yaw": 209,
-"zone": "coverage"
-}
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 67.5, 73.4, -93.5)
 
 [node name="brambleshaw--harvest-3058-seed" type="Marker3D" parent="Gameplay/Harvestables"]
 gizmo_extents = 0.8

@@ -179,7 +179,14 @@ def test_scene_writer_is_idempotent_and_restores_the_count(tmp_path):
     plan = copy.deepcopy(PLAN)
     plan["maps"] = {region: plan["maps"][region]}
     base_count = json.loads((regions / "region-authoring-spec.json").read_bytes())["gameplay"].get("authoredMarkerCount")
-    already = len(H.read_scene(region, tmp_path, RULES["pass"])["generated"])
+    current = H.read_scene(region, tmp_path, RULES["pass"])
+    if H.sha(current["base"].encode("utf-8")) != plan["maps"][region]["inputs"]["sceneSha256"]:
+        # A later pass edited the scene after this plan was applied (the 2026-11-15 map quality pass): the writer
+        # must refuse to write the plan onto a base it was not made from.
+        with pytest.raises(H.CoverageError):
+            H.apply_scenes(tmp_path, plan, log=lambda *a: None)
+        pytest.skip(f"{region}'s scene changed after the plan was applied; the writer refuses it, as it should")
+    already = len(current["generated"])
     if base_count is not None:
         base_count -= already               # the scene may carry the applied pass already
     first = H.apply_scenes(tmp_path, plan, log=lambda *a: None)
