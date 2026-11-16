@@ -521,6 +521,15 @@ def finish(paths, *, dry_run: bool = False, quantise_pass: bool = True,
         _save_index(index)
     quantised = quantise(files + fresh, dry_run) if quantise_pass else {"files": 0, "bytes": 0, "accessors": {}}
     vertices = consolidate_vertices(files + fresh, dry_run)
+    manifests = package_manifests(files)
+    # The image, quantise and vertex passes above rewrite the prototypes this
+    # publish created, after share() recorded their bytes in the index and the
+    # manifests. The road step below verifies every manifest's externalMeshes
+    # digest against the pool file, so bring the new ones back in step first
+    # (2026-11-15: a new kit prototype placed in Boarsend failed it with
+    # "source prototype hash mismatch"). The pass after the road step stays.
+    reconciled = SM.reconcile(dry_run, prototypes={path.stem for path in fresh},
+                              manifests=manifests) if fresh else []
     # A publisher may still emit its authored road ribbons as intermediate
     # geometry. Convert before accounting and never let a later publish bring
     # nonbridge road render/collision meshes back into the shipped leaves.
@@ -543,8 +552,8 @@ def finish(paths, *, dry_run: bool = False, quantise_pass: bool = True,
                 # outdoor authoring scene or road terrain to convert.
                 continue
             road_reports.append(road_publish.finish_region(REPO, region, apply=not dry_run))
-    manifests = package_manifests(files)
-    reconciled = SM.reconcile(dry_run, prototypes={path.stem for path in fresh}, manifests=manifests)
+    reconciled = sorted(set(reconciled) | set(SM.reconcile(dry_run, prototypes={path.stem for path in fresh},
+                                                             manifests=manifests)))
     restated = restamp(manifests, dry_run, factor)
     verb = "would finish" if dry_run else "finished"
     log(f"{verb} {len(files)} files: "
