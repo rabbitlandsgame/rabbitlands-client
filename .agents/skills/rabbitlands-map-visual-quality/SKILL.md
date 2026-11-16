@@ -150,7 +150,11 @@ gets hard, is in `references/edge-pipeline.md`. Read it before changing a consta
     a class texture now replaces the source's alpha too) and a generated tilled soil
     (slot `soil`) on all 15 isles. Forest floor got no slot: its moss pack is its own
     texture and wraps cleanly. Its patches are authored at opacity 0.4, under the
-    0.42 patch cut, so most of each is cut away; that is a look or content fix.
+    0.42 patch cut, so most of each was cut away. Since the 2026-11-16 polish pass
+    the look cuts forest-floor patches at their own `FOREST_FLOOR_RIM` (0.36, smaller
+    lobes), so they draw as dapples; the same pass softened the continent water's
+    edge (depth fade and foam, `WATER_SHORE_*`) and drew the steep-face rock as grey
+    stone without the verge's grass trims.
 - **Republished in the content pass** (client 3523bffd): four hairpin reroutes, the
   smaller road kinks, rebuilt patches, wider paving blends and road `edge_feather`
   0.16 → 0.45. Its lessons are in the references.

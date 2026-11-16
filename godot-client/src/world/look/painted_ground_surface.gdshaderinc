@@ -135,13 +135,6 @@ void fragment() {
 		texel = vec4(mix(recoloured, own_hue, look_class_hue), detail.a);
 	}
 	vec3 world_normal = (INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz;
-	// The steep-face rock layer (look_rock_layer, painted_ground_paint.gdshaderinc):
-	// on a cliff the texel becomes the rock face's, and .a says how much. The
-	// continent height is the world height less the wrapper's translation.
-	vec4 look_rock_sample = look_rock_layer(texel.rgb, texel_mean, world_normal,
-		vec3(look_ground_xz.x, (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).y - MODEL_MATRIX[3].y,
-			look_ground_xz.y));
-	texel.rgb = look_rock_sample.rgb;
 	vec3 albedo = texel.rgb * albedo_color.rgb;
 	vec3 vertex_colour = COLOR.rgb;
 	if (vertex_albedo_srgb) {
@@ -155,6 +148,15 @@ void fragment() {
 		albedo *= vertex_colour;
 		reference *= vertex_colour;
 	}
+	// The steep-face rock layer (look_rock_layer, painted_ground_paint.gdshaderinc):
+	// on a cliff the albedo becomes the rock face's, drawn as stone after the
+	// tint and vertex colour that would green it, and the reference the
+	// stone's; .a says how much. The continent height is the world height
+	// less the wrapper's translation.
+	vec4 look_rock_sample = look_rock_layer(albedo, reference, world_normal,
+		vec3(look_ground_xz.x, (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).y - MODEL_MATRIX[3].y,
+			look_ground_xz.y));
+	albedo = look_rock_sample.rgb;
 	if (look_debug > 0) {
 		ALBEDO = vec3(0.0);
 		EMISSION = look_debug_colour(reference, vertex_colour, look_ground_xz);

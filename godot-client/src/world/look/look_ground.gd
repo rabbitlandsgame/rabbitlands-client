@@ -63,6 +63,10 @@ const RendererFamily := preload("res://src/runtime/renderer_family.gd")
 
 const BIOME_SHADER_PATH := "res://src/world/biome_blend.gdshader"
 const CONTINENT_WATER_PATH := "res://src/world/continent_water.gdshader"
+## The continent's water with a soft edge where it meets the ground
+## (LookProfile.WATER_SHORE_*), which `decode_continent_sea` draws the sea's
+## copy with at a quality whose `water_shore` is true.
+const SHADER_WATER_SHORE := preload("res://src/world/look/continent_water_shore.gdshader")
 const PAINT_INCLUDE := "res://src/world/look/painted_ground_paint.gdshaderinc"
 ## The line of the biome blend the paint is spliced onto.
 const BIOME_ALBEDO_LINE := "ALBEDO = color / total;"
@@ -127,6 +131,11 @@ const ROCK_META := &"look_rock_face_region"
 ## as it draws (painted_ground_paint.gdshaderinc look_rock_repeat): the
 ## graphics quality's switch for the steep-face rock layer (`apply_quality`).
 const ROCK_FACE_GLOBAL := &"rl_rock_face"
+## The global shader uniform (project.godot [shader_globals], a float, 1 by
+## default) the soft-edged water (SHADER_WATER_SHORE) multiplies its fade and
+## foam by: the graphics quality's switch for the water's edge, set with the
+## rock face's by `apply_quality`, so seas already painted follow a change.
+const WATER_SHORE_GLOBAL := &"rl_water_shore"
 ## Marks a painted material's Mobile depth pre-pass (`mobile_prepass`).
 const PREPASS_META := &"look_mobile_prepass"
 ## WorldLoader.BATCH_META: the node is hidden and a MultiMesh draws it.
@@ -172,7 +181,13 @@ static func paint_loaded(root: Node, manifest: WorldManifest) -> int:
 ## region's border. A region whose sea meets no other's may name its own
 ## (`water.sea_value`, `sea_chroma`, and `sea_tint`, a multiplier on the
 ## decoded linear colour): sw_isle's lagoon sea read navy-teal where its
-## concept paints turquoise. Returns the surfaces changed.
+## concept paints turquoise. At a quality whose `water_shore` is true the
+## copy is drawn by SHADER_WATER_SHORE (`set_water_shore`): the water fades in
+## over its first metres of depth and carries a broken foam line, so the
+## shoreline no longer zigzags along the terrain's 2 m facets. At LOW it stays
+## opaque and reads no depth; a sea painted at LOW keeps that until its chunk
+## is painted again, and one painted above LOW follows LOW at once through
+## WATER_SHORE_GLOBAL. Returns the surfaces changed.
 static func decode_continent_sea(root: Node, region := "") -> int:
 	if not LookProfile.full_painted() or root == null or not LookProfile.linear_renderer():
 		return 0
@@ -181,6 +196,7 @@ static func decode_continent_sea(root: Node, region := "") -> int:
 	var chroma := float(LookProfile.region_value(region, "water", "sea_chroma",
 		LookProfile.CONTINENT_SEA_CHROMA))
 	var tint: Color = LookProfile.region_value(region, "water", "sea_tint", Color.WHITE)
+	var shore := bool(LookProfile.quality_value("water_shore"))
 	var changed := 0
 	for node: Node in root.find_children("*", "MeshInstance3D", true, false):
 		var mesh_instance := node as MeshInstance3D
@@ -198,9 +214,30 @@ static func decode_continent_sea(root: Node, region := "") -> int:
 			decoded.set_shader_parameter(&"look_sea_value", value)
 			decoded.set_shader_parameter(&"look_sea_chroma", chroma)
 			decoded.set_shader_parameter(&"look_sea_tint", Vector3(tint.r, tint.g, tint.b))
+			if shore:
+				set_water_shore(decoded)
 			mesh_instance.set_surface_override_material(surface, decoded)
 			changed += 1
 	return changed
+
+## Gives a decoded continent sea the soft-edged shader (SHADER_WATER_SHORE)
+## and the shore constants, keeping every parameter it had.
+static func set_water_shore(sea: ShaderMaterial) -> void:
+	var kept := {}
+	if sea.shader != null:
+		for entry: Dictionary in sea.shader.get_shader_uniform_list():
+			var name := StringName(str(entry.get("name", "")))
+			var value: Variant = sea.get_shader_parameter(name)
+			if value != null:
+				kept[name] = value
+	sea.shader = SHADER_WATER_SHORE
+	for name: StringName in kept:
+		sea.set_shader_parameter(name, kept[name])
+	sea.set_shader_parameter(&"look_shore_depth", LookProfile.WATER_SHORE_DEPTH)
+	sea.set_shader_parameter(&"look_shore_wobble", LookProfile.WATER_SHORE_WOBBLE)
+	sea.set_shader_parameter(&"look_shore_foam", LookProfile.WATER_SHORE_FOAM)
+	var foam := LookProfile.WATER_SHORE_FOAM_COLOUR
+	sea.set_shader_parameter(&"look_shore_foam_colour", Vector3(foam.r, foam.g, foam.b))
 
 ## Linear renderers only (Forward+ and Mobile): the rivers, canals, lakes,
 ## pools and small seas drawn by a StandardMaterial3D (the continent
@@ -711,6 +748,19 @@ static func is_rock(material: Material) -> bool:
 		and not LookProfile.green_tint(tint) and not sand_tint(tint) \
 		and not is_paving(standard) and not is_cobble(standard)
 
+## A forest-floor moss patch (LookProfile.FOREST_FLOOR_*): a blended patch
+## whose material name contains FOREST_FLOOR_WORD and whose tint is a muted,
+## not green earth. Authored at opacity 0.4, it is cut at FOREST_FLOOR_RIM so
+## it draws as a dappled floor rather than almost not at all.
+static func is_forest_floor(material: Material) -> bool:
+	var standard := material as BaseMaterial3D
+	if standard == null or standard.transparency == BaseMaterial3D.TRANSPARENCY_DISABLED:
+		return false
+	var tint := standard.albedo_color
+	return String(standard.resource_name).to_lower().contains(LookProfile.FOREST_FLOOR_WORD) \
+		and tint.v <= LookProfile.FOREST_FLOOR_TINT.x and tint.s <= LookProfile.FOREST_FLOOR_TINT.y \
+		and not LookProfile.green_tint(tint)
+
 ## True when `region`'s file names this blended patch as a decorative inlay
 ## (`ground.keep_patches`: words contained in its material's name, which the
 ## continent exporter writes as authored_<region>_<patch id>). It is drawn
@@ -845,16 +895,22 @@ static func painted_source_for(source: Material, kind: Kind, has_colour: bool,
 	var kept := kind == Kind.PATCH and not meadow and is_kept_patch(standard, region)
 	var rock := kind == Kind.PATCH and not meadow and not kept and is_rock(standard)
 	var paved := kind == Kind.PATCH and is_paving(standard) and not kept
+	var forest_floor := kind == Kind.PATCH and blended and not meadow and not kept \
+		and not rock and not paved and is_forest_floor(standard)
 	var rim := LookProfile.DECK_RIM
 	var rim_lobe := LookProfile.DECK_RIM_LOBE
+	var lobe_metres := LookProfile.RIM_LOBE_METRES
 	if kind == Kind.PATCH:
 		rim = LookProfile.PAVING_RIM if paved \
-			else LookProfile.MEADOW_RIM if meadow else LookProfile.PATCH_RIM
+			else LookProfile.MEADOW_RIM if meadow \
+			else LookProfile.FOREST_FLOOR_RIM if forest_floor else LookProfile.PATCH_RIM
 		rim_lobe = LookProfile.PAVING_RIM_LOBE if paved \
-			else LookProfile.MEADOW_RIM_LOBE if meadow else LookProfile.PATCH_RIM_LOBE
+			else LookProfile.MEADOW_RIM_LOBE if meadow \
+			else LookProfile.FOREST_FLOOR_RIM_LOBE if forest_floor else LookProfile.PATCH_RIM_LOBE
+		if forest_floor:
+			lobe_metres = LookProfile.FOREST_FLOOR_LOBE_METRES
 	painted.set_shader_parameter(&"look_rim", rim)
-	painted.set_shader_parameter(&"look_rim_lobe",
-		Vector2(rim_lobe.x, LookProfile.RIM_LOBE_METRES))
+	painted.set_shader_parameter(&"look_rim_lobe", Vector2(rim_lobe.x, lobe_metres))
 	painted.set_shader_parameter(&"look_rim_grain", rim_lobe.y)
 	# A region's class texture for this surface (`ground.class_textures`).
 	var slot := class_slot(standard, kind, meadow, kept, rock)
@@ -1009,6 +1065,12 @@ static func rock_face_metres(region: String) -> float:
 static func rock_face_switch() -> float:
 	return 1.0 if bool(LookProfile.quality_value("rock_face")) else 0.0
 
+## The graphics quality's switch for the water's soft edge: 1 at a quality
+## whose `water_shore` is true (MEDIUM, HIGH), 0 where it is false (LOW, or
+## ELORIA_LOOK_QUALITY_TRIM water_shore=0 for a measurement).
+static func water_shore_switch() -> float:
+	return 1.0 if bool(LookProfile.quality_value("water_shore")) else 0.0
+
 ## The quality was read or changed (main's _apply_graphics_quality, the
 ## trailer camera): gives ROCK_FACE_GLOBAL the quality's switch
 ## (`rock_face_switch`). Every painted ground material, road composites
@@ -1019,6 +1081,7 @@ static func rock_face_switch() -> float:
 static func apply_quality() -> float:
 	_rock_face_switch = rock_face_switch()
 	RenderingServer.global_shader_parameter_set(ROCK_FACE_GLOBAL, _rock_face_switch)
+	RenderingServer.global_shader_parameter_set(WATER_SHORE_GLOBAL, water_shore_switch())
 	return _rock_face_switch
 
 ## The rock face's repeat `painted` draws with now: its look_rock_metres times
