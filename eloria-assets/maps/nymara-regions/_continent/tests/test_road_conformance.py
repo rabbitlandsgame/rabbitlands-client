@@ -9,7 +9,10 @@ from shapely.geometry import Polygon
 from shapely.ops import unary_union
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-from terrain_export import conform_road_faces, encoded_road_faces
+import math
+
+import landscape as L
+from terrain_export import authored_road_faces, conform_road_faces, encoded_road_faces
 from world_layout import triangle_sample
 
 
@@ -27,6 +30,65 @@ def attributes(faces):
 def signed_area(faces):
     a,b=faces[:,1]-faces[:,0],faces[:,2]-faces[:,0]
     return (a[:,0]*b[:,2]-a[:,2]*b[:,0])*.5
+
+
+def reference_road_faces(world,snapshot,path):
+    """The ribbon exporter before bend repair (client e13cb478), kept verbatim as the straight-road oracle."""
+    controls=path['points'];vertices=[];uv=[];colors=[];indices=[];along=0.;lateral_steps=6
+    road_override=path['surface'].get('roadOverrides');feather=float(road_override['edgeFeather']) if road_override else 0.
+    control_points=[snapshot.continent_point(value['position']) for value in controls]
+    control_widths=[float(value['width']) for value in controls]
+    points=[];widths=[]
+    for index,(start,end) in enumerate(zip(control_points,control_points[1:])):
+        count=max(1,int(math.ceil(np.linalg.norm(end[[0,2]]-start[[0,2]]))))
+        amount=np.linspace(0.,1.,count+1)[:-1]
+        points.extend(start*(1-value)+end*value for value in amount)
+        widths.extend(control_widths[index]*(1-value)+control_widths[index+1]*value for value in amount)
+    points.append(control_points[-1]);widths.append(control_widths[-1])
+    for index,(point,width) in enumerate(zip(points,widths)):
+        previous=point if index==0 else points[index-1];following=point if index==len(points)-1 else points[index+1]
+        tangent=(following-previous)[[0,2]];tangent/=max(np.linalg.norm(tangent),1e-12);side=np.array([-tangent[1],tangent[0]])
+        if index:along+=float(np.linalg.norm(point-points[index-1]))
+        for lateral_index in range(lateral_steps+1):
+            u=lateral_index/lateral_steps;lateral=width*(.5-u)
+            vertex=point.copy();vertex[[0,2]]+=side*lateral
+            vertex[1]=float(world.height_at(vertex[0],vertex[2]))+.055
+            vertices.append(vertex);uv.append([u*width,along])
+            distance_from_edge=1.-abs(u*2.-1.)
+            alpha=1. if feather<=0 else float(L.smoothstep(0.,feather,distance_from_edge))
+            colors.append([1.,1.,1.,alpha])
+        if index<len(points)-1:
+            base=index*(lateral_steps+1);following=base+lateral_steps+1
+            for lateral_index in range(lateral_steps):
+                a=base+lateral_index;b=a+1;c=following+lateral_index;d=c+1
+                indices.extend((a,d,b,a,c,d))
+    vertices=np.asarray(vertices,float);face_indices=np.asarray(indices).reshape(-1,3)
+    return vertices[face_indices],np.asarray(uv)[face_indices],np.asarray(colors)[face_indices]
+
+
+def road(points,width=5.5,feather=.45):
+    """A saved road through rows of [x, z] (optionally with a width) on gently sloping ground."""
+    world=SimpleNamespace(height_at=lambda x,z:.01*np.asarray(x)+.02*np.asarray(z)+3.)
+    snapshot=SimpleNamespace(continent_point=lambda value:np.asarray(value,float)+np.array([100.,0.,200.]))
+    rows=[{'position':[float(p[0]),.03*float(p[0])-.02*float(p[1]),float(p[1])],'width':float(p[2]) if len(p)>2 else width}
+          for i,p in enumerate(points)]
+    return world,snapshot,{'points':rows,'surface':{'roadOverrides':{'edgeFeather':feather}}}
+
+
+def uv_mapping(faces,uv):
+    """Per triangle (fold, anisotropy) of the ground-from-texture map in the xz plane."""
+    e1,e2=faces[:,1,[0,2]]-faces[:,0,[0,2]],faces[:,2,[0,2]]-faces[:,0,[0,2]]
+    f1,f2=uv[:,1]-uv[:,0],uv[:,2]-uv[:,0]
+    ground=e1[:,0]*e2[:,1]-e1[:,1]*e2[:,0];texture=f1[:,0]*f2[:,1]-f1[:,1]*f2[:,0]
+    fold=((ground*texture<0)|((texture==0)&(ground!=0)))&(abs(ground)>1e-9)
+    valid=(abs(texture)>1e-12)&(abs(ground)>1e-9)
+    jacobian=np.stack((e1,e2),-1)@np.linalg.inv(np.where(valid[:,None,None],np.stack((f1,f2),-1),np.eye(2)))
+    sigma=np.linalg.svd(jacobian,compute_uv=False)
+    return fold,np.where(valid,sigma[:,0]/sigma[:,1],1.)
+
+
+def footprint(faces):
+    return unary_union([Polygon(f[:,[0,2]]) for f in faces if Polygon(f[:,[0,2]]).area>1e-12])
 
 
 class RoadConformanceTests(unittest.TestCase):
@@ -106,6 +168,51 @@ class RoadConformanceTests(unittest.TestCase):
         out,actual_uv,actual_colors=conform_road_faces(w,original,uv,colors)
         np.testing.assert_array_equal(out[:,:,[0,2]],original[:,:,[0,2]])
         np.testing.assert_array_equal(actual_uv,uv);np.testing.assert_array_equal(actual_colors,colors)
+
+    def test_straight_and_gently_curved_roads_keep_their_exact_ribbon(self):
+        # Saved samples a centimetre apart and a 2 mm backwards blip, as editor bakes write them,
+        # on a straight tapering road; and a gentle 1 m-sampled curve. Neither folds or streaks,
+        # so the exporter must emit the old ribbon byte for byte.
+        straight=[[0,0],[1,0],[2,0],[2.01,0],[3,0],[4.002,0],[4.,0],[5,0,6.5],[7,0,7.]]
+        gentle=[[10*math.sin(a),10-10*math.cos(a)] for a in np.linspace(0.,1.2,13)]
+        for points in (straight,gentle):
+            args=road(points)
+            expected=reference_road_faces(*args);actual=authored_road_faces(*args)
+            for value,reference in zip(actual,expected):
+                self.assertEqual(value.shape,reference.shape)
+                self.assertEqual(value.tobytes(),reference.tobytes())
+
+    def test_sharp_bends_are_continuous_unfolded_and_keep_their_coverage(self):
+        # A 72 degree corner sampled 1 cm before its vertex (Suncoil trail-15) and a pair of
+        # 45 degree grid corners 3 m apart (A3 trails). Before the fix both fanned the outer
+        # side into one texture row (a streak) and folded the inner side back over itself.
+        corner=[[float(x),0] for x in range(-10,0)]+[[-.01,0],[0,0]]+[[.309*k,.951*k] for k in range(1,11)]
+        grid=([[float(x),0] for x in range(-7,4)]+[[3.71,.71],[4.41,1.41],[5.12,2.12]]+
+              [[5.12,2.12+k] for k in range(1,11)])
+        straight=reference_road_faces(*road([[0,0],[5,0]]))
+        expected={round(float(a),9):float(c) for a,c in zip(straight[1][...,0].ravel()/5.5,straight[2][...,3].ravel())}
+        for points in (corner,grid):
+            args=road(points)
+            old_faces,old_uv,_=reference_road_faces(*args)
+            fold,anisotropy=uv_mapping(old_faces,old_uv)
+            self.assertTrue(fold.any() and anisotropy.max()>10)
+            faces,uv,colors=authored_road_faces(*args)
+            fold,anisotropy=uv_mapping(faces,uv)
+            self.assertFalse(fold.any())
+            self.assertLess(anisotropy.max(),3.5)
+            # One uv and alpha per ground vertex: the strips are continuous, with no seam or fan.
+            seen={}
+            for position,value,colour in zip(faces.reshape(-1,3),uv.reshape(-1,2),colors.reshape(-1,4)):
+                row=np.concatenate((value,colour))
+                np.testing.assert_array_equal(seen.setdefault(position[[0,2]].round(9).tobytes(),row),row)
+            # No two triangles overlap, and the ribbon covers what the old one did (the
+            # centreline's half-width buffer, mitred inside and rounded outside) to within 2%.
+            cover=footprint(faces);old_cover=footprint(old_faces)
+            self.assertAlmostEqual(sum(Polygon(f[:,[0,2]]).area for f in faces),cover.area,places=6)
+            self.assertLess(cover.symmetric_difference(old_cover).area,.02*old_cover.area)
+            # The lateral alpha profile is the straight road's: alpha is the same function of u.
+            profile={round(float(a),9):float(c) for a,c in zip(uv[...,0].ravel()/5.5,colors[...,3].ravel())}
+            self.assertEqual(profile,expected)
 
 
 if __name__=='__main__':unittest.main()

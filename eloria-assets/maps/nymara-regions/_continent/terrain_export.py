@@ -107,9 +107,227 @@ def conform_road_faces(world,faces,uv,colors):
     return result[:,:,:3],result[:,:,3:5],result[:,:,5:]
 
 
+ROAD_LATERAL_STEPS=6
+# Bend repair (see road_ribbon_stations). A strip is rebuilt when one of its
+# triangles folds over by more than BEND_FOLD_AREA square metres or maps its
+# texture with more than BEND_ANISOTROPY times the stretch in one direction
+# than in the other. Straight and gently curved strips stay byte-identical.
+BEND_FOLD_AREA=5e-3
+BEND_ANISOTROPY=3.
+BEND_SPACING=.25        # station spacing (m) inside a rebuilt bend
+BEND_LENGTH=2.          # chord half-length = BEND_LENGTH * half-width * 2 tan(turn / 2) / (1 + cos(turn)):
+                        # the inner edge then advances at least 1 / BEND_LENGTH as fast as the centreline
+BEND_MIN_LENGTH=.5
+BEND_MAX_MITRE=3.       # a section edge never reaches further than 3 half-widths
+
+
+def _polyline_at(xz_along,values,s):
+    """Linear interpolation of per-station values at xz arc lengths s."""
+    scalar=np.ndim(s)==0;s=np.atleast_1d(np.asarray(s,float))
+    j=np.clip(np.searchsorted(xz_along,s,side='right')-1,0,len(xz_along)-2)
+    span=xz_along[j+1]-xz_along[j]
+    t=np.clip(np.where(span>0,(s-xz_along[j])/np.where(span>0,span,1.),0.),0.,1.)
+    values=np.asarray(values,float)
+    shape=(-1,)+(1,)*(values.ndim-1)
+    result=values[j]*(1-t).reshape(shape)+values[j+1]*t.reshape(shape)
+    return result[0] if scalar else result
+
+
+def _strip_defects(xz,width,along,left,right,steps=ROAD_LATERAL_STEPS):
+    """Per station interval: (fold area, worst anisotropy) of its triangles in the xz/uv planes."""
+    xz=np.asarray(xz,float);width=np.asarray(width,float);along=np.asarray(along,float)
+    u=np.arange(steps+1)/steps;lateral=width[:,None]*(.5-u[None,:])
+    vectors=np.where((lateral>0)[...,None],np.asarray(left,float)[:,None,:],np.asarray(right,float)[:,None,:])
+    ground=xz[:,None,:]+vectors*lateral[...,None]
+    texture=np.stack((u[None,:]*width[:,None],np.broadcast_to(along[:,None],lateral.shape)),axis=-1)
+    a,b=slice(None,-1),slice(1,None)
+    # Parallel sections cannot fan or cross; a "fold" between them is only a saved
+    # sample a few millimetres behind its neighbour, which draws nothing visible.
+    first,second=np.asarray(left,float),np.asarray(right,float)
+    turning=(abs(first[a,0]*first[b,1]-first[a,1]*first[b,0])>1e-9)|(abs(second[a,0]*second[b,1]-second[a,1]*second[b,0])>1e-9)
+    corners=[(ground[a,:-1],ground[b,1:],ground[a,1:]),(ground[a,:-1],ground[b,:-1],ground[b,1:])]
+    maps=[(texture[a,:-1],texture[b,1:],texture[a,1:]),(texture[a,:-1],texture[b,:-1],texture[b,1:])]
+    fold=np.zeros(len(xz)-1);worst=np.ones(len(xz)-1)
+    for (p0,p1,p2),(q0,q1,q2) in zip(corners,maps):
+        e1,e2=p1-p0,p2-p0;f1,f2=q1-q0,q2-q0
+        ground_area=.5*(e1[...,0]*e2[...,1]-e1[...,1]*e2[...,0])
+        texture_area=.5*(f1[...,0]*f2[...,1]-f1[...,1]*f2[...,0])
+        folded=(ground_area*texture_area<0)|((texture_area==0)&(ground_area!=0))
+        fold=np.maximum(fold,np.where(folded&turning[:,None],abs(ground_area),0.).sum(axis=1))
+        # Jacobian ground = J @ texture over each triangle; singular-value ratio.
+        determinant=f1[...,0]*f2[...,1]-f1[...,1]*f2[...,0]
+        valid=(abs(determinant)>1e-12)&(abs(ground_area)>1e-9)
+        safe=np.where(valid,determinant,1.)
+        inverse=np.stack((np.stack((f2[...,1],-f2[...,0]),-1),np.stack((-f1[...,1],f1[...,0]),-1)),-2)/safe[...,None,None]
+        ground_edges=np.stack((e1,e2),-1)
+        jacobian=ground_edges@inverse
+        frobenius=(jacobian**2).sum(axis=(-1,-2));det=abs(np.linalg.det(jacobian))
+        root=np.sqrt(np.maximum(frobenius**2-4*det**2,0.))
+        large=np.sqrt((frobenius+root)/2);small=det/np.maximum(large,1e-300)
+        ratio=np.where(valid,large/np.maximum(small,1e-300),1.)
+        worst=np.maximum(worst,ratio.max(axis=1))
+    return fold,worst
+
+
+def road_ribbon_stations(points,widths):
+    """Cross-sections of a saved road ribbon: one station per saved sample, bends rebuilt.
+
+    Returns (stations, bends). Each station is (point, width, along, left, right):
+    vertices are point + left * lateral on the u < .5 side and point + right *
+    lateral on the other, with uv (u * width, along) and the edge-feather alpha
+    of u, exactly like a straight road. Outside rebuilt bends every station is
+    the saved sample with its central-difference section, so straight and gently
+    curved roads keep their exact output.
+
+    Saved samples sit centimetres from authored corners, so a central-difference
+    section turns through the whole corner inside that sliver: the outer side
+    becomes a fan of triangles that share one texture row (a streak) and the
+    inner side folds back over itself. Where a strip folds or stretches its
+    texture beyond BEND_ANISOTROPY, the stations of that bend are replaced by
+    stations every BEND_SPACING metres on the same centreline, whose sections
+    turn gradually with a chord of the centreline. Each section's two halves
+    are lengthened so that their ends lie exactly a half-width from the
+    centreline: the inner edge keeps its mitred corner, the outer edge its
+    rounded one, and the lateral alpha profile is unchanged.
+    """
+    points=[np.asarray(point,float) for point in points];widths=[float(value) for value in widths]
+    count=len(points);sides=[];alongs=[];along=0.
+    for index,point in enumerate(points):
+        previous=point if index==0 else points[index-1];following=point if index==count-1 else points[index+1]
+        tangent=(following-previous)[[0,2]];tangent/=max(np.linalg.norm(tangent),1e-12);side=np.array([-tangent[1],tangent[0]])
+        if index:along+=float(np.linalg.norm(point-points[index-1]))
+        sides.append(side);alongs.append(along)
+    original=[(point,width,along,side,side) for point,width,along,side in zip(points,widths,alongs,sides)]
+    if count<3:return original,[]
+    P=np.asarray(points);xz=P[:,[0,2]];W=np.asarray(widths);A=np.asarray(alongs);S=np.asarray(sides)
+    step=np.linalg.norm(np.diff(xz,axis=0),axis=1);s=np.concatenate(([0.],np.cumsum(step)));total=s[-1]
+    fold,worst=_strip_defects(xz,W,A,S,S)
+    bad=np.nonzero((fold>BEND_FOLD_AREA)|(worst>BEND_ANISOTROPY))[0]
+    if not len(bad):return original,[]
+    def at(values,where):return _polyline_at(s,values,where)
+    # Robust turn at each sample: directions to the samples at least 5 cm away.
+    back=np.clip(np.searchsorted(s,s-.05,side='right')-1,0,count-1)
+    ahead=np.clip(np.searchsorted(s,s+.05,side='left'),0,count-1)
+    d_in=xz-xz[back];d_out=xz[ahead]-xz
+    turn=np.arctan2(d_in[:,0]*d_out[:,1]-d_in[:,1]*d_out[:,0],(d_in*d_out).sum(axis=1))
+    turn[(np.linalg.norm(d_in,axis=1)==0)|(np.linalg.norm(d_out,axis=1)==0)]=0.
+    def direction(a,b):
+        chord=at(xz,b)-at(xz,a);norm=np.linalg.norm(chord)
+        return chord/norm if norm>0 else None
+    def heading(a,b):
+        first,second=direction(max(a-.5,0.),a),direction(b,min(b+.5,total))
+        if first is None or second is None:return 0.
+        return abs(math.atan2(first[0]*second[1]-first[1]*second[0],float(first@second)))
+    # A road that doubles back on itself (an out-and-back spur) overlaps by design and
+    # turning sections cannot help: its reversal keeps the saved ribbon, and bends
+    # nearby stop half a metre short of it, as they would at a road end.
+    reversal=s[abs(turn)>=math.radians(150.)]
+    seeds=[[s[i],s[i+1],1.] for i in bad if not ((reversal>=s[i]-.5)&(reversal<=s[i+1]+.5)).any()]
+    if not seeds:return original,[]
+    def sized(a,b,growth):
+        inside=(s>=a-1e-9)&(s<=b+1e-9)
+        angle=min(max(heading(a,b),float(abs(turn[inside]).max()) if inside.any() else 0.),math.radians(150.))
+        near=(s>=a-1.)&(s<=b+1.);half=.5*float(W[near].max() if near.any() else at(W,a))
+        length=min(growth*max(BEND_LENGTH*half*2*math.tan(angle/2)/(1+math.cos(angle)),BEND_MIN_LENGTH),max(4*half,2.))
+        # Inside a road the chord shrinks to the local tangent at both zone ends (see
+        # build), so a full-length chord needs a 2 * length run-in on each side. Near a
+        # road end the chord is one-sided instead, and no longer than the run-in, so
+        # the end's own section stays square to the road.
+        if a-2*length<0:length=min(length,max(a,BEND_SPACING))
+        if b+2*length>total:length=min(length,max(total-b,BEND_SPACING))
+        before=reversal[reversal<a];after=reversal[reversal>b]
+        start=max(a-2*length,0.,before.max()+.5 if len(before) else 0.)
+        end=min(b+2*length,total,after.min()-.5 if len(after) else total)
+        return [start,end,length]
+    def zones_from(seeds):
+        # Seeds whose bends would overlap are rebuilt as one bend, sized by their combined turn.
+        merged=[]
+        for seed in sorted(seeds):
+            if merged and seed[0]<=merged[-1][1]+1e-9:
+                merged[-1]=[merged[-1][0],max(merged[-1][1],seed[1]),max(merged[-1][2],seed[2])]
+            else:merged.append(list(seed))
+        while True:
+            zones=[sized(*seed) for seed in merged]
+            joined=[list(merged[0])];end=zones[0][1]
+            for seed,zone in zip(merged[1:],zones[1:]):
+                if not ((s>=end)&(s<=zone[0])).any():
+                    joined[-1]=[joined[-1][0],max(joined[-1][1],seed[1]),max(joined[-1][2],seed[2])];end=max(end,zone[1])
+                else:joined.append(list(seed));end=zone[1]
+            if len(joined)==len(merged):return zones
+            merged=joined
+    def build(zone):
+        za,zb,length=zone[:3]
+        corners=[i for i in np.argsort(-abs(turn)) if za<s[i]<zb and abs(turn[i])>=math.radians(1.)]
+        kept=[]
+        for i in corners:
+            if all(abs(s[i]-s[j])>BEND_SPACING/3 for j in kept):kept.append(i)
+        n=max(2,int(math.ceil((zb-za)/BEND_SPACING)))
+        uniform=[value for value in za+(zb-za)*np.arange(1,n)/n if all(abs(value-s[j])>BEND_SPACING/3 for j in kept)]
+        where=np.array(sorted([(float(s[i]),i) for i in kept]+[(float(value),-1) for value in uniform]))
+        where_s=where[:,0];source=where[:,1].astype(int)
+        point=at(P,where_s);width=at(W,where_s);along=at(A,where_s)
+        for k,i in enumerate(source):
+            if i>=0:point[k]=P[i];width[k]=W[i];along[k]=A[i]
+        # Inside a road the chord shrinks to the local tangent at the zone ends, so
+        # the bend meets the kept sections smoothly; at a road end it is one-sided.
+        run_in=where_s-za if za>0 else np.inf;run_out=zb-where_s if zb<total else np.inf
+        half_chord=np.minimum(length,np.minimum(run_in,run_out))
+        chord=at(xz,np.minimum(where_s+half_chord,zb))-at(xz,np.maximum(where_s-half_chord,za))
+        chord/=np.maximum(np.linalg.norm(chord,axis=1,keepdims=True),1e-12)
+        side=np.stack((-chord[:,1],chord[:,0]),axis=1)
+        # Lengthen each half-section until its end lies a half-width from the
+        # local centreline (the ribbon's own buffer outline).
+        reach=length+float(W.max())+1.
+        local=np.nonzero((s[1:]>=za-reach)&(s[:-1]<=zb+reach))[0]
+        start,end=xz[local],xz[local+1];edge=end-start;edge_length=(edge**2).sum(axis=1)
+        half=width/2;centre=point[:,[0,2]]
+        scales=[]
+        for sign in (1.,-1.):
+            def gap(scale):
+                probe=centre+sign*side*(scale*half)[:,None]
+                offset=probe[:,None,:]-start[None]
+                t=np.clip((offset*edge[None]).sum(-1)/np.where(edge_length>0,edge_length,1.)[None],0.,1.)
+                return np.sqrt(((offset-t[...,None]*edge[None])**2).sum(-1)).min(axis=1)-half
+            grid=np.linspace(1.,BEND_MAX_MITRE,41);values=np.stack([gap(value) for value in grid],axis=1)
+            reached=values>=0;first=np.where(reached.any(axis=1),reached.argmax(axis=1),len(grid)-1)
+            low=grid[np.maximum(first-1,0)];high=grid[first]
+            low=np.where(first==0,1.,low);high=np.where(first==0,1.,high)
+            for _ in range(30):
+                middle=(low+high)/2;inside=gap(middle)<0
+                low=np.where(inside,middle,low);high=np.where(inside,high,middle)
+            scales.append(np.where(reached.any(axis=1),high,BEND_MAX_MITRE))
+        left=side*scales[0][:,None];right=side*scales[1][:,None]
+        return [(point[k],float(width[k]),float(along[k]),left[k],right[k]) for k in range(len(where_s))]
+    best=None
+    for _ in range(6):
+        zones=zones_from(seeds);rebuilt={id(zone):build(zone) for zone in zones}
+        stations=[];bends=[];index=0;failed=False
+        for zone in zones:
+            za,zb=zone[:2]
+            while index<count and s[index]<=za:stations.append(original[index]);index+=1
+            first=len(stations)-1;stations.extend(rebuilt[id(zone)])
+            while index<count and s[index]<zb:index+=1
+            last=len(stations) if index<count else len(stations)-1
+            if index<count:stations.append(original[index]);index+=1
+            span=stations[max(first,0):last+1]
+            fold,_=_strip_defects(np.array([value[0][[0,2]] for value in span]),[value[1] for value in span],
+                [value[2] for value in span],[value[3] for value in span],[value[4] for value in span])
+            bends.append({'from':float(zone[0]),'to':float(zone[1]),'length':float(zone[2]),
+                          'foldArea':float(fold.sum())})
+            if fold.max(initial=0.)>BEND_FOLD_AREA:
+                failed=True
+                for seed in seeds:
+                    if zone[0]<=seed[0]<=zone[1]:seed[2]*=1.5
+        stations.extend(original[index:])
+        residual=sum(value['foldArea'] for value in bends)
+        if best is None or residual<best[0]:best=(residual,stations,bends)
+        if not failed:break
+    return best[1],best[2]
+
+
 def authored_road_faces(world,snapshot,path):
     """Original saved ribbon topology and attributes, before ground subdivision."""
-    controls=path['points'];vertices=[];uv=[];colors=[];indices=[];along=0.;lateral_steps=6
+    controls=path['points'];vertices=[];uv=[];colors=[];indices=[];lateral_steps=ROAD_LATERAL_STEPS
     road_override=path['surface'].get('roadOverrides');feather=float(road_override['edgeFeather']) if road_override else 0.
     control_points=[snapshot.continent_point(value['position']) for value in controls]
     control_widths=[float(value['width']) for value in controls]
@@ -120,19 +338,17 @@ def authored_road_faces(world,snapshot,path):
         points.extend(start*(1-value)+end*value for value in amount)
         widths.extend(control_widths[index]*(1-value)+control_widths[index+1]*value for value in amount)
     points.append(control_points[-1]);widths.append(control_widths[-1])
-    for index,(point,width) in enumerate(zip(points,widths)):
-        previous=point if index==0 else points[index-1];following=point if index==len(points)-1 else points[index+1]
-        tangent=(following-previous)[[0,2]];tangent/=max(np.linalg.norm(tangent),1e-12);side=np.array([-tangent[1],tangent[0]])
-        if index:along+=float(np.linalg.norm(point-points[index-1]))
+    stations,_=road_ribbon_stations(points,widths)
+    for index,(point,width,along,left,right) in enumerate(stations):
         for lateral_index in range(lateral_steps+1):
             u=lateral_index/lateral_steps;lateral=width*(.5-u)
-            vertex=point.copy();vertex[[0,2]]+=side*lateral
+            vertex=point.copy();vertex[[0,2]]+=(left if lateral>0 else right)*lateral
             vertex[1]=float(world.height_at(vertex[0],vertex[2]))+.055
             vertices.append(vertex);uv.append([u*width,along])
             distance_from_edge=1.-abs(u*2.-1.)
             alpha=1. if feather<=0 else float(L.smoothstep(0.,feather,distance_from_edge))
             colors.append([1.,1.,1.,alpha])
-        if index<len(points)-1:
+        if index<len(stations)-1:
             base=index*(lateral_steps+1);following=base+lateral_steps+1
             for lateral_index in range(lateral_steps):
                 a=base+lateral_index;b=a+1;c=following+lateral_index;d=c+1
