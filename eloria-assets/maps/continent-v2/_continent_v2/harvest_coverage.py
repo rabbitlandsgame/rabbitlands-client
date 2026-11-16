@@ -1527,8 +1527,9 @@ def verify_applied(checkout: Path, plan, server: Path | None = None) -> list:
     grids and tables - so --check proves the applied state instead: every map's scene carries exactly the plan's
     markers, and the server's overlay table serves exactly the plan's rows.
 
-    Later passes edit the rest of the scene (the 2026-11-15 map quality pass re-seated scenery and removed 97 of
-    this pass's nodes, from the scenes and this plan together), so a base that differs from the one the plan was
+    Later passes edit the rest of the scene (the 2026-11-15 map quality pass re-seated scenery and removed 112 of
+    this pass's nodes, 97 in its first wave and 15 in its second, from the scenes and this plan together; the plan's
+    "before"/"after"/"targets*" metrics still describe the plan as generated), so a base that differs from the one the plan was
     made from is not a problem here: publish_server.py re-checks every node against the scene it is published from
     (the D4 approach ring, the D11 road band, the gameplay rings) and refuses one a later edit has blocked."""
     problems = []
