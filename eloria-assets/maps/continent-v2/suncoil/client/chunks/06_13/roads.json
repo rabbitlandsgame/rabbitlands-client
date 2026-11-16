@@ -1,0 +1,344 @@
+{
+  "schema": "rabbitlands-road-terrain-blend-v1",
+  "region": "suncoil",
+  "chunk": "06_13",
+  "pixels_per_metre": 4,
+  "source_glb_sha256": "66a63f188cfb002460bd71e977f0afd1c1db935bd86732309df071954569e956",
+  "source_manifest_sha256": "509ff69a2534353b71080d86098a454e375126ee7bc1d86e9571520206e6bf54",
+  "authoring_scene_sha256": "7927a27d36f3ee95954e7c7ab4d6634d35f40eb57f909114045b67322f9ecd4b",
+  "mask_space": "gltf_scene_world_xz",
+  "source_frame_node": "AuthoredGround_suncoilBase_suncoil_06_13",
+  "source_frame_matrix": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    -3631.0,
+    0.0,
+    -7961.0,
+    1.0
+  ],
+  "targets": [
+    {
+      "name": "AuthoredGround_suncoilBase_suncoil_06_13",
+      "world_matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        -3631.0,
+        0.0,
+        -7961.0,
+        1.0
+      ]
+    }
+  ],
+  "removed_road_node_names": [
+    "Walk_suncoil_suncoil--a3-trail-02_suncoil_06_13",
+    "Walk_suncoil_suncoil--a3-trail-04_suncoil_06_13"
+  ],
+  "source_road_ids": [
+    "suncoil--a3-trail-02",
+    "suncoil--a3-trail-04"
+  ],
+  "retained_walk_nodes": [],
+  "collision_policy": "retained_terrain_only_for_removed_road_ribbons;structural_walks_unchanged",
+  "styles": [
+    {
+      "id": 0,
+      "identity_sha256": "305fbf47464643d740ba68208092f75cce43e2dd6e586a86eec35172a5110dba",
+      "material_document": {
+        "asset": {
+          "version": "2.0"
+        },
+        "materials": [
+          {
+            "name": "authored_suncoil_suncoil--a3-trail-01",
+            "pbrMetallicRoughness": {
+              "baseColorFactor": [
+                0.3423916453975833,
+                0.2956997859736278,
+                0.17886751091127312,
+                1.0
+              ],
+              "metallicFactor": 0.0,
+              "roughnessFactor": 1.0,
+              "baseColorTexture": {
+                "index": 0
+              },
+              "metallicRoughnessTexture": {
+                "index": 1
+              }
+            },
+            "occlusionTexture": {
+              "index": 1
+            },
+            "normalTexture": {
+              "index": 2,
+              "scale": 0.72
+            },
+            "alphaMode": "BLEND",
+            "doubleSided": true
+          }
+        ],
+        "textures": [
+          {
+            "sampler": 0,
+            "source": 0
+          },
+          {
+            "sampler": 0,
+            "source": 1
+          },
+          {
+            "sampler": 0,
+            "source": 2
+          }
+        ],
+        "images": [
+          {
+            "uri": "../../../../../nymara-regions/_continent/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png",
+            "name": "suncoil_suncoil--a3-trail-01_albedoTexture",
+            "extras": {
+              "rl_texture_policy_directory": "../../../../_continent_v2/shared-assets"
+            }
+          },
+          {
+            "uri": "../../../../../nymara-regions/_continent/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png",
+            "name": "suncoil_suncoil--a3-trail-01_ormTexture",
+            "extras": {
+              "rl_texture_policy_directory": "../../../../_continent_v2/shared-assets"
+            }
+          },
+          {
+            "uri": "../../../../../nymara-regions/_continent/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png",
+            "name": "suncoil_suncoil--a3-trail-01_normalTexture",
+            "extras": {
+              "rl_texture_policy_directory": "../../../../_continent_v2/shared-assets"
+            }
+          }
+        ],
+        "samplers": [
+          {
+            "magFilter": 9729,
+            "minFilter": 9987,
+            "wrapS": 10497,
+            "wrapT": 10497
+          }
+        ]
+      },
+      "externalResources": {
+        "../../../../../nymara-regions/_continent/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+        "../../../../../nymara-regions/_continent/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
+        "../../../../../nymara-regions/_continent/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7"
+      },
+      "original_material_names": [
+        "authored_suncoil_suncoil--a3-trail-01",
+        "authored_suncoil_suncoil--a3-trail-02",
+        "authored_suncoil_suncoil--a3-trail-03",
+        "authored_suncoil_suncoil--a3-trail-04",
+        "authored_suncoil_suncoil--a3-trail-05",
+        "authored_suncoil_suncoil--a3-trail-06",
+        "authored_suncoil_suncoil--a3-trail-07",
+        "authored_suncoil_suncoil--a3-trail-08",
+        "authored_suncoil_suncoil--a3-trail-09",
+        "authored_suncoil_suncoil--a3-trail-10",
+        "authored_suncoil_suncoil--a3-trail-11",
+        "authored_suncoil_suncoil--a3-trail-12",
+        "authored_suncoil_suncoil--a3-trail-13",
+        "authored_suncoil_suncoil--a3-trail-14",
+        "authored_suncoil_suncoil--a3-trail-15",
+        "authored_suncoil_suncoil--pier-root-pad"
+      ],
+      "vertex_rgb": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "footstep_class": "dirt"
+    }
+  ],
+  "field": {
+    "grid": {
+      "origin_xz": [
+        -331.0,
+        285.5
+      ],
+      "width": 235,
+      "height": 138,
+      "pixels_per_metre": 4,
+      "gutter_pixels": 2,
+      "axis_order": "row_increasing_z,column_increasing_x",
+      "sample": "pixel_centres"
+    },
+    "coverage_mips": [
+      {
+        "level": 0,
+        "width": 235,
+        "height": 138,
+        "file": "coverage-mip0.png",
+        "sha256": "46b24ce920241c6de25779e65422af83f1f7bef3e7140af3c88684f6e3249583",
+        "decoded_sha256": "e3aeff29d30e670427911099bf78398078f217046793ce25556f95300ea485ba"
+      },
+      {
+        "level": 1,
+        "width": 117,
+        "height": 69,
+        "file": "coverage-mip1.png",
+        "sha256": "ef7d6879260e7426706a694ad780be5cdbd4d2065ac78d90aae0a9d0ad61c6ac",
+        "decoded_sha256": "fd9a0e6b078a630ce7a627cd18e6fd95253c7ca41e6c86d477aaf363d930c0ea"
+      },
+      {
+        "level": 2,
+        "width": 58,
+        "height": 34,
+        "file": "coverage-mip2.png",
+        "sha256": "8479d206ee6e1a8f9dd455b0f9aba9078e78822b2e5de258d5009faa4190d507",
+        "decoded_sha256": "e6effa1e257eb03cdd6fa8fdf04e247f910b7f0692456cd72a0a9fcc913edc16"
+      },
+      {
+        "level": 3,
+        "width": 29,
+        "height": 17,
+        "file": "coverage-mip3.png",
+        "sha256": "417fd24de4126bc8e05f371f7f0c945a6a6502ff4fc92efb5a5670651e1e5e2f",
+        "decoded_sha256": "f4d410da4d3a99f4950d112cecaef52be9ec58d06c1cbaf23387714ff8c977b3"
+      },
+      {
+        "level": 4,
+        "width": 14,
+        "height": 8,
+        "file": "coverage-mip4.png",
+        "sha256": "ec1fd93ec11fb7d30bc45c73695a93fad1e3da5c250a2f18f63e94773cba9288",
+        "decoded_sha256": "b8fcadf07b9602c5f20ca51efbd227720644b9175b3a20461cb74bca889c9bb9"
+      },
+      {
+        "level": 5,
+        "width": 7,
+        "height": 4,
+        "file": "coverage-mip5.png",
+        "sha256": "3ff5919102eef072a6d89de3c15a6683dd5a459e0b489e1ded12347dcc3e09ab",
+        "decoded_sha256": "6fb3213b64671a772c0f5ad518b95c2e6fceeeb6a55e51b61362c4ddf8b7e779"
+      },
+      {
+        "level": 6,
+        "width": 3,
+        "height": 2,
+        "file": "coverage-mip6.png",
+        "sha256": "5b331f55dae294736c5d78a2c4b65e4ff58e79a6afb6cad2bc41653edfd11f98",
+        "decoded_sha256": "afe2a373d6106fd691ea8759bf9f132aceabb78c5741d26c8383eafee6c8c315"
+      },
+      {
+        "level": 7,
+        "width": 1,
+        "height": 1,
+        "file": "coverage-mip7.png",
+        "sha256": "ed52220bad7d3861be98a1fe758286d3eb5995db4e29d5bee53335a207766d0c",
+        "decoded_sha256": "bbf3f11cb5b43e700273a78d12de55e4a7eab741ed2abf13787a4d2dc832b8ec"
+      }
+    ],
+    "triangle_ids": {
+      "file": "triangle-ids.bin.zst",
+      "compression": "zstd",
+      "uncompressed_bytes": 64860,
+      "sha256": "9e254ff775b3112e1c85cefeb2ed2cf9c455bba4142dee1792be0720ae6002d8",
+      "file_sha256": "4c5ca4f077997409533e81f435eba7c5e1047ed5e2552c075aba7e35707321aa",
+      "codec_roundtrip_byte_identical": true,
+      "format": "RG8",
+      "byte_order": "little",
+      "width": 235,
+      "height": 138,
+      "mipmaps": false,
+      "id_zero": "reserved",
+      "id_base": 1
+    },
+    "affine_coefficients": {
+      "file": "affine-coefficients.rgba32f.zst",
+      "compression": "zstd",
+      "uncompressed_bytes": 163840,
+      "sha256": "692e6c935eea78845651f814c0c7f8b9ef60fbf42088c62aab9efa17a82c891f",
+      "file_sha256": "1a7326f0285df8e5a23bc1513a2cb020a5c00d960029df0c6b329371ffa7c8f9",
+      "codec_roundtrip_byte_identical": true,
+      "format": "RGBA32F",
+      "byte_order": "little",
+      "width": 2048,
+      "height": 5,
+      "records_per_row": 1024,
+      "record_count": 5065,
+      "texels_per_record": 2,
+      "mipmaps": false,
+      "layout": [
+        "u_at_grid_origin",
+        "v_at_grid_origin",
+        "dU_dX",
+        "dU_dZ",
+        "dV_dX",
+        "dV_dZ",
+        "style_id",
+        "reserved"
+      ]
+    },
+    "validation": {
+      "maximum_covered_uv_abs_error": 3.0517578125e-05,
+      "maximum_halo_uv_abs_error": 6.103515625e-05,
+      "source_jacobian_float32_byte_identical": true,
+      "selected_triangle_count": 5065,
+      "maximum_triangle_id": 5065,
+      "coverage_policy": "maximum_raw_interpolated_source_alpha",
+      "uv_policy": "highest_alpha_then_last_stable_authored_triangle",
+      "affine_halo_policy": "nearest_valid_selected_triangle_evaluated_at_fragment_position"
+    }
+  },
+  "overlap": {
+    "covered_pixels": 7142,
+    "multiply_covered_pixels": 228,
+    "different_uv_overlap_pixels": 165,
+    "maximum_source_fragments_per_pixel": 6
+  },
+  "active_style_ids": [
+    0
+  ],
+  "appearance_limit": "Dominant UV and maximum raw alpha collapse independent overlapping road samples at four pixels per metre.",
+  "resources": {
+    "affine-coefficients.rgba32f.zst": "1a7326f0285df8e5a23bc1513a2cb020a5c00d960029df0c6b329371ffa7c8f9",
+    "coverage-mip0.png": "46b24ce920241c6de25779e65422af83f1f7bef3e7140af3c88684f6e3249583",
+    "coverage-mip1.png": "ef7d6879260e7426706a694ad780be5cdbd4d2065ac78d90aae0a9d0ad61c6ac",
+    "coverage-mip2.png": "8479d206ee6e1a8f9dd455b0f9aba9078e78822b2e5de258d5009faa4190d507",
+    "coverage-mip3.png": "417fd24de4126bc8e05f371f7f0c945a6a6502ff4fc92efb5a5670651e1e5e2f",
+    "coverage-mip4.png": "ec1fd93ec11fb7d30bc45c73695a93fad1e3da5c250a2f18f63e94773cba9288",
+    "coverage-mip5.png": "3ff5919102eef072a6d89de3c15a6683dd5a459e0b489e1ded12347dcc3e09ab",
+    "coverage-mip6.png": "5b331f55dae294736c5d78a2c4b65e4ff58e79a6afb6cad2bc41653edfd11f98",
+    "coverage-mip7.png": "ed52220bad7d3861be98a1fe758286d3eb5995db4e29d5bee53335a207766d0c",
+    "triangle-ids.bin.zst": "4c5ca4f077997409533e81f435eba7c5e1047ed5e2552c075aba7e35707321aa",
+    "../../../../../nymara-regions/_continent/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+    "../../../../../nymara-regions/_continent/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
+    "../../../../../nymara-regions/_continent/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7"
+  },
+  "externalImagePolicies": {
+    "../../../../../nymara-regions/_continent/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": [
+      "../../../../_continent_v2/shared-assets"
+    ]
+  }
+}

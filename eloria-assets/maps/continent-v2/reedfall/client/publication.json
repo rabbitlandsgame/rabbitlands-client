@@ -2,23 +2,23 @@
  "region": "reedfall",
  "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
  "snapshot": {
-  "sha256": "6412c73badd1e37b8e6569cc5193113443142b83ccbfa02c29de9edd7684b462",
-  "sceneSha256": "6701743297b399bddce8dbd38451f5d6051bd5b957a034b57e29763da6126740",
+  "sha256": "a622ae9466ebea298d5343770a3c36b238de6c645f24c87e251996eca91c8070",
+  "sceneSha256": "4ee97f6ac8965d867cb515abaa5d91ec085e8aca9e56043bda07c1fde21e0217",
   "recipe": "region_bake_cli.gd --scene godot-client/world_authoring/regions/reedfall/reedfall.tscn --output <bake>/continent-authoring.json"
  },
  "collision": {
-  "sidecarSha256": "6a84a3d0ea822527faffaa2ec645bd57524b4bc3bfe820f7588e0cb4d813368c",
-  "collisionSha256": "0f918255511e6ce9196bb188971867ce7cb9e1efe3f06896cdc8665d1c0f69e1",
-  "servedGridSha256": "f1c842ffbb3c01fbdaef8581e31796cd8ddb4f0e8917ece59ebb99d864e1923f",
-  "walkableCells": 480934,
-  "openTiles": 118233,
-  "sourceSnapshotSha256": "6412c73badd1e37b8e6569cc5193113443142b83ccbfa02c29de9edd7684b462"
+  "sidecarSha256": "bad7e1d37848de9b01a2fde74388926f5805a5de3e4306980a949cafcfaa26a2",
+  "collisionSha256": "ac403ec19f3d3e8c77caa5ef6f72baf6a6f6201e5be52c862bde76583d530d32",
+  "servedGridSha256": "91eee62c40a6b8d5fff33375c31f06a9207e695f348feb9dc3d1148d38712d7f",
+  "walkableCells": 480948,
+  "openTiles": 118235,
+  "sourceSnapshotSha256": "a622ae9466ebea298d5343770a3c36b238de6c645f24c87e251996eca91c8070"
  },
  "chunks": 38,
  "kitPlacementsOutsideWindow": 0,
  "lightingMarkers": 0,
  "chunkGlbBytes": {
-  "total": 13947304,
+  "total": 13977656,
   "max": 939000,
   "over100MiB": []
  },
@@ -38,22 +38,22 @@
   "08_09": 11.0,
   "08_10": 104.0,
   "08_11": 35.8,
-  "08_12": 55.9,
-  "09_07": 101.5,
+  "08_12": 76.2,
+  "09_07": 101.6,
   "09_08": 198.7,
   "09_09": 101.7,
   "09_10": 157.5,
   "09_11": 101.2,
-  "09_12": 23.6,
-  "10_07": 88.3,
+  "09_12": 39.8,
+  "10_07": 88.4,
   "10_08": 208.7,
   "10_09": 174.0,
-  "10_10": 75.8,
+  "10_10": 59.7,
   "10_11": 19.3,
-  "11_07": 39.2,
-  "11_08": 196.0,
-  "11_09": 152.9,
-  "11_10": 92.5,
+  "11_07": 51.3,
+  "11_08": 200.1,
+  "11_09": 150.2,
+  "11_10": 89.8,
   "11_11": 48.5,
   "12_07": 23.0,
   "12_08": 63.6,
@@ -63,30 +63,29 @@
   "13_08": 91.7
  },
  "timings": {
-  "snapshot_s": 0.5,
-  "terrain_s": 0.1,
+  "snapshot_s": 0.7,
+  "terrain_s": 0.0,
   "water_s": 0.0,
   "overlays_s": 0.5,
   "bridges_s": 0.0,
-  "surface_glb_bytes": 91662820,
+  "surface_glb_bytes": 93003376,
   "walk_kit_nodes": 10,
   "library_s": 0.2,
-  "harvest_nodes": 231,
-  "chunks_s": 1.1,
-  "space_passes_s": 18.0
+  "harvest_nodes": 230,
+  "chunks_s": 1.0,
+  "space_passes_s": 19.8
  },
- "seconds": 27.9,
+ "seconds": 30.0,
  "imagePolicy": {
   "surface": {
-   "imagesResampled": 7,
+   "imagesResampled": 6,
    "resampledImages": [
     "64f31e3beff4ed70a468c6b81a1fd624ab1c593e3a2a8641b54ab9702faea5f5",
     "64f31e3beff4ed70a468c6b81a1fd624ab1c593e3a2a8641b54ab9702faea5f5",
     "64f31e3beff4ed70a468c6b81a1fd624ab1c593e3a2a8641b54ab9702faea5f5",
     "64f31e3beff4ed70a468c6b81a1fd624ab1c593e3a2a8641b54ab9702faea5f5",
     "64f31e3beff4ed70a468c6b81a1fd624ab1c593e3a2a8641b54ab9702faea5f5",
-    "64f31e3beff4ed70a468c6b81a1fd624ab1c593e3a2a8641b54ab9702faea5f5",
-    "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7"
+    "64f31e3beff4ed70a468c6b81a1fd624ab1c593e3a2a8641b54ab9702faea5f5"
    ]
   },
   "library": {
@@ -110,7 +109,7 @@
    -945
   ],
   "maximumPlacements": 56,
-  "maximumTriangles": 134520,
+  "maximumTriangles": 136269,
   "placementLimit": 240,
   "triangleLimit": 450000,
   "cellMetres": 96

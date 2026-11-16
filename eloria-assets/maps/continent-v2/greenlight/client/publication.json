@@ -2,23 +2,23 @@
  "region": "greenlight",
  "tool": "eloria-assets/maps/continent-v2/_continent_v2/publish_client.py",
  "snapshot": {
-  "sha256": "949f1bb6e369f4fc5beecdeb1fda22562d66d24825971fbd86130036a0212501",
-  "sceneSha256": "78aaeca054fbd406ae9fbdcb624e8910a47740eaba3aa2f22151c3c68f7a561c",
+  "sha256": "4dd3cb234a62f5a623cc21e8c493cbef0205b66216584a8815bfad27599a35d0",
+  "sceneSha256": "03a6c3330bef7f0434b8f71af19d9b7ede86026a2cf2c60da7246e05d52cca56",
   "recipe": "region_bake_cli.gd --scene godot-client/world_authoring/regions/greenlight/greenlight.tscn --output <bake>/continent-authoring.json"
  },
  "collision": {
-  "sidecarSha256": "879bd3f128e1359b43c6c57af90d7ebe4263557badc92368637e45a44a387bec",
-  "collisionSha256": "c00a8e60760b845d3a1afcca37042f451f89f311aed93ba168513ccb82f99b33",
-  "servedGridSha256": "5be60fba793428dbf206784c985e2213bd578e35bbc488d4bdec2bac3dcf12b4",
+  "sidecarSha256": "b436865f16b42d631532550784981d7664392af4e1a4231906772a735eeeb6e7",
+  "collisionSha256": "6ea85f085dea530c81592b3cbdebc4c33fc27a33b3c4946cf21548befcd793ff",
+  "servedGridSha256": "455f81479b527c530c8112312bf0b41b1990d92e0791bd8ae6ede70f7e95379d",
   "walkableCells": 425645,
   "openTiles": 104708,
-  "sourceSnapshotSha256": "949f1bb6e369f4fc5beecdeb1fda22562d66d24825971fbd86130036a0212501"
+  "sourceSnapshotSha256": "4dd3cb234a62f5a623cc21e8c493cbef0205b66216584a8815bfad27599a35d0"
  },
  "chunks": 67,
  "kitPlacementsOutsideWindow": 0,
  "lightingMarkers": 0,
  "chunkGlbBytes": {
-  "total": 18508760,
+  "total": 18505800,
   "max": 1236684,
   "over100MiB": []
  },
@@ -36,8 +36,8 @@
   "07_05": 10.8,
   "07_06": 11.0,
   "07_07": 43.3,
-  "07_08": 103.8,
-  "07_09": 88.1,
+  "07_08": 87.7,
+  "07_09": 84.0,
   "07_10": 11.1,
   "07_11": 11.1,
   "07_12": 11.1,
@@ -47,7 +47,7 @@
   "08_06": 11.1,
   "08_07": 11.2,
   "08_08": 11.1,
-  "08_09": 87.7,
+  "08_09": 75.5,
   "08_10": 15.2,
   "08_11": 11.1,
   "08_12": 11.0,
@@ -72,8 +72,8 @@
   "11_08": 10.9,
   "11_09": 11.0,
   "11_10": 11.2,
-  "11_11": 100.8,
-  "11_12": 125.9,
+  "11_11": 100.9,
+  "11_12": 126.0,
   "11_13": 116.4,
   "11_14": 11.0,
   "12_08": 10.9,
@@ -81,7 +81,7 @@
   "12_10": 11.1,
   "12_11": 89.3,
   "12_12": 63.8,
-  "12_13": 134.0,
+  "12_13": 134.1,
   "12_14": 147.4,
   "13_08": 10.9,
   "13_09": 10.9,
@@ -92,19 +92,19 @@
   "13_14": 19.1
  },
  "timings": {
-  "snapshot_s": 0.6,
+  "snapshot_s": 0.7,
   "terrain_s": 0.1,
   "water_s": 0.0,
-  "overlays_s": 0.6,
+  "overlays_s": 0.7,
   "bridges_s": 0.0,
-  "surface_glb_bytes": 114009232,
+  "surface_glb_bytes": 115477180,
   "walk_kit_nodes": 29,
-  "library_s": 0.3,
+  "library_s": 0.1,
   "harvest_nodes": 194,
-  "chunks_s": 1.5,
-  "space_passes_s": 14.4
+  "chunks_s": 1.3,
+  "space_passes_s": 16.0
  },
- "seconds": 23.8,
+ "seconds": 25.3,
  "imagePolicy": {
   "surface": {
    "imagesResampled": 0,
@@ -127,7 +127,7 @@
    -968
   ],
   "maximumPlacements": 112,
-  "maximumTriangles": 154687,
+  "maximumTriangles": 155652,
   "placementLimit": 240,
   "triangleLimit": 450000,
   "cellMetres": 96

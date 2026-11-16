@@ -1,0 +1,448 @@
+{
+  "schema": "rabbitlands-road-terrain-blend-v1",
+  "region": "saltsound",
+  "chunk": "08_13",
+  "pixels_per_metre": 4,
+  "source_glb_sha256": "a5a47cccc22530327c93e511d8f32f469df9d5dd4f8a8dd9cf35bed500277738",
+  "source_manifest_sha256": "ea28e06ddccfc0b0022e01b948aadebcb52047d31256a83b984287b273bd5ee2",
+  "authoring_scene_sha256": "b0d500dd6c5dac4bf8bd833483a4670819b5a2ce5e0a717a9ea5c815fe040df4",
+  "mask_space": "gltf_scene_world_xz",
+  "source_frame_node": "AuthoredGround_saltsoundBase_saltsound_08_13",
+  "source_frame_matrix": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    -2059.0,
+    0.0,
+    -6521.0,
+    1.0
+  ],
+  "targets": [
+    {
+      "name": "AuthoredGround_saltsoundBase_saltsound_08_13",
+      "world_matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        -2059.0,
+        0.0,
+        -6521.0,
+        1.0
+      ]
+    }
+  ],
+  "removed_road_node_names": [
+    "Walk_saltsound_saltsound--a3-trail-10_saltsound_08_13",
+    "Walk_saltsound_saltsound--a3-trail-11_saltsound_08_13"
+  ],
+  "source_road_ids": [
+    "saltsound--a3-trail-10",
+    "saltsound--a3-trail-11"
+  ],
+  "retained_walk_nodes": [],
+  "collision_policy": "retained_terrain_only_for_removed_road_ribbons;structural_walks_unchanged",
+  "styles": [
+    {
+      "id": 0,
+      "identity_sha256": "4d1cde4765a88bf0e35bd0c312163ec98e9d806e6b174a59e89177300fda09cc",
+      "material_document": {
+        "asset": {
+          "version": "2.0"
+        },
+        "materials": [
+          {
+            "name": "authored_saltsound_saltsound--r26-1--1",
+            "pbrMetallicRoughness": {
+              "baseColorFactor": [
+                0.3185468059531732,
+                0.1959941698684143,
+                0.07828832086604431,
+                1.0
+              ],
+              "metallicFactor": 0.0,
+              "roughnessFactor": 1.0,
+              "baseColorTexture": {
+                "index": 0
+              },
+              "metallicRoughnessTexture": {
+                "index": 1
+              }
+            },
+            "occlusionTexture": {
+              "index": 1
+            },
+            "normalTexture": {
+              "index": 2,
+              "scale": 0.72
+            },
+            "alphaMode": "BLEND",
+            "doubleSided": true
+          }
+        ],
+        "textures": [
+          {
+            "sampler": 0,
+            "source": 0
+          },
+          {
+            "sampler": 0,
+            "source": 1
+          },
+          {
+            "sampler": 0,
+            "source": 2
+          }
+        ],
+        "images": [
+          {
+            "uri": "../../../../../nymara-regions/_continent/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png",
+            "name": "saltsound_saltsound--r26-1--1_albedoTexture",
+            "extras": {
+              "rl_texture_policy_directory": "../../../../_continent_v2/shared-assets"
+            }
+          },
+          {
+            "uri": "../../../../../nymara-regions/_continent/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png",
+            "name": "saltsound_forest-19_ormTexture",
+            "extras": {
+              "rl_texture_policy_directory": "../../../../_continent_v2/shared-assets"
+            }
+          },
+          {
+            "uri": "../../../../../nymara-regions/_continent/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png",
+            "name": "saltsound_forest-19_normalTexture",
+            "extras": {
+              "rl_texture_policy_directory": "../../../../_continent_v2/shared-assets"
+            }
+          }
+        ],
+        "samplers": [
+          {
+            "magFilter": 9729,
+            "minFilter": 9987,
+            "wrapS": 10497,
+            "wrapT": 10497
+          }
+        ]
+      },
+      "externalResources": {
+        "../../../../../nymara-regions/_continent/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+        "../../../../../nymara-regions/_continent/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
+        "../../../../../nymara-regions/_continent/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7"
+      },
+      "original_material_names": [
+        "authored_saltsound_saltsound--r26-1--1"
+      ],
+      "vertex_rgb": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "footstep_class": "dirt"
+    },
+    {
+      "id": 1,
+      "identity_sha256": "fa45eb2ccbe86cb9789bff3aa068742fe1b8db553dc494603c3490edae0e1d98",
+      "material_document": {
+        "asset": {
+          "version": "2.0"
+        },
+        "materials": [
+          {
+            "name": "authored_saltsound_saltsound--r26-switchback",
+            "pbrMetallicRoughness": {
+              "baseColorFactor": [
+                0.3931231648339321,
+                0.23302198075030706,
+                0.1328683257311731,
+                1.0
+              ],
+              "metallicFactor": 0.0,
+              "roughnessFactor": 1.0,
+              "baseColorTexture": {
+                "index": 0
+              },
+              "metallicRoughnessTexture": {
+                "index": 1
+              }
+            },
+            "occlusionTexture": {
+              "index": 1
+            },
+            "normalTexture": {
+              "index": 2,
+              "scale": 0.72
+            },
+            "alphaMode": "BLEND",
+            "doubleSided": true
+          }
+        ],
+        "textures": [
+          {
+            "sampler": 0,
+            "source": 0
+          },
+          {
+            "sampler": 0,
+            "source": 1
+          },
+          {
+            "sampler": 0,
+            "source": 2
+          }
+        ],
+        "images": [
+          {
+            "uri": "../../../../../nymara-regions/_continent/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png",
+            "name": "saltsound_saltsound--r26-1--1_albedoTexture",
+            "extras": {
+              "rl_texture_policy_directory": "../../../../_continent_v2/shared-assets"
+            }
+          },
+          {
+            "uri": "../../../../../nymara-regions/_continent/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png",
+            "name": "saltsound_forest-19_ormTexture",
+            "extras": {
+              "rl_texture_policy_directory": "../../../../_continent_v2/shared-assets"
+            }
+          },
+          {
+            "uri": "../../../../../nymara-regions/_continent/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png",
+            "name": "saltsound_forest-19_normalTexture",
+            "extras": {
+              "rl_texture_policy_directory": "../../../../_continent_v2/shared-assets"
+            }
+          }
+        ],
+        "samplers": [
+          {
+            "magFilter": 9729,
+            "minFilter": 9987,
+            "wrapS": 10497,
+            "wrapT": 10497
+          }
+        ]
+      },
+      "externalResources": {
+        "../../../../../nymara-regions/_continent/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+        "../../../../../nymara-regions/_continent/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
+        "../../../../../nymara-regions/_continent/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7"
+      },
+      "original_material_names": [
+        "authored_saltsound_saltsound--a3-trail-01",
+        "authored_saltsound_saltsound--a3-trail-02",
+        "authored_saltsound_saltsound--a3-trail-03",
+        "authored_saltsound_saltsound--a3-trail-04",
+        "authored_saltsound_saltsound--a3-trail-05",
+        "authored_saltsound_saltsound--a3-trail-06",
+        "authored_saltsound_saltsound--a3-trail-07",
+        "authored_saltsound_saltsound--a3-trail-08",
+        "authored_saltsound_saltsound--a3-trail-09",
+        "authored_saltsound_saltsound--a3-trail-10",
+        "authored_saltsound_saltsound--a3-trail-11",
+        "authored_saltsound_saltsound--a3-trail-12",
+        "authored_saltsound_saltsound--r26-switchback"
+      ],
+      "vertex_rgb": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "footstep_class": "dirt"
+    }
+  ],
+  "field": {
+    "grid": {
+      "origin_xz": [
+        -175.0,
+        131.5
+      ],
+      "width": 326,
+      "height": 174,
+      "pixels_per_metre": 4,
+      "gutter_pixels": 2,
+      "axis_order": "row_increasing_z,column_increasing_x",
+      "sample": "pixel_centres"
+    },
+    "coverage_mips": [
+      {
+        "level": 0,
+        "width": 326,
+        "height": 174,
+        "file": "coverage-mip0.png",
+        "sha256": "fd721f769ae29317a245cd0044d36fe27457de42663fcec03bba6c1a3816b791",
+        "decoded_sha256": "5cf1646b968662f3f28e7cd60237405b2f96ffa7bcb90deed514e2ff57a4e686"
+      },
+      {
+        "level": 1,
+        "width": 163,
+        "height": 87,
+        "file": "coverage-mip1.png",
+        "sha256": "4229cc9a9cfc96414b1f04333f9ae46f1034410169e8a400fde87e620c81021b",
+        "decoded_sha256": "130767d3ac4469ad76607f320e43debf98e686c31f59826227d78b463ebc8e1e"
+      },
+      {
+        "level": 2,
+        "width": 81,
+        "height": 43,
+        "file": "coverage-mip2.png",
+        "sha256": "74c3d748c2a1a8643f308595cfcea43ba5dc1e53ce0fd7e2ce5953db0f075023",
+        "decoded_sha256": "785d75c4ccb446eee1c8820c8fa595231093563eecd829c8f0d30347defc238d"
+      },
+      {
+        "level": 3,
+        "width": 40,
+        "height": 21,
+        "file": "coverage-mip3.png",
+        "sha256": "25b44835de57d6373fab70ae58cc259bcd5cb0e94df16e904f2806d4c136650a",
+        "decoded_sha256": "6a38e603e3d98ff84338c57ee211b5c2abfb45d090cca14d3472f691939744ec"
+      },
+      {
+        "level": 4,
+        "width": 20,
+        "height": 10,
+        "file": "coverage-mip4.png",
+        "sha256": "a61b211be62488a059f729b568cbeb70fbf3bf11cf2e20e6cfee2f141941e6b0",
+        "decoded_sha256": "6836785987bf0559b31979d463ab74d5deecc286a53762c5964788438ae64b07"
+      },
+      {
+        "level": 5,
+        "width": 10,
+        "height": 5,
+        "file": "coverage-mip5.png",
+        "sha256": "32818dbaf166c345e3bd260b7007df3ffe635751a2c6865e377b8015046dbe8c",
+        "decoded_sha256": "af4da507cff8d46880ee679afcbe9d12d11fa0dafbf6fdfe3eb8d6a656412336"
+      },
+      {
+        "level": 6,
+        "width": 5,
+        "height": 2,
+        "file": "coverage-mip6.png",
+        "sha256": "e08b56de1857a00e6da380497c9c24632b097024d60a68a39510d9d3402e08d3",
+        "decoded_sha256": "d513fdf828f8abf682e494c3e9368fbc034ef4d49686937e1cd9ba9364430134"
+      },
+      {
+        "level": 7,
+        "width": 2,
+        "height": 1,
+        "file": "coverage-mip7.png",
+        "sha256": "3a5efc740cea7bbf55e695b19997ac993cdd6b378d5cb5c8cd9ea69c602883ec",
+        "decoded_sha256": "c4276dd4d388edf6e346b32dc881c65c5fb0d3f67948a1d51cef76fe2d2f68f5"
+      },
+      {
+        "level": 8,
+        "width": 1,
+        "height": 1,
+        "file": "coverage-mip8.png",
+        "sha256": "4404cc7bd35227fac216fb889b7813a5ad34d0ddd551f800b7b232335abcc0f9",
+        "decoded_sha256": "ab897fbdedfa502b2d839b6a56100887dccdc507555c282e59589e06300a62e2"
+      }
+    ],
+    "triangle_ids": {
+      "file": "triangle-ids.bin.zst",
+      "compression": "zstd",
+      "uncompressed_bytes": 113448,
+      "sha256": "dec09a564538609502aae420351e9cb7e69d1dafed86cdbbfca053aa309e7517",
+      "file_sha256": "b475b795b9e832a03ad6f80f4e298a5feecb57632d04852a94ec103d829e7921",
+      "codec_roundtrip_byte_identical": true,
+      "format": "RG8",
+      "byte_order": "little",
+      "width": 326,
+      "height": 174,
+      "mipmaps": false,
+      "id_zero": "reserved",
+      "id_base": 1
+    },
+    "affine_coefficients": {
+      "file": "affine-coefficients.rgba32f.zst",
+      "compression": "zstd",
+      "uncompressed_bytes": 163840,
+      "sha256": "e68ec921ddd39bc9e262b588a935b86162409e66f3755bb947c88431328aefde",
+      "file_sha256": "e369edece8818fbb7617e11177e73943900f9076518b20edf858f54b2850e718",
+      "codec_roundtrip_byte_identical": true,
+      "format": "RGBA32F",
+      "byte_order": "little",
+      "width": 2048,
+      "height": 5,
+      "records_per_row": 1024,
+      "record_count": 4473,
+      "texels_per_record": 2,
+      "mipmaps": false,
+      "layout": [
+        "u_at_grid_origin",
+        "v_at_grid_origin",
+        "dU_dX",
+        "dU_dZ",
+        "dV_dX",
+        "dV_dZ",
+        "style_id",
+        "reserved"
+      ]
+    },
+    "validation": {
+      "maximum_covered_uv_abs_error": 3.0517578125e-05,
+      "maximum_halo_uv_abs_error": 3.0517578125e-05,
+      "source_jacobian_float32_byte_identical": true,
+      "selected_triangle_count": 4473,
+      "maximum_triangle_id": 4473,
+      "coverage_policy": "maximum_raw_interpolated_source_alpha",
+      "uv_policy": "highest_alpha_then_last_stable_authored_triangle",
+      "affine_halo_policy": "nearest_valid_selected_triangle_evaluated_at_fragment_position"
+    }
+  },
+  "overlap": {
+    "covered_pixels": 6611,
+    "multiply_covered_pixels": 97,
+    "different_uv_overlap_pixels": 9,
+    "maximum_source_fragments_per_pixel": 6
+  },
+  "active_style_ids": [
+    1
+  ],
+  "appearance_limit": "Dominant UV and maximum raw alpha collapse independent overlapping road samples at four pixels per metre.",
+  "resources": {
+    "affine-coefficients.rgba32f.zst": "e369edece8818fbb7617e11177e73943900f9076518b20edf858f54b2850e718",
+    "coverage-mip0.png": "fd721f769ae29317a245cd0044d36fe27457de42663fcec03bba6c1a3816b791",
+    "coverage-mip1.png": "4229cc9a9cfc96414b1f04333f9ae46f1034410169e8a400fde87e620c81021b",
+    "coverage-mip2.png": "74c3d748c2a1a8643f308595cfcea43ba5dc1e53ce0fd7e2ce5953db0f075023",
+    "coverage-mip3.png": "25b44835de57d6373fab70ae58cc259bcd5cb0e94df16e904f2806d4c136650a",
+    "coverage-mip4.png": "a61b211be62488a059f729b568cbeb70fbf3bf11cf2e20e6cfee2f141941e6b0",
+    "coverage-mip5.png": "32818dbaf166c345e3bd260b7007df3ffe635751a2c6865e377b8015046dbe8c",
+    "coverage-mip6.png": "e08b56de1857a00e6da380497c9c24632b097024d60a68a39510d9d3402e08d3",
+    "coverage-mip7.png": "3a5efc740cea7bbf55e695b19997ac993cdd6b378d5cb5c8cd9ea69c602883ec",
+    "coverage-mip8.png": "4404cc7bd35227fac216fb889b7813a5ad34d0ddd551f800b7b232335abcc0f9",
+    "triangle-ids.bin.zst": "b475b795b9e832a03ad6f80f4e298a5feecb57632d04852a94ec103d829e7921",
+    "../../../../../nymara-regions/_continent/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805",
+    "../../../../../nymara-regions/_continent/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": "ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5",
+    "../../../../../nymara-regions/_continent/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": "6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7"
+  },
+  "externalImagePolicies": {
+    "../../../../../nymara-regions/_continent/shared-assets/6ebd390dd8d1694b88f8fc0654471317b6c31c4839fca038c879db059fcd4cb7.png": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805.png": [
+      "../../../../_continent_v2/shared-assets"
+    ],
+    "../../../../../nymara-regions/_continent/shared-assets/ea239b8c8f86d900f3a82d2b5665d73b8e1b955657626987be7ef40320ffbab5.png": [
+      "../../../../_continent_v2/shared-assets"
+    ]
+  }
+}
