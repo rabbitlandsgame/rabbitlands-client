@@ -243,6 +243,22 @@ def geometry_resident_bytes(glb_bytes):
     return max(1, math.ceil(GEOMETRY_RESIDENT_FACTOR * int(glb_bytes)))
 
 
+def continent_inherited_prototypes(checkout=DEFAULT_CHECKOUT):
+    """Every pooled prototype a committed continent-v2 package places (git HEAD), for publish_finish's policy check.
+
+    The check refuses to pool a fresh mesh onto a prototype whose texture policy directory differs, and a fresh
+    continent export carries no policy extras, so its implied directory is its own pool: every prototype pooled from
+    the Nymara territories differs. A package may reuse the prototypes it already ships (2026-11-09). A territory
+    newly placing a kit another territory already ships (border flora carried across a seam, 2026-11-16) gets the
+    same prototype with the same images and policy the continent delivers today, so the whole continent's committed
+    set counts as inherited. A prototype no territory ships, or an explicit incoming policy, is still checked.
+    """
+    found = set()
+    for package in sorted((Path(checkout) / "eloria-assets/maps/continent-v2").glob("*/client")):
+        found |= PF.published_prototypes(package)
+    return frozenset(found)
+
+
 def chunk_key(local_x, local_z):
     cx = np.floor((np.asarray(local_x) - CHUNK_ORIGIN[0]) / CHUNK).astype(int)
     cz = np.floor((np.asarray(local_z) - CHUNK_ORIGIN[1]) / CHUNK).astype(int)
@@ -1034,7 +1050,8 @@ def main():
     # goes with them: on a territory's first publish there is no
     # publication.json yet to read it from, and the prototypes count at it too.
     t = time.time()
-    PF.finish([out], factor=GEOMETRY_RESIDENT_FACTOR)
+    PF.finish([out], factor=GEOMETRY_RESIDENT_FACTOR,
+              inherited_prototypes=PF.published_prototypes(out) | continent_inherited_prototypes())
     timings["space_passes_s"] = round(time.time() - t, 1)
     manifest = json.loads((out / "world.json").read_text(encoding="utf-8"))
     glbs = sorted((out / "chunks").glob("*/world.glb"))
