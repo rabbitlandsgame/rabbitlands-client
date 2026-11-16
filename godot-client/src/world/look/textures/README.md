@@ -93,3 +93,43 @@ gravel" (every patch the look classes as rock), "Forest floor moss" and "Soil".
   patch cut (`LookProfile.PATCH_RIM`), so most of each patch is cut away and
   what is left is the brightest moss in noisy blocks. That needs a look or
   content change, not a texture.
+
+## Cliff rock face (2026-11-15, map quality pass)
+
+`cliff-rock-face.png` is not a class-texture slot. It is the steep-face rock
+layer (`LookProfile.ROCK_FACE_TEXTURE` `cliff_rock`, repeat 8 m): on opaque
+terrain and base ground steeper than about 50 degrees the look maps it from
+the side, along x and z, instead of the planar ground texture, which streaked
+down every cliff (Landfall's bailey cliff and gully, Coilmere's Spindle Hill,
+Boarsend's and Ravenhead's sea cliffs; map quality sweeps 1 and 3).
+No existing texture fitted: the style pack's `stone-basecolor.png` is coursed
+masonry in stripes, `cavern-basecolor.png` a soft blur, and the coastal gravel
+and alpine scree are ground seen from above.
+
+| File | Repeat | Source SHA-256 (generated) | File SHA-256 |
+|---|---:|---|---|
+| `cliff-rock-face.png` | 8 m | `50d78cee834f9a5b86a442409e05986330a69917d8412781a998803fa858fc75` | `b62973aa14f4d7388218f53af29ebd74bb1fbf847577a31249b3894fdf150907` |
+
+- Generator: the built-in image generation tool through Codex (the
+  gpt-image-bridge skill), 1254x1254 RGB, with the
+  `coastal-limestone-gravel` (Image 1) and `forest-floor-moss` (Image 2) pack
+  tiles attached as style references only. Two candidates were made; the
+  second drew its blocks on a rising diagonal, which would stripe across a
+  cliff, and was dropped.
+- Prompt, in the pack manifests' structure: a square seamless albedo-only tile
+  of a weathered sea-cliff rock face of pale limestone and granite seen straight
+  on as a vertical wall: chunky angular blocks and slabs between irregular
+  cracks and joints, a gentle horizontal bedding of uneven broken ledges (not
+  regular courses), a few vertical fissures, small lichen and moss flecks;
+  painterly hand-painted Oldcraft brushwork as in the references; flat
+  orthographic front elevation, blocks 30 cm to 1.5 m at an 8 m repeat, no
+  centre feature, no sky or ground line; pale warm limestone grey, chalky
+  cream, buff and cool granite grey, mid value; uniform neutral diffuse albedo,
+  no cast shadows or light direction; avoid bricks, masonry courses, mortar
+  grid, vertical streaks, drips, water, frame, vignette, gradients.
+- Processing: `make_seamless.py raw.png cliff-rock-face.png --size 1024
+  --band 0.45` (wide band for the large blocks). Wrap difference x 0.040,
+  y 0.039 against 0.024 between neighbours; checked tiled 3x3. Mean sRGB
+  (163.3, 151.6, 127.7). The look rescales it to the ground's own mean colour
+  and keeps `ROCK_FACE_HUE` (0.5) of its own hue, so a map's palette decides
+  the cliff's colour.

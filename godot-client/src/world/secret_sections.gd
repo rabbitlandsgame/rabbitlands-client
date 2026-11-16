@@ -29,7 +29,10 @@ var fog_hides: Callable = Callable()
 var _sections: Array[Dictionary] = []
 var _members: Dictionary = {}          # section id -> Array[Node3D]
 var _loose: Array[Node3D] = []         # nodes no section claims: left visible
-var _culled: Dictionary = {}           # actors and objects hidden by position (a set)
+## Instance id -> WeakRef for dynamic nodes hidden by position. Quest handoffs
+## can free these nodes without replacing the section controller. Freed Object
+## keys can make dictionary iteration repeat, so only stable IDs are keys.
+var _culled: Dictionary = {}
 var _current: String = ""
 const MARGIN := 3.0
 ## The sections' bounds grown by MARGIN, in list order, four numbers each
@@ -69,13 +72,10 @@ func reset() -> void:
 		for value: Variant in _members[id] as Array:
 			if is_instance_valid(value):
 				(value as Node3D).visible = true
-	for value: Variant in _culled:
-		if is_instance_valid(value):
-			(value as Node3D).visible = true
+	restore_dynamic()
 	_sections.clear()
 	_members.clear()
 	_loose.clear()
-	_culled.clear()
 	_ids.clear()
 	_bounds.clear()
 	_earlier_overlaps.clear()
@@ -173,16 +173,19 @@ func cull_dynamic(nodes: Array, keep: Node3D = null) -> void:
 		if shown and fogged and bool(fog_hides.call(node)):
 			shown = false
 		node.visible = shown
-		if not shown and not _culled.has(node):
-			_culled[node] = true
+		if not shown:
+			var identity := node.get_instance_id()
+			if not _culled.has(identity):
+				_culled[identity] = weakref(node)
 
 
 ## Shows again every dynamic node a cull hid. For a map without sections,
 ## once its fog is lifted: nothing else hides those nodes there.
 func restore_dynamic() -> void:
-	for value: Variant in _culled:
-		if is_instance_valid(value):
-			(value as Node3D).visible = true
+	for reference: WeakRef in _culled.values():
+		var node := reference.get_ref() as Node3D
+		if is_instance_valid(node):
+			node.visible = true
 	_culled.clear()
 
 

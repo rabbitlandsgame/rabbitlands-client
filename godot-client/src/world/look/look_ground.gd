@@ -118,6 +118,15 @@ vec3 look_biome_reference(vec4 weights, vec4 secondary) {
 const PAINTED_META := &"look_painted_ground"
 ## Marks the copy of a kit paving deck's mesh that carries a coverage.
 const KIT_MESH_META := &"look_kit_paving_mesh"
+## Marks a painted material that carries the steep-face rock layer, with the
+## region it was painted for (`set_rock_face`); a road composite of one keeps
+## it (RoadGround.rebind).
+const ROCK_META := &"look_rock_face_region"
+## The global shader uniform (project.godot [shader_globals], a float, 1 by
+## default) every painted ground material multiplies into its look_rock_metres
+## as it draws (painted_ground_paint.gdshaderinc look_rock_repeat): the
+## graphics quality's switch for the steep-face rock layer (`apply_quality`).
+const ROCK_FACE_GLOBAL := &"rl_rock_face"
 ## Marks a painted material's Mobile depth pre-pass (`mobile_prepass`).
 const PREPASS_META := &"look_mobile_prepass"
 ## WorldLoader.BATCH_META: the node is hidden and a MultiMesh draws it.
@@ -136,6 +145,9 @@ static var _biome_uniforms := PackedStringArray()
 ## worker threads too.
 static var _prepass_mutex := Mutex.new()
 static var _prepass_shaders: Dictionary = {}
+## The switch `apply_quality` last gave ROCK_FACE_GLOBAL (the project's
+## default, 1, before it first runs).
+static var _rock_face_switch := 1.0
 
 ## Paints a continent map's root as the loader finishes it. Maps outside the
 ## continent wait for `paint_bound`. Returns the surfaces painted.
@@ -855,6 +867,9 @@ static func painted_source_for(source: Material, kind: Kind, has_colour: bool,
 			painted.set_shader_parameter(&"look_class_metres",
 				float((LookProfile.CLASS_TEXTURES[texture_name] as Dictionary)["metres"]))
 			painted.set_shader_parameter(&"look_class_hue", LookProfile.CLASS_TEXTURE_HUE)
+	# The steep-face rock layer, on opaque terrain and base ground only.
+	if takes_rock_face(kind, blended):
+		set_rock_face(painted, region)
 	var opacity := 1.0
 	if meadow:
 		opacity = LookProfile.MEADOW_OPACITY
@@ -968,6 +983,69 @@ static func class_slot(material: BaseMaterial3D, kind: Kind, meadow: bool, kept:
 	if soil_tint(material.albedo_color) and not is_cobble(material):
 		return "soil"
 	return ""
+
+## Whether a painted surface of `kind` takes the steep-face rock layer
+## (LookProfile.ROCK_FACE_TEXTURE): the opaque terrain and an opaque authored
+## patch (the base ground the biome blend did not take over). Blended patches
+## and walk decks lie over them and keep their own textures.
+static func takes_rock_face(kind: Kind, blended: bool) -> bool:
+	return not blended and (kind == Kind.TERRAIN or kind == Kind.PATCH)
+
+## The rock face's repeat in metres a material painted for `region` carries
+## (look_rock_metres), or 0 where it never draws it: in a region whose
+## `ground.rock_face` is 0, or when its texture does not load. The graphics
+## quality is not in it: the shader multiplies it by ROCK_FACE_GLOBAL as it
+## draws (`apply_quality`), so a material painted at one quality follows the
+## next without being visited.
+static func rock_face_metres(region: String) -> float:
+	if float(LookProfile.region_value(region, "ground", "rock_face", 1.0)) <= 0.0:
+		return 0.0
+	var entry: Variant = LookProfile.CLASS_TEXTURES.get(LookProfile.ROCK_FACE_TEXTURE)
+	return float((entry as Dictionary)["metres"]) if entry is Dictionary else 0.0
+
+## The graphics quality's switch for the rock layer: 1 at a quality whose
+## `rock_face` is true (MEDIUM, HIGH), 0 where it is false (LOW, or
+## ELORIA_LOOK_QUALITY_TRIM rock_face=0 for a measurement).
+static func rock_face_switch() -> float:
+	return 1.0 if bool(LookProfile.quality_value("rock_face")) else 0.0
+
+## The quality was read or changed (main's _apply_graphics_quality, the
+## trailer camera): gives ROCK_FACE_GLOBAL the quality's switch
+## (`rock_face_switch`). Every painted ground material, road composites
+## included, reads that one value as it draws, so roots already loaded, still
+## being painted on a loader worker or waiting to be installed, parked behind
+## an interior and prewarmed all follow at once, and nothing walks them. Main
+## thread. Returns the switch.
+static func apply_quality() -> float:
+	_rock_face_switch = rock_face_switch()
+	RenderingServer.global_shader_parameter_set(ROCK_FACE_GLOBAL, _rock_face_switch)
+	return _rock_face_switch
+
+## The rock face's repeat `painted` draws with now: its look_rock_metres times
+## the switch `apply_quality` last gave ROCK_FACE_GLOBAL, as the shader's
+## look_rock_repeat takes it. 0 where it draws no rock.
+static func rock_face_drawn(painted: Material) -> float:
+	var shader := painted as ShaderMaterial
+	if shader == null:
+		return 0.0
+	var metres: Variant = shader.get_shader_parameter(&"look_rock_metres")
+	return (float(metres) if metres != null else 0.0) * _rock_face_switch
+
+## Gives a painted terrain material the rock layer's texture and constants,
+## and marks it (ROCK_META, the region). Off (look_rock_metres 0) where
+## `rock_face_metres` is 0; at LOW it keeps its repeat and ROCK_FACE_GLOBAL
+## switches it off (`apply_quality`).
+static func set_rock_face(painted: ShaderMaterial, region: String) -> void:
+	painted.set_meta(ROCK_META, region)
+	var detail := class_texture(LookProfile.ROCK_FACE_TEXTURE)
+	painted.set_shader_parameter(&"look_rock_texture", detail)
+	painted.set_shader_parameter(&"look_rock_metres",
+		rock_face_metres(region) if detail != null else 0.0)
+	painted.set_shader_parameter(&"look_rock_up", LookProfile.ROCK_FACE_UP)
+	painted.set_shader_parameter(&"look_rock_wobble", LookProfile.ROCK_FACE_WOBBLE)
+	painted.set_shader_parameter(&"look_rock_hue", LookProfile.ROCK_FACE_HUE)
+	painted.set_shader_parameter(&"look_rock_value", LookProfile.ROCK_FACE_VALUE)
+	painted.set_shader_parameter(&"look_rock_grain", LookProfile.ROCK_FACE_GRAIN)
 
 ## The class texture `texture_name` names (LookProfile.CLASS_TEXTURES), with
 ## mipmaps. Authored import settings provide the chain before play; older

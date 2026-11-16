@@ -31,6 +31,14 @@
 // multiplied into coverage it opened every 4 m tile edge to the grass beneath,
 // a grid of green grout lines over the isles' scree (map audit 2026-10-17).
 //
+// On opaque terrain and base ground steeper than about 50 degrees, the
+// texel is a rock face mapped from the side instead (look_rock_layer in
+// painted_ground_paint.gdshaderinc, LookProfile.ROCK_FACE_*): mapped from
+// above, the ground texture streaked down every cliff. It lives in the paint
+// include, and this body names nothing but look_* words, the texel and the
+// normal, because road_ground/material.gd copies this fragment body into its
+// road evaluation with every look_* name prefixed "road_".
+//
 // A shader that also defines LOOK_GROUND_EDGE_BAND (the walk decks) darkens
 // the ground beyond that edge by look_edge_band, where the deck's geometry
 // runs on but its coverage has stopped: the dark verge edging that frames a
@@ -126,6 +134,14 @@ void fragment() {
 		vec3 own_hue = detail.rgb * (look_luma(texel_mean) / max(look_luma(detail_mean), 0.02));
 		texel = vec4(mix(recoloured, own_hue, look_class_hue), detail.a);
 	}
+	vec3 world_normal = (INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz;
+	// The steep-face rock layer (look_rock_layer, painted_ground_paint.gdshaderinc):
+	// on a cliff the texel becomes the rock face's, and .a says how much. The
+	// continent height is the world height less the wrapper's translation.
+	vec4 look_rock_sample = look_rock_layer(texel.rgb, texel_mean, world_normal,
+		vec3(look_ground_xz.x, (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).y - MODEL_MATRIX[3].y,
+			look_ground_xz.y));
+	texel.rgb = look_rock_sample.rgb;
 	vec3 albedo = texel.rgb * albedo_color.rgb;
 	vec3 vertex_colour = COLOR.rgb;
 	if (vertex_albedo_srgb) {
@@ -139,12 +155,12 @@ void fragment() {
 		albedo *= vertex_colour;
 		reference *= vertex_colour;
 	}
-	vec3 world_normal = (INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz;
 	if (look_debug > 0) {
 		ALBEDO = vec3(0.0);
 		EMISSION = look_debug_colour(reference, vertex_colour, look_ground_xz);
 	} else {
-		ALBEDO = look_paint(albedo, reference, vertex_colour, look_ground_xz, world_normal);
+		ALBEDO = look_paint_rock(albedo, reference, vertex_colour, look_ground_xz, world_normal,
+			look_rock_sample.a);
 	}
 	ROUGHNESS = roughness_value;
 	METALLIC = metallic_value;

@@ -143,6 +143,11 @@ static func rebind(root: Node, manifest: WorldManifest) -> Dictionary:
 			return made
 		var material: ShaderMaterial = made.material
 		material.set_meta(MATERIAL_META, item.source)
+		# The base half keeps the steep-face rock layer's look_rock_* uniforms
+		# (Composite.build copies them) and so its marker. Its quality switch is
+		# the global it reads as it draws (LookGround.apply_quality).
+		if (item.base as Material).has_meta(LookGround.ROCK_META):
+			material.set_meta(LookGround.ROCK_META, (item.base as Material).get_meta(LookGround.ROCK_META))
 		# Painted wrappers participate in LookSwitch's ordinary source chain;
 		# Original road materials are structural and survive look-off rebinds.
 		if painted:

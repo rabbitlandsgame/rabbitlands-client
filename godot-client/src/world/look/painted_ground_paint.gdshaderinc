@@ -88,6 +88,8 @@ uniform float look_verge_grain = 1.0;
 // How much of the texture's grain a steep face keeps (1: as much as flat ground). A planar-mapped detail
 // tile streaks down a cliff (sw_isle's gorge walls); a region may calm it there (ground.verge_grain_steep).
 uniform float look_verge_grain_steep = 1.0;
+// How much of the steep-face rock layer's grain it keeps (LookProfile.ROCK_FACE_GRAIN).
+uniform float look_rock_grain = 1.0;
 uniform float look_variation_metres = 16.0;
 uniform float look_variation = 0.2;
 uniform float look_variation_hue = 0.06;
@@ -153,6 +155,98 @@ float look_variation_at(vec2 xz) {
 	vec2 p = xz / look_variation_metres;
 	return 0.65 * look_value_noise(p)
 		+ 0.35 * look_value_noise(p * 2.7 + vec2(13.1, 7.7)) - 0.5;
+}
+
+// The steep-face rock layer (LookProfile.ROCK_FACE_*; look_rock_metres 0:
+// none, which every surface but opaque terrain and base ground keeps). The
+// ground textures are mapped from above, so on a face steeper than about 50
+// degrees one texel stretches down the slope into a long vertical streak
+// (Landfall's bailey cliff, Spindle Hill, Boarsend's sea cliffs; map quality
+// sweeps 2026-11-15). There the surface gives way to a rock face mapped from
+// the side: projected along x and along z, each weighed by how far the face
+// normal points that way, in continent metres. It is recoloured to the
+// surface's own mean colour as a class texture is (keeping look_rock_hue of
+// its own hue, times look_rock_value), so the palette, the paint classes and
+// every trim see the colour they always did.
+// look_rock_up: the world-up normal component where the rock begins (x) and
+// where it is whole (y). look_rock_wobble: how far noise moves that threshold
+// (x) and the noise's size in metres (y), so the rock's edge wanders across a
+// bank instead of following one contour.
+// look_rock_metres is the material's repeat (0 off: the surface's kind, its
+// region's ground.rock_face 0 or a texture that did not load). rl_rock_face,
+// a global (project.godot [shader_globals]), is the graphics quality's switch:
+// 0 at LOW, 1 otherwise, set by LookGround.apply_quality. Every material reads
+// it as it draws, so a root painted on a worker before a quality change, a
+// parked or prewarmed root and a road composite all follow the change at once.
+// The guard keeps road_ground's composed shader, which copies this include
+// into its road half, to one declaration.
+#ifndef RL_ROCK_FACE_GLOBAL
+#define RL_ROCK_FACE_GLOBAL
+global uniform float rl_rock_face;
+#endif
+uniform sampler2D look_rock_texture : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform float look_rock_metres = 0.0;
+uniform vec2 look_rock_up = vec2(0.72, 0.6);
+uniform vec2 look_rock_wobble = vec2(0.05, 7.0);
+uniform float look_rock_hue = 0.5;
+uniform float look_rock_value = 1.0;
+
+// The rock face's repeat in metres as drawn: the material's, or 0 where the
+// layer is off for it or at this quality.
+float look_rock_repeat() {
+	return look_rock_metres * rl_rock_face;
+}
+
+// How much of a pixel is rock face: 0 on anything less steep than the
+// threshold, and wherever the layer is off.
+float look_rock_weight(vec3 world_normal, vec2 xz) {
+	if (look_rock_repeat() <= 0.0) {
+		return 0.0;
+	}
+	float up = abs(world_normal.y) + (look_value_noise(xz / look_rock_wobble.y
+		+ vec2(23.1, 4.7)) - 0.5) * 2.0 * look_rock_wobble.x;
+	return 1.0 - smoothstep(look_rock_up.y, look_rock_up.x, up);
+}
+
+// The texel with the rock face laid over it where the face is steep, and in
+// .a how much of it is rock. `texel` and `texel_mean` are the surface's own
+// texel and mean colour, `position` the continent position in metres. Level
+// ground returns `texel` untouched and samples nothing. The gradients are
+// taken before the steepness test, where the whole quad runs, and handed to
+// textureGrad: the samples are made only on steep pixels.
+vec4 look_rock_layer(vec3 texel, vec3 texel_mean, vec3 world_normal, vec3 position) {
+	float metres = look_rock_repeat();
+	if (metres <= 0.0) {
+		return vec4(texel, 0.0);
+	}
+	vec3 p = position / metres;
+	vec3 p_dx = dFdx(p);
+	vec3 p_dy = dFdy(p);
+	float rock = look_rock_weight(world_normal, position.xz);
+	if (rock <= 0.0) {
+		return vec4(texel, 0.0);
+	}
+	// Each side projection by how far the face points along its axis,
+	// sharpened so a corner turns over a narrow band.
+	vec2 sides = pow(abs(world_normal.xz), vec2(4.0));
+	sides /= max(sides.x + sides.y, 0.0001);
+	vec3 face = vec3(0.0);
+	float taken = 0.0;
+	if (sides.x > 0.01) {
+		face += sides.x * textureGrad(look_rock_texture, vec2(p.z, -p.y),
+			vec2(p_dx.z, -p_dx.y), vec2(p_dy.z, -p_dy.y)).rgb;
+		taken += sides.x;
+	}
+	if (sides.y > 0.01) {
+		face += sides.y * textureGrad(look_rock_texture, vec2(p.x, -p.y) + vec2(0.37, 0.61),
+			vec2(p_dx.x, -p_dx.y), vec2(p_dy.x, -p_dy.y)).rgb;
+		taken += sides.y;
+	}
+	face /= max(taken, 0.0001);
+	vec3 face_mean = max(textureLod(look_rock_texture, vec2(0.5), 16.0).rgb, vec3(0.02));
+	vec3 recoloured = face * texel_mean / face_mean;
+	vec3 own_hue = face * (look_luma(texel_mean) / max(look_luma(face_mean), 0.02));
+	return vec4(mix(texel, mix(recoloured, own_hue, look_rock_hue) * look_rock_value, rock), rock);
 }
 
 // How much of a terrain pixel is the exporter's worn road. The terrain mixes
@@ -311,7 +405,11 @@ vec3 look_weights(vec3 reference, vec3 vertex_colour, float up) {
 // vertex_colour: the raw vertex colour (only the terrain reads it).
 // xz: continent-space position in metres. world_normal: the surface normal
 // in world space (its up component, and which way a bank faces).
-vec3 look_paint(vec3 albedo, vec3 reference, vec3 vertex_colour, vec2 xz, vec3 world_normal) {
+// rock: how much of the pixel is the steep-face rock layer
+// (painted_ground_surface.gdshaderinc), which keeps look_rock_grain of its
+// grain where the planar texture's streaks keep only look_verge_grain_steep.
+vec3 look_paint_rock(vec3 albedo, vec3 reference, vec3 vertex_colour, vec2 xz,
+		vec3 world_normal, float rock) {
 	float up = abs(world_normal.y);
 	albedo = look_to_linear(albedo);
 	reference = look_to_linear(reference);
@@ -336,8 +434,11 @@ vec3 look_paint(vec3 albedo, vec3 reference, vec3 vertex_colour, vec2 xz, vec3 w
 		+ look_border_verge[0] * border.x + look_border_verge[1] * border.y
 		+ look_border_verge[2] * border.z + look_border_verge[3] * border.w;
 
-	// A steep face keeps look_verge_grain_steep of its texture's grain.
-	vec3 grained = mix(reference, albedo, mix(look_verge_grain_steep, 1.0, smoothstep(0.55, 0.8, up)));
+	// A steep face keeps look_verge_grain_steep of its texture's grain, and
+	// look_rock_grain of the rock face's that replaces it there.
+	float steep_grain = rock > 0.0 ? mix(look_verge_grain_steep, look_rock_grain, rock)
+		: look_verge_grain_steep;
+	vec3 grained = mix(reference, albedo, mix(steep_grain, 1.0, smoothstep(0.55, 0.8, up)));
 
 	// Verge: deeper and a little richer by hue, with a painted mottle.
 	float verge_scale = mix(verge_trims.y, verge_trims.x, look_green(reference));
@@ -394,6 +495,12 @@ vec3 look_paint(vec3 albedo, vec3 reference, vec3 vertex_colour, vec2 xz, vec3 w
 		/ max(length(world_normal.xz), 0.0001), 0.0, 1.0);
 	colour *= mix(look_slope_shade, 1.0, max(level, sunward));
 	return look_from_linear(look_saturate(colour * look_surface_tint, look_local_saturation));
+}
+
+// look_paint_rock without the rock layer: the biome blend's splice
+// (LookGround.BIOME_PAINTED_LINE) and any surface without it.
+vec3 look_paint(vec3 albedo, vec3 reference, vec3 vertex_colour, vec2 xz, vec3 world_normal) {
+	return look_paint_rock(albedo, reference, vertex_colour, xz, world_normal, 0.0);
 }
 
 // What the debug views draw as emission (ALBEDO is black): 1, the class as
