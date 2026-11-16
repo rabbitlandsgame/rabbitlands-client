@@ -169,6 +169,24 @@ def _strip_defects(xz,width,along,left,right,steps=ROAD_LATERAL_STEPS):
     return fold,worst
 
 
+def _segments_near(points,start,edge,edge_length,bound,chunk=512):
+    """The segments (start, start + edge) within bound of each point, as flat pairs.
+
+    Returns (point index, segment index, distance, nearest) per pair, sorted by
+    point; nearest marks each point's nearest segment, which is always a pair.
+    """
+    rows=[];columns=[];distances=[];nearest=[]
+    divisor=np.where(edge_length>0,edge_length,1.)
+    for first in range(0,len(points),chunk):
+        offset=points[first:first+chunk,None,:]-start[None]
+        t=np.clip((offset*edge[None]).sum(-1)/divisor[None],0.,1.)
+        distance=np.sqrt(((offset-t[...,None]*edge[None])**2).sum(-1))
+        closest=np.zeros(distance.shape,bool);closest[np.arange(len(distance)),distance.argmin(axis=1)]=True
+        row,column=np.nonzero((distance<=bound[first:first+chunk,None])|closest)
+        rows.append(row+first);columns.append(column);distances.append(distance[row,column]);nearest.append(closest[row,column])
+    return np.concatenate(rows),np.concatenate(columns),np.concatenate(distances),np.concatenate(nearest)
+
+
 def road_ribbon_stations(points,widths):
     """Cross-sections of a saved road ribbon: one station per saved sample, bends rebuilt.
 
@@ -222,9 +240,13 @@ def road_ribbon_stations(points,widths):
     # turning sections cannot help: its reversal keeps the saved ribbon, and bends
     # nearby stop half a metre short of it, as they would at a road end.
     reversal=s[abs(turn)>=math.radians(150.)]
-    seeds=[[s[i],s[i+1],1.] for i in bad if not ((reversal>=s[i]-.5)&(reversal<=s[i+1]+.5)).any()]
+    # A seed is [from, to, growth, first strip, last strip]. When a road's first or last
+    # strip is itself defective, its end section is square to a few centimetres of
+    # road that turn away from the rest (a saved sample just before the end), so no
+    # section sequence can reach it without folding: that end is rebuilt with the bend.
+    seeds=[[s[i],s[i+1],1.,i==0,i==count-2] for i in bad if not ((reversal>=s[i]-.5)&(reversal<=s[i+1]+.5)).any()]
     if not seeds:return original,[]
-    def sized(a,b,growth):
+    def sized(a,b,growth,free_start=False,free_end=False):
         inside=(s>=a-1e-9)&(s<=b+1e-9)
         angle=min(max(heading(a,b),float(abs(turn[inside]).max()) if inside.any() else 0.),math.radians(150.))
         near=(s>=a-1.)&(s<=b+1.);half=.5*float(W[near].max() if near.any() else at(W,a))
@@ -232,33 +254,37 @@ def road_ribbon_stations(points,widths):
         # Inside a road the chord shrinks to the local tangent at both zone ends (see
         # build), so a full-length chord needs a 2 * length run-in on each side. Near a
         # road end the chord is one-sided instead, and no longer than the run-in, so
-        # the end's own section stays square to the road.
-        if a-2*length<0:length=min(length,max(a,BEND_SPACING))
-        if b+2*length>total:length=min(length,max(total-b,BEND_SPACING))
+        # the end's own section stays square to the road. A rebuilt end is square to
+        # the road after its last bend: only the other seeds of the zone bound the run-in.
+        first=[seed[0] for seed in seeds if not seed[3] and a<=seed[0]<=b] if free_start else [a]
+        last=[seed[1] for seed in seeds if not seed[4] and a<=seed[1]<=b] if free_end else [b]
+        if first and min(first)-2*length<0:length=min(length,max(min(first),BEND_SPACING))
+        if last and max(last)+2*length>total:length=min(length,max(total-max(last),BEND_SPACING))
         before=reversal[reversal<a];after=reversal[reversal>b]
         start=max(a-2*length,0.,before.max()+.5 if len(before) else 0.)
         end=min(b+2*length,total,after.min()-.5 if len(after) else total)
-        return [start,end,length]
+        return [start,end,length,free_start,free_end]
+    def combined(first,second):
+        return [first[0],max(first[1],second[1]),max(first[2],second[2]),first[3] or second[3],first[4] or second[4]]
     def zones_from(seeds):
         # Seeds whose bends would overlap are rebuilt as one bend, sized by their combined turn.
         merged=[]
         for seed in sorted(seeds):
-            if merged and seed[0]<=merged[-1][1]+1e-9:
-                merged[-1]=[merged[-1][0],max(merged[-1][1],seed[1]),max(merged[-1][2],seed[2])]
+            if merged and seed[0]<=merged[-1][1]+1e-9:merged[-1]=combined(merged[-1],seed)
             else:merged.append(list(seed))
         while True:
             zones=[sized(*seed) for seed in merged]
             joined=[list(merged[0])];end=zones[0][1]
             for seed,zone in zip(merged[1:],zones[1:]):
                 if not ((s>=end)&(s<=zone[0])).any():
-                    joined[-1]=[joined[-1][0],max(joined[-1][1],seed[1]),max(joined[-1][2],seed[2])];end=max(end,zone[1])
+                    joined[-1]=combined(joined[-1],seed);end=max(end,zone[1])
                 else:joined.append(list(seed));end=zone[1]
             if len(joined)==len(merged):return zones
             merged=joined
     def build(zone):
-        za,zb,length=zone[:3]
+        za,zb,length,free_start,free_end=zone
         corners=[i for i in np.argsort(-abs(turn)) if za<s[i]<zb and abs(turn[i])>=math.radians(1.)]
-        kept=[]
+        kept=([0] if free_start else [])+([count-1] if free_end else [])
         for i in corners:
             if all(abs(s[i]-s[j])>BEND_SPACING/3 for j in kept):kept.append(i)
         n=max(2,int(math.ceil((zb-za)/BEND_SPACING)))
@@ -281,31 +307,60 @@ def road_ribbon_stations(points,widths):
         local=np.nonzero((s[1:]>=za-reach)&(s[:-1]<=zb+reach))[0]
         start,end=xz[local],xz[local+1];edge=end-start;edge_length=(edge**2).sum(axis=1)
         half=width/2;centre=point[:,[0,2]]
+        # A probe at scale k lies k * half * |side| from its station, which is on the
+        # centreline, so its nearest segment lies within twice that of the station.
+        # Each probe is measured against those segments only, with the same float
+        # operations, and each station stops at its first grid scale that reaches
+        # the outline: the distances, and so the output, are the same as measuring
+        # every probe against every local segment.
+        unit=half*np.linalg.norm(side,axis=1)*(1+1e-9)
+        row,near,distance,nearest=_segments_near(centre,start,edge,edge_length,2*BEND_MAX_MITRE*unit+1e-6)
+        divisor=np.where(edge_length>0,edge_length,1.)
+        def gap(sign,stations,scale):
+            """Distance beyond the outline of the probes of stations (sorted) at scale."""
+            bound=np.full(len(unit),-np.inf);bound[stations]=2*scale*unit[stations]+1e-6
+            pairs=np.nonzero((distance<=bound[row])|(nearest&(bound[row]>-np.inf)))[0]
+            probe=centre[stations]+sign*side[stations]*(scale*half[stations])[:,None]
+            position=np.searchsorted(stations,row[pairs])
+            segment=near[pairs]
+            offset=probe[position]-start[segment]
+            t=np.clip((offset*edge[segment]).sum(-1)/divisor[segment],0.,1.)
+            values=np.sqrt(((offset-t[...,None]*edge[segment])**2).sum(-1))
+            return np.minimum.reduceat(values,np.searchsorted(position,np.arange(len(stations))))-half[stations]
         scales=[]
+        grid=np.linspace(1.,BEND_MAX_MITRE,41)
         for sign in (1.,-1.):
-            def gap(scale):
-                probe=centre+sign*side*(scale*half)[:,None]
-                offset=probe[:,None,:]-start[None]
-                t=np.clip((offset*edge[None]).sum(-1)/np.where(edge_length>0,edge_length,1.)[None],0.,1.)
-                return np.sqrt(((offset-t[...,None]*edge[None])**2).sum(-1)).min(axis=1)-half
-            grid=np.linspace(1.,BEND_MAX_MITRE,41);values=np.stack([gap(value) for value in grid],axis=1)
-            reached=values>=0;first=np.where(reached.any(axis=1),reached.argmax(axis=1),len(grid)-1)
-            low=grid[np.maximum(first-1,0)];high=grid[first]
-            low=np.where(first==0,1.,low);high=np.where(first==0,1.,high)
-            for _ in range(30):
-                middle=(low+high)/2;inside=gap(middle)<0
-                low=np.where(inside,middle,low);high=np.where(inside,high,middle)
-            scales.append(np.where(reached.any(axis=1),high,BEND_MAX_MITRE))
+            first=np.full(len(where_s),-1);active=np.arange(len(where_s))
+            for index,value in enumerate(grid):
+                if not len(active):break
+                reached=gap(sign,active,value)>=0
+                first[active[reached]]=index;active=active[~reached]
+            scale=np.where(first<0,BEND_MAX_MITRE,1.)
+            search=np.nonzero(first>0)[0]
+            if len(search):
+                low=grid[first[search]-1];high=grid[first[search]]
+                for _ in range(30):
+                    middle=(low+high)/2;inside=gap(sign,search,middle)<0
+                    low=np.where(inside,middle,low);high=np.where(inside,high,middle)
+                scale[search]=high
+            scales.append(scale)
         left=side*scales[0][:,None];right=side*scales[1][:,None]
         return [(point[k],float(width[k]),float(along[k]),left[k],right[k]) for k in range(len(where_s))]
-    best=None
+    best=None;built={}
     for _ in range(6):
-        zones=zones_from(seeds);rebuilt={id(zone):build(zone) for zone in zones}
+        zones=zones_from(seeds)
+        for zone in zones:
+            # A retry rebuilds only the zones it changed.
+            if tuple(zone) not in built:built[tuple(zone)]=build(zone)
+        rebuilt={id(zone):built[tuple(zone)] for zone in zones}
         stations=[];bends=[];index=0;failed=False
         for zone in zones:
-            za,zb=zone[:2]
-            while index<count and s[index]<=za:stations.append(original[index]);index+=1
+            za,zb,_,free_start,free_end=zone
+            while index<count and s[index]<=za:
+                if not free_start:stations.append(original[index])
+                index+=1
             first=len(stations)-1;stations.extend(rebuilt[id(zone)])
+            if free_end:index=count
             while index<count and s[index]<zb:index+=1
             last=len(stations) if index<count else len(stations)-1
             if index<count:stations.append(original[index]);index+=1
