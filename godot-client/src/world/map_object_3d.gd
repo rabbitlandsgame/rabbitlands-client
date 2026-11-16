@@ -4,6 +4,7 @@ const WORLD_LABEL_STYLE := preload("res://src/ui/world_label_style.gd")
 const TextColors := preload("res://src/ui/text_colors.gd")
 const STORAGE_GLOW_SHADER := preload("res://src/world/storage_glow.gdshader")
 const SPELL_MATERIALS := preload("res://src/world/spell_visual_material.gd")
+const HARVEST_GLINT := preload("res://src/world/harvest_glint.gd")
 ## A clickable world object: a harvest node or an interactive.
 ##
 ## The world package renders the surrounding scenery as ordinary map geometry,
@@ -187,6 +188,60 @@ var _label_point := Vector3.ZERO
 ## The smallest side a footprint pick box is given, so a thin hedge or a kelp
 ## strand is still a target a player can hit.
 const FOOTPRINT_PICK_MINIMUM := 0.6
+
+## Seating (map polish, owner-approved 2026-11-16). A node stands on its tile's
+## centre, at the walk surface's height there; its model used to stand level at
+## that height, so on a slope the downhill rim of a low mat or cap hung in the
+## air (210 of the 17 Landfall maps' 779 Mushroom and Lotus nodes by more than
+## the model is tall) and the uphill rim sank. `_seat_model` samples the walk
+## surface under the model's footprint (its centre and SEAT_RIM_SAMPLES points
+## on an ellipse at SEAT_RIM_SHARE of its bounds) and seats the model on it:
+## a low model (up to SEAT_LOW_MODEL_HEIGHT tall: a cap, a pad, a mat, a strand,
+## a pan) is tilted to the plane fitted through the samples (at most
+## SEAT_MAX_TILT_DEGREES) and lowered until no sample floats; a taller one
+## (a bush, a reed clump, a boulder) stays upright and is lowered onto the
+## lowest sample, rooted in the uphill side. The drop is clamped
+## (SEAT_LOW_MAX_DROP; SEAT_UPRIGHT_DROP_SHARE of a taller model's height, at
+## most SEAT_UPRIGHT_MAX_DROP) and a sample more than SEAT_OUTLIER_METRES from
+## the samples' median (a ledge's foot, a deck) is ignored. Only the model
+## moves: the node, its served tile and its pick stay where the server put
+## them (the pick box follows the model down by the same few centimetres).
+const SEAT_RIM_SAMPLES := 8
+const SEAT_RIM_SHARE := 0.85
+## How far the model's base is let into the lowest sample, so no hairline of
+## light shows under it.
+const SEAT_EMBED := 0.01
+const SEAT_LOW_MODEL_HEIGHT := 0.55
+const SEAT_MAX_TILT_DEGREES := 25.0
+## A grade below this is level: the model keeps its rest basis exactly.
+const SEAT_LEVEL_GRADE := 0.02
+const SEAT_LOW_MAX_DROP := 0.15
+## A low model sinks into the ground under it at most this share of its height
+## (and at least SEAT_LOW_MIN_SINK may always sink).
+const SEAT_LOW_SINK_SHARE := 0.4
+const SEAT_LOW_MIN_SINK := 0.05
+const SEAT_UPRIGHT_MAX_DROP := 0.35
+const SEAT_UPRIGHT_DROP_SHARE := 0.35
+## A node in a dip is lifted at most this far.
+const SEAT_MAX_RAISE := 0.08
+const SEAT_OUTLIER_METRES := 0.8
+## The seat's rays run this far above and below the node's own height.
+const SEAT_RAY_METRES := 1.5
+## A seat ray that missed is moved this far and asked again (GroundDrape's
+## heightfield-seam nudge).
+const SEAT_SEAM_NUDGE := 0.0001
+## The last seat: {offset, slope, tilt_degrees, floating, sunk, samples, low}
+## (see `seat_for`), or {} before the model was seated.
+var seat: Dictionary = {}
+## The model's transform as built (yaw, scale, a wall node's inset), which a
+## seat starts from, and its bounds in its own space.
+var _model_rest := Transform3D.IDENTITY
+var _model_bounds := AABB()
+var _has_model_rest := false
+var _pick_rest_y := NAN
+## The node height the current seat was worked out at, NAN when it must be
+## worked out again (never seated, or a sample found no ground).
+var _seated_at := NAN
 
 ## `catalog` is `data/world/objects.json`, whole. It has no default: this took
 ## a release standing every node in the world on a bare ring because the one
@@ -489,11 +544,214 @@ func map_glyph() -> String:
 
 func set_surface_height(height: float) -> void:
 	global_position.y = height + 0.05
+	_seat_model()
 	_drape_ring()
 	if is_instance_valid(_storage_glow):
 		var draped := GroundDrape.drape(_storage_glow, _storage_glow_flat,
 			STORAGE_GLOW_CLEARANCE)
 		_storage_glow.mesh = _storage_glow_flat if draped == null else draped
+
+## Turns the cave glint (harvest_glint.gd) on or off. Main asks for it on a
+## dark interior map only (HARVEST_GLINT.wanted_for); anything but a harvest
+## node ignores it. The glint stands under the model, so it takes the model's
+## yaw, scale and seat; a node with no model of its own (a bare ring, promoted
+## scenery) glints over its tile.
+func set_cave_glint(enabled: bool) -> void:
+	var holder := get_node_or_null("Model") as Node3D
+	var existing := (holder.get_node_or_null(HARVEST_GLINT.NODE_NAME) if holder != null
+		else get_node_or_null(HARVEST_GLINT.NODE_NAME)) as MeshInstance3D
+	if existing != null:
+		existing.visible = enabled
+		return
+	if not enabled or not is_harvestable():
+		return
+	var glint: MeshInstance3D
+	if holder != null and _has_model_rest:
+		glint = HARVEST_GLINT.build(_model_bounds, is_wall_placed())
+	else:
+		holder = self
+		glint = HARVEST_GLINT.build(AABB(Vector3(-0.5, 0.0, -0.5), Vector3(1.0, 0.6, 1.0)))
+	holder.add_child(glint)
+
+## The cave glint drawn on this node, or null.
+func cave_glint() -> MeshInstance3D:
+	var holder := get_node_or_null("Model")
+	var glint := (holder.get_node_or_null(HARVEST_GLINT.NODE_NAME) if holder != null
+		else get_node_or_null(HARVEST_GLINT.NODE_NAME)) as MeshInstance3D
+	return glint
+
+## Seats the model on the walk surface under its footprint (SEAT_* above).
+## Worked out again only when the node's height changed or a sample found no
+## ground the last time, so the surface refreshes that place every node again
+## as chunks arrive cost one height comparison per seated node.
+func _seat_model() -> void:
+	if not is_harvestable() or is_wall_placed() or not _has_model_rest or not is_inside_tree():
+		return
+	var model := get_node_or_null("Model") as Node3D
+	if model == null or is_equal_approx(_seated_at, global_position.y):
+		return
+	var world := get_world_3d()
+	if world == null:
+		return
+	var space := world.direct_space_state
+	var origin := global_position
+	var ground := PackedVector3Array()
+	var complete := true
+	for index: int in range(SEAT_RIM_SAMPLES + 1):
+		var local := _seat_sample_point(index)
+		var height: Variant = _seat_ray(space, origin.x + local.x, origin.z + local.z, origin.y)
+		if height == null:
+			complete = false
+			continue
+		ground.append(Vector3(local.x, float(height) - origin.y, local.z))
+	var worked := seat_for(ground, _model_bounds.size.y * _model_rest.basis.get_scale().y)
+	if worked.is_empty():
+		return
+	seat = worked
+	var slope: Vector2 = seat.slope
+	var tilt := Basis.IDENTITY
+	if not slope.is_zero_approx():
+		var normal := Vector3(-slope.x, 1.0, -slope.y).normalized()
+		tilt = Basis(Vector3.UP.cross(normal).normalized(), Vector3.UP.angle_to(normal))
+	# The seat places the model's base; a model whose geometry starts above its
+	# origin is lowered by that much more (one that reaches below it is meant
+	# to be let into the ground, and keeps that).
+	var above := maxf(0.0, _model_bounds.position.y * _model_rest.basis.get_scale().y)
+	model.transform = Transform3D(tilt * _model_rest.basis,
+		_model_rest.origin + Vector3.UP * (float(seat.offset) - above))
+	var pick := get_node_or_null("PickShape") as CollisionShape3D
+	if pick != null:
+		if is_nan(_pick_rest_y):
+			_pick_rest_y = pick.position.y
+		pick.position.y = _pick_rest_y + minf(float(seat.offset), 0.0)
+	_seated_at = origin.y if complete else NAN
+
+## Where seat sample `index` stands, relative to the node, flat: 0 is the
+## footprint's centre, the rest an ellipse round it (SEAT_RIM_SHARE of the
+## model's bounds), turned and scaled with the model as built.
+func _seat_sample_point(index: int) -> Vector3:
+	var centre := _model_bounds.get_center()
+	var point := Vector3(centre.x, _model_bounds.position.y, centre.z)
+	if index > 0:
+		var angle := TAU * float(index - 1) / float(SEAT_RIM_SAMPLES)
+		var half := _model_bounds.size * 0.5 * SEAT_RIM_SHARE
+		point += Vector3(cos(angle) * half.x, 0.0, sin(angle) * half.z)
+	var placed := _model_rest * point
+	return Vector3(placed.x, 0.0, placed.z)
+
+## The walk surface's height under `x, z` within SEAT_RAY_METRES of `around`,
+## or null where there is none.
+static func _seat_ray(space: PhysicsDirectSpaceState3D, x: float, z: float,
+		around: float) -> Variant:
+	for nudge: float in [0.0, SEAT_SEAM_NUDGE]:
+		var query := PhysicsRayQueryParameters3D.create(
+			Vector3(x + nudge, around + SEAT_RAY_METRES, z + nudge),
+			Vector3(x + nudge, around - SEAT_RAY_METRES, z + nudge),
+			WorldLoader.NAVIGATION_SURFACE_LAYER)
+		var hit: Dictionary = space.intersect_ray(query)
+		var position_value: Variant = hit.get("position")
+		if position_value is Vector3:
+			return (position_value as Vector3).y
+	return null
+
+## The seat for a model `model_height` metres tall over `ground`: points (x,
+## ground height, z) relative to the node origin. Returns {} for fewer than
+## three usable samples, else {offset: the model's drop (negative) or lift
+## from its rest height, slope: Vector2(dy/dx, dy/dz) its base is tilted to
+## (zero for an upright model or level ground), tilt_degrees, floating and
+## sunk: the most any sample's ground lies below or above the seated base,
+## samples: how many were used, low: whether the model is tilted}.
+static func seat_for(ground: PackedVector3Array, model_height: float) -> Dictionary:
+	if ground.size() < 3:
+		return {}
+	var heights: Array[float] = []
+	for point: Vector3 in ground:
+		heights.append(point.y)
+	heights.sort()
+	var median: float = heights[heights.size() >> 1]
+	var kept := PackedVector3Array()
+	for point: Vector3 in ground:
+		if absf(point.y - median) <= SEAT_OUTLIER_METRES:
+			kept.append(point)
+	if kept.size() < 3:
+		return {}
+	var low := model_height <= SEAT_LOW_MODEL_HEIGHT
+	var slope := Vector2.ZERO
+	if low:
+		slope = plane_slope(kept)
+		var limit := tan(deg_to_rad(SEAT_MAX_TILT_DEGREES))
+		if slope.length() < SEAT_LEVEL_GRADE:
+			slope = Vector2.ZERO
+		elif slope.length() > limit:
+			slope = slope.normalized() * limit
+	var lowest := INF
+	var highest := -INF
+	for point: Vector3 in kept:
+		var residual := point.y - slope.x * point.x - slope.y * point.z
+		lowest = minf(lowest, residual)
+		highest = maxf(highest, residual)
+	var base := lowest - SEAT_EMBED
+	# A low model in a hollow the plane cannot follow would vanish into its
+	# rim: it sinks at most SEAT_LOW_SINK_SHARE of its height, and floats over
+	# the hollow's floor instead.
+	if low:
+		base = maxf(base, highest - maxf(SEAT_LOW_MIN_SINK, SEAT_LOW_SINK_SHARE * model_height))
+	var max_drop := SEAT_LOW_MAX_DROP if low else minf(SEAT_UPRIGHT_MAX_DROP,
+		maxf(SEAT_LOW_MAX_DROP, SEAT_UPRIGHT_DROP_SHARE * model_height))
+	var offset := clampf(base, -max_drop, SEAT_MAX_RAISE)
+	var floating := 0.0
+	var sunk := 0.0
+	for point: Vector3 in kept:
+		var gap := offset + slope.x * point.x + slope.y * point.z - point.y
+		floating = maxf(floating, gap)
+		sunk = maxf(sunk, -gap)
+	return {"offset": offset, "slope": slope, "tilt_degrees": rad_to_deg(atan(slope.length())),
+		"floating": floating, "sunk": sunk, "samples": kept.size(), "low": low}
+
+## The least-squares plane through `points` (x, height, z) as its gradient
+## Vector2(dy/dx, dy/dz); zero when the points do not span a plane.
+static func plane_slope(points: PackedVector3Array) -> Vector2:
+	var mean := Vector3.ZERO
+	for point: Vector3 in points:
+		mean += point
+	mean /= float(points.size())
+	var sxx := 0.0
+	var sxz := 0.0
+	var szz := 0.0
+	var sxy := 0.0
+	var szy := 0.0
+	for point: Vector3 in points:
+		var d := point - mean
+		sxx += d.x * d.x
+		sxz += d.x * d.z
+		szz += d.z * d.z
+		sxy += d.x * d.y
+		szy += d.z * d.y
+	var determinant := sxx * szz - sxz * sxz
+	if absf(determinant) < 1e-9:
+		return Vector2.ZERO
+	return Vector2((sxy * szz - szy * sxz) / determinant, (szy * sxx - sxy * sxz) / determinant)
+
+## The bounds of every mesh under `model`, in the model's own space (its own
+## transform left out), or an empty AABB for none.
+static func model_space_bounds(model: Node3D) -> AABB:
+	var bounds := AABB()
+	var found := false
+	var meshes: Array[Node] = model.find_children("*", "MeshInstance3D", true, false)
+	for node: Node in meshes:
+		var mesh_instance := node as MeshInstance3D
+		if mesh_instance.mesh == null or mesh_instance.name == HARVEST_GLINT.NODE_NAME:
+			continue
+		var to_model := Transform3D.IDENTITY
+		var walker: Node = mesh_instance
+		while walker != null and walker != model:
+			if walker is Node3D:
+				to_model = (walker as Node3D).transform * to_model
+			walker = walker.get_parent()
+		var box := to_model * mesh_instance.mesh.get_aabb()
+		bounds = box if not found else bounds.merge(box)
+		found = true
+	return bounds
 
 func set_particles_enabled(enabled: bool) -> void:
 	if is_instance_valid(_storage_sparks):
@@ -957,6 +1215,9 @@ func _add_model(entry: Dictionary) -> float:
 	if is_wall_placed() and _stated_number("inset"):
 		_model_offset = -Vector3(sin(_model_yaw), 0.0, cos(_model_yaw)) * float(presentation.inset)
 		model.position = _model_offset
+	_model_rest = model.transform
+	_model_bounds = model_space_bounds(model)
+	_has_model_rest = true
 	return float(entry.get("height", 1.0)) * model.scale.y
 
 ## Multiplies every surface's albedo by `colour`, on copies of the shared

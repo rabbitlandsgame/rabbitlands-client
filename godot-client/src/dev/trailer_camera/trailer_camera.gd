@@ -436,6 +436,9 @@ static func _show_whole_region(root: Node3D) -> void:
 				(node as Node3D).visible = true
 
 func _populate() -> void:
+	# The map package's harvest nodes, when ELORIA_TRAILER_HARVEST asks for them.
+	preload("res://src/dev/trailer_camera/trailer_harvest.gd").place(self, _active.manifest, str(_active.id),
+		MapRegistry.resolve(_registry(), str(_active.id)), shot.samples(), _ground_at)
 	if not bool(shot.data.get("ambientLife", true)):
 		return
 	var population := AmbientPopulation.new()
