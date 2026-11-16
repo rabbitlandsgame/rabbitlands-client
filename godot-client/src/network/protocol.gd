@@ -4678,6 +4678,20 @@ static func campaign_scene_inspection_valid(inspection: Variant) -> bool:
 	return not bool(inspection.can_start) or (int(inspection.actor_id) > 0 \
 		and str(inspection.status) in ["pending", "blocked"])
 
+## Decoding and sending share one contract for all supply-quest options.
+const SHELVES_CHOICE_OPTIONS:Dictionary={
+	"shelves_route":["direct","careful"],"shelves_lesson":["ingredients","food","tool"],
+	"shelves_basics":["basics_accept","basics_defer"],"shelves_patrol_retry":["retry","cancel"],
+	"shelves_fire_quarry":["assault","silence"],"shelves_fire_coal":["lift","haul"],"shelves_fire_retry":["retry","cancel"],
+	"shelves_water_gates":["repair","breach"],"shelves_water_route":["sheltered","coastal"],"shelves_water_retry":["retry","cancel"],
+	"shelves_gear":["wand","charm","robe"],"shelves_cape":["keeper","artificer"],
+	"shelves_enriched":["life","fire","water","earth","wind","magic","death","frost"]}
+
+static func campaign_shelves_option_valid(option_id:String)->bool:
+	for options:Array in SHELVES_CHOICE_OPTIONS.values():
+		if option_id in options:return true
+	return false
+
 static func campaign_scene_choice_valid(choice: Variant) -> bool:
 	if not choice is Dictionary:
 		return false
@@ -4686,15 +4700,8 @@ static func campaign_scene_choice_valid(choice: Variant) -> bool:
 	var allowed: Array = {"opening_rescue": ["defend", "repair", "evacuate"],
 		"cart_release": ["unload", "lever", "haul"], "claims_lead": ["physical", "chronology", "records"],
 		"rescue_response": ["help", "watch"], "rescue_accept": ["accept", "defer"],
-		"rescue_reward": ["sword", "bow", "wand"],
-		"shelves_route": ["direct", "careful"], "shelves_lesson": ["ingredients", "food", "tool"],
-		"shelves_basics": ["basics_accept", "basics_defer"],
-		"shelves_patrol_retry": ["retry", "cancel"],
-		"shelves_fire_quarry": ["assault", "silence"], "shelves_fire_coal": ["lift", "haul"], "shelves_fire_retry": ["retry", "cancel"],
-		"shelves_water_gates": ["repair", "breach"], "shelves_water_route": ["sheltered", "coastal"], "shelves_water_retry": ["retry", "cancel"],
-		"shelves_gear": ["wand", "charm", "robe"],
-		"shelves_cape": ["keeper", "artificer"],
-		"shelves_enriched": ["life", "fire", "water", "earth", "wind", "magic", "death", "frost"]}.get(str(choice.get("id", "")), [])
+		"rescue_reward": ["sword", "bow", "wand"]}.get(str(choice.get("id", "")),
+			SHELVES_CHOICE_OPTIONS.get(str(choice.get("id", "")), []))
 	if allowed.is_empty() or not choice.get("selected") is String \
 			or (not str(choice.selected).is_empty() and choice.selected not in allowed):
 		return false
