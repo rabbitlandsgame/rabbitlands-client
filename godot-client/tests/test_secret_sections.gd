@@ -105,6 +105,7 @@ func _run() -> void:
 		"an inactive controller hides nothing")
 
 	await _test_retired_scene_nodes(manifest, plain)
+	_test_freed_dynamic_keys(manifest)
 	_test_retained_actor(manifest)
 	# The reported continent door: the old exterior coordinates overlap Deep
 	# Workings, while the destination is in Lantern Mine's Upper Galleries.
@@ -184,6 +185,51 @@ func _test_retired_scene_nodes(manifest: WorldManifest, plain: WorldManifest) ->
 	_expect(not next_beta.visible, "section culling works again after reentry")
 	sections.reset()
 	next_world.free()
+
+
+func _test_freed_dynamic_keys(manifest: WorldManifest) -> void:
+	# Leaving a private worksite removes several hidden actors and objects on
+	# the same client map. The next map change must still restore live nodes.
+	for restore_only: bool in [false, true]:
+		var world := Node3D.new()
+		root.add_child(world)
+		var sections = SectionsScript.new()
+		sections.configure(manifest, world)
+		sections.update(Vector3(20, 0, 20), true)
+		var retired_a := Node3D.new()
+		var retired_b := Node3D.new()
+		var survivor := Node3D.new()
+		for actor: Node3D in [retired_a, retired_b, survivor]:
+			world.add_child(actor)
+			actor.position = Vector3(110, 0, 20)
+		sections.cull_dynamic([retired_a, retired_b, survivor])
+		_expect(not survivor.visible, "the surviving actor starts hidden in another section")
+		retired_a.free()
+		retired_b.free()
+		# Quest handoffs replace whole actor/object rosters while the same
+		# section controller remains active. Grow its cache after each removal.
+		for roster: int in 4:
+			var departed: Array[Node3D] = []
+			for index: int in 32:
+				var actor := Node3D.new()
+				world.add_child(actor)
+				actor.position = Vector3(110, 0, 20)
+				departed.append(actor)
+			sections.cull_dynamic(departed)
+			for actor: Node3D in departed:
+				actor.free()
+		print("test_secret_sections: restoring after multiple dynamic departures, restore_only=", restore_only)
+		if restore_only:
+			sections.restore_dynamic()
+		else:
+			sections.reset()
+		_expect(survivor.visible,
+			"visibility restoration passes multiple freed dynamic nodes and restores the survivor")
+		if restore_only:
+			sections.cull_dynamic([survivor])
+			_expect(not survivor.visible, "dynamic culling still works after restoring stale nodes")
+		sections.reset()
+		world.free()
 
 
 func _test_retained_actor(manifest: WorldManifest,
