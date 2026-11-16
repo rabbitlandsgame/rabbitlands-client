@@ -272,6 +272,7 @@ func _bind_environment() -> void:
 	LookSky.install(_lighting, _world_environment)
 	LookGround.paint_bound(_active.root, _active.manifest)
 	LookSwitch.apply_shadow_quality(_sun)
+	LookGround.apply_quality()
 	_sun.directional_shadow_max_distance = float(shot.data.get("shadowDistance", 200.0))
 	_fog_wanted = _world_environment.environment.fog_enabled and bool(shot.data.get("fog", true))
 	if shot.data.get("sunBearing") is float:

@@ -594,8 +594,9 @@ const CLASS_TEXTURES := {
 ## by noise ROCK_FACE_WOBBLE.y metres across so its edge wanders over a bank.
 ## Level ground never reaches it and takes no extra sample: it draws exactly as
 ## before. Only opaque terrain and base ground take it (patches and decks lie
-## over them), never at LOW quality (QUALITY_PRESETS `rock_face`), and a region
-## may switch it off with `ground.rock_face` 0.
+## over them), never at LOW quality (QUALITY_PRESETS `rock_face`, through the
+## global shader value LookGround.ROCK_FACE_GLOBAL that every painted material
+## reads as it draws), and a region may switch it off with `ground.rock_face` 0.
 const ROCK_FACE_TEXTURE := "cliff_rock"
 const ROCK_FACE_UP := Vector2(0.72, 0.6)
 const ROCK_FACE_WOBBLE := Vector2(0.05, 7.0)

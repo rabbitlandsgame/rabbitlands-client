@@ -16661,12 +16661,11 @@ func _apply_look_switch() -> void:
 ## it) and the server is told the new cap.
 func _apply_graphics_quality() -> void:
 	LookSwitch.apply_shadow_quality(world_sun)
-	# The painted ground's steep-face rock layer follows the quality on every
-	# loaded root (LookGround.apply_quality; a root still loading paints with it).
-	if world_loader != null and exterior_stream != null:
-		for world: Dictionary in LookSwitch.worlds(world_loader.world_root,
-				world_loader.manifest, exterior_stream.residents):
-			LookGround.apply_quality(world.root as Node)
+	# The painted ground's steep-face rock layer: one global shader value that
+	# every painted ground material reads as it draws (LookGround.apply_quality),
+	# so a root painted on a loader worker before this change and installed
+	# after it, a parked or prewarmed root and a road composite all follow it.
+	LookGround.apply_quality()
 	if world_distance != null:
 		world_distance.set_quality(LookProfile.quality())
 	crowd.set_quality(LookProfile.quality())

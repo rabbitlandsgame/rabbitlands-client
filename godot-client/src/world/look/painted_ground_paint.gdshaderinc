@@ -172,6 +172,18 @@ float look_variation_at(vec2 xz) {
 // where it is whole (y). look_rock_wobble: how far noise moves that threshold
 // (x) and the noise's size in metres (y), so the rock's edge wanders across a
 // bank instead of following one contour.
+// look_rock_metres is the material's repeat (0 off: the surface's kind, its
+// region's ground.rock_face 0 or a texture that did not load). rl_rock_face,
+// a global (project.godot [shader_globals]), is the graphics quality's switch:
+// 0 at LOW, 1 otherwise, set by LookGround.apply_quality. Every material reads
+// it as it draws, so a root painted on a worker before a quality change, a
+// parked or prewarmed root and a road composite all follow the change at once.
+// The guard keeps road_ground's composed shader, which copies this include
+// into its road half, to one declaration.
+#ifndef RL_ROCK_FACE_GLOBAL
+#define RL_ROCK_FACE_GLOBAL
+global uniform float rl_rock_face;
+#endif
 uniform sampler2D look_rock_texture : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform float look_rock_metres = 0.0;
 uniform vec2 look_rock_up = vec2(0.72, 0.6);
@@ -179,10 +191,16 @@ uniform vec2 look_rock_wobble = vec2(0.05, 7.0);
 uniform float look_rock_hue = 0.5;
 uniform float look_rock_value = 1.0;
 
+// The rock face's repeat in metres as drawn: the material's, or 0 where the
+// layer is off for it or at this quality.
+float look_rock_repeat() {
+	return look_rock_metres * rl_rock_face;
+}
+
 // How much of a pixel is rock face: 0 on anything less steep than the
 // threshold, and wherever the layer is off.
 float look_rock_weight(vec3 world_normal, vec2 xz) {
-	if (look_rock_metres <= 0.0) {
+	if (look_rock_repeat() <= 0.0) {
 		return 0.0;
 	}
 	float up = abs(world_normal.y) + (look_value_noise(xz / look_rock_wobble.y
@@ -197,10 +215,11 @@ float look_rock_weight(vec3 world_normal, vec2 xz) {
 // taken before the steepness test, where the whole quad runs, and handed to
 // textureGrad: the samples are made only on steep pixels.
 vec4 look_rock_layer(vec3 texel, vec3 texel_mean, vec3 world_normal, vec3 position) {
-	if (look_rock_metres <= 0.0) {
+	float metres = look_rock_repeat();
+	if (metres <= 0.0) {
 		return vec4(texel, 0.0);
 	}
-	vec3 p = position / look_rock_metres;
+	vec3 p = position / metres;
 	vec3 p_dx = dFdx(p);
 	vec3 p_dy = dFdy(p);
 	float rock = look_rock_weight(world_normal, position.xz);
