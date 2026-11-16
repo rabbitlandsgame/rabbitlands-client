@@ -1,13 +1,27 @@
 {
   "schema": "eloria-texture-pack-entry-v1",
   "assetId": "coastal-limestone-gravel",
-  "version": "v001",
-  "generator": "OpenAI built-in image_gen",
-  "generationId": "exec-754c9843-e2de-4005-96cd-bc47a2697a3b",
-  "generatedSource": "C:/rabbitlands/private-inputs\\.codex\\generated_images\\01a0d202-9e5e-7430-9e95-399455b48aea\\exec-754c9843-e2de-4005-96cd-bc47a2697a3b.png",
-  "integrationAsset": "C:\\rabbitlands\\work-output\\region-materials-client\\godot-client\\src\\dev\\map_authoring_pilot\\style\\texture_packs\\coastal-limestone-gravel\\coastal-limestone-gravel-v001.png",
-  "assetSha256": "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
-  "generatedSourceSha256": "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+  "version": "v002",
+  "generator": "derived, not generated: v001 made seamless and opaque with make_seamless.py (no image generation)",
+  "generationId": null,
+  "generationLineage": [
+    {
+      "generationId": "exec-754c9843-e2de-4005-96cd-bc47a2697a3b",
+      "inputImages": [],
+      "note": "v001's own generation; v002 reuses its pixels"
+    }
+  ],
+  "derivedFrom": {
+    "version": "v001",
+    "path": "godot-client/src/dev/map_authoring_pilot/style/texture_packs/coastal-limestone-gravel/coastal-limestone-gravel-v001.png",
+    "sha256": "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "process": ".agents/skills/rabbitlands-map-visual-quality/scripts/make_seamless.py --size 1024 (defaults): divides out low-frequency light falloff, rolls the tile by half and replaces the middle bands along a minimum-error cut; the output is RGB, so v001's alpha vignette (min 0.161 in the corners, about 0.58 along the edges) is dropped",
+    "sameAs": "godot-client/src/world/look/textures/coastal-gravel.png (byte-identical; the runtime class texture made on 2026-10-17, see that folder's README.md)"
+  },
+  "generatedSource": null,
+  "integrationAsset": "godot-client/src/dev/map_authoring_pilot/style/texture_packs/coastal-limestone-gravel/coastal-limestone-gravel-v002.png",
+  "assetSha256": "8ceb494b4b117ba3372ccb353a22909455be2d5e9e107985401110ff3261bdc4",
+  "generatedSourceSha256": null,
   "designReferences": [
     {
       "role": "design reference only; not passed as generation input",
@@ -33,6 +47,16 @@
   "metallicScalarSuggestion": 0.0,
   "normalMapStatus": "not generated; any reuse of compatible existing map requires separate validation",
   "ormMapStatus": "not generated; use scalar settings unless an existing compatible map is separately validated",
-  "seamReview": "visual prototype only; tile continuity remains to be checked with repeated-plane preview",
-  "approvalStatus": "approved for integration as an asset; not yet product-assigned"
+  "size": [
+    1024,
+    1024
+  ],
+  "channels": "RGB (opaque)",
+  "meanSrgb": [
+    188.9,
+    181.4,
+    162.7
+  ],
+  "seamReview": "seamless: wrap difference x 0.033 / y 0.037 against 0.032 / 0.035 between neighbouring texels; in game since 2026-10-17 as the Landfall isles' rock class texture. Replaces v001, whose alpha vignette drew a grid of pale squares in the published map previews (map-detail.webp, minimap.webp) of 11 Landfall maps (map quality audit 2026-11-15, minimap-gravel-grid)",
+  "approvalStatus": "approved for integration as an asset; owner approved the pack version in the map quality polish pass (2026-11-16)"
 }

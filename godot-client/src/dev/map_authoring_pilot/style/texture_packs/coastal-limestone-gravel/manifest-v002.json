@@ -1,0 +1,62 @@
+{
+  "schema": "eloria-texture-pack-entry-v1",
+  "assetId": "coastal-limestone-gravel",
+  "version": "v002",
+  "generator": "derived, not generated: v001 made seamless and opaque with make_seamless.py (no image generation)",
+  "generationId": null,
+  "generationLineage": [
+    {
+      "generationId": "exec-754c9843-e2de-4005-96cd-bc47a2697a3b",
+      "inputImages": [],
+      "note": "v001's own generation; v002 reuses its pixels"
+    }
+  ],
+  "derivedFrom": {
+    "version": "v001",
+    "path": "godot-client/src/dev/map_authoring_pilot/style/texture_packs/coastal-limestone-gravel/coastal-limestone-gravel-v001.png",
+    "sha256": "9ee53453b9ded8fedd5fdbff750c5d9f7c80bf985dc2cfd49207c15860a057e7",
+    "process": ".agents/skills/rabbitlands-map-visual-quality/scripts/make_seamless.py --size 1024 (defaults): divides out low-frequency light falloff, rolls the tile by half and replaces the middle bands along a minimum-error cut; the output is RGB, so v001's alpha vignette (min 0.161 in the corners, about 0.58 along the edges) is dropped",
+    "sameAs": "godot-client/src/world/look/textures/coastal-gravel.png (byte-identical; the runtime class texture made on 2026-10-17, see that folder's README.md)"
+  },
+  "generatedSource": null,
+  "integrationAsset": "godot-client/src/dev/map_authoring_pilot/style/texture_packs/coastal-limestone-gravel/coastal-limestone-gravel-v002.png",
+  "assetSha256": "8ceb494b4b117ba3372ccb353a22909455be2d5e9e107985401110ff3261bdc4",
+  "generatedSourceSha256": null,
+  "designReferences": [
+    {
+      "role": "design reference only; not passed as generation input",
+      "path": "C:\\rabbitlands\\work-output\\godot-map-editor-client\\godot-client\\src\\dev\\map_authoring_pilot\\style\\textures\\ground-basecolor.png",
+      "sha256": "8d151b32044978bf84083d557696ee7e97c3ef575d3071e7d48d3896fa47b805"
+    },
+    {
+      "role": "design reference only; not passed as generation input",
+      "path": "C:\\rabbitlands\\work-output\\godot-map-editor-client\\godot-client\\src\\dev\\map_authoring_pilot\\style\\textures\\desert-basecolor.png",
+      "sha256": "5d3d975e645bf4fd460f1022d0522c29b3dbc7b4e281bf0deb9559062fc9570a"
+    },
+    {
+      "role": "gameplay-scale style reference only; not passed as generation input",
+      "path": "C:\\rabbitlands\\work-output\\godot-map-editor-client\\prototypes\\last-lantern\\previews\\garden.png",
+      "sha256": "0f2041f063f534eed49c812183b7e2ebf651c530b5b1fc338df4fde33584686e"
+    }
+  ],
+  "generationInputImages": [],
+  "prompt": "Use case: stylized-concept\nAsset type: square seamless albedo-only source tile for a low-poly fantasy coastal terrain material\nPrimary request: Create a repeatable pale coastal limestone gravel and fine shingle ground texture for island shores, harbour edges and exposed banks.\nStyle/medium: quiet painterly low-poly fantasy ground consistent with Eloria's approved stylized grass/desert assets; medium-scale surface detail.\nComposition/framing: flat orthographic square tile with evenly distributed fine-to-small rounded limestone chips and compact gravel; left/right and top/bottom edges must wrap seamlessly with no framing or visual edge treatment; no center feature.\nColor palette: pale warm grey, chalky cream and soft subdued green-grey, with small low-contrast darker mineral flecks.\nMaterials/textures: compact weathered limestone grit and smooth small shingle, gently mottled, lightly worn by shore water; intended world repeat about 4 metres, readable at gameplay camera distance without becoming a field of dots.\nLighting/mood: uniform neutral diffuse albedo only.\nConstraints: both-axis seamless repeat; texture only, no water or shoreline geometry; diffuse base colour only.\nAvoid: large distinct rocks, centerpiece stones, high contrast white pebbles, noisy dots, shells, seaweed, plants, water, foam, dramatic strata, edge frame, borders, gradients, shadows, highlights, directional lighting, perspective, horizon, text, logos, watermark.",
+  "intendedRole": "ground",
+  "worldRepeat": "4 m",
+  "roughnessScalarSuggestion": 0.92,
+  "metallicScalarSuggestion": 0.0,
+  "normalMapStatus": "not generated; any reuse of compatible existing map requires separate validation",
+  "ormMapStatus": "not generated; use scalar settings unless an existing compatible map is separately validated",
+  "size": [
+    1024,
+    1024
+  ],
+  "channels": "RGB (opaque)",
+  "meanSrgb": [
+    188.9,
+    181.4,
+    162.7
+  ],
+  "seamReview": "seamless: wrap difference x 0.033 / y 0.037 against 0.032 / 0.035 between neighbouring texels; in game since 2026-10-17 as the Landfall isles' rock class texture. Replaces v001, whose alpha vignette drew a grid of pale squares in the published map previews (map-detail.webp, minimap.webp) of 11 Landfall maps (map quality audit 2026-11-15, minimap-gravel-grid)",
+  "approvalStatus": "approved for integration as an asset; owner approved the pack version in the map quality polish pass (2026-11-16)"
+}

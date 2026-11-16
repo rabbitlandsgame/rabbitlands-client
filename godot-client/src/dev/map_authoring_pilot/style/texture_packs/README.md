@@ -15,7 +15,7 @@ Ten square, painterly albedo sources for ground and architectural materials. The
 | reed-thatch | bundled reed-thatch roof surface | 2 m | Sunmane, Manymouth Delta, Westhaven |
 | weathered-limestone-masonry | architecture | 2 m |  |
 
-Each asset folder contains its PNG and a manifest with the exact generation prompt, source hash, design-reference hashes, repeat intent, and suggested roughness. Design references were not supplied as image-generation inputs. The snow folder preserves v001 provenance and selects v002 after reducing visible edge darkening.
+Each asset folder contains its PNG and a manifest with the exact generation prompt, source hash, design-reference hashes, repeat intent, and suggested roughness. Design references were not supplied as image-generation inputs. The snow folder preserves v001 provenance and selects v002 after reducing visible edge darkening. The coastal gravel folder likewise keeps v001 and selects v002: the same tile made seamless and opaque (no new generation; it is the runtime class texture `src/world/look/textures/coastal-gravel.png`), because v001's alpha vignette drew a grid in the published map previews.
 
 Only albedo/base-color art was generated. No normal or ORM artwork is included. Existing detail maps may be reused only after confirming their scale and surface compatibility; otherwise use a reviewed scalar roughness setting.
 

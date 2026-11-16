@@ -137,7 +137,7 @@ const _PRESETS := {
 	},
 	COASTAL_LIMESTONE_GRAVEL: {
 		"family": "coastal-limestone-gravel", "detail_family": "stone",
-		"albedo_path": "res://src/dev/map_authoring_pilot/style/texture_packs/coastal-limestone-gravel/coastal-limestone-gravel-v001.png",
+		"albedo_path": "res://src/dev/map_authoring_pilot/style/texture_packs/coastal-limestone-gravel/coastal-limestone-gravel-v002.png",
 		"tint": Color.WHITE, "roughness": 0.94, "normal_strength": 0.75,
 		"density": 0.25, "world_density": 0.25,
 	},
