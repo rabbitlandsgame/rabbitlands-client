@@ -560,6 +560,18 @@ const FOREST_FLOOR_LOBE_METRES := 3.0
 ## patch's does; leaf litter (#f29e52) is too bright to pass.
 const FOREST_FLOOR_WORD := "forest"
 const FOREST_FLOOR_TINT := Vector2(0.65, 0.3)
+## A forest floor gives way to the stone on a cliff: its coverage (and the
+## noise the cut adds to it) is scaled by 1 - FOREST_FLOOR_STEEP times the
+## steep-face rock layer's own steepness (ROCK_FACE_UP, wobbled by
+## ROCK_FACE_WOBBLE: painted_ground_paint.gdshaderinc look_rock_steep), so it
+## draws as before on level ground, thins out where the rock begins and is gone
+## where the rock is whole. On steep terrain the exporter's coverage alternates
+## 0 and 0.4 vertex by vertex, and cut at FOREST_FLOOR_RIM it drew crisp moss
+## diamonds on the 2 m lattice over the cliff faces (Coilmere's Spindle Hill;
+## 12,307 forest-floor vertices over 0.36 on grades above 1.33 on 12 maps, map
+## polish verify 2026-11-16). It applies at every quality: at LOW, which draws
+## no rock layer, the cliff keeps its own ground rather than the diamonds.
+const FOREST_FLOOR_STEEP := 1.0
 const PAVING_RIM_LOBE := Vector2(0.09, 0.3)
 const MEADOW_RIM_LOBE := Vector2(0.12, 0.12)
 ## Opaque kit paving among a region's walk decks (`ground.kit_paving`):
@@ -743,6 +755,26 @@ const WATER_SHORE_DEPTH := Vector2(0.9, 0.0)
 const WATER_SHORE_WOBBLE := Vector2(0.22, 2.3)
 const WATER_SHORE_FOAM := Vector3(0.28, 0.45, 1.4)
 const WATER_SHORE_FOAM_COLOUR := Color(0.62, 0.68, 0.68)
+## The soft-edged sea's place in the transparent pass (Material.render_priority:
+## Godot draws a lower priority first, and sorts one priority back to front by
+## each instance's AABB centre). Left at 0, its 96 m Water_ cells were sorted
+## against every other blended surface by their centres (map polish verify,
+## 2026-11-16): a painted glaze or deck under the shallow edge (Coilmere's knob
+## mole paving) whose colour pass came after a nearer sea cell failed against
+## the depth the sea writes, and its pixels, which its own depth pre-pass had
+## kept the terrain from colouring, showed near-black through the fading water,
+## flickering as the sort changed; and rain, flames and spell effects at 0 were
+## painted over by any sea cell sorted after them. The sea draws at
+## WATER_SHORE_PRIORITY: after the painted ground's blended copies (glazes,
+## overlays, walk decks, kit paving and the road composites built on them,
+## which draw at their source's priority plus GROUND_GLAZE_PRIORITY_SHIFT, at
+## most WATER_SHORE_PRIORITY - 1: LookGround.glaze_priority), so it blends over
+## the ground beneath it, and before everything else (effects, markers, faded
+## kit models, the harvest glint: 0 and up), which it never paints over. The
+## exporter's bridge decks and supports blend at alpha 0 (walk and collision
+## carriers; the kit pier spans that draw them are opaque) and draw nothing.
+const WATER_SHORE_PRIORITY := -1
+const GROUND_GLAZE_PRIORITY_SHIFT := -2
 ## Inland water drawn by a StandardMaterial3D (rivers, canals, lagoons, the
 ## tutorial islands' seas and pools) is tinted by this display multiplier in
 ## Forward+ and Mobile (LookGround.decode_inland_water): value down and red

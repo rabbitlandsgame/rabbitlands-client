@@ -231,6 +231,9 @@ static func set_water_shore(sea: ShaderMaterial) -> void:
 			if value != null:
 				kept[name] = value
 	sea.shader = SHADER_WATER_SHORE
+	# Its fixed place in the transparent pass: after the painted ground's
+	# blended copies (`glaze_priority`), before every effect.
+	sea.render_priority = LookProfile.WATER_SHORE_PRIORITY
 	for name: StringName in kept:
 		sea.set_shader_parameter(name, kept[name])
 	sea.set_shader_parameter(&"look_shore_depth", LookProfile.WATER_SHORE_DEPTH)
@@ -748,6 +751,15 @@ static func is_rock(material: Material) -> bool:
 		and not LookProfile.green_tint(tint) and not sand_tint(tint) \
 		and not is_paving(standard) and not is_cobble(standard)
 
+## The render priority of a painted blended copy of a source at
+## `source_priority`: shifted by LookProfile.GROUND_GLAZE_PRIORITY_SHIFT, so
+## the copies keep their order among themselves, and kept under
+## LookProfile.WATER_SHORE_PRIORITY within Godot's range, so the soft-edged sea
+## always blends over the ground beneath it rather than failing it by depth.
+static func glaze_priority(source_priority: int) -> int:
+	return clampi(source_priority + LookProfile.GROUND_GLAZE_PRIORITY_SHIFT,
+		Material.RENDER_PRIORITY_MIN, LookProfile.WATER_SHORE_PRIORITY - 1)
+
 ## A forest-floor moss patch (LookProfile.FOREST_FLOOR_*): a blended patch
 ## whose material name contains FOREST_FLOOR_WORD and whose tint is a muted,
 ## not green earth. Authored at opacity 0.4, it is cut at FOREST_FLOOR_RIM so
@@ -878,7 +890,10 @@ static func painted_source_for(source: Material, kind: Kind, has_colour: bool,
 	painted.resource_name = standard.resource_name
 	painted.set_meta(LookProfile.SOURCE_META, source)
 	painted.shader = shader
-	painted.render_priority = standard.render_priority
+	# A blended copy draws before the soft-edged sea (`glaze_priority`); an
+	# opaque one keeps its source's priority.
+	painted.render_priority = glaze_priority(standard.render_priority) if blended \
+		else standard.render_priority
 	painted.next_pass = standard.next_pass
 	# A blended painted surface dithers itself out if OccluderFade fades it
 	# (layer L3, LookFade); it already carries the dither.
@@ -909,6 +924,11 @@ static func painted_source_for(source: Material, kind: Kind, has_colour: bool,
 			else LookProfile.FOREST_FLOOR_RIM_LOBE if forest_floor else LookProfile.PATCH_RIM_LOBE
 		if forest_floor:
 			lobe_metres = LookProfile.FOREST_FLOOR_LOBE_METRES
+			# On a cliff it gives way to the stone, over the rock layer's
+			# own steepness band (LookProfile.FOREST_FLOOR_STEEP).
+			painted.set_shader_parameter(&"look_rim_steep", LookProfile.FOREST_FLOOR_STEEP)
+			painted.set_shader_parameter(&"look_rock_up", LookProfile.ROCK_FACE_UP)
+			painted.set_shader_parameter(&"look_rock_wobble", LookProfile.ROCK_FACE_WOBBLE)
 	painted.set_shader_parameter(&"look_rim", rim)
 	painted.set_shader_parameter(&"look_rim_lobe", Vector2(rim_lobe.x, lobe_metres))
 	painted.set_shader_parameter(&"look_rim_grain", rim_lobe.y)

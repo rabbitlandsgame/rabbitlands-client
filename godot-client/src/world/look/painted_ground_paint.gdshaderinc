@@ -200,15 +200,30 @@ float look_rock_repeat() {
 	return look_rock_metres * rl_rock_face;
 }
 
+// How steep a pixel is on the rock layer's scale, whether or not the layer
+// draws: 0 on anything less steep than look_rock_up.x, 1 from look_rock_up.y,
+// the threshold wobbled as the rock's edge is. A forest floor gives way over
+// it (painted_ground_surface.gdshaderinc look_rim_steep).
+float look_rock_steep(vec3 world_normal, vec2 xz) {
+	float up = abs(world_normal.y) + (look_value_noise(xz / look_rock_wobble.y
+		+ vec2(23.1, 4.7)) - 0.5) * 2.0 * look_rock_wobble.x;
+	return 1.0 - smoothstep(look_rock_up.y, look_rock_up.x, up);
+}
+
 // How much of a pixel is rock face: 0 on anything less steep than the
 // threshold, and wherever the layer is off.
 float look_rock_weight(vec3 world_normal, vec2 xz) {
 	if (look_rock_repeat() <= 0.0) {
 		return 0.0;
 	}
-	float up = abs(world_normal.y) + (look_value_noise(xz / look_rock_wobble.y
-		+ vec2(23.1, 4.7)) - 0.5) * 2.0 * look_rock_wobble.x;
-	return 1.0 - smoothstep(look_rock_up.y, look_rock_up.x, up);
+	return look_rock_steep(world_normal, xz);
+}
+
+// What a blended patch keeps of its coverage on a steep face: 1 where
+// `amount` is 0 (every surface but the forest floor) and on level ground, down
+// to 1 - amount where the rock layer is whole.
+float look_steep_keep(float amount, vec3 world_normal, vec2 xz) {
+	return amount > 0.0 ? 1.0 - amount * look_rock_steep(world_normal, xz) : 1.0;
 }
 
 // How much of a terrain pixel is the exporter's worn road. The terrain mixes

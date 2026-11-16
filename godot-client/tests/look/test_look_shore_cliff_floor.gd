@@ -35,6 +35,7 @@ func _run() -> void:
 	_check_rock_shader_text()
 	_check_forest_floor_selection()
 	_check_forest_floor_dapples()
+	_check_forest_floor_steep()
 	LookProfile.set_player_quality(LookProfile.QUALITY_DEFAULT)
 	LookGround.apply_quality()
 	if failures == 0:
@@ -150,7 +151,7 @@ func _check_shore_shaders() -> void:
 	_expect(include.contains("#if CURRENT_RENDERER == RENDERER_COMPATIBILITY"),
 		"the depth is unprojected for the compatibility renderer's clip range too")
 	_expect(shore.contains("depth_draw_always") and shore.contains("#define CONTINENT_WATER_SHORE"),
-		"the soft-edged sea still writes depth, so a glaze sorted after it stays under it")
+		"the soft-edged sea still writes depth (its place in the transparent pass: test_look_sea_order)")
 
 # --- The cliff's tone ------------------------------------------------------------
 
@@ -320,6 +321,85 @@ func _check_forest_floor_dapples() -> void:
 		"and not one solid disc: %.2f of it is fully covered" % inside[1])
 	_expect(float(blend[0]) < float(inside[0]) * 0.6,
 		"it thins out across its blend (%.2f at half coverage)" % blend[0])
+
+## GLSL's smoothstep, edges either way round.
+func _glsl_smoothstep(edge0: float, edge1: float, x: float) -> float:
+	var t := clampf((x - edge0) / (edge1 - edge0), 0.0, 1.0)
+	return t * t * (3.0 - 2.0 * t)
+
+## look_rock_steep (painted_ground_paint.gdshaderinc) as GDScript.
+func _rock_steep(up: float, xz: Vector2) -> float:
+	var wobble := LookProfile.ROCK_FACE_WOBBLE
+	var wobbled := up + (_noise(xz / wobble.y + Vector2(23.1, 4.7)) - 0.5) * 2.0 * wobble.x
+	return 1.0 - _glsl_smoothstep(LookProfile.ROCK_FACE_UP.y, LookProfile.ROCK_FACE_UP.x, wobbled)
+
+## The forest floor's coverage on ground whose normal has world-up component
+## `up`: the cut's whole weight scaled by look_steep_keep, as the surface does.
+func _floor_coverage(alpha: float, xz: Vector2, up: float) -> float:
+	var rim := LookProfile.FOREST_FLOOR_RIM
+	var lobe_p := xz / LookProfile.FOREST_FLOOR_LOBE_METRES
+	var lobe := 0.65 * _noise(lobe_p + Vector2(41.3, 17.9)) \
+		+ 0.35 * _noise(lobe_p * 2.7 + Vector2(7.1, 29.3)) - 0.5
+	var grain := clampf((_noise(xz / 0.35 + Vector2(3.3, 8.1)) - 0.5) * 0.8, -1.0, 1.0)
+	var keep := 1.0 - LookProfile.FOREST_FLOOR_STEEP * _rock_steep(up, xz)
+	var weight := (alpha + (_noise(xz / LookProfile.RIM_NOISE_METRES) - 0.5) * 2.0 * rim.z \
+		+ lobe * 2.0 * LookProfile.FOREST_FLOOR_RIM_LOBE.x + grain * LookProfile.FOREST_FLOOR_RIM_LOBE.y) * keep
+	return smoothstep(rim.x - rim.y, rim.x + rim.y, weight)
+
+## On a cliff the forest floor gives way to the stone; on level ground it
+## dapples exactly as before. The exporter's coverage on steep ground
+## alternates 0 and 0.4 vertex by vertex: the worst case is 0.4 everywhere.
+func _check_forest_floor_steep() -> void:
+	var moss := Color("858066")
+	var painted := LookGround.painted_source_for(_patch("authored_coilmere_th-forest2-23", moss),
+		LookGround.Kind.PATCH, true, "coilmere") as ShaderMaterial
+	var yard := LookGround.painted_source_for(_patch("authored_coilmere_yard-03", moss),
+		LookGround.Kind.PATCH, true, "coilmere") as ShaderMaterial
+	_expect(painted != null and is_equal_approx(float(painted.get_shader_parameter(&"look_rim_steep")),
+			LookProfile.FOREST_FLOOR_STEEP) and LookProfile.FOREST_FLOOR_STEEP == 1.0
+		and painted.get_shader_parameter(&"look_rock_up") == LookProfile.ROCK_FACE_UP
+		and painted.get_shader_parameter(&"look_rock_wobble") == LookProfile.ROCK_FACE_WOBBLE,
+		"a forest floor gives way over the rock layer's steepness band")
+	var yard_steep: Variant = yard.get_shader_parameter(&"look_rim_steep") if yard != null else 1.0
+	_expect(yard != null and (yard_steep == null or float(yard_steep) == 0.0),
+		"every other glaze keeps its coverage on a slope")
+	var level_same := true
+	var level_total := 0.0
+	var steep_max := 0.0
+	var ramp_total := 0.0
+	var count := 0
+	for i: int in 120:
+		for j: int in 120:
+			var xz := Vector2(1300.0 + i * 0.5, 7100.0 + j * 0.5)
+			var before := _coverage(0.4, xz, LookProfile.FOREST_FLOOR_RIM,
+				LookProfile.FOREST_FLOOR_RIM_LOBE.x, LookProfile.FOREST_FLOOR_LOBE_METRES,
+				LookProfile.FOREST_FLOOR_RIM_LOBE.y)
+			var level := _floor_coverage(0.4, xz, 1.0)
+			level_same = level_same and level == before
+			level_total += level
+			# Grade 1.33 (53 degrees, up 0.6) and steeper: the rock is whole.
+			steep_max = maxf(steep_max, _floor_coverage(0.4, xz, 0.6 - LookProfile.ROCK_FACE_WOBBLE.x))
+			steep_max = maxf(steep_max, _floor_coverage(0.4, xz, 0.45))
+			# Halfway through the band (up 0.66, about 49 degrees).
+			ramp_total += _floor_coverage(0.4, xz, 0.66)
+			count += 1
+	print("forest floor on slopes: level %.2f, mid-band %.2f, steep max %.3f"
+		% [level_total / count, ramp_total / count, steep_max])
+	_expect(level_same, "on level ground the forest floor dapples exactly as before")
+	_expect(steep_max == 0.0, "on a cliff (grade 1.33 and up) no forest floor draws (max %.3f)" % steep_max)
+	_expect(ramp_total / count < level_total / count * 0.75,
+		"it thins out across the rock's band (%.2f against %.2f level)" % [ramp_total / count,
+			level_total / count])
+	var surface := FileAccess.get_file_as_string("res://src/world/look/painted_ground_surface.gdshaderinc")
+	var paint := FileAccess.get_file_as_string("res://src/world/look/painted_ground_paint.gdshaderinc")
+	_expect(surface.contains("* look_steep_keep(look_rim_steep, world_normal, look_ground_xz);")
+		and surface.contains("uniform float look_rim_steep = 0.0;")
+		and paint.contains("float look_rock_steep(vec3 world_normal, vec2 xz) {")
+		and paint.contains("return look_rock_steep(world_normal, xz);"),
+		"the surface scales its cut's weight by the rock layer's own steepness")
+	var overlay_names := _uniform_names(LookGround.SHADER_OVERLAY)
+	_expect("look_rim_steep" in overlay_names and "look_rock_up" in overlay_names,
+		"the overlay parses with the steep-face cut")
 
 func _uniform_names(shader: Shader) -> Array[String]:
 	var names: Array[String] = []
