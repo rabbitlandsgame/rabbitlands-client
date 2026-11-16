@@ -59,7 +59,7 @@ def test_the_publisher_writes_that_figure_into_every_cell():
     assert '"estimatedResidentBytes": geometry + sum(stats["sharedResourceResidentBytes"].values())' in source
     assert 'record["geometryResidentFactor"] = GEOMETRY_RESIDENT_FACTOR' in source
     # The prototype figures come from the space passes, at the v2 factor, before the record reads the manifest.
-    assert source.index("PF.finish([out], factor=GEOMETRY_RESIDENT_FACTOR)") < source.index(
+    assert source.index("PF.finish([out], factor=GEOMETRY_RESIDENT_FACTOR,") < source.index(
         'manifest = json.loads((out / "world.json").read_text(encoding="utf-8"))')
     assert '["glbBytes"] * 5' not in source
 

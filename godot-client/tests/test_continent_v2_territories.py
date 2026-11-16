@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import dataclasses
 from pathlib import Path
+import re
 import sys
 
 import numpy as np
@@ -119,7 +120,14 @@ def test_shared_border_vertices_are_byte_equal(territories,lattice):
     assert all(entry.get("mirroredPatches",[])==[] for entry in report.values())
     assert [p["id"] for p in T.patches(by_id(territories,"ravenhead"))]==["seam-mole-pier"]
     assert [p["id"] for p in T.patches(by_id(territories,"coilmere"))]==["seam-mole-knob"]
-    assert sum(len(T.patches(t)) for t in territories)==2
+    # Map polish 2026-11-16: terrain pads under seated buildings (mq-pad-*) and path or brook-bank grading (pt-*,
+    # pt2-*, pt3-*) are sculpted inside one territory, and the checks above (no shared vertex sculpted, no mirrored
+    # patch) hold every one of them off the borders. Any other kind of patch is new and needs that review first.
+    seam={"seam-mole-pier","seam-mole-knob"}
+    others=[p["id"] for t in territories for p in T.patches(t) if p["id"] not in seam]
+    assert sum(len(T.patches(t)) for t in territories)==2+len(others)
+    assert all(re.match(r"(mq-pad-|pt[23]?-)",i) for i in others),sorted(i for i in others
+                                                                       if not re.match(r"(mq-pad-|pt[23]?-)",i))
 
 
 def shared_pair(territories,lattice):
