@@ -80,6 +80,11 @@ uniform vec2 look_rim_lobe = vec2(0.0, 5.0);
 // How far the texture's grain moves the cut (vertex alpha per unit of
 // relative luminance): light stones stay, dark joints go first.
 uniform float look_rim_grain = 0.0;
+// How much of the coverage, and the noise the cut adds to it, gives way on a
+// steep face (look_steep_keep over the rock layer's steepness band,
+// look_rock_up): 0 none; the forest floor 1 (LookProfile.FOREST_FLOOR_STEEP),
+// so a cliff shows its stone rather than moss diamonds on the 2 m lattice.
+uniform float look_rim_steep = 0.0;
 // A class texture laid over the source's (look_class_metres 0: none), and how
 // much of its own hue it keeps against the source's mean colour.
 uniform sampler2D look_class_texture : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
@@ -135,13 +140,6 @@ void fragment() {
 		texel = vec4(mix(recoloured, own_hue, look_class_hue), detail.a);
 	}
 	vec3 world_normal = (INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz;
-	// The steep-face rock layer (look_rock_layer, painted_ground_paint.gdshaderinc):
-	// on a cliff the texel becomes the rock face's, and .a says how much. The
-	// continent height is the world height less the wrapper's translation.
-	vec4 look_rock_sample = look_rock_layer(texel.rgb, texel_mean, world_normal,
-		vec3(look_ground_xz.x, (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).y - MODEL_MATRIX[3].y,
-			look_ground_xz.y));
-	texel.rgb = look_rock_sample.rgb;
 	vec3 albedo = texel.rgb * albedo_color.rgb;
 	vec3 vertex_colour = COLOR.rgb;
 	if (vertex_albedo_srgb) {
@@ -155,6 +153,15 @@ void fragment() {
 		albedo *= vertex_colour;
 		reference *= vertex_colour;
 	}
+	// The steep-face rock layer (look_rock_layer, painted_ground_paint.gdshaderinc):
+	// on a cliff the albedo becomes the rock face's, drawn as stone after the
+	// tint and vertex colour that would green it, and the reference the
+	// stone's; .a says how much. The continent height is the world height
+	// less the wrapper's translation.
+	vec4 look_rock_sample = look_rock_layer(albedo, reference, world_normal,
+		vec3(look_ground_xz.x, (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).y - MODEL_MATRIX[3].y,
+			look_ground_xz.y));
+	albedo = look_rock_sample.rgb;
 	if (look_debug > 0) {
 		ALBEDO = vec3(0.0);
 		EMISSION = look_debug_colour(reference, vertex_colour, look_ground_xz);
@@ -180,9 +187,10 @@ void fragment() {
 		float lobe = 0.65 * look_value_noise(lobe_p + vec2(41.3, 17.9))
 			+ 0.35 * look_value_noise(lobe_p * 2.7 + vec2(7.1, 29.3)) - 0.5;
 		float grain = look_luma(texel.rgb) / max(look_luma(texel_mean), 0.02) - 1.0;
-		float weight = COLOR.a + (look_value_noise(look_ground_xz / look_rim_noise_metres)
+		float weight = (COLOR.a + (look_value_noise(look_ground_xz / look_rim_noise_metres)
 			- 0.5) * 2.0 * look_rim.z + lobe * 2.0 * look_rim_lobe.x
-			+ clamp(grain, -1.0, 1.0) * look_rim_grain;
+			+ clamp(grain, -1.0, 1.0) * look_rim_grain)
+			* look_steep_keep(look_rim_steep, world_normal, look_ground_xz);
 		coverage = smoothstep(look_rim.x - look_rim.y, look_rim.x + look_rim.y, weight);
 		if (look_debug == 0) {
 			band = mix(look_edge_band, look_edge_band_paving,

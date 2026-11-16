@@ -97,11 +97,14 @@ const QUALITY_TRIM_VARIABLE := "ELORIA_LOOK_QUALITY_TRIM"
 ## as it always did.
 const QUALITY_PRESETS := {
 	Quality.LOW: {"shadow_splits": 2, "shadow_atlas": 2048, "shadow_filter": 0,
-		"ssao": false, "ssil": false, "glow": false, "grass": false, "rock_face": false},
+		"ssao": false, "ssil": false, "glow": false, "grass": false, "rock_face": false,
+		"water_shore": false},
 	Quality.MEDIUM: {"shadow_splits": 2, "shadow_atlas": 4096, "shadow_filter": 2,
-		"ssao": true, "ssil": false, "glow": true, "grass": true, "rock_face": true},
+		"ssao": true, "ssil": false, "glow": true, "grass": true, "rock_face": true,
+		"water_shore": true},
 	Quality.HIGH: {"shadow_splits": 4, "shadow_atlas": 4096, "shadow_filter": 2,
-		"ssao": true, "ssil": true, "glow": true, "grass": true, "rock_face": true},
+		"ssao": true, "ssil": true, "glow": true, "grass": true, "rock_face": true,
+		"water_shore": true},
 }
 ## The shadow atlas's depth, which no quality changes (Godot's default).
 const SHADOW_ATLAS_16_BITS := true
@@ -534,6 +537,41 @@ const RIM_NOISE_METRES := 0.9
 const RIM_LOBE_METRES := 5.0
 const DECK_RIM_LOBE := Vector2(0.14, 0.25)
 const PATCH_RIM_LOBE := Vector2(0.18, 0.2)
+## The continent's forest-floor moss patches (LookGround.is_forest_floor: the
+## "Forest floor moss" preset, 77 enabled patches on 13 Landfall maps) are
+## authored at opacity 0.4, which the exporter writes into their coverage, so
+## their interiors sit at 0.4, under PATCH_RIM's 0.42 cut: only the noise's
+## peaks drew and the moss barely showed (map quality report 2026-11-15,
+## forest-floor-under-cut; owner-approved 2026-11-16). They are cut lower, at
+## FOREST_FLOOR_RIM, just under their 0.4 interior, so the broad lobes
+## (FOREST_FLOOR_RIM_LOBE, FOREST_FLOOR_LOBE_METRES across, smaller than
+## RIM_LOBE_METRES) and the moss texture's grain decide where it draws: about
+## half to two thirds of the floor in dapples a few metres across, thinning
+## out over the patch's 8 m blend where its coverage falls, never one flat
+## disc. Cut at 0.2 instead, a 100-300 m ellipse filled solid with moss.
+const FOREST_FLOOR_RIM := Vector3(0.36, 0.08, 0.08)
+const FOREST_FLOOR_RIM_LOBE := Vector2(0.16, 0.25)
+const FOREST_FLOOR_LOBE_METRES := 3.0
+## A forest-floor patch is a blended patch whose material name (the continent
+## exporter's authored_<region>_<patch id>) contains FOREST_FLOOR_WORD and
+## whose tint is a muted earth: at most x bright and y saturated (display
+## value and saturation; the moss preset's #858066 is 0.52 and 0.23), and not
+## green. Every Landfall forest-floor patch id contains "forest" and no other
+## patch's does; leaf litter (#f29e52) is too bright to pass.
+const FOREST_FLOOR_WORD := "forest"
+const FOREST_FLOOR_TINT := Vector2(0.65, 0.3)
+## A forest floor gives way to the stone on a cliff: its coverage (and the
+## noise the cut adds to it) is scaled by 1 - FOREST_FLOOR_STEEP times the
+## steep-face rock layer's own steepness (ROCK_FACE_UP, wobbled by
+## ROCK_FACE_WOBBLE: painted_ground_paint.gdshaderinc look_rock_steep), so it
+## draws as before on level ground, thins out where the rock begins and is gone
+## where the rock is whole. On steep terrain the exporter's coverage alternates
+## 0 and 0.4 vertex by vertex, and cut at FOREST_FLOOR_RIM it drew crisp moss
+## diamonds on the 2 m lattice over the cliff faces (Coilmere's Spindle Hill;
+## 12,307 forest-floor vertices over 0.36 on grades above 1.33 on 12 maps, map
+## polish verify 2026-11-16). It applies at every quality: at LOW, which draws
+## no rock layer, the cliff keeps its own ground rather than the diamonds.
+const FOREST_FLOOR_STEEP := 1.0
 const PAVING_RIM_LOBE := Vector2(0.09, 0.3)
 const MEADOW_RIM_LOBE := Vector2(0.12, 0.12)
 ## Opaque kit paving among a region's walk decks (`ground.kit_paving`):
@@ -585,10 +623,17 @@ const CLASS_TEXTURES := {
 ## cliffs (map quality sweeps 2026-11-15). `ground.verge_grain_steep` only
 ## calmed the streaks. There the terrain and base ground give way to
 ## ROCK_FACE_TEXTURE (a CLASS_TEXTURES name, its `metres` the repeat) mapped
-## from the side along x and z in continent metres, recoloured to the ground's
-## own mean colour as a class texture is, keeping ROCK_FACE_HUE of its own
-## hue, times ROCK_FACE_VALUE; the paint keeps ROCK_FACE_GRAIN of its grain
-## where a region calms the planar texture's. It begins at the world-up normal
+## from the side along x and z in continent metres, drawn as stone at the
+## ground's luminance times ROCK_FACE_VALUE, keeping ROCK_FACE_HUE of its own
+## grey hue and taking the rest from the ground's mean colour (after its tint
+## and vertex colour) with any grass green turned to grey; the paint keeps
+## ROCK_FACE_GRAIN of its grain where a region calms the planar texture's, and
+## gives it the earth's verge value rather than the grass's deepening and lost
+## red. Recoloured to the ground's whole colour at a hue share of 0.5 and then
+## painted as grass, Coilmere's Spindle Hill and knob read dark olive (map
+## polish 2026-11-16); at 0.75 Landfall's cliffs keep a modest warmth from its
+## tan ground and Coilmere's and Boarsend's green hills draw grey stone. It
+## begins at the world-up normal
 ## component ROCK_FACE_UP.x (about 44 degrees, grade 0.96) and is whole at .y
 ## (about 53 degrees, grade 1.33), the threshold moved up to ROCK_FACE_WOBBLE.x
 ## by noise ROCK_FACE_WOBBLE.y metres across so its edge wanders over a bank.
@@ -600,7 +645,7 @@ const CLASS_TEXTURES := {
 const ROCK_FACE_TEXTURE := "cliff_rock"
 const ROCK_FACE_UP := Vector2(0.72, 0.6)
 const ROCK_FACE_WOBBLE := Vector2(0.05, 7.0)
-const ROCK_FACE_HUE := 0.5
+const ROCK_FACE_HUE := 0.75
 const ROCK_FACE_VALUE := 1.0
 const ROCK_FACE_GRAIN := 1.0
 ## The surfaces a class texture can cover: walk decks, pale paving, sand
@@ -613,8 +658,9 @@ const ROCK_FACE_GRAIN := 1.0
 ## gravel" (410 patch meshes on the 15 isles) and every one classed soil is
 ## "Soil". Their "Forest floor moss" patches are plain glazes and have no slot:
 ## the moss pack is their own texture already, and it wraps without a grid.
-## What they lack at the game camera is coverage, not texture: authored at
-## opacity 0.4, under PATCH_RIM's 0.42 cut, most of each is cut away.
+## What they lacked at the game camera was coverage, not texture: authored at
+## opacity 0.4, under PATCH_RIM's 0.42 cut, most of each was cut away; they
+## are cut at FOREST_FLOOR_RIM instead.
 const CLASS_TEXTURE_SLOTS := ["deck", "paving", "sand", "meadow", "rock", "soil"]
 ## How much of a class texture's own hue survives its recolouring (0: the
 ## source's mean colour exactly; 1: only its luminance is matched).
@@ -685,6 +731,50 @@ const CONTINENT_SEA_VALUE := 4.0
 ## (11, 62, 76 against develop's 37, 72, 87; md_border_cw's frame saturation
 ## 0.63, over the 0.52 ceiling).
 const CONTINENT_SEA_CHROMA := 0.7
+## The continent water's edge (LookGround.decode_continent_sea,
+## continent_water.gdshaderinc CONTINENT_WATER_SHORE). The terrain is faceted
+## on a 2 m lattice, so the flat water cut it along a polyline that zigzagged
+## cell by cell: Ravenhead's harbour beach drew a row of saw teeth and
+## Saltsound's inlet a staircase (map polish 2026-11-16). The water now fades
+## in over its first WATER_SHORE_DEPTH.x metres of depth (its surface height
+## less the scene's height beneath it, from the depth buffer; .y is the depth
+## where it starts, 0 at the waterline), so on a beach the cut becomes a
+## gradient a few metres wide and against a bank a narrow one.
+## WATER_SHORE_WOBBLE moves that depth by up to x metres in two octaves of
+## noise y metres across, so the fade's contours do not trace the facets
+## either. WATER_SHORE_FOAM: a broken wash along the first x metres of depth,
+## at most y opaque, in drifting noise z metres across, in
+## WATER_SHORE_FOAM_COLOUR (decoded linear albedo, a little below the sand so
+## it reads as wet foam rather than a white rule). Only in Forward+ and Mobile
+## (the decoded copy; the compatibility renderer keeps the loader's opaque
+## sea) and never at LOW (QUALITY_PRESETS `water_shore`: the edge reads the
+## depth buffer and draws the sea in the transparent pass). Every Water_ cell
+## the loader gives the sea material takes it, so lakes and the sloping
+## drainage do too.
+const WATER_SHORE_DEPTH := Vector2(0.9, 0.0)
+const WATER_SHORE_WOBBLE := Vector2(0.22, 2.3)
+const WATER_SHORE_FOAM := Vector3(0.28, 0.45, 1.4)
+const WATER_SHORE_FOAM_COLOUR := Color(0.62, 0.68, 0.68)
+## The soft-edged sea's place in the transparent pass (Material.render_priority:
+## Godot draws a lower priority first, and sorts one priority back to front by
+## each instance's AABB centre). Left at 0, its 96 m Water_ cells were sorted
+## against every other blended surface by their centres (map polish verify,
+## 2026-11-16): a painted glaze or deck under the shallow edge (Coilmere's knob
+## mole paving) whose colour pass came after a nearer sea cell failed against
+## the depth the sea writes, and its pixels, which its own depth pre-pass had
+## kept the terrain from colouring, showed near-black through the fading water,
+## flickering as the sort changed; and rain, flames and spell effects at 0 were
+## painted over by any sea cell sorted after them. The sea draws at
+## WATER_SHORE_PRIORITY: after the painted ground's blended copies (glazes,
+## overlays, walk decks, kit paving and the road composites built on them,
+## which draw at their source's priority plus GROUND_GLAZE_PRIORITY_SHIFT, at
+## most WATER_SHORE_PRIORITY - 1: LookGround.glaze_priority), so it blends over
+## the ground beneath it, and before everything else (effects, markers, faded
+## kit models, the harvest glint: 0 and up), which it never paints over. The
+## exporter's bridge decks and supports blend at alpha 0 (walk and collision
+## carriers; the kit pier spans that draw them are opaque) and draw nothing.
+const WATER_SHORE_PRIORITY := -1
+const GROUND_GLAZE_PRIORITY_SHIFT := -2
 ## Inland water drawn by a StandardMaterial3D (rivers, canals, lagoons, the
 ## tutorial islands' seas and pools) is tinted by this display multiplier in
 ## Forward+ and Mobile (LookGround.decode_inland_water): value down and red

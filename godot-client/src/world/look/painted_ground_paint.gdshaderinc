@@ -164,10 +164,13 @@ float look_variation_at(vec2 xz) {
 // (Landfall's bailey cliff, Spindle Hill, Boarsend's sea cliffs; map quality
 // sweeps 2026-11-15). There the surface gives way to a rock face mapped from
 // the side: projected along x and along z, each weighed by how far the face
-// normal points that way, in continent metres. It is recoloured to the
-// surface's own mean colour as a class texture is (keeping look_rock_hue of
-// its own hue, times look_rock_value), so the palette, the paint classes and
-// every trim see the colour they always did.
+// normal points that way, in continent metres. It is drawn as stone at the
+// ground's own luminance (times look_rock_value), keeping look_rock_hue of its
+// own grey hue and taking the rest from the ground's mean colour with any
+// grass green taken out (look_rock_tone), and the paint gives it none of the
+// verge's grass trims: recoloured to the ground's whole mean colour and then
+// deepened and stripped of red as grass, Coilmere's Spindle Hill read dark
+// olive (map polish 2026-11-16).
 // look_rock_up: the world-up normal component where the rock begins (x) and
 // where it is whole (y). look_rock_wobble: how far noise moves that threshold
 // (x) and the noise's size in metres (y), so the rock's edge wanders across a
@@ -197,56 +200,30 @@ float look_rock_repeat() {
 	return look_rock_metres * rl_rock_face;
 }
 
+// How steep a pixel is on the rock layer's scale, whether or not the layer
+// draws: 0 on anything less steep than look_rock_up.x, 1 from look_rock_up.y,
+// the threshold wobbled as the rock's edge is. A forest floor gives way over
+// it (painted_ground_surface.gdshaderinc look_rim_steep).
+float look_rock_steep(vec3 world_normal, vec2 xz) {
+	float up = abs(world_normal.y) + (look_value_noise(xz / look_rock_wobble.y
+		+ vec2(23.1, 4.7)) - 0.5) * 2.0 * look_rock_wobble.x;
+	return 1.0 - smoothstep(look_rock_up.y, look_rock_up.x, up);
+}
+
 // How much of a pixel is rock face: 0 on anything less steep than the
 // threshold, and wherever the layer is off.
 float look_rock_weight(vec3 world_normal, vec2 xz) {
 	if (look_rock_repeat() <= 0.0) {
 		return 0.0;
 	}
-	float up = abs(world_normal.y) + (look_value_noise(xz / look_rock_wobble.y
-		+ vec2(23.1, 4.7)) - 0.5) * 2.0 * look_rock_wobble.x;
-	return 1.0 - smoothstep(look_rock_up.y, look_rock_up.x, up);
+	return look_rock_steep(world_normal, xz);
 }
 
-// The texel with the rock face laid over it where the face is steep, and in
-// .a how much of it is rock. `texel` and `texel_mean` are the surface's own
-// texel and mean colour, `position` the continent position in metres. Level
-// ground returns `texel` untouched and samples nothing. The gradients are
-// taken before the steepness test, where the whole quad runs, and handed to
-// textureGrad: the samples are made only on steep pixels.
-vec4 look_rock_layer(vec3 texel, vec3 texel_mean, vec3 world_normal, vec3 position) {
-	float metres = look_rock_repeat();
-	if (metres <= 0.0) {
-		return vec4(texel, 0.0);
-	}
-	vec3 p = position / metres;
-	vec3 p_dx = dFdx(p);
-	vec3 p_dy = dFdy(p);
-	float rock = look_rock_weight(world_normal, position.xz);
-	if (rock <= 0.0) {
-		return vec4(texel, 0.0);
-	}
-	// Each side projection by how far the face points along its axis,
-	// sharpened so a corner turns over a narrow band.
-	vec2 sides = pow(abs(world_normal.xz), vec2(4.0));
-	sides /= max(sides.x + sides.y, 0.0001);
-	vec3 face = vec3(0.0);
-	float taken = 0.0;
-	if (sides.x > 0.01) {
-		face += sides.x * textureGrad(look_rock_texture, vec2(p.z, -p.y),
-			vec2(p_dx.z, -p_dx.y), vec2(p_dy.z, -p_dy.y)).rgb;
-		taken += sides.x;
-	}
-	if (sides.y > 0.01) {
-		face += sides.y * textureGrad(look_rock_texture, vec2(p.x, -p.y) + vec2(0.37, 0.61),
-			vec2(p_dx.x, -p_dx.y), vec2(p_dy.x, -p_dy.y)).rgb;
-		taken += sides.y;
-	}
-	face /= max(taken, 0.0001);
-	vec3 face_mean = max(textureLod(look_rock_texture, vec2(0.5), 16.0).rgb, vec3(0.02));
-	vec3 recoloured = face * texel_mean / face_mean;
-	vec3 own_hue = face * (look_luma(texel_mean) / max(look_luma(face_mean), 0.02));
-	return vec4(mix(texel, mix(recoloured, own_hue, look_rock_hue) * look_rock_value, rock), rock);
+// What a blended patch keeps of its coverage on a steep face: 1 where
+// `amount` is 0 (every surface but the forest floor) and on level ground, down
+// to 1 - amount where the rock layer is whole.
+float look_steep_keep(float amount, vec3 world_normal, vec2 xz) {
+	return amount > 0.0 ? 1.0 - amount * look_rock_steep(world_normal, xz) : 1.0;
 }
 
 // How much of a terrain pixel is the exporter's worn road. The terrain mixes
@@ -331,6 +308,63 @@ vec3 look_tint(vec3 display_tint, float chroma) {
 // cyan-grey snow at luminance 174-176 against develop's 236-242.
 float look_green(vec3 colour) {
 	return smoothstep(0.02, 0.12, (colour.g - max(colour.r, colour.b)) / max(colour.g, 0.0001));
+}
+
+// The steep-face rock's mean colour as drawn on ground whose mean colour is
+// `ground` (linear, after tint and vertex colour): stone at the ground's
+// luminance times look_rock_value, keeping look_rock_hue of the rock
+// texture's own hue (`face_mean`) and taking the rest from the ground's hue
+// with its grass green turned to grey (look_green), so Landfall's tan cliffs
+// stay a warm stone and Coilmere's green hills grow grey ones.
+vec3 look_rock_tone(vec3 ground, vec3 face_mean) {
+	float luma = max(look_luma(ground), 0.0001);
+	vec3 ground_hue = mix(ground / luma, vec3(1.0), look_green(ground));
+	vec3 own_hue = face_mean / max(look_luma(face_mean), 0.0001);
+	return mix(ground_hue, own_hue, look_rock_hue) * luma * look_rock_value;
+}
+
+// The albedo with the rock face laid over it where the face is steep, and in
+// .a how much of it is rock. `albedo` and `reference` are the surface's own
+// albedo and mean colour after its tint and vertex colour, `position` the
+// continent position in metres. On rock the reference becomes the stone's
+// (look_rock_tone), so the paint classes and trims it as stone, not grass.
+// Level ground returns `albedo` and `reference` untouched and samples
+// nothing. The gradients are taken before the steepness test, where the whole
+// quad runs, and handed to textureGrad: the samples are made only on steep
+// pixels.
+vec4 look_rock_layer(vec3 albedo, inout vec3 reference, vec3 world_normal, vec3 position) {
+	float metres = look_rock_repeat();
+	if (metres <= 0.0) {
+		return vec4(albedo, 0.0);
+	}
+	vec3 p = position / metres;
+	vec3 p_dx = dFdx(p);
+	vec3 p_dy = dFdy(p);
+	float rock = look_rock_weight(world_normal, position.xz);
+	if (rock <= 0.0) {
+		return vec4(albedo, 0.0);
+	}
+	// Each side projection by how far the face points along its axis,
+	// sharpened so a corner turns over a narrow band.
+	vec2 sides = pow(abs(world_normal.xz), vec2(4.0));
+	sides /= max(sides.x + sides.y, 0.0001);
+	vec3 face = vec3(0.0);
+	float taken = 0.0;
+	if (sides.x > 0.01) {
+		face += sides.x * textureGrad(look_rock_texture, vec2(p.z, -p.y),
+			vec2(p_dx.z, -p_dx.y), vec2(p_dy.z, -p_dy.y)).rgb;
+		taken += sides.x;
+	}
+	if (sides.y > 0.01) {
+		face += sides.y * textureGrad(look_rock_texture, vec2(p.x, -p.y) + vec2(0.37, 0.61),
+			vec2(p_dx.x, -p_dx.y), vec2(p_dy.x, -p_dy.y)).rgb;
+		taken += sides.y;
+	}
+	face /= max(taken, 0.0001);
+	vec3 face_mean = max(textureLod(look_rock_texture, vec2(0.5), 16.0).rgb, vec3(0.02));
+	vec3 stone = look_rock_tone(reference, face_mean);
+	reference = mix(reference, stone, rock);
+	return vec4(mix(albedo, face * stone / face_mean, rock), rock);
 }
 
 // How far inside the pale paving a continent position is, 0..1 over
@@ -440,11 +474,14 @@ vec3 look_paint_rock(vec3 albedo, vec3 reference, vec3 vertex_colour, vec2 xz,
 		: look_verge_grain_steep;
 	vec3 grained = mix(reference, albedo, mix(steep_grain, 1.0, smoothstep(0.55, 0.8, up)));
 
-	// Verge: deeper and a little richer by hue, with a painted mottle.
-	float verge_scale = mix(verge_trims.y, verge_trims.x, look_green(reference));
+	// Verge: deeper and a little richer by hue, with a painted mottle. The
+	// rock face is stone: it takes the earth's value and none of the grass's
+	// deepening or lost red, even where it is only part of the pixel.
+	float verge_green = look_green(reference) * (1.0 - rock);
+	float verge_scale = mix(verge_trims.y, verge_trims.x, verge_green);
 	vec3 verge = look_saturate(mix(reference, grained, look_verge_grain) * verge_scale,
 		verge_trims.z);
-	verge.r *= mix(1.0, verge_trims.w, look_green(reference));
+	verge.r *= mix(1.0, verge_trims.w, verge_green);
 	verge *= 1.0 + (look_value_noise(xz / look_verge_fine_metres + vec2(5.3, 2.1))
 		- 0.5) * 2.0 * look_verge_fine;
 	vec3 colour = mix(verge, grained, pale);

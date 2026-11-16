@@ -179,6 +179,7 @@ const MountBindQueueScript := preload("res://src/mounts/mount_bind_queue.gd")
 const MapChangeCurtainScript := preload("res://src/world/map_change_curtain.gd")
 const LiveEffectBudgetScript := preload("res://src/world/live_effect_budget.gd")
 const UndergroundSceneryScript := preload("res://src/world/underground_scenery.gd")
+const HarvestGlintScript := preload("res://src/world/harvest_glint.gd")
 const InvasionAssistantScript := preload("res://src/ui/invasion_assistant.gd")
 const ExtensionWindowsScript := preload("res://src/ui/extension_windows.gd")
 const MapViewScript := preload("res://src/world/map_view.gd")
@@ -19504,6 +19505,7 @@ func _sync_map_objects() -> void:
 		world_root.add_child(map_object)
 		map_object_nodes[object_id] = map_object
 		_paint_map_object_look(map_object)
+		map_object.set_cave_glint(_cave_glint_here())
 		_place_map_object_on_surface(map_object)
 	if is_instance_valid(lantern_scene) and lantern_scene.has_method("bind_map_objects"):
 		lantern_scene.bind_map_objects(map_object_nodes)
@@ -19650,6 +19652,13 @@ func _bind_map_presentation(manifest: WorldManifest) -> void:
 	_map_presentation = map_presentation_of(here,
 		manifest.data if manifest != null else {}, _lantern_pick_shapes(here),
 		UndergroundSceneryScript.harvest_presentation(here))
+	# A dark interior's harvest nodes glint (harvest_glint.gd); objects listed
+	# while the map was loading take it now.
+	_map_presentation["caveGlint"] = HarvestGlintScript.wanted_for(
+		manifest.data if manifest != null else {}, MapRegistry.resolve(map_registry, AppState.current_map))
+	for raw_object: Variant in map_object_nodes.values():
+		if is_instance_valid(raw_object):
+			(raw_object as MapObject3D).set_cave_glint(_cave_glint_here())
 	if (_map_presentation.nodes as Dictionary).is_empty() \
 			and (_map_presentation.groupings as Array).is_empty():
 		return
@@ -19742,6 +19751,12 @@ func _object_presentation(object_id: int) -> Dictionary:
 			AppState.current_map):
 		return {}
 	return (_map_presentation.get("nodes", {}) as Dictionary).get(object_id, {}) as Dictionary
+
+## Whether the current map's harvest nodes glint: a dark interior
+## (harvest_glint.gd `wanted_for`, read as the map bound). Never on an exterior.
+func _cave_glint_here() -> bool:
+	return bool(_map_presentation.get("caveGlint", false)) and str(_map_presentation.get("map", "")) \
+		== EloriaProtocol.map_id_from_reference(AppState.current_map)
 
 ## Look-pass parity for a runtime world object: its map's root was painted as
 ## it loaded (LookFoliage.paint_loaded), before the server listed this object,
