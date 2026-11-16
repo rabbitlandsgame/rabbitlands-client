@@ -513,6 +513,12 @@
 
 [ext_resource type="PackedScene" path="res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3-noplate.glb" id="mq_2"]
 
+[ext_resource type="PackedScene" path="res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb" id="mq_3"]
+
+[ext_resource type="PackedScene" path="res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb" id="mq_4"]
+
+[ext_resource type="PackedScene" path="res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb" id="mq_5"]
+
 [sub_resource type="StandardMaterial3D" id="material"]
 cull_mode = 2
 vertex_color_use_as_albedo = true
@@ -1305,6 +1311,16 @@ preview_clip_inside = PackedVector2Array(2259, 6717, 2259, 7093, 2283, 7139, 230
 
 [node name="Patches" type="Node3D" parent="Terrain"]
 
+
+[node name="mq_pad_ringholm_00_lf_biomes_kit_animal_pen_0_ringholm_0001" type="Marker3D" parent="Terrain/Patches"]
+script = ExtResource("patch")
+patch_id = "mq-pad-ringholm-00-lf_biomes-kit-animal-pen-0-ringholm-0001"
+transform = Transform3D(-0.34202, 0, -0.939693, 0, 1, 0, 0.939693, 0, -0.34202, 348.2966, 4.972, -99.9959)
+shape = 1
+operation = 1
+size = Vector2(22.093, 24.69)
+feather = 3.5
+enabled = true
 
 [node name="Ground" type="Node3D" parent="."]
 
@@ -3684,26 +3700,6 @@ transform = Transform3D(0.090235, 0, 1.101765, 0, 1.105454, 0, -1.101765, 0, 0.0
 metadata/map_asset_id = "tollholms:kit-coastal-rock-1"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-1.glb"
 
-[node name="s2_Coastal Rock 13" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s2_18_itflr")
-asset_id = "tollholms-kit-coastal-rock-3-007"
-node_name = "Authored_tollholms_kit_coastal_rock_3_007"
-catalog_asset_id = "tollholms:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3.glb"
-collision_role = "solid"
-metadata = {
-"a3Layer": "coast",
-"a3Piece": "a3-coast-00021",
-"a3Zone": "cliff-foot",
-"polishStep": "a3-coast"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-1.43744, 0, 0.024021, 0, 1.437641, 0, -0.024021, 0, -1.43744, -202.0289, 6.5077, 229.5081)
-
-[node name="Content" parent="AuthoredAssets/s2_Coastal Rock 13" instance=ExtResource("s2_97_ndnly")]
-metadata/map_asset_id = "tollholms:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-coastal-rock-3.glb"
-
 [node name="s2_Coastal Rock 15" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s2_18_itflr")
 asset_id = "tollholms-kit-coastal-rock-1-007"
@@ -4962,25 +4958,6 @@ transform = Transform3D(-0.273456, 0.04441, -1.20608, -0.182253, 1.22095, 0.0862
 metadata/map_asset_id = "tollholms:kit-shell-scree-1"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-shell-scree-1.glb"
 
-[node name="s2_Beach Rocks 4" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s2_18_itflr")
-asset_id = "tollholms-kit-beach-rocks-1-004"
-node_name = "Authored_tollholms_kit_beach_rocks_1_004"
-catalog_asset_id = "tollholms:kit-beach-rocks-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-beach-rocks-1.glb"
-metadata = {
-"a3Layer": "coast",
-"a3Piece": "a3-coast-00256",
-"a3Zone": "beach",
-"polishStep": "a3-coast"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.505661, 0.006103, 1.128644, -0.129281, 1.228912, 0.051276, -1.121232, -0.138945, 0.503091, -57.198, 0.5429, -187.754)
-
-[node name="Content" parent="AuthoredAssets/s2_Beach Rocks 4" instance=ExtResource("s2_105_fn3qb")]
-metadata/map_asset_id = "tollholms:kit-beach-rocks-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-beach-rocks-1.glb"
-
 [node name="s2_Kelp Wrack 8" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s2_18_itflr")
 asset_id = "tollholms-kit-kelp-wrack-1-008"
@@ -5016,25 +4993,6 @@ metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(0.643314, -0.024612, -0.599795, -0.11307, 0.85845, -0.156499, 0.589555, 0.191497, 0.624473, 89.4073, 0.6232, 112.9881)
 
 [node name="Content" parent="AuthoredAssets/s2_Shell Scree 7" instance=ExtResource("s2_104_e1p32")]
-metadata/map_asset_id = "tollholms:kit-shell-scree-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-shell-scree-1.glb"
-
-[node name="s2_Shell Scree 9" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s2_18_itflr")
-asset_id = "tollholms-kit-shell-scree-1-009"
-node_name = "Authored_tollholms_kit_shell_scree_1_009"
-catalog_asset_id = "tollholms:kit-shell-scree-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-shell-scree-1.glb"
-metadata = {
-"a3Layer": "coast",
-"a3Piece": "a3-coast-00266",
-"a3Zone": "beach",
-"polishStep": "a3-coast"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.578736, 0.120337, -1.081143, 0.082699, 1.216214, 0.17964, 1.084671, -0.156935, 0.563157, 51.4429, 0.3481, -115.926)
-
-[node name="Content" parent="AuthoredAssets/s2_Shell Scree 9" instance=ExtResource("s2_104_e1p32")]
 metadata/map_asset_id = "tollholms:kit-shell-scree-1"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-shell-scree-1.glb"
 
@@ -5132,25 +5090,6 @@ transform = Transform3D(0.107323, 0.097458, -1.121085, -0.267986, 1.095986, 0.06
 [node name="Content" parent="AuthoredAssets/s2_Driftwood 9" instance=ExtResource("s2_106_ucxah")]
 metadata/map_asset_id = "tollholms:kit-driftwood-2"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-driftwood-2.glb"
-
-[node name="s2_Beach Rocks 11" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s2_18_itflr")
-asset_id = "tollholms-kit-beach-rocks-1-011"
-node_name = "Authored_tollholms_kit_beach_rocks_1_011"
-catalog_asset_id = "tollholms:kit-beach-rocks-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-beach-rocks-1.glb"
-metadata = {
-"a3Layer": "coast",
-"a3Piece": "a3-coast-00293",
-"a3Zone": "beach",
-"polishStep": "a3-coast"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.368808, 0.166363, 1.033682, -0.278134, 1.072129, -0.073315, -1.009365, -0.234642, 0.397896, -142.8214, 0.4657, -223.7491)
-
-[node name="Content" parent="AuthoredAssets/s2_Beach Rocks 11" instance=ExtResource("s2_105_fn3qb")]
-metadata/map_asset_id = "tollholms:kit-beach-rocks-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-beach-rocks-1.glb"
 
 [node name="s2_Shell Scree 17" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s2_18_itflr")
@@ -5266,25 +5205,6 @@ transform = Transform3D(-0.139474, 0.142753, 0.923711, 0.329237, 0.881583, -0.08
 metadata/map_asset_id = "tollholms:kit-driftwood-2"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-driftwood-2.glb"
 
-[node name="s2_Beach Rocks 17" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s2_18_itflr")
-asset_id = "tollholms-kit-beach-rocks-1-017"
-node_name = "Authored_tollholms_kit_beach_rocks_1_017"
-catalog_asset_id = "tollholms:kit-beach-rocks-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-beach-rocks-1.glb"
-metadata = {
-"a3Layer": "coast",
-"a3Piece": "a3-coast-00319",
-"a3Zone": "beach",
-"polishStep": "a3-coast"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.336065, 0.009398, -1.083072, 0.129554, 1.125519, 0.049966, 1.075337, -0.138536, 0.332463, 70.5818, 0.4452, -108.4695)
-
-[node name="Content" parent="AuthoredAssets/s2_Beach Rocks 17" instance=ExtResource("s2_105_fn3qb")]
-metadata/map_asset_id = "tollholms:kit-beach-rocks-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-beach-rocks-1.glb"
-
 [node name="s2_Kelp Wrack 25" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s2_18_itflr")
 asset_id = "tollholms-kit-kelp-wrack-1-025"
@@ -5360,120 +5280,6 @@ transform = Transform3D(-0.764065, 0.011491, -0.709647, -0.061612, 1.037698, 0.0
 [node name="Content" parent="AuthoredAssets/s2_Driftwood 20" instance=ExtResource("s2_103_0q0j6")]
 metadata/map_asset_id = "tollholms:kit-driftwood-1"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-driftwood-1.glb"
-
-[node name="s2_Beach Rocks 18" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s2_18_itflr")
-asset_id = "tollholms-kit-beach-rocks-1-018"
-node_name = "Authored_tollholms_kit_beach_rocks_1_018"
-catalog_asset_id = "tollholms:kit-beach-rocks-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-beach-rocks-1.glb"
-metadata = {
-"a3Layer": "coast",
-"a3Piece": "a3-coast-00337",
-"a3Zone": "beach",
-"polishStep": "a3-coast"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.486645, 0.077554, -1.093675, 0.158369, 1.188987, 0.013845, 1.084924, -0.138773, -0.492592, -115.2106, 0.4219, -206.639)
-
-[node name="Content" parent="AuthoredAssets/s2_Beach Rocks 18" instance=ExtResource("s2_105_fn3qb")]
-metadata/map_asset_id = "tollholms:kit-beach-rocks-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-beach-rocks-1.glb"
-
-[node name="s2_Shell Scree 34" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s2_18_itflr")
-asset_id = "tollholms-kit-shell-scree-1-034"
-node_name = "Authored_tollholms_kit_shell_scree_1_034"
-catalog_asset_id = "tollholms:kit-shell-scree-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-shell-scree-1.glb"
-metadata = {
-"a3Layer": "coast",
-"a3Piece": "a3-coast-00342",
-"a3Zone": "beach",
-"polishStep": "a3-coast"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-1.089363, 0.133068, 0.38686, 0.100886, 1.153769, -0.112777, -0.396472, -0.072038, -1.09165, 168.6056, 0.3845, -32.5571)
-
-[node name="Content" parent="AuthoredAssets/s2_Shell Scree 34" instance=ExtResource("s2_104_e1p32")]
-metadata/map_asset_id = "tollholms:kit-shell-scree-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-shell-scree-1.glb"
-
-[node name="s2_Beach Rocks 20" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s2_18_itflr")
-asset_id = "tollholms-kit-beach-rocks-1-020"
-node_name = "Authored_tollholms_kit_beach_rocks_1_020"
-catalog_asset_id = "tollholms:kit-beach-rocks-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-beach-rocks-1.glb"
-metadata = {
-"a3Layer": "coast",
-"a3Piece": "a3-coast-00344",
-"a3Zone": "beach",
-"polishStep": "a3-coast"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.309182, 0.026272, -0.839613, 0.119852, 0.886905, -0.016383, 0.83143, -0.118079, -0.309864, 87.7631, 0.7803, -101.4712)
-
-[node name="Content" parent="AuthoredAssets/s2_Beach Rocks 20" instance=ExtResource("s2_105_fn3qb")]
-metadata/map_asset_id = "tollholms:kit-beach-rocks-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-beach-rocks-1.glb"
-
-[node name="s2_Beach Rocks 22" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s2_18_itflr")
-asset_id = "tollholms-kit-beach-rocks-1-022"
-node_name = "Authored_tollholms_kit_beach_rocks_1_022"
-catalog_asset_id = "tollholms:kit-beach-rocks-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-beach-rocks-1.glb"
-metadata = {
-"a3Layer": "coast",
-"a3Piece": "a3-coast-00347",
-"a3Zone": "beach",
-"polishStep": "a3-coast"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-1.045669, 0.063277, 0.087391, 0.053571, 1.043579, -0.114621, -0.093656, -0.109563, -1.041293, 179.1474, 0.5649, -20.322)
-
-[node name="Content" parent="AuthoredAssets/s2_Beach Rocks 22" instance=ExtResource("s2_105_fn3qb")]
-metadata/map_asset_id = "tollholms:kit-beach-rocks-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-beach-rocks-1.glb"
-
-[node name="s2_Kelp Wrack 33" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s2_18_itflr")
-asset_id = "tollholms-kit-kelp-wrack-1-033"
-node_name = "Authored_tollholms_kit_kelp_wrack_1_033"
-catalog_asset_id = "tollholms:kit-kelp-wrack-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-kelp-wrack-1.glb"
-metadata = {
-"a3Layer": "coast",
-"a3Piece": "a3-coast-00352",
-"a3Zone": "beach",
-"polishStep": "a3-coast"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(1.155977, 0.122282, 0.185431, -0.135808, 1.166709, 0.077243, -0.175766, -0.097249, 1.159857, 224.5013, 0.6042, 29.9463)
-
-[node name="Content" parent="AuthoredAssets/s2_Kelp Wrack 33" instance=ExtResource("s2_102_4w5jk")]
-metadata/map_asset_id = "tollholms:kit-kelp-wrack-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-kelp-wrack-1.glb"
-
-[node name="s2_Beach Rocks 23" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s2_18_itflr")
-asset_id = "tollholms-kit-beach-rocks-1-023"
-node_name = "Authored_tollholms_kit_beach_rocks_1_023"
-catalog_asset_id = "tollholms:kit-beach-rocks-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-beach-rocks-1.glb"
-metadata = {
-"a3Layer": "coast",
-"a3Piece": "a3-coast-00353",
-"a3Zone": "beach",
-"polishStep": "a3-coast"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.916626, 0.042536, -0.733354, 0.048635, 1.166599, 0.128455, 0.732974, -0.130601, 0.908577, -96.0533, 0.4877, -201.2905)
-
-[node name="Content" parent="AuthoredAssets/s2_Beach Rocks 23" instance=ExtResource("s2_105_fn3qb")]
-metadata/map_asset_id = "tollholms:kit-beach-rocks-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-beach-rocks-1.glb"
 
 [node name="s2_Kelp Wrack 36" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s2_18_itflr")
@@ -11798,7 +11604,7 @@ metadata = {
 "biomeRule": "sunmane camp core"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.877983, 0, -0.478692, 0, 1, 0, 0.478692, 0, 0.877983, 311.000, 5.3500, -140.000)
+transform = Transform3D(0.877983, 0, -0.478692, 0, 1, 0, 0.478692, 0, 0.877983, 308, 5.3500, -141)
 
 [node name="Content" parent="AuthoredAssets/a3_ringholm_Camp Pavilion 1 2" instance=ExtResource("a3_camp_pavilion_1")]
 metadata/map_asset_id = "lf_biomes:kit-camp-pavilion-1"
@@ -12691,7 +12497,7 @@ metadata = {
 "biomeRule": "sunmane camp outskirts"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.34202, 0, -0.939693, 0, 1, 0, 0.939693, 0, -0.34202, 349.500, 4.8876, -99.700)
+transform = Transform3D(-0.34202, 0, -0.939693, 0, 1, 0, 0.939693, 0, -0.34202, 349.500, 5.2105, -99.700)
 
 [node name="Content" parent="AuthoredAssets/a3_ringholm_Animal Pen 0 1" instance=ExtResource("a3_animal_pen_0")]
 metadata/map_asset_id = "lf_biomes:kit-animal-pen-0"
@@ -12767,7 +12573,7 @@ metadata = {
 "biomeRule": "sunmane camp outskirts"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.438371, 0, -0.898794, 0, 1, 0, 0.898794, 0, -0.438371, 337.500, 5.3500, -96.900)
+transform = Transform3D(-0.438371, 0, -0.898794, 0, 1, 0, 0.898794, 0, -0.438371, 337.500, 4.8443, -96.900)
 
 [node name="Content" parent="AuthoredAssets/a3_ringholm_Hay Feeder 1 1" instance=ExtResource("a3_hay_feeder_1")]
 metadata/map_asset_id = "lf_biomes:kit-hay-feeder-1"
@@ -13033,7 +12839,7 @@ metadata = {
 "biomeRule": "sunmane camp outskirts"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.5, 0, -0.866025, 0, 1, 0, 0.866025, 0, -0.5, 334.600, 5.3500, -93.500)
+transform = Transform3D(-0.5, 0, -0.866025, 0, 1, 0, 0.866025, 0, -0.5, 334.600, 5.2894, -93.500)
 
 [node name="Content" parent="AuthoredAssets/a3_ringholm_Wooden Pail 1 3" instance=ExtResource("a3_wooden_pail_1")]
 metadata/map_asset_id = "lf_biomes:kit-wooden-pail-1"
@@ -13451,7 +13257,7 @@ metadata = {
 "biomeRule": "sunmane camp outskirts"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-1, 0, 1.22465e-16, 0, 1, 0, -1.22465e-16, 0, -1, 268.000, 5.4272, -33.000)
+transform = Transform3D(-0.121047, 0, -0.992647, 0, 1, 0, 0.992647, 0, -0.121047, 269.3945, 5.9, -42.97599)
 
 [node name="Content" parent="AuthoredAssets/a3_ringholm_March Gate 1" instance=ExtResource("a3_march_gate")]
 metadata/map_asset_id = "lf_biomes:kit-march-gate"
@@ -13470,7 +13276,7 @@ metadata = {
 "biomeRule": "sunmane camp outskirts"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(6.12323e-17, 0, 1, 0, 1, 0, -1, 0, 6.12323e-17, 180.000, 5.3630, -137.000)
+transform = Transform3D(-0.992719, 0, -0.120457, 0, 1, 0, 0.120457, 0, -0.992719, 190.569, 3.939, -118.77)
 
 [node name="Content" parent="AuthoredAssets/a3_ringholm_March Gate 2" instance=ExtResource("a3_march_gate")]
 metadata/map_asset_id = "lf_biomes:kit-march-gate"
@@ -31615,7 +31421,7 @@ metadata = {
 "biomeRule": "tumbleweed"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.60159, 0, 1.17001, 0, 1.31561, 0, -1.17001, 0, -0.60159, 359.584, 4.2941, -106.019)
+transform = Transform3D(-0.60159, 0, 1.17001, 0, 1.31561, 0, -1.17001, 0, -0.60159, 359.584, 4.5443, -106.019)
 
 [node name="Content" parent="AuthoredAssets/a3_ringholm_Tumbleweed 2 104" instance=ExtResource("a3_tumbleweed_2")]
 metadata/map_asset_id = "lf_biomes:kit-tumbleweed-2"
@@ -49190,7 +48996,7 @@ metadata = {
 "biomeRule": "feather grass"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.549366, 0, 0.815484, 0, 0.983268, 0, -0.815484, 0, 0.549366, 351.994, 5.4027, -90.096)
+transform = Transform3D(0.549366, 0, 0.815484, 0, 0.983268, 0, -0.815484, 0, 0.549366, 351.994, 4.9895, -90.096)
 
 [node name="Content" parent="AuthoredAssets/a3_ringholm_Feather Grass 4 216" instance=ExtResource("a3_feather_grass_4")]
 metadata/map_asset_id = "lf_biomes:kit-feather-grass-4"
@@ -58107,6 +57913,1659 @@ transform = Transform3D(0.227906, 0, 0.80647, 0, 0.838054, 0, -0.80647, 0, 0.227
 metadata/map_asset_id = "lf_biomes:kit-dune-grass-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dune-grass-1.glb"
 
+[node name="mq_mq2-ringholm-ashen-brush-1-0001" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-ashen-brush-1-0001"
+node_name = "Authored_mq2_ringholm_ashen_brush_1_0001"
+catalog_asset_id = "lf_biomes:kit-ashen-brush-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-ashen-brush-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "saltsound>ringholm",
+"distFromBorder": 11.7
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.753651, 0, 0.89085, 0, 1.166878, 0, -0.89085, 0, 0.753651, 2.5912, 1.8158, -150.6833)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-ashen-brush-1-0001" instance=ExtResource("a3_ashen_brush_1")]
+metadata/map_asset_id = "lf_biomes:kit-ashen-brush-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-ashen-brush-1.glb"
+
+[node name="mq_mq2-ringholm-ashen-brush-2-0001" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-ashen-brush-2-0001"
+node_name = "Authored_mq2_ringholm_ashen_brush_2_0001"
+catalog_asset_id = "lf_biomes:kit-ashen-brush-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-ashen-brush-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "saltsound>ringholm",
+"distFromBorder": 2.8
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.942103, 0, 0.087786, 0, 0.946184, 0, -0.087786, 0, 0.942103, 32.8654, 0.498, -140.8403)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-ashen-brush-2-0001" instance=ExtResource("a3_ashen_brush_2")]
+metadata/map_asset_id = "lf_biomes:kit-ashen-brush-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-ashen-brush-2.glb"
+
+[node name="mq_mq2-ringholm-ashen-brush-1-0002" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-ashen-brush-1-0002"
+node_name = "Authored_mq2_ringholm_ashen_brush_1_0002"
+catalog_asset_id = "lf_biomes:kit-ashen-brush-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-ashen-brush-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "saltsound>ringholm",
+"distFromBorder": 10.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.0196, 0, 0.368743, 0, 1.08423, 0, -0.368743, 0, 1.0196, 81.0448, 2.4161, -145.6084)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-ashen-brush-1-0002" instance=ExtResource("a3_ashen_brush_1")]
+metadata/map_asset_id = "lf_biomes:kit-ashen-brush-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-ashen-brush-1.glb"
+
+[node name="mq_mq2-ringholm-ashen-brush-2-0002" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-ashen-brush-2-0002"
+node_name = "Authored_mq2_ringholm_ashen_brush_2_0002"
+catalog_asset_id = "lf_biomes:kit-ashen-brush-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-ashen-brush-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "saltsound>ringholm",
+"distFromBorder": 12.6
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.916911, 0, 0.029198, 0, 0.917376, 0, -0.029198, 0, 0.916911, 120.3007, 2.3051, -162.8405)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-ashen-brush-2-0002" instance=ExtResource("a3_ashen_brush_2")]
+metadata/map_asset_id = "lf_biomes:kit-ashen-brush-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-ashen-brush-2.glb"
+
+[node name="mq_mq2-ringholm-ashen-brush-3-0001" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-ashen-brush-3-0001"
+node_name = "Authored_mq2_ringholm_ashen_brush_3_0001"
+catalog_asset_id = "lf_biomes:kit-ashen-brush-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-ashen-brush-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "saltsound>ringholm",
+"distFromBorder": 8.2
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.372399, 0, -0.860382, 0, 0.937517, 0, 0.860382, 0, 0.372399, 63.4696, 1.6755, -140.5986)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-ashen-brush-3-0001" instance=ExtResource("a3_ashen_brush_3")]
+metadata/map_asset_id = "lf_biomes:kit-ashen-brush-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-ashen-brush-3.glb"
+
+[node name="mq_mq2-ringholm-ashen-brush-1-0003" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-ashen-brush-1-0003"
+node_name = "Authored_mq2_ringholm_ashen_brush_1_0003"
+catalog_asset_id = "lf_biomes:kit-ashen-brush-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-ashen-brush-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "saltsound>ringholm",
+"distFromBorder": 6.3
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.988792, 0, 0.008089, 0, 0.988825, 0, -0.008089, 0, -0.988792, 105.696, 3.0519, -162.9287)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-ashen-brush-1-0003" instance=ExtResource("a3_ashen_brush_1")]
+metadata/map_asset_id = "lf_biomes:kit-ashen-brush-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-ashen-brush-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0001" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0001"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0001"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0012"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-1.03554, 0.097947, 0.843645, -0.194216, 1.267786, -0.385581, -0.826808, -0.420475, -0.966056, 12.216, 1.4432, -148.784)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0001" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-2-0002" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-2-0002"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_2_0002"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0016"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.373711, 0.033112, 0.992384, 0.02475, 1.060326, -0.026058, -0.992628, 0.013972, -0.374269, -142.2271, 0.4661, 326.6965)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-2-0002" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0003" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0003"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0003"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-0-ringholm-0008"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-1.203952, 0.255784, -0.467543, 0.3272, 1.266515, -0.149674, 0.420668, -0.253055, -1.221689, 332.82, 3.606, -177.616)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0003" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0004" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0004"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0004"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-0-ringholm-0008"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.032442, 0.20313, -0.965502, 0.200269, 0.944558, 0.205453, 0.9661, -0.202624, -0.010168, 334.1495, 3.1062, -178.8472)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0004" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0005" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0005"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0005"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-0-ringholm-0008"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.202913, 0.205851, -1.191417, 0.166314, 1.191843, 0.23425, 1.197576, -0.200397, 0.169338, 331.5695, 4.1916, -175.7397)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0005" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0006" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0006"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0006"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0003"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.359514, 0.097252, 1.00862, 0.27457, 1.020834, -0.196298, -0.975389, 0.323208, 0.316505, 144.717, 2.0136, 92.278)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0006" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0007" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0007"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0007"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0003"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.661601, 0.079721, 0.729313, 0.263195, 0.942483, 0.135736, -0.684823, 0.285202, -0.652416, 145.9767, 1.7036, 92.9341)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0007" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0008" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0008"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0008"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0003"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.228615, 0.113965, 1.116897, 0.358285, 1.087625, -0.037642, -1.063992, 0.341755, -0.252658, 145.5702, 2.399, 90.7553)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0008" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0009" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0009"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0009"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0020"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.101283, -0.164582, 0.840631, -0.30012, 1.208275, 0.629739, -0.802294, -0.677905, 0.918335, -175.549, 90.0034, 68.854)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0009" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0010" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0010"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0010"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0020"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.910528, -0.098948, -0.296408, 0.228504, 0.833686, 0.423631, 0.213153, -0.471049, 0.812027, -174.428, 89.7753, 68.0816)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0010" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0011" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0011"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0011"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-0-ringholm-0015"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.548496, -0.382363, -0.804466, 0.338752, 0.963316, -0.226899, 0.82378, -0.141543, 0.628941, -201.321, 94.9509, -122.018)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0011" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0012" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0012"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0012"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0006"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.045487, 0.022444, -1.159213, -0.090591, 1.15649, 0.025946, 1.155886, 0.091522, -0.043584, 236.4129, 0.7477, 233.7687)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0012" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0013" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0013"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0013"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0006"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.83601, 0.021906, -1.138708, -0.109737, 1.407532, -0.053488, 1.13362, 0.120098, 0.834585, 234.9003, 0.7076, 234.3152)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0013" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-2-0014" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-2-0014"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_2_0014"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0008"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.896115, 0.389499, 0.528484, -0.525035, 0.962039, 0.181231, -0.394136, -0.395976, 0.960149, 122.607, 8.8128, -46.522)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-2-0014" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0015" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0015"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0015"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0008"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.845321, 0.346176, 0.106015, 0.281914, 0.798326, -0.35895, -0.227161, -0.29746, -0.839976, 123.737, 8.9241, -45.0417)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0015" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0016" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0016"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0016"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0008"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.81905, 0.381504, 0.471986, -0.478491, 0.893607, 0.10804, -0.373313, -0.308352, 0.89706, 119.9931, 9.5565, -47.8702)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0016" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-2-0017" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-2-0017"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_2_0017"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0001"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.563546, 0.394935, 0.746854, 0.13571, 0.92842, -0.388546, -0.833875, -0.115807, -0.56797, -84.537, 69.2808, -37.337)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-2-0017" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0018" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0018"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0018"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0001"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.230507, 0.532744, -1.226622, 0.268731, 1.237773, 0.487087, 1.310039, -0.160168, -0.315747, -87.1147, 70.3779, -37.314)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0018" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0019" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0019"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0019"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0011"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.116173, -0.35475, 0.856098, 0.188771, 0.835649, 0.371892, -0.907258, 0.219297, -0.032244, -222.898, 77.648, 167.533)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0019" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-2-0020" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-2-0020"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_2_0020"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0011"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-1.167948, -0.554137, -0.009307, -0.534086, 1.119572, 0.364096, -0.148008, 0.332786, -1.240405, -224.5431, 76.2725, 168.7444)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-2-0020" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0021" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0021"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0021"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0011"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.733165, -0.277715, 1.029479, 0.329109, 1.247296, 0.102092, -1.014219, 0.203985, 0.777324, -220.3085, 78.5633, 166.1703)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0021" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0022" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0022"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0022"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-0-ringholm-0038"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.728623, -0.304654, -0.716317, -0.516372, 0.923369, 0.132529, 0.582481, 0.437481, -0.778551, -269.9395, 89.3185, -44.0388)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0022" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0023" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0023"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0023"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0005"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.988177, 0.481647, 0.529331, -0.36942, 1.116207, -0.326005, -0.612947, 0.103765, 1.049857, -73.212, 64.3388, 58.883)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0023" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0024" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0024"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0024"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0005"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.15009, 0.363036, -0.867224, -0.030177, 0.875893, 0.371887, 0.93966, 0.086116, -0.126577, -71.3152, 63.7444, 57.1286)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0024" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0025" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0025"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0025"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0005"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.919686, 0.389294, 0.029378, -0.383604, 0.915081, -0.117086, -0.072528, 0.096497, 0.991798, -72.0162, 63.794, 59.4825)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0025" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-2-0026" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-2-0026"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_2_0026"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0016"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.876973, 0.455126, -0.86016, -0.230277, 1.222071, 0.411841, 0.945509, -0.124503, 0.898114, 70.508, 36.0016, 31.704)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-2-0026" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0027" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0027"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0027"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0016"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.891303, 0.441695, -0.776672, -0.234034, 1.174151, 0.399165, 0.862289, -0.13788, 0.911143, 71.1191, 35.9698, 33.0437)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0027" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-2-0028" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-2-0028"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_2_0028"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0016"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.93115, 0.390031, -0.407107, 0.402114, 1.010384, 0.048273, 0.395177, -0.109096, -1.008382, 72.3312, 35.4657, 32.8736)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-2-0028" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0029" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0029"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0029"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0013"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.412632, -0.210767, -1.221612, 0.373723, 1.248757, -0.089216, 1.181985, -0.321256, 0.454674, 11.579, 42.3624, -63.607)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0029" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0030" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0030"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0030"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0024"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.344145, -0.212377, -0.767015, -0.237599, 0.824961, -0.121815, 0.759581, 0.161828, -0.385618, -256.3229, 83.7182, 94.7319)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0030" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0031" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0031"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0031"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0017"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.735565, 0.255113, 0.977332, -0.217927, 1.140459, -0.461711, -0.98629, -0.442252, -0.626866, -273.489, 89.737, -145.725)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0031" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-2-0032" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-2-0032"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_2_0032"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0005"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.985535, 0.088781, -0.339273, 0.054149, 1.038384, 0.114428, 0.346491, 0.090243, -0.982887, 331.7855, 0.7818, 224.6325)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-2-0032" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0033" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0033"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0033"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0031"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.652507, 0.331962, -1.03106, 0.630167, 1.095358, -0.046138, 0.881007, -0.537625, -0.73064, -60.418, 32.0603, -129.172)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0033" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-2-0034" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-2-0034"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_2_0034"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0008"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.048992, -0.15579, -0.020316, 0.140915, 0.993617, -0.343417, 0.069471, 0.33693, 1.003354, 71.6043, 0.7605, 104.8282)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-2-0034" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-2-0035" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-2-0035"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_2_0035"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0008"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.062492, -0.239355, 0.561471, 0.361023, 1.155308, -0.19067, -0.492141, 0.33076, 1.072299, 73.272, 0.5794, 106.2392)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-2-0035" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0036" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0036"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0036"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0008"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.660709, -0.161722, -0.666516, -0.304973, 0.898224, 0.084373, 0.61432, 0.271981, -0.674961, 74.6484, 0.6259, 107.3041)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0036" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0037" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0037"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0037"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0014"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.821559, 0.229671, 0.406144, -0.321463, 0.874701, 0.155627, -0.338176, -0.273513, 0.838742, 179.487, 2.4631, -1.134)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0037" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0038" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0038"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0038"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0014"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.496368, 0.108399, -1.005605, 0.349505, 1.069553, -0.057224, 0.949125, -0.337162, -0.504833, 182.1044, 1.9796, -1.1981)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0038" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-2-0039" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-2-0039"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_2_0039"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-0-ringholm-0009"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.844713, 0.416537, 0.900376, 0.303098, 1.234367, -0.28669, -0.944623, 0.023585, -0.897136, -131.279, 88.0633, 14.861)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-2-0039" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0040" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0040"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0040"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-0-ringholm-0009"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.986847, 0.378572, -0.322753, 0.346735, 1.037561, 0.156827, 0.356736, 0.038777, -1.04527, -133.4153, 88.8265, 16.4512)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0040" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0041" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0041"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0041"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-0-ringholm-0030"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.761649, 0.475186, -0.612943, 0.179749, 0.943855, 0.508369, 0.754448, 0.254846, -0.739914, -122.381, 75.0256, 152.58)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0041" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0042" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0042"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0042"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-0-ringholm-0039"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.967805, 0.529172, 0.26648, 0.438041, 0.982732, -0.360612, -0.398942, -0.204689, -1.042415, -119.97, 74.3257, -94.818)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0042" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0043" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0043"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0043"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-0-ringholm-0039"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.100453, 0.494068, -0.945484, 0.283137, 0.927955, 0.454826, 1.028531, -0.207196, -0.217548, -117.7374, 73.2211, -93.9793)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0043" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-2-0044" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-2-0044"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_2_0044"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-0-ringholm-0039"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.535506, 0.617935, 1.020284, 0.067762, 1.13234, -0.650235, -1.190895, -0.213434, -0.495787, -120.716, 75.0115, -93.4874)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-2-0044" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0045" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0045"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0045"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0011"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.907776, -0.253602, 0.324644, -0.234369, 0.963998, 0.0977, -0.338791, 0.012643, -0.937458, -254.161, 92.1168, 30.842)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0045" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0046" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0046"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0046"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0011"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.640305, -0.346317, -0.886787, -0.243624, 1.092725, -0.250833, 0.920312, 0.048316, -0.68338, -253.819, 92.153, 32.9735)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0046" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0047" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0047"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0047"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0033"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.554979, -0.314353, 0.855894, 0.155443, 0.954685, 0.451429, -0.898448, 0.35935, -0.45059, -334.6631, 80.8311, -35.4116)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0047" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0048" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0048"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0048"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0015"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.964812, 0.0394, -0.214247, 0.128105, 0.889419, -0.413328, 0.176191, -0.430927, -0.872683, 76.181, 6.3693, -83.148)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0048" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0049" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0049"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0049"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0017"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.321909, 0.442276, 0.992591, 0.237679, 0.981505, -0.514418, -1.060355, 0.354273, 0.18603, -113.343, 83.8676, 98.696)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0049" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0050" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0050"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0050"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0017"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.194109, 0.39154, -0.883223, -0.397652, 0.853404, 0.290928, 0.880488, 0.299103, 0.326102, -112.9623, 83.1922, 100.0711)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0050" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0051" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0051"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0051"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0027"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.673797, 0.266647, 0.72692, 0.30312, 0.977553, -0.077616, -0.712483, 0.163723, -0.720472, -202.646, 87.9379, 17.094)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0051" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0052" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0052"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0052"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0027"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.82528, 0.155808, -0.729431, -0.039046, 1.077343, 0.2743, 0.744863, 0.229104, -0.793803, -202.8963, 87.4199, 20.0696)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0052" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-2-0053" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-2-0053"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_2_0053"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0027"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-1.243467, 0.279318, 0.443712, 0.317487, 1.30999, 0.065088, -0.417254, 0.164365, -1.272789, -201.1816, 87.4921, 16.9994)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-2-0053" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0054" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0054"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0054"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0029"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.042269, 0.352465, 0.999614, -0.010921, 1.0005, -0.352316, -1.059877, 0.003747, 0.043496, 117.598, 19.2881, 7.201)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0054" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0055" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0055"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0055"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0029"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.869307, 0.394897, 0.903797, 0.264182, 1.253947, -0.293788, -0.950263, -0.012645, -0.908475, 116.1248, 19.7616, 8.2749)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0055" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-2-0056" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-2-0056"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_2_0056"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0029"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.925545, 0.307375, 0.110164, -0.304492, 0.93206, -0.042395, -0.117897, 0.005802, 0.974328, 116.4358, 19.6631, 6.6259)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-2-0056" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0057" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0057"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0057"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-0-ringholm-0005"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.207353, 0.230228, 0.792476, -0.199624, 0.778849, -0.278501, -0.800733, -0.253787, -0.135784, -33.636, 41.8503, -81.711)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0057" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0058" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0058"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0058"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-0-ringholm-0005"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-1.126801, 0.317724, 0.294622, 0.202708, 1.112026, -0.423955, -0.382962, -0.346236, -1.09128, -33.2217, 42.4187, -79.4194)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0058" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0059" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0059"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0059"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-0-ringholm-0005"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.909648, 0.256759, -0.20027, 0.303879, 0.882878, -0.248348, 0.117006, -0.296806, -0.91198, -33.1917, 40.9853, -83.8582)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0059" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0060" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0060"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0060"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0019"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.099191, -0.357002, -0.822035, -0.084591, 0.827092, -0.348991, 0.892209, 0.038728, -0.124478, -299.198, 87.6829, -82.01)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0060" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0061" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0061"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0061"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0019"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.084296, -0.447859, -1.068275, -0.026753, 1.071567, -0.447128, 1.158047, -0.007846, -0.088091, -301.4773, 86.6722, -83.3971)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0061" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-2-0062" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-2-0062"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_2_0062"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0029"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.827815, 0.304678, 0.498079, -0.144664, 0.944236, -0.337162, -0.565671, 0.204394, 0.815124, 112.6986, 17.1184, 58.9768)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-2-0062" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0063" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0063"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0063"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0029"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.696541, 0.339077, 0.674998, -0.090228, 0.948941, -0.383582, -0.74997, 0.200755, 0.673058, 113.5115, 17.5684, 55.7887)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0063" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0064" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0064"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0064"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0030"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.687617, 0.40197, -0.611894, -0.502148, 0.869833, 0.007128, 0.532768, 0.301037, 0.796459, -85.977, 46.7509, 183.837)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0064" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0065" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0065"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0065"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0030"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.833373, 0.431426, -0.697084, 0.075551, 1.030215, 0.547279, 0.8163, 0.3451, -0.762315, -83.4468, 45.814, 183.2237)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0065" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0066" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0066"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0066"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0030"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.349253, 0.445315, -0.97883, -0.191126, 0.98707, 0.517259, 1.058246, 0.325239, -0.229623, -84.905, 46.5979, 182.7568)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0066" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0067" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0067"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0067"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0035"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.196188, 0.263465, -0.405837, -0.347998, 1.220405, -0.233436, 0.336177, 0.325854, 1.202409, -186.559, 91.3313, 110.834)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0067" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0068" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0068"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0068"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0035"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.684241, 0.180916, -0.735623, -0.058086, 0.975826, 0.294019, 0.755313, 0.238937, -0.643792, -185.1853, 91.0678, 110.8191)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0068" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0069" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0069"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0069"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-2-ringholm-0035"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-1.182649, 0.277322, 0.594426, 0.375465, 1.291127, 0.144652, -0.537844, 0.291532, -1.206085, -188.2082, 92.3242, 108.164)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0069" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0070" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0070"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0070"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0014"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.000063, 0.3597, -0.442585, -0.31453, 1.093111, 0.177687, 0.475748, -0.033435, 1.047825, -64.944, 64.1824, 0.878)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0070" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-2-0071" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-2-0071"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_2_0071"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-1-ringholm-0014"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.48188, 0.364933, 0.989706, -0.171204, 1.100718, -0.322509, -1.040857, -0.012099, 0.511246, -63.6236, 63.691, 1.0063)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-2-0071" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-2.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-1-0072" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-1-0072"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_1_0072"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-0-ringholm-0020"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-1.332341, 0.442121, -0.199187, 0.464759, 1.33043, -0.155665, 0.138366, -0.21157, -1.395124, -127.055, 83.8632, -53.594)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-1-0072" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-1.glb"
+
+[node name="mq_mq2-ringholm-lichen-stone-mat-3-0073" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-ringholm-lichen-stone-mat-3-0073"
+node_name = "Authored_mq2_ringholm_lichen_stone_mat_3_0073"
+catalog_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "ringholm-scree-restore",
+"biomeMap": "ringholm",
+"biomeRule": "steppe scree",
+"oldScree": "lf_biomes-kit-mountain-scree-0-ringholm-0020"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.777899, 0.349916, 0.64404, 0.174222, 1.000505, -0.333155, -0.711952, -0.137494, -0.785223, -124.8313, 82.8162, -55.7587)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-ringholm-lichen-stone-mat-3-0073" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-lichen-stone-mat-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-lichen-stone-mat-3.glb"
+
 [node name="ringholm--obj-boat-suncoil" type="Marker3D" parent="Gameplay/Interactives"]
 gizmo_extents = 0.8
 script = ExtResource("s2_marker")
@@ -58309,7 +59768,7 @@ extras = {
 "yaw": 162,
 "zone": "coverage"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 199.5, 0.6, -15.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 187.5, 0.5, 104.5)
 
 [node name="ringholm--harvest-3037-salt" type="Marker3D" parent="Gameplay/Harvestables"]
 gizmo_extents = 0.8
@@ -58730,7 +60189,7 @@ extras = {
 "yaw": 272,
 "zone": "coverage"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 170.5, 0.45, -31.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 169.5, 0.55, 101.5)
 
 [node name="ringholm--harvest-3061-sage" type="Marker3D" parent="Gameplay/Harvestables"]
 gizmo_extents = 0.8
@@ -58902,7 +60361,7 @@ extras = {
 "yaw": 70,
 "zone": "coverage"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -237.5, 1.6, 276.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -348.5, 0.5, 311.5)
 
 [node name="ringholm--harvest-3070-salt" type="Marker3D" parent="Gameplay/Harvestables"]
 gizmo_extents = 0.8
@@ -58940,7 +60399,7 @@ extras = {
 "yaw": 316,
 "zone": "coverage"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -236.5, 1.6, 273.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -351.5, 0.5, 310.5)
 
 [node name="ringholm--harvest-3072-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
 gizmo_extents = 0.8
@@ -59206,7 +60665,7 @@ extras = {
 "yaw": 85,
 "zone": "coverage"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -139.5, 0.5, -222.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46.5, 0.4, 91.5)
 
 [node name="ringholm--harvest-3086-bramble" type="Marker3D" parent="Gameplay/Harvestables"]
 gizmo_extents = 0.8
@@ -64759,7 +66218,7 @@ extras = {
 "yaw": 313,
 "zone": "coverage"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 53.5, 0.55, -114.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 51.5, 0.55, 96.5)
 
 [node name="ringholm--harvest-3519-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
 gizmo_extents = 0.8
@@ -65425,7 +66884,7 @@ extras = {
 "yaw": 341,
 "zone": "coverage"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 1.3, -156.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 66.5, 0.3, 104.5)
 
 [node name="ringholm--harvest-3561-sage" type="Marker3D" parent="Gameplay/Harvestables"]
 gizmo_extents = 0.8
@@ -68922,7 +70381,7 @@ extras = {
 "yaw": 156,
 "zone": "coverage"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 226.5, 0.45, 29.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 183.5, 0.5, 104.5)
 
 [node name="ringholm--harvest-3747-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
 gizmo_extents = 0.8

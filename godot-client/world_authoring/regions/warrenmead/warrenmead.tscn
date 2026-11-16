@@ -449,7 +449,7 @@ source_material = SubResource("s0_ORMMaterial3D_my32w")
 [sub_resource type="Curve3D" id="s0_Curve3D_dwtsy"]
 resource_local_to_scene = true
 _data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -668.2, 4.17, -271.8, 0, 0, 0, 0, 0, 0, -672.2, 4.17, -277.1, 0, 0, 0, 0, 0, 0, -677.2, 3.54, -284.2, 0, 0, 0, 0, 0, 0, -684.3, 3.54, -291.6, 0, 0, 0, 0, 0, 0, -690.5, 2.48, -297.2, 0, 0, 0, 0, 0, 0, -693.1, 0.36, -300.3),
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -668.2, 1.534, -271.8, 0, 0, 0, 0, 0, 0, -672.2, 1.534, -277.1, 0, 0, 0, 0, 0, 0, -677.2, 0.956, -284.2, 0, 0, 0, 0, 0, 0, -684.3, 0.753, -291.6, 0, 0, 0, 0, 0, 0, -690.5, -0.05, -297.2, 0, 0, 0, 0, 0, 0, -693.1, -0.05, -300.3),
 "tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0)
 }
 point_count = 6
@@ -3919,25 +3919,6 @@ transform = Transform3D(-0.789034, 0.459356, -0.531013, 0.421188, 0.948774, 0.19
 [node name="Content" parent="AuthoredAssets/s0_Coastal Boulders 181" instance=ExtResource("s0_90_x1ic5")]
 metadata/map_asset_id = "sw_isle:kit-coastal-boulders-2"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-2.glb"
-
-[node name="s0_Coastal Rock 128" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-coastal-rock-3-036"
-node_name = "Authored_sw_isle_kit_coastal_rock_3_036"
-catalog_asset_id = "sw_isle:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
-collision_role = "solid"
-metadata = {
-"polishLayer": "shore",
-"polishPiece": "shore-0063-b",
-"polishStep": "d1-rock"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.636982, 0.496727, -0.319668, 0.464751, 0.711612, 0.179683, 0.364598, -0.039266, -0.787526, 54.2178, 3.0978, -204.1782)
-
-[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 128" instance=ExtResource("s0_96_e14li")]
-metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
 
 [node name="s0_Coastal Rock 129" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")

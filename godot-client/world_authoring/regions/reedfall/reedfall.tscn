@@ -232,6 +232,14 @@
 
 [ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb" id="mq_1"]
 
+[ext_resource type="PackedScene" path="res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-bracken-patch-1.glb" id="mq_2"]
+
+[ext_resource type="PackedScene" path="res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb" id="mq_3"]
+
+[ext_resource type="PackedScene" path="res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-2.glb" id="mq_4"]
+
+[ext_resource type="PackedScene" path="res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-1.glb" id="mq_5"]
+
 [sub_resource type="StandardMaterial3D" id="material"]
 cull_mode = 2
 vertex_color_use_as_albedo = true
@@ -5746,25 +5754,6 @@ transform = Transform3D(-0.011543, -0.138536, 0.826041, -0.243197, 0.791083, 0.1
 metadata/map_asset_id = "sw_isle:kit-coastal-boulders-4"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-boulders-4.glb"
 
-[node name="s0_Coastal Rock 356" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-coastal-rock-3-111"
-node_name = "Authored_sw_isle_kit_coastal_rock_3_111"
-catalog_asset_id = "sw_isle:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
-collision_role = "solid"
-metadata = {
-"polishLayer": "gorge",
-"polishPiece": "gorge-0027-b",
-"polishStep": "d1-rock"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.200545, 0.562222, -0.877118, 0.146655, 0.869092, 0.590609, 1.031466, -0.23288, 0.086562, -293.3023, 71.7746, -13.4547)
-
-[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 356" instance=ExtResource("s0_96_e14li")]
-metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
-
 [node name="s0_Coastal Rock 357" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "sw_isle-kit-coastal-rock-2-127"
@@ -6617,44 +6606,6 @@ metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(0.426236, 0.00256, 1.008008, -0.181825, 1.076664, 0.074151, -0.991477, -0.196347, 0.419745, 97.284, -2.2597, -63.5778)
 
 [node name="Content" parent="AuthoredAssets/s0_Coastal Rock 401" instance=ExtResource("s0_96_e14li")]
-metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
-
-[node name="s0_Coastal Rock 402" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-coastal-rock-3-130"
-node_name = "Authored_sw_isle_kit_coastal_rock_3_130"
-catalog_asset_id = "sw_isle:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
-collision_role = "solid"
-metadata = {
-"polishLayer": "gorge",
-"polishPiece": "gorge-0087-a",
-"polishStep": "d1-rock"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.86199, -0.385349, 0.970592, -0.034468, 1.247347, 0.525838, -1.043721, -0.359445, 0.784228, -5, 97.0313, 23)
-
-[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 402" instance=ExtResource("s0_96_e14li")]
-metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
-metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
-
-[node name="s0_Coastal Rock 403" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "sw_isle-kit-coastal-rock-3-131"
-node_name = "Authored_sw_isle_kit_coastal_rock_3_131"
-catalog_asset_id = "sw_isle:kit-coastal-rock-3"
-scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
-collision_role = "solid"
-metadata = {
-"polishLayer": "gorge",
-"polishPiece": "gorge-0087-b",
-"polishStep": "d1-rock"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.927011, -0.227035, 0.332024, 0.00486, 0.827763, 0.579585, -0.402195, 0.53329, -0.758271, -3.1307, 93.4847, 27.7161)
-
-[node name="Content" parent="AuthoredAssets/s0_Coastal Rock 403" instance=ExtResource("s0_96_e14li")]
 metadata/map_asset_id = "sw_isle:kit-coastal-rock-3"
 metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3.glb"
 
@@ -16761,6 +16712,1126 @@ transform = Transform3D(0.1735, 0, -0.9848, 0, 1, 0, 0.9848, 0, 0.1735, -34.3599
 metadata/map_asset_id = "tollholms:kit-harbour-banner-1"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-1.glb"
 
+[node name="mq_mq2-reedfall-bracken-patch-1-0001" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-bracken-patch-1-0001"
+node_name = "Authored_mq2_reedfall_bracken_patch_1_0001"
+catalog_asset_id = "lf_biomes:kit-bracken-patch-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-bracken-patch-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 14.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.021233, 0.138448, -0.428461, -0.061142, 1.094827, 0.208038, 0.446103, -0.166884, 1.009359, -83.04, 66.5147, 244.6788)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-bracken-patch-1-0001" instance=ExtResource("mq_2")]
+metadata/map_asset_id = "lf_biomes:kit-bracken-patch-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-bracken-patch-1.glb"
+
+[node name="mq_mq2-reedfall-flower-meadow-2-0001" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-flower-meadow-2-0001"
+node_name = "Authored_mq2_reedfall_flower_meadow_2_0001"
+catalog_asset_id = "sw_isle:kit-flower-meadow-2"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 4.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.978444, 0.077083, 0.47271, -0.136418, 1.075497, 0.10699, -0.459115, -0.15529, 0.975627, -106.0884, 70.2812, 259.7493)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-flower-meadow-2-0001" instance=ExtResource("s0_30_le438")]
+metadata/map_asset_id = "sw_isle:kit-flower-meadow-2"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-2.glb"
+
+[node name="mq_mq2-reedfall-blackthorn-shrub-1-0001" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-blackthorn-shrub-1-0001"
+node_name = "Authored_mq2_reedfall_blackthorn_shrub_1_0001"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 16.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.071139, 0.095569, -0.983084, 0.100119, 0.981252, 0.088146, 0.982631, -0.09306, -0.080153, -80.9983, 66.2141, 243.7528)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-blackthorn-shrub-1-0001" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq2-reedfall-flower-meadow-4-0001" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-flower-meadow-4-0001"
+node_name = "Authored_mq2_reedfall_flower_meadow_4_0001"
+catalog_asset_id = "sw_isle:kit-flower-meadow-4"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-4.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 34.5
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.475595, 0.143312, -0.840822, 0.040112, 0.957874, 0.185952, 0.852004, -0.125094, 0.460598, -63.198, 59.8906, 221.6906)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-flower-meadow-4-0001" instance=ExtResource("s0_122_a6ow2")]
+metadata/map_asset_id = "sw_isle:kit-flower-meadow-4"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-4.glb"
+
+[node name="mq_mq2-reedfall-blackthorn-shrub-1-0002" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-blackthorn-shrub-1-0002"
+node_name = "Authored_mq2_reedfall_blackthorn_shrub_1_0002"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 24.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.616549, 0, 0.801672, 0, 1.011341, 0, -0.801672, 0, 0.616549, -183.0035, 73.9604, 229.0674)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-blackthorn-shrub-1-0002" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq2-reedfall-flower-meadow-1-0001" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-flower-meadow-1-0001"
+node_name = "Authored_mq2_reedfall_flower_meadow_1_0001"
+catalog_asset_id = "sw_isle:kit-flower-meadow-1"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 14.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.899923, 0.087713, 0.533173, -0.096576, 1.04519, -0.00894, -0.531639, -0.04139, 0.904143, -111.5649, 69.8469, 249.0121)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-flower-meadow-1-0001" instance=ExtResource("s0_60_7ox6l")]
+metadata/map_asset_id = "sw_isle:kit-flower-meadow-1"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-1.glb"
+
+[node name="mq_mq2-reedfall-flower-meadow-1-0002" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-flower-meadow-1-0002"
+node_name = "Authored_mq2_reedfall_flower_meadow_1_0002"
+catalog_asset_id = "sw_isle:kit-flower-meadow-1"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 14.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.140954, 0.027028, 0.409785, -0.087172, 1.198351, 0.163672, -0.401317, -0.183458, 1.129477, -185.2288, 75.0288, 238.2446)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-flower-meadow-1-0002" instance=ExtResource("s0_60_7ox6l")]
+metadata/map_asset_id = "sw_isle:kit-flower-meadow-1"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-1.glb"
+
+[node name="mq_mq2-reedfall-flower-meadow-2-0002" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-flower-meadow-2-0002"
+node_name = "Authored_mq2_reedfall_flower_meadow_2_0002"
+catalog_asset_id = "sw_isle:kit-flower-meadow-2"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 12.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.700416, 0.12968, 0.74074, -0.192519, 1.009457, 0.005314, -0.726945, -0.142389, 0.7123, -79.4396, 66.5943, 247.9232)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-flower-meadow-2-0002" instance=ExtResource("s0_30_le438")]
+metadata/map_asset_id = "sw_isle:kit-flower-meadow-2"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-2.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0001" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0001"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0001"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 2.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.335618, 0, -0.809791, 0, 0.876585, 0, 0.809791, 0, -0.335618, -114.2865, 71.1699, 261.7168)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0001" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0002" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0002"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0002"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 19.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.395409, 0, -0.818233, 0, 0.908765, 0, 0.818233, 0, -0.395409, -101.3938, 68.3377, 244.0545)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0002" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0003" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0003"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0003"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 24.1
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.722197, 0, -0.645734, 0, 0.968783, 0, 0.645734, 0, -0.722197, -179.6209, 73.7794, 229.6085)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0003" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0004" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0004"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0004"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 16.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.840233, 0, -0.041936, 0, 0.841279, 0, 0.041936, 0, 0.840233, -94.6176, 67.8302, 245.4132)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0004" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-blackthorn-shrub-1-0003" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-blackthorn-shrub-1-0003"
+node_name = "Authored_mq2_reedfall_blackthorn_shrub_1_0003"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 36.5
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.897324, 0, -0.75022, 0, 1.169624, 0, 0.75022, 0, -0.897324, -130.0511, 69.343, 223.6104)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-blackthorn-shrub-1-0003" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq2-reedfall-bracken-patch-1-0002" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-bracken-patch-1-0002"
+node_name = "Authored_mq2_reedfall_bracken_patch_1_0002"
+catalog_asset_id = "lf_biomes:kit-bracken-patch-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-bracken-patch-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 4.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.778245, 0.072751, -0.409618, -0.054761, 0.879221, 0.052115, 0.412408, -0.020541, 0.779899, -157.8893, 73.3155, 252.9725)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-bracken-patch-1-0002" instance=ExtResource("mq_2")]
+metadata/map_asset_id = "lf_biomes:kit-bracken-patch-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-bracken-patch-1.glb"
+
+[node name="mq_mq2-reedfall-blackthorn-shrub-1-0004" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-blackthorn-shrub-1-0004"
+node_name = "Authored_mq2_reedfall_blackthorn_shrub_1_0004"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 48.7
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.885282, 0.103063, -0.462792, 0.136109, 0.994223, -0.038954, 0.454172, -0.097063, -0.89041, -76.6124, 60.0488, 209.8054)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-blackthorn-shrub-1-0004" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0005" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0005"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0005"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 60.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.501909, 0, -0.977287, 0, 1.098636, 0, 0.977287, 0, -0.501909, -120.0023, 65.8074, 201.5926)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0005" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0006" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0006"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0006"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 26.1
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.17055, 0.048864, 0.972953, -0.086252, 0.983114, -0.064494, -0.970353, -0.095975, -0.165274, -71.1508, 64.0255, 231.0495)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0006" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0007" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0007"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0007"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 4.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.66755, 0, -0.548841, 0, 0.864204, 0, 0.548841, 0, -0.66755, -72.3455, 66.1306, 254.8216)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0007" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-flower-meadow-2-0003" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-flower-meadow-2-0003"
+node_name = "Authored_mq2_reedfall_flower_meadow_2_0003"
+catalog_asset_id = "sw_isle:kit-flower-meadow-2"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 2.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.398841, 0.059423, 1.065226, -0.061699, 1.136609, -0.040304, -1.065097, -0.04359, 0.401224, -145.1288, 72.7519, 257.6212)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-flower-meadow-2-0003" instance=ExtResource("s0_30_le438")]
+metadata/map_asset_id = "sw_isle:kit-flower-meadow-2"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-2.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0008" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0008"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0008"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 24.7
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.638115, 0, -0.735659, 0, 0.97385, 0, 0.735659, 0, -0.638115, -174.7607, 73.3308, 229.7342)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0008" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-bracken-patch-1-0003" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-bracken-patch-1-0003"
+node_name = "Authored_mq2_reedfall_bracken_patch_1_0003"
+catalog_asset_id = "lf_biomes:kit-bracken-patch-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-bracken-patch-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 42.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.641804, 0.122904, 0.647111, -0.060388, 0.888722, -0.228684, -0.655905, -0.202084, -0.612144, -136.4361, 69.1207, 217.6009)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-bracken-patch-1-0003" instance=ExtResource("mq_2")]
+metadata/map_asset_id = "lf_biomes:kit-bracken-patch-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-bracken-patch-1.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0009" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0009"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0009"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 28.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.93359, 0, 0.067083, 0, 0.935997, 0, -0.067083, 0, -0.93359, -166.512, 72.5406, 226.5944)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0009" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-blackthorn-shrub-1-0005" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-blackthorn-shrub-1-0005"
+node_name = "Authored_mq2_reedfall_blackthorn_shrub_1_0005"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 38.2
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.017148, 0, 0.082236, 0, 1.020467, 0, -0.082236, 0, 1.017148, -133.6408, 69.5648, 221.6414)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-blackthorn-shrub-1-0005" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq2-reedfall-blackthorn-shrub-1-0006" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-blackthorn-shrub-1-0006"
+node_name = "Authored_mq2_reedfall_blackthorn_shrub_1_0006"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 42.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.788256, 0, -0.6316, 0, 1.010083, 0, 0.6316, 0, -0.788256, -134.3344, 68.6835, 216.396)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-blackthorn-shrub-1-0006" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0010" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0010"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0010"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 2.8
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.653816, 0, 0.821497, 0, 1.04992, 0, -0.821497, 0, 0.653816, -178.6385, 75.2963, 250.2014)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0010" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-blackthorn-shrub-1-0007" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-blackthorn-shrub-1-0007"
+node_name = "Authored_mq2_reedfall_blackthorn_shrub_1_0007"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 16.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.773584, 0, 0.672743, 0, 1.02519, 0, -0.672743, 0, -0.773584, -109.7311, 69.4784, 246.5657)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-blackthorn-shrub-1-0007" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0011" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0011"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0011"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 10.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.742827, 0, 0.650788, 0, 0.987582, 0, -0.650788, 0, -0.742827, -121.544, 71.0066, 251.8661)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0011" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0012" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0012"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0012"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 11.7
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.266497, 0, -0.890464, 0, 0.929487, 0, 0.890464, 0, -0.266497, -101.5982, 69.2896, 252.0706)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0012" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0013" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0013"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0013"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 24.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.214591, 0, -0.93667, 0, 0.960937, 0, 0.93667, 0, -0.214591, -198.0832, 74.9922, 227.8538)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0013" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0014" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0014"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0014"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 4.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.912481, 0, 0.382793, 0, 0.989521, 0, -0.382793, 0, -0.912481, -196.6795, 77.2447, 246.3664)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0014" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-undergrowth-4-0001" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-undergrowth-4-0001"
+node_name = "Authored_mq2_reedfall_undergrowth_4_0001"
+catalog_asset_id = "sw_isle:kit-undergrowth-4"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-undergrowth-4.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 2.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.591395, 0, 1.518706, 0, 1.62979, 0, -1.518706, 0, 0.591395, -146.5159, 72.5888, 257.0137)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-undergrowth-4-0001" instance=ExtResource("s0_117_f0g1p")]
+metadata/map_asset_id = "sw_isle:kit-undergrowth-4"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-undergrowth-4.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0015" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0015"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0015"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 4.5
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.99145, 0, 0.235492, 0, 1.019034, 0, -0.235492, 0, 0.99145, -148.8662, 72.5809, 252.9666)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0015" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0016" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0016"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0016"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "brambleshaw>reedfall",
+"distFromBorder": 58.1
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.506267, 0, 0.950938, 0, 1.077307, 0, -0.950938, 0, -0.506267, -133.4643, 67.8381, 202.0103)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0016" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-feather-grass-2-0001" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-feather-grass-2-0001"
+node_name = "Authored_mq2_reedfall_feather_grass_2_0001"
+catalog_asset_id = "lf_biomes:kit-feather-grass-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "hearthcroft>reedfall",
+"distFromBorder": 18.4
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.549164, -0.049704, 0.89337, 0.097329, 1.78499, -0.069464, -0.889443, 0.108755, 1.548403, 181.1292, 69.35, -180.1224)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-feather-grass-2-0001" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "lf_biomes:kit-feather-grass-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-2.glb"
+
+[node name="mq_mq2-reedfall-flower-meadow-3-0001" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-flower-meadow-3-0001"
+node_name = "Authored_mq2_reedfall_flower_meadow_3_0001"
+catalog_asset_id = "sw_isle:kit-flower-meadow-3"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "hearthcroft>reedfall",
+"distFromBorder": 43.9
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.831989, 0, -0.524572, 0, 0.983556, 0, 0.524572, 0, -0.831989, 101.1935, 62.1269, -165.6811)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-flower-meadow-3-0001" instance=ExtResource("s0_58_sg4cx")]
+metadata/map_asset_id = "sw_isle:kit-flower-meadow-3"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-3.glb"
+
+[node name="mq_mq2-reedfall-feather-grass-2-0002" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-feather-grass-2-0002"
+node_name = "Authored_mq2_reedfall_feather_grass_2_0002"
+catalog_asset_id = "lf_biomes:kit-feather-grass-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "hearthcroft>reedfall",
+"distFromBorder": 11.3
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.445543, 0, -0.112956, 0, 1.44995, 0, 0.112956, 0, 1.445543, 103.9463, 71.9182, -208.7339)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-feather-grass-2-0002" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "lf_biomes:kit-feather-grass-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-2.glb"
+
+[node name="mq_mq2-reedfall-flower-meadow-1-0003" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-flower-meadow-1-0003"
+node_name = "Authored_mq2_reedfall_flower_meadow_1_0003"
+catalog_asset_id = "sw_isle:kit-flower-meadow-1"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "hearthcroft>reedfall",
+"distFromBorder": 46.8
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.176932, -0.00389, 1.142724, 0.223309, 1.134164, -0.030715, -1.120699, 0.225378, 0.174289, 108.5698, 61.056, -158.5591)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-flower-meadow-1-0003" instance=ExtResource("s0_60_7ox6l")]
+metadata/map_asset_id = "sw_isle:kit-flower-meadow-1"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-1.glb"
+
+[node name="mq_mq2-reedfall-feather-grass-2-0003" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-feather-grass-2-0003"
+node_name = "Authored_mq2_reedfall_feather_grass_2_0003"
+catalog_asset_id = "lf_biomes:kit-feather-grass-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "hearthcroft>reedfall",
+"distFromBorder": 10.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-1.195072, 0, -1.011015, 0, 1.565359, 0, 1.011015, 0, -1.195072, 95.4363, 72.9944, -220.4359)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-feather-grass-2-0003" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "lf_biomes:kit-feather-grass-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-2.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0017" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0017"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0017"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "hearthcroft>reedfall",
+"distFromBorder": 61.2
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.650258, 0, -0.827611, 0, 1.052509, 0, 0.827611, 0, 0.650258, 112.0443, 59.2306, -143.9903)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0017" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0018" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0018"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0018"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "hearthcroft>reedfall",
+"distFromBorder": 4.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.597905, 0, 0.933834, 0, 1.108845, 0, -0.933834, 0, -0.597905, 113.4232, 72.2809, -208.4321)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0018" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-feather-grass-2-0004" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-feather-grass-2-0004"
+node_name = "Authored_mq2_reedfall_feather_grass_2_0004"
+catalog_asset_id = "lf_biomes:kit-feather-grass-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "hearthcroft>reedfall",
+"distFromBorder": 12.8
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.709191, 0, -1.412242, 0, 1.58031, 0, 1.412242, 0, 0.709191, 92.2477, 73.0261, -220.8909)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-feather-grass-2-0004" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "lf_biomes:kit-feather-grass-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-2.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0019" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0019"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0019"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "hearthcroft>reedfall",
+"distFromBorder": 6.3
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.428072, 0, -1.068362, 0, 1.150931, 0, 1.068362, 0, 0.428072, 104.789, 72.5591, -217.1788)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0019" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0020" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0020"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0020"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "hearthcroft>reedfall",
+"distFromBorder": 6.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.538716, 0, -0.930312, 0, 1.075033, 0, 0.930312, 0, -0.538716, 154.1572, 70.6899, -194.455)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0020" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0021" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0021"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0021"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "hearthcroft>reedfall",
+"distFromBorder": 43.7
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.91994, 0, 0.504082, 0, 1.048994, 0, -0.504082, 0, 0.91994, 111.6209, 61.4385, -161.4153)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0021" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0022" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0022"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0022"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "hearthcroft>reedfall",
+"distFromBorder": 41.8
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.794465, -0.006167, -0.747181, -0.153731, 1.06592, -0.172258, 0.731221, 0.230799, 0.77559, 130.6725, 61.0267, -161.3933)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0022" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-flower-meadow-1-0004" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-flower-meadow-1-0004"
+node_name = "Authored_mq2_reedfall_flower_meadow_1_0004"
+catalog_asset_id = "sw_isle:kit-flower-meadow-1"
+scene_path = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "hearthcroft>reedfall",
+"distFromBorder": 4.5
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.271628, -0.065761, -0.068055, 0.060827, 1.270435, -0.091047, 0.072499, 0.08755, 1.270068, 106.9126, 72.6917, -216.6309)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-flower-meadow-1-0004" instance=ExtResource("s0_60_7ox6l")]
+metadata/map_asset_id = "sw_isle:kit-flower-meadow-1"
+metadata/map_asset_scene = "res://world_authoring/regions/sw_isle/assets/prototypes/kit-flower-meadow-1.glb"
+
+[node name="mq_mq2-reedfall-feather-grass-2-0005" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-feather-grass-2-0005"
+node_name = "Authored_mq2_reedfall_feather_grass_2_0005"
+catalog_asset_id = "lf_biomes:kit-feather-grass-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "hearthcroft>reedfall",
+"distFromBorder": 21.3
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.444513, 0, -1.342796, 0, 1.414458, 0, 1.342796, 0, -0.444513, 96.5047, 70.8189, -203.4691)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-feather-grass-2-0005" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "lf_biomes:kit-feather-grass-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-2.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0023" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0023"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0023"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "hearthcroft>reedfall",
+"distFromBorder": 2.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.671892, 0, 0.802322, 0, 1.046498, 0, -0.802322, 0, -0.671892, 114.0306, 72.6092, -212.9402)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0023" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0024" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0024"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0024"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "hearthcroft>reedfall",
+"distFromBorder": 60.8
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-1.161988, 0, -0.360356, 0, 1.216583, 0, 0.360356, 0, -1.161988, 113.686, 59.0161, -143.4706)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0024" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0025" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0025"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0025"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "hearthcroft>reedfall",
+"distFromBorder": 46.7
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.688643, -0.011978, -0.739174, -0.11476, 0.999676, 0.090715, 0.73031, 0.145793, -0.682747, 88.9234, 63.4692, -173.6194)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0025" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-feather-grass-1-0001" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-feather-grass-1-0001"
+node_name = "Authored_mq2_reedfall_feather_grass_1_0001"
+catalog_asset_id = "lf_biomes:kit-feather-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "hearthcroft>reedfall",
+"distFromBorder": 18.9
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-1.224079, 0, 0.370556, 0, 1.278938, 0, -0.370556, 0, -1.224079, 93.3898, 71.725, -209.9746)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-feather-grass-1-0001" instance=ExtResource("mq_5")]
+metadata/map_asset_id = "lf_biomes:kit-feather-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-1.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0026" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0026"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0026"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "hearthcroft>reedfall",
+"distFromBorder": 47.2
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.474403, 0, 0.912987, 0, 1.028885, 0, -0.912987, 0, -0.474403, 71.0972, 68.5177, -190.7116)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0026" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0027" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0027"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0027"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "hearthcroft>reedfall",
+"distFromBorder": 24.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.057312, 0, 1.160989, 0, 1.162403, 0, -1.160989, 0, -0.057312, 151.0434, 67.8044, -178.0548)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0027" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0028" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0028"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0028"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "hearthcroft>reedfall",
+"distFromBorder": 45.3
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.844088, -0.017281, -0.597231, -0.088918, 1.02584, 0.095989, 0.590827, 0.129699, -0.838791, 87.5516, 63.7423, -174.727)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0028" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-tussock-grass-1-0029" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-tussock-grass-1-0029"
+node_name = "Authored_mq2_reedfall_tussock_grass_1_0029"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "hearthcroft>reedfall",
+"distFromBorder": 18.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.309441, 0, 1.021237, 0, 1.067089, 0, -1.021237, 0, 0.309441, 145.6764, 68.6799, -183.58)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-tussock-grass-1-0029" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-reedfall-feather-grass-2-0006" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-reedfall-feather-grass-2-0006"
+node_name = "Authored_mq2_reedfall_feather_grass_2_0006"
+catalog_asset_id = "lf_biomes:kit-feather-grass-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "hearthcroft>reedfall",
+"distFromBorder": 16.1
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.842286, -0.067143, -1.37751, -0.129935, 1.610778, 0.000937, 1.373011, 0.111247, -0.844957, 161.6922, 68.892, -183.0852)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-reedfall-feather-grass-2-0006" instance=ExtResource("mq_4")]
+metadata/map_asset_id = "lf_biomes:kit-feather-grass-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-feather-grass-2.glb"
+
 [node name="reedfall--obj-boat-stagheath" type="Marker3D" parent="Gameplay/Interactives"]
 gizmo_extents = 0.8
 script = ExtResource("s0_marker")
@@ -17341,25 +18412,6 @@ extras = {
 "bindPlacement": "lf_biomes-kit-bulrush-clump-1-reedfall-0001"
 }
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -130.5, 76.974, -95.5)
-
-[node name="reedfall--harvest-3042-watercress" type="Marker3D" parent="Gameplay/Harvestables"]
-gizmo_extents = 0.8
-script = ExtResource("s0_marker")
-record_id = "reedfall--harvest-3042-watercress"
-kind = "harvestable"
-label = "Watercress"
-extras = {
-"authority": "server",
-"cluster": "reedfall-wild-0007",
-"grouping": "reedfall-wild-0007",
-"groupingName": "Reed and Watercress",
-"objectId": 3042,
-"pass": "harvest-coverage-1",
-"resource": "Watercress",
-"yaw": 37,
-"zone": "coverage"
-}
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -132.5, 77.45, -96.5)
 
 [node name="reedfall--harvest-3043-lavender" type="Marker3D" parent="Gameplay/Harvestables"]
 gizmo_extents = 0.8

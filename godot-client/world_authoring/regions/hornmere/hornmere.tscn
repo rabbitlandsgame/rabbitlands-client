@@ -329,6 +329,14 @@ _data = {
 }
 point_count = 111
 
+[sub_resource type="Curve3D" id="mq_road_1"]
+resource_local_to_scene = true
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -299.7, 101.941, -345, 0, 0, 0, 0, 0, 0, -300.762, 101.941, -345, 0, 0, 0, 0, 0, 0, -301.823, 101.941, -345, 0, 0, 0, 0, 0, 0, -302.885, 101.941, -345, 0, 0, 0, 0, 0, 0, -303.946, 101.941, -345, 0, 0, 0, 0, 0, 0, -305.008, 101.941, -345, 0, 0, 0, 0, 0, 0, -306.069, 101.941, -345, 0, 0, 0, 0, 0, 0, -307.131, 101.941, -345, 0, 0, 0, 0, 0, 0, -308.192, 101.941, -345, 0, 0, 0, 0, 0, 0, -309.254, 101.941, -345, 0, 0, 0, 0, 0, 0, -310.315, 101.941, -345, 0, 0, 0, 0, 0, 0, -311.377, 101.941, -345, 0, 0, 0, 0, 0, 0, -312.438, 101.941, -345, 0, 0, 0, 0, 0, 0, -313.5, 101.941, -345, 0, 0, 0, 0, 0, 0, -314.463, 101.941, -344.933, 0, 0, 0, 0, 0, 0, -315.405, 101.941, -344.725, 0, 0, 0, 0, 0, 0, -316.303, 101.941, -344.372, 0, 0, 0, 0, 0, 0, -317.132, 101.941, -343.877, 0, 0, 0, 0, 0, 0, -317.869, 101.941, -343.254, 0, 0, 0, 0, 0, 0, -318.493, 101.941, -342.518, 0, 0, 0, 0, 0, 0, -318.99, 101.941, -341.69, 0, 0, 0, 0, 0, 0, -319.347, 101.941, -340.794, 0, 0, 0, 0, 0, 0, -319.555, 101.941, -339.852, 0, 0, 0, 0, 0, 0, -319.607, 101.941, -338.888, 0, 0, 0, 0, 0, 0, -319.5, 101.941, -337.929, 0, 0, 0, 0, 0, 0, -319.307, 101.941, -336.948),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 26
+
 [node name="hornmere" type="Node3D" groups=["map_authoring_region"]]
 script = ExtResource("region")
 region_id = "hornmere"
@@ -352,6 +360,16 @@ preview_uv_metres_inverse = 0.17
 preview_clip_inside = PackedVector2Array(621, 6131, 621, 5021, 1351, 5021, 1351, 6131)
 
 [node name="Patches" type="Node3D" parent="Terrain"]
+
+[node name="mq_pad_hornmere_00_lf_biomes_kit_mountain_townhouse_1_hornmere_0006" type="Marker3D" parent="Terrain/Patches"]
+script = ExtResource("patch")
+patch_id = "mq-pad-hornmere-00-lf_biomes-kit-mountain-townhouse-1-hornmere-0006"
+transform = Transform3D(-0.939693, 0, -0.34202, 0, 1, 0, 0.34202, 0, -0.939693, -333.9972, 7.7297, -0.083)
+shape = 1
+operation = 1
+size = Vector2(15.016, 13.898)
+feather = 3.5
+enabled = true
 
 [node name="Ground" type="Node3D" parent="."]
 
@@ -1324,7 +1342,7 @@ metadata = {
 "biomeRule": "cold quay"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.939693, 0, -0.34202, 0, 1, 0, 0.34202, 0, -0.939693, -334.000, 7.148, 0.000)
+transform = Transform3D(-0.939693, 0, -0.34202, 0, 1, 0, 0.34202, 0, -0.939693, -334.000, 7.6652, 0.000)
 
 [node name="Content" parent="AuthoredAssets/a3_hornmere_Mountain Townhouse 1 6" instance=ExtResource("a3_mountain_townhouse_1")]
 metadata/map_asset_id = "lf_biomes:kit-mountain-townhouse-1"
@@ -9304,7 +9322,7 @@ metadata = {
 "biomeRule": "mountain pines"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.363295, 0, -1.09032, 0, 1.14925, 0, 1.09032, 0, -0.363295, -288.804, 50.4059, -81.549)
+transform = Transform3D(-0.363295, 0, -1.09032, 0, 1.14925, 0, 1.09032, 0, -0.363295, -286.804, 49.8449, -79.049)
 
 [node name="Content" parent="AuthoredAssets/a3_hornmere_Mountain Pine Tree 1 75" instance=ExtResource("a3_mountain_pine_tree_1")]
 metadata/map_asset_id = "lf_biomes:kit-mountain-pine-tree-1"
@@ -32908,6 +32926,82 @@ transform = Transform3D(-0.0223328, 0, -1.17641, 0, 1.17662, 0, 1.17641, 0, -0.0
 metadata/map_asset_id = "lf_biomes:kit-alpine-flower-cushion-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-alpine-flower-cushion-1.glb"
 
+[node name="mq_mq3-hornmere-juniper-shrub-003" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("bn_asset_script")
+asset_id = "mq3-hornmere-juniper-shrub-003"
+node_name = "Authored_mq3_hornmere_juniper_shrub_003"
+catalog_asset_id = "lf_biomes:kit-juniper-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-juniper-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.967664, 0, -0.468449, 0, 1.07509, 0, 0.468449, 0, 0.967664, -333.25, 8.553838, -6.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-hornmere-juniper-shrub-003" instance=ExtResource("a3_juniper_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-juniper-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-juniper-shrub-1.glb"
+
+[node name="mq_mq3-hornmere-juniper-shrub-005" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("bn_asset_script")
+asset_id = "mq3-hornmere-juniper-shrub-005"
+node_name = "Authored_mq3_hornmere_juniper_shrub_005"
+catalog_asset_id = "lf_biomes:kit-juniper-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-juniper-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.5625, 0, -0.919785, 0, 1.078151, 0, 0.919785, 0, 0.5625, -331.75, 8.052491, -6.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-hornmere-juniper-shrub-005" instance=ExtResource("a3_juniper_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-juniper-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-juniper-shrub-1.glb"
+
+[node name="mq_mq3-hornmere-juniper-shrub-008" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("bn_asset_script")
+asset_id = "mq3-hornmere-juniper-shrub-008"
+node_name = "Authored_mq3_hornmere_juniper_shrub_008"
+catalog_asset_id = "lf_biomes:kit-juniper-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-juniper-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads3"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.455664, 0, -0.974034, 0, 1.075347, 0, 0.974034, 0, -0.455664, -329.25, 8.724165, -6.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-hornmere-juniper-shrub-008" instance=ExtResource("a3_juniper_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-juniper-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-juniper-shrub-1.glb"
+
+[node name="mq_mq3-hornmere-juniper-shrub-009" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("bn_asset_script")
+asset_id = "mq3-hornmere-juniper-shrub-009"
+node_name = "Authored_mq3_hornmere_juniper_shrub_009"
+catalog_asset_id = "lf_biomes:kit-juniper-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-juniper-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads3"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.915261, 0, 0.3397, 0, 0.976268, 0, -0.3397, 0, -0.915261, -330.75, 8.491092, -7.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-hornmere-juniper-shrub-009" instance=ExtResource("a3_juniper_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-juniper-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-juniper-shrub-1.glb"
+
 [node name="hornmere--obj-boat-stagheath" type="Marker3D" parent="Gameplay/Interactives"]
 gizmo_extents = 0.8
 script = ExtResource("marker")
@@ -33340,6 +33434,21 @@ properties = {
 }
 default_width = 5
 point_widths = PackedFloat32Array(5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5)
+surface = SubResource("a3t_worn_surface")
+
+[node name="hornmere--lens-gate-spur" type="Path3D" parent="Roads"]
+curve = SubResource("mq_road_1")
+script = ExtResource("a3t_path")
+path_id = "hornmere--lens-gate-spur"
+properties = {
+"pass": "a3-trails-2026-10-20",
+"source": "map polish 2026-11-16: spur from the lens gate passage onto a3-trail-01 (landfall-gate-paths hornmere-3)",
+"terrainConform": false,
+"terrainFeather": 2.0,
+"approval": "owner 2026-11-16: map quality report decisions (Reroutes: the Hornmere lens-gate spur)"
+}
+default_width = 3.6
+point_widths = PackedFloat32Array(3.6, 3.6, 3.6, 3.6, 3.6, 3.6, 3.6, 3.6, 3.6, 3.6, 3.6, 3.6, 3.6, 3.6, 3.6, 3.6, 3.6, 3.6, 3.6, 3.6, 3.6, 3.6, 3.6, 3.6, 3.6, 3.6)
 surface = SubResource("a3t_worn_surface")
 
 [node name="hornmere--mirror-vaults-door" type="Marker3D" parent="RuntimePoints"]

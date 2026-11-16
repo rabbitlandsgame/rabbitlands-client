@@ -187,6 +187,10 @@
 
 [ext_resource type="PackedScene" path="res://world_authoring/regions/sw_isle/assets/prototypes/kit-coastal-rock-3-noplate.glb" id="mq_1"]
 
+[ext_resource type="PackedScene" path="res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-ashen-brush-3.glb" id="mq_2"]
+
+[ext_resource type="PackedScene" path="res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-ashen-brush-2.glb" id="mq_3"]
+
 [sub_resource type="StandardMaterial3D" id="material"]
 cull_mode = 2
 vertex_color_use_as_albedo = true
@@ -72461,6 +72465,406 @@ transform = Transform3D(0.2589, 0, 0.9659, 0, 1, 0, -0.9659, 0, 0.2589, 408.4604
 [node name="Content" parent="AuthoredAssets/BN Stagheath Banner For Saltsound" instance=ExtResource("bn_kit_harbour_banner_1")]
 metadata/map_asset_id = "tollholms:kit-harbour-banner-1"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-harbour-banner-1.glb"
+
+[node name="mq_mq2-stagheath-ashen-brush-3-0001" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-stagheath-ashen-brush-3-0001"
+node_name = "Authored_mq2_stagheath_ashen_brush_3_0001"
+catalog_asset_id = "lf_biomes:kit-ashen-brush-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-ashen-brush-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "saltsound>stagheath",
+"distFromBorder": 42.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.318277, 0, -0.858948, 0, 0.916019, 0, 0.858948, 0, 0.318277, 490.4295, 68.5914, -44.5444)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-stagheath-ashen-brush-3-0001" instance=ExtResource("mq_2")]
+metadata/map_asset_id = "lf_biomes:kit-ashen-brush-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-ashen-brush-3.glb"
+
+[node name="mq_mq2-stagheath-heather-clump-2-0001" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-stagheath-heather-clump-2-0001"
+node_name = "Authored_mq2_stagheath_heather_clump_2_0001"
+catalog_asset_id = "lf_biomes:kit-heather-clump-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "saltsound>stagheath",
+"distFromBorder": 4.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.781135, 0.440424, -0.462677, -0.33117, 0.904201, 0.301599, 0.546232, -0.081625, 0.844502, 527.6143, 56.392, -72.3176)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-stagheath-heather-clump-2-0001" instance=ExtResource("lv_heather_clump_2")]
+metadata/map_asset_id = "lf_biomes:kit-heather-clump-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-2.glb"
+
+[node name="mq_mq2-stagheath-heather-clump-1-0001" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-stagheath-heather-clump-1-0001"
+node_name = "Authored_mq2_stagheath_heather_clump_1_0001"
+catalog_asset_id = "lf_biomes:kit-heather-clump-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "saltsound>stagheath",
+"distFromBorder": 24.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.718926, 0.517124, 0.599222, -0.492307, 0.926015, -0.208491, -0.619772, -0.135711, 0.860699, 508.6312, 64.9825, -129.98)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-stagheath-heather-clump-1-0001" instance=ExtResource("lv_heather_clump_1")]
+metadata/map_asset_id = "lf_biomes:kit-heather-clump-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-1.glb"
+
+[node name="mq_mq2-stagheath-heather-clump-2-0002" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-stagheath-heather-clump-2-0002"
+node_name = "Authored_mq2_stagheath_heather_clump_2_0002"
+catalog_asset_id = "lf_biomes:kit-heather-clump-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "saltsound>stagheath",
+"distFromBorder": 44.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.294801, 0.080523, -1.078478, 0.080028, 1.116389, 0.061478, 1.078515, -0.060828, -0.299353, 487.4507, 71.985, 87.6092)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-stagheath-heather-clump-2-0002" instance=ExtResource("lv_heather_clump_2")]
+metadata/map_asset_id = "lf_biomes:kit-heather-clump-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-2.glb"
+
+[node name="mq_mq2-stagheath-heather-clump-2-0003" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-stagheath-heather-clump-2-0003"
+node_name = "Authored_mq2_stagheath_heather_clump_2_0003"
+catalog_asset_id = "lf_biomes:kit-heather-clump-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "saltsound>stagheath",
+"distFromBorder": 6.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.818989, 0.379701, -0.007592, -0.377191, 0.815352, 0.088896, 0.044246, -0.077475, 0.89834, 525.1664, 58.0194, -66.0341)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-stagheath-heather-clump-2-0003" instance=ExtResource("lv_heather_clump_2")]
+metadata/map_asset_id = "lf_biomes:kit-heather-clump-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-2.glb"
+
+[node name="mq_mq2-stagheath-ashen-brush-2-0001" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-stagheath-ashen-brush-2-0001"
+node_name = "Authored_mq2_stagheath_ashen_brush_2_0001"
+catalog_asset_id = "lf_biomes:kit-ashen-brush-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-ashen-brush-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "saltsound>stagheath",
+"distFromBorder": 30.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-1.020503, 0.18186, -0.254194, 0.162051, 1.050101, 0.100702, 0.267258, 0.057692, -1.031677, 500.8, 67.1902, -80.9698)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-stagheath-ashen-brush-2-0001" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-ashen-brush-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-ashen-brush-2.glb"
+
+[node name="mq_mq2-stagheath-heather-clump-2-0004" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-stagheath-heather-clump-2-0004"
+node_name = "Authored_mq2_stagheath_heather_clump_2_0004"
+catalog_asset_id = "lf_biomes:kit-heather-clump-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "saltsound>stagheath",
+"distFromBorder": 22.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.498257, 0.203604, 0.682145, 0.083348, 0.843589, -0.190911, -0.706986, -0.04404, -0.503257, 509.3994, 65.6618, -30.8766)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-stagheath-heather-clump-2-0004" instance=ExtResource("lv_heather_clump_2")]
+metadata/map_asset_id = "lf_biomes:kit-heather-clump-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-2.glb"
+
+[node name="mq_mq2-stagheath-heather-clump-2-0005" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-stagheath-heather-clump-2-0005"
+node_name = "Authored_mq2_stagheath_heather_clump_2_0005"
+catalog_asset_id = "lf_biomes:kit-heather-clump-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "saltsound>stagheath",
+"distFromBorder": 34.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.185776, 0.110806, -0.999771, 0.044052, 1.0166, 0.104485, 1.004928, -0.024079, -0.189403, 496.9686, 69.4193, -4.931)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-stagheath-heather-clump-2-0005" instance=ExtResource("lv_heather_clump_2")]
+metadata/map_asset_id = "lf_biomes:kit-heather-clump-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-2.glb"
+
+[node name="mq_mq2-stagheath-heather-clump-2-0006" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-stagheath-heather-clump-2-0006"
+node_name = "Authored_mq2_stagheath_heather_clump_2_0006"
+catalog_asset_id = "lf_biomes:kit-heather-clump-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "saltsound>stagheath",
+"distFromBorder": 50.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.150624, 0.113473, -0.939113, 0.03306, 0.950994, 0.109606, 0.945366, -0.015177, -0.153461, 482.6786, 69.9511, -77.7958)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-stagheath-heather-clump-2-0006" instance=ExtResource("lv_heather_clump_2")]
+metadata/map_asset_id = "lf_biomes:kit-heather-clump-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-2.glb"
+
+[node name="mq_mq2-stagheath-ashen-brush-2-0002" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-stagheath-ashen-brush-2-0002"
+node_name = "Authored_mq2_stagheath_ashen_brush_2_0002"
+catalog_asset_id = "lf_biomes:kit-ashen-brush-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-ashen-brush-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "saltsound>stagheath",
+"distFromBorder": 18.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-1.070171, 0.14446, -0.045043, 0.146118, 1.070169, -0.039398, 0.039333, -0.045099, -1.079159, 513.4563, 64.5524, -32.0136)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-stagheath-ashen-brush-2-0002" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-ashen-brush-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-ashen-brush-2.glb"
+
+[node name="mq_mq2-stagheath-heather-clump-2-0007" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-stagheath-heather-clump-2-0007"
+node_name = "Authored_mq2_stagheath_heather_clump_2_0007"
+catalog_asset_id = "lf_biomes:kit-heather-clump-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "saltsound>stagheath",
+"distFromBorder": 38.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.045072, 0.245734, 1.034086, 0.021064, 1.034606, -0.246776, -1.062674, 0.03093, 0.038968, 494.6862, 67.8209, -60.3645)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-stagheath-heather-clump-2-0007" instance=ExtResource("lv_heather_clump_2")]
+metadata/map_asset_id = "lf_biomes:kit-heather-clump-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-2.glb"
+
+[node name="mq_mq2-stagheath-ashen-brush-3-0002" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-stagheath-ashen-brush-3-0002"
+node_name = "Authored_mq2_stagheath_ashen_brush_3_0002"
+catalog_asset_id = "lf_biomes:kit-ashen-brush-3"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-ashen-brush-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "saltsound>stagheath",
+"distFromBorder": 20.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.793127, 0, 0.296362, 0, 0.846689, 0, -0.296362, 0, 0.793127, 512.6986, 70.9741, 93.439)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-stagheath-ashen-brush-3-0002" instance=ExtResource("mq_2")]
+metadata/map_asset_id = "lf_biomes:kit-ashen-brush-3"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-ashen-brush-3.glb"
+
+[node name="mq_mq2-stagheath-heather-clump-2-0008" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-stagheath-heather-clump-2-0008"
+node_name = "Authored_mq2_stagheath_heather_clump_2_0008"
+catalog_asset_id = "lf_biomes:kit-heather-clump-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "saltsound>stagheath",
+"distFromBorder": 28.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.181829, 0.171314, -1.034455, 0.077244, 1.044853, 0.186614, 1.045696, -0.10697, 0.16609, 503.5163, 67.3871, -122.371)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-stagheath-heather-clump-2-0008" instance=ExtResource("lv_heather_clump_2")]
+metadata/map_asset_id = "lf_biomes:kit-heather-clump-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-2.glb"
+
+[node name="mq_mq2-stagheath-heather-clump-1-0002" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-stagheath-heather-clump-1-0002"
+node_name = "Authored_mq2_stagheath_heather_clump_1_0002"
+catalog_asset_id = "lf_biomes:kit-heather-clump-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "saltsound>stagheath",
+"distFromBorder": 38.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.166881, 0.071263, 0.851697, -0.019906, 0.867869, -0.068715, -0.854441, -0.0063, 0.167946, 492.9779, 71.5857, 80.6565)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-stagheath-heather-clump-1-0002" instance=ExtResource("lv_heather_clump_1")]
+metadata/map_asset_id = "lf_biomes:kit-heather-clump-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-1.glb"
+
+[node name="mq_mq2-stagheath-heather-clump-2-0009" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-stagheath-heather-clump-2-0009"
+node_name = "Authored_mq2_stagheath_heather_clump_2_0009"
+catalog_asset_id = "lf_biomes:kit-heather-clump-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "saltsound>stagheath",
+"distFromBorder": 36.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.806122, 0.20856, 0.48077, -0.162008, 0.938042, -0.135282, -0.498387, 0.032413, 0.821602, 496.214, 68.9486, -89.7372)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-stagheath-heather-clump-2-0009" instance=ExtResource("lv_heather_clump_2")]
+metadata/map_asset_id = "lf_biomes:kit-heather-clump-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-2.glb"
+
+[node name="mq_mq2-stagheath-ashen-brush-2-0003" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-stagheath-ashen-brush-2-0003"
+node_name = "Authored_mq2_stagheath_ashen_brush_2_0003"
+catalog_asset_id = "lf_biomes:kit-ashen-brush-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-ashen-brush-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "saltsound>stagheath",
+"distFromBorder": 14.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.718341, 0, 0.41212, 0, 0.828165, 0, -0.41212, 0, 0.718341, 516.9826, 71.3437, 68.4071)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-stagheath-ashen-brush-2-0003" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-ashen-brush-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-ashen-brush-2.glb"
+
+[node name="mq_mq2-stagheath-heather-clump-2-0010" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-stagheath-heather-clump-2-0010"
+node_name = "Authored_mq2_stagheath_heather_clump_2_0010"
+catalog_asset_id = "lf_biomes:kit-heather-clump-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "saltsound>stagheath",
+"distFromBorder": 42.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-1.029953, 0.062735, -0.473169, 0.124848, 1.12156, -0.123057, 0.460692, -0.16369, -1.024498, 489.001, 69.1797, -100.7986)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-stagheath-heather-clump-2-0010" instance=ExtResource("lv_heather_clump_2")]
+metadata/map_asset_id = "lf_biomes:kit-heather-clump-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-2.glb"
+
+[node name="mq_mq2-stagheath-ashen-brush-2-0004" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-stagheath-ashen-brush-2-0004"
+node_name = "Authored_mq2_stagheath_ashen_brush_2_0004"
+catalog_asset_id = "lf_biomes:kit-ashen-brush-2"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-ashen-brush-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "saltsound>stagheath",
+"distFromBorder": 32.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.538192, 0, 0.761865, 0, 0.932786, 0, -0.761865, 0, 0.538192, 499.5402, 66.864, -70.382)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-stagheath-ashen-brush-2-0004" instance=ExtResource("mq_3")]
+metadata/map_asset_id = "lf_biomes:kit-ashen-brush-2"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-ashen-brush-2.glb"
+
+[node name="mq_mq2-stagheath-heather-clump-1-0003" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-stagheath-heather-clump-1-0003"
+node_name = "Authored_mq2_stagheath_heather_clump_1_0003"
+catalog_asset_id = "lf_biomes:kit-heather-clump-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "saltsound>stagheath",
+"distFromBorder": 4.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.178632, 0.145336, 0.956096, -0.204356, 0.955988, -0.107139, -0.945242, -0.179214, 0.203846, 528.5289, 65.9262, 14.1033)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-stagheath-heather-clump-1-0003" instance=ExtResource("lv_heather_clump_1")]
+metadata/map_asset_id = "lf_biomes:kit-heather-clump-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-1.glb"
+
+[node name="mq_mq2-stagheath-heather-clump-1-0004" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-stagheath-heather-clump-1-0004"
+node_name = "Authored_mq2_stagheath_heather_clump_1_0004"
+catalog_asset_id = "lf_biomes:kit-heather-clump-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "saltsound>stagheath",
+"distFromBorder": 26.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.202334, 0.089114, 1.019855, -0.135215, 1.032802, -0.063419, -1.014772, -0.119849, 0.211798, 505.8474, 69.8986, 18.8916)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-stagheath-heather-clump-1-0004" instance=ExtResource("lv_heather_clump_1")]
+metadata/map_asset_id = "lf_biomes:kit-heather-clump-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-heather-clump-1.glb"
 
 [node name="stagheath--obj-boat-hornmere" type="Marker3D" parent="Gameplay/Interactives"]
 gizmo_extents = 0.8

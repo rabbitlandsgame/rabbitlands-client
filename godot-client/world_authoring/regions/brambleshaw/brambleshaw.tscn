@@ -156,13 +156,7 @@
 [ext_resource type="PackedScene" path="res://world_authoring/regions/tollholms/assets/prototypes/kit-market-canopy-2.glb" id="tp_9"]
 
 
-[ext_resource type="PackedScene" path="res://world_authoring/regions/tollholms/assets/prototypes/kit-produce-stall-1.glb" id="tp_10"]
-
-
 [ext_resource type="PackedScene" path="res://world_authoring/regions/tollholms/assets/prototypes/kit-lantern-post-1.glb" id="tp_11"]
-
-
-[ext_resource type="PackedScene" path="res://world_authoring/regions/tollholms/assets/prototypes/kit-stone-bench-1.glb" id="tp_12"]
 
 
 [ext_resource type="PackedScene" path="res://world_authoring/regions/tollholms/assets/prototypes/kit-feed-sacks-1.glb" id="tp_13"]
@@ -840,6 +834,76 @@ preview_clip_inside = PackedVector2Array(1129, 7911, 1299, 7921, 1675, 7941, 162
 
 [node name="Patches" type="Node3D" parent="Terrain"]
 
+
+[node name="mq_pad_brambleshaw_00_tollholms_kit_haven_townhouse_2_005" type="Marker3D" parent="Terrain/Patches"]
+script = ExtResource("patch")
+patch_id = "mq-pad-brambleshaw-00-tollholms-kit-haven-townhouse-2-005"
+transform = Transform3D(0.718855, 0, -0.69516, 0, 1, 0, 0.69516, 0, 0.718855, -25.289, 89.6058, 62.6238)
+shape = 1
+operation = 1
+size = Vector2(13.753, 12.931)
+feather = 3.5
+enabled = true
+
+[node name="mq_pad_brambleshaw_07_tollholms_kit_haven_townhouse_3_002" type="Marker3D" parent="Terrain/Patches"]
+script = ExtResource("patch")
+patch_id = "mq-pad-brambleshaw-07-tollholms-kit-haven-townhouse-3-002"
+transform = Transform3D(0.998209, 0, -0.059829, 0, 1, 0, 0.059829, 0, 0.998209, -56.8246, 103.7513, 67.805)
+shape = 1
+operation = 1
+size = Vector2(16.57, 16.518)
+feather = 3.5
+enabled = true
+
+[node name="mq_pad_brambleshaw_08_tollholms_kit_haven_townhouse_1_004" type="Marker3D" parent="Terrain/Patches"]
+script = ExtResource("patch")
+patch_id = "mq-pad-brambleshaw-08-tollholms-kit-haven-townhouse-1-004"
+transform = Transform3D(0.942408, 0, 0.334465, 0, 1, 0, -0.334465, 0, 0.942408, -71.2947, 105.6341, 54.0544)
+shape = 1
+operation = 1
+size = Vector2(15, 18.782)
+feather = 3.5
+enabled = true
+
+[node name="mq_pad_brambleshaw_11_tollholms_kit_haven_townhouse_2_001" type="Marker3D" parent="Terrain/Patches"]
+script = ExtResource("patch")
+patch_id = "mq-pad-brambleshaw-11-tollholms-kit-haven-townhouse-2-001"
+transform = Transform3D(0.941117, 0, 0.338081, 0, 1, 0, -0.338081, 0, 0.941117, -62.899, 108.739, 77.935)
+shape = 1
+operation = 1
+size = Vector2(15.13, 10.931)
+feather = 3.5
+enabled = true
+
+[node name="mq_pad_brambleshaw_12_tollholms_kit_dovecote_1_001" type="Marker3D" parent="Terrain/Patches"]
+script = ExtResource("patch")
+patch_id = "mq-pad-brambleshaw-12-tollholms-kit-dovecote-1-001"
+transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, -96.9748, 109.5858, 26.8452)
+shape = 1
+operation = 1
+size = Vector2(13.147, 13.156)
+feather = 3.5
+enabled = true
+
+[node name="mq_pad_brambleshaw_15_tollholms_kit_haven_townhouse_3_001" type="Marker3D" parent="Terrain/Patches"]
+script = ExtResource("patch")
+patch_id = "mq-pad-brambleshaw-15-tollholms-kit-haven-townhouse-3-001"
+transform = Transform3D(-0.792077, 0, -0.610422, 0, 1, 0, 0.610422, 0, -0.792077, -45.5488, 113.4643, 109.6146)
+shape = 1
+operation = 1
+size = Vector2(16.57, 14.608)
+feather = 3.5
+enabled = true
+
+[node name="mq_pad_brambleshaw_16_tollholms_kit_apple_cart_1_001" type="Marker3D" parent="Terrain/Patches"]
+script = ExtResource("patch")
+patch_id = "mq-pad-brambleshaw-16-tollholms-kit-apple-cart-1-001"
+transform = Transform3D(0.996195, 0, -0.087156, 0, 1, 0, 0.087156, 0, 0.996195, -57.37, 114.2136, 102.484)
+shape = 1
+operation = 1
+size = Vector2(10.4, 9.58)
+feather = 3.0
+enabled = true
 
 [node name="Ground" type="Node3D" parent="."]
 
@@ -8481,7 +8545,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.00453761, 0, -0.999989, 0, 1, 0, 0.999989, 0, -0.00453761, -40.364, 105.6478, 95.494)
+transform = Transform3D(-0.00453761, 0, -0.999989, 0, 1, 0, 0.999989, 0, -0.00453761, -40.364, 105.724, 95.494)
 
 [node name="Content" parent="AuthoredAssets/s2_Merchant House 1" instance=ExtResource("tp_0")]
 metadata/map_asset_id = "tollholms:kit-merchant-house-1"
@@ -8503,7 +8567,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.941117, 0, 0.338081, 0, 1, 0, -0.338081, 0, 0.941117, -61.978, 107.552, 78.511)
+transform = Transform3D(0.941117, 0, 0.338081, 0, 1, 0, -0.338081, 0, 0.941117, -61.978, 108.6186, 78.511)
 
 [node name="Content" parent="AuthoredAssets/s2_Haven Townhouse 2" instance=ExtResource("tp_1")]
 metadata/map_asset_id = "tollholms:kit-haven-townhouse-2"
@@ -8525,7 +8589,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.792077, 0, -0.610422, 0, 1, 0, 0.610422, 0, -0.792077, -45.503, 112.0024, 109.674)
+transform = Transform3D(-0.792077, 0, -0.610422, 0, 1, 0, 0.610422, 0, -0.792077, -45.503, 113.3885, 109.674)
 
 [node name="Content" parent="AuthoredAssets/s2_Haven Townhouse 3" instance=ExtResource("tp_2")]
 metadata/map_asset_id = "tollholms:kit-haven-townhouse-3"
@@ -8591,7 +8655,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.998209, 0, -0.0598291, 0, 1, 0, 0.0598291, 0, 0.998209, -56.763, 101.8713, 66.777)
+transform = Transform3D(0.998209, 0, -0.0598291, 0, 1, 0, 0.0598291, 0, 0.998209, -56.763, 103.6677, 66.777)
 
 [node name="Content" parent="AuthoredAssets/s2_Haven Townhouse 5" instance=ExtResource("tp_2")]
 metadata/map_asset_id = "tollholms:kit-haven-townhouse-3"
@@ -8745,7 +8809,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.942408, 0, 0.334465, 0, 1, 0, -0.334465, 0, 0.942408, -71.670, 103.8971, 52.997)
+transform = Transform3D(0.942408, 0, 0.334465, 0, 1, 0, -0.334465, 0, 0.942408, -71.670, 105.5344, 52.997)
 
 [node name="Content" parent="AuthoredAssets/s2_Haven Townhouse 12" instance=ExtResource("tp_3")]
 metadata/map_asset_id = "tollholms:kit-haven-townhouse-1"
@@ -8767,7 +8831,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.718855, 0, -0.69516, 0, 1, 0, 0.69516, 0, 0.718855, -25.199, 88.5031, 62.507)
+transform = Transform3D(0.718855, 0, -0.69516, 0, 1, 0, 0.69516, 0, 0.718855, -25.199, 89.4507, 62.507)
 
 [node name="Content" parent="AuthoredAssets/s2_Haven Townhouse 13" instance=ExtResource("tp_1")]
 metadata/map_asset_id = "tollholms:kit-haven-townhouse-2"
@@ -8831,7 +8895,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, -96.981, 108.7062, 26.837)
+transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, -96.981, 109.5074, 26.837)
 
 [node name="Content" parent="AuthoredAssets/s2_Dovecote 1" instance=ExtResource("tp_4")]
 metadata/map_asset_id = "tollholms:kit-dovecote-1"
@@ -8857,26 +8921,6 @@ transform = Transform3D(-0.817251, 0.265891, -0.0351674, 0.224462, 0.92072, -0.2
 metadata/map_asset_id = "tollholms:kit-drystone-dyke-1"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-drystone-dyke-1.glb"
 
-[node name="s2_Drystone Dyke 2" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "tollholms-kit-drystone-dyke-1-002"
-node_name = "Authored_tollholms_kit_drystone_dyke_1_002"
-catalog_asset_id = "tollholms:kit-drystone-dyke-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-drystone-dyke-1.glb"
-metadata = {
-"transplant": "coilmere (-105.1, -36.8), a3-2026-10-20",
-"a3Layer": "village",
-"a3Piece": "th-pad-dyke-house-13-1",
-"note": "terrace wall on the pad's filled downhill edge",
-"polishStep": "a3-village"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.551756, 0.248369, 0.616899, -0.149648, 0.798608, -0.566742, -0.467972, -0.548214, -0.546112, -23.719, 86.5555, 57.789)
-
-[node name="Content" parent="AuthoredAssets/s2_Drystone Dyke 2" instance=ExtResource("tp_5")]
-metadata/map_asset_id = "tollholms:kit-drystone-dyke-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-drystone-dyke-1.glb"
-
 [node name="s2_Drystone Dyke 3" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "tollholms-kit-drystone-dyke-1-003"
@@ -8894,26 +8938,6 @@ metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(-0.420467, 0.198018, -0.832731, 0.12374, 0.978641, 0.138233, 0.684966, -0.0552386, -0.536144, -22.297, 85.5312, 51.227)
 
 [node name="Content" parent="AuthoredAssets/s2_Drystone Dyke 3" instance=ExtResource("tp_5")]
-metadata/map_asset_id = "tollholms:kit-drystone-dyke-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-drystone-dyke-1.glb"
-
-[node name="s2_Drystone Dyke 4" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "tollholms-kit-drystone-dyke-1-004"
-node_name = "Authored_tollholms_kit_drystone_dyke_1_004"
-catalog_asset_id = "tollholms:kit-drystone-dyke-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-drystone-dyke-1.glb"
-metadata = {
-"transplant": "coilmere (-107.3, -38.3), a3-2026-10-20",
-"a3Layer": "village",
-"a3Piece": "th-pad-dyke-house-14-1",
-"note": "terrace wall on the pad's filled downhill edge",
-"polishStep": "a3-village"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.427298, 0.144672, -0.838429, 0.0763344, 0.989279, 0.111872, 0.687655, -0.0199196, -0.533405, -24.894, 86.1698, 55.357)
-
-[node name="Content" parent="AuthoredAssets/s2_Drystone Dyke 4" instance=ExtResource("tp_5")]
 metadata/map_asset_id = "tollholms:kit-drystone-dyke-1"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-drystone-dyke-1.glb"
 
@@ -8997,26 +9021,6 @@ transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, -60.287, 1
 metadata/map_asset_id = "tollholms:kit-market-canopy-2"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-market-canopy-2.glb"
 
-[node name="s2_Produce Stall 1" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "tollholms-kit-produce-stall-1-001"
-node_name = "Authored_tollholms_kit_produce_stall_1_001"
-catalog_asset_id = "tollholms:kit-produce-stall-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-produce-stall-1.glb"
-collision_role = "solid"
-metadata = {
-"transplant": "coilmere (-108.0, 17.0), a3-2026-10-20",
-"a3Layer": "village",
-"a3Piece": "th-square-04",
-"polishStep": "a3-village"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, -53.163, 112.3413, 102.942)
-
-[node name="Content" parent="AuthoredAssets/s2_Produce Stall 1" instance=ExtResource("tp_10")]
-metadata/map_asset_id = "tollholms:kit-produce-stall-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-produce-stall-1.glb"
-
 [node name="s2_Lantern Post 1" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "tollholms-kit-lantern-post-1-001"
@@ -9057,26 +9061,6 @@ transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, -64.519, 1
 metadata/map_asset_id = "tollholms:kit-lantern-post-1"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-lantern-post-1.glb"
 
-[node name="s2_Stone Bench 1" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "tollholms-kit-stone-bench-1-001"
-node_name = "Authored_tollholms_kit_stone_bench_1_001"
-catalog_asset_id = "tollholms:kit-stone-bench-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-stone-bench-1.glb"
-collision_role = "solid"
-metadata = {
-"transplant": "coilmere (-115.0, 20.0), a3-2026-10-20",
-"a3Layer": "village",
-"a3Piece": "th-square-07",
-"polishStep": "a3-village"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, -60.725, 114.5954, 102.040)
-
-[node name="Content" parent="AuthoredAssets/s2_Stone Bench 1" instance=ExtResource("tp_12")]
-metadata/map_asset_id = "tollholms:kit-stone-bench-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-stone-bench-1.glb"
-
 [node name="s2_Feed Sacks 1" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "tollholms-kit-feed-sacks-1-001"
@@ -9090,7 +9074,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.961333, 0, -0.275388, 0, 1, 0, 0.275388, 0, -0.961333, -37.922, 110.7442, 106.545)
+transform = Transform3D(-0.961333, 0, -0.275388, 0, 1, 0, 0.275388, 0, -0.961333, -41.7963, 113.3568, 107.5398)
 
 [node name="Content" parent="AuthoredAssets/s2_Feed Sacks 1" instance=ExtResource("tp_13")]
 metadata/map_asset_id = "tollholms:kit-feed-sacks-1"
@@ -9130,7 +9114,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, -63.192, 109.7062, 82.600)
+transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, -65.3353, 108.689, 79.2227)
 
 [node name="Content" parent="AuthoredAssets/s2_Lantern Post 4" instance=ExtResource("tp_11")]
 metadata/map_asset_id = "tollholms:kit-lantern-post-1"
@@ -9190,7 +9174,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.774729, 0, -0.632294, 0, 1, 0, 0.632295, 0, -0.774728, -50.321, 113.3504, 107.985)
+transform = Transform3D(-0.774729, 0, -0.632294, 0, 1, 0, 0.632295, 0, -0.774728, -49.9674, 113.4113, 108.3386)
 
 [node name="Content" parent="AuthoredAssets/s2_Barrel Stack 1" instance=ExtResource("tp_15")]
 metadata/map_asset_id = "tollholms:kit-barrel-stack-1"
@@ -9250,7 +9234,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.967681, 0, -0.252177, 0, 1, 0, 0.252177, 0, 0.967682, -54.239, 103.7735, 71.215)
+transform = Transform3D(0.967681, 0, -0.252177, 0, 1, 0, 0.252177, 0, 0.967682, -54.239, 103.6913, 71.215)
 
 [node name="Content" parent="AuthoredAssets/s2_Terracotta Pots 2" instance=ExtResource("tp_14")]
 metadata/map_asset_id = "tollholms:kit-terracotta-pots-1"
@@ -9270,7 +9254,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.960782, 0, 0.277303, 0, 1, 0, -0.277303, 0, 0.960783, -65.247, 106.3173, 67.869)
+transform = Transform3D(0.960782, 0, 0.277303, 0, 1, 0, -0.277303, 0, 0.960783, -60.1078, 103.7013, 69.8283)
 
 [node name="Content" parent="AuthoredAssets/s2_Barrel Stack 2" instance=ExtResource("tp_15")]
 metadata/map_asset_id = "tollholms:kit-barrel-stack-1"
@@ -9350,7 +9334,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.938625, 0, 0.344938, 0, 1, 0, -0.344938, 0, 0.938626, -67.979, 104.7867, 57.417)
+transform = Transform3D(0.938625, 0, 0.344938, 0, 1, 0, -0.344938, 0, 0.938626, -67.979, 105.5738, 57.417)
 
 [node name="Content" parent="AuthoredAssets/s2_Barrel Stack 3" instance=ExtResource("tp_15")]
 metadata/map_asset_id = "tollholms:kit-barrel-stack-1"
@@ -9370,7 +9354,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.690891, 0, -0.722959, 0, 1, 0, 0.722958, 0, 0.690892, -26.824, 91.4290, 66.249)
+transform = Transform3D(0.690891, 0, -0.722959, 0, 1, 0, 0.722958, 0, 0.690892, -22.2292, 89.5552, 64.2772)
 
 [node name="Content" parent="AuthoredAssets/s2_Citrus Planter 3" instance=ExtResource("tp_16")]
 metadata/map_asset_id = "tollholms:kit-citrus-planter-1"
@@ -9390,7 +9374,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.847693, 0, -0.530487, 0, 1, 0, 0.530487, 0, 0.847693, -28.413, 86.3915, 55.318)
+transform = Transform3D(0.847693, 0, -0.530487, 0, 1, 0, 0.530487, 0, 0.847693, -28.413, 86.4253, 55.318)
 
 [node name="Content" parent="AuthoredAssets/s2_Crate Stack 3" instance=ExtResource("tp_17")]
 metadata/map_asset_id = "tollholms:kit-crate-stack-1"
@@ -12682,7 +12666,7 @@ metadata = {
 "rfWhy": "a pot or planter by the house's lane side"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.145641, 0, 0.989338, 0, 1, 0, -0.989338, 0, 0.145641, -23.523, 89.5930, 65.137)
+transform = Transform3D(0.145641, 0, 0.989338, 0, 1, 0, -0.989338, 0, 0.145641, -27.1994, 89.5171, 59.7766)
 
 [node name="Content" parent="AuthoredAssets/s2_Citrus Planter 4" instance=ExtResource("tp_16")]
 metadata/map_asset_id = "tollholms:kit-citrus-planter-1"
@@ -12743,7 +12727,7 @@ metadata = {
 "vdFix": "on the door approach of th-house-01; moved 3.00 m"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.934496, 0, -0.355972, 0, 1, 0, 0.355972, 0, -0.934497, -64.518, 109.6166, 80.740)
+transform = Transform3D(-0.934496, 0, -0.355972, 0, 1, 0, 0.355972, 0, -0.934497, -64.518, 108.6884, 80.740)
 
 [node name="Content" parent="AuthoredAssets/s2_Terracotta Pots 7" instance=ExtResource("tp_14")]
 metadata/map_asset_id = "tollholms:kit-terracotta-pots-1"
@@ -12784,7 +12768,7 @@ metadata = {
 "vdFix": "on the door approach of th-house-02; moved 3.25 m"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.136203, 0, -0.990681, 0, 1, 0, 0.990682, 0, 0.136203, -44.176, 111.31, 104.212)
+transform = Transform3D(0.136203, 0, -0.990681, 0, 1, 0, 0.990682, 0, 0.136203, -46.9462, 113.3461, 106.3511)
 
 [node name="Content" parent="AuthoredAssets/s2_Terracotta Pots 8" instance=ExtResource("tp_14")]
 metadata/map_asset_id = "tollholms:kit-terracotta-pots-1"
@@ -12804,7 +12788,7 @@ metadata = {
 "rfWhy": "square life"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.996195, 0, -0.0871561, 0, 1, 0, 0.0871561, 0, 0.996195, -57.370, 113.5391, 102.484)
+transform = Transform3D(0.996195, 0, -0.0871561, 0, 1, 0, 0.0871561, 0, 0.996195, -57.370, 114.1519, 102.484)
 
 [node name="Content" parent="AuthoredAssets/s2_Apple Cart 1" instance=ExtResource("tp_26")]
 metadata/map_asset_id = "tollholms:kit-apple-cart-1"
@@ -12823,7 +12807,7 @@ metadata = {
 "rfWhy": "square life"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, -51.492, 111.6643, 100.345)
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, -51.492, 111.767, 100.345)
 
 [node name="Content" parent="AuthoredAssets/s2_Harbour Banner 1" instance=ExtResource("tp_27")]
 metadata/map_asset_id = "tollholms:kit-harbour-banner-1"
@@ -12882,7 +12866,7 @@ metadata = {
 "rfWhy": "blossom tree in a yard"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.516717, 0, 0.736888, 0, 0.9, 0, -0.736888, 0, 0.516717, -99.069, 117.0206, 85.166)
+transform = Transform3D(0.516717, 0, 0.736888, 0, 0.9, 0, -0.736888, 0, 0.516717, -99.069, 118.3266, 84.666)
 
 [node name="Content" parent="AuthoredAssets/s2_Sw Blossom Tree" instance=ExtResource("tp_29")]
 metadata/map_asset_id = "tollholms:kit-sw-blossom-tree"
@@ -13890,27 +13874,6 @@ transform = Transform3D(-0.481886, 0.110509, -0.869237, 0.105468, 0.992119, 0.06
 metadata/map_asset_id = "tollholms:kit-wheat-stooks-1"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-wheat-stooks-1.glb"
 
-[node name="s2_Terracotta Pots 9" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "tollholms-kit-terracotta-pots-1-009"
-node_name = "Authored_tollholms_kit_terracotta_pots_1_009"
-catalog_asset_id = "tollholms:kit-terracotta-pots-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-terracotta-pots-1.glb"
-collision_role = "solid"
-metadata = {
-"transplant": "coilmere (-153.9, 2.7), a3-2026-10-20",
-"polishStep": "vd-th-density",
-"vdFix": "overlapping flower-shrub-1-091 (22 %); moved 0.25 m, turned",
-"vdLayer": "village",
-"vdWhy": "a pot or planter beside the front door"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.758489, 0, 0.651686, 0, 1, 0, -0.651686, 0, 0.758489, -85.769, 112.2475, 67.619)
-
-[node name="Content" parent="AuthoredAssets/s2_Terracotta Pots 9" instance=ExtResource("tp_14")]
-metadata/map_asset_id = "tollholms:kit-terracotta-pots-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-terracotta-pots-1.glb"
-
 [node name="s2_Cabbage Rows 25" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "tollholms-kit-cabbage-rows-1-025"
@@ -13985,7 +13948,7 @@ metadata = {
 "vdWhy": "yard clutter at a back corner"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.671278, 0, -0.741206, 0, 1, 0, 0.741207, 0, 0.671278, -67.499, 105.8014, 61.029)
+transform = Transform3D(0.671278, 0, -0.741206, 0, 1, 0, 0.741207, 0, 0.671278, -67.499, 105.6242, 61.029)
 
 [node name="Content" parent="AuthoredAssets/s2_Feed Sacks 4" instance=ExtResource("tp_13")]
 metadata/map_asset_id = "tollholms:kit-feed-sacks-1"
@@ -14068,7 +14031,7 @@ metadata = {
 "vdWhy": "yard clutter at a back corner"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.491546, 0, -0.870852, 0, 1, 0, 0.870852, 0, 0.491546, -45.847, 114.5733, 114.690)
+transform = Transform3D(0.491546, 0, -0.870852, 0, 1, 0, 0.870852, 0, 0.491546, -46.2006, 113.4143, 114.3364)
 
 [node name="Content" parent="AuthoredAssets/s2_Crate Stack 8" instance=ExtResource("tp_17")]
 metadata/map_asset_id = "tollholms:kit-crate-stack-1"
@@ -14209,7 +14172,7 @@ metadata = {
 "vdWhy": "a village tree, crown clear of every roof"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.611092, 0, -0.341417, 0, 0.7, 0, 0.341417, 0, 0.611092, -105.442, 115.0650, 60.285)
+transform = Transform3D(0.611092, 0, -0.341417, 0, 0.7, 0, 0.341417, 0, 0.611092, -105.942, 116.141, 59.785)
 
 [node name="Content" parent="AuthoredAssets/s2_Olive Tree 22" instance=ExtResource("tp_20")]
 metadata/map_asset_id = "tollholms:kit-olive-tree-2"
@@ -14843,47 +14806,6 @@ transform = Transform3D(-0.15207, 0.180241, 0.517411, -0.178793, 0.725619, -0.16
 metadata/map_asset_id = "tollholms:kit-cabbage-rows-1"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-cabbage-rows-1.glb"
 
-[node name="s2_Cabbage Rows 38" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "tollholms-kit-cabbage-rows-1-038"
-node_name = "Authored_tollholms_kit_cabbage_rows_1_038"
-catalog_asset_id = "tollholms:kit-cabbage-rows-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-cabbage-rows-1.glb"
-metadata = {
-"transplant": "coilmere (-99.2, 25.2), a3-2026-10-20",
-"polishStep": "vd-th-density-2",
-"vdFix": "re-seated by the review's seating rule",
-"vdLayer": "village",
-"vdWhy": "a kitchen garden bed"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.452517, 0.163204, 0.343287, -0.194253, 0.753983, 0.045738, -0.342774, -0.211835, 0.427274, -49.611, 115.4807, 114.476)
-
-[node name="Content" parent="AuthoredAssets/s2_Cabbage Rows 38" instance=ExtResource("tp_21")]
-metadata/map_asset_id = "tollholms:kit-cabbage-rows-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-cabbage-rows-1.glb"
-
-[node name="s2_Crate Stack 17" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "tollholms-kit-crate-stack-1-017"
-node_name = "Authored_tollholms_kit_crate_stack_1_017"
-catalog_asset_id = "tollholms:kit-crate-stack-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-crate-stack-1.glb"
-collision_role = "solid"
-metadata = {
-"transplant": "coilmere (-144.1, 6.6), a3-2026-10-20",
-"polishStep": "vd-th-density-2",
-"vdFix": "41 % of the mesh under the ground; moved 0.25 m",
-"vdLayer": "village",
-"vdWhy": "more yard clutter"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.667143, 0, 0.744929, 0, 1, 0, -0.74493, 0, -0.667143, -79.239, 112.7746, 75.860)
-
-[node name="Content" parent="AuthoredAssets/s2_Crate Stack 17" instance=ExtResource("tp_17")]
-metadata/map_asset_id = "tollholms:kit-crate-stack-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-crate-stack-1.glb"
-
 [node name="s2_Barrel Stack 10" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "tollholms-kit-barrel-stack-1-010"
@@ -14899,7 +14821,7 @@ metadata = {
 "vdWhy": "more yard clutter"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.567567, 0, 0.823327, 0, 1, 0, -0.823327, 0, 0.567567, -40.825, 112.4696, 111.093)
+transform = Transform3D(0.567567, 0, 0.823327, 0, 1, 0, -0.823327, 0, 0.567567, -41.325, 113.3907, 111.093)
 
 [node name="Content" parent="AuthoredAssets/s2_Barrel Stack 10" instance=ExtResource("tp_15")]
 metadata/map_asset_id = "tollholms:kit-barrel-stack-1"
@@ -15000,7 +14922,7 @@ metadata = {
 "vdReplaces": "tollholms-kit-flower-planter-1-012"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.333444, 0, 0.942771, 0, 1, 0, -0.94277, 0, -0.333444, -71.591, 106.2377, 58.265)
+transform = Transform3D(-0.333444, 0, 0.942771, 0, 1, 0, -0.94277, 0, -0.333444, -71.591, 105.5741, 58.265)
 
 [node name="Content" parent="AuthoredAssets/s2_Terracotta Pots 6" instance=ExtResource("tp_14")]
 metadata/map_asset_id = "tollholms:kit-terracotta-pots-1"
@@ -15086,26 +15008,6 @@ transform = Transform3D(0.965926, 0, 0.258819, 0, 1, 0, -0.258819, 0, 0.965926, 
 [node name="Content" parent="AuthoredAssets/s2_Citrus Planter 8" instance=ExtResource("tp_16")]
 metadata/map_asset_id = "tollholms:kit-citrus-planter-1"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-citrus-planter-1.glb"
-
-[node name="s2_Terracotta Pots 11" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "tollholms-kit-terracotta-pots-1-011"
-node_name = "Authored_tollholms_kit_terracotta_pots_1_011"
-catalog_asset_id = "tollholms:kit-terracotta-pots-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-terracotta-pots-1.glb"
-collision_role = "solid"
-metadata = {
-"transplant": "coilmere (-98.6, 9.5), a3-2026-10-20",
-"polishStep": "vd-th-density-3",
-"vdLayer": "village",
-"vdWhy": "a pot by a side wall"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.999977, 0, 0.00685131, 0, 1, 0, -0.00685131, 0, 0.999977, -41.289, 109.7446, 101.122)
-
-[node name="Content" parent="AuthoredAssets/s2_Terracotta Pots 11" instance=ExtResource("tp_14")]
-metadata/map_asset_id = "tollholms:kit-terracotta-pots-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-terracotta-pots-1.glb"
 
 [node name="s2_Lemon Tree 11" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -15301,7 +15203,7 @@ metadata = {
 "vdWhy": "a yard tree, crown clear of every roof"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.486728, 0, 0.402228, 0, 0.63142, 0, -0.402228, 0, -0.486728, -56.895, 113.5459, 105.406)
+transform = Transform3D(-0.486728, 0, 0.402228, 0, 0.63142, 0, -0.402228, 0, -0.486728, -56.895, 113.1298, 105.406)
 
 [node name="Content" parent="AuthoredAssets/s2_Olive Tree 26" instance=ExtResource("tp_20")]
 metadata/map_asset_id = "tollholms:kit-olive-tree-2"
@@ -15441,7 +15343,7 @@ metadata = {
 "vdWhy": "a yard tree, crown clear of every roof"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.699836, 0, -0.413622, 0, 0.812929, 0, 0.413622, 0, -0.699836, -38.306, 111.6483, 109.210)
+transform = Transform3D(-0.699836, 0, -0.413622, 0, 0.812929, 0, 0.413622, 0, -0.699836, -38.306, 112.4921, 109.210)
 
 [node name="Content" parent="AuthoredAssets/s2_Olive Tree 28" instance=ExtResource("tp_19")]
 metadata/map_asset_id = "tollholms:kit-olive-tree-1"
@@ -15971,7 +15873,7 @@ metadata = {
 "vdWhy": "a lawn tree, crown clear of roofs, fields and other crowns (in th_play_north_houses / _north_lawn)"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.864678, 0, -0.280925, 0, 0.909169, 0, 0.280925, 0, -0.864678, -59.353, 93.7008, 30.664)
+transform = Transform3D(-0.864678, 0, -0.280925, 0, 0.909169, 0, 0.280925, 0, -0.864678, -59.353, 95.5658, 31.164)
 
 [node name="Content" parent="AuthoredAssets/s2_Olive Tree 29" instance=ExtResource("tp_19")]
 metadata/map_asset_id = "tollholms:kit-olive-tree-1"
@@ -16271,7 +16173,7 @@ metadata = {
 "biomeRule": "tree-swap"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.403274, 0, 1.01583, 0, 1.09295, 0, -1.01583, 0, -0.403274, -126.356, 118.7201, 19.663)
+transform = Transform3D(-0.403274, 0, 1.01583, 0, 1.09295, 0, -1.01583, 0, -0.403274, -126.356, 119.6751, 20.163)
 
 [node name="Content" parent="AuthoredAssets/lv_tollholm_Olive Tree 1 16" instance=ExtResource("tp_33")]
 metadata/map_asset_id = "lf_biomes:kit-olive-tree-1"
@@ -16371,7 +16273,7 @@ metadata = {
 "biomeRule": "tree-swap"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.679845, 0, -0.623306, 0, 0.922333, 0, 0.623306, 0, -0.679845, 20.260, 82.2628, 64.811)
+transform = Transform3D(-0.679845, 0, -0.623306, 0, 0.922333, 0, 0.623306, 0, -0.679845, 19.76, 83.3438, 64.811)
 
 [node name="Content" parent="AuthoredAssets/lv_tollholm_Olive Tree 1 25" instance=ExtResource("tp_33")]
 metadata/map_asset_id = "lf_biomes:kit-olive-tree-1"
@@ -16451,7 +16353,7 @@ metadata = {
 "biomeRule": "tree-swap"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.113584, 0, -0.943133, 0, 0.949948, 0, 0.943133, 0, -0.113584, 24.832, 78.6899, 55.060)
+transform = Transform3D(-0.113584, 0, -0.943133, 0, 0.949948, 0, 0.943133, 0, -0.113584, 24.832, 78.9139, 53.06)
 
 [node name="Content" parent="AuthoredAssets/lv_tollholm_Olive Tree 1 33" instance=ExtResource("tp_33")]
 metadata/map_asset_id = "lf_biomes:kit-olive-tree-1"
@@ -16928,7 +16830,7 @@ metadata = {
 "polishStep": "a3-village"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.944742, 0, 0.327813, 0, 1, 0, -0.327813, 0, 0.944742, -59.338, 108.3030, 81.622)
+transform = Transform3D(0.944742, 0, 0.327813, 0, 1, 0, -0.327813, 0, 0.944742, -59.338, 108.2469, 81.622)
 
 [node name="Content" parent="AuthoredAssets/s2_Flower Planter 1" instance=ExtResource("tp_37")]
 metadata/map_asset_id = "tollholms:kit-flower-planter-1"
@@ -17116,27 +17018,6 @@ transform = Transform3D(-0.0901106, 0, 0.995932, 0, 1, 0, -0.995932, 0, -0.09011
 metadata/map_asset_id = "tollholms:kit-flower-planter-1"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-planter-1.glb"
 
-[node name="s2_Flower Planter 9" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "tollholms-kit-flower-planter-1-009"
-node_name = "Authored_tollholms_kit_flower_planter_1_009"
-catalog_asset_id = "tollholms:kit-flower-planter-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-planter-1.glb"
-collision_role = "solid"
-metadata = {
-"transplant": "coilmere (-107.8, -29.0), a3-2026-10-20",
-"polishStep": "vd-th-density",
-"vdFix": "on the door approach of th-house-13; moved 0.75 m, turned",
-"vdLayer": "village",
-"vdWhy": "a pot or planter beside the front door"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.698874, 0, 0.715245, 0, 1, 0, -0.715245, 0, 0.698874, -30.005, 91.0969, 63.199)
-
-[node name="Content" parent="AuthoredAssets/s2_Flower Planter 9" instance=ExtResource("tp_37")]
-metadata/map_asset_id = "tollholms:kit-flower-planter-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-planter-1.glb"
-
 [node name="s2_Flower Planter 10" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "tollholms-kit-flower-planter-1-010"
@@ -17152,7 +17033,7 @@ metadata = {
 "vdWhy": "a pot or planter beside the front door"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.500039, 0, 0.866003, 0, 1, 0, -0.866003, 0, 0.500039, -96.873, 109.2848, 30.717)
+transform = Transform3D(0.500039, 0, 0.866003, 0, 1, 0, -0.866003, 0, 0.500039, -96.007, 109.5279, 30.217)
 
 [node name="Content" parent="AuthoredAssets/s2_Flower Planter 10" instance=ExtResource("tp_37")]
 metadata/map_asset_id = "tollholms:kit-flower-planter-1"
@@ -17172,7 +17053,7 @@ metadata = {
 "vdWhy": "flowers beside the front door"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.669339, 0, -0.78857, 0, 1.03434, 0, 0.788571, 0, 0.669339, -61.556, 102.2845, 57.097)
+transform = Transform3D(0.669339, 0, -0.78857, 0, 1.03434, 0, 0.788571, 0, 0.669339, -61.556, 102.3616, 57.097)
 
 [node name="Content" parent="AuthoredAssets/s2_Flower Shrub 259" instance=ExtResource("tp_40")]
 metadata/map_asset_id = "tollholms:kit-flower-shrub-3"
@@ -17214,7 +17095,7 @@ metadata = {
 "vdWhy": "flowers beside the front door"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.10064, 0, 0.928966, 0, 0.934401, 0, -0.928966, 0, -0.10064, -66.806, 103.8743, 55.533)
+transform = Transform3D(-0.10064, 0, 0.928966, 0, 0.934401, 0, -0.928966, 0, -0.10064, -67.672, 105.0069, 56.033)
 
 [node name="Content" parent="AuthoredAssets/s2_Flower Shrub 264" instance=ExtResource("tp_41")]
 metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
@@ -17235,30 +17116,9 @@ metadata = {
 "vdWhy": "a pot or planter beside the front door"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.94296, 0, 0.332908, 0, 1, 0, -0.332908, 0, 0.94296, -59.297, 105.8143, 73.555)
+transform = Transform3D(0.94296, 0, 0.332908, 0, 1, 0, -0.332908, 0, 0.94296, -62.5331, 108.5714, 75.9061)
 
 [node name="Content" parent="AuthoredAssets/s2_Flower Planter 13" instance=ExtResource("tp_37")]
-metadata/map_asset_id = "tollholms:kit-flower-planter-1"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-planter-1.glb"
-
-[node name="s2_Flower Planter 16" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "tollholms-kit-flower-planter-1-016"
-node_name = "Authored_tollholms_kit_flower_planter_1_016"
-catalog_asset_id = "tollholms:kit-flower-planter-1"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-planter-1.glb"
-collision_role = "solid"
-metadata = {
-"transplant": "coilmere (-100.4, 15.2), a3-2026-10-20",
-"polishStep": "vd-th-density",
-"vdFix": "re-seated by the review's seating rule",
-"vdLayer": "village",
-"vdWhy": "a pot or planter beside the front door"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.224965, 0, -0.974366, 0, 1, 0, 0.974367, 0, -0.224965, -45.729, 111.6692, 105.204)
-
-[node name="Content" parent="AuthoredAssets/s2_Flower Planter 16" instance=ExtResource("tp_37")]
 metadata/map_asset_id = "tollholms:kit-flower-planter-1"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-planter-1.glb"
 
@@ -17276,7 +17136,7 @@ metadata = {
 "vdWhy": "flowers beside the front door"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.61097, 0, -0.737331, 0, 0.957571, 0, 0.737331, 0, -0.61097, -51.310, 114.0419, 109.423)
+transform = Transform3D(-0.61097, 0, -0.737331, 0, 0.957571, 0, 0.737331, 0, -0.61097, -51.310, 113.0829, 109.423)
 
 [node name="Content" parent="AuthoredAssets/s2_Flower Shrub 275" instance=ExtResource("tp_38")]
 metadata/map_asset_id = "tollholms:kit-flower-shrub-2"
@@ -17297,7 +17157,7 @@ metadata = {
 "vdWhy": "flowers beside the front door"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.542566, 0, -0.689376, 0, 0.877279, 0, 0.689377, 0, -0.542565, -51.658, 113.8099, 108.525)
+transform = Transform3D(-0.542566, 0, -0.689376, 0, 0.877279, 0, 0.689377, 0, -0.542565, -48.4889, 112.9373, 107.0394)
 
 [node name="Content" parent="AuthoredAssets/s2_Flower Shrub 276" instance=ExtResource("tp_40")]
 metadata/map_asset_id = "tollholms:kit-flower-shrub-3"
@@ -17401,7 +17261,7 @@ metadata = {
 "vdWhy": "a flower bed"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(0.873992, 0, -0.2148, 0, 0.9, 0, 0.2148, 0, 0.873991, -41.635, 113.1775, 112.727)
+transform = Transform3D(0.873992, 0, -0.2148, 0, 0.9, 0, 0.2148, 0, 0.873991, -41.9886, 113.0111, 112.3734)
 
 [node name="Content" parent="AuthoredAssets/s2_Flower Shrub 300" instance=ExtResource("tp_41")]
 metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
@@ -17741,25 +17601,6 @@ transform = Transform3D(0.254777, 0, -0.890285, 0, 0.926023, 0, 0.890285, 0, 0.2
 metadata/map_asset_id = "tollholms:kit-flower-shrub-3"
 metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-3.glb"
 
-[node name="s2_Flower Shrub 266" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "tollholms-kit-flower-shrub-2-093"
-node_name = "Authored_tollholms_kit_flower_shrub_2_093"
-catalog_asset_id = "tollholms:kit-flower-shrub-2"
-scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-2.glb"
-metadata = {
-"transplant": "coilmere (-129.3, -20.6), a3-2026-10-20",
-"polishStep": "vd-th-bank2",
-"vdLayer": "bank",
-"vdWhy": "bank planting on the north-houses road cut (on the bank, upright, base on the ground, slope 0.53, 6 % buried)"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-1.49817, 0, 0.0739877, 0, 1.5, 0, -0.0739875, 0, -1.49818, -52.847, 99.5923, 59.724)
-
-[node name="Content" parent="AuthoredAssets/s2_Flower Shrub 266" instance=ExtResource("tp_38")]
-metadata/map_asset_id = "tollholms:kit-flower-shrub-2"
-metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-2.glb"
-
 [node name="s2_Flower Shrub 267" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
 asset_id = "tollholms-kit-flower-shrub-1-086"
@@ -17795,7 +17636,7 @@ metadata = {
 "vdWhy": "flowers beside the front door"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.421374, 0, -1.00017, 0, 1.0853, 0, 1.00017, 0, -0.421374, -59.675, 105.1253, 70.238)
+transform = Transform3D(-0.421374, 0, -1.00017, 0, 1.0853, 0, 1.00017, 0, -0.421374, -58.675, 103.1445, 70.238)
 
 [node name="Content" parent="AuthoredAssets/s2_Flower Shrub 279" instance=ExtResource("tp_41")]
 metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
@@ -17838,7 +17679,7 @@ metadata = {
 "vdWhy": "flowers beside the front door"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-1.05452, 0, 0.132308, 0, 1.06278, 0, -0.132308, 0, -1.05452, -60.491, 105.5030, 70.490)
+transform = Transform3D(-1.05452, 0, 0.132308, 0, 1.06278, 0, -0.132308, 0, -1.05452, -56.491, 103.1334, 70.490)
 
 [node name="Content" parent="AuthoredAssets/s2_Flower Shrub 285" instance=ExtResource("tp_38")]
 metadata/map_asset_id = "tollholms:kit-flower-shrub-2"
@@ -17860,7 +17701,7 @@ metadata = {
 "vdWhy": "flowers beside the front door"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.64902, 0, -0.564867, 0, 0.860408, 0, 0.564866, 0, -0.649021, -61.842, 105.6279, 69.141)
+transform = Transform3D(-0.64902, 0, -0.564867, 0, 0.860408, 0, 0.564866, 0, -0.649021, -60.723, 103.2107, 63.756)
 
 [node name="Content" parent="AuthoredAssets/s2_Flower Shrub 289" instance=ExtResource("tp_40")]
 metadata/map_asset_id = "tollholms:kit-flower-shrub-3"
@@ -18227,25 +18068,6 @@ transform = Transform3D(-0.320029, 0, 0.937261, 0, 0.990392, 0, -0.937261, 0, -0
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Hawthorn Tree 1 6" instance=ExtResource("lv_hawthorn_tree_1")]
 metadata/map_asset_id = "lf_biomes:kit-hawthorn-tree-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-hawthorn-tree-1.glb"
-
-[node name="a3_brambleshaw_Summer Oak Tree 2 11" type="Node3D" parent="AuthoredAssets"]
-script = ExtResource("s0_19_jaile")
-asset_id = "lf_biomes-kit-summer-oak-tree-2-brambleshaw-0011"
-node_name = "Authored_lf_biomes_kit_summer_oak_tree_2_brambleshaw_0011"
-catalog_asset_id = "lf_biomes:kit-summer-oak-tree-2"
-scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-summer-oak-tree-2.glb"
-collision_role = "solid"
-metadata = {
-"biomeMap": "brambleshaw",
-"biomePass": "a3-2026-10-20",
-"biomeRule": "tree-swap"
-}
-metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.653613, 0, 0.723791, 0, 0.975235, 0, -0.723791, 0, -0.653613, -45.500, 116.4173, 120.720)
-
-[node name="Content" parent="AuthoredAssets/a3_brambleshaw_Summer Oak Tree 2 11" instance=ExtResource("lv_summer_oak_tree_2")]
-metadata/map_asset_id = "lf_biomes:kit-summer-oak-tree-2"
-metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-summer-oak-tree-2.glb"
 
 [node name="a3_brambleshaw_Summer Oak Tree 2 12" type="Node3D" parent="AuthoredAssets"]
 script = ExtResource("s0_19_jaile")
@@ -24077,6 +23899,2537 @@ metadata/map_authoring_asset_wrapper = true
 transform = Transform3D(-0.105934, 0, 0.867395, 0, 0.87384, 0, -0.867395, 0, -0.105934, 21.414, 112.6856, 134.052)
 
 [node name="Content" parent="AuthoredAssets/a3_brambleshaw_Tussock Grass 1 177" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-004" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-004"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_004"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.05682, 0, -0.898655, 0, 0.90045, 0, 0.898655, 0, 0.05682, -91.88847, 107.9041, 26.23151)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-004" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-005" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-005"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_005"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.141354, 0, 0.977894, 0, 0.988058, 0, -0.977894, 0, 0.141354, -92.90138, 108.3118, 28.13699)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-005" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-010" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-010"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_010"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.863422, 0, -0.46089, 0, 0.978732, 0, 0.46089, 0, 0.863422, -103.5769, 110.7629, 26.08463)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-010" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-011" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-011"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_011"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.913419, 0, -0.361364, 0, 0.982303, 0, 0.361364, 0, -0.913419, -104.4056, 111.07, 27.42731)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-011" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-016" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-016"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_016"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.831673, 0, -0.663554, 0, 1.063947, 0, 0.663554, 0, 0.831673, -102.5731, 110.1085, 29.58688)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-016" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-017" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-017"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_017"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.647154, 0, -0.796704, 0, 1.026423, 0, 0.796704, 0, -0.647154, -71.82082, 103.9629, 46.13163)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-017" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-022" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-022"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_022"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.335374, 0, 0.913317, 0, 0.972946, 0, -0.913317, 0, -0.335374, -67.35445, 101.1819, 43.06693)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-022" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-023" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-023"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_023"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.210339, 0, -1.029091, 0, 1.050367, 0, 1.029091, 0, 0.210339, -67.05972, 101.5371, 44.88187)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-023" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-028" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-028"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_028"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.357194, 0, -0.869, 0, 0.939547, 0, 0.869, 0, -0.357194, -65.87453, 102.8761, 51.85532)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-028" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-034" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-034"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_034"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.880578, 0, -0.653086, 0, 1.096329, 0, 0.653086, 0, -0.880578, -63.40579, 102.7196, 55.93354)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-034" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-035" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-035"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_035"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.14023, 0, -0.911008, 0, 0.921738, 0, 0.911008, 0, 0.14023, -63.8604, 103.6601, 57.94227)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-035" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-040" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-040"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_040"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.303852, 0, 1.030659, 0, 1.074515, 0, -1.030659, 0, 0.303852, -77.61015, 106.1942, 54.81261)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-040" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-041" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-041"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_041"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.327267, 0, 1.001924, 0, 1.054019, 0, -1.001924, 0, -0.327267, -78.6359, 107.2404, 55.89443)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-041" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-tussock-grass-042" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-tussock-grass-042"
+node_name = "Authored_mq3_brambleshaw_tussock_grass_042"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.666201, 0, -0.685272, 0, 0.955731, 0, 0.685272, 0, -0.666201, -77.15382, 105.6319, 49.75008)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-tussock-grass-042" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-046" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-046"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_046"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.607898, 0, 0.675635, 0, 0.908858, 0, -0.675635, 0, -0.607898, -75.71313, 106.0603, 59.35137)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-046" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-tussock-grass-049" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-tussock-grass-049"
+node_name = "Authored_mq3_brambleshaw_tussock_grass_049"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.639447, 0, -0.697119, 0, 0.945974, 0, 0.697119, 0, 0.639447, -75.35214, 105.5841, 55.20687)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-tussock-grass-049" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-058" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-058"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_058"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.443517, 0, -0.918849, 0, 1.02029, 0, 0.918849, 0, 0.443517, -25.69205, 86.61064, 56.23864)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-058" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-065" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-065"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_065"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.935004, 0, 0.049945, 0, 0.936337, 0, -0.049945, 0, -0.935004, -54.1635, 100.1584, 59.06352)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-065" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-082" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-082"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_082"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.949166, 0, 0.213966, 0, 0.972984, 0, -0.213966, 0, 0.949166, -47.10054, 98.40977, 62.62275)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-082" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-083" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-083"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_083"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.0705, 0, 1.084606, 0, 1.086895, 0, -1.084606, 0, -0.0705, -33.57488, 91.86706, 62.09025)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-083" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-089" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-089"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_089"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.965086, 0, 0.300629, 0, 1.010826, 0, -0.300629, 0, -0.965086, -31.20516, 90.04708, 61.12925)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-089" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-bracken-patch-099" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-bracken-patch-099"
+node_name = "Authored_mq3_brambleshaw_bracken_patch_099"
+catalog_asset_id = "lf_biomes:kit-bracken-patch-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-bracken-patch-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.297521, 0, 0.950161, 0, 0.995653, 0, -0.950161, 0, 0.297521, -24.16939, 89.5558, 67.06632)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-bracken-patch-099" instance=ExtResource("lv_bracken_patch_1")]
+metadata/map_asset_id = "lf_biomes:kit-bracken-patch-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-bracken-patch-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-106" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-106"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_106"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.98644, 0, 0.295267, 0, 1.029683, 0, -0.295267, 0, 0.98644, -19.36994, 86.47115, 61.34608)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-106" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-112" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-112"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_112"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.09333, 0, -0.001494, 0, 1.093331, 0, 0.001494, 0, 1.09333, -64.11954, 104.7843, 71.94844)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-112" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-tussock-grass-114" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-tussock-grass-114"
+node_name = "Authored_mq3_brambleshaw_tussock_grass_114"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.243523, 0, -1.084933, 0, 1.111927, 0, 1.084933, 0, -0.243523, -63.18013, 104.1751, 64.2812)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-tussock-grass-114" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-118" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-118"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_118"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.965864, 0, 0.281444, 0, 1.006034, 0, -0.281444, 0, -0.965864, -61.72946, 104.1952, 72.88431)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-118" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-124" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-124"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_124"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.898358, 0, 0.323493, 0, 0.954827, 0, -0.323493, 0, -0.898358, -56.67909, 106.2269, 76.73533)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-124" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-125" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-125"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_125"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.667223, 0, -0.822712, 0, 1.059264, 0, 0.822712, 0, 0.667223, -56.24766, 106.6618, 78.22803)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-125" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-130" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-130"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_130"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.895322, 0, 0.097302, 0, 0.900593, 0, -0.097302, 0, -0.895322, -69.1143, 108.9882, 76.79227)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-130" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-bracken-patch-135" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-bracken-patch-135"
+node_name = "Authored_mq3_brambleshaw_bracken_patch_135"
+catalog_asset_id = "lf_biomes:kit-bracken-patch-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-bracken-patch-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.916986, 0, -0.559365, 0, 1.074129, 0, 0.559365, 0, 0.916986, -67.21802, 108.7611, 80.3568)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-bracken-patch-135" instance=ExtResource("lv_bracken_patch_1")]
+metadata/map_asset_id = "lf_biomes:kit-bracken-patch-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-bracken-patch-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-136" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-136"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_136"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.291681, 0, -0.98891, 0, 1.031029, 0, 0.98891, 0, 0.291681, -67.20358, 108.9645, 82.10231)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-136" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-143" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-143"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_143"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.893228, 0, -0.227168, 0, 0.921662, 0, 0.227168, 0, -0.893228, -43.13695, 111.3972, 102.6553)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-143" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-148" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-148"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_148"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.179432, 0, -0.891208, 0, 0.909092, 0, 0.891208, 0, -0.179432, -39.59098, 110.6264, 105.7523)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-148" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-149" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-149"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_149"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-1.079765, 0, -0.188064, 0, 1.09602, 0, 0.188064, 0, -1.079765, -37.7901, 110.074, 105.1746)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-149" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-tussock-grass-152" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-tussock-grass-152"
+node_name = "Authored_mq3_brambleshaw_tussock_grass_152"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.672006, 0, -0.842593, 0, 1.077754, 0, 0.842593, 0, 0.672006, -61.15635, 114.5396, 104.307)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-tussock-grass-152" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-154" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-154"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_154"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.574833, 0, -0.930608, 0, 1.09383, 0, 0.930608, 0, -0.574833, -53.34962, 114.5181, 112.2349)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-154" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-160" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-160"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_160"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.723876, 0, -0.6617, 0, 0.980736, 0, 0.6617, 0, -0.723876, -49.10245, 114.0535, 116.2113)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-160" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-161" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-161"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_161"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.908384, 0, 0.088237, 0, 0.91266, 0, -0.088237, 0, 0.908384, -45.36742, 113.6266, 116.4309)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-161" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-162" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-162"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_162"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.274573, 0, -0.910802, 0, 0.951289, 0, 0.910802, 0, 0.274573, -31.25, 92.36817, 64.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-162" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-163" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-163"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_163"
+catalog_asset_id = "tollholms:kit-flower-shrub-3"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.870026, 0, -0.48995, 0, 0.998497, 0, 0.48995, 0, 0.870026, -28.75, 92.39937, 66.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-163" instance=ExtResource("tp_40")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-3"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-3.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-164" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-164"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_164"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.923555, 0, -0.179621, 0, 0.94086, 0, 0.179621, 0, 0.923555, -58.25, 105.427, 73.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-164" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-166" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-166"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_166"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.988001, 0, 0.095477, 0, 0.992604, 0, -0.095477, 0, 0.988001, -22.75, 87.54756, 58.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-166" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-167" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-167"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_167"
+catalog_asset_id = "tollholms:kit-flower-shrub-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.564655, 0, 0.769328, 0, 0.954306, 0, -0.769328, 0, 0.564655, -50.25, 101.5364, 61.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-167" instance=ExtResource("tp_41")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-168" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-168"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_168"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.034917, 0, -0.176183, 0, 1.049807, 0, 0.176183, 0, 1.034917, -27.75, 92.88977, 69.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-168" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-170" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-170"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_170"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.734875, 0, -0.660879, 0, 0.988333, 0, 0.660879, 0, 0.734875, -50.25, 102.4726, 68.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-170" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-171" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-171"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_171"
+catalog_asset_id = "tollholms:kit-flower-shrub-2"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.977221, 0, 0.086518, 0, 0.981044, 0, -0.086518, 0, 0.977221, -55.25, 104.1191, 73.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-171" instance=ExtResource("tp_38")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-2"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-2.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-172" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-172"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_172"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.160751, 0, -1.050573, 0, 1.0628, 0, 1.050573, 0, -0.160751, -69.25, 103.9846, 45.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-172" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-173" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-173"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_173"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.997669, 0, -0.194636, 0, 1.016477, 0, 0.194636, 0, 0.997669, -53.25, 102.2334, 61.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-173" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-174" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-174"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_174"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.934586, 0, 0.24199, 0, 0.965406, 0, -0.24199, 0, -0.934586, -79.75, 106.7318, 49.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-174" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-175" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-175"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_175"
+catalog_asset_id = "tollholms:kit-flower-shrub-3"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.148033, 0, -0.923123, 0, 0.934917, 0, 0.923123, 0, 0.148033, -70.25, 110.8994, 79.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-175" instance=ExtResource("tp_40")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-3"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-3.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-176" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-176"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_176"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.975867, 0, -0.169314, 0, 0.990446, 0, 0.169314, 0, 0.975867, -48.25, 98.43661, 59.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-176" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-178" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-178"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_178"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.901716, 0, -0.371378, 0, 0.975199, 0, 0.371378, 0, 0.901716, -41.25, 111.4333, 103.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-178" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-179" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-179"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_179"
+catalog_asset_id = "tollholms:kit-flower-shrub-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.830207, 0, 0.632737, 0, 1.043839, 0, -0.632737, 0, 0.830207, -25.75, 94.34481, 71.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-179" instance=ExtResource("tp_41")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-180" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-180"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_180"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.067285, 0, 0.064758, 0, 1.069248, 0, -0.064758, 0, 1.067285, -47.75, 114.6651, 117.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-180" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-182" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-182"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_182"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.037543, 0, -0.265299, 0, 1.070924, 0, 0.265299, 0, 1.037543, -21.75, 87.07496, 59.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-182" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-183" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-183"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_183"
+catalog_asset_id = "tollholms:kit-flower-shrub-3"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.648561, 0, -0.752356, 0, 0.993313, 0, 0.752356, 0, -0.648561, -101.75, 110.322, 25.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-183" instance=ExtResource("tp_40")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-3"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-3.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-184" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-184"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_184"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.916941, 0, -0.131886, 0, 0.926377, 0, 0.131886, 0, 0.916941, -51.25, 114.777, 114.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-184" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-186" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-186"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_186"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.933565, 0, -0.116639, 0, 0.940823, 0, 0.116639, 0, 0.933565, -28.75, 87.03291, 57.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-186" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-187" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-187"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_187"
+catalog_asset_id = "tollholms:kit-flower-shrub-3"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.817141, 0, -0.717917, 0, 1.087715, 0, 0.717917, 0, 0.817141, -33.25, 93.50847, 64.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-187" instance=ExtResource("tp_40")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-3"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-3.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-190" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-190"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_190"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.970225, 0, -0.159442, 0, 0.983239, 0, 0.159442, 0, 0.970225, -31.25, 94.32255, 67.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-190" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-191" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-191"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_191"
+catalog_asset_id = "tollholms:kit-flower-shrub-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.929656, 0, 0.262646, 0, 0.966045, 0, -0.262646, 0, 0.929656, -68.25, 111.0583, 83.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-191" instance=ExtResource("tp_41")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-192" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-192"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_192"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.568199, 0, 0.793205, 0, 0.975718, 0, -0.793205, 0, -0.568199, -18.25, 84.66886, 59.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-192" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-193" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-193"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_193"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.039149, 0, -0.223208, 0, 1.062851, 0, 0.223208, 0, 1.039149, -23.25, 92.35816, 69.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-193" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-194" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-194"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_194"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.806871, 0, 0.505111, 0, 0.951933, 0, -0.505111, 0, -0.806871, -19.25, 89.01149, 63.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-194" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-198" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-198"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_198"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.957799, 0, -0.028385, 0, 0.958219, 0, 0.028385, 0, -0.957799, -64.75, 103.8015, 53.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-198" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-199" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-199"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_199"
+catalog_asset_id = "tollholms:kit-flower-shrub-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.737013, 0, 0.59964, 0, 0.950135, 0, -0.59964, 0, 0.737013, -30.25, 90.42373, 63.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-199" instance=ExtResource("tp_41")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-201" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-201"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_201"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.14233, 0, -0.976026, 0, 0.986349, 0, 0.976026, 0, 0.14233, -64.75, 107.4206, 73.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-201" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-203" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-203"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_203"
+catalog_asset_id = "tollholms:kit-flower-shrub-2"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.065899, 0, 0.120546, 0, 1.072694, 0, -0.120546, 0, 1.065899, -76.75, 108.4606, 61.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-203" instance=ExtResource("tp_38")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-2"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-2.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-204" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-204"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_204"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.920393, 0, 0.236078, 0, 0.950187, 0, -0.236078, 0, -0.920393, -53.75, 112.4104, 99.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-204" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-205" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-205"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_205"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.950991, 0, -0.438119, 0, 1.047059, 0, 0.438119, 0, 0.950991, -24.25, 87.59839, 57.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-205" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-206" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-206"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_206"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.807359, 0, -0.480844, 0, 0.939702, 0, 0.480844, 0, 0.807359, -72.75, 107.2496, 63.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-206" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-207" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-207"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_207"
+catalog_asset_id = "tollholms:kit-flower-shrub-2"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.949273, 0, -0.530305, 0, 1.087355, 0, 0.530305, 0, 0.949273, -50.25, 101.6231, 63.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-207" instance=ExtResource("tp_38")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-2"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-2.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-210" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-210"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_210"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.835346, 0, 0.557651, 0, 1.004379, 0, -0.557651, 0, 0.835346, -69.25, 105.4883, 47.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-210" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-211" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-211"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_211"
+catalog_asset_id = "tollholms:kit-flower-shrub-3"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.5333, 0, -0.918, 0, 1.061665, 0, 0.918, 0, 0.5333, -65.75, 102.9702, 49.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-211" instance=ExtResource("tp_40")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-3"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-3.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-212" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-212"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_212"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.89173, 0, -0.394188, 0, 0.97497, 0, 0.394188, 0, 0.89173, -79.25, 106.8589, 51.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-212" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-216" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-216"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_216"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.881184, 0, -0.39467, 0, 0.965531, 0, 0.39467, 0, -0.881184, -65.25, 106.511, 68.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-216" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-218" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-218"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_218"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.212116, 0, -0.913076, 0, 0.93739, 0, 0.913076, 0, -0.212116, -57.25, 108.4348, 79.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-218" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-219" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-219"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_219"
+catalog_asset_id = "tollholms:kit-flower-shrub-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.868488, 0, 0.500324, 0, 1.002295, 0, -0.500324, 0, -0.868488, -44.25, 113.5933, 114.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-219" instance=ExtResource("tp_41")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-220" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-220"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_220"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.494759, 0, -0.934081, 0, 1.057021, 0, 0.934081, 0, -0.494759, -77.25, 106.7855, 56.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-220" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-tussock-grass-221" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-tussock-grass-221"
+node_name = "Authored_mq3_brambleshaw_tussock_grass_221"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.813738, 0, 0.726663, 0, 1.090967, 0, -0.726663, 0, -0.813738, -69.75, 105.6331, 59.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-tussock-grass-221" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-223" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-223"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_223"
+catalog_asset_id = "tollholms:kit-flower-shrub-3"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.016208, 0, -0.343348, 0, 1.072645, 0, 0.343348, 0, 1.016208, -56.75, 104.0531, 73.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-223" instance=ExtResource("tp_40")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-3"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-3.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-224" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-224"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_224"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.020264, 0, -0.279179, 0, 1.057771, 0, 0.279179, 0, 1.020264, -68.75, 109.6724, 79.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-224" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-226" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-226"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_226"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.39638, 0, -0.900839, 0, 0.984189, 0, 0.900839, 0, 0.39638, -48.25, 113.7932, 114.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-226" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-227" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-227"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_227"
+catalog_asset_id = "tollholms:kit-flower-shrub-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.937833, 0, 0.264126, 0, 0.974317, 0, -0.264126, 0, 0.937833, -50.25, 115.2205, 115.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-227" instance=ExtResource("tp_41")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-228" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-228"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_228"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.883411, 0, 0.369902, 0, 0.957728, 0, -0.369902, 0, 0.883411, -91.25, 107.3332, 23.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-228" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-229" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-229"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_229"
+catalog_asset_id = "tollholms:kit-flower-shrub-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.181211, 0, 1.049201, 0, 1.064735, 0, -1.049201, 0, 0.181211, -16.75, 86.44535, 61.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-229" instance=ExtResource("tp_41")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-230" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-230"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_230"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.676289, 0, 0.63925, 0, 0.930595, 0, -0.63925, 0, 0.676289, -65.25, 110.1473, 83.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-230" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-231" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-231"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_231"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.021381, 0, -0.167766, 0, 1.035068, 0, 0.167766, 0, 1.021381, -93.75, 108.289, 22.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-231" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-232" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-232"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_232"
+catalog_asset_id = "tollholms:kit-flower-shrub-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.135194, 0, 0.990111, 0, 0.999299, 0, -0.990111, 0, -0.135194, -73.25, 105.9865, 61.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-232" instance=ExtResource("tp_41")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-233" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-233"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_233"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.318233, 0, -0.925154, 0, 0.978357, 0, 0.925154, 0, 0.318233, -90.25, 107.3475, 26.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-233" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-234" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-234"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_234"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.570455, 0, -0.844951, 0, 1.01949, 0, 0.844951, 0, 0.570455, -49.75, 101.4207, 64.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-234" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-235" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-235"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_235"
+catalog_asset_id = "tollholms:kit-flower-shrub-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.812081, 0, 0.572034, 0, 0.993327, 0, -0.572034, 0, -0.812081, -66.25, 102.5054, 46.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-235" instance=ExtResource("tp_41")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-236" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-236"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_236"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.880428, 0, -0.399223, 0, 0.966712, 0, 0.399223, 0, 0.880428, -51.75, 99.58534, 59.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-236" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-237" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-237"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_237"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.104918, 0, -1.045788, 0, 1.051038, 0, 1.045788, 0, -0.104918, -61.75, 115.2718, 105.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-237" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-238" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-238"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_238"
+catalog_asset_id = "tollholms:kit-flower-shrub-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.952059, 0, 0.357879, 0, 1.017101, 0, -0.357879, 0, -0.952059, -54.25, 114.6377, 109.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-238" instance=ExtResource("tp_41")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-239" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-239"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_239"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.937447, 0, 0.071763, 0, 0.94019, 0, -0.071763, 0, 0.937447, -74.25, 107.5198, 63.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-239" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-240" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-240"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_240"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.132639, 0, -1.005131, 0, 1.013845, 0, 1.005131, 0, 0.132639, -62.75, 104.1508, 59.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-240" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-241" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-241"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_241"
+catalog_asset_id = "tollholms:kit-flower-shrub-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.971129, 0, 0.313689, 0, 1.020535, 0, -0.313689, 0, -0.971129, -71.25, 106.0043, 61.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-241" instance=ExtResource("tp_41")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-242" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-242"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_242"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.734627, 0, 0.695161, 0, 1.011398, 0, -0.695161, 0, 0.734627, -63.75, 105.2185, 68.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-242" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-243" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-243"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_243"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.876784, 0, -0.43702, 0, 0.979661, 0, 0.43702, 0, 0.876784, -104.25, 111.6631, 29.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-243" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-244" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-244"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_244"
+catalog_asset_id = "tollholms:kit-flower-shrub-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.64437, 0, 0.699546, 0, 0.951093, 0, -0.699546, 0, -0.64437, -25.75, 91.29224, 68.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-244" instance=ExtResource("tp_41")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-245" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-245"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_245"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.650968, 0, -0.741809, 0, 0.986935, 0, 0.741809, 0, 0.650968, -92.25, 108.0664, 29.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-245" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-247" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-247"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_247"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.741639, 0, -0.605477, 0, 0.957409, 0, 0.605477, 0, 0.741639, -78.25, 106.4457, 52.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-247" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-250" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-250"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_250"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.43487, 0, -0.895087, 0, 0.995135, 0, 0.895087, 0, -0.43487, -67.75, 103.8483, 47.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-250" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-251" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-251"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_251"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.040276, 0, 0.265861, 0, 1.073711, 0, -0.265861, 0, 1.040276, -55.75, 101.363, 59.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-251" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-252" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-252"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_252"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.864097, 0, -0.482673, 0, 0.989766, 0, 0.482673, 0, 0.864097, -89.75, 106.2401, 23.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-252" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-253" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-253"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_253"
+catalog_asset_id = "tollholms:kit-flower-shrub-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.052615, 0, 1.087264, 0, 1.088536, 0, -1.087264, 0, -0.052615, -75.75, 106.4178, 56.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-253" instance=ExtResource("tp_41")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-254" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-254"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_254"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.959116, 0, -0.231517, 0, 0.986662, 0, 0.231517, 0, 0.959116, -29.25, 94.08081, 69.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-254" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-255" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-255"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_255"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.804318, 0, -0.535234, 0, 0.966128, 0, 0.535234, 0, 0.804318, -51.75, 113.8028, 110.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-255" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-256" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-256"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_256"
+catalog_asset_id = "tollholms:kit-flower-shrub-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.886115, 0, 0.612256, 0, 1.077059, 0, -0.612256, 0, 0.886115, -94.75, 109.3333, 24.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-256" instance=ExtResource("tp_41")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-257" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-257"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_257"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.598388, 0, -0.699639, 0, 0.920632, 0, 0.699639, 0, 0.598388, -102.75, 110.3967, 27.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-257" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-259" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-259"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_259"
+catalog_asset_id = "tollholms:kit-flower-shrub-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.966796, 0, 0.23877, 0, 0.995844, 0, -0.23877, 0, 0.966796, -51.25, 103.4911, 69.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-259" instance=ExtResource("tp_41")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-260" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-260"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_260"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.539754, 0, -0.821862, 0, 0.983256, 0, 0.821862, 0, 0.539754, -91.25, 107.6188, 27.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-260" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-blackthorn-shrub-261" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-blackthorn-shrub-261"
+node_name = "Authored_mq3_brambleshaw_blackthorn_shrub_261"
+catalog_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.629438, 0, 0.711926, 0, 0.950279, 0, -0.711926, 0, -0.629438, -71.25, 110.774, 76.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-blackthorn-shrub-261" instance=ExtResource("lv_blackthorn_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-blackthorn-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-blackthorn-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-262" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-262"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_262"
+catalog_asset_id = "tollholms:kit-flower-shrub-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.962715, 0, 0.480945, 0, 1.076163, 0, -0.480945, 0, -0.962715, -66.75, 110.5482, 83.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-262" instance=ExtResource("tp_41")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-263" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-263"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_263"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads2"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.91692, 0, -0.122144, 0, 0.925019, 0, 0.122144, 0, 0.91692, -39.75, 109.8979, 102.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-263" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-264" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-264"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_264"
+catalog_asset_id = "tollholms:kit-flower-shrub-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads3"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.944832, 0, 0.403163, 0, 1.027252, 0, -0.403163, 0, -0.944832, -37.75, 111.5811, 107.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-264" instance=ExtResource("tp_41")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-265" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-265"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_265"
+catalog_asset_id = "tollholms:kit-flower-shrub-3"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-3.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads3"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.102656, 0, 1.04621, 0, 1.051234, 0, -1.04621, 0, -0.102656, -60.25, 105.6742, 72.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-265" instance=ExtResource("tp_40")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-3"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-3.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-266" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-266"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_266"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads3"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.832573, 0, -0.562774, 0, 1.004934, 0, 0.562774, 0, -0.832573, -45.75, 110.9655, 101.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-266" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-267" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-267"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_267"
+catalog_asset_id = "tollholms:kit-flower-shrub-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads3"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.519314, 0, 0.836587, 0, 0.984665, 0, -0.836587, 0, 0.519314, -64.25, 105.5268, 65.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-267" instance=ExtResource("tp_41")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-268" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-268"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_268"
+catalog_asset_id = "tollholms:kit-flower-shrub-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads3"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.589459, 0, 0.735461, 0, 0.94253, 0, -0.735461, 0, -0.589459, -63.75, 102.4117, 51.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-268" instance=ExtResource("tp_41")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-dog-rose-shrub-269" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-dog-rose-shrub-269"
+node_name = "Authored_mq3_brambleshaw_dog_rose_shrub_269"
+catalog_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads3"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.948071, 0, 0.218026, 0, 0.972818, 0, -0.218026, 0, 0.948071, -55.75, 102.6605, 61.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-dog-rose-shrub-269" instance=ExtResource("lv_dog_rose_shrub_1")]
+metadata/map_asset_id = "lf_biomes:kit-dog-rose-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-dog-rose-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-270" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-270"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_270"
+catalog_asset_id = "tollholms:kit-flower-shrub-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads3"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.0052, 0, 0.276375, 0, 1.042502, 0, -0.276375, 0, 1.0052, -59.25, 108.581, 75.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-270" instance=ExtResource("tp_41")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-271" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-271"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_271"
+catalog_asset_id = "tollholms:kit-flower-shrub-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads3"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.934293, 0, -0.339434, 0, 0.994042, 0, 0.339434, 0, -0.934293, -22.25, 89.95072, 66.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-271" instance=ExtResource("tp_41")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-272" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-272"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_272"
+catalog_asset_id = "tollholms:kit-flower-shrub-2"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-2.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads3"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.359668, 0, -0.914661, 0, 0.982835, 0, 0.914661, 0, -0.359668, -41.75, 110.2077, 100.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-272" instance=ExtResource("tp_38")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-2"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-2.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-273" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-273"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_273"
+catalog_asset_id = "tollholms:kit-flower-shrub-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads3"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.918928, 0, 0.215608, 0, 0.943883, 0, -0.215608, 0, 0.918928, -67.25, 105.5332, 52.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-273" instance=ExtResource("tp_41")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-274" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-274"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_274"
+catalog_asset_id = "tollholms:kit-flower-shrub-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads3"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.554974, 0, 0.847896, 0, 1.013373, 0, -0.847896, 0, 0.554974, -24.25, 86.36711, 54.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-274" instance=ExtResource("tp_41")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-275" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-275"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_275"
+catalog_asset_id = "tollholms:kit-flower-shrub-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads3"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(1.025456, 0, 0.151023, 0, 1.036518, 0, -0.151023, 0, 1.025456, -27.75, 89.96311, 64.25)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-275" instance=ExtResource("tp_41")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+
+[node name="mq_mq3-brambleshaw-flower-shrub-276" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq3-brambleshaw-flower-shrub-276"
+node_name = "Authored_mq3_brambleshaw_flower_shrub_276"
+catalog_asset_id = "tollholms:kit-flower-shrub-1"
+scene_path = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "pad-bank",
+"designer": "pads3"
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.759073, 0, 0.671881, 0, 1.013714, 0, -0.671881, 0, -0.759073, -49.75, 113.7908, 111.75)
+
+[node name="Content" parent="AuthoredAssets/mq_mq3-brambleshaw-flower-shrub-276" instance=ExtResource("tp_41")]
+metadata/map_asset_id = "tollholms:kit-flower-shrub-1"
+metadata/map_asset_scene = "res://world_authoring/regions/tollholms/assets/prototypes/kit-flower-shrub-1.glb"
+
+[node name="mq_mq2-brambleshaw-tussock-grass-1-0001" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-brambleshaw-tussock-grass-1-0001"
+node_name = "Authored_mq2_brambleshaw_tussock_grass_1_0001"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "reedfall>brambleshaw",
+"distFromBorder": 21.5
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(-0.902262, 0, -0.138403, 0, 0.912816, 0, 0.138403, 0, -0.902262, 126.7787, 69.5326, -85.6815)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-brambleshaw-tussock-grass-1-0001" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-brambleshaw-tussock-grass-1-0002" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-brambleshaw-tussock-grass-1-0002"
+node_name = "Authored_mq2_brambleshaw_tussock_grass_1_0002"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "reedfall>brambleshaw",
+"distFromBorder": 12.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.38884, 0, 0.853178, 0, 0.937608, 0, -0.853178, 0, 0.38884, 94.6991, 72.0884, -91.181)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-brambleshaw-tussock-grass-1-0002" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-brambleshaw-tussock-grass-1-0003" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-brambleshaw-tussock-grass-1-0003"
+node_name = "Authored_mq2_brambleshaw_tussock_grass_1_0003"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "reedfall>brambleshaw",
+"distFromBorder": 18.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.654376, 0, -0.684604, 0, 0.947043, 0, 0.684604, 0, 0.654376, 105.8295, 72.2548, -84.968)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-brambleshaw-tussock-grass-1-0003" instance=ExtResource("lv_tussock_grass_1")]
+metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
+metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+
+[node name="mq_mq2-brambleshaw-tussock-grass-1-0004" type="Node3D" parent="AuthoredAssets"]
+script = ExtResource("s0_19_jaile")
+asset_id = "mq2-brambleshaw-tussock-grass-1-0004"
+node_name = "Authored_mq2_brambleshaw_tussock_grass_1_0004"
+catalog_asset_id = "lf_biomes:kit-tussock-grass-1"
+scene_path = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
+collision_role = "none"
+metadata = {
+"mapQualityPass": "mq-polish-2026-11-16",
+"dressing": "border-interfinger",
+"border": "reedfall>brambleshaw",
+"distFromBorder": 2.0
+}
+metadata/map_authoring_asset_wrapper = true
+transform = Transform3D(0.995975, 0, -0.020403, 0, 0.996184, 0, 0.020403, 0, 0.995975, 78.8592, 71.6095, -103.0976)
+
+[node name="Content" parent="AuthoredAssets/mq_mq2-brambleshaw-tussock-grass-1-0004" instance=ExtResource("lv_tussock_grass_1")]
 metadata/map_asset_id = "lf_biomes:kit-tussock-grass-1"
 metadata/map_asset_scene = "res://world_authoring/continent-v2/kits/lf-biomes/prototypes/kit-tussock-grass-1.glb"
 
