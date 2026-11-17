@@ -86,7 +86,9 @@ func _check_sea() -> int:
 	var inland := river.get_surface_override_material(0) as ShaderMaterial
 	_expect(inland != null and soft != null and inland.shader == soft.shader
 		and inland.render_priority == soft.render_priority
-		and inland.get_shader_parameter(&"look_shore_inland") == LookProfile.WATER_SHORE_INLAND,
+		and inland.get_shader_parameter(&"look_shore_inland") == LookProfile.WATER_SHORE_INLAND
+		and inland.get_shader_parameter(&"look_shore_clear") == LookProfile.WATER_SHORE_CLEAR
+		and inland.get_shader_parameter(&"look_shore_shallow") == LookProfile.WATER_SHORE_SHALLOW,
 		"an inland water cell draws with the sea's shader at the sea's priority")
 	highland.free()
 	return soft.render_priority if soft != null else 0

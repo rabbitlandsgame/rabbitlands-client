@@ -828,10 +828,71 @@ const CONTINENT_SEA_CHROMA := 0.7
 ## shelf 0.7 m down is opaque, and a beach of grade 0.2-0.43 keeps a gradient
 ## 1.3-2.8 m wide (0.6 of what 0.9 m gave; Boarsend's beach at 30 m: 14 px
 ## instead of 25).
+## Round 6 (2026-11-17): the foam was a band 0.28 m deep, 0.45 opaque at its
+## strongest right on the facets' cut, and in a cool grey; over a gentle beach
+## or a notch of the 2 m sawtooth it laid a frosted sheet whose land edge
+## redrew the cut (Saltsound's shell and kelp strands, Boarsend's beach); a
+## band ramped in from the cut still drew the sawtooth as a white outline. Now
+## it is a thin ridge of broken wash peaking 0.4 x metres of wobbled depth off
+## the waterline and gone by x (so it wanders on and off the beach with the
+## wobble instead of tracing the cut, where it is nothing), at most y opaque,
+## over about a third of the shore, in a little warmer white (at 0.2 it still
+## drew a bright wavy line along the sheltered channel at Coilmere's mole, and
+## at 0.16 a pale streak along Saltsound's 281-292 step and kelp notch).
+## Repair: the foam lies over the shallows' cover, and in the sun its colour
+## (0.66, 0.69, 0.66) lit some 30 times the dark sea's albedo: at 0.12 it
+## alone laid a grey-white band 1-10 cm deep along the kelp notch's waterline
+## (luma 148, saturation 0.15, over water that is 120 without it; a depth
+## render placed the band in the foam's depths). Now at most 0.05, in a
+## dimmer white: a faint broken sheen.
 const WATER_SHORE_DEPTH := Vector2(0.55, 0.0)
 const WATER_SHORE_WOBBLE := Vector2(0.14, 2.3)
-const WATER_SHORE_FOAM := Vector3(0.28, 0.45, 1.4)
-const WATER_SHORE_FOAM_COLOUR := Color(0.62, 0.68, 0.68)
+const WATER_SHORE_FOAM := Vector3(0.14, 0.05, 1.4)
+const WATER_SHORE_FOAM_COLOUR := Color(0.5, 0.54, 0.52)
+## How the water closes over its fade (round 6). The fade was a smoothstep of
+## alpha in the sea's own colour: nearly clear over the first decimetres, so
+## sand blended in linear light with the dark teal came out a grey film, and
+## submerged facets and rock shelves showed through as pale panels and
+## halos. x: the cover is 1 - (1 - t)^x over the fade (t 0 at the waterline,
+## 1 at its end), steep at first like light through water, so the bed darkens
+## within centimetres; y: metres of true depth (at the sea's fade; scaled
+## with the fade, as the wobble is) over which the water rises from nothing,
+## so no wobble draws the facets' straight cut; z: the fade over steep ground
+## and objects (the foam's chord gate, WATER_SHORE_FOAM_UP, now read for every
+## sea pixel inside the fade), so rocks, hulls, posts and risers keep a crisp
+## waterline and their submerged flanks stay teal; w: the sea's cover just past
+## that rise, so a shelf or a notch a few centimetres under reads as darkened,
+## tinted wet sand from the waterline on. Inland water keeps its own fade
+## (WATER_SHORE_INLAND.z), no floor, and is not gated.
+## Repair (round 6 review): with no floor (cover 0 over the first 4 cm, 0.25
+## at 5 cm, 0.45 at 10 cm) the submerged bed, which the ground draws paler and
+## greyer than the dry sand (Saltsound's kelp notch and steps: 165, 160, 145
+## against 157, 143, 113), showed through as a pane lighter than the beach.
+## Over that bed the shallows composite darker than the sand and at least
+## 0.2 saturated only from a cover of about 0.67 (in linear light, at y's
+## tint), so w is 0.7 (0.5: notch 123 luma but a pale share of 0.10; 0.6: the
+## Coilmere boulder's submerged skirt still 450 px brighter than develop).
+## y is 3 mm, so the floor holds from the waterline on: the waterline is the
+## cut, soft only where the ground is near level (the pale band a 1.5 cm or
+## 8 mm rise seemed to leave along the kelp notch's cut was the foam, see
+## WATER_SHORE_FOAM). And z
+## at 0.1 m switched a 1 m wide band of shallows to opaque wherever the gate
+## flipped in one pixel, drawing ruled cyan lines and shards along rock feet
+## and risers; at 0.22 m, with the floor, a flip steps the cover by about a
+## tenth and a rock's flank is still crisp.
+const WATER_SHORE_CLEAR := Vector4(3.0, 0.003, 0.22, 0.7)
+## The colour of the shallowest water over a beach, as a multiplier (rgb) of
+## the decoded sea's own (its waves and a region's tint carry): a greener
+## teal, easing to the sea's colour by the end of the fade, so the sand under
+## the shallows reads tinted and darkened rather than grey (round 6). Its
+## luminance gain on the decoded sea is about 1.2: the round-6 first cut,
+## (1.4, 2.4, 2.1), raised it 2.35 times and drew the shallows over a pale
+## shelf lighter than the dry sand (the review's frosted pane). Over steep
+## ground or an object (the chord's gate) the shallows keep the sea's colour:
+## the tint over a dark grass bank glowed cyan (Suncoil's pier-root tooth).
+## Inland water takes w of it: over Twinbrook's pale stones the whole tint
+## drew the brook's shallows as a pale cyan sheet.
+const WATER_SHORE_SHALLOW := Vector4(1.0, 1.26, 0.96, 0.18)
 ## The foam lies only over ground that faces up: whole where the normal's up
 ## component is y or more (grade 0.48 or less), none at x or less (grade 0.88,
 ## 41 degrees, or more). On a bank facet or a single-node shore tooth (Suncoil's
@@ -843,11 +904,29 @@ const WATER_SHORE_FOAM_COLOUR := Color(0.62, 0.68, 0.68)
 ## and centred on the water's point, read back from the depth buffer: it
 ## eases across a facet's edge rather than switching the foam along it, and
 ## the ground layers a few millimetres apart in the depth beneath a beach do
-## not move it (continent_water.gdshaderinc). An end off the screen is read
-## as the ground under the pixel (a half chord), so the frame's edges gate the
-## foam too. Weighted by this gate, the terrain facets under the foam band on
-## the 17 Landfall maps keep 50% of their foam (whole maps: Suncoil's 30%,
-## Boarsend's 78%, Stagheath's 88%; at a gate of 0.8-0.92, 36%).
+## not move it (continent_water.gdshaderinc). An end off the screen is pulled
+## back along its chord to the frame's edge (round 6 repair; one off even a
+## tenth of the way out mirrors its opposite through the ground under the
+## pixel), so the frame's edges gate the foam too. An end whose scene point
+## stands above the water tells nothing and mirrors likewise: it is something
+## in front of the water there (a tuft, a stump, a seaweed pile, a near bank's
+## crest, a creature: round 6 first read them as steep ground and drew opaque
+## sea in their shape beside them) or ground already out of the water. A
+## chord with neither end reads no slope. Weighted by this gate (round 4's
+## half chord), the terrain facets under the foam band on the 17 Landfall
+## maps kept 50% of their foam (whole maps: Suncoil's 30%, Boarsend's 78%,
+## Stagheath's 88%; at a gate of 0.8-0.92, 36%).
+## Round 6: the same gate now also shortens the sea's fade (WATER_SHORE_CLEAR.z)
+## and keeps the shallow tint (WATER_SHORE_SHALLOW) off steep ground, and it
+## reads a bump the chords straddle: the ground under the pixel against the
+## mean of the four ends, over the reach, adds to the chords' grade. The two
+## chords alone read a submerged rock's top (Coilmere's knob mole, 0.14 m
+## down) as flat, since all four ends lie on the seabed around it, and it drew
+## through the water as a pale ghost. A planar beach has no bump (mapq, the
+## as-built round-4 terrain, sea pixels 0-0.55 m deep: Boarsend's beach keeps
+## a gate of 1.0, Saltsound's shell strand 0.997, its stepped 281-292 beach
+## 0.81 against 0.89; Suncoil's pier-root tooth falls from 0.16 open to 0.10).
+## A 2 m chord (z 1.0) was tried and loosened the tooth to 0.36.
 const WATER_SHORE_FOAM_UP := Vector3(0.75, 0.9, 0.5)
 ## Inland water: the Water_ cells also draw the elevated lakes and the sloping
 ## drainage (rivers), whose drawn depth can be a few centimetres by design
