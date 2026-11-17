@@ -7,7 +7,7 @@
   "recipe": "region_bake_cli.gd --scene godot-client/world_authoring/regions/boarsend/boarsend.tscn --output <bake>/continent-authoring.json"
  },
  "collision": {
-  "sidecarSha256": "ed68449df3a569d926fc2eca4c75d00b63e7e5dcbd7ef72b67321f448f094220",
+  "sidecarSha256": "bdd020b3a292c95634c4e84578cf17a64531a0e4cae1ae9503ab9d02eabd0cb4",
   "collisionSha256": "f6ae1bdf44bba933524195828cc448241ed8cc98c30576afde400a8976613f50",
   "servedGridSha256": "13f3b987f816157c39c3b4b826020e9bea7f6bbd9553b309d70318fad7028fcd",
   "walkableCells": 713064,
@@ -18,8 +18,8 @@
  "kitPlacementsOutsideWindow": 0,
  "lightingMarkers": 0,
  "chunkGlbBytes": {
-  "total": 45620032,
-  "max": 1553228,
+  "total": 45531296,
+  "max": 1553224,
   "over100MiB": []
  },
  "estimatedResidentMiB": {
@@ -131,19 +131,19 @@
   "16_10": 10.9
  },
  "timings": {
-  "snapshot_s": 1.8,
-  "terrain_s": 0.3,
+  "snapshot_s": 1.4,
+  "terrain_s": 0.2,
   "water_s": 0.0,
-  "overlays_s": 1.2,
+  "overlays_s": 1.1,
   "bridges_s": 0.0,
-  "surface_glb_bytes": 297434152,
+  "surface_glb_bytes": 297292336,
   "walk_kit_nodes": 3,
-  "library_s": 0.5,
+  "library_s": 0.6,
   "harvest_nodes": 261,
-  "chunks_s": 4.1,
-  "space_passes_s": 18.3
+  "chunks_s": 5.0,
+  "space_passes_s": 20.7
  },
- "seconds": 38.3,
+ "seconds": 42.2,
  "imagePolicy": {
   "surface": {
    "imagesResampled": 7,
@@ -174,7 +174,7 @@
    -940
   ],
   "maximumPlacements": 107,
-  "maximumTriangles": 200032,
+  "maximumTriangles": 200029,
   "placementLimit": 240,
   "triangleLimit": 450000,
   "cellMetres": 96
