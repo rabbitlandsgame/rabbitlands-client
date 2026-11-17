@@ -780,11 +780,48 @@ const CONTINENT_SEA_CHROMA := 0.7
 ## sea) and never at LOW (QUALITY_PRESETS `water_shore`: the edge reads the
 ## depth buffer and draws the sea in the transparent pass). Every Water_ cell
 ## the loader gives the sea material takes it, so lakes and the sloping
-## drainage do too.
-const WATER_SHORE_DEPTH := Vector2(0.9, 0.0)
-const WATER_SHORE_WOBBLE := Vector2(0.22, 2.3)
+## drainage do too, as inland water (WATER_SHORE_INLAND).
+## Round 4 (2026-11-16): the fade was 0.9 m with a 0.22 m wobble. That showed
+## Suncoil's 0.7-0.95 m shelf beside the pier through the water as a pale
+## wedge cut by a lattice row's straight edge, and Saltsound's inlet shelf as
+## pale ruled panels; at 0.55 m (wobble 0.14, the same quarter of the fade) a
+## shelf 0.7 m down is opaque, and a beach of grade 0.2-0.43 keeps a gradient
+## 1.3-2.8 m wide (0.6 of what 0.9 m gave; Boarsend's beach at 30 m: 14 px
+## instead of 25).
+const WATER_SHORE_DEPTH := Vector2(0.55, 0.0)
+const WATER_SHORE_WOBBLE := Vector2(0.14, 2.3)
 const WATER_SHORE_FOAM := Vector3(0.28, 0.45, 1.4)
 const WATER_SHORE_FOAM_COLOUR := Color(0.62, 0.68, 0.68)
+## The foam lies only over ground that faces up: whole where the normal's up
+## component is y or more (grade 0.48 or less), none at x or less (grade 0.88,
+## 41 degrees, or more). On a bank facet or a single-node shore tooth (Suncoil's
+## pier root: up 0.68 / 0.74 / 0.83 at the 10th / 50th / 90th percentile of the
+## facets under the foam) the foam band is a thin sliver over a stretched
+## texture and drew a pale streaked smear with a straight top; a beach keeps
+## its whole wash (Boarsend's beach: 0.90 / 0.92 / 0.96). The slope is the
+## ground's over two chords, east-west and north-south, each 2 z metres long
+## and centred on the water's point, read back from the depth buffer: it
+## eases across a facet's edge rather than switching the foam along it, and
+## the ground layers a few millimetres apart in the depth beneath a beach do
+## not move it (continent_water.gdshaderinc). An end off the screen is read
+## as the ground under the pixel (a half chord), so the frame's edges gate the
+## foam too. Weighted by this gate, the terrain facets under the foam band on
+## the 17 Landfall maps keep 50% of their foam (whole maps: Suncoil's 30%,
+## Boarsend's 78%, Stagheath's 88%; at a gate of 0.8-0.92, 36%).
+const WATER_SHORE_FOAM_UP := Vector3(0.75, 0.9, 0.5)
+## Inland water: the Water_ cells also draw the elevated lakes and the sloping
+## drainage (rivers), whose drawn depth can be a few centimetres by design
+## (Twinbrook's graded brook: 0.03 / 0.13 / 0.28 m at its 10th / 50th / 90th
+## percentile). Under the sea's fade it read as a clear grey smear with foam
+## blobs. Water whose surface's continent height is y metres or more is
+## inland and fades in over z metres instead, its wobble in the same
+## proportion to the fade, and carries no foam; from x to y metres it blends
+## from the sea's edge, so a river mouth meets the coast without a seam. The
+## sea is at 0 on every continent map. On the Landfall maps the inland water
+## is Twinbrook's brooks (142-151 m), Hornmere's lake (99.3 m) and Reedfall's
+## lakes and outlet (45.4-47.6 m); Warrenmead's west creek runs down a beach
+## into the sea (1.5 m to -0.05 m) and blends.
+const WATER_SHORE_INLAND := Vector3(0.5, 2.0, 0.12)
 ## The soft-edged sea's place in the transparent pass (Material.render_priority:
 ## Godot draws a lower priority first, and sorts one priority back to front by
 ## each instance's AABB centre). Left at 0, its 96 m Water_ cells were sorted

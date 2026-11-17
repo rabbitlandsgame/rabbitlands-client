@@ -125,6 +125,15 @@ func _run() -> void:
 			"An elevated lake retains its actual continent-space placement")
 		_expect(river_transform.basis.is_equal_approx(river.basis),
 			"A sloping river retains the mesh transform used for common ripple phase")
+		# The look's soft-edged water tells inland water from the sea by this
+		# transform's height (continent_water.gdshaderinc continent_water_level,
+		# LookProfile.WATER_SHORE_INLAND): the sea is below its start, the
+		# exported lakes and rivers above its end, and a rebase moves neither.
+		var inland := LookProfile.WATER_SHORE_INLAND
+		_expect((transform * Vector3.ZERO).y < inland.x and (coast_transform * Vector3.ZERO).y < inland.x,
+			"Sea cells sit below the inland water's start")
+		_expect((lake_transform * Vector3.ZERO).y >= inland.y and (river_transform * Vector3.ZERO).y >= inland.y,
+			"Exported elevated lakes and rivers sit above the inland water's end")
 		_expect(lake_material.get_shader_parameter("wave_texture") == material.get_shader_parameter("wave_texture"),
 			"Sea, lake and river surfaces reuse one actual wave texture")
 	_expect(fountain.get_surface_override_material(0) == null and decorative.get_surface_override_material(0) == null

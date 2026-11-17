@@ -71,6 +71,24 @@ func _check_sea() -> int:
 		and opaque.render_priority == source.render_priority,
 		"LOW's opaque sea keeps the loader's priority (it draws in the opaque pass)")
 	_expect(source.render_priority == 0, "the loader's own sea material is never edited")
+	# Inland water (an elevated lake or river cell, map polish round 4) is the
+	# same material in the same place: the shader alone gives it its narrow
+	# fade (LookProfile.WATER_SHORE_INLAND), by its continent height.
+	var highland := Node3D.new()
+	root.add_child(highland)
+	var river := MeshInstance3D.new()
+	river.name = "Water_test_5_6"
+	river.mesh = BoxMesh.new()
+	river.position = Vector3(0.0, 142.0, 0.0)
+	highland.add_child(river)
+	river.set_surface_override_material(0, source)
+	LookGround.decode_continent_sea(highland)
+	var inland := river.get_surface_override_material(0) as ShaderMaterial
+	_expect(inland != null and soft != null and inland.shader == soft.shader
+		and inland.render_priority == soft.render_priority
+		and inland.get_shader_parameter(&"look_shore_inland") == LookProfile.WATER_SHORE_INLAND,
+		"an inland water cell draws with the sea's shader at the sea's priority")
+	highland.free()
 	return soft.render_priority if soft != null else 0
 
 func _patch(material_name: String, transparency: BaseMaterial3D.Transparency, tint: Color,

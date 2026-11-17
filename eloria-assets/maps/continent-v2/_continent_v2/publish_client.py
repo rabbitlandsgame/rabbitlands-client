@@ -269,6 +269,121 @@ def chunk_name(cx, cz):
     return f"{int(cx):02d}_{int(cz):02d}"
 
 
+# River ribbons (river_ribbon_faces): the longest mitre, in half-widths (a 120 degree turn).
+RIVER_MITRE_LIMIT = 2.0
+
+
+def _river_edge_unlooped(edge, along, reach):
+    """One side of a ribbon with its swallowtails cut off. Where a bend is tighter than the ribbon's half-width, the
+    inner edge's mitred points run past the bend's inner corner and back: the stations in that loop take the point
+    where the edge crosses itself (the corner of the true offset), so their quads close into triangles round it.
+    Only later segments within `reach` metres of path are searched, and the farthest crossing wins."""
+    e = edge.copy()
+    n = len(e)
+    j = 0
+    while j < n - 2:
+        a, b = e[j], e[j + 1]
+        stop = min(int(np.searchsorted(along, along[j + 1] + reach, side="right")), n - 1)
+        ks = np.arange(j + 2, stop)
+        if len(ks):
+            c, d = e[ks], e[ks + 1]
+            r, s, q = b - a, d - c, c - a
+            denom = r[0] * s[:, 1] - r[1] * s[:, 0]
+            safe = np.where(np.abs(denom) > 1e-12, denom, 1.0)
+            t = (q[:, 0] * s[:, 1] - q[:, 1] * s[:, 0]) / safe
+            u = (q[:, 0] * r[1] - q[:, 1] * r[0]) / safe
+            # A crossing inside segment j; the later segment may only touch it (a corner's own mitre point is the
+            # inner corner exactly, where the edges before and after it meet).
+            hit = np.flatnonzero((np.abs(denom) > 1e-12) & (t > 1e-9) & (t < 1 - 1e-9)
+                                 & (u > -1e-9) & (u < 1 + 1e-9))
+            if len(hit):
+                k = int(ks[hit[-1]])
+                e[j + 1:k + 1] = a + r * t[hit[-1]]
+                j = k
+                continue
+        j += 1
+    return e
+
+
+def _river_sections_uncrossed(centre, edge, along, reach):
+    """One side's half-sections (centre -> edge) kept from crossing an earlier one within `reach` metres of path.
+    Where a sharp bend also widens or narrows, the edge folds back without crossing itself (so _river_edge_unlooped
+    finds no corner): a half-section that crosses an earlier one, and every half-section between them, then ends
+    at that earlier one's edge point, so their quads close into a fan of triangles round it. Meeting at the edge
+    points (a swallowtail's inner corner) is no crossing. The quads between consecutive sections then tile the
+    ribbon without overlapping; what the fan leaves out is the fold's own sliver."""
+    e = edge.copy()
+    for j in range(1, len(e)):
+        ms = np.arange(int(np.searchsorted(along, along[j] - reach, side="left")), j)
+        if not len(ms):
+            continue
+        a, r = centre[j], e[j] - centre[j]
+        c, s = centre[ms], e[ms] - centre[ms]
+        q = c - a
+        denom = r[0] * s[:, 1] - r[1] * s[:, 0]
+        safe = np.where(np.abs(denom) > 1e-12, denom, 1.0)
+        t = (q[:, 0] * s[:, 1] - q[:, 1] * s[:, 0]) / safe       # along this half-section
+        u = (q[:, 0] * r[1] - q[:, 1] * r[0]) / safe             # along the earlier one
+        hit = np.flatnonzero((np.abs(denom) > 1e-12) & (t > 1e-9) & (t < 1 - 1e-9) & (u > 1e-9) & (u < 1 - 1e-9))
+        if len(hit):
+            m = int(ms[hit[0]])
+            e[m + 1:j + 1] = e[m]
+    return e
+
+
+def river_ribbon_faces(points, widths):
+    """A river path's water ribbon: (m, 3, 3) triangles (the points' own frame), one shared section per saved point.
+
+    The ribbon used to be one quad per segment, each squared to its own segment, so at every bend the quads
+    overlapped on the inside and left a wedge open on the outside. Under the soft-edged water (look polish round 4,
+    2026-11-16) the overlaps blended twice and drew stripes and pale chips across Twinbrook's brook, and the wedges
+    showed the dry bed as spikes across the stream. Every point now carries ONE section, which both quads that meet
+    there use: square to the bisector of its two segments (an end point's: its own segment's), each half
+    1 / cos(half the turn) long (at most RIVER_MITRE_LIMIT half-widths), so both edges are the centreline's mitred
+    offsets and a straight stretch keeps its old square sections. Where a bend is tighter than the half-width, the
+    inner edge's loop is cut at the inner corner (_river_edge_unlooped), and where a sharp bend also changes width,
+    the half-sections that would still cross an earlier one end at its edge point (_river_sections_uncrossed). So
+    the faces neither overlap nor fold, and the only ribbon they leave out is such a fold's sliver.
+    A point closer than 1 mm in plan to the one kept before it is dropped (a section needs a direction). The faces
+    keep the old order and winding ([l0, r0, l1], [r0, r1, l1]); put_water turns each upward and files it by its
+    centroid."""
+    pts = np.asarray(points, float).reshape(-1, 3)
+    half = np.asarray(widths, float).reshape(-1) / 2.0
+    keep = [0] if len(pts) else []
+    for i in range(1, len(pts)):
+        if math.hypot(pts[i, 0] - pts[keep[-1], 0], pts[i, 2] - pts[keep[-1], 2]) > 1e-3:
+            keep.append(i)
+    pts, half = pts[keep], half[keep]
+    count = len(pts)
+    if count < 2:
+        return np.zeros((0, 3, 3))
+    xz = pts[:, [0, 2]]
+    seg = np.diff(xz, axis=0)
+    length = np.hypot(seg[:, 0], seg[:, 1])
+    normal = np.c_[-seg[:, 1], seg[:, 0]] / length[:, None]      # left of the flow, as the old quads put it
+    side = np.empty((count, 2))
+    side[0], side[-1] = normal[0], normal[-1]
+    middle = normal[:-1] + normal[1:]
+    size = np.hypot(middle[:, 0], middle[:, 1])
+    side[1:-1] = np.where(size[:, None] > 1e-9, middle / np.maximum(size, 1e-12)[:, None], normal[:-1])
+    cos = np.ones(count)
+    cos[1:-1] = np.einsum("ij,ij->i", side[1:-1], normal[:-1])
+    reach = half / np.maximum(cos, 1.0 / RIVER_MITRE_LIMIT)
+    along = np.r_[0.0, np.cumsum(length)]
+    search = 4.0 * RIVER_MITRE_LIMIT * float(half.max()) + 1.0
+    left = _river_sections_uncrossed(xz, _river_edge_unlooped(xz + side * reach[:, None], along, search),
+                                     along, search)
+    right = _river_sections_uncrossed(xz, _river_edge_unlooped(xz - side * reach[:, None], along, search),
+                                      along, search)
+    lift = pts[:, 1]
+    left3 = np.c_[left[:, 0], lift, left[:, 1]]
+    right3 = np.c_[right[:, 0], lift, right[:, 1]]
+    faces = np.empty((2 * (count - 1), 3, 3))
+    faces[0::2] = np.stack([left3[:-1], right3[:-1], left3[1:]], axis=1)
+    faces[1::2] = np.stack([right3[:-1], right3[1:], left3[1:]], axis=1)
+    return faces
+
+
 def in_closed_window(inside_window, x, z):
     """A point inside the ownership polygon or on its edge (a kit placement's origin, continent metres): d1_check
     keeps origins ON the edge (kit-coastal-rock-3_168 stands at local x = 1019.0), so the test nudges 1 cm each way."""
@@ -776,18 +891,7 @@ def main():
             continue
         pts = np.asarray([p["position"] for p in path["points"]], float) + translation
         widths = np.asarray([float(p["width"]) for p in path["points"]])
-        faces = []
-        for i in range(len(pts) - 1):
-            d = pts[i + 1][[0, 2]] - pts[i][[0, 2]]
-            length = np.linalg.norm(d)
-            if length < 1e-6:
-                continue
-            side = np.array([-d[1], d[0]]) / length
-            l0 = pts[i].copy(); r0 = pts[i].copy(); l1 = pts[i + 1].copy(); r1 = pts[i + 1].copy()
-            l0[[0, 2]] += side * widths[i] / 2; r0[[0, 2]] -= side * widths[i] / 2
-            l1[[0, 2]] += side * widths[i + 1] / 2; r1[[0, 2]] -= side * widths[i + 1] / 2
-            faces += [np.array([l0, r0, l1]), np.array([r0, r1, l1])]
-        put_water(faces)
+        put_water(river_ribbon_faces(pts, widths))         # one mitred section per point: no wedge, no overlap
     for name, faces in water_faces.items():
         if not keep(name):
             continue

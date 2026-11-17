@@ -184,7 +184,10 @@ static func paint_loaded(root: Node, manifest: WorldManifest) -> int:
 ## concept paints turquoise. At a quality whose `water_shore` is true the
 ## copy is drawn by SHADER_WATER_SHORE (`set_water_shore`): the water fades in
 ## over its first metres of depth and carries a broken foam line, so the
-## shoreline no longer zigzags along the terrain's 2 m facets. At LOW it stays
+## shoreline no longer zigzags along the terrain's 2 m facets; the elevated
+## lakes and rivers on the same cells fade in over a few centimetres and carry
+## no foam (LookProfile.WATER_SHORE_INLAND), and no foam lies over steep
+## ground (LookProfile.WATER_SHORE_FOAM_UP). At LOW it stays
 ## opaque and reads no depth; a sea painted at LOW keeps that until its chunk
 ## is painted again, and one painted above LOW follows LOW at once through
 ## WATER_SHORE_GLOBAL. Returns the surfaces changed.
@@ -241,6 +244,8 @@ static func set_water_shore(sea: ShaderMaterial) -> void:
 	sea.set_shader_parameter(&"look_shore_foam", LookProfile.WATER_SHORE_FOAM)
 	var foam := LookProfile.WATER_SHORE_FOAM_COLOUR
 	sea.set_shader_parameter(&"look_shore_foam_colour", Vector3(foam.r, foam.g, foam.b))
+	sea.set_shader_parameter(&"look_shore_foam_up", LookProfile.WATER_SHORE_FOAM_UP)
+	sea.set_shader_parameter(&"look_shore_inland", LookProfile.WATER_SHORE_INLAND)
 
 ## Linear renderers only (Forward+ and Mobile): the rivers, canals, lakes,
 ## pools and small seas drawn by a StandardMaterial3D (the continent

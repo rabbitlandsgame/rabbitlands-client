@@ -5,7 +5,12 @@ extends SceneTree
 ## is drawn by the soft-edged shader at MEDIUM and HIGH, keeping every
 ## parameter the loader and the decode gave it, and stays the opaque shader at
 ## LOW and in the compatibility renderer; the quality's switch is a declared
-## global; the opaque shader the loader puts in never reads depth.
+## global; the opaque shader the loader puts in never reads depth. Round 4
+## (the shore's alpha and foam, here as GDScript, _shore): inland water
+## (Twinbrook's graded brook) reads as water with no foam, Suncoil's 0.7 m
+## shelf is opaque, a beach keeps its gradient and wash, a bank facet gets no
+## foam (at the frame's edge too, _gate), and a river mouth blends into the
+## sea's edge without a seam.
 ##
 ## The cliff's tone: the steep-face rock is drawn as stone on a cliff
 ## (look_rock_tone, here as GDScript): on green ground it is not green, on tan
@@ -33,6 +38,8 @@ func _run() -> void:
 	_check_shore_global()
 	_check_shore_decode()
 	_check_shore_shaders()
+	_check_shore_model()
+	_check_shore_gate_edge()
 	_check_rock_tone()
 	_check_rock_shader_text()
 	_check_forest_floor_selection()
@@ -56,6 +63,18 @@ func _check_shore_constants() -> void:
 		"the depth wobble is smaller than half the fade (%s)" % str(wobble))
 	_expect(foam.x > 0.0 and foam.x < depth.x and foam.y > 0.0 and foam.y <= 0.6 and foam.z > 0.0,
 		"the foam is a band inside the fade and never solid (%s)" % str(foam))
+	_expect(depth.x <= 0.7,
+		"the sea's fade ends by 0.7 m, so Suncoil's shelf beside the pier is not drawn through it (%s)"
+			% str(depth))
+	var up := LookProfile.WATER_SHORE_FOAM_UP
+	_expect(up.x < up.y and up.x >= 0.7 and up.y <= 0.95,
+		"the foam fades out between a beach and a bank facet (%s)" % str(up))
+	_expect(up.z >= 0.25 and up.z <= 1.0,
+		"the ground's slope is read over a chord of 0.5-2 m, not a pixel (%s)" % str(up))
+	var inland := LookProfile.WATER_SHORE_INLAND
+	_expect(inland.x > 0.0 and inland.x < inland.y and inland.y <= 5.0 and inland.z > 0.0
+		and inland.z <= 0.2 and inland.z < depth.x,
+		"inland water starts a little above the sea and fades in over a few centimetres (%s)" % str(inland))
 	_expect(not bool(LookProfile.QUALITY_PRESETS[LookProfile.Quality.LOW]["water_shore"])
 		and bool(LookProfile.QUALITY_PRESETS[LookProfile.Quality.MEDIUM]["water_shore"])
 		and bool(LookProfile.QUALITY_PRESETS[LookProfile.Quality.HIGH]["water_shore"]),
@@ -124,7 +143,11 @@ func _check_shore_decode() -> void:
 				_expect((drawn.get_shader_parameter(&"look_shore_depth") as Vector2)
 						.is_equal_approx(LookProfile.WATER_SHORE_DEPTH)
 					and (drawn.get_shader_parameter(&"look_shore_foam") as Vector3)
-						.is_equal_approx(LookProfile.WATER_SHORE_FOAM),
+						.is_equal_approx(LookProfile.WATER_SHORE_FOAM)
+					and (drawn.get_shader_parameter(&"look_shore_foam_up") as Vector3)
+						.is_equal_approx(LookProfile.WATER_SHORE_FOAM_UP)
+					and (drawn.get_shader_parameter(&"look_shore_inland") as Vector3)
+						.is_equal_approx(LookProfile.WATER_SHORE_INLAND),
 					"%s: the soft-edged sea takes the shore constants" % label)
 				_expect(sea.shader.resource_path == LookGround.CONTINENT_WATER_PATH
 					and sea.get_shader_parameter(&"look_decode_albedo") != true,
@@ -141,7 +164,8 @@ func _check_shore_shaders() -> void:
 		"the loader's opaque sea compiles and reads no depth")
 	var shore_names := _uniform_names(LookGround.SHADER_WATER_SHORE)
 	_expect("water_to_continent" in shore_names and "look_decode_albedo" in shore_names
-		and "look_shore_depth" in shore_names and "look_shore_foam" in shore_names,
+		and "look_shore_depth" in shore_names and "look_shore_foam" in shore_names
+		and "look_shore_foam_up" in shore_names and "look_shore_inland" in shore_names,
 		"the soft-edged sea compiles with the shore uniforms")
 	var include := FileAccess.get_file_as_string("res://src/world/continent_water.gdshaderinc")
 	var shore := FileAccess.get_file_as_string("res://src/world/look/continent_water_shore.gdshader")
@@ -154,6 +178,155 @@ func _check_shore_shaders() -> void:
 		"the depth is unprojected for the compatibility renderer's clip range too")
 	_expect(shore.contains("depth_draw_always") and shore.contains("#define CONTINENT_WATER_SHORE"),
 		"the soft-edged sea still writes depth (its place in the transparent pass: test_look_sea_order)")
+	# Round 4: what _shore models, line for line.
+	_expect(include.contains("continent_water_level = (water_to_continent * vec4(VERTEX, 1.0)).y;"),
+		"inland water is told by its continent height, which a rebase cannot move")
+	# The slope beneath the foam is a chord's, read back around the water's own
+	# point, never a pixel's (a pixel's derivative switches the foam along each
+	# 2 m facet's edge and reads the ground layers a few millimetres apart
+	# beneath a beach), and only the foam's band pays for the four extra reads.
+	_expect(not include.contains("dFdx(") and not include.contains("dFdy(")
+		and not include.contains("fwidth("),
+		"the shore reads no screen derivatives")
+	var branch := include.find("if (foam_band > 0.0 && shore_world.w > 0.5) {")
+	_expect(branch > 0 and include.find("continent_water_scene_at(water_world + reach_x,") > branch
+		and include.find("continent_water_scene_at(water_world - reach_z,") > branch
+		and include.contains("vec3 facet = cross(south.xyz - north.xyz, east.xyz - west.xyz);"),
+		"the foam's band reads the ground east, west, south and north of the water's point")
+	# Near the frame's edge an end falls off the screen: it becomes the ground
+	# under the pixel (a half chord), and only a chord blind at both ends keeps
+	# the wash (_gate models it). Round 4's first gate kept the wash whenever
+	# any end left the screen, which drew the steep-facet streaks back in a
+	# strip a chord wide along every edge of the frame (Suncoil's pier root).
+	var blind_at := include.find(
+		"bool blind = (east.w < 0.5 && west.w < 0.5) || (south.w < 0.5 && north.w < 0.5);")
+	var facet_at := include.find("vec3 facet = cross(south.xyz - north.xyz, east.xyz - west.xyz);")
+	var swaps_ok := blind_at > branch
+	for end: String in ["east", "west", "south", "north"]:
+		var swap_at := include.find("%s = %s.w > 0.5 ? %s : shore_world;" % [end, end, end])
+		swaps_ok = swaps_ok and swap_at > blind_at and swap_at < facet_at
+	_expect(swaps_ok and include.contains("if (!blind) {")
+		and not include.contains("east.w * west.w * south.w * north.w"),
+		"an end off the screen reads the ground under the pixel; only a chord blind at both ends keeps the wash")
+	for line: String in [
+			"float inland = smoothstep(look_shore_inland.x, look_shore_inland.y, continent_water_level);",
+			"float fade = mix(look_shore_depth.x, min(look_shore_depth.x, look_shore_inland.z), inland);",
+			"float wobble = look_shore_wobble.x * fade / max(look_shore_depth.x, 0.001);",
+			"float shore_alpha = smoothstep(look_shore_depth.y, max(fade, look_shore_depth.y + 0.001), wobbled);",
+			"foam_ground = smoothstep(look_shore_foam_up.x, look_shore_foam_up.y, facet_up);",
+			"float foam_band = (1.0 - smoothstep(0.0, look_shore_foam.x, wobbled)) * shore_on * (1.0 - inland);",
+			"float foam = foam_band * smoothstep(0.35, 0.7, foam_noise) * look_shore_foam.y * foam_ground;"]:
+		_expect(include.contains(line), "the shore shader still reads: %s" % line)
+
+## The shore's alpha (x) and foam (y) as continent_water.gdshaderinc draws them
+## (CONTINENT_WATER_SHORE) for water whose surface is `level` metres up in the
+## continent's frame, `depth` metres over the ground beneath, the wobble noise
+## at `noise` (0-1, 0.5 none) and that ground's normal up component `up`; the
+## foam's own noise at its strongest, the quality's switch on.
+func _shore(level: float, depth: float, noise: float, up: float) -> Vector2:
+	var fade_row := LookProfile.WATER_SHORE_DEPTH
+	var inland_row := LookProfile.WATER_SHORE_INLAND
+	var up_row := LookProfile.WATER_SHORE_FOAM_UP
+	var inland := smoothstep(inland_row.x, inland_row.y, level)
+	var fade := lerpf(fade_row.x, minf(fade_row.x, inland_row.z), inland)
+	var wobble := LookProfile.WATER_SHORE_WOBBLE.x * fade / maxf(fade_row.x, 0.001)
+	var wobbled := depth + (noise - 0.5) * 2.0 * wobble
+	var alpha := smoothstep(fade_row.y, maxf(fade, fade_row.y + 0.001), wobbled)
+	var foam := (1.0 - smoothstep(0.0, LookProfile.WATER_SHORE_FOAM.x, wobbled)) \
+		* LookProfile.WATER_SHORE_FOAM.y * smoothstep(up_row.x, up_row.y, up) * (1.0 - inland)
+	return Vector2(clampf(alpha + foam, 0.0, 1.0), foam)
+
+## The foam's ground gate as continent_water.gdshaderinc reads it: `ends` holds
+## the ground east, west, south and north of the water's point (null where
+## that end is off the screen), `centre` the ground under the pixel itself.
+func _gate(centre: Vector3, ends: Array) -> float:
+	if (ends[0] == null and ends[1] == null) or (ends[2] == null and ends[3] == null):
+		return 1.0
+	var at: Array[Vector3] = []
+	for end: Variant in ends:
+		if end == null:
+			at.append(centre)
+		else:
+			at.append(end as Vector3)
+	var facet := (at[2] - at[3]).cross(at[0] - at[1])
+	var up := absf(facet.y) / maxf(facet.length(), 0.000001)
+	var row := LookProfile.WATER_SHORE_FOAM_UP
+	return _glsl_smoothstep(row.x, row.y, up)
+
+## The ground of the plane y = -grade_x x - grade_z z at the chord's four ends
+## around the origin, `off` naming the ends off the screen.
+func _plane_ends(grade_x: float, grade_z: float, off: Array) -> Array:
+	var reach := LookProfile.WATER_SHORE_FOAM_UP.z
+	var ends := []
+	var names := ["east", "west", "south", "north"]
+	var steps := [Vector2(reach, 0.0), Vector2(-reach, 0.0), Vector2(0.0, reach), Vector2(0.0, -reach)]
+	for i: int in 4:
+		var step: Vector2 = steps[i]
+		if names[i] in off:
+			ends.append(null)
+		else:
+			ends.append(Vector3(step.x, -grade_x * step.x - grade_z * step.y, step.y))
+	return ends
+
+func _check_shore_gate_edge() -> void:
+	# Suncoil's pier root at the frame's right edge: pixel (1595, 155) lies on
+	# a facet whose 1 m chord faces up 0.72 (grade about 0.96), and its east end
+	# projects off the screen. Every half chord still reads it as a bank.
+	var bank := 0.96
+	for off: Array in [[], ["east"], ["west"], ["south"], ["north"], ["east", "north"], ["west", "south"]]:
+		_expect(_gate(Vector3.ZERO, _plane_ends(bank, 0.0, off)) == 0.0
+			and _gate(Vector3.ZERO, _plane_ends(0.0, bank, off)) == 0.0
+			and _gate(Vector3.ZERO, _plane_ends(bank * 0.7, bank * 0.7, off)) == 0.0,
+			"a bank facet gets no foam with %s off the screen" % (str(off) if not off.is_empty() else "no end"))
+		_expect(_gate(Vector3.ZERO, _plane_ends(0.2, 0.1, off)) == 1.0,
+			"a beach keeps its whole wash with %s off the screen" % (str(off) if not off.is_empty() else "no end"))
+	# Only a chord with both ends off the screen cannot tell: the wash stays.
+	_expect(_gate(Vector3.ZERO, _plane_ends(bank, 0.0, ["east", "west"])) == 1.0
+		and _gate(Vector3.ZERO, _plane_ends(bank, 0.0, ["south", "north"])) == 1.0,
+		"a chord blind at both ends keeps the wash")
+
+func _check_shore_model() -> void:
+	# Twinbrook's graded brook (castle-brook-west, surface 142-143 m): drawn
+	# depth 0.03 / 0.13 / 0.28 m at its 10th / 50th / 90th percentile. Under the
+	# sea's edge it drew at alpha 0.1-0.5 with foam; now it reads as water.
+	var lowest := 1.0
+	for noise: float in [0.0, 0.5, 1.0]:
+		lowest = minf(lowest, _shore(142.1, 0.13, noise, 1.0).x)
+		_expect(_shore(142.1, 0.28, noise, 1.0).x > 0.99 and _shore(142.1, 0.13, noise, 1.0).y == 0.0,
+			"the brook is opaque at its 90th percentile and carries no foam (noise %.1f)" % noise)
+	_expect(lowest >= 0.9, "the brook's median depth draws at alpha %.2f (0.9 or more)" % lowest)
+	_expect(_shore(142.1, 0.02, 0.5, 1.0).x < 0.3,
+		"the brook still fades in at its very edge (%.2f)" % _shore(142.1, 0.02, 0.5, 1.0).x)
+	_expect(_shore(47.57, 0.05, 0.5, 1.0).y == 0.0 and _shore(99.3, 0.05, 0.5, 1.0).y == 0.0,
+		"Reedfall's and Hornmere's lakes carry no surf")
+	# Suncoil's shelf beside the pier: 0.71-0.95 m deep. At 0.9 m of fade it
+	# showed through as a pale wedge; it is opaque at the wobble's worst.
+	_expect(_shore(0.0, 0.71, 0.0, 1.0).x >= 0.999,
+		"a 0.71 m shelf is opaque (%.3f)" % _shore(0.0, 0.71, 0.0, 1.0).x)
+	# A sea beach keeps its gradient: still clear near the waterline and not yet
+	# opaque 0.35 m down (1.75 m of beach at grade 0.2), with its wash.
+	_expect(_shore(0.0, 0.03, 0.5, 1.0).x < 0.6 and _shore(0.0, 0.35, 0.5, 1.0).x < 0.95,
+		"a beach keeps a gradient (%.2f at 0.03 m, %.2f at 0.35 m)" % [
+			_shore(0.0, 0.03, 0.5, 1.0).x, _shore(0.0, 0.35, 0.5, 1.0).x])
+	_expect(_shore(0.0, 0.05, 0.5, 0.95).y > 0.3,
+		"a beach keeps its wash (%.2f)" % _shore(0.0, 0.05, 0.5, 0.95).y)
+	# Suncoil's pier-root tooth (its facets under the foam face up 0.68 / 0.74 /
+	# 0.83 at the 10th / 50th / 90th percentile) drew a pale streaked smear;
+	# Boarsend's beach (0.90 / 0.92 / 0.96) keeps its whole wash.
+	_expect(_shore(0.0, 0.05, 0.5, 0.68).y == 0.0 and _shore(0.0, 0.05, 0.5, 0.74).y == 0.0
+		and _shore(0.0, 0.05, 0.5, 0.83).y < 0.75 * _shore(0.0, 0.05, 0.5, 1.0).y,
+		"the tooth's facets get little or no foam (%.2f at its 90th percentile)"
+			% _shore(0.0, 0.05, 0.5, 0.83).y)
+	_expect(is_equal_approx(_shore(0.0, 0.05, 0.5, 0.9).y, _shore(0.0, 0.05, 0.5, 1.0).y),
+		"a beach's facet keeps its whole wash")
+	# A river mouth runs from the sea's edge into inland water without a seam.
+	var previous := _shore(0.0, 0.1, 0.5, 1.0)
+	var jump := 0.0
+	for step: int in range(1, 41):
+		var now := _shore(step * 0.05, 0.1, 0.5, 1.0)
+		jump = maxf(jump, maxf(absf(now.x - previous.x), absf(now.y - previous.y)))
+		previous = now
+	_expect(jump < 0.1, "alpha and foam change by at most %.3f per 5 cm of river mouth" % jump)
 
 # --- The cliff's tone ------------------------------------------------------------
 
