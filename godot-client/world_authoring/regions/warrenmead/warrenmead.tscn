@@ -496,6 +496,106 @@ preview_clip_inside = PackedVector2Array(899, 7541, 855, 7421, 849, 7301, 869, 7
 [node name="Patches" type="Node3D" parent="Terrain"]
 
 
+[node name="pt5_wm_creek_bank_x99_z_192" type="Marker3D" parent="Terrain/Patches"]
+script = ExtResource("patch")
+patch_id = "pt5-wm-creek-bank-x99-z-192"
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 99, 0.62, -192)
+shape = 0
+operation = 1
+size = Vector2(3, 3)
+feather = 0.0
+enabled = true
+
+[node name="pt5_wm_creek_bank_x103_z_192" type="Marker3D" parent="Terrain/Patches"]
+script = ExtResource("patch")
+patch_id = "pt5-wm-creek-bank-x103-z-192"
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 103, 0.18, -192)
+shape = 0
+operation = 1
+size = Vector2(3, 3)
+feather = 0.0
+enabled = true
+
+[node name="pt5_wm_creek_bank_x105_z_190" type="Marker3D" parent="Terrain/Patches"]
+script = ExtResource("patch")
+patch_id = "pt5-wm-creek-bank-x105-z-190"
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 105, 0.24, -190)
+shape = 0
+operation = 1
+size = Vector2(3, 3)
+feather = 0.0
+enabled = true
+
+[node name="pt5_wm_creek_bank_x107_z_190" type="Marker3D" parent="Terrain/Patches"]
+script = ExtResource("patch")
+patch_id = "pt5-wm-creek-bank-x107-z-190"
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 107, 0.12, -190)
+shape = 0
+operation = 1
+size = Vector2(3, 3)
+feather = 0.0
+enabled = true
+
+[node name="pt5_wm_creek_bank_x107_z_188" type="Marker3D" parent="Terrain/Patches"]
+script = ExtResource("patch")
+patch_id = "pt5-wm-creek-bank-x107-z-188"
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 107, 0.34, -188)
+shape = 0
+operation = 1
+size = Vector2(3, 3)
+feather = 0.0
+enabled = true
+
+[node name="pt5_wm_creek_bank_x111_z_186" type="Marker3D" parent="Terrain/Patches"]
+script = ExtResource("patch")
+patch_id = "pt5-wm-creek-bank-x111-z-186"
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 111, 0.36, -186)
+shape = 0
+operation = 1
+size = Vector2(3, 3)
+feather = 0.0
+enabled = true
+
+[node name="pt5_wm_creek_bank_x107_z_186" type="Marker3D" parent="Terrain/Patches"]
+script = ExtResource("patch")
+patch_id = "pt5-wm-creek-bank-x107-z-186"
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 107, 0.82, -186)
+shape = 0
+operation = 1
+size = Vector2(3, 3)
+feather = 0.0
+enabled = true
+
+[node name="pt5_wm_creek_bank_x109_z_186" type="Marker3D" parent="Terrain/Patches"]
+script = ExtResource("patch")
+patch_id = "pt5-wm-creek-bank-x109-z-186"
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 109, 0.62, -186)
+shape = 0
+operation = 1
+size = Vector2(3, 3)
+feather = 0.0
+enabled = true
+
+[node name="pt5_wm_creek_bank_x113_z_182" type="Marker3D" parent="Terrain/Patches"]
+script = ExtResource("patch")
+patch_id = "pt5-wm-creek-bank-x113-z-182"
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 113, 1.02, -182)
+shape = 0
+operation = 1
+size = Vector2(3, 3)
+feather = 0.0
+enabled = true
+
+[node name="pt5_wm_creek_bank_x117_z_178" type="Marker3D" parent="Terrain/Patches"]
+script = ExtResource("patch")
+patch_id = "pt5-wm-creek-bank-x117-z-178"
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 117, 1.16, -178)
+shape = 0
+operation = 1
+size = Vector2(3, 3)
+feather = 0.0
+enabled = true
+
 [node name="Ground" type="Node3D" parent="."]
 
 
@@ -19139,7 +19239,7 @@ metadata = {
 "biomeRule": "feather-grass"
 }
 metadata/map_authoring_asset_wrapper = true
-transform = Transform3D(-0.116861, 0, -0.864137, 0, 0.872003, 0, 0.864137, 0, -0.116861, 98.157, 1.3768, -190.744)
+transform = Transform3D(-0.116861, 0, -0.864137, 0, 0.872003, 0, 0.864137, 0, -0.116861, 98.157, 0.8997, -190.744)
 
 [node name="Content" parent="AuthoredAssets/lv_warrenmead_Feather Grass 1 107" instance=ExtResource("lv_feather_grass_1")]
 metadata/map_asset_id = "lf_biomes:kit-feather-grass-1"

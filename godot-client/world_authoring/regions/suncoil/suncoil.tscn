@@ -413,7 +413,7 @@ point_count = 187
 [sub_resource type="Curve3D" id="mq_road_1"]
 resource_local_to_scene = true
 _data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -340.094, 1.14, -313.372, 0, 0, 0, 0, 0, 0, -339.307, 1.719, -311.21, 0, 0, 0, 0, 0, 0, -338.692, 2.078, -309.519, 0, 0, 0, 0, 0, 0, -337.905, 2.473, -307.357),
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -340.094, 1.14, -313.372, 0, 0, 0, 0, 0, 0, -339.307, 1.719, -311.21, 0, 0, 0, 0, 0, 0, -338.85, 2.132, -309.32, 0, 0, 0, 0, 0, 0, -336.85, 2.21, -308.35),
 "tilts": PackedFloat32Array(0, 0, 0, 0)
 }
 point_count = 4
@@ -134712,7 +134712,7 @@ properties = {
 "terrainFeather": 2.0
 }
 default_width = 5.5
-point_widths = PackedFloat32Array(5.5, 5.5, 5.5, 5.5, 5.5)
+point_widths = PackedFloat32Array(5.5, 5.5, 5.5, 5.5, 3.8)
 surface = SubResource("a3t_worn_surface")
 
 [node name="suncoil--a3-trail-12" type="Path3D" parent="Roads"]
@@ -134777,13 +134777,13 @@ script = ExtResource("a3t_path")
 path_id = "suncoil--pier-root-pad"
 properties = {
 "pass": "a3-trails-2026-10-20",
-"source": "map polish 2026-11-16: worn-earth pad at the boatnet pier's deck root, joining a3-trail-11 (roads-paths suncoil-1)",
+"source": "map polish 2026-11-16: worn-earth pad at the boatnet pier's deck root, joining a3-trail-11 (roads-paths suncoil-1); paths5 2026-11-17: centreline bent towards trail-11's junction and the end tapered to 3.0 m inside trail-11's strip (no square 6 m cap past the junction); repair round: point 2 moved 0.5 m west / 0.3 m south so the pad wraps trail-11's tapered end; repair round 2: point 3 moved 0.7 m east / 0.4 m north so the production road builder does not fold the bend (0 folded faces)",
 "terrainConform": false,
 "terrainFeather": 2.0,
 "approval": "owner 2026-11-16: map quality report decisions (Reroutes: Suncoil trail-11 pier approach)"
 }
 default_width = 5.5
-point_widths = PackedFloat32Array(8.4, 8, 7.2, 6)
+point_widths = PackedFloat32Array(8.4, 7.4, 6.6, 3)
 surface = SubResource("a3t_worn_surface")
 
 [node name="suncoil--serpent-catacombs-door" type="Marker3D" parent="RuntimePoints"]
@@ -139222,7 +139222,7 @@ extras = {
 "yaw": 121,
 "zone": "coverage"
 }
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 283.5, 1, 76.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 281.5, 1, 72.5)
 
 [node name="suncoil--harvest-3358-sunleaf" type="Marker3D" parent="Gameplay/Harvestables"]
 gizmo_extents = 0.8
