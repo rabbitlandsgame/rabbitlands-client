@@ -929,8 +929,10 @@ static func painted_source_for(source: Material, kind: Kind, has_colour: bool,
 			else LookProfile.FOREST_FLOOR_RIM_LOBE if forest_floor else LookProfile.PATCH_RIM_LOBE
 		if forest_floor:
 			lobe_metres = LookProfile.FOREST_FLOOR_LOBE_METRES
-			# On a cliff it gives way to the stone, over the rock layer's
-			# own steepness band (LookProfile.FOREST_FLOOR_STEEP).
+			# On a cliff or a step's riser it gives way to the stone: the
+			# exporter scales its coverage by the smoothed slope and the
+			# facet's own; what is left of the look's own per-facet cut is
+			# LookProfile.FOREST_FLOOR_STEEP (0).
 			painted.set_shader_parameter(&"look_rim_steep", LookProfile.FOREST_FLOOR_STEEP)
 			painted.set_shader_parameter(&"look_rock_up", LookProfile.ROCK_FACE_UP)
 			painted.set_shader_parameter(&"look_rock_wobble", LookProfile.ROCK_FACE_WOBBLE)
@@ -1135,6 +1137,7 @@ static func set_rock_face(painted: ShaderMaterial, region: String) -> void:
 	painted.set_shader_parameter(&"look_rock_value", LookProfile.ROCK_FACE_VALUE)
 	painted.set_shader_parameter(&"look_rock_grain", LookProfile.ROCK_FACE_GRAIN)
 	painted.set_shader_parameter(&"look_rock_stone_up", LookProfile.ROCK_FACE_STONE_UP)
+	painted.set_shader_parameter(&"look_rock_stone_flat", LookProfile.ROCK_FACE_STONE_FLAT)
 	painted.set_shader_parameter(&"look_rock_moss_hue", LookProfile.ROCK_FACE_MOSS_HUE)
 
 ## The class texture `texture_name` names (LookProfile.CLASS_TEXTURES), with

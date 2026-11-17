@@ -139,3 +139,117 @@ def test_a_territory_published_alone_smooths_over_its_whole_field():
     shared = set(alphas["west"]) & set(alphas["east"])
     assert shared
     assert all(alphas["west"][k] == pytest.approx(alphas["east"][k]) for k in shared)
+
+
+def test_a_forest_floor_gives_way_on_a_cliff_but_keeps_its_brink():
+    # Level ground and an 80 degree wall under one forest-floor patch and one other glaze: the floor's coverage is
+    # scaled at each facet corner by forest_floor_keep; it keeps the authored 0.4 on every level facet, the brink's
+    # included, loses all of it on the wall, and every other glaze keeps its coverage on the wall.
+    from types import SimpleNamespace
+    import authoring as A
+    from amberwood import gltf as G
+
+    pbr = {"albedoColor": [0.52, 0.5, 0.4, 1.], "roughness": 1., "metallic": 0., "normalScale": 1.,
+           "uvScale": [1., 1., 1.]}
+
+    def region(region_id, preset, priority):
+        matrix = np.eye(4)
+        matrix[0, 3], matrix[2, 3] = 11., 11.
+        return {"id": region_id, "enabled": True, "priority": priority, "shape": "rectangle", "size": [40., 40.],
+                "blendWidth": 0., "opacity": 0.4, "matrix": matrix.ravel(order="F").tolist(),
+                "surface": {"preset": preset, "rotationDegrees": 0, "pbr": pbr, "pbrOverrides": pbr}}
+
+    class Snapshot:
+        translation = np.array([0., 0., 0.])
+        terrain_width = terrain_height = 12
+
+        @staticmethod
+        def base_colors():
+            return np.full((12, 12, 4), 200, dtype=np.uint8)
+        document = {"terrain": {"origin": [0., 0.], "cellMetres": 2., "previewUvMetresInverse": .24,
+                                "baseSurface": {"preset": "Desert", "rotationDegrees": 0}},
+                    "groundRegions": [region("forest-01", T.FOREST_FLOOR_PRESET, 1),
+                                      region("meadow-01", "Custom", 2)], "paths": []}
+    x = np.arange(0., 24., 2.)
+    gx, gz = np.meshgrid(x, x)
+    height = np.where(gx >= 12., (gx - 12.) * np.tan(np.radians(80)), 0.)
+    world = SimpleNamespace(authoring_snapshot=Snapshot(), ids=[A.SUNMANE], owner=np.zeros(gx.shape, int),
+                            gx=gx, gz=gz, height=height, x=x, z=x, x0=0., z0=0.)
+    world.owner_at = lambda px, pz: np.zeros(np.broadcast_arrays(px, pz)[0].shape, dtype=int)
+    overlays = {item["name"]: item["mesh"] for item in T.authored_overlays(world, G.GltfBuilder("test"))}
+    forest, meadow = overlays["AuthoredGround_forest-01"], overlays["AuthoredGround_meadow-01"]
+    positions = np.stack([gx, height + .006, gz], axis=-1).reshape(-1, 3)
+    row, col = np.nonzero(np.ones((11, 11), bool))
+    a = row * 12 + col
+    tri = np.stack((a, a + 12, a + 1, a + 1, a + 12, a + 12 + 1), axis=1).reshape(-1, 3)
+    up = T.base_smooth_up(positions, tri)
+    by_key = {tuple(k): u for k, u in zip(np.round(positions[:, [0, 2]], 6).tolist(), up)}
+    smooth = np.array([by_key[tuple(k)] for k in np.round(forest.positions[:, [0, 2]], 6).tolist()])
+    corners = np.arange(len(forest.positions)).reshape(-1, 3)
+    np.testing.assert_allclose(forest.colors[:, 3].reshape(-1, 3),
+                               0.4 * T.forest_floor_keep(forest.positions, smooth, corners), atol=1e-9)
+    # The brink's vertices are smoothed to a cliff (under 0.6, where the smoothed slope alone keeps under 0.9 of the
+    # floor, under the look's 0.36 rim), yet every level facet, the brink's too, keeps the authored 0.4 at all three
+    # corners: the floor reaches the crease, with no teeth cut into the brink.
+    brink = smooth[forest.positions[:, 0] == 12.]
+    assert np.median(brink) < 0.6
+    assert 0.4 * T.L.smoothstep(*T.FOREST_FLOOR_SMOOTH_UP, brink).min() < 0.36
+    assert np.all(forest.colors[:, 3] == pytest.approx(0.4))
+    # Facets lying on the wall are not emitted at all; the other glaze covers them.
+    assert forest.positions[:, 0].max() == pytest.approx(12.)
+    assert meadow.positions[:, 0].max() > 20.
+    assert np.all(meadow.colors[:, 3] == pytest.approx(0.4))
+
+
+def _facet(facet_up):
+    """One lattice triangle whose own world-up normal component is `facet_up`."""
+    rise = 2. * np.sqrt(1. / facet_up ** 2 - 1.)
+    return np.array([[0., 0., 0.], [2., rise, 0.], [0., 0., 2.]]), np.array([[0, 1, 2]])
+
+
+def test_a_forest_floor_leaves_a_riser_and_a_sheer_face_but_keeps_a_short_bank():
+    def keep(facet_up, smooth):
+        positions, triangles = _facet(facet_up)
+        return T.forest_floor_keep(positions, np.asarray(smooth, float), triangles)[0]
+
+    # Landfall forest-21: a terrace step one facet wide (facet up 0.28-0.57, smoothed 0.65-0.87 at its corners)
+    # loses its floor; the short bank beside it (facet up 0.42-0.57, smoothed at least 0.82) keeps all of it.
+    for facet_up, smooth in ((0.28, (0.66, 0.82, 0.65)), (0.525, (0.78, 0.86, 0.84)), (0.569, (0.74, 0.84, 0.87))):
+        assert keep(facet_up, smooth).max() < 0.1
+    for facet_up, smooth in ((0.416, (0.82, 0.9, 0.84)), (0.501, (0.85, 0.86, 0.82)), (0.567, (0.91, 0.84, 0.9))):
+        assert keep(facet_up, smooth) == pytest.approx(np.ones(3))
+    # A face steeper than about 66 degrees sheds it however gentle the ground around it.
+    assert keep(0.3, (0.95, 0.95, 0.95)).max() == 0.
+    # A level facet keeps it at a cliff's brink or foot, a steep one inside a cliff keeps none.
+    assert keep(0.95, (0.3, 0.45, 0.9)) == pytest.approx(np.ones(3))
+    assert keep(0.5, (0.3, 0.4, 0.45)).max() == 0.
+    # A brink facet keeps it whole up to the crease: as level as about 37 degrees (Landfall (-263, -83), at the top of
+    # a sheer drop, two corners smoothed under 0.4), or with a corner on ground the floor keeps by the smoothed slope
+    # (Spindle Hill's lip, coilmere (-254, 73)).
+    assert keep(0.844, (0.357, 0.369, 0.639)) == pytest.approx(np.ones(3))
+    assert keep(0.777, (0.604, 0.776, 0.78)) == pytest.approx(np.ones(3))
+    # A ledge facet inside the face, every corner smoothed under 0.61, is not kept whole by its levelness: Spindle
+    # Hill's lip wedge (C24, facets 13619 / 13618) keeps none at its corners in the face, and its steeper half stays
+    # under the look's 0.36 rim (authored 0.4) everywhere.
+    wedge = keep(0.728, (0.333, 0.604, 0.584))
+    assert wedge[0] < 0.02 and wedge[1:].min() > 0.9
+    wedge = keep(0.687, (0.584, 0.318, 0.333))
+    assert wedge[1:].max() == 0. and 0.4 * wedge.max() < 0.34
+    # There it keeps it per corner where the look's stone leaves that corner, so the floor meets the stone along
+    # the smoothed contour.
+    ledge = keep(0.73, (0.3, 0.45, 0.6))
+    assert ledge[0] == 0. < ledge[1] < ledge[2] == pytest.approx(1.)
+    # On a broad slope smoothed gentler than 46 degrees a facet of 50 degrees or less keeps it all, and the keep
+    # follows the smoothed contour per corner, never a facet's edge, where the facet is level enough for the face
+    # cut to leave it.
+    assert keep(0.66, (0.7, 0.72, 0.75)) == pytest.approx(np.ones(3))
+    inside = keep(0.62, (0.5, 0.6, 0.7))
+    assert inside[0] < inside[1] < inside[2]
+    # Never more as the facet steepens or the ground around it does.
+    ups = np.linspace(0.05, 1., 96)
+    for smooth in (0.3, 0.55, 0.7, 0.8, 0.9):
+        values = np.array([keep(u, (smooth,) * 3)[0] for u in ups])
+        assert np.all(np.diff(values) >= -1e-12)
+    for facet_up in (0.3, 0.5, 0.6, 0.7, 0.9):
+        values = np.array([keep(facet_up, (s,) * 3)[0] for s in np.linspace(0., 1., 101)])
+        assert np.all(np.diff(values) >= -1e-12)

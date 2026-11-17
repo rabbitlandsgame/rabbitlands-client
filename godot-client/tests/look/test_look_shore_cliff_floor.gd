@@ -21,7 +21,9 @@ extends SceneTree
 ## The forest floor: the moss patches are told apart from other glazes and
 ## cut at FOREST_FLOOR_RIM, and the cut (the shader's coverage, here as
 ## GDScript) draws them as dapples, neither the near-nothing PATCH_RIM left nor
-## a flat solid disc.
+## a flat solid disc; it never reads the 2 m facet's own normal (the exporter
+## scales the coverage on a cliff or a step's riser, from the smoothed slope
+## and the facet's own).
 
 const RendererFamily := preload("res://src/runtime/renderer_family.gd")
 
@@ -509,7 +511,8 @@ func _rock_steep(up: float, xz: Vector2) -> float:
 	return 1.0 - _glsl_smoothstep(LookProfile.ROCK_FACE_UP.y, LookProfile.ROCK_FACE_UP.x, wobbled)
 
 ## The forest floor's coverage on ground whose normal has world-up component
-## `up`: the cut's whole weight scaled by look_steep_keep, as the surface does.
+## `up`: the cut's whole weight scaled by look_steep_keep, as the surface does
+## (by 1 - FOREST_FLOOR_STEEP times the rock's steepness: by 1 now).
 func _floor_coverage(alpha: float, xz: Vector2, up: float) -> float:
 	var rim := LookProfile.FOREST_FLOOR_RIM
 	var lobe_p := xz / LookProfile.FOREST_FLOOR_LOBE_METRES
@@ -521,9 +524,15 @@ func _floor_coverage(alpha: float, xz: Vector2, up: float) -> float:
 		+ lobe * 2.0 * LookProfile.FOREST_FLOOR_RIM_LOBE.x + grain * LookProfile.FOREST_FLOOR_RIM_LOBE.y) * keep
 	return smoothstep(rim.x - rim.y, rim.x + rim.y, weight)
 
-## On a cliff the forest floor gives way to the stone; on level ground it
-## dapples exactly as before. The exporter's coverage on steep ground
-## alternates 0 and 0.4 vertex by vertex: the worst case is 0.4 everywhere.
+## The forest floor never reads its 2 m facet's own normal: cut out by the rock
+## layer's steepness facet by facet (FOREST_FLOOR_STEEP 1), it drew flat olive
+## triangles with ruled edges on Landfall's forest-21 bank, whose 44-60 degree
+## facets lie on ground smoothed to 0.86-1.0 (map polish review of round 4,
+## 2026-11-17). On a cliff or a step's riser it gives way to the stone through
+## its coverage: the exporter scales it at each facet corner from the smoothed
+## slope and the facet's own (terrain_export.py forest_floor_keep, tested in
+## test_base_smooth_up.py), so a cliff's face carries none, and with none the
+## cut draws next to nothing.
 func _check_forest_floor_steep() -> void:
 	var moss := Color("858066")
 	var painted := LookGround.painted_source_for(_patch("authored_coilmere_th-forest2-23", moss),
@@ -531,17 +540,16 @@ func _check_forest_floor_steep() -> void:
 	var yard := LookGround.painted_source_for(_patch("authored_coilmere_yard-03", moss),
 		LookGround.Kind.PATCH, true, "coilmere") as ShaderMaterial
 	_expect(painted != null and is_equal_approx(float(painted.get_shader_parameter(&"look_rim_steep")),
-			LookProfile.FOREST_FLOOR_STEEP) and LookProfile.FOREST_FLOOR_STEEP == 1.0
-		and painted.get_shader_parameter(&"look_rock_up") == LookProfile.ROCK_FACE_UP
-		and painted.get_shader_parameter(&"look_rock_wobble") == LookProfile.ROCK_FACE_WOBBLE,
-		"a forest floor gives way over the rock layer's steepness band")
+			LookProfile.FOREST_FLOOR_STEEP) and LookProfile.FOREST_FLOOR_STEEP == 0.0,
+		"a forest floor's cut keeps none of the per-facet steep cut")
 	var yard_steep: Variant = yard.get_shader_parameter(&"look_rim_steep") if yard != null else 1.0
 	_expect(yard != null and (yard_steep == null or float(yard_steep) == 0.0),
 		"every other glaze keeps its coverage on a slope")
 	var level_same := true
+	var facet_same := true
 	var level_total := 0.0
-	var steep_max := 0.0
-	var ramp_total := 0.0
+	var bare_total := 0.0
+	var bare_max := 0.0
 	var count := 0
 	for i: int in 120:
 		for j: int in 120:
@@ -552,26 +560,28 @@ func _check_forest_floor_steep() -> void:
 			var level := _floor_coverage(0.4, xz, 1.0)
 			level_same = level_same and level == before
 			level_total += level
-			# Grade 1.33 (53 degrees, up 0.6) and steeper: the rock is whole.
-			steep_max = maxf(steep_max, _floor_coverage(0.4, xz, 0.6 - LookProfile.ROCK_FACE_WOBBLE.x))
-			steep_max = maxf(steep_max, _floor_coverage(0.4, xz, 0.45))
-			# Halfway through the band (up 0.66, about 49 degrees).
-			ramp_total += _floor_coverage(0.4, xz, 0.66)
+			# A bank's 44-60 degree facets (up 0.5-0.72) and a cliff's: the
+			# same coverage draws the same floor.
+			for up: float in [0.72, 0.66, 0.6, 0.5, 0.3]:
+				facet_same = facet_same and _floor_coverage(0.4, xz, up) == level
+			# A cliff's vertices, which the exporter's fade leaves at 0.
+			var bare := _floor_coverage(0.0, xz, 0.45)
+			bare_total += bare
+			bare_max = maxf(bare_max, bare)
 			count += 1
-	print("forest floor on slopes: level %.2f, mid-band %.2f, steep max %.3f"
-		% [level_total / count, ramp_total / count, steep_max])
+	print("forest floor on slopes: level %.2f, coverage 0 mean %.4f (max %.3f)"
+		% [level_total / count, bare_total / count, bare_max])
 	_expect(level_same, "on level ground the forest floor dapples exactly as before")
-	_expect(steep_max == 0.0, "on a cliff (grade 1.33 and up) no forest floor draws (max %.3f)" % steep_max)
-	_expect(ramp_total / count < level_total / count * 0.75,
-		"it thins out across the rock's band (%.2f against %.2f level)" % [ramp_total / count,
-			level_total / count])
+	_expect(facet_same, "a steep facet draws the floor its coverage gives, as level ground does")
+	_expect(bare_total / count < 0.01,
+		"where the exporter's fade leaves no coverage next to nothing draws (%.4f)" % (bare_total / count))
 	var surface := FileAccess.get_file_as_string("res://src/world/look/painted_ground_surface.gdshaderinc")
 	var paint := FileAccess.get_file_as_string("res://src/world/look/painted_ground_paint.gdshaderinc")
 	_expect(surface.contains("* look_steep_keep(look_rim_steep, world_normal, look_ground_xz);")
 		and surface.contains("uniform float look_rim_steep = 0.0;")
 		and paint.contains("float look_rock_steep(vec3 world_normal, vec2 xz) {")
 		and paint.contains("return look_rock_steep(world_normal, xz);"),
-		"the surface scales its cut's weight by the rock layer's own steepness")
+		"the surface can still scale its cut's weight by the rock layer's steepness (none does)")
 	var overlay_names := _uniform_names(LookGround.SHADER_OVERLAY)
 	_expect("look_rim_steep" in overlay_names and "look_rock_up" in overlay_names,
 		"the overlay parses with the steep-face cut")

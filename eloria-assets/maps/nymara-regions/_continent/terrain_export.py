@@ -476,8 +476,12 @@ def clip_weighted_ground_faces(faces, uv, colors, polygon):
     return result[:,:,:3],result[:,:,3:5],result[:,:,5:]
 
 
-def ground_region_faces(world, snapshot, ground, owned_triangles, positions, layer):
-    """Original analytic footprint weights on the shared terrain lattice, then optional exact mask cuts."""
+def ground_region_faces(world, snapshot, ground, owned_triangles, positions, layer, corner_keep=None):
+    """Original analytic footprint weights on the shared terrain lattice, then optional exact mask cuts.
+
+    `corner_keep`, when given, maps lattice triangles (m, 3 indices into `positions`) to one factor per corner (m, 3)
+    that scales the weights there (forest_floor_keep: a forest floor gives way on a cliff or a riser), before the
+    mask cuts interpolate them."""
     from shapely.geometry import Polygon
     translation=snapshot.translation
     matrix=np.asarray(ground['matrix'],float).reshape(4,4,order='F');inverse=np.linalg.inv(matrix)
@@ -510,6 +514,7 @@ def ground_region_faces(world, snapshot, ground, owned_triangles, positions, lay
         inside=np.where(radius<1e-5,min(half),(1-radius)*radius/np.maximum(gradient,1e-5))
     blend=float(ground['blendWidth'])
     weights=(np.where(inside>0,1. if blend<=0 else L.smoothstep(0,blend,inside),0)*float(ground['opacity'])).reshape(-1,3)
+    if corner_keep is not None:weights=weights*corner_keep(triangles)
     selected=weights.max(axis=1)>0;faces=faces[selected]
     colors=np.ones((len(faces),3,4));colors[...,3]=weights[selected]
     anchor=np.asarray(ground.get('uvAnchorContinent',translation[[0,2]]),float)
@@ -556,6 +561,84 @@ def base_smooth_up(positions,tri):
     return np.clip(up,0.,1.)
 
 
+# A forest-floor moss patch (surface preset FOREST_FLOOR_PRESET; the look tells
+# it by its id, which always contains "forest" on continent-v2) gives way to
+# the stone on a cliff and on the riser of a step, and stays on a short bank in
+# level forest. Its alpha is its coverage, so it cannot carry the slope to the
+# look; the exporter scales its coverage at each corner of each 2 m facet by
+# forest_floor_keep, from the facet's own world-up normal component (fu) and
+# the smoothed one the base ground carries (base_smooth_up, su; about 4 m
+# across, one value per lattice vertex):
+#  - by su at the corner (FOREST_FLOOR_SMOOTH_UP: whole on ground smoothed
+#    gentler than about 46 degrees, none from 60), so on a broad slope and
+#    inside a cliff the floor's cut wanders along the smoothed contour, never
+#    along a facet's edge;
+#  - but never below what the facet's own levelness keeps
+#    (FOREST_FLOOR_LEVEL_UP, the look's ROCK_FACE_UP band) where the facet is
+#    ground: a level facet at a cliff's brink or foot keeps its floor whole,
+#    up to the crease. Read per vertex alone, the su contour ran inside the
+#    brink's level facets and cut pale sawtooth teeth with ruled edges along
+#    it (Landfall (-265, -75), Twinbrook, Boarsend; 315 m2 of level facets,
+#    map polish verify of round 6). A facet is ground when it is as level as
+#    FOREST_FLOOR_GROUND_UP (about 33-39 degrees) or when a corner of it lies
+#    on ground the floor keeps by su (FOREST_FLOOR_BRINK_UP: a brink facet);
+#  - a steeper facet whose corners all lie inside a cliff (su under
+#    FOREST_FLOOR_BRINK_UP: a ledge in the face; level ledges stay ground)
+#    keeps it by its levelness only per corner, where the look's stone does
+#    not take that corner (FOREST_FLOOR_STONE_UP, the look's ROCK_FACE_STONE_UP
+#    band lowered by its wobble): there the floor meets the stone along the
+#    smoothed contour. Kept whole, a 43-47 degree ledge facet at Spindle Hill's
+#    lip (coilmere (-256, 73), corners smoothed 0.32-0.60) was a brown
+#    parallelogram with ruled edges over the grey stone (C24, verify of the
+#    round-6 repair);
+#  - a facet steeper than FOREST_FLOOR_FACE_UP loses it unless all three of
+#    its corners lie on a gentle bank (su over FOREST_FLOOR_BANK_UP, 35-39
+#    degrees): no vertex value can see a step one facet wide, every vertex of
+#    which also touches the flat ground above or below it, so su stays 0.65-0.87
+#    on Landfall's forest-21 terrace step (facets 56-74 degrees) and the floor's
+#    top-down texture smeared down its riser as a brown wash; the short bank
+#    beside it (facets 44-66 degrees, su at least 0.82) keeps its floor;
+#  - and a facet steeper than FOREST_FLOOR_SHEER_UP (about 66 degrees) loses it
+#    anywhere.
+# The look used to cut the floor by the rock layer's steepness on each facet
+# alone, and on that short bank it cut the floor out one whole facet at a time:
+# flat olive triangles with ruled edges in the brown floor (map polish review
+# of round 4, 2026-11-17, C6).
+FOREST_FLOOR_PRESET='Forest floor moss'
+FOREST_FLOOR_SMOOTH_UP=(0.5,0.7)
+FOREST_FLOOR_LEVEL_UP=(0.6,0.72)
+FOREST_FLOOR_GROUND_UP=(0.78,0.84)
+FOREST_FLOOR_BRINK_UP=(0.6,0.66)
+FOREST_FLOOR_STONE_UP=(0.35,0.5)
+FOREST_FLOOR_FACE_UP=(0.55,0.65)
+FOREST_FLOOR_BANK_UP=(0.78,0.82)
+FOREST_FLOOR_SHEER_UP=(0.3,0.41)
+
+
+def forest_floor_keep(positions,smooth_up,triangles):
+    """How much of a forest floor's coverage stays at each corner of each triangle (m, 3 indices into `positions`,
+    n x 3, and `smooth_up`, the base ground's smoothed up per vertex): (m, 3), exactly 0 below a byte's worth, so a
+    facet wholly on a cliff or a riser is not emitted at all."""
+    triangles=np.asarray(triangles,np.int64).reshape(-1,3)
+    corners=np.asarray(positions,float)[triangles]
+    normal=np.cross(corners[:,1]-corners[:,0],corners[:,2]-corners[:,0])
+    length=np.linalg.norm(normal,axis=1)
+    facet_up=np.where(length>1e-12,np.abs(normal[:,1])/np.maximum(length,1e-12),1.)
+    facet_up=np.nan_to_num(facet_up,nan=1.)
+    smooth=np.nan_to_num(np.asarray(smooth_up,float)[triangles],nan=1.)
+    vertex=L.smoothstep(FOREST_FLOOR_SMOOTH_UP[0],FOREST_FLOOR_SMOOTH_UP[1],smooth)
+    ground=np.maximum(L.smoothstep(FOREST_FLOOR_GROUND_UP[0],FOREST_FLOOR_GROUND_UP[1],facet_up),
+                      L.smoothstep(FOREST_FLOOR_BRINK_UP[0],FOREST_FLOOR_BRINK_UP[1],smooth.max(axis=1)))
+    unstoned=L.smoothstep(FOREST_FLOOR_STONE_UP[0],FOREST_FLOOR_STONE_UP[1],smooth)
+    level=L.smoothstep(FOREST_FLOOR_LEVEL_UP[0],FOREST_FLOOR_LEVEL_UP[1],facet_up)[:,None]* \
+        np.maximum(ground[:,None],unstoned)
+    face=1.-L.smoothstep(FOREST_FLOOR_FACE_UP[0],FOREST_FLOOR_FACE_UP[1],facet_up)
+    bank=L.smoothstep(FOREST_FLOOR_BANK_UP[0],FOREST_FLOOR_BANK_UP[1],smooth.min(axis=1))
+    sheer=L.smoothstep(FOREST_FLOOR_SHEER_UP[0],FOREST_FLOOR_SHEER_UP[1],facet_up)
+    keep=np.maximum(vertex,level)*(sheer*(1.-face*(1.-bank)))[:,None]
+    return np.where(keep<1/512,0.,keep)
+
+
 def authored_overlays(world,builder):
     snapshots=dict(getattr(world,'authoring_snapshots',{}))
     snapshot=getattr(world,'authoring_snapshot',None)
@@ -591,6 +674,23 @@ def authored_overlays(world,builder):
                          'keys':owner*10000+cz*100+cx})
     positions=np.stack([world.gx,world.height+.006,world.gz],axis=-1).reshape(-1,3)
     smooth_up=None
+    def field_smooth_up():
+        # base_smooth_up per lattice vertex, over every cell of the field, not
+        # only this territory's: a territory published on its own
+        # (continent-v2's one-territory facade) then agrees with its neighbour
+        # on the vertices they share wherever their fields agree.
+        nonlocal smooth_up
+        if smooth_up is None:
+            nx=len(world.x)
+            field=positions[:,1].reshape(world.height.shape)
+            finite=(np.isfinite(field[:-1,:-1])&np.isfinite(field[1:,:-1])
+                    &np.isfinite(field[:-1,1:])&np.isfinite(field[1:,1:]))
+            cell_row,cell_col=np.nonzero(finite);cell=cell_row*nx+cell_col
+            cell_tri=np.stack((cell,cell+nx,cell+1,cell+1,cell+nx,cell+nx+1),axis=1).reshape(-1,3)
+            used,local=np.unique(cell_tri,return_inverse=True)
+            smooth_up=np.ones(len(positions))
+            smooth_up[used]=base_smooth_up(positions[used],local.reshape(-1,3))
+        return smooth_up
     for region_id,snapshot in snapshots.items():
         translation=snapshot.translation
         # Base surface follows this territory's exact owned terrain cells. A
@@ -612,26 +712,16 @@ def authored_overlays(world,builder):
                 raise AUTHORING.AuthoringError(
                     f'{region_id}: owned terrain vertices fall outside exact baseColors grid')
             vertex_colors=base_colors[indices[...,1],indices[...,0]].astype(float)/255.
-            if smooth_up is None:
-                # Over every cell of the field, not only this territory's: a
-                # territory published on its own (continent-v2's one-territory
-                # facade) then agrees with its neighbour on the vertices they
-                # share wherever their fields agree.
-                field=positions[:,1].reshape(world.height.shape)
-                finite=(np.isfinite(field[:-1,:-1])&np.isfinite(field[1:,:-1])
-                        &np.isfinite(field[:-1,1:])&np.isfinite(field[1:,1:]))
-                cell_row,cell_col=np.nonzero(finite);cell=cell_row*nx+cell_col
-                cell_tri=np.stack((cell,cell+nx,cell+1,cell+1,cell+nx,cell+nx+1),axis=1).reshape(-1,3)
-                used,local=np.unique(cell_tri,return_inverse=True)
-                smooth_up=np.ones(len(positions))
-                smooth_up[used]=base_smooth_up(positions[used],local.reshape(-1,3))
-            vertex_colors[...,3]=np.minimum(smooth_up[tri],BASE_SMOOTH_UP_MAX)
+            vertex_colors[...,3]=np.minimum(field_smooth_up()[tri],BASE_SMOOTH_UP_MAX)
         add(node_name(region_id,'',base=True),positions[tri],snapshot.document['terrain']['baseSurface'],local_uv,
             vertex_colors)
         ordered_regions=sorted(snapshot.document['groundRegions'],key=lambda value:(value['priority'],value['id']))
         for layer,ground_region in enumerate(ordered_regions):
             if not ground_region['enabled']:continue
-            faces,uv,colors=ground_region_faces(world,snapshot,ground_region,tri,positions,layer)
+            keep=None
+            if ground_region['surface'].get('preset')==FOREST_FLOOR_PRESET:
+                keep=lambda triangles:forest_floor_keep(positions,field_smooth_up(),triangles)
+            faces,uv,colors=ground_region_faces(world,snapshot,ground_region,tri,positions,layer,corner_keep=keep)
             add(node_name(region_id,ground_region['id']),faces,ground_region['surface'],uv,colors,blend=True)
         for path in snapshot.document['paths']:
             if path['kind']!='road':continue

@@ -185,7 +185,20 @@ float look_variation_at(vec2 xz) {
 // (look_rock_stone): the exporter carries its world-up component in the base
 // ground's vertex alpha (terrain_export.py base_smooth_up), one value per
 // lattice vertex, so it is the same on both sides of every facet edge and a
-// steep facet among level ones reads as the bank it is.
+// steep facet among level ones reads as the bank it is. The stone is that
+// smoothed value alone, never capped by the facet's own rock weight: capped,
+// the stone stopped on the lattice edge wherever a ledge or lip facet inside
+// a cliff (ny 0.69-0.78) met a whole-rock neighbour, a moss or grass triangle
+// with ruled edges against grey stone at Spindle Hill's lip and a straight
+// stone-against-grass line and a pale stone triangle on Coilmere's knob (map
+// polish review of round 4, 2026-11-17). The rock is at least the stone
+// there, so such a facet fades into stone with its neighbours along the
+// smoothed contour; only the mossy rock below the stone (the rock weight
+// beyond it, which develop already drew) still follows the facets. Level
+// ground keeps none (look_rock_stone_flat, a wide band on the facet's own
+// normal, so neighbouring facets of like slope take like shares): a cliff's
+// level brink and foot stay the grass they were, and the face texture, mapped
+// from the side, never streaks across a flat facet.
 // look_rock_up: the world-up normal component where the rock begins (x) and
 // where it is whole (y). look_rock_wobble: how far noise moves that threshold
 // (x) and the noise's size in metres (y), so the rock's edge wanders across a
@@ -211,6 +224,9 @@ uniform vec2 look_rock_wobble = vec2(0.05, 7.0);
 uniform float look_rock_hue = 0.5;
 uniform float look_rock_value = 1.0;
 uniform vec2 look_rock_stone_up = vec2(0.55, 0.4);
+// The facet's own world-up normal component where level ground begins to
+// refuse the stone (y) and refuses it wholly (x).
+uniform vec2 look_rock_stone_flat = vec2(0.97, 0.85);
 uniform float look_rock_moss_hue = 0.5;
 
 // The rock face's repeat in metres as drawn: the material's, or 0 where the
@@ -238,7 +254,9 @@ float look_rock_steep(vec3 world_normal, vec2 xz) {
 // (published before it, procedural terrain, any surface without vertex
 // colours): mossy rock, as the rock was drawn before the stone.
 float look_rock_stone(float smooth_up, vec2 xz) {
-	if (smooth_up > 0.998) {
+	// None carried, or too level for the wobble to reach the band: no noise
+	// to evaluate on the level ground that is most of every map.
+	if (smooth_up > 0.998 || smooth_up >= look_rock_stone_up.x + look_rock_wobble.x) {
 		return 0.0;
 	}
 	float up = smooth_up + (look_value_noise(xz / look_rock_wobble.y
@@ -359,9 +377,18 @@ vec3 look_rock_tone(vec3 ground, vec3 face_mean) {
 	return mix(ground_hue, own_hue, look_rock_hue) * luma * look_rock_value;
 }
 
+// How much of a base ground pixel is cliff stone: look_rock_stone on the
+// smoothed up `smooth_up`, refused by level facets (look_rock_stone_flat on
+// the facet normal). It never reads the facet's rock weight.
+float look_rock_stone_share(vec3 world_normal, float smooth_up, vec2 xz) {
+	float stone = look_rock_stone(smooth_up, xz);
+	return stone > 0.0 ? stone * (1.0 - smoothstep(look_rock_stone_flat.y, look_rock_stone_flat.x,
+		abs(world_normal.y))) : 0.0;
+}
+
 // The albedo with the rock face laid over it where the face is steep, and in
 // .a how much of it is rock; `stone` says how much of the pixel is stone
-// (look_rock_stone, at most the rock). `albedo` and `reference` are the
+// (look_rock_stone_share; the rock is at least the stone). `albedo` and `reference` are the
 // surface's own albedo and mean colour after its tint and vertex colour,
 // `mean` its texture's mean colour before them and `tint` what they multiply
 // it by, `smooth_up` the ground's smoothed world-up normal component (its
@@ -382,7 +409,11 @@ vec4 look_rock_layer(vec3 albedo, inout vec3 reference, vec3 mean, vec3 tint, ve
 	vec3 p = position / metres;
 	vec3 p_dx = dFdx(p);
 	vec3 p_dy = dFdy(p);
-	float rock = look_rock_weight(world_normal, position.xz);
+	// The stone from the smoothed slope alone, and the rock at least that: a
+	// ledge facet inside a cliff fades into its stone along the smoothed
+	// contour instead of stopping it on the facet's edge.
+	float cliff = look_rock_stone_share(world_normal, smooth_up, position.xz);
+	float rock = max(look_rock_weight(world_normal, position.xz), cliff);
 	if (rock <= 0.0) {
 		return vec4(albedo, 0.0);
 	}
@@ -404,7 +435,7 @@ vec4 look_rock_layer(vec3 albedo, inout vec3 reference, vec3 mean, vec3 tint, ve
 	}
 	face /= max(taken, 0.0001);
 	vec3 face_mean = max(textureLod(look_rock_texture, vec2(0.5), 16.0).rgb, vec3(0.02));
-	stone = rock * look_rock_stone(smooth_up, position.xz);
+	stone = cliff;
 	vec3 own_hue = face_mean / look_luma(face_mean);
 	vec3 moss = mix(mean, own_hue * look_luma(mean), look_rock_moss_hue) * look_rock_value * tint;
 	vec3 tone = look_rock_tone(reference, face_mean);
@@ -574,7 +605,13 @@ vec3 look_paint_rock(vec3 albedo, vec3 reference, vec3 vertex_colour, vec2 xz,
 		* mix(1.0, look_path_variation_share, max(path, max(yard, pale) * 0.5));
 	colour *= 1.0 + variation * 2.0 * look_variation;
 	colour *= vec3(1.0) + vec3(variation, 0.0, -variation) * 2.0 * look_variation_hue;
-	float level = smoothstep(look_slope_up.y, look_slope_up.x, up);
+	// Stone is shaded as the cliff it is part of, not by its own facet: a
+	// ledge facet inside a cliff (facet ny 0.75-0.86, smoothed under 0.45)
+	// drawn as stone would otherwise be spared the shade by its own normal and
+	// read one 2 m facet paler than the face around it (map polish round 6; a
+	// sunward facet is spared either way). Where there is no stone the slope
+	// shade is exactly as before.
+	float level = smoothstep(look_slope_up.y, look_slope_up.x, up) * (1.0 - stone);
 	float sunward = clamp(dot(world_normal.xz, look_sun_heading)
 		/ max(length(world_normal.xz), 0.0001), 0.0, 1.0);
 	colour *= mix(look_slope_shade, 1.0, max(level, sunward));

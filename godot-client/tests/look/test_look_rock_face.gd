@@ -26,6 +26,13 @@ extends SceneTree
 ## whose smoothed normal is a bank's takes none; a cliff is wholly stone; and
 ## the stone changes smoothly with the smoothed normal, so two facets meeting at
 ## an edge, which share its vertices' values, draw the same stone there.
+## Not capped by the facet (map polish round 6, 2026-11-17): the stone is never
+## scaled by the facet's own rock weight and the rock is at least the stone
+## (look_rock_stone_share, here as GDScript), so a ledge facet with no rock of
+## its own inside a cliff takes the cliff's stone and two facets of unlike
+## steepness meeting at an edge draw the same stone and the same rock face
+## colour there; only level facets refuse it, over ROCK_FACE_STONE_FLAT, a band
+## wide enough that facets of like slope take like shares.
 
 const RoadGround := preload("res://src/world/road_ground/road_ground.gd")
 const Composite := preload("res://src/world/road_ground/material.gd")
@@ -49,6 +56,7 @@ func _run() -> void:
 	_check_road_rebind()
 	_check_flat_ground()
 	_check_stone()
+	_check_stone_share()
 	_check_region_switch()
 	_check_shader_text()
 	LookProfile.set_player_quality(LookProfile.QUALITY_DEFAULT)
@@ -91,6 +99,12 @@ func _check_constants() -> void:
 			% [stone.x + wobble.x, up.x])
 	_expect(stone.x - stone.y >= 0.1,
 		"the stone comes in over a wide band of the smoothed normal (%.2f)" % (stone.x - stone.y))
+	var flat := LookProfile.ROCK_FACE_STONE_FLAT
+	_expect(flat.x > flat.y and flat.x <= 1.0 and flat.y >= up.x + wobble.x,
+		"level facets refuse the stone only above every facet the rock reaches (%.2f-%.2f against %.2f)"
+			% [flat.y, flat.x, up.x + wobble.x])
+	_expect(flat.x - flat.y >= 0.1,
+		"and over a band wide enough that facets of like slope take like shares (%.2f)" % (flat.x - flat.y))
 	_expect(LookProfile.ROCK_FACE_MOSS_HUE >= 0.0 and LookProfile.ROCK_FACE_MOSS_HUE <= 1.0,
 		"the moss's hue share is in range")
 	_expect(not bool(LookProfile.QUALITY_PRESETS[LookProfile.Quality.LOW]["rock_face"])
@@ -162,9 +176,10 @@ func _check_selection() -> void:
 	var painted_terrain := terrain as ShaderMaterial
 	_expect(painted_terrain != null
 		and painted_terrain.get_shader_parameter(&"look_rock_stone_up") == LookProfile.ROCK_FACE_STONE_UP
+		and painted_terrain.get_shader_parameter(&"look_rock_stone_flat") == LookProfile.ROCK_FACE_STONE_FLAT
 		and is_equal_approx(float(painted_terrain.get_shader_parameter(&"look_rock_moss_hue")),
 			LookProfile.ROCK_FACE_MOSS_HUE),
-		"opaque terrain takes the stone's threshold and the moss's hue share")
+		"opaque terrain takes the stone's thresholds and the moss's hue share")
 	var base := LookGround.painted_source_for(_standard(BaseMaterial3D.TRANSPARENCY_DISABLED,
 		BaseMaterial3D.CULL_DISABLED), LookGround.Kind.PATCH, true, "landfall")
 	_expect(is_equal_approx(_rock_metres(base), metres),
@@ -461,6 +476,80 @@ func _check_stone() -> void:
 		"a bank's mossy rock is drawn as before the stone tone (%s against %s, hue share %.2f)"
 			% [str(now), str(before), hue])
 
+## look_rock_weight on a facet whose own normal has world-up component `up`,
+## with the noise given.
+func _facet_rock(up: float, noise: float) -> float:
+	var wobbled := up + (noise - 0.5) * 2.0 * LookProfile.ROCK_FACE_WOBBLE.x
+	return 1.0 - _glsl_smoothstep(LookProfile.ROCK_FACE_UP.y, LookProfile.ROCK_FACE_UP.x, wobbled)
+
+## look_rock_stone_share: the stone on the smoothed up component, refused by a
+## level facet (ROCK_FACE_STONE_FLAT on its own normal), never by its rock.
+func _stone_share(up: float, smooth_up: float, noise: float) -> float:
+	var flat := LookProfile.ROCK_FACE_STONE_FLAT
+	return _stone(smooth_up, noise) * (1.0 - _glsl_smoothstep(flat.y, flat.x, up))
+
+## look_rock_layer's rock and stone on a facet (rock at least the stone).
+func _layer(up: float, smooth_up: float, rock_noise: float, stone_noise: float) -> Vector2:
+	var stone := _stone_share(up, smooth_up, stone_noise)
+	return Vector2(maxf(_facet_rock(up, rock_noise), stone), stone)
+
+## Not capped by the facet: the Spindle lip wedge and the knob's ledges.
+func _check_stone_share() -> void:
+	# A ledge facet inside a cliff with no rock of its own (facet up 0.69-0.78)
+	# takes the cliff's stone from its smoothed normal (0.32-0.47 there).
+	var wedge_least := 1.0
+	for noise: float in [0.0, 0.5, 0.9999]:
+		for up: float in [0.69, 0.73, 0.78]:
+			wedge_least = minf(wedge_least, _layer(up, 0.38, 0.9999, noise).y)
+	_expect(wedge_least > 0.8,
+		"a ledge facet with no rock inside a cliff takes the cliff's stone (least %.2f)" % wedge_least)
+	# Two facets meeting at an edge share its vertices' smoothed values: whatever
+	# their own steepness (a whole-rock face beside a grass ledge or lip), they
+	# draw the same stone there, and the rock is never less than the stone.
+	var step := 0.0
+	var below := 0.0
+	var pairs := [[0.29, 0.76], [0.605, 0.739], [0.689, 0.736], [0.1, 0.84], [0.17, 0.78]]
+	for pair: Array in pairs:
+		for smooth: float in [0.32, 0.4, 0.43, 0.47, 0.5, 0.54, 0.58, 0.997]:
+			for noise: float in [0.0, 0.5, 0.9999]:
+				for rock_noise: float in [0.0, 0.5, 0.9999]:
+					var a := _layer(float(pair[0]), smooth, rock_noise, noise)
+					var b := _layer(float(pair[1]), smooth, rock_noise, noise)
+					step = maxf(step, absf(a.y - b.y))
+					below = maxf(below, maxf(a.y - a.x, b.y - b.x))
+	_expect(step == 0.0, "facets of unlike steepness draw the same stone at their shared edge (step %.4f)" % step)
+	_expect(below <= 0.0, "the rock is never less than the stone")
+	# A mesh that carries no smoothed normal draws the rock as before the stone.
+	var unchanged := true
+	for up: float in [0.1, 0.5, 0.62, 0.7, 0.75, 0.9]:
+		for noise: float in [0.0, 0.5, 0.9999]:
+			var none := _layer(up, 1.0, noise, noise)
+			unchanged = unchanged and none.y == 0.0 and is_equal_approx(none.x, _facet_rock(up, noise))
+	_expect(unchanged, "with no smoothed normal carried the rock is the facet's own and none of it is stone")
+	# Level facets refuse the stone; every facet the rock reaches takes all of it.
+	var level_worst := 0.0
+	var steep_least := 1.0
+	for smooth: float in [0.2, 0.35, 0.45]:
+		for noise: float in [0.0, 0.5, 0.9999]:
+			level_worst = maxf(level_worst, _stone_share(LookProfile.ROCK_FACE_STONE_FLAT.x, smooth, noise))
+			level_worst = maxf(level_worst, _stone_share(1.0, smooth, noise))
+			var reach := LookProfile.ROCK_FACE_UP.x + LookProfile.ROCK_FACE_WOBBLE.x
+			steep_least = minf(steep_least, _stone_share(reach, smooth, noise) / maxf(_stone(smooth, noise), 0.0001))
+	_expect(level_worst == 0.0, "a level facet is never stone, however cliff-like around it (worst %.4f)"
+		% level_worst)
+	_expect(is_equal_approx(steep_least, 1.0),
+		"every facet the rock reaches takes its whole stone share (least %.3f)" % steep_least)
+	# Facets of like slope take like shares: the refusal changes by at most this
+	# much per 0.01 of the facet's up component.
+	var flat_steepest := 0.0
+	var last := _stone_share(0.8, 0.3, 0.5)
+	for i: int in range(1, 21):
+		var value := _stone_share(0.8 + i * 0.01, 0.3, 0.5)
+		flat_steepest = maxf(flat_steepest, absf(value - last))
+		last = value
+	print("rock stone: level refusal at most %.3f per 0.01 of the facet's up component" % flat_steepest)
+	_expect(flat_steepest <= 0.13, "level facets refuse the stone gradually (%.3f per 0.01)" % flat_steepest)
+
 func _check_region_switch() -> void:
 	var problems := PackedStringArray()
 	var typed := LookProfile.typed_region({"id": "test_rock", "schema": 1,
@@ -503,9 +592,18 @@ func _check_shader_text() -> void:
 	_expect(surface.contains("float look_smooth_up = use_vertex_alpha ? 1.0 : COLOR.a;")
 		and surface.contains("look_smooth_up, vec3(look_ground_xz.x,")
 		and paint.contains("float look_rock_stone(float smooth_up, vec2 xz) {")
-		and paint.contains("stone = rock * look_rock_stone(smooth_up, position.xz);")
+		and paint.contains("float stone = look_rock_stone(smooth_up, xz);")
+		and paint.contains("float cliff = look_rock_stone_share(world_normal, smooth_up, position.xz);")
+		and paint.contains("float rock = max(look_rock_weight(world_normal, position.xz), cliff);")
+		and paint.contains("\tstone = cliff;\n")
+		and not paint.contains("stone = rock * look_rock_stone")
 		and not paint.contains("look_rock_mottle"),
-		"the stone is read from the base ground's vertex alpha, not from the facet's normal")
+		"the stone is read from the base ground's vertex alpha, never capped by the facet's rock")
+	var share_at := paint.find("float look_rock_stone_share(")
+	var share_body := paint.substr(share_at, paint.find("\n}\n", share_at) - share_at)
+	_expect(share_at >= 0 and not share_body.contains("look_rock_weight")
+		and not share_body.contains("look_rock_steep") and share_body.contains("look_rock_stone_flat"),
+		"the stone share reads the smoothed normal and the level refusal, not the rock weight")
 	# road_ground/material.gd copies the surface's fragment body into its road
 	# evaluation with look_* names prefixed: what it composes must still parse.
 	var header := FileAccess.get_file_as_string("res://src/world/look/painted_ground.gdshader")
@@ -522,6 +620,8 @@ func _check_shader_text() -> void:
 	_expect(paint.contains("float verge_green = look_green(reference) * (1.0 - stone);")
 		and surface.contains("look_rock_sample.a, look_stone);"),
 		"the paint takes the stone's share, not the rock's, out of the grass trims")
+	_expect(paint.contains("float level = smoothstep(look_slope_up.y, look_slope_up.x, up) * (1.0 - stone);"),
+		"stone takes the slope shade of the cliff it is part of, not its own facet's level")
 	_expect(paint.contains("rock > 0.0 ? mix(look_verge_grain_steep, look_rock_grain, rock)\n\t\t: look_verge_grain_steep"),
 		"without rock the steep grain is the region's verge_grain_steep exactly")
 	# Both painted ground shaders compile with the layer in (a shader that fails
@@ -533,6 +633,7 @@ func _check_shader_text() -> void:
 		var names := _uniform_names(load(path) as Shader)
 		_expect("look_rock_metres" in names and "look_rock_texture" in names
 			and "look_rock_grain" in names and "look_rock_stone_up" in names
+			and "look_rock_stone_flat" in names
 			and "look_rock_moss_hue" in names and not "look_rock_mottle" in names,
 			"%s declares the rock layer" % path.get_file())
 

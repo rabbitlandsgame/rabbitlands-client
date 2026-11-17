@@ -560,18 +560,34 @@ const FOREST_FLOOR_LOBE_METRES := 3.0
 ## patch's does; leaf litter (#f29e52) is too bright to pass.
 const FOREST_FLOOR_WORD := "forest"
 const FOREST_FLOOR_TINT := Vector2(0.65, 0.3)
-## A forest floor gives way to the stone on a cliff: its coverage (and the
-## noise the cut adds to it) is scaled by 1 - FOREST_FLOOR_STEEP times the
-## steep-face rock layer's own steepness (ROCK_FACE_UP, wobbled by
-## ROCK_FACE_WOBBLE: painted_ground_paint.gdshaderinc look_rock_steep), so it
-## draws as before on level ground, thins out where the rock begins and is gone
-## where the rock is whole. On steep terrain the exporter's coverage alternates
-## 0 and 0.4 vertex by vertex, and cut at FOREST_FLOOR_RIM it drew crisp moss
-## diamonds on the 2 m lattice over the cliff faces (Coilmere's Spindle Hill;
-## 12,307 forest-floor vertices over 0.36 on grades above 1.33 on 12 maps, map
-## polish verify 2026-11-16). It applies at every quality: at LOW, which draws
-## no rock layer, the cliff keeps its own ground rather than the diamonds.
-const FOREST_FLOOR_STEEP := 1.0
+## A forest floor gives way to the stone on a cliff. Cut at FOREST_FLOOR_RIM
+## over the cliff faces, it drew crisp moss diamonds on the 2 m lattice
+## (Coilmere's Spindle Hill; 12,307 forest-floor vertices over 0.36 on grades
+## above 1.33 on 12 maps, map polish verify 2026-11-16). The exporter now
+## scales its coverage at each corner of each 2 m facet (terrain_export.py
+## forest_floor_keep), at every quality: by the ground's smoothed slope
+## (base_smooth_up; whole gentler than about 46 degrees, none from 60), so on a
+## broad slope and inside a cliff its edge wanders along the smoothed contour;
+## never below what a level facet keeps where that facet is ground (about 33-39
+## degrees or gentler, or with a corner on ground the floor keeps), so it
+## reaches a cliff's brink, while a steeper ledge facet inside a cliff keeps it
+## only at corners the stone leaves (Spindle Hill's lip wedge); and to
+## none on a facet steeper than about 55-65 degrees unless the ground around
+## all its corners is a gentle bank, or steeper than about 66 degrees anywhere,
+## so a terrace step's riser shows its mossy rock while a short bank in level
+## forest keeps its floor.
+## FOREST_FLOOR_STEEP is the share of the look's own cut that is left: it
+## scales the coverage (and the noise the cut adds to it) by 1 -
+## FOREST_FLOOR_STEEP times the rock layer's steepness (ROCK_FACE_UP, wobbled
+## by ROCK_FACE_WOBBLE: painted_ground_paint.gdshaderinc look_rock_steep) on
+## each 2 m facet's own normal. At 1 it cut the floor out one whole facet at a
+## time on any bank of 44-60 degree facets, however gentle the bank around
+## them: flat olive triangles with ruled edges in the brown floor of Landfall's
+## forest-21 bank, where the smoothed slope is 0.86-1.0 (map polish review of
+## round 4, 2026-11-17). The facet alone cannot tell that bank from a cliff;
+## the exporter, which also has the smoothed slope, can. So it is 0.
+## Packages published before forest_floor_keep keep their floor on cliffs.
+const FOREST_FLOOR_STEEP := 0.0
 const PAVING_RIM_LOBE := Vector2(0.09, 0.3)
 const MEADOW_RIM_LOBE := Vector2(0.12, 0.12)
 ## Opaque kit paving among a region's walk decks (`ground.kit_paving`):
@@ -664,6 +680,29 @@ const CLASS_TEXTURES := {
 ## fifths of Spindle Hill's face (by area) is stone, as is three quarters of
 ## Boarsend's sea cliff, and none of the Twinbrook crest's or Landfall's forest
 ## banks.
+## The stone is that smoothed share alone, and the rock is at least the stone
+## (look_rock_stone_share, look_rock_layer). Capped by the facet's own rock
+## weight, as round 4 drew it, the stone stopped on the lattice edge wherever a
+## ledge or lip facet inside a cliff (facet ny 0.69-0.78, little or no rock of
+## its own) met a whole-rock neighbour: a dark moss triangle with ruled edges
+## against the grey stone at Spindle Hill's lip, and on Coilmere's knob a
+## straight stone-against-grass line along a grass ledge and a pale stone
+## triangle beside a grass facet (map polish review of round 4, 2026-11-17).
+## Now such a facet fades into the stone with its neighbours along the smoothed
+## contour. What still follows the facets is the mossy rock under the stone
+## (the rock weight beyond it on ROCK_FACE_UP), which develop already drew and
+## which matches the grass beside it. Level facets refuse the stone over
+## ROCK_FACE_STONE_FLAT on their own normal (none at .x, about 14 degrees; all
+## from .y, 32 degrees): a band that wide moves a facet's share only as far as
+## its slope differs from its neighbour's, so no step shows inside a slope,
+## while a cliff's level brink and foot stay the grass they were (the stone
+## would otherwise spill a metre or two onto them) and the side-mapped face
+## never streaks across a flat facet. Every facet the old rule drew as rock
+## (ny under ROCK_FACE_UP.x plus the wobble) takes its whole share. Stone is
+## also shaded as the cliff it is part of (the paint's slope shade, SLOPE_UP,
+## loses its facet's own level by the stone's share): a ledge facet drawn as
+## stone would otherwise be spared the shade by its own normal and light one
+## facet pale against the face.
 ## Level ground never reaches the layer and takes no extra sample: it draws
 ## exactly as before. Only opaque terrain and base ground take it (patches and
 ## decks lie over them), never at LOW quality (QUALITY_PRESETS `rock_face`,
@@ -677,6 +716,7 @@ const ROCK_FACE_HUE := 0.75
 const ROCK_FACE_VALUE := 1.0
 const ROCK_FACE_GRAIN := 1.0
 const ROCK_FACE_STONE_UP := Vector2(0.55, 0.4)
+const ROCK_FACE_STONE_FLAT := Vector2(0.97, 0.85)
 const ROCK_FACE_MOSS_HUE := 0.5
 ## The surfaces a class texture can cover: walk decks, pale paving, sand
 ## glazes, green meadows, bare rock and bare soil (LookGround.class_slot). A

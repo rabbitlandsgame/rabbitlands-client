@@ -82,8 +82,11 @@ uniform vec2 look_rim_lobe = vec2(0.0, 5.0);
 uniform float look_rim_grain = 0.0;
 // How much of the coverage, and the noise the cut adds to it, gives way on a
 // steep face (look_steep_keep over the rock layer's steepness band,
-// look_rock_up): 0 none; the forest floor 1 (LookProfile.FOREST_FLOOR_STEEP),
-// so a cliff shows its stone rather than moss diamonds on the 2 m lattice.
+// look_rock_up, on each 2 m facet's own normal): 0 none, which every surface
+// now keeps (LookProfile.FOREST_FLOOR_STEEP): read per facet, it cut a forest
+// floor out one facet at a time on gentle banks. The exporter scales a forest
+// floor's coverage on a cliff or a step's riser instead, from the smoothed
+// slope and the facet's own (terrain_export.py forest_floor_keep).
 uniform float look_rim_steep = 0.0;
 // A class texture laid over the source's (look_class_metres 0: none), and how
 // much of its own hue it keeps against the source's mean colour.
@@ -159,7 +162,8 @@ void fragment() {
 	// on a steep face the albedo becomes the rock face's, mossy rock under the
 	// tint and vertex colour on a bank and stone after them on a cliff, where
 	// the reference becomes the stone's; .a says how much is rock and
-	// look_stone how much of that is stone. What is a cliff comes from the
+	// look_stone how much of that is stone (the rock is at least the stone, so
+	// it never stops on a facet's edge). What is a cliff comes from the
 	// ground's smoothed up component, which the exporter carries in the opaque
 	// base ground's vertex alpha (1: none; a blended surface's alpha is its
 	// coverage). The continent height is the world height less the wrapper's
