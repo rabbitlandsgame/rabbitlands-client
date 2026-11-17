@@ -123,11 +123,13 @@ def test_shared_border_vertices_are_byte_equal(territories,lattice):
     # Map polish 2026-11-16: terrain pads under seated buildings (mq-pad-*) and path or brook-bank grading (pt-*,
     # pt2-*, pt3-*) are sculpted inside one territory, and the checks above (no shared vertex sculpted, no mirrored
     # patch) hold every one of them off the borders. Any other kind of patch is new and needs that review first.
+    # Rounds 4-6 (2026-11-17) added pad-bank grading (mq4-bank-*, Brambleshaw) and brook and creek grading (pt4-*,
+    # pt5-*, Twinbrook and Warrenmead), reviewed the same way: the checks above hold them inside their territory.
     seam={"seam-mole-pier","seam-mole-knob"}
     others=[p["id"] for t in territories for p in T.patches(t) if p["id"] not in seam]
     assert sum(len(T.patches(t)) for t in territories)==2+len(others)
-    assert all(re.match(r"(mq-pad-|pt[23]?-)",i) for i in others),sorted(i for i in others
-                                                                       if not re.match(r"(mq-pad-|pt[23]?-)",i))
+    kinds=r"(mq-pad-|mq4-bank-|pt[2-5]?-)"
+    assert all(re.match(kinds,i) for i in others),sorted(i for i in others if not re.match(kinds,i))
 
 
 def shared_pair(territories,lattice):
