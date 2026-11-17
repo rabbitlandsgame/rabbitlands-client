@@ -17,6 +17,15 @@ extends SceneTree
 ## (the weight is exactly 0 there), the biome blend's look_paint is
 ## look_paint_rock without rock, and every road composite variant still parses
 ## with the global declared once.
+## The stone (map polish round 4, 2026-11-16): the rock is stone only on a
+## cliff, read from the ground's smoothed normal that the exporter carries in
+## the base ground's vertex alpha (look_rock_stone and ROCK_FACE_STONE_UP, here
+## as GDScript with the noise at its extremes), never from the facet's own: a
+## mesh that carries none (alpha 1) draws the mossy rock exactly as before the
+## stone tone (e13cb478's recolouring, here as GDScript), however steep; ground
+## whose smoothed normal is a bank's takes none; a cliff is wholly stone; and
+## the stone changes smoothly with the smoothed normal, so two facets meeting at
+## an edge, which share its vertices' values, draw the same stone there.
 
 const RoadGround := preload("res://src/world/road_ground/road_ground.gd")
 const Composite := preload("res://src/world/road_ground/material.gd")
@@ -39,6 +48,7 @@ func _run() -> void:
 	_check_road_composite()
 	_check_road_rebind()
 	_check_flat_ground()
+	_check_stone()
 	_check_region_switch()
 	_check_shader_text()
 	LookProfile.set_player_quality(LookProfile.QUALITY_DEFAULT)
@@ -73,6 +83,16 @@ func _check_constants() -> void:
 	_expect(LookProfile.ROCK_FACE_HUE >= 0.0 and LookProfile.ROCK_FACE_HUE <= 1.0
 		and LookProfile.ROCK_FACE_VALUE > 0.0 and LookProfile.ROCK_FACE_GRAIN >= 0.0,
 		"the hue share, value and grain are in range")
+	var stone := LookProfile.ROCK_FACE_STONE_UP
+	_expect(stone.x > stone.y and stone.y > 0.0,
+		"the stone begins on gentler faces (up %.2f) than it is whole (%.2f)" % [stone.x, stone.y])
+	_expect(stone.x + wobble.x < up.x,
+		"ground whose smoothed normal is gentler than where the rock begins is never stone (%.2f against %.2f)"
+			% [stone.x + wobble.x, up.x])
+	_expect(stone.x - stone.y >= 0.1,
+		"the stone comes in over a wide band of the smoothed normal (%.2f)" % (stone.x - stone.y))
+	_expect(LookProfile.ROCK_FACE_MOSS_HUE >= 0.0 and LookProfile.ROCK_FACE_MOSS_HUE <= 1.0,
+		"the moss's hue share is in range")
 	_expect(not bool(LookProfile.QUALITY_PRESETS[LookProfile.Quality.LOW]["rock_face"])
 		and bool(LookProfile.QUALITY_PRESETS[LookProfile.Quality.MEDIUM]["rock_face"])
 		and bool(LookProfile.QUALITY_PRESETS[LookProfile.Quality.HIGH]["rock_face"]),
@@ -139,6 +159,12 @@ func _check_selection() -> void:
 		and (terrain as ShaderMaterial).get_shader_parameter(&"look_rock_texture") != null
 		and (terrain as ShaderMaterial).has_meta(LookGround.ROCK_META),
 		"opaque terrain takes the rock face at its repeat")
+	var painted_terrain := terrain as ShaderMaterial
+	_expect(painted_terrain != null
+		and painted_terrain.get_shader_parameter(&"look_rock_stone_up") == LookProfile.ROCK_FACE_STONE_UP
+		and is_equal_approx(float(painted_terrain.get_shader_parameter(&"look_rock_moss_hue")),
+			LookProfile.ROCK_FACE_MOSS_HUE),
+		"opaque terrain takes the stone's threshold and the moss's hue share")
 	var base := LookGround.painted_source_for(_standard(BaseMaterial3D.TRANSPARENCY_DISABLED,
 		BaseMaterial3D.CULL_DISABLED), LookGround.Kind.PATCH, true, "landfall")
 	_expect(is_equal_approx(_rock_metres(base), metres),
@@ -366,6 +392,75 @@ func _check_flat_ground() -> void:
 	var cliff := 1.0 - smoothstep(up.y, up.x, cos(deg_to_rad(60.0)) + wobble.x)
 	_expect(cliff == 1.0, "a 60 degree cliff is wholly rock face whatever the noise")
 
+## GLSL's smoothstep, edges either way round.
+func _glsl_smoothstep(edge0: float, edge1: float, x: float) -> float:
+	var t := clampf((x - edge0) / (edge1 - edge0), 0.0, 1.0)
+	return t * t * (3.0 - 2.0 * t)
+
+## look_rock_stone (painted_ground_paint.gdshaderinc) as GDScript, with the
+## noise given (0..1) rather than sampled; `smooth_up` is the vertex alpha.
+func _stone(smooth_up: float, noise: float) -> float:
+	if smooth_up > 0.998:
+		return 0.0
+	var wobbled := smooth_up + (noise - 0.5) * 2.0 * LookProfile.ROCK_FACE_WOBBLE.x
+	var stone := LookProfile.ROCK_FACE_STONE_UP
+	return 1.0 - _glsl_smoothstep(stone.y, stone.x, wobbled)
+
+func _luma(colour: Vector3) -> float:
+	return colour.dot(Vector3(0.2126, 0.7152, 0.0722))
+
+## The stone: none where the mesh carries no smoothed normal or where it is a
+## bank's, whole on a cliff, and smooth in between; and the bank's mossy rock
+## is the rock as e13cb478 drew it, before the stone.
+func _check_stone() -> void:
+	var none_worst := 0.0
+	var bank_worst := 0.0
+	var cliff_least := 1.0
+	for noise: float in [0.0, 0.25, 0.5, 0.75, 0.9999]:
+		# Alpha 255 (and anything over 0.998): published before it, procedural
+		# terrain, or no vertex colours.
+		for alpha: float in [1.0, 0.999]:
+			none_worst = maxf(none_worst, _stone(alpha, noise))
+		# Ground whose smoothed normal is 53 degrees or gentler: a bank, a lone
+		# steep facet in grassland, the rim of a moss diamond.
+		for degrees: float in [0.0, 30.0, 44.0, 50.0, 53.0]:
+			bank_worst = maxf(bank_worst, _stone(cos(deg_to_rad(degrees)), noise))
+		cliff_least = minf(cliff_least, _stone(cos(deg_to_rad(70.0)), noise))
+	_expect(none_worst == 0.0, "a mesh that carries no smoothed normal is never stone (worst %.4f)" % none_worst)
+	_expect(bank_worst == 0.0, "ground whose smoothed normal is 53 degrees or gentler is never stone (worst %.4f)"
+		% bank_worst)
+	_expect(cliff_least == 1.0, "a cliff whose smoothed normal is 70 degrees is wholly stone (least %.4f)"
+		% cliff_least)
+	var rising := true
+	var steepest := 0.0
+	for noise: float in [0.0, 0.5, 0.9999]:
+		var last := _stone(0.997, noise)
+		for step: int in range(1, 100):
+			var value := _stone(0.997 - step * 0.01, noise)
+			rising = rising and value >= last - 0.000001
+			steepest = maxf(steepest, absf(value - last))
+			last = value
+	_expect(rising, "the stone only grows as the smoothed normal steepens")
+	print("rock stone: at most %.3f more per 0.01 of the smoothed up component" % steepest)
+	_expect(steepest <= 0.11,
+		"the stone changes smoothly with the smoothed normal (%.3f per 0.01 at most)" % steepest)
+	# The mossy rock (look_rock_layer with no stone) against e13cb478's
+	# recolouring of the texel before its tint and vertex colour, for a texel of
+	# the rock face, the ground texture's mean and a green vertex colour.
+	var face := Vector3(0.42, 0.35, 0.26)
+	var face_mean := Vector3(0.379, 0.322, 0.224)
+	var mean := Vector3(0.809, 0.809, 0.809)
+	var tint := Vector3(0.11, 0.165, 0.067)
+	var hue := LookProfile.ROCK_FACE_MOSS_HUE
+	var before := (face * mean / face_mean).lerp(face * (_luma(mean) / maxf(_luma(face_mean), 0.02)), hue) \
+		* LookProfile.ROCK_FACE_VALUE * tint
+	var own_hue := face_mean / _luma(face_mean)
+	var moss := mean.lerp(own_hue * _luma(mean), hue) * LookProfile.ROCK_FACE_VALUE * tint
+	var now := face * moss / face_mean
+	_expect(now.is_equal_approx(before) and is_equal_approx(hue, 0.5),
+		"a bank's mossy rock is drawn as before the stone tone (%s against %s, hue share %.2f)"
+			% [str(now), str(before), hue])
+
 func _check_region_switch() -> void:
 	var problems := PackedStringArray()
 	var typed := LookProfile.typed_region({"id": "test_rock", "schema": 1,
@@ -403,6 +498,14 @@ func _check_shader_text() -> void:
 		"look_rock_metres is read only through look_rock_repeat, which both rock functions call")
 	_expect(surface.contains("look_paint_rock(albedo, reference, vertex_colour, look_ground_xz, world_normal,"),
 		"painted ground hands the rock weight to the paint")
+	# The stone reads the smoothed normal the vertex alpha carries, never the
+	# facet's own; a blended surface's alpha is its coverage, so it hands 1.
+	_expect(surface.contains("float look_smooth_up = use_vertex_alpha ? 1.0 : COLOR.a;")
+		and surface.contains("look_smooth_up, vec3(look_ground_xz.x,")
+		and paint.contains("float look_rock_stone(float smooth_up, vec2 xz) {")
+		and paint.contains("stone = rock * look_rock_stone(smooth_up, position.xz);")
+		and not paint.contains("look_rock_mottle"),
+		"the stone is read from the base ground's vertex alpha, not from the facet's normal")
 	# road_ground/material.gd copies the surface's fragment body into its road
 	# evaluation with look_* names prefixed: what it composes must still parse.
 	var header := FileAccess.get_file_as_string("res://src/world/look/painted_ground.gdshader")
@@ -414,8 +517,11 @@ func _check_shader_text() -> void:
 		var road_names := _uniform_names(road_shader)
 		_expect("look_rock_metres" in road_names and "road_look_rock_metres" in road_names,
 			"the composed road ground shader parses with the rock layer in both halves")
-	_expect(paint.contains("return look_paint_rock(albedo, reference, vertex_colour, xz, world_normal, 0.0);"),
-		"look_paint (the biome blend's splice) is look_paint_rock without rock")
+	_expect(paint.contains("return look_paint_rock(albedo, reference, vertex_colour, xz, world_normal, 0.0, 0.0);"),
+		"look_paint (the biome blend's splice) is look_paint_rock without rock or stone")
+	_expect(paint.contains("float verge_green = look_green(reference) * (1.0 - stone);")
+		and surface.contains("look_rock_sample.a, look_stone);"),
+		"the paint takes the stone's share, not the rock's, out of the grass trims")
 	_expect(paint.contains("rock > 0.0 ? mix(look_verge_grain_steep, look_rock_grain, rock)\n\t\t: look_verge_grain_steep"),
 		"without rock the steep grain is the region's verge_grain_steep exactly")
 	# Both painted ground shaders compile with the layer in (a shader that fails
@@ -426,7 +532,9 @@ func _check_shader_text() -> void:
 			"res://src/world/look/painted_ground_deck.gdshader"]:
 		var names := _uniform_names(load(path) as Shader)
 		_expect("look_rock_metres" in names and "look_rock_texture" in names
-			and "look_rock_grain" in names, "%s declares the rock layer" % path.get_file())
+			and "look_rock_grain" in names and "look_rock_stone_up" in names
+			and "look_rock_moss_hue" in names and not "look_rock_mottle" in names,
+			"%s declares the rock layer" % path.get_file())
 
 func _expect(condition: bool, message: String) -> void:
 	if condition:

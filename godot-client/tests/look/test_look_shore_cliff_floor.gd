@@ -7,9 +7,11 @@ extends SceneTree
 ## LOW and in the compatibility renderer; the quality's switch is a declared
 ## global; the opaque shader the loader puts in never reads depth.
 ##
-## The cliff's tone: the steep-face rock is drawn as stone (look_rock_tone, here
-## as GDScript): on green ground it is not green, on tan ground it keeps a
-## modest warmth, and the paint gives it no grass trims.
+## The cliff's tone: the steep-face rock is drawn as stone on a cliff
+## (look_rock_tone, here as GDScript): on green ground it is not green, on tan
+## ground it keeps a modest warmth, and the paint gives the stone no grass
+## trims (which faces are cliffs, read from the ground's smoothed normal:
+## test_look_rock_face).
 ##
 ## The forest floor: the moss patches are told apart from other glazes and
 ## cut at FOREST_FLOOR_RIM, and the cut (the shader's coverage, here as
@@ -206,11 +208,11 @@ func _check_rock_shader_text() -> void:
 		and paint.contains("vec4 look_rock_layer(vec3 albedo, inout vec3 reference,")
 		and paint.find("float look_green(") < paint.find("vec3 look_rock_tone("),
 		"the rock layer draws stone from the ground's colour after its tint and vertex colour")
-	_expect(paint.contains("float verge_green = look_green(reference) * (1.0 - rock);")
+	_expect(paint.contains("float verge_green = look_green(reference) * (1.0 - stone);")
 		and paint.count("look_green(reference)") == 2,
-		"the verge's grass trims skip the rock face")
+		"the verge's grass trims skip the stone")
 	var vertex_at := surface.find("reference *= vertex_colour;")
-	var layer_at := surface.find("look_rock_layer(albedo, reference, world_normal,")
+	var layer_at := surface.find("look_rock_layer(albedo, reference, texel_mean, look_rock_tint, world_normal,")
 	_expect(vertex_at > 0 and layer_at > vertex_at,
 		"the rock is laid over the albedo after the vertex colour that would green it")
 

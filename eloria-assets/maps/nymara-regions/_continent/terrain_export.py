@@ -520,6 +520,42 @@ def ground_region_faces(world, snapshot, ground, owned_triangles, positions, lay
     return faces,uv,colors
 
 
+# The opaque base ground carries, in its vertex colour's alpha, its smoothed
+# world-up normal component (base_smooth_up). The ground is faceted on the 2 m
+# lattice and every facet carries one flat normal, so anything the look derives
+# from a facet's own normal changes at the facet's edges. This value is the
+# same on both sides of every edge, and it tells a steep facet inside a cliff
+# (steep neighbours) from one on a grassy bank (level neighbours): the look's
+# steep-face rock layer draws cliff stone by it (godot-client
+# painted_ground_paint.gdshaderinc look_rock_stone; map polish round 4,
+# 2026-11-16). It is at most BASE_SMOOTH_UP_MAX, so a byte alpha of 255 still
+# means "none carried", as on ground published before it; the opaque base never
+# reads its alpha as coverage (only blended overlays do).
+BASE_SMOOTH_UP_MAX=254/255
+
+
+def base_smooth_up(positions,tri):
+    """Per vertex of `positions` (n, 3): the world-up component of its smoothed
+    normal over the triangles `tri` (m, 3 indices). Each vertex takes the
+    area-weighted mean of its triangles' normals, which is then averaged once
+    more with its edge neighbours' (about 4 m across on the 2 m lattice).
+    Vertices no triangle uses get 1."""
+    positions=np.asarray(positions,float);tri=np.asarray(tri,np.int64).reshape(-1,3)
+    face=np.cross(positions[tri[:,1]]-positions[tri[:,0]],positions[tri[:,2]]-positions[tri[:,0]])
+    face[face[:,1]<0]*=-1
+    first=np.zeros((len(positions),3))
+    for corner in range(3):
+        np.add.at(first,tri[:,corner],face)
+    first/=np.maximum(np.linalg.norm(first,axis=1,keepdims=True),1e-12)
+    second=first.copy()
+    for a,b in ((0,1),(1,2),(2,0)):
+        np.add.at(second,tri[:,a],first[tri[:,b]]*.5)
+        np.add.at(second,tri[:,b],first[tri[:,a]]*.5)
+    length=np.linalg.norm(second,axis=1)
+    up=np.where(length>1e-12,second[:,1]/np.maximum(length,1e-12),1.)
+    return np.clip(up,0.,1.)
+
+
 def authored_overlays(world,builder):
     snapshots=dict(getattr(world,'authoring_snapshots',{}))
     snapshot=getattr(world,'authoring_snapshot',None)
@@ -554,6 +590,7 @@ def authored_overlays(world,builder):
         overlays.append({'name':('Walk_' if walk else 'AuthoredGround_')+name,'mesh':mesh,
                          'keys':owner*10000+cz*100+cx})
     positions=np.stack([world.gx,world.height+.006,world.gz],axis=-1).reshape(-1,3)
+    smooth_up=None
     for region_id,snapshot in snapshots.items():
         translation=snapshot.translation
         # Base surface follows this territory's exact owned terrain cells. A
@@ -575,6 +612,20 @@ def authored_overlays(world,builder):
                 raise AUTHORING.AuthoringError(
                     f'{region_id}: owned terrain vertices fall outside exact baseColors grid')
             vertex_colors=base_colors[indices[...,1],indices[...,0]].astype(float)/255.
+            if smooth_up is None:
+                # Over every cell of the field, not only this territory's: a
+                # territory published on its own (continent-v2's one-territory
+                # facade) then agrees with its neighbour on the vertices they
+                # share wherever their fields agree.
+                field=positions[:,1].reshape(world.height.shape)
+                finite=(np.isfinite(field[:-1,:-1])&np.isfinite(field[1:,:-1])
+                        &np.isfinite(field[:-1,1:])&np.isfinite(field[1:,1:]))
+                cell_row,cell_col=np.nonzero(finite);cell=cell_row*nx+cell_col
+                cell_tri=np.stack((cell,cell+nx,cell+1,cell+1,cell+nx,cell+nx+1),axis=1).reshape(-1,3)
+                used,local=np.unique(cell_tri,return_inverse=True)
+                smooth_up=np.ones(len(positions))
+                smooth_up[used]=base_smooth_up(positions[used],local.reshape(-1,3))
+            vertex_colors[...,3]=np.minimum(smooth_up[tri],BASE_SMOOTH_UP_MAX)
         add(node_name(region_id,'',base=True),positions[tri],snapshot.document['terrain']['baseSurface'],local_uv,
             vertex_colors)
         ordered_regions=sorted(snapshot.document['groundRegions'],key=lambda value:(value['priority'],value['id']))

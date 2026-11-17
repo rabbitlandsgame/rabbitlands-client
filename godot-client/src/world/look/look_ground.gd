@@ -1129,6 +1129,8 @@ static func set_rock_face(painted: ShaderMaterial, region: String) -> void:
 	painted.set_shader_parameter(&"look_rock_hue", LookProfile.ROCK_FACE_HUE)
 	painted.set_shader_parameter(&"look_rock_value", LookProfile.ROCK_FACE_VALUE)
 	painted.set_shader_parameter(&"look_rock_grain", LookProfile.ROCK_FACE_GRAIN)
+	painted.set_shader_parameter(&"look_rock_stone_up", LookProfile.ROCK_FACE_STONE_UP)
+	painted.set_shader_parameter(&"look_rock_moss_hue", LookProfile.ROCK_FACE_MOSS_HUE)
 
 ## The class texture `texture_name` names (LookProfile.CLASS_TEXTURES), with
 ## mipmaps. Authored import settings provide the chain before play; older

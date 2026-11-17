@@ -623,31 +623,61 @@ const CLASS_TEXTURES := {
 ## cliffs (map quality sweeps 2026-11-15). `ground.verge_grain_steep` only
 ## calmed the streaks. There the terrain and base ground give way to
 ## ROCK_FACE_TEXTURE (a CLASS_TEXTURES name, its `metres` the repeat) mapped
-## from the side along x and z in continent metres, drawn as stone at the
-## ground's luminance times ROCK_FACE_VALUE, keeping ROCK_FACE_HUE of its own
-## grey hue and taking the rest from the ground's mean colour (after its tint
-## and vertex colour) with any grass green turned to grey; the paint keeps
-## ROCK_FACE_GRAIN of its grain where a region calms the planar texture's, and
-## gives it the earth's verge value rather than the grass's deepening and lost
-## red. Recoloured to the ground's whole colour at a hue share of 0.5 and then
-## painted as grass, Coilmere's Spindle Hill and knob read dark olive (map
-## polish 2026-11-16); at 0.75 Landfall's cliffs keep a modest warmth from its
-## tan ground and Coilmere's and Boarsend's green hills draw grey stone. It
-## begins at the world-up normal
-## component ROCK_FACE_UP.x (about 44 degrees, grade 0.96) and is whole at .y
-## (about 53 degrees, grade 1.33), the threshold moved up to ROCK_FACE_WOBBLE.x
-## by noise ROCK_FACE_WOBBLE.y metres across so its edge wanders over a bank.
-## Level ground never reaches it and takes no extra sample: it draws exactly as
-## before. Only opaque terrain and base ground take it (patches and decks lie
-## over them), never at LOW quality (QUALITY_PRESETS `rock_face`, through the
-## global shader value LookGround.ROCK_FACE_GLOBAL that every painted material
-## reads as it draws), and a region may switch it off with `ground.rock_face` 0.
+## from the side along x and z in continent metres; the paint keeps
+## ROCK_FACE_GRAIN of its grain where a region calms the planar texture's. It
+## begins at the world-up normal component ROCK_FACE_UP.x (about 44 degrees,
+## grade 0.96) and is whole at .y (about 53 degrees, grade 1.33), the
+## threshold moved up to ROCK_FACE_WOBBLE.x by noise ROCK_FACE_WOBBLE.y metres
+## across so its edge wanders over a bank.
+## How it is coloured depends on whether the face is part of a cliff
+## (ROCK_FACE_STONE_UP). On a cliff it is stone: the ground's luminance times ROCK_FACE_VALUE,
+## keeping ROCK_FACE_HUE of its own grey hue and taking the rest from the
+## ground's mean colour (after its tint and vertex colour) with any grass green
+## turned to grey, and the paint gives it the earth's verge value rather than
+## the grass's deepening and lost red. Recoloured to the ground's whole colour
+## at a hue share of 0.5 and then painted as grass, Coilmere's Spindle Hill and
+## knob read dark olive (map polish 2026-11-16); at 0.75 Landfall's cliffs keep
+## a modest warmth from its tan ground and Coilmere's and Boarsend's green
+## hills draw grey stone. On a bank it is the mossy rock it was before that:
+## the face recoloured to the ground texture's mean colour keeping
+## ROCK_FACE_MOSS_HUE of its own hue, under the tint and vertex colour, with the
+## verge's trims. The ground is faceted on a 2 m lattice with one flat normal
+## per facet, so whatever is taken from a facet's own normal changes at its
+## edges. Stone on the whole band drew every partly steep facet of a grassy
+## slope as a hard-edged tan triangle: bands and lone triangles over Landfall's
+## escarpment above the isle path (lf-110) and the Twinbrook border crest, a
+## stone parallelogram in Twinbrook's grass, teeth along Spindle Hill's foot,
+## and Spindle's moss diamonds at twice their contrast. Stone from a steeper
+## facet threshold drew Spindle Hill's face and Coilmere's knob as a patchwork
+## of moss and stone along the facets' edges, because their 53-65 degree facets
+## are as steep as those of a grassy escarpment (map polish round 4,
+## 2026-11-16). So what is a cliff is read from the ground's smoothed normal:
+## the exporter carries the world-up component of each lattice vertex's normal,
+## averaged over its triangles and once more over its neighbours (about 4 m
+## across), in the opaque base ground's vertex alpha (terrain_export.py
+## base_smooth_up; a byte alpha of 255 means none, and then the rock stays
+## mossy as before the stone). It is one value per vertex, so the stone share
+## is the same on both sides of every facet edge, and a steep facet among level
+## ones (a bank, a moss diamond's rim) reads as the bank it is. Stone begins
+## where that smoothed component falls to ROCK_FACE_STONE_UP.x (57 degrees) and
+## is whole at .y (66 degrees), wobbled as the rock is in noise of its own: four
+## fifths of Spindle Hill's face (by area) is stone, as is three quarters of
+## Boarsend's sea cliff, and none of the Twinbrook crest's or Landfall's forest
+## banks.
+## Level ground never reaches the layer and takes no extra sample: it draws
+## exactly as before. Only opaque terrain and base ground take it (patches and
+## decks lie over them), never at LOW quality (QUALITY_PRESETS `rock_face`,
+## through the global shader value LookGround.ROCK_FACE_GLOBAL that every
+## painted material reads as it draws), and a region may switch it off with
+## `ground.rock_face` 0.
 const ROCK_FACE_TEXTURE := "cliff_rock"
 const ROCK_FACE_UP := Vector2(0.72, 0.6)
 const ROCK_FACE_WOBBLE := Vector2(0.05, 7.0)
 const ROCK_FACE_HUE := 0.75
 const ROCK_FACE_VALUE := 1.0
 const ROCK_FACE_GRAIN := 1.0
+const ROCK_FACE_STONE_UP := Vector2(0.55, 0.4)
+const ROCK_FACE_MOSS_HUE := 0.5
 ## The surfaces a class texture can cover: walk decks, pale paving, sand
 ## glazes, green meadows, bare rock and bare soil (LookGround.class_slot). A
 ## meadow keeps its own texture on the isles: a fine turf at a 4 m repeat

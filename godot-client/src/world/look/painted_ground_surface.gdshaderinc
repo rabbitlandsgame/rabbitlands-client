@@ -149,25 +149,33 @@ void fragment() {
 	// The smallest mip is the texture's mean colour: the reference the paint
 	// classes and lifts by, so a lifted path keeps its texture's grain.
 	vec3 reference = texel_mean * albedo_color.rgb;
+	vec3 look_rock_tint = albedo_color.rgb;
 	if (use_vertex_albedo) {
 		albedo *= vertex_colour;
 		reference *= vertex_colour;
+		look_rock_tint *= vertex_colour;
 	}
 	// The steep-face rock layer (look_rock_layer, painted_ground_paint.gdshaderinc):
-	// on a cliff the albedo becomes the rock face's, drawn as stone after the
-	// tint and vertex colour that would green it, and the reference the
-	// stone's; .a says how much. The continent height is the world height
-	// less the wrapper's translation.
-	vec4 look_rock_sample = look_rock_layer(albedo, reference, world_normal,
-		vec3(look_ground_xz.x, (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).y - MODEL_MATRIX[3].y,
-			look_ground_xz.y));
+	// on a steep face the albedo becomes the rock face's, mossy rock under the
+	// tint and vertex colour on a bank and stone after them on a cliff, where
+	// the reference becomes the stone's; .a says how much is rock and
+	// look_stone how much of that is stone. What is a cliff comes from the
+	// ground's smoothed up component, which the exporter carries in the opaque
+	// base ground's vertex alpha (1: none; a blended surface's alpha is its
+	// coverage). The continent height is the world height less the wrapper's
+	// translation.
+	float look_stone = 0.0;
+	float look_smooth_up = use_vertex_alpha ? 1.0 : COLOR.a;
+	vec4 look_rock_sample = look_rock_layer(albedo, reference, texel_mean, look_rock_tint, world_normal,
+		look_smooth_up, vec3(look_ground_xz.x, (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).y - MODEL_MATRIX[3].y,
+			look_ground_xz.y), look_stone);
 	albedo = look_rock_sample.rgb;
 	if (look_debug > 0) {
 		ALBEDO = vec3(0.0);
 		EMISSION = look_debug_colour(reference, vertex_colour, look_ground_xz);
 	} else {
 		ALBEDO = look_paint_rock(albedo, reference, vertex_colour, look_ground_xz, world_normal,
-			look_rock_sample.a);
+			look_rock_sample.a, look_stone);
 	}
 	ROUGHNESS = roughness_value;
 	METALLIC = metallic_value;
