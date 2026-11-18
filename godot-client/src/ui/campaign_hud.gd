@@ -372,8 +372,9 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 		_entry.text=str(ledger.get("start_label","Start work")) if bool(ledger.get("can_begin",false)) else "Do now · Show on map"
 		_entry.tooltip_text="Start here when you are ready." if bool(ledger.get("can_begin",false)) else "Show the destination or the next door on your map. Walk there when you are ready; Untrack keeps the assignment in your quest log."
 		if _can_report():
-			_entry.text="Report to Ilka"
-			_entry.tooltip_text="Tell Ilka what you secured and collect this assignment's reward."
+			var helper := str(party.get("role", "")) == "helper"
+			_entry.text="Finish helping at Ilka" if helper else "Report to Ilka"
+			_entry.tooltip_text="Finish helping this crew and return to your own assignment." if helper else "Tell Ilka what you secured and collect this assignment's reward."
 	if checkin:
 		_entry.visible = travelling
 		_entry.text = "Show Liora on map"
@@ -436,7 +437,8 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 		var enabled := bool(target.get("enabled", true)) and not completed
 		var nearby := _nearby(target)
 		var navigation := int(target.get("object_id", -1)) == 0 and not target.has("actor_id")
-		button.text = ("✓ " if completed else "Walk to · " if navigation else "" if nearby else "Go to · ") + str(target.get("label", "Work site"))
+		button.text = ("Optional · " if Guidance.is_support_target(snapshot,target) else "") \
+			+ ("✓ " if completed else "Walk to · " if navigation else "" if nearby else "Go to · ") + str(target.get("label", "Work site"))
 		button.disabled = not enabled
 		button.tooltip_text = str(target.get("detail", "Use the marked place in the world."))
 		button.pressed.connect(_request_target.bind(str(target.get("id", "")), int(target.get("object_id", -1))))
@@ -797,7 +799,9 @@ func _apply_party(party: Dictionary, adoption: Dictionary) -> void:
 			status = "offline"
 		elif not bool(member.get("present", true)):
 			status = "away"
-		elif str(member.get("adoption", "")) == "adopted":
+		elif str(member.get("role", "")) == "helper":
+			status = "helping"
+		elif str(member.get("adoption", "")) == "adopted" and str(_state.get("kind", "")) != "shelves":
 			status = "outcome recorded"
 		elif str(member.get("adoption", "")) == "help_only":
 			status = "help only"

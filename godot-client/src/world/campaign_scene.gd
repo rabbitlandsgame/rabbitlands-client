@@ -68,6 +68,7 @@ var _choice_completed := false
 var _choice_review := false
 var _choice_pending_at := -1
 var _choice_error := ""
+var _choice_wait_reason := ""
 var _seeking_decision := false
 var _inspection_state: Dictionary = {}
 var _inspection_sent := false
@@ -575,10 +576,24 @@ func _has_choice() -> bool:
 	return not _choice_state.is_empty() and str(_definition.get("choice_id", "")) == str(_choice_state.get("id", "")) \
 		and EloriaProtocol.campaign_scene_choice_valid(_choice_state)
 
+func _owner_wait_reason(snapshot: Dictionary) -> String:
+	if _choice_state.is_empty() or bool(_choice_state.get("owner_is_you", false)): return ""
+	var owner := str(_choice_state.get("owner", "the story owner"))
+	var party: Dictionary = snapshot.get("party", {})
+	if bool(party.get("waiting_for_owner", false)):
+		return "Waiting for %s to return before choosing for the party." % owner
+	for member: Dictionary in party.get("members", []):
+		if str(member.get("role", "")) != "owner" and str(member.get("name", "")) != owner: continue
+		if member.has("present") and not bool(member.present):
+			return "Waiting for %s to rejoin the conversation before choosing for the party." % owner \
+				if bool(member.get("online", false)) else "Waiting for %s to return before choosing for the party." % owner
+	return ""
+
 func _show_choice() -> void:
 	var payload := _choice_state.duplicate(true)
 	payload.token = _choice_token()
 	payload.error = _choice_error
+	payload.waiting_reason = _choice_wait_reason
 	_choice_dialog.apply_choice(payload, _choice_review)
 	_dialogue.set_content(_protagonist_name, _choice_dialog,
 		_actors.get(str(_definition.get("choice_actor", "protagonist"))) as Node3D)
@@ -851,6 +866,7 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 	var identity := next_run + ":" + next_token
 	var previous_selection := str(_choice_state.get("selected", ""))
 	_choice_state = (scene.get("choice", {}) as Dictionary).duplicate(true)
+	_choice_wait_reason = _owner_wait_reason(snapshot)
 	_inspection_state = (scene.get("inspection", {}) as Dictionary).duplicate(true)
 	_cart_state = (snapshot.get("cart", {}) as Dictionary).duplicate(true)
 	_protagonist_name = str(_choice_state.get("owner", "You")).strip_edges()
@@ -1669,7 +1685,14 @@ func _update_caption() -> void:
 		role = str(_definition.get("response_actor", "odo"))
 		text = str(_choice_state.get("response", ""))
 		if text.is_empty():
-			text = "Return to play and speak to %s when you are ready to decide." % (speaker if not speaker.is_empty() else "the speaker")
+			# Older recordings can lack a reply. Show their actual record in the
+			# player's frame instead of inventing an NPC line or an obsolete task.
+			speaker = _protagonist_name
+			role = str(_definition.get("choice_actor", "protagonist"))
+			text = "No answer was recorded for this scene."
+			for option: Dictionary in _choice_state.get("options", []):
+				if str(option.id) == str(_choice_state.get("selected", "")):
+					text = "Recorded answer: " + str(option.label)
 	if role.is_empty() and not speaker.is_empty():
 		role = {"Odo Fenn": "odo", "Landing clerk": "clerk", "Dock foreman": "foreman",
 			"Worker": "worker", "Works Hand": "worker", "Serit Voss": "voss"}.get(speaker, "")

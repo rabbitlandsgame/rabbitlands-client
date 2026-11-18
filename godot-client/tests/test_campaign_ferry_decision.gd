@@ -227,7 +227,7 @@ func run() -> void:
 	for row: Dictionary in empty.scene._choice_dialog._content.values():
 		expect(not (row.heading as Label).text.begins_with("✓ "), "an empty replay invents no selected highlight")
 	empty.scene._choice_dialog.continue_button.pressed.emit(); tick(empty,0)
-	expect(empty.scene._caption.text.contains("ready to decide") \
+	expect(empty.scene._caption.text.contains("No answer was recorded") \
 		and str(empty.scene._choice_state.get("selected", "")).is_empty(), \
 		"empty replay follow-up preserves the absence of a decision")
 	at(empty,16)

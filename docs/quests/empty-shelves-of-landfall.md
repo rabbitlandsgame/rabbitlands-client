@@ -84,6 +84,8 @@ Ilka provides one guard allowance: 1,500 Fire, 250 Life and 500 Water Essences, 
 
 Ilka assigns each chapter at The True Note and gives directions in her conversation. Accepting an assignment keeps the player at the shop. The quest instructions list the destination and tasks; **Do now · Show on map** opens the map without moving the player. The normal Instructions, minimize, Hide and Untrack controls remain available, and the assignment stays in the quest log.
 
+During the opening lessons, the card offers the relevant conversation when you reach Ilka with completed gathering or a finished batch, and begins or resumes practice when you reach Ostrid. A defeat in practice keeps your current lesson. Personal supply caches are labelled as optional; required practice and rare-drop recovery remain actionable. Party helpers see their supporting role and retain their own unfinished assignment.
+
 A tracked assignment adds a gold **!** to the map and minimap. Inside the shop, it marks the correct door; outdoors, it marks the worksite. Walk there and use the labelled start interaction or the quest card's **Start** button when ready. Raids, spider hunts and delivery escorts begin at their worksite. Walking past a marker alone does not force a cinematic or encounter. Nearby party members enter by travelling there too.
 
 Fenna introduces the crew at the Sage beds. The camera establishes one view of the group and stays settled during the conversation; later field dialogue keeps the gameplay view. Ilka stays in her shop. After the Hearthroot shipment, players return to The True Note. Her reward conversation continues directly into the mine assignment. Accepting the raid leaves the player free to walk there or untrack it.

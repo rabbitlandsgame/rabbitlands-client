@@ -78,16 +78,27 @@ static func conversation_actor(snapshot: Dictionary, target: Dictionary) -> int:
 		return actor_id
 	return -1
 
+static func is_support_target(snapshot: Dictionary, target: Dictionary) -> bool:
+	# Practice can reopen required spell targets or the rare-drop hunt.
+	return str(snapshot.get("kind", "")) == "shelves" and str(target.get("id", "")) == "storage" \
+		and str(target.get("id", "")) not in (snapshot.get("preferred_targets", []) as Array)
+
 static func legend(snapshot: Dictionary) -> String:
 	var targets := work_targets(snapshot)
+	if bool((snapshot.get("party", {}) as Dictionary).get("waiting_for_scene", false)):
+		return "Waiting for the party to finish the scene. Work markers appear when everyone is ready."
+	if str(snapshot.get("kind", "")) == "shelves":
+		var ledger: Dictionary = snapshot.get("shelves", {})
+		if bool(ledger.get("private_practice", false)) and str(ledger.get("lesson_window", "")) == "spells":
+			return "Follow Ostrid's lesson above. Use Open Magic or your spell bar to cast. Talk to Ostrid to review the lesson."
+		if not targets.is_empty() and targets.all(func(target: Dictionary) -> bool: return is_support_target(snapshot,target)):
+			return "Follow the objective above. Use the personal supply cache when you need your own supplies."
 	if str(snapshot.get("kind", "")) == "rescue":
 		if targets.is_empty():
 			return "Follow the objective above. Action markers appear when the next step is ready."
 		return "Follow the objective above." \
 			+ "\nGround circles mark ready actions. Select a label to walk there, then select it again when close."
 	if targets.is_empty():
-		if bool((snapshot.get("party", {}) as Dictionary).get("waiting_for_scene", false)):
-			return "Waiting for the party to finish the scene. Work markers appear when everyone is ready."
 		return "Follow the crew's instructions. New work sites appear when they are ready."
 	var preferred := str(targets[0].id) in (snapshot.get("preferred_targets", []) as Array)
 	var next := "Next: " + str(targets[0].label) if targets.size()==1 or targets[0].has("actor_id") or preferred else "Choose one of the labelled work sites."
@@ -146,7 +157,7 @@ func apply_snapshot(snapshot: Dictionary, objects: Dictionary, actors: Dictionar
 				ring.visible = enabled and not blocked
 				var material := ring.material_override as StandardMaterial3D
 				if material != null:
-					material.albedo_color = NEXT_COLOUR if tracked and available.size()==1 and not rescue else _controlled[object_id].colour
+					material.albedo_color = NEXT_COLOUR if tracked and available.size()==1 and not rescue and not is_support_target(snapshot,row) else _controlled[object_id].colour
 			if pin != null:pin.visible = enabled
 			object.collision_layer = int(_controlled[object_id].pick_layer) if enabled and not blocked else 0
 		if not enabled or not tracked or blocked or shown >= MAX_LABELS:
@@ -177,7 +188,9 @@ func apply_snapshot(snapshot: Dictionary, objects: Dictionary, actors: Dictionar
 			# A ready conversation can coexist with a combat objective. Do not
 			# promote it over the objective without an explicit server priority.
 			next = str(row.id) in (snapshot.get("preferred_targets", []) as Array)
-		label.text = ("NEXT · " if next else "WORK · ") + str(row.label) + "\n" + verb
+		var support := is_support_target(snapshot,row)
+		if support:next = false
+		label.text = ("OPTIONAL · " if support else "NEXT · " if next else "WORK · ") + str(row.label) + "\n" + verb
 		label.modulate = NEXT_COLOUR if next else Color.WHITE
 		label.show()
 		shown += 1

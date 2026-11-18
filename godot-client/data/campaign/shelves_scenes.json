@@ -94,7 +94,7 @@
     },
     "measure.shelves.review": {
       "title": "A Reliable Supply",
-      "duration": 38,
+      "duration": 34,
       "entry_seconds": 0,
       "exit_seconds": 0,
       "fov": 48,
@@ -126,8 +126,7 @@
         }
       ],
       "dialogue_holds": [
-        34.0,
-        38
+        34.0
       ],
       "choice_id": "shelves_cape",
       "choice_actor": "recipient",
@@ -154,12 +153,6 @@
             "finale": "Listen. Mortars, wheels, voices, and no empty shelves. We did not merely save a shipment. We taught this place how to keep going."
           },
           "text": "This supply can be relied on again."
-        },
-        {
-          "at": 34,
-          "speaker": "Ilka Tarn",
-          "speaker_actor": "mentor",
-          "text": "There is one more gift: an enriched essence from my reserve. Choose the one that will serve your next journey."
         }
       ],
       "handoff": {
@@ -440,7 +433,7 @@
           "at": 34,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
-          "text": "Your work and reward are recorded. Let us return to The True Note."
+          "text": "Take it with my thanks. The potters can bring their next shipment here safely now."
         }
       ],
       "cues": [
@@ -1556,9 +1549,9 @@
       "duration": 20,
       "entry_seconds": 0,
       "exit_seconds": 0,
-      "anchor": "protagonist",
+      "anchor": "recipient",
       "required_actors": [
-        "protagonist"
+        "recipient"
       ],
       "cast_roles": [
         "mentor",
@@ -1583,15 +1576,16 @@
         {
           "at": 0,
           "speaker": "You",
-          "speaker_actor": "protagonist",
+          "speaker_actor": "recipient",
           "text": "We were overwhelmed. We can regroup and try again, or leave for now. What should we do?"
         }
       ],
       "choice_id": "shelves_patrol_retry",
       "choice_at": 0,
       "choice_response_until": 20,
-      "response_actor": "protagonist",
-      "response_speaker": "You"
+      "response_actor": "recipient",
+      "response_speaker": "You",
+      "choice_actor": "recipient"
     },
     "measure.shelves.fire.brief": {
       "title": "The Price of a Spark",
@@ -1691,7 +1685,8 @@
       "choice_at": 20,
       "choice_response_until": 40,
       "response_actor": "mentor",
-      "response_speaker": "Brenna Flint"
+      "response_speaker": "Brenna Flint",
+      "choice_actor": "recipient"
     },
     "measure.shelves.fire.entry_coal": {
       "title": "The Price of a Spark",
@@ -1734,7 +1729,8 @@
       "choice_at": 20,
       "choice_response_until": 40,
       "response_actor": "mentor",
-      "response_speaker": "Brenna Flint"
+      "response_speaker": "Brenna Flint",
+      "choice_actor": "recipient"
     },
     "measure.shelves.fire.entry_sapper": {
       "title": "The Price of a Spark",
@@ -2000,9 +1996,9 @@
       "duration": 20,
       "entry_seconds": 0,
       "exit_seconds": 0,
-      "anchor": "mentor",
+      "anchor": "recipient",
       "required_actors": [
-        "protagonist"
+        "recipient"
       ],
       "cast_roles": [
         "mentor",
@@ -2026,7 +2022,7 @@
         {
           "at": 0,
           "speaker": "You",
-          "speaker_actor": "protagonist",
+          "speaker_actor": "recipient",
           "text": "We were overwhelmed. We can regroup at the last secured load or leave for now. Which shall we do?"
         }
       ],
@@ -2034,8 +2030,9 @@
       "choice_id": "shelves_fire_retry",
       "choice_at": 0,
       "choice_response_until": 20,
-      "response_actor": "protagonist",
-      "response_speaker": "You"
+      "response_actor": "recipient",
+      "response_speaker": "You",
+      "choice_actor": "recipient"
     },
     "measure.shelves.water.brief": {
       "title": "Where the Water Goes",

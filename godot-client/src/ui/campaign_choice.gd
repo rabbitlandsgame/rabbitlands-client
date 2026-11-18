@@ -263,7 +263,9 @@ func _refresh() -> void:
 		status_label.text = _error
 	elif not bool(_payload.get("owner_is_you", false)):
 		var owner := str(_payload.get("owner", "")).strip_edges()
-		status_label.text = "Waiting for " + (owner if not owner.is_empty() else "the story owner") + " to choose an approach."
+		var reason := str(_payload.get("waiting_reason", ""))
+		status_label.text = reason if not reason.is_empty() else \
+			"Waiting for " + (owner if not owner.is_empty() else "the story owner") + " to choose an approach."
 	else:
 		status_label.text = "Choose an approach to continue." if _can_choose() else "This choice is not available at this point."
 	status_label.add_theme_color_override("font_color", GOLD if _replay and not selected_label.is_empty() else Color("ddd7ca"))
