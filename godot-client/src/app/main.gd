@@ -73,6 +73,7 @@ const CampaignGuidanceScript = preload("res://src/world/campaign_guidance.gd")
 const CampaignCrossingScript = preload("res://src/world/campaign_crossing.gd")
 const CampaignCartScript = preload("res://src/world/campaign_cart.gd")
 const CampaignRescueScript = preload("res://src/world/campaign_rescue_presentation.gd")
+const CampaignAllyRecoveryScript = preload("res://src/ui/campaign_ally_recovery.gd")
 const CampaignCutawayScript = preload("res://src/world/campaign_cutaway.gd")
 @onready var campaign_scene := CampaignSceneScript.new()
 @onready var campaign_hud := CampaignHudScript.new()
@@ -1688,6 +1689,7 @@ func _ready() -> void:
 	campaign_hud.rescue_action_requested.connect(_on_rescue_action)
 	campaign_hud.rescue_reward_requested.connect(_on_rescue_reward)
 	campaign_hud.patient_heal_requested.connect(_on_rescue_patient_heal)
+	campaign_hud.ally_heal_requested.connect(_on_campaign_ally_heal)
 	campaign_scene.presentation_finished.connect(_on_campaign_scene_finished)
 	campaign_scene.choice_requested.connect(_on_campaign_scene_choice)
 	campaign_scene.inspection_requested.connect(_on_campaign_scene_inspection)
@@ -9509,6 +9511,24 @@ func _on_rescue_patient_heal(run_id: String, actor_id: int) -> void:
 		return
 	# The button is an explicit choice of this patient. Use the same native
 	# targeted cast/approach/channel/cancel path as selecting her in the world.
+	magic_selection.begin(1, 1)
+	magic_selection.confirm_actor(actor_id)
+
+func _on_campaign_ally_heal(run_id: String, actor_id: int) -> void:
+	var snapshot: Dictionary = AppState.campaign
+	var actual: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
+	if not AppState.authenticated or _world_input_blocked() or _disconnect_console_active \
+			or bool(AppState.death.get("dead", false)) or int(actual.get("kind", 0)) != 1 \
+			or int(actual.get("health", 0)) <= 0 or not _grounded_actors.has(AppState.local_actor_id) \
+			or run_id.is_empty() or run_id != str(snapshot.get("run_id", "")) \
+			or not CampaignAllyRecoveryScript.contains(snapshot, AppState.current_map, actor_id) \
+			or not is_instance_valid(actor_nodes.get(actor_id)) or not _spell_target_candidate(1, actor_id):
+		return
+	# A repeat click on the same recovery action must not cancel its paid,
+	# in-flight channel. Other explicit spell/target choices retain normal input.
+	var casting: Dictionary = magic_selection.active_target_cast
+	if int(casting.get("id", -1)) == 1 and int(casting.get("target_id", -1)) == actor_id:
+		return
 	magic_selection.begin(1, 1)
 	magic_selection.confirm_actor(actor_id)
 
@@ -17633,6 +17653,8 @@ func _spell_target_candidate(spell_id: int, actor_id: int) -> bool:
 	if actor.is_empty():
 		return false
 	var spell: Dictionary = spell_catalog.spell(spell_id)
+	if _is_shelves_grower(actor_id, actor):
+		return not bool(spell.get("hostile", false)) and spell.get("scope") == "target" and spell.get("effect") == "heal"
 	if not bool(actor.get("alive", int(actor.get("health", 0)) > 0)):
 		return actor_id != AppState.local_actor_id and (int(actor.get("kind", 0)) in [1, 4] or _is_rescue_companion(actor_id)) \
 			and spell.get("scope") == "target" and spell.get("effect") == "heal"
@@ -19130,6 +19152,8 @@ func _is_shelves_training_opponent(actor_id: int, dto: Dictionary) -> bool:
 func _is_shelves_grower(actor_id: int, dto: Dictionary) -> bool:
 	var state: Dictionary=AppState.campaign
 	if int(dto.get("kind",0))!=2 or str(state.get("kind",""))!="shelves" or not bool(state.get("active",false)) \
+			or str(state.get("run_id","")).is_empty() or not (state.get("travel",{}) as Dictionary).is_empty() \
+			or str((state.get("shelves",{}) as Dictionary).get("phase",""))!="work" \
 			or EloriaProtocol.map_id_from_reference(str(state.get("map","")))!=EloriaProtocol.map_id_from_reference(AppState.current_map):return false
 	var growers: Dictionary=(state.get("shelves",{}) as Dictionary).get("growers",(state.get("shelves",{}) as Dictionary).get("fire",(state.get("shelves",{}) as Dictionary).get("water",{})))
 	for worker: Dictionary in growers.get("workers",[]):

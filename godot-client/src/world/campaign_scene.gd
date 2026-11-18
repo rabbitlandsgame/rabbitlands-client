@@ -533,13 +533,17 @@ func inspection_context() -> Dictionary:
 
 func inspection_send_failed() -> void:
 	_inspection_pending_at = -1
+	if is_instance_valid(_inspection_retry):
+		_inspection_retry.text = "Retry family rescue" if str(_inspection_state.get("id", "")) == "rescue_family" else "Retry inspection"
+		_inspection_retry.disabled = not bool(_inspection_state.get("can_start", false))
+		_inspection_retry.show()
 	if str(_inspection_state.get("id", "")) == "rescue_family":
-		_inspection_error = "The way to the cage is blocked. Retry, or return to play and approach the cage."
-		if is_instance_valid(_inspection_retry): _inspection_retry.show()
+		_inspection_error = "The family's path is blocked. Retry the rescue, or return to play to clear the way." \
+			if bool(_inspection_state.get("can_start", false)) else \
+			"The family cannot continue yet. Return to play to help clear the way; the story owner can retry when ready."
 		return
 	var subject := "cart" if str(_inspection_state.get("id", "")) == "cart_assessment" else "landing"
 	_inspection_error = "The inspection has not been confirmed. Retry, or return to play and inspect the %s." % subject
-	if is_instance_valid(_inspection_retry): _inspection_retry.show()
 
 func _has_inspection() -> bool:
 	return not _inspection_state.is_empty() \
@@ -867,6 +871,7 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 	var previous_selection := str(_choice_state.get("selected", ""))
 	_choice_state = (scene.get("choice", {}) as Dictionary).duplicate(true)
 	_choice_wait_reason = _owner_wait_reason(snapshot)
+	var previous_inspection_status := str(_inspection_state.get("status", ""))
 	_inspection_state = (scene.get("inspection", {}) as Dictionary).duplicate(true)
 	_cart_state = (snapshot.get("cart", {}) as Dictionary).duplicate(true)
 	_protagonist_name = str(_choice_state.get("owner", "You")).strip_edges()
@@ -1051,6 +1056,20 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 			_update_caption()
 			return
 		if _has_inspection():
+			var family_inspection := str(_inspection_state.get("id", "")) == "rescue_family"
+			var inspection_status := str(_inspection_state.get("status", ""))
+			if is_instance_valid(_inspection_retry):
+				_inspection_retry.disabled = not bool(_inspection_state.get("can_start", false))
+			if not _replaying and family_inspection:
+				if inspection_status == "blocked":
+					# This native attempt already stopped. Do not automatically
+					# restart it merely because permission becomes available.
+					_inspection_sent = true
+				elif previous_inspection_status == "blocked":
+					_inspection_error = ""
+					_inspection_retry.hide()
+					if inspection_status == "walking":
+						_inspection_pending_at = Time.get_ticks_msec()
 			# A saved escort can already be walking when this client rejoins.
 			# Observe its normal recovery deadline without restarting the native
 			# action or taking ownership of another party member's movement.
@@ -1065,9 +1084,10 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 					and next_elapsed >= float(_definition.get("inspection_wait_at", 24.0)):
 				elapsed = float(_definition.get("inspection_wait_at", 24.0))
 				if str(_inspection_state.get("status", "")) == "blocked" and _inspection_error.is_empty() \
-						and bool(_choice_state.get("owner_is_you", false)):
+						and (family_inspection or bool(_choice_state.get("owner_is_you", false))):
 					inspection_send_failed()
-					_inspection_error = "The path is blocked. Retry the walk, or return to play to reach the inspection point."
+					if not family_inspection:
+						_inspection_error = "The path is blocked. Retry the walk, or return to play to reach the inspection point."
 				if _inspection_pending_at >= 0 and Time.get_ticks_msec() - _inspection_pending_at >= \
 						int(float(_definition.get("inspection_timeout", 8.0)) * 1000.0):
 					inspection_send_failed()

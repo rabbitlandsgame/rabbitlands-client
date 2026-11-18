@@ -64,6 +64,8 @@ func run() -> void:
 	expect(str(Readout.summary(rescue).text).contains("Heal Target") and not str(Readout.summary(rescue).text).contains("low on ether"),
 		"reviving the companion takes priority over resource advice")
 	rescue.rescue.stage="injured"
+	expect(str(Readout.summary(rescue).text).contains("Elen"), "an injured mine companion keeps her introduced name")
+	rescue.rescue.mother.configured=false
 	expect(not str(Readout.summary(rescue).text).contains("Elen"), "the opening does not reveal the woman's name before her introduction")
 	rescue.rescue.checkin={"visiting":true}
 	expect(Readout.summary(rescue).is_empty(), "the safe inn conversation has no private-mine combat alerts")

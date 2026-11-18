@@ -123,7 +123,7 @@ static func _rescue(snapshot: Dictionary) -> Dictionary:
 	if str(rescue.get("stage", "")) in ["reward", "aftermath", "complete"]: return {}
 	var mother: Dictionary = rescue.get("mother", {})
 	if bool(mother.get("downed", false)):
-		if str(rescue.get("stage", "")) in ["choice", "ambush", "injured", "ready"]:
+		if not bool(mother.get("configured", false)):
 			return {"text":"The woman is hurt — use Heal Target to help her stand.", "urgent":true}
 		return {"text":"Elen is down — use Heal Target before continuing together.", "urgent":true}
 	if not bool(mother.get("configured", false)) or not bool(mother.get("enabled", false)):

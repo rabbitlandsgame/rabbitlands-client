@@ -78,6 +78,10 @@ Fenna, Sela, Nell and Ada have Harvesting 40 and use the normal harvesting rates
 
 The four workers have visible health bars and companion rows beside the human party. Downed workers stop working until a successful Heal Target cast revives them. A story-owner defeat resets the current field and offers Retry or Cancel; a completed Sage shipment survives a later Hearthroot defeat. Pausing or disconnecting saves progress and worker health without offline production. Gathering swings are four times faster than at level 10; hauling and combat still add to completion time.
 
+The tracked quest card offers a named **Heal Target** action for a fallen Life, Fire or Water worker, and for Elen inside Lantern Mine. It casts the ordinary Power 1 spell on that ally, with its normal approach, casting time and costs; moving cancels the cast. The Magic window and direct world targeting work as well. An unused assisted first recovery for Elen remains available. These actions do not appear for paused encounters or healthy workers.
+
+Water crew orders remain in effect until changed. Selecting Work, Regroup or Wait again keeps the current jobs running. The ledger shows the current order; other available orders remain choices. Barge departure and repairs wait for the relevant pilot, hull, obstruction and nearby-attacker conditions.
+
 Ilka provides one guard allowance: 1,500 Fire, 250 Life and 500 Water Essences, plus 20 minor healing potions. Items that do not fit go to personal storage. Restarting or canceling does not issue another allowance.
 
 ## Playing together and recovering

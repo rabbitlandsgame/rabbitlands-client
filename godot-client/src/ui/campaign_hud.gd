@@ -1,6 +1,7 @@
 extends Control
 const Guidance := preload("res://src/world/campaign_guidance.gd")
 const FieldReadout := preload("res://src/ui/campaign_field_readout.gd")
+const AllyRecovery := preload("res://src/ui/campaign_ally_recovery.gd")
 ## The quest's field checklist. Its controls request ordinary movement/use;
 ## only a new authoritative snapshot changes completion or available decisions.
 signal target_requested(object_id: int, tile: Vector2i, nearby: bool)
@@ -13,6 +14,7 @@ signal prediction_requested(run_id: String, revision: int, candidate: int)
 signal rescue_action_requested(action: String, run_id: String)
 signal rescue_reward_requested(choice: String, run_id: String)
 signal patient_heal_requested(run_id: String, actor_id: int)
+signal ally_heal_requested(run_id: String, actor_id: int)
 signal transcript_requested
 signal reduced_motion_changed(value: bool)
 signal replay_requested
@@ -24,6 +26,8 @@ var _title: Label
 var _hint: Label
 var _guidance: Label
 var _field_summary: Label
+var _recovery_actions: HFlowContainer
+var _recovery_signature := ""
 var _notice: Label
 var _opening_details: Label
 var _bank: Label
@@ -150,6 +154,11 @@ func _build() -> void:
 	_field_summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_field_summary.add_theme_font_size_override("font_size", 14)
 	column.add_child(_field_summary)
+	_recovery_actions = HFlowContainer.new()
+	_recovery_actions.name = "AllyRecoveryActions"
+	_recovery_actions.add_theme_constant_override("h_separation", 5)
+	_recovery_actions.add_theme_constant_override("v_separation", 5)
+	column.add_child(_recovery_actions)
 	_guidance = Label.new()
 	_guidance.name = "WorkSiteInstructions"
 	_guidance.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -357,6 +366,7 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 	_field_summary.text = str(field_readout.get("text", ""))
 	_field_summary.visible = not _field_summary.text.is_empty()
 	_field_summary.add_theme_color_override("font_color", Color("ffb39c") if bool(field_readout.get("urgent", false)) else Color("e5cc90"))
+	_apply_ally_recovery()
 	_apply_party(party, snapshot.get("adoption", {}))
 	_apply_companion(snapshot.get("companion", {}))
 	_entry.visible = (not active or travelling) and bool(snapshot.get("available", false)) and not can_own
@@ -396,16 +406,17 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 	if complete:
 		_title.text = "Quest complete!"
 		_hint.text = "But maybe you should check in on Liora later to see how she is feeling."
-		for control: Control in [_notice, _field_summary, _opening_details, _rescue, _rescue_actions,
+		for control: Control in [_notice, _field_summary, _recovery_actions, _opening_details, _rescue, _rescue_actions,
 				_rescue_rewards, _scroll, _guidance, _help, _account, _entry, _join, _own,
 				_bank, _road, _lamps, _prediction_actions, _party, _adoption, _adoption_actions,
 				_companion, _companion_actions, _convoy, _convoy_actions]:
 			control.hide()
 		_lesson_window.hide()
 	var actions_first := _guidance.visible or _field_summary.visible
-	if actions_first != _opening_actions_first or (actions_first and _field_summary.visible and _scroll.get_index() < _field_summary.get_index()):
+	var action_anchor: Control = _recovery_actions if _recovery_actions.visible else _field_summary if _field_summary.visible else _hint
+	if actions_first != _opening_actions_first or (actions_first and _scroll.get_index() < action_anchor.get_index()):
 		_opening_actions_first = actions_first
-		_column.move_child(_scroll, (_field_summary.get_index() + 1 if _field_summary.visible else _hint.get_index() + 1) if _opening_actions_first else _entry.get_index() - 1)
+		_column.move_child(_scroll, action_anchor.get_index() + 1 if _opening_actions_first else _entry.get_index() - 1)
 	_title.visible = not _embedded
 	_hint.visible = not _embedded
 	_layout()
@@ -541,7 +552,7 @@ func _apply_rescue(rescue: Dictionary) -> void:
 		return
 	var mother: Dictionary = rescue.get("mother", {})
 	var lines: PackedStringArray = []
-	var name := "Injured woman" if bool(mother.get("downed", false)) or not bool(mother.get("configured", false)) else "Elen Reed"
+	var name := "Injured woman" if not bool(mother.get("configured", false)) else "Elen Reed"
 	lines.append("%s · level 10 companion\nHealth %d/%d · Mana %d/%d" % [name,
 		int(mother.get("health", 0)), int(mother.get("max_health", 1)), int(mother.get("mana", 0)), int(mother.get("max_mana", 1))])
 	lines.append("Her mana is finite. Revival casts used: %d." % int(mother.get("revives_spent", 0)))
@@ -551,7 +562,7 @@ func _apply_rescue(rescue: Dictionary) -> void:
 		lines.append("Elen is following the rescue party.")
 	var patient: Dictionary = rescue.get("patient", {})
 	_patient_heal.visible = _rescue_local() and str(rescue.get("stage", "")) == "injured" \
-		and int(patient.get("actor_id", 0)) > 0
+		and int(patient.get("actor_id", 0)) > 0 and not AllyRecovery.contains(_state, _current_map, int(patient.get("actor_id", 0)))
 	_patient_heal.disabled = not bool(patient.get("can_cast", false))
 	_patient_heal.text = "Heal Target · first lesson" if int(patient.get("lesson_remaining", 0)) > 0 else "Heal Target"
 	_patient_heal.tooltip_text = "Cast Heal Target on this patient. The first lesson supplies its cost." \
@@ -570,6 +581,31 @@ func _apply_rescue(rescue: Dictionary) -> void:
 		lines.append("The family has reached the mine exit." if bool((rescue.get("daughter", {}) as Dictionary).get("returned", false)) \
 			else "Liora is free. Stay with the family until they reach safety.")
 	_rescue.text = "\n".join(lines)
+
+func _apply_ally_recovery() -> void:
+	var patients := AllyRecovery.patients(_state, _current_map)
+	_recovery_actions.visible = not patients.is_empty()
+	var run_id := str(_state.get("run_id", ""))
+	var signature := run_id + ":" + _current_map + ":" + JSON.stringify(patients)
+	if signature == _recovery_signature: return
+	_recovery_signature = signature
+	for child: Node in _recovery_actions.get_children():
+		_recovery_actions.remove_child(child)
+		child.queue_free()
+	for patient: Dictionary in patients:
+		var button := Button.new()
+		button.text = "Heal Target · " + str(patient.name)
+		button.tooltip_text = "Cast Heal Target at Power 1 on this fallen ally. Requires Magic 0, 5 ether, 1 Life Essence and 1 Water Essence. Normal approach and casting time apply; moving cancels the cast."
+		if bool(patient.get("assisted", false)):
+			button.tooltip_text = "Cast Heal Target at Power 1 on Elen. Your unused first recovery lesson can supply this cast's cost. Normal approach and casting time apply; moving cancels the cast."
+		button.pressed.connect(_request_ally_heal.bind(run_id, int(patient.actor_id)))
+		_recovery_actions.add_child(button)
+
+func _request_ally_heal(run_id: String, actor_id: int) -> void:
+	if not _available or not _recovery_actions.is_visible_in_tree() or run_id != str(_state.get("run_id", "")) \
+			or not AllyRecovery.contains(_state, _current_map, actor_id):
+		return
+	ally_heal_requested.emit(run_id, actor_id)
 
 func _request_rescue_action(action: String) -> void:
 	if not _rescue_local() or action not in ["accept", "defer", "supplies"]:
