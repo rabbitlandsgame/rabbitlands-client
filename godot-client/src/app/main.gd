@@ -9380,7 +9380,7 @@ func _on_campaign_action(action: String) -> void:
 		if lesson=="spells":_on_spells_button_pressed()
 		elif lesson=="mixing":_on_manufacturing_button_pressed()
 		return
-	if action=="shelves_destination":
+	if action in ["shelves_destination", "rescue_checkin_destination"]:
 		if not full_map.visible:_toggle_full_map()
 		var pins:=_campaign_destination_marks()
 		if not pins.is_empty():
@@ -9514,7 +9514,8 @@ func _on_campaign_actor_target(actor_id: int, _tile: Vector2i, _nearby: bool) ->
 	if _try_rescue_conversation(actor_id):
 		return
 	if _world_input_blocked() or not AppState.authenticated or not bool(AppState.campaign.get("active", false)) \
-			or not (AppState.campaign.get("travel", {}) as Dictionary).is_empty() \
+			or (not (AppState.campaign.get("travel", {}) as Dictionary).is_empty() \
+				and str(AppState.campaign.get("key", "")) != "rescue_checkin") \
 			or EloriaProtocol.map_id_from_reference(str(AppState.campaign.get("map", ""))) \
 			!= EloriaProtocol.map_id_from_reference(AppState.current_map):
 		return
@@ -9756,6 +9757,9 @@ func _on_shelves_choice(option_id: String) -> void:
 		campaign_scene.choice_send_failed()
 
 func _on_campaign_scene_choice(option_id: String) -> void:
+	if str(AppState.campaign.get("key", "")) == "rescue_checkin":
+		_on_rescue_checkin_choice(option_id)
+		return
 	if str(AppState.campaign.get("kind", "")) == "shelves":
 		_on_shelves_choice(option_id)
 		return
@@ -9824,6 +9828,35 @@ func _on_campaign_scene_choice(option_id: String) -> void:
 	if error != OK:
 		campaign_scene.choice_send_failed()
 		AppState.append_local_message("Could not send your choice. Please try again.")
+
+func _on_rescue_checkin_choice(option_id: String) -> void:
+	var snapshot: Dictionary = AppState.campaign
+	var scene: Dictionary = snapshot.get("scene", {})
+	var choice: Dictionary = scene.get("choice", {})
+	var context := campaign_scene.choice_context()
+	var actual: Dictionary = AppState.actors.get(AppState.local_actor_id, {})
+	if not AppState.authenticated or _disconnect_console_active or bool(AppState.death.get("dead", false)) \
+			or not _grounded_actors.has(AppState.local_actor_id) or not campaign_scene.playing or campaign_scene.is_replaying() \
+			or str(snapshot.get("kind", "")) != "rescue" or not bool(snapshot.get("active", false)) \
+			or str(snapshot.get("key", "")) != "rescue_checkin" or str(snapshot.get("stage", "")) != "checkin" \
+			or EloriaProtocol.map_id_from_reference(AppState.current_map) != "landfall_town" \
+			or EloriaProtocol.map_id_from_reference(str(snapshot.get("map", ""))) != "landfall_town" \
+			or str(scene.get("id", "")) != "measure.rescue.checkin" or str(choice.get("id", "")) != "rescue_checkin" \
+			or not EloriaProtocol.campaign_rescue_valid(snapshot.get("rescue", {})) \
+			or not EloriaProtocol.campaign_scene_choice_valid(choice) or option_id not in ["listen", "rest"] \
+			or not bool(choice.get("can_choose", false)) or not bool(choice.get("owner_is_you", false)) \
+			or not str(choice.get("selected", "")).is_empty() or not bool(context.get("waiting", false)) \
+			or str(context.get("run_id", "")) != str(snapshot.get("run_id", "")) \
+			or str(context.get("token", "")) != str(scene.get("token", "")) or str(context.get("id", "")) != "rescue_checkin" \
+			or int((scene.get("actors", {}) as Dictionary).get("recipient", -1)) != AppState.local_actor_id \
+			or int(actual.get("kind", 0)) != 1 or int(actual.get("health", 0)) <= 0:
+		return
+	var daughter := int((scene.get("actors", {}) as Dictionary).get("daughter", -1))
+	if not is_instance_valid(actor_nodes.get(daughter)) or int((AppState.actors.get(daughter, {}) as Dictionary).get("kind", 0)) != 2:
+		return
+	if Network.campaign_rescue_checkin_choice(str(snapshot.run_id), str(scene.token), option_id) != OK:
+		campaign_scene.choice_send_failed()
+		AppState.append_local_message("Could not send your answer to Liora. Please try again.")
 
 func _on_rescue_scene_choice(option_id: String) -> void:
 	var snapshot: Dictionary = AppState.campaign
@@ -19060,6 +19093,7 @@ func _is_tutorial_companion(actor_id: int) -> bool:
 
 func _is_rescue_companion(actor_id: int) -> bool:
 	var snapshot: Dictionary = AppState.campaign
+	if str(snapshot.get("key", "")) == "rescue_checkin": return false
 	if actor_id <= 0 or str(snapshot.get("kind", "")) != "rescue" or not bool(snapshot.get("active", false)) \
 			or str(snapshot.get("run_id", "")).is_empty() \
 			or EloriaProtocol.map_id_from_reference(str(snapshot.get("map", ""))) != EloriaProtocol.map_id_from_reference(AppState.current_map) \

@@ -673,6 +673,12 @@ func campaign_rescue_choice(run_id: String, token: String, option_id: String) ->
 		return ERR_INVALID_PARAMETER
 	return send_chat("#campaign rescue_choice %s %s %s" % [run_id, token, option_id])
 
+func campaign_rescue_checkin_choice(run_id: String, token: String, option_id: String) -> Error:
+	if not _campaign_identifier(run_id) or not run_id.begins_with("checkin_") \
+			or not _campaign_identifier(token) or option_id not in ["listen", "rest"]:
+		return ERR_INVALID_PARAMETER
+	return send_chat("#campaign rescue_checkin_choice %s %s %s" % [run_id, token, option_id])
+
 func campaign_rescue_reward(choice: String) -> Error:
 	if choice not in ["sword", "bow", "wand"]:
 		return ERR_INVALID_PARAMETER

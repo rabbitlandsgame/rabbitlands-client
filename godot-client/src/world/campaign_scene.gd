@@ -1353,9 +1353,26 @@ func _commit_scene_handoff() -> void:
 func _advance_scene_handoff(delta: float, snapshot: Dictionary, rig: Node3D, nodes: Dictionary,
 		local_id: int, current_map: String, world_ready: bool) -> bool:
 	_scene_handoff.elapsed = float(_scene_handoff.elapsed) + maxf(delta, 0.0)
+	if str(_scene_handoff.mode) == "hold" and map_key(current_map) != str(_scene_handoff.map):
+		cancel("map_changed")
+		return false
+	var scene: Dictionary = snapshot.get("scene", {})
+	var changed_run := str(snapshot.get("run_id", "")) != str(_scene_handoff.run)
+	var successor: bool = (changed_run or str(scene.get("token", "")) != str(_scene_handoff.token)) \
+		and str(scene.get("id", "")) in _scene_handoff.to
+	var between_chapters: bool = not bool(snapshot.get("active", false)) \
+		and (not changed_run or str(snapshot.get("run_id", "")).is_empty()) \
+		and _scene_id.begins_with("measure.shelves.") and str(snapshot.get("kind", "")) == "shelves" \
+		and map_key(current_map) == str(_scene_handoff.map) \
+		and map_key(str(snapshot.get("map", ""))) == str(_scene_handoff.map) \
+		and not (_scene_handoff.to as Array).is_empty() and scene.is_empty()
 	var supply_return := str(snapshot.get("kind", "")) == "shelves" \
 		and str(_scene_handoff.gameplay_map) == "landfall_town"
-	if (not bool(snapshot.get("active", false)) and not supply_return) or str(snapshot.get("run_id", "")) != str(_scene_handoff.run):
+	# A completed chapter can hand directly to a new run's briefing. Only an
+	# explicitly authored successor may inherit the held view and input lease;
+	# an unrelated quest still releases the old presentation immediately.
+	if (not bool(snapshot.get("active", false)) and not supply_return and not between_chapters) \
+			or (changed_run and not successor and not between_chapters):
 		cancel("inactive")
 		return false
 	if maxf(float(_scene_handoff.elapsed), (Time.get_ticks_msec() - int(_scene_handoff.started)) / 1000.0) >= WAIT_LIMIT:
@@ -1365,7 +1382,6 @@ func _advance_scene_handoff(delta: float, snapshot: Dictionary, rig: Node3D, nod
 		_set_exit_black(smoothstep(0.0, 0.5, float(_scene_handoff.elapsed)))
 		if float(_scene_handoff.elapsed) >= 0.5: _commit_scene_handoff()
 		return true
-	var scene: Dictionary = snapshot.get("scene", {})
 	var here := map_key(current_map)
 	var matches_map := here == map_key(str(snapshot.get("map", "")))
 	var gameplay := str(_scene_handoff.gameplay_map)
@@ -1381,8 +1397,7 @@ func _advance_scene_handoff(delta: float, snapshot: Dictionary, rig: Node3D, nod
 			"run":str(snapshot.get("run_id", "")), "map":here}
 		_layer.hide()
 		return false
-	if str(scene.get("token", "")) != str(_scene_handoff.token) \
-			and str(scene.get("id", "")) in _scene_handoff.to:
+	if successor:
 		# The state packet may precede CHANGE_MAP. Keep black until both agree,
 		# then let the ordinary readiness barrier wait for the new native cast.
 		return not matches_map

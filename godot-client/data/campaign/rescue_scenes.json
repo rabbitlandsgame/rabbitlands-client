@@ -9,7 +9,13 @@
         "escort",
         "guard"
       ],
-      "handoff": {"mode": "hold", "when": "watch", "to": ["measure.rescue.injured"]},
+      "handoff": {
+        "mode": "hold",
+        "when": "watch",
+        "to": [
+          "measure.rescue.injured"
+        ]
+      },
       "title": "A Daughter in the Dark",
       "duration": 64,
       "fov": 46,
@@ -938,7 +944,21 @@
     },
     "measure.rescue.commitment": {
       "live_camera": "gameplay",
-      "handoff": {"mode": "fade", "when": "accept", "to": ["measure.rescue.descent"], "variants": {"returned": {"mode": "hold", "to": ["measure.rescue.descent"]}}},
+      "handoff": {
+        "mode": "fade",
+        "when": "accept",
+        "to": [
+          "measure.rescue.descent"
+        ],
+        "variants": {
+          "returned": {
+            "mode": "hold",
+            "to": [
+              "measure.rescue.descent"
+            ]
+          }
+        }
+      },
       "title": "The Way to the Mine",
       "duration": 52,
       "fov": 43,
@@ -1209,7 +1229,10 @@
       }
     },
     "measure.rescue.descent": {
-      "handoff": {"mode": "fade", "gameplay_map": "landfall_insides"},
+      "handoff": {
+        "mode": "fade",
+        "gameplay_map": "landfall_insides"
+      },
       "title": "Below the Lanterns",
       "duration": 62,
       "fov": 45,
@@ -1479,7 +1502,13 @@
     },
     "measure.rescue.captive": {
       "live_camera": "gameplay",
-      "handoff": {"mode": "fade", "to": ["measure.rescue.resolved", "measure.rescue.shadow"]},
+      "handoff": {
+        "mode": "fade",
+        "to": [
+          "measure.rescue.resolved",
+          "measure.rescue.shadow"
+        ]
+      },
       "title": "Liora",
       "release_actors_after": {
         "goblin_boss": 28
@@ -1768,7 +1797,12 @@
     },
     "measure.rescue.resolved": {
       "live_camera": "gameplay",
-      "handoff": {"mode": "fade", "to": ["measure.rescue.shadow"]},
+      "handoff": {
+        "mode": "fade",
+        "to": [
+          "measure.rescue.shadow"
+        ]
+      },
       "title": "A Welcome in Landfall",
       "duration": 60,
       "fov": 44,
@@ -1871,7 +1905,7 @@
           "at": 51,
           "speaker": "Elen Reed",
           "speaker_actor": "mother",
-          "text": "Come and visit us in Landfall. Ask for Elen Reed. You will always be welcome in our home."
+          "text": "Come and visit us at Landfall’s inn, near Hob Tennant. Liora and I are staying there while we find our feet again. You will always be welcome."
         }
       ],
       "events": [
@@ -2057,6 +2091,75 @@
         "out_seconds": 0.8,
         "in_seconds": 0.8
       }
+    },
+    "measure.rescue.checkin": {
+      "title": "Check in with Liora",
+      "duration": 70,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "live_camera": "gameplay",
+      "required_actors": [
+        "mother",
+        "daughter"
+      ],
+      "cast_roles": [
+        "mother",
+        "daughter",
+        "protagonist",
+        "recipient"
+      ],
+      "native_roles": [
+        "protagonist",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "shots": [],
+      "dialogue_holds": [
+        16,
+        32,
+        52,
+        70
+      ],
+      "choice_id": "rescue_checkin",
+      "choice_actor": "recipient",
+      "choice_at": 32,
+      "choice_response_until": 52,
+      "response_speaker": "Liora Reed",
+      "response_actor": "daughter",
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Elen Reed",
+          "speaker_actor": "mother",
+          "text": "You found us. Hob has made room for us here. Liora wanted to show you what she has been drawing."
+        },
+        {
+          "at": 16,
+          "speaker": "Liora Reed",
+          "speaker_actor": "daughter",
+          "text": "I drew the lanterns so I would remember the way out. Sometimes I still hear that cold voice. Do you want to see?"
+        },
+        {
+          "at": 52,
+          "speaker": "Elen Reed",
+          "speaker_actor": "mother",
+          "text": "We are safe here. Thank you for coming back. Whatever Liora remembers, she can tell us in her own time."
+        }
+      ],
+      "cues": [
+        {
+          "at": 0,
+          "actor": "mother",
+          "action": "idle",
+          "face": "recipient"
+        },
+        {
+          "at": 0,
+          "actor": "daughter",
+          "action": "idle",
+          "face": "recipient"
+        }
+      ]
     }
   }
 }

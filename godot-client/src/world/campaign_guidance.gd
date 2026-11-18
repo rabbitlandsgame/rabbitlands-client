@@ -18,7 +18,8 @@ static func is_guided(snapshot: Dictionary) -> bool:
 
 static func navigation_targets(snapshot: Dictionary, current_map: String, tracked: bool) -> Array[Dictionary]:
 	var result:Array[Dictionary]=[]
-	if not tracked or str(snapshot.get("kind",""))!="shelves":return result
+	if not tracked or (str(snapshot.get("kind",""))!="shelves" \
+			and str(snapshot.get("key",""))!="rescue_checkin"):return result
 	var travel:Dictionary=snapshot.get("travel",{})
 	if travel.is_empty():return result
 	var here:=EloriaProtocol.map_id_from_reference(current_map)
@@ -100,7 +101,8 @@ static func legend(snapshot: Dictionary) -> String:
 func apply_snapshot(snapshot: Dictionary, objects: Dictionary, actors: Dictionary,
 		current_map: String, local_tile: Vector2i, tracked: bool, blocked: bool) -> void:
 	if not is_guided(snapshot) or not bool(snapshot.get("active", false)) \
-			or (not (snapshot.get("travel", {}) as Dictionary).is_empty() and str(snapshot.get("kind",""))!="shelves") \
+			or (not (snapshot.get("travel", {}) as Dictionary).is_empty() and str(snapshot.get("kind",""))!="shelves" \
+				and str(snapshot.get("key", ""))!="rescue_checkin") \
 			or EloriaProtocol.map_id_from_reference(str(snapshot.get("map", ""))) \
 			!= EloriaProtocol.map_id_from_reference(current_map):
 		clear()

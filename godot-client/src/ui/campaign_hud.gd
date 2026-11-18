@@ -321,13 +321,15 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 	_local_tile = local_tile
 	_current_map = EloriaProtocol.map_id_from_reference(current_map)
 	var active := bool(snapshot.get("active", false))
-	var complete := str(snapshot.get("kind", "")) == "rescue" and bool(snapshot.get("completed", false))
+	var checkin := str(snapshot.get("key", "")) == "rescue_checkin"
+	var complete := str(snapshot.get("kind", "")) == "rescue" and not checkin and bool(snapshot.get("completed", false))
 	var matches := EloriaProtocol.map_id_from_reference(str(snapshot.get("map", ""))) == _current_map
 	var party: Dictionary = snapshot.get("party", {})
 	var can_join := bool(party.get("can_join", false))
 	var can_own := bool(party.get("can_start_own", false)) and str(party.get("role", "")) != "owner"
 	var travel: Dictionary = snapshot.get("travel", {})
 	var travelling := not travel.is_empty()
+	if checkin and matches and not (snapshot.get("targets", []) as Array).is_empty(): travelling = false
 	_available = not blocked and not (complete and _dismissed_completion == tracking_identity(snapshot)) \
 		and (active and matches or travelling or not active and (bool(snapshot.get("available", false)) or can_join or can_own))
 	visible = _available
@@ -361,7 +363,12 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 		var ledger:Dictionary=snapshot.get("shelves",{})
 		_entry.text=str(ledger.get("start_label","Start work")) if bool(ledger.get("can_begin",false)) else "Do now · Show on map"
 		_entry.tooltip_text="Start here when you are ready." if bool(ledger.get("can_begin",false)) else "Show the destination or the next door on your map. Walk there when you are ready; Untrack keeps the assignment in your quest log."
+	if checkin:
+		_entry.visible = travelling
+		_entry.text = "Show Liora on map"
+		_entry.tooltip_text = "Visit Elen and Liora at Landfall's inn, near Hob Tennant."
 	_leave.visible = active and not travelling
+	if checkin: _leave.hide()
 	if str(snapshot.get("kind", ""))=="shelves" and _current_map=="landfall_town":
 		_leave.visible = bool((snapshot.get("shelves",{}) as Dictionary).get("private_practice",false))
 	_leave.text = "Continue" if complete else "Return"
@@ -436,6 +443,9 @@ func _request_leave() -> void:
 
 func _request_entry() -> void:
 	var kind := str(_state.get("kind", ""))
+	if str(_state.get("key", "")) == "rescue_checkin":
+		action_requested.emit("rescue_checkin_destination")
+		return
 	if kind=="shelves" and not (_state.get("travel",{}) as Dictionary).is_empty() \
 			and not bool((_state.get("shelves",{}) as Dictionary).get("can_begin",false)):
 		action_requested.emit("shelves_destination")
@@ -494,6 +504,7 @@ func _rescue_local() -> bool:
 		and EloriaProtocol.map_id_from_reference(str(_state.get("map", ""))) == _current_map
 
 func _apply_rescue(rescue: Dictionary) -> void:
+	if rescue.has("checkin"): rescue = {}
 	var present := not rescue.is_empty() and str(_state.get("kind", "")) == "rescue"
 	_rescue.visible = present
 	_rescue_actions.visible = present and _rescue_local()
@@ -850,7 +861,8 @@ func _nearby(target: Dictionary) -> bool:
 	return maxi(absi(_local_tile.x - tile.x), absi(_local_tile.y - tile.y)) <= maxf(1.0, float(target.get("range", 3.0)))
 
 func _request_target(identity: String, object_id: int) -> void:
-	if not (_state.get("travel", {}) as Dictionary).is_empty() \
+	if (not (_state.get("travel", {}) as Dictionary).is_empty() \
+			and str(_state.get("key", "")) != "rescue_checkin") \
 			or EloriaProtocol.map_id_from_reference(str(_state.get("map", ""))) != _current_map:
 		return
 	for target: Dictionary in _state.get("targets", []):

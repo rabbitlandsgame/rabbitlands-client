@@ -86,7 +86,8 @@ func has_campaign() -> bool:
 		or bool(party.get("can_join", false)) or bool(party.get("can_start_own", false)))
 
 func rescue_completed() -> bool:
-	return str(_campaign.get("kind", "")) == "rescue" and bool(_campaign.get("completed", false))
+	return str(_campaign.get("kind", "")) == "rescue" and str(_campaign.get("key", "")) != "rescue_checkin" \
+		and bool(_campaign.get("completed", false))
 
 func campaign_entry() -> Dictionary:
 	if not has_campaign():

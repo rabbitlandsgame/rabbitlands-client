@@ -580,7 +580,7 @@
           "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
-          "text": "Thank you for your help, here is 500 gold coins for your work. Next we will need to gather ingredients for fire essences to supply our offensive magic. Please gather 100 coal and 50 flint and bring them to me so we can mix a new supply of fire essences. I have marked the mines on your map. You will need a pickaxe to harvest these, so please take these with you."
+          "text": "Welcome back. Now put your fire magic to work along the next supply route. Gather 100 Coal and 50 Flint, then bring them here to mix Fire Essences. The workings are marked on your map. Take these pickaxes with you."
         }
       ]
     },
@@ -609,7 +609,7 @@
           "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
-          "text": "Thank you for your help, here is 500 gold coins for your work. The last basic essence we need to prepare is water essence. Please gather 100 kelp and 50 watercress and bring them to me so we can mix a new supply of water essences. You will need to travel east to Reedfall to gather these. I have marked their location on your map."
+          "text": "One last practice batch: Water Essence, so our mages can recover ether. Gather 100 Kelp and 50 Watercress east in Reedfall, then bring them back to mix. I have marked both gathering beds on your map."
         }
       ]
     },
@@ -676,7 +676,7 @@
           "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
-          "text": "Thank you â€” that is a sound practice batch. You have earned 500 gold and the lesson experience. The shop stock will remain reserved until we secure the gathering crews and their supply route."
+          "text": "A sound practice batch. Here is your pay. Reliable shipments will let us fill these shelves again; first we must make the gathering routes safe."
         }
       ],
       "handoff": {
@@ -686,7 +686,8 @@
           "measure.shelves.basics.accepted_fire",
           "measure.shelves.basics.accepted_water",
           "measure.shelves.basics.trainer"
-        ]
+        ],
+        "unless_variant": "final"
       }
     },
     "measure.shelves.basics.missing": {
@@ -743,13 +744,13 @@
           "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
-          "text": "Next we will need to teach you the basics of magic so that you can help defend our patrols. Go to Ostrid Hollin at the temple and she will teach you."
+          "text": "You have made our first healing supplies. Before you take the longer road, learn how to use them. Find Ostrid Hollin at the temple; she will teach you to heal, strike with fire, and recover ether."
         }
       ]
     },
     "measure.shelves.basics.heal": {
       "title": "Practicing the Basics",
-      "duration": 76,
+      "duration": 24,
       "entry_seconds": 0,
       "exit_seconds": 0,
       "fov": 48,
@@ -765,41 +766,20 @@
       "stage_protagonist": false,
       "shots": [],
       "dialogue_holds": [
-        20.0,
-        38.0,
-        56.0,
-        76
+        24
       ],
       "lines": [
         {
           "at": 0,
           "speaker": "Ostrid Hollin",
           "speaker_actor": "mentor",
-          "text": "We need all the help we can get to protect the city. Let's go into the temple to practice."
-        },
-        {
-          "at": 20,
-          "speaker": "Ostrid Hollin",
-          "speaker_actor": "mentor",
-          "text": "There are three basic spells that you will need to know to help our patrols. Open the spell window and we will get started."
-        },
-        {
-          "at": 38,
-          "speaker": "Ostrid Hollin",
-          "speaker_actor": "mentor",
-          "text": "There are many different spells available for advanced mages, but for now we will focus on how to heal yourself, how to damage an enemy with fire, and how to restore your ether when you are low. Many spells have different targeting options. You see for heal four options are available. From left to right you can target yourself, another individual target, your allies, or an area of effect. The ether, reagent costs, and recommended magic levels are higher for targeting others than yourself."
-        },
-        {
-          "at": 56,
-          "speaker": "Ostrid Hollin",
-          "speaker_actor": "mentor",
-          "text": "Healing yourself costs 5 ether and 1 life essence. The amount of health you heal will scale with your magic level and your magic defense attribute. You can cast heal by clicking in this window or using it from the quickspell bar if you have it assigned. Here are some life essences for you to practice with. Try casting heal on yourself."
+          "text": "First, mend your own wounds. Open Magic and choose Heal on yourself, or use its quickspell shortcut. It costs five ether and one Life Essence. I have given you practice supplies. Try it now; I will watch your cast."
         }
       ]
     },
     "measure.shelves.basics.fire": {
       "title": "Practicing the Basics",
-      "duration": 40,
+      "duration": 24,
       "entry_seconds": 0,
       "exit_seconds": 0,
       "fov": 48,
@@ -815,27 +795,20 @@
       "stage_protagonist": false,
       "shots": [],
       "dialogue_holds": [
-        20.0,
-        40
+        24
       ],
       "lines": [
         {
           "at": 0,
           "speaker": "Ostrid Hollin",
           "speaker_actor": "mentor",
-          "text": "Next let's learn to cast fire bolt on your opponents. Open the spell window."
-        },
-        {
-          "at": 20,
-          "speaker": "Ostrid Hollin",
-          "speaker_actor": "mentor",
-          "text": "Here you see there are only two options for offensive magic: one target or an area of effect. Casting fire bolt on one target costs 5 ether and 1 fire essence. The amount of damage your spell will do scales with your magic level, your magic offense attribute, and any elemental weaknesses or resistances on the target. Try casting fire bolt on the practice dummy over there."
+          "text": "Now aim Fire Bolt at the practice dummy. Choose its individual-target version in Magic. One bolt costs five ether and one Fire Essence. Watch the target as you cast; your magic and its defenses decide the damage."
         }
       ]
     },
     "measure.shelves.basics.ether": {
       "title": "Practicing the Basics",
-      "duration": 58,
+      "duration": 24,
       "entry_seconds": 0,
       "exit_seconds": 0,
       "fov": 48,
@@ -851,34 +824,20 @@
       "stage_protagonist": false,
       "shots": [],
       "dialogue_holds": [
-        20.0,
-        38.0,
-        58
+        24
       ],
       "lines": [
         {
           "at": 0,
           "speaker": "Ostrid Hollin",
           "speaker_actor": "mentor",
-          "text": "Note that your ether is going down as we are casting spells. You can also regain ether with magic. Open the spell window."
-        },
-        {
-          "at": 20,
-          "speaker": "Ostrid Hollin",
-          "speaker_actor": "mentor",
-          "text": "The gain ether spell can be used when you are not engaged in melee combat to restore ether over time. The amount of ether you gain scales with your magic level and magic defense attribute. Restoring your own ether costs 1 water essence and no ether. Try casting gain ether on yourself."
-        },
-        {
-          "at": 38,
-          "speaker": "Ostrid Hollin",
-          "speaker_actor": "mentor",
-          "text": "Gain Ether is also called Restore Ether. Entering melee combat ends its recovery. Poison and ranged attacks do not interrupt it."
+          "text": "Your ether falls when you cast. Restore Ether, also called Gain Ether, spends one Water Essence to recover it over time. Try it on yourself now. Make room before using it in a fight: entering melee ends the recovery."
         }
       ]
     },
     "measure.shelves.basics.spar": {
       "title": "Practicing the Basics",
-      "duration": 40,
+      "duration": 24,
       "entry_seconds": 0,
       "exit_seconds": 0,
       "fov": 48,
@@ -894,21 +853,14 @@
       "stage_protagonist": false,
       "shots": [],
       "dialogue_holds": [
-        20.0,
-        40
+        24
       ],
       "lines": [
         {
           "at": 0,
           "speaker": "Ostrid Hollin",
           "speaker_actor": "mentor",
-          "text": "Meet me in the sparring arena through the doorway on the right. Let's spar with magic to see what you have learned. Keep your health and ether up, and try to take me down with your fire bolt."
-        },
-        {
-          "at": 20,
-          "speaker": "Ostrid Hollin",
-          "speaker_actor": "mentor",
-          "text": "This is a private, nonlethal practice bout. I will stop if either of us falls. Talk to me to review the lesson or retry."
+          "text": "Meet me in the sparring arena through the doorway on the right. Let's spar with magic to see what you have learned. Keep your health and ether up, and try to take me down with your fire bolt.\n\nThis is a private, nonlethal practice bout. I will stop if either of us falls. Talk to me to review the lesson or retry."
         }
       ]
     },
@@ -966,9 +918,14 @@
           "at": 0,
           "speaker": "Ostrid Hollin",
           "speaker_actor": "mentor",
-          "text": "Excellent work. You should be ready to defend our caravans. Go back to Ilka when you are ready to help. Here are a few more essences for you to use to continue practicing."
+          "text": "Well done. You can heal, strike with fire, and recover ether. Take these essences for the road, then return to Ilka. She will help you put those lessons to use on the next supply run."
         }
-      ]
+      ],
+      "handoff": {
+        "mode": "fade",
+        "when": "early",
+        "gameplay_map": "landfall"
+      }
     },
     "measure.shelves.basics.mixing_life": {
       "title": "Restocking the Basics",
@@ -1699,7 +1656,7 @@
           "speaker_actor": "mentor",
           "variants": {
             "fire": "Brenna’s quarry at Blackcut has been seized. Our Flint is sitting behind a barricade, and the crew cannot finish the next shipment. Will you help her reopen the workings?\n\nWalk to the marked quarry west of town. Brenna will explain the approaches. I have set aside a guard allowance in your pack or personal storage. It is paid once; Fire stock stays reserved until the whole route is safe.",
-            "fire_coal": "The Flint is secured. Brenna still has eight thousand Coal stranded below Lantern Mine. Her miners need another two thousand, and a safe way to bring the loads out.\n\nEnter Lantern Mine and follow the marked route to the Coal workings. Meet Brenna there and choose a hauling plan. You can go when ready; the assignment stays in your quest log.",
+            "fire_coal": "The Flint is secured. Brenna has most of the Coal ready in the old stock bay. The miners only need six hundred fresh Coal, but the damaged lift is keeping the whole shipment underground.\n\nMeet her at the marked Coal workings in Lantern Mine. Choose a hauling plan, then keep the route safe while the crew brings the loads out.",
             "fire_sapper": "The cut ropes and powder marks tell the same story. Krek Cinderhook is preparing another attack from a service yard beside Blackcut. Stop him before the crew takes the road again.\n\nMeet Brenna at the marked yard near Blackcut. The signal, water channels and powder store will change the fight. Your party can help, and you can untrack this until you are ready."
           },
           "text": "Brenna’s quarry at Blackcut has been seized. Our Flint is sitting behind a barricade, and the crew cannot finish the next shipment. Will you help her reopen the workings?\n\nWalk to the marked quarry west of town. Brenna will explain the approaches. I have set aside a guard allowance in your pack or personal storage. It is paid once; Fire stock stays reserved until the whole route is safe."
@@ -1798,7 +1755,7 @@
           "at": 0,
           "speaker": "Brenna Flint",
           "speaker_actor": "mentor",
-          "text": "Eight thousand Coal is waiting in the old stock bay. The miners will finish another two thousand while we recover it. None of it counts until the loads reach the shipment store.\n\nThe lift needs three repair steps. Keep the mechanic safe and use the lift station to begin each one. Or we can clear three supports and take the old haul passage. That route is longer, with spiders in the side tunnels. Which plan shall we use?"
+          "text": "Most of our Coal is already cut: nine thousand four hundred in the stock bay, with six hundred still to mine. The trouble is getting it out.\n\nWe can repair the lift in three protected steps, or brace the old haul passage and clear its spiders. Choose our route. Once it is open, guard the loading paths while we finish the shipment."
         }
       ],
       "live_camera": "gameplay",
@@ -1990,7 +1947,6 @@
         "to": [
           "measure.shelves.fire.brief"
         ],
-        "gameplay_map": "landfall_town",
         "keep_dialogue": true
       }
     },
@@ -2143,7 +2099,7 @@
           "speaker_actor": "mentor",
           "variants": {
             "water": "Flint and Coal are reaching us again. But the coastal cutters have stopped coming. Someone is charging them to use their own water.\n\nWalk to the coastal waterworks marked east of the city and speak with Iona Reed. The keeper needs fresh water for Watercress and tidal water for Kelp. I have put 150 Life Essences, 300 Water Essences and 20 minor healing potions in your pouch. Overflow goes to storage. Heal Target restores a worker; Restore Ether replenishes your ether. The shop stock must wait until the whole route is secure.",
-            "water_cutters": "Both gathering channels are open. Iona has four villagers ready to bring in our first shipment: four thousand Kelp and two thousand Watercress. Two Kelp and one Watercress make one Water Essence.\n\nMeet them at the coastal landing. You can order Work, Regroup or Wait from the marked crew station. The hauler must bring every load into secured storage. Their cargo belongs to the shop; the smaller marked patches are available for your own spell ingredients. Keep the cutters alive, and use Heal Target if one falls.",
+            "water_cutters": "Both gathering channels are open. Iona is ready to bring in our first shipment: four hundred Kelp and two hundred Watercress.\n\nMeet the crew at the coastal landing. You can order Work, Regroup or Wait. Protect the loading point and anyone carrying a bag; the hauler must bring every load into secured storage. When one gathering job is finished, those hands will help with the other.",
             "water_barge": "The cutters have secured the ingredients. Now we need the boat to reach our landing. Follow the towpath beside it; you do not need to board.\n\nIona will offer the sheltered channel or the coastal passage. Order Sail when ready and Wait when the party needs to regroup. Heal the crew, but use Wood Planks to repair the hull at a safe halt. I have supplied twelve planks once; bring replacements from the general store if needed. Secured cargo survives a failed crossing.",
             "water_keeper": "The delivery proves this route can work, but Veyra Lockhand will keep attacking it while she holds the upper gatehouse. Confront her at the marked gatehouse.\n\nThe gate controls can separate her guards if you prefer. No particular spell is required. Watch for marked surges and move out before they strike. Once she is gone and you return with the news, I can promise Water Essence stock again."
           },
@@ -2243,7 +2199,7 @@
         {
           "speaker": "Iona Reed",
           "speaker_actor": "mentor",
-          "text": "Tamsin and I will cut Kelp, Nell will gather Watercress, and Ada will haul the bags from the loading point into storage. We work at the level-ten harvesting rate.\n\nOrder Work when you are ready. Regroup brings us to the active landing; Wait stops the crew. Only secured loads count. Once the first beds are cleared, we will move to the next landing together. Protect anyone who is isolated, and Heal Target a fallen worker.",
+          "text": "Tamsin and I will start on Kelp, Nell on Watercress, and Ada will haul our bags into storage. We need four hundred Kelp and two hundred Watercress. Anyone who finishes gathering will lend a hand at the other beds.\n\nOrder Work when you are ready. Regroup brings us to the active landing; Wait stops us. Protect the workers and use Heal Target if someone falls.",
           "at": 0
         }
       ],
@@ -2459,7 +2415,7 @@
           "speaker_actor": "recipient",
           "variants": {
             "water": "Fresh water reaches the Watercress, and tidal water reaches the Kelp. I should tell Ilka that the crew can begin.",
-            "water_cutters": "Four thousand Kelp and two thousand Watercress are secured. I should return to Ilka before we launch the shipment.",
+            "water_cutters": "The Kelp and Watercress shipment is secured. I should return to Ilka before we launch the boat.",
             "water_barge": "The cargo has reached the final landing. The ambushers’ orders point to Veyra at the upper gatehouse. Ilka needs to hear this.",
             "water_keeper": "Veyra is defeated and the gate controls are free. Iona can reopen the route. I should return to Ilka to restore Water Essence stock."
           },
@@ -2502,7 +2458,7 @@
           "speaker_actor": "mentor",
           "variants": {
             "water": "Both beds have water again. Here is your pay. Now let us put Iona’s cutters back to work.",
-            "water_cutters": "Four thousand Kelp and two thousand Watercress, all secured. You have earned this reward. The shipment still needs a boat and a safe passage.",
+            "water_cutters": "Four hundred Kelp and two hundred Watercress, safely secured. You have earned your pay. Now we need a boat and a safe passage for the shipment.",
             "water_barge": "The cargo arrived, but those orders explain why the attacks keep coming. Take your reward. We must deal with the keeper of that toll."
           },
           "at": 0,
@@ -2514,7 +2470,6 @@
         "to": [
           "measure.shelves.water.brief"
         ],
-        "gameplay_map": "landfall_town",
         "keep_dialogue": true
       }
     },

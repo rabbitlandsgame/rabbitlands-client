@@ -8,8 +8,8 @@ Experience below is the chapter bonus. Ordinary combat, gathering and mixing als
 
 | Chapter | What the player does | Bonus experience | Other reward |
 | --- | --- | --- | --- |
-| **Restocking the Basics** | Gather the marked ingredients and make 25 Life, Fire and Water Essences in turn. Return each practice batch to Ilka. | 500 / 1,000 / 1,500 Harvesting and Alchemy for the three batches | 500 gold per delivered batch, tools and food; merchant essence stock stays locked. |
-| **Practicing the Basics** | Learn Heal, Fire Bolt and Gain Ether in the temple, then spar with Ostrid in the arena. | 1,500 Magic | 25 Life, Fire and Water Essences. Ostrid has 200 health and uses gentle, nonlethal training spells. |
+| **Restocking the Basics** | Start with 25 Life Essences. After Ostrid's practical magic lesson, return to Ilka for the Fire and Water batches of 25 each. | 500 / 1,000 / 1,500 Harvesting and Alchemy for the three batches | 500 gold per delivered batch, tools and food; merchant essence stock stays locked. |
+| **Practicing the Basics** | After the first Life delivery, learn Heal, Fire Bolt and Gain Ether in the temple, then spar with Ostrid in the arena. Return to Ilka to continue the supply lessons. | 1,500 Magic | 25 Life, Fire and Water Essences. Ostrid has 200 health and uses gentle, nonlethal training spells. |
 | **A Harvest Worth Defending** | Protect four villagers with Harvesting 40 while they gather and store 10,000 Sage, then 5,000 Hearthroot. Intercept goblins coming from the Old Warren. Heal Target revives fallen workers. | 2,000 Harvesting, 1,500 Magic, 1,000 Defense | 1,500 gold, 100 Life and 100 Water Essences. Life stock remains locked until the raid. |
 | **The Hand Behind the Raids** | Enter the Old Warren with your party. Fight goblins and small wolves and find Grask, the orc directing the raids, in a deeper western cave. | 1,500 Attack, 1,500 Defense, 2,000 Magic | 2,500 gold, 150 Life Essences and Life Essence shop stock. |
 
@@ -18,7 +18,7 @@ Experience below is the chapter bonus. Ordinary combat, gathering and mixing als
 | Chapter | What the player does | Bonus experience | Other reward |
 | --- | --- | --- | --- |
 | **The Toll at Blackcut** | Meet Brenna at the Flint workings. Choose nine guards head-on, or silence the signal and clear six. Release four workers; protect them recovering 4,000 Flint and mining 1,000 more. | 1,500 Harvesting, 500 Defense | 750 gold, 75 Fire Essences; assault adds 500 Attack and 250 Defense XP; the quiet approach adds 500 Alchemy XP and 25 Fire Essences. |
-| **A Load Worth Lifting** | Meet the crew at the Lantern Mine Coal workings. Protect three lift repairs or clear three supports in the old haul passage. Secure 8,000 existing Coal and 2,000 newly mined Coal. | 1,000 Magic, 1,000 Defense | 1,000 gold, 20 minor healing potions and 100 Water Essences; the lift adds 500 Defense XP; the haul passage adds 500 Attack XP and 25 Fire Essences. |
+| **A Load Worth Lifting** | Meet the crew at the Lantern Mine Coal workings. Protect three lift repairs or clear three supports in the old haul passage. Secure 9,400 existing Coal and 600 newly mined Coal. | 1,000 Magic, 1,000 Defense | 1,000 gold, 20 minor healing potions and 100 Water Essences; the lift adds 500 Defense XP; the haul passage adds 500 Attack XP and 25 Fire Essences. |
 | **Cut the Fuse** | Confront Krek Cinderhook in the Blackcut service yard. Optional signal, water and powder preparations change the fight. Avoid marked blast areas. | 2,000 Magic, 1,500 Alchemy | 2,000 gold, one Enriched Fire Essence, and Fire Essence shop stock. Signal/water/powder preparations add 250 Alchemy/Defense/Magic XP respectively. |
 
 Ilka gives a once-only allowance of 350 Fire, 150 Life and 250 Water Essences, plus 20 minor healing potions, when assigning Blackcut. Overflow goes to personal storage. Shop stock remains locked until the final report. The four level-10 workers recover sealed merchant stock and mine the remaining resources using native harvesting rates. Their shipment never enters the player's inventory. The quest window distinguishes recovered and newly mined secured loads, carried goods and worker health.
@@ -29,20 +29,20 @@ Krek and his guards are present from the start. The signal stops reinforcement w
 
 Assignments mark the real worksites; players walk there and choose when to begin. Party helpers keep their own unfinished quests and receive no duplicate allowances or rewards. Portrait conversations combine consecutive lines from the same speaker, retain one camera framing, and show the recorded choice on replay. Reports hand directly into the next briefing. The final report closes on Continue. Public-world restoration keeps the player's current position rather than sending them back to the worksite entrance.
 
-The target is roughly 50–75 minutes including travel and combat, subject to a full-length pacing playtest. Native automated journeys accelerate quantities and clocks while retaining real movement, spell costs, creature deaths and reward validation.
+The Coal stage focuses on protected repairs and hauling the existing stock, with a smaller amount of fresh mining. Previously mined Coal and carried bags still count when resuming an older assignment. Workers keep their normal harvesting rates; secured loads and reward receipts are preserved.
 
 ### Where the Water Goes
 
 | Chapter | What the player does | Bonus experience | Other reward |
 | --- | --- | --- | --- |
 | **Water Behind the Gates** | Meet Iona at the coastal worksite (400, 315). Balance Fresh 2 / Tide 1 / Drain 0, or defeat six guards and breach their diversion. Both restore both gathering beds. | 1,000 Alchemy, 750 Magic | 1,000 gold and 100 Water Essences; repairs add 500 Alchemy XP, breaching adds 500 Attack XP. |
-| **The Cutters’ Share** | Protect two Kelp cutters, one Watercress gatherer and a hauler. Secure 4,000 Kelp and 2,000 Watercress across two loading sites. Order Work, Regroup or Wait. | 2,000 Harvesting, 1,000 Defense | 1,500 gold and 150 Water Essences. |
+| **The Cutters’ Share** | Protect two Kelp cutters, one Watercress gatherer and a hauler. Secure 400 Kelp and 200 Watercress across two loading sites. Cutters who finish one crop help with the other after delivering their bag. Order Work, Regroup or Wait. | 2,000 Harvesting, 1,000 Defense | 1,500 gold and 150 Water Essences. |
 | **A Boat Against the Current** | Follow the towpath beside the cargo boat. Choose three defended obstruction stops or stronger coastal ambushes. Order Sail at each landing; Wait halts the boat. | 1,500 Magic, 1,500 Defense | 2,000 gold and 20 minor healing potions. Sheltered adds 500 Defense XP and 10 potions; coastal adds 500 Attack XP and 500 gold. |
 | **The Keeper of the Toll** | Confront Veyra and four guards at the upper gatehouse (405, 325). Optional gates isolate guard pairs; avoid four-second marked surges. | 2,000 Magic, 2,000 Alchemy | 3,000 gold, one Enriched Water Essence and permanent Water Essence shop stock. Each used guard gate adds 250 Alchemy XP. |
 
 Ilka supplies 150 Life Essences, 300 Water Essences and 20 minor healing potions once when assigning the sluices. The boat assignment supplies twelve Wood Planks once. Overflow goes to personal storage. Heal Target revives crew members; Restore Ether replenishes the player's ether. Separate native Kelp and Watercress patches allow personal gathering and mixing without borrowing the merchant shipment.
 
-The level-10 cutters deliver bags to a loading point; the hauler walks them into secured storage. The ledger distinguishes cut, waiting and secured quantities for each crop. Once half of each shipment is secured and all old-bed cargo is deposited, the crew regroups at the second beds. There is no tide deadline. Only Work produces yields, with no cinematic or offline catch-up.
+The level-10 cutters deliver bags to a loading point; the hauler walks them into secured storage. The ledger distinguishes cut, waiting and secured quantities for each crop. Once half of each shipment is secured and all old-bed cargo is deposited, the crew regroups at the second beds. Every bag keeps its original crop until deposited. There is no tide deadline. Only Work produces yields, with no cinematic or offline catch-up. Existing secured cargo counts toward the shorter shipment without being discarded.
 
 The cargo boat follows a connected route through three landings while players use the adjacent towpath. It waits if the party falls behind. Ada must be standing to pilot it. A Wood Plank restores 40 hull at a safe halt; healing cannot repair the boat. Secured loads, completed preparations and landing checkpoints survive retries. Unsecured bags are lost on defeat. A broken hull or the story owner's defeat offers Retry/Cancel at the saved landing.
 
@@ -70,7 +70,7 @@ The retained route-choice chapters show their extra experience and item rewards 
 
 ### Protecting the crew
 
-Fenna, Sela, Nell and Ada have Harvesting 40 and gather Sage and Hearthroot once every 0.25 seconds per worker, carrying 250 items per trip. The quest window separately shows gathered items, items in bags and items delivered to the crew store. Only deliveries complete a shipment. The cargo belongs to Ilka and never enters the player's tradable inventory. Personal storage remains separate.
+Fenna, Sela, Nell and Ada have Harvesting 40 and use the normal harvesting rates: 0.2 seconds per Sage and 0.25 seconds per Hearthroot, carrying 250 items per trip. The quest window separately shows gathered items, items in bags and items delivered to the crew store. Only deliveries complete a shipment. The cargo belongs to Ilka and never enters the player's tradable inventory. Personal storage remains separate.
 
 The four workers have visible health bars and companion rows beside the human party. Downed workers stop working until a successful Heal Target cast revives them. A story-owner defeat resets the current field and offers Retry or Cancel; a completed Sage shipment survives a later Hearthroot defeat. Pausing or disconnecting saves progress and worker health without offline production. Gathering swings are four times faster than at level 10; hauling and combat still add to completion time.
 

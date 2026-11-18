@@ -314,9 +314,11 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"campaign_party_v1",
 	"campaign_cart_v1",
 	"campaign_rescue_v1",
+	"campaign_rescue_checkin_v1",
 	"campaign_shelves_v1",
 	"campaign_shelves_travel_v1",
 	"campaign_shelves_basics_v1",
+	"campaign_shelves_early_magic_v1",
 	"campaign_shelves_patrol_v1",
 	"campaign_shelves_fire_v1",
 	"campaign_shelves_water_v1",
@@ -4292,8 +4294,15 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 	elif str((scene.get("choice",{}) as Dictionary).get("id","")).begins_with("shelves_") or not (value.get("shelves",{}) as Dictionary).is_empty():
 		return {"type":"invalid","error":"campaign_shelves_binding"}
 	var rescue: Dictionary = value.get("rescue", {})
-	if str(value.get("kind", "")) == "rescue" and map_id_from_reference(str(value.get("map", ""))) not in ["landfall", "landfall_insides"]:
+	var checkin := str(value.get("key", "")) == "rescue_checkin"
+	var rescue_maps: Array = ["landfall_town"] if checkin else ["landfall", "landfall_insides"]
+	if str(value.get("kind", "")) == "rescue" and map_id_from_reference(str(value.get("map", ""))) not in rescue_maps:
 		return {"type":"invalid", "error":"campaign_rescue_map"}
+	if checkin and (str(value.get("kind", "")) != "rescue" or str(value.get("stage", "")) != "checkin" \
+			or not rescue.has("checkin") or (not scene.is_empty() and str(scene.get("id", "")) != "measure.rescue.checkin")):
+		return {"type":"invalid", "error":"campaign_rescue_checkin"}
+	if str(rescue.get("stage", "")) == "checkin" and not checkin:
+		return {"type":"invalid", "error":"campaign_rescue_checkin_binding"}
 	if str(value.get("kind", "")) == "rescue" and bool(value.active) and rescue.is_empty():
 		return {"type": "invalid", "error": "campaign_rescue_missing"}
 	if not rescue.is_empty():
@@ -4303,13 +4312,16 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 		if int(patient.actor_id) > 0 and int((value.get("actors", {}) as Dictionary).get("mother", -1)) != int(patient.actor_id):
 			return {"type": "invalid", "error": "campaign_rescue_patient_binding"}
 	var rescue_choice := str((scene.get("choice", {}) as Dictionary).get("id", ""))
-	if rescue_choice in ["rescue_response", "rescue_accept", "rescue_reward"]:
+	if rescue_choice in ["rescue_response", "rescue_accept", "rescue_reward", "rescue_checkin"]:
 		var allowed_scenes: Array = {"rescue_response":["measure.rescue.abduction", "measure.rescue.injured"],
-			"rescue_accept":["measure.rescue.commitment"], "rescue_reward":["measure.rescue.resolved"]}[rescue_choice]
+			"rescue_accept":["measure.rescue.commitment"], "rescue_reward":["measure.rescue.resolved"],
+			"rescue_checkin":["measure.rescue.checkin"]}[rescue_choice]
 		if str(value.get("kind", "")) != "rescue" or rescue.is_empty() or str(scene.get("id", "")) not in allowed_scenes:
 			return {"type": "invalid", "error": "campaign_rescue_choice"}
 		if rescue_choice == "rescue_reward" and not _campaign_integer((scene.get("actors", {}) as Dictionary).get("recipient"), 1, 2147483647.0):
 			return {"type": "invalid", "error": "campaign_rescue_recipient"}
+		if rescue_choice == "rescue_checkin" and (not checkin or str(rescue.stage) != "checkin"):
+			return {"type":"invalid", "error":"campaign_rescue_checkin_choice"}
 	if (not (value.get("cart", {}) as Dictionary).is_empty() or not (value.get("inquiry", {}) as Dictionary).is_empty() \
 			or str((scene.get("choice", {}) as Dictionary).get("id", "")) in ["cart_release", "claims_lead"] \
 			or str((scene.get("inspection", {}) as Dictionary).get("id", "")) == "cart_assessment") \
@@ -4563,8 +4575,15 @@ static func campaign_rescue_valid(rescue: Variant) -> bool:
 	if rescue.is_empty():
 		return true
 	if rescue.get("stage") not in ["choice", "ambush", "injured", "ready", "to_mine", "mine", "boss", "boss_confrontation", "boss_defeated", \
-			"daughter_freed", "aftermath", "burned", "reward", "complete"] \
+			"daughter_freed", "aftermath", "burned", "reward", "complete", "checkin"] \
 			or rescue.get("branch") not in ["", "help", "watch"]:
+		return false
+	if str(rescue.stage) == "checkin":
+		var visit: Variant = rescue.get("checkin")
+		if not visit is Dictionary or not visit.get("completed") is bool or not visit.get("visiting") is bool \
+				or visit.get("answer") not in ["", "listen", "rest"]:
+			return false
+	elif rescue.has("checkin"):
 		return false
 	for field: String in ["mother", "patient", "daughter", "reward", "supplies"]:
 		if not rescue.get(field) is Dictionary:
@@ -4700,7 +4719,7 @@ static func campaign_scene_choice_valid(choice: Variant) -> bool:
 	var allowed: Array = {"opening_rescue": ["defend", "repair", "evacuate"],
 		"cart_release": ["unload", "lever", "haul"], "claims_lead": ["physical", "chronology", "records"],
 		"rescue_response": ["help", "watch"], "rescue_accept": ["accept", "defer"],
-		"rescue_reward": ["sword", "bow", "wand"]}.get(str(choice.get("id", "")),
+		"rescue_reward": ["sword", "bow", "wand"], "rescue_checkin": ["listen", "rest"]}.get(str(choice.get("id", "")),
 			SHELVES_CHOICE_OPTIONS.get(str(choice.get("id", "")), []))
 	if allowed.is_empty() or not choice.get("selected") is String \
 			or (not str(choice.selected).is_empty() and choice.selected not in allowed):
