@@ -8,6 +8,7 @@ func decision(f: Dictionary, name: String) -> void:
 	f.scene._scene_id=f.state.scene.id
 	f.scene._definition=Scene.scene_definitions()[f.state.scene.id].duplicate(true)
 	if name=="resolved":
+		f.state.scene.actors.recipient=1
 		f.scene._actors.recipient=f.nodes[1]
 		f.scene._posts.recipient=f.scene._posts.protagonist
 	f.state.scene.choice.id=ids[name]
@@ -41,7 +42,8 @@ func run() -> void:
 		expect(rewarded.scene._caption.text==rewarded.state.scene.choice.response and not rewarded.scene._choice_waiting,
 			"the confirmed weapon remains acknowledged without another choice prompt at "+str(moment))
 	rewarded.scene.elapsed=51;rewarded.scene._update_caption()
-	expect(rewarded.scene._caption.text.contains("always be welcome") and rewarded.events.choices==["sword"],"the single weapon selection proceeds directly to Elen's farewell")
+	var farewell:Dictionary=(rewarded.scene._definition.lines as Array).filter(func(line:Dictionary)->bool:return float(line.at)==51)[0]
+	expect(rewarded.scene._caption.text==farewell.text and rewarded.events.choices==["sword"],"the single weapon selection proceeds directly to Elen's authored farewell")
 	dispose(rewarded);await process_frame
 
 	var f:=fixture();tick(f,1);f.scene.skip();tick(f)

@@ -770,6 +770,35 @@
         }
       ]
     },
+    "measure.shelves.basics.heal_target": {
+      "title": "Practicing the Basics",
+      "duration": 24,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "fov": 48,
+      "live_camera": "gameplay",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "protagonist",
+        "recipient"
+      ],
+      "stage_protagonist": false,
+      "shots": [],
+      "dialogue_holds": [
+        24
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Ostrid Hollin",
+          "speaker_actor": "mentor",
+          "text": "Now tend an ally. I have a practice wound you can safely mend. Open Magic, choose Heal Target at power one and Cast, then click me. You can do this from Magic level zero. It costs five ether, one Life Essence and one Water Essence. Watch my health rise."
+        }
+      ]
+    },
     "measure.shelves.basics.fire": {
       "title": "Practicing the Basics",
       "duration": 24,
@@ -795,7 +824,10 @@
           "at": 0,
           "speaker": "Ostrid Hollin",
           "speaker_actor": "mentor",
-          "text": "Now aim Fire Bolt at the practice dummy. Choose its individual-target version in Magic. One bolt costs five ether and one Fire Essence. Watch the target as you cast; your magic and its defenses decide the damage."
+          "text": "Now aim Fire Bolt at the practice dummy. Choose its individual-target version in Magic. One bolt costs five ether and one Fire Essence. Watch the target as you cast; your magic and its defenses decide the damage.",
+          "variants": {
+            "ally_healed": "That helped. Heal Target is how you keep another person standing.\n\nNow aim Fire Bolt at the practice dummy. Choose its individual-target version in Magic. One bolt costs five ether and one Fire Essence. Watch the target as you cast; your magic and its defenses decide the damage."
+          }
         }
       ]
     },

@@ -6065,6 +6065,8 @@ func _overhead_health_for(actor_id: int, dto: Dictionary,
 		return true
 	if _is_shelves_training_opponent(actor_id, dto):
 		return true
+	if _is_shelves_practice_patient(actor_id, dto):
+		return true
 	if _is_shelves_grower(actor_id, dto):
 		return true
 	if _is_rescue_companion(actor_id):
@@ -15712,6 +15714,7 @@ func _floating_feedback_row(preferred_y: float, lowest_y: float) -> float:
 func _on_window_size_changed() -> void:
 	_fit_hud_action_buttons.call_deferred()
 	_fit_stats_window_to_viewport.call_deferred()
+	_fit_popup_to_viewport.call_deferred()
 	_layout_full_window_views()
 	# Match the render viewport to the actual drawable area so resizing changes
 	# camera aspect instead of stretching a fixed 16:9 render target. The
@@ -17635,6 +17638,8 @@ func _spell_target_candidate(spell_id: int, actor_id: int) -> bool:
 			and spell.get("scope") == "target" and spell.get("effect") == "heal"
 	if _is_boss_objective(actor_id):
 		return not bool(spell.get("hostile", false)) and spell.get("effect") in ["heal", "regeneration", "dispel"]
+	if _is_shelves_practice_patient(actor_id, actor):
+		return not bool(spell.get("hostile", false)) and spell.get("scope") == "target" and spell.get("effect") == "heal"
 	if bool(spell.get("hostile", false)):
 		if spell.get("effect") == "mana_drain" and int(actor.get("kind", 0)) not in [1, 4]: return false
 		if spell.get("effect") == "disrupt" and not ReplicatedActor3D.is_summon(actor): return false
@@ -19104,6 +19109,16 @@ func _is_rescue_companion(actor_id: int) -> bool:
 	return int(actual.get("kind", 0)) == 2 and EloriaProtocol.campaign_rescue_valid(snapshot.get("rescue", {})) \
 		and not (snapshot.get("rescue", {}) as Dictionary).is_empty()
 
+func _is_shelves_practice_patient(actor_id: int, dto: Dictionary) -> bool:
+	var state: Dictionary = AppState.campaign
+	var ledger: Dictionary = state.get("shelves", {})
+	var actors: Dictionary = state.get("actors", {})
+	return actor_id > 0 and int(dto.get("kind", 0)) == 2 and str(state.get("kind", "")) == "shelves" \
+		and bool(state.get("active", false)) and not str(state.get("run_id", "")).is_empty() \
+		and bool(ledger.get("private_practice", false)) and not bool(ledger.get("sparring", false)) \
+		and int(actors.get("practice_patient", -1)) == actor_id and int(actors.get("mentor", -1)) == actor_id \
+		and EloriaProtocol.map_id_from_reference(str(state.get("map", ""))) == EloriaProtocol.map_id_from_reference(AppState.current_map)
+
 func _is_shelves_training_opponent(actor_id: int, dto: Dictionary) -> bool:
 	var state:Dictionary=AppState.campaign
 	var ledger:Dictionary=state.get("shelves",{})
@@ -19160,8 +19175,10 @@ func _send_attack(actor_id: int) -> void:
 ## built only from text options answers the moment a button is clicked and
 ## closes, because each option *is* the action.
 func _sync_popup() -> void:
+	var scroll := _ensure_popup_scroll()
 	for child: Node in popup_options.get_children():
 		if is_instance_valid(child):
+			popup_options.remove_child(child)
 			child.queue_free()
 	_popup_radio_groups.clear()
 	_popup_entries.clear()
@@ -19181,6 +19198,7 @@ func _sync_popup() -> void:
 			EloriaProtocol.POPUP_DISPLAY_TEXT:
 				var display := Label.new()
 				display.text = label
+				display.size.x = maxf(1.0, popup_text.size.x)
 				display.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 				popup_options.add_child(display)
 			EloriaProtocol.POPUP_TEXT_OPTION:
@@ -19203,6 +19221,8 @@ func _sync_popup() -> void:
 				needs_confirm = true
 				var prompt := Label.new()
 				prompt.text = label
+				prompt.size.x = maxf(1.0, popup_text.size.x)
+				prompt.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 				popup_options.add_child(prompt)
 				var entry := LineEdit.new()
 				entry.max_length = 255
@@ -19215,7 +19235,53 @@ func _sync_popup() -> void:
 	popup_dismiss.visible = true
 	_close_panels_for_popup()
 	popup_panel.show()
+	_fit_popup_to_viewport(true)
+	scroll.scroll_vertical = 0
 	popup_panel.move_to_front()
+
+## Wrapping text can briefly measure at width zero while new options are
+## attached. Keep that transient minimum inside a scroll body, with the
+## dismissal and reply controls outside it even for a long server message.
+func _ensure_popup_scroll() -> ScrollContainer:
+	var content := popup_panel.get_node("PopupContent") as VBoxContainer
+	var scroll := content.get_node_or_null("PopupScroll") as ScrollContainer
+	if scroll != null:
+		return scroll
+	scroll = ScrollContainer.new()
+	scroll.name = "PopupScroll"
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.follow_focus = true
+	content.add_child(scroll)
+	content.move_child(scroll, 1)
+	var body := VBoxContainer.new()
+	body.name = "Body"
+	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body.add_theme_constant_override("separation", content.get_theme_constant("separation"))
+	scroll.add_child(body)
+	popup_text.custom_minimum_size = Vector2.ZERO
+	popup_text.size.x = minf(512.0, maxf(1.0, game_view.size.x - 120.0))
+	popup_text.scroll_active = false
+	popup_text.reparent(body)
+	popup_options.size_flags_vertical = Control.SIZE_FILL
+	popup_options.reparent(body)
+	popup_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	return scroll
+
+func _fit_popup_to_viewport(center := false) -> void:
+	if not popup_panel.is_visible_in_tree():
+		return
+	var dragger := popup_panel.get_node_or_null("WindowDrag") as WindowDrag
+	var margin := Vector2(12, 12)
+	if dragger != null:
+		margin += Vector2(dragger.reserved_right, dragger.reserved_bottom)
+	var available := (game_view.size - margin).max(Vector2.ONE)
+	popup_panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	popup_panel.size = Vector2(520, 340).min(available)
+	if center:
+		popup_panel.position = (game_view.size - popup_panel.size) * 0.5
+	if dragger != null:
+		dragger.clamp_into_view()
 
 ## The popup is modal, so the windows that own the keyboard or the pointer are
 ## closed underneath it rather than left fighting for input.

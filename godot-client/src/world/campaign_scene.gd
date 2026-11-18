@@ -1045,6 +1045,14 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 			_update_caption()
 			return
 		if _has_inspection():
+			# A saved escort can already be walking when this client rejoins.
+			# Observe its normal recovery deadline without restarting the native
+			# action or taking ownership of another party member's movement.
+			if not _replaying and not _inspection_sent \
+					and str(_inspection_state.get("id", "")) == "rescue_family" \
+					and str(_inspection_state.get("status", "")) == "walking":
+				_inspection_sent = true
+				_inspection_pending_at = Time.get_ticks_msec()
 			if not _replaying and not _inspection_sent and next_elapsed >= float(_definition.get("inspection_at", 19.0)):
 				_request_inspection()
 			if not _replaying and str(_inspection_state.get("status", "")) != "complete" \

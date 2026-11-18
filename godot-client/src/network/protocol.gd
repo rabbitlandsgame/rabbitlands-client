@@ -319,6 +319,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"campaign_shelves_travel_v1",
 	"campaign_shelves_basics_v1",
 	"campaign_shelves_early_magic_v1",
+	"campaign_shelves_heal_target_v1",
 	"campaign_shelves_patrol_v1",
 	"campaign_shelves_fire_v1",
 	"campaign_shelves_water_v1",
