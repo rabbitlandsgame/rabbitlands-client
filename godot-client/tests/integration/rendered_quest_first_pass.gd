@@ -78,12 +78,26 @@ func run() -> void:
 	var visit: Dictionary = family.filter(func(row: Dictionary) -> bool: return not row.scene.is_empty() and row.scene.choice.selected=="")[0]
 	if not await load_town(Vector2i(29,29)): quit(1); return
 	if not await show_record(visit,visit.native_cast): quit(1); return
+	var held_view := _preview_camera.global_transform
+	var mother := _actors[int(visit.actors.mother)] as Node3D
+	var daughter := _actors[int(visit.actors.daughter)] as Node3D
+	var mother_post := mother.global_position
+	var daughter_post := daughter.global_position
+	var visitor_facing := float(mother.get("_cinematic_yaw"))
 	expect(_presentation._dialogue._portrait_frame.visible, "Elen's headshot is visible at the real inn")
 	await capture("01-liora-at-the-inn.png")
 	_presentation.continue_dialogue(); _presentation.update(0,_record,_rig,_actors,_hero,"landfall_town",true,_adapter,surface_height)
+	expect(absf(angle_difference(visitor_facing,float(mother.get("_cinematic_yaw"))))>0.1,
+		"Elen turns toward Liora while her daughter speaks")
+	expect(_preview_camera.global_transform.is_equal_approx(held_view)
+		and mother.global_position.is_equal_approx(mother_post) and daughter.global_position.is_equal_approx(daughter_post),
+		"the family shares one camera and holds its natural conversation positions")
 	await capture("02-liora-shares-her-drawing.png")
 	_presentation.continue_dialogue(); _presentation.update(0,_record,_rig,_actors,_hero,"landfall_town",true,_adapter,surface_height)
 	expect(_presentation._choice_waiting and _presentation._dialogue._portrait_frame.visible, "the player answers Liora inside the portrait dialogue")
+	expect(absf(angle_difference(visitor_facing,float(mother.get("_cinematic_yaw"))))<0.01
+		and _preview_camera.global_transform.is_equal_approx(held_view),
+		"Elen returns her attention to the visitor for the answer without a camera move")
 	await capture("03-player-listen-or-rest.png")
 	_presentation.cancel("next_preview"); _fade.reset()
 	_stage.queue_free(); _actors.clear(); _actor_dtos.clear()
@@ -95,6 +109,19 @@ func run() -> void:
 	if not await show_record(heal,lessons.actors): quit(1); return
 	expect(_presentation._dialogue.body_label.text.split(" ").size()<65, "Ostrid gives one short practical instruction")
 	await capture("04-early-heal-lesson.png")
+	var supply_path := OS.get_environment("RL_SUPPLY_DIALOGUE_EVIDENCE")
+	if not supply_path.is_empty():
+		_presentation.cancel("next_preview"); _fade.reset()
+		_stage.queue_free(); _actors.clear(); _actor_dtos.clear()
+		for _i: int in 4: await process_frame
+		var supply: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(supply_path))
+		var mentor: Dictionary = supply.actors.mentor
+		if not await load_town(Vector2i(int(mentor.x),int(mentor.y))): quit(1); return
+		if not await show_record(supply.campaign,supply.actors): quit(1); return
+		expect(_presentation._dialogue.body_label.text.split(" ").size()<65
+			and _presentation._dialogue._portrait_frame.visible and _presentation._line_continue.visible,
+			"Ilka's combined briefing stays readable with one immediate Continue")
+		await capture("05-ilka-asks-for-the-crew.png")
 	_presentation.cancel("preview_done"); _fade.reset()
 	expect(await ContinentChunkStream.drain_workers(self), "map workers drain cleanly after preview")
 	var report := FileAccess.open(_directory.path_join("report.json"),FileAccess.WRITE)

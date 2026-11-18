@@ -31,6 +31,8 @@ Assignments mark the real worksites; players walk there and choose when to begin
 
 The Coal stage focuses on protected repairs and hauling the existing stock, with a smaller amount of fresh mining. Previously mined Coal and carried bags still count when resuming an older assignment. Workers keep their normal harvesting rates; secured loads and reward receipts are preserved.
 
+During field work, the quest window keeps secured progress and the next useful action above the detailed ledger. Crew rows distinguish gathering, recovering stock, carrying, moving, waiting, repairing and being attacked. If progress stops, the guidance identifies the blocker: a fallen worker, guards, unfinished repairs, an obstruction or someone who needs to catch up with the barge. Ground-hazard warnings disappear after the blast or surge has passed.
+
 ### Where the Water Goes
 
 | Chapter | What the player does | Bonus experience | Other reward |

@@ -6,6 +6,8 @@ Elen travels with the rescue party and supports it with a finite supply of heali
 
 Follow the lanterns through Lantern Mine's Upper Galleries to the stairs and the lower workings. The stairs remain available while ordinary goblin groups survive. Secure the captive's chamber, free Liora and escort the family outside before choosing your personal rescue reward.
 
+Near junctions, stairs and the captive's chamber, Elen gives occasional short clues in chat without opening another dialogue or moving the camera. She also warns when her healing ether is running low. The quest instructions reflect nearby landmarks, and the field readout highlights when Elen needs healing. These reminders wait until combat and cinematic dialogue finish.
+
 ## Check in with Liora
 
 After completing the rescue, track **Check in with Liora** in the quest journal. Elen and Liora are staying at Landfall's existing inn near Hob Tennant. The quest marker points to the inn outdoors and to Liora inside. Walk there and speak with either family member when ready.

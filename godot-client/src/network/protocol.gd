@@ -4383,15 +4383,27 @@ static func campaign_growers_valid(value: Variant) -> bool:
 				or not worker.get("name") is String or str(worker.name).length()>64 \
 				or not _campaign_integer(worker.get("max_health"),1,10000) or not _campaign_integer(worker.get("health"),0,float(worker.max_health)) \
 				or not worker.get("downed") is bool or not _campaign_integer(worker.get("cargo"),0,250) \
-				or not worker.get("harvesting") is bool or worker.get("activity") not in ["harvest","return"]:return false
+				or not worker.get("harvesting") is bool or worker.get("activity") not in ["harvest","return"] \
+				or not campaign_worker_feedback_valid(worker):return false
 		seen.append(worker.actor_id)
 	return true
+
+static func campaign_worker_feedback_valid(value: Dictionary) -> bool:
+	if value.has("status") and value.status not in ["harvesting", "loading", "returning", "moving", "under_attack", "downed", "waiting", "repairing"]:
+		return false
+	if value.has("resource") and value.resource not in ["", "Sage", "Hearthroot", "Flint", "Coal", "Kelp", "Watercress"]:
+		return false
+	return true
+
+static func campaign_field_hint_valid(value: Dictionary) -> bool:
+	return not value.has("field_hint") or (value.field_hint is String and str(value.field_hint).length() <= 240)
 
 static func campaign_water_valid(value: Variant) -> bool:
 	if not value is Dictionary or value.get("stage") not in ["water","water_cutters","water_barge","water_keeper"] \
 			or value.get("route") not in ["","repair","breach","sheltered","coastal"] or value.get("command") not in ["work","regroup","wait"]:return false
 	for key:String in ["channels","sailing","north","south","boss_defeated"]:
 		if not value.get(key) is bool:return false
+	if not campaign_field_hint_valid(value):return false
 	if not value.get("flow") is Array or value.flow.size()!=3:return false
 	for level:Variant in value.flow:
 		if not _campaign_integer(level,0,2):return false
@@ -4418,6 +4430,7 @@ static func campaign_fire_valid(value: Variant) -> bool:
 			or value.get("route") not in ["","assault","silence","lift","haul"] or value.get("step") not in ["route","extract"]:return false
 	for key: String in ["recovered","mined","recovered_goal","mined_goal"]:
 		if not _campaign_integer(value.get(key),0,10000):return false
+	if not campaign_field_hint_valid(value):return false
 	if float(value.recovered)>float(value.recovered_goal) or float(value.mined)>float(value.mined_goal):return false
 	if not _campaign_integer(value.get("carried"),0,1000) or not _campaign_integer(value.get("repair"),0,3) \
 			or not _campaign_integer(value.get("passages"),0,3) or not _campaign_integer(value.get("wave"),0,1000000) or not _campaign_tile(value.get("cart_tile")):return false

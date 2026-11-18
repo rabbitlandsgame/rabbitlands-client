@@ -931,13 +931,13 @@
         {
           "at": 2,
           "speaker": "Injured woman",
-          "text": "I'm still here. Please… don't let them keep her.",
+          "text": "Liora… I can still hear her. Please. Help me get up.",
           "speaker_actor": "mother"
         },
         {
           "at": 10,
           "speaker": "",
-          "text": "The woman is badly hurt. Select her and cast Heal Target to get her back on her feet. She is a companion you can protect, heal and revive."
+          "text": "Cast Heal Target on the injured woman to get her back on her feet."
         }
       ],
       "events": []
@@ -1319,26 +1319,26 @@
         {
           "at": 3,
           "speaker": "Elen Reed",
-          "text": "Goblins have occupied the Upper Galleries and the lower workings. They have been pillaging the nearby towns and taking people from the roads.",
+          "text": "I used to pass this mine on the way to market. The goblins have taken the galleries and the lower workings. Now they're taking people too.",
           "speaker_actor": "mother"
         },
         {
           "at": 12,
           "speaker": "Elen Reed",
-          "text": "I never thought they would come this close to Landfall. Follow the lanterns through the galleries to the stairs. Stay close; we need to find Liora.",
+          "text": "The lanterns lead to the stairs. Stay close. Liora is down there, and she's counting on us.",
           "speaker_actor": "mother"
         },
         {
           "at": 22,
           "speaker": "Elen Reed",
-          "text": "Take the supplies I brought: fifty minor healing potions, and fifty each of Life, Water, and Fire Essence for your spells.",
+          "text": "Take these potions and essences. If we're going to bring her home, we need to keep each other standing.",
           "speaker_actor": "mother"
         },
         {
           "at": 33,
           "speaker": "Elen Reed",
           "speaker_actor": "mother",
-          "text": "Heal restores your own health. Select me or a party member and use Heal Target to heal them. Restore Ether—also called Gain Ether—replenishes your mana. Stay close enough that we can help each other; if I fall, heal me and I can stand with you again."
+          "text": "Use Heal when you're hurt, or Heal Target on me. I'll help you while my ether lasts. If I fall, heal me and I can stand with you again. Restore Ether helps you recover between fights."
         }
       ],
       "events": [
@@ -1488,7 +1488,7 @@
         {
           "at": 23,
           "speaker": "Elen Reed",
-          "text": "Open the cage. She has done nothing to you.",
+          "text": "Look at me. Open the cage. She has done nothing to you.",
           "speaker_actor": "mother"
         },
         {
@@ -1894,7 +1894,7 @@
           "at": 12,
           "speaker": "Elen Reed",
           "speaker_actor": "mother",
-          "text": "That is all right, Liora. You are safe now. Thank you. You brought my daughter back to me, and I will never forget it. Take the sword, bow, or wand—whichever suits you—and this purse. You have earned them."
+          "text": "You're safe now, Liora. We can go home.\n\nI can never repay you for bringing my daughter back. Please, take the sword, bow or wand that suits you, and this purse."
         },
         {
           "at": 22,
@@ -1905,7 +1905,7 @@
           "at": 51,
           "speaker": "Elen Reed",
           "speaker_actor": "mother",
-          "text": "Come and visit us at Landfall’s inn, near Hob Tennant. Liora and I are staying there while we find our feet again. You will always be welcome."
+          "text": "We're staying at Landfall's inn, near Hob Tennant. Come when you can. It will do Liora good to see a familiar face."
         }
       ],
       "events": [
@@ -2131,7 +2131,7 @@
           "at": 0,
           "speaker": "Elen Reed",
           "speaker_actor": "mother",
-          "text": "You found us. Hob has made room for us here. Liora wanted to show you what she has been drawing."
+          "text": "You found us. Hob has made room for us here. Liora has been drawing the lanterns. She wanted you to see."
         },
         {
           "at": 16,
@@ -2158,6 +2158,30 @@
           "actor": "daughter",
           "action": "idle",
           "face": "recipient"
+        },
+        {
+          "at": 16,
+          "actor": "mother",
+          "action": "idle",
+          "face": "daughter"
+        },
+        {
+          "at": 32,
+          "actor": "mother",
+          "action": "idle",
+          "face": "recipient"
+        },
+        {
+          "at": 32,
+          "actor": "daughter",
+          "action": "idle",
+          "face": "recipient"
+        },
+        {
+          "at": 52,
+          "actor": "daughter",
+          "action": "idle",
+          "face": "mother"
         }
       ]
     }

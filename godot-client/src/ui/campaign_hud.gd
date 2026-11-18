@@ -1,5 +1,6 @@
 extends Control
 const Guidance := preload("res://src/world/campaign_guidance.gd")
+const FieldReadout := preload("res://src/ui/campaign_field_readout.gd")
 ## The quest's field checklist. Its controls request ordinary movement/use;
 ## only a new authoritative snapshot changes completion or available decisions.
 signal target_requested(object_id: int, tile: Vector2i, nearby: bool)
@@ -22,6 +23,7 @@ var _body_scroll: ScrollContainer
 var _title: Label
 var _hint: Label
 var _guidance: Label
+var _field_summary: Label
 var _notice: Label
 var _opening_details: Label
 var _bank: Label
@@ -143,6 +145,11 @@ func _build() -> void:
 	_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_hint.add_theme_font_size_override("font_size", 16)
 	column.add_child(_hint)
+	_field_summary = Label.new()
+	_field_summary.name = "FieldReadout"
+	_field_summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_field_summary.add_theme_font_size_override("font_size", 14)
+	column.add_child(_field_summary)
 	_guidance = Label.new()
 	_guidance.name = "WorkSiteInstructions"
 	_guidance.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -349,6 +356,10 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 	_apply_lamps(snapshot.get("lamps", {}))
 	_apply_rescue(snapshot.get("rescue", {}))
 	_apply_shelves(snapshot.get("shelves", {}))
+	var field_readout := FieldReadout.summary(snapshot)
+	_field_summary.text = str(field_readout.get("text", ""))
+	_field_summary.visible = not _field_summary.text.is_empty()
+	_field_summary.add_theme_color_override("font_color", Color("ffb39c") if bool(field_readout.get("urgent", false)) else Color("e5cc90"))
 	_apply_party(party, snapshot.get("adoption", {}))
 	_apply_companion(snapshot.get("companion", {}))
 	_entry.visible = (not active or travelling) and bool(snapshot.get("available", false)) and not can_own
@@ -379,20 +390,21 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 	_account.visible = active
 	_scroll.visible = active and not travelling
 	_reduced.set_pressed_no_signal(reduced_motion)
-	_guidance.visible = active and matches and not travelling and Guidance.is_guided(snapshot)
+	_guidance.visible = active and matches and not travelling and Guidance.is_guided(snapshot) and not _field_summary.visible
 	_guidance.text = Guidance.legend(snapshot) if _guidance.visible else ""
 	if complete:
 		_title.text = "Quest complete!"
 		_hint.text = "But maybe you should check in on Liora later to see how she is feeling."
-		for control: Control in [_notice, _opening_details, _rescue, _rescue_actions,
+		for control: Control in [_notice, _field_summary, _opening_details, _rescue, _rescue_actions,
 				_rescue_rewards, _scroll, _guidance, _help, _account, _entry, _join, _own,
 				_bank, _road, _lamps, _prediction_actions, _party, _adoption, _adoption_actions,
 				_companion, _companion_actions, _convoy, _convoy_actions]:
 			control.hide()
 		_lesson_window.hide()
-	if _guidance.visible != _opening_actions_first:
-		_opening_actions_first = _guidance.visible
-		_column.move_child(_scroll, _hint.get_index() + 1 if _opening_actions_first else _entry.get_index() - 1)
+	var actions_first := _guidance.visible or _field_summary.visible
+	if actions_first != _opening_actions_first or (actions_first and _field_summary.visible and _scroll.get_index() < _field_summary.get_index()):
+		_opening_actions_first = actions_first
+		_column.move_child(_scroll, (_field_summary.get_index() + 1 if _field_summary.visible else _hint.get_index() + 1) if _opening_actions_first else _entry.get_index() - 1)
 	_title.visible = not _embedded
 	_hint.visible = not _embedded
 	_layout()
@@ -475,7 +487,7 @@ func _apply_shelves(ledger: Dictionary) -> void:
 		lines.append("%s gathered: %s · In bags: %s · In crew storage: %s" % [crop,str(stored+carried),str(carried),str(stored)])
 		lines.append("Four level-%d harvesters · 250 per bag · Raiding waves: %d" % [int(growers.get("harvesting_level",10)),int(growers.get("wave",0))])
 		for worker: Dictionary in growers.get("workers",[]):
-			lines.append("%s · %d/%d health · %d carried · %s" % [worker.name,int(worker.health),int(worker.max_health),int(worker.cargo),"DOWNED — use Heal Target" if bool(worker.downed) else "Carrying to storage" if str(worker.activity)=="return" else "Harvesting"])
+			lines.append("%s · %d/%d health · %d carried · %s" % [worker.name,int(worker.health),int(worker.max_health),int(worker.cargo),FieldReadout.worker_activity(worker)])
 	var fire: Dictionary=ledger.get("fire",{})
 	if not fire.is_empty():
 		if str(fire.stage)!="fire_sapper":
@@ -483,9 +495,9 @@ func _apply_shelves(ledger: Dictionary) -> void:
 			if str(fire.stage)=="fire_coal":lines.append("Lift repairs: %d/3 · Passage supports: %d/3" % [int(fire.repair),int(fire.passages)])
 		else:
 			lines.append("Signal silenced: %s · Water channels open: %s · Powder ignited: %s" % ["Yes" if fire.signal else "No","Yes" if fire.water else "No","Yes" if fire.powder else "No"])
-			if not (fire.hazards as Array).is_empty():lines.append("MOVE OUT OF THE MARKED BLAST AREA")
+			if FieldReadout.has_warning(fire):lines.append("MOVE OUT OF THE MARKED BLAST AREA")
 		for worker: Dictionary in fire.get("workers",[]):
-			lines.append("%s · %d/%d health · %d carried · %s" % [worker.name,int(worker.health),int(worker.max_health),int(worker.cargo),"DOWNED — use Heal Target" if bool(worker.downed) else "Hauling" if str(worker.activity)=="return" else "Working"])
+			lines.append("%s · %d/%d health · %d carried · %s" % [worker.name,int(worker.health),int(worker.max_health),int(worker.cargo),FieldReadout.worker_activity(worker,"Mining")])
 	var water:Dictionary=ledger.get("water",{})
 	if not water.is_empty():
 		if str(water.stage)=="water":lines.append("Channel settings · Fresh %d/2 · Tide %d/2 · Drain %d/2\nKeeper’s marks: Fresh 2, Tide 1, Drain 0" % [int(water.flow[0]),int(water.flow[1]),int(water.flow[2])])
@@ -494,8 +506,8 @@ func _apply_shelves(ledger: Dictionary) -> void:
 			for crop:String in ["kelp","cress"]:lines.append("%s · Cut %d/%d · At loading point %d · Secured %d/%d" % ["Kelp" if crop=="kelp" else "Watercress",int(water.cut[crop]),int(water.goals[crop]),int(water.bins[crop]),int(water.stored[crop]),int(water.goals[crop])])
 		elif str(water.stage)=="water_barge":lines.append("Barge hull: %d/100 · Landings: %d/3 · %s\nStay close and drive attackers away. Heal the crew; repair the boat with Wood Planks." % [int(water.hull),int(water.landing),"Departure ordered" if water.sailing else "Waiting for your departure order"])
 		else:lines.append("North guards isolated: %s · South guards isolated: %s" % ["Yes" if water.north else "No","Yes" if water.south else "No"])
-		if not (water.hazards as Array).is_empty():lines.append("MOVE OUT OF THE MARKED SURGE")
-		for worker:Dictionary in water.workers:lines.append("%s · %d/%d health · %d carried · %s" % [worker.name,int(worker.health),int(worker.max_health),int(worker.cargo),"DOWNED — use Heal Target" if worker.downed else "Hauling" if str(worker.activity)=="return" else "Cutting" if worker.harvesting else "Ready"])
+		if FieldReadout.has_warning(water):lines.append("MOVE OUT OF THE MARKED SURGE")
+		for worker:Dictionary in water.workers:lines.append("%s · %d/%d health · %d carried · %s" % [worker.name,int(worker.health),int(worker.max_health),int(worker.cargo),FieldReadout.worker_activity(worker,"Cutting")])
 	_shelves.text = "\n".join(lines)
 
 func _rescue_local() -> bool:

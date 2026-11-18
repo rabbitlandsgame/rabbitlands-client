@@ -1103,7 +1103,7 @@
     },
     "measure.shelves.growers.brief_crew": {
       "title": "A Harvest Worth Defending",
-      "duration": 40,
+      "duration": 20,
       "entry_seconds": 0,
       "exit_seconds": 0,
       "anchor": "mentor",
@@ -1127,27 +1127,20 @@
       ],
       "live_camera": "gameplay",
       "dialogue_holds": [
-        20,
-        40
+        20
       ],
       "lines": [
         {
           "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
-          "text": "Four villagers have offered to gather our next shipment. Goblins have been coming out of the Old Warren to drive them off. Will you keep the crew safe?"
-        },
-        {
-          "at": 20,
-          "speaker": "Ilka Tarn",
-          "speaker_actor": "mentor",
-          "text": "The crew needs 10,000 Sage, then 5,000 Hearthroot. They will harvest and carry the loads themselves. Protect all four. If someone falls, use Heal Target on her; she will get back to work. Go to the marked beds when you are ready. I have put a guard allowance in your pack or personal storage. These practice supplies do not reopen the shop stock."
+          "text": "Fenna, Sela, Nell and Ada have volunteered to bring in the herbs. Goblins from the Old Warren keep driving them off.\n\nWill you guard them? We need 10,000 Sage and 5,000 Hearthroot. I have packed healing supplies for you. Meet the crew at the marked Sage beds when you are ready."
         }
       ]
     },
     "measure.shelves.growers.sage_entry": {
       "title": "A Harvest Worth Defending",
-      "duration": 40,
+      "duration": 20,
       "entry_seconds": 1.5,
       "exit_seconds": 1.2,
       "anchor": "mentor",
@@ -1170,21 +1163,14 @@
         "boss"
       ],
       "dialogue_holds": [
-        20,
-        40
+        20
       ],
       "lines": [
         {
           "at": 0,
           "speaker": "Fenna Ash",
           "speaker_actor": "mentor",
-          "text": "We will harvest the Sage and carry full bags to that store. Watch the approach from the Old Warren. The goblins have been coming south out of its mouth."
-        },
-        {
-          "at": 20,
-          "speaker": "Fenna Ash",
-          "speaker_actor": "mentor",
-          "text": "Our four health bars tell you who needs help. Heal Target gets a fallen worker back on her feet. The shipment counts only when a bag reaches storage. You can pause from the quest window; nobody keeps harvesting while you are away."
+          "text": "We'll gather the Sage and carry full bags to that store. Watch the Old Warren approach; the goblins come south out of its mouth.\n\nWe need 10,000 Sage safely stored. If anyone falls, Heal Target will get her back up. We'll handle the harvest. You keep those goblins away."
         }
       ],
       "shots": [
@@ -1237,7 +1223,7 @@
           "at": 0,
           "speaker": "Fenna Ash",
           "speaker_actor": "mentor",
-          "text": "All 10,000 Sage are in storage. Keep the bags here; the next crew will turn them into essences. Meet us at the Hearthroot patch marked on your map. We only need 5,000 roots for the same number of mixes."
+          "text": "That's the Sage safely stored. The mixers can take it from here. Meet us at the marked Hearthroot beds next. We need 5,000 roots for the same number of essences."
         }
       ]
     },
@@ -1274,7 +1260,7 @@
           "at": 0,
           "speaker": "Fenna Ash",
           "speaker_actor": "mentor",
-          "text": "Same work, new ground. We need 5,000 Hearthroot in storage. The goblins still come out of the Old Warren, but now their route leads east toward these beds. Watch the western approach."
+          "text": "The Hearthroot beds are more exposed. The raiders still come from the Old Warren, west of here. Watch that approach while we gather the 5,000 roots."
         }
       ]
     },
@@ -1317,7 +1303,7 @@
     },
     "measure.shelves.growers.report_crew": {
       "title": "A trail back to the Warren",
-      "duration": 40,
+      "duration": 20,
       "entry_seconds": 0,
       "exit_seconds": 0,
       "anchor": "mentor",
@@ -1341,34 +1327,26 @@
       ],
       "live_camera": "gameplay",
       "dialogue_holds": [
-        20,
-        40
+        20
       ],
       "lines": [
         {
           "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
-          "text": "Ten thousand Sage and five thousand Hearthroot, safely stored. But the crew saw every raider coming from the Old Warren. We have enough ingredients; we still need a road that stays safe."
-        },
-        {
-          "at": 20,
-          "speaker": "Ilka Tarn",
-          "speaker_actor": "mentor",
-          "text": "You have earned your pay for protecting the crew. There is another job when you are ready: go into the Old Warren and stop whoever is sending those raiders. Our Life Essence stock will open once that route is safe."
+          "text": "The herbs are safe, and the crew has earned a quiet evening. You have earned your pay too. But every raider came from the Old Warren. We must stop them at the source."
         }
       ],
       "handoff": {
         "to": [
           "measure.shelves.growers.brief_raid"
         ],
-        "gameplay_map": "landfall_town",
         "keep_dialogue": true
       }
     },
     "measure.shelves.growers.brief_raid": {
       "title": "The Hand Behind the Raids",
-      "duration": 40,
+      "duration": 20,
       "entry_seconds": 0,
       "exit_seconds": 0,
       "anchor": "mentor",
@@ -1392,21 +1370,14 @@
       ],
       "live_camera": "gameplay",
       "dialogue_holds": [
-        20,
-        40
+        20
       ],
       "lines": [
         {
           "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
-          "text": "Every raider came from the Old Warren. Goblins and their wolves have a leader down there. Break their hold before another gathering crew takes the road."
-        },
-        {
-          "at": 20,
-          "speaker": "Ilka Tarn",
-          "speaker_actor": "mentor",
-          "text": "Enter the Old Warren west of town. Your party can join at the entrance. Follow the goblin tracks and wolf prints into the deeper western caves and confront Grask, the orc directing the raids."
+          "text": "Grask is an orc, with goblins and wolves at his heels. He's sending them out of the Old Warren to take our shipments.\n\nEnter the mine west of town with your party. Follow the tracks into the deeper western caves and stop him. Then we can keep Life Essence on these shelves."
         }
       ]
     },
@@ -1576,7 +1547,7 @@
           "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
-          "text": "Grask is gone, the crew has a safe route, and we can finally promise a steady supply. Life Essence is now available here. Fire and Water must wait until we secure their own gathering crews."
+          "text": "Fenna's crew can take the road again. Life Essence is back on the shelves, thanks to you. Now we can help people without wondering where the next handful of herbs will come from."
         }
       ]
     },
@@ -1655,11 +1626,11 @@
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
           "variants": {
-            "fire": "Brenna’s quarry at Blackcut has been seized. Our Flint is sitting behind a barricade, and the crew cannot finish the next shipment. Will you help her reopen the workings?\n\nWalk to the marked quarry west of town. Brenna will explain the approaches. I have set aside a guard allowance in your pack or personal storage. It is paid once; Fire stock stays reserved until the whole route is safe.",
-            "fire_coal": "The Flint is secured. Brenna has most of the Coal ready in the old stock bay. The miners only need six hundred fresh Coal, but the damaged lift is keeping the whole shipment underground.\n\nMeet her at the marked Coal workings in Lantern Mine. Choose a hauling plan, then keep the route safe while the crew brings the loads out.",
-            "fire_sapper": "The cut ropes and powder marks tell the same story. Krek Cinderhook is preparing another attack from a service yard beside Blackcut. Stop him before the crew takes the road again.\n\nMeet Brenna at the marked yard near Blackcut. The signal, water channels and powder store will change the fight. Your party can help, and you can untrack this until you are ready."
+            "fire": "Brenna's people have been driven out of Blackcut. The Flint is there, but a goblin barricade stands between the crew and their work.\n\nWill you help them? Take these supplies, then meet Brenna at the quarry west of town. She knows the ground.",
+            "fire_coal": "The Flint is safe. Now Brenna needs help getting the Coal out of Lantern Mine. Most of it is already cut, but the lift ropes have been slashed.\n\nMeet her at the marked Coal workings. Help her choose a hauling route and keep the workers safe.",
+            "fire_sapper": "The cut ropes and powder traces point to Krek Cinderhook. He's preparing another attack from the service yard beside Blackcut.\n\nMeet Brenna at the marked yard. Stop Krek before the next shift takes the road."
           },
-          "text": "Brenna’s quarry at Blackcut has been seized. Our Flint is sitting behind a barricade, and the crew cannot finish the next shipment. Will you help her reopen the workings?\n\nWalk to the marked quarry west of town. Brenna will explain the approaches. I have set aside a guard allowance in your pack or personal storage. It is paid once; Fire stock stays reserved until the whole route is safe."
+          "text": "Brenna's people have been driven out of Blackcut. The Flint is there, but a goblin barricade stands between the crew and their work.\n\nWill you help them? Take these supplies, then meet Brenna at the quarry west of town. She knows the ground."
         }
       ],
       "live_camera": "gameplay"
@@ -1697,7 +1668,7 @@
           "at": 0,
           "speaker": "Brenna Flint",
           "speaker_actor": "mentor",
-          "text": "Four thousand Flint is already cut. We need one thousand more. Two of us will mine while two recover the old stock and haul it to the shipment store.\n\nWe can break their barricade, or take the side approach and cut the signal rope. Pick our approach. After the guards are cleared, release the crew at the marked gate. Keep an eye on both hauling paths, and use Heal Target if someone falls."
+          "text": "They've put a barricade between us and our own Flint. We can break it head-on, or slip round the side and cut the signal rope.\n\nOnce the guards are down, release the crew at the gate. We'll recover the cut stock and finish mining. Keep the hauling paths clear; Heal Target will get a fallen worker back up."
         }
       ],
       "shots": [
@@ -1755,7 +1726,7 @@
           "at": 0,
           "speaker": "Brenna Flint",
           "speaker_actor": "mentor",
-          "text": "Most of our Coal is already cut: nine thousand four hundred in the stock bay, with six hundred still to mine. The trouble is getting it out.\n\nWe can repair the lift in three protected steps, or brace the old haul passage and clear its spiders. Choose our route. Once it is open, guard the loading paths while we finish the shipment."
+          "text": "Those cut ropes were no accident. Most of the Coal is ready; we only need a few more loads from the seam.\n\nWe can repair the lift in three protected steps, or brace the old passage and clear its spiders. Which route do you trust?"
         }
       ],
       "live_camera": "gameplay",
@@ -1797,7 +1768,7 @@
           "at": 0,
           "speaker": "Brenna Flint",
           "speaker_actor": "mentor",
-          "text": "Krek is already in the yard. We can confront him now, or deal with his equipment first. Cut the signal to stop reinforcements. Open the water channels to weaken his blasts.\n\nThe powder has a marked fuse. Anyone can light it from close by, or you can cast Fire Bolt on the barrels from a distance. Stay out of the marked blast circles. We will hold this staging area while your party moves ahead."
+          "text": "Krek has powder enough to burn the workings. His signal brings reinforcements; cut it for a quieter fight. Open the water channels to weaken his blasts.\n\nLight the powder fuse up close, or use Fire Bolt from a distance. Watch his blast marks and keep moving."
         }
       ],
       "live_camera": "gameplay"
@@ -1982,7 +1953,7 @@
           "at": 0,
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
-          "text": "Krek is gone, the miners can work, and the hauling route is open. That is a supply I can promise. Fire Essence is now available here. This enriched essence is for you. Water will wait until we secure its own gathering crews."
+          "text": "The quarry is working, and the Coal can reach us again. With Krek gone, that is a supply I can promise. Fire Essence is back on the shelves. Take this enriched essence with my thanks."
         }
       ],
       "live_camera": "gameplay"
@@ -2019,7 +1990,7 @@
           "at": 0,
           "speaker": "Brenna Flint",
           "speaker_actor": "mentor",
-          "text": "Your secured loads and finished preparations are still here. We will pick up where we left off. Check the quest instructions for the next station, and Heal Target any worker who needs it."
+          "text": "The loads we brought in are still safe. Take a breath, check the workers, and we'll finish this. If anyone is down, Heal Target will put them back on their feet."
         }
       ],
       "live_camera": "gameplay"
@@ -2098,13 +2069,13 @@
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
           "variants": {
-            "water": "Flint and Coal are reaching us again. But the coastal cutters have stopped coming. Someone is charging them to use their own water.\n\nWalk to the coastal waterworks marked east of the city and speak with Iona Reed. The keeper needs fresh water for Watercress and tidal water for Kelp. I have put 150 Life Essences, 300 Water Essences and 20 minor healing potions in your pouch. Overflow goes to storage. Heal Target restores a worker; Restore Ether replenishes your ether. The shop stock must wait until the whole route is secure.",
-            "water_cutters": "Both gathering channels are open. Iona is ready to bring in our first shipment: four hundred Kelp and two hundred Watercress.\n\nMeet the crew at the coastal landing. You can order Work, Regroup or Wait. Protect the loading point and anyone carrying a bag; the hauler must bring every load into secured storage. When one gathering job is finished, those hands will help with the other.",
-            "water_barge": "The cutters have secured the ingredients. Now we need the boat to reach our landing. Follow the towpath beside it; you do not need to board.\n\nIona will offer the sheltered channel or the coastal passage. Order Sail when ready and Wait when the party needs to regroup. Heal the crew, but use Wood Planks to repair the hull at a safe halt. I have supplied twelve planks once; bring replacements from the general store if needed. Secured cargo survives a failed crossing.",
-            "water_keeper": "The delivery proves this route can work, but Veyra Lockhand will keep attacking it while she holds the upper gatehouse. Confront her at the marked gatehouse.\n\nThe gate controls can separate her guards if you prefer. No particular spell is required. Watch for marked surges and move out before they strike. Once she is gone and you return with the news, I can promise Water Essence stock again."
+            "water": "Flint and Coal are reaching us again. Now the coast has gone quiet. Veyra's people are charging the cutters to use their own water.\n\nTake these supplies and meet Iona at the marked waterworks east of the city. Help her reopen the channels. We need a route nobody can hold to ransom.",
+            "water_cutters": "The channels are open. Iona's crew can bring in the first 400 Kelp and 200 Watercress.\n\nMeet them at the coastal landing. Guard the workers and the loading point while Ada hauls the bags. Once one gathering job is finished, those hands can help with the other.",
+            "water_barge": "The cutters have done their part. Now we must get the shipment home.\n\nMeet Iona and the barge at the coastal landing. She'll explain the two passages. I've packed Wood Planks for repairs; keep the crew and their cargo safe.",
+            "water_keeper": "The shipment reached us, but the cutters will never be free while Veyra holds the upper gatehouse.\n\nMeet Iona there. You can separate Veyra's guards with the gate controls, or face them together. Watch the water gathering at your feet and move before it strikes."
           },
           "at": 0,
-          "text": "Flint and Coal are reaching us again. But the coastal cutters have stopped coming. Someone is charging them to use their own water.\n\nWalk to the coastal waterworks marked east of the city and speak with Iona Reed. The keeper needs fresh water for Watercress and tidal water for Kelp. I have put 150 Life Essences, 300 Water Essences and 20 minor healing potions in your pouch. Overflow goes to storage. Heal Target restores a worker; Restore Ether replenishes your ether. The shop stock must wait until the whole route is secure."
+          "text": "Flint and Coal are reaching us again. Now the coast has gone quiet. Veyra's people are charging the cutters to use their own water.\n\nTake these supplies and meet Iona at the marked waterworks east of the city. Help her reopen the channels. We need a route nobody can hold to ransom."
         }
       ],
       "live_camera": "gameplay"
@@ -2141,7 +2112,7 @@
         {
           "speaker": "Iona Reed",
           "speaker_actor": "mentor",
-          "text": "Fresh water belongs in the Watercress channel; tidal water belongs in the Kelp beds. The keeper’s marks are Fresh two, Tide one, Drain zero. Turn a named gate to cycle its setting, then test the channels.\n\nOr we can clear the six bandits at the diversion and breach their spillway. Either way restores both beds. Which approach shall we take?",
+          "text": "Watercress needs fresh water; Kelp needs the tide. The keeper's marks show Fresh two, Tide one, Drain shut.\n\nWe can reset the gates and test the flow, or clear the six guards and break their diversion. Either way, this water belongs to the cutters.",
           "at": 0
         }
       ],
@@ -2199,7 +2170,7 @@
         {
           "speaker": "Iona Reed",
           "speaker_actor": "mentor",
-          "text": "Tamsin and I will start on Kelp, Nell on Watercress, and Ada will haul our bags into storage. We need four hundred Kelp and two hundred Watercress. Anyone who finishes gathering will lend a hand at the other beds.\n\nOrder Work when you are ready. Regroup brings us to the active landing; Wait stops us. Protect the workers and use Heal Target if someone falls.",
+          "text": "Tamsin and I will cut Kelp. Nell will take the Watercress, and Ada will haul the bags. When one patch is finished, we'll help the others.\n\nTell us Work when you're ready. Regroup brings us to the landing; Wait holds us here. Watch Ada while she's carrying a load. Heal Target gets a fallen worker back up.",
           "at": 0
         }
       ],
@@ -2236,7 +2207,7 @@
         {
           "speaker": "Iona Reed",
           "speaker_actor": "mentor",
-          "text": "The first beds are cleared and their cargo is secure. We are regrouping at the second loading point. Follow the marked crew station, then order Work when you are ready. No tide deadline will rush you.",
+          "text": "That's the first load safe. The next beds are along the bank. We'll gather at the second landing; give the word when you want us to start again.",
           "at": 0
         }
       ],
@@ -2274,7 +2245,7 @@
         {
           "speaker": "Iona Reed",
           "speaker_actor": "mentor",
-          "text": "Our barge follows this stepped waterway while we take the towpath beside it. The sheltered channel has three blocked passages to clear under attack. The coastal passage has fewer delays, but heavier ambushes.\n\nSail begins each leg. Wait halts the boat, and it also waits if the party falls behind. One Wood Plank repairs forty hull at a safe halt. Healing is for people, not planks. Which passage shall we take?",
+          "text": "The sheltered channel has three obstructions, but the banks give us cover. The coastal passage is clearer, with more room for an ambush.\n\nWe'll take the towpath beside the boat. Give Ada the word to Sail, or Wait if we need to regroup. Which passage shall we take?",
           "at": 0
         }
       ],
@@ -2317,7 +2288,7 @@
         {
           "speaker": "Iona Reed",
           "speaker_actor": "mentor",
-          "text": "Veyra is already in the gatehouse yard. Her north and south guards watch the controls. Closing a gate traps its two guards behind the barrier, but you can also fight straight through.\n\nHer surges are marked on the ground for four seconds. Step clear before the water strikes. We will hold here; you and your party can approach whenever you are ready.",
+          "text": "Veyra's north and south guards watch the controls. Close a gate and you'll shut two of them out of the fight, or you can take them all on.\n\nWatch for water gathering under you. Her surges give you a moment to get clear. We'll keep the cutters back.",
           "at": 0
         }
       ],
@@ -2504,7 +2475,7 @@
         {
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
-          "text": "The cutters have their water, the boat has its route, and Veyra has lost her toll. Water Essence is now available here. You have earned this enriched essence and your pay.\n\nThese attacks were too coordinated to be simple theft. Keep those orders safe; we may need to learn who wanted Landfall’s essence shelves empty.",
+          "text": "The cutters have their water, the boat has its passage, and Veyra has lost her toll. I can keep Water Essence on the shelves again.\n\nTake your pay and this enriched essence. Keep those orders too. Someone wanted these routes broken; I want to know who.",
           "at": 0
         }
       ],
@@ -2541,7 +2512,7 @@
         {
           "speaker": "Iona Reed",
           "speaker_actor": "mentor",
-          "text": "Your secured cargo and finished preparations are safe. Check the quest instructions for our next step. Order the crew or boat to continue when you are ready, and Heal Target anyone who has fallen.",
+          "text": "We haven't lost the work we finished. Take a breath and check on the crew. Anyone still down needs Heal Target. Then give the word, and we'll carry on.",
           "at": 0
         }
       ],
@@ -2578,7 +2549,7 @@
         {
           "speaker": "You",
           "speaker_actor": "recipient",
-          "text": "We can regroup at the saved landing or leave for now. The secured cargo is safe; unfinished loads must be gathered again.",
+          "text": "We can regroup and try again, or withdraw and come back prepared. What shall we do?",
           "at": 0
         }
       ],
