@@ -2,6 +2,17 @@ extends RefCounted
 ## Passive field summaries. Available actions still come from the server targets.
 const RESOURCES := ["Sage", "Hearthroot", "Flint", "Coal", "Kelp", "Watercress"]
 
+static func instructions(snapshot: Dictionary) -> String:
+	var travel: Dictionary = snapshot.get("travel", {})
+	if travel.is_empty(): return str(snapshot.get("hint", "Explore with the field crew."))
+	var text := str(travel.get("route", snapshot.get("hint", "Follow the marked destination.")))
+	# The rescue's old npc field can identify a place (Lantern Mine), rather
+	# than a person. Its authored route already explains how to resume.
+	var npc := str(travel.get("npc", ""))
+	if not npc.is_empty() and (str(snapshot.get("kind", "")) != "rescue" or str(snapshot.get("key", "")) == "rescue_checkin"):
+		text += "\nSpeak with " + npc + " to continue."
+	return text
+
 static func worker_activity(worker: Dictionary, working := "Harvesting") -> String:
 	if bool(worker.get("downed", false)): return "DOWNED — use Heal Target"
 	var resource := str(worker.get("resource", ""))

@@ -8,6 +8,8 @@ Follow the lanterns through Lantern Mine's Upper Galleries to the stairs and the
 
 Near junctions, stairs and the captive's chamber, Elen gives occasional short clues in chat without opening another dialogue or moving the camera. She also warns when her healing ether is running low. The quest instructions reflect nearby landmarks, and the field readout highlights when Elen needs healing. These reminders wait until combat and cinematic dialogue finish.
 
+Gather the party at the stairs, finish any nearby fight and heal fallen companions before changing levels. A party member who is still shooting or waiting to be revived stays in place until it is safe to continue together. Elen keeps her current health and ether through the transfer.
+
 ## Check in with Liora
 
 After completing the rescue, track **Check in with Liora** in the quest journal. Elen and Liora are staying at Landfall's existing inn near Hob Tennant. The quest marker points to the inn outdoors and to Liora inside. Walk there and speak with either family member when ready.
@@ -15,3 +17,5 @@ After completing the rescue, track **Check in with Liora** in the quest journal.
 The visit is a short portrait conversation. Ask what Liora remembers, or reassure her that she does not have to talk about it yet. Either answer completes the check-in; there is no wrong answer or combat requirement. Each player chooses for their own character, including when visiting with a party.
 
 The visit does not pay the rescue reward again or replace another quest assignment. Existing completed rescuers can make the same visit. Replays show the recorded answer without changing it, and the follow-up is archived after completion.
+
+If combat or trading interrupts the visit, speak with the family again afterward. Your chosen answer remains recorded; the interrupted conversation cannot complete the visit in the background.

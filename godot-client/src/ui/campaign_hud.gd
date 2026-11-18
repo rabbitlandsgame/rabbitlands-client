@@ -343,10 +343,7 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 	if not _available:
 		return
 	_title.text = str(travel.get("title", snapshot.get("title", "The Missing Measure")))
-	_hint.text = str(snapshot.get("hint", "Explore the quay and speak with the field crew."))
-	if travelling:
-		_hint.text = str(travel.get("route", "Explore the public roads to " + str(travel.get("map", "Twinbrook")) + "."))
-		if not str(travel.get("npc", "")).is_empty():_hint.text += "\nSpeak with " + str(travel.npc) + " there to continue."
+	_hint.text = FieldReadout.instructions(snapshot)
 	_notice.text = str(snapshot.get("party_notice", ""))
 	_notice.visible = not _notice.text.is_empty()
 	_opening_details.text = opening_details(snapshot)
@@ -374,6 +371,9 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 		var ledger:Dictionary=snapshot.get("shelves",{})
 		_entry.text=str(ledger.get("start_label","Start work")) if bool(ledger.get("can_begin",false)) else "Do now · Show on map"
 		_entry.tooltip_text="Start here when you are ready." if bool(ledger.get("can_begin",false)) else "Show the destination or the next door on your map. Walk there when you are ready; Untrack keeps the assignment in your quest log."
+		if _can_report():
+			_entry.text="Report to Ilka"
+			_entry.tooltip_text="Tell Ilka what you secured and collect this assignment's reward."
 	if checkin:
 		_entry.visible = travelling
 		_entry.text = "Show Liora on map"
@@ -443,7 +443,7 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 		_targets.add_child(button)
 
 func _request_leave() -> void:
-	if not _available: return
+	if not _available or not _leave.is_visible_in_tree(): return
 	if str(_state.get("kind", "")) == "rescue" and bool(_state.get("completed", false)):
 		# This is a local notice, not another quest decision. Dismiss now;
 		# the ordinary leave request still returns us from the private map.
@@ -454,21 +454,29 @@ func _request_leave() -> void:
 	action_requested.emit("leave")
 
 func _request_entry() -> void:
+	if not _available or not _entry.is_visible_in_tree(): return
 	var kind := str(_state.get("kind", ""))
 	if str(_state.get("key", "")) == "rescue_checkin":
 		action_requested.emit("rescue_checkin_destination")
 		return
 	if kind=="shelves" and not (_state.get("travel",{}) as Dictionary).is_empty() \
-			and not bool((_state.get("shelves",{}) as Dictionary).get("can_begin",false)):
+			and not bool((_state.get("shelves",{}) as Dictionary).get("can_begin",false)) and not _can_report():
 		action_requested.emit("shelves_destination")
 		return
 	action_requested.emit(kind if kind in ["bank", "road", "lamps", "rescue", "shelves"] else "resume" if bool(_state.get("started", false)) else "start")
+
+func _can_report() -> bool:
+	return str(_state.get("kind", "")) == "shelves" and bool(_state.get("available", false)) \
+		and str((_state.get("shelves", {}) as Dictionary).get("phase", "")) == "report" and _current_map == "landfall_town"
 
 func _apply_shelves(ledger: Dictionary) -> void:
 	_shelves.visible = not ledger.is_empty()
 	_lesson_window.visible = str(ledger.get("lesson_window", "")) in ["spells", "mixing"]
 	_lesson_window.text = "Open Magic" if str(ledger.get("lesson_window", "")) == "spells" else "Open Mixing"
 	if ledger.is_empty(): return
+	var local_work := bool(_state.get("active", false)) and str(ledger.get("phase", "")) == "work" \
+		and (_state.get("travel", {}) as Dictionary).is_empty() \
+		and EloriaProtocol.map_id_from_reference(str(_state.get("map", ""))) == _current_map
 	var lines: PackedStringArray = ["NEXT STEP" if str(ledger.get("phase","")) in ["travel","report"] else "SUPPLY LEDGER"]
 	if not str(ledger.get("current_supply","")).is_empty():
 		lines[0] = "Current supply: " + str(ledger.current_supply) + " Essence"
@@ -477,7 +485,8 @@ func _apply_shelves(ledger: Dictionary) -> void:
 			+ " · %d/%d" % [int(row.current),int(row.target)] + ("" if bool(row.get("personal",false)) else " · party"))
 	lines.append("Restored stock: " + (", ".join(ledger.get("unlocked", [])) if not (ledger.get("unlocked", []) as Array).is_empty() else "None yet"))
 	if str(ledger.get("chapter", "")) == "magic":lines.append("Spider specimens examined: %d/12" % int(ledger.get("samples",0)))
-	if str(ledger.get("chapter", "")) == "earth":lines.append("Cart integrity: %d%%. Stay near the cart; clear each ambush before moving on." % int(ledger.get("cart_integrity",100)))
+	if str(ledger.get("chapter", "")) == "earth":
+		lines.append("Cart integrity: %d%%" % int(ledger.get("cart_integrity",100)) + (". Stay near the cart; clear each ambush before moving on." if local_work else ""))
 	var growers: Dictionary=ledger.get("growers",{})
 	if not growers.is_empty() and not bool(growers.get("raid",false)):
 		var field:=str(growers.get("field","sage"))
@@ -485,8 +494,8 @@ func _apply_shelves(ledger: Dictionary) -> void:
 		var stored:=int((growers.get("stored",{}) as Dictionary).get(field,0))
 		var carried:=int(growers.get("carried",0))
 		lines.append("%s gathered: %s · In bags: %s · In crew storage: %s" % [crop,str(stored+carried),str(carried),str(stored)])
-		lines.append("Four level-%d harvesters · 250 per bag · Raiding waves: %d" % [int(growers.get("harvesting_level",10)),int(growers.get("wave",0))])
-		for worker: Dictionary in growers.get("workers",[]):
+		if local_work:lines.append("Four level-%d harvesters · 250 per bag · Raiding waves: %d" % [int(growers.get("harvesting_level",10)),int(growers.get("wave",0))])
+		for worker: Dictionary in growers.get("workers",[]) if local_work else []:
 			lines.append("%s · %d/%d health · %d carried · %s" % [worker.name,int(worker.health),int(worker.max_health),int(worker.cargo),FieldReadout.worker_activity(worker)])
 	var fire: Dictionary=ledger.get("fire",{})
 	if not fire.is_empty():
@@ -495,19 +504,21 @@ func _apply_shelves(ledger: Dictionary) -> void:
 			if str(fire.stage)=="fire_coal":lines.append("Lift repairs: %d/3 · Passage supports: %d/3" % [int(fire.repair),int(fire.passages)])
 		else:
 			lines.append("Signal silenced: %s · Water channels open: %s · Powder ignited: %s" % ["Yes" if fire.signal else "No","Yes" if fire.water else "No","Yes" if fire.powder else "No"])
-			if FieldReadout.has_warning(fire):lines.append("MOVE OUT OF THE MARKED BLAST AREA")
-		for worker: Dictionary in fire.get("workers",[]):
+			if local_work and FieldReadout.has_warning(fire):lines.append("MOVE OUT OF THE MARKED BLAST AREA")
+		for worker: Dictionary in fire.get("workers",[]) if local_work else []:
 			lines.append("%s · %d/%d health · %d carried · %s" % [worker.name,int(worker.health),int(worker.max_health),int(worker.cargo),FieldReadout.worker_activity(worker,"Mining")])
 	var water:Dictionary=ledger.get("water",{})
 	if not water.is_empty():
 		if str(water.stage)=="water":lines.append("Channel settings · Fresh %d/2 · Tide %d/2 · Drain %d/2\nKeeper’s marks: Fresh 2, Tide 1, Drain 0" % [int(water.flow[0]),int(water.flow[1]),int(water.flow[2])])
 		elif str(water.stage)=="water_cutters":
-			lines.append("Crew: %s · Gathering beds %d/2" % [str(water.command).capitalize(),int(water.bed)+1])
+			if local_work:lines.append("Crew: %s · Gathering beds %d/2" % [str(water.command).capitalize(),int(water.bed)+1])
 			for crop:String in ["kelp","cress"]:lines.append("%s · Cut %d/%d · At loading point %d · Secured %d/%d" % ["Kelp" if crop=="kelp" else "Watercress",int(water.cut[crop]),int(water.goals[crop]),int(water.bins[crop]),int(water.stored[crop]),int(water.goals[crop])])
-		elif str(water.stage)=="water_barge":lines.append("Barge hull: %d/100 · Landings: %d/3 · %s\nStay close and drive attackers away. Heal the crew; repair the boat with Wood Planks." % [int(water.hull),int(water.landing),"Departure ordered" if water.sailing else "Waiting for your departure order"])
+		elif str(water.stage)=="water_barge":
+			lines.append("Barge hull: %d/100 · Landings: %d/3" % [int(water.hull),int(water.landing)])
+			if local_work:lines.append(("Departure ordered" if water.sailing else "Waiting for your departure order") + "\nStay close and drive attackers away. Heal the crew; repair the boat with Wood Planks.")
 		else:lines.append("North guards isolated: %s · South guards isolated: %s" % ["Yes" if water.north else "No","Yes" if water.south else "No"])
-		if FieldReadout.has_warning(water):lines.append("MOVE OUT OF THE MARKED SURGE")
-		for worker:Dictionary in water.workers:lines.append("%s · %d/%d health · %d carried · %s" % [worker.name,int(worker.health),int(worker.max_health),int(worker.cargo),FieldReadout.worker_activity(worker,"Cutting")])
+		if local_work and FieldReadout.has_warning(water):lines.append("MOVE OUT OF THE MARKED SURGE")
+		for worker:Dictionary in water.workers if local_work else []:lines.append("%s · %d/%d health · %d carried · %s" % [worker.name,int(worker.health),int(worker.max_health),int(worker.cargo),FieldReadout.worker_activity(worker,"Cutting")])
 	_shelves.text = "\n".join(lines)
 
 func _rescue_local() -> bool:
@@ -518,7 +529,7 @@ func _rescue_local() -> bool:
 func _apply_rescue(rescue: Dictionary) -> void:
 	if rescue.has("checkin"): rescue = {}
 	var present := not rescue.is_empty() and str(_state.get("kind", "")) == "rescue"
-	_rescue.visible = present
+	_rescue.visible = present and _rescue_local()
 	_rescue_actions.visible = present and _rescue_local()
 	_rescue_rewards.visible = false
 	_patient_heal.hide()
@@ -873,7 +884,7 @@ func _nearby(target: Dictionary) -> bool:
 	return maxi(absi(_local_tile.x - tile.x), absi(_local_tile.y - tile.y)) <= maxf(1.0, float(target.get("range", 3.0)))
 
 func _request_target(identity: String, object_id: int) -> void:
-	if (not (_state.get("travel", {}) as Dictionary).is_empty() \
+	if not _available or not _scroll.is_visible_in_tree() or (not (_state.get("travel", {}) as Dictionary).is_empty() \
 			and str(_state.get("key", "")) != "rescue_checkin") \
 			or EloriaProtocol.map_id_from_reference(str(_state.get("map", ""))) != _current_map:
 		return

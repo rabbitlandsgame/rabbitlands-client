@@ -569,7 +569,7 @@ func choice_send_failed() -> void:
 		_choice_dialog.release_pending(_choice_error)
 
 func _choice_token() -> String:
-	return _run + "|" + _token + "|" + str(_choice_state.get("id", ""))
+	return _run + "|" + _token + "|" + str(_playback_generation) + "|" + str(_choice_state.get("id", ""))
 
 func _has_choice() -> bool:
 	return not _choice_state.is_empty() and str(_definition.get("choice_id", "")) == str(_choice_state.get("id", "")) \
@@ -803,6 +803,14 @@ func set_reduced_motion(value: bool, persist := true) -> void:
 func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictionary,
 		local_actor_id: int, current_map: String, world_ready := true,
 		coordinate_adapter: CoordinateAdapter = null, surface_sample := Callable()) -> void:
+	# Native replacement can precede the interruption snapshot. The old body
+	# may still be parked alive, but camera restoration must use the current one.
+	if not _player_camera.is_empty() and _body_ready(actor_nodes.get(local_actor_id)):
+		var previous: Variant = _player_actor.get_ref() if _player_actor != null else null
+		if is_instance_valid(previous) and previous != actor_nodes[local_actor_id]:
+			for role: String in _actors:
+				if _actors[role] == previous: _visibility_posts[role] = previous.visible
+		_player_actor = weakref(actor_nodes[local_actor_id])
 	_update_entry_visibility(snapshot, actor_nodes, current_map)
 	_update_handoff_visibility(snapshot, actor_nodes, current_map)
 	if not _scene_handoff.is_empty() and _advance_scene_handoff(delta, snapshot, rig, actor_nodes, local_actor_id, current_map, world_ready):
@@ -963,15 +971,29 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 		if not is_instance_valid(_rig) or not is_instance_valid(_camera):
 			cancel("camera_lost")
 			return
-		# Never hold the player's controls for a missing NPC or an asset failure.
+		# Parking retains a valid old node. It must not retain the scene's pose
+		# lease after native interest removes or replaces its role binding.
+		var current_bindings := _scene_bindings(scene, snapshot)
 		for role: String in _actors.keys():
-			if not is_instance_valid(_actors[role]):
+			var bound: Variant = _actors[role]
+			var current: Variant = actor_nodes.get(int(current_bindings.get(role, -1)))
+			if not is_instance_valid(bound) or bound.is_queued_for_deletion() or current != bound:
+				# A cached, authorized dead boss can acquire its local presentation
+				# body after leaving native interest. Living roles never do this.
+				if role == "goblin_boss" and is_instance_valid(current) \
+						and current == _replay_visuals.get(int(current_bindings.get(role, -1))):
+					_release_cast_role(role)
+					_actors[role] = current
+					_posts[role] = current.global_transform
+					_visibility_posts[role] = current.visible
+					continue
 				# Native interest can retire the corpse after the film has left
 				# its cave. Only an explicit completed role may leave the cast;
 				# a missing current speaker still releases the player safely.
 				if elapsed >= float((_definition.get("release_actors_after", {}) as Dictionary).get(role, INF)):
-					_actors.erase(role)
+					_release_cast_role(role)
 					continue
+				_release_cast_role(role)
 				cancel("actor_lost")
 				return
 		if _returning:
@@ -1240,7 +1262,7 @@ func _apply_camera(exit_view := false) -> void:
 		if entry_fade > 0.0:
 			opacity = smoothstep(0.0, entry_fade, elapsed)
 		var exit_fade := minf(0.6, _handoff_seconds("exit_seconds"))
-		if exit_fade > 0.0:
+		if exit_fade > 0.0 and not _has_scene_handoff():
 			opacity = minf(opacity, 1.0 - smoothstep(_duration() - exit_fade, _duration(), elapsed))
 		_screen.modulate.a = opacity
 	_apply_camera_pose(pose)
@@ -1888,6 +1910,23 @@ func _handoff_native_stamp(actor: Node3D) -> Dictionary:
 		var key := str(property.name)
 		if key in ["actor_id", "_last_command_sequence"]: stamp[key] = actor.get(key)
 	return stamp
+
+func _release_cast_role(role: String) -> void:
+	var value: Variant = _actors.get(role)
+	if is_instance_valid(value) and not value.is_queued_for_deletion() and not _portrait_only_roles.has(role):
+		var actor := value as Node3D
+		var native_visibility := actor.visible
+		if actor.has_method("end_cinematic_presentation"):
+			actor.call("end_cinematic_presentation")
+		elif _posts.has(role):
+			actor.global_transform = _posts[role]
+		# Parking and replacement own visibility now; do not resurrect the body.
+		actor.visible = native_visibility
+	_actors.erase(role)
+	_posts.erase(role)
+	_visibility_posts.erase(role)
+	_portrait_only_roles.erase(role)
+	_staged_actor_roles.erase(role)
 
 func _release_handoff_visibility(key := 0) -> void:
 	var keys: Array = [key] if key != 0 else _handoff_hidden.keys()

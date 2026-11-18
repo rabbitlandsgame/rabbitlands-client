@@ -288,7 +288,17 @@ func _focus_choice(identity: String) -> void:
 		return
 	set_meta(&"focused_choice", identity)
 	if _replay:
-		continue_button.grab_focus()
+		if _embedded:
+			# Focusing the footer scrolls the recorded approaches out of the
+			# shared portrait frame. Open at the chosen row; Continue remains
+			# reachable by scrolling or normal keyboard navigation.
+			var parent := get_parent()
+			while parent != null and not parent is ScrollContainer: parent = parent.get_parent()
+			if parent is ScrollContainer:
+				var selected := str(_payload.get("selected", ""))
+				(parent as ScrollContainer).ensure_control_visible(option_buttons.get(selected,option_buttons[_options[0].id]))
+		else:
+			continue_button.grab_focus()
 	elif _can_choose() and not _options.is_empty():
 		(option_buttons[str(_options[0].id)] as Button).grab_focus()
 

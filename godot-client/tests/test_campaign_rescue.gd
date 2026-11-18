@@ -346,9 +346,26 @@ func run() -> void:
 	main.call("_on_campaign_scene_finished", str(app.campaign.scene.token), "skipped")
 	expect(frames.size() == 1 and frames[0] == EloriaProtocol.chat("#campaign scene_done rescue-run rescue-run:measure.rescue.abduction"), "Skip releases the actual scene barrier without inventing a response")
 	frames.clear()
+	var card_guide: Node=main.get("lantern_guide")
+	var guide_before: Dictionary={}
+	for property: String in ["_campaign","_campaign_choices","_prefer_campaign","_campaign_signature","_rescue_return_tracking","_hidden_windows"]:
+		var value: Variant=card_guide.get(property)
+		guide_before[property]=value.duplicate(true) if value is Dictionary else value
+	var main_was_visible: bool=main.visible
+	var game_was_visible: bool=main.get("game_view").visible
+	main.show()
+	main.get("game_view").show()
 	main.get("campaign_hud").call("apply_state", app.campaign, Vector2i(253,154), "landfall")
+	card_guide.call("apply_campaign", app.campaign)
 	main.get("campaign_hud").call("_request_target", "mother", 64000)
 	expect(frames.size() == 1 and frames[0] == EloriaProtocol.chat("#campaign rescue replay"), "after Skip the enabled mother card requests the current cinematic conversation without inventing a response")
+	frames.clear();card_guide.call("hide_window")
+	main.get("campaign_hud").call("_request_target", "mother", 64000)
+	expect(frames.is_empty(), "hiding the mother card rejects its queued conversation action")
+	card_guide.call("show_window")
+	for property: String in guide_before:card_guide.set(property,guide_before[property])
+	card_guide.call("_refresh")
+	main.get("game_view").visible=game_was_visible;main.visible=main_was_visible
 	for response: int in [6400,6401,6402,6403]:
 		frames.clear(); main.call("_on_dialogue_option", 20, response)
 		expect(frames.size() == 1 and frames[0] == EloriaProtocol.npc_response(20,response), "native mother response " + str(response) + " remains available independently of replay")

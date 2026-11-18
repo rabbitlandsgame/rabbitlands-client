@@ -1,5 +1,6 @@
 extends Control
 const TextColors := preload("res://src/ui/text_colors.gd")
+const FieldReadout := preload("res://src/ui/campaign_field_readout.gd")
 ## This overlay teaches the existing UI. It cannot perform gameplay actions
 ## or locally advance a quest. Tracking changes only its presentation; skipping
 ## or leaving still requires the server's existing prompt.
@@ -94,10 +95,7 @@ func campaign_entry() -> Dictionary:
 		return {}
 	var travel: Dictionary = _campaign.get("travel", {})
 	var adoption: Dictionary = _campaign.get("adoption", {})
-	var objective := str(_campaign.get("hint", "Explore with the field crew."))
-	if not travel.is_empty():
-		objective = str(travel.get("route", objective))
-		if not str(travel.get("npc", "")).is_empty():objective += "\nSpeak with " + str(travel.npc) + " to continue."
+	var objective := FieldReadout.instructions(_campaign)
 	if str(adoption.get("state", "")) == "pending":
 		objective += "\n\nYour account: " + str(adoption.get("summary", "Choose whether to record this shared outcome."))
 		if not bool(adoption.get("can_adopt", false)):
