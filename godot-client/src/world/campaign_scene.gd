@@ -882,6 +882,12 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 		_interactive_requested_identity = ""
 		var replay := _replay_requested_identity == identity and _replay_allowed(snapshot, current_map)
 		_replay_requested_identity = ""
+		# An explicit receipt means this recipient already finished the film,
+		# even on a fresh client with no local playback history. Retain it for
+		# requested replay; legacy informational scenes can omit the flag.
+		if scene.has("requires_ack") and not bool(scene.requires_ack) and not replay and not interactive:
+			_handled[identity] = true
+			return
 		if _failed.has(identity) and not interactive: return
 		if _handled.has(identity) and not replay and not interactive:
 			if bool(scene.get("requires_ack", false)) and not _ack_requested:
@@ -1899,7 +1905,7 @@ func cancel(reason := "cancelled") -> void:
 			_camera.near = float(_saved.near)
 			_camera.far = float(_saved.far)
 	if not retaining_handoff:
-		if not was_replay and _returns_to_player(): _restore_player_camera()
+		if not was_replay and not adopt and _returns_to_player(): _restore_player_camera()
 		_player_camera.clear()
 		_player_actor = null
 	_saved.clear()

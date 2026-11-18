@@ -31,6 +31,21 @@ func run() -> void:
 			var state: Dictionary=record.get("snapshot",record)
 			var decoded:=EloriaProtocol.decode_campaign(JSON.stringify(state).to_utf8_buffer())
 			expect(decoded.type=="campaign","new and retained native lesson states decode: "+str(decoded.get("error","")))
+			if variable=="RL_HEAL_TARGET_LESSON_EVIDENCE" and decoded.type=="campaign":
+				var objectives:Array=state.shelves.objectives
+				expect(decoded.state.shelves.objectives==objectives
+					and objectives.all(func(row:Dictionary)->bool:return str(row.label).length()<=240),
+					"native objective labels fit their wire limit and survive decoding unchanged")
+				root.get_node("AppState")._on_packet(EloriaProtocol.ServerMessage.ELORIA_CAMPAIGN_STATE,
+					JSON.stringify(state).to_utf8_buffer())
+				var applied:Dictionary=root.get_node("AppState").campaign
+				expect(applied.scene.id==state.scene.id and applied.shelves.objectives==objectives
+					and applied.actors==decoded.state.actors,
+					"the actual campaign packet advances client state with its objective and actor aliases")
+				if state.actors.has("practice_patient"):
+					expect(decoded.state.actors.get("practice_patient")==state.actors.practice_patient
+						and decoded.state.actors.practice_patient==decoded.state.actors.mentor,
+						"the decoded native target lesson retains the exact patient/mentor alias")
 		if variable=="RL_HEAL_TARGET_LESSON_EVIDENCE":
 			var prompt: Dictionary=rows.filter(func(row: Dictionary)->bool:return row.get("capture_label")=="target-prompt")[0]
 			var ready: Dictionary=rows.filter(func(row: Dictionary)->bool:return row.get("capture_label")=="target-play")[0]
@@ -45,6 +60,13 @@ func run() -> void:
 				and not healed.actors.has("practice_patient"),"the actual paid heal changes the follow-up and releases friendly targeting")
 			expect(legacy.scene.id=="measure.shelves.basics.fire" and str(legacy.scene.get("variant",""))!="ally_healed"
 				and not legacy.actors.has("practice_patient"),"retained Fire lessons do not invent ally-healing completion")
+			var boundary:Dictionary=prompt.duplicate(true)
+			boundary.shelves.objectives[0].label="x".repeat(240)
+			expect(EloriaProtocol.decode_campaign(JSON.stringify(boundary).to_utf8_buffer()).type=="campaign",
+				"the supported objective-label boundary remains accepted")
+			boundary.shelves.objectives[0].label="x".repeat(241)
+			expect(EloriaProtocol.decode_campaign(JSON.stringify(boundary).to_utf8_buffer()).get("error")=="campaign_shelves",
+				"an overlong lesson objective cannot silently replace a valid client quest state")
 
 	var f:=fixture(); f.scene.cancel("replace_fixture")
 	f.scene._definitions=definitions
