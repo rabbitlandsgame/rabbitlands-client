@@ -53,6 +53,7 @@ func run() -> void:
 		{"id":"ribbon","dimensions":Vector2i(1280,720),"compact":true,"details":false,"more":false},
 		{"id":"more","dimensions":Vector2i(1280,720),"compact":false,"details":false,"more":true},
 		{"id":"instructions","dimensions":Vector2i(1280,720),"compact":false,"details":true,"more":false},
+		{"id":"instructions-small","dimensions":Vector2i(900,460),"compact":false,"details":true,"more":false},
 		{"id":"ribbon-small-more","dimensions":Vector2i(900,460),"compact":true,"details":false,"more":true},
 		{"id":"elen-small-ribbon","dimensions":Vector2i(900,460),"compact":true,"details":false,"more":false,"native":true}]:
 		if bool(capture.get("native",false)) and native.is_empty(): continue
@@ -70,6 +71,10 @@ func run() -> void:
 			expect(guide.card.more_is_open() and root.get_visible_rect().encloses(guide.card._menu.get_global_rect()),capture.id+" anchored controls fit")
 		if capture.id == "slim": expect(guide.card.size.y < 165,"the default card remains compact")
 		if capture.id == "ribbon": expect(guide.card.size.y < 70,"the collapsed state is a one-line ribbon")
+		if capture.details:
+			expect(guide.card.details_close.is_visible_in_tree(),"inline instructions retain their local Close control")
+			expect(hud._inline_ledger.is_visible_in_tree() and not hud._shelves.is_visible_in_tree(),"the compact facts replace the repeated supply ledger")
+			expect(hud._map_button.is_visible_in_tree(),"the map action remains in the foldout")
 		if capture.id == "elen-small-ribbon": expect(hud._recovery_actions.is_visible_in_tree(),"native recovery stays visible with the ledger collapsed")
 		expect(JSON.stringify(current) == before,"rendering changes no quest state")
 		await RenderingServer.frame_post_draw

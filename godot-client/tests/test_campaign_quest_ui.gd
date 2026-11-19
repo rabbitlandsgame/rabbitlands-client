@@ -129,7 +129,8 @@ func run() -> void:
 	var public_complete:=state.duplicate(true);public_complete.active=false;public_complete.started=true;public_complete.available=false;public_complete.travel={};public_complete.party={"can_join":false,"can_start_own":false}
 	await show_state(public_complete)
 	expect(not guide.has_campaign() and campaign_row()==-1 and guide.quest_title()=="Signed Ashore","a fully quiescent public completion removes the expedition row and restores the standard guide")
-	expect(windows.tracked_quest.visible and windows.tracked_quest_text.text.contains("Another ordinary quest"),"the ordinary pinned quest returns after the expedition becomes quiescent")
+	expect(windows.tracked_quest.visible and windows.tracked_quest.get("heading").text == "Another ordinary quest" \
+		and windows.tracked_quest_text.text.contains("Gather three supplies"),"the ordinary pinned quest returns after the expedition becomes quiescent")
 	public_complete.travel={"map":"landfall","npc":"Ammet Sorrel","route":"Return for optional field work."};await show_state(public_complete)
 	expect(guide.has_campaign() and campaign_row()>=0,"unfinished optional travel retains its real expedition entry")
 	await show_state(state)
@@ -151,7 +152,8 @@ func run() -> void:
 		and guide.instruction.text.contains("check in on Liora later"),"the ending offers the Liora follow-up message and one Continue action")
 	expect(not guide.collapse.visible and not guide.untrack.visible and not guide.instruction.text.contains("Speak"),
 		"the completion notice offers no active quest tracking or repeated conversation")
-	expect(not guide.hide_button.visible,"the completed rescue keeps its Continue action accessible")
+	expect(not guide.hide_button.visible and not guide.card.details_close.is_visible_in_tree(),
+		"the completed rescue keeps Continue accessible without an Instructions close action")
 	await capture("rescue-complete-return-1280x720")
 	var departures:Array[String]=[]
 	hud.action_requested.connect(func(action:String)->void:departures.append(action))

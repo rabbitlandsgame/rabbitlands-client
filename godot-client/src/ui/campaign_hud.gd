@@ -2,6 +2,7 @@ extends Control
 const Guidance := preload("res://src/world/campaign_guidance.gd")
 const FieldReadout := preload("res://src/ui/campaign_field_readout.gd")
 const AllyRecovery := preload("res://src/ui/campaign_ally_recovery.gd")
+const TrackerSummary := preload("res://src/ui/quest_tracker_summary.gd")
 ## The quest's field checklist. Its controls request ordinary movement/use;
 ## only a new authoritative snapshot changes completion or available decisions.
 signal target_requested(object_id: int, tile: Vector2i, nearby: bool)
@@ -22,6 +23,7 @@ signal completion_dismissed
 
 var _panel: PanelContainer
 var _body_scroll: ScrollContainer
+var _margin: MarginContainer
 var _title: Label
 var _hint: Label
 var _guidance: Label
@@ -78,6 +80,13 @@ var _dismissed_completion := ""
 var _tracker_recovery := false
 var _tracker_details_open := true
 var _tracker_recovery_host: Control
+var _inline_content: VBoxContainer
+var _inline_ledger: GridContainer
+var _inline_guidance: Label
+var _inline_note: Label
+var _map_button: Button
+var _inline_signature := ""
+var _inline_fit_queued := false
 
 func embed_instruction(label: Label) -> void:
 	if label.get_parent() != _column:
@@ -95,6 +104,7 @@ func embed() -> void:
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	for side: String in ["left","right","top","bottom"]: _margin.add_theme_constant_override("margin_"+side,0)
 	# The enclosing quest card already scrolls. Let action rows take their
 	# natural height so a wrapped prerequisite never clips inside a second list.
 	_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -102,6 +112,7 @@ func embed() -> void:
 	_title.hide()
 	_hint.hide()
 	_layout()
+	_queue_inline_fit()
 
 func presentation_available() -> bool:
 	return _available
@@ -166,6 +177,7 @@ func _build() -> void:
 	_body_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_panel.add_child(_body_scroll)
 	var margin := MarginContainer.new()
+	_margin = margin
 	margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	for side: String in ["left", "right", "top", "bottom"]:
 		margin.add_theme_constant_override("margin_" + side, 12)
@@ -182,6 +194,22 @@ func _build() -> void:
 	_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_hint.add_theme_font_size_override("font_size", 16)
 	column.add_child(_hint)
+	_inline_content = VBoxContainer.new(); _inline_content.name = "InlineInstructionFacts"
+	_inline_content.add_theme_constant_override("separation",7); column.add_child(_inline_content)
+	_inline_guidance = Label.new(); _inline_guidance.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_inline_guidance.add_theme_font_size_override("font_size",13); _inline_content.add_child(_inline_guidance)
+	_inline_ledger = GridContainer.new(); _inline_ledger.name = "InstructionLedger"; _inline_ledger.columns = 2
+	_inline_ledger.add_theme_constant_override("h_separation",12); _inline_ledger.add_theme_constant_override("v_separation",5)
+	_inline_content.add_child(_inline_ledger)
+	_inline_note = Label.new(); _inline_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_inline_note.add_theme_font_size_override("font_size",12); _inline_note.add_theme_color_override("font_color",Color("bac8c2"))
+	_inline_content.add_child(_inline_note)
+	_map_button = Button.new(); _map_button.name = "ShowQuestMap"; _map_button.text = "Show on map"
+	_map_button.tooltip_text = "Open this area's map to see your party and marked work sites."
+	_map_button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_map_button.add_theme_font_size_override("font_size",12); _map_button.pressed.connect(_request_map)
+	_inline_content.add_child(_map_button); _inline_content.hide()
+	column.minimum_size_changed.connect(_queue_inline_fit)
 	_field_summary = Label.new()
 	_field_summary.name = "FieldReadout"
 	_field_summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -452,6 +480,7 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 		_column.move_child(_scroll, action_anchor.get_index() + 1 if _opening_actions_first else _entry.get_index() - 1)
 	_title.visible = not _embedded
 	_hint.visible = not _embedded
+	_apply_inline_instructions(complete,matches,travelling)
 	_layout()
 	var rows: Array = []
 	var source: Array = [] if complete else Guidance.card_targets(snapshot) if Guidance.is_guided(snapshot) else snapshot.get("targets", [])
@@ -490,6 +519,57 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 		button.tooltip_text = str(target.get("detail", "Use the marked place in the world."))
 		button.pressed.connect(_request_target.bind(str(target.get("id", "")), int(target.get("object_id", -1))))
 		_targets.add_child(button)
+	_queue_inline_fit()
+
+func _apply_inline_instructions(complete: bool, matches: bool, travelling: bool) -> void:
+	if not _tracker_recovery or complete:
+		_inline_content.hide()
+		return
+	var content := TrackerSummary.instructions(_state,_current_map)
+	var covered := bool(content.get("replaces_supply_ledger",false))
+	var rows: Array = content.get("ledger",[])
+	var signature := JSON.stringify(rows)
+	if signature != _inline_signature:
+		_inline_signature = signature
+		for child: Node in _inline_ledger.get_children():
+			_inline_ledger.remove_child(child); child.queue_free()
+		for row: Dictionary in rows:
+			for key: String in ["label","value"]:
+				var label := Label.new(); label.text = str(row.get(key,""))
+				label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+				label.add_theme_font_size_override("font_size",12)
+				if key == "value": label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+				else: label.add_theme_color_override("font_color",Color("bac8c2"))
+				_inline_ledger.add_child(label)
+	_inline_ledger.visible = covered and not rows.is_empty()
+	_inline_guidance.text = str(content.get("guidance",""))
+	_inline_guidance.visible = covered and not _inline_guidance.text.is_empty()
+	_inline_note.text = str(content.get("note",""))
+	_inline_note.visible = covered and not _inline_note.text.is_empty() and not "heal target" in str(content.get("text","")).to_lower()
+	_map_button.visible = bool(_state.get("active",false)) and matches and not travelling
+	_inline_content.visible = _inline_ledger.visible or _inline_guidance.visible or _inline_note.visible or _map_button.visible
+	if covered:
+		_shelves.hide()
+		_field_summary.hide()
+	# The slim header already gives the route summary; actual work buttons and
+	# specialized preparation/lesson/party requirements remain in the foldout.
+	if covered: _guidance.hide()
+
+func _request_map() -> void:
+	if _available and _map_button.is_visible_in_tree() and bool(_state.get("active",false)) \
+			and EloriaProtocol.map_id_from_reference(str(_state.get("map",""))) == _current_map \
+			and (_state.get("travel",{}) as Dictionary).is_empty():
+		action_requested.emit("quest_map")
+
+func _queue_inline_fit() -> void:
+	if not _embedded or _inline_fit_queued: return
+	_inline_fit_queued = true
+	_fit_inline.call_deferred()
+
+func _fit_inline() -> void:
+	_inline_fit_queued = false
+	_layout()
 
 func _request_leave() -> void:
 	if not _available or not _leave.is_visible_in_tree(): return
@@ -945,7 +1025,8 @@ func _layout() -> void:
 	var viewport_size := get_viewport().get_visible_rect().size
 	if _embedded:
 		var complete := str(_state.get("kind","")) == "rescue" and str(_state.get("key","")) != "rescue_checkin" and bool(_state.get("completed",false))
-		custom_minimum_size = Vector2(0, 100.0 if complete else clampf(viewport_size.y - 250.0,72.0,300.0))
+		var limit := clampf(viewport_size.y-230.0,56.0,240.0)
+		custom_minimum_size = Vector2(0,100.0 if complete else minf(maxf(32,_column.get_combined_minimum_size().y),limit))
 		_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		_scroll.custom_minimum_size.y = 0.0
 		return

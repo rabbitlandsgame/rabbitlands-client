@@ -248,7 +248,6 @@ var _tracked_quest_layout_revision := 0
 var _tracked_quest_compact := false
 var _tracked_quest_details_open := false
 var _tracked_quest_presented_title := ""
-var _tracked_quest_details_scroll: ScrollContainer
 
 func _ready() -> void:
 	name = "ExtensionWindows"
@@ -769,30 +768,20 @@ func _sync_tracked_quest() -> void:
 		tracked_quest.hide()
 		return
 	var target: int = int(tracked.get("target", 0))
-	var lines: Array[String] = [
-		"[center][font_size=20][color={quest_heading}][b]QUEST TRACKER[/b][/color][/font_size][/center]",
-		"[font_size=17]◆  [b]%s[/b][/font_size]"
-			% str(tracked.get("title", "")),
-		"[indent][font_size=15]%s[/font_size][/indent]"
-			% str(tracked.get("objective", ""))]
-	if bool(tracked.get("ready", false)):
-		lines.append("[indent][font_size=15][color={quest_ready}][b]Ready to turn in[/b][/color]"
-			+ " at %s[/font_size][/indent]"
-			% str(tracked.get("location", "unknown")))
-	elif target > 0:
-		lines.append(("[indent][font_size=15]%d of %d"
-			+ "  ·  %s[/font_size][/indent]") % [
-				int(tracked.get("current", 0)), target,
-				str(tracked.get("location", "unknown"))])
-	else:
-		lines.append("[indent][font_size=15]%s[/font_size][/indent]"
-			% str(tracked.get("location", "unknown")))
+	var full_objective := str(tracked.get("objective", ""))
+	var facts: PackedStringArray = []
+	if target > 0:
+		facts.append("Progress: %d / %d" % [int(tracked.get("current", 0)), target])
+	var location := str(tracked.get("location", ""))
+	if not location.is_empty(): facts.append("Location: " + location)
+	if bool(tracked.get("ready", false)): facts.append("Ready to turn in.")
 	if _tracked_quest_presented_title != _tracked_quest_title:
 		_tracked_quest_presented_title = _tracked_quest_title
 		_tracked_quest_details_open = false
-	tracked_quest_text.text = _quest_markup("\n".join(lines))
+	# The common foldout supplies its Instructions heading. Keep this body
+	# faithful to the journal, including its paragraphs and literal brackets.
+	tracked_quest_text.text = full_objective + ("\n\n" + "\n".join(facts) if not facts.is_empty() else "")
 	var current := maxi(0, int(tracked.get("current", 0)))
-	var full_objective := str(tracked.get("objective", ""))
 	var summary := {"objective":full_objective.split("\n", false)[0] if not full_objective.strip_edges().is_empty() else "",
 		"full_objective":full_objective,
 		"counter":"%d / %d" % [current, target] if target > 0 else "",
@@ -820,10 +809,7 @@ func _fit_tracked_quest_to_content(revision: int) -> void:
 	await get_tree().process_frame
 	if revision != _tracked_quest_layout_revision or not tracked_quest.visible:
 		return
-	# Full instructions scroll inside their own bounded detail area. The slim
-	# card and ribbon keep their natural chrome height, independent of prose.
-	_tracked_quest_details_scroll.custom_minimum_size.y = clampf(
-		get_viewport_rect().size.y - 235.0, 64.0, 140.0)
+	# The shared inline foldout owns bounded scrolling for the full notes.
 	tracked_quest.reset_size()
 
 ## One list serves both halves of the window, so a selection has to be read
@@ -2609,21 +2595,16 @@ func _build() -> void:
 	tracked_quest.connect("instructions_toggled", _on_tracked_quest_instructions)
 	tracked_quest.connect("hide_requested", _on_quest_hide_pressed)
 	tracked_quest.connect("untrack_requested", _on_quest_untrack_pressed)
-	_tracked_quest_details_scroll = ScrollContainer.new()
-	_tracked_quest_details_scroll.name = "TrackedQuestInstructionsScroll"
-	_tracked_quest_details_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	_tracked_quest_details_scroll.custom_minimum_size.y = 100
-	(tracked_quest.get("details") as VBoxContainer).add_child(_tracked_quest_details_scroll)
 	tracked_quest_text = RichTextLabel.new()
 	tracked_quest_text.name = "TrackedQuestText"
-	tracked_quest_text.bbcode_enabled = true
+	tracked_quest_text.bbcode_enabled = false
 	tracked_quest_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	tracked_quest_text.scroll_active = false
 	tracked_quest_text.fit_content = true
 	tracked_quest_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_tracked_quest_details_scroll.add_child(tracked_quest_text)
+	(tracked_quest.get("details") as VBoxContainer).add_child(tracked_quest_text)
 	TextColors.bind(tracked_quest_text, "quest_active", "default_color")
-	tracked_quest_text.add_theme_font_size_override("normal_font_size", 13)
+	tracked_quest_text.add_theme_font_size_override("normal_font_size", 14)
 	quest_hide_button = tracked_quest.get("hide_button")
 	quest_hide_button.name = "HideQuest"
 	quest_untrack_button = tracked_quest.get("untrack_button")

@@ -165,9 +165,9 @@ func _run() -> void:
 	windows._on_quest_track_pressed()
 	await process_frame
 	_expect(windows.tracked_quest.visible
-		and windows.tracked_quest_text.text.contains("Kill Them All")
+		and windows.tracked_quest.get("heading").text == "Kill Them All"
 		and windows.tracked_quest_text.text.contains("Defeat 3 rats")
-		and windows.tracked_quest_text.text.contains("1 of 3")
+		and windows.tracked_quest_text.text.contains("Progress: 1 / 3")
 		and windows.tracked_quest_text.text.contains("Four Gates"),
 		"the tracked readout states the quest, the objective and the progress")
 	var tracked_rect: Rect2 = windows.tracked_quest.get_global_rect()

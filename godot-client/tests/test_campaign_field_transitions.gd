@@ -136,6 +136,18 @@ func run() -> void:
 		client.campaign_hud._entry.pressed.emit()
 		expect(frames==[EloriaProtocol.chat("#campaign shelves")], "the visible report button reaches Main and the ordinary server campaign dispatcher (visible=%s, blocked=%s, label=%s, frames=%d)" \
 			% [client.campaign_hud._entry.is_visible_in_tree(),client._world_input_blocked(),client.campaign_hud._entry.text,frames.size()])
+		var local_work: Dictionary=reporting.duplicate(true)
+		local_work.active=true;local_work.travel={};local_work.scene={};local_work.stage="work";local_work.shelves.phase="work"
+		app.campaign=local_work;app.lantern_tutorial={};frames.clear()
+		client.campaign_hud.apply_state(local_work,Vector2i(178,26),"landfall_town")
+		client.lantern_guide.apply_campaign(local_work);await settle()
+		var unchanged:=JSON.stringify(app.campaign)
+		client.campaign_hud._map_button.pressed.emit();await settle()
+		expect(client.full_map.visible and frames.is_empty() and JSON.stringify(app.campaign)==unchanged,
+			"the inline map control opens the real map without movement, quest submission or progress changes")
+		client._toggle_full_map();client.lantern_guide.card.details_close.pressed.emit()
+		client.campaign_hud._map_button.pressed.emit()
+		expect(not client.full_map.visible and frames.is_empty(),"a closed foldout cannot dispatch a hidden map action")
 		app.authenticated=false;client._clear_world_presentation()
 		expect(await ContinentChunkStream.drain_workers(self,30000), "the report interaction leaves no world workers running")
 		client.queue_free();await process_frame;await process_frame;GlbSceneCache.clear();NativeAnimationImporter.clear()

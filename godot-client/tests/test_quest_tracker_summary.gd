@@ -19,8 +19,102 @@ func supplies() -> Dictionary:
 				"workers":[{"actor_id":400,"name":"Ada","health":80,"downed":false},
 					{"actor_id":401,"name":"Nell","health":1,"downed":true}]}}}
 
+func ledger_value(detail: Dictionary, label: String) -> String:
+	for row: Dictionary in detail.ledger:
+		if str(row.label) == label: return str(row.value)
+	return ""
+
+func inline_instructions() -> void:
+	var state := supplies()
+	state.shelves.growers.stored.sage = 6240; state.shelves.growers.carried = 760
+	state.shelves.growers.workers = []
+	for index: int in 4:
+		state.shelves.growers.workers.append({"actor_id":400+index,"name":"Worker "+str(index),"health":80,"downed":false})
+	var before := JSON.stringify(state)
+	var detail := Summary.instructions(state,"landfall")
+	expect(detail.text == Readout.instructions(state) and JSON.stringify(state) == before,
+		"inline Instructions preserves the exact native objective and never changes quest state")
+	expect(ledger_value(detail,"Crew storage") == "6,240 / 10,000 Sage" \
+		and ledger_value(detail,"In workers' bags") == "760 Sage" and ledger_value(detail,"Crew") == "4 / 4 standing",
+		"the Sage foldout separates secured stock, actual carried bags and crew status")
+	expect(detail.replaces_supply_ledger and detail.ledger.size() == 3,
+		"a complete active-field production table can replace the verbose supply ledger")
+	expect(detail.note == "Use Heal Target to revive a fallen worker.","a known native healthy crew keeps one brief actual recovery lesson")
+	expect(detail.guidance == "Watch the Old Warren approach and protect the carrying workers.",
+		"useful field guidance retains the complete nonurgent action line")
+	var remote := Summary.instructions(state,"landfall_town")
+	expect(remote.ledger.is_empty() and remote.note.is_empty() and not remote.replaces_supply_ledger,
+		"Instructions never presents a remote crew as a current local encounter")
+	state.travel = {"label":"Ilka Tarn","route":"Return to The True Note with the shipment."}
+	detail = Summary.instructions(state,"landfall")
+	expect(detail.text == Readout.instructions(state) and detail.ledger.is_empty() and detail.note.is_empty(),
+		"native travel replaces suspended field readouts with its exact route")
+	state.erase("travel")
+	state.shelves.objectives = []
+	detail = Summary.instructions(state,"landfall")
+	expect(ledger_value(detail,"Crew storage") == "6,240 Sage" and not detail.replaces_supply_ledger,
+		"a missing contract preserves the native storage value without inventing a goal or hiding the old checklist")
+	for worker: Dictionary in state.shelves.growers.workers: worker.erase("actor_id")
+	expect(Summary.instructions(state,"landfall").note.is_empty(),"crew metadata without a native ally identity does not promise Heal Target support")
+	state.shelves.erase("growers")
+	state.shelves.fire = {"stage":"fire_coal","step":"extract","recovered":50,"mined":30,
+		"recovered_goal":100,"mined_goal":200,"carried":20,"workers":[],
+		"field_hint":"Protect the miners and both hauling paths. Heal Target revives a fallen worker."}
+	state.hint = state.shelves.fire.field_hint
+	detail = Summary.instructions(state,"landfall")
+	expect(ledger_value(detail,"Recovered secured") == "50 / 100 Coal" \
+		and ledger_value(detail,"Mined secured") == "30 / 200 Coal" and ledger_value(detail,"In workers' bags") == "20 Coal",
+		"Coal retains both actual quota requirements and never counts its bags as secured")
+	expect(detail.replaces_supply_ledger and detail.guidance.is_empty(),
+		"complete extraction quotas can replace the old ledger without duplicating the native instruction paragraph")
+	state.shelves.fire.step = "repair"
+	detail = Summary.instructions(state,"landfall")
+	expect(not detail.replaces_supply_ledger and ledger_value(detail,"Recovered secured").is_empty(),
+		"lift preparation keeps its existing work checklist instead of promising an extraction table")
+	state.shelves.fire.step = "extract"; state.shelves.fire.erase("mined_goal")
+	expect(not Summary.instructions(state,"landfall").replaces_supply_ledger,
+		"an incomplete Fire quota cannot hide required supply work")
+	state.shelves.erase("fire")
+	state.shelves.objectives = [{"id":"kelp","label":"Secure Kelp","current":100,"target":400},
+		{"id":"cress","label":"Secure Watercress","current":50,"target":200}]
+	state.shelves.water = {"stage":"water_cutters","command":"work","workers":[],
+		"stored":{"kelp":100,"cress":50},"bins":{"kelp":20,"cress":10},"cut":{"kelp":135,"cress":65},
+		"goals":{"kelp":800,"cress":400},"field_hint":"Protect the cutters and Ada along the loading route."}
+	state.hint = state.shelves.water.field_hint
+	detail = Summary.instructions(state,"landfall")
+	expect(ledger_value(detail,"Kelp secured") == "100 / 400" and ledger_value(detail,"Watercress secured") == "50 / 200",
+		"Water preserves two production contracts and ignores inflated legacy wire goals")
+	expect(ledger_value(detail,"At loading point") == "20 Kelp · 10 Watercress" \
+		and ledger_value(detail,"In workers' bags") == "15 Kelp · 5 Watercress",
+		"native allocated totals separate loading bins and actual typed worker cargo")
+	expect(detail.replaces_supply_ledger,"both complete Water goal rows can replace its production ledger")
+	state.shelves.water.erase("cut")
+	expect(ledger_value(Summary.instructions(state,"landfall"),"In workers' bags").is_empty(),
+		"missing allocation metadata does not invent zero or untyped worker cargo")
+	state.shelves.water.cut = {"kelp":100,"cress":65}
+	expect(ledger_value(Summary.instructions(state,"landfall"),"In workers' bags").is_empty(),
+		"inconsistent allocated metadata is not clamped into a false bag count")
+	state.shelves.objectives.remove_at(1)
+	expect(not Summary.instructions(state,"landfall").replaces_supply_ledger,
+		"a missing Water production contract keeps the existing full checklist")
+	state.shelves.water.merge({"stage":"water_barge","hull":0,"landing":1,
+		"field_hint":"Repair the hull with Wood Planks before ordering Sail."},true)
+	state.hint = state.shelves.water.field_hint
+	detail = Summary.instructions(state,"landfall")
+	expect(detail.text == state.hint and not detail.replaces_supply_ledger,
+		"barge material requirements and specialized controls remain in their original instructions")
+	state.shelves.phase = "report"
+	expect(Summary.instructions(state,"landfall").ledger.is_empty(),"reporting shows no stale harvesting ledger")
+	state.shelves.phase = "work"; state.active = false
+	expect(Summary.instructions(state,"landfall").note.is_empty(),"paused workers cannot advertise a local recovery lesson")
+	var generic := {"kind":"rescue","active":true,"hint":"Stay with Elen and Liora until they reach safety."}
+	detail = Summary.instructions(generic,"landfall_insides")
+	expect(detail.text == generic.hint and detail.ledger.is_empty() and not detail.replaces_supply_ledger,
+		"rescue and generic quest Instructions keep their exact objective and existing specialized controls")
+
 func run() -> void:
 	root.get_node("Network").block_for_hud_preview()
+	inline_instructions()
 	var state := supplies()
 	var original := JSON.stringify(state)
 	var summary := Summary.campaign(state,"landfall")
@@ -162,8 +256,16 @@ func run() -> void:
 				"native compact summary has an actionable instruction and a bounded real counter")
 			expect(str(summary.counter).is_empty() == str(summary.ribbon_counter).is_empty(),
 				"native ribbon counters exist only when a real descriptive counter exists")
+			var detail := Summary.instructions(source,str(source.map))
+			expect(detail.text == Readout.instructions(source) and JSON.stringify(source) == before,
+				"native inline Instructions retain exact instructions without quest mutations")
+			for row: Dictionary in detail.ledger:
+				expect(row.label is String and row.value is String and not str(row.value).is_empty(),
+					"native inline ledger consists only of readable passive values")
 			if not (source.get("travel",{}) as Dictionary).is_empty():
 				expect(summary.recovery.is_empty() and not summary.urgent and summary.progress == -1.0,
 					"native travel never displays suspended encounter actions or shipment progress")
+				expect(detail.ledger.is_empty() and detail.note.is_empty() and not detail.replaces_supply_ledger,
+					"native travel leaves its suspended field ledger and recovery note hidden")
 	print("Quest tracker summary: %d checks; %d failures" % [checks,failures])
 	quit(1 if failures else 0)
