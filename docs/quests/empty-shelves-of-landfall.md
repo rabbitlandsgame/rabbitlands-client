@@ -88,6 +88,8 @@ Ilka provides one guard allowance: 1,500 Fire, 250 Life and 500 Water Essences, 
 
 Ilka assigns each chapter at The True Note and gives directions in her conversation. Accepting an assignment keeps the player at the shop. The quest instructions list the destination and tasks; **Do now · Show on map** opens the map without moving the player. The normal Instructions, minimize, Hide and Untrack controls remain available, and the assignment stays in the quest log.
 
+During play, the slim quest card shows your next action and the current shipment or objective counter. Its chevron collapses it to a quest ribbon. **More** holds **Instructions**, **Replay scene**, **Hide** and **Untrack**. Instructions opens the full ledger and work controls. Hide keeps the quest tracked; Untrack stops following it without losing progress. Use the quest journal to show or track it again. Urgent Heal Target actions remain available with the ledger closed.
+
 During the opening lessons, the card offers the relevant conversation when you reach Ilka with completed gathering or a finished batch, and begins or resumes practice when you reach Ostrid. A defeat in practice keeps your current lesson. Personal supply caches are labelled as optional; required practice and rare-drop recovery remain actionable. Party helpers see their supporting role and retain their own unfinished assignment.
 
 New learners practice Heal Target on Ostrid's minor training injury before learning Fire Bolt. Open Magic, choose Heal Target at Power 1, select Cast, then click Ostrid. Her health bar shows the result. Magic level 0 is sufficient; the cast costs 5 ether, one Life Essence and one Water Essence. The lesson needs actual healing on Ostrid, and explains that the same spell revives downed supply workers. Water practice supplies arrive before this cast and are shared with the later Gain Ether lesson. Courses already in progress retain their original lesson order and rewards.
@@ -105,6 +107,8 @@ The new raid uses a party-only copy of the existing Old Warren caves, not Lanter
 Supply chests use normal personal storage. Gatherers' caches beside the resource patches let players bank materials and mix from storage. Crops not yet native to Landfall arrive in the crew's cultivation trays. A genuine critical mixing failure permits replacement of the lost training ingredients; repeated requests alone do not generate supplies.
 
 The intact gland has a chance to drop for nearby participants, with a usable gland guaranteed by their twelfth eligible spider. A late learner can request another nest after the first is cleared. Ordinary enriched-mix chances remain unchanged.
+
+In the later supply expeditions, a player who has finished their own practice can use **Finish** and report to Ilka while friends continue theirs. Leaving this way preserves the remaining party's work. Work sites that still need materials, repairs or cleared attackers explain the missing step in the quest card; their ground markers appear when they become usable.
 
 ## Presentation and follow-on work
 

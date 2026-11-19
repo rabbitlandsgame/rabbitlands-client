@@ -20,6 +20,7 @@ func settle() -> void:
 		await process_frame
 
 func click(control: Control) -> void:
+	await open_more_for(control)
 	var point := control.get_global_rect().get_center()
 	var motion := InputEventMouseMotion.new()
 	motion.position = point
@@ -32,6 +33,17 @@ func click(control: Control) -> void:
 	event.pressed = false
 	root.push_input(event, true)
 	await settle()
+
+func open_more_for(control: Control) -> void:
+	if control.is_visible_in_tree(): return
+	var parent := control.get_parent()
+	while parent != null:
+		if parent.has_method("open_more") and parent is Control and parent.is_visible_in_tree():
+			if control in [parent.get("hide_button"), parent.get("untrack_button"),
+					parent.get("instructions_button"), parent.get("replay_button")]:
+				await click(parent.get("more"))
+				return
+		parent = parent.get_parent()
 
 func capture(filename: String) -> void:
 	var directory := OS.get_environment("ELORIA_ARTIFACT_DIR")
@@ -73,15 +85,20 @@ func run() -> void:
 	await settle()
 	expect(windows.tracked_quest.visible and windows.quest_track_button.text == "Untrack",
 		"tracking an ordinary quest opens its window and offers Untrack")
-	expect(windows.tracked_quest.get_global_rect().encloses(windows.quest_untrack_button.get_global_rect()),
-		"the quest window's untrack control fits within its bounds")
-	expect(windows.tracked_quest.get_global_rect().encloses(windows.quest_hide_button.get_global_rect()),
-		"the quest window's Hide control fits within its bounds")
+	await open_more_for(windows.quest_untrack_button)
+	var menu: Control = windows.tracked_quest.get("_menu")
+	expect(windows.quest_untrack_button.is_visible_in_tree()
+		and menu.get_global_rect().encloses(windows.quest_untrack_button.get_global_rect()),
+		"the quest window's untrack control is reachable inside More")
+	expect(windows.quest_hide_button.is_visible_in_tree()
+		and root.get_visible_rect().encloses(menu.get_global_rect()),
+		"the quest window's More actions fit the viewport")
 	main.hud_workspace.change_part("objectives", "compact", true)
 	await settle()
-	expect(windows.tracked_quest.get_global_rect().encloses(windows.quest_hide_button.get_global_rect())
-		and not windows.quest_hide_button.get_global_rect().intersects(windows.tracked_quest_text.get_global_rect()),
-		"Hide stays accessible below the objective in the compact HUD layout")
+	await open_more_for(windows.quest_hide_button)
+	expect(windows.quest_hide_button.is_visible_in_tree()
+		and root.get_visible_rect().encloses(windows.quest_hide_button.get_global_rect()),
+		"Hide stays accessible in More with the compact HUD preference")
 	main.hud_workspace.change_part("objectives", "compact", false)
 	await settle()
 	await click(windows.quest_hide_button)
@@ -149,6 +166,7 @@ func run() -> void:
 			"untracking preserves the active quest and its progress: " + sample.quest)
 		snapshot.stage = 2
 		snapshot.title = "Return the supplies"
+		snapshot.hint = "Return the supplies to the guide."
 		snapshot.count = 2
 		guide_state(snapshot)
 		app_state.state_changed.emit(&"quest_journal")
@@ -157,7 +175,8 @@ func run() -> void:
 			"new objectives do not reopen an untracked guide: " + sample.quest)
 		windows.quest_track_button.pressed.emit()
 		await settle()
-		expect(guide.visible and guide.heading.text == "Return the supplies" and not windows.tracked_quest.visible,
+		expect(guide.visible and guide.heading.text == sample.quest
+			and guide.card.get("objective").text == snapshot.hint and not windows.tracked_quest.visible,
 			"Track restores the latest objective without a duplicate tracker: " + sample.quest)
 		windows.quest_track_button.pressed.emit()
 		expect(not guide.visible, "Untrack in the journal hides the guide: " + sample.quest)
