@@ -10,6 +10,8 @@ Near junctions, stairs and the captive's chamber, Elen gives occasional short cl
 
 Gather the party at the stairs, finish any nearby fight and heal fallen companions before changing levels. A party member who is still shooting or waiting to be revived stays in place until it is safe to continue together. Elen keeps her current health and ether through the transfer.
 
+If Elen falls during the chamber fight, heal her before opening Liora's cage. The quest card explains the blocked action and offers Heal Target while she is down. Freeing Liora then resumes the family's conversation and journey outside. Personal weapon rewards become available outside to players who took part in the rescue.
+
 ## Check in with Liora
 
 After completing the rescue, track **Check in with Liora** in the quest journal. Elen and Liora are staying at Landfall's existing inn near Hob Tennant. The quest marker points to the inn outdoors and to Liora inside. Walk there and speak with either family member when ready.

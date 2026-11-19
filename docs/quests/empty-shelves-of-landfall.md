@@ -106,6 +106,8 @@ Supply chests use normal personal storage. Gatherers' caches beside the resource
 
 The intact gland has a chance to drop for nearby participants, with a usable gland guaranteed by their twelfth eligible spider. A late learner can request another nest after the first is cleared. Ordinary enriched-mix chances remain unchanged.
 
+In the later supply expeditions, a player who has finished their own practice can use **Finish** and report to Ilka while friends continue theirs. Leaving this way preserves the remaining party's work. Work sites that still need materials, repairs or cleared attackers explain the missing step in the quest card; their ground markers appear when they become usable.
+
 ## Presentation and follow-on work
 
 Conversations use the shared cinematic dialogue window, headshots and gold speaker names. The camera settles on the conversation; field reviews and apprentice lessons retain the gameplay view. Choices occupy the same dialogue frame with the player's portrait. Return to Play stops at an unanswered decision, and replay displays the recorded selection without changing progress.

@@ -92,6 +92,10 @@ func embed() -> void:
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	# The enclosing quest card already scrolls. Let action rows take their
+	# natural height so a wrapped prerequisite never clips inside a second list.
+	_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_scroll.size_flags_vertical = Control.SIZE_FILL
 	_title.hide()
 	_hint.hide()
 	_layout()
@@ -421,7 +425,7 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 	_hint.visible = not _embedded
 	_layout()
 	var rows: Array = []
-	var source: Array = [] if complete else Guidance.work_targets(snapshot) if Guidance.is_guided(snapshot) else snapshot.get("targets", [])
+	var source: Array = [] if complete else Guidance.card_targets(snapshot) if Guidance.is_guided(snapshot) else snapshot.get("targets", [])
 	# Keep the server's clue order stable within each group, including legacy
 	# encounters that have no navigation-only checkpoint.
 	for navigation: bool in [true, false]:
@@ -449,7 +453,10 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 		var nearby := _nearby(target)
 		var navigation := int(target.get("object_id", -1)) == 0 and not target.has("actor_id")
 		button.text = ("Optional · " if Guidance.is_support_target(snapshot,target) else "") \
-			+ ("✓ " if completed else "Walk to · " if navigation else "" if nearby else "Go to · ") + str(target.get("label", "Work site"))
+			+ ("✓ " if completed else "Not ready · " if not enabled else "Walk to · " if navigation else "" if nearby else "Go to · ") + str(target.get("label", "Work site"))
+		if not enabled and not completed and not str(target.get("detail", "")).strip_edges().is_empty():
+			button.text += "\n" + str(target.detail)
+			button.add_theme_color_override("font_disabled_color", Color("bcc2bc"))
 		button.disabled = not enabled
 		button.tooltip_text = str(target.get("detail", "Use the marked place in the world."))
 		button.pressed.connect(_request_target.bind(str(target.get("id", "")), int(target.get("object_id", -1))))
@@ -909,7 +916,7 @@ func _layout() -> void:
 	if _embedded:
 		custom_minimum_size = Vector2(0, clampf(viewport_size.y - 250.0, 72.0, 300.0))
 		_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		_scroll.custom_minimum_size.y = 56.0
+		_scroll.custom_minimum_size.y = 0.0
 		return
 	var width := minf(332.0, maxf(240.0, viewport_size.x - 24.0))
 	_panel.offset_left = -width - 12.0

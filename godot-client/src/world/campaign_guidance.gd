@@ -66,6 +66,24 @@ static func work_targets(snapshot: Dictionary) -> Array[Dictionary]:
 		if int(row.get("object_id", -1)) != 0 and str(row.id) not in preferred: ordered.append(row)
 	return ordered
 
+static func card_targets(snapshot: Dictionary) -> Array[Dictionary]:
+	var rows := work_targets(snapshot)
+	if str(snapshot.get("kind", "")) not in ["shelves", "rescue"]:
+		return rows
+	# Keep blocked prerequisites readable in the card without presenting them
+	# as ready work circles in the world. The server supplies the reason.
+	var identities: Dictionary = {}
+	for row: Dictionary in rows: identities[str(row.get("id", ""))] = true
+	for row: Dictionary in snapshot.get("targets", []):
+		var identity := str(row.get("id", ""))
+		if identity in ["return", "leave", "storage"] or identities.has(identity) \
+				or bool(row.get("enabled", true)) or bool(row.get("completed", false)) \
+				or str(row.get("detail", "")).strip_edges().is_empty():
+			continue
+		rows.append(row)
+		identities[identity] = true
+	return rows
+
 static func near(target: Dictionary, tile: Vector2i) -> bool:
 	var raw: Array = target.get("tile", [0,0])
 	return maxi(absi(tile.x-int(raw[0])), absi(tile.y-int(raw[1]))) <= maxf(1, float(target.get("range",3)))
