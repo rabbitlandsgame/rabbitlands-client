@@ -6,7 +6,7 @@ const AllyRecovery := preload("res://src/ui/campaign_ally_recovery.gd")
 
 static func _empty(full: String) -> Dictionary:
 	return {"objective":"", "ribbon_objective":"", "counter":"", "ribbon_counter":"", "progress":-1.0, "urgent":false,
-		"alert":"", "recovery":{}, "secondary":"", "full_objective":full}
+		"alert":"", "recovery":{}, "secondary":"", "cargo":"", "full_objective":full}
 
 static func _number(value: int) -> String:
 	var digits := str(maxi(0,value))
@@ -65,6 +65,14 @@ static func _crew(result: Dictionary, workers: Array) -> void:
 		return not bool(worker.get("downed",false)) and int(worker.get("health",1)) > 0).size()
 	result.secondary = "Crew %d / %d" % [standing,workers.size()]
 
+static func _cargo(result: Dictionary, ledger: Dictionary, resource: String) -> void:
+	# Native bags are in transit, not secured progress. Unknown or empty cargo
+	# needs no extra card row, and must never be inferred from a shipment goal.
+	var carried: Variant = ledger.get("carried")
+	if typeof(carried) not in [TYPE_INT,TYPE_FLOAT] or not is_finite(float(carried)) \
+			or float(carried) != floor(float(carried)) or float(carried) <= 0: return
+	result.cargo = "In workers' bags · %s %s" % [_number(int(carried)),resource]
+
 static func _field_action(readout: Dictionary, fallback: String) -> String:
 	# The shared readout places progress first and the actual current action
 	# last. Keep that complete authored instruction, including needed materials.
@@ -84,7 +92,7 @@ static func _water_final_loads(ledger: Dictionary, water: Dictionary) -> bool:
 		unfinished = unfinished or int((water.get("stored",{}) as Dictionary).get(identity,0)) < goal
 	return unfinished
 
-static func _supply(result: Dictionary, snapshot: Dictionary, readout: Dictionary) -> void:
+static func _supply(result: Dictionary, snapshot: Dictionary, readout: Dictionary, local: bool) -> void:
 	var ledger: Dictionary = snapshot.get("shelves",{})
 	var fire: Dictionary = ledger.get("fire",{})
 	var water: Dictionary = ledger.get("water",{})
@@ -100,6 +108,7 @@ static func _supply(result: Dictionary, snapshot: Dictionary, readout: Dictionar
 					+ " delivery" if final_bags else "Protect miners and hauling paths"
 				var resource := "Coal" if str(fire.get("stage","")) == "fire_coal" else "Flint"
 				result.ribbon_objective = "Guard final " + resource + " load" if final_bags else "Guard " + resource + " crew"
+				if local: _cargo(result,fire,resource)
 			else: result.objective = _field_action(readout,"Protect the crew and loading paths")
 			_counter(result,"Coal secured" if str(fire.get("stage","")) == "fire_coal" else "Flint secured",
 				int(fire.get("recovered",0))+int(fire.get("mined",0)),
@@ -142,6 +151,7 @@ static func _supply(result: Dictionary, snapshot: Dictionary, readout: Dictionar
 		result.ribbon_objective = "Guard " + crop + " crew"
 		var row := _named_objective(ledger,identity)
 		_counter(result,crop + " secured",int((growers.get("stored",{}) as Dictionary).get(identity,0)),int(row.get("target",0)))
+		if local: _cargo(result,growers,crop)
 
 static func campaign(snapshot: Dictionary, current_map := "") -> Dictionary:
 	var result := _empty(FieldReadout.instructions(snapshot))
@@ -170,7 +180,7 @@ static func campaign(snapshot: Dictionary, current_map := "") -> Dictionary:
 	if phase == "work":
 		_task(result,_unfinished(ledger))
 		if str(result.objective).is_empty(): result.objective = _preferred(snapshot)
-		if str(snapshot.get("kind","")) == "shelves": _supply(result,snapshot,readout)
+		if str(snapshot.get("kind","")) == "shelves": _supply(result,snapshot,readout,local and bool(snapshot.get("active",false)))
 		var preferred := _preferred(snapshot)
 		if not preferred.is_empty() and _unfinished(ledger).is_empty(): result.objective = preferred
 	elif str(snapshot.get("kind","")) == "shelves" and phase == "report":

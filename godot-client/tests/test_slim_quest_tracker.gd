@@ -28,10 +28,15 @@ func run() -> void:
 	expect(guide.visible and not guide.compact and not hud.is_visible_in_tree(), "gameplay begins with the slim card and keeps the full ledger closed")
 	expect(tracker.objective.text == "Protect the Sage harvesters" and tracker.counter.text.contains("6,240 / 10,000") \
 		and is_equal_approx(tracker.progress.value,62.4), "the small card shows the current action and real delivered progress")
+	expect(tracker.cargo.is_visible_in_tree() and tracker.cargo.text == "In workers' bags · 760 Sage" \
+		and tracker.counter.tooltip_text.contains("6,240 / 10,000") and tracker.counter.tooltip_text.contains("760 Sage"),
+		"carried stock is readable beside secured progress without adding it to the delivery bar")
 	expect(tracker.size.y < 165 and not guide.chapter.is_visible_in_tree(), "the gameplay card omits the old expedition heading and large instruction stack: " + str(tracker.size))
 	await click_button(guide.collapse); guide._process(0); await settle()
 	expect(guide.compact and tracker.heading.text == "Guard Sage crew" and not tracker.objective.visible \
 		and tracker._ribbon_counter.visible and tracker.size.y < 70, "collapse produces a one-line objective ribbon with its counter")
+	expect(not tracker.cargo.visible and tracker._ribbon_counter.tooltip_text.contains("760 Sage"),
+		"the one-line ribbon keeps carried stock in its descriptive tooltip")
 	await click_button(tracker.more)
 	expect(tracker.more_is_open() and root.get_visible_rect().encloses(tracker._menu.get_global_rect()), "the real More button opens a bounded anchored menu")
 	expect(tracker.instructions_button.visible and tracker.replay_button.visible and tracker.hide_button.visible \
@@ -49,6 +54,35 @@ func run() -> void:
 	expect(tracker.details_close.is_visible_in_tree() and not hud._shelves.is_visible_in_tree() \
 		and hud._inline_ledger.is_visible_in_tree() and hud._map_button.is_visible_in_tree(),
 		"the inline foldout replaces duplicate field prose with facts and keeps its map action and close control")
+	expect(hud._map_button.get_index() < hud._scroll.get_index() and hud._scroll.get_index() < hud._inline_content.get_index(),
+		"field navigation precedes the optional cache and the long production account")
+	var work := state.duplicate(true)
+	work.shelves.erase("growers")
+	work.shelves.fire = {"stage":"fire_coal","step":"repair","route":"lift","repair":0,"passages":0,
+		"recovered":0,"mined":0,"recovered_goal":9400,"mined_goal":600,"carried":0,"workers":[]}
+	work.shelves.objectives = [{"id":"machinery","label":"Repair the lift","current":0,"target":3,"personal":false}]
+	work.targets.append({"id":"lift","object_id":61872,"tile":[101,100],"label":"Work on the lift","enabled":true})
+	work.targets.append({"id":"blocked","object_id":61873,"tile":[102,100],"label":"Open the blocked route","enabled":false,"detail":"Clear the guards first."})
+	hud.apply_state(work,Vector2i(100,100),"landfall"); guide.apply_campaign(work); await settle()
+	expect(hud._targets.get_child(0).text == "Work on the lift" and hud._targets.get_child(-1).text.begins_with("Optional"),
+		"ready primary work leads the server's earlier optional-cache row without losing blocked requirements")
+	expect(hud._scroll.get_index() < hud._inline_content.get_index() and hud._scroll.get_index() < hud._shelves.get_index(),
+		"the lift action is available before its detailed stock and crew account")
+	var primary: Array = []; hud.target_requested.connect(func(id: int,_tile: Vector2i,_near: bool) -> void: primary.append(id))
+	hud._request_target("lift",61872)
+	expect(primary == [61872],"reordering primary work preserves the native target dispatcher")
+	work.shelves.fire.step = "extract"; work.shelves.fire.carried = 1000
+	work.shelves.objectives = [{"id":"secured","label":"Secure Coal","current":0,"target":10000,"personal":false}]
+	hud.apply_state(work,Vector2i(100,100),"landfall"); guide.apply_campaign(work); await settle()
+	expect(tracker.cargo.text == "In workers' bags · 1,000 Coal" and tracker.progress.value == 0,
+		"a full native Coal bag load remains visible while delivery progress is unchanged")
+	var report := work.duplicate(true); report.available = true; report.stage = "report"; report.map = "landfall_town"
+	report.shelves.phase = "report"; report.travel = {"map":"landfall_town","npc":"Ilka Tarn","label":"The True Note","tile":[178,26],"route":"Return to Ilka."}
+	hud.apply_state(report,Vector2i(178,26),"landfall_town"); guide.apply_campaign(report); await settle()
+	expect(hud._entry.is_visible_in_tree() and hud._entry.get_index() < hud._inline_content.get_index() \
+		and hud._entry.get_index() < hud._shelves.get_index(),"the primary report action precedes long carried-stock and crew details")
+	expect(not tracker.cargo.visible,"returning to Ilka hides the local shipment-bag row")
+	hud.apply_state(state,Vector2i(100,100),"landfall"); guide.apply_campaign(state); await settle()
 	await click_button(tracker.details_close)
 	expect(guide.visible and guide.is_campaign_tracked() and not guide._details_open and not hud.is_visible_in_tree(),
 		"Close Instructions returns to the slim card without hiding or untracking the quest")

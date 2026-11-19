@@ -121,6 +121,19 @@ func run() -> void:
 	expect(summary.objective == "Protect the Sage harvesters" and summary.counter == "Sage secured · 1,200 / 10,000",
 		"the current field names its action and counts actual delivered Sage")
 	expect(is_equal_approx(float(summary.progress),0.12),"bags do not inflate delivery progress")
+	expect(summary.cargo == "In workers' bags · 800 Sage", "the slim card separates native carried Sage from secured delivery progress")
+	var wire_state: Dictionary = JSON.parse_string(JSON.stringify(state))
+	expect(Summary.campaign(wire_state,"landfall").cargo == summary.cargo,
+		"whole native JSON numbers retain the carried readout after packet decoding")
+	for unknown: Variant in [null,-1,2.5,"800"]:
+		var invalid_cargo := {"cargo":""}; Summary._cargo(invalid_cargo,{"carried":unknown},"Sage")
+		expect(invalid_cargo.cargo.is_empty(),"unknown, negative or fractional cargo cannot invent carried stock")
+	var no_cargo := state.duplicate(true); no_cargo.shelves.growers.erase("carried")
+	expect(Summary.campaign(no_cargo,"landfall").cargo.is_empty(),"older snapshots without a bag total omit the extra row")
+	no_cargo.shelves.growers.carried = 0
+	expect(Summary.campaign(no_cargo,"landfall").cargo.is_empty(),"empty bags keep the gameplay card compact")
+	no_cargo.shelves.growers.carried = 800; no_cargo.active = false
+	expect(Summary.campaign(no_cargo,"landfall").cargo.is_empty(),"a suspended encounter does not advertise local carried cargo")
 	expect(summary.ribbon_counter == "1,200 / 10k", "the ribbon drops descriptive text while retaining exact receipt counts")
 	expect(summary.ribbon_objective == "Guard Sage crew", "the Sage ribbon preserves its action in a short field-specific label")
 	expect(summary.urgent and summary.alert.contains("Nell") and summary.recovery.actor_id == 401,
@@ -138,30 +151,32 @@ func run() -> void:
 	expect(Summary.campaign(changed_goal,"landfall").progress == -1.0,
 		"a missing native goal never invents an overall progress percentage")
 	var remote := Summary.campaign(state,"landfall_town")
-	expect(not remote.urgent and remote.recovery.is_empty(),"a worker on another map cannot offer a local healing shortcut")
+	expect(not remote.urgent and remote.recovery.is_empty() and remote.cargo.is_empty(),"a worker on another map cannot offer local healing or carried cargo")
 	state.travel = {"map":"landfall_town","npc":"Ilka Tarn","label":"The True Note", "route":"Return to The True Note with your delivery."}
 	summary = Summary.campaign(state,"landfall")
 	expect(summary.objective == "Speak with Ilka Tarn" and summary.progress == -1.0 \
-		and not summary.urgent and summary.recovery.is_empty(), "travel leads over stale field counters and downed workers")
+		and not summary.urgent and summary.recovery.is_empty() and summary.cargo.is_empty(), "travel leads over stale field counters, bags and downed workers")
 	expect(summary.full_objective == Readout.instructions(state),"the entire travel route is retained for details")
 	state.erase("travel")
 	state.party = {"waiting_for_scene":true}
 	summary = Summary.campaign(state,"landfall")
-	expect(summary.objective.contains("Wait for the party") and summary.recovery.is_empty(),"a party scene barrier does not prompt unavailable work")
+	expect(summary.objective.contains("Wait for the party") and summary.recovery.is_empty() and summary.cargo.is_empty(),"a party scene barrier does not prompt unavailable work or bags")
 	state.erase("party")
 	state.shelves.growers.field = "root"; state.shelves.growers.stored.root = 1250
 	summary = Summary.campaign(state,"landfall")
 	expect(summary.counter == "Hearthroot secured · 1,250 / 5,000" and is_equal_approx(float(summary.progress),0.25),
 		"the next field uses its own native storage and goal")
 	expect(summary.ribbon_objective == "Guard Hearthroot crew", "the next field keeps its own crop identity in the ribbon")
+	expect(summary.cargo == "In workers' bags · 800 Hearthroot", "the next field names the actual carried crop")
 	state.shelves.erase("growers")
 	state.shelves.objectives = [{"id":"secured","label":"Secure Coal","current":20,"target":300},
 		{"id":"machinery","label":"Protect three lift repairs","current":1,"target":3}]
-	state.shelves.fire = {"stage":"fire_coal","step":"repair","route":"lift","recovered":20,"mined":0,"recovered_goal":100,"mined_goal":200,"workers":[]}
+	state.shelves.fire = {"stage":"fire_coal","step":"repair","route":"lift","recovered":20,"mined":0,"recovered_goal":100,"mined_goal":200,"carried":99,"workers":[]}
 	summary = Summary.campaign(state,"landfall")
 	expect(summary.objective == "Protect three lift repairs" and summary.counter == "Progress · 1 / 3",
 		"lift preparations lead over a future shipment goal")
 	expect(summary.ribbon_objective.is_empty(),"unmapped lift instructions remain intact for the ordinary objective fallback")
+	expect(summary.cargo.is_empty(),"lift preparation does not advertise future extraction bags")
 	state.shelves.fire.step = "extract"; state.shelves.fire.mined = 40; state.shelves.fire.carried = 99
 	state.shelves.fire.field_hint = "Protect the miners and both hauling paths. Heal Target revives a fallen worker."
 	state.hint = state.shelves.fire.field_hint
@@ -171,14 +186,20 @@ func run() -> void:
 	expect(summary.objective == "Protect miners and hauling paths" and summary.full_objective == state.hint,
 		"Fire extraction uses a bounded action without trimming or replacing the source instructions")
 	expect(summary.ribbon_objective == "Guard Coal crew", "the Coal extraction ribbon uses a compact action for its actual resource")
+	expect(summary.cargo == "In workers' bags · 99 Coal", "Coal bags remain visible while the secured counter waits for delivery")
 	state.shelves.fire.carried = 240
 	summary = Summary.campaign(state,"landfall")
 	expect(summary.objective == "Guard the final Coal delivery" and summary.ribbon_counter == "60 / 300",
 		"actually allocated final Coal bags change the action but never inflate secured progress")
 	expect(summary.ribbon_objective == "Guard final Coal load", "the final-load ribbon names delivery rather than implying more mining")
+	expect(summary.cargo == "In workers' bags · 240 Coal" and is_equal_approx(float(summary.progress),0.2),
+		"a full final load remains in transit rather than becoming secured progress")
+	var quarry := state.duplicate(true); quarry.shelves.fire.stage = "fire"
+	expect(Summary.campaign(quarry,"landfall").cargo == "In workers' bags · 240 Flint", "quarry hauling uses the native Flint resource identity")
 	state.shelves.fire.hazards = [{"kind":"warning"}]; state.shelves.fire.stage = "fire_sapper"
 	summary = Summary.campaign(state,"landfall")
 	expect(summary.urgent and summary.alert.contains("BLAST"),"an actual blast warning retains the shared urgent instruction")
+	expect(summary.cargo.is_empty(),"the sapper stage cannot retain an old extraction bag readout")
 	state.shelves.erase("fire")
 	state.shelves.water = {"stage":"water_cutters","command":"wait","stored":{"kelp":100,"cress":50},
 		"goals":{"kelp":800,"cress":400},"cut":{"kelp":700,"cress":300},"bins":{"kelp":600,"cress":250},"workers":[]}
@@ -256,6 +277,13 @@ func run() -> void:
 				"native compact summary has an actionable instruction and a bounded real counter")
 			expect(str(summary.counter).is_empty() == str(summary.ribbon_counter).is_empty(),
 				"native ribbon counters exist only when a real descriptive counter exists")
+			var ledger: Dictionary = source.get("shelves",{})
+			var production: Dictionary = ledger.get("fire",ledger.get("growers",{}))
+			var extraction := str(production.get("stage","")) in ["fire","fire_coal"] and str(production.get("step","")) == "extract"
+			var field := ledger.has("growers") and not bool(production.get("raid",false))
+			if bool(source.get("active",false)) and str(ledger.get("phase","")) == "work" \
+					and (source.get("travel",{}) as Dictionary).is_empty() and (extraction or field) and int(production.get("carried",0)) > 0:
+				expect(not str(summary.cargo).is_empty(),"actual native Life/Fire carried bags remain visible after decoder normalization")
 			var detail := Summary.instructions(source,str(source.map))
 			expect(detail.text == Readout.instructions(source) and JSON.stringify(source) == before,
 				"native inline Instructions retain exact instructions without quest mutations")

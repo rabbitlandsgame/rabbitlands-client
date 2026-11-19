@@ -75,7 +75,6 @@ var _available := false
 var _replay_available := false
 var _replay_retry := false
 var _column: VBoxContainer
-var _opening_actions_first := false
 var _dismissed_completion := ""
 var _tracker_recovery := false
 var _tracker_details_open := true
@@ -134,7 +133,7 @@ func set_tracker_details_open(value: bool) -> void:
 	_tracker_details_open = value
 	if _tracker_recovery:
 		_recovery_actions.reparent(_column if value else _tracker_recovery_host)
-		if value: _column.move_child(_recovery_actions,_field_summary.get_index()+1)
+		_order_instruction_actions()
 	_fit_tracker_recovery()
 
 func _fit_tracker_recovery() -> void:
@@ -213,7 +212,7 @@ func _build() -> void:
 	_map_button.tooltip_text = "Open this area's map to see your party and marked work sites."
 	_map_button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_map_button.add_theme_font_size_override("font_size",12); _map_button.pressed.connect(_request_map)
-	_inline_content.add_child(_map_button); _inline_content.hide()
+	column.add_child(_map_button); _map_button.hide(); _inline_content.hide()
 	column.minimum_size_changed.connect(_queue_inline_fit)
 	_field_summary = Label.new()
 	_field_summary.name = "FieldReadout"
@@ -478,23 +477,21 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 				_companion, _companion_actions, _convoy, _convoy_actions]:
 			control.hide()
 		_lesson_window.hide()
-	var actions_first := _guidance.visible or _field_summary.visible
-	var action_anchor: Control = _recovery_actions if _recovery_actions.visible and _recovery_actions.get_parent() == _column else _field_summary if _field_summary.visible else _hint
-	if actions_first != _opening_actions_first or (actions_first and _scroll.get_index() < action_anchor.get_index()):
-		_opening_actions_first = actions_first
-		_column.move_child(_scroll, action_anchor.get_index() + 1 if _opening_actions_first else _entry.get_index() - 1)
 	_title.visible = not _embedded
 	_hint.visible = not _embedded
 	_apply_inline_instructions(complete,matches,travelling)
+	_order_instruction_actions()
 	_layout()
 	var rows: Array = []
 	var source: Array = [] if complete else Guidance.card_targets(snapshot) if Guidance.is_guided(snapshot) else snapshot.get("targets", [])
-	# Keep the server's clue order stable within each group, including legacy
-	# encounters that have no navigation-only checkpoint.
-	for navigation: bool in [true, false]:
-		for target: Dictionary in source:
-			if (int(target.get("object_id", -1)) == 0) == navigation:
-				rows.append(target)
+	# Ready quest work precedes optional supplies, preserving the server's clue
+	# order inside each group. Explicit required storage remains ordinary work.
+	for support: bool in [false,true]:
+		for navigation: bool in [true,false]:
+			for target: Dictionary in source:
+				if Guidance.is_support_target(snapshot,target) == support \
+						and (int(target.get("object_id", -1)) == 0) == navigation:
+					rows.append(target)
 	if Guidance.is_guided(snapshot):
 		_scroll.visible = _scroll.visible and not rows.is_empty()
 	var signature := str(snapshot.get("run_id", "")) + ":" + JSON.stringify(rows)
@@ -526,9 +523,28 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 		_targets.add_child(button)
 	_queue_inline_fit()
 
+func _order_instruction_actions() -> void:
+	# Keep the existing dispatchers close to the instruction they act on. The
+	# long supply/crew accounts follow them instead of pushing them off screen.
+	var source: Array = Guidance.card_targets(_state) if Guidance.is_guided(_state) else _state.get("targets",[])
+	var required := source.any(func(target: Dictionary) -> bool:
+		return not Guidance.is_support_target(_state,target) and bool(target.get("enabled",true)) \
+			and not bool(target.get("completed",false)))
+	var controls: Array[Control] = [_entry,_lesson_window]
+	if _recovery_actions.get_parent() == _column: controls.append(_recovery_actions)
+	if not required: controls.append(_map_button)
+	controls.append(_scroll)
+	if required: controls.append(_map_button)
+	controls.append(_inline_content)
+	var index := _hint.get_index()+1
+	for control: Control in controls:
+		if control.get_index() != index: _column.move_child(control,index)
+		index += 1
+
 func _apply_inline_instructions(complete: bool, matches: bool, travelling: bool) -> void:
 	if not _tracker_recovery or complete:
 		_inline_content.hide()
+		_map_button.hide()
 		return
 	var content := TrackerSummary.instructions(_state,_current_map)
 	var covered := bool(content.get("replaces_supply_ledger",false))
@@ -553,7 +569,7 @@ func _apply_inline_instructions(complete: bool, matches: bool, travelling: bool)
 	_inline_note.text = str(content.get("note",""))
 	_inline_note.visible = covered and not _inline_note.text.is_empty() and not "heal target" in str(content.get("text","")).to_lower()
 	_map_button.visible = bool(_state.get("active",false)) and matches and not travelling
-	_inline_content.visible = _inline_ledger.visible or _inline_guidance.visible or _inline_note.visible or _map_button.visible
+	_inline_content.visible = _inline_ledger.visible or _inline_guidance.visible or _inline_note.visible
 	if covered:
 		_shelves.hide()
 		_field_summary.hide()

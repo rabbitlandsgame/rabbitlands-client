@@ -20,6 +20,7 @@ var collapse: Button
 var more: Button
 var counter: Label
 var secondary: Label
+var cargo: Label
 var progress: ProgressBar
 var details: VBoxContainer
 var details_scroll: ScrollContainer
@@ -102,6 +103,10 @@ func configure() -> void:
 	_meta.add_child(counter)
 	secondary = Label.new(); secondary.add_theme_font_size_override("font_size",12)
 	secondary.add_theme_color_override("font_color",Color("bac8c2")); _meta.add_child(secondary)
+	cargo = Label.new(); cargo.name = "QuestCarriedCargo"
+	cargo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	cargo.add_theme_font_size_override("font_size",12)
+	cargo.add_theme_color_override("font_color",Color("bac8c2")); _column.add_child(cargo)
 	alert_label = Label.new(); alert_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	alert_label.add_theme_font_size_override("font_size",12)
 	alert_label.add_theme_color_override("font_color",Color("ffb39c")); _column.add_child(alert_label)
@@ -184,6 +189,8 @@ func apply_presentation(title: String, summary: Dictionary, compact: bool, detai
 	_replay_ready = replay_ready; _replay_retry = replay_retry
 	var action := str(summary.get("objective",title))
 	var amount := str(summary.get("counter",""))
+	var carried := str(summary.get("cargo",""))
+	var shipment := amount + ("\n" if not amount.is_empty() and not carried.is_empty() else "") + carried
 	var ribbon_action := str(summary.get("ribbon_objective",""))
 	if ribbon_action.is_empty(): ribbon_action = action
 	heading.text = ribbon_action if _compact else title
@@ -191,10 +198,12 @@ func apply_presentation(title: String, summary: Dictionary, compact: bool, detai
 	heading.add_theme_font_size_override("font_size",18 if complete else 13)
 	objective.text = action; objective.tooltip_text = str(summary.get("full_objective",action))
 	objective.visible = not _compact and not complete and not action.is_empty()
-	counter.text = amount; counter.tooltip_text = amount; counter.visible = not amount.is_empty()
+	counter.text = amount; counter.tooltip_text = shipment; counter.visible = not amount.is_empty()
 	secondary.text = str(summary.get("secondary","")); secondary.visible = not secondary.text.is_empty()
+	cargo.text = carried; cargo.visible = not _compact and not complete and not carried.is_empty()
+	cargo.tooltip_text = carried + "\nIn transit. Only deliveries count as secured stock."
 	_meta.visible = not _compact and not complete and (counter.visible or secondary.visible)
-	_ribbon_counter.text = str(summary.get("ribbon_counter",amount)); _ribbon_counter.tooltip_text = amount
+	_ribbon_counter.text = str(summary.get("ribbon_counter",amount)); _ribbon_counter.tooltip_text = shipment
 	_ribbon_counter.visible = _compact and not amount.is_empty()
 	# Allow a useful objective to keep room even with a long resource counter.
 	_ribbon_counter.custom_minimum_size.x = 108 if _ribbon_counter.visible else 0
@@ -202,7 +211,7 @@ func apply_presentation(title: String, summary: Dictionary, compact: bool, detai
 	_ribbon_counter.size_flags_horizontal = Control.SIZE_SHRINK_END
 	progress.visible = not _compact and not complete and float(summary.get("progress",-1)) >= 0
 	progress.value = clampf(float(summary.get("progress",0)),0,1) * 100
-	progress.tooltip_text = amount
+	progress.tooltip_text = shipment
 	alert_label.text = str(summary.get("alert","")); alert_label.visible = not complete and not alert_label.text.is_empty()
 	details.visible = _details_open
 	_detail_region.visible = _details_open
