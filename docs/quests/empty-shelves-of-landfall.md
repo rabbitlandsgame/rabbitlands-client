@@ -13,7 +13,7 @@ Experience below is the chapter bonus. Ordinary combat, gathering and mixing als
 | **A Harvest Worth Defending** | Protect four villagers with Harvesting 40 while they gather and store 10,000 Sage, then 5,000 Hearthroot. Intercept goblins coming from the Old Warren. Heal Target revives fallen workers. | 2,000 Harvesting, 1,500 Magic, 1,000 Defense | 1,500 gold, 100 Life and 100 Water Essences. Life stock remains locked until the raid. |
 | **The Hand Behind the Raids** | Enter the Old Warren with your party. Fight goblins and small wolves and find Grask, the orc directing the raids, in a deeper western cave. | 1,500 Attack, 1,500 Defense, 2,000 Magic | 2,500 gold, 150 Life Essences and Life Essence shop stock. |
 
-Goblin squads follow the connected route from the Old Warren and close on free fighting positions beside standing workers or defenders. They regroup around obstructions rather than wandering away from the attack. Solo work begins with three raiders, then alternates three- and four-goblin waves every 25 seconds, with at most twelve alive; additional party members increase the squads and cap. The longer journey to the Hearthroot field is preserved.
+Goblin squads follow the connected route from the Old Warren and close on free fighting positions beside standing workers or defenders. They regroup around obstructions rather than wandering away from the attack. Solo work begins with three raiders, then alternates three- and four-goblin squads; additional party members increase the squads. Attacks are at least 25 seconds apart and wait until at most one solo or two party raiders remain and at least three workers stand. Clearing a squad gives a 12-second recovery break. The longer journey to the Hearthroot field is preserved.
 
 ### The Price of a Spark
 
@@ -106,7 +106,7 @@ Fenna introduces the crew at the Sage beds. The camera establishes one view of t
 
 One to eight players can take an expedition together through their normal party. Shared fights, repairs and deliveries count for the expedition; each learner demonstrates their own casts, gathering and mixtures. Unlocks and rewards are personal and paid once. Completed players can help another party member without receiving the same chapter reward again.
 
-Friends can help protect the crew or raid the Warren even while their own earlier lessons remain unfinished. Their previous assignment resumes when they leave. Eligible learners each receive Ilka's guard allowance once; helpers receive no duplicate allowance or chapter reward.
+Friends can help protect the crew or raid the Warren even while their own earlier lessons remain unfinished. Their previous assignment resumes when they leave. Eligible learners each receive Ilka's guard allowance once, including those who join at the field after the owner's briefing. Helpers receive no duplicate allowance or chapter reward.
 
 The new raid uses a party-only copy of the existing Old Warren caves, not Lantern Mine. The ordinary entrance starts an accepted raid, subject to the normal tracked-quest area-start rules. Grask and his guards are present from the beginning; the boss chamber has no kill-count gate. Leaving saves defeated enemies and surviving enemy health. The retained later expeditions continue to use Mara's finite-mana Warden support.
 
@@ -126,4 +126,4 @@ After restoring Frost stock, players with Potion level 16 can practise three Fro
 
 The finale opens one standing supply contract per day: deliver 100 basic essences for 600 gold (4,200 for Frost), 250 Alchemy XP and 100 Magic XP. Ingredient bundles remain available for the restored families.
 
-Native automated checks cover both deliveries, worker revival, party joins, pause/resume, retry choices, the cave entrance, raid combat and the Life unlock. Delivery counts and clocks are accelerated in progression tests; the production goals and actual level-40 swing timing are checked separately. Full-length combat pacing remains a playtest tuning task.
+Native automated checks cover both deliveries, worker revival, party joins, pause/resume, retry choices, the cave entrance, raid combat and the Life unlock. Progression tests can accelerate delivery counts and clocks; full production quantities, level-40 harvesting timing and attack pressure are checked separately in native encounter playtests.
