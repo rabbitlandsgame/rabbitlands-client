@@ -156,7 +156,9 @@ func apply_snapshot(snapshot: Dictionary, objects: Dictionary, actors: Dictionar
 				for child: String in ["Ring","MapMarker"]:
 					var mark := old.get_node_or_null(child) as Node3D
 					if mark!=null:mark.hide()
-	for label: Label3D in _labels.values():
+	# Map objects and actors own these labels, so a map teardown can free a
+	# label before its next guidance snapshot. Validate before any typed cast.
+	for label: Variant in _labels.values():
 		if is_instance_valid(label):label.hide()
 	var shown := 0
 	var ordered: Array[Dictionary] = available.duplicate()
@@ -186,7 +188,8 @@ func apply_snapshot(snapshot: Dictionary, objects: Dictionary, actors: Dictionar
 			parent = actors.get(actor_id) as Node3D
 		if not is_instance_valid(parent):continue
 		var key := str(row.id)
-		var label: Label3D = _labels.get(key) as Label3D
+		var saved_label: Variant = _labels.get(key)
+		var label: Label3D = saved_label if is_instance_valid(saved_label) else null
 		if not is_instance_valid(label):
 			label = Label3D.new()
 			label.name = "CampaignWork_" + key
@@ -237,7 +240,7 @@ func clear() -> void:
 			if ring.material_override is StandardMaterial3D:
 				(ring.material_override as StandardMaterial3D).albedo_color = saved.colour
 		if pin != null:pin.visible = bool(saved.pin_visible)
-	for label: Label3D in _labels.values():
+	for label: Variant in _labels.values():
 		if is_instance_valid(label):label.queue_free()
 	_controlled.clear()
 	_labels.clear()

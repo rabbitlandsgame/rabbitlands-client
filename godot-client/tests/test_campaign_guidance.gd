@@ -24,9 +24,43 @@ func make_object(id:int,tile:Vector2i,adapter:CoordinateAdapter)->MapObject3D:
 	var object:=MapObject3D.new();root.add_child(object)
 	object.configure({"object_id":id,"kind":EloriaProtocol.MAP_OBJECT_INTERACTIVE,"x":tile.x,"y":tile.y,"label":"Work "+str(id)},adapter,{"interactives":{"roles":{},"models":{}}})
 	return object
+func check_freed_label_parents(adapter:CoordinateAdapter)->void:
+	var state:Dictionary={"kind":"shelves","active":true,"run_id":"map-lifecycle","map":"landfall","actors":{"mentor":30},"targets":[
+		{"id":"release","object_id":61871,"label":"Open the gate","tile":[47,216],"enabled":true},
+		{"id":"mentor","object_id":0,"actor_id":30,"role":"mentor","label":"Speak to Brenna","tile":[54,213],"enabled":true}]}
+	var guidance:=Guidance.new();root.add_child(guidance)
+	var map_parent:=Node3D.new();root.add_child(map_parent)
+	var object:=make_object(61871,Vector2i(47,216),adapter);object.reparent(map_parent)
+	var actor:=Node3D.new();map_parent.add_child(actor)
+	guidance.apply_snapshot(state,{61871:object},{30:actor},"landfall",Vector2i(47,216),true,false)
+	var old_object_label:Variant=guidance._labels.get("release")
+	var old_actor_label:Variant=guidance._labels.get("mentor")
+	expect(is_instance_valid(old_object_label) and is_instance_valid(old_actor_label),"world objects and native actors both own their guidance labels")
+	map_parent.free()
+	expect(not is_instance_valid(old_object_label) and not is_instance_valid(old_actor_label) and guidance._labels.size()==2,"actual map-parent teardown frees both labels before guidance receives another snapshot")
+	map_parent=Node3D.new();root.add_child(map_parent)
+	object=make_object(61871,Vector2i(47,216),adapter);object.reparent(map_parent)
+	actor=Node3D.new();map_parent.add_child(actor)
+	guidance.apply_snapshot(state,{61871:object},{30:actor},"landfall",Vector2i(47,216),true,false)
+	var object_label:Variant=guidance._labels.get("release")
+	var actor_label:Variant=guidance._labels.get("mentor")
+	expect(is_instance_valid(object_label) and object_label.get_parent()==object and object_label.visible,"same-run map-object replacement recreates its freed label on the new object")
+	expect(is_instance_valid(actor_label) and actor_label.get_parent()==actor and actor_label.visible,"same-run actor replacement recreates its freed conversation label on the new actor")
+	map_parent.free()
+	guidance.clear()
+	expect(guidance._labels.is_empty() and guidance._controlled.is_empty() and guidance._identity.is_empty(),"shutdown clears stale freed labels and weak object records without touching dead parents")
+	map_parent=Node3D.new();root.add_child(map_parent)
+	object=make_object(61871,Vector2i(47,216),adapter);object.reparent(map_parent)
+	actor=Node3D.new();map_parent.add_child(actor)
+	guidance.apply_snapshot(state,{61871:object},{30:actor},"landfall",Vector2i(47,216),true,false)
+	map_parent.free()
+	guidance.apply_snapshot(state,{}, {},"landfall_insides",Vector2i.ZERO,true,false)
+	expect(guidance._labels.is_empty() and guidance._identity.is_empty(),"a map-change snapshot safely clears labels whose world parents were already freed")
+	guidance.free()
 func run()->void:
 	create_timer(60).timeout.connect(func()->void:push_error("Guidance test timed out");quit(1))
 	var state:=snapshot();var adapter:=CoordinateAdapter.new({"serverOrigin":[435,448],"metresPerTile":1.0,"walkingHeight":2.5})
+	check_freed_label_parents(adapter)
 	var objects:Dictionary={}
 	for row:Dictionary in state.targets:objects[int(row.object_id)]=make_object(row.object_id,Vector2i(row.tile[0],row.tile[1]),adapter)
 	objects[9]=make_object(9,Vector2i(449,309),adapter)
