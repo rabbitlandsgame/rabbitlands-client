@@ -87,6 +87,11 @@ var _inline_note: Label
 var _map_button: Button
 var _inline_signature := ""
 var _inline_fit_queued := false
+var _instruction_height_limit := 240.0
+
+func set_instruction_height_limit(value: float) -> void:
+	_instruction_height_limit = maxf(32,value)
+	_layout()
 
 func embed_instruction(label: Label) -> void:
 	if label.get_parent() != _column:
@@ -1025,7 +1030,7 @@ func _layout() -> void:
 	var viewport_size := get_viewport().get_visible_rect().size
 	if _embedded:
 		var complete := str(_state.get("kind","")) == "rescue" and str(_state.get("key","")) != "rescue_checkin" and bool(_state.get("completed",false))
-		var limit := clampf(viewport_size.y-230.0,56.0,240.0)
+		var limit := minf(_instruction_height_limit,clampf(viewport_size.y-230.0,32.0,240.0))
 		custom_minimum_size = Vector2(0,100.0 if complete else minf(maxf(32,_column.get_combined_minimum_size().y),limit))
 		_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		_scroll.custom_minimum_size.y = 0.0

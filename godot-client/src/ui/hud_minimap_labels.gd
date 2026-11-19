@@ -42,6 +42,28 @@ func markers() -> Array[Dictionary]:
 			"label":["N", "E", "S", "W"][index], "arrow":index == 0 and config.north_marker == "arrow"})
 	return result
 
+func _title_rect(font: Font) -> Rect2:
+	var title: String = source._current_map_display_name
+	var width := minf(size.x+60,font.get_string_size(title,HORIZONTAL_ALIGNMENT_LEFT,-1,21).x+24)
+	return Rect2(Vector2((size.x-width)*0.5,-maxf(36,float(config.direction_offset)+38)),Vector2(width,28))
+
+## Labels deliberately overhang the map. Quest placement must reserve those
+## visible pixels too, including a custom direction distance or long map name.
+func drawn_bounds() -> Rect2:
+	var result := Rect2(Vector2.ZERO,size)
+	if source == null or config.is_empty(): return result
+	for marker: Dictionary in markers():
+		result = result.merge(Rect2(marker.position-Vector2(12,12),Vector2(24,24)))
+	if config.map_title:
+		var font := ThemeDB.fallback_font
+		var title_rect := _title_rect(font)
+		var title: String = source._current_map_display_name
+		# The plaque has a width cap; drawing text does not clip to that cap.
+		# Reserve long names and their outline on either side of the plaque.
+		var overhang := maxf(0,font.get_string_size(title,HORIZONTAL_ALIGNMENT_LEFT,-1,21).x+8-title_rect.size.x)
+		result = result.merge(title_rect.grow_individual(overhang+4,4,overhang+4,4))
+	return result
+
 func _plaque(rect: Rect2) -> void:
 	if not config.map_label_frame: return
 	if config.show_background: draw_style_box(_label_style(), rect)
@@ -76,8 +98,8 @@ func _draw() -> void:
 			draw_string(font, point + Vector2(-width / 2, 6), marker.label, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, color)
 	if config.map_title:
 		var title: String = source._current_map_display_name
-		var width := minf(size.x + 60, font.get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, 21).x + 24)
-		var rect := Rect2(Vector2((size.x - width) * 0.5, -maxf(36, float(config.direction_offset) + 38)), Vector2(width, 28))
+		var rect := _title_rect(font)
+		var width := rect.size.x
 		_plaque(rect)
 		draw_string_outline(font, rect.position + Vector2(6, 21), title, HORIZONTAL_ALIGNMENT_CENTER, width - 12, 21, 4, Color("161a1def"))
 		draw_string(font, rect.position + Vector2(6, 21), title, HORIZONTAL_ALIGNMENT_CENTER, width - 12, 21, color)

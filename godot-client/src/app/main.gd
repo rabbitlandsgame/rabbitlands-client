@@ -13417,6 +13417,15 @@ func _configure_window_stack() -> void:
 	game_view.add_child(window_stack)
 	window_stack.configure(game_view)
 	_layout_full_window_views()
+	var tracker: Control = extension_windows.get("tracked_quest")
+	tracker.reparent(game_view)
+	window_stack.register_hud(lantern_guide, lantern_guide.card)
+	window_stack.register_hud(tracker, tracker)
+	window_stack.register_hud(minimap_frame, minimap_frame)
+	window_stack.attach_overlay(lantern_guide.card, lantern_guide.card.get("_menu"))
+	window_stack.attach_overlay(tracker, tracker.get("_menu"))
+	lantern_guide.card.call("set_minimap", minimap_frame)
+	tracker.call("set_minimap", minimap_frame, true)
 	# The Tab map covers HUD parts in both drawing and pointer order. Normal
 	# window activation still lets explicitly opened windows appear above it.
 	window_stack.register(full_map)
@@ -13424,12 +13433,6 @@ func _configure_window_stack() -> void:
 	full_map.visibility_changed.connect(_sync_world_overlay_visibility)
 	console_panel.visibility_changed.connect(_sync_world_overlay_visibility)
 	_sync_world_overlay_visibility()
-	# Reminder cards are HUD surfaces below all windows, including for input.
-	game_view.move_child(lantern_guide, viewport_container.get_index() + 1)
-	var tracker: Control = extension_windows.get("tracked_quest")
-	tracker.reparent(game_view)
-	tracker.z_index = 8
-	game_view.move_child(tracker, lantern_guide.get_index() + 1)
 	for panel: Control in [stats_panel, inventory_panel, dialogue_panel,
 			trade_panel, storage_panel, ground_bag_panel, manufacturing_panel,
 			item_lists_panel, reading_panel, chat_hud, system_chat_hud]:
