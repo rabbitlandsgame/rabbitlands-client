@@ -1,6 +1,12 @@
 extends PanelContainer
 ## Shared quest chrome. It changes presentation only; owners dispatch actions.
 const TextColors := preload("res://src/ui/text_colors.gd")
+const MENU_MARKS := {
+	"instructions": '<path d="M10 5C7 3 4 3 2 4v12c3-1 5-1 8 1m0-12c3-2 6-2 8-1v12c-3-1-5-1-8 1V5z"/>',
+	"replay": '<path d="M4 8a6.5 6.5 0 1 1 0 5M4 3v5h5"/>',
+	"hide": '<path d="M2 2l16 16M8 4c5-1 8 3 10 6-1 2-2 3-4 4M5 5c-1 1-2 3-3 5 2 3 5 6 8 6l2-.2"/><path d="M8 8a3 3 0 0 0 4 4"/>',
+	"untrack": '<path d="M5 8V3h10v14l-5-3-5 3v-5M2 10h7"/>'}
+static var _menu_icons: Dictionary = {}
 signal compact_toggled(value: bool)
 signal instructions_toggled(value: bool)
 signal replay_requested()
@@ -94,10 +100,13 @@ func configure() -> void:
 	menu_style.set_corner_radius_all(5); menu_style.set_content_margin_all(5)
 	_menu.add_theme_stylebox_override("panel",menu_style); add_child(_menu)
 	var actions := VBoxContainer.new(); actions.add_theme_constant_override("separation",2); _menu.add_child(actions)
-	instructions_button = _menu_button(actions,"Instructions","Read the full objective and use its work controls.")
-	replay_button = _menu_button(actions,"Replay scene","Replay the current cinematic without changing quest progress.")
-	hide_button = _menu_button(actions,"Hide","Hide this card while keeping the quest tracked. Reopen it from Quests.")
-	untrack_button = _menu_button(actions,"Untrack","Stop following this quest. Your progress stays saved in Quests.")
+	instructions_button = _menu_button(actions,"Instructions","Read the full objective and use its work controls.","instructions")
+	replay_button = _menu_button(actions,"Replay scene","Replay the current cinematic without changing quest progress.","replay")
+	var divider := HSeparator.new()
+	var line := StyleBoxLine.new(); line.color = Color("53665e"); line.thickness = 1
+	divider.add_theme_stylebox_override("separator",line); actions.add_child(divider)
+	hide_button = _menu_button(actions,"Hide","Hide this card while keeping the quest tracked. Reopen it from Quests.","hide")
+	untrack_button = _menu_button(actions,"Untrack","Stop following this quest. Your progress stays saved in Quests.","untrack")
 	instructions_button.name = "QuestInstructions"; replay_button.name = "QuestReplay"
 	hide_button.name = "HideQuest"; untrack_button.name = "UntrackQuest"
 	instructions_button.toggle_mode = true
@@ -113,11 +122,25 @@ func configure() -> void:
 	minimum_size_changed.connect(_queue_fit)
 	set_process(false)
 
-func _menu_button(parent: VBoxContainer, label: String, hint: String) -> Button:
+static func _menu_icon(identity: String) -> Texture2D:
+	if not _menu_icons.has(identity):
+		var svg := '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 20 20"><g fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">%s</g></svg>' % MENU_MARKS[identity]
+		var image := Image.new()
+		if image.load_svg_from_string(svg) != OK: return null
+		_menu_icons[identity] = ImageTexture.create_from_image(image)
+	return _menu_icons[identity]
+
+func _menu_button(parent: VBoxContainer, label: String, hint: String, mark: String) -> Button:
 	var button := Button.new(); button.text = label; button.tooltip_text = hint
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT; button.flat = true
+	button.icon = _menu_icon(mark)
+	button.add_theme_constant_override("h_separation",10)
+	button.add_theme_constant_override("icon_max_width",16)
+	for state: String in ["icon_normal_color","icon_hover_color","icon_pressed_color","icon_hover_pressed_color"]:
+		button.add_theme_color_override(state,Color("e9c36f"))
+	button.add_theme_color_override("icon_disabled_color",Color("80948d"))
 	button.add_theme_font_size_override("font_size",14)
-	button.custom_minimum_size.y = 30; parent.add_child(button)
+	button.custom_minimum_size.y = 34; parent.add_child(button)
 	return button
 
 func apply_presentation(title: String, summary: Dictionary, compact: bool, details_open: bool,

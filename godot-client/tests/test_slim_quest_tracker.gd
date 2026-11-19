@@ -36,6 +36,9 @@ func run() -> void:
 	expect(tracker.more_is_open() and root.get_visible_rect().encloses(tracker._menu.get_global_rect()), "the real More button opens a bounded anchored menu")
 	expect(tracker.instructions_button.visible and tracker.replay_button.visible and tracker.hide_button.visible \
 		and tracker.untrack_button.visible and tracker.replay_button.disabled, "all four controls remain accessible and unavailable replay is explained")
+	expect([tracker.instructions_button,tracker.replay_button,tracker.hide_button,tracker.untrack_button].all(
+		func(button: Button) -> bool: return button.icon != null and button.icon.get_size() == Vector2(16,16)),
+		"the selected icon list keeps a crisp native icon beside every named action")
 	var replays: Array = []; hud.replay_requested.connect(func() -> void: replays.append(true))
 	hud.set_replay_available(true,true); guide.apply_campaign(state); await settle()
 	expect(tracker.more_is_open() and not tracker.replay_button.disabled and tracker.replay_button.text == "Retry scene", "snapshot refreshes preserve the open menu and update actual retry readiness")
