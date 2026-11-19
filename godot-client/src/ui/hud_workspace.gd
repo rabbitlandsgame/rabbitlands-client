@@ -171,7 +171,7 @@ func configure(owner_main: Control) -> void:
 	minimap_labels = MinimapLabels.new()
 	minimap_labels.name = "HudMinimapLabels"
 	main.minimap_frame.add_child(minimap_labels)
-	minimap_labels.z_index = 10
+	minimap_labels.z_index = 1
 	minimap_labels.hide()
 	for key: String in ["food_meter", "load_meter", "xp_meter"]:
 		var strip := ResourceStrip.new()

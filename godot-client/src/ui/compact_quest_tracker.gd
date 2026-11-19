@@ -1,6 +1,7 @@
 extends PanelContainer
 ## Shared quest chrome. It changes presentation only; owners dispatch actions.
 const TextColors := preload("res://src/ui/text_colors.gd")
+const Placement := preload("res://src/ui/quest_tracker_placement.gd")
 const MENU_MARKS := {
 	"instructions": '<path d="M10 5C7 3 4 3 2 4v12c3-1 5-1 8 1m0-12c3-2 6-2 8-1v12c-3-1-5-1-8 1V5z"/>',
 	"replay": '<path d="M4 8a6.5 6.5 0 1 1 0 5M4 3v5h5"/>',
@@ -44,6 +45,10 @@ var _detail_region: VBoxContainer
 var _detail_header: HBoxContainer
 var _detail_rule: HSeparator
 var _own_details_scroll := true
+var _minimap: Control
+var _automatic_placement := false
+var _preferred_origin := Vector2.INF
+var _last_placed_origin := Vector2.INF
 
 func _ready() -> void:
 	configure()
@@ -226,9 +231,49 @@ func _queue_fit() -> void:
 func _finish_fit() -> void:
 	_fit_queued = false
 	if details_scroll != null and _own_details_scroll:
-		var limit := clampf(get_viewport().get_visible_rect().size.y-230,56,240)
+		var limit := minf(240,details_height_budget(get_viewport_rect().size.y-56))
 		details_scroll.custom_minimum_size.y = minf(details.get_combined_minimum_size().y,limit)
 	reset_size()
+	if _automatic_placement: _place_automatically()
+
+## Reserve the actual header/recovery height, rather than assuming all quests
+## have the same chrome. Owners with an existing scroll use the same budget.
+func details_height_budget(card_height: float) -> float:
+	var body := details_scroll.get_combined_minimum_size().y
+	var chrome := maxf(0,get_combined_minimum_size().y-body) if _details_open else 150.0
+	var scale_y := maxf(0.01,absf(get_global_transform().get_scale().y))
+	return maxf(32,card_height/scale_y-chrome)
+
+func set_minimap(control: Control, automatic := false) -> void:
+	_minimap = control
+	_automatic_placement = automatic
+	set_process(_automatic_placement or more_is_open())
+	_queue_fit()
+
+func _placement_bounds() -> Rect2:
+	var area := get_viewport_rect().grow(-8)
+	area.size.y = maxf(1,area.size.y-WindowDrag.RESERVED_BOTTOM_BAR)
+	return area
+
+func _minimap_obstacles() -> Array[Rect2]:
+	var result: Array[Rect2] = []
+	if not is_instance_valid(_minimap) or not _minimap.is_visible_in_tree(): return result
+	var bounds := _minimap.get_global_rect()
+	var labels := _minimap.get_node_or_null("HudMinimapLabels") as Control
+	if labels != null and labels.is_visible_in_tree() and labels.has_method("drawn_bounds"):
+		bounds = bounds.merge(labels.get_global_transform() * (labels.call("drawn_bounds") as Rect2))
+	result.append(bounds)
+	return result
+
+func avoid_minimap_overlap() -> void:
+	global_position = Placement.place(get_global_rect(),_placement_bounds(),_minimap_obstacles()).position
+
+func _place_automatically() -> void:
+	if not is_inside_tree() or not is_visible_in_tree(): return
+	if not global_position.is_equal_approx(_last_placed_origin): _preferred_origin = global_position
+	var preferred := get_global_rect(); preferred.position = _preferred_origin
+	global_position = Placement.place(preferred,_placement_bounds(),_minimap_obstacles()).position
+	_last_placed_origin = global_position
 
 func use_details_scroll(enabled: bool) -> void:
 	configure()
@@ -239,6 +284,7 @@ func use_details_scroll(enabled: bool) -> void:
 
 func open_more() -> void:
 	if _complete or not is_visible_in_tree(): return
+	if has_meta(WindowStack.STACK_META): WindowStack.activate(self)
 	_menu.show(); _place_more(); instructions_button.grab_focus()
 	set_process(true)
 
@@ -247,13 +293,14 @@ func close_more() -> void:
 	var focused := get_viewport().gui_get_focus_owner()
 	var held := focused != null and _menu.is_ancestor_of(focused)
 	_menu.hide()
-	set_process(false)
+	set_process(_automatic_placement)
 	if held and is_visible_in_tree() and more.visible: more.grab_focus()
 
 func more_is_open() -> bool:
 	return _menu != null and _menu.visible
 
 func _process(_delta: float) -> void:
+	if _automatic_placement: _place_automatically()
 	if more_is_open(): _place_more()
 
 func _place_more() -> void:

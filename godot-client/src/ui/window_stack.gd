@@ -5,6 +5,7 @@ extends Node
 ## same list so the surface the player sees also owns the pointer.
 
 const STACK_META := &"rabbitlands_window_stack"
+const HUD_Z := 24
 const WINDOW_Z := 20
 const MODAL_Z := 300
 
@@ -12,6 +13,7 @@ var surface: Control
 var _windows: Array[Control] = []
 var _modals: Array[Control] = []
 var _full_window_views: Array[Control] = []
+var _hud_controls: Dictionary = {}
 var _world_surface: Control
 var _decorations: Dictionary = {}
 var _overlays: Dictionary = {}
@@ -41,6 +43,74 @@ func register(window: Control, modal := false) -> void:
 		window.move_to_front()
 	_sync_layers()
 
+## HUD owners keep their layout parent and input policy. A full-screen guide
+## contributes only its visible card's hit region, never its empty viewport.
+func register_hud(owner: Control, hit_control: Control) -> void:
+	if owner == null or hit_control == null or _hud_controls.has(owner): return
+	if owner.get_parent() != surface: return
+	_hud_controls[owner] = hit_control
+	owner.set_meta(STACK_META, self)
+	hit_control.set_meta(STACK_META, self)
+	hit_control.tree_entered.connect(func() -> void: _sync_layers.call_deferred())
+	var order := _hud_order()
+	order.erase(owner); order.append(owner)
+	_place_huds(order)
+	_sync_layers()
+
+func _hud_hit(owner: Control) -> Control:
+	var hit := _hud_controls.get(owner) as Control
+	if not is_instance_valid(hit) or owner.get_parent() != surface: return null
+	# A tutorial card can temporarily belong to manufacturing's normal window.
+	return hit if hit == owner or owner.is_ancestor_of(hit) else null
+
+func _hud_order() -> Array[Control]:
+	var order: Array[Control] = []
+	for child: Node in surface.get_children():
+		if child is Control and _hud_controls.has(child): order.append(child)
+	return order
+
+func _place_huds(order: Array[Control]) -> void:
+	if order.is_empty(): return
+	var first_window: Control
+	for child: Node in surface.get_children():
+		if child is Control and child in _windows and child not in _full_window_views:
+			first_window = child; break
+	var boundary := first_window.get_index() if first_window != null else surface.get_child_count()
+	var settled := boundary >= order.size()
+	for index: int in order.size():
+		settled = settled and order[index].get_index() == boundary - order.size() + index
+	if settled: return
+	for owner: Control in order:
+		boundary = first_window.get_index() if first_window != null else surface.get_child_count()
+		if owner.get_index() < boundary: boundary -= 1
+		if owner.get_index() != boundary: surface.move_child(owner, boundary)
+
+func _owner_for(window: Control) -> Control:
+	var anchor := window
+	if _overlays.has(anchor) and is_instance_valid(_overlays[anchor]): anchor = _overlays[anchor]
+	var target: Control = anchor if anchor in _windows else null
+	var ancestor := anchor.get_parent()
+	while ancestor != null and ancestor != surface:
+		if ancestor is Control and ancestor in _windows: target = ancestor
+		ancestor = ancestor.get_parent()
+	if target != null: return target
+	for owner: Control in _hud_controls:
+		if not is_instance_valid(owner): continue
+		var hit := _hud_hit(owner)
+		if hit != null and (anchor == owner or anchor == hit or hit.is_ancestor_of(anchor)): return owner
+	return anchor
+
+func _contains_pointer(owner: Control, point: Vector2) -> bool:
+	var hit := _hud_hit(owner) if _hud_controls.has(owner) else owner
+	if not is_instance_valid(hit) or not hit.is_visible_in_tree(): return false
+	if hit.get_global_rect().has_point(point): return true
+	for raw_overlay: Variant in _overlays:
+		if not is_instance_valid(raw_overlay) or not is_instance_valid(_overlays[raw_overlay]): continue
+		var overlay := raw_overlay as Control
+		if overlay.is_visible_in_tree() and _owner_for(_overlays[overlay]) == owner \
+				and overlay.get_global_rect().has_point(point): return true
+	return false
+
 ## Background views cover the world without covering the player's HUD.
 ## Keep their GUI order below the HUD too; z_index alone cannot route clicks.
 func register_full_window_view(window: Control, world_surface: Control) -> void:
@@ -65,6 +135,7 @@ func decorate(window: Control, decorations: Array) -> void:
 ## drawing group rather than a fixed z_index above every other window.
 func attach_overlay(window: Control, overlay: Control) -> void:
 	_overlays[overlay] = window
+	overlay.set_meta(STACK_META, self)
 	_sync_layers()
 
 ## A non-blocking item card stays above the ledger it describes, even when
@@ -80,16 +151,17 @@ static func activate(window: Control) -> void:
 	if stack == null:
 		window.move_to_front()
 		return
-	var target := window
-	var ancestor := window.get_parent()
-	while ancestor != null and ancestor != stack.surface:
-		if ancestor is Control and ancestor in stack._windows:
-			target = ancestor as Control
-		ancestor = ancestor.get_parent()
+	var target := stack._owner_for(window)
 	if target in stack._full_window_views:
 		stack._raise_modals()
 		return
-	target.move_to_front()
+	if stack._hud_controls.has(target):
+		if stack._hud_hit(target) == null: return
+		var order := stack._hud_order()
+		order.erase(target); order.append(target)
+		stack._place_huds(order)
+	else:
+		target.move_to_front()
 	stack._sync_layers()
 	stack._raise_modals()
 	var focus := window.get_viewport().gui_get_focus_owner()
@@ -114,9 +186,8 @@ func handle_pointer(event: InputEvent) -> void:
 	var children := surface.get_children()
 	children.reverse()
 	for child: Node in children:
-		if child is Control and child in _windows and child not in _full_window_views \
-				and (child as Control).is_visible_in_tree() \
-				and (child as Control).get_global_rect().has_point(event.position):
+		if child is Control and (child in _windows or _hud_controls.has(child)) \
+				and child not in _full_window_views and _contains_pointer(child, event.position):
 			activate(child as Control)
 			return
 
@@ -125,6 +196,17 @@ func _sync_layers() -> void:
 			or surface.is_queued_for_deletion():
 		return
 	_updating = true
+	var hud_rank := 0
+	for child: Node in surface.get_children():
+		if not child is Control or not _hud_controls.has(child): continue
+		var owner := child as Control
+		owner.z_as_relative = false
+		owner.z_index = HUD_Z + hud_rank * 4
+		var hit := _hud_hit(owner)
+		if hit != null and hit != owner:
+			hit.z_as_relative = true; hit.z_index = 0
+		hud_rank += 1
+	var window_z := maxi(WINDOW_Z, HUD_Z + hud_rank * 4)
 	var rank := 0
 	for child: Node in surface.get_children():
 		if not child is Control or not child in _windows:
@@ -134,7 +216,7 @@ func _sync_layers() -> void:
 		if window in _full_window_views:
 			window.z_index = 0
 			continue
-		window.z_index = (MODAL_Z if window in _modals else WINDOW_Z) + rank * 4
+		window.z_index = (MODAL_Z if window in _modals else window_z) + rank * 4
 		for index: int in (_decorations.get(window, []) as Array).size():
 			var raw_decoration: Variant = _decorations[window][index]
 			if not is_instance_valid(raw_decoration):
@@ -152,12 +234,7 @@ func _sync_layers() -> void:
 		if not is_instance_valid(raw_overlay) or not is_instance_valid(_overlays[raw_overlay]):
 			continue
 		var overlay := raw_overlay as Control
-		var host: Control = _overlays[overlay]
-		var ancestor := host.get_parent()
-		while ancestor != null and ancestor != surface:
-			if ancestor is Control and ancestor in _windows:
-				host = ancestor as Control
-			ancestor = ancestor.get_parent()
+		var host := _owner_for(_overlays[overlay])
 		overlay.z_as_relative = false
 		overlay.z_index = host.z_index + 1
 	_updating = false
@@ -179,6 +256,7 @@ func _raise_modals() -> void:
 				if view.get_index() != next_index:
 					surface.move_child(view, next_index)
 				next_index += 1
+	_place_huds(_hud_order())
 	for raw_window: Variant in _companions:
 		if not is_instance_valid(raw_window) or not is_instance_valid(_companions[raw_window]):
 			continue

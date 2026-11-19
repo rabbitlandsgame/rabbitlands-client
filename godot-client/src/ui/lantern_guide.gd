@@ -452,11 +452,11 @@ func control_for_step() -> Control:
 	return null
 
 func _process(_delta: float) -> void:
+	if not docked: _restore_card_layer()
 	if using_campaign():
 		if docked:
 			card.reparent(self)
-			card.z_as_relative = false
-			card.z_index = 8
+			_restore_card_layer()
 			docked = false
 		highlighted = null
 		if not AppState.authenticated:
@@ -468,6 +468,7 @@ func _process(_delta: float) -> void:
 			var width := minf(340 if compact else 300,maxf(190,area.x - 24))
 			_set_tracker_width(width)
 			card.position = Vector2(maxf(12, area.x-width-96), clampf(62, 8, maxf(8, area.y-card.size.y-12)))
+			_fit_floating_card()
 		queue_redraw()
 		return
 	var manufacturing := _node("ManufacturingPanel")
@@ -487,8 +488,7 @@ func _process(_delta: float) -> void:
 			detail.custom_minimum_size.y = 120
 		else:
 			card.reparent(self)
-			card.z_as_relative = false
-			card.z_index = 8
+			_restore_card_layer()
 			detail.custom_minimum_size.y = 120
 			manufacturing.position = manufacturing_rect.position
 			manufacturing.size = manufacturing_rect.size
@@ -551,7 +551,22 @@ func _process(_delta: float) -> void:
 				card.position.x = area.x-96-width
 	_set_tracker_width(minf(width,maxf(190,area.x-24)))
 	card.position.y = clampf(62, 8, maxf(8, area.y-card.size.y-110))
+	_fit_floating_card()
 	queue_redraw()
+
+func _restore_card_layer() -> void:
+	var grouped := has_meta(WindowStack.STACK_META)
+	card.z_as_relative = grouped
+	card.z_index = 0 if grouped else 8
+
+func _fit_floating_card() -> void:
+	var budget: float = _tracker.details_height_budget(get_viewport_rect().size.y-56)
+	if using_campaign() and is_instance_valid(campaign_content):
+		campaign_content.call("set_instruction_height_limit",budget)
+	else:
+		_standard_scroll.custom_minimum_size.y = minf(220,minf(budget,maxf(32,_standard_body.get_combined_minimum_size().y)))
+	card.reset_size()
+	_tracker.avoid_minimap_overlap()
 
 func _set_tracker_width(width: float) -> void:
 	if card.custom_minimum_size.x != width:

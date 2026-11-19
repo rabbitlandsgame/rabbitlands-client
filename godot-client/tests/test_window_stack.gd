@@ -40,7 +40,7 @@ func _check_quest_and_shop(main: Control) -> void:
 	await process_frame
 	var close: Button = merchant.get_node("Body/Header/Close")
 	var point := close.get_global_rect().get_center()
-	guide.card.global_position = point - Vector2(200, 90)
+	guide.card.global_position = point - guide.card.size * 0.5
 	_expect(guide.card.get_global_rect().has_point(point), "quest card overlaps the shop Close button")
 	_expect(guide.card.z_index < merchant.z_index, "quest guide draws behind the shop even when refreshed later")
 	_click(point)
@@ -79,6 +79,11 @@ func _check_docked_windows(main: Control) -> void:
 	var guide: Control = main.lantern_guide
 	guide.apply_state({"active": true, "tutorial": "watchpost", "stage": 3,
 		"total": 4, "title": "Make the field dressing", "control": "manufacture"})
+	# Explicitly exercise the retained legacy-side docking path. The current
+	# mixing workspace normally supplies its own instruction placement instead.
+	var workspace: Control = main.mixing_workspace
+	var workspace_ready: bool = workspace.ready_to_layout
+	workspace.ready_to_layout = false
 	main.manufacturing_panel.show()
 	guide._process(0.0)
 	await process_frame
@@ -87,9 +92,10 @@ func _check_docked_windows(main: Control) -> void:
 		"a docked instruction card belongs to manufacturing's window")
 	main.manufacturing_panel.hide()
 	guide._process(0.0)
-	_expect(guide.card.get_parent() == guide and not guide.card.z_as_relative
-		and guide.card.z_index < main.manufacturing_panel.z_index,
+	_expect(guide.card.get_parent() == guide and guide.card.z_as_relative
+		and guide.card.z_index == 0 and guide.z_index < main.manufacturing_panel.z_index,
 		"undocking restores the reminder card's background priority")
+	workspace.ready_to_layout = workspace_ready
 	guide.hide()
 
 func _check_overlap(main: Control) -> void:
