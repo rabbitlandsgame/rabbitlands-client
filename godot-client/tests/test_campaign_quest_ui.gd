@@ -57,7 +57,7 @@ func run() -> void:
 	state=sample();await show_state(state)
 	expect(guide.is_campaign_tracked() and guide.using_campaign() and guide.card.is_visible_in_tree(),"a newly accepted active expedition uses the existing quest card automatically")
 	expect(hud is Control and guide.card.is_ancestor_of(hud) and hud._panel.get_parent()==hud,"all interactive controls live inside the existing guide card, with no campaign CanvasLayer")
-	expect(guide.instruction.is_visible_in_tree() and guide.instruction.text.contains("Inspect the landing"),"expanded field instructions retain the current objective inside the bounded shared card")
+	expect(guide.card.objective.is_visible_in_tree() and guide.card.objective.text.contains("Inspect the landing") and not hud.is_visible_in_tree(),"the slim card retains the current objective while keeping full instructions closed")
 	state.map="maps/nymara/greenlight.elm";await show_state(state)
 	expect(guide.campaign_entry().location=="Greenlight","journal locations display the world name instead of internal compatibility paths")
 	expect(app.quest_journal.size()==1 and not app.quest_journal[0].has("_campaign"),"the current-expedition row does not alter the server's journal")
@@ -73,7 +73,7 @@ func run() -> void:
 	expect(guide.visible and guide.instruction.text.contains("next inspection") and not windows.quest_show_button.visible,
 		"Show quest restores the latest expedition instructions without changing tracking")
 	guide.collapse.pressed.emit();await settle()
-	expect(guide.compact and not hud.visible and guide.collapse.text=="Instructions","the existing Less control minimizes the campaign instructions")
+	expect(guide.compact and not hud.visible and guide.card.heading.text.contains("next inspection"),"the collapse control retains the next action in a compact ribbon")
 	state.hint="Check the cargo seal.";state.scene.token="evidence";state.key="seal";state.title="One Cargo Two Claims"
 	await show_state(state)
 	expect(guide.compact and guide.is_campaign_tracked() and not hud.visible,"progress and a new scene preserve the minimized choice for the same run")
@@ -83,7 +83,7 @@ func run() -> void:
 	await show_state(state)
 	expect(not guide.visible,"restating the campaign never reopens an explicitly untracked card")
 	select_row(campaign_row());windows.quest_track_button.pressed.emit();await settle()
-	expect(guide.visible and guide.heading.text=="One Cargo Two Claims" and hud.visible,"Track restores the latest shared work in the existing card")
+	expect(guide.visible and guide.heading.text=="One Cargo Two Claims" and not hud.visible and guide.card.objective.text=="Check the cargo seal.","Track restores the latest shared work in the slim card")
 	var frames:Array=network.get("sent_frames")
 	expect(frames.is_empty(),"campaign tracking and minimizing never send a dispatch tracking or gameplay command")
 	state.map="twinbrook";state.phase="brook";state.scene.token="brook-arrival";await show_state(state,"twinbrook")
@@ -193,9 +193,8 @@ func run() -> void:
 	await capture("campaign-existing-quest-card-1280x720")
 	windows.toggle_quest_journal();select_row(campaign_row());windows.sync_campaign_replay();await settle();await capture("campaign-existing-journal-replay-1280x720")
 	windows.quest_panel.hide();root.size=Vector2i(720,480);root.content_scale_factor=1.5
-	await show_state(state);guide._process(0);await settle();hud._body_scroll.ensure_control_visible(hud._replay);await settle()
-	var clip:Rect2=hud._body_scroll.get_global_rect().intersection(root.get_visible_rect())
-	expect(clip.encloses(hud._replay.get_global_rect()),"replay remains reachable by scrolling in a small 150-percent window")
+	await show_state(state);guide._process(0);await settle();guide.card.open_more();await settle()
+	expect(guide.card.replay_button.is_visible_in_tree() and root.get_visible_rect().encloses(guide.card.replay_button.get_global_rect()),"replay remains reachable in More in a small 150-percent window")
 	expect(root.get_visible_rect().encloses(guide.card.get_global_rect()),"the shared quest card fits the small scaled viewport")
 	await capture("campaign-existing-quest-card-720x480-150-percent")
 	guide.apply_campaign({});await settle()

@@ -38,6 +38,7 @@ func run() -> void:
 			if decoded.type != "campaign": quit(1); return
 			hud.apply_state(decoded.state,Vector2i.ZERO,str(state.map))
 			guide.apply_campaign(decoded.state); guide._process(0)
+			if not guide._details_open: guide.card.instructions_button.pressed.emit()
 			for _frame in 5: await process_frame
 			var button: Button
 			for child: Node in hud._targets.get_children():
@@ -55,7 +56,7 @@ func run() -> void:
 			expect(hud._scroll.get_global_rect().encloses(button.get_global_rect()), "the inner action list does not clip the explanation")
 			expect(root.get_visible_rect().encloses(button.get_global_rect()), "the entire explanation fits the logical viewport")
 			expect(root.get_visible_rect().encloses(guide.card.get_global_rect()) \
-				and root.get_visible_rect().encloses(guide._buttons.get_global_rect()), "the normal quest card and footer remain on screen")
+				and root.get_visible_rect().encloses(guide.card.more.get_global_rect()), "the normal quest card and More remain on screen")
 			expect(JSON.stringify(state) == original, "rendering changes no native proof or quest state")
 			await RenderingServer.frame_post_draw
 			var filename := "%s-%dx%d.png" % [record.label,dimensions.x,dimensions.y]

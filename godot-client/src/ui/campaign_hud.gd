@@ -75,6 +75,9 @@ var _replay_retry := false
 var _column: VBoxContainer
 var _opening_actions_first := false
 var _dismissed_completion := ""
+var _tracker_recovery := false
+var _tracker_details_open := true
+var _tracker_recovery_host: Control
 
 func embed_instruction(label: Label) -> void:
 	if label.get_parent() != _column:
@@ -102,6 +105,32 @@ func embed() -> void:
 
 func presentation_available() -> bool:
 	return _available
+
+func host_tracker_recovery(host: Control) -> void:
+	_build()
+	_tracker_recovery = true
+	_tracker_recovery_host = host
+	_recovery_actions.reparent(host)
+	_fit_tracker_recovery()
+
+func set_tracker_details_open(value: bool) -> void:
+	if _tracker_details_open == value: return
+	_tracker_details_open = value
+	if _tracker_recovery:
+		_recovery_actions.reparent(_column if value else _tracker_recovery_host)
+		if value: _column.move_child(_recovery_actions,_field_summary.get_index()+1)
+	_fit_tracker_recovery()
+
+func _fit_tracker_recovery() -> void:
+	if not _tracker_recovery: return
+	var count := _recovery_actions.get_child_count()
+	for index: int in count:
+		var button := _recovery_actions.get_child(index) as Button
+		if not button.has_meta("tracker_tooltip"): button.set_meta("tracker_tooltip",button.tooltip_text)
+		button.tooltip_text = str(button.get_meta("tracker_tooltip"))
+		button.visible = _tracker_details_open or index == 0
+		if count > 1 and not _tracker_details_open and index == 0:
+			button.tooltip_text += "\n%d allies need healing. Open Instructions to choose another fallen ally." % count
 
 func set_replay_available(value: bool, retry := false) -> void:
 	_build()
@@ -399,7 +428,7 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 		_leave.visible = bool((snapshot.get("shelves",{}) as Dictionary).get("private_practice",false))
 	_leave.text = "Continue" if complete else "Return"
 	_leave.tooltip_text = "Continue your journey. Your follow-up is in the quest log." if complete else "Return to the public road. Completed milestones are saved."
-	_replay.visible = not complete
+	_replay.visible = not complete and not _tracker_recovery
 	_reduced.visible = not complete
 	_help.visible = active or travelling
 	_account.visible = active
@@ -417,7 +446,7 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 			control.hide()
 		_lesson_window.hide()
 	var actions_first := _guidance.visible or _field_summary.visible
-	var action_anchor: Control = _recovery_actions if _recovery_actions.visible else _field_summary if _field_summary.visible else _hint
+	var action_anchor: Control = _recovery_actions if _recovery_actions.visible and _recovery_actions.get_parent() == _column else _field_summary if _field_summary.visible else _hint
 	if actions_first != _opening_actions_first or (actions_first and _scroll.get_index() < action_anchor.get_index()):
 		_opening_actions_first = actions_first
 		_column.move_child(_scroll, action_anchor.get_index() + 1 if _opening_actions_first else _entry.get_index() - 1)
@@ -607,6 +636,7 @@ func _apply_ally_recovery() -> void:
 			button.tooltip_text = "Cast Heal Target at Power 1 on Elen. Your unused first recovery lesson can supply this cast's cost. Normal approach and casting time apply; moving cancels the cast."
 		button.pressed.connect(_request_ally_heal.bind(run_id, int(patient.actor_id)))
 		_recovery_actions.add_child(button)
+	_fit_tracker_recovery()
 
 func _request_ally_heal(run_id: String, actor_id: int) -> void:
 	if not _available or not _recovery_actions.is_visible_in_tree() or run_id != str(_state.get("run_id", "")) \
@@ -914,7 +944,8 @@ func _request_decision(action: String) -> void:
 func _layout() -> void:
 	var viewport_size := get_viewport().get_visible_rect().size
 	if _embedded:
-		custom_minimum_size = Vector2(0, clampf(viewport_size.y - 250.0, 72.0, 300.0))
+		var complete := str(_state.get("kind","")) == "rescue" and str(_state.get("key","")) != "rescue_checkin" and bool(_state.get("completed",false))
+		custom_minimum_size = Vector2(0, 100.0 if complete else clampf(viewport_size.y - 250.0,72.0,300.0))
 		_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		_scroll.custom_minimum_size.y = 0.0
 		return

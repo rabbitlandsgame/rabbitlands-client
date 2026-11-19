@@ -1,6 +1,8 @@
 extends Control
 const TextColors := preload("res://src/ui/text_colors.gd")
 const FieldReadout := preload("res://src/ui/campaign_field_readout.gd")
+const CompactTracker := preload("res://src/ui/compact_quest_tracker.gd")
+const TrackerSummary := preload("res://src/ui/quest_tracker_summary.gd")
 ## This overlay teaches the existing UI. It cannot perform gameplay actions
 ## or locally advance a quest. Tracking changes only its presentation; skipping
 ## or leaving still requires the server's existing prompt.
@@ -35,14 +37,19 @@ var _buttons: HFlowContainer
 var _pending_campaign_kind := ""
 var _pending_campaign_msec := 0
 var _rescue_return_tracking: Dictionary = {}
+var _tracker
+var _details_open := false
+var _standard_scroll: ScrollContainer
+var _standard_body: VBoxContainer
 
 func attach_campaign(content: Control) -> void:
 	campaign_content = content
 	content.completion_dismissed.connect(_refresh)
 	content.reparent(_body)
-	_body.move_child(content, _buttons.get_index())
+	_body.move_child(content,0)
 	content.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
 	content.call("embed")
+	content.call("host_tracker_recovery",_tracker.recovery_slot)
 	_refresh()
 
 func apply_campaign(snapshot: Dictionary) -> void:
@@ -171,57 +178,52 @@ func configure(owner_ui: Control) -> void:
 	z_index = 240
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	card = PanelContainer.new()
+	_tracker = CompactTracker.new()
+	_tracker.configure()
+	card = _tracker
 	card.name = "TutorialInstruction"
 	card.z_as_relative = false
 	card.z_index = 8
 	card.position = Vector2(maxf(16, get_viewport_rect().size.x-310-96), 62)
-	card.custom_minimum_size.x = 310
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color("13262eee")
-	style.border_color = Color("cbaa68")
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(7)
-	style.set_content_margin_all(12)
-	card.add_theme_stylebox_override("panel", style)
+	card.custom_minimum_size.x = 300
 	add_child(card)
-	var body := VBoxContainer.new()
-	_body = body
-	body.add_theme_constant_override("separation", 8)
-	card.add_child(body)
+	_body = _tracker.details
+	heading = _tracker.heading
+	collapse = _tracker.collapse
+	untrack = _tracker.untrack_button
+	hide_button = _tracker.hide_button
+	_tracker.compact_toggled.connect(func(value: bool) -> void:
+		compact = value
+		if compact: _details_open = false
+		_refresh())
+	_tracker.instructions_toggled.connect(func(value: bool) -> void:
+		_details_open = value
+		if value: compact = false
+		_refresh())
+	_tracker.replay_requested.connect(request_campaign_replay)
+	_tracker.hide_requested.connect(hide_window)
+	_tracker.untrack_requested.connect(func() -> void:
+		set_campaign_tracked(false) if using_campaign() else set_quest_tracked(false))
+	_standard_scroll = ScrollContainer.new()
+	_standard_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_standard_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_standard_scroll.custom_minimum_size.y = 120
+	_body.add_child(_standard_scroll)
+	_standard_body = VBoxContainer.new()
+	_standard_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_standard_body.add_theme_constant_override("separation",7)
+	_standard_scroll.add_child(_standard_body)
 	chapter = Label.new()
 	TextColors.bind(chapter, "guide_heading")
 	chapter.add_theme_font_size_override("font_size", 12)
-	body.add_child(chapter)
-	heading = Label.new()
-	heading.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	heading.custom_minimum_size.x = 286
-	heading.add_theme_font_size_override("font_size", 19)
-	body.add_child(heading)
+	_standard_body.add_child(chapter)
 	instruction = Label.new()
 	instruction.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	instruction.custom_minimum_size.x = 286
 	instruction.add_theme_font_size_override("font_size", 14)
-	body.add_child(instruction)
+	_standard_body.add_child(instruction)
 	var buttons := HFlowContainer.new()
 	_buttons = buttons
-	body.add_child(buttons)
-	collapse = Button.new()
-	collapse.text = "Less"
-	collapse.pressed.connect(func(): compact = not compact; _refresh())
-	buttons.add_child(collapse)
-	untrack = Button.new()
-	untrack.name = "UntrackQuest"
-	untrack.text = "Untrack"
-	untrack.tooltip_text = "Stop tracking this quest. Keep your progress and choose Track in Quests to follow it again."
-	untrack.pressed.connect(func(): set_campaign_tracked(false) if using_campaign() else set_quest_tracked(false))
-	buttons.add_child(untrack)
-	hide_button = Button.new()
-	hide_button.name = "HideQuest"
-	hide_button.text = "Hide"
-	hide_button.tooltip_text = "Hide this window while keeping the quest tracked. Choose Show quest in Quests to reopen it."
-	hide_button.pressed.connect(hide_window)
-	buttons.add_child(hide_button)
+	_standard_body.add_child(buttons)
 	skip = Button.new()
 	skip.name = "SkipTutorial"
 	skip.text = "Skip tutorial…"
@@ -286,34 +288,33 @@ func _refresh() -> void:
 	if card == null:
 		return
 	var complete := rescue_completed() and bool(_campaign.get("active", false))
-	chapter.visible = not complete
 	var campaign := using_campaign() or complete
 	if is_instance_valid(campaign_content):
-		campaign_content.visible = campaign and (complete or not compact) and bool(campaign_content.call("presentation_available"))
+		campaign_content.visible = campaign and (complete or _details_open) and bool(campaign_content.call("presentation_available"))
+		campaign_content.call("set_tracker_details_open",_details_open or complete)
+	_tracker.recovery_slot.visible = campaign and not complete
 	if campaign:
-		collapse.visible = not complete
-		untrack.visible = not complete
-		hide_button.visible = not complete
 		visible = AppState.authenticated and is_instance_valid(campaign_content) \
 			and bool(campaign_content.call("presentation_available")) and (complete or not is_window_hidden())
 		card.visible = visible
-		chapter.text = "RESCUE COMPLETE" if complete else "CURRENT EXPEDITION"
-		heading.text = "Quest complete!" if complete else str(_campaign.get("title", "The Missing Measure"))
+		chapter.hide()
+		_standard_scroll.hide()
 		campaign_content.call("embed_instruction", instruction)
 		instruction.text = "But maybe you should check in on Liora later to see how she is feeling." if complete else str(campaign_entry().get("objective", ""))
-		instruction.visible = complete or not compact
+		instruction.show()
 		skip.hide()
 		help.hide()
-		collapse.text = "Instructions" if compact else "Less"
-		card.reset_size()
+		var summary := TrackerSummary.campaign(_campaign,AppState.current_map)
+		_tracker.recovery_slot.visible = not complete and not _details_open and not (summary.get("recovery",{}) as Dictionary).is_empty()
+		_tracker.apply_presentation("Quest complete!" if complete else str(_campaign.get("title","The Missing Measure")),
+			summary,compact,_details_open,bool(campaign_content.get("_replay_available")),bool(campaign_content.get("_replay_retry")),complete)
 		return
-	collapse.show()
-	untrack.show()
-	hide_button.show()
-	if instruction.get_parent() != _body:
-		instruction.reparent(_body)
-		_body.move_child(instruction, heading.get_index() + 1)
-		instruction.custom_minimum_size.x = heading.custom_minimum_size.x
+	if instruction.get_parent() != _standard_body:
+		instruction.reparent(_standard_body)
+		_standard_body.move_child(instruction,1)
+		instruction.custom_minimum_size.x = 0
+	chapter.show()
+	_standard_scroll.show()
 	visible = AppState.authenticated and is_quest_tracked() and not is_window_hidden()
 	card.visible = visible
 	if not visible: return
@@ -332,7 +333,6 @@ func _refresh() -> void:
 	if field:
 		help.text = "Quest help"
 	chapter.text = ("HELP FOR THE WATCHPOST" if watchpost else str(state.get("adventure", "PRACTICE")).to_upper() if road else "THE BORROWED SKY" if sky else "THE SECOND BELL" if second_bell else str(state.get("chapter", "SIGNED ASHORE")) if signed_ashore else "THE LAST LANTERN") + "  ·  %d / %d" % [int(state.get("stage", 1)), int(state.get("total", 28))]
-	heading.text = str(state.get("title", ""))
 	if field:
 		chapter.text = "MAIN WORLD DISPATCH  ·  %d / %d" % [int(state.get("stage",1)),int(state.get("total",1))]
 	instruction.text = str(state.get("hint", ""))
@@ -347,9 +347,8 @@ func _refresh() -> void:
 	# 3 Lemons sold, 2 points spent); the Lantern keeps its four counted steps.
 	if needed > 1 and (road or field or watchpost or signed_ashore or str(state.get("key", "")) in ["reed", "quartz", "take_reed", "attribute", "sage"]):
 		instruction.text += "\nProgress: %d / %d" % [int(state.get("count", 0)), needed]
-	instruction.visible = not compact
-	collapse.text = "Instructions" if compact else "Less"
-	card.reset_size()
+	instruction.show()
+	_tracker.apply_presentation(quest_title(),TrackerSummary.guide(state),compact,_details_open)
 
 func _node(name: String) -> Control:
 	# The native manufacturing builder moves these nodes into its side pane,
@@ -464,9 +463,8 @@ func _process(_delta: float) -> void:
 			return
 		if visible:
 			var area := get_viewport_rect().size
-			var width := minf(310, maxf(190, area.x - 24))
-			card.custom_minimum_size.x = width
-			heading.custom_minimum_size.x = width - 24
+			var width := minf(340 if compact else 300,maxf(190,area.x - 24))
+			_set_tracker_width(width)
 			card.position = Vector2(maxf(12, area.x-width-96), clampf(62, 8, maxf(8, area.y-card.size.y-12)))
 		queue_redraw()
 		return
@@ -499,9 +497,7 @@ func _process(_delta: float) -> void:
 	if not visible: return
 	highlighted = control_for_step()
 	if docked:
-		card.custom_minimum_size.x = 350
-		heading.custom_minimum_size.x = 326
-		instruction.custom_minimum_size.x = 326
+		_set_tracker_width(340 if compact else 300)
 		manufacturing.size.y = get_viewport_rect().size.y - WindowDrag.RESERVED_BOTTOM_BAR - 16
 		manufacturing.position.y = 8
 		queue_redraw()
@@ -509,7 +505,7 @@ func _process(_delta: float) -> void:
 	# Start at the upper right, clear of chat and the resource rail, and move
 	# beside an open gameplay panel if it covers the controls being taught.
 	var area := get_viewport_rect().size
-	var width := 310.0
+	var width := 340.0 if compact else 300.0
 	card.position = Vector2(maxf(16, area.x-width-96),
 		clampf(62, 8, maxf(8, area.y-card.size.y-110)))
 	var panels: Array[Control] = []
@@ -546,19 +542,22 @@ func _process(_delta: float) -> void:
 			var left_space := ring_bounds.position.x-24
 			var right_space := area.x-96-ring_bounds.end.x-12
 			if left_space >= right_space:
-				width = clampf(left_space,190,310)
+				width = clampf(left_space,190,340 if compact else 300)
 				card.position.x = 12
 			else:
-				width = clampf(right_space,190,310)
+				width = clampf(right_space,190,340 if compact else 300)
 				card.position.x = area.x-96-width
-	if card.custom_minimum_size.x != width:
-		card.custom_minimum_size.x = width
-		heading.custom_minimum_size.x = width-24
-		instruction.custom_minimum_size.x = width-24
-		card.size.x = width
-		card.reset_size()
+	_set_tracker_width(minf(width,maxf(190,area.x-24)))
 	card.position.y = clampf(62, 8, maxf(8, area.y-card.size.y-110))
 	queue_redraw()
+
+func _set_tracker_width(width: float) -> void:
+	if card.custom_minimum_size.x != width:
+		card.custom_minimum_size.x = width
+		card.size.x = width
+		card.reset_size()
+	var available := maxf(56,get_viewport_rect().size.y-190)
+	_standard_scroll.custom_minimum_size.y = minf(220,minf(available,maxf(36,_standard_body.get_combined_minimum_size().y)))
 
 func _highlight_rect(control: Control) -> Rect2:
 	if not _visible(control): return Rect2()

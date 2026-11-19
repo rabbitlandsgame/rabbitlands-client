@@ -174,34 +174,39 @@ func _run() -> void:
 	_expect(tracked_rect.position.x >= 0.0 and tracked_rect.end.y <= 720.0
 		and not tracked_rect.intersects(resource_rail.get_global_rect()),
 		"the tracked readout fits 1280x720 clear of the resource rail")
-	var tracker_page_panel := windows.tracked_quest.get_node(
-		"TrackerParchment") as PanelContainer
-	var tracker_page := tracker_page_panel.get_theme_stylebox("panel") as StyleBoxFlat
-	var tracker_page_texture := (tracker_page_panel.get_node("ParchmentTexture")
-		as PanelContainer).get_theme_stylebox("panel") as StyleBoxTexture
 	_expect(str(windows.tracked_quest.get_meta(&"visual_style", ""))
-			== "eloria_quest_tracker"
-		and tracker_page != null and tracker_page_texture != null
-		and tracker_page_texture.texture == windows.QUEST_PARCHMENT_TEXTURE,
-		"the pinned tracker is a compact textured parchment note")
+			== "compact_quest_tracker"
+		and windows.tracked_quest.has_method("apply_presentation")
+		and not windows.tracked_quest.get("details").visible,
+		"the pinned tracker uses the shared slim card with optional full instructions")
 	_expect(tracked_rect.position.x >= 1280.0 * 0.5
 		and tracked_rect.end.x <= 1280.0 - windows.RESERVED_RIGHT_RAIL,
-		"the tracked parchment sits upper-right immediately left of the resource rail")
+		"the tracked card sits upper-right immediately left of the resource rail")
 	var short_tracker_height: float = windows.tracked_quest.size.y
 	var long_quest: Dictionary = (app_state.get("quest_journal") as Array)[0].duplicate(true)
 	long_quest["objective"] = ("Search the fallen waystones along the northern road.\n"
 		+ "Ask the three wardens what they saw.\n"
 		+ "Return with the recovered sigil before nightfall.")
-	app_state.set("quest_journal", [long_quest])
+	(app_state.get("quest_journal") as Array).assign([long_quest])
 	windows.call("_sync_tracked_quest")
 	await process_frame
 	await process_frame
-	_expect(windows.tracked_quest.size.y > short_tracker_height
-		and windows.tracked_quest.size.y <= windows.QUEST_TRACKER_MAX_HEIGHT,
-		"the tracker grows once per changed objective and clamps before covering the HUD"
-			+ " (short %.1f, long %.1f, content %.1f)" % [short_tracker_height,
-				windows.tracked_quest.size.y,
-				windows.tracked_quest_text.get_content_height()])
+	_expect(not windows.tracked_quest.get("details").visible
+		and windows.tracked_quest.size.y <= windows.QUEST_TRACKER_MAX_HEIGHT
+		and windows.tracked_quest.get("objective").text == "Search the fallen waystones along the northern road."
+		and windows.tracked_quest_text.text.contains("Return with the recovered sigil"),
+		"long prose stays in full Instructions while the slim card keeps its current task"
+			+ " (short %.1f, long %.1f)" % [short_tracker_height,windows.tracked_quest.size.y])
+	windows._on_tracked_quest_compact(true)
+	workspace.model.working.legacy = false
+	workspace.apply_layout(); workspace._process(0)
+	await process_frame; await process_frame
+	_expect(windows._tracked_quest_compact and windows.tracked_quest.size.y < 70
+		and windows.tracked_quest_text.text.contains("Return with the recovered sigil"),
+		"modern HUD presets preserve natural ribbon height and the full instruction record")
+	workspace.model.working.legacy = true
+	workspace.apply_layout()
+	windows._on_tracked_quest_compact(false)
 	# The server restates the journal with the quest ready to turn in.
 	app_state.call("_on_packet", 224, _hex(
 		"01000103000000030000004b696c6c205468656d20416c6c00446566656174203"
@@ -221,6 +226,9 @@ func _run() -> void:
 	await process_frame
 	_expect(not windows.tracked_quest.visible,
 		"the readout does not come back on its own when the quest returns")
+	if "--quest-tracker-only" in OS.get_cmdline_user_args():
+		print("Extension quest tracker subset: ", "PASS" if failures == 0 else "FAIL (%d)" % failures)
+		main.queue_free(); await process_frame; quit(failures); return
 
 	# 229 mail.
 	app_state.call("_on_packet", 229, _hex(

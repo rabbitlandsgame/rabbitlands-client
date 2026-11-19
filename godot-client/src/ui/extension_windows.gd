@@ -4,6 +4,7 @@ const MerchantCatalog := preload("res://src/ui/merchant_catalog.gd")
 const MerchantNames := preload("res://src/state/item_names.gd")
 const TextColors := preload("res://src/ui/text_colors.gd")
 const InstanceTiers := preload("res://src/state/item_instance_tiers.gd")
+const CompactQuestTracker := preload("res://src/ui/compact_quest_tracker.gd")
 ## The nine Eloria extension windows, built here rather than in main.gd.
 ##
 ## Each is driven by one server-push state packet and renders that snapshot and
@@ -244,6 +245,10 @@ var _tracked_quest_title := ""
 var _hidden_tracked_quests: Dictionary = {}
 var _field_tracking_title := ""
 var _tracked_quest_layout_revision := 0
+var _tracked_quest_compact := false
+var _tracked_quest_details_open := false
+var _tracked_quest_presented_title := ""
+var _tracked_quest_details_scroll: ScrollContainer
 
 func _ready() -> void:
 	name = "ExtensionWindows"
@@ -782,32 +787,44 @@ func _sync_tracked_quest() -> void:
 	else:
 		lines.append("[indent][font_size=15]%s[/font_size][/indent]"
 			% str(tracked.get("location", "unknown")))
-	# Let the label report its natural wrapped height for this one update. The
-	# event-driven fitter turns this back off after applying the bounded size.
-	tracked_quest.custom_minimum_size.y = QUEST_TRACKER_SIZE.y
-	tracked_quest.size.y = QUEST_TRACKER_SIZE.y
-	tracked_quest_text.fit_content = true
+	if _tracked_quest_presented_title != _tracked_quest_title:
+		_tracked_quest_presented_title = _tracked_quest_title
+		_tracked_quest_details_open = false
 	tracked_quest_text.text = _quest_markup("\n".join(lines))
+	var current := maxi(0, int(tracked.get("current", 0)))
+	var full_objective := str(tracked.get("objective", ""))
+	var summary := {"objective":full_objective.split("\n", false)[0] if not full_objective.strip_edges().is_empty() else "",
+		"full_objective":full_objective,
+		"counter":"%d / %d" % [current, target] if target > 0 else "",
+		"progress":clampf(float(current) / float(target), 0.0, 1.0) if target > 0 else -1.0,
+		"secondary":("Ready to turn in · " if bool(tracked.get("ready", false)) else "") \
+			+ str(tracked.get("location", "unknown")), "alert":""}
+	tracked_quest.call("apply_presentation", _tracked_quest_title, summary,
+		_tracked_quest_compact, _tracked_quest_details_open)
 	tracked_quest.show()
-	# RichTextLabel resolves wrapped line height after its container settles.
-	# Fit only when the server changes the quest, never from `_process()`.
 	_tracked_quest_layout_revision += 1
 	_fit_tracked_quest_to_content(_tracked_quest_layout_revision)
+
+func _on_tracked_quest_compact(value: bool) -> void:
+	_tracked_quest_compact = value
+	if value: _tracked_quest_details_open = false
+	_sync_tracked_quest()
+
+func _on_tracked_quest_instructions(value: bool) -> void:
+	_tracked_quest_details_open = value
+	if value: _tracked_quest_compact = false
+	_sync_tracked_quest()
 
 func _fit_tracked_quest_to_content(revision: int) -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	if revision != _tracked_quest_layout_revision or not tracked_quest.visible:
 		return
-	var content_height := tracked_quest_text.get_content_height()
-	tracked_quest_text.fit_content = false
-	var chrome_height := 36.0 + maxf(quest_hide_button.get_combined_minimum_size().y,
-		quest_untrack_button.get_combined_minimum_size().y)
-	var desired_height := clampf(content_height + chrome_height,
-		QUEST_TRACKER_SIZE.y, QUEST_TRACKER_MAX_HEIGHT)
-	tracked_quest.custom_minimum_size.y = desired_height
-	tracked_quest.size.y = desired_height
-	tracked_quest_text.scroll_active = content_height + chrome_height > QUEST_TRACKER_MAX_HEIGHT
+	# Full instructions scroll inside their own bounded detail area. The slim
+	# card and ribbon keep their natural chrome height, independent of prose.
+	_tracked_quest_details_scroll.custom_minimum_size.y = clampf(
+		get_viewport_rect().size.y - 235.0, 64.0, 140.0)
+	tracked_quest.reset_size()
 
 ## One list serves both halves of the window, so a selection has to be read
 ## against whichever half is showing - against the other one it would either
@@ -2579,58 +2596,39 @@ func _build() -> void:
 
 	# This is a pinned HUD note, not another modal window. It sits immediately
 	# left of the fixed 96-pixel resource rail and leaves the centre view clear.
-	tracked_quest = _panel("TrackedQuest",
-		Vector2(-RESERVED_RIGHT_RAIL - QUEST_TRACKER_SIZE.x - 12.0, 18.0),
-		QUEST_TRACKER_SIZE, Control.PRESET_TOP_RIGHT)
+	tracked_quest = CompactQuestTracker.new()
+	tracked_quest.name = "TrackedQuest"
+	tracked_quest.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	tracked_quest.position = Vector2(-RESERVED_RIGHT_RAIL - QUEST_TRACKER_SIZE.x - 12.0, 18.0)
+	tracked_quest.custom_minimum_size = Vector2(QUEST_TRACKER_SIZE.x, 0)
+	add_child(tracked_quest)
+	tracked_quest.call("configure")
 	tracked_quest.z_index = 20
-	tracked_quest.clip_contents = true
-	tracked_quest.set_meta(&"visual_style", "eloria_quest_tracker")
-	var tracker_parchment := PanelContainer.new()
-	tracker_parchment.name = "TrackerParchment"
-	tracker_parchment.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tracker_parchment.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	tracked_quest.add_child(tracker_parchment)
-	var tracker_parchment_surface := PanelContainer.new()
-	tracker_parchment_surface.name = "ParchmentTexture"
-	tracker_parchment_surface.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tracker_parchment_surface.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	tracker_parchment.add_child(tracker_parchment_surface)
-	var tracker_column := VBoxContainer.new()
-	tracker_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tracker_column.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	tracker_column.add_theme_constant_override("separation", 4)
-	tracker_parchment_surface.add_child(tracker_column)
+	tracked_quest.set_meta(&"visual_style", "compact_quest_tracker")
+	tracked_quest.connect("compact_toggled", _on_tracked_quest_compact)
+	tracked_quest.connect("instructions_toggled", _on_tracked_quest_instructions)
+	tracked_quest.connect("hide_requested", _on_quest_hide_pressed)
+	tracked_quest.connect("untrack_requested", _on_quest_untrack_pressed)
+	_tracked_quest_details_scroll = ScrollContainer.new()
+	_tracked_quest_details_scroll.name = "TrackedQuestInstructionsScroll"
+	_tracked_quest_details_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_tracked_quest_details_scroll.custom_minimum_size.y = 100
+	(tracked_quest.get("details") as VBoxContainer).add_child(_tracked_quest_details_scroll)
 	tracked_quest_text = RichTextLabel.new()
 	tracked_quest_text.name = "TrackedQuestText"
 	tracked_quest_text.bbcode_enabled = true
 	tracked_quest_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	tracked_quest_text.scroll_active = false
+	tracked_quest_text.fit_content = true
 	tracked_quest_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tracked_quest_text.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	tracker_column.add_child(tracked_quest_text)
-	_style_quest_tracker(tracker_parchment, tracker_parchment_surface)
-	var tracker_actions := HFlowContainer.new()
-	tracker_actions.name = "TrackerActions"
-	tracker_actions.alignment = FlowContainer.ALIGNMENT_END
-	tracker_column.add_child(tracker_actions)
-	quest_hide_button = Button.new()
+	_tracked_quest_details_scroll.add_child(tracked_quest_text)
+	TextColors.bind(tracked_quest_text, "quest_active", "default_color")
+	tracked_quest_text.add_theme_font_size_override("normal_font_size", 13)
+	quest_hide_button = tracked_quest.get("hide_button")
 	quest_hide_button.name = "HideQuest"
-	quest_hide_button.text = "Hide"
-	quest_hide_button.tooltip_text = "Hide this window while keeping the quest tracked. Choose Show quest in Quests to reopen it."
-	quest_hide_button.flat = true
-	TextColors.bind(quest_hide_button, "ui_button")
-	quest_hide_button.add_theme_font_size_override("font_size", 12)
-	tracker_actions.add_child(quest_hide_button)
-	quest_hide_button.pressed.connect(_on_quest_hide_pressed)
-	quest_untrack_button = Button.new()
+	quest_untrack_button = tracked_quest.get("untrack_button")
 	quest_untrack_button.name = "UntrackQuest"
-	quest_untrack_button.text = "Untrack"
-	quest_untrack_button.tooltip_text = "Untrack quest. Choose Track in Quests to show it again."
-	quest_untrack_button.flat = true
-	TextColors.bind(quest_untrack_button, "ui_button")
-	quest_untrack_button.add_theme_font_size_override("font_size", 12)
-	tracker_actions.add_child(quest_untrack_button)
-	quest_untrack_button.pressed.connect(_on_quest_untrack_pressed)
+	tracked_quest.hide()
 
 	mail_panel = _window("MailWindow", "Mail")
 	var mail_columns := HSplitContainer.new()

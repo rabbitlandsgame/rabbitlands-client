@@ -242,6 +242,8 @@ func configure(owner_main: Control) -> void:
 		if dragger != null: dragger.moved.connect(func(_where: Vector2) -> void: _remember_moved(key))
 	parts.party.resized.connect(func() -> void:
 		if not _layout_running: queue_layout())
+	parts.objectives.resized.connect(func() -> void:
+		if not _layout_running: queue_layout())
 	main.extension_windows.party_layout_saved.connect(func() -> void:
 		if _applying: return
 		model.working.parts.party.dimensions = main.extension_windows._party_expanded_size if main.extension_windows._party_custom_size else Vector2.ZERO
@@ -298,11 +300,12 @@ func _process(_delta: float) -> void:
 		_root("target").visible = bool(model.working.parts.target.enabled) and not AppState.actors.get(AppState.selected_actor_id, {}).is_empty()
 		for key: String in ["chat", "system_chat"]:
 			parts[key]._header.visible = not model.working.parts[key].compact or parts[key].get_global_rect().has_point(get_global_mouse_position())
-		var tracker_text: RichTextLabel = main.extension_windows.tracked_quest_text
-		if tracker_text.text.contains("[color="):
-			tracker_text.text = _quest_tags.sub(tracker_text.text, "", true)
-		if model.working.parts.objectives.compact and tracker_text.text.contains("QUEST TRACKER"):
-			tracker_text.text = tracker_text.text.substr(tracker_text.text.find("\n") + 1)
+		if not parts.objectives.has_method("apply_presentation"):
+			var tracker_text: RichTextLabel = main.extension_windows.tracked_quest_text
+			if tracker_text.text.contains("[color="):
+				tracker_text.text = _quest_tags.sub(tracker_text.text, "", true)
+			if model.working.parts.objectives.compact and tracker_text.text.contains("QUEST TRACKER"):
+				tracker_text.text = tracker_text.text.substr(tracker_text.text.find("\n") + 1)
 		var party_changed := false
 		var actions: Control = parts.party.get_node("Body/PartyActions")
 		var collapsed: bool = main.extension_windows._party_collapsed
@@ -869,7 +872,14 @@ func select_component(key: String, arc_index := -1) -> void:
 		_number("Direction distance from radius", config.direction_offset, -48, 120, 1, func(value: float) -> void: change_part(key, "direction_offset", value))
 		_toggle("Map label HUD background / border", config.map_label_frame, func(value: bool) -> void: change_part(key, "map_label_frame", value))
 	if key == "objectives":
-		_toggle("Compact objectives", config.compact, func(value: bool) -> void: change_part(key, "compact", value))
+		if parts.objectives.has_method("apply_presentation"):
+			var ribbon_hint := Label.new()
+			ribbon_hint.text = "Use the quest card's chevron to switch between the card and ribbon."
+			ribbon_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			ribbon_hint.add_theme_font_size_override("font_size",12)
+			details.add_child(ribbon_hint)
+		else:
+			_toggle("Compact objectives", config.compact, func(value: bool) -> void: change_part(key, "compact", value))
 	if key == "party":
 		_toggle("Compact roster (actions appear on hover)", config.compact, func(value: bool) -> void: change_part(key, "compact", value))
 		_toggle("Include yourself in roster", config.show_self, func(value: bool) -> void: change_part(key, "show_self", value))
@@ -1600,8 +1610,9 @@ func apply_layout() -> void:
 		(parts.party.get_node("Body/PartyActions") as Control).visible = not main.extension_windows._party_collapsed
 		(parts.party.get_node("Body/Header") as Control).show()
 		for child: Control in main.extension_windows.party_rows.get_children(): child.show()
-		var parchment: PanelContainer = parts.objectives.get_node("TrackerParchment")
-		main.extension_windows._style_quest_tracker(parchment, parchment.get_node("ParchmentTexture"))
+		if not parts.objectives.has_method("apply_presentation"):
+			var parchment: PanelContainer = parts.objectives.get_node("TrackerParchment")
+			main.extension_windows._style_quest_tracker(parchment, parchment.get_node("ParchmentTexture"))
 		for button: Button in _button_styles:
 			SlotStyle.clear(button)
 			button.add_theme_stylebox_override("normal", _button_styles[button])
@@ -1702,7 +1713,7 @@ func _style_part(key: String) -> void:
 	else:
 		control.add_theme_stylebox_override("panel", box)
 	if key == "nameplate" and not main._banner_option("banner_background"): main._apply_banner_background()
-	if key == "objectives":
+	if key == "objectives" and not control.has_method("apply_presentation"):
 		var parchment: PanelContainer = control.get_node("TrackerParchment")
 		parchment.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 		(parchment.get_node("ParchmentTexture") as PanelContainer).add_theme_stylebox_override("panel", StyleBoxEmpty.new())
@@ -2164,6 +2175,13 @@ func _dock_part(key: String, resolved: Dictionary) -> void:
 	control.position += config.dock_offset - source_offset
 
 func _resize_layout_part(key: String, screen_size: Vector2) -> void:
+	if key == "objectives" and _root(key).has_method("apply_presentation"):
+		# Docking may stretch the width, but prose and old preset heights must
+		# not turn a quest ribbon back into the previous parchment-sized panel.
+		var tracker := _root(key)
+		tracker.size.x = maxf(tracker.get_combined_minimum_size().x, screen_size.x / tracker.scale.x)
+		tracker.size.y = tracker.get_combined_minimum_size().y
+		return
 	match key:
 		"resources", "food_meter", "load_meter", "xp_meter": _root(key).size = _root(key).fitted_size(screen_size / _root(key).scale)
 		"utilities": _layout_menu_icons(screen_size)

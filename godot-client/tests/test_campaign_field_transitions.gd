@@ -83,11 +83,12 @@ func run() -> void:
 	expect(guide.campaign_entry().objective==hud._hint.text, "the journal and shared card use the same rescue resume instructions")
 	hud.apply_state(report,Vector2i(178,26),"landfall_town");guide.apply_campaign(report)
 	root.size=Vector2i(720,480);root.content_scale_factor=1.5
+	guide.card.open_more();guide.card.instructions_button.pressed.emit()
 	guide._process(0);await settle()
 	hud._body_scroll.ensure_control_visible(hud._entry);await settle()
 	var bounds: Rect2=root.get_visible_rect()
 	var clip: Rect2=hud._body_scroll.get_global_rect().intersection(bounds)
-	expect(bounds.encloses(guide.card.get_global_rect()) and bounds.encloses(guide._buttons.get_global_rect()), "the report card and footer fit a small viewport at 150 percent")
+	expect(bounds.encloses(guide.card.get_global_rect()) and bounds.encloses(guide.card.more.get_global_rect()), "the report card and More fit a small viewport at 150 percent")
 	expect(clip.encloses(hud._entry.get_global_rect()), "Report to Ilka remains reachable by scrolling in the small window")
 	var output := OS.get_environment("RL_FIELD_TRANSITIONS_OUT")
 	if not output.is_empty() and DisplayServer.get_name()!="headless":
@@ -99,7 +100,7 @@ func run() -> void:
 	guide._refresh()
 	expect(not guide.visible, "a report-ready update does not reopen the player's hidden quest card")
 	guide.show_window();guide.collapse.pressed.emit();hud._request_entry()
-	expect(guide.compact and actions.is_empty(), "minimizing retains the normal Instructions control without a hidden report request")
+	expect(guide.compact and actions.is_empty(), "the ribbon retains More Instructions without a hidden report request")
 	guide.collapse.pressed.emit();guide.untrack.pressed.emit();hud._request_entry()
 	expect(not guide.is_campaign_tracked() and actions.is_empty(), "Untrack preserves the normal quest behavior and suppresses hidden entry")
 	var evidence := OS.get_environment("RL_SUPPLY_PAUSE_EVIDENCE")
@@ -130,6 +131,7 @@ func run() -> void:
 		client.game_view.show()
 		client.campaign_hud.apply_state(reporting,Vector2i(178,26),"landfall_town")
 		client.lantern_guide.apply_campaign(reporting)
+		client.lantern_guide.card.open_more();client.lantern_guide.card.instructions_button.pressed.emit();await settle()
 		var frames: Array=network.sent_frames;frames.clear()
 		client.campaign_hud._entry.pressed.emit()
 		expect(frames==[EloriaProtocol.chat("#campaign shelves")], "the visible report button reaches Main and the ordinary server campaign dispatcher (visible=%s, blocked=%s, label=%s, frames=%d)" \
