@@ -180,6 +180,8 @@ func configure(owner_ui: Control) -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_tracker = CompactTracker.new()
 	_tracker.configure()
+	# Campaign and tutorial bodies already provide their one bounded scroll.
+	_tracker.use_details_scroll(false)
 	card = _tracker
 	card.name = "TutorialInstruction"
 	card.z_as_relative = false

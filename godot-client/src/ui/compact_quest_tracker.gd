@@ -21,6 +21,8 @@ var counter: Label
 var secondary: Label
 var progress: ProgressBar
 var details: VBoxContainer
+var details_scroll: ScrollContainer
+var details_close: Button
 var recovery_slot: VBoxContainer
 var instructions_button: Button
 var replay_button: Button
@@ -38,6 +40,14 @@ var _replay_ready := false
 var _replay_retry := false
 var _signature := ""
 var _fit_queued := false
+var _detail_region: VBoxContainer
+var _detail_header: HBoxContainer
+var _detail_rule: HSeparator
+var _own_details_scroll := true
+
+func _ready() -> void:
+	configure()
+	if not get_viewport().size_changed.is_connected(_queue_fit): get_viewport().size_changed.connect(_queue_fit)
 
 func configure() -> void:
 	if heading != null: return
@@ -91,8 +101,27 @@ func configure() -> void:
 	alert_label.add_theme_font_size_override("font_size",12)
 	alert_label.add_theme_color_override("font_color",Color("ffb39c")); _column.add_child(alert_label)
 	recovery_slot = VBoxContainer.new(); recovery_slot.name = "QuestRecovery"; _column.add_child(recovery_slot)
+	_detail_region = VBoxContainer.new(); _detail_region.name = "InstructionsFoldout"
+	_detail_region.add_theme_constant_override("separation",6); _column.add_child(_detail_region)
+	_detail_rule = HSeparator.new()
+	var detail_line := StyleBoxLine.new(); detail_line.color = Color("53665e"); detail_line.thickness = 1
+	_detail_rule.add_theme_stylebox_override("separator",detail_line); _detail_region.add_child(_detail_rule)
+	_detail_header = HBoxContainer.new(); _detail_region.add_child(_detail_header)
+	var detail_title := Label.new(); detail_title.text = "Instructions"
+	detail_title.add_theme_font_size_override("font_size",13); TextColors.bind(detail_title,"guide_heading")
+	detail_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL; _detail_header.add_child(detail_title)
+	details_close = Button.new(); details_close.name = "CloseInstructions"; details_close.text = "×"
+	details_close.flat = true; details_close.custom_minimum_size = Vector2(24,24)
+	details_close.tooltip_text = "Close instructions and keep the quest card visible."
+	details_close.pressed.connect(func() -> void:
+		if not _complete: instructions_toggled.emit(false); more.grab_focus())
+	_detail_header.add_child(details_close)
+	details_scroll = ScrollContainer.new(); details_scroll.name = "InstructionsScroll"
+	details_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_detail_region.add_child(details_scroll)
 	details = VBoxContainer.new(); details.name = "QuestInstructions"
-	details.add_theme_constant_override("separation",6); _column.add_child(details)
+	details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	details.add_theme_constant_override("separation",6); details_scroll.add_child(details)
 	_menu = PanelContainer.new(); _menu.name = "QuestMoreMenu"; _menu.set_as_top_level(true)
 	_menu.z_as_relative = false; _menu.z_index = 245; _menu.hide()
 	var menu_style := StyleBoxFlat.new(); menu_style.bg_color = Color("193237")
@@ -171,6 +200,8 @@ func apply_presentation(title: String, summary: Dictionary, compact: bool, detai
 	progress.tooltip_text = amount
 	alert_label.text = str(summary.get("alert","")); alert_label.visible = not complete and not alert_label.text.is_empty()
 	details.visible = _details_open
+	_detail_region.visible = _details_open
+	_detail_header.visible = not complete; _detail_rule.visible = not complete
 	collapse.visible = not complete; more.visible = not complete
 	for button: Button in [instructions_button,replay_button,hide_button,untrack_button]: button.visible = not complete
 	collapse.text = "▸" if _compact else "▾"
@@ -194,7 +225,17 @@ func _queue_fit() -> void:
 
 func _finish_fit() -> void:
 	_fit_queued = false
+	if details_scroll != null and _own_details_scroll:
+		var limit := clampf(get_viewport().get_visible_rect().size.y-230,56,240)
+		details_scroll.custom_minimum_size.y = minf(details.get_combined_minimum_size().y,limit)
 	reset_size()
+
+func use_details_scroll(enabled: bool) -> void:
+	configure()
+	_own_details_scroll = enabled
+	details_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO if enabled else ScrollContainer.SCROLL_MODE_DISABLED
+	if not enabled: details_scroll.custom_minimum_size.y = 0
+	_queue_fit()
 
 func open_more() -> void:
 	if _complete or not is_visible_in_tree(): return

@@ -191,3 +191,92 @@ static func guide(payload: Dictionary) -> Dictionary:
 	var item := str(payload.get("item",""))
 	_counter(result,item if not item.is_empty() else "Progress",int(payload.get("count",0)),int(payload.get("required",0)))
 	return result
+
+static func _ledger_row(result: Dictionary, label: String, value: String) -> void:
+	result.ledger.append({"label":label,"value":value})
+
+static func _stored_quantity(current: int, goal: int, resource: String) -> String:
+	return _number(current) + (" / " + _number(goal) if goal > 0 else "") + " " + resource
+
+static func _typed_cargo(values: Dictionary) -> String:
+	var parts: PackedStringArray = []
+	for pair: Array in [["kelp","Kelp"],["cress","Watercress"]]:
+		if values.has(pair[0]) and int(values[pair[0]]) > 0:
+			parts.append(_number(int(values[pair[0]])) + " " + str(pair[1]))
+	return " · ".join(parts) if not parts.is_empty() else "0"
+
+static func instructions(snapshot: Dictionary, current_map := "") -> Dictionary:
+	var result := {"text":FieldReadout.instructions(snapshot),"ledger":[],"note":"","guidance":"",
+		"replaces_supply_ledger":false}
+	var ledger: Dictionary = snapshot.get("shelves",{})
+	if str(snapshot.get("kind","")) != "shelves" or not bool(snapshot.get("active",false)) \
+			or str(snapshot.get("run_id","")).is_empty() or str(ledger.get("phase","")) != "work" \
+			or not (snapshot.get("travel",{}) as Dictionary).is_empty() \
+			or (not current_map.is_empty() and EloriaProtocol.map_id_from_reference(current_map) \
+				!= EloriaProtocol.map_id_from_reference(str(snapshot.get("map","")))):
+		return result
+	var workers: Array = []
+	var fire: Dictionary = ledger.get("fire",{})
+	var water: Dictionary = ledger.get("water",{})
+	var growers: Dictionary = ledger.get("growers",{})
+	if not fire.is_empty():
+		workers = fire.get("workers",[])
+		if str(fire.get("step","")) == "extract" and str(fire.get("stage","")) in ["fire","fire_coal"]:
+			var resource := "Coal" if str(fire.stage) == "fire_coal" else "Flint"
+			var quotas := true
+			for pair: Array in [["recovered","Recovered secured"],["mined","Mined secured"]]:
+				var key := str(pair[0])
+				var valid := fire.has(key) and fire.has(key+"_goal") and int(fire[key]) >= 0 and int(fire[key+"_goal"]) > 0
+				quotas = quotas and valid
+				if valid: _ledger_row(result,str(pair[1]),_stored_quantity(int(fire[key]),int(fire[key+"_goal"]),resource))
+			if fire.has("carried"): _ledger_row(result,"In workers' bags",_number(int(fire.carried)) + " " + resource)
+			result.replaces_supply_ledger = quotas
+	elif not water.is_empty():
+		workers = water.get("workers",[])
+		if str(water.get("stage","")) == "water_cutters":
+			var stored: Dictionary = water.get("stored",{})
+			var bins: Dictionary = water.get("bins",{})
+			var cut: Dictionary = water.get("cut",{})
+			var complete_goals := true
+			var bags_known := true
+			var bags := {}
+			for pair: Array in [["kelp","Kelp"],["cress","Watercress"]]:
+				var identity := str(pair[0])
+				var row := _named_objective(ledger,identity)
+				var goal := int(row.get("target",(water.get("goals",{}) as Dictionary).get(identity,0)))
+				var valid := stored.has(identity) and goal > 0
+				# Objective targets are the actual production contract. A legacy
+				# wire goal alone may have grown to preserve already cut cargo.
+				complete_goals = complete_goals and valid and int(row.get("target",0)) > 0
+				if valid: _ledger_row(result,str(pair[1])+" secured",_stored_quantity(int(stored[identity]),goal,"").strip_edges())
+				var known := cut.has(identity) and stored.has(identity) and bins.has(identity)
+				if known:
+					var carried := int(cut[identity])-int(stored[identity])-int(bins[identity])
+					known = carried >= 0
+					if known: bags[identity] = carried
+				bags_known = bags_known and known
+			if bins.has("kelp") and bins.has("cress") and int(bins.kelp)+int(bins.cress) > 0:
+				_ledger_row(result,"At loading point",_typed_cargo(bins))
+			if bags_known: _ledger_row(result,"In workers' bags",_typed_cargo(bags))
+			result.replaces_supply_ledger = complete_goals
+	elif not growers.is_empty():
+		workers = growers.get("workers",[])
+		var identity := str(growers.get("field",""))
+		if not bool(growers.get("raid",false)) and identity in ["sage","root"]:
+			var crop := "Sage" if identity == "sage" else "Hearthroot"
+			var stored: Dictionary = growers.get("stored",{})
+			var row := _named_objective(ledger,identity)
+			if stored.has(identity):
+				_ledger_row(result,"Crew storage",_stored_quantity(int(stored[identity]),int(row.get("target",0)),crop))
+			if growers.has("carried"): _ledger_row(result,"In workers' bags",_number(int(growers.carried)) + " " + crop)
+			result.replaces_supply_ledger = stored.has(identity) and int(row.get("target",0)) > 0
+	if not workers.is_empty():
+		var standing := workers.filter(func(worker: Dictionary) -> bool:
+			return not bool(worker.get("downed",false)) and int(worker.get("health",1)) > 0).size()
+		_ledger_row(result,"Crew", "%d / %d standing" % [standing,workers.size()])
+		if workers.any(func(worker: Dictionary) -> bool: return int(worker.get("actor_id",0)) > 0):
+			result.note = "Use Heal Target to revive a fallen worker."
+	var readout := FieldReadout.summary(snapshot)
+	var guidance := _field_action(readout,"")
+	if not guidance.is_empty() and guidance != str(result.text).strip_edges(): result.guidance = guidance
+	return result

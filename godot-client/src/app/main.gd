@@ -9384,7 +9384,7 @@ func _on_campaign_action(action: String) -> void:
 		if lesson=="spells":_on_spells_button_pressed()
 		elif lesson=="mixing":_on_manufacturing_button_pressed()
 		return
-	if action in ["shelves_destination", "rescue_checkin_destination"]:
+	if action in ["shelves_destination", "rescue_checkin_destination", "quest_map"]:
 		if not full_map.visible:_toggle_full_map()
 		var pins:=_campaign_destination_marks()
 		if not pins.is_empty():

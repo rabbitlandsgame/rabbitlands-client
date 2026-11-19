@@ -37,7 +37,7 @@ func run() -> void:
 	expect(recorder.reload() == OK, "the isolated ordinary-tracker transport recorder compiles")
 	network.set_script(recorder); network.block_for_hud_preview()
 	var app := root.get_node("AppState"); app.authenticated = true
-	var first := {"title":"A useful delivery", "objective":"Gather Sage.\nKeep the crew's supplies safe.",
+	var first := {"title":"A useful delivery", "objective":"Gather Sage.\n\n[b]Keep the crew's supplies safe.[/b]",
 		"location":"Landfall", "current":1, "target":3, "ready":false}
 	var second := {"title":"Another quest", "objective":"Speak with the guard.",
 		"location":"Landfall", "current":0, "target":1, "ready":false}
@@ -57,12 +57,26 @@ func run() -> void:
 	expect(not tracker.get("details").visible and windows.tracked_quest_text.text.contains("Keep the crew")
 		and tracker.get("objective").tooltip_text == first.objective,
 		"full instructions remain available without expanding the default card")
+	var expected_notes: String = first.objective + "\n\nProgress: 1 / 3\nLocation: Landfall"
+	expect(windows.tracked_quest_text.text == expected_notes
+		and windows.tracked_quest_text.get_parsed_text() == expected_notes,
+		"inline notes preserve exact objective paragraphs and literal brackets beside native progress and location")
+	expect(not "QUEST TRACKER" in windows.tracked_quest_text.text and not first.title in windows.tracked_quest_text.text,
+		"inline notes do not repeat the tracker banner or quest-title hierarchy")
+	expect(windows.tracked_quest_text.get_parent() == tracker.get("details")
+		and tracker.get("details").get_parent() == tracker.get("details_scroll"),
+		"ordinary notes use the single common inline scroll body")
 	await click(tracker.get("more"))
 	expect(tracker.call("more_is_open") and tracker.get("replay_button").disabled,
 		"More opens real actions and ordinary quests do not invent a cinematic replay")
 	await click(tracker.get("instructions_button"))
 	expect(windows._tracked_quest_details_open and windows.tracked_quest_text.is_visible_in_tree()
 		and not tracker.call("more_is_open"), "More Instructions exposes the complete objective in the existing detail reader")
+	await click(tracker.get("details_close"))
+	expect(not windows._tracked_quest_details_open and tracker.visible and not windows._tracked_quest_compact
+		and windows._tracked_quest_title == first.title,
+		"the inline Close button keeps the quest card and tracking while closing only its full notes")
+	await click(tracker.get("more")); await click(tracker.get("instructions_button"))
 	await click(tracker.get("collapse"))
 	expect(windows._tracked_quest_compact and not tracker.get("objective").visible
 		and not tracker.get("details").visible and tracker.size.y < 70,
@@ -74,6 +88,12 @@ func run() -> void:
 	await click(tracker.get("more")); await click(tracker.get("instructions_button"))
 	expect(not windows._tracked_quest_compact and windows._tracked_quest_details_open,
 		"Instructions expands a collapsed ribbon without changing quest tracking")
+	var ready := updated.duplicate(true); ready.current = 3; ready.ready = true
+	app.quest_journal.assign([ready, second.duplicate(true)]); app.state_changed.emit(&"quest_journal"); await settle()
+	expect(windows._tracked_quest_details_open and windows.tracked_quest_text.text == first.objective
+		+ "\n\nProgress: 3 / 3\nLocation: Landfall\nReady to turn in.",
+		"an open inline foldout follows native progress and ready status without losing its exact objective")
+	app.quest_journal.assign([updated, second.duplicate(true)]); app.state_changed.emit(&"quest_journal"); await settle()
 	windows.quest_list.select(1); windows.quest_list.item_selected.emit(1)
 	await click(tracker.get("more")); await click(windows.quest_hide_button)
 	expect(not tracker.visible and windows._tracked_quest_title == first.title,
@@ -115,6 +135,18 @@ func run() -> void:
 		root.push_input(escape, true); await settle()
 		expect(not tracker.call("more_is_open") and windows._tracked_quest_compact == compact,
 			"Escape closes More without altering the tracked quest or ribbon preference")
+	var long_notes := updated.duplicate(true)
+	long_notes.objective = "\n\n".join(PackedStringArray(range(30).map(
+		func(index: int) -> String: return "Journal paragraph %d: keep these native instructions intact." % index)))
+	app.quest_journal.assign([long_notes, second.duplicate(true)]); app.state_changed.emit(&"quest_journal"); await settle()
+	await click(tracker.get("more")); await click(tracker.get("instructions_button"))
+	var scroll: ScrollContainer = tracker.get("details_scroll")
+	expect(root.get_visible_rect().encloses(tracker.get_global_rect())
+		and scroll.get_v_scroll_bar().max_value > scroll.get_v_scroll_bar().page,
+		"long ordinary notes stay scrollable inside the inline foldout in a small scaled window")
+	await click(tracker.get("details_close"))
+	expect(tracker.visible and not windows._tracked_quest_details_open and windows._tracked_quest_title == first.title,
+		"closing long instructions leaves the tracked slim card available")
 	expect((network.get("sent_frames") as Array).is_empty(),
 		"ordinary More, instructions, collapse, Hide, Show and Untrack emit no gameplay or dispatch commands")
 	windows.queue_free(); guide.queue_free(); await process_frame; await process_frame

@@ -46,6 +46,13 @@ func run() -> void:
 	expect(replays == [true] and not tracker.more_is_open(), "the menu replay uses the existing local cinematic request once")
 	await click_button(tracker.more); await click_button(tracker.instructions_button)
 	expect(not guide.compact and guide._details_open and hud.is_visible_in_tree() and guide.instruction.is_visible_in_tree(), "Instructions expands the real quest controls from the ribbon")
+	expect(tracker.details_close.is_visible_in_tree() and not hud._shelves.is_visible_in_tree() \
+		and hud._inline_ledger.is_visible_in_tree() and hud._map_button.is_visible_in_tree(),
+		"the inline foldout replaces duplicate field prose with facts and keeps its map action and close control")
+	await click_button(tracker.details_close)
+	expect(guide.visible and guide.is_campaign_tracked() and not guide._details_open and not hud.is_visible_in_tree(),
+		"Close Instructions returns to the slim card without hiding or untracking the quest")
+	await click_button(tracker.more); await click_button(tracker.instructions_button)
 	var uses: Array = []; hud.target_requested.connect(func(id: int,_tile: Vector2i,_near: bool) -> void: uses.append(id))
 	hud._request_target("storage",61992)
 	expect(uses == [61992], "full instructions preserve the ordinary work dispatcher")
