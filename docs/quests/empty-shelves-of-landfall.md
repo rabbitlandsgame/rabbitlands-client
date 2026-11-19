@@ -13,15 +13,19 @@ Experience below is the chapter bonus. Ordinary combat, gathering and mixing als
 | **A Harvest Worth Defending** | Protect four villagers with Harvesting 40 while they gather and store 10,000 Sage, then 5,000 Hearthroot. Intercept goblins coming from the Old Warren. Heal Target revives fallen workers. | 2,000 Harvesting, 1,500 Magic, 1,000 Defense | 1,500 gold, 100 Life and 100 Water Essences. Life stock remains locked until the raid. |
 | **The Hand Behind the Raids** | Enter the Old Warren with your party. Fight goblins and small wolves and find Grask, the orc directing the raids, in a deeper western cave. | 1,500 Attack, 1,500 Defense, 2,000 Magic | 2,500 gold, 150 Life Essences and Life Essence shop stock. |
 
+Goblin squads follow the connected route from the Old Warren and close on free fighting positions beside standing workers or defenders. They regroup around obstructions rather than wandering away from the attack. Solo work begins with three raiders, then alternates three- and four-goblin waves every 25 seconds, with at most twelve alive; additional party members increase the squads and cap. The longer journey to the Hearthroot field is preserved.
+
 ### The Price of a Spark
 
 | Chapter | What the player does | Bonus experience | Other reward |
 | --- | --- | --- | --- |
-| **The Toll at Blackcut** | Meet Brenna at the Flint workings. Choose nine guards head-on, or silence the signal and clear six. Release four workers; protect them recovering 4,000 Flint and mining 1,000 more. | 1,500 Harvesting, 500 Defense | 750 gold, 75 Fire Essences; assault adds 500 Attack and 250 Defense XP; the quiet approach adds 500 Alchemy XP and 25 Fire Essences. |
+| **The Toll at Blackcut** | Meet Brenna outside the Flint workings. Choose nine guards head-on, or silence the signal and clear six. Free her three stranded crewmates, then protect all four workers recovering 4,000 Flint and mining 1,000 more. | 1,500 Harvesting, 500 Defense | 750 gold, 75 Fire Essences; assault adds 500 Attack and 250 Defense XP; the quiet approach adds 500 Alchemy XP and 25 Fire Essences. |
 | **A Load Worth Lifting** | Meet the crew at the Lantern Mine Coal workings. Protect three lift repairs or clear three supports in the old haul passage. Secure 9,400 existing Coal and 600 newly mined Coal. | 1,000 Magic, 1,000 Defense | 1,000 gold, 20 minor healing potions and 100 Water Essences; the lift adds 500 Defense XP; the haul passage adds 500 Attack XP and 25 Fire Essences. |
 | **Cut the Fuse** | Confront Krek Cinderhook in the Blackcut service yard. Optional signal, water and powder preparations change the fight. Avoid marked blast areas. | 2,000 Magic, 1,500 Alchemy | 2,000 gold, one Enriched Fire Essence, and Fire Essence shop stock. Signal/water/powder preparations add 250 Alchemy/Defense/Magic XP respectively. |
 
 Ilka gives a once-only allowance of 350 Fire, 150 Life and 250 Water Essences, plus 20 minor healing potions, when assigning Blackcut. Overflow goes to personal storage. Shop stock remains locked until the final report. The four level-10 workers recover sealed merchant stock and mine the remaining resources using native harvesting rates. Their shipment never enters the player's inventory. The quest window distinguishes recovered and newly mined secured loads, carried goods and worker health.
+
+Brenna meets the player on the safe side of the quarry gate. Jessa, Miri and Tessa are held on the stock side beside the loaded morning wagon. They cannot start work until the guards are cleared and the player releases them. Opening the gate removes the barricade and starts their ordinary jobs; the wagon's visible loads diminish as recovered Flint reaches secured storage.
 
 Workers walk between the resource patches, stock bay and shipment store. The lift route needs a living mechanic and three protected repairs; the old passage uses a longer cart route. Heal Target revives downed workers during setup as well as extraction. Pausing preserves worker health, cargo, secured loads and finished preparations. Defeat drops unsecured bags and offers Retry/Cancel while retaining secured loads. No offline yields are produced.
 

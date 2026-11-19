@@ -1652,11 +1652,11 @@
           "speaker": "Ilka Tarn",
           "speaker_actor": "mentor",
           "variants": {
-            "fire": "Brenna's people have been driven out of Blackcut. The Flint is there, but a goblin barricade stands between the crew and their work.\n\nWill you help them? Take these supplies, then meet Brenna at the quarry west of town. She knows the ground.",
+            "fire": "Three of Brenna's crewmates are stranded inside Blackcut beside their wagon of cut Flint. Goblins have blocked the hauling gate.\n\nWill you help them? Take these supplies, then meet Brenna outside the quarry west of town. She knows the ground.",
             "fire_coal": "The Flint is safe. Now Brenna needs help getting the Coal out of Lantern Mine. Most of it is already cut, but the lift ropes have been slashed.\n\nMeet her at the marked Coal workings. Help her choose a hauling route and keep the workers safe.",
             "fire_sapper": "The cut ropes and powder traces point to Krek Cinderhook. He's preparing another attack from the service yard beside Blackcut.\n\nMeet Brenna at the marked yard. Stop Krek before the next shift takes the road."
           },
-          "text": "Brenna's people have been driven out of Blackcut. The Flint is there, but a goblin barricade stands between the crew and their work.\n\nWill you help them? Take these supplies, then meet Brenna at the quarry west of town. She knows the ground."
+          "text": "Three of Brenna's crewmates are stranded inside Blackcut beside their wagon of cut Flint. Goblins have blocked the hauling gate.\n\nWill you help them? Take these supplies, then meet Brenna outside the quarry west of town. She knows the ground."
         }
       ],
       "live_camera": "gameplay"
@@ -1673,6 +1673,9 @@
       "cast_roles": [
         "mentor",
         "worker",
+        "crew_one",
+        "crew_two",
+        "crew_three",
         "protagonist",
         "recipient",
         "boss"
@@ -1680,6 +1683,9 @@
       "native_roles": [
         "mentor",
         "worker",
+        "crew_one",
+        "crew_two",
+        "crew_three",
         "protagonist",
         "recipient",
         "boss"
@@ -1694,22 +1700,22 @@
           "at": 0,
           "speaker": "Brenna Flint",
           "speaker_actor": "mentor",
-          "text": "They've put a barricade between us and our own Flint. We can break it head-on, or slip round the side and cut the signal rope.\n\nOnce the guards are down, release the crew at the gate. We'll recover the cut stock and finish mining. Keep the hauling paths clear; Heal Target will get a fallen worker back up."
+          "text": "Jessa, Miri and Tessa are pinned behind that gate. The wagon holds our morning's cut Flint. We can break through, or circle round and cut the signal rope.\n\nClear the guards, then open the gate. We'll haul that stock and finish cutting the order. Keep the routes safe; Heal Target revives a fallen worker."
         }
       ],
       "shots": [
         {
           "t": 0,
-          "anchor_actor": "mentor",
+          "anchor": "release",
           "position": [
-            -9,
-            7,
-            11
+            22,
+            17,
+            12
           ],
           "target": [
+            6,
             0,
-            1,
-            0
+            2
           ]
         }
       ],
