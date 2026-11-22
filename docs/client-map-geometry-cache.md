@@ -186,6 +186,13 @@ The distance pass (WD-C3) runs after every cache snapshot and restores its
 shadows, ranges and LOD bias for a pack, so geometry, prepared and scene-cache
 entries never carry them; it needs no policy bump.
 
+Procedural descent floors are built from each run's server layout after the
+static frame loads. Their floor nodes, including the rock faces and their top
+caps, are outside the loader's cache snapshot and are never prepared on disk.
+The top-cap presentation change therefore needs no geometry-policy bump or
+preparation-scope change. It reuses the face's material and cutaway visibility;
+the server walk grid and client walk collider are unchanged.
+
 Development checkouts lack a release identity. Selected source-input metadata
 provides a cheap hint that preparation should run again; it is not evidence that
 a cache entry is valid. Runtime source and payload hashes remain authoritative,

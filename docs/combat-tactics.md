@@ -11,6 +11,10 @@ or disable rules with their checkboxes. Drag a row or use **Up** and **Down**
 to change its priority. **Delete** removes the selected rule. Rules are
 read from top to bottom. The first usable action wins; unavailable actions
 fall through to lower rules. **Save** saves the current preset.
+Highlighted rules explain duplicate actions, overlapping health thresholds,
+or unrestricted automatic retreat. Hover the rule to read the warning; saved
+rules are never changed automatically. Put emergency healing above a broader
+healing or potion rule when you want it to take priority.
 **More → Refresh** discards unsaved edits and loads the server's current plan.
 **More → Restore preset** restores that preset's default rules.
 
@@ -89,8 +93,12 @@ lower rules. Saved rules identify the item, so moving inventory slots is safe.
 Your rules begin paused. **Start** explicitly enables
 them for this session and map. Combat actions require an eligible opponent.
 Item rules and explicit Out of combat rules for Self or Ally can also run
-outside a fight. **Pause** stops them. Manual movement, attacks, casting,
-techniques, item use, fleeing and Escape pause your tactics. Changing maps,
+outside a fight. Clicking a creature to attack or use **Charge** keeps tactics
+enabled and gives your chosen target priority. During a fight, ordinary ground
+clicks do not turn into accidental retreats while tactics is running. Hold
+**Ctrl** and click the ground to deliberately retreat.
+**Pause** and **Escape** stop tactics. Manual movement outside combat, casting,
+other techniques, item use and manual fleeing also pause tactics. Changing maps,
 defeat or disconnect
 also stops execution. Saved presets remain available, but execution never
 starts automatically after reconnecting. Your ordinary combat round is

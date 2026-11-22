@@ -23,6 +23,20 @@ func run() -> void:
 	root.content_scale_size = Vector2i.ZERO
 	root.size = Vector2i(1024, 720)
 	var state := fixture()
+	var warnings_panel = load("res://src/ui/combat_tactics_panel.gd").new()
+	var attack := {"enabled":true,"target":"current_target","condition":"always","value":50,"status":"poison","action":"attack","power":1,"combat":"any"}
+	warnings_panel._rules = [attack.duplicate(true), attack.duplicate(true)]
+	warnings_panel._rules[1].value = 70
+	check(not warnings_panel._rule_warnings(1).is_empty(), "equivalent Always attacks are flagged despite unused threshold differences")
+	warnings_panel._rules[0].enabled = false
+	check(warnings_panel._rule_warnings(1).is_empty(), "disabled earlier rules do not shadow an enabled action")
+	var retreat: Dictionary = attack.duplicate(true)
+	retreat.target = "self"; retreat.action = "flee"
+	warnings_panel._rules = [retreat]
+	check(not warnings_panel._rule_warnings(0).is_empty(), "unconditional automatic fleeing is explained")
+	retreat.condition = "health_below"; retreat.value = 20
+	check(warnings_panel._rule_warnings(0).is_empty(), "conditional retreats are not flagged as unconditional")
+	warnings_panel.free()
 	check(Protocol.valid(state), "actual server tactics state passes the client contract")
 	var app := root.get_node("AppState")
 	app._on_packet(EloriaProtocol.ServerMessage.ELORIA_MAGIC_STATE, JSON.stringify(state).to_utf8_buffer())

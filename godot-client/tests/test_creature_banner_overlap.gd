@@ -125,7 +125,9 @@ func _run() -> void:
 	creatures.append(make_actor(903, ReplicatedActor3D.CREATURE_ACTOR_KIND,
 		ReplicatedActor3D.INVASION_NAME_COLOUR))
 	expect_creatures_visible(true, "overlapping ordinary and invasion creatures")
-	expect_creatures_visible(true, "a creature target does not suppress its neighbours", 902)
+	main._declutter_actor_overheads(902)
+	expect(not creatures[1].overhead_crowded() and creatures[0].overhead_crowded()
+		and creatures[2].overhead_crowded(), "combat focus suppresses overlapping secondary creature banners")
 	for offset: float in [-2.0, -1.0, 0.0, 1.0, 2.0]:
 		camera.global_position.x = offset
 		camera.look_at(Vector3(0, 1, 0))

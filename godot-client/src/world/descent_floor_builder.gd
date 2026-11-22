@@ -40,6 +40,9 @@ const SUB_METRES := 0.5
 ## on an edge tile stand clear of the faces and the kit pieces set into them.
 const MARGIN := 0.5
 const WALL_FOOT := -0.15
+## Give cutaway rock faces a visible top instead of a paper-thin edge over
+## the void. It stays in the face mesh, so section visibility and fading agree.
+const ROCK_CAP_DEPTH := 0.75
 const FLOOR_UV := 0.22
 const WALL_UV := 0.3
 ## A stair's well or flight: its opening in the face, metres.
@@ -520,6 +523,14 @@ class _Floor:
 				var uvs := [Vector2(along_p, low * WALL_UV), Vector2(along_q, low * WALL_UV),
 					Vector2(along_q, top_q * WALL_UV), Vector2(along_p, top_p * WALL_UV)]
 				quad(tools[name] as SurfaceTool, corners, normal, uvs)
+				if not run.chasm:
+					var back_p := p + into * ROCK_CAP_DEPTH
+					var back_q := q + into * ROCK_CAP_DEPTH
+					var cap := [at(p.x, p.y, top_p), at(q.x, q.y, top_q),
+						at(back_q.x, back_q.y, top_at(at(back_q.x, back_q.y, 0.0))),
+						at(back_p.x, back_p.y, top_at(at(back_p.x, back_p.y, 0.0)))]
+					quad(tools[name] as SurfaceTool, cap, Vector3.UP,
+						[p * WALL_UV, q * WALL_UV, back_q * WALL_UV, back_p * WALL_UV])
 				if run.chasm:
 					normal = -normal
 		for name: String in tools:

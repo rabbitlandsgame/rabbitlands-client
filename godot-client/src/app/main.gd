@@ -6003,6 +6003,7 @@ func _speech_body_color(line: Dictionary, start: int) -> Color:
 ## stand the player up; Ctrl deliberately overrides that lock.
 func _movement_locked(ctrl_pressed: bool) -> bool:
 	return _actor_input_locked(ctrl_pressed) \
+		or (AppState.player_tactics_active and bool(AppState.combat_state.get("active", false)) and not ctrl_pressed) \
 		or (_banner_option("ranging_lock") and _range_weapon_equipped())
 
 func _actor_input_locked(ctrl_pressed: bool) -> bool:
@@ -11397,9 +11398,9 @@ func _release_bodies(releases: Array) -> void:
 		crowd.forget(id)
 		crowd.releases += 1
 
-## Keep player banners readable without making creatures hide one another.
-## A creature yields only to visible player banners; the combat target stays
-## readable even there. NPC and player banners retain their overlap filtering.
+## In combat the target claims space before secondary creature banners, so
+## overlapping packs retain a readable focus. Outside combat creature names
+## keep their ordinary visibility. Player banners retain their own priority.
 ## Bodies and interaction targets remain independent of overhead visibility.
 const OVERHEAD_REVEAL_GAP_PIXELS := 6.0
 
@@ -11457,6 +11458,7 @@ func _declutter_actor_overheads(target_id: int) -> void:
 		return a.id < b.id)
 	var occupied: Array[Rect2] = []
 	var player_occupied: Array[Rect2] = []
+	var creature_occupied: Array[Rect2] = []
 	if actor_resource_overlay.visible:
 		var scale_to_view := Vector2(main_viewport.size) / viewport_container.size
 		var own := actor_resource_overlay.get_global_rect()
@@ -11473,7 +11475,7 @@ func _declutter_actor_overheads(target_id: int) -> void:
 			continue
 		var crowded := false
 		var creature: bool = candidate.type in [&"creature", &"invasion"]
-		var obstacles: Array[Rect2] = player_occupied if creature else occupied
+		var obstacles: Array[Rect2] = (occupied + creature_occupied if target_id >= 0 else player_occupied) if creature else occupied
 		# A shown block hides on actual overlap; a hidden block returns only
 		# once it is six render pixels clear. Camera movement inside this band
 		# keeps the previous answer instead of toggling names and health bars.
@@ -11489,6 +11491,8 @@ func _declutter_actor_overheads(target_id: int) -> void:
 			crowd.count_overhead(int(candidate.id))
 		# Hidden banners do not claim screen space. In particular a disabled
 		# NPC/player name must not hide the next visible player's health.
+		if not crowded and creature and target_id >= 0 and candidate_actor._overhead_shown():
+			creature_occupied.append(candidate.rect)
 		if not crowded and not creature and candidate_actor._overhead_shown():
 			occupied.append(candidate.rect)
 			if candidate.type == &"player":
@@ -11617,7 +11621,7 @@ func _update_secret_sections(force: bool = false) -> void:
 ## is measured on), so a state that outlives the map, or arrives before it,
 ## draws nothing on another map. Rebuilt only when the floor, its explored
 ## cells or the map change; the clock alone changes nothing here.
-func _sync_descent_fog() -> void:
+func _sync_descent_fog(force := false) -> void:
 	var manifest: WorldManifest = world_loader.manifest if world_loader != null else null
 	var grid: Dictionary = DescentFogScript.view(AppState.descent)
 	if grid.is_empty() or manifest == null or adapter == null \
@@ -11625,7 +11629,7 @@ func _sync_descent_fog() -> void:
 		grid = {}
 	var key := "" if grid.is_empty() else "%d|%s" % [manifest.get_instance_id(),
 		DescentFogScript.signature(grid)]
-	if key == _descent_fog_key:
+	if not force and key == _descent_fog_key:
 		return
 	_descent_fog_key = key
 	_descent_fog_grid = grid
@@ -11663,6 +11667,7 @@ func _sync_descent_fog() -> void:
 
 func _remove_descent_fog_presentation() -> void:
 	if is_instance_valid(_descent_fog_node):
+		_descent_fog_node.hide()
 		_descent_fog_node.queue_free()
 	_descent_fog_node = null
 	_descent_fog_cells = null
@@ -11717,8 +11722,10 @@ func _sync_descent_floors() -> void:
 	_descent_floor_step("picture", began)
 	_install_map_picture(manifest)
 	_descent_floor_step("fog", began)
-	_descent_fog_key = ""
-	_sync_descent_fog()
+	# An empty grid has an empty key. Resetting the key to "" before this
+	# call made a closed run look unchanged, leaving its screen fog visible
+	# over every later map until reconnect. Force the lifecycle refresh.
+	_sync_descent_fog(true)
 	_queue_descent_floor_snap()
 	_descent_floor_step("done", began)
 
@@ -15284,11 +15291,30 @@ func _update_actor_resource_overlay() -> void:
 	var overlay_position: Vector2 = screen_position - Vector2(
 		actor_resource_overlay.size.x * 0.5,
 		actor_resource_overlay.size.y + 8.0 + instance_lift)
-	actor_resource_overlay.position = Vector2(
-		clampf(overlay_position.x, 4.0,
-			maxf(4.0, game_view.size.x - actor_resource_overlay.size.x - 90.0)),
-		clampf(overlay_position.y, 34.0,
-			maxf(34.0, game_view.size.y - actor_resource_overlay.size.y - 86.0)))
+	var panel_min := Vector2(4.0, 34.0)
+	var panel_max := Vector2(maxf(4.0, game_view.size.x - actor_resource_overlay.size.x - 90.0),
+		maxf(34.0, game_view.size.y - actor_resource_overlay.size.y - 86.0))
+	overlay_position = overlay_position.clamp(panel_min, panel_max)
+	var target_id := _combat_target_actor_id()
+	var target_actor := actor_nodes.get(target_id) as ReplicatedActor3D
+	if is_instance_valid(target_actor) and target_actor.is_inside_tree():
+		var target_point := target_actor.global_position + Vector3.UP * (target_actor.head_height() + 0.35)
+		if not gameplay_camera.is_position_behind(target_point):
+			var target_dto: Dictionary = AppState.actors.get(target_id, {})
+			var target_rect := overhead_block_rect(gameplay_camera.unproject_position(target_point),
+				str(target_dto.get("name", "")), target_actor.occupation(), target_actor.status_effect_count())
+			target_rect = Rect2(viewport_container.position + target_rect.position * viewport_scale, target_rect.size * viewport_scale)
+			if Rect2(overlay_position, actor_resource_overlay.size).grow(8.0).intersects(target_rect):
+				for candidate: Vector2 in [
+						Vector2(overlay_position.x, target_rect.position.y - actor_resource_overlay.size.y - 12.0),
+						Vector2(overlay_position.x, target_rect.end.y + 12.0),
+						Vector2(target_rect.position.x - actor_resource_overlay.size.x - 12.0, overlay_position.y),
+						Vector2(target_rect.end.x + 12.0, overlay_position.y)]:
+					candidate = candidate.clamp(panel_min, panel_max)
+					if not Rect2(candidate, actor_resource_overlay.size).grow(8.0).intersects(target_rect):
+						overlay_position = candidate
+						break
+	actor_resource_overlay.position = overlay_position
 	actor_resource_overlay.show()
 
 ## Just over an actor's head, where your own banner and the experience that

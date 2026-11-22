@@ -100,7 +100,7 @@ func _ready() -> void:
 	_run = Style.button("▶ Start", true)
 	_run.name = "StartTactics"
 	_run.custom_minimum_size.x = 80
-	_run.tooltip_text = "Start or resume my combat tactics for this session."
+	_run.tooltip_text = "Start or resume my combat tactics. Attack and Charge keep tactics running. During combat, Ctrl-click ground to retreat; Escape or Pause stops tactics."
 	_run.pressed.connect(func() -> void: _send({"op":"run", "active":true}))
 	top.add_child(_run)
 	_pause = Style.button("Ⅱ Pause")
@@ -115,7 +115,7 @@ func _ready() -> void:
 	_status.name = "TacticsStatus"
 	_status.add_theme_stylebox_override("normal", Style.box(Color("423016"), Style.BRASS, 4))
 	status_row.add_child(_status)
-	_help = Style.label("Manual actions pause tactics.", 12, true)
+	_help = Style.label("Attack and Charge keep tactics running.", 12, true)
 	_help.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_help.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	status_row.add_child(_help)
@@ -326,7 +326,7 @@ func _sync_runtime(value: Dictionary) -> void:
 	_status.text = "Running" if bool(value.active) else "Paused"
 	_status.tooltip_text = str(value.status)
 	_status.add_theme_stylebox_override("normal", Style.box(Style.MOSS if bool(value.active) else Color("423016"), Style.BRASS, 4))
-	_help.text = "Manual actions pause tactics." if own and not bool(value.active) else str(value.status)
+	_help.text = "Attack and Charge keep tactics running." if own and not bool(value.active) else str(value.status)
 
 func _notice(text: String) -> void:
 	_message.text = text
@@ -382,11 +382,16 @@ func _render_rows() -> void:
 		var row := RuleRow.new()
 		row.name = "Rule%d" % (index + 1)
 		row.configure(index, get_instance_id(), _summary(entry), bool(entry.enabled), _glyph(entry), index == _selected, _short)
+		var warnings := _rule_warnings(index)
+		if not warnings.is_empty():
+			row.summary_label.text = "⚠ " + row.summary_label.text
+			row.summary_label.add_theme_color_override("font_color", Style.GOLD)
+			row.tooltip_text = "\n".join(warnings) + "\n\n" + row.tooltip_text
 		row.pressed.connect(_select_rule.bind(index))
 		row.enabled_changed.connect(func(on: bool) -> void:
 			entry.enabled = on
 			_changed()
-			row.summary_label.modulate.a = 1.0 if on else 0.55)
+			_render_rows.call_deferred())
 		row.reorder_requested.connect(_move_rule)
 		_rows.add_child(row)
 	if _rules.is_empty():
@@ -394,6 +399,42 @@ func _render_rows() -> void:
 		empty.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		_rows.add_child(empty)
 	_follow_selection.call_deferred()
+
+## Compare execution-relevant fields; unused threshold/status defaults do
+## not make two Always rules different. Warnings never rewrite a saved plan.
+func _rule_warnings(index: int) -> PackedStringArray:
+	var warnings := PackedStringArray()
+	var entry: Dictionary = _rules[index]
+	if not bool(entry.enabled): return warnings
+	if entry.action in ["flee", "technique:step_back"] and str(entry.condition) == "always" \
+			and entry.get("and_conditions", []).is_empty():
+		warnings.append("This rule retreats whenever available. Add a condition to limit automatic fleeing.")
+	for earlier: int in index:
+		var other: Dictionary = _rules[earlier]
+		if not bool(other.enabled) or entry.target != other.target: continue
+		if other.get("combat", "any") != "any" and other.get("combat", "any") != entry.get("combat", "any"): continue
+		var same_action: bool = entry.action == other.action and int(entry.get("power", 1)) == int(other.get("power", 1))
+		if same_action and (_condition_key(entry) == _condition_key(other) \
+				or (other.condition == "always" and other.get("and_conditions", []).is_empty())):
+			warnings.append("Rule %d already covers this action when usable. Remove the duplicate or change its conditions." % (earlier + 1))
+			break
+		if entry.target == "self" and entry.condition == "health_below" and other.condition == "health_below" \
+				and int(other.value) > int(entry.value) and entry.get("and_conditions", []).is_empty() \
+				and other.get("and_conditions", []).is_empty():
+			warnings.append("Rule %d also matches below %d%% health and runs first when usable. Put emergency actions above it." % [earlier + 1, int(entry.value)])
+	return warnings
+
+func _condition_key(entry: Dictionary) -> String:
+	var keys := PackedStringArray()
+	for check: Dictionary in _conditions(entry):
+		var condition := str(check.condition)
+		var value := ""
+		if condition in ["health_below", "ether_below", "action_points_below", "action_points_at_least", "opponents_below", "opponents_at_least"]:
+			value = str(check.value)
+		elif condition in ["has_status", "missing_status", "missing_buff", "missing_debuff"]: value = str(check.status)
+		keys.append(condition + ":" + value)
+	keys.sort()
+	return "|".join(keys)
 
 func _follow_selection() -> void:
 	if _follow_pending: return

@@ -108,6 +108,12 @@ func _check_floor(layout: Dictionary) -> void:
 			mouths += 1
 		elif node != null and Vector3(wall.outward[0], 0, wall.outward[2]) == Builder.FACE_OUT[facing]:
 			faces += 1
+			var arrays := node.mesh.surface_get_arrays(0)
+			var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+			var has_cap := false
+			for normal: Vector3 in normals:
+				if normal.dot(Vector3.UP) > 0.99: has_cap = true; break
+			_expect(has_cap, "%s: %s has a rock cap that follows its cutaway" % [section, wall.node])
 		_expect(node != null and wall.section == section, "%s: %s stands under the floor" % [section, wall.node])
 	_expect(faces == 4, "%s registers a rock face for each of the four facings" % section)
 	_expect(mouths == (layout.stairs as Array).size(), "%s registers a mouth for each stair" % section)
@@ -265,9 +271,17 @@ func _check_main(app: Node, raw: Array) -> void:
 	main._install_map_picture(manifest)
 	_expect(not main._map_picture.is_empty() and main._map_picture.texture is ImageTexture,
 		"the minimap and full map show the floor's own picture")
+	var fog_before_exit: MeshInstance3D = main._descent_fog_node
 	app._on_packet(EloriaProtocol.ServerMessage.ELORIA_DESCENT_STATE,
 		_bytes({"version": 1, "kind": "state", "open": false}))
 	_expect(map_root.get_node_or_null(Floors.NODE_NAME) == null, "leaving the descent takes its floors away")
+	_expect(main._descent_fog_node == null and main._descent_fog_grid.is_empty(),
+		"closing a procedural run removes the fog even when floor cleanup runs first")
+	_expect(not is_instance_valid(fog_before_exit) or not fog_before_exit.visible,
+		"departing fog stops drawing immediately rather than darkening the next map")
+	main.world_loader.manifest = WorldManifest.load_file("res://../eloria-assets/maps/continent-v2/suncoil/client/world.json")
+	main._sync_descent_fog()
+	_expect(main._descent_fog_node == null, "returning to Suncoil cannot retain the dungeon's screen fog")
 	main.queue_free()
 	await process_frame
 

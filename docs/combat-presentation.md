@@ -63,10 +63,13 @@ with creature banners hidden. The character banner's Instance Mode switch
 selects which set applies, and leaving it restores the normal choices.
 Preferences apply immediately, survive actor updates and save locally under
 `[creature_banners]`. The Graphics name-distance setting still controls range.
-Creature banners can overlap each other and NPC banners, while visible player
-banners retain their space. The active combat target keeps its existing
-exception to overlap hiding; explicit visibility and content choices still
-apply to it. Hidden NPC/player banners do not reserve invisible screen space.
+During combat the active opponent's banner takes priority over overlapping
+secondary enemy banners. Other enemies regain their names and health when
+there is room. Outside combat creature banners retain their ordinary overlap
+behavior. Visible player banners retain their space, and your own resource
+panel moves clear of the opponent's banner when needed. Explicit visibility
+and content choices still apply to the opponent. Hidden NPC/player banners
+do not reserve invisible screen space.
 At the edge of another banner, a visible block hides on actual overlap and an
 overlap-hidden block returns once six render pixels clear. This small gap keeps
 names and health bars steady during slight camera movement; range, wall and

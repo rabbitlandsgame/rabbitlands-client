@@ -39,7 +39,7 @@ func sample() -> Dictionary:
 		"rules":{"essences":essences,"initial":{"weights":[70,25,4,1],"max_essences":5},"promotion":{"costs":{"Enriched Magic Essence":10,"Enriched Life Essence":10}},"catalysts":["Fire","Frost","Earth","Wind"]},
 		"items":[{"instance_id":501,"slot":0,"name":"Militia Arming Sword","image_id":374,"tier":"normal","quality":100,"durability":90,"max_durability":100,"effects":[],"effect_names":[]},
 		{"instance_id":502,"slot":1,"name":"Militia Arming Sword","image_id":374,"tier":"magic","quality":100,"durability":96,"max_durability":100,"effects":["Brutal: +20 physical damage.","Flamebound: +10 heat damage."],"effect_names":["Brutal","Flamebound"]},
-		{"instance_id":503,"slot":2,"name":"Phoenix Helm","image_id":182,"tier":"rare","quality":110,"durability":96,"max_durability":100,"effects":["Plated: +20 armor.","Vital: +50 maximum health.","Spellguard: +25% less incoming spell damage.","Restorative: +10 mana per normal regeneration tick."],"effect_names":["Plated","Vital","Spellguard","Restorative"]}],
+		{"instance_id":503,"slot":2,"name":"Phoenix Helm","image_id":182,"tier":"rare","quality":110,"durability":96,"max_durability":100,"effects":["Plated: +20 armor.","Vital: +50 maximum health.","Spellguard: +25% less incoming spell damage.","Restorative: +10 ether per normal regeneration tick."],"effect_names":["Plated","Vital","Spellguard","Restorative"]}],
 		"quote":null,"error":"","message":"","result":null}
 
 func receive(value: Dictionary) -> void:
@@ -184,8 +184,28 @@ func run() -> void:
 	var serial: int = window.get("_serial")
 	state.state_changed.emit(&"inventory")
 	expect(int(window.get("_serial")) == serial,"inventory preceding receipt preserves pending request")
-	receive(sample())
+	var receipt := sample()
+	receipt.items[2].effects[0] = "Plated: +21 armor."
+	receipt.result = {"instance_id":503,"name":"Phoenix Helm","tier":"rare","effects":receipt.items[2].effects.duplicate()}
+	receive(receipt)
+	expect(window.status.text.contains("Spent") and window.status.tooltip_text.contains("+21 armor.")
+		and window.status.tooltip_text.contains("+20 armor."), "receipt shows the spent materials and before/after effect changes")
+	if OS.get_cmdline_user_args().has("--capture"): await capture("receipt")
 	var chosen_ids: Array = []
+	choose("reroll")
+	window.dose.select(2)
+	window.dose.item_selected.emit(2)
+	(window.get("_families")["Frost"] as SpinBox).value = 1
+	var refresh_id: int = window.selected_id
+	var request_count := requests.size()
+	state.state_changed.emit(&"inventory")
+	state.state_changed.emit(&"inventory")
+	await frames()
+	expect(requests.size() == request_count + 1 and requests[-1].op == "list", "inventory changes coalesce into one automatic equipment refresh")
+	expect(requests[-1].focus == refresh_id and window.confirm_button.disabled, "refresh preserves copy identity and invalidates old confirmation")
+	receive(sample())
+	expect(window.selected_id == refresh_id and window.dose.selected == 2, "automatic refresh retains equipment and reroll quantity")
+	expect(int((window.get("_families")["Frost"] as SpinBox).value) == 1, "automatic refresh retains the selected catalyst")
 	window.choose_ingredients({"output":"Torch","equipmentIngredients":[{"name":"Militia Arming Sword","quantity":1}]},func(ids: Array) -> void: chosen_ids.assign(ids))
 	receive(sample())
 	expect(window.copies.item_count == 2 and window.confirm_button.disabled,"craft picker filters matching copies and needs explicit selection")

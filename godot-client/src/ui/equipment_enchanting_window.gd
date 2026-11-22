@@ -59,6 +59,10 @@ var _source := "backpack"
 var _offset := 0
 var _preferred_id := 0
 var _copies_heading: Label
+var _refresh_queued := false
+var _restore_refresh_options := false
+var _before_effects: Array = []
+var _spent_materials := ""
 
 func configure(owner_main: Node) -> void:
 	main = owner_main
@@ -206,6 +210,9 @@ func _begin() -> void:
 	selected_id = 0
 	_placed = false
 	_stale = false
+	_restore_refresh_options = false
+	_before_effects = []
+	_spent_materials = ""
 	_locks = {}
 	copies.clear()
 	_clear(effects)
@@ -275,10 +282,15 @@ func _state_changed(part: StringName) -> void:
 	elif visible and part == &"enchanting_recovery_available":
 		_update_tabs()
 	elif visible and (part == &"inventory" or part == &"storage"):
+		if not _stale and _pending != "confirm" and not _copy().is_empty():
+			_last_params = _params().duplicate(true)
 		_stale = true
 		_invalidate(_pending != "confirm")
-		status.text = "Your belongings changed. Refresh before choosing an equipment operation."
+		status.text = "Updating equipment and material costs…"
 		_update_buttons()
+		if not _refresh_queued:
+			_refresh_queued = true
+			_refresh_changed_equipment.call_deferred()
 	elif visible and part == &"enchanting":
 		var incoming: Dictionary = AppState.enchanting
 		if int(incoming.get("request_id", -1)) != _serial: return
@@ -289,9 +301,22 @@ func _state_changed(part: StringName) -> void:
 		_busy = false
 		_pending = ""
 		_render()
+		if _restore_refresh_options and selected_id == int(_last_params.get("instance_id", -1)) \
+				and _action == str(_last_params.get("action", "")):
+			_restore_options()
+			_update_summary()
+			_update_buttons()
+		_restore_refresh_options = false
 		var review := _review_requested
 		_review_requested = false
 		if review and not quote.is_empty(): _ask_confirmation()
+
+func _refresh_changed_equipment() -> void:
+	_refresh_queued = false
+	if not visible or not _stale or _pending == "confirm": return
+	_preferred_id = selected_id
+	_restore_refresh_options = true
+	_refresh()
 
 func _needed() -> Dictionary:
 	var result := {}
@@ -338,6 +363,17 @@ func _render() -> void:
 	_reading = false
 	status.text = str(snapshot.get("error", ""))
 	if status.text.is_empty(): status.text = str(snapshot.get("message", ""))
+	status.tooltip_text = ""
+	if snapshot.get("result") is Dictionary:
+		var after: Array = snapshot.result.get("effects", [])
+		var added := PackedStringArray()
+		var removed := PackedStringArray()
+		for effect: String in after:
+			if effect not in _before_effects: added.append(effect)
+		for effect: String in _before_effects:
+			if effect not in after: removed.append(effect)
+		status.text = "Equipment updated · %d effects · Spent %s" % [after.size(), _spent_materials]
+		status.tooltip_text = "Added or changed:\n%s\n\nRemoved or replaced:\n%s\n\nSpent: %s" % ["\n".join(added) if not added.is_empty() else "None", "\n".join(removed) if not removed.is_empty() else "None", _spent_materials]
 	_show_copy()
 	if not quote.is_empty():
 		_restore_options()
@@ -623,6 +659,8 @@ func _confirm() -> void:
 		return
 	if quote.is_empty() or _busy: return
 	var token := str(quote.token)
+	_before_effects = _copy().get("effects", []).duplicate()
+	_spent_materials = Parts.summary(quote.get("inputs", []), int(quote.get("gold_fee", 0)))
 	quote = {}
 	_send({"op": "confirm", "token": token})
 	if _busy: status.text = "Applying the equipment operation…"
