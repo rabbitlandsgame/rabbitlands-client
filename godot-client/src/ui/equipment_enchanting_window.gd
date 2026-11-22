@@ -1,5 +1,6 @@
 extends PanelContainer
 const Parts := preload("res://src/ui/crafting_window_parts.gd")
+const Workbench := preload("res://src/ui/crafting_workbench.gd")
 const Tiers := preload("res://src/state/item_instance_tiers.gd")
 const LABELS := {"enchant": "Enchant plain equipment", "promote": "Promote blue → yellow", "add": "Add effects · Life", "remove": "Remove an effect · Death", "values": "Reroll numbers · Water", "reroll": "Reroll effects · Magic"}
 const FAMILIES := ["Life", "Death", "Water", "Magic", "Fire", "Frost", "Earth", "Wind"]
@@ -9,14 +10,22 @@ var heading: Label
 var selected_title: Label
 var effects: VBoxContainer
 var options: VBoxContainer
-var action_picker: OptionButton
+var operation_buttons: Dictionary = {}
+var _operation_grid: GridContainer
+var _more: MenuButton
+var _effect_rows: Dictionary = {}
+var effect_keep_buttons: Dictionary = {}
+var quote_delay := 0.18
+var _quote_revision := 0
+var _dose_row: HBoxContainer
+var _catalyst_picker: OptionButton
+var _catalyst_line: HBoxContainer
+var _catalyst_family := ""
 var dose: OptionButton
 var target: OptionButton
-var locks_body: VBoxContainer
 var explanation: Label
 var status: Label
 var columns: HBoxContainer
-var preview_button: Button
 var confirm_button: Button
 var confirmation: ConfirmationDialog
 var snapshot: Dictionary = {}
@@ -54,7 +63,7 @@ var _family_rows: Dictionary = {}
 var _combine_toggle: CheckButton
 var _combined: VBoxContainer
 var _last_params: Dictionary = {}
-var location_controls: HBoxContainer
+var location_controls: VBoxContainer
 var _source := "backpack"
 var _offset := 0
 var _preferred_id := 0
@@ -67,21 +76,20 @@ var _spent_materials := ""
 func configure(owner_main: Node) -> void:
 	main = owner_main
 	name = "EquipmentEnchanting"
-	theme = main.theme.duplicate() as Theme if main.theme != null else Theme.new()
-	theme.default_font_size = 16
-	theme.set_color("font_color", "Label", Parts.IVORY)
-	add_theme_stylebox_override("panel", Parts.style(Parts.BRONZE, Color("071213"), 14))
-	var body := VBoxContainer.new()
-	body.add_theme_constant_override("separation", 10)
-	add_child(body)
-	var header := HBoxContainer.new()
-	body.add_child(header)
-	heading = Parts.label(header, "Enchant", 26)
-	var serif := SystemFont.new()
-	serif.font_names = PackedStringArray(["Georgia", "Noto Serif", "serif"])
-	heading.add_theme_font_override("font", serif)
+	var frame := Workbench.build(self, main, 2, _navigate, _refresh, _preview, _review)
+	heading = frame.title
+	tabs = frame.tabs
+	columns = frame.columns
+	_summary = frame.costs
+	_odds = frame.odds
+	status = frame.status
+	_totals = frame.totals
+	confirm_button = frame.confirm
+	_more = frame.more
+	(frame.dragger as WindowDrag).moved.connect(func(_to: Vector2) -> void: _placed = true)
+	var left: VBoxContainer = frame.left
 	location_controls = preload("res://src/ui/crafting_location_controls.gd").new()
-	header.add_child(location_controls)
+	left.add_child(location_controls)
 	location_controls.location_changed.connect(func(location: String) -> void:
 		_source = location
 		_offset = 0
@@ -95,83 +103,41 @@ func configure(owner_main: Node) -> void:
 		_offset = offset
 		selected_id = 0
 		_refresh())
-	Parts.button(header, "Refresh", _refresh)
-	Parts.button(header, "×", hide).tooltip_text = "Close crafting window"
-	var dragger := WindowDrag.attach(self, header)
-	dragger.reserved_bottom = 88
-	dragger.moved.connect(func(_to: Vector2) -> void: _placed = true)
-	tabs = Parts.navigation(body, 2, _navigate)
-	_purpose = Parts.label(body, "", 14)
-	_purpose.modulate = Parts.MUTED
-	columns = HBoxContainer.new()
-	columns.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	columns.add_theme_constant_override("separation", 16)
-	body.add_child(columns)
-	var left := VBoxContainer.new()
-	left.custom_minimum_size.x = 220
-	columns.add_child(left)
-	_copies_heading = Parts.label(left, "Backpack copies", 17)
+	_copies_heading = Parts.label(left, "Backpack copies", 11)
 	copies = Parts.ledger(left)
 	copies.name = "EquipmentCopies"
 	copies.item_selected.connect(_selection_changed)
 	copies.multi_selected.connect(func(index: int, chosen: bool) -> void:
 		var selected := copies.get_selected_items()
 		_selection_changed(index if chosen else int(selected[0]) if not selected.is_empty() else -1))
-	var scroll := ScrollContainer.new()
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	columns.add_child(scroll)
-	var right := VBoxContainer.new()
-	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	right.add_theme_constant_override("separation", 12)
-	scroll.add_child(right)
+	var right: VBoxContainer = frame.right
 	_hero = Parts.hero(right)
 	selected_title = _hero.title
-	effects = VBoxContainer.new()
-	effects.add_theme_constant_override("separation", 8)
-	right.add_child(effects)
-	_operation_label = Parts.label(right, "Operation", 17)
-	action_picker = OptionButton.new()
-	action_picker.custom_minimum_size.y = 42
-	action_picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	right.add_child(action_picker)
-	action_picker.item_selected.connect(func(index: int) -> void:
-		if _reading: return
-		_action = str(action_picker.get_item_metadata(index))
-		_locks = {}
-		_build_options()
-		_changed())
-	explanation = Parts.label(right, "", 14)
-	explanation.modulate = Parts.MUTED
+	_operation_label = Parts.label(right, "Operation", 11)
+	_operation_grid = GridContainer.new()
+	_operation_grid.columns = 2
+	_operation_grid.custom_minimum_size.y = 82
+	_operation_grid.add_theme_constant_override("h_separation", 4)
+	_operation_grid.add_theme_constant_override("v_separation", 4)
+	right.add_child(_operation_grid)
 	options = VBoxContainer.new()
-	options.add_theme_constant_override("separation", 10)
+	options.add_theme_constant_override("separation", 4)
 	right.add_child(options)
-	_summary = VBoxContainer.new()
-	_summary.add_theme_constant_override("separation", 12)
-	right.add_child(_summary)
-	status = Parts.label(body, "", 13)
-	status.custom_minimum_size.y = 30
-	var footer := Parts.card(body)
-	_odds = HBoxContainer.new()
-	_odds.add_theme_constant_override("separation", 8)
-	footer.add_child(_odds)
-	var actions := HBoxContainer.new()
-	actions.add_theme_constant_override("separation", 12)
-	footer.add_child(actions)
-	_totals = Parts.label(actions, "Select an equipment copy", 15)
-	preview_button = Parts.button(actions, "Check costs", _preview)
-	confirm_button = Parts.button(actions, "Review enchantment", _review, true)
-	confirm_button.custom_minimum_size.x = 190
+	effects = VBoxContainer.new()
+	effects.custom_minimum_size.y = 128
+	effects.add_theme_constant_override("separation", 0)
+	right.add_child(effects)
+	explanation = Parts.label(right, "", 11)
+	explanation.modulate = Parts.MUTED
+	_purpose = Parts.label(right, "", 11)
+	_purpose.hide()
 	confirmation = ConfirmationDialog.new()
 	confirmation.title = "Review enchantment"
 	confirmation.ok_button_text = "Apply enchantment"
 	confirmation.confirmed.connect(_confirm)
 	add_child(confirmation)
-	add_child(preload("res://src/ui/storage_ledger_frame.gd").new())
 	AppState.state_changed.connect(_state_changed)
 	get_viewport().size_changed.connect(_fit)
-	minimum_size_changed.connect(func() -> void: _fit.call_deferred())
 	visibility_changed.connect(func() -> void:
 		if not visible: _invalidate())
 	hide()
@@ -204,7 +170,7 @@ func _begin() -> void:
 	_clear(_odds)
 	_odds.visible = false
 	_totals.text = "Select an equipment copy"
-	action_picker.hide()
+	_operation_grid.hide()
 	_operation_label.hide()
 	snapshot = {}
 	selected_id = 0
@@ -218,12 +184,11 @@ func _begin() -> void:
 	_clear(effects)
 	_clear(options)
 	explanation.text = "Select an equipment copy to inspect its saved effects and available operations."
-	heading.text = "Enchant" if _craft_recipe.is_empty() else "Choose copies · " + str(_craft_recipe.output)
+	heading.text = "RL Enchanting" if _craft_recipe.is_empty() else "Choose copies · " + str(_craft_recipe.output)
 	location_controls.visible = _craft_recipe.is_empty()
 	location_controls.render(snapshot, _source, true)
 	_purpose.text = "Imbue an individual copy with effects. Equipment, materials and gold use your %s." % _source if _craft_recipe.is_empty() else "Choose unequipped backpack copies for this recipe."
 	copies.select_mode = ItemList.SELECT_SINGLE if _craft_recipe.is_empty() else ItemList.SELECT_MULTI
-	preview_button.visible = _craft_recipe.is_empty()
 	confirm_button.text = "Review enchantment" if _craft_recipe.is_empty() else "Craft one…"
 	_update_tabs()
 	show()
@@ -233,6 +198,7 @@ func _begin() -> void:
 	_fit.call_deferred()
 
 func _invalidate(cancel_pending: bool = true) -> void:
+	_quote_revision += 1
 	quote = {}
 	_review_requested = false
 	confirmation.hide()
@@ -251,12 +217,13 @@ func _send(request: Dictionary) -> void:
 	location_controls.render(snapshot, _source, true)
 	_pending = str(request.op)
 	_busy = true
-	preview_button.disabled = true
+	_more.get_popup().set_item_disabled(1, true)
 	confirm_button.disabled = true
 	if request.op == "confirm":
 		for index: int in copies.item_count: copies.set_item_disabled(index, true)
 		for index: int in tabs.tab_count: tabs.set_tab_disabled(index, true)
-		action_picker.disabled = true
+		for button: CheckBox in operation_buttons.values(): button.disabled = true
+		for button: CheckBox in effect_keep_buttons.values(): button.disabled = true
 		_freeze_options(options)
 	var error: Error = send_request.call(request)
 	if error != OK:
@@ -265,7 +232,7 @@ func _send(request: Dictionary) -> void:
 	else:
 		get_tree().create_timer(reply_seconds).timeout.connect(func() -> void:
 			if _busy and int(request.request_id) == _serial:
-				status.text = "The server has not answered yet. Refresh to check whether the operation completed."
+				status.text = "No answer yet. Use ••• → Retry connection to check the result."
 				if _pending != "confirm":
 					_busy = false
 					_update_buttons())
@@ -295,13 +262,14 @@ func _state_changed(part: StringName) -> void:
 		var incoming: Dictionary = AppState.enchanting
 		if int(incoming.get("request_id", -1)) != _serial: return
 		if str(incoming.get("source", "backpack")) != _source: return
+		var completed := _pending
 		snapshot = incoming
 		quote = incoming.quote if incoming.get("quote") is Dictionary else {}
 		_stale = false
 		_busy = false
 		_pending = ""
 		_render()
-		if _restore_refresh_options and selected_id == int(_last_params.get("instance_id", -1)) \
+		if (completed == "quote" or _restore_refresh_options) and selected_id == int(_last_params.get("instance_id", -1)) \
 				and _action == str(_last_params.get("action", "")):
 			_restore_options()
 			_update_summary()
@@ -310,6 +278,7 @@ func _state_changed(part: StringName) -> void:
 		var review := _review_requested
 		_review_requested = false
 		if review and not quote.is_empty(): _ask_confirmation()
+		elif completed == "list": _queue_quote()
 
 func _refresh_changed_equipment() -> void:
 	_refresh_queued = false
@@ -392,36 +361,59 @@ func _update_tabs() -> void:
 	tabs.set_tab_disabled(1, confirming or not AppState.enchanting_recovery_available)
 
 func _show_copy() -> void:
+	var focused_operation := ""
+	for key: String in operation_buttons:
+		if (operation_buttons[key] as CheckBox).has_focus(): focused_operation = key
 	_clear(effects)
+	_effect_rows = {}
+	effect_keep_buttons = {}
 	var row := _copy()
 	Parts.show_hero(_hero, main, row)
-	if not row.is_empty() and not row.effects.is_empty():
-		Parts.label(effects, "Current effects", 17)
-		var grid := GridContainer.new()
-		grid.columns = 2 if get_viewport_rect().size.x >= 1100 else 1
-		grid.add_theme_constant_override("h_separation", 8)
-		grid.add_theme_constant_override("v_separation", 8)
-		effects.add_child(grid)
-		for text: String in row.effects: Parts.effect(grid, text)
-	_reading = true
-	action_picker.clear()
-	action_picker.disabled = false
-	action_picker.visible = _craft_recipe.is_empty() and not row.is_empty() and row.tier != "normal"
-	_operation_label.visible = action_picker.visible
+	if not row.is_empty():
+		for text: String in row.effects:
+			var line := Parts.effect(effects, text)
+			_effect_rows[text.get_slice(":", 0)] = line
+		if row.effects.is_empty(): Parts.label(effects, "Plain equipment · no effects yet.", 11).modulate = Parts.MUTED
+	_clear(_operation_grid)
+	operation_buttons = {}
 	var actions: Array = []
 	if not row.is_empty():
 		if row.tier == "normal": actions = ["enchant"]
 		else:
-			if row.tier == "magic" and row.effects.size() == 2: actions.append("promote")
+			actions.append_array(["reroll", "values", "remove"])
 			if row.effects.size() < (2 if row.tier == "magic" else 4): actions.append("add")
-			actions.append_array(["remove", "values", "reroll"])
+			if row.tier == "magic" and row.effects.size() == 2: actions.append("promote")
 	if _action not in actions: _action = str(actions[0]) if not actions.is_empty() else "enchant"
+	_operation_grid.visible = _craft_recipe.is_empty() and not row.is_empty()
+	_operation_label.visible = _operation_grid.visible
+	var group := ButtonGroup.new()
+	var captions := {"enchant":"Enchant equipment", "reroll":"Reroll effects", "values":"Reroll numbers", "remove":"Remove effect", "add":"Add effects", "promote":"Promote to yellow"}
+	var families := {"enchant":"Magic", "reroll":"Magic", "values":"Water", "remove":"Death", "add":"Life", "promote":"Magic"}
 	for action: String in actions:
-		action_picker.add_item(str(LABELS[action]))
-		var index := action_picker.item_count - 1
-		action_picker.set_item_metadata(index, action)
-		if action == _action: action_picker.select(index)
-	_reading = false
+		var button := CheckBox.new()
+		button.name = "Operation_" + action
+		button.text = str(captions[action])
+		button.tooltip_text = str(LABELS[action])
+		button.button_group = group
+		button.icon = Parts.material_icon(main, {"name":"Enriched " + str(families[action]) + " Essence"})
+		button.expand_icon = true
+		button.add_theme_constant_override("icon_max_width", 20)
+		button.add_theme_font_size_override("font_size", 11)
+		button.custom_minimum_size = Vector2(0, 38)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.clip_text = true
+		for state: String in ["normal", "hover", "pressed", "focus", "disabled"]:
+			button.add_theme_stylebox_override(state, Parts.style(Parts.BRONZE, Color("514026") if state == "pressed" else Color("1c1a15"), 4))
+		_operation_grid.add_child(button)
+		button.set_pressed_no_signal(action == _action)
+		operation_buttons[action] = button
+		if action == focused_operation: button.grab_focus.call_deferred()
+		button.toggled.connect(func(on: bool) -> void:
+			if not on or _reading: return
+			_action = action
+			_locks = {}
+			_build_options()
+			_changed())
 	_build_options()
 	if not _craft_recipe.is_empty():
 		explanation.text = "Select exactly these equipment copies:\n" + _materials(_craft_recipe.get("equipmentIngredients", [])) + "\n\nCrafts one item using normal mixing success, failure and Recycler rules. Selected equipment is lost on success or critical failure when ingredients are consumed."
@@ -433,7 +425,6 @@ func _build_options() -> void:
 	_families = {}
 	dose = null
 	target = null
-	locks_body = null
 	_advanced = null
 	_advanced_toggle = null
 	_primary_picker = null
@@ -441,6 +432,10 @@ func _build_options() -> void:
 	_primary_family = ""
 	_family_rows = {}
 	_combine_toggle = null
+	_dose_row = null
+	_catalyst_picker = null
+	_catalyst_line = null
+	_catalyst_family = ""
 	if not _craft_recipe.is_empty() or _copy().is_empty():
 		_reading = false
 		return
@@ -457,7 +452,7 @@ func _build_options() -> void:
 		_label(options, "Keep both existing effects and their values. Add one new effect.", 14).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	elif _action == "remove":
 		target = OptionButton.new()
-		target.custom_minimum_size.y = 42
+		target.custom_minimum_size.y = 26
 		options.add_child(target)
 		target.add_item("Random effect · 1 Death")
 		target.set_item_metadata(0, "")
@@ -467,28 +462,43 @@ func _build_options() -> void:
 		target.item_selected.connect(func(_index: int) -> void: _changed())
 	else:
 		var line := HBoxContainer.new()
+		_dose_row = line
+		line.add_theme_constant_override("separation", 4)
 		options.add_child(line)
-		_label(line, "Effects to add" if _action == "add" else "Enriched essences to spend", 14)
+		_label(line, "Effects to add" if _action == "add" else "Magic" if _action == "reroll" else "Water", 11)
 		dose = OptionButton.new()
-		dose.custom_minimum_size = Vector2(76, 42)
+		dose.custom_minimum_size = Vector2(60, 26)
 		line.add_child(dose)
 		var quantities: Array = [1,3,5] if _action == "reroll" else [1,2,3,4,5]
 		if _action == "add": quantities = range(1, (2 if row.tier == "magic" else 4) - row.effects.size() + 1)
 		for amount: int in quantities:
-			dose.add_item(str(amount))
+			dose.add_item("%d · keep %d" % [amount, 0 if amount == 1 else 1 if amount == 3 else 2] if _action == "reroll" else str(amount))
 			dose.set_item_metadata(dose.item_count - 1, amount)
 		dose.item_selected.connect(func(_index: int) -> void:
 			_locks = {}
 			_rebuild_locks()
 			_changed())
-	if _action == "reroll":
-		locks_body = VBoxContainer.new()
-		options.add_child(locks_body)
-		_rebuild_locks()
+	_rebuild_locks()
 	if _action in ["promote", "add", "reroll"] and int(config.get("max_catalysts", 5)) > 0:
+		_catalyst_line = _dose_row
+		if _catalyst_line == null:
+			_catalyst_line = HBoxContainer.new()
+			options.add_child(_catalyst_line)
+		_catalyst_picker = OptionButton.new()
+		_catalyst_picker.fit_to_longest_item = false
+		_catalyst_picker.clip_text = true
+		_catalyst_picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_catalyst_picker.custom_minimum_size = Vector2(88, 26)
+		_catalyst_picker.tooltip_text = "Optional catalyst theme. Combine catalysts for multiple themes."
+		_catalyst_picker.add_item("Catalyst: None")
+		_catalyst_picker.set_item_metadata(0, "")
+		for family: String in config.get("catalysts", []):
+			_catalyst_picker.add_icon_item(Parts.material_icon(main, {"name":"Enriched " + family + " Essence"}), family)
+			_catalyst_picker.set_item_metadata(_catalyst_picker.item_count - 1, family)
+		_catalyst_line.add_child(_catalyst_picker)
 		_advanced_toggle = CheckButton.new()
-		_advanced_toggle.text = "More options · favor an effect theme"
-		_advanced_toggle.custom_minimum_size.y = 42
+		_advanced_toggle.text = "Combine catalysts"
+		_advanced_toggle.custom_minimum_size.y = 26
 		_advanced_toggle.button_pressed = _advanced_open
 		options.add_child(_advanced_toggle)
 		_advanced = VBoxContainer.new()
@@ -498,6 +508,9 @@ func _build_options() -> void:
 			_advanced_open = expanded
 			_advanced.visible = expanded)
 		_family_grid(config.get("catalysts", []), false, _advanced)
+		_catalyst_picker.item_selected.connect(func(index: int) -> void:
+			_select_catalyst(str(_catalyst_picker.get_item_metadata(index)), true)
+			_changed())
 	_reading = false
 	_local_explanation()
 	_fit.call_deferred()
@@ -505,8 +518,8 @@ func _build_options() -> void:
 func _family_grid(families: Array, initial: bool, parent: Node = null) -> void:
 	var grid := GridContainer.new()
 	grid.columns = 2
-	grid.add_theme_constant_override("h_separation", 10)
-	grid.add_theme_constant_override("v_separation", 8)
+	grid.add_theme_constant_override("h_separation", 4)
+	grid.add_theme_constant_override("v_separation", 4)
 	(parent if parent != null else options).add_child(grid)
 	var initial_family := str(families[0]) if not families.is_empty() else ""
 	if initial:
@@ -518,34 +531,40 @@ func _family_grid(families: Array, initial: bool, parent: Node = null) -> void:
 		var card := Parts.card(grid)
 		var line := HBoxContainer.new()
 		card.add_child(line)
-		if initial: _family_rows[family] = line
+		_family_rows[family] = line
 		var family_rules: Dictionary = snapshot.get("rules", {}).get("essences", {}).get(family, {})
 		var item := str(family_rules.get("item", "Enriched " + family + " Essence"))
-		Parts.icon(line, Parts.material_icon(main, {"name": item}), 28)
+		Parts.icon(line, Parts.material_icon(main, {"name": item}), 22)
 		var caption := Parts.label(line, "%s\n%d owned" % [family, int(snapshot.get("available", {}).get(family, 0))], 14)
 		caption.tooltip_text = "Favors: " + ", ".join(family_rules.get("favored_effects", []))
 		var amount := SpinBox.new()
 		amount.min_value = 0
 		var settings: Dictionary = snapshot.get("rules", {})
 		amount.max_value = int(settings.get("initial", {}).get("max_essences", 5)) if initial else int(settings.get("max_catalysts", 5))
-		amount.custom_minimum_size = Vector2(72, 42)
+		amount.custom_minimum_size = Vector2(58, 26)
 		amount.value = 1 if initial and family == initial_family else 0
 		line.add_child(amount)
 		_families[family] = amount
 		amount.value_changed.connect(func(_value: float) -> void: _changed())
 
 func _rebuild_locks() -> void:
-	if locks_body == null: return
-	_clear(locks_body)
-	var quantity := _quantity()
-	var maximum := mini(0 if quantity == 1 else 1 if quantity == 3 else 2, _copy().effects.size() - 1)
-	_label(locks_body, "Preserve up to %d effect(s), including their rolled numbers" % maximum, 13).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	for effect: String in _copy().effect_names:
+	for button: CheckBox in effect_keep_buttons.values():
+		if is_instance_valid(button):
+			button.get_parent().remove_child(button)
+			button.queue_free()
+	effect_keep_buttons = {}
+	if _action != "reroll": return
+	var maximum := mini(0 if _quantity() == 1 else 1 if _quantity() == 3 else 2, _copy().get("effects", []).size() - 1)
+	for effect: String in _copy().get("effect_names", []):
+		if not _effect_rows.has(effect): continue
 		var button := CheckBox.new()
-		button.text = effect
+		button.text = "Keep"
+		button.add_theme_font_size_override("font_size", 11)
+		button.tooltip_text = "Preserve this effect and its rolled numbers (up to %d)." % maximum
 		button.button_pressed = bool(_locks.get(effect, false))
 		button.disabled = maximum <= 0
-		locks_body.add_child(button)
+		_effect_rows[effect].add_child(button)
+		effect_keep_buttons[effect] = button
 		button.toggled.connect(func(keep: bool) -> void:
 			if keep and _locks.size() >= maximum:
 				button.set_pressed_no_signal(false)
@@ -565,6 +584,14 @@ func _restore_options() -> void:
 	var selected: Dictionary = _last_params.get("essences", {}) if _action == "enchant" else _last_params.get("catalysts", {})
 	for family: String in _families:
 		(_families[family] as SpinBox).set_value_no_signal(int(selected.get(family, 0)))
+	if _action != "enchant" and _catalyst_picker != null:
+		var first := ""
+		for family: String in selected:
+			if int(selected[family]) > 0:
+				first = family
+				break
+		_select_catalyst(first, false)
+		_advanced_toggle.button_pressed = selected.size() > 1 or _advanced_open
 	if _action == "enchant":
 		var first := ""
 		for family: String in selected:
@@ -595,9 +622,10 @@ func _params() -> Dictionary:
 func _changed() -> void:
 	if _reading or _pending == "confirm": return
 	_invalidate()
-	status.text = "Preview the costs before applying this operation."
+	status.text = "Updating costs…"
 	_local_explanation()
 	_update_buttons()
+	_queue_quote()
 
 func _local_explanation() -> void:
 	if not _craft_recipe.is_empty(): return
@@ -617,8 +645,8 @@ func _update_buttons() -> void:
 	var blocked := _busy or _stale or _pending == "confirm" or _copy().is_empty() or not bool(snapshot.get("enabled", false))
 	var issue := _selection_issue() if _craft_recipe.is_empty() and not _copy().is_empty() else ""
 	blocked = blocked or not issue.is_empty()
-	if not issue.is_empty() and not _busy and not _stale and (status.text.is_empty() or status.text.begins_with("Preview the costs")): status.text = issue
-	preview_button.disabled = blocked
+	if not issue.is_empty() and not _busy and not _stale and (status.text.is_empty() or status.text.begins_with("Updating costs")): status.text = issue
+	_more.get_popup().set_item_disabled(1, blocked)
 	if not _craft_recipe.is_empty():
 		var selected := {}
 		for index: int in copies.get_selected_items():
@@ -629,6 +657,7 @@ func _update_buttons() -> void:
 	else:
 		confirm_button.disabled = blocked
 		confirm_button.text = {"enchant":"Review enchantment", "promote":"Review promotion", "add":"Review added effects", "remove":"Review removal", "values":"Review number reroll", "reroll":"Review effect reroll"}.get(_action, "Review changes")
+	if not snapshot.get("result") is Dictionary: status.tooltip_text = status.text
 
 func _preview() -> void:
 	_invalidate()
@@ -671,12 +700,7 @@ func _materials(rows: Array) -> String:
 	return "\n".join(values)
 
 func _fit() -> void:
-	if not visible or not is_inside_tree(): return
-	var viewport := get_viewport_rect().size
-	custom_minimum_size = Vector2(minf(1000, maxf(560, viewport.x - 112)), 0)
-	size = Vector2(custom_minimum_size.x, minf(700, maxf(350, viewport.y - 112)))
-	var desired := position if _placed else (viewport - size - Vector2(96, 88)) / 2
-	position = Vector2(clampf(desired.x, 8, maxf(8, viewport.x - size.x - 104)), clampf(desired.y, 8, maxf(8, viewport.y - size.y - 96)))
+	Workbench.fit(self, _placed)
 
 func _clear(parent: Node) -> void:
 	for child: Node in parent.get_children():
@@ -692,7 +716,7 @@ func _freeze_options(parent: Node) -> void:
 func _label(parent: Node, text: String, font_size: int) -> Label:
 	var result := Label.new()
 	result.text = text
-	result.add_theme_font_size_override("font_size", font_size)
+	result.add_theme_font_size_override("font_size", clampi(font_size, 11, 13))
 	result.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(result)
 	return result
@@ -708,8 +732,13 @@ func _review() -> void:
 func _navigate(index: int) -> void:
 	if index == 2: return
 	var row := _copy()
+	var next_position := position
 	hide()
-	main.inventory_workspace.recovery_window.open(index, int(row.get("slot", -1)), _source, int(row.get("instance_id", 0)))
+	var next: Control = main.inventory_workspace.recovery_window
+	next.open(index, int(row.get("slot", -1)), _source, int(row.get("instance_id", 0)))
+	next.position = next_position
+	next.set("_placed", true)
+	next.call("_fit")
 
 func _update_summary() -> void:
 	_clear(_summary)
@@ -724,7 +753,7 @@ func _update_summary() -> void:
 	var rows: Array = quote.get("inputs", []) if not quote.is_empty() else _estimated_costs()
 	var config: Dictionary = snapshot.get("rules", {})
 	var fee := int(quote.get("gold_fee", config.get("operations", {}).get(_action, {}).get("gold_fee", 0)))
-	var costs := Parts.card(_summary, "Materials to spend")
+	var costs := _summary
 	Parts.cost_heading(costs)
 	for row: Dictionary in rows:
 		var owned := -1
@@ -733,7 +762,8 @@ func _update_summary() -> void:
 		Parts.material(costs, main, row, owned)
 	if fee > 0: Parts.material(costs, main, {"name":"Gold Coins", "quantity":fee}, int(snapshot.get("gold_available", -1)))
 	if rows.is_empty(): Parts.label(costs, "Choose enriched essences to see the cost.", 14)
-	_totals.text = "Total cost\n" + Parts.summary(rows, fee)
+	_totals.text = "Total cost" if quote.is_empty() else "Total cost · checked"
+	_totals.tooltip_text = Parts.summary(rows, fee)
 	var chances: Array = quote.get("chances", [])
 	if quote.is_empty() and _action == "enchant":
 		var weights: Array = config.get("initial", {}).get("weights", [])
@@ -755,18 +785,18 @@ func _update_summary() -> void:
 func _initial_essences() -> void:
 	var body := Parts.card(options)
 	_primary_line = HBoxContainer.new()
-	_primary_line.add_theme_constant_override("separation", 10)
+	_primary_line.add_theme_constant_override("separation", 4)
 	body.add_child(_primary_line)
 	_primary_picker = OptionButton.new()
-	_primary_picker.custom_minimum_size.y = 42
+	_primary_picker.custom_minimum_size.y = 26
 	_primary_picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_primary_line.add_child(_primary_picker)
 	for family: String in FAMILIES:
 		var item := str(snapshot.get("rules", {}).get("essences", {}).get(family, {}).get("item", "Enriched " + family + " Essence"))
 		_primary_picker.add_icon_item(Parts.material_icon(main, {"name":item}), "%s · %d owned" % [family, int(snapshot.get("available", {}).get(family, 0))])
 	_combine_toggle = CheckButton.new()
-	_combine_toggle.text = "More options · combine essence themes"
-	_combine_toggle.custom_minimum_size.y = 38
+	_combine_toggle.text = "Combine essence themes"
+	_combine_toggle.custom_minimum_size.y = 26
 	options.add_child(_combine_toggle)
 	_combined = VBoxContainer.new()
 	_combined.visible = false
@@ -837,3 +867,28 @@ func _estimated_costs() -> Array:
 	var rows: Array = []
 	for item: String in costs: rows.append({"name":item, "quantity":int(costs[item])})
 	return rows
+
+func _queue_quote() -> void:
+	var revision := _quote_revision
+	if not visible or not _craft_recipe.is_empty(): return
+	get_tree().create_timer(quote_delay).timeout.connect(func() -> void:
+		if revision != _quote_revision or not visible or _busy or _stale or _copy().is_empty(): return
+		if not _selection_issue().is_empty(): return
+		_preview())
+
+func _select_catalyst(family: String, transfer: bool) -> void:
+	var previous_amount := 1.0
+	if not _catalyst_family.is_empty():
+		var previous := _families[_catalyst_family] as SpinBox
+		previous_amount = previous.value
+		previous.reparent(_family_rows[_catalyst_family])
+		(_family_rows[_catalyst_family] as HBoxContainer).get_parent().get_parent().show()
+		if transfer: previous.set_value_no_signal(0)
+	_catalyst_family = family
+	if not family.is_empty():
+		var amount := _families[family] as SpinBox
+		if transfer: amount.set_value_no_signal(maxf(1, previous_amount))
+		amount.reparent(_catalyst_line)
+		(_family_rows[family] as HBoxContainer).get_parent().get_parent().hide()
+	for index: int in _catalyst_picker.item_count:
+		if str(_catalyst_picker.get_item_metadata(index)) == family: _catalyst_picker.select(index)

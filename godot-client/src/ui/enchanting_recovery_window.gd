@@ -1,6 +1,7 @@
 extends PanelContainer
 ## Quotes identify one exact object. Only the server commits costs and returns.
 const Parts := preload("res://src/ui/crafting_window_parts.gd")
+const Workbench := preload("res://src/ui/crafting_workbench.gd")
 const Tiers := preload("res://src/state/item_instance_tiers.gd")
 const IVORY := Color("eee3c8")
 const MUTED := Color("ada98f")
@@ -11,14 +12,19 @@ var tabs: TabBar
 var copies: ItemList
 var recipes: ItemList
 var quantity: SpinBox
-var salvage_body: HBoxContainer
-var refine_body: HBoxContainer
+var salvage_body: VBoxContainer
+var refine_body: VBoxContainer
 var details: VBoxContainer
 var detail_scroll: ScrollContainer
 var selected_title: Label
 var refining_text: Label
 var status: Label
-var preview_button: Button
+var _more: MenuButton
+var _costs: VBoxContainer
+var _refine_hero: Dictionary
+var quote_delay := 0.18
+var _quote_revision := 0
+var _refresh_queued := false
 var confirm_button: Button
 var confirmation: ConfirmationDialog
 var snapshot: Dictionary = {}
@@ -37,15 +43,13 @@ var _placed := false
 var reply_seconds := 10.0
 ## Sends a request; returns whether it went out. Tests stand in for the link.
 var send_request: Callable = func(request: Dictionary) -> Error: return Network.enchanting_recovery_request(request)
-var _font: SystemFont
 var _hero: Dictionary
-var _refine_details: VBoxContainer
 var _heading: Label
 var _purpose: Label
 var _totals: Label
 var _review_requested := false
 var _quantity_buttons: Array[Button] = []
-var location_controls: HBoxContainer
+var location_controls: VBoxContainer
 var _source := "backpack"
 var _offset := 0
 var _preferred_id := 0
@@ -54,21 +58,20 @@ var _copies_heading: Label
 func configure(owner_main: Node) -> void:
 	main = owner_main
 	name = "EnchantingRecovery"
-	theme = main.theme.duplicate() as Theme if main.theme != null else Theme.new()
-	theme.default_font_size = 16
-	theme.set_color("font_color", "Label", IVORY)
-	add_theme_stylebox_override("panel", Parts.style(BRONZE, Color("071213"), 14))
-	var content := VBoxContainer.new()
-	content.add_theme_constant_override("separation", 10)
-	add_child(content)
-	var header := HBoxContainer.new()
-	content.add_child(header)
-	_heading = Parts.label(header, "Break Down", 26)
-	_font = SystemFont.new()
-	_font.font_names = PackedStringArray(["Georgia", "Noto Serif", "serif"])
-	_heading.add_theme_font_override("font", _font)
+	var frame := Workbench.build(self, main, 0, _navigate, _refresh, _preview, _review)
+	_heading = frame.title
+	tabs = frame.tabs
+	status = frame.status
+	_totals = frame.totals
+	confirm_button = frame.confirm
+	_more = frame.more
+	_costs = frame.costs
+	(frame.odds as HBoxContainer).hide()
+	detail_scroll = frame.scroll
+	(frame.dragger as WindowDrag).moved.connect(func(_to: Vector2) -> void: _placed = true)
+	var left: VBoxContainer = frame.left
 	location_controls = preload("res://src/ui/crafting_location_controls.gd").new()
-	header.add_child(location_controls)
+	left.add_child(location_controls)
 	location_controls.location_changed.connect(func(location: String) -> void:
 		_source = location
 		_offset = 0
@@ -81,106 +84,64 @@ func configure(owner_main: Node) -> void:
 		_offset = offset
 		selected_id = 0
 		_refresh())
-	Parts.button(header, "Refresh", _refresh)
-	Parts.button(header, "×", hide).tooltip_text = "Close crafting window"
-	var dragger := WindowDrag.attach(self, header)
-	dragger.reserved_bottom = 88
-	dragger.moved.connect(func(_to: Vector2) -> void: _placed = true)
-	tabs = Parts.navigation(content, 0, _navigate)
-	_purpose = Parts.label(content, "", 14)
-	_purpose.modulate = MUTED
-	salvage_body = HBoxContainer.new()
-	salvage_body.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	salvage_body.add_theme_constant_override("separation", 16)
-	content.add_child(salvage_body)
-	var selection := VBoxContainer.new()
-	selection.custom_minimum_size.x = 220
-	salvage_body.add_child(selection)
-	_copies_heading = Parts.label(selection, "Backpack copies", 17)
-	copies = Parts.ledger(selection)
+	_copies_heading = Parts.label(left, "Backpack copies", 11)
+	copies = Parts.ledger(left)
 	copies.name = "Copies"
 	copies.item_selected.connect(func(index: int) -> void:
 		if _pending_op == "confirm": return
 		selected_id = int(copies.get_item_metadata(index))
 		_invalidate()
-		_update_details())
-	detail_scroll = ScrollContainer.new()
-	detail_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	detail_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	detail_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	salvage_body.add_child(detail_scroll)
-	var selected := VBoxContainer.new()
-	selected.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	selected.add_theme_constant_override("separation", 12)
-	detail_scroll.add_child(selected)
-	_hero = Parts.hero(selected)
-	selected_title = _hero.title
-	details = VBoxContainer.new()
-	details.add_theme_constant_override("separation", 8)
-	selected.add_child(details)
-	refine_body = HBoxContainer.new()
-	refine_body.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	refine_body.add_theme_constant_override("separation", 16)
-	content.add_child(refine_body)
-	var recipe_selection := VBoxContainer.new()
-	recipe_selection.custom_minimum_size.x = 220
-	refine_body.add_child(recipe_selection)
-	Parts.label(recipe_selection, "Enriched essences", 17)
-	recipes = Parts.ledger(recipe_selection)
+		_update_details()
+		_queue_quote())
+	recipes = Parts.ledger(left)
 	recipes.item_selected.connect(func(_index: int) -> void:
 		if _rendering or _pending_op == "confirm": return
 		_invalidate()
-		_update_details())
-	var refine_scroll := ScrollContainer.new()
-	refine_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	refine_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	refine_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	refine_body.add_child(refine_scroll)
-	var refine_content := VBoxContainer.new()
-	refine_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	refine_content.add_theme_constant_override("separation", 12)
-	refine_scroll.add_child(refine_content)
+		_update_details()
+		_queue_quote())
+	var right: VBoxContainer = frame.right
+	salvage_body = VBoxContainer.new()
+	salvage_body.add_theme_constant_override("separation", 5)
+	right.add_child(salvage_body)
+	_hero = Parts.hero(salvage_body)
+	selected_title = _hero.title
+	details = VBoxContainer.new()
+	details.custom_minimum_size.y = 128
+	details.add_theme_constant_override("separation", 0)
+	salvage_body.add_child(details)
+	refine_body = VBoxContainer.new()
+	refine_body.add_theme_constant_override("separation", 5)
+	right.add_child(refine_body)
+	_refine_hero = Parts.hero(refine_body)
 	var amount_row := HBoxContainer.new()
-	refine_content.add_child(amount_row)
-	Parts.label(amount_row, "Quantity", 18)
+	amount_row.add_theme_constant_override("separation", 4)
+	refine_body.add_child(amount_row)
+	Parts.label(amount_row, "Quantity", 11)
 	var less := Parts.button(amount_row, "−", func() -> void: quantity.value -= 1)
-	less.custom_minimum_size.x = 44
 	_quantity_buttons.append(less)
 	quantity = SpinBox.new()
 	quantity.min_value = 1
 	quantity.max_value = 100
 	quantity.value = 1
-	quantity.custom_minimum_size = Vector2(94, 42)
+	quantity.custom_minimum_size = Vector2(64, 26)
 	quantity.get_line_edit().alignment = HORIZONTAL_ALIGNMENT_CENTER
 	amount_row.add_child(quantity)
 	var more := Parts.button(amount_row, "+", func() -> void: quantity.value += 1)
-	more.custom_minimum_size.x = 44
 	_quantity_buttons.append(more)
 	quantity.value_changed.connect(func(_value: float) -> void:
 		if _rendering or _pending_op == "confirm": return
 		_invalidate()
-		_update_details())
-	_refine_details = VBoxContainer.new()
-	_refine_details.add_theme_constant_override("separation", 12)
-	refine_content.add_child(_refine_details)
-	status = Parts.label(content, "", 13)
-	status.custom_minimum_size.y = 30
-	var footer := Parts.card(content)
-	var actions := HBoxContainer.new()
-	actions.add_theme_constant_override("separation", 12)
-	footer.add_child(actions)
-	_totals = Parts.label(actions, "", 15)
-	preview_button = Parts.button(actions, "Check returns", _preview)
-	confirm_button = Parts.button(actions, "Review breakdown", _review, true)
-	confirm_button.custom_minimum_size.x = 190
+		_update_details()
+		_queue_quote())
+	refining_text = Parts.label(refine_body, "Guaranteed result · no failure roll", 11)
+	_purpose = Parts.label(right, "", 11)
+	_purpose.hide()
 	confirmation = ConfirmationDialog.new()
 	confirmation.title = "Review breakdown"
 	confirmation.confirmed.connect(_confirm)
 	add_child(confirmation)
-	add_child(preload("res://src/ui/storage_ledger_frame.gd").new())
 	AppState.state_changed.connect(_state_changed)
 	get_viewport().size_changed.connect(_fit)
-	minimum_size_changed.connect(func() -> void: _fit.call_deferred())
 	visibility_changed.connect(func() -> void:
 		if not visible: _invalidate())
 	hide()
@@ -207,6 +168,7 @@ func open(tab: int = 0, preferred_slot: int = -1, location: String = "backpack",
 	_fit.call_deferred()
 
 func _invalidate(cancel_pending: bool = true) -> void:
+	_quote_revision += 1
 	quote = {}
 	_review_requested = false
 	confirmation.hide()
@@ -226,7 +188,7 @@ func _send(request: Dictionary) -> void:
 	location_controls.render(snapshot, _source, true, tabs.current_tab == 0)
 	_busy = true
 	_pending_op = str(request.op)
-	preview_button.disabled = true
+	_more.get_popup().set_item_disabled(1, true)
 	confirm_button.disabled = true
 	if request.op == "confirm":
 		for index: int in copies.item_count: copies.set_item_disabled(index, true)
@@ -253,7 +215,7 @@ func _reply_overdue(serial: int) -> void:
 	# stays pending, so the inventory packets the server sends ahead of its
 	# receipt do not cancel it, and Preview stays locked until it comes.
 	if _pending_op == "confirm":
-		status.text = "No answer from the server yet. Refresh to see whether it went through."
+		status.text = "No answer yet. Use ••• → Retry connection to check the result."
 		return
 	_pending_op = ""
 	status.text = ("The server did not answer. Disenchanting and refining are not available here." if snapshot.is_empty()
@@ -273,12 +235,16 @@ func _state_changed(part: StringName) -> void:
 		# A confirmation sends inventory updates before its final receipt.
 		_stale = true
 		_invalidate(_pending_op != "confirm")
-		status.text = "Your inventory changed. Refresh to check the available copies and materials."
-		preview_button.disabled = true
+		status.text = "Updating copies and material costs…"
+		if not _refresh_queued:
+			_refresh_queued = true
+			_refresh_changed_equipment.call_deferred()
+		_more.get_popup().set_item_disabled(1, true)
 	elif visible and part == &"enchanting_recovery":
 		var incoming: Dictionary = AppState.enchanting_recovery
 		if int(incoming.get("request_id", -1)) != _serial: return
 		if str(incoming.get("source", "backpack")) != _source: return
+		var completed := _pending_op
 		snapshot = incoming
 		_stale = false
 		quote = snapshot.get("quote", {}) if snapshot.get("quote") is Dictionary else {}
@@ -288,6 +254,7 @@ func _state_changed(part: StringName) -> void:
 		var review := _review_requested
 		_review_requested = false
 		if review and not quote.is_empty(): _ask_confirmation()
+		elif completed == "list": _queue_quote()
 
 func _render() -> void:
 	_rendering = true
@@ -345,62 +312,52 @@ func _recipe() -> Dictionary:
 
 func _update_details() -> void:
 	location_controls.render(snapshot, _source, _busy or _pending_op == "confirm", tabs.current_tab == 0)
-	salvage_body.visible = tabs.current_tab == 0
-	refine_body.visible = tabs.current_tab == 1
-	_heading.text = "Break Down" if tabs.current_tab == 0 else "Refine"
-	_purpose.text = ("Recover materials from one enchanted copy. Results go to your %s." if tabs.current_tab == 0 else "Combine shards and normal essences. Materials, gold and results use your %s.") % _source
-	_purpose.modulate = MUTED
-	preview_button.text = "Check returns" if tabs.current_tab == 0 else "Check costs"
-	confirm_button.text = "Review breakdown" if tabs.current_tab == 0 else "Refine %d…" % int(quantity.value)
-	var chosen := _copy() if tabs.current_tab == 0 else _recipe()
+	var breaking := tabs.current_tab == 0
+	salvage_body.visible = breaking
+	refine_body.visible = not breaking
+	copies.visible = breaking
+	recipes.visible = not breaking
+	_copies_heading.text = ("Storage copies" if _source == "storage" else "Backpack copies") if breaking else "Enriched essences"
+	confirm_button.text = "Review breakdown" if breaking else "Review refine ×%d" % int(quantity.value)
+	var chosen := _copy() if breaking else _recipe()
 	var blocked := _busy or _stale or _pending_op == "confirm" or chosen.is_empty() or not bool(snapshot.get("enabled", false))
-	preview_button.disabled = blocked
+	_more.get_popup().set_item_disabled(1, blocked)
 	confirm_button.disabled = blocked
-	if tabs.current_tab == 0:
+	_clear(_costs)
+	_totals.text = "Returns" if breaking else "Total cost"
+	if breaking:
 		_clear(details)
 		Parts.show_hero(_hero, main, chosen)
 		if chosen.is_empty():
-			Parts.label(details, "Select an individual copy to see its effects and exact returns.")
-			_totals.text = "No copy selected"
+			Parts.label(details, "Select an individual copy to see its effects and exact returns.", 11)
 		else:
-			_purpose.text = ("Storage copy #%d" % int(chosen.instance_id) if _source == "storage" else "Backpack slot %d" % (int(chosen.slot) + 1)) + " · This individual copy will be destroyed."
-			_purpose.modulate = Parts.AMBER
-			Parts.label(details, "Current effects", 18)
-			var grid := GridContainer.new()
-			grid.columns = 2 if get_viewport_rect().size.x >= 1100 else 1
-			grid.add_theme_constant_override("h_separation", 8)
-			grid.add_theme_constant_override("v_separation", 8)
-			details.add_child(grid)
-			for effect: String in chosen.effects: Parts.effect(grid, effect)
-			var returns := Parts.card(details, "You receive")
-			for row: Dictionary in chosen.outputs: Parts.material(returns, main, row)
-			Parts.label(details, "This copy will be destroyed.", 16).modulate = Parts.AMBER
-			_totals.text = "Returns\n" + Parts.summary(chosen.outputs)
+			for effect: String in chosen.effects: Parts.effect(details, effect)
+			Parts.label(details, "This copy will be destroyed.", 11).modulate = Parts.AMBER
+			Parts.label(_costs, "You receive", 11)
+			var outputs: Array = quote.get("outputs", chosen.outputs)
+			for row: Dictionary in outputs: Parts.material(_costs, main, row)
+			_totals.tooltip_text = Parts.summary(outputs)
 	else:
-		_clear(_refine_details)
-		if chosen.is_empty():
-			refining_text = Parts.label(_refine_details, "Choose an essence recipe.")
-			_totals.text = "No recipe selected"
-		else:
-			var costs := Parts.card(_refine_details, "Input materials")
-			Parts.cost_heading(costs)
+		(_refine_hero.title as Label).text = str(chosen.get("result", "Choose an essence recipe"))
+		(_refine_hero.icon as TextureRect).texture = main.call("_named_icon", int(chosen.image_id), str(chosen.result)) if not chosen.is_empty() else null
+		(_refine_hero.condition as Label).text = "Result stays in " + _source
+		(_refine_hero.slots as Label).text = "×%d enriched essence" % int(quantity.value)
+		if not chosen.is_empty():
+			Parts.cost_heading(_costs)
 			var count := int(quantity.value)
 			var rows := [
 				{"name": snapshot.get("shard_item", "Enchanting Shards"), "quantity": count * int(chosen.shard_cost), "owned": int(snapshot.get("shard_available", 0))},
 				{"name": chosen.normal, "quantity": count * int(chosen.normal_cost), "owned": int(chosen.normal_available)},
 				{"name": "Gold Coins", "quantity": count * int(chosen.gold_fee), "owned": int(snapshot.get("gold_available", 0))}]
-			for row: Dictionary in rows: Parts.material(costs, main, row, int(row.owned))
 			for row: Dictionary in rows:
+				Parts.material(_costs, main, row, int(row.owned))
 				if int(row.quantity) > int(row.owned):
-					preview_button.disabled = true
+					_more.get_popup().set_item_disabled(1, true)
 					confirm_button.disabled = true
-					if not _busy and not _stale and status.text.is_empty(): status.text = "Not enough materials for this quantity. Reduce it or gather more."
-			var result := Parts.card(_refine_details, "Result")
-			Parts.material(result, main, {"name": chosen.result, "quantity": count, "image_id": chosen.image_id})
-			refining_text = Parts.label(result, "Guaranteed result · no failure roll", 14)
-			refining_text.modulate = CYAN
-			_totals.text = "Total cost\n" + Parts.summary(rows)
-	if status.text.is_empty(): status.text = "Review checks the selected copy, materials and room for your result."
+					if not _busy and not _stale and status.text.is_empty(): status.text = "Not enough materials. Reduce the amount or gather more."
+			_totals.tooltip_text = Parts.summary(rows)
+	if status.text.is_empty(): status.text = "Costs current · Review checks the exact copy and materials."
+	status.tooltip_text = status.text
 	_fit.call_deferred()
 
 func _materials(rows: Array) -> String:
@@ -436,12 +393,7 @@ func _confirm() -> void:
 	status.text = "Completing recovery…" if _busy else status.text
 
 func _fit() -> void:
-	if not is_inside_tree() or not visible: return
-	var viewport := get_viewport_rect().size
-	custom_minimum_size = Vector2(minf(1000, maxf(560, viewport.x - 112)), 0)
-	size = Vector2(custom_minimum_size.x, minf(700, maxf(350, viewport.y - 112)))
-	var desired := position if _placed else (viewport - size - Vector2(96, 88)) / 2
-	position = Vector2(clampf(desired.x, 8, maxf(8, viewport.x - size.x - 104)), clampf(desired.y, 8, maxf(8, viewport.y - size.y - 96)))
+	Workbench.fit(self, _placed)
 
 func _clear(parent: Node) -> void:
 	for child: Node in parent.get_children():
@@ -459,8 +411,28 @@ func _review() -> void:
 func _navigate(index: int) -> void:
 	if index == 2:
 		var selected := _copy()
+		var next_position := position
 		hide()
-		main.inventory_workspace.enchanting_window.open(int(selected.get("slot", -1)), _source, int(selected.get("instance_id", 0)))
+		var next: Control = main.inventory_workspace.enchanting_window
+		next.open(int(selected.get("slot", -1)), _source, int(selected.get("instance_id", 0)))
+		next.position = next_position
+		next.set("_placed", true)
+		next.call("_fit")
 		return
 	_invalidate()
 	_update_details()
+	_queue_quote()
+
+func _refresh_changed_equipment() -> void:
+	_refresh_queued = false
+	if not visible or not _stale or _pending_op == "confirm": return
+	_preferred_id = selected_id
+	_refresh()
+
+func _queue_quote() -> void:
+	var revision := _quote_revision
+	if not visible: return
+	get_tree().create_timer(quote_delay).timeout.connect(func() -> void:
+		if revision != _quote_revision or not visible or _busy or _stale or _pending_op == "confirm": return
+		if _more.get_popup().is_item_disabled(1): return
+		_preview())

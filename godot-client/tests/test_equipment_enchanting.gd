@@ -47,12 +47,51 @@ func receive(value: Dictionary) -> void:
 	state.call("_on_packet",185,JSON.stringify(value).to_utf8_buffer())
 
 func choose(action: String) -> void:
-	for index: int in window.action_picker.item_count:
-		if str(window.action_picker.get_item_metadata(index)) == action:
-			window.action_picker.select(index)
-			window.action_picker.item_selected.emit(index)
-			return
-	expect(false,"operation offered: " + action)
+	if not window.operation_buttons.has(action):
+		expect(false,"operation offered: " + action)
+		return
+	(window.operation_buttons[action] as CheckBox).button_pressed = true
+
+func check_fixed_workbench() -> void:
+	var geometry := sample()
+	for count: int in [1, 3]:
+		var copy: Dictionary = geometry.items[2].duplicate(true)
+		copy.instance_id = 600 + count
+		copy.slot = 3 if count == 1 else 4
+		copy.tier = "magic" if count == 1 else "rare"
+		copy.effects = copy.effects.slice(0, count)
+		copy.effect_names = copy.effect_names.slice(0, count)
+		geometry.items.append(copy)
+	geometry.total = geometry.items.size()
+	receive(geometry)
+	await frames()
+	var size_before := window.size
+	var position_before := window.position
+	var review_y: float = window.confirm_button.global_position.y
+	expect(size_before.x <= 540, "Classic rows uses the compact workbench width")
+	for index: int in geometry.items.size():
+		window.copies.select(index)
+		window.copies.item_selected.emit(index)
+		await frames()
+		expect(window.size == size_before and window.position == position_before, "%d effects retain the same outer window" % geometry.items[index].effects.size())
+		expect(is_equal_approx(window.confirm_button.global_position.y, review_y), "%d effects retain the Review button position" % geometry.items[index].effects.size())
+		if OS.get_cmdline_user_args().has("--capture"): await capture("fixed-%d-effects" % geometry.items[index].effects.size())
+	window.copies.select(2)
+	window.copies.item_selected.emit(2)
+	choose("values")
+	choose("reroll")
+	var selected := 0
+	for button: CheckBox in window.operation_buttons.values():
+		if button.button_pressed: selected += 1
+	expect(selected == 1 and window.operation_buttons.reroll.button_pressed, "operation radio buttons select exactly one action")
+	window.get("_advanced_toggle").button_pressed = true
+	await frames()
+	expect(window.size == size_before, "opening advanced catalyst choices retains the outer size")
+	window.get("_advanced_toggle").button_pressed = false
+	window.copies.select(0)
+	window.copies.item_selected.emit(0)
+	receive(sample())
+	await frames()
 
 func run() -> void:
 	create_timer(90).timeout.connect(func() -> void: quit(99))
@@ -80,6 +119,7 @@ func run() -> void:
 	main.game_view.show()
 	state.set("authenticated",true)
 	window = main.inventory_workspace.enchanting_window
+	window.quote_delay = 3600.0 # Packet fixtures below explicitly deliver each quote.
 	window.send_request = func(request: Dictionary) -> Error:
 		requests.append(request.duplicate(true))
 		return OK
@@ -92,22 +132,29 @@ func run() -> void:
 	expect(state.enchanting_recovery_available,"enchanting announcement offers recovery even before any equipment is inspected")
 	expect(main.mixing_workspace.refine.visible,"enchanting announcement offers the Mixing Refine entry")
 	var recovery: PanelContainer = main.inventory_workspace.recovery_window
+	recovery.quote_delay = 3600.0
 	var recovery_requests: Array[Dictionary] = []
 	recovery.send_request = func(request: Dictionary) -> Error:
 		recovery_requests.append(request.duplicate(true))
 		return OK
 	window.open(0)
 	expect(not window.tabs.is_tab_disabled(0) and not window.tabs.is_tab_disabled(1),"recovery tabs are enabled before the equipment list returns")
+	window.position = Vector2(50, 10)
+	window.set("_placed", true)
+	await frames()
+	var navigation_position := window.position
 	await click_tab(window.tabs, 0)
 	expect(not window.visible and recovery.visible and recovery.salvage_body.visible,"clicking Break Down opens its panel from a fresh enchanting announcement")
+	expect(recovery.position == navigation_position, "switching workbench tools preserves the dragged window position")
 	expect(not recovery_requests.is_empty() and recovery_requests[-1].op == "list","Break Down requests recovery options")
 	recovery.hide()
 	window.open(0)
 	receive(sample())
 	await frames()
 	expect(window.visible and window.selected_id == 501,"plain copy preselected by inspection slot")
+	await check_fixed_workbench()
 	expect(window.selected_title.text == "Militia Arming Sword","item name has no tier prefix")
-	expect(window.action_picker.item_count == 1 and window.get("_action") == "enchant","plain gear offers first enchanting")
+	expect(window.operation_buttons.size() == 1 and window.get("_action") == "enchant","plain gear offers first enchanting as a radio option")
 	expect(not window.confirm_button.disabled and window.quote.is_empty(),"Review is available before a quote; spending still needs the server token")
 	expect((window.get("_odds") as HBoxContainer).visible,"enchantment odds stay visible next to the main action")
 	expect(Rect2(Vector2.ZERO, Vector2(1184,712)).encloses(window.get_global_rect()),"plain enchanting with odds fits above the HUD")
@@ -164,9 +211,8 @@ func run() -> void:
 	choose("reroll")
 	window.dose.select(2)
 	window.dose.item_selected.emit(2)
-	var locks: VBoxContainer = window.locks_body
-	(locks.get_child(1) as CheckBox).button_pressed = true
-	(locks.get_child(2) as CheckBox).button_pressed = true
+	(window.effect_keep_buttons["Plated"] as CheckBox).button_pressed = true
+	(window.effect_keep_buttons["Vital"] as CheckBox).button_pressed = true
 	(window.get("_families")["Frost"] as SpinBox).value = 1
 	window.call("_preview")
 	expect(requests[-1].quantity == 5 and requests[-1].locks.size() == 2 and requests[-1].catalysts == {"Frost":1},"Magic locks and themed catalyst request")
@@ -174,6 +220,14 @@ func run() -> void:
 	data.quote = {"token":"reroll-token","action":"reroll","name":"Phoenix Helm","summary":"Preserve two chosen effects and reroll the rest.","gold_fee":0,"chances":[],"inputs":[{"name":"Enriched Magic Essence","quantity":5},{"name":"Enriched Frost Essence","quantity":1}]}
 	receive(data)
 	expect(window.dose.selected == 2 and window.get("_locks").size() == 2,"quote keeps locks and quantity controls")
+	window.call("_select_catalyst", "Frost", true)
+	(window.get("_families")["Frost"] as SpinBox).value = 2
+	window.call("_select_catalyst", "Fire", true)
+	expect(int((window.get("_families")["Fire"] as SpinBox).value) == 2 and int((window.get("_families")["Frost"] as SpinBox).value) == 0, "changing the single catalyst theme transfers its amount")
+	window.call("_select_catalyst", "Frost", true)
+	(window.get("_families")["Frost"] as SpinBox).value = 1
+	window.call("_preview")
+	receive(data)
 	if OS.get_cmdline_user_args().has("--capture"): await capture("reroll")
 	var inventory_before: Dictionary = state.inventory.duplicate(true)
 	window.call("_confirm")
@@ -250,9 +304,8 @@ func run() -> void:
 	window.open(0)
 	receive(sample())
 	expect(window.tabs.current_tab == 2 and window.visible,"returning to enchanting restores the active tab")
-	var locations: HBoxContainer = window.location_controls
-	locations.picker.select(1)
-	locations.picker.item_selected.emit(1)
+	var locations: VBoxContainer = window.location_controls
+	locations.storage.pressed.emit()
 	expect(requests[-1].source == "storage" and requests[-1].op == "list" and window.selected_id == 0, "location change reloads copies without retaining backpack selection")
 	var stored := sample()
 	stored.source = "storage"
@@ -277,6 +330,27 @@ func run() -> void:
 	main.inventory_workspace.recovery_window.hide()
 	window.open()
 	receive(sample())
+	window.quote_delay = 0.01
+	window.copies.select(2)
+	window.copies.item_selected.emit(2)
+	choose("values")
+	await create_timer(0.05).timeout
+	expect(requests[-1].op == "quote" and requests[-1].action == "values" and requests[-1].instance_id == 503,
+		"radio operation changes automatically request the latest costs")
+	var automatic := sample()
+	automatic.quote = {"token":"auto-water","action":"values","name":"Phoenix Helm","summary":"Reroll numbers, keeping effect types.","gold_fee":0,"chances":[],"inputs":[{"name":"Enriched Water Essence","quantity":1}]}
+	receive(automatic)
+	expect(not window.confirmation.visible and not window.confirm_button.disabled, "automatic quotes update costs without opening a spending confirmation")
+	window.confirm_button.pressed.emit()
+	expect(window.confirmation.visible, "Review opens the authoritative confirmation after automatic costing")
+	window.quote_delay = 3600.0
+	window.dose.select(4)
+	window.dose.item_selected.emit(4)
+	window.call("_preview")
+	var refused := sample()
+	refused.error = "Materials changed; review the current costs."
+	receive(refused)
+	expect(window.dose.selected == 4 and window.quote.is_empty(), "a refused quote preserves draft choices while clearing its token")
 	state.set("authenticated",false)
 	state.state_changed.emit(&"connection")
 	expect(not window.visible and window.quote.is_empty(),"disconnect closes and invalidates enchanting")

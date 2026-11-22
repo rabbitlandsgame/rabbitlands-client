@@ -4,22 +4,36 @@ Open **Inventory → ••• → Enchant equipment…**, click **Enchant** on 
 inspection card, or use **Mixing → ••• → Enchant equipment…**. These controls
 appear when the connected server supports enchanting.
 
-Choose **Backpack** or **Storage** at the top of the window. Storage requires
+Choose **Backpack** or **Storage** above the copy list. Storage requires
 opening your own storage at a nearby keeper or chest. Equipment, materials and
 gold fees all come from the selected location, and results stay there. Backpack
 equipment must be unequipped first. Choose the individual copy,
-pick an operation and materials, then click **Review enchantment** (or the
-operation's Review button). The server checks the selection and opens a
+select an operation's radio button and materials, then click **Review enchantment**
+(or the operation's Review button). Costs update automatically as you change
+the copy, operation, quantity, kept effects or catalysts. The server checks the
+selection and opens a
 confirmation with the exact cost. Nothing is spent until you confirm.
 Your item keeps its identity, condition,
 quality and creator. Blue names support up to two effects; yellow names support
 up to four.
 
+The compact Classic rows workbench keeps the original equipment, effect and
+essence artwork. Its outer size stays fixed as effect counts and operations
+change; the cost summary and Review button remain at the bottom. It fits within
+the current viewport above the HUD. Advanced combinations scroll inside the
+workbench when needed.
+
 The copy list shows backpack slots or storage copy numbers and effect counts,
 so identical items stay distinct. Use the arrows to page through stored copies.
-Pick an essence theme and quantity for plain equipment; **More options**
-lets you combine themes. Current odds and total costs stay beside the main action.
+Pick an essence theme and quantity for plain equipment; **Combine essence themes**
+lets you mix themes. For effect rerolls, **Keep** beside an effect preserves it
+within the selected Magic quantity's limit. The catalyst picker selects one
+theme; **Combine catalysts** exposes additional themes and amounts.
+Current odds and total costs stay beside the main action.
 Use the **Break Down**, **Refine** and **Enchant** tabs to move between windows.
+Inventory and storage changes automatically refresh all three tools while
+preserving a valid selection and draft amounts. **••• → Retry connection** is
+available when a reply is delayed; ordinary edits do not require Refresh.
 
 | What you want | What to use |
 | --- | --- |

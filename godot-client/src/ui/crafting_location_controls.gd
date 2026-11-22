@@ -1,42 +1,61 @@
-extends HBoxContainer
+extends VBoxContainer
 ## One location owns the equipment, materials, fees and resulting items.
 signal location_changed(location: String)
 signal page_changed(offset: int)
-var picker: OptionButton
+var backpack: Button
+var storage: Button
 var previous: Button
 var next: Button
 var page_label: Label
 var offset := 0
+var _location := "backpack"
 
 func _init() -> void:
-	picker = OptionButton.new()
-	picker.name = "CraftingLocation"
-	picker.add_item("Backpack")
-	picker.add_item("Storage")
-	picker.custom_minimum_size.y = 42
-	picker.tooltip_text = "Equipment, materials, gold fees and results use this location."
-	add_child(picker)
-	picker.item_selected.connect(func(index: int) -> void: location_changed.emit("storage" if index == 1 else "backpack"))
+	var source_row := HBoxContainer.new()
+	source_row.add_theme_constant_override("separation", 3)
+	add_child(source_row)
+	var group := ButtonGroup.new()
+	for location: String in ["backpack", "storage"]:
+		var button := Button.new()
+		button.text = location.capitalize()
+		button.toggle_mode = true
+		button.button_group = group
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.add_theme_font_size_override("font_size", 11)
+		button.custom_minimum_size.y = 26
+		button.tooltip_text = "Equipment, materials, gold fees and results use this location."
+		source_row.add_child(button)
+		if location == "backpack": backpack = button
+		else: storage = button
+		button.pressed.connect(func() -> void:
+			if _location != location: location_changed.emit(location))
+	var pages := HBoxContainer.new()
+	pages.add_theme_constant_override("separation", 3)
+	add_child(pages)
 	previous = Button.new()
 	previous.text = "‹"
-	previous.custom_minimum_size = Vector2(36, 42)
+	previous.custom_minimum_size = Vector2(26, 24)
 	previous.tooltip_text = "Previous copies"
-	add_child(previous)
+	pages.add_child(previous)
 	previous.pressed.connect(func() -> void: page_changed.emit(maxi(0, offset - 24)))
 	page_label = Label.new()
-	add_child(page_label)
+	page_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	page_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	pages.add_child(page_label)
 	next = Button.new()
 	next.text = "›"
-	next.custom_minimum_size = Vector2(36, 42)
+	next.custom_minimum_size = Vector2(26, 24)
 	next.tooltip_text = "More copies"
-	add_child(next)
+	pages.add_child(next)
 	next.pressed.connect(func() -> void: page_changed.emit(offset + 24))
 
 func render(snapshot: Dictionary, location: String, locked: bool, paging: bool = true) -> void:
-	picker.select(1 if location == "storage" else 0)
-	picker.disabled = locked
-	picker.set_item_disabled(1, not bool(snapshot.get("storage_supported", false)) or not bool(snapshot.get("storage_available", false)))
-	picker.set_item_tooltip(1, "Uses stored equipment and materials; results stay in storage. Open storage at a nearby keeper or chest.")
+	_location = location
+	backpack.set_pressed_no_signal(location == "backpack")
+	storage.set_pressed_no_signal(location == "storage")
+	backpack.disabled = locked
+	storage.disabled = locked or not bool(snapshot.get("storage_supported", false)) or not bool(snapshot.get("storage_available", false))
+	storage.tooltip_text = "Uses stored equipment and materials; results stay in storage. Open storage at a nearby keeper or chest."
 	offset = int(snapshot.get("offset", 0))
 	var total := int(snapshot.get("total", 0))
 	previous.visible = paging and total > 24

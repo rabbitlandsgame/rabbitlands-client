@@ -112,6 +112,7 @@ func run() -> void:
 	expect(more_menu.get_item_index(23) == more_menu.get_item_index(21) + 1 and more_menu.item_count == offered_count,
 		"reopening the menu does not add the entry twice")
 	window = main.inventory_workspace.recovery_window
+	window.quote_delay = 3600.0 # Manual packet fixtures; automatic quoting is checked separately.
 	window.send_request = func(request: Dictionary) -> Error:
 		requests.append(request.duplicate(true))
 		return OK
@@ -132,7 +133,7 @@ func run() -> void:
 		and not hero_condition.text.contains("Durability"), "a copy with no recorded durability is listed without a durability figure")
 	receive(sample())
 	await frames()
-	expect(text_of(window.details).contains("Spellguard") and text_of(window.details).contains("You receive") and text_of(window.details).contains("This copy will be destroyed"), "effects, returns and destruction warning are visible")
+	expect(text_of(window.details).contains("Spellguard") and text_of(window.get("_costs")).contains("You receive") and text_of(window.details).contains("This copy will be destroyed"), "effects, returns and destruction warning are visible")
 	expect(not window.confirm_button.disabled and window.quote.is_empty(), "Review is available without allowing an unquoted spend")
 	window.call("_review")
 	expect(requests[-1].op == "quote" and requests[-1].instance_id == 502, "Review checks the exact copy with the server")
@@ -152,11 +153,16 @@ func run() -> void:
 	data.request_id = int(window.get("_serial")) - 1
 	state.call("_on_packet", 186, JSON.stringify(data).to_utf8_buffer())
 	expect(window.quote.is_empty() and window.selected_id == 503, "stale quote response is ignored")
+	state.state_changed.emit(&"inventory")
+	await frames()
+	expect(requests[-1].op == "list" and requests[-1].focus == 503, "automatic recovery refresh requests the selected exact copy")
+	receive(sample())
+	expect(window.selected_id == 503, "automatic recovery refresh retains the selected copy")
 	window.tabs.current_tab = 1
-	var costs := text_of(window.get("_refine_details"))
+	var costs := text_of(window.get("_costs"))
 	expect(window.quote.is_empty() and costs.contains("Enchanting Shards\n20\n45") and costs.contains("Life Essence\n100\n240") and costs.contains("Gold Coins\n100\n500"), "refining shows required and owned quantities for all configured costs")
 	window.quantity.value = 2
-	costs = text_of(window.get("_refine_details"))
+	costs = text_of(window.get("_costs"))
 	expect(costs.contains("Enchanting Shards\n40\n45") and costs.contains("Gold Coins\n200\n500"), "batch cost cards scale exactly")
 	data = sample()
 	data.quote = {"token": "refine-token", "action": "refine", "name": "Enriched Life Essence", "inputs": [{"name": "Life Essence", "quantity": 200}, {"name": "Enchanting Shards", "quantity": 40}], "outputs": [{"name": "Enriched Life Essence", "quantity": 2}], "gold_fee": 200}
@@ -197,12 +203,12 @@ func run() -> void:
 	expect(int(window.get("_serial")) == asked and window.copies.item_count == 2, "a late answer to that request still lands")
 	window.call("_send", {"op": "quote", "action": "disenchant", "instance_id": window.selected_id})
 	await create_timer(0.5).timeout
-	expect(window.status.text.contains("has not answered yet") and not window.preview_button.disabled,
+	expect(window.status.text.contains("has not answered yet") and not window.get("_more").get_popup().is_item_disabled(1),
 		"a slow quote on a server that has answered asks for a retry and unlocks Preview")
 	window.call("_send", {"op": "confirm", "token": "slow-token"})
 	asked = window.get("_serial")
 	await create_timer(0.5).timeout
-	expect(window.status.text.contains("Refresh to see") and str(window.get("_pending_op")) == "confirm",
+	expect(window.status.text.contains("Retry connection") and str(window.get("_pending_op")) == "confirm",
 		"a slow confirmation says to refresh and stays pending")
 	state.state_changed.emit(&"inventory")
 	var receipt := sample()
@@ -238,9 +244,8 @@ func run() -> void:
 	state.set("authenticated", true)
 	window.open(0)
 	receive(sample())
-	var locations: HBoxContainer = window.location_controls
-	locations.picker.select(1)
-	locations.picker.item_selected.emit(1)
+	var locations: VBoxContainer = window.location_controls
+	locations.storage.pressed.emit()
 	expect(requests[-1].op == "list" and requests[-1].source == "storage" and window.quote.is_empty(), "changing to storage requests fresh options and clears quote")
 	var stored := sample()
 	stored.source = "storage"
@@ -264,6 +269,20 @@ func run() -> void:
 	receive(stored)
 	await frames()
 	expect(Rect2(Vector2.ZERO, Vector2(804, 592)).encloses(window.get_global_rect()), "storage selector and paging fit narrow viewport")
+	var refresh_count := requests.size()
+	var preserved_quantity: int = window.quantity.value
+	var preserved_copy: int = window.selected_id
+	state.state_changed.emit(&"inventory")
+	state.state_changed.emit(&"storage")
+	await frames()
+	expect(requests.size() == refresh_count + 1 and requests[-1].op == "list" and requests[-1].source == "storage", "recovery inventory changes coalesce into one automatic refresh")
+	receive(stored)
+	expect(int(window.quantity.value) == preserved_quantity and window.selected_id == preserved_copy, "recovery refresh preserves the copy and quantity")
+	window.quote_delay = 0.01
+	window.quantity.value = 2
+	await create_timer(0.05).timeout
+	expect(requests[-1].op == "quote" and requests[-1].action == "refine" and requests[-1].quantity == 2, "refining quantity automatically updates its server quote")
+	window.quote_delay = 3600.0
 	state.set("enchanting_available", true)
 	window.tabs.set_tab_disabled(2, false)
 	window.tabs.current_tab = 2

@@ -12,4 +12,4 @@ func _draw() -> void:
 		if not rect.intersects(Rect2(Vector2.ZERO, size)): continue
 		var baseline := rect.end.y - 7
 		if baseline < 14 or baseline > size.y - 8: continue
-		draw_string(font, Vector2(rect.position.x + 50, baseline), str(notes[identity]), HORIZONTAL_ALIGNMENT_LEFT, maxf(0, size.x - 62), 12, Color("b5b9ac"))
+		draw_string(font, Vector2(rect.position.x + fixed_icon_size.x + 8, baseline), str(notes[identity]), HORIZONTAL_ALIGNMENT_LEFT, maxf(0, size.x - fixed_icon_size.x - 16), 11, Color("b6aa91"))
