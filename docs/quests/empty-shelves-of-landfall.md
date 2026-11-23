@@ -86,7 +86,9 @@ The four workers have visible health bars and companion rows beside the human pa
 
 The tracked quest card offers a named **Heal Target** action for a fallen Life, Fire or Water worker, and for Elen inside Lantern Mine. It casts the ordinary Power 1 spell on that ally, with its normal approach, casting time and costs; moving cancels the cast. The Magic window and direct world targeting work as well. An unused assisted first recovery for Elen remains available. These actions do not appear for paused encounters or healthy workers.
 
-Water crew orders remain in effect until changed. Selecting Work, Regroup or Wait again keeps the current jobs running. The ledger shows the current order; other available orders remain choices. Barge departure and repairs wait for the relevant pilot, hull, obstruction and nearby-attacker conditions.
+Water crew orders remain in effect until changed. Selecting Work, Regroup or Wait again keeps the current jobs running. The ledger shows the current order; other available orders remain choices. During cutting, the slim card distinguishes the current resource's bags and loading-point stock from secured deliveries. Every Water progress view uses the actual delivery objective, even when a legacy shipment retains more previously cut cargo.
+
+The active barge card keeps hull condition visible. Disabled orders explain whether the boat needs repairs, Ada needs Heal Target, attackers remain, or an obstruction needs clearing. Ada pilots the boat; Heal Target helps the crew, while a Wood Plank repairs forty hull, up to full health, at a halted boat clear of attackers. Wait holds the boat at its current position and Sail continues the route.
 
 Ilka provides one guard allowance: 1,500 Fire, 250 Life and 500 Water Essences, plus 20 minor healing potions. Items that do not fit go to personal storage. Restarting or canceling does not issue another allowance.
 
@@ -99,6 +101,10 @@ During play, the slim quest card shows your next action and the current shipment
 The card makes room for the minimap and its labels where space allows. In a crowded layout, click an exposed part of the quest card or minimap to bring that HUD surface forward. Normal windows and confirmations keep their usual precedence.
 
 During the opening lessons, the card offers the relevant conversation when you reach Ilka with completed gathering or a finished batch, and begins or resumes practice when you reach Ostrid. A defeat in practice keeps your current lesson. Personal supply caches are labelled as optional; required practice and rare-drop recovery remain actionable. Party helpers see their supporting role and retain their own unfinished assignment.
+
+Eligible players joining an active Fire or Water worksite receive the same personal supplies they would receive at its briefing. Existing allowance receipts prevent duplicates on re-entry or replay; helper-only guests receive no additional kit. A helper who finishes the prerequisites can rejoin as an eligible participant and receive their own chapter progress and report reward. Guests who already completed the chapter remain helpers.
+
+Fire and Water conversations and replays select the text for the actual chapter. Return conversations describe the current quarry, Coal, sapper, channel, cutter, barge or gatehouse task without adding another camera setup or dialogue window. Returning to an active sapper assignment resumes the work instead of repeating its first introduction.
 
 New learners practice Heal Target on Ostrid's minor training injury before learning Fire Bolt. Open Magic, choose Heal Target at Power 1, select Cast, then click Ostrid. Her health bar shows the result. Magic level 0 is sufficient; the cast costs 5 ether, one Life Essence and one Water Essence. The lesson needs actual healing on Ostrid, and explains that the same spell revives downed supply workers. Water practice supplies arrive before this cast and are shared with the later Gain Ether lesson. Courses already in progress retain their original lesson order and rewards.
 

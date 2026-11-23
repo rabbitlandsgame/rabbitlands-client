@@ -82,6 +82,28 @@ func run() -> void:
 	expect(hud._entry.is_visible_in_tree() and hud._entry.get_index() < hud._inline_content.get_index() \
 		and hud._entry.get_index() < hud._shelves.get_index(),"the primary report action precedes long carried-stock and crew details")
 	expect(not tracker.cargo.visible,"returning to Ilka hides the local shipment-bag row")
+	var water := state.duplicate(true); water.key = "water_cutters"; water.title = "The Cutters' Share"
+	water.shelves.chapter = "water_cutters"; water.shelves.erase("growers")
+	water.shelves.objectives = [{"id":"kelp","label":"Secure Kelp","current":100,"target":400,"personal":false},
+		{"id":"cress","label":"Secure Watercress","current":50,"target":200,"personal":false}]
+	water.shelves.water = {"stage":"water_cutters","command":"work","stored":{"kelp":100,"cress":50},
+		"bins":{"kelp":20,"cress":10},"cut":{"kelp":135,"cress":65},"goals":{"kelp":800,"cress":400},
+		"workers":[],"bed":0,"hull":40,"landing":1,"sailing":false,
+		"field_hint":"Protect the cutters and Ada's loading route."}
+	water.hint = water.shelves.water.field_hint
+	hud.apply_state(water,Vector2i(100,100),"landfall"); guide.apply_campaign(water); await settle()
+	expect(tracker.cargo.text == "Kelp · Bags 15 · Loading 20" and tracker.progress.value == 25,
+		"the real Water card separates carried bags, loading stock and secured delivery progress")
+	expect(hud._shelves.text.contains("Cut 135/400") and hud._shelves.text.contains("Secured 100/400") \
+		and not hud._shelves.text.contains("100/800"),"the original full Water ledger and slim card agree on the actual production contract")
+	var barge := water.duplicate(true); barge.key = "water_barge"; barge.title = "A Barge Against the Current"
+	barge.shelves.chapter = "water_barge"; barge.shelves.water.stage = "water_barge"
+	barge.shelves.water.field_hint = "The barge is waiting. Repair it with Wood Planks if needed, then order Sail."
+	barge.hint = barge.shelves.water.field_hint
+	barge.shelves.objectives = [{"id":"landings","label":"Reach the three landings","current":1,"target":3,"personal":false}]
+	hud.apply_state(barge,Vector2i(100,100),"landfall"); guide.apply_campaign(barge); await settle()
+	expect(tracker.secondary.text == "Hull 40 / 100" and tracker.secondary.is_visible_in_tree() \
+		and not tracker.cargo.visible,"the actual barge card shows hull condition and clears the previous cutters' cargo")
 	hud.apply_state(state,Vector2i(100,100),"landfall"); guide.apply_campaign(state); await settle()
 	await click_button(tracker.details_close)
 	expect(guide.visible and guide.is_campaign_tracked() and not guide._details_open and not hud.is_visible_in_tree(),
@@ -107,6 +129,12 @@ func run() -> void:
 		expect(root.get_visible_rect().encloses(tracker.get_global_rect()) \
 			and root.get_visible_rect().encloses(tracker._menu.get_global_rect()), "the slim card and More fit a small scaled viewport")
 		tracker.close_more()
+		for shipment: Dictionary in [water,barge]:
+			hud.apply_state(shipment,Vector2i(100,100),"landfall"); guide.apply_campaign(shipment)
+			guide._process(0); await settle(); tracker.open_more(); await settle()
+			expect(root.get_visible_rect().encloses(tracker.get_global_rect()) \
+				and root.get_visible_rect().encloses(tracker._menu.get_global_rect()),"Water cargo and barge hull keep the card and More bounded at a small scaled size")
+			tracker.close_more()
 	expect(before.shelves.growers.stored.sage == state.shelves.growers.stored.sage \
 		and before.shelves.objectives == state.shelves.objectives, "presentation controls do not change native delivery progress")
 	var evidence := OS.get_environment("RL_SLIM_RECOVERY_EVIDENCE")
