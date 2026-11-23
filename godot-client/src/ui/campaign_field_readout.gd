@@ -2,6 +2,26 @@ extends RefCounted
 ## Passive field summaries. Available actions still come from the server targets.
 const RESOURCES := ["Sage", "Hearthroot", "Flint", "Coal", "Kelp", "Watercress"]
 
+static func objective_target(ledger: Dictionary, identity: String, fallback := 0) -> int:
+	# Wire goals can grow to preserve a legacy shipment's already cut cargo.
+	# The objective is the production contract whenever the server supplies it.
+	for row: Dictionary in ledger.get("objectives",[]):
+		if str(row.get("id","")) == identity and row.has("target"):
+			return maxi(0,int(row.target))
+	return maxi(0,int(fallback))
+
+static func water_cargo(water: Dictionary, identity: String) -> Dictionary:
+	var values := {}
+	for key: String in ["cut","stored","bins"]:
+		var counts: Variant = water.get(key)
+		if not counts is Dictionary: return {}
+		var count: Variant = counts.get(identity)
+		if typeof(count) not in [TYPE_INT,TYPE_FLOAT] or not is_finite(float(count)) \
+				or float(count) != floor(float(count)) or float(count) < 0: return {}
+		values[key] = int(count)
+	var bags: int = values.cut-values.stored-values.bins
+	return {"bags":bags,"loading":values.bins} if bags >= 0 else {}
+
 static func instructions(snapshot: Dictionary) -> String:
 	var travel: Dictionary = snapshot.get("travel", {})
 	if travel.is_empty(): return str(snapshot.get("hint", "Explore with the field crew."))
@@ -88,8 +108,8 @@ static func _supply(snapshot: Dictionary) -> Dictionary:
 			"water_cutters":
 				var stored: Dictionary = water.get("stored", {})
 				var goals: Dictionary = water.get("goals", {})
-				progress = "Secured: %d/%d Kelp · %d/%d Watercress" % [int(stored.get("kelp", 0)), int(goals.get("kelp", 0)),
-					int(stored.get("cress", 0)), int(goals.get("cress", 0))]
+				progress = "Secured: %d/%d Kelp · %d/%d Watercress" % [int(stored.get("kelp", 0)), objective_target(ledger,"kelp",int(goals.get("kelp",0))),
+					int(stored.get("cress", 0)), objective_target(ledger,"cress",int(goals.get("cress",0)))]
 				match str(water.get("command", "wait")):
 					"wait": action = "Crew waiting — choose Work when you are ready."
 					"regroup": action = "The crew is regrouping. Follow the marked landing, then choose Work."

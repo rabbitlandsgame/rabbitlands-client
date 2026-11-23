@@ -2024,7 +2024,12 @@
           "at": 0,
           "speaker": "Brenna Flint",
           "speaker_actor": "mentor",
-          "text": "The loads we brought in are still safe. Take a breath, check the workers, and we'll finish this. If anyone is down, Heal Target will put them back on their feet."
+          "variants": {
+            "fire": "The Flint we've secured is still safe. Finish opening the marked hauling gate if you need to, then protect the miners and their loads. If anyone is down, Heal Target will put them back on their feet.",
+            "fire_coal": "Our secured Coal and finished repairs are still here. Finish the marked lift repairs or passage supports for the route we chose, then guard the miners and hauling paths. A fallen mechanic cannot finish the lift; Heal Target gets her, or any fallen worker, back up.",
+            "fire_sapper": "Krek is still holding the yard, but our finished preparations still count. Check the marked signal, water channels and powder fuse for what remains. Choose the preparations you want, then take him on. Keep moving out of his blast marks."
+          },
+          "text": "The Flint we've secured is still safe. Finish opening the marked hauling gate if you need to, then protect the miners and their loads. If anyone is down, Heal Target will put them back on their feet."
         }
       ],
       "live_camera": "gameplay"
@@ -2280,7 +2285,7 @@
         {
           "speaker": "Iona Reed",
           "speaker_actor": "mentor",
-          "text": "The sheltered channel has three obstructions, but the banks give us cover. The coastal passage is clearer, with more room for an ambush.\n\nWe'll take the towpath beside the boat. Give Ada the word to Sail, or Wait if we need to regroup. Which passage shall we take?",
+          "text": "The sheltered channel has three obstructions, but the banks give us cover. The coastal passage is clearer, with more room for an ambush.\n\nWe'll take the towpath beside the boat. Give Ada the word to Sail, or Wait to regroup. She needs to be on her feet to pilot; Heal Target helps the crew, not the hull. Halt and clear the attackers before using Repair. One Wood Plank restores forty hull. Which passage shall we take?",
           "at": 0
         }
       ],
@@ -2547,7 +2552,13 @@
         {
           "speaker": "Iona Reed",
           "speaker_actor": "mentor",
-          "text": "We haven't lost the work we finished. Take a breath and check on the crew. Anyone still down needs Heal Target. Then give the word, and we'll carry on.",
+          "variants": {
+            "water": "The gates and diversion are as we left them. Finish the marked stations for our chosen plan: balance and Test the channels, or clear the guards and open the spillway. Both beds need their water back.",
+            "water_cutters": "The secured Kelp and Watercress are safe. Check on the crew; Heal Target revives anyone still down. Regroup brings us to the active landing, Work starts the cutting and hauling, and Wait holds us there. Watch Ada's bags until they reach storage.",
+            "water_barge": "The boat is where we left it. Wait holds it here; Sail continues the passage. Ada needs to be standing to pilot; Heal Target helps her and the crew, not the hull. For hull repairs, halt, clear the attackers and use Repair with a Wood Plank. Each plank restores forty hull.",
+            "water_keeper": "Our finished gate work still counts. Use either marked gate to shut a pair of guards out, or face them together. Veyra still holds the route. Watch for water gathering under your feet and move before her surge strikes. We'll keep the cutters back."
+          },
+          "text": "The gates and diversion are as we left them. Finish the marked stations for our chosen plan: balance and Test the channels, or clear the guards and open the spillway. Both beds need their water back.",
           "at": 0
         }
       ],

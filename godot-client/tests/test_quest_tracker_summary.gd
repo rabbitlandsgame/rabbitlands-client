@@ -211,17 +211,38 @@ func run() -> void:
 	expect(summary.objective == "Order Work at the crew station" and summary.counter == "Kelp secured · 100 / 400" \
 		and is_equal_approx(float(summary.progress),0.25), "Water respects current orders, secured bags and the actual production goal")
 	expect(summary.ribbon_objective == "Order Work", "the waiting ribbon names the command rather than claiming workers are gathering")
+	expect(summary.cargo.is_empty(),"a waiting Water crew does not advertise its saved stock as moving cargo")
 	state.shelves.water.command = "regroup"
 	expect(Summary.campaign(state,"landfall").objective == "Meet crew; then order Work",
 		"regroup names the meeting step before the next native work order")
 	expect(Summary.campaign(state,"landfall").ribbon_objective == "Meet the crew", "the regroup ribbon names the immediate meeting action")
+	expect(Summary.campaign(state,"landfall").cargo.is_empty(),"regrouping keeps saved cargo in Instructions rather than a stale work row")
 	state.shelves.water.command = "work"; state.shelves.water.cut = {"kelp":300,"cress":200}
+	state.shelves.water.bins = {"kelp":20,"cress":10}
 	state.shelves.water.field_hint = "Protect the cutters and Ada along the loading route. Heal Target gets a fallen worker back on her feet."
 	state.hint = state.shelves.water.field_hint
 	summary = Summary.campaign(state,"landfall")
 	expect(summary.objective == "Protect cutters and Ada's route" and summary.full_objective == state.hint,
 		"Water work has one bounded action while full instructions remain exact")
 	expect(summary.ribbon_objective == "Guard cutters", "the work ribbon keeps its current guard action short")
+	expect(summary.cargo == "Kelp · Bags 180 · Loading 20" and is_equal_approx(float(summary.progress),0.25),
+		"Water names the focused cargo and separates native bags and loading bins without adding either to secured progress")
+	for map: String in ["landfall_town","other-map"]:
+		expect(Summary.campaign(state,map).cargo.is_empty(),"remote Water work has no current cargo row")
+	state.active = false
+	expect(Summary.campaign(state,"landfall").cargo.is_empty(),"suspended Water work has no current cargo row")
+	state.active = true
+	for bad: Variant in [null,-1,2.5,"300"]:
+		var cargo: Dictionary = state.shelves.water.duplicate(true); cargo.cut.kelp = bad
+		expect(Readout.water_cargo(cargo,"kelp").is_empty(),"unknown, negative, fractional and nonnumeric Water allocation cannot invent bags")
+	var inconsistent: Dictionary = state.shelves.water.duplicate(true); inconsistent.cut.kelp = 119
+	expect(Readout.water_cargo(inconsistent,"kelp").is_empty(),"inconsistent Water allocation is omitted instead of clamped into fake cargo")
+	var wire_water: Dictionary = JSON.parse_string(JSON.stringify(state.shelves.water))
+	expect(Readout.water_cargo(wire_water,"kelp") == {"bags":180,"loading":20},"whole native JSON numbers preserve the typed allocation")
+	expect(str(Readout.summary(state).text).contains("100/400 Kelp") and str(Readout.summary(state).text).contains("50/200 Watercress"),
+		"the field readout uses the same production targets as the card instead of inflated legacy wire goals")
+	var legacy: Dictionary = state.shelves.duplicate(true); legacy.objectives = []
+	expect(Readout.objective_target(legacy,"kelp",800) == 800,"legacy snapshots without objective contracts keep their compatible wire goal")
 	state.shelves.water.cut.kelp = 400
 	summary = Summary.campaign(state,"landfall")
 	expect(summary.objective == "Guard the final delivery route" and summary.counter == "Kelp secured · 100 / 400",
@@ -233,6 +254,9 @@ func run() -> void:
 	state.shelves.water.stored.kelp = 400
 	summary = Summary.campaign(state,"landfall")
 	expect(summary.counter == "Watercress secured · 50 / 200", "the remaining required crop becomes the primary counter")
+	state.shelves.water.cut = {"kelp":400,"cress":65}
+	expect(Summary.campaign(state,"landfall").cargo == "Watercress · Bags 5 · Loading 10",
+		"Water's cargo row follows the remaining crop counter")
 	state.shelves.water.workers = [{"actor_id":501,"name":"Ada","health":1,"downed":true}]
 	summary = Summary.campaign(state,"landfall")
 	expect(summary.urgent and summary.alert.contains("Ada") and summary.recovery.actor_id == 501,
@@ -245,6 +269,14 @@ func run() -> void:
 		"field_hint":"Repair the hull with Wood Planks before ordering Sail."},true)
 	expect(Summary.campaign(state,"landfall").objective == state.shelves.water.field_hint,
 		"barge blockers and their Wood Plank requirements remain intact")
+	expect(Summary.campaign(state,"landfall").secondary == "Hull 0 / 100" \
+		and Summary.campaign(state,"landfall").cargo.is_empty(),"the barge shows hull condition instead of retaining cutter cargo")
+	for hull: int in [40,100]:
+		state.shelves.water.hull = hull
+		expect(Summary.campaign(state,"landfall").secondary == "Hull %d / 100" % hull,"damaged and healthy hull condition stays visible on the slim card")
+	state.active = false
+	expect(not Summary.campaign(state,"landfall").secondary.begins_with("Hull"),"a suspended encounter does not present saved hull as a current barge")
+	state.active = true
 	state.shelves.erase("water")
 	state.shelves.objectives = [{"id":"orc","label":"Defeat the raiders' leader","current":0,"target":1}]
 	state.targets = [{"id":"storage","label":"Personal supply cache","enabled":true}]

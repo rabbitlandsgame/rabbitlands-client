@@ -662,7 +662,9 @@ func _apply_shelves(ledger: Dictionary) -> void:
 		if str(water.stage)=="water":lines.append("Channel settings · Fresh %d/2 · Tide %d/2 · Drain %d/2\nKeeper’s marks: Fresh 2, Tide 1, Drain 0" % [int(water.flow[0]),int(water.flow[1]),int(water.flow[2])])
 		elif str(water.stage)=="water_cutters":
 			if local_work:lines.append("Crew: %s · Gathering beds %d/2" % [str(water.command).capitalize(),int(water.bed)+1])
-			for crop:String in ["kelp","cress"]:lines.append("%s · Cut %d/%d · At loading point %d · Secured %d/%d" % ["Kelp" if crop=="kelp" else "Watercress",int(water.cut[crop]),int(water.goals[crop]),int(water.bins[crop]),int(water.stored[crop]),int(water.goals[crop])])
+			for crop:String in ["kelp","cress"]:
+				var goal := FieldReadout.objective_target(ledger,crop,int(water.goals[crop]))
+				lines.append("%s · Cut %d/%d · At loading point %d · Secured %d/%d" % ["Kelp" if crop=="kelp" else "Watercress",int(water.cut[crop]),goal,int(water.bins[crop]),int(water.stored[crop]),goal])
 		elif str(water.stage)=="water_barge":
 			lines.append("Barge hull: %d/100 · Landings: %d/3" % [int(water.hull),int(water.landing)])
 			if local_work:lines.append(("Departure ordered" if water.sailing else "Waiting for your departure order") + "\nStay close and drive attackers away. Heal the crew; repair the boat with Wood Planks.")

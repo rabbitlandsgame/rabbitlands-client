@@ -86,8 +86,7 @@ static func _water_final_loads(ledger: Dictionary, water: Dictionary) -> bool:
 	var cut: Dictionary = water.get("cut",{})
 	var unfinished := false
 	for identity: String in ["kelp","cress"]:
-		var row := _named_objective(ledger,identity)
-		var goal := int(row.get("target",(water.get("goals",{}) as Dictionary).get(identity,0)))
+		var goal := FieldReadout.objective_target(ledger,identity,int((water.get("goals",{}) as Dictionary).get(identity,0)))
 		if goal <= 0 or not cut.has(identity) or int(cut[identity]) < goal: return false
 		unfinished = unfinished or int((water.get("stored",{}) as Dictionary).get(identity,0)) < goal
 	return unfinished
@@ -133,15 +132,23 @@ static func _supply(result: Dictionary, snapshot: Dictionary, readout: Dictionar
 					result.objective = "Guard the final delivery route" if final_loads else "Protect cutters and Ada's route"
 					result.ribbon_objective = "Guard final delivery" if final_loads else "Guard cutters"
 			for identity: String in ["kelp","cress"]:
-				var row := _named_objective(ledger,identity)
-				var goal := int(row.get("target",(water.get("goals",{}) as Dictionary).get(identity,0)))
+				var goal := FieldReadout.objective_target(ledger,identity,int((water.get("goals",{}) as Dictionary).get(identity,0)))
 				var stored := int((water.get("stored",{}) as Dictionary).get(identity,0))
 				if goal <= 0 or stored >= goal: continue
-				_counter(result,("Kelp" if identity == "kelp" else "Watercress") + " secured",stored,goal)
+				var resource := "Kelp" if identity == "kelp" else "Watercress"
+				_counter(result,resource + " secured",stored,goal)
+				if local and str(water.get("command","wait")) == "work":
+					var cargo := FieldReadout.water_cargo(water,identity)
+					if not cargo.is_empty() and int(cargo.bags)+int(cargo.loading) > 0:
+						result.cargo = "%s · Bags %s · Loading %s" % [resource,_number(int(cargo.bags)),_number(int(cargo.loading))]
 				break
 		elif str(water.get("stage","")) == "water_barge":
 			var landings := _named_objective(ledger,"landings")
 			_counter(result,"Landings reached",int(water.get("landing",0)),int(landings.get("target",0)))
+			var hull: Variant = water.get("hull")
+			if local and typeof(hull) in [TYPE_INT,TYPE_FLOAT] and is_finite(float(hull)) \
+					and float(hull) == floor(float(hull)) and float(hull) >= 0 and float(hull) <= 100:
+				result.secondary = "Hull %d / 100" % int(hull)
 		return
 	if not growers.is_empty() and not bool(growers.get("raid",false)):
 		_crew(result,growers.get("workers",[]))
@@ -246,24 +253,22 @@ static func instructions(snapshot: Dictionary, current_map := "") -> Dictionary:
 		if str(water.get("stage","")) == "water_cutters":
 			var stored: Dictionary = water.get("stored",{})
 			var bins: Dictionary = water.get("bins",{})
-			var cut: Dictionary = water.get("cut",{})
 			var complete_goals := true
 			var bags_known := true
 			var bags := {}
 			for pair: Array in [["kelp","Kelp"],["cress","Watercress"]]:
 				var identity := str(pair[0])
 				var row := _named_objective(ledger,identity)
-				var goal := int(row.get("target",(water.get("goals",{}) as Dictionary).get(identity,0)))
+				var goal := FieldReadout.objective_target(ledger,identity,int((water.get("goals",{}) as Dictionary).get(identity,0)))
 				var valid := stored.has(identity) and goal > 0
 				# Objective targets are the actual production contract. A legacy
 				# wire goal alone may have grown to preserve already cut cargo.
 				complete_goals = complete_goals and valid and int(row.get("target",0)) > 0
 				if valid: _ledger_row(result,str(pair[1])+" secured",_stored_quantity(int(stored[identity]),goal,"").strip_edges())
-				var known := cut.has(identity) and stored.has(identity) and bins.has(identity)
+				var cargo := FieldReadout.water_cargo(water,identity)
+				var known := not cargo.is_empty()
 				if known:
-					var carried := int(cut[identity])-int(stored[identity])-int(bins[identity])
-					known = carried >= 0
-					if known: bags[identity] = carried
+					bags[identity] = cargo.bags
 				bags_known = bags_known and known
 			if bins.has("kelp") and bins.has("cress") and int(bins.kelp)+int(bins.cress) > 0:
 				_ledger_row(result,"At loading point",_typed_cargo(bins))
