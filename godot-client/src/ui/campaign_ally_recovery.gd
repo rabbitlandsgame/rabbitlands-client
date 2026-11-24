@@ -10,6 +10,12 @@ static func patients(snapshot: Dictionary, current_map: String) -> Array[Diction
 			!= EloriaProtocol.map_id_from_reference(current_map):
 		return result
 	match str(snapshot.get("kind", "")):
+		"contracts":
+			var encounter: Dictionary = (snapshot.get("contracts",{}) as Dictionary).get("encounter",{})
+			if str(encounter.get("phase","")) != "work": return result
+			for worker: Dictionary in encounter.get("workers",[]):
+				if int(worker.get("actor_id",0)) > 0 and bool(worker.get("downed",false)):
+					result.append({"actor_id":int(worker.actor_id),"name":str(worker.name)})
 		"shelves":
 			var ledger: Dictionary = snapshot.get("shelves", {})
 			if str(ledger.get("phase", "")) != "work": return result

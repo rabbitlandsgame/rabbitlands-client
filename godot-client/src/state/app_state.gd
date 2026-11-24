@@ -244,6 +244,7 @@ var marketplace: Dictionary = _empty_marketplace_state()
 var merchant: Dictionary = {"open": false, "actor_id": -1, "npc_name": "",
 	"gold": 0, "carried": 0, "capacity": 0, "items": []}
 var quest_journal: Array[Dictionary] = []
+var contracts_board: Dictionary = {}
 ## What this character has finished. Held separately from the journal because
 ## the two answer different questions and arrive in different packets: the
 ## journal is what is open now, this is the record that outlives the machine.
@@ -984,6 +985,7 @@ func _on_connection_state_changed(value: String) -> void:
 		marketplace = _empty_marketplace_state()
 		merchant = _empty_merchant_state()
 		quest_journal.clear()
+		contracts_board.clear()
 		quest_archive.clear()
 		# The catalog half is per-profile and the mask is per-character, so a
 		# logout clears both rather than carrying one into the next session.
@@ -1967,7 +1969,11 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 		"lantern_tutorial":
 			lantern_tutorial = (event.state as Dictionary).duplicate(true)
 			state_changed.emit(&"lantern_tutorial")
+		"contracts_board":
+			_store_contracts_board(event.state)
 		"campaign":
+			if str((event.state as Dictionary).get("kind","")) == "contracts":
+				_store_contracts_board(event.state.contracts)
 			campaign = (event.state as Dictionary).duplicate(true)
 			state_changed.emit(&"campaign")
 		"almanac":
@@ -2292,6 +2298,18 @@ func _empty_reading_state() -> Dictionary:
 func close_marketplace() -> void:
 	marketplace = _empty_marketplace_state()
 	state_changed.emit(&"marketplace")
+
+func _store_contracts_board(value: Dictionary) -> void:
+	var changed := not contracts_board.is_empty() and int(value.get("reset_token",0)) != int(contracts_board.get("reset_token",0))
+	contracts_board = value.duplicate(true)
+	if changed:
+		var affected: Array = contracts_board.get("reset_skills",[])
+		var row := EloriaProtocol.ContractsProtocol.current(campaign) if str(campaign.get("kind","")) == "contracts" else {}
+		var clear_current := str(row.get("skill",campaign.get("key",""))) in affected and str(campaign.get("kind","")) == "contracts"
+		if clear_current: campaign = {}
+		state_changed.emit(&"contracts_reset")
+		if clear_current: state_changed.emit(&"campaign")
+	state_changed.emit(&"contracts")
 
 func close_merchant() -> void:
 	merchant = _empty_merchant_state()

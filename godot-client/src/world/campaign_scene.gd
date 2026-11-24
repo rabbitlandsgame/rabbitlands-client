@@ -5,6 +5,7 @@ const DATA_PATH := "res://data/campaign/scenes.json"
 const CART_DATA_PATH := "res://data/campaign/last_cart_scenes.json"
 const RESCUE_DATA_PATH := "res://data/campaign/rescue_scenes.json"
 const SHELVES_DATA_PATH := "res://data/campaign/shelves_scenes.json"
+const CONTRACTS_DATA_PATH := "res://data/campaign/contracts_scenes.json"
 const Dialogue := preload("res://src/ui/campaign_dialogue.gd")
 const Choice := preload("res://src/ui/campaign_choice.gd")
 const WAIT_LIMIT := 45.0
@@ -155,6 +156,9 @@ static func scene_definitions() -> Dictionary:
 	if FileAccess.file_exists(SHELVES_DATA_PATH):
 		var shelves: Variant = JSON.parse_string(FileAccess.get_file_as_string(SHELVES_DATA_PATH))
 		if shelves is Dictionary: definitions.merge(shelves.get("scenes", {}), false)
+	if FileAccess.file_exists(CONTRACTS_DATA_PATH):
+		var contracts: Variant = JSON.parse_string(FileAccess.get_file_as_string(CONTRACTS_DATA_PATH))
+		if contracts is Dictionary: definitions.merge(contracts.get("scenes",{}),false)
 	return definitions
 
 func event_context() -> Dictionary:

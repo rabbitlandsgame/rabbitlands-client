@@ -14,15 +14,24 @@ static func is_opening(snapshot: Dictionary) -> bool:
 	return str(snapshot.get("kind", "opening")) in ["", "opening"]
 
 static func is_guided(snapshot: Dictionary) -> bool:
-	return is_opening(snapshot) or str(snapshot.get("kind", "")) in ["rescue", "shelves"]
+	return is_opening(snapshot) or str(snapshot.get("kind", "")) in ["rescue", "shelves","contracts"]
 
 static func navigation_targets(snapshot: Dictionary, current_map: String, tracked: bool) -> Array[Dictionary]:
 	var result:Array[Dictionary]=[]
-	if not tracked or (str(snapshot.get("kind",""))!="shelves" \
+	if not tracked or (str(snapshot.get("kind","")) not in ["shelves","contracts"] \
 			and str(snapshot.get("key",""))!="rescue_checkin"):return result
 	var travel:Dictionary=snapshot.get("travel",{})
-	if travel.is_empty():return result
 	var here:=EloriaProtocol.map_id_from_reference(current_map)
+	if travel.is_empty():
+		if str(snapshot.get("kind","")) == "contracts" and bool(snapshot.get("active",false)) \
+				and EloriaProtocol.map_id_from_reference(str(snapshot.get("map",""))) == here \
+				and str(((snapshot.get("contracts",{}) as Dictionary).get("encounter",{}) as Dictionary).get("phase","")) != "complete":
+			for target: Dictionary in snapshot.get("targets",[]):
+				if str(target.get("id","")) == "checkpoint" and int(target.get("object_id",-1)) == 0 \
+						and bool(target.get("enabled",false)) and not bool(target.get("completed",false)):
+					result.append({"tile":target.tile,"label":str(target.label)})
+					break
+		return result
 	if travel.has("markers"):
 		for pin:Dictionary in travel.markers:
 			if EloriaProtocol.map_id_from_reference(str(pin.get("map","")))==here:result.append(pin)
@@ -68,7 +77,7 @@ static func work_targets(snapshot: Dictionary) -> Array[Dictionary]:
 
 static func card_targets(snapshot: Dictionary) -> Array[Dictionary]:
 	var rows := work_targets(snapshot)
-	if str(snapshot.get("kind", "")) not in ["shelves", "rescue"]:
+	if str(snapshot.get("kind", "")) not in ["shelves", "rescue","contracts"]:
 		return rows
 	# Keep blocked prerequisites readable in the card without presenting them
 	# as ready work circles in the world. The server supplies the reason.
@@ -130,7 +139,7 @@ static func legend(snapshot: Dictionary) -> String:
 func apply_snapshot(snapshot: Dictionary, objects: Dictionary, actors: Dictionary,
 		current_map: String, local_tile: Vector2i, tracked: bool, blocked: bool) -> void:
 	if not is_guided(snapshot) or not bool(snapshot.get("active", false)) \
-			or (not (snapshot.get("travel", {}) as Dictionary).is_empty() and str(snapshot.get("kind",""))!="shelves" \
+			or (not (snapshot.get("travel", {}) as Dictionary).is_empty() and str(snapshot.get("kind","")) not in ["shelves","contracts"] \
 				and str(snapshot.get("key", ""))!="rescue_checkin") \
 			or EloriaProtocol.map_id_from_reference(str(snapshot.get("map", ""))) \
 			!= EloriaProtocol.map_id_from_reference(current_map):
