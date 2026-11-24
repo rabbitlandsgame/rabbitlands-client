@@ -3,6 +3,7 @@ const Codec := preload("res://src/network/contracts_protocol.gd")
 const Board := preload("res://src/ui/contracts_board.gd")
 const Summary := preload("res://src/ui/quest_tracker_summary.gd")
 const Recovery := preload("res://src/ui/campaign_ally_recovery.gd")
+const Guidance := preload("res://src/world/campaign_guidance.gd")
 var checks := 0
 var failures := 0
 
@@ -30,6 +31,18 @@ static func snapshot(board: Dictionary, board_only := false) -> Dictionary:
 		"title":"Melee for Landfall","hint":"Complete your contract.","map":"landfall","run_id":"daily_melee" if not board_only else "",
 		"key":"melee","stage":"work","targets":[],"actors":{},"scene":{},"contracts":board,"board_only":board_only}
 
+static func expanded_board() -> Dictionary:
+	var value := board_state(); value.offers = []
+	for template: String in Codec.TEMPLATES:
+		var binding: Array = Codec.TEMPLATES[template]
+		for route: String in ["standard","bold"]:
+			var row := offer(str(binding[0])); row.id = template+"_"+route
+			row.template_id = template; row.quest_id = int(binding[1]); row.route = route
+			row.route_label = route.capitalize()+" terms"; row.title = template.replace("_"," ").capitalize()
+			value.offers.append(row)
+	value.reset_token = 0; value.reset_skills = []
+	return value
+
 func settle() -> void:
 	for frame: int in 5: await process_frame
 
@@ -53,6 +66,28 @@ func run() -> void:
 	expect(not Codec.valid(invalid),"identities cannot inject another command")
 	invalid = state.duplicate(true); invalid.offers.append(invalid.offers[0])
 	expect(not Codec.valid(invalid),"duplicate offer identities are rejected")
+	var expanded := expanded_board()
+	expect(expanded.offers.size() == 36 and Codec.valid(expanded),"all eighteen templates and their two routes have bound journal identities")
+	invalid = expanded.duplicate(true); invalid.offers.append(offer("melee"))
+	expect(not Codec.valid(invalid),"the expanded board still rejects more than thirty-six offers")
+	invalid = expanded.duplicate(true); invalid.offers[12].quest_id = 1090
+	expect(not Codec.valid(invalid),"a new template cannot borrow the legacy journal identity")
+	invalid = expanded.duplicate(true); invalid.offers[0].template_id = "unknown"
+	expect(not Codec.valid(invalid),"unknown templates are rejected")
+	invalid = expanded.duplicate(true); invalid.offers[12].erase("template_id")
+	expect(not Codec.valid(invalid),"new journal identities require their exact template binding")
+	invalid = expanded.duplicate(true); invalid.reset_token = -1
+	expect(not Codec.valid(invalid),"negative reset generations are rejected")
+	invalid = expanded.duplicate(true); invalid.reset_skills = ["melee","melee"]
+	expect(not Codec.valid(invalid),"reset disciplines are bounded and unique")
+	var template_scene := snapshot(expanded)
+	template_scene.contracts.current = expanded.offers[12].duplicate(true)
+	template_scene.scene = {"id":"contracts.brief","token":"intro:1","requires_ack":true,"variant":"hold_worksite","actors":{"mentor":20,"recipient":1}}
+	expect(EloriaProtocol.decode_campaign(JSON.stringify(template_scene).to_utf8_buffer()).type == "campaign","a new template selects its own introductory language")
+	invalid = template_scene.duplicate(true); invalid.scene.variant = "healing_line"
+	expect(EloriaProtocol.decode_campaign(JSON.stringify(invalid).to_utf8_buffer()).type == "invalid","template dialogue cannot cross to another discipline")
+	invalid = template_scene.duplicate(true); invalid.scene.id = "contracts.report"
+	expect(EloriaProtocol.decode_campaign(JSON.stringify(invalid).to_utf8_buffer()).type == "invalid","report and pause retain their compatible discipline variants")
 	var transport: Node = load("res://tests/contracts_transport.gd").new()
 	expect(transport.contract_request("accept","daily_melee",7) == OK and transport.sent[-1] == "#contract accept daily_melee 7","accept carries the displayed revision")
 	expect(transport.contract_request("join","Friend") == OK and transport.sent[-1] == "#contract join Friend","visible party joining uses the normal contract command")
@@ -75,6 +110,49 @@ func run() -> void:
 	for size: Vector2i in [Vector2i(1280,720),Vector2i(720,480)]:
 		root.size = size; board._fit(); await settle()
 		expect(root.get_visible_rect().encloses(board.panel.get_global_rect()),"the board fits the viewport with scrollable offers")
+	board.apply_state(expanded); await settle(); await settle()
+	expect(board._offer_count.text == "36 offers","the complete board advertises all posted choices")
+	expect(board._discipline_row.size.y <= 48 and board.discipline.size.y <= 40,"the discipline selector stays one compact row instead of wrapping its label vertically")
+	board.discipline.select(2); board.discipline.item_selected.emit(2); await settle()
+	var visible_offers: Array = board.columns.Available.get_children().filter(func(row: Node) -> bool:return row.has_meta("contract_skill"))
+	expect(visible_offers.size() == 6 and visible_offers.all(func(row: Node) -> bool:return row.get_meta("contract_skill") == "magic"),"the discipline selector shows all three Magic templates and both routes")
+	expect(board.columns.Available.find_children("*","Button",true,false).any(func(button: Button) -> bool:return button.text == "Join Friend"),"party joining remains visible while offers are filtered")
+	board.apply_state(expanded); await settle()
+	expect(board.discipline.selected == 2 and board.state.offers.size() == 36,"refresh retains the filter without changing the authoritative offers")
+	board.tabs.current_tab = 1; await settle()
+	expect(not board._discipline_row.visible and board.columns.Accepted.get_child_count() == 1,"the offer filter never hides accepted assignments")
+	board._abandon = "daily_melee"; board._abandon_skill = "melee"; board._confirm.popup_centered()
+	board.reset_contracts(["magic"])
+	expect(board._confirm.visible,"an unrelated reset preserves an open abandonment confirmation")
+	board.reset_contracts(["melee"])
+	expect(not board._confirm.visible and board._abandon.is_empty(),"a matching reset invalidates the stale abandonment confirmation")
+	board.tabs.current_tab = 0; board.discipline.select(0); board.discipline.item_selected.emit(0)
+	app.contracts_board = expanded.duplicate(true)
+	var reset := expanded.duplicate(true); reset.reset_token = 1; reset.reset_skills = ["melee"]
+	app._on_packet(191,JSON.stringify(snapshot(reset,true)).to_utf8_buffer())
+	expect(app.campaign.run_id == "story","a daily testing reset leaves an unrelated story campaign untouched")
+	var magic := snapshot(reset); magic.run_id = "daily_magic"; magic.key = "magic"; magic.contracts.current = offer("magic")
+	app.campaign = magic
+	reset.reset_token = 2
+	app._on_packet(191,JSON.stringify(snapshot(reset,true)).to_utf8_buffer())
+	expect(app.campaign.run_id == "daily_magic","a Melee reset preserves an active Magic assignment")
+	reset.reset_token = 3; reset.reset_skills = ["magic"]
+	app._on_packet(191,JSON.stringify(snapshot(reset,true)).to_utf8_buffer())
+	expect(app.campaign.is_empty(),"a matching reset discards the old active campaign and its replay snapshot")
+	var field := snapshot(expanded)
+	field.contracts.encounter = {"phase":"work","stage":"1","waves":0,"workers":[]}
+	field.targets = [{"id":"checkpoint","object_id":0,"tile":[68,249],"label":"Clear the second hostile post","enabled":true}]
+	expect(Guidance.navigation_targets(field,"landfall",true) == [{"tile":[68,249],"label":"Clear the second hostile post"}],"a private field checkpoint gets a named map pin without public travel")
+	expect(Guidance.navigation_targets(field,"landfall",false).is_empty() and Guidance.navigation_targets(field,"landfall_town",true).is_empty(),"untracked or remote private checkpoints stay off the map")
+	field.contracts.encounter.phase = "complete"
+	expect(Guidance.navigation_targets(field,"landfall",true).is_empty(),"a completed encounter hides any stale checkpoint")
+	field.contracts.encounter.phase = "work"; field.targets[0].enabled = false
+	expect(Guidance.navigation_targets(field,"landfall",true).is_empty(),"disabled checkpoints never advertise ready navigation")
+	field.targets[0].enabled = true
+	var field_hud: Control = load("res://src/ui/campaign_hud.gd").new(); root.add_child(field_hud)
+	field_hud.apply_state(field,Vector2i(64,249),"landfall")
+	expect(not field.has("travel") and field_hud._leave.visible and field_hud._leave.text == "Pause contract","a checkpoint retains private encounter Pause behavior")
+	field_hud.queue_free(); await settle()
 	var active := snapshot(state)
 	var summary := Summary.campaign(active,"landfall")
 	expect(summary.objective == "Demonstrate your skill" and summary.counter.contains("0 / 10"),"the shared quest card presents native personal proof")
@@ -113,6 +191,12 @@ func run() -> void:
 	expect(guide.is_campaign_tracked(),"an explicit private helping view can show temporary guidance")
 	guide.set_campaign_tracked(false)
 	expect(not guide.is_campaign_tracked() and str(state.tracked_id) == "daily_melee","untracking helper guidance preserves the helper's personal tracked contract")
+	guide.set_campaign_tracked(true); guide.hide_window(); guide.set_campaign_tracked(false)
+	var old_identity: String = guide.campaign_identity()
+	guide.reset_contracts(["melee"])
+	expect(guide.campaign_identity() == old_identity and guide.is_window_hidden("campaign:"+old_identity),"an unrelated reset preserves the player's hidden contract window")
+	guide.reset_contracts(["magic"]); guide.apply_campaign(active)
+	expect(guide.is_campaign_tracked() and not guide.is_window_hidden(),"a reset clears only that discipline's saved hidden and untracked presentation")
 	guide.queue_free(); owner.queue_free(); await settle()
 	var native_path := OS.get_environment("RL_CONTRACTS_NATIVE")
 	if not native_path.is_empty():
@@ -121,7 +205,13 @@ func run() -> void:
 			var dto: Dictionary = record.get("snapshot",record)
 			var decoded := EloriaProtocol.decode_campaign(JSON.stringify(dto).to_utf8_buffer())
 			expect(decoded.type in ["campaign","contracts_board"],"the actual native contracts packet decodes: "+str(decoded.get("error","")))
-			if str(record.get("label","")) == "board.accepted.travel":
+			if decoded.type in ["campaign","contracts_board"]:
+				app._on_packet(191,JSON.stringify(dto).to_utf8_buffer())
+			if str(record.get("label","")) == "reset.magic_only":
+				expect(str(app.campaign.get("key","")) == "melee" and (app.contracts_board.accepted as Array).all(func(row: Dictionary) -> bool:return str(row.skill) != "magic"),"the actual selective reset packet clears Magic while preserving the current Melee assignment")
+			if str(record.get("label","")) == "reset.all":
+				expect(app.campaign.is_empty() and (app.contracts_board.accepted as Array).is_empty(),"the actual full reset clears the old card snapshot and accepted board rows")
+			if str(record.get("label","")) in ["board.accepted.travel","options.board36"]:
 				root.size = Vector2i(1280,720); board.apply_state(dto.contracts)
 				await settle(); await settle()
 				expect(root.get_visible_rect().encloses(board.panel.get_global_rect()),"long native offers fit on their first opening after wrapping settles")

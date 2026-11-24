@@ -1,10 +1,25 @@
 extends RefCounted
 ## Bounded, read-only shape checks for the Landfall contracts board.
 const SKILLS := ["melee","magic","ranging","summoning","harvesting","alchemy"]
+const TEMPLATES := {
+	"watch_road":["melee",1090], "wardens_call":["magic",1091],
+	"towpath_lookout":["ranging",1092], "watchful_companion":["summoning",1093],
+	"gatherers_round":["harvesting",1094], "apprentice_order":["alchemy",1095],
+	"hold_worksite":["melee",1100], "sweep_camps":["melee",1101],
+	"healing_line":["magic",1102], "break_siege":["magic",1103],
+	"ridge_sentinels":["ranging",1104], "trail_pursuit":["ranging",1105],
+	"supply_guard":["summoning",1106], "hunt_burrows":["summoning",1107],
+	"harvest_bundle":["harvesting",1108], "harvest_survey":["harvesting",1109],
+	"alchemy_reagents":["alchemy",1110], "alchemy_stock":["alchemy",1111]}
 
 static func number(value: Variant, maximum := 2147483647) -> bool:
 	return typeof(value) in [TYPE_INT,TYPE_FLOAT] and is_finite(float(value)) \
 		and float(value) == floor(float(value)) and float(value) >= 0 and float(value) <= maximum
+
+static func variant_skill(variant: String) -> String:
+	if variant in SKILLS: return variant
+	var binding: Array = TEMPLATES.get(variant,[])
+	return str(binding[0]) if binding.size() == 2 and int(binding[1]) >= 1100 else ""
 
 static func text(value: Variant, maximum := 256, empty := true) -> bool:
 	return value is String and value.length() <= maximum and (empty or not value.is_empty())
@@ -27,7 +42,12 @@ static func reward(value: Variant) -> bool:
 
 static func row(value: Variant) -> bool:
 	if not value is Dictionary or not identity(value.get("id")) or value.get("skill") not in SKILLS: return false
-	if not number(value.get("quest_id"),65535) or int(value.quest_id) != 1090+SKILLS.find(value.skill): return false
+	if not number(value.get("quest_id"),65535): return false
+	if value.has("template_id"):
+		if not identity(value.template_id) or not TEMPLATES.has(value.template_id): return false
+		var binding: Array = TEMPLATES[value.template_id]
+		if str(value.skill) != str(binding[0]) or int(value.quest_id) != int(binding[1]): return false
+	elif int(value.quest_id) != 1090+SKILLS.find(value.skill): return false
 	for key: String in ["title","description","route","tier","status","reason"]:
 		if not text(value.get(key),1024 if key == "description" else 256,key not in ["title","status"]): return false
 	if not value.get("eligible") is bool or not reward(value.get("reward")): return false
@@ -45,6 +65,7 @@ static func row(value: Variant) -> bool:
 		if not number(coordinate,65535): return false
 	if value.has("can_reroll") and not value.can_reroll is bool: return false
 	if value.has("reroll_reason") and not text(value.reroll_reason,256): return false
+	if value.has("route_label") and not text(value.route_label,128): return false
 	if value.has("donation"):
 		var donation: Variant = value.donation
 		if not donation is Dictionary or not text(donation.get("item"),128,false) \
@@ -58,6 +79,13 @@ static func valid(value: Variant) -> bool:
 			or value.get("accepted_limit") != 3 or not identity(value.get("tracked_id"),true) \
 			or not number(value.get("marks")): return false
 	if value.has("open") and not value.open is bool: return false
+	if value.has("reset_token") and not number(value.reset_token): return false
+	if value.has("reset_skills"):
+		if not value.reset_skills is Array or value.reset_skills.size() > SKILLS.size(): return false
+		var reset := {}
+		for skill: Variant in value.reset_skills:
+			if skill not in SKILLS or reset.has(skill): return false
+			reset[skill] = true
 	if value.has("current") and (not value.current is Dictionary or (not value.current.is_empty() and not row(value.current))): return false
 	if value.has("joins"):
 		if not value.joins is Array or value.joins.size() > 7: return false
@@ -80,7 +108,7 @@ static func valid(value: Variant) -> bool:
 			or not weekly.get("awarded") is bool or weekly.get("bonus_marks") != 3: return false
 	for key: String in ["offers","accepted"]:
 		var rows: Variant = value.get(key)
-		if not rows is Array or rows.size() > (3 if key == "accepted" else 12): return false
+		if not rows is Array or rows.size() > (3 if key == "accepted" else 36): return false
 		var seen := {}
 		for entry: Variant in rows:
 			if not row(entry) or seen.has(entry.id): return false

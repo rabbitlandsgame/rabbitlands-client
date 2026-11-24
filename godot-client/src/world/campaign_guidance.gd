@@ -21,8 +21,17 @@ static func navigation_targets(snapshot: Dictionary, current_map: String, tracke
 	if not tracked or (str(snapshot.get("kind","")) not in ["shelves","contracts"] \
 			and str(snapshot.get("key",""))!="rescue_checkin"):return result
 	var travel:Dictionary=snapshot.get("travel",{})
-	if travel.is_empty():return result
 	var here:=EloriaProtocol.map_id_from_reference(current_map)
+	if travel.is_empty():
+		if str(snapshot.get("kind","")) == "contracts" and bool(snapshot.get("active",false)) \
+				and EloriaProtocol.map_id_from_reference(str(snapshot.get("map",""))) == here \
+				and str(((snapshot.get("contracts",{}) as Dictionary).get("encounter",{}) as Dictionary).get("phase","")) != "complete":
+			for target: Dictionary in snapshot.get("targets",[]):
+				if str(target.get("id","")) == "checkpoint" and int(target.get("object_id",-1)) == 0 \
+						and bool(target.get("enabled",false)) and not bool(target.get("completed",false)):
+					result.append({"tile":target.tile,"label":str(target.label)})
+					break
+		return result
 	if travel.has("markers"):
 		for pin:Dictionary in travel.markers:
 			if EloriaProtocol.map_id_from_reference(str(pin.get("map","")))==here:result.append(pin)

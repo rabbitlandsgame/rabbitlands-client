@@ -4336,9 +4336,15 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 	if str(value.get("kind","")) == "contracts":
 		if not ContractsProtocol.valid(value.get("contracts")) or not value.get("board_only",false) is bool:
 			return {"type":"invalid","error":"contracts_shape"}
-		if not scene.is_empty() and (str(scene.get("id","")) not in ["contracts.brief","contracts.entry","contracts.report","contracts.pause"] \
-				or str(scene.get("variant","")) not in ContractsProtocol.SKILLS):
-			return {"type":"invalid","error":"contracts_scene"}
+		if not scene.is_empty():
+			var scene_id := str(scene.get("id",""))
+			var variant := str(scene.get("variant",""))
+			var skill := ContractsProtocol.variant_skill(variant)
+			var contract := ContractsProtocol.current(value)
+			if scene_id not in ["contracts.brief","contracts.entry","contracts.report","contracts.pause"] or skill.is_empty() \
+					or skill != str(contract.get("skill",value.get("key",""))) \
+					or (variant not in ContractsProtocol.SKILLS and scene_id not in ["contracts.brief","contracts.entry"]):
+				return {"type":"invalid","error":"contracts_scene"}
 		if not (scene.get("choice",{}) as Dictionary).is_empty() and (str(scene.get("id","")) != "contracts.pause" \
 				or str((scene.choice as Dictionary).get("id","")) != "contract_retry"):
 			return {"type":"invalid","error":"contracts_choice"}

@@ -32,6 +32,7 @@ var _campaign: Dictionary = {}
 var _campaign_choices: Dictionary = {}
 var _prefer_campaign := false
 var _campaign_signature := ""
+var _contract_skills := {}
 var _body: VBoxContainer
 var _buttons: HFlowContainer
 var _pending_campaign_kind := ""
@@ -65,6 +66,8 @@ func apply_campaign(snapshot: Dictionary) -> void:
 		_prefer_campaign = true
 		_pending_campaign_kind = ""
 	_campaign = snapshot
+	if incoming_kind == "contracts":
+		_contract_skills[campaign_identity()] = str(EloriaProtocol.ContractsProtocol.current(snapshot).get("skill",snapshot.get("key","")))
 	if bool(snapshot.get("active", false)) and not _campaign_choices.has(campaign_identity()):
 		_campaign_choices[campaign_identity()] = true
 		_prefer_campaign = true
@@ -80,6 +83,17 @@ func apply_campaign(snapshot: Dictionary) -> void:
 
 func campaign_identity() -> String:
 	return str(_campaign.get("kind", "opening")) + ":" + str(_campaign.get("run_id", "lead"))
+
+func reset_contracts(skills: Array) -> void:
+	for identity: String in _contract_skills.keys():
+		if str(_contract_skills[identity]) not in skills: continue
+		_campaign_choices.erase(identity)
+		_hidden_windows.erase("campaign:"+identity)
+		_contract_skills.erase(identity)
+	var current_skill := str(EloriaProtocol.ContractsProtocol.current(_campaign).get("skill",_campaign.get("key","")))
+	if str(_campaign.get("kind","")) == "contracts" and current_skill in skills:
+		_campaign = {}; _prefer_campaign = false; _details_open = false; _campaign_signature = ""
+	_refresh(); tracking_changed.emit()
 
 func has_campaign() -> bool:
 	if str(_campaign.get("kind","")) == "contracts" \

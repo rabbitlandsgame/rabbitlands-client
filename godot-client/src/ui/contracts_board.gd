@@ -7,12 +7,17 @@ var heading: Label
 var account: Label
 var weekly: Label
 var tabs: TabContainer
+var discipline: OptionButton
 var columns := {}
 var state := {}
 var _pending := false
 var _signature := ""
 var _confirm: ConfirmationDialog
 var _abandon := ""
+var _abandon_skill := ""
+var _discipline_row: HBoxContainer
+var _offer_count: Label
+var _skill_filter := ""
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -32,7 +37,21 @@ func _ready() -> void:
 	account = Label.new(); account.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART; body.add_child(account)
 	weekly = Label.new(); weekly.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART; body.add_child(weekly)
 	_text(body,"Keep up to three contracts accepted and one tracked. Each discipline can be claimed once per UTC day; unfinished progress is retained.",Color("b8c7cf"))
+	_discipline_row = HBoxContainer.new(); _discipline_row.name = "ContractsDisciplineFilter"; body.add_child(_discipline_row)
+	var filter_label := Label.new(); filter_label.text = "Discipline"
+	filter_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER; _discipline_row.add_child(filter_label)
+	discipline = OptionButton.new(); discipline.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	discipline.size_flags_vertical = Control.SIZE_SHRINK_CENTER; discipline.custom_minimum_size.y = 32
+	discipline.add_item("All disciplines")
+	for skill: String in EloriaProtocol.ContractsProtocol.SKILLS: discipline.add_item(skill.capitalize())
+	discipline.tooltip_text = "Browse offers by discipline. Your accepted assignments stay the same."
+	_discipline_row.add_child(discipline)
+	_offer_count = Label.new(); _offer_count.size_flags_vertical = Control.SIZE_SHRINK_CENTER; _discipline_row.add_child(_offer_count)
+	discipline.item_selected.connect(func(index: int) -> void:
+		_skill_filter = "" if index == 0 else str(EloriaProtocol.ContractsProtocol.SKILLS[index-1])
+		_render_available(); _fit())
 	tabs = TabContainer.new(); tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL; body.add_child(tabs)
+	tabs.tab_changed.connect(func(index: int) -> void: _discipline_row.visible = index == 0; _fit())
 	for title: String in ["Available","Accepted","Marks"]:
 		var scroll := ScrollContainer.new(); scroll.name = title; scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 		tabs.add_child(scroll)
@@ -84,8 +103,11 @@ func _send(action: String, identity: String) -> void:
 
 func _entry(column: VBoxContainer, entry: Dictionary, accepted: bool) -> void:
 	var box := VBoxContainer.new(); column.add_child(box)
+	box.set_meta("contract_skill",str(entry.skill))
 	_text(box,str(entry.title),Color("e5bd74"))
-	_text(box,"%s · %s · %s route" % [str(entry.skill).capitalize(),str(entry.tier),str(entry.route).replace("_"," ").capitalize()],Color("b8c7cf"))
+	var route := str(entry.get("route_label",""))
+	if route.is_empty(): route = str(entry.route).replace("_"," ").capitalize()+" route"
+	_text(box,"%s · %s · %s" % [str(entry.skill).capitalize(),str(entry.tier),route],Color("b8c7cf"))
 	_text(box,str(entry.description))
 	_text(box,"Rewards · " + reward_text(entry.reward),Color("bdd2bc"))
 	_text(box,"Where · " + str(entry.location.label),Color("b8c7cf"))
@@ -106,11 +128,33 @@ func _entry(column: VBoxContainer, entry: Dictionary, accepted: bool) -> void:
 				_text(box,"Optional donation · %d %s for %d extra gold. The ordinary report keeps your goods." % [int(donation.count),str(donation.item),int(donation.gold)],Color("b8c7cf"))
 				_button(actions,"Report + donate","donate",str(entry.id),bool(donation.eligible),str(donation.reason))
 		var abandon := Button.new(); abandon.text = "Abandon"; actions.add_child(abandon)
-		abandon.pressed.connect(func() -> void: _abandon = str(entry.id); _confirm.popup_centered())
+		abandon.pressed.connect(func() -> void: _abandon = str(entry.id); _abandon_skill = str(entry.skill); _confirm.popup_centered())
 	else:
 		_button(actions,"Accept","accept",str(entry.id),bool(entry.eligible),str(entry.reason))
 		_button(actions,"Reroll","reroll",str(entry.skill),bool(entry.get("can_reroll",false)),str(entry.get("reroll_reason","")))
 	box.add_child(HSeparator.new())
+
+func reset_contracts(skills: Array) -> void:
+	if _abandon_skill in skills:
+		_confirm.hide(); _abandon = ""; _abandon_skill = ""
+	# Rebuild from the next authoritative board, including any settled request.
+	_signature = ""
+
+func _render_available() -> void:
+	var column: VBoxContainer = columns.get("Available")
+	if column == null: return
+	for child: Node in column.get_children(): column.remove_child(child); child.queue_free()
+	var count := 0
+	for entry: Dictionary in state.get("offers",[]):
+		if not _skill_filter.is_empty() and str(entry.skill) != _skill_filter: continue
+		_entry(column,entry,false); count += 1
+	_offer_count.text = "%d offers" % count
+	if count == 0: _text(column,"No offers posted for this discipline.",Color("b8c7cf"))
+	# Helping a party member is separate from accepting personal work.
+	for join: Dictionary in state.get("joins",[]):
+		_text(column,"Party · %s — %s" % [str(join.owner),str(join.title)],Color("e5bd74"))
+		_button(column,"Join " + str(join.owner),"join",str(join.owner),bool(join.eligible),str(join.reason))
+		if not str(join.reason).is_empty(): _text(column,str(join.reason),Color("dbb98d"))
 
 func apply_state(value: Dictionary, allow_open := true) -> void:
 	var signature := JSON.stringify(value)
@@ -125,11 +169,7 @@ func apply_state(value: Dictionary, allow_open := true) -> void:
 	account.text = "Accepted %d / %d · %d marks · UTC day %s · Resets 00:00 UTC" % [(state.get("accepted",[]) as Array).size(),int(state.get("accepted_limit",3)),int(state.get("marks",0)),str(state.get("day",""))]
 	var progress: Dictionary = state.get("weekly",{})
 	weekly.text = "Weekly · %d / 5 completed · %s" % [int(progress.get("count",0)),"3 bonus marks awarded" if bool(progress.get("awarded",false)) else "+3 marks on your fifth completion"]
-	for entry: Dictionary in state.get("offers",[]): _entry(columns.Available,entry,false)
-	for join: Dictionary in state.get("joins",[]):
-		_text(columns.Available,"Party · %s — %s" % [str(join.owner),str(join.title)],Color("e5bd74"))
-		_button(columns.Available,"Join " + str(join.owner),"join",str(join.owner),bool(join.eligible),str(join.reason))
-		if not str(join.reason).is_empty(): _text(columns.Available,str(join.reason),Color("dbb98d"))
+	_render_available()
 	for entry: Dictionary in state.get("accepted",[]): _entry(columns.Accepted,entry,true)
 	if (state.get("accepted",[]) as Array).is_empty(): _text(columns.Accepted,"No accepted contracts. Unfinished contracts keep their progress across the UTC reset.")
 	for entry: Dictionary in state.get("catalog",[]):

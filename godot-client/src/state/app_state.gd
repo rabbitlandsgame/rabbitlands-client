@@ -1970,12 +1970,10 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 			lantern_tutorial = (event.state as Dictionary).duplicate(true)
 			state_changed.emit(&"lantern_tutorial")
 		"contracts_board":
-			contracts_board = (event.state as Dictionary).duplicate(true)
-			state_changed.emit(&"contracts")
+			_store_contracts_board(event.state)
 		"campaign":
 			if str((event.state as Dictionary).get("kind","")) == "contracts":
-				contracts_board = (event.state.contracts as Dictionary).duplicate(true)
-				state_changed.emit(&"contracts")
+				_store_contracts_board(event.state.contracts)
 			campaign = (event.state as Dictionary).duplicate(true)
 			state_changed.emit(&"campaign")
 		"almanac":
@@ -2300,6 +2298,18 @@ func _empty_reading_state() -> Dictionary:
 func close_marketplace() -> void:
 	marketplace = _empty_marketplace_state()
 	state_changed.emit(&"marketplace")
+
+func _store_contracts_board(value: Dictionary) -> void:
+	var changed := not contracts_board.is_empty() and int(value.get("reset_token",0)) != int(contracts_board.get("reset_token",0))
+	contracts_board = value.duplicate(true)
+	if changed:
+		var affected: Array = contracts_board.get("reset_skills",[])
+		var row := EloriaProtocol.ContractsProtocol.current(campaign) if str(campaign.get("kind","")) == "contracts" else {}
+		var clear_current := str(row.get("skill",campaign.get("key",""))) in affected and str(campaign.get("kind","")) == "contracts"
+		if clear_current: campaign = {}
+		state_changed.emit(&"contracts_reset")
+		if clear_current: state_changed.emit(&"campaign")
+	state_changed.emit(&"contracts")
 
 func close_merchant() -> void:
 	merchant = _empty_merchant_state()

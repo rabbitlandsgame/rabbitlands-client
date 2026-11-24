@@ -7050,6 +7050,13 @@ func _on_state_changed(path: StringName) -> void:
 			# old and the new target can have changed.
 			_sync_overhead_health_for([])
 			_queue_character_ui_sync(CHARACTER_UI_CRAFTING)
+		&"contracts_reset":
+			var skills: Array = AppState.contracts_board.get("reset_skills",[])
+			var view: Dictionary = campaign_scene.presentation_state()
+			if str(view.get("id","")).begins_with("contracts.") and EloriaProtocol.ContractsProtocol.variant_skill(str(view.get("variant",""))) in skills:
+				var presenting := bool(view.get("playing",false)) or bool(view.get("pending",false)) or bool(view.get("returning",false))
+				if presenting: campaign_scene.cancel("contracts_reset")
+				if presenting or AppState.campaign.is_empty(): campaign_hud.set_replay_available(false)
 		&"campaign":
 			# Sparring can begin/end without an actor packet. Refresh the old
 			# and new instructor immediately when the quest state changes.

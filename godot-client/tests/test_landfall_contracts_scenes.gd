@@ -6,6 +6,9 @@ func contract_fixture(skill: String, scene_id: String) -> Dictionary:
 	f.scene.set_auto_dialogue(false,false)
 	f.state = Contracts.snapshot(Contracts.board_state())
 	f.state.key = skill
+	var row := Contracts.offer(skill)
+	f.state.run_id = str(row.id); f.state.contracts.current = row
+	f.state.contracts.accepted = [row]; f.state.contracts.tracked_id = str(row.id)
 	f.state.actors = {"mentor":20,"worker":20,"protagonist":1,"recipient":1}
 	f.state.scene = {"id":scene_id,"token":skill+":"+scene_id,"requires_ack":true,"variant":skill,"actors":f.state.actors.duplicate(true)}
 	return f
@@ -30,6 +33,22 @@ func run() -> void:
 			tick(f,0.1); f.scene.continue_dialogue(); tick(f,0)
 			expect(f.events.finished.size() == 1 and f.events.replay.size() == 1 and JSON.stringify(f.state) == original,skill+" replay cannot emit another live completion or alter proof")
 			dispose(f); await process_frame
+	for template: String in EloriaProtocol.ContractsProtocol.TEMPLATES:
+		var binding: Array = EloriaProtocol.ContractsProtocol.TEMPLATES[template]
+		if int(binding[1]) < 1100: continue
+		for scene_id: String in ["contracts.brief","contracts.entry"]:
+			var f := contract_fixture(str(binding[0]),scene_id)
+			f.state.contracts.current = Contracts.offer(str(binding[0]))
+			f.state.contracts.current.template_id = template; f.state.contracts.current.quest_id = int(binding[1])
+			f.state.scene.variant = template
+			expect(EloriaProtocol.decode_campaign(JSON.stringify(f.state).to_utf8_buffer()).type == "campaign",template+" admits only its declared discipline and journal binding")
+			var before: Transform3D = f.rig.camera.global_transform
+			tick(f,0.1)
+			expect(f.scene.playing and f.scene._dialogue.portrait_visible() and not f.scene._caption.text.is_empty(),template+" has its own brief and entry portrait dialogue")
+			expect(f.rig.camera.global_transform.is_equal_approx(before) and f.scene._line_continue.visible,template+" keeps the current view and immediate Continue")
+			f.scene.continue_dialogue(); tick(f,0)
+			expect(f.events.finished.size() == 1,template+" acknowledges its manual scene once")
+			dispose(f); await process_frame
 	var pause := contract_fixture("melee","contracts.pause")
 	pause.state.scene.choice = {"id":"contract_retry","title":"What next?","owner":"You","owner_is_you":true,"can_choose":true,"selected":"","response":"",
 		"options":[{"id":"resume","label":"Continue","detail":"Keep health and progress."},{"id":"leave","label":"Leave for now","detail":"Return later."}]}
@@ -41,6 +60,20 @@ func run() -> void:
 		"options":[{"id":"retry","label":"Retry this stage","detail":"Keep completed stages."},{"id":"leave","label":"Leave for now","detail":"Return later."}]}
 	tick(pause,0.1); pause.scene.skip(); tick(pause,0)
 	expect(pause.scene._choice_waiting and pause.events.finished.is_empty(),"a failed contract stage offers its actual retry/leave decision")
+	var app: Node = root.get_node("AppState"); app.authenticated = true
+	var main: Node = load("res://src/app/main.gd").new()
+	var hud: Control = load("res://src/ui/campaign_hud.gd").new(); root.add_child(hud)
+	main.campaign_scene = pause.scene; main.campaign_hud = hud
+	app.campaign = {"kind":"shelves","run_id":"retained-story"}; app.contracts_board = {"reset_skills":["ranging"]}
+	hud.set_replay_available(true)
+	var before: Transform3D = pause.rig.camera.global_transform
+	main._on_state_changed(&"contracts_reset")
+	expect(pause.scene._choice_waiting and hud._replay_available and before.is_equal_approx(pause.rig.camera.global_transform),"an unrelated reset preserves the live question, camera and Replay state")
+	app.campaign = {}; app.contracts_board.reset_skills = ["melee"]
+	main._on_state_changed(&"contracts_reset")
+	expect(not pause.scene.blocks_input() and not hud._replay_available and not pause.scene._handled.has(identity(pause)),"a matching reset releases the pending decision without marking it completed")
+	expect(pause.events.finished[-1][1] == "contracts_reset" and before.is_equal_approx(pause.rig.camera.global_transform),"reset cancellation sends no successful completion and preserves the current gameplay view")
+	main.free(); hud.queue_free()
 	dispose(pause); await process_frame
 	var path := OS.get_environment("RL_CONTRACTS_NATIVE")
 	if not path.is_empty():

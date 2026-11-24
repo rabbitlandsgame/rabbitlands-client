@@ -378,6 +378,10 @@ func _toggle(panel: PanelContainer) -> void:
 
 func _on_state_changed(path: StringName) -> void:
 	match path:
+		&"contracts_reset":
+			var skills: Array = AppState.contracts_board.get("reset_skills",[])
+			contracts_board.reset_contracts(skills)
+			if quest_guide != null: quest_guide.reset_contracts(skills)
 		&"contracts":
 			_sync_contracts(true); _sync_quests()
 		&"navigation":
