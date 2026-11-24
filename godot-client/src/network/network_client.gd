@@ -637,7 +637,10 @@ func use_map_object(object_id: int) -> Error:
 	return send_frame(EloriaProtocol.use_map_object(object_id))
 
 func contract_request(action: String, identity := "", revision := -1) -> Error:
-	if action in ["board","untrack","leave"]:
+	if action == "board":
+		if identity.is_empty(): return send_chat("#contract board")
+		return send_chat("#contract board "+identity) if identity in EloriaProtocol.ContractsProtocol.SKILLS else ERR_INVALID_PARAMETER
+	if action in ["untrack","leave"]:
 		return send_chat("#contract " + action) if identity.is_empty() else ERR_INVALID_PARAMETER
 	if action in ["track","begin","join"]:
 		return send_chat("#contract %s %s" % [action,identity]) if _campaign_identifier(identity) else ERR_INVALID_PARAMETER

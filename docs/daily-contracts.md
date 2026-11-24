@@ -4,16 +4,18 @@ Speak with **Batu Ensh at the Landfall watch house** and choose **Landfall daily
 
 ## Pick your work
 
-Choose from **three assignments in each discipline**, each with two posted routes or sets of terms. Use **Discipline** on the Available tab to browse all offers or focus on one skill. The Accepted and Marks tabs remain separate from this filter.
+Choose from **five assignments in each discipline**, covering Routine, Standard, Demanding, Hard, and Expert difficulty. Each has two posted routes or sets of terms. Use **Discipline** on the Available tab to load that skill’s ten offers. Changing pages keeps your accepted work and tracked quest. The Accepted and Marks tabs always show your own assignments and rewards.
 
 | Discipline | Assignments | What changes |
 | --- | --- | --- |
-| Melee | The Watch on the Road; The Unbroken Perimeter; Clearing the Approaches | Escort the repair crew, hold its camp against changing approaches, or clear three hostile posts. Make your own melee contribution. |
-| Magic | The Warden’s Call; Triage at the Watch; Breaking the Siege | Escort wounded wardens, restore real health at the recovery camp, or clear threat posts with magic. Healing a full-health character does not count. |
-| Ranging | Towpath Lookout; The Distant Watch; Along the Ridgeline | Cover a moving crew, defend the lookout, or clear dispersed ambushers. Bring an equipped, compatible bow and ammunition. |
-| Summoning | A Watchful Companion; Guardians of the Supply; The Burrow Hunt | Escort the patrol, defend a supply camp, or clear hostile posts using your own summon. Learn a usable summon first. |
-| Harvesting | The Gatherer’s Round; The Apothecary’s Basket; A Gatherer’s Survey | Gather one fresh resource, assemble a two-resource bundle, or gather a quota while sampling three distinct nodes. Bring a Pickaxe for mining terms. |
-| Alchemy | The Apprentice’s Order; From Reagent to Essence; A Shelf Ready for Sale | Mix fresh batches, gather a fresh ingredient before mixing, or mix and deliver ordinary essences for the shelves. Bring a learned recipe and your Mortar and Pestle. |
+| Melee | The Watch on the Road; The Unbroken Perimeter; Clearing the Approaches; The Relief Column; The Thornline Breakthrough | Escort the repair crew, hold its camp against changing approaches, or clear hostile posts. Make your own melee contribution. |
+| Magic | The Warden’s Call; Triage at the Watch; Breaking the Siege; The Arcane Perimeter; The Wardens’ Last Mile | Escort wounded wardens, restore real health at the recovery camp, or clear threat posts with magic. Healing a full-health character does not count. |
+| Ranging | Towpath Lookout; The Distant Watch; Along the Ridgeline; The Longshot Convoy; The Ridgebreak Hunt | Cover a moving crew, defend the lookout, or clear dispersed ambushers. Bring an equipped, compatible bow and ammunition. |
+| Summoning | A Watchful Companion; Guardians of the Supply; The Burrow Hunt; The Companions’ Vigil; The Packbreak Patrol | Escort the patrol, defend a supply camp, or clear hostile posts using your own summon. Learn a usable summon first. |
+| Harvesting | The Gatherer’s Round; The Apothecary’s Basket; A Gatherer’s Survey; Supplies for the Watch; A Survey Beyond the Road | Gather one fresh resource, assemble a two-resource bundle, or gather a quota while sampling distinct nodes. Bring a Pickaxe for mining terms. |
+| Alchemy | The Apprentice’s Order; From Reagent to Essence; A Shelf Ready for Sale; The Apothecary’s Reserve; The Guild’s Commission | Mix fresh batches, gather a fresh ingredient before mixing, or mix and deliver ordinary essences for the shelves. Bring a learned recipe and your Mortar and Pestle. |
+
+Difficulty sets the amount of work and the threats you face. Combat assignments have three stages on Routine, Standard, and Demanding; four on Hard; and five on Expert. Gathering and mixing orders show their exact quotas before you accept.
 
 You can accept up to **three contracts** and track one at a time. Accepted objectives and rewards stay fixed if your level changes. The marked destination and Instructions explain where to go. Walk there yourself, then choose **Start** when ready. Opening the board or crossing a worksite does not begin an encounter.
 
@@ -35,15 +37,19 @@ During Triage at the Watch, the Heal Target controls also include living wounded
 
 ## Report and rewards
 
-Return to Batu when both objectives are complete. Each contract awards the displayed discipline experience, gold, supplies, and **one service mark**, in addition to ordinary gameplay experience and loot. Melee contract experience is split between Attack and Defense.
+Return to Batu when the posted objectives are complete. Each contract awards the displayed experience, gold, supplies, and **one service mark**, in addition to ordinary gameplay experience and loot.
 
-Base completion rewards follow the tier shown on the board. Some routes add gold; check the posted terms for the exact reward.
+New offers use the difficulty shown on the board. Experience is the listed multiplier times your **base skill level, with a minimum level of one**. The board shows the quoted levels and exact XP. Melee applies the full multiplier separately to Attack and Defense, using each skill’s own base level. Accepting fixes those rewards even if you train further before reporting.
 
-| Tier | Base gold | Discipline experience |
+| Difficulty | Base gold | XP multiplier |
 | --- | --- | --- |
-| 1 | 150 | 600 |
-| 2 | 300 | 1,500 |
-| 3 | 600 | 3,000 |
+| Routine | 500 | 150× |
+| Standard | 1,500 | 400× |
+| Demanding | 3,000 | 800× |
+| Hard | 6,000 | 1,500× |
+| Expert | 10,000 | 3,000× |
+
+Some routes add gold, up to the 10,000-coin limit. Check the posted terms for the exact reward. Previously accepted assignments keep their original quoted terms.
 
 Each discipline also has a **bonus day once every three UTC days**, when new offers include an extra skill-supply parcel alongside those normal rewards:
 
@@ -56,7 +62,7 @@ Each discipline also has a **bonus day once every three UTC days**, when new off
 | Harvesting | Bread or Cooked Meat |
 | Alchemy | Full Life, Fire, or Water Essence ingredient batches |
 
-Parcels rotate by day and tier and appear in the reward list **before acceptance**. Changing templates or routes, rerolling, or using the testing reset does not change that discipline’s parcel for the day. Already accepted assignments keep their quoted rewards across day or level changes.
+Parcels rotate by day and appear in the reward list **before acceptance**. Changing templates or routes, rerolling, or using the testing reset does not change that discipline’s parcel for the day. Already accepted assignments keep their quoted rewards across day or level changes.
 
 You keep harvested and mixed goods unless the posted assignment explicitly requires a handover. **A Shelf Ready for Sale** requires the listed ordinary essences when you report. Enriched results count toward mixing practice, but are never taken for the handover; mix enough ordinary stock to fill the order.
 

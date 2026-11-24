@@ -313,6 +313,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"signed_ashore_v1",
 	"campaign_v1",
 	"landfall_contracts_v1",
+	"landfall_contracts_difficulty_v1",
 	"campaign_party_v1",
 	"campaign_cart_v1",
 	"campaign_rescue_v1",

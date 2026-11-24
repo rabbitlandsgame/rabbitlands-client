@@ -18,6 +18,7 @@ var _abandon_skill := ""
 var _discipline_row: HBoxContainer
 var _offer_count: Label
 var _skill_filter := ""
+var _requested_skill := ""
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -42,14 +43,21 @@ func _ready() -> void:
 	filter_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER; _discipline_row.add_child(filter_label)
 	discipline = OptionButton.new(); discipline.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	discipline.size_flags_vertical = Control.SIZE_SHRINK_CENTER; discipline.custom_minimum_size.y = 32
-	discipline.add_item("All disciplines")
 	for skill: String in EloriaProtocol.ContractsProtocol.SKILLS: discipline.add_item(skill.capitalize())
 	discipline.tooltip_text = "Browse offers by discipline. Your accepted assignments stay the same."
 	_discipline_row.add_child(discipline)
 	_offer_count = Label.new(); _offer_count.size_flags_vertical = Control.SIZE_SHRINK_CENTER; _discipline_row.add_child(_offer_count)
 	discipline.item_selected.connect(func(index: int) -> void:
-		_skill_filter = "" if index == 0 else str(EloriaProtocol.ContractsProtocol.SKILLS[index-1])
-		_render_available(); _fit())
+		var skill: String = EloriaProtocol.ContractsProtocol.SKILLS[index]
+		if _pending:
+			discipline.select(EloriaProtocol.ContractsProtocol.SKILLS.find(_skill_filter)); return
+		if state.has("offer_skill"):
+			_requested_skill = skill
+			discipline.select(EloriaProtocol.ContractsProtocol.SKILLS.find(_skill_filter))
+			_send("board",skill); _render_available(); _fit()
+		else:
+			# Older recorded packets contain every discipline in one snapshot.
+			_skill_filter = skill; _render_available(); _fit())
 	tabs = TabContainer.new(); tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL; body.add_child(tabs)
 	tabs.tab_changed.connect(func(index: int) -> void: _discipline_row.visible = index == 0; _fit())
 	for title: String in ["Available","Accepted","Marks"]:
@@ -58,7 +66,7 @@ func _ready() -> void:
 		var column := VBoxContainer.new(); column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		scroll.add_child(column); columns[title] = column
 	var refresh := Button.new(); refresh.text = "Refresh board"; body.add_child(refresh)
-	refresh.pressed.connect(func() -> void: action_requested.emit("board","",-1))
+	refresh.pressed.connect(func() -> void: action_requested.emit("board",_requested_skill if not _requested_skill.is_empty() else _skill_filter if state.has("offer_skill") else "",-1))
 	_confirm = ConfirmationDialog.new(); _confirm.title = "Abandon contract?"; add_child(_confirm)
 	_confirm.dialog_text = "Abandon this contract and lose its current progress? Earned completed rewards are kept."
 	_confirm.confirmed.connect(func() -> void: _send("abandon",_abandon))
@@ -79,13 +87,27 @@ func _text(parent: Node, value: String, color := Color.WHITE) -> void:
 	var label := Label.new(); label.text = value; label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.add_theme_color_override("font_color",color); parent.add_child(label)
 
+static func number_text(value: int) -> String:
+	var digits := str(maxi(0,value)); var grouped := ""
+	while digits.length() > 3:
+		grouped = ","+digits.right(3)+grouped; digits = digits.left(digits.length()-3)
+	return digits+grouped
+
 static func reward_text(reward: Dictionary) -> String:
 	var parts: PackedStringArray = []
-	for skill: String in reward.get("xp",{}): parts.append("%d %s XP" % [int(reward.xp[skill]),skill.capitalize()])
-	if int(reward.get("gold",0)): parts.append("%d gold" % int(reward.gold))
-	if int(reward.get("marks",0)): parts.append("%d marks" % int(reward.marks))
-	for item: Dictionary in reward.get("items",[]): parts.append("%d %s" % [int(item.count),str(item.name)])
+	for skill: String in reward.get("xp",{}): parts.append("%s %s XP" % [number_text(int(reward.xp[skill])),skill.capitalize()])
+	if int(reward.get("gold",0)): parts.append("%s gold" % number_text(int(reward.gold)))
+	if int(reward.get("marks",0)): parts.append("%s marks" % number_text(int(reward.marks)))
+	for item: Dictionary in reward.get("items",[]): parts.append("%s %s" % [number_text(int(item.count)),str(item.name)])
 	return " · ".join(parts)
+
+static func xp_quote_text(entry: Dictionary) -> String:
+	var difficulty: Dictionary = entry.get("difficulty",{})
+	if difficulty.is_empty() or (entry.reward.get("xp",{}) as Dictionary).is_empty(): return ""
+	var parts: PackedStringArray = []
+	for skill: String in entry.reward.xp:
+		parts.append("%s× base %s %s" % [number_text(int(difficulty.xp_multiplier)),skill.capitalize(),number_text(int(difficulty.xp_levels[skill]))])
+	return "XP quote · "+" · ".join(parts)+". Minimum level 1; fixed when accepted."
 
 func _button(parent: Node, text: String, action: String, identity: String, enabled := true, reason := "") -> Button:
 	var button := Button.new(); button.text = text; button.disabled = not enabled or _pending
@@ -96,10 +118,11 @@ func _button(parent: Node, text: String, action: String, identity: String, enabl
 func _send(action: String, identity: String) -> void:
 	if _pending: return
 	_pending = true
-	action_requested.emit(action,identity,int(state.get("revision",0)))
+	discipline.disabled = true
 	# No optimistic progress or reward update; the next snapshot settles it.
 	for column: VBoxContainer in columns.values():
 		for button: Node in column.find_children("*","Button",true,false): button.disabled = true
+	action_requested.emit(action,identity,int(state.get("revision",0)))
 
 func _entry(column: VBoxContainer, entry: Dictionary, accepted: bool) -> void:
 	var box := VBoxContainer.new(); column.add_child(box)
@@ -107,7 +130,8 @@ func _entry(column: VBoxContainer, entry: Dictionary, accepted: bool) -> void:
 	_text(box,str(entry.title),Color("e5bd74"))
 	var route := str(entry.get("route_label",""))
 	if route.is_empty(): route = str(entry.route).replace("_"," ").capitalize()+" route"
-	_text(box,"%s · %s · %s" % [str(entry.skill).capitalize(),str(entry.tier),route],Color("b8c7cf"))
+	var difficulty: Dictionary = entry.get("difficulty",{})
+	_text(box,"%s · %s · %s" % [str(entry.skill).capitalize(),str(difficulty.get("label",entry.tier)),route],Color("b8c7cf"))
 	var locked_offer := not accepted and not bool(entry.eligible)
 	if locked_offer and not str(entry.reason).is_empty(): _text(box,str(entry.reason),Color("dbb98d"))
 	var step: Dictionary = entry.get("next_step",{}) if accepted else {}
@@ -116,6 +140,8 @@ func _entry(column: VBoxContainer, entry: Dictionary, accepted: bool) -> void:
 		if not str(step.get("detail","")).is_empty(): _text(box,str(step.detail))
 	_text(box,str(entry.description))
 	_text(box,"Rewards · " + reward_text(entry.reward),Color("bdd2bc"))
+	var quote := xp_quote_text(entry)
+	if not quote.is_empty(): _text(box,quote,Color("b8c7cf"))
 	_text(box,"Where · " + str((step.get("location",entry.location) as Dictionary).label),Color("b8c7cf"))
 	var preparation: Dictionary = entry.get("preparation",{})
 	if not preparation.is_empty():
@@ -162,11 +188,15 @@ func _render_available() -> void:
 	if column == null: return
 	for child: Node in column.get_children(): column.remove_child(child); child.queue_free()
 	var count := 0
-	for entry: Dictionary in state.get("offers",[]):
-		if not _skill_filter.is_empty() and str(entry.skill) != _skill_filter: continue
-		_entry(column,entry,false); count += 1
-	_offer_count.text = "%d offers" % count
-	if count == 0: _text(column,"No offers posted for this discipline.",Color("b8c7cf"))
+	if not _requested_skill.is_empty():
+		_text(column,"Loading "+_requested_skill.capitalize()+" offers…",Color("b8c7cf"))
+		_offer_count.text = "Loading…"
+	else:
+		for entry: Dictionary in state.get("offers",[]):
+			if str(entry.skill) != _skill_filter: continue
+			_entry(column,entry,false); count += 1
+		_offer_count.text = "%d offers" % count
+		if count == 0: _text(column,"No offers posted for this discipline.",Color("b8c7cf"))
 	# Helping a party member is separate from accepting personal work.
 	for join: Dictionary in state.get("joins",[]):
 		_text(column,"Party · %s — %s" % [str(join.owner),str(join.title)],Color("e5bd74"))
@@ -179,8 +209,12 @@ func apply_state(value: Dictionary, allow_open := true) -> void:
 		if allow_open and bool(state.get("open",false)): panel.show(); panel.move_to_front()
 		return
 	_signature = signature
-	state = value.duplicate(true); _pending = false
+	state = value.duplicate(true); _pending = false; _requested_skill = ""
+	if state.has("offer_skill"): _skill_filter = str(state.offer_skill)
+	elif _skill_filter.is_empty():
+		_skill_filter = str((state.get("current",{}) as Dictionary).get("skill","melee"))
 	if not is_node_ready(): return
+	discipline.disabled = false; discipline.select(EloriaProtocol.ContractsProtocol.SKILLS.find(_skill_filter))
 	for column: VBoxContainer in columns.values():
 		for child: Node in column.get_children(): column.remove_child(child); child.queue_free()
 	account.text = "Accepted %d / %d · %d marks · UTC day %s · Resets 00:00 UTC" % [(state.get("accepted",[]) as Array).size(),int(state.get("accepted_limit",3)),int(state.get("marks",0)),str(state.get("day",""))]
