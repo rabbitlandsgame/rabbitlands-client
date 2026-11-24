@@ -1,0 +1,152 @@
+{
+  "version": 1,
+  "scenes": {
+    "contracts.brief": {
+      "title": "Landfall Contracts",
+      "duration": 12,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "live_camera": "gameplay",
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "protagonist",
+        "recipient",
+        "worker"
+      ],
+      "stage_protagonist": false,
+      "shots": [],
+      "dialogue_holds": [
+        12
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Batu Ensh",
+          "speaker_actor": "mentor",
+          "variants": {
+            "melee": "The roads need hands who can hold their ground. Read the marked assignment, take your weapon, and work with your party. Your own part in the fight is what earns this contract.",
+            "magic": "A useful spell is one you can rely on when someone needs it. Follow this assignment with real casts, keep enough ether to finish, and use the marked worksite when the instructions call for it.",
+            "ranging": "A bow can protect a road without drawing every threat onto the workers. Take this assignment to its marked site and make your own shots count.",
+            "summoning": "A summoned ally is a partner, not a substitute for judgement. Follow this assignment with your own creature and keep the party together at the worksite.",
+            "harvesting": "We need fresh gathering to keep the wagons moving. Walk to the marked patch and choose Start. What you gather after starting this assignment counts; old stock can stay in your pack.",
+            "alchemy": "Take this assignment to The True Note and choose Start before mixing fresh batches. You keep the goods. If you later choose to donate ordinary stock, I can add the posted bonus; enriched supplies are yours to keep."
+          }
+        }
+      ]
+    },
+    "contracts.entry": {
+      "title": "Landfall Contracts",
+      "duration": 12,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "live_camera": "gameplay",
+      "anchor": "recipient",
+      "required_actors": [
+        "recipient"
+      ],
+      "cast_roles": [
+        "mentor",
+        "protagonist",
+        "recipient",
+        "worker"
+      ],
+      "stage_protagonist": false,
+      "shots": [],
+      "dialogue_holds": [
+        12
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "You",
+          "speaker_actor": "recipient",
+          "variants": {
+            "melee": "This is the marked worksite. I will begin when the party is ready.",
+            "magic": "This is the marked worksite. I will begin when the party is ready.",
+            "ranging": "This is the marked worksite. I will begin when the party is ready.",
+            "summoning": "This is the marked worksite. I will begin when the party is ready.",
+            "harvesting": "This is the marked gathering patch. Once I start, fresh gathering here will count for the assignment.",
+            "alchemy": "I have reached the preparation area. Once I start, I will mix the fresh batches listed in the assignment."
+          }
+        }
+      ]
+    },
+    "contracts.report": {
+      "title": "Landfall Contracts",
+      "duration": 12,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "live_camera": "gameplay",
+      "anchor": "mentor",
+      "required_actors": [
+        "mentor"
+      ],
+      "cast_roles": [
+        "mentor",
+        "protagonist",
+        "recipient",
+        "worker"
+      ],
+      "stage_protagonist": false,
+      "shots": [],
+      "dialogue_holds": [
+        12
+      ],
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "Batu Ensh",
+          "speaker_actor": "mentor",
+          "variants": {
+            "melee": "Good work. Your contract reward is recorded, and the supply line has another dependable hand. Any weekly bonus you earned is recorded with it.",
+            "magic": "Good work. Your contract reward is recorded, and the supply line has another dependable hand. Any weekly bonus you earned is recorded with it.",
+            "ranging": "Good work. Your contract reward is recorded, and the supply line has another dependable hand. Any weekly bonus you earned is recorded with it.",
+            "summoning": "Good work. Your contract reward is recorded, and the supply line has another dependable hand. Any weekly bonus you earned is recorded with it.",
+            "harvesting": "Good work. Your contract reward is recorded, and the supply line has another dependable hand. Any weekly bonus you earned is recorded with it.",
+            "alchemy": "Good work. Your contract reward is recorded, and the supply line has another dependable hand. Any weekly bonus you earned is recorded with it."
+          }
+        }
+      ]
+    },
+    "contracts.pause": {
+      "title": "A Moment to Regroup",
+      "duration": 14,
+      "entry_seconds": 0,
+      "exit_seconds": 0,
+      "live_camera": "gameplay",
+      "anchor": "recipient",
+      "required_actors": [
+        "recipient"
+      ],
+      "cast_roles": [
+        "protagonist",
+        "recipient",
+        "worker"
+      ],
+      "stage_protagonist": false,
+      "shots": [],
+      "dialogue_holds": [
+        4,
+        14
+      ],
+      "choice_id": "contract_retry",
+      "choice_actor": "recipient",
+      "choice_at": 4,
+      "choice_response_until": 13,
+      "response_speaker": "You",
+      "response_actor": "recipient",
+      "lines": [
+        {
+          "at": 0,
+          "speaker": "You",
+          "speaker_actor": "recipient",
+          "text": "Our completed work is saved. Let's decide how to proceed, or leave and return later."
+        }
+      ]
+    }
+  }
+}

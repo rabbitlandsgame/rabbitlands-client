@@ -1,5 +1,6 @@
 class_name EloriaProtocol
 extends RefCounted
+const ContractsProtocol := preload("res://src/network/contracts_protocol.gd")
 
 const HEADER_SIZE := 3
 # Actor animation frames. Only the two resting frames are meaningful in an
@@ -311,6 +312,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"field_dispatch_v1",
 	"signed_ashore_v1",
 	"campaign_v1",
+	"landfall_contracts_v1",
 	"campaign_party_v1",
 	"campaign_cart_v1",
 	"campaign_rescue_v1",
@@ -4331,6 +4333,20 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 	if str((scene.get("choice", {}) as Dictionary).get("id", "")) == "claims_lead" \
 			and (value.get("inquiry", {}) as Dictionary).is_empty():
 		return {"type": "invalid", "error": "campaign_inquiry_choice"}
+	if str(value.get("kind","")) == "contracts":
+		if not ContractsProtocol.valid(value.get("contracts")) or not value.get("board_only",false) is bool:
+			return {"type":"invalid","error":"contracts_shape"}
+		if not scene.is_empty() and (str(scene.get("id","")) not in ["contracts.brief","contracts.entry","contracts.report","contracts.pause"] \
+				or str(scene.get("variant","")) not in ContractsProtocol.SKILLS):
+			return {"type":"invalid","error":"contracts_scene"}
+		if not (scene.get("choice",{}) as Dictionary).is_empty() and (str(scene.get("id","")) != "contracts.pause" \
+				or str((scene.choice as Dictionary).get("id","")) != "contract_retry"):
+			return {"type":"invalid","error":"contracts_choice"}
+		if bool(value.get("board_only",false)):
+			if not scene.is_empty(): return {"type":"invalid","error":"contracts_board_scene"}
+			return {"type":"contracts_board","state":value.contracts}
+	elif value.has("contracts") or str((scene.get("choice",{}) as Dictionary).get("id","")) == "contract_retry":
+		return {"type":"invalid","error":"contracts_binding"}
 	return {"type": "campaign", "state": value}
 
 ## One actual held boss may be reconstructed as a collision-free scene visual
@@ -4733,7 +4749,8 @@ static func campaign_scene_choice_valid(choice: Variant) -> bool:
 	var allowed: Array = {"opening_rescue": ["defend", "repair", "evacuate"],
 		"cart_release": ["unload", "lever", "haul"], "claims_lead": ["physical", "chronology", "records"],
 		"rescue_response": ["help", "watch"], "rescue_accept": ["accept", "defer"],
-		"rescue_reward": ["sword", "bow", "wand"], "rescue_checkin": ["listen", "rest"]}.get(str(choice.get("id", "")),
+		"rescue_reward": ["sword", "bow", "wand"], "rescue_checkin": ["listen", "rest"],
+		"contract_retry":["resume","retry","leave"]}.get(str(choice.get("id", "")),
 			SHELVES_CHOICE_OPTIONS.get(str(choice.get("id", "")), []))
 	if allowed.is_empty() or not choice.get("selected") is String \
 			or (not str(choice.selected).is_empty() and choice.selected not in allowed):
@@ -4747,7 +4764,8 @@ static func campaign_scene_choice_valid(choice: Variant) -> bool:
 	if bool(choice.can_choose) and (not bool(choice.owner_is_you) or not str(choice.selected).is_empty()):
 		return false
 	var options: Variant = choice.get("options")
-	if not options is Array or options.size() != allowed.size():
+	var contract_pause := str(choice.get("id","")) == "contract_retry"
+	if not options is Array or (options.size() not in [2,3] if contract_pause else options.size() != allowed.size()):
 		return false
 	var ids: Array[String] = []
 	for option: Variant in options:
@@ -4756,6 +4774,8 @@ static func campaign_scene_choice_valid(choice: Variant) -> bool:
 				or str(option.id) in ids:
 			return false
 		ids.append(str(option.id))
+	if contract_pause and ("leave" not in ids or (not str(choice.selected).is_empty() and str(choice.selected) not in ids)):
+		return false
 	return true
 
 static func _campaign_lamps_valid(lamps: Variant) -> bool:

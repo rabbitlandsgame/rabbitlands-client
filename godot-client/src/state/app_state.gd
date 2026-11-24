@@ -244,6 +244,7 @@ var marketplace: Dictionary = _empty_marketplace_state()
 var merchant: Dictionary = {"open": false, "actor_id": -1, "npc_name": "",
 	"gold": 0, "carried": 0, "capacity": 0, "items": []}
 var quest_journal: Array[Dictionary] = []
+var contracts_board: Dictionary = {}
 ## What this character has finished. Held separately from the journal because
 ## the two answer different questions and arrive in different packets: the
 ## journal is what is open now, this is the record that outlives the machine.
@@ -984,6 +985,7 @@ func _on_connection_state_changed(value: String) -> void:
 		marketplace = _empty_marketplace_state()
 		merchant = _empty_merchant_state()
 		quest_journal.clear()
+		contracts_board.clear()
 		quest_archive.clear()
 		# The catalog half is per-profile and the mask is per-character, so a
 		# logout clears both rather than carrying one into the next session.
@@ -1967,7 +1969,13 @@ func _on_packet(command: int, payload: PackedByteArray) -> void:
 		"lantern_tutorial":
 			lantern_tutorial = (event.state as Dictionary).duplicate(true)
 			state_changed.emit(&"lantern_tutorial")
+		"contracts_board":
+			contracts_board = (event.state as Dictionary).duplicate(true)
+			state_changed.emit(&"contracts")
 		"campaign":
+			if str((event.state as Dictionary).get("kind","")) == "contracts":
+				contracts_board = (event.state.contracts as Dictionary).duplicate(true)
+				state_changed.emit(&"contracts")
 			campaign = (event.state as Dictionary).duplicate(true)
 			state_changed.emit(&"campaign")
 		"almanac":

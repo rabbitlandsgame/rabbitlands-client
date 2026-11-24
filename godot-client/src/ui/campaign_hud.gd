@@ -482,6 +482,15 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 	_apply_inline_instructions(complete,matches,travelling)
 	_order_instruction_actions()
 	_layout()
+	if str(snapshot.get("kind","")) == "contracts":
+		var contract := EloriaProtocol.ContractsProtocol.current(snapshot)
+		_entry.visible = true; _entry.text = "Report contract" if str(contract.get("status","")) == "ready" and bool(contract.get("eligible",false)) \
+			else "Start / resume contract" if bool(snapshot.get("available",false)) else "Show on map"
+		_entry.tooltip_text = "Report your completed assignment to Batu Ensh." if _entry.text == "Report contract" \
+			else "Begin here. Your progress is retained if you pause." if bool(snapshot.get("available",false)) \
+			else "Show this contract's destination. Walk there to begin or report."
+		_leave.visible = active and not travelling
+		_leave.text = "Pause contract"; _leave.tooltip_text = "Leave the private encounter; accepted contract progress is retained."
 	var rows: Array = []
 	var source: Array = [] if complete else Guidance.card_targets(snapshot) if Guidance.is_guided(snapshot) else snapshot.get("targets", [])
 	# Ready quest work precedes optional supplies, preserving the server's clue
@@ -606,6 +615,11 @@ func _request_leave() -> void:
 func _request_entry() -> void:
 	if not _available or not _entry.is_visible_in_tree(): return
 	var kind := str(_state.get("kind", ""))
+	if kind == "contracts":
+		var contract := EloriaProtocol.ContractsProtocol.current(_state)
+		action_requested.emit("contract_claim" if str(contract.get("status","")) == "ready" and bool(contract.get("eligible",false)) \
+			else "contract_begin" if bool(_state.get("available",false)) else "quest_map")
+		return
 	if str(_state.get("key", "")) == "rescue_checkin":
 		action_requested.emit("rescue_checkin_destination")
 		return

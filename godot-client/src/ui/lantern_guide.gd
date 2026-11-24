@@ -82,6 +82,10 @@ func campaign_identity() -> String:
 	return str(_campaign.get("kind", "opening")) + ":" + str(_campaign.get("run_id", "lead"))
 
 func has_campaign() -> bool:
+	if str(_campaign.get("kind","")) == "contracts" \
+			and str((_campaign.get("contracts",{}) as Dictionary).get("tracked_id","")) != str(_campaign.get("run_id","")) \
+			and ((_campaign.get("contracts",{}) as Dictionary).get("encounter",{}) as Dictionary).is_empty() \
+			and (_campaign.get("scene",{}) as Dictionary).is_empty(): return false
 	if str(_campaign.get("kind", "")) == "shelves" and bool(_campaign.get("completed", false)) and not bool(_campaign.get("active", false)): return false
 	# Map membership keeps the ending and Return action alive. It must not
 	# fabricate an active journal quest after the server archives this account.
@@ -114,7 +118,7 @@ func campaign_entry() -> Dictionary:
 	return {"title":str(_campaign.get("title", "The Missing Measure")), "objective":objective,
 		"location":location,
 		"_campaign":true, "_campaign_identity":campaign_identity(),
-		"_exact_title":str(_campaign.get("kind", "opening")) in ["opening", "rescue", "shelves"]}
+		"_exact_title":str(_campaign.get("kind", "opening")) in ["opening", "rescue", "shelves","contracts"]}
 
 func is_campaign_tracked() -> bool:
 	return has_campaign() and bool(_campaign_choices.get(campaign_identity(), false))
@@ -125,6 +129,13 @@ func using_campaign() -> bool:
 func set_campaign_tracked(tracked: bool) -> void:
 	if not has_campaign():
 		return
+	if str(_campaign.get("kind","")) == "contracts":
+		var accepted: Array = (_campaign.get("contracts",{}) as Dictionary).get("accepted",[])
+		if accepted.any(func(entry: Dictionary) -> bool: return str(entry.id) == str(_campaign.get("run_id",""))):
+			Network.contract_request("track" if tracked else "untrack",str(_campaign.get("run_id","")) if tracked else "")
+			return
+		# A temporary helping view is not a fourth personal assignment. Closing
+		# its guidance must not untrack the helper's own saved contract.
 	_campaign_choices[campaign_identity()] = tracked
 	_prefer_campaign = tracked
 	if tracked:

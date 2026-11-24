@@ -636,6 +636,23 @@ func harvest(object_id: int) -> Error:
 func use_map_object(object_id: int) -> Error:
 	return send_frame(EloriaProtocol.use_map_object(object_id))
 
+func contract_request(action: String, identity := "", revision := -1) -> Error:
+	if action in ["board","untrack","leave"]:
+		return send_chat("#contract " + action) if identity.is_empty() else ERR_INVALID_PARAMETER
+	if action in ["track","begin","join"]:
+		return send_chat("#contract %s %s" % [action,identity]) if _campaign_identifier(identity) else ERR_INVALID_PARAMETER
+	if action not in ["accept","abandon","reroll","claim","donate","redeem"] or not _campaign_identifier(identity) \
+			or revision < 0 or revision > 2147483647: return ERR_INVALID_PARAMETER
+	return send_chat("#contract %s %s %d" % [action,identity,revision])
+
+func contract_scene_done(identity: String, token: String) -> Error:
+	if not _campaign_identifier(identity) or not _campaign_identifier(token): return ERR_INVALID_PARAMETER
+	return send_chat("#contract scene_done %s %s" % [identity,token])
+
+func contract_scene_choice(identity: String, token: String, option: String) -> Error:
+	if not _campaign_identifier(identity) or not _campaign_identifier(token) or not _campaign_identifier(option): return ERR_INVALID_PARAMETER
+	return send_chat("#contract scene_choice %s %s %s" % [identity,token,option])
+
 func campaign_request(action: String) -> Error:
 	if action not in ["start", "resume", "leave", "hint", "join", "own", "bank", "road", "lamps", "cart", "continue", "rescue", "rescue replay", "accept", "defer", "supplies", "shelves"]:
 		return ERR_INVALID_PARAMETER

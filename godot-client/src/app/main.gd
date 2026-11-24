@@ -1849,6 +1849,9 @@ func _ready() -> void:
 	extension_windows = ExtensionWindowsScript.new()
 	game_view.add_child(extension_windows)
 	extension_windows.configure(item_atlas, lantern_guide)
+	extension_windows.contract_map_requested.connect(func(identity: String) -> void:
+		if str(AppState.campaign.get("kind","")) == "contracts" and str(AppState.campaign.get("run_id","")) == identity:
+			_on_campaign_action("quest_map"))
 	extension_windows.set_dock_rail(right_rail)
 	_configure_service_buttons()
 	extension_windows.gauntlet_loot_window.configure(item_atlas, model_registry, equipment_config)
@@ -9359,7 +9362,7 @@ func _on_campaign_target(object_id: int, tile: Vector2i, nearby: bool) -> void:
 		return
 	if _world_input_blocked() or not bool(AppState.campaign.get("active", false)):
 		return
-	if (not (AppState.campaign.get("travel", {}) as Dictionary).is_empty() and str(AppState.campaign.get("kind",""))!="shelves") \
+	if (not (AppState.campaign.get("travel", {}) as Dictionary).is_empty() and str(AppState.campaign.get("kind","")) not in ["shelves","contracts"]) \
 			or EloriaProtocol.map_id_from_reference(str(AppState.campaign.get("map", ""))) \
 			!= EloriaProtocol.map_id_from_reference(AppState.current_map):
 		return
@@ -9396,6 +9399,11 @@ func _on_campaign_action(action: String) -> void:
 		return
 	if action in ["accept", "defer", "supplies"]:
 		_on_rescue_action(action, str(AppState.campaign.get("run_id", "")))
+		return
+	if str(AppState.campaign.get("kind","")) == "contracts":
+		var identity := str(AppState.campaign.get("run_id",""))
+		if action == "contract_claim": Network.contract_request("claim",identity,int(AppState.contracts_board.get("revision",0)))
+		else: Network.contract_request("leave" if action == "leave" else "begin",identity if action != "leave" else "")
 		return
 	lantern_guide.follow_campaign_request(action)
 	Network.campaign_request(action)
@@ -9655,7 +9663,8 @@ func _on_campaign_scene_finished(token: String, reason: String) -> void:
 		return
 	var scene: Dictionary = AppState.campaign.get("scene", {})
 	if bool(scene.get("requires_ack", false)) and str(scene.get("token", "")) == token:
-		Network.campaign_scene_done(str(AppState.campaign.get("run_id", "")), token)
+		if str(AppState.campaign.get("kind","")) == "contracts": Network.contract_scene_done(str(AppState.campaign.get("run_id","")),token)
+		else: Network.campaign_scene_done(str(AppState.campaign.get("run_id", "")), token)
 
 func _on_campaign_scene_event(event_id: String) -> void:
 	if event_id not in ["rescue_burn", "rescue_depart"] or not _rescue_action_ready(str(AppState.campaign.get("run_id", "")), true) \
@@ -9780,6 +9789,12 @@ func _on_shelves_choice(option_id: String) -> void:
 		campaign_scene.choice_send_failed()
 
 func _on_campaign_scene_choice(option_id: String) -> void:
+	if str(AppState.campaign.get("kind","")) == "contracts":
+		var scene: Dictionary = AppState.campaign.get("scene",{})
+		if AppState.authenticated and campaign_scene.playing and not campaign_scene.is_replaying() \
+				and bool((scene.get("choice",{}) as Dictionary).get("can_choose",false)):
+			Network.contract_scene_choice(str(AppState.campaign.get("run_id","")),str(scene.get("token","")),option_id)
+		return
 	if str(AppState.campaign.get("key", "")) == "rescue_checkin":
 		_on_rescue_checkin_choice(option_id)
 		return
@@ -19180,6 +19195,11 @@ func _is_shelves_training_opponent(actor_id: int, dto: Dictionary) -> bool:
 
 func _is_shelves_grower(actor_id: int, dto: Dictionary) -> bool:
 	var state: Dictionary=AppState.campaign
+	if str(state.get("kind","")) == "contracts" and int(dto.get("kind",0)) == 2 and bool(state.get("active",false)) \
+			and (state.get("travel",{}) as Dictionary).is_empty() \
+			and EloriaProtocol.map_id_from_reference(str(state.get("map",""))) == EloriaProtocol.map_id_from_reference(AppState.current_map):
+		for worker: Dictionary in ((state.get("contracts",{}) as Dictionary).get("encounter",{}) as Dictionary).get("workers",[]):
+			if int(worker.get("actor_id",-1)) == actor_id: return true
 	if int(dto.get("kind",0))!=2 or str(state.get("kind",""))!="shelves" or not bool(state.get("active",false)) \
 			or str(state.get("run_id","")).is_empty() or not (state.get("travel",{}) as Dictionary).is_empty() \
 			or str((state.get("shelves",{}) as Dictionary).get("phase",""))!="work" \

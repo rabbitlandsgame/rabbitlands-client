@@ -5,6 +5,9 @@ const MerchantNames := preload("res://src/state/item_names.gd")
 const TextColors := preload("res://src/ui/text_colors.gd")
 const InstanceTiers := preload("res://src/state/item_instance_tiers.gd")
 const CompactQuestTracker := preload("res://src/ui/compact_quest_tracker.gd")
+const ContractsBoard := preload("res://src/ui/contracts_board.gd")
+signal contract_map_requested(identity: String)
+var contracts_board: Control
 ## The nine Eloria extension windows, built here rather than in main.gd.
 ##
 ## Each is driven by one server-push state packet and renders that snapshot and
@@ -256,6 +259,14 @@ func _ready() -> void:
 	# too, or every centre-anchored readout lands 640 pixels off screen.
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_build()
+	contracts_board = ContractsBoard.new(); add_child(contracts_board)
+	contracts_board.action_requested.connect(func(action: String, identity: String, revision: int) -> void:
+		var error := Network.contract_request(action,identity,revision)
+		if error != OK:
+			AppState.append_local_message("Could not send the contract request. Reconnect and try again.")
+			contracts_board.apply_state(AppState.contracts_board,false))
+	contracts_board.navigation_requested.connect(func(entry: Dictionary) -> void:
+		contracts_board.panel.hide(); contract_map_requested.emit(str(entry.id)))
 	gauntlet_ready_window = preload("res://src/ui/gauntlet_ready_window.gd").new()
 	add_child(gauntlet_ready_window)
 	gauntlet_loot_window = preload("res://src/ui/gauntlet_loot_window.gd").new()
@@ -351,7 +362,7 @@ func toggle_achievements() -> void:
 func _cascade() -> Array[PanelContainer]:
 	# The tracked-quest readout is deliberately absent: it is a HUD element the
 	# player pinned, not a window covering the screen, so cancel leaves it be.
-	return [gauntlet_loot_window.panel, descent_reward_window.panel, gauntlet_ready_window.panel, merchant_panel,
+	return [contracts_board.panel, gauntlet_loot_window.panel, descent_reward_window.panel, gauntlet_ready_window.panel, merchant_panel,
 		market_panel, detail_panel, mail_panel, quest_panel, party_panel, achievements_panel]
 
 func _toggle(panel: PanelContainer) -> void:
@@ -367,6 +378,8 @@ func _toggle(panel: PanelContainer) -> void:
 
 func _on_state_changed(path: StringName) -> void:
 	match path:
+		&"contracts":
+			_sync_contracts(true); _sync_quests()
 		&"navigation":
 			_sync_navigation()
 		&"combat_state":
@@ -401,6 +414,8 @@ func _on_state_changed(path: StringName) -> void:
 		&"party":
 			_sync_party()
 		&"campaign":
+			if str(AppState.campaign.get("kind","")) == "contracts" and not (AppState.campaign.get("scene",{}) as Dictionary).is_empty():
+				contracts_board.panel.hide()
 			var signature := JSON.stringify(_quest_party_members())
 			if signature != _party_rescue_signature:
 				_sync_party()
@@ -410,6 +425,7 @@ func _on_state_changed(path: StringName) -> void:
 			_sync_achievements()
 		&"connection":
 			if AppState.connection_state == "disconnected":
+				_sync_contracts()
 				_field_tracking_title = ""
 				_tracked_quest_title = ""
 				# A dropped session is not a fight that just ended: nothing
@@ -419,6 +435,7 @@ func _on_state_changed(path: StringName) -> void:
 				sync_all()
 
 func sync_all() -> void:
+	_sync_contracts()
 	_sync_navigation()
 	_sync_combat()
 	_sync_events()
@@ -563,6 +580,18 @@ func _sync_events() -> void:
 
 # --- quest journal -----------------------------------------------------------
 
+func _sync_contracts(allow_open := false) -> void:
+	if contracts_board == null: return
+	if AppState.contracts_board.is_empty(): contracts_board.panel.hide()
+	else: contracts_board.apply_state(AppState.contracts_board,allow_open)
+
+func _contract_journal(entry: Dictionary) -> Dictionary:
+	var objectives: PackedStringArray = []
+	for row: Dictionary in entry.get("objectives",[]): objectives.append("%s · %d / %d" % [str(row.label),int(row.current),int(row.target)])
+	return {"title":str(entry.title),"objective":str(entry.description)+"\n"+"\n".join(objectives),
+		"location":str(entry.location.label),"ready":str(entry.status)=="ready","target":0,"current":0,
+		"_contract_id":str(entry.id),"_contract_quest_id":int(entry.quest_id),"_campaign_identity":"contracts:"+str(entry.id)}
+
 func _sync_quests() -> void:
 	if not _field_tracking_title.is_empty():
 		_tracked_quest_title = _field_tracking_title
@@ -572,6 +601,12 @@ func _sync_quests() -> void:
 	_quest_entries.clear()
 	for entry: Dictionary in AppState.quest_journal:
 		_quest_entries.append(entry.duplicate(true))
+	for contract: Dictionary in AppState.contracts_board.get("accepted",[]):
+		var row := _contract_journal(contract)
+		var found := false
+		for entry: Dictionary in _quest_entries:
+			if str(entry.get("title","")) == str(row.title): entry.merge(row,true); found = true; break
+		if not found: _quest_entries.append(row)
 	if quest_guide != null and quest_guide.has_method("campaign_entry"):
 		var campaign: Dictionary = quest_guide.campaign_entry()
 		if not campaign.is_empty():
@@ -669,6 +704,10 @@ func _on_quest_track_pressed() -> void:
 	var title: String = str(
 		(_quest_entries[index] as Dictionary).get("title", ""))
 	var entry: Dictionary = _quest_entries[index]
+	if entry.has("_contract_id"):
+		Network.contract_request("untrack" if str(AppState.contracts_board.get("tracked_id","")) == str(entry._contract_id) else "track",
+			"" if str(AppState.contracts_board.get("tracked_id","")) == str(entry._contract_id) else str(entry._contract_id))
+		return
 	if bool(entry.get("_campaign", false)) and quest_guide != null:
 		quest_guide.set_campaign_tracked(not quest_guide.using_campaign())
 		return
@@ -838,6 +877,8 @@ func _show_quest(index: int) -> void:
 	var entry: Dictionary = _quest_entries[index]
 	var campaign := bool(entry.get("_campaign", false)) and quest_guide != null
 	quest_track_button.text = "Untrack" if (quest_guide.using_campaign() if campaign else _quest_is_tracked(str(entry.get("title", "")))) else "Track"
+	if entry.has("_contract_id"):
+		quest_track_button.text = "Untrack" if str(AppState.contracts_board.get("tracked_id","")) == str(entry._contract_id) else "Track"
 	quest_show_button.visible = _quest_window_hidden(entry)
 	quest_replay_button.visible = campaign
 	sync_campaign_replay()
@@ -2052,9 +2093,10 @@ func _quest_party_members() -> Array[Dictionary]:
 	var mother:=_rescue_party_member()
 	if not mother.is_empty():result.append(mother)
 	var snapshot: Dictionary=AppState.campaign
-	if not AppState.authenticated or str(snapshot.get("kind",""))!="shelves" or not bool(snapshot.get("active",false)) \
+	if not AppState.authenticated or str(snapshot.get("kind","")) not in ["shelves","contracts"] or not bool(snapshot.get("active",false)) \
 			or EloriaProtocol.map_id_from_reference(str(snapshot.get("map","")))!=EloriaProtocol.map_id_from_reference(AppState.current_map):return result
 	var growers: Dictionary=(snapshot.get("shelves",{}) as Dictionary).get("growers",(snapshot.get("shelves",{}) as Dictionary).get("fire",(snapshot.get("shelves",{}) as Dictionary).get("water",{})))
+	if str(snapshot.get("kind","")) == "contracts": growers = (snapshot.get("contracts",{}) as Dictionary).get("encounter",{})
 	for worker: Dictionary in growers.get("workers",[]):
 		var actor: Dictionary=AppState.actors.get(int(worker.actor_id),{})
 		if int(actor.get("kind",0))!=2:continue
@@ -2514,6 +2556,12 @@ func _build() -> void:
 	quest_done_button.toggle_mode = true
 	quest_done_button.pressed.connect(_on_quest_view.bind(true))
 	quest_views.add_child(quest_done_button)
+	var contracts_button := Button.new(); contracts_button.name = "OpenLandfallContracts"; contracts_button.text = "Contracts"
+	contracts_button.tooltip_text = "Browse Landfall contracts anywhere. Visit Batu Ensh to accept, report or redeem marks."
+	contracts_button.pressed.connect(func() -> void:
+		if Network.contract_request("board") == OK: quest_panel.hide()
+		else: AppState.append_local_message("Could not open the contracts board. Reconnect and try again."))
+	quest_views.add_child(contracts_button)
 	var quest_columns := VBoxContainer.new()
 	quest_columns.name = "QuestColumns"
 	quest_columns.size_flags_vertical = Control.SIZE_EXPAND_FILL

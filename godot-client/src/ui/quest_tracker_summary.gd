@@ -162,6 +162,22 @@ static func _supply(result: Dictionary, snapshot: Dictionary, readout: Dictionar
 
 static func campaign(snapshot: Dictionary, current_map := "") -> Dictionary:
 	var result := _empty(FieldReadout.instructions(snapshot))
+	if str(snapshot.get("kind","")) == "contracts":
+		var contract := EloriaProtocol.ContractsProtocol.current(snapshot)
+		result.objective = str(snapshot.get("hint",contract.get("description","Follow the contract instructions.")))
+		for objective: Dictionary in contract.get("objectives",[]):
+			if int(objective.current) < int(objective.target):
+				_task(result,objective); break
+		if not (snapshot.get("travel",{}) as Dictionary).is_empty(): result.objective = FieldReadout.instructions(snapshot)
+		if str(contract.get("status","")) == "ready": result.objective = "Report to Batu Ensh"
+		result.ribbon_objective = str(contract.get("title",snapshot.get("title","Landfall contract")))
+		var workers: Array = ((snapshot.get("contracts",{}) as Dictionary).get("encounter",{}) as Dictionary).get("workers",[])
+		_crew(result,workers)
+		var patients := AllyRecovery.patients(snapshot,current_map if not current_map.is_empty() else str(snapshot.get("map","")))
+		if not patients.is_empty():
+			result.recovery = patients[0]; result.urgent = true
+			result.alert = str(patients[0].name) + " is down — use Heal Target."
+		return result
 	var travel: Dictionary = snapshot.get("travel",{})
 	if not travel.is_empty():
 		var npc := str(travel.get("npc",""))
@@ -225,6 +241,13 @@ static func _typed_cargo(values: Dictionary) -> String:
 static func instructions(snapshot: Dictionary, current_map := "") -> Dictionary:
 	var result := {"text":FieldReadout.instructions(snapshot),"ledger":[],"note":"","guidance":"",
 		"replaces_supply_ledger":false}
+	if str(snapshot.get("kind","")) == "contracts":
+		var contract := EloriaProtocol.ContractsProtocol.current(snapshot)
+		for objective: Dictionary in contract.get("objectives",[]):
+			_ledger_row(result,str(objective.label),"%s / %s" % [_number(int(objective.current)),_number(int(objective.target))])
+		result.replaces_supply_ledger = not contract.is_empty()
+		result.note = "Unfinished contract progress is kept when you pause."
+		return result
 	var ledger: Dictionary = snapshot.get("shelves",{})
 	if str(snapshot.get("kind","")) != "shelves" or not bool(snapshot.get("active",false)) \
 			or str(snapshot.get("run_id","")).is_empty() or str(ledger.get("phase","")) != "work" \
