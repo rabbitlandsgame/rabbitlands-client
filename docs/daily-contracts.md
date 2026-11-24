@@ -37,6 +37,27 @@ During Triage at the Watch, the Heal Target controls also include living wounded
 
 Return to Batu when both objectives are complete. Each contract awards the displayed discipline experience, gold, supplies, and **one service mark**, in addition to ordinary gameplay experience and loot. Melee contract experience is split between Attack and Defense.
 
+Base completion rewards follow the tier shown on the board. Some routes add gold; check the posted terms for the exact reward.
+
+| Tier | Base gold | Discipline experience |
+| --- | --- | --- |
+| 1 | 150 | 600 |
+| 2 | 300 | 1,500 |
+| 3 | 600 | 3,000 |
+
+Each discipline also has a **bonus day once every three UTC days**, when new offers include an extra skill-supply parcel alongside those normal rewards:
+
+| Discipline | Parcel examples |
+| --- | --- |
+| Melee | Bandages or Potions of Minor Healing |
+| Magic | Life, Fire, or Water Essence |
+| Ranging | A reusable Basic Quiver or Basic Bolt Case |
+| Summoning | Bones, Reed, and Aether Salt |
+| Harvesting | Bread or Cooked Meat |
+| Alchemy | Full Life, Fire, or Water Essence ingredient batches |
+
+Parcels rotate by day and tier and appear in the reward list **before acceptance**. Changing templates or routes, rerolling, or using the testing reset does not change that discipline’s parcel for the day. Already accepted assignments keep their quoted rewards across day or level changes.
+
 You keep harvested and mixed goods unless the posted assignment explicitly requires a handover. **A Shelf Ready for Sale** requires the listed ordinary essences when you report. Enriched results count toward mixing practice, but are never taken for the handover; mix enough ordinary stock to fill the order.
 
 If that ordinary stock is missing, the card shows what to prepare instead of telling you to report immediately. Once the stock is ready, the destination returns to Batu.
