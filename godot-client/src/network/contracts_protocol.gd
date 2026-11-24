@@ -10,7 +10,14 @@ const TEMPLATES := {
 	"ridge_sentinels":["ranging",1104], "trail_pursuit":["ranging",1105],
 	"supply_guard":["summoning",1106], "hunt_burrows":["summoning",1107],
 	"harvest_bundle":["harvesting",1108], "harvest_survey":["harvesting",1109],
-	"alchemy_reagents":["alchemy",1110], "alchemy_stock":["alchemy",1111]}
+	"alchemy_reagents":["alchemy",1110], "alchemy_stock":["alchemy",1111],
+	"relief_column":["melee",1112], "thornline_breakthrough":["melee",1113],
+	"arcane_perimeter":["magic",1114], "wardens_last_mile":["magic",1115],
+	"longshot_convoy":["ranging",1116], "ridgebreak_hunt":["ranging",1117],
+	"companions_vigil":["summoning",1118], "packbreak_patrol":["summoning",1119],
+	"watch_supplies":["harvesting",1120], "frontier_survey":["harvesting",1121],
+	"apothecary_reserve":["alchemy",1122], "guild_commission":["alchemy",1123]}
+const DIFFICULTIES := ["routine","standard","demanding","hard","expert"]
 
 static func number(value: Variant, maximum := 2147483647) -> bool:
 	return typeof(value) in [TYPE_INT,TYPE_FLOAT] and is_finite(float(value)) \
@@ -56,6 +63,17 @@ static func row(value: Variant) -> bool:
 	for key: String in ["title","description","route","tier","status","reason"]:
 		if not text(value.get(key),1024 if key == "description" else 256,key not in ["title","status"]): return false
 	if not value.get("eligible") is bool or not reward(value.get("reward")): return false
+	if value.has("difficulty"):
+		var difficulty: Variant = value.difficulty
+		if not difficulty is Dictionary or not number(difficulty.get("rank"),4): return false
+		var rank := int(difficulty.rank)
+		if difficulty.get("id") != DIFFICULTIES[rank] or not text(difficulty.get("label"),128,false) \
+				or not number(difficulty.get("xp_multiplier"),3000) or int(difficulty.xp_multiplier) < 150 \
+				or not difficulty.get("xp_levels") is Dictionary or difficulty.xp_levels.is_empty() or difficulty.xp_levels.size() > 8: return false
+		for skill: Variant in difficulty.xp_levels:
+			if not identity(skill) or not number(difficulty.xp_levels[skill]) or int(difficulty.xp_levels[skill]) < 1: return false
+		for skill: Variant in value.reward.xp:
+			if not difficulty.xp_levels.has(skill): return false
 	if not value.get("objectives") is Array or value.objectives.size() > 16: return false
 	var seen := {}
 	for objective: Variant in value.objectives:
@@ -92,6 +110,9 @@ static func valid(value: Variant) -> bool:
 			or value.get("accepted_limit") != 3 or not identity(value.get("tracked_id"),true) \
 			or not number(value.get("marks")): return false
 	if value.has("open") and not value.open is bool: return false
+	var paged: bool = value.has("offer_skill")
+	if paged and (value.offer_skill not in SKILLS or value.get("offer_total") != 60): return false
+	if not paged and value.has("offer_total"): return false
 	if value.has("reset_token") and not number(value.reset_token): return false
 	if value.has("reset_skills"):
 		if not value.reset_skills is Array or value.reset_skills.size() > SKILLS.size(): return false
@@ -121,10 +142,11 @@ static func valid(value: Variant) -> bool:
 			or not weekly.get("awarded") is bool or weekly.get("bonus_marks") != 3: return false
 	for key: String in ["offers","accepted"]:
 		var rows: Variant = value.get(key)
-		if not rows is Array or rows.size() > (3 if key == "accepted" else 36): return false
+		if not rows is Array or rows.size() > (3 if key == "accepted" else 10 if paged else 36): return false
 		var seen := {}
 		for entry: Variant in rows:
 			if not row(entry) or seen.has(entry.id): return false
+			if key == "offers" and paged and str(entry.skill) != str(value.offer_skill): return false
 			seen[entry.id] = true
 	if not value.get("catalog") is Array or value.catalog.size() > 16: return false
 	var seen := {}

@@ -31,16 +31,17 @@ static func snapshot(board: Dictionary, board_only := false) -> Dictionary:
 		"title":"Melee for Landfall","hint":"Complete your contract.","map":"landfall","run_id":"daily_melee" if not board_only else "",
 		"key":"melee","stage":"work","targets":[],"actors":{},"scene":{},"contracts":board,"board_only":board_only}
 
-static func expanded_board() -> Dictionary:
+static func expanded_board(skill := "melee") -> Dictionary:
 	var value := board_state(); value.offers = []
 	for template: String in Codec.TEMPLATES:
 		var binding: Array = Codec.TEMPLATES[template]
+		if str(binding[0]) != skill: continue
 		for route: String in ["standard","bold"]:
 			var row := offer(str(binding[0])); row.id = template+"_"+route
 			row.template_id = template; row.quest_id = int(binding[1]); row.route = route
 			row.route_label = route.capitalize()+" terms"; row.title = template.replace("_"," ").capitalize()
 			value.offers.append(row)
-	value.reset_token = 0; value.reset_skills = []
+	value.reset_token = 0; value.reset_skills = []; value.offer_skill = skill; value.offer_total = 60
 	return value
 
 func settle() -> void:
@@ -67,21 +68,22 @@ func run() -> void:
 	invalid = state.duplicate(true); invalid.offers.append(invalid.offers[0])
 	expect(not Codec.valid(invalid),"duplicate offer identities are rejected")
 	var expanded := expanded_board()
-	expect(expanded.offers.size() == 36 and Codec.valid(expanded),"all eighteen templates and their two routes have bound journal identities")
+	expect(expanded.offers.size() == 10 and Codec.valid(expanded),"five templates and both routes fit one authoritative discipline page")
 	invalid = expanded.duplicate(true); invalid.offers.append(offer("melee"))
-	expect(not Codec.valid(invalid),"the expanded board still rejects more than thirty-six offers")
-	invalid = expanded.duplicate(true); invalid.offers[12].quest_id = 1090
+	expect(not Codec.valid(invalid),"a discipline page rejects more than ten offers")
+	var new_index: int = expanded.offers.find_custom(func(row: Dictionary) -> bool:return str(row.template_id) == "hold_worksite")
+	invalid = expanded.duplicate(true); invalid.offers[new_index].quest_id = 1090
 	expect(not Codec.valid(invalid),"a new template cannot borrow the legacy journal identity")
 	invalid = expanded.duplicate(true); invalid.offers[0].template_id = "unknown"
 	expect(not Codec.valid(invalid),"unknown templates are rejected")
-	invalid = expanded.duplicate(true); invalid.offers[12].erase("template_id")
+	invalid = expanded.duplicate(true); invalid.offers[new_index].erase("template_id")
 	expect(not Codec.valid(invalid),"new journal identities require their exact template binding")
 	invalid = expanded.duplicate(true); invalid.reset_token = -1
 	expect(not Codec.valid(invalid),"negative reset generations are rejected")
 	invalid = expanded.duplicate(true); invalid.reset_skills = ["melee","melee"]
 	expect(not Codec.valid(invalid),"reset disciplines are bounded and unique")
 	var template_scene := snapshot(expanded)
-	template_scene.contracts.current = expanded.offers[12].duplicate(true)
+	template_scene.contracts.current = expanded.offers[new_index].duplicate(true)
 	template_scene.scene = {"id":"contracts.brief","token":"intro:1","requires_ack":true,"variant":"hold_worksite","actors":{"mentor":20,"recipient":1}}
 	expect(EloriaProtocol.decode_campaign(JSON.stringify(template_scene).to_utf8_buffer()).type == "campaign","a new template selects its own introductory language")
 	invalid = template_scene.duplicate(true); invalid.scene.variant = "healing_line"
@@ -96,7 +98,7 @@ func run() -> void:
 	expect(transport.contract_scene_done("daily_melee","token:7") == OK and transport.sent[-1].begins_with("#contract scene_done"),"scene acknowledgement uses the contracts namespace")
 	transport.free()
 	var board: Control = Board.new(); root.add_child(board); await settle(); board.apply_state(state); await settle()
-	expect(board.panel.visible and board.columns.Available.get_child_count() >= 6,"all offers and party joins are visible in the board")
+	expect(board.panel.visible and board.columns.Available.get_child_count() >= 3,"the legacy selected discipline and party joins are visible in the board")
 	var actions: Array = []; board.action_requested.connect(func(action: String,id: String,revision: int) -> void: actions.append([action,id,revision]))
 	var joins: Array = board.columns.Available.find_children("*","Button",true,false).filter(func(button: Button) -> bool: return button.text == "Join Friend")
 	(joins[0] as Button).pressed.emit()
@@ -111,14 +113,16 @@ func run() -> void:
 		root.size = size; board._fit(); await settle()
 		expect(root.get_visible_rect().encloses(board.panel.get_global_rect()),"the board fits the viewport with scrollable offers")
 	board.apply_state(expanded); await settle(); await settle()
-	expect(board._offer_count.text == "36 offers","the complete board advertises all posted choices")
+	expect(board._offer_count.text == "10 offers","the page advertises its five choices and two routes")
 	expect(board._discipline_row.size.y <= 48 and board.discipline.size.y <= 40,"the discipline selector stays one compact row instead of wrapping its label vertically")
-	board.discipline.select(2); board.discipline.item_selected.emit(2); await settle()
+	actions.clear(); board.discipline.select(1); board.discipline.item_selected.emit(1); await settle()
+	expect(actions == [["board","magic",7]] and board.state.offer_skill == "melee" and board.state.tracked_id == "daily_melee","changing discipline requests a page without altering accepted or tracked state")
+	var magic_page := expanded_board("magic"); board.apply_state(magic_page); await settle()
 	var visible_offers: Array = board.columns.Available.get_children().filter(func(row: Node) -> bool:return row.has_meta("contract_skill"))
-	expect(visible_offers.size() == 6 and visible_offers.all(func(row: Node) -> bool:return row.get_meta("contract_skill") == "magic"),"the discipline selector shows all three Magic templates and both routes")
+	expect(visible_offers.size() == 10 and visible_offers.all(func(row: Node) -> bool:return row.get_meta("contract_skill") == "magic"),"the returned page shows all five Magic templates and both routes")
 	expect(board.columns.Available.find_children("*","Button",true,false).any(func(button: Button) -> bool:return button.text == "Join Friend"),"party joining remains visible while offers are filtered")
-	board.apply_state(expanded); await settle()
-	expect(board.discipline.selected == 2 and board.state.offers.size() == 36,"refresh retains the filter without changing the authoritative offers")
+	board.apply_state(magic_page); await settle()
+	expect(board.discipline.selected == 1 and board.state.offers.size() == 10,"refresh retains the server page without changing authoritative offers")
 	board.tabs.current_tab = 1; await settle()
 	expect(not board._discipline_row.visible and board.columns.Accepted.get_child_count() == 1,"the offer filter never hides accepted assignments")
 	board._abandon = "daily_melee"; board._abandon_skill = "melee"; board._confirm.popup_centered()
@@ -126,7 +130,7 @@ func run() -> void:
 	expect(board._confirm.visible,"an unrelated reset preserves an open abandonment confirmation")
 	board.reset_contracts(["melee"])
 	expect(not board._confirm.visible and board._abandon.is_empty(),"a matching reset invalidates the stale abandonment confirmation")
-	board.tabs.current_tab = 0; board.discipline.select(0); board.discipline.item_selected.emit(0)
+	board.tabs.current_tab = 0; board.apply_state(expanded)
 	app.contracts_board = expanded.duplicate(true)
 	var reset := expanded.duplicate(true); reset.reset_token = 1; reset.reset_skills = ["melee"]
 	app._on_packet(191,JSON.stringify(snapshot(reset,true)).to_utf8_buffer())
