@@ -12,10 +12,18 @@ static func patients(snapshot: Dictionary, current_map: String) -> Array[Diction
 	match str(snapshot.get("kind", "")):
 		"contracts":
 			var encounter: Dictionary = (snapshot.get("contracts",{}) as Dictionary).get("encounter",{})
-			if str(encounter.get("phase","")) != "work": return result
-			for worker: Dictionary in encounter.get("workers",[]):
-				if int(worker.get("actor_id",0)) > 0 and bool(worker.get("downed",false)):
-					result.append({"actor_id":int(worker.actor_id),"name":str(worker.name)})
+			var phase := str(encounter.get("phase",""))
+			var contract := EloriaProtocol.ContractsProtocol.current(snapshot)
+			var triage := str(contract.get("skill","")) == "magic" and str(contract.get("template_id","")) == "healing_line" \
+				and (contract.get("objectives",[]) as Array).any(func(goal: Dictionary) -> bool:return str(goal.get("id","")) == "healing" and int(goal.current) < int(goal.target))
+			if phase != "work" and not (triage and phase == "complete"): return result
+			# Fallen allies retain priority over the triage lesson's living patients.
+			for downed: bool in [true,false]:
+				for worker: Dictionary in encounter.get("workers",[]):
+					if int(worker.get("actor_id",0)) <= 0 or bool(worker.get("downed",false)) != downed: continue
+					if downed: result.append({"actor_id":int(worker.actor_id),"name":str(worker.name)})
+					elif triage and int(worker.get("health",0)) > 0 and int(worker.get("health",0)) < int(worker.get("max_health",0)):
+						result.append({"actor_id":int(worker.actor_id),"name":str(worker.name),"wounded":true})
 		"shelves":
 			var ledger: Dictionary = snapshot.get("shelves", {})
 			if str(ledger.get("phase", "")) != "work": return result
