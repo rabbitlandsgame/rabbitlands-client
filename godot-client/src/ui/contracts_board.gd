@@ -108,12 +108,29 @@ func _entry(column: VBoxContainer, entry: Dictionary, accepted: bool) -> void:
 	var route := str(entry.get("route_label",""))
 	if route.is_empty(): route = str(entry.route).replace("_"," ").capitalize()+" route"
 	_text(box,"%s · %s · %s" % [str(entry.skill).capitalize(),str(entry.tier),route],Color("b8c7cf"))
+	var locked_offer := not accepted and not bool(entry.eligible)
+	if locked_offer and not str(entry.reason).is_empty(): _text(box,str(entry.reason),Color("dbb98d"))
+	var step: Dictionary = entry.get("next_step",{}) if accepted else {}
+	if not str(step.get("action","")).is_empty():
+		_text(box,"Next · "+str(step.action),Color("e5bd74"))
+		if not str(step.get("detail","")).is_empty(): _text(box,str(step.detail))
 	_text(box,str(entry.description))
 	_text(box,"Rewards · " + reward_text(entry.reward),Color("bdd2bc"))
-	_text(box,"Where · " + str(entry.location.label),Color("b8c7cf"))
+	_text(box,"Where · " + str((step.get("location",entry.location) as Dictionary).label),Color("b8c7cf"))
+	var preparation: Dictionary = entry.get("preparation",{})
+	if not preparation.is_empty():
+		if bool(preparation.ready): _text(box,"Essentials ready",Color("bdd2bc"))
+		elif not accepted:
+			if str(preparation.reason) != str(entry.reason): _text(box,"Essentials · "+str(preparation.reason),Color("dbb98d"))
+		else:
+			var missing: PackedStringArray = []
+			for check: Dictionary in preparation.checks:
+				if not bool(check.ready): missing.append(str(check.label))
+			_text(box,"Prepare · "+" · ".join(missing) if not missing.is_empty() else "Prepare before starting",Color("dbb98d"))
+			if not str(preparation.reason).is_empty(): _text(box,str(preparation.reason),Color("dbb98d"))
 	for objective: Dictionary in entry.objectives:
 		_text(box,"%s · %d / %d" % [str(objective.label),int(objective.current),int(objective.target)])
-	if not str(entry.reason).is_empty(): _text(box,str(entry.reason),Color("dbb98d"))
+	if not locked_offer and not str(entry.reason).is_empty(): _text(box,str(entry.reason),Color("dbb98d"))
 	var actions := HFlowContainer.new(); box.add_child(actions)
 	if accepted:
 		var tracked := str(state.get("tracked_id","")) == str(entry.id)

@@ -164,19 +164,30 @@ static func campaign(snapshot: Dictionary, current_map := "") -> Dictionary:
 	var result := _empty(FieldReadout.instructions(snapshot))
 	if str(snapshot.get("kind","")) == "contracts":
 		var contract := EloriaProtocol.ContractsProtocol.current(snapshot)
-		result.objective = str(snapshot.get("hint",contract.get("description","Follow the contract instructions.")))
-		for objective: Dictionary in contract.get("objectives",[]):
-			if int(objective.current) < int(objective.target):
-				_task(result,objective); break
-		if not (snapshot.get("travel",{}) as Dictionary).is_empty(): result.objective = FieldReadout.instructions(snapshot)
-		if str(contract.get("status","")) == "ready": result.objective = "Report to Batu Ensh"
+		var step: Dictionary = contract.get("next_step",{})
+		var objective_id := str(step.get("objective_id",""))
+		if not str(step.get("action","")).is_empty():
+			result.objective = str(step.action)
+			_counter(result,"Progress",int(step.current),int(step.target))
+		else:
+			result.objective = str(snapshot.get("hint",contract.get("description","Follow the contract instructions.")))
+			for objective: Dictionary in contract.get("objectives",[]):
+				if int(objective.current) < int(objective.target):
+					_task(result,objective); objective_id = str(objective.id); break
+			if not (snapshot.get("travel",{}) as Dictionary).is_empty(): result.objective = FieldReadout.instructions(snapshot)
+			if str(contract.get("status","")) == "ready": result.objective = "Report to Batu Ensh"
 		result.ribbon_objective = str(contract.get("title",snapshot.get("title","Landfall contract")))
 		var workers: Array = ((snapshot.get("contracts",{}) as Dictionary).get("encounter",{}) as Dictionary).get("workers",[])
 		_crew(result,workers)
+		for objective: Dictionary in contract.get("objectives",[]):
+			if str(objective.id) == "sites" and objective_id != "sites" and int(objective.current) < int(objective.target):
+				result.secondary = "Samples %s / %s" % [_number(int(objective.current)),_number(int(objective.target))]
 		var patients := AllyRecovery.patients(snapshot,current_map if not current_map.is_empty() else str(snapshot.get("map","")))
 		if not patients.is_empty():
-			result.recovery = patients[0]; result.urgent = true
-			result.alert = str(patients[0].name) + " is down — use Heal Target."
+			result.recovery = patients[0]
+			if not bool(patients[0].get("wounded",false)):
+				result.urgent = true
+				result.alert = str(patients[0].name) + " is down — use Heal Target."
 		return result
 	var travel: Dictionary = snapshot.get("travel",{})
 	if not travel.is_empty():
@@ -245,6 +256,13 @@ static func instructions(snapshot: Dictionary, current_map := "") -> Dictionary:
 		var contract := EloriaProtocol.ContractsProtocol.current(snapshot)
 		for objective: Dictionary in contract.get("objectives",[]):
 			_ledger_row(result,str(objective.label),"%s / %s" % [_number(int(objective.current)),_number(int(objective.target))])
+		var preparation: Dictionary = contract.get("preparation",{})
+		for check: Dictionary in preparation.get("checks",[]):
+			var detail := str(check.detail)
+			_ledger_row(result,"Essentials · "+str(check.label),"Ready"+(" · "+detail if not detail.is_empty() else "") if bool(check.ready) else detail if not detail.is_empty() else "Needed")
+		if not preparation.is_empty() and not bool(preparation.ready) and not str(preparation.reason).is_empty() \
+				and not str(result.text).contains(str(preparation.reason)):
+			result.guidance = str(preparation.reason)
 		result.replaces_supply_ledger = not contract.is_empty()
 		result.note = "Unfinished contract progress is kept when you pause."
 		return result

@@ -435,6 +435,7 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 	_apply_party(party, snapshot.get("adoption", {}))
 	_apply_companion(snapshot.get("companion", {}))
 	_entry.visible = (not active or travelling) and bool(snapshot.get("available", false)) and not can_own
+	_entry.disabled = false
 	_join.visible = not active and can_join
 	_own.visible = can_own
 	_entry.text = ("Continue " if bool(snapshot.get("started", false)) else "Begin ") + str(snapshot.get("title", "The Missing Measure"))
@@ -489,6 +490,10 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 		_entry.tooltip_text = "Report your completed assignment to Batu Ensh." if _entry.text == "Report contract" \
 			else "Begin here. Your progress is retained if you pause." if bool(snapshot.get("available",false)) \
 			else "Show this contract's destination. Walk there to begin or report."
+		var preparation: Dictionary = contract.get("preparation",{})
+		if str(contract.get("status","")) != "ready" and bool(snapshot.get("available",false)) \
+				and not preparation.is_empty() and not bool(preparation.ready):
+			_entry.disabled = true; _entry.text = "Prepare before starting"; _entry.tooltip_text = str(preparation.reason)
 		_leave.visible = active and not travelling
 		_leave.text = "Pause contract"; _leave.tooltip_text = "Leave the private encounter; accepted contract progress is retained."
 	var rows: Array = []
@@ -613,7 +618,7 @@ func _request_leave() -> void:
 	action_requested.emit("leave")
 
 func _request_entry() -> void:
-	if not _available or not _entry.is_visible_in_tree(): return
+	if not _available or not _entry.is_visible_in_tree() or _entry.disabled: return
 	var kind := str(_state.get("kind", ""))
 	if kind == "contracts":
 		var contract := EloriaProtocol.ContractsProtocol.current(_state)
@@ -749,6 +754,8 @@ func _apply_ally_recovery() -> void:
 		var button := Button.new()
 		button.text = "Heal Target · " + str(patient.name)
 		button.tooltip_text = "Cast Heal Target at Power 1 on this fallen ally. Requires Magic 0, 5 ether, 1 Life Essence and 1 Water Essence. Normal approach and casting time apply; moving cancels the cast."
+		if bool(patient.get("wounded",false)):
+			button.tooltip_text = "Cast Heal Target at Power 1 on this wounded ally. Requires Magic 0, 5 ether, 1 Life Essence and 1 Water Essence. Normal approach and casting time apply; moving cancels the cast."
 		if bool(patient.get("assisted", false)):
 			button.tooltip_text = "Cast Heal Target at Power 1 on Elen. Your unused first recovery lesson can supply this cast's cost. Normal approach and casting time apply; moving cancels the cast."
 		button.pressed.connect(_request_ally_heal.bind(run_id, int(patient.actor_id)))

@@ -592,8 +592,13 @@ func _sync_contracts(allow_open := false) -> void:
 func _contract_journal(entry: Dictionary) -> Dictionary:
 	var objectives: PackedStringArray = []
 	for row: Dictionary in entry.get("objectives",[]): objectives.append("%s · %d / %d" % [str(row.label),int(row.current),int(row.target)])
-	return {"title":str(entry.title),"objective":str(entry.description)+"\n"+"\n".join(objectives),
-		"location":str(entry.location.label),"ready":str(entry.status)=="ready","target":0,"current":0,
+	var step: Dictionary = entry.get("next_step",{})
+	var detail := str(step.get("detail",""))
+	if detail.is_empty(): detail = str(entry.description)
+	var missing_handover := (entry.get("objectives",[]) as Array).any(func(row: Dictionary) -> bool:
+		return str(row.get("id","")).begins_with("handover_") and int(row.current) < int(row.target))
+	return {"title":str(entry.title),"objective":detail+"\n"+"\n".join(objectives),
+		"location":str((step.get("location",entry.location) as Dictionary).label),"ready":str(entry.status)=="ready" and not missing_handover,"target":0,"current":0,
 		"_contract_id":str(entry.id),"_contract_quest_id":int(entry.quest_id),"_campaign_identity":"contracts:"+str(entry.id)}
 
 func _sync_quests() -> void:

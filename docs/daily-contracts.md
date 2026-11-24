@@ -17,6 +17,10 @@ Choose from **three assignments in each discipline**, each with two posted route
 
 You can accept up to **three contracts** and track one at a time. Accepted objectives and rewards stay fixed if your level changes. The marked destination and Instructions explain where to go. Walk there yourself, then choose **Start** when ready. Opening the board or crossing a worksite does not begin an encounter.
 
+The Accepted board and quest card show your current step. A two-resource basket moves its destination to the second patch when the first is finished. A reagent order changes from gathering to mixing at The True Note. Surveys mark the resource nodes you still need to sample, and the card shows the sample count alongside any remaining gathering quota.
+
+Check **Instructions** for preparation before starting: the usable recipe or spell, tools, ingredients, and other essentials are listed with their current readiness. Summoning assignments use your own companion **summoned inside the worksite**; a creature left on the public map does not accompany you into the private patrol.
+
 The ordinary quest card controls still apply: collapse it to the ribbon, or use **More** for Instructions, Replay, Hide, and Untrack. Hiding or untracking guidance preserves the assignment.
 
 ## Work with your party
@@ -27,11 +31,36 @@ If you accepted the same assignment with matching encounter terms, being present
 
 Crew health is visible. Use **Heal Target** to recover fallen workers. You may leave an encounter and resume later. After defeat, an explicit retry restores the crew for another attempt while retaining completed checkpoints. It does not restore your health, ether, or supplies.
 
+During Triage at the Watch, the Heal Target controls also include living wounded crew while your healing objective remains unfinished, including after the attacks end. These are ordinary paid casts; fully healed crew stop appearing as patients.
+
 ## Report and rewards
 
 Return to Batu when both objectives are complete. Each contract awards the displayed discipline experience, gold, supplies, and **one service mark**, in addition to ordinary gameplay experience and loot. Melee contract experience is split between Attack and Defense.
 
+Base completion rewards follow the tier shown on the board. Some routes add gold; check the posted terms for the exact reward.
+
+| Tier | Base gold | Discipline experience |
+| --- | --- | --- |
+| 1 | 150 | 600 |
+| 2 | 300 | 1,500 |
+| 3 | 600 | 3,000 |
+
+Each discipline also has a **bonus day once every three UTC days**, when new offers include an extra skill-supply parcel alongside those normal rewards:
+
+| Discipline | Parcel examples |
+| --- | --- |
+| Melee | Bandages or Potions of Minor Healing |
+| Magic | Life, Fire, or Water Essence |
+| Ranging | A reusable Basic Quiver or Basic Bolt Case |
+| Summoning | Bones, Reed, and Aether Salt |
+| Harvesting | Bread or Cooked Meat |
+| Alchemy | Full Life, Fire, or Water Essence ingredient batches |
+
+Parcels rotate by day and tier and appear in the reward list **before acceptance**. Changing templates or routes, rerolling, or using the testing reset does not change that discipline’s parcel for the day. Already accepted assignments keep their quoted rewards across day or level changes.
+
 You keep harvested and mixed goods unless the posted assignment explicitly requires a handover. **A Shelf Ready for Sale** requires the listed ordinary essences when you report. Enriched results count toward mixing practice, but are never taken for the handover; mix enough ordinary stock to fill the order.
+
+If that ordinary stock is missing, the card shows what to prepare instead of telling you to report immediately. Once the stock is ready, the destination returns to Batu.
 
 The Apprentice’s Order can instead offer an optional donation of ordinary essences for extra gold. Its normal report remains available without donating, and the board shows the amount before you choose.
 

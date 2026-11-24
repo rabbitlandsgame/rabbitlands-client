@@ -40,6 +40,11 @@ static func reward(value: Variant) -> bool:
 		if not item is Dictionary or not text(item.get("name"),128,false) or not number(item.get("count"),1000000): return false
 	return true
 
+static func location(value: Variant) -> bool:
+	if not value is Dictionary or not text(value.get("map"),128,false) or not text(value.get("label"),256) \
+			or not value.get("tile") is Array or value.tile.size() != 2: return false
+	return value.tile.all(func(coordinate: Variant) -> bool:return number(coordinate,65535))
+
 static func row(value: Variant) -> bool:
 	if not value is Dictionary or not identity(value.get("id")) or value.get("skill") not in SKILLS: return false
 	if not number(value.get("quest_id"),65535): return false
@@ -58,11 +63,19 @@ static func row(value: Variant) -> bool:
 				or not text(objective.get("label"),256,false) or not number(objective.get("current")) \
 				or not number(objective.get("target")): return false
 		seen[objective.id] = true
-	var location: Variant = value.get("location")
-	if not location is Dictionary or not text(location.get("map"),128,false) or not text(location.get("label"),256) \
-			or not location.get("tile") is Array or location.tile.size() != 2: return false
-	for coordinate: Variant in location.tile:
-		if not number(coordinate,65535): return false
+	if not location(value.get("location")): return false
+	if value.has("next_step"):
+		var step: Variant = value.next_step
+		if not step is Dictionary or not identity(step.get("objective_id"),true) or not text(step.get("action"),256) \
+				or not text(step.get("detail"),1024) or not location(step.get("location")) \
+				or not number(step.get("current")) or not number(step.get("target")): return false
+	if value.has("preparation"):
+		var preparation: Variant = value.preparation
+		if not preparation is Dictionary or not preparation.get("ready") is bool or not text(preparation.get("reason"),256) \
+				or not preparation.get("checks") is Array or preparation.checks.size() > 8: return false
+		for check: Variant in preparation.checks:
+			if not check is Dictionary or not text(check.get("label"),128,false) or not check.get("ready") is bool \
+					or not text(check.get("detail"),256): return false
 	if value.has("can_reroll") and not value.can_reroll is bool: return false
 	if value.has("reroll_reason") and not text(value.reroll_reason,256): return false
 	if value.has("route_label") and not text(value.route_label,128): return false

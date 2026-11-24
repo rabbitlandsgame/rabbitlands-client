@@ -23,6 +23,10 @@ static func water_cargo(water: Dictionary, identity: String) -> Dictionary:
 	return {"bags":bags,"loading":values.bins} if bags >= 0 else {}
 
 static func instructions(snapshot: Dictionary) -> String:
+	if str(snapshot.get("kind","")) == "contracts":
+		var step: Dictionary = EloriaProtocol.ContractsProtocol.current(snapshot).get("next_step",{})
+		for key: String in ["detail","action"]:
+			if not str(step.get(key,"")).is_empty(): return str(step[key])
 	var travel: Dictionary = snapshot.get("travel", {})
 	if travel.is_empty(): return str(snapshot.get("hint", "Explore with the field crew."))
 	var text := str(travel.get("route", snapshot.get("hint", "Follow the marked destination.")))
