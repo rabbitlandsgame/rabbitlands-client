@@ -59,16 +59,14 @@ func run() -> void:
 	var board: Control = load("res://src/ui/contracts_board.gd").new(); root.add_child(board); await settle()
 	board.apply_state(value.contracts); board.tabs.current_tab = 1; await settle()
 	var labels: Array = board.columns.Accepted.find_children("*","Label",true,false)
-	expect(labels.any(func(label: Label) -> bool:return label.text == "Where · The True Note") and labels.any(func(label: Label) -> bool:return label.text == "Next · Mix 10 Life Essences"),"the Accepted board advances from the original Sage patch to the real mixing destination")
-	expect(labels.any(func(label: Label) -> bool:return label.text == "Prepare · Mortar and Pestle"),"the board shows a concise essentials blocker")
+	expect(labels.any(func(label: Label) -> bool:return label.text == "Where · The True Note") and labels.any(func(label: Label) -> bool:return label.text == str(row.next_step.detail)),"the compact Accepted description advances from the original Sage patch to the real mixing destination")
+	expect(board.columns.Accepted.get_child(0).tooltip_text.contains(str(row.preparation.reason)),"the compact card retains the essentials blocker in its tooltip")
 	var preview := mixing_row(); preview.status = "offer"; preview.eligible = false
 	preview.reason = str(preview.preparation.reason); preview.preparation.checks = []
 	var preview_board: Dictionary = value.contracts.duplicate(true); preview_board.offers = [preview]
 	board.apply_state(preview_board); await settle()
 	var preview_labels: Array = board.columns.Available.get_child(0).find_children("*","Label",true,false)
-	var reason_index := preview_labels.find_custom(func(label: Label) -> bool:return label.text == str(preview.reason))
-	var description_index := preview_labels.find_custom(func(label: Label) -> bool:return label.text == str(preview.description))
-	expect(reason_index >= 0 and reason_index < description_index and preview_labels.filter(func(label: Label) -> bool:return label.text == str(preview.reason)).size() == 1,"locked offer blockers appear near the title without repeating the same preparation reason")
+	expect(preview_labels.size() == 3 and preview_labels[1].text == str(preview.description) and board.columns.Available.get_child(0).tooltip_text == str(preview.reason),"offers keep only their name, description and start location while explaining locked actions on hover")
 	root.size = Vector2i(800,600); board._fit(); await settle()
 	expect(root.get_visible_rect().encloses(board.panel.get_global_rect()),"the preparation board remains bounded in a small window")
 	board.panel.hide()
@@ -150,7 +148,7 @@ func run() -> void:
 					if str(accepted.id) == str(dto.run_id): continue
 					var panels: Array = board.columns.Accepted.get_children().filter(func(panel: Node) -> bool:return str(panel.get_meta("contract_skill","")) == str(accepted.skill))
 					var shown: Array = panels[0].find_children("*","Label",true,false)
-					expect(shown.any(func(label: Label) -> bool:return label.text == "Next · "+str(accepted.next_step.action)) and shown.any(func(label: Label) -> bool:return label.text == "Where · "+str(accepted.next_step.location.label)),"other accepted work retains its own native action and destination while a patrol is active")
+					expect(shown.any(func(label: Label) -> bool:return label.text == str(accepted.next_step.detail)) and shown.any(func(label: Label) -> bool:return label.text == "Where · "+str(accepted.next_step.location.label)),"other accepted work retains its own native description and destination while a patrol is active")
 	hud.queue_free(); board.queue_free(); journal.queue_free(); await settle()
 	print("Contract current step: ",checks," checks; ",failures," failures")
 	quit(1 if failures else 0)

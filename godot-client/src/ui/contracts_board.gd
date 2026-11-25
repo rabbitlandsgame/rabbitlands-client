@@ -101,14 +101,6 @@ static func reward_text(reward: Dictionary) -> String:
 	for item: Dictionary in reward.get("items",[]): parts.append("%s %s" % [number_text(int(item.count)),str(item.name)])
 	return " · ".join(parts)
 
-static func xp_quote_text(entry: Dictionary) -> String:
-	var difficulty: Dictionary = entry.get("difficulty",{})
-	if difficulty.is_empty() or (entry.reward.get("xp",{}) as Dictionary).is_empty(): return ""
-	var parts: PackedStringArray = []
-	for skill: String in entry.reward.xp:
-		parts.append("%s× base %s %s" % [number_text(int(difficulty.xp_multiplier)),skill.capitalize(),number_text(int(difficulty.xp_levels[skill]))])
-	return "XP quote · "+" · ".join(parts)+". Minimum level 1; fixed when accepted."
-
 func _button(parent: Node, text: String, action: String, identity: String, enabled := true, reason := "") -> Button:
 	var button := Button.new(); button.text = text; button.disabled = not enabled or _pending
 	button.custom_minimum_size = Vector2(112,32)
@@ -127,36 +119,21 @@ func _send(action: String, identity: String) -> void:
 func _entry(column: VBoxContainer, entry: Dictionary, accepted: bool) -> void:
 	var box := VBoxContainer.new(); column.add_child(box)
 	box.set_meta("contract_skill",str(entry.skill))
-	_text(box,str(entry.title),Color("e5bd74"))
-	var route := str(entry.get("route_label",""))
-	if route.is_empty(): route = str(entry.route).replace("_"," ").capitalize()+" route"
-	var difficulty: Dictionary = entry.get("difficulty",{})
-	_text(box,"%s · %s · %s" % [str(entry.skill).capitalize(),str(difficulty.get("label",entry.tier)),route],Color("b8c7cf"))
-	var locked_offer := not accepted and not bool(entry.eligible)
-	if locked_offer and not str(entry.reason).is_empty(): _text(box,str(entry.reason),Color("dbb98d"))
-	var step: Dictionary = entry.get("next_step",{}) if accepted else {}
-	if not str(step.get("action","")).is_empty():
-		_text(box,"Next · "+str(step.action),Color("e5bd74"))
-		if not str(step.get("detail","")).is_empty(): _text(box,str(step.detail))
-	_text(box,str(entry.description))
-	_text(box,"Rewards · " + reward_text(entry.reward),Color("bdd2bc"))
-	var quote := xp_quote_text(entry)
-	if not quote.is_empty(): _text(box,quote,Color("b8c7cf"))
-	_text(box,"Where · " + str((step.get("location",entry.location) as Dictionary).label),Color("b8c7cf"))
+	var explanations: PackedStringArray = []
+	if not str(entry.reason).is_empty(): explanations.append(str(entry.reason))
 	var preparation: Dictionary = entry.get("preparation",{})
-	if not preparation.is_empty():
-		if bool(preparation.ready): _text(box,"Essentials ready",Color("bdd2bc"))
-		elif not accepted:
-			if str(preparation.reason) != str(entry.reason): _text(box,"Essentials · "+str(preparation.reason),Color("dbb98d"))
-		else:
-			var missing: PackedStringArray = []
-			for check: Dictionary in preparation.checks:
-				if not bool(check.ready): missing.append(str(check.label))
-			_text(box,"Prepare · "+" · ".join(missing) if not missing.is_empty() else "Prepare before starting",Color("dbb98d"))
-			if not str(preparation.reason).is_empty(): _text(box,str(preparation.reason),Color("dbb98d"))
-	for objective: Dictionary in entry.objectives:
-		_text(box,"%s · %d / %d" % [str(objective.label),int(objective.current),int(objective.target)])
-	if not locked_offer and not str(entry.reason).is_empty(): _text(box,str(entry.reason),Color("dbb98d"))
+	if not bool(preparation.get("ready",true)):
+		var reason := str(preparation.get("reason",""))
+		if not reason.is_empty() and reason not in explanations: explanations.append(reason)
+	box.tooltip_text = "\n".join(explanations)
+	_text(box,str(entry.title),Color("e5bd74"))
+	var step: Dictionary = entry.get("next_step",{}) if accepted else {}
+	var description := str(step.get("detail",""))
+	if description.is_empty(): description = str(entry.description)
+	_text(box,description)
+	_text(box,("Where · " if accepted else "Start · ") + str((step.get("location",entry.location) as Dictionary).label),Color("b8c7cf"))
+	# The tracker and Instructions retain detailed progress and preparation.
+	# This list keeps only the description, destination and available actions.
 	var actions := HFlowContainer.new(); box.add_child(actions)
 	if accepted:
 		var tracked := str(state.get("tracked_id","")) == str(entry.id)
@@ -168,8 +145,9 @@ func _entry(column: VBoxContainer, entry: Dictionary, accepted: bool) -> void:
 			_button(actions,"Report contract","claim",str(entry.id),bool(entry.eligible),str(entry.reason))
 			var donation: Dictionary = entry.get("donation",{})
 			if not donation.is_empty():
-				_text(box,"Optional donation · %d %s for %d extra gold. The ordinary report keeps your goods." % [int(donation.count),str(donation.item),int(donation.gold)],Color("b8c7cf"))
-				_button(actions,"Report + donate","donate",str(entry.id),bool(donation.eligible),str(donation.reason))
+				var detail := "Donate %d %s when reporting. The ordinary report keeps your goods." % [int(donation.count),str(donation.item)]
+				if not str(donation.reason).is_empty(): detail += "\n"+str(donation.reason)
+				_button(actions,"Report + donate","donate",str(entry.id),bool(donation.eligible),detail)
 		var abandon := Button.new(); abandon.text = "Abandon"; actions.add_child(abandon)
 		abandon.pressed.connect(func() -> void: _abandon = str(entry.id); _abandon_skill = str(entry.skill); _confirm.popup_centered())
 	else:
@@ -219,7 +197,7 @@ func apply_state(value: Dictionary, allow_open := true) -> void:
 		for child: Node in column.get_children(): column.remove_child(child); child.queue_free()
 	account.text = "Accepted %d / %d · %d marks · UTC day %s · Resets 00:00 UTC" % [(state.get("accepted",[]) as Array).size(),int(state.get("accepted_limit",3)),int(state.get("marks",0)),str(state.get("day",""))]
 	var progress: Dictionary = state.get("weekly",{})
-	weekly.text = "Weekly · %d / 5 completed · %s" % [int(progress.get("count",0)),"3 bonus marks awarded" if bool(progress.get("awarded",false)) else "+3 marks on your fifth completion"]
+	weekly.text = "Weekly · %d / 5 completed" % int(progress.get("count",0))
 	_render_available()
 	for entry: Dictionary in state.get("accepted",[]): _entry(columns.Accepted,entry,true)
 	if (state.get("accepted",[]) as Array).is_empty(): _text(columns.Accepted,"No accepted contracts. Unfinished contracts keep their progress across the UTC reset.")
