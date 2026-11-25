@@ -98,7 +98,7 @@ func run() -> void:
 	expect(transport.contract_scene_done("daily_melee","token:7") == OK and transport.sent[-1].begins_with("#contract scene_done"),"scene acknowledgement uses the contracts namespace")
 	transport.free()
 	var board: Control = Board.new(); root.add_child(board); await settle(); board.apply_state(state); await settle()
-	expect(board.panel.visible and board.columns.Available.get_child_count() >= 3,"the legacy selected discipline and party joins are visible in the board")
+	expect(board.panel.visible and board.columns.Available.get_child_count() >= 2,"the legacy selected discipline and grouped party invitation are visible in the board")
 	var actions: Array = []; board.action_requested.connect(func(action: String,id: String,revision: int) -> void: actions.append([action,id,revision]))
 	var joins: Array = board.columns.Available.find_children("*","Button",true,false).filter(func(button: Button) -> bool: return button.text == "Join Friend")
 	(joins[0] as Button).pressed.emit()

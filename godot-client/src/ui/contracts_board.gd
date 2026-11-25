@@ -2,6 +2,9 @@ extends Control
 ## The server owns offers, availability, rewards and all contract progress.
 signal action_requested(action: String, identity: String, revision: int)
 signal navigation_requested(entry: Dictionary)
+const Surface := preload("res://src/ui/contracts_noticeboard_surface.gd")
+const INK := Color("392b21")
+const MUTED_INK := Color("65503b")
 var panel: PanelContainer
 var heading: Label
 var account: Label
@@ -19,30 +22,44 @@ var _discipline_row: HBoxContainer
 var _offer_count: Label
 var _skill_filter := ""
 var _requested_skill := ""
+var _nav_buttons: Array[Button] = []
+var _title_font: SystemFont
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	panel = PanelContainer.new(); panel.name = "LandfallContracts"; add_child(panel)
+	_title_font = SystemFont.new(); _title_font.font_names = PackedStringArray(["Georgia","Liberation Serif","Noto Serif","serif"])
+	panel = Surface.new(); panel.name = "LandfallContracts"; add_child(panel)
 	panel.z_index = 26; panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	var style := StyleBoxFlat.new(); style.bg_color = Color("17272ff5"); style.border_color = Color("a88b53")
-	style.set_border_width_all(1); style.set_corner_radius_all(6)
-	for edge: int in [SIDE_LEFT,SIDE_TOP,SIDE_RIGHT,SIDE_BOTTOM]: style.set_content_margin(edge,12)
-	panel.add_theme_stylebox_override("panel",style)
 	var body := VBoxContainer.new(); panel.add_child(body)
-	var header := HBoxContainer.new(); body.add_child(header); WindowDrag.attach(panel,header)
-	heading = Label.new(); heading.text = "Landfall Contracts"; heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body.add_theme_constant_override("separation",12)
+	var rail := PanelContainer.new(); body.add_child(rail)
+	var rail_style := _style(Color("173c3e"),Color("ac8850"),14,10)
+	rail.add_theme_stylebox_override("panel",rail_style)
+	var rail_body := VBoxContainer.new(); rail_body.add_theme_constant_override("separation",10); rail.add_child(rail_body)
+	var header := HBoxContainer.new(); rail_body.add_child(header)
+	heading = Label.new(); heading.text = "Daily Contracts"; heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	heading.add_theme_font_override("font",_title_font); heading.add_theme_font_size_override("font_size",28)
+	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	heading.add_theme_color_override("font_color",Color("e5bd74")); header.add_child(heading)
+	heading.tooltip_text = "Keep up to three contracts accepted and one tracked. Each discipline can be claimed once per UTC day; unfinished progress is retained."
 	var close := Button.new(); close.text = "×"; close.tooltip_text = "Close the board"; header.add_child(close)
+	_style_button(close,false); close.custom_minimum_size = Vector2(32,32)
 	close.pressed.connect(panel.hide)
-	account = Label.new(); account.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART; body.add_child(account)
-	weekly = Label.new(); weekly.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART; body.add_child(weekly)
-	_text(body,"Keep up to three contracts accepted and one tracked. Each discipline can be claimed once per UTC day; unfinished progress is retained.",Color("b8c7cf"))
-	_discipline_row = HBoxContainer.new(); _discipline_row.name = "ContractsDisciplineFilter"; body.add_child(_discipline_row)
-	var filter_label := Label.new(); filter_label.text = "Discipline"
-	filter_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER; _discipline_row.add_child(filter_label)
+	WindowDrag.attach(panel,header)
+	var toolbar := HFlowContainer.new(); toolbar.add_theme_constant_override("h_separation",18); rail_body.add_child(toolbar)
+	var navigation := HBoxContainer.new(); toolbar.add_child(navigation)
+	var selection := ButtonGroup.new()
+	for title: String in ["Available","Accepted","Marks"]:
+		var index := _nav_buttons.size()
+		var button := Button.new(); button.text = title; button.toggle_mode = true; button.button_group = selection
+		_style_button(button,false); navigation.add_child(button); _nav_buttons.append(button)
+		button.pressed.connect(func() -> void: tabs.current_tab = index)
+	_nav_buttons[0].button_pressed = true
+	_discipline_row = HBoxContainer.new(); _discipline_row.name = "ContractsDisciplineFilter"; toolbar.add_child(_discipline_row)
 	discipline = OptionButton.new(); discipline.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	discipline.size_flags_vertical = Control.SIZE_SHRINK_CENTER; discipline.custom_minimum_size.y = 32
+	discipline.size_flags_vertical = Control.SIZE_SHRINK_CENTER; discipline.custom_minimum_size = Vector2(160,34)
+	_style_button(discipline,false)
 	for skill: String in EloriaProtocol.ContractsProtocol.SKILLS: discipline.add_item(skill.capitalize())
 	discipline.tooltip_text = "Browse offers by discipline. Your accepted assignments stay the same."
 	_discipline_row.add_child(discipline)
@@ -59,13 +76,23 @@ func _ready() -> void:
 			# Older recorded packets contain every discipline in one snapshot.
 			_skill_filter = skill; _render_available(); _fit())
 	tabs = TabContainer.new(); tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL; body.add_child(tabs)
-	tabs.tab_changed.connect(func(index: int) -> void: _discipline_row.visible = index == 0; _fit())
+	tabs.tabs_visible = false; tabs.add_theme_stylebox_override("panel",StyleBoxEmpty.new())
+	tabs.tab_changed.connect(func(index: int) -> void:
+		_discipline_row.visible = index == 0
+		_nav_buttons[index].button_pressed = true; _fit())
 	for title: String in ["Available","Accepted","Marks"]:
 		var scroll := ScrollContainer.new(); scroll.name = title; scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 		tabs.add_child(scroll)
-		var column := VBoxContainer.new(); column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var column: Container = VBoxContainer.new() if title == "Marks" else GridContainer.new()
+		column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		column.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		column.add_theme_constant_override("h_separation",16); column.add_theme_constant_override("v_separation",16)
 		scroll.add_child(column); columns[title] = column
-	var refresh := Button.new(); refresh.text = "Refresh board"; body.add_child(refresh)
+	var footer := HBoxContainer.new(); footer.add_theme_constant_override("separation",12); body.add_child(footer)
+	account = Label.new(); account.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	account.size_flags_horizontal = Control.SIZE_EXPAND_FILL; account.add_theme_font_size_override("font_size",13); footer.add_child(account)
+	weekly = Label.new(); weekly.add_theme_font_size_override("font_size",13); footer.add_child(weekly)
+	var refresh := Button.new(); refresh.text = "Refresh board"; _style_button(refresh,false); footer.add_child(refresh)
 	refresh.pressed.connect(func() -> void: action_requested.emit("board",_requested_skill if not _requested_skill.is_empty() else _skill_filter if state.has("offer_skill") else "",-1))
 	_confirm = ConfirmationDialog.new(); _confirm.title = "Abandon contract?"; add_child(_confirm)
 	_confirm.dialog_text = "Abandon this contract and lose its current progress? Earned completed rewards are kept."
@@ -80,12 +107,37 @@ func _fit() -> void:
 	if panel == null: return
 	var available := get_viewport_rect().size
 	panel.custom_minimum_size = Vector2.ZERO
-	panel.size = Vector2(minf(640,available.x-24),minf(560,available.y-32))
+	panel.size = Vector2(minf(900,available.x-24),minf(480,available.y-52))
+	var paired := panel.size.x >= 740 and get_window().size.x >= 760
+	for title: String in ["Available","Accepted"]:
+		var grid: GridContainer = columns.get(title)
+		if grid != null: grid.columns = 2 if paired and grid.get_child_count() > 1 else 1
 	panel.position = ((available-panel.size)*0.5).max(Vector2(12,12))
 
-func _text(parent: Node, value: String, color := Color.WHITE) -> void:
+func _text(parent: Node, value: String, color := Color.WHITE) -> Label:
 	var label := Label.new(); label.text = value; label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.add_theme_color_override("font_color",color); parent.add_child(label)
+	return label
+
+func _style(background: Color, border: Color, horizontal := 12, vertical := 6) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new(); style.bg_color = background; style.border_color = border
+	style.set_border_width_all(1); style.set_corner_radius_all(3)
+	style.content_margin_left = horizontal; style.content_margin_right = horizontal
+	style.content_margin_top = vertical; style.content_margin_bottom = vertical
+	return style
+
+func _style_button(button: Button, primary := true) -> void:
+	var base := Color("235955") if primary else Color("293a39")
+	button.add_theme_stylebox_override("normal",_style(base,Color("b99659")))
+	button.add_theme_stylebox_override("hover",_style(base.lightened(0.18),Color("efca7d")))
+	button.add_theme_stylebox_override("pressed",_style(Color("586449"),Color("efca7d")))
+	button.add_theme_stylebox_override("disabled",_style(Color("38403b"),Color("897b60")))
+	button.add_theme_stylebox_override("focus",_style(Color(0,0,0,0),Color("ffe2a0")))
+	button.add_theme_color_override("font_color",Color("fff0d4"))
+	button.add_theme_color_override("font_hover_color",Color.WHITE)
+	button.add_theme_color_override("font_pressed_color",Color("fff0d4"))
+	button.add_theme_color_override("font_disabled_color",Color("c6bdab"))
+	button.custom_minimum_size.y = 34
 
 static func number_text(value: int) -> String:
 	var digits := str(maxi(0,value)); var grouped := ""
@@ -104,6 +156,7 @@ static func reward_text(reward: Dictionary) -> String:
 func _button(parent: Node, text: String, action: String, identity: String, enabled := true, reason := "") -> Button:
 	var button := Button.new(); button.text = text; button.disabled = not enabled or _pending
 	button.custom_minimum_size = Vector2(112,32)
+	_style_button(button,action in ["accept","claim","join"])
 	button.tooltip_text = reason; button.pressed.connect(_send.bind(action,identity)); parent.add_child(button)
 	return button
 
@@ -112,13 +165,17 @@ func _send(action: String, identity: String) -> void:
 	_pending = true
 	discipline.disabled = true
 	# No optimistic progress or reward update; the next snapshot settles it.
-	for column: VBoxContainer in columns.values():
+	for column: Container in columns.values():
 		for button: Node in column.find_children("*","Button",true,false): button.disabled = true
 	action_requested.emit(action,identity,int(state.get("revision",0)))
 
-func _entry(column: VBoxContainer, entry: Dictionary, accepted: bool) -> void:
-	var box := VBoxContainer.new(); column.add_child(box)
+func _entry(column: Container, entry: Dictionary, accepted: bool) -> void:
+	var box := Surface.new(); box.paper = true; column.add_child(box)
+	box.mouse_filter = Control.MOUSE_FILTER_PASS
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	box.custom_minimum_size.y = 268
 	box.set_meta("contract_skill",str(entry.skill))
+	var body := VBoxContainer.new(); body.add_theme_constant_override("separation",14); box.add_child(body)
 	var explanations: PackedStringArray = []
 	if not str(entry.reason).is_empty(): explanations.append(str(entry.reason))
 	var preparation: Dictionary = entry.get("preparation",{})
@@ -126,20 +183,25 @@ func _entry(column: VBoxContainer, entry: Dictionary, accepted: bool) -> void:
 		var reason := str(preparation.get("reason",""))
 		if not reason.is_empty() and reason not in explanations: explanations.append(reason)
 	box.tooltip_text = "\n".join(explanations)
-	_text(box,str(entry.title),Color("e5bd74"))
+	var title := _text(body,str(entry.title).trim_prefix("Daily: "),INK)
+	title.add_theme_font_override("font",_title_font); title.add_theme_font_size_override("font_size",22)
+	var divider := HSeparator.new(); divider.add_theme_stylebox_override("separator",_style(Color("b58c4d"),Color("b58c4d"),0,0))
+	body.add_child(divider)
 	var step: Dictionary = entry.get("next_step",{}) if accepted else {}
 	var description := str(step.get("detail",""))
 	if description.is_empty(): description = str(entry.description)
-	_text(box,description)
-	_text(box,("Where · " if accepted else "Start · ") + str((step.get("location",entry.location) as Dictionary).label),Color("b8c7cf"))
+	_text(body,description,INK)
+	_text(body,("Where · " if accepted else "Start · ") + str((step.get("location",entry.location) as Dictionary).label),MUTED_INK)
 	# The tracker and Instructions retain detailed progress and preparation.
 	# This list keeps only the description, destination and available actions.
-	var actions := HFlowContainer.new(); box.add_child(actions)
+	var space := Control.new(); space.size_flags_vertical = Control.SIZE_EXPAND_FILL; body.add_child(space)
+	var actions := HFlowContainer.new(); actions.add_theme_constant_override("h_separation",8); actions.add_theme_constant_override("v_separation",6); body.add_child(actions)
 	if accepted:
 		var tracked := str(state.get("tracked_id","")) == str(entry.id)
 		_button(actions,"Untrack" if tracked else "Track","untrack" if tracked else "track","" if tracked else str(entry.id))
 		if tracked:
 			var go := Button.new(); go.text = "Show on map"; actions.add_child(go)
+			_style_button(go,false)
 			go.pressed.connect(func() -> void: navigation_requested.emit(entry))
 		if str(entry.status) == "ready":
 			_button(actions,"Report contract","claim",str(entry.id),bool(entry.eligible),str(entry.reason))
@@ -149,11 +211,11 @@ func _entry(column: VBoxContainer, entry: Dictionary, accepted: bool) -> void:
 				if not str(donation.reason).is_empty(): detail += "\n"+str(donation.reason)
 				_button(actions,"Report + donate","donate",str(entry.id),bool(donation.eligible),detail)
 		var abandon := Button.new(); abandon.text = "Abandon"; actions.add_child(abandon)
+		_style_button(abandon,false)
 		abandon.pressed.connect(func() -> void: _abandon = str(entry.id); _abandon_skill = str(entry.skill); _confirm.popup_centered())
 	else:
 		_button(actions,"Accept","accept",str(entry.id),bool(entry.eligible),str(entry.reason))
 		_button(actions,"Reroll","reroll",str(entry.skill),bool(entry.get("can_reroll",false)),str(entry.get("reroll_reason","")))
-	box.add_child(HSeparator.new())
 
 func reset_contracts(skills: Array) -> void:
 	if _abandon_skill in skills:
@@ -162,7 +224,7 @@ func reset_contracts(skills: Array) -> void:
 	_signature = ""
 
 func _render_available() -> void:
-	var column: VBoxContainer = columns.get("Available")
+	var column: Container = columns.get("Available")
 	if column == null: return
 	for child: Node in column.get_children(): column.remove_child(child); child.queue_free()
 	var count := 0
@@ -177,9 +239,10 @@ func _render_available() -> void:
 		if count == 0: _text(column,"No offers posted for this discipline.",Color("b8c7cf"))
 	# Helping a party member is separate from accepting personal work.
 	for join: Dictionary in state.get("joins",[]):
-		_text(column,"Party · %s — %s" % [str(join.owner),str(join.title)],Color("e5bd74"))
-		_button(column,"Join " + str(join.owner),"join",str(join.owner),bool(join.eligible),str(join.reason))
-		if not str(join.reason).is_empty(): _text(column,str(join.reason),Color("dbb98d"))
+		var invitation := VBoxContainer.new(); column.add_child(invitation)
+		_text(invitation,"Party · %s — %s" % [str(join.owner),str(join.title)],Color("e5bd74"))
+		_button(invitation,"Join " + str(join.owner),"join",str(join.owner),bool(join.eligible),str(join.reason))
+		if not str(join.reason).is_empty(): _text(invitation,str(join.reason),Color("dbb98d"))
 
 func apply_state(value: Dictionary, allow_open := true) -> void:
 	var signature := JSON.stringify(value)
@@ -193,9 +256,10 @@ func apply_state(value: Dictionary, allow_open := true) -> void:
 		_skill_filter = str((state.get("current",{}) as Dictionary).get("skill","melee"))
 	if not is_node_ready(): return
 	discipline.disabled = false; discipline.select(EloriaProtocol.ContractsProtocol.SKILLS.find(_skill_filter))
-	for column: VBoxContainer in columns.values():
+	for column: Container in columns.values():
 		for child: Node in column.get_children(): column.remove_child(child); child.queue_free()
-	account.text = "Accepted %d / %d · %d marks · UTC day %s · Resets 00:00 UTC" % [(state.get("accepted",[]) as Array).size(),int(state.get("accepted_limit",3)),int(state.get("marks",0)),str(state.get("day",""))]
+	account.text = "Accepted %d / %d · %d marks" % [(state.get("accepted",[]) as Array).size(),int(state.get("accepted_limit",3)),int(state.get("marks",0))]
+	account.tooltip_text = "UTC day %s · Resets 00:00 UTC" % str(state.get("day",""))
 	var progress: Dictionary = state.get("weekly",{})
 	weekly.text = "Weekly · %d / 5 completed" % int(progress.get("count",0))
 	_render_available()
