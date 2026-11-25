@@ -4,7 +4,7 @@ Speak with **Batu Ensh at the Landfall watch house** and choose **Landfall daily
 
 ## Pick your work
 
-Batu posts **two offers per discipline at a time**: one Routine assignment and one higher-difficulty assignment that rotates with the UTC day. Use the skill selector on the Available tab to load that skill’s two offers. Each card shows its name, description, and starting location, with buttons to accept or replace it. Contract cards do not list rewards or XP. Changing pages keeps your accepted work and tracked quest. The Accepted tab shows your assignments; the Marks tab lets you exchange service marks for supplies.
+Batu posts **two offers per discipline at a time**: one Routine assignment and one higher-difficulty assignment that rotates with the UTC day. Select a skill using the radio buttons on the Available tab to load that skill’s two offers. Each card shows its name, description, and starting location, with buttons to accept or replace it. Contract cards do not list rewards or XP. Changing pages keeps your accepted work and tracked quest. The Accepted tab shows your assignments; the Marks tab lets you exchange service marks for supplies.
 
 The board presents the offers as two pinned parchment notices with a teal header and a wooden frame. On narrow windows, the notices stack in a scrollable list. Use the header to move the window and the close button to return to play.
 

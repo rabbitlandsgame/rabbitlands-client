@@ -62,18 +62,18 @@ func run() -> void:
 	var board: Control = Board.new();root.add_child(board);await settle();board.apply_state(page);await settle()
 	var actions: Array = [];board.action_requested.connect(func(action: String,id: String,revision: int) -> void:actions.append([action,id,revision]))
 	var frozen := JSON.stringify(board.state)
-	board.discipline.select(1);board.discipline.item_selected.emit(1);await settle()
-	expect(actions == [["board","magic",7]] and board.state.offer_skill == "melee" and board._offer_count.text == "Loading…","a page switch requests authoritative data and clearly waits for it")
+	board._discipline_buttons.magic.pressed.emit();await settle()
+	expect(actions == [["board","magic",7]] and board.state.offer_skill == "melee" and board._offer_count.text == "Loading…" and board._discipline_buttons.melee.button_pressed and board._discipline_buttons.values().all(func(button: CheckBox) -> bool:return button.disabled),"a page switch keeps the authoritative radio selected and disables all six options while loading")
 	expect(JSON.stringify(board.state) == frozen and board.state.accepted.size() == 1 and board.state.tracked_id == "daily_melee","loading another page never edits accepted work or tracking")
 	var magic := Contracts.expanded_board("magic");board.apply_state(magic);await settle()
-	expect(not board.discipline.disabled and board.discipline.selected == 1 and board._offer_count.text == "10 offers","the returned server page settles the selector and ten available routes")
+	expect(not board._discipline_buttons.magic.disabled and board._discipline_buttons.magic.button_pressed and board._offer_count.text == "10 offers","the returned server page settles the radio selection and ten available routes")
 	board.panel.hide();board.apply_state(magic,false)
 	expect(not board.panel.visible,"a passive snapshot does not reopen a closed board")
 	# Exercise the same synchronous transport-failure fallback as ExtensionWindows.
 	board.action_requested.connect(func(action: String,_id: String,_revision: int) -> void:
 		if action == "board":board.apply_state(magic,false))
-	board.discipline.select(0);board.discipline.item_selected.emit(0);await settle()
-	expect(not board.discipline.disabled and not board._pending and board.discipline.selected == 1,"failed page transport can immediately restore the last authoritative page without leaving disabled controls")
+	board._discipline_buttons.melee.pressed.emit();await settle()
+	expect(not board._discipline_buttons.magic.disabled and not board._pending and board._discipline_buttons.magic.button_pressed,"failed page transport can immediately restore the last authoritative radio selection without leaving disabled controls")
 	var native_path := OS.get_environment("RL_CONTRACTS_NATIVE")
 	var registry := {}
 	if not native_path.is_empty():

@@ -10,7 +10,7 @@ var heading: Label
 var account: Label
 var weekly: Label
 var tabs: TabContainer
-var discipline: OptionButton
+var _discipline_buttons := {}
 var columns := {}
 var state := {}
 var _pending := false
@@ -18,7 +18,7 @@ var _signature := ""
 var _confirm: ConfirmationDialog
 var _abandon := ""
 var _abandon_skill := ""
-var _discipline_row: HBoxContainer
+var _discipline_row: HFlowContainer
 var _offer_count: Label
 var _skill_filter := ""
 var _requested_skill := ""
@@ -56,29 +56,27 @@ func _ready() -> void:
 		_style_button(button,false); navigation.add_child(button); _nav_buttons.append(button)
 		button.pressed.connect(func() -> void: tabs.current_tab = index)
 	_nav_buttons[0].button_pressed = true
-	_discipline_row = HBoxContainer.new(); _discipline_row.name = "ContractsDisciplineFilter"; toolbar.add_child(_discipline_row)
-	discipline = OptionButton.new(); discipline.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	discipline.size_flags_vertical = Control.SIZE_SHRINK_CENTER; discipline.custom_minimum_size = Vector2(160,34)
-	_style_button(discipline,false)
-	for skill: String in EloriaProtocol.ContractsProtocol.SKILLS: discipline.add_item(skill.capitalize())
-	discipline.tooltip_text = "Browse offers by discipline. Your accepted assignments stay the same."
-	_discipline_row.add_child(discipline)
-	_offer_count = Label.new(); _offer_count.size_flags_vertical = Control.SIZE_SHRINK_CENTER; _discipline_row.add_child(_offer_count)
-	discipline.item_selected.connect(func(index: int) -> void:
-		var skill: String = EloriaProtocol.ContractsProtocol.SKILLS[index]
-		if _pending:
-			discipline.select(EloriaProtocol.ContractsProtocol.SKILLS.find(_skill_filter)); return
-		if state.has("offer_skill"):
-			_requested_skill = skill
-			discipline.select(EloriaProtocol.ContractsProtocol.SKILLS.find(_skill_filter))
-			_send("board",skill); _render_available(); _fit()
-		else:
-			# Older recorded packets contain every discipline in one snapshot.
-			_skill_filter = skill; _render_available(); _fit())
+	_offer_count = Label.new(); _offer_count.size_flags_vertical = Control.SIZE_SHRINK_CENTER; toolbar.add_child(_offer_count)
+	_discipline_row = HFlowContainer.new(); _discipline_row.name = "ContractsDisciplineFilter"; rail_body.add_child(_discipline_row)
+	_discipline_row.add_theme_constant_override("h_separation",12)
+	_discipline_row.add_theme_constant_override("v_separation",4)
+	var disciplines := ButtonGroup.new()
+	for skill: String in EloriaProtocol.ContractsProtocol.SKILLS:
+		var button := CheckBox.new(); button.name = skill.capitalize()+"Contracts"; button.text = skill.capitalize()
+		button.button_group = disciplines; button.custom_minimum_size.y = 32
+		button.add_theme_color_override("font_color",Color("fff0d4"))
+		button.add_theme_color_override("font_pressed_color",Color("e5bd74"))
+		button.add_theme_color_override("font_disabled_color",Color("a7b6b0"))
+		button.add_theme_color_override("checkbox_checked_color",Color("e5bd74"))
+		button.add_theme_color_override("checkbox_unchecked_color",Color("c4c6b1"))
+		button.tooltip_text = "Browse "+skill+" offers. Your accepted assignments stay the same."
+		_discipline_row.add_child(button); _discipline_buttons[skill] = button
+		button.pressed.connect(_on_discipline_pressed.bind(skill))
 	tabs = TabContainer.new(); tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL; body.add_child(tabs)
 	tabs.tabs_visible = false; tabs.add_theme_stylebox_override("panel",StyleBoxEmpty.new())
 	tabs.tab_changed.connect(func(index: int) -> void:
 		_discipline_row.visible = index == 0
+		_offer_count.visible = index == 0
 		_nav_buttons[index].button_pressed = true; _fit())
 	for title: String in ["Available","Accepted","Marks"]:
 		var scroll := ScrollContainer.new(); scroll.name = title; scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -107,12 +105,30 @@ func _fit() -> void:
 	if panel == null: return
 	var available := get_viewport_rect().size
 	panel.custom_minimum_size = Vector2.ZERO
-	panel.size = Vector2(minf(900,available.x-24),minf(480,available.y-52))
+	panel.size = Vector2(minf(900,available.x-24),minf(520 if _discipline_row.visible else 480,available.y-52))
 	var paired := panel.size.x >= 740 and get_window().size.x >= 760
 	for title: String in ["Available","Accepted"]:
 		var grid: GridContainer = columns.get(title)
 		if grid != null: grid.columns = 2 if paired and grid.get_child_count() > 1 else 1
 	panel.position = ((available-panel.size)*0.5).max(Vector2(12,12))
+
+func _sync_discipline_selection() -> void:
+	for skill: String in _discipline_buttons:
+		var button: CheckBox = _discipline_buttons[skill]
+		button.set_pressed_no_signal(skill == _skill_filter)
+		button.disabled = _pending
+
+func _on_discipline_pressed(skill: String) -> void:
+	if _pending or skill == _skill_filter:
+		_sync_discipline_selection(); return
+	if state.has("offer_skill"):
+		_requested_skill = skill
+		_sync_discipline_selection()
+		_send("board",skill)
+	else:
+		# Older recorded packets contain every discipline in one snapshot.
+		_skill_filter = skill; _sync_discipline_selection()
+	_render_available(); _fit()
 
 func _text(parent: Node, value: String, color := Color.WHITE) -> Label:
 	var label := Label.new(); label.text = value; label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -163,7 +179,7 @@ func _button(parent: Node, text: String, action: String, identity: String, enabl
 func _send(action: String, identity: String) -> void:
 	if _pending: return
 	_pending = true
-	discipline.disabled = true
+	_sync_discipline_selection()
 	# No optimistic progress or reward update; the next snapshot settles it.
 	for column: Container in columns.values():
 		for button: Node in column.find_children("*","Button",true,false): button.disabled = true
@@ -255,7 +271,7 @@ func apply_state(value: Dictionary, allow_open := true) -> void:
 	elif _skill_filter.is_empty():
 		_skill_filter = str((state.get("current",{}) as Dictionary).get("skill","melee"))
 	if not is_node_ready(): return
-	discipline.disabled = false; discipline.select(EloriaProtocol.ContractsProtocol.SKILLS.find(_skill_filter))
+	_sync_discipline_selection()
 	for column: Container in columns.values():
 		for child: Node in column.get_children(): column.remove_child(child); child.queue_free()
 	account.text = "Accepted %d / %d · %d marks" % [(state.get("accepted",[]) as Array).size(),int(state.get("accepted_limit",3)),int(state.get("marks",0))]
