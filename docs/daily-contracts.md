@@ -4,7 +4,9 @@ Speak with **Batu Ensh at the Landfall watch house** and choose **Landfall daily
 
 ## Pick your work
 
-Choose from **five assignments in each discipline**, covering Routine, Standard, Demanding, Hard, and Expert difficulty. Each has two posted routes or sets of terms. Use **Discipline** on the Available tab to load that skill’s ten offers. Changing pages keeps your accepted work and tracked quest. The Accepted and Marks tabs always show your own assignments and rewards.
+Batu posts **two offers per discipline at a time**: one Routine assignment and one higher-difficulty assignment that rotates with the UTC day. Each posted offer has its own route and quoted terms. Use **Discipline** on the Available tab to load that skill’s two offers. Changing pages keeps your accepted work and tracked quest. The Accepted and Marks tabs always show your own assignments and rewards.
+
+The full rotation draws from five assignments per discipline, covering Routine, Standard, Demanding, Hard, and Expert difficulty. The possible assignments are listed below; they are not all posted on the same day.
 
 | Discipline | Assignments | What changes |
 | --- | --- | --- |
@@ -78,7 +80,7 @@ Exchange service marks with Batu for posted consumable supplies. Completing **fi
 
 You may collect one completion per discipline per UTC day. The board displays the next reset. Unfinished accepted work survives the reset and disconnects, but still uses that discipline’s allowance on the day you report it.
 
-One free replacement is available per UTC day before starting that discipline’s work. Use the posted replacement control at Batu; it changes the unstarted terms rather than awarding anything.
+One free replacement is available per UTC day before starting that discipline’s work. Use the posted replacement control at Batu; it replaces the unstarted posted offers rather than awarding anything.
 
 These contracts are separate from the older Daily assignment and Ilka’s standing supply orders.
 

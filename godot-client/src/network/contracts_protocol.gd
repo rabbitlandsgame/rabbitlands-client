@@ -113,6 +113,8 @@ static func valid(value: Variant) -> bool:
 	var paged: bool = value.has("offer_skill")
 	if paged and (value.offer_skill not in SKILLS or value.get("offer_total") != 60): return false
 	if not paged and value.has("offer_total"): return false
+	if value.has("offer_limit") and (not paged or not number(value.offer_limit,2) or int(value.offer_limit) != 2): return false
+	var offer_max := 2 if value.has("offer_limit") else 10 if paged else 36
 	if value.has("reset_token") and not number(value.reset_token): return false
 	if value.has("reset_skills"):
 		if not value.reset_skills is Array or value.reset_skills.size() > SKILLS.size(): return false
@@ -142,7 +144,7 @@ static func valid(value: Variant) -> bool:
 			or not weekly.get("awarded") is bool or weekly.get("bonus_marks") != 3: return false
 	for key: String in ["offers","accepted"]:
 		var rows: Variant = value.get(key)
-		if not rows is Array or rows.size() > (3 if key == "accepted" else 10 if paged else 36): return false
+		if not rows is Array or rows.size() > (3 if key == "accepted" else offer_max): return false
 		var seen := {}
 		for entry: Variant in rows:
 			if not row(entry) or seen.has(entry.id): return false
