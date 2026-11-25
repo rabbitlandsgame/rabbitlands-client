@@ -50,11 +50,11 @@ func run() -> void:
 	var tracked := str(board.state.tracked_id)
 	var actions: Array = []
 	board.action_requested.connect(func(action: String,id: String,revision: int) -> void: actions.append([action,id,revision]))
-	board.discipline.select(1); board.discipline.item_selected.emit(1); await settle()
+	board._discipline_buttons.magic.pressed.emit(); await settle()
 	expect(actions == [["board","magic",7]],"changing discipline still requests a server-owned page")
 	expect(JSON.stringify(board.state.accepted) == accepted and JSON.stringify(board.state.current) == current and str(board.state.tracked_id) == tracked,"requesting a new pair leaves all current and accepted terms intact")
 	var magic := posted("magic"); board.apply_state(magic); await settle()
-	expect(board._offer_count.text == "2 offers" and board.discipline.selected == 1 and not board._pending,"the returned posted pair settles the existing selector")
+	expect(board._offer_count.text == "2 offers" and board._discipline_buttons.magic.button_pressed and not board._pending,"the returned posted pair settles the radio selection")
 	var native_path := OS.get_environment("RL_CONTRACTS_NATIVE")
 	if not native_path.is_empty():
 		var records: Array = JSON.parse_string(FileAccess.get_file_as_string(native_path))

@@ -54,31 +54,26 @@ func run() -> void:
 	expect(transport.contract_request("board","all") == ERR_INVALID_PARAMETER and transport.contract_request("board","magic\nclaim") == ERR_INVALID_PARAMETER,"page requests reject unknown or injected discipline names")
 	transport.free()
 	var row := expert();row.reward.xp.attack = 1234567
-	expect(Board.reward_text(row.reward).contains("1,234,567 Attack XP") and Board.reward_text(row.reward).contains("267,000 Defense XP") and Board.reward_text(row.reward).contains("10,000 gold"),"large quoted rewards are grouped and displayed verbatim rather than recalculated from current levels")
-	var quote := Board.xp_quote_text(row)
-	expect(quote.contains("3,000× base Attack 137") and quote.contains("3,000× base Defense 89"),"the XP explanation identifies both separate captured melee levels")
-	row.reward.xp = {}
-	expect(Board.xp_quote_text(row).is_empty(),"a helping view with no personal reward does not promise the owner's XP")
-	var legacy := Contracts.offer("melee")
-	expect(Board.xp_quote_text(legacy).is_empty() and Codec.valid(Contracts.board_state()),"older accepted terms retain their quoted reward and Tier fallback")
+	expect(Board.reward_text(row.reward).contains("1,234,567 Attack XP") and Board.reward_text(row.reward).contains("267,000 Defense XP") and Board.reward_text(row.reward).contains("10,000 gold"),"the reward formatter retained for Marks preserves server amounts rather than recalculating them")
+	expect(Codec.valid(Contracts.board_state()),"older accepted terms remain compatible without a difficulty quote")
 	var app: Node = root.get_node("AppState");app.campaign = {"kind":"shelves","run_id":"standing-order","active":true}
 	app._on_packet(191,JSON.stringify(Contracts.snapshot(page,true)).to_utf8_buffer())
 	expect(app.campaign.run_id == "standing-order","opening a discipline page cannot replace an unrelated quest")
 	var board: Control = Board.new();root.add_child(board);await settle();board.apply_state(page);await settle()
 	var actions: Array = [];board.action_requested.connect(func(action: String,id: String,revision: int) -> void:actions.append([action,id,revision]))
 	var frozen := JSON.stringify(board.state)
-	board.discipline.select(1);board.discipline.item_selected.emit(1);await settle()
-	expect(actions == [["board","magic",7]] and board.state.offer_skill == "melee" and board._offer_count.text == "Loading…","a page switch requests authoritative data and clearly waits for it")
+	board._discipline_buttons.magic.pressed.emit();await settle()
+	expect(actions == [["board","magic",7]] and board.state.offer_skill == "melee" and board._offer_count.text == "Loading…" and board._discipline_buttons.melee.button_pressed and board._discipline_buttons.values().all(func(button: CheckBox) -> bool:return button.disabled),"a page switch keeps the authoritative radio selected and disables all six options while loading")
 	expect(JSON.stringify(board.state) == frozen and board.state.accepted.size() == 1 and board.state.tracked_id == "daily_melee","loading another page never edits accepted work or tracking")
 	var magic := Contracts.expanded_board("magic");board.apply_state(magic);await settle()
-	expect(not board.discipline.disabled and board.discipline.selected == 1 and board._offer_count.text == "10 offers","the returned server page settles the selector and ten available routes")
+	expect(not board._discipline_buttons.magic.disabled and board._discipline_buttons.magic.button_pressed and board._offer_count.text == "10 offers","the returned server page settles the radio selection and ten available routes")
 	board.panel.hide();board.apply_state(magic,false)
 	expect(not board.panel.visible,"a passive snapshot does not reopen a closed board")
 	# Exercise the same synchronous transport-failure fallback as ExtensionWindows.
 	board.action_requested.connect(func(action: String,_id: String,_revision: int) -> void:
 		if action == "board":board.apply_state(magic,false))
-	board.discipline.select(0);board.discipline.item_selected.emit(0);await settle()
-	expect(not board.discipline.disabled and not board._pending and board.discipline.selected == 1,"failed page transport can immediately restore the last authoritative page without leaving disabled controls")
+	board._discipline_buttons.melee.pressed.emit();await settle()
+	expect(not board._discipline_buttons.magic.disabled and not board._pending and board._discipline_buttons.magic.button_pressed,"failed page transport can immediately restore the last authoritative radio selection without leaving disabled controls")
 	var native_path := OS.get_environment("RL_CONTRACTS_NATIVE")
 	var registry := {}
 	if not native_path.is_empty():
@@ -94,7 +89,7 @@ func run() -> void:
 			board.apply_state(native,false);board.panel.show();board.tabs.current_tab = 0
 			for dimensions: Vector2i in [Vector2i(1280,720),Vector2i(800,600)]:
 				root.size = dimensions;board._fit();await settle()
-				expect(root.get_visible_rect().encloses(board.panel.get_global_rect()) and board._discipline_row.size.y <= 48,"native ten-offer pages and large reward labels fit both supported window sizes")
+				expect(root.get_visible_rect().encloses(board.panel.get_global_rect()) and board._discipline_row.size.y <= 48,"legacy ten-offer pages fit both supported window sizes with the compact card layout")
 		if registry.size() > 0:expect(registry.size() == 30,"the captured six pages collectively expose all thirty template identities")
 	board.queue_free();await settle()
 	print("Contract difficulty: ",checks," checks; ",failures," failures")
