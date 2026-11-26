@@ -1,6 +1,7 @@
 class_name EloriaProtocol
 extends RefCounted
 const ContractsProtocol := preload("res://src/network/contracts_protocol.gd")
+const CONTRACT_JOURNEYS_CAPABILITY := "landfall_contract_journeys_v1"
 
 const HEADER_SIZE := 3
 # Actor animation frames. Only the two resting frames are meaningful in an
@@ -314,6 +315,7 @@ const CLIENT_CAPABILITIES: Array[String] = [
 	"campaign_v1",
 	"landfall_contracts_v1",
 	"landfall_contracts_difficulty_v1",
+	CONTRACT_JOURNEYS_CAPABILITY,
 	"campaign_party_v1",
 	"campaign_cart_v1",
 	"campaign_rescue_v1",
@@ -4220,13 +4222,13 @@ static func decode_campaign(payload: PackedByteArray) -> Dictionary:
 	if travel.has("via"):
 		if not travel.via is Array or travel.via.size()>8:return {"type":"invalid","error":"campaign_travel_via"}
 		for pin: Variant in travel.via:
-			if not pin is Dictionary or not pin.get("map") is String or map_id_from_reference(pin.map) not in ["landfall","landfall_town","landfall_insides","reedfall"] \
+			if not pin is Dictionary or not pin.get("map") is String or not _campaign_navigation_map(pin.map, str(value.get("kind", ""))) \
 					or not _campaign_navigation_tile(pin.get("tile")) or not pin.get("label") is String or str(pin.label).length()>240:
 				return {"type":"invalid","error":"campaign_travel_via"}
 	if travel.has("markers"):
 		if not travel.markers is Array or travel.markers.size()>8:return {"type":"invalid","error":"campaign_travel_markers"}
 		for pin:Variant in travel.markers:
-			if not pin is Dictionary or not pin.get("map") is String or map_id_from_reference(pin.map) not in ["landfall","landfall_town","landfall_insides","reedfall"] \
+			if not pin is Dictionary or not pin.get("map") is String or not _campaign_navigation_map(pin.map, str(value.get("kind", ""))) \
 					or not _campaign_navigation_tile(pin.get("tile")) or not pin.get("label") is String or str(pin.label).length()>240:
 				return {"type":"invalid","error":"campaign_travel_markers"}
 	if travel.has("label") and (not travel.label is String or str(travel.label).length()>240):
@@ -4939,6 +4941,14 @@ static func _campaign_road_valid(road: Variant) -> bool:
 	var optional: Variant = road.get("optional", {})
 	return optional is Dictionary and optional.get("supper", "unfound") in ["unfound", "found", "treated", "safe", "completed"] \
 		and optional.get("last_bowl", "unstarted") in ["unstarted", "portioned", "completed"]
+
+static func _campaign_navigation_map(reference: String, kind: String) -> bool:
+	var map_id := map_id_from_reference(reference)
+	if map_id in ["landfall", "landfall_town", "landfall_insides", "reedfall"]:
+		return true
+	if kind != "contracts":
+		return false
+	return ContractsProtocol.navigation_map(reference)
 
 static func _campaign_navigation_tile(tile: Variant) -> bool:
 	return _campaign_tile(tile) and int(tile[0])>=0 and int(tile[1])>=0 and int(tile[0])<=2047 and int(tile[1])<=2047

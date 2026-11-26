@@ -49,6 +49,32 @@ func run() -> void:
 			f.scene.continue_dialogue(); tick(f,0)
 			expect(f.events.finished.size() == 1,template+" acknowledges its manual scene once")
 			dispose(f); await process_frame
+	for region: String in ["pinebrow", "ravenhead", "whitepeak"]:
+		for scene_id: String in ["contracts.brief", "contracts.entry"]:
+			var f := contract_fixture("melee",scene_id)
+			f.state.map = region
+			f.state.contracts.current.journey = {"version":3,"map":region,"tile":[128,128],"label":"Relief route",
+				"description":"Take the relief crew along the orchard road and protect their crossing.",
+				"objective":"I will lead the crew along the orchard road and protect the crossing."}
+			f.nodes[1].global_position = Vector3(345,0,781); f.nodes[1].server_target = f.nodes[1].global_position
+			f.nodes[20].global_position = Vector3(346,0,781); f.nodes[20].server_target = f.nodes[20].global_position
+			f.rig.camera.global_position = Vector3(345,12,793); f.rig.camera.look_at(f.nodes[1].global_position)
+			var before: Transform3D = f.rig.camera.global_transform
+			var original := JSON.stringify(f.state)
+			var expected := str(f.state.contracts.current.journey.description if scene_id == "contracts.brief" else f.state.contracts.current.journey.objective)
+			tick(f,0.1,region)
+			expect(f.scene.playing and f.scene._dialogue.portrait_visible() and expected in f.scene._caption.text,
+				region+" uses the frozen route's existing single portrait line")
+			expect(f.rig.camera.global_transform.is_equal_approx(before) and f.scene._line_continue.visible,
+				region+" opens the short briefing at the player's current camera with immediate Continue")
+			f.scene.continue_dialogue(); tick(f,0,region)
+			expect(f.events.finished.size() == 1 and f.rig.camera.global_transform.is_equal_approx(before),region+" finishes without a camera recenter")
+			expect(f.scene.request_replay(f.state,region),region+" supports the same route briefing on replay")
+			tick(f,0.1,region)
+			expect(expected in f.scene._caption.text and f.rig.camera.global_transform.is_equal_approx(before),region+" replay keeps the regional text and current framing")
+			f.scene.continue_dialogue(); tick(f,0,region)
+			expect(f.events.finished.size() == 1 and f.events.replay.size() == 1 and JSON.stringify(f.state) == original,region+" replay cannot change accepted work")
+			dispose(f); await process_frame
 	var pause := contract_fixture("melee","contracts.pause")
 	pause.state.scene.choice = {"id":"contract_retry","title":"What next?","owner":"You","owner_is_you":true,"can_choose":true,"selected":"","response":"",
 		"options":[{"id":"resume","label":"Continue","detail":"Keep health and progress."},{"id":"leave","label":"Leave for now","detail":"Return later."}]}
@@ -78,16 +104,58 @@ func run() -> void:
 	var path := OS.get_environment("RL_CONTRACTS_NATIVE")
 	if not path.is_empty():
 		var records: Array = JSON.parse_string(FileAccess.get_file_as_string(path))
+		var missions: Dictionary = {}
+		var rotation := false
 		for row: Dictionary in records:
 			var dto: Dictionary = row.get("snapshot",row)
+			rotation = rotation or str(row.get("label", "")).begins_with("journey.board.")
+			for offer: Dictionary in (dto.get("contracts", {}) as Dictionary).get("offers", []):
+				if offer.has("journey"):
+					missions[str(offer.template_id)+":"+str(offer.route)] = offer
 			if str((dto.get("scene",{}) as Dictionary).get("id","")).is_empty(): continue
 			var decoded := EloriaProtocol.decode_campaign(JSON.stringify(dto).to_utf8_buffer())
 			expect(decoded.type == "campaign","native contract scene packet decodes: "+str(decoded.get("error","")))
 			if decoded.type != "campaign":continue
 			var f := contract_fixture(str(dto.key),str(dto.scene.id))
 			f.state = dto.duplicate(true); f.state.actors = {"mentor":20,"worker":20,"protagonist":1,"recipient":1}; f.state.scene.actors = f.state.actors.duplicate(true)
+			var native_camera_before: Transform3D = f.rig.camera.global_transform
 			tick(f,0.1,str(dto.map))
 			expect(f.scene.playing and not f.scene._caption.text.is_empty(),"actual native contract state selects its authored portrait scene")
+			var journey: Dictionary = (dto.contracts.get("current",{}) as Dictionary).get("journey",{})
+			if not journey.is_empty() and str(dto.scene.id) in ["contracts.brief","contracts.entry"]:
+				var expected := str(journey.description if str(dto.scene.id) == "contracts.brief" else journey.objective)
+				expect(expected in f.scene._caption.text and f.scene._dialogue.portrait_visible(),"actual native itinerary supplies its single portrait briefing line")
+				expect(f.rig.camera.global_transform.is_equal_approx(native_camera_before),"actual regional scene keeps the established gameplay view")
 			dispose(f); await process_frame
+		if rotation: expect(missions.size() == 40,"the native board rotation supplies all forty frozen mission variants")
+		# These are actual offer rows presented through the scene controller,
+		# rather than forty additional server encounter playthroughs.
+		for mission: String in missions:
+			var offer: Dictionary = missions[mission]
+			for scene_id: String in ["contracts.brief", "contracts.entry"]:
+				var f := contract_fixture(str(offer.skill), scene_id)
+				var region := str(offer.journey.map)
+				f.state.map = region; f.state.run_id = str(offer.id)
+				f.state.contracts.current = offer.duplicate(true)
+				f.state.contracts.accepted = [f.state.contracts.current]
+				f.state.contracts.tracked_id = str(offer.id)
+				f.state.scene.variant = str(offer.template_id)
+				f.nodes[1].global_position = Vector3(345,0,781); f.nodes[1].server_target = f.nodes[1].global_position
+				f.nodes[20].global_position = Vector3(346,0,781); f.nodes[20].server_target = f.nodes[20].global_position
+				f.rig.camera.global_position = Vector3(345,12,793); f.rig.camera.look_at(f.nodes[1].global_position)
+				var mission_camera: Transform3D = f.rig.camera.global_transform
+				var original := JSON.stringify(f.state)
+				var expected := str(offer.journey.description if scene_id == "contracts.brief" else offer.journey.objective)
+				tick(f,0.1,region)
+				expect(f.scene.playing and f.scene._dialogue.portrait_visible() and expected in f.scene._caption.text,mission+" presents its frozen "+scene_id+" line")
+				expect(f.rig.camera.global_transform.is_equal_approx(mission_camera) and f.scene._line_continue.visible,mission+" keeps the player's view and immediate Continue")
+				f.scene.continue_dialogue(); tick(f,0,region)
+				expect(f.events.finished.size() == 1 and f.rig.camera.global_transform.is_equal_approx(mission_camera),mission+" finishes without recentering")
+				expect(f.scene.request_replay(f.state,region),mission+" can replay its frozen mission line")
+				tick(f,0.1,region)
+				expect(expected in f.scene._caption.text and f.rig.camera.global_transform.is_equal_approx(mission_camera),mission+" replay retains its text and current camera")
+				f.scene.continue_dialogue(); tick(f,0,region)
+				expect(f.events.finished.size() == 1 and f.events.replay.size() == 1 and JSON.stringify(f.state) == original,mission+" replay cannot alter accepted work")
+				dispose(f); await process_frame
 	print("Landfall contracts scenes: ",checks," checks; ",failures," failures")
 	quit(1 if failures else 0)
