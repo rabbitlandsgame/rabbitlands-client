@@ -18,6 +18,33 @@ const TEMPLATES := {
 	"watch_supplies":["harvesting",1120], "frontier_survey":["harvesting",1121],
 	"apothecary_reserve":["alchemy",1122], "guild_commission":["alchemy",1123]}
 const DIFFICULTIES := ["routine","standard","demanding","hard","expert"]
+const MapRegistryScript := preload("res://src/world/map_registry.gd")
+static var _navigation_loaded := false
+static var _navigation_maps: Dictionary = {}
+
+static func navigation_map(reference: String) -> bool:
+	# Match transport/guidance filename normalization so every admitted pin can
+	# be matched to the current map; canonical registry ids remain lowercase.
+	var map_id := reference.get_file().get_basename()
+	if map_id in ["landfall", "landfall_town", "landfall_insides", "reedfall"]:
+		return true
+	if not _navigation_loaded:
+		_navigation_loaded = true
+		var registry: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/maps/registry.json"))
+		if registry is Dictionary and registry.get("maps") is Dictionary:
+			var maps: Dictionary = registry.maps
+			for key: String in maps:
+				var entry := MapRegistryScript.resolve(maps, key)
+				if str(entry.get("status", "")) == "continent-v2-served":
+					_navigation_maps[MapRegistryScript.normalize_server_map_id(key)] = true
+	return _navigation_maps.has(map_id)
+
+static func journey(value: Variant) -> bool:
+	return value is Dictionary and number(value.get("version"),3) and int(value.version) == 3 \
+		and location(value) and navigation_map(value.map) \
+		and int(value.tile[0]) <= 2047 and int(value.tile[1]) <= 2047 \
+		and text(value.label,256,false) and text(value.get("description"),1024,false) \
+		and text(value.get("objective"),1024,false)
 
 static func number(value: Variant, maximum := 2147483647) -> bool:
 	return typeof(value) in [TYPE_INT,TYPE_FLOAT] and is_finite(float(value)) \
@@ -63,6 +90,7 @@ static func row(value: Variant) -> bool:
 	for key: String in ["title","description","route","tier","status","reason"]:
 		if not text(value.get(key),1024 if key == "description" else 256,key not in ["title","status"]): return false
 	if not value.get("eligible") is bool or not reward(value.get("reward")): return false
+	if value.has("journey") and not journey(value.journey): return false
 	if value.has("difficulty"):
 		var difficulty: Variant = value.difficulty
 		if not difficulty is Dictionary or not number(difficulty.get("rank"),4): return false

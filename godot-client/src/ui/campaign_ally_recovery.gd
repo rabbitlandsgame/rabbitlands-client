@@ -15,7 +15,7 @@ static func patients(snapshot: Dictionary, current_map: String) -> Array[Diction
 			var phase := str(encounter.get("phase",""))
 			var contract := EloriaProtocol.ContractsProtocol.current(snapshot)
 			var triage := str(contract.get("skill","")) == "magic" and str(contract.get("template_id","")) == "healing_line" \
-				and (contract.get("objectives",[]) as Array).any(func(goal: Dictionary) -> bool:return str(goal.get("id","")) == "healing" and int(goal.current) < int(goal.target))
+				and (contract.get("objectives",[]) as Array).any(func(goal: Dictionary) -> bool:return str(goal.get("id","")) in ["healing","practice"] and int(goal.current) < int(goal.target))
 			if phase != "work" and not (triage and phase == "complete"): return result
 			# Fallen allies retain priority over the triage lesson's living patients.
 			for downed: bool in [true,false]:

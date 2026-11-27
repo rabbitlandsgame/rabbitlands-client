@@ -916,6 +916,7 @@ func update(delta: float, snapshot: Dictionary, rig: Node3D, actor_nodes: Dictio
 		_map = here
 		_variant = str(scene.get("variant", snapshot.get("cargo_priority", "")))
 		_definition = (_definitions[id] as Dictionary).duplicate(true)
+		_apply_contract_briefing(snapshot, id)
 		if not replay: _handled.erase(identity)
 		# The same conversation has a different physical worksite at Twinbrook.
 		# Select its authored establishing frame once, then hold that view.
@@ -1678,6 +1679,18 @@ func _carry_attachment_frame(carrier: Node3D, bone_name: String) -> Transform3D:
 				# the imported mesh scale; carry offsets are authored in metres.
 				return Transform3D(carrier.global_basis.orthonormalized(), bone_world.origin)
 	return carrier.global_transform
+
+func _apply_contract_briefing(snapshot: Dictionary, scene_id: String) -> void:
+	if str(snapshot.get("kind", "")) != "contracts" or scene_id not in ["contracts.brief", "contracts.entry"]:
+		return
+	var row: Dictionary = (snapshot.get("contracts", {}) as Dictionary).get("current", {})
+	var journey: Variant = row.get("journey")
+	if not EloriaProtocol.ContractsProtocol.journey(journey):
+		return
+	var lines: Array = _definition.get("lines", [])
+	if lines.size() == 1 and lines[0] is Dictionary:
+		lines[0].erase("variants")
+		lines[0].text = journey.description if scene_id == "contracts.brief" else journey.objective
 
 func _line_text(line: Dictionary) -> String:
 	var branch := str(_choice_state.get("selected", ""))

@@ -21,6 +21,12 @@ The full rotation draws from five assignments per discipline, covering Routine, 
 
 Difficulty sets the amount of work and the threats you face. Combat assignments have three stages on Routine, Standard, and Demanding; four on Hard; and five on Expert. After accepting, check the quest tracker and Instructions for exact quotas and progress.
 
+Protection assignments now name the route, camp, or hostile posts you will secure. Moving crews travel between distinct checkpoints; camp defenses stay in one place and face attacks from different approaches. Standard and Bold routes can take different paths. **The Watch on the Road** begins on Landfall’s **Eastwatch road**, away from the Sage harvesters.
+
+Higher-difficulty work can take you to other regions. Check the named destination before setting out. Your map shows the assignment marker in its region and the next doorway or crossing when you need to travel there. Previously accepted assignments keep their saved destination and route.
+
+Batu’s short briefing describes the accepted mission. Worksite conversations use the same portraits and highlighted speaker names, keeping your current camera view. Continue is available immediately, and Replay lets you review the briefing without changing quest progress.
+
 You can accept up to **three contracts** and track one at a time. Accepted objectives and rewards stay fixed if your level changes. The marked destination and Instructions explain where to go. Walk there yourself, then choose **Start** when ready. Opening the board or crossing a worksite does not begin an encounter.
 
 The Accepted board shows your current instructions and destination. Hover over a contract card or a disabled action to see its requirements; the quest tracker and Instructions retain the full preparation checklist and objective progress. A two-resource basket moves its destination to the second patch when the first is finished. A reagent order changes from gathering to mixing at The True Note. Surveys mark the resource nodes you still need to sample, and the quest tracker shows the sample count alongside any remaining gathering quota.
@@ -37,7 +43,7 @@ If you accepted the same assignment with matching encounter terms, being present
 
 Crew health is visible. Use **Heal Target** to recover fallen workers. You may leave an encounter and resume later. After defeat, an explicit retry restores the crew for another attempt while retaining completed checkpoints. It does not restore your health, ether, or supplies.
 
-During Triage at the Watch, the Heal Target controls also include living wounded crew while your healing objective remains unfinished, including after the attacks end. These are ordinary paid casts; fully healed crew stop appearing as patients.
+New Triage at the Watch assignments share the crew’s recovery goal across the party. One healer can restore the required health while the other casters defend with magic; each player still needs their own useful spell contribution. The Heal Target controls include living wounded crew while the recovery or your magic contribution remains unfinished, including after the attacks end. These are ordinary paid casts; fully healed crew stop appearing as patients. Older accepted Triage assignments keep their original personal healing objective.
 
 ## Report and rewards
 
