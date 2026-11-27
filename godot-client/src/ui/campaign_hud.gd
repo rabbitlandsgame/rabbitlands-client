@@ -121,6 +121,25 @@ func embed() -> void:
 func presentation_available() -> bool:
 	return _available
 
+func contract_exit_action() -> Dictionary:
+	if not _available or str(_state.get("kind","")) != "contracts" or not bool(_state.get("active",false)) \
+			or EloriaProtocol.map_id_from_reference(str(_state.get("map",""))) != _current_map:
+		return {}
+	var board: Dictionary = _state.get("contracts",{})
+	var encounter: Dictionary = board.get("encounter",{})
+	var allowed := bool(board.get("can_leave_encounter",not encounter.is_empty() and (_state.get("travel",{}) as Dictionary).is_empty()))
+	if not allowed: return {}
+	var complete := bool(board.get("encounter_complete",str(encounter.get("phase","")) == "complete"))
+	var contract := EloriaProtocol.ContractsProtocol.current(_state)
+	var report := complete and str(contract.get("status","")) == "ready" and not str(contract.get("reason","")).begins_with("Helping the party.")
+	return {"label":"Leave and report" if report else "Leave encounter" if complete else "Pause and leave","complete":complete,
+		"tooltip":"Return to the public map and report to Batu. Earned progress is kept." if report \
+			else "Return to the public map. Earned progress is kept; unfinished objectives can be resumed later." if complete \
+			else "Leave this private encounter. Completed checkpoints and earned progress are kept; your party can continue."}
+
+func request_contract_leave() -> void:
+	if not contract_exit_action().is_empty(): action_requested.emit("leave")
+
 func host_tracker_recovery(host: Control) -> void:
 	_build()
 	_tracker_recovery = true
@@ -494,8 +513,12 @@ func apply_state(snapshot: Dictionary, local_tile: Vector2i, current_map: String
 		if str(contract.get("status","")) != "ready" and bool(snapshot.get("available",false)) \
 				and not preparation.is_empty() and not bool(preparation.ready):
 			_entry.disabled = true; _entry.text = "Prepare before starting"; _entry.tooltip_text = str(preparation.reason)
-		_leave.visible = active and not travelling
-		_leave.text = "Pause contract"; _leave.tooltip_text = "Leave the private encounter; accepted contract progress is retained."
+		var exit := contract_exit_action()
+		_leave.visible = not exit.is_empty()
+		_leave.text = str(exit.get("label","Pause and leave")); _leave.tooltip_text = str(exit.get("tooltip",""))
+		if bool(exit.get("complete",false)):
+			_entry.text = str(exit.label); _entry.tooltip_text = str(exit.tooltip)
+			_entry.disabled = false; _entry.visible = not _embedded
 	var rows: Array = []
 	var source: Array = [] if complete else Guidance.card_targets(snapshot) if Guidance.is_guided(snapshot) else snapshot.get("targets", [])
 	# Ready quest work precedes optional supplies, preserving the server's clue
@@ -607,6 +630,9 @@ func _fit_inline() -> void:
 	_layout()
 
 func _request_leave() -> void:
+	if str(_state.get("kind","")) == "contracts":
+		request_contract_leave()
+		return
 	if not _available or not _leave.is_visible_in_tree(): return
 	if str(_state.get("kind", "")) == "rescue" and bool(_state.get("completed", false)):
 		# This is a local notice, not another quest decision. Dismiss now;
@@ -621,6 +647,9 @@ func _request_entry() -> void:
 	if not _available or not _entry.is_visible_in_tree() or _entry.disabled: return
 	var kind := str(_state.get("kind", ""))
 	if kind == "contracts":
+		if bool(contract_exit_action().get("complete",false)):
+			request_contract_leave()
+			return
 		var contract := EloriaProtocol.ContractsProtocol.current(_state)
 		action_requested.emit("contract_claim" if str(contract.get("status","")) == "ready" and bool(contract.get("eligible",false)) \
 			else "contract_begin" if bool(_state.get("available",false)) else "quest_map")

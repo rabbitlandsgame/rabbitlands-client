@@ -24,6 +24,7 @@ var _skill_filter := ""
 var _requested_skill := ""
 var _nav_buttons: Array[Button] = []
 var _title_font: SystemFont
+var encounter_leave_button: Button
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -90,6 +91,9 @@ func _ready() -> void:
 	account = Label.new(); account.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	account.size_flags_horizontal = Control.SIZE_EXPAND_FILL; account.add_theme_font_size_override("font_size",13); footer.add_child(account)
 	weekly = Label.new(); weekly.add_theme_font_size_override("font_size",13); footer.add_child(weekly)
+	encounter_leave_button = Button.new(); encounter_leave_button.name = "LeaveContractEncounter"
+	_style_button(encounter_leave_button); footer.add_child(encounter_leave_button)
+	encounter_leave_button.pressed.connect(_send.bind("leave","")); encounter_leave_button.hide()
 	var refresh := Button.new(); refresh.text = "Refresh board"; _style_button(refresh,false); footer.add_child(refresh)
 	refresh.pressed.connect(func() -> void: action_requested.emit("board",_requested_skill if not _requested_skill.is_empty() else _skill_filter if state.has("offer_skill") else "",-1))
 	_confirm = ConfirmationDialog.new(); _confirm.title = "Abandon contract?"; add_child(_confirm)
@@ -179,6 +183,7 @@ func _button(parent: Node, text: String, action: String, identity: String, enabl
 func _send(action: String, identity: String) -> void:
 	if _pending: return
 	_pending = true
+	encounter_leave_button.disabled = true
 	_sync_discipline_selection()
 	# No optimistic progress or reward update; the next snapshot settles it.
 	for column: Container in columns.values():
@@ -271,6 +276,15 @@ func apply_state(value: Dictionary, allow_open := true) -> void:
 	elif _skill_filter.is_empty():
 		_skill_filter = str((state.get("current",{}) as Dictionary).get("skill","melee"))
 	if not is_node_ready(): return
+	encounter_leave_button.visible = bool(state.get("can_leave_encounter",false))
+	encounter_leave_button.disabled = false
+	var current: Dictionary = state.get("current",{})
+	var completed := bool(state.get("encounter_complete",false))
+	var report := completed and str(current.get("status","")) == "ready" and not str(current.get("reason","")).begins_with("Helping the party.")
+	encounter_leave_button.text = "Leave and report" if report else "Leave encounter" if completed else "Pause and leave"
+	encounter_leave_button.tooltip_text = "Return to the public map and report to Batu. Earned progress is kept." if report \
+		else "Return to the public map. Earned progress is kept; unfinished objectives can be resumed later." if completed \
+		else "Leave this private encounter. Completed progress is kept; your party can continue."
 	_sync_discipline_selection()
 	for column: Container in columns.values():
 		for child: Node in column.get_children(): column.remove_child(child); child.queue_free()

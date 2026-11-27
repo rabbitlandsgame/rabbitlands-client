@@ -5,6 +5,7 @@ const Placement := preload("res://src/ui/quest_tracker_placement.gd")
 const MENU_MARKS := {
 	"instructions": '<path d="M10 5C7 3 4 3 2 4v12c3-1 5-1 8 1m0-12c3-2 6-2 8-1v12c-3-1-5-1-8 1V5z"/>',
 	"replay": '<path d="M4 8a6.5 6.5 0 1 1 0 5M4 3v5h5"/>',
+	"leave": '<path d="M8 3H3v14h5M10 6l5 4-5 4M6 10h10"/>',
 	"hide": '<path d="M2 2l16 16M8 4c5-1 8 3 10 6-1 2-2 3-4 4M5 5c-1 1-2 3-3 5 2 3 5 6 8 6l2-.2"/><path d="M8 8a3 3 0 0 0 4 4"/>',
 	"untrack": '<path d="M5 8V3h10v14l-5-3-5 3v-5M2 10h7"/>'}
 static var _menu_icons: Dictionary = {}
@@ -13,6 +14,7 @@ signal instructions_toggled(value: bool)
 signal replay_requested()
 signal hide_requested()
 signal untrack_requested()
+signal encounter_leave_requested()
 
 var heading: Label
 var objective: Label
@@ -30,6 +32,8 @@ var instructions_button: Button
 var replay_button: Button
 var hide_button: Button
 var untrack_button: Button
+var encounter_leave_button: Button
+var encounter_leave_menu_button: Button
 var alert_label: Label
 var _column: VBoxContainer
 var _meta: HBoxContainer
@@ -41,6 +45,8 @@ var _complete := false
 var _replay_ready := false
 var _replay_retry := false
 var _signature := ""
+var _exit_signature := ""
+var _exit_divider: HSeparator
 var _fit_queued := false
 var _detail_region: VBoxContainer
 var _detail_header: HBoxContainer
@@ -110,6 +116,11 @@ func configure() -> void:
 	alert_label = Label.new(); alert_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	alert_label.add_theme_font_size_override("font_size",12)
 	alert_label.add_theme_color_override("font_color",Color("ffb39c")); _column.add_child(alert_label)
+	encounter_leave_button = Button.new(); encounter_leave_button.name = "LeaveCompletedEncounter"
+	encounter_leave_button.custom_minimum_size.y = 32
+	encounter_leave_button.add_theme_font_size_override("font_size",13)
+	encounter_leave_button.pressed.connect(func() -> void: encounter_leave_requested.emit())
+	encounter_leave_button.hide(); _column.add_child(encounter_leave_button)
 	recovery_slot = VBoxContainer.new(); recovery_slot.name = "QuestRecovery"; _column.add_child(recovery_slot)
 	_detail_region = VBoxContainer.new(); _detail_region.name = "InstructionsFoldout"
 	_detail_region.add_theme_constant_override("separation",6); _column.add_child(_detail_region)
@@ -146,6 +157,10 @@ func configure() -> void:
 	divider.add_theme_stylebox_override("separator",line); actions.add_child(divider)
 	hide_button = _menu_button(actions,"Hide","Hide this card while keeping the quest tracked. Reopen it from Quests.","hide")
 	untrack_button = _menu_button(actions,"Untrack","Stop following this quest. Your progress stays saved in Quests.","untrack")
+	_exit_divider = HSeparator.new(); _exit_divider.add_theme_stylebox_override("separator",line); actions.add_child(_exit_divider); _exit_divider.hide()
+	encounter_leave_menu_button = _menu_button(actions,"Pause and leave","Return to the public map. Completed progress is kept.","leave")
+	encounter_leave_menu_button.name = "LeaveQuestEncounter"; encounter_leave_menu_button.hide()
+	encounter_leave_menu_button.pressed.connect(func() -> void: close_more(); encounter_leave_requested.emit())
 	instructions_button.name = "QuestInstructions"; replay_button.name = "QuestReplay"
 	hide_button.name = "HideQuest"; untrack_button.name = "UntrackQuest"
 	instructions_button.toggle_mode = true
@@ -181,6 +196,24 @@ func _menu_button(parent: VBoxContainer, label: String, hint: String, mark: Stri
 	button.add_theme_font_size_override("font_size",14)
 	button.custom_minimum_size.y = 34; parent.add_child(button)
 	return button
+
+func set_encounter_exit(action: Dictionary = {}) -> void:
+	configure()
+	var label := str(action.get("label",""))
+	var complete := bool(action.get("complete",false))
+	var signature := JSON.stringify(action)
+	encounter_leave_button.text = label
+	encounter_leave_button.tooltip_text = str(action.get("tooltip",""))
+	encounter_leave_button.visible = not label.is_empty() and complete
+	encounter_leave_menu_button.text = label
+	encounter_leave_menu_button.tooltip_text = str(action.get("tooltip",""))
+	encounter_leave_menu_button.visible = not label.is_empty() and not complete
+	_exit_divider.visible = encounter_leave_menu_button.visible
+	more.tooltip_text = "Instructions, Replay scene, Pause and leave, Hide and Untrack" if encounter_leave_menu_button.visible \
+		else "Instructions, Replay scene, Hide and Untrack"
+	if signature != _exit_signature:
+		_exit_signature = signature; reset_size(); _queue_fit()
+	if _menu.visible: _place_more()
 
 func apply_presentation(title: String, summary: Dictionary, compact: bool, details_open: bool,
 		replay_ready := false, replay_retry := false, complete := false) -> void:
