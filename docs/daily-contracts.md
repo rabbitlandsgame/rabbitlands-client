@@ -43,6 +43,8 @@ If you accepted the same assignment with matching encounter terms, being present
 
 Crew health is visible. Use **Heal Target** to recover fallen workers. You may leave an encounter and resume later. After defeat, an explicit retry restores the crew for another attempt while retaining completed checkpoints. It does not restore your health, ether, or supplies.
 
+During an encounter, choose **More → Pause and leave** to return to the public map from anywhere. When the encounter ends, the quest card offers **Leave and report** if your assignment is ready, or **Leave encounter** if you still have personal objectives. If you hide or untrack the quest, reopen **Daily Contracts** from Quests to use the same exit. Leaving retains earned progress and lets the rest of your party continue.
+
 New Triage at the Watch assignments share the crew’s recovery goal across the party. One healer can restore the required health while the other casters defend with magic; each player still needs their own useful spell contribution. The Heal Target controls include living wounded crew while the recovery or your magic contribution remains unfinished, including after the attacks end. These are ordinary paid casts; fully healed crew stop appearing as patients. Older accepted Triage assignments keep their original personal healing objective.
 
 ## Report and rewards

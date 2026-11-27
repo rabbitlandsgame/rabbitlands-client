@@ -155,7 +155,7 @@ func run() -> void:
 	field.targets[0].enabled = true
 	var field_hud: Control = load("res://src/ui/campaign_hud.gd").new(); root.add_child(field_hud)
 	field_hud.apply_state(field,Vector2i(64,249),"landfall")
-	expect(not field.has("travel") and field_hud._leave.visible and field_hud._leave.text == "Pause contract","a checkpoint retains private encounter Pause behavior")
+	expect(not field.has("travel") and field_hud._leave.visible and field_hud._leave.text == "Pause and leave","a checkpoint retains private encounter Pause behavior")
 	field_hud.queue_free(); await settle()
 	var active := snapshot(state)
 	var summary := Summary.campaign(active,"landfall")

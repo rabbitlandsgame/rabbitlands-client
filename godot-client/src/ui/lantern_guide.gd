@@ -228,6 +228,8 @@ func configure(owner_ui: Control) -> void:
 		if value: compact = false
 		_refresh())
 	_tracker.replay_requested.connect(request_campaign_replay)
+	_tracker.encounter_leave_requested.connect(func() -> void:
+		if is_instance_valid(campaign_content): campaign_content.call("request_contract_leave"))
 	_tracker.hide_requested.connect(hide_window)
 	_tracker.untrack_requested.connect(func() -> void:
 		set_campaign_tracked(false) if using_campaign() else set_quest_tracked(false))
@@ -335,7 +337,9 @@ func _refresh() -> void:
 		_tracker.recovery_slot.visible = not complete and not _details_open and not (summary.get("recovery",{}) as Dictionary).is_empty()
 		_tracker.apply_presentation("Quest complete!" if complete else str(_campaign.get("title","The Missing Measure")),
 			summary,compact,_details_open,bool(campaign_content.get("_replay_available")),bool(campaign_content.get("_replay_retry")),complete)
+		_tracker.set_encounter_exit(campaign_content.call("contract_exit_action"))
 		return
+	_tracker.set_encounter_exit()
 	if instruction.get_parent() != _standard_body:
 		instruction.reparent(_standard_body)
 		_standard_body.move_child(instruction,1)

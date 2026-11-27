@@ -138,6 +138,8 @@ static func valid(value: Variant) -> bool:
 			or value.get("accepted_limit") != 3 or not identity(value.get("tracked_id"),true) \
 			or not number(value.get("marks")): return false
 	if value.has("open") and not value.open is bool: return false
+	for field: String in ["can_leave_encounter","encounter_complete"]:
+		if value.has(field) and not value[field] is bool: return false
 	var paged: bool = value.has("offer_skill")
 	if paged and (value.offer_skill not in SKILLS or value.get("offer_total") != 60): return false
 	if not paged and value.has("offer_total"): return false
